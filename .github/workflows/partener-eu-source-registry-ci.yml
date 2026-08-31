@@ -19,6 +19,7 @@ on:
       - 'partener-eu/ingest/interreg_applicant_partner_fit.py'
       - 'partener-eu/ingest/interreg_programming_pipeline_registry.json'
       - 'partener-eu/ingest/interreg_programming_pipeline.py'
+      - 'partener-eu/ingest/interreg_programming_lkg_history.py'
       - 'partener-eu/p11/candidate_staging.py'
       - 'partener-eu/p11/eea_civil_society_stage.py'
       - 'partener-eu/p11/test_eea_civil_society_stage.py'
@@ -33,6 +34,7 @@ on:
       - 'partener-eu/ops/test_interreg_territorial_fit.py'
       - 'partener-eu/ops/test_interreg_applicant_partner_fit.py'
       - 'partener-eu/ops/test_interreg_programming_pipeline.py'
+      - 'partener-eu/ops/test_interreg_programming_lkg_history.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
@@ -94,6 +96,7 @@ jobs:
           python -m py_compile partener-eu/ingest/interreg_territorial_fit.py
           python -m py_compile partener-eu/ingest/interreg_applicant_partner_fit.py
           python -m py_compile partener-eu/ingest/interreg_programming_pipeline.py
+          python -m py_compile partener-eu/ingest/interreg_programming_lkg_history.py
           python -m py_compile partener-eu/p11/candidate_staging.py
           python -m py_compile partener-eu/p11/eea_civil_society_stage.py
           python -m py_compile partener-eu/p11/test_eea_civil_society_stage.py
@@ -104,6 +107,7 @@ jobs:
           python -m py_compile partener-eu/ops/test_interreg_territorial_fit.py
           python -m py_compile partener-eu/ops/test_interreg_applicant_partner_fit.py
           python -m py_compile partener-eu/ops/test_interreg_programming_pipeline.py
+          python -m py_compile partener-eu/ops/test_interreg_programming_lkg_history.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
           python -m py_compile partener-eu/ops/test_eea_civil_society_calls.py
@@ -198,6 +202,9 @@ jobs:
       - name: Validate Interreg 2028-2034 programming pipeline stays non-authorizing
         run: python partener-eu/ops/test_interreg_programming_pipeline.py
 
+      - name: Validate bounded historical Interreg LKG resolution stays non-authorizing
+        run: python partener-eu/ops/test_interreg_programming_lkg_history.py
+
       - name: Capture live Interreg 2028-2034 programming watch evidence
         run: |
           python partener-eu/ingest/interreg_programming_pipeline.py \
@@ -264,64 +271,94 @@ jobs:
           print(json.dumps({'source_count':d['source_count'],'healthy_source_count':healthy,'health_state':d.get('health_state'),'top_watch':[(r['source_id'],r['observation_state'],r['consultation_lifecycle'],r['watch_priority']) for r in d['watchlist'][:4]],'open_call_authorized':d['open_call_authorized']}, ensure_ascii=False))
           PY
 
-      - name: Restore previous Interreg programming snapshot from this branch
+      - name: Restore bounded Interreg programming history from this branch
         id: interreg_previous_snapshot
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          mkdir -p /tmp/interreg-programming-previous
+          mkdir -p /tmp/interreg-programming-previous /tmp/interreg-programming-history
           gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-interreg-programming-pipeline-evidence&per_page=100" > /tmp/interreg-programming-artifacts.json
-          PREVIOUS_RUN_ID="$(python - <<'PY'
+          python - <<'PY' > /tmp/interreg-programming-history-run-ids.txt
           import json, os
           data=json.load(open('/tmp/interreg-programming-artifacts.json', encoding='utf-8'))
           branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
           current=int(os.environ['GITHUB_RUN_ID'])
           candidates=[]
+          seen=set()
           for artifact in data.get('artifacts') or []:
               run=artifact.get('workflow_run') or {}
               if artifact.get('expired') is True:
                   continue
               run_id=int(run.get('id') or 0)
-              if run_id == 0 or run_id == current:
+              if run_id == 0 or run_id == current or run_id in seen:
                   continue
               if branch and str(run.get('head_branch') or '') != branch:
                   continue
-              candidates.append(artifact)
-          candidates.sort(key=lambda item: (str(item.get('created_at') or ''), int(item.get('id') or 0)), reverse=True)
-          if candidates:
-              print(int((candidates[0].get('workflow_run') or {}).get('id') or 0))
+              seen.add(run_id)
+              candidates.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0), run_id))
+          candidates.sort(reverse=True)
+          for _created_at, _artifact_id, run_id in candidates[:12]:
+              print(run_id)
           PY
-          )"
-          if [ -z "$PREVIOUS_RUN_ID" ] || [ "$PREVIOUS_RUN_ID" = "0" ]; then
-            echo "No previous non-expired Interreg programming artifact found for this branch; baseline reconciliation will be used."
+          HISTORY_COUNT=0
+          PREVIOUS_RUN_ID=""
+          while IFS= read -r RUN_ID; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            if [ "$CONCLUSION" != "success" ]; then
+              echo "Skipping historical run $RUN_ID with conclusion=$CONCLUSION"
+              continue
+            fi
+            if [ -z "$PREVIOUS_RUN_ID" ]; then
+              PREVIOUS_RUN_ID="$RUN_ID"
+            fi
+            DEST="/tmp/interreg-programming-history/${RUN_ID}"
+            mkdir -p "$DEST"
+            gh run download "$RUN_ID" \
+              --repo "$GITHUB_REPOSITORY" \
+              --name partener-interreg-programming-pipeline-evidence \
+              --dir "$DEST"
+            test -s "$DEST/interreg-programming-pipeline.json"
+            HISTORY_COUNT=$((HISTORY_COUNT + 1))
+            if [ "$HISTORY_COUNT" -ge 8 ]; then
+              break
+            fi
+          done < /tmp/interreg-programming-history-run-ids.txt
+          echo "history_count=$HISTORY_COUNT" >> "$GITHUB_OUTPUT"
+          if [ -z "$PREVIOUS_RUN_ID" ]; then
+            echo "No previous successful non-expired Interreg programming artifact found for this branch; baseline reconciliation will be used."
             echo "available=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          gh run download "$PREVIOUS_RUN_ID" \
-            --repo "$GITHUB_REPOSITORY" \
-            --name partener-interreg-programming-pipeline-evidence \
-            --dir /tmp/interreg-programming-previous
-          test -s /tmp/interreg-programming-previous/interreg-programming-pipeline.json
-          echo "Previous Interreg programming snapshot restored from run $PREVIOUS_RUN_ID"
+          cp "/tmp/interreg-programming-history/${PREVIOUS_RUN_ID}/interreg-programming-pipeline.json" \
+            /tmp/interreg-programming-previous/interreg-programming-pipeline.json
+          if [ -s "/tmp/interreg-programming-history/${PREVIOUS_RUN_ID}/interreg-programming-reconciliation.json" ]; then
+            cp "/tmp/interreg-programming-history/${PREVIOUS_RUN_ID}/interreg-programming-reconciliation.json" \
+              /tmp/interreg-programming-previous/interreg-programming-reconciliation.json
+          fi
+          echo "Previous Interreg programming snapshot restored from successful run $PREVIOUS_RUN_ID; bounded history count=$HISTORY_COUNT"
           echo "available=true" >> "$GITHUB_OUTPUT"
           echo "run_id=$PREVIOUS_RUN_ID" >> "$GITHUB_OUTPUT"
 
-      - name: Reconcile Interreg programming evidence with previous branch snapshot
+      - name: Reconcile Interreg programming evidence with previous branch snapshot and bounded LKG history
         shell: bash
         env:
           PREVIOUS_AVAILABLE: ${{ steps.interreg_previous_snapshot.outputs.available }}
           PREVIOUS_WORKFLOW_RUN_ID: ${{ steps.interreg_previous_snapshot.outputs.run_id }}
+          HISTORY_COUNT: ${{ steps.interreg_previous_snapshot.outputs.history_count }}
         run: |
           set -euo pipefail
           python - <<'PY'
           import json, os, pathlib, sys
           sys.path.insert(0, 'partener-eu/ingest')
+          from interreg_programming_lkg_history import enrich_reconciliation_with_history
           from interreg_programming_pipeline import reconcile_snapshots
 
           current_path=pathlib.Path('/tmp/interreg-programming-pipeline.json')
           previous_path=pathlib.Path('/tmp/interreg-programming-previous/interreg-programming-pipeline.json')
+          history_root=pathlib.Path('/tmp/interreg-programming-history')
           output_path=pathlib.Path('/tmp/interreg-programming-reconciliation.json')
           current=json.loads(current_path.read_text(encoding='utf-8'))
           previous=None
@@ -331,6 +368,10 @@ jobs:
                   sys.exit(2)
               previous=json.loads(previous_path.read_text(encoding='utf-8'))
           receipt=reconcile_snapshots(current, previous)
+          history_snapshots=[]
+          for path in sorted(history_root.glob('*/interreg-programming-pipeline.json')):
+              history_snapshots.append(json.loads(path.read_text(encoding='utf-8')))
+          receipt=enrich_reconciliation_with_history(current, receipt, history_snapshots, max_history_snapshots=8)
           if receipt.get('adapter_id') != 'INTERREG_PROGRAMMING_RECONCILIATION_V1':
               print('FAIL reconciliation identity drift')
               sys.exit(2)
@@ -340,6 +381,13 @@ jobs:
                   sys.exit(2)
           if receipt.get('publication_effect') != 'NONE' or receipt.get('market_intelligence_only') is not True:
               print('FAIL programming reconciliation publication/policy drift')
+              sys.exit(2)
+          if receipt.get('historical_lkg_resolution_version') != 'INTERREG_PROGRAMMING_HISTORICAL_LKG_V1':
+              print('FAIL historical LKG resolver identity drift')
+              sys.exit(2)
+          expected_history_count=int(os.environ.get('HISTORY_COUNT') or '0')
+          if receipt.get('historical_lkg_snapshot_count_considered') != min(expected_history_count, 8):
+              print('FAIL bounded history count drift:', receipt.get('historical_lkg_snapshot_count_considered'), expected_history_count)
               sys.exit(2)
           if previous is None:
               if receipt.get('reconciliation_state') != 'BASELINE_CAPTURED_NO_PREVIOUS_SNAPSHOT':
@@ -357,6 +405,8 @@ jobs:
               'reconciliation_state': receipt.get('reconciliation_state'),
               'semantic_change_count': receipt.get('semantic_change_count'),
               'transport_or_content_change_count': receipt.get('transport_or_content_change_count'),
+              'historical_lkg_snapshot_count_considered': receipt.get('historical_lkg_snapshot_count_considered'),
+              'historical_lkg_reference_available_count': receipt.get('historical_lkg_reference_available_count'),
               'lkg_reference_available_count': receipt.get('lkg_reference_available_count'),
               'lkg_reference_missing_count': receipt.get('lkg_reference_missing_count'),
               'pipeline_watch_candidate': receipt.get('pipeline_watch_candidate'),
