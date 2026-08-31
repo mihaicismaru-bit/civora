@@ -1,0 +1,33 @@
+name: VÂLCEA CLAR BJAI Vâlcea Event References
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/bjai_valcea_event_reference_adapter.py'
+      - '.github/workflows/valcea-clar-bjai-valcea-event-references.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/scripts/bjai_valcea_event_reference_adapter.py'
+      - '.github/workflows/valcea-clar-bjai-valcea-event-references.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-bjai-valcea-event-references-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile BJAI Vâlcea event reference adapter
+        run: python -m py_compile valcea-clar/scripts/bjai_valcea_event_reference_adapter.py
+      - name: Run BJAI Vâlcea fail-closed regressions
+        run: python valcea-clar/scripts/bjai_valcea_event_reference_adapter.py --self-test
