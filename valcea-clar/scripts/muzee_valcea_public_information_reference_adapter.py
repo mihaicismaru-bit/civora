@@ -294,6 +294,9 @@ def parse_current_tariff_reference(
     candidates: dict[str, TariffCandidate] = {}
     errors: list[str] = []
     for href, anchor_text in parser.anchors:
+        anchor_key = fold(anchor_text)
+        if "vizualizare taxa" not in anchor_key and "tarif" not in anchor_key:
+            continue
         context = _context_for_href(source_html, href)
         label_match = TARIFF_LABEL_RE.search(context)
         if not label_match or int(label_match.group(1)) != current_year:
