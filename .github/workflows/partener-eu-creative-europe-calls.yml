@@ -1,0 +1,104 @@
+name: PARTENER.EU Creative Europe Call Index CI
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/creative_europe_call_index.py'
+      - 'partener-eu/ingest/creative_europe_call_fetch.py'
+      - 'partener-eu/ops/test_creative_europe_call_index.py'
+      - 'partener-eu/ops/test_creative_europe_call_fetch.py'
+      - '.github/workflows/partener-eu-creative-europe-calls.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  creative-europe-call-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED="${{ github.event.pull_request.head.sha || github.sha }}"
+          ACTUAL="$(git rev-parse HEAD)"
+          test "$ACTUAL" = "$EXPECTED"
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Validate Creative Europe adapter syntax
+        run: |
+          python -m py_compile partener-eu/ingest/creative_europe_call_index.py
+          python -m py_compile partener-eu/ingest/creative_europe_call_fetch.py
+          python -m py_compile partener-eu/ops/test_creative_europe_call_index.py
+          python -m py_compile partener-eu/ops/test_creative_europe_call_fetch.py
+
+      - name: Validate mixed-index filter stays non-authorizing
+        run: python partener-eu/ops/test_creative_europe_call_index.py
+
+      - name: Validate bounded acquisition fails closed
+        run: python partener-eu/ops/test_creative_europe_call_fetch.py
+
+      - name: Capture live official Creative Europe call-index evidence
+        run: |
+          mkdir -p /tmp/creative-europe
+          python partener-eu/ingest/creative_europe_call_fetch.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --out /tmp/creative-europe/evidence.json \
+            --raw-out /tmp/creative-europe/index.html
+
+      - name: Validate live evidence keeps OPEN/material boundary
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          p='/tmp/creative-europe/evidence.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('adapter_id') != 'CREATIVE_EUROPE_CALLS_V1':
+              print('FAIL adapter identity drift')
+              sys.exit(2)
+          stats=d.get('stats') or {}
+          count=int(stats.get('exact_crea_reference_candidates') or 0)
+          if count < 1:
+              print('FAIL no explicit CREA-* references in official index')
+              sys.exit(2)
+          if int(stats.get('records_requiring_ft_reconcile') or 0) != count:
+              print('FAIL F&T reconcile gate lost')
+              sys.exit(2)
+          if int(stats.get('open_call_authorized') or 0) != 0:
+              print('FAIL index authorized OPEN')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL live evidence became authorizing', key, d.get(key))
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
+              print('FAIL publication/canonical effect')
+              sys.exit(2)
+          raw_hash=str((d.get('receipt') or {}).get('raw_sha256') or '')
+          if not re.fullmatch(r'[0-9a-f]{64}', raw_hash):
+              print('FAIL missing immutable raw SHA-256')
+              sys.exit(2)
+          refs=[r.get('call_reference_candidate') for r in (d.get('batch') or {}).get('records', [])]
+          if not all(isinstance(x,str) and x.startswith('CREA-') for x in refs):
+              print('FAIL non-CREA row leaked into Creative Europe evidence', refs)
+              sys.exit(2)
+          print(json.dumps({'count':count,'refs':refs[:10],'visible_open_candidates':stats.get('visible_open_candidates'),'open_call_authorized':False}, ensure_ascii=False))
+          PY
+
+      - name: Upload bounded Creative Europe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-creative-europe-call-index-evidence
+          path: /tmp/creative-europe
+          retention-days: 7
+          if-no-files-found: error
