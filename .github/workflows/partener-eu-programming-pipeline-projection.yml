@@ -1,0 +1,130 @@
+name: PARTENER.EU Programming Pipeline Projection CI
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/interreg_programming_pipeline_registry.json'
+      - 'partener-eu/ingest/interreg_programming_pipeline.py'
+      - 'partener-eu/web/programming_pipeline_projection.py'
+      - 'partener-eu/ops/test_programming_pipeline_projection.py'
+      - '.github/workflows/partener-eu-programming-pipeline-projection.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  projection-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "Exact event head verified: $ACTUAL_SHA"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate projection syntax and fail-closed regression
+        run: |
+          python -m py_compile partener-eu/web/programming_pipeline_projection.py
+          python -m py_compile partener-eu/ops/test_programming_pipeline_projection.py
+          python partener-eu/ops/test_programming_pipeline_projection.py
+
+      - name: Capture live upstream programming snapshot
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/partener-programming-projection
+          python partener-eu/ingest/interreg_programming_pipeline.py \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-product-projection" \
+            --output /tmp/partener-programming-projection/interreg-programming-pipeline.json
+
+      - name: Build baseline semantic reconciliation receipt
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          sys.path.insert(0, 'partener-eu/ingest')
+          from interreg_programming_pipeline import reconcile_snapshots
+          root=pathlib.Path('/tmp/partener-programming-projection')
+          snapshot=json.loads((root/'interreg-programming-pipeline.json').read_text(encoding='utf-8'))
+          receipt=reconcile_snapshots(snapshot, None)
+          (root/'interreg-programming-reconciliation.json').write_text(
+              json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          PY
+
+      - name: Build read-only PROGRAMARE VIITOARE projection
+        run: |
+          python partener-eu/web/programming_pipeline_projection.py \
+            --snapshot /tmp/partener-programming-projection/interreg-programming-pipeline.json \
+            --reconciliation /tmp/partener-programming-projection/interreg-programming-reconciliation.json \
+            --output /tmp/partener-programming-projection/programming-pipeline-public-projection.json
+
+      - name: Validate live projection remains preview-only and non-authorizing
+        run: |
+          python - <<'PY'
+          import json, pathlib, sys
+          p=pathlib.Path('/tmp/partener-programming-projection/programming-pipeline-public-projection.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          if d.get('projection_id') != 'PROGRAMMING_PIPELINE_PUBLIC_PROJECTION_V1':
+              print('FAIL projection identity drift')
+              sys.exit(2)
+          if d.get('surface') != 'PROGRAMARE_VIITOARE_PIPELINE' or d.get('surface_state') != 'PREVIEW_READ_ONLY_NOT_PUBLISHED':
+              print('FAIL pipeline preview surface drift')
+              sys.exit(2)
+          if d.get('card_count', 0) < 1 or len(d.get('cards') or []) != d.get('card_count'):
+              print('FAIL projection card inventory')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL projection became authorizing:', key, d.get(key))
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('reader_copy_generated') is not False or d.get('seo_indexing_state') != 'NOINDEX_PREVIEW_ONLY':
+              print('FAIL preview/publication boundary drift')
+              sys.exit(2)
+          allowed={'PROPOSAL','CONSULTATION','PROGRAMMING_PROCESS'}
+          for card in d['cards']:
+              if card.get('observation_state') not in allowed:
+                  print('FAIL forbidden card state:', card.get('source_id'), card.get('observation_state'))
+                  sys.exit(2)
+              if card.get('open_confirmation_state') != 'NOT_CONFIRMED_MISSING_EXACT_CALL_EVIDENCE':
+                  print('FAIL card open-confirmation boundary:', card.get('source_id'))
+                  sys.exit(2)
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+                  if card.get(key) is not False:
+                      print('FAIL card became authorizing:', card.get('source_id'), key)
+                      sys.exit(2)
+          print(json.dumps({
+              'card_count': d['card_count'],
+              'healthy_source_count': d.get('healthy_source_count'),
+              'degraded_source_count': d.get('degraded_source_count'),
+              'reconciliation_state': d.get('reconciliation_state'),
+              'surface_state': d.get('surface_state'),
+              'open_call_authorized': d.get('open_call_authorized'),
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload bounded projection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-programming-pipeline-projection-evidence
+          path: /tmp/partener-programming-projection
+          retention-days: 7
+          if-no-files-found: error
