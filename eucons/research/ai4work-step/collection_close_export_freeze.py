@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +16,7 @@ ARTIFACT_CLASS = "COLLECTION_CLOSE_EXPORT_FREEZE_CONTROL_NOT_NEED_EVIDENCE"
 PROD_EVIDENCE_CLASS = "PROD_REAL_EVIDENCE"
 FREEZE_STATUS = "FROZEN_FOR_NF06_PROD"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+MAX_CONTROL_CLOCK_SKEW = timedelta(minutes=5)
 EXPECTED_KEYS = {
     "schema_version",
     "research_id",
@@ -91,6 +92,7 @@ def validate_collection_freeze_receipt(
     itself. It proves that the declared collection window was closed, the runtime
     acceptance path was disabled, no post-close records were accepted, and the
     exact canonical export/rights snapshot/retention policy are frozen together.
+    Future-dated operational completion claims fail closed beyond bounded clock skew.
     """
     if receipt is None:
         raise CollectionCloseExportFreezeError(
@@ -197,6 +199,18 @@ def validate_collection_freeze_receipt(
         raise CollectionCloseExportFreezeError("canonical export was frozen before latest candidate record")
     if retention_anchor != closed_at:
         raise CollectionCloseExportFreezeError("retention anchor must equal collection_closed_at")
+
+    validation_now = datetime.now(timezone.utc)
+    latest_allowed_control_time = validation_now + MAX_CONTROL_CLOCK_SKEW
+    for field, value in (
+        ("collection_closed_at", closed_at),
+        ("runtime_acceptance_disabled_at", disabled_at),
+        ("export_frozen_at", frozen_at),
+    ):
+        if value > latest_allowed_control_time:
+            raise CollectionCloseExportFreezeError(
+                f"{field} is future-dated beyond allowed clock skew"
+            )
 
     if receipt.get("live_respondent_delete_max_days_after_close") != 180:
         raise CollectionCloseExportFreezeError("live respondent deletion maximum must remain 180 days after collection close")
