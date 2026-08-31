@@ -15,7 +15,7 @@ from urllib.request import Request, urlopen
 ADAPTER_ID = "INTERREG_ROMD_TRANSPORT_DIAGNOSTIC_V1"
 ALLOWED_HOSTS = {"ro-md.net", "www.ro-md.net"}
 ALLOWED_PATH_PREFIXES = (
-    "/en/news-2021-2027/",
+    "/en/news-2021-2027",
     "/en/programme-2021-2027",
 )
 MARKER_GROUPS = (
