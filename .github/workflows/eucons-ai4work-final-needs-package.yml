@@ -60,7 +60,7 @@ jobs:
 
           assert plan.get('status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
           assert plan.get('approval', {}).get('approved_for_prod') is False
-          assert lock.get('status') == 'OPEN_NOT_LOCKED'
+          assert lock.get('state') == 'OPEN_NOT_LOCKED'
           assert manifest.get('approved_for_prod') is False
           assert manifest.get('collection_enabled') is False
           assert plan.get('test_twin_evidence_class') == 'TEST_TWIN_NON_EVIDENCE'
