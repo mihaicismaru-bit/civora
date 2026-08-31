@@ -1,0 +1,125 @@
+name: PARTENER.EU EU4Health HaDEA Call CI
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu4health_hadea_call_registry.json'
+      - 'partener-eu/ingest/eu4health_hadea_call.py'
+      - 'partener-eu/ops/test_eu4health_hadea_call.py'
+      - '.github/workflows/partener-eu-eu4health-hadea-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eu4health-hadea-call-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify checkout is exact event head
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "$EXPECTED_SHA"
+          echo "Exact event head verified: $ACTUAL_SHA"
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate registry and adapter syntax
+        run: |
+          python -m json.tool partener-eu/ingest/eu4health_hadea_call_registry.json >/dev/null
+          python -m py_compile partener-eu/ingest/eu4health_hadea_call.py
+          python -m py_compile partener-eu/ops/test_eu4health_hadea_call.py
+
+      - name: Validate EU4Health HaDEA authority boundary
+        run: python partener-eu/ops/test_eu4health_hadea_call.py
+
+      - name: Capture live exact HaDEA EU4Health call evidence
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/eu4health-hadea
+          python partener-eu/ingest/eu4health_hadea_call.py \
+            --call-url 'https://hadea.ec.europa.eu/calls-proposals/health-data-biotech-innovation-leveraging-european-health-data-space-0_en' \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eu4health-hadea" \
+            --output /tmp/eu4health-hadea/exact-call.json
+
+      - name: Validate live exact-call evidence stays non-authorizing
+        run: |
+          python - <<'PY'
+          import json, string, sys
+          p='/tmp/eu4health-hadea/exact-call.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('adapter_id') != 'EU4HEALTH_HADEA_CALLS_V1':
+              print('FAIL adapter identity drift')
+              sys.exit(2)
+          if d.get('observation_state') != 'EXACT_CALL_EVIDENCE_UNRECONCILED':
+              print('FAIL observation state drift:', d.get('observation_state'))
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL EU4Health evidence became authorizing:', key, d.get(key))
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('market_intelligence_only') is not True:
+              print('FAIL EU4Health publication/policy drift')
+              sys.exit(2)
+          if d.get('funding_tenders_exact_topic_required') is not True or d.get('semantic_reconciliation_required') is not True:
+              print('FAIL downstream material-admission requirement relaxed')
+              sys.exit(2)
+          reg_hash=str(d.get('registry_sha256') or '')
+          if len(reg_hash) != 64 or any(ch not in string.hexdigits for ch in reg_hash):
+              print('FAIL registry hash invalid:', reg_hash)
+              sys.exit(2)
+          health=(d.get('source_health') or {}).get('health_state')
+          if health == 'HEALTHY':
+              raw_hash=str((d.get('source_health') or {}).get('raw_sha256') or '')
+              if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
+                  print('FAIL healthy HaDEA evidence missing raw hash')
+                  sys.exit(2)
+              extracted=d.get('extracted') or {}
+              if extracted.get('call_reference') != 'EU4H-2026-SANTE-PJ-08':
+                  print('FAIL exact call reference mismatch:', extracted.get('call_reference'))
+                  sys.exit(2)
+              if extracted.get('page_kind') != 'CALL_FOR_PROPOSALS' or extracted.get('programme_candidate') != 'EU4Health':
+                  print('FAIL exact call semantic markers incomplete:', extracted)
+                  sys.exit(2)
+              if d.get('evidence_usable_for_reconciliation') is not True:
+                  print('FAIL healthy exact evidence not marked usable for reconciliation')
+                  sys.exit(2)
+          elif not str(health).startswith('DEGRADED'):
+              print('FAIL unexpected live source health:', health)
+              sys.exit(2)
+          elif (d.get('source_health') or {}).get('lkg_required') is not True:
+              print('FAIL degraded exact source lacks LKG requirement')
+              sys.exit(2)
+          print(json.dumps({
+              'health_state': health,
+              'call_reference': (d.get('extracted') or {}).get('call_reference'),
+              'status_candidate': (d.get('extracted') or {}).get('status_candidate'),
+              'funding_tenders_link_present': (d.get('extracted') or {}).get('funding_tenders_link_present'),
+              'funding_tenders_exact_topic_url': (d.get('extracted') or {}).get('funding_tenders_exact_topic_url'),
+              'evidence_usable_for_reconciliation': d.get('evidence_usable_for_reconciliation'),
+              'open_call_authorized': d.get('open_call_authorized'),
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload bounded EU4Health HaDEA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu4health-hadea-call-evidence
+          path: /tmp/eu4health-hadea
+          retention-days: 7
+          if-no-files-found: error
