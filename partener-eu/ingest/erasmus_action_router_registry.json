@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "ERASMUS_ACTION_ROUTER_REGISTRY_V1",
+  "programme_family": "Erasmus+",
+  "source_family": "EU_DIRECT",
+  "evidence_checked_date": "2026-08-31",
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "publication_effect": "NONE"
+  },
+  "evidence_sources": [
+    {
+      "id": "ERASMUS-OFFICIAL-HOW-TO-APPLY",
+      "authority_class": "OFFICIAL_PROGRAMME_APPLICATION_GUIDANCE",
+      "authority_url": "https://erasmus-plus.ec.europa.eu/resources-and-tools/how-to-apply",
+      "allowed_hosts": ["erasmus-plus.ec.europa.eu"],
+      "allowed_path_prefixes": ["/resources-and-tools/how-to-apply"],
+      "required_marker_groups": [
+        ["Application forms", "application forms"],
+        ["decentralised", "decentralized"],
+        ["centralised", "centralized", "EACEA"]
+      ]
+    },
+    {
+      "id": "ERASMUS-EACEA-HOW-TO-GET-GRANT",
+      "authority_class": "OFFICIAL_EXECUTIVE_AGENCY_APPLICATION_GUIDANCE",
+      "authority_url": "https://www.eacea.ec.europa.eu/grants/how-get-grant_en",
+      "allowed_hosts": ["www.eacea.ec.europa.eu"],
+      "allowed_path_prefixes": ["/grants/how-get-grant_en"],
+      "required_marker_groups": [
+        ["How to get a grant"],
+        ["Funding & Tenders Portal", "Funding & Tenders"],
+        ["Participant Identification Code", "PIC"]
+      ]
+    }
+  ],
+  "management_modes": {
+    "CENTRALISED_EACEA": {
+      "route_owner": "European Education and Culture Executive Agency (EACEA)",
+      "route_class": "CENTRALISED_EU_DIRECT",
+      "registration_identifier_kind": "PIC",
+      "application_gateway_url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/home",
+      "gateway_host": "ec.europa.eu",
+      "exact_action_endpoint_required": true,
+      "exact_call_or_topic_identifier_required": true,
+      "semantic_reconciliation_required": true,
+      "route_basis_source_ids": [
+        "ERASMUS-OFFICIAL-HOW-TO-APPLY",
+        "ERASMUS-EACEA-HOW-TO-GET-GRANT"
+      ]
+    },
+    "DECENTRALISED_NATIONAL_AGENCY": {
+      "route_owner": "Erasmus+ National Agencies",
+      "route_class": "DECENTRALISED_NATIONAL_AGENCY",
+      "registration_identifier_kind": "OID",
+      "application_gateway_url": "https://webgate.ec.europa.eu/erasmus-esc/index/",
+      "gateway_host": "webgate.ec.europa.eu",
+      "exact_action_endpoint_required": true,
+      "exact_call_or_topic_identifier_required": true,
+      "semantic_reconciliation_required": true,
+      "route_basis_source_ids": [
+        "ERASMUS-OFFICIAL-HOW-TO-APPLY"
+      ]
+    }
+  }
+}
