@@ -66,6 +66,115 @@ final class EuconsResearchGovernanceGate
         return true;
     }
 
+    private static function isList(array $value): bool
+    {
+        if ($value === []) {
+            return true;
+        }
+        return array_keys($value) === range(0, count($value) - 1);
+    }
+
+    private static function canonicalize(mixed $value): mixed
+    {
+        if (!is_array($value)) {
+            return $value;
+        }
+        if (self::isList($value)) {
+            return array_map([self::class, 'canonicalize'], $value);
+        }
+        ksort($value, SORT_STRING);
+        foreach ($value as $key => $child) {
+            $value[$key] = self::canonicalize($child);
+        }
+        return $value;
+    }
+
+    private static function canonicalSha256(array $value): string
+    {
+        $json = json_encode(
+            self::canonicalize($value),
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+        );
+        return hash('sha256', $json);
+    }
+
+    private static function timestamp(mixed $value): ?int
+    {
+        if (!is_string($value) || trim($value) === '') {
+            return null;
+        }
+        $parsed = strtotime(trim($value));
+        return $parsed === false ? null : $parsed;
+    }
+
+    private function precollectionMethodReady(array $manifest, array $frame, array $plan, array $planLock): bool
+    {
+        $frameId = $frame['collection_frame_id'] ?? null;
+        if (!is_string($frameId) || trim($frameId) === ''
+            || ($plan['collection_frame_id'] ?? null) !== $frameId
+            || ($planLock['collection_frame_id'] ?? null) !== $frameId) {
+            return false;
+        }
+
+        $approval = $plan['approval'] ?? null;
+        if (($plan['schema_version'] ?? null) !== 'eucons.ai4work_need_analysis_plan.v0.2'
+            || ($plan['status'] ?? null) !== 'APPROVED_FOR_PROD'
+            || ($plan['evidence_class'] ?? null) !== 'METHOD_PLAN_NOT_EVIDENCE'
+            || !is_array($approval)
+            || ($approval['approved'] ?? false) !== true
+            || ($approval['approved_for_prod'] ?? false) !== true
+            || !self::nonPlaceholder($approval['approver_reference'] ?? null)
+            || self::timestamp($approval['approved_at'] ?? null) === null
+            || ($plan['synthetic_records_allowed'] ?? null) !== false
+            || ($plan['test_twin_evidence_class'] ?? null) !== 'TEST_TWIN_NON_EVIDENCE'
+            || ($plan['project_activity_as_need_evidence'] ?? null) !== false
+            || ($plan['merge_authorized'] ?? null) !== false
+            || ($plan['deploy_authorized'] ?? null) !== false
+            || ($plan['prod_activation_authorized'] ?? null) !== false) {
+            return false;
+        }
+
+        $ranking = $plan['core_skill_ranking'] ?? null;
+        if (!is_array($ranking)
+            || ($ranking['respondent_weighting_allowed'] ?? null) !== false
+            || ($ranking['secondary_evidence_can_change_numeric_order'] ?? null) !== false
+            || ($ranking['missing_direct_indicator_imputation_allowed'] ?? null) !== false
+            || ($ranking['representativeness_claim_allowed'] ?? null) !== false
+            || ($ranking['causal_claim_allowed'] ?? null) !== false) {
+            return false;
+        }
+
+        $declaredSha = $planLock['need_analysis_plan_sha256'] ?? null;
+        if (($planLock['schema_version'] ?? null) !== 'eucons.ai4work_precollection_analysis_plan_lock.v0.1'
+            || ($planLock['state'] ?? null) !== 'LOCKED_BEFORE_PROD_ACTIVATION'
+            || ($planLock['evidence_class'] ?? null) !== 'METHOD_CONTROL_NOT_EVIDENCE'
+            || ($planLock['need_analysis_plan_reference'] ?? null) !== 'NEED_ANALYSIS_PLAN_DRAFT.json'
+            || !is_string($declaredSha)
+            || !preg_match('/^[0-9a-f]{64}$/', $declaredSha)
+            || !hash_equals(self::canonicalSha256($plan), $declaredSha)
+            || ($planLock['synthetic_or_test_twin_can_satisfy_lock'] ?? null) !== false
+            || ($planLock['project_activity_as_need_evidence'] ?? null) !== false
+            || ($planLock['secondary_evidence_can_change_numeric_order'] ?? null) !== false
+            || !self::nonPlaceholder($planLock['approver_reference'] ?? null)
+            || self::timestamp($planLock['approved_at'] ?? null) === null
+            || ($planLock['merge_authorized'] ?? null) !== false
+            || ($planLock['deploy_authorized'] ?? null) !== false
+            || ($planLock['prod_activation_authorized'] ?? null) !== false) {
+            return false;
+        }
+
+        $planApprovedAt = self::timestamp($approval['approved_at'] ?? null);
+        $lockApprovedAt = self::timestamp($planLock['approved_at'] ?? null);
+        $activationApprovedAt = self::timestamp($manifest['approval_timestamp'] ?? null);
+        if ($planApprovedAt === null || $lockApprovedAt === null || $activationApprovedAt === null
+            || $planApprovedAt > $lockApprovedAt
+            || $lockApprovedAt > $activationApprovedAt) {
+            return false;
+        }
+
+        return true;
+    }
+
     private function resolveLocalReference(mixed $reference): ?string
     {
         if (!is_string($reference) || trim($reference) === '') {
@@ -149,11 +258,13 @@ final class EuconsResearchGovernanceGate
             $frame = $this->artifact('COLLECTION_FRAME_DRAFT.json');
             $dpia = $this->artifact('GDPR_DPIA_SCREENING_DRAFT.json');
             $article13 = $this->artifact('ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json');
+            $plan = $this->artifact('NEED_ANALYSIS_PLAN_DRAFT.json');
+            $planLock = $this->artifact('PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json');
         } catch (Throwable) {
             return false;
         }
 
-        foreach ([$contract, $manifest, $controller, $frame, $dpia, $article13] as $artifact) {
+        foreach ([$contract, $manifest, $controller, $frame, $dpia, $article13, $plan, $planLock] as $artifact) {
             if (($artifact['research_id'] ?? null) !== self::RESEARCH_ID) {
                 return false;
             }
@@ -196,6 +307,10 @@ final class EuconsResearchGovernanceGate
             || ($frameApproval['approved_for_prod'] ?? false) !== true
             || !is_array($nf06)
             || ($nf06['eligible_now'] ?? false) !== true) {
+            return false;
+        }
+
+        if (!$this->precollectionMethodReady($manifest, $frame, $plan, $planLock)) {
             return false;
         }
 
