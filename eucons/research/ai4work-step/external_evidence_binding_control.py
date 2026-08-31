@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from prod_activation_gate import REQUIRED_EXTERNAL_KEYS
+from prod_activation_gate import FROZEN_DOCUMENTARY_KEYS, REQUIRED_EXTERNAL_KEYS
 
 HERE = Path(__file__).resolve().parent
 MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
@@ -89,6 +89,9 @@ def _binding_errors_for_item(*, key: str, item: Any, research_id: str) -> list[s
     if status not in ALLOWED_STATUSES:
         errors.append(f"evidence_status_invalid:{key}")
         return errors
+    if status == "FROZEN" and key not in FROZEN_DOCUMENTARY_KEYS:
+        errors.append(f"operational_evidence_may_not_be_frozen:{key}")
+        return errors
 
     has_reference = isinstance(reference, str) and bool(reference.strip())
     has_digest = isinstance(digest, str) and bool(SHA256_RE.fullmatch(digest))
@@ -129,9 +132,10 @@ def _binding_errors_for_item(*, key: str, item: Any, research_id: str) -> list[s
         if artifact_research_id is not None and artifact_research_id != research_id:
             errors.append(f"evidence_research_id_mismatch:{key}")
 
-    # FROZEN may bind documentary/provider context. PASS/APPROVED is stronger: it
-    # must point to a machine-verifiable attestation for this exact gate, not merely
-    # to any immutable repository file that happens to have a correct digest.
+    # FROZEN is only an immutable documentary/provider-context state for the explicit
+    # allowlist imported from the activation gate. PASS/APPROVED is stronger: it must
+    # point to a machine-verifiable attestation for this exact gate, not merely to any
+    # immutable repository file that happens to have a correct digest.
     if status in SEMANTIC_ATTESTATION_STATUSES:
         if artifact is None:
             errors.append(f"promoted_evidence_attestation_not_json:{key}")
@@ -187,7 +191,7 @@ def main() -> int:
         assert_repository_external_evidence_bindings()
     except (OSError, json.JSONDecodeError, ExternalEvidenceBindingError) as exc:
         raise SystemExit(f"REJECTED: {exc}")
-    print("PASS: activation evidence references are immutable repo-local bindings; PASS/APPROVED gates are semantically attested; OPEN gates remain non-promoted")
+    print("PASS: activation evidence references are immutable repo-local bindings; FROZEN is documentary-only; PASS/APPROVED gates are semantically attested; OPEN gates remain non-promoted")
     return 0
 
 
