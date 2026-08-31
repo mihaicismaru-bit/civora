@@ -35,6 +35,7 @@ def _expect_fail(data: dict, needle: str) -> None:
 
 
 def main() -> None:
+    registry, _ = pipeline.load_registry()
     result = pipeline.resolve(
         run_id="TEST-INTERREG-PIPELINE",
         observed_at="2026-08-31T01:49:33Z",
@@ -42,7 +43,7 @@ def main() -> None:
     )
     assert result["adapter_id"] == "INTERREG_PROGRAMMING_PIPELINE_V1"
     assert result["observation_state"] == "PROGRAMMING_PIPELINE"
-    assert result["source_count"] == 6
+    assert result["source_count"] == len(registry["sources"]) == 8
     assert result["registry_freshness_state"] == "CURRENT_CHECK_30D"
     assert result["health_state"] == "NOT_PROBED"
     for key in pipeline.MATERIAL_FLAGS:
@@ -56,6 +57,10 @@ def main() -> None:
     assert by_id["INT-PIPE-ROBG-2028-2034"]["consultation_lifecycle"] == "AFTER_WINDOW"
     assert by_id["INT-PIPE-RORS-2028-2034"]["consultation_lifecycle"] == "AFTER_WINDOW"
     assert by_id["INT-PIPE-EU-COM-2025-552"]["observation_state"] == "PROPOSAL"
+    assert by_id["INT-PIPE-DANUBE-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
+    assert by_id["INT-PIPE-INTERREG-EUROPE-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
+    assert by_id["INT-PIPE-DANUBE-2028-2034"]["programme_ids"] == ["DANUBE"]
+    assert by_id["INT-PIPE-INTERREG-EUROPE-2028-2034"]["programme_ids"] == ["INTERREG_EUROPE"]
     assert result["watchlist"][0]["source_id"] == "INT-PIPE-BSB-2028-2034"
     for row in result["watchlist"]:
         for key in pipeline.MATERIAL_FLAGS:
@@ -67,7 +72,6 @@ def main() -> None:
         for forbidden in ("call_status", "call_budget", "call_deadline", "call_eligibility"):
             assert forbidden not in row
 
-    registry, _ = pipeline.load_registry()
     bad = copy.deepcopy(registry)
     bad["sources"][0]["observation_state"] = "OPEN_CALL"
     _expect_fail(bad, "forbidden programming observation state")
