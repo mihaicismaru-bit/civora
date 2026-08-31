@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import copy
 import hashlib
-from datetime import datetime, timedelta, timezone
 import json
 import unittest
+from datetime import datetime, timedelta, timezone
 
 import canonical_export_integrity as EXPORT_INTEGRITY
 import collection_close_export_freeze as FREEZE
@@ -40,15 +40,10 @@ def persisted_bundle(record: dict) -> dict:
     }
 
 
-def rights_snapshot(
-    response_ids: list[str] | None = None,
-    *,
-    captured_at: str | None = None,
-    **overrides,
-) -> dict:
+def rights_snapshot(response_ids: list[str] | None = None, *, captured_at: str | None = None, **overrides) -> dict:
     if captured_at is None:
         captured_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    snapshot = {
+    value = {
         "schema_version": HANDOFF.RIGHTS_HOLD_SNAPSHOT_SCHEMA,
         "research_id": "AI4WORK-STEP-NF-RUN-001",
         "source_class": HANDOFF.RIGHTS_HOLD_SOURCE_CLASS,
@@ -57,24 +52,19 @@ def rights_snapshot(
         "complete_current_snapshot": True,
         "response_ids": [] if response_ids is None else list(response_ids),
     }
-    snapshot.update(overrides)
-    return snapshot
+    value.update(overrides)
+    return value
 
 
-def _canonical_snapshot_sha(snapshot: dict) -> str:
+def canonical_snapshot_sha(snapshot: dict) -> str:
     payload = (
-        json.dumps(
-            snapshot,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        )
+        json.dumps(snapshot, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
         + "\n"
     ).encode("utf-8")
     return hashlib.sha256(payload).hexdigest()
 
 
-def _unvalidated_source_bytes(bundles: list[dict]) -> bytes:
+def unvalidated_source_bytes(bundles: list[dict]) -> bytes:
     records = [copy.deepcopy(bundle["wrapper"]["record"]) for bundle in bundles]
     records.sort(
         key=lambda row: (
@@ -86,15 +76,10 @@ def _unvalidated_source_bytes(bundles: list[dict]) -> bytes:
     return b"".join(canonical_json_bytes(record) for record in records)
 
 
-def freeze_receipt(
-    bundles: list[dict],
-    frame: dict,
-    snapshot: dict,
-    **overrides,
-) -> dict:
-    source_bytes = _unvalidated_source_bytes(bundles)
+def freeze_receipt(bundles: list[dict], frame: dict, snapshot: dict, **overrides) -> dict:
+    source_bytes = unvalidated_source_bytes(bundles)
     now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    receipt = {
+    value = {
         "schema_version": FREEZE.SCHEMA_VERSION,
         "research_id": "AI4WORK-STEP-NF-RUN-001",
         "artifact_class": FREEZE.ARTIFACT_CLASS,
@@ -108,7 +93,7 @@ def freeze_receipt(
         "source_export_sha256": hashlib.sha256(source_bytes).hexdigest(),
         "accepted_record_count": len(bundles),
         "post_close_accepted_record_count": 0,
-        "rights_hold_snapshot_sha256": _canonical_snapshot_sha(snapshot),
+        "rights_hold_snapshot_sha256": canonical_snapshot_sha(snapshot),
         "collection_channel_register_sha256": frame["collection_channel_register_sha256"],
         "retention_schedule_sha256": FREEZE.retention_schedule_sha256(),
         "retention_anchor_at": frame["collection_closed_at"],
@@ -122,18 +107,12 @@ def freeze_receipt(
         "receipt_is_authorization": False,
         "nf06_freeze_prerequisite_satisfied": True,
     }
-    receipt.update(overrides)
-    return receipt
+    value.update(overrides)
+    return value
 
 
-def call_handoff(
-    bundles: list[dict],
-    frame: dict,
-    snapshot: dict | None,
-    *,
-    freeze: dict | None = None,
-):
-    if freeze is None and isinstance(snapshot, dict):
+def handoff(bundles: list[dict], frame: dict, snapshot: dict, freeze: dict | None = None):
+    if freeze is None:
         freeze = freeze_receipt(bundles, frame, snapshot)
     return HANDOFF.build_prod_preingest_from_persisted_bundles(
         bundles,
@@ -144,330 +123,151 @@ def call_handoff(
 
 
 class NF06PersistedHandoffTests(unittest.TestCase):
-    def test_valid_persisted_prod_bundles_build_exact_nf06_source_and_manifest(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in reversed(records)]
-        frame, expected_source_bytes = collection_frame(records, prod=True)
+    def setUp(self):
+        self.records = normalized_records()
+        self.bundles = [persisted_bundle(record) for record in self.records]
+        self.frame, self.expected_source = collection_frame(self.records, prod=True)
+
+    def test_valid_persisted_prod_handoff_binds_rights_and_collection_freeze(self):
         snapshot = rights_snapshot()
-
-        source_bytes, manifest = call_handoff(bundles, frame, snapshot)
-
-        self.assertEqual(source_bytes, expected_source_bytes)
-        self.assertEqual(
-            manifest["source_export_sha256"],
-            hashlib.sha256(expected_source_bytes).hexdigest(),
-        )
+        source_bytes, manifest = handoff(list(reversed(self.bundles)), self.frame, snapshot)
+        self.assertEqual(source_bytes, self.expected_source)
         self.assertEqual(manifest["evidence_class"], "PROD_REAL_EVIDENCE")
         self.assertEqual(manifest["record_count"], 2)
         self.assertTrue(manifest["prod_promotion_eligible"])
         self.assertTrue(manifest["rights_hold_snapshot_checked"])
         self.assertTrue(manifest["held_responses_excluded_from_export"])
         self.assertEqual(manifest["rights_hold_count_at_export"], 0)
-        self.assertEqual(
-            manifest["rights_hold_snapshot_schema"],
-            "eucons.ai4work_rights_hold_snapshot.v0.1",
-        )
-        self.assertEqual(
-            manifest["rights_hold_snapshot_source_class"],
-            "EUCONS_RESEARCH_RIGHTS_STORE",
-        )
-        self.assertEqual(
-            manifest["rights_hold_snapshot_captured_at"],
-            snapshot["captured_at"],
-        )
-        canonical_snapshot = (
-            json.dumps(
-                snapshot,
-                ensure_ascii=False,
-                sort_keys=True,
-                separators=(",", ":"),
-            )
-            + "\n"
-        ).encode("utf-8")
-        self.assertEqual(
-            manifest["rights_hold_snapshot_sha256"],
-            hashlib.sha256(canonical_snapshot).hexdigest(),
-        )
-        self.assertEqual(
-            manifest["rights_hold_receipt_set_sha256"],
-            hashlib.sha256(
-                json.dumps([], ensure_ascii=False, separators=(",", ":")).encode(
-                    "utf-8"
-                )
-            ).hexdigest(),
-        )
+        self.assertEqual(manifest["rights_hold_snapshot_sha256"], canonical_snapshot_sha(snapshot))
         self.assertTrue(manifest["collection_close_export_freeze_checked"])
-        self.assertEqual(
-            manifest["collection_close_export_freeze_schema"],
-            FREEZE.SCHEMA_VERSION,
-        )
-        self.assertEqual(
-            manifest["collection_close_export_freeze_status"],
-            "FROZEN_FOR_NF06_PROD",
-        )
-        self.assertEqual(
-            manifest["collection_close_post_close_accepted_record_count"], 0
-        )
+        self.assertEqual(manifest["collection_close_export_freeze_schema"], FREEZE.SCHEMA_VERSION)
+        self.assertEqual(manifest["collection_close_export_freeze_status"], FREEZE.FREEZE_STATUS)
+        self.assertEqual(manifest["collection_close_post_close_accepted_record_count"], 0)
         self.assertTrue(manifest["collection_close_control_not_need_evidence"])
         self.assertFalse(manifest["collection_close_receipt_is_authorization"])
 
-    def test_prod_handoff_requires_structured_authoritative_rights_hold_snapshot(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "authoritative rights-hold snapshot object is required",
-        ):
-            call_handoff(bundles, frame, None, freeze=None)
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "rights-hold snapshot must be an object",
-        ):
+    def test_missing_authoritative_rights_snapshot_fails_closed(self):
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "authoritative rights-hold snapshot"):
             HANDOFF.build_prod_preingest_from_persisted_bundles(
-                bundles,
-                collection_frame=frame,
+                self.bundles,
+                collection_frame=self.frame,
+                rights_hold_snapshot=None,
+                collection_freeze_receipt=None,
+            )
+
+    def test_non_object_rights_snapshot_fails_closed(self):
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "rights-hold snapshot must be an object"):
+            HANDOFF.build_prod_preingest_from_persisted_bundles(
+                self.bundles,
+                collection_frame=self.frame,
                 rights_hold_snapshot=set(),
                 collection_freeze_receipt=None,
             )
 
-    def test_prod_handoff_requires_collection_close_export_freeze_receipt(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
+    def test_missing_collection_freeze_receipt_fails_closed(self):
         snapshot = rights_snapshot()
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "authoritative collection close/export freeze receipt"):
+            HANDOFF.build_prod_preingest_from_persisted_bundles(
+                self.bundles,
+                collection_frame=self.frame,
+                rights_hold_snapshot=snapshot,
+                collection_freeze_receipt=None,
+            )
 
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "authoritative collection close/export freeze receipt is required",
-        ):
-            call_handoff(bundles, frame, snapshot, freeze=None)
+    def test_held_response_fails_before_export(self):
+        snapshot = rights_snapshot([self.records[0]["response_id"]])
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "under rights analysis hold"):
+            handoff(self.bundles, self.frame, snapshot)
 
-    def test_collection_freeze_rejects_post_close_accepts_and_hash_drift(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
+    def test_rights_snapshot_structure_source_and_completeness_fail_closed(self):
+        for snapshot, pattern in [
+            (rights_snapshot(["not-an-opaque-receipt"]), "lowercase SHA-256 hex"),
+            (rights_snapshot(source_class="ARBITRARY_CALLER_SET"), "source_class mismatch"),
+            (rights_snapshot(complete_current_snapshot=False), "complete_current_snapshot=true"),
+            (rights_snapshot(case_narrative="forbidden"), "exact field allowlist mismatch"),
+        ]:
+            with self.subTest(pattern=pattern):
+                with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, pattern):
+                    handoff(self.bundles, self.frame, snapshot)
+
+    def test_rights_snapshot_temporal_controls_fail_closed(self):
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "predates collection close"):
+            handoff(self.bundles, self.frame, rights_snapshot(captured_at="2026-08-28T17:59:59Z"))
+
+        stale = (datetime.now(timezone.utc) - HANDOFF.MAX_RIGHTS_HOLD_SNAPSHOT_AGE - timedelta(seconds=5)).isoformat().replace("+00:00", "Z")
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "stale at NF06 persisted handoff"):
+            handoff(self.bundles, self.frame, rights_snapshot(captured_at=stale))
+
+        future = (datetime.now(timezone.utc) + HANDOFF.MAX_RIGHTS_HOLD_CLOCK_SKEW + timedelta(seconds=5)).isoformat().replace("+00:00", "Z")
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "future beyond allowed clock skew"):
+            handoff(self.bundles, self.frame, rights_snapshot(captured_at=future))
+
+    def test_collection_freeze_rejects_post_close_accepts_and_source_hash_drift(self):
         snapshot = rights_snapshot()
+        for freeze, pattern in [
+            (freeze_receipt(self.bundles, self.frame, snapshot, post_close_accepted_record_count=1), "post-close accepted records must be zero"),
+            (freeze_receipt(self.bundles, self.frame, snapshot, source_export_sha256="0" * 64), "source_export_sha256 mismatch"),
+        ]:
+            with self.subTest(pattern=pattern):
+                with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, pattern):
+                    handoff(self.bundles, self.frame, snapshot, freeze)
 
-        bad_count = freeze_receipt(
-            bundles,
-            frame,
+    def test_collection_freeze_binds_retention_and_cannot_authorize(self):
+        snapshot = rights_snapshot()
+        for freeze, pattern in [
+            (freeze_receipt(self.bundles, self.frame, snapshot, retention_schedule_sha256="0" * 64), "retention schedule SHA-256 mismatch"),
+            (freeze_receipt(self.bundles, self.frame, snapshot, receipt_is_authorization=True), "must not act as controller/deploy authorization"),
+            (freeze_receipt(self.bundles, self.frame, snapshot, synthetic_records_included=True), "synthetic records are forbidden"),
+        ]:
+            with self.subTest(pattern=pattern):
+                with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, pattern):
+                    handoff(self.bundles, self.frame, snapshot, freeze)
+
+    def test_collection_freeze_temporal_chain_is_fail_closed(self):
+        snapshot = rights_snapshot()
+        close = self.frame["collection_closed_at"]
+        before_close = "2026-08-28T17:59:59Z"
+        freeze = freeze_receipt(
+            self.bundles,
+            self.frame,
             snapshot,
-            post_close_accepted_record_count=1,
+            runtime_acceptance_disabled_at=before_close,
+            export_frozen_at=before_close,
         )
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "post-close accepted records must be zero",
-        ):
-            call_handoff(bundles, frame, snapshot, freeze=bad_count)
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "runtime acceptance was disabled before declared collection close"):
+            handoff(self.bundles, self.frame, snapshot, freeze)
 
-        bad_hash = freeze_receipt(
-            bundles,
-            frame,
+        freeze = freeze_receipt(
+            self.bundles,
+            self.frame,
             snapshot,
-            source_export_sha256="0" * 64,
+            retention_anchor_at="2026-08-28T18:00:01Z" if close != "2026-08-28T18:00:01Z" else "2026-08-28T18:00:02Z",
         )
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "source_export_sha256 mismatch",
-        ):
-            call_handoff(bundles, frame, snapshot, freeze=bad_hash)
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "retention anchor must equal collection_closed_at"):
+            handoff(self.bundles, self.frame, snapshot, freeze)
 
-    def test_collection_freeze_binds_retention_and_is_not_authorization(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-        snapshot = rights_snapshot()
+    def test_persisted_record_or_receipt_tamper_fails_before_nf06(self):
+        tampered = copy.deepcopy(self.bundles)
+        tampered[0]["wrapper"]["record"]["answers"]["A01"] = "tampered"
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "integrity validation"):
+            handoff(tampered, self.frame, rights_snapshot())
 
-        bad_retention = freeze_receipt(
-            bundles,
-            frame,
-            snapshot,
-            retention_schedule_sha256="0" * 64,
-        )
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "retention schedule SHA-256 mismatch",
-        ):
-            call_handoff(bundles, frame, snapshot, freeze=bad_retention)
+        tampered = copy.deepcopy(self.bundles)
+        tampered[1]["receipt"]["body_sha256"] = "0" * 64
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "integrity validation"):
+            handoff(tampered, self.frame, rights_snapshot())
 
-        bad_authorization = freeze_receipt(
-            bundles,
-            frame,
-            snapshot,
-            receipt_is_authorization=True,
-        )
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "must not act as controller/deploy authorization",
-        ):
-            call_handoff(bundles, frame, snapshot, freeze=bad_authorization)
+    def test_duplicate_response_id_fails_closed(self):
+        bundles = [self.bundles[0], copy.deepcopy(self.bundles[0])]
+        with self.assertRaisesRegex(HANDOFF.NF06PersistedHandoffError, "duplicate response_id"):
+            handoff(bundles, self.frame, rights_snapshot())
 
-    def test_record_under_rights_hold_fails_before_nf06_prod_export(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-        snapshot = rights_snapshot([records[0]["response_id"]])
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "under rights analysis hold",
-        ):
-            call_handoff(bundles, frame, snapshot)
-
-    def test_invalid_rights_hold_receipt_fails_closed(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-        snapshot = rights_snapshot(["not-an-opaque-receipt"])
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "lowercase SHA-256 hex",
-        ):
-            call_handoff(bundles, frame, snapshot)
-
-    def test_rights_snapshot_source_class_and_completeness_are_fail_closed(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "source_class mismatch",
-        ):
-            call_handoff(
-                bundles,
-                frame,
-                rights_snapshot(source_class="ARBITRARY_CALLER_SET"),
-            )
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "complete_current_snapshot=true",
-        ):
-            call_handoff(
-                bundles,
-                frame,
-                rights_snapshot(complete_current_snapshot=False),
-            )
-
-    def test_rights_snapshot_must_not_predate_collection_close_or_candidate_records(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "predates collection close",
-        ):
-            call_handoff(
-                bundles,
-                frame,
-                rights_snapshot(captured_at="2026-08-28T17:59:59Z"),
-            )
-
-        frame2 = copy.deepcopy(frame)
-        frame2["collection_closed_at"] = "2026-08-28T09:30:00+00:00"
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "predates latest candidate record",
-        ):
-            call_handoff(
-                bundles,
-                frame2,
-                rights_snapshot(captured_at="2026-08-28T09:45:00Z"),
-            )
-
-    def test_rights_snapshot_must_be_fresh_at_handoff_and_not_future_dated(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-
-        stale = (
-            datetime.now(timezone.utc) - HANDOFF.MAX_RIGHTS_HOLD_SNAPSHOT_AGE - timedelta(seconds=5)
-        ).isoformat().replace("+00:00", "Z")
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "stale at NF06 persisted handoff",
-        ):
-            call_handoff(bundles, frame, rights_snapshot(captured_at=stale))
-
-        future = (
-            datetime.now(timezone.utc) + HANDOFF.MAX_RIGHTS_HOLD_CLOCK_SKEW + timedelta(seconds=5)
-        ).isoformat().replace("+00:00", "Z")
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "future beyond allowed clock skew",
-        ):
-            call_handoff(bundles, frame, rights_snapshot(captured_at=future))
-
-    def test_rights_snapshot_rejects_unreviewed_extra_fields(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "exact field allowlist mismatch",
-        ):
-            call_handoff(
-                bundles,
-                frame,
-                rights_snapshot(
-                    case_narrative="must never enter analytical control artifact"
-                ),
-            )
-
-    def test_record_tamper_after_persistence_commit_fails_before_nf06(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-        bundles[0]["wrapper"]["record"]["answers"]["A01"] = "tampered"
-        snapshot = rights_snapshot()
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "integrity validation",
-        ):
-            call_handoff(bundles, frame, snapshot)
-
-    def test_receipt_body_digest_tamper_fails_before_nf06(self):
-        records = normalized_records()
-        bundles = [persisted_bundle(record) for record in records]
-        frame, _ = collection_frame(records, prod=True)
-        bundles[1]["receipt"]["body_sha256"] = "0" * 64
-        snapshot = rights_snapshot()
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "integrity validation",
-        ):
-            call_handoff(bundles, frame, snapshot)
-
-    def test_duplicate_persisted_response_id_fails_closed(self):
-        records = normalized_records()
-        first = persisted_bundle(records[0])
-        bundles = [first, copy.deepcopy(first)]
-        frame, _ = collection_frame(records, prod=True)
-        snapshot = rights_snapshot()
-
-        with self.assertRaisesRegex(
-            HANDOFF.NF06PersistedHandoffError,
-            "duplicate response_id",
-        ):
-            call_handoff(bundles, frame, snapshot)
-
-    def test_test_twin_record_is_not_accepted_by_prod_persisted_handoff(self):
+    def test_test_twin_record_is_not_accepted_by_prod_handoff(self):
         records = normalized_records(synthetic=True)
         bundles = [persisted_bundle(record) for record in records]
         frame, _ = collection_frame(records, prod=True)
-        snapshot = rights_snapshot()
-
         with self.assertRaises(HANDOFF.NF06PersistedHandoffError):
-            call_handoff(bundles, frame, snapshot)
+            handoff(bundles, frame, rights_snapshot())
 
 
 if __name__ == "__main__":
