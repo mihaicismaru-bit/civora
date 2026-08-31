@@ -16,6 +16,8 @@ class StaticSurfacePrivacyControlTests(unittest.TestCase):
         self.assertEqual(result["allowed_network_egress"], [ALLOWED_RESEARCH_API])
         self.assertEqual(result["browser_storage_hits"], [])
         self.assertTrue(result["recruitment_channel_fragment_scrubbed"])
+        self.assertTrue(result["post_accept_form_state_cleared"])
+        self.assertTrue(result["post_accept_channel_cleared"])
         self.assertFalse(result["test_twin_evidence_eligible"])
         for page in result["pages"].values():
             self.assertEqual(page["external_assets"], 0)
@@ -59,12 +61,20 @@ class StaticSurfacePrivacyControlTests(unittest.TestCase):
 
     def test_recruitment_channel_fragment_is_captured_once_then_scrubbed(self) -> None:
         client_source = (Path(__file__).resolve().parent / "research_form.js").read_text(encoding="utf-8")
-        self.assertIn("const recruitmentChannel = (() => {", client_source)
+        self.assertIn("let recruitmentChannel = (() => {", client_source)
         self.assertIn("globalThis.history.replaceState", client_source)
         self.assertIn("const channelId = () => recruitmentChannel;", client_source)
         self.assertNotIn("localStorage", client_source)
         self.assertNotIn("sessionStorage", client_source)
         self.assertNotIn("indexedDB", client_source)
+
+    def test_accepted_submission_clears_in_page_analytical_and_channel_state(self) -> None:
+        client_source = (Path(__file__).resolve().parent / "research_form.js").read_text(encoding="utf-8")
+        self.assertIn("const clearAcceptedClientState = (form) => {", client_source)
+        self.assertIn("retryState.delete(form);", client_source)
+        self.assertIn("recruitmentChannel = null;", client_source)
+        self.assertIn("form.reset();", client_source)
+        self.assertIn("clearAcceptedClientState(form);", client_source)
 
 
 if __name__ == "__main__":
