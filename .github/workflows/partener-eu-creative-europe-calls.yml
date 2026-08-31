@@ -6,22 +6,26 @@ on:
       - 'partener-eu/ingest/creative_europe_call_index.py'
       - 'partener-eu/ingest/creative_europe_call_fetch.py'
       - 'partener-eu/ingest/creative_europe_ft_exact.py'
+      - 'partener-eu/ingest/creative_europe_ft_reconcile.py'
       - 'partener-eu/ops/test_creative_europe_call_index.py'
       - 'partener-eu/ops/test_creative_europe_call_fetch.py'
       - 'partener-eu/ops/test_creative_europe_ft_exact.py'
+      - 'partener-eu/ops/test_creative_europe_ft_reconcile.py'
       - '.github/workflows/partener-eu-creative-europe-calls.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   creative-europe-call-index:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout exact event head
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
+          fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Verify checkout is exact event head
@@ -33,7 +37,7 @@ jobs:
           test "$ACTUAL" = "$EXPECTED"
 
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
 
@@ -42,9 +46,11 @@ jobs:
           python -m py_compile partener-eu/ingest/creative_europe_call_index.py
           python -m py_compile partener-eu/ingest/creative_europe_call_fetch.py
           python -m py_compile partener-eu/ingest/creative_europe_ft_exact.py
+          python -m py_compile partener-eu/ingest/creative_europe_ft_reconcile.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_index.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_fetch.py
           python -m py_compile partener-eu/ops/test_creative_europe_ft_exact.py
+          python -m py_compile partener-eu/ops/test_creative_europe_ft_reconcile.py
 
       - name: Validate mixed-index filter stays non-authorizing
         run: python partener-eu/ops/test_creative_europe_call_index.py
@@ -54,6 +60,9 @@ jobs:
 
       - name: Validate exact structured F&T handoff stays non-authorizing
         run: python partener-eu/ops/test_creative_europe_ft_exact.py
+
+      - name: Validate exact-topic semantic reconciliation stays non-authorizing
+        run: python partener-eu/ops/test_creative_europe_ft_reconcile.py
 
       - name: Capture live official Creative Europe call-index evidence
         run: |
@@ -140,6 +149,113 @@ jobs:
               print('FAIL exact F&T evidence crossed publication boundary')
               sys.exit(2)
           print(json.dumps({'reference':d.get('reference'),'status_label':d.get('status_label'),'candidate_state':d.get('candidate_observation_state'),'open_call_authorized':False}, ensure_ascii=False))
+          PY
+
+      - name: Restore previous successful exact-topic observation from this branch
+        id: previous_exact
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/creative-europe/reconciliation/previous
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-creative-europe-call-index-evidence&per_page=100" \
+            > /tmp/creative-europe/reconciliation/artifacts.json
+          python - <<'PY' > /tmp/creative-europe/reconciliation/candidate-runs.txt
+          import json, os
+          data=json.load(open('/tmp/creative-europe/reconciliation/artifacts.json', encoding='utf-8'))
+          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
+          current=int(os.environ['GITHUB_RUN_ID'])
+          candidates=[]
+          seen=set()
+          for artifact in data.get('artifacts') or []:
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              run_id=int(run.get('id') or 0)
+              if not run_id or run_id == current or run_id in seen:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              seen.add(run_id)
+              candidates.append((str(artifact.get('created_at') or ''), run_id))
+          for _created, run_id in sorted(candidates, reverse=True):
+              print(run_id)
+          PY
+          FOUND=""
+          while IFS= read -r RUN_ID; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            [ "$CONCLUSION" = "success" ] || continue
+            DEST="/tmp/creative-europe/reconciliation/download-${RUN_ID}"
+            mkdir -p "$DEST"
+            if gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name partener-creative-europe-call-index-evidence --dir "$DEST"; then
+              PREVIOUS="$(find "$DEST" -type f -path '*/ft/ft-exact-evidence.json' -print -quit)"
+              if [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ]; then
+                cp "$PREVIOUS" /tmp/creative-europe/reconciliation/previous/ft-exact-evidence.json
+                FOUND="$RUN_ID"
+                break
+              fi
+            fi
+          done < /tmp/creative-europe/reconciliation/candidate-runs.txt
+          if [ -n "$FOUND" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "run_id=$FOUND" >> "$GITHUB_OUTPUT"
+            echo "Restored previous exact-topic evidence from successful run $FOUND"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "No prior successful same-branch exact-topic artifact; baseline reconciliation will be used."
+          fi
+
+      - name: Reconcile exact Creative Europe topic against previous observation
+        shell: bash
+        env:
+          PREVIOUS_AVAILABLE: ${{ steps.previous_exact.outputs.available }}
+        run: |
+          set -euo pipefail
+          ARGS=(
+            --current /tmp/creative-europe/ft/ft-exact-evidence.json
+            --output /tmp/creative-europe/reconciliation/ft-reconciliation.json
+          )
+          if [ "$PREVIOUS_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous /tmp/creative-europe/reconciliation/previous/ft-exact-evidence.json)
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_reconcile.py "${ARGS[@]}"
+
+      - name: Validate reconciled exact-topic evidence remains non-authorizing
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          p='/tmp/creative-europe/reconciliation/ft-reconciliation.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('adapter_id') != 'CREATIVE_EUROPE_FT_RECONCILE_V1':
+              print('FAIL reconciliation identity drift')
+              sys.exit(2)
+          if d.get('reference') != 'CREA-MEDIA-2026-DEVMINISLATE' or d.get('semantic_reconciliation_passed') is not True:
+              print('FAIL exact-reference semantic reconciliation missing')
+              sys.exit(2)
+          if d.get('reconciliation_state') not in ('BASELINE_CAPTURED_NON_AUTHORIZING','NO_CHANGE','EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'):
+              print('FAIL unexpected reconciliation state', d.get('reconciliation_state'))
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL reconciliation became authorizing', key, d.get(key))
+                  sys.exit(2)
+          for key in ('current_evidence_sha256','current_semantic_fingerprint','reconciliation_fingerprint'):
+              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
+                  print('FAIL reconciliation hash invalid', key)
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
+              print('FAIL reconciliation crossed publication boundary')
+              sys.exit(2)
+          print(json.dumps({
+              'reference': d.get('reference'),
+              'reconciliation_state': d.get('reconciliation_state'),
+              'semantic_change_count': d.get('semantic_change_count'),
+              'material_admission_ready_for_downstream_review': d.get('material_admission_ready_for_downstream_review'),
+              'open_call_authorized': False,
+          }, ensure_ascii=False))
           PY
 
       - name: Upload bounded Creative Europe evidence
