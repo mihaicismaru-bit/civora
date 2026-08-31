@@ -51,7 +51,7 @@ final class EuconsResearchRuntime
         return ($this->contract['production_enabled'] ?? false) === true
             && ($this->activationManifest['approved_for_prod'] ?? false) === true
             && ($this->activationManifest['collection_enabled'] ?? false) === true
-            && ($this->activationManifest['deploy_authorized'] ?? false) === true
+            && ($this->activationManifest['deploy_authorized'] ?? null) === false
             && ($this->activationManifest['real_collection_authorized'] ?? false) === true
             && $approvalRef !== ''
             && trim((string)(getenv('AI4WORK_RESEARCH_PROD_ENABLED') ?: '')) === '1';
