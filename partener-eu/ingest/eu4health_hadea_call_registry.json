@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "EU4HEALTH_HADEA_CALL_REGISTRY_V1",
+  "programme_family": "EU4Health",
+  "source_family": "EU_DIRECT",
+  "evidence_checked_date": "2026-08-31",
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "publication_effect": "NONE"
+  },
+  "authority": {
+    "id": "EU4HEALTH-HADEA-EXACT-CALL-PAGE",
+    "authority_class": "OFFICIAL_EXECUTIVE_AGENCY_EXACT_CALL_EVIDENCE",
+    "allowed_hosts": ["hadea.ec.europa.eu"],
+    "allowed_path_prefixes": ["/calls-proposals/"],
+    "required_marker_groups": [
+      ["Call for proposals", "call for proposals"],
+      ["Status"],
+      ["EU4Health"],
+      ["Funding and Tenders Portal", "Funding & Tenders Portal", "Funding and Tenders", "Funding & Tenders"]
+    ],
+    "reference_patterns": ["EU4H-[0-9]{4}-[A-Z0-9-]+"]
+  },
+  "admission": {
+    "exact_hadea_call_page_required": true,
+    "exact_call_reference_required": true,
+    "funding_tenders_exact_topic_required_for_material_admission": true,
+    "semantic_reconciliation_required": true,
+    "generic_programme_page_authorizes_open": false,
+    "call_index_authorizes_open": false
+  },
+  "live_fixture": {
+    "url": "https://hadea.ec.europa.eu/calls-proposals/health-data-biotech-innovation-leveraging-european-health-data-space-0_en",
+    "expected_reference": "EU4H-2026-SANTE-PJ-08",
+    "expected_programme": "EU4Health"
+  }
+}
