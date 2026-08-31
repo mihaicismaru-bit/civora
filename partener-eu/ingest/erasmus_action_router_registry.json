@@ -29,6 +29,19 @@
       ]
     },
     {
+      "id": "ERASMUS-PROGRAMME-GUIDE-SUBMIT-APPLICATION",
+      "authority_class": "OFFICIAL_ERASMUS_PROGRAMME_GUIDE",
+      "authority_url": "https://erasmus-plus.ec.europa.eu/programme-guide/part-c/what-to-do-to-submit",
+      "allowed_hosts": ["erasmus-plus.ec.europa.eu"],
+      "allowed_path_prefixes": ["/programme-guide/part-c/what-to-do-to-submit"],
+      "required_marker_groups": [
+        ["Executive Agency"],
+        ["Participant Identification Code", "PIC"],
+        ["National Agencies"],
+        ["Organisation ID", "OID"]
+      ]
+    },
+    {
       "id": "ERASMUS-EACEA-HOW-TO-GET-GRANT",
       "authority_class": "OFFICIAL_EXECUTIVE_AGENCY_APPLICATION_GUIDANCE",
       "authority_url": "https://www.eacea.ec.europa.eu/grants/how-get-grant_en",
@@ -53,6 +66,7 @@
       "semantic_reconciliation_required": true,
       "route_basis_source_ids": [
         "ERASMUS-OFFICIAL-HOW-TO-APPLY",
+        "ERASMUS-PROGRAMME-GUIDE-SUBMIT-APPLICATION",
         "ERASMUS-EACEA-HOW-TO-GET-GRANT"
       ]
     },
@@ -66,7 +80,8 @@
       "exact_call_or_topic_identifier_required": true,
       "semantic_reconciliation_required": true,
       "route_basis_source_ids": [
-        "ERASMUS-OFFICIAL-HOW-TO-APPLY"
+        "ERASMUS-OFFICIAL-HOW-TO-APPLY",
+        "ERASMUS-PROGRAMME-GUIDE-SUBMIT-APPLICATION"
       ]
     }
   }
