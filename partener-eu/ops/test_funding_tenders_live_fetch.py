@@ -23,6 +23,24 @@ def assert_true(value, message):
         raise AssertionError(message)
 
 
+def structured_receipt(identifier, status_code, *, call_identifier=None, verified=True):
+    return {
+        "identifier": identifier,
+        "query_text": f'"{identifier}"',
+        "api_url": f"{mod.SEARCH_ENDPOINT}?apiKey=SEDIA&text=%22{identifier}%22&pageSize=10&pageNumber=1",
+        "http_status": 200,
+        "content_type": "application/json",
+        "bytes": 1234,
+        "raw_sha256": "f" * 64,
+        "matched_identifiers": [identifier],
+        "exact_match_count": 1,
+        "status_codes": [status_code],
+        "call_identifiers": [call_identifier] if call_identifier else [],
+        "raw_types": ["1"],
+        "verified": verified,
+    }
+
+
 def main():
     query = mod.default_query()
     terms = query["bool"]["must"]
@@ -100,6 +118,13 @@ def main():
         UPCOMING_ID: {"url": upcoming_url, "final_url": upcoming_url, "http_status": 200, "verified": True, "body_sha256": "b" * 64},
         UNKNOWN_ID: {"url": unknown_url, "final_url": unknown_url, "http_status": 200, "verified": True, "body_sha256": "c" * 64},
     }
+    structured = {
+        OPEN_ID: structured_receipt(OPEN_ID, "31094502", call_identifier="HORIZON-TEST-2026"),
+        UPCOMING_ID: structured_receipt(UPCOMING_ID, "31094501"),
+        UNKNOWN_ID: structured_receipt(UNKNOWN_ID, "99999999"),
+    }
+    assert_true(mod._structured_receipt_confirms_record(flat[0], structured[OPEN_ID]), "exact structured topic readback should confirm matching identifier/status/call")
+
     evidence = mod.assemble_evidence(
         search_payload,
         facet_payloads,
@@ -108,15 +133,35 @@ def main():
         search_receipt={"url": mod.SEARCH_ENDPOINT, "http_status": 200, "sha256": "d" * 64},
         facet_receipts={"broad": {"url": mod.FACET_ENDPOINT, "http_status": 200, "sha256": "e" * 64}},
         readbacks=readbacks,
+        structured_readbacks=structured,
     )
     mod.validate_live_evidence(evidence)
     rows = {row["identifier"]: row for row in evidence["batch"]["records"]}
-    assert_true(rows[OPEN_ID]["observation_state"] == "OPEN_CALL", "official Facet OPEN plus exact readback should classify OPEN_CALL")
+    assert_true(rows[OPEN_ID]["observation_state"] == "OPEN_CALL", "official Facet OPEN plus exact structured+page readback should classify OPEN_CALL")
     assert_true(rows[UPCOMING_ID]["observation_state"] == "FORTHCOMING_CALL", "official Facet forthcoming must remain distinct")
-    assert_true(rows[UNKNOWN_ID]["observation_state"] == "UNKNOWN", "unresolved status code must fail closed despite successful topic readback")
+    assert_true(rows[UNKNOWN_ID]["observation_state"] == "UNKNOWN", "unresolved status code must fail closed despite successful exact readbacks")
     assert_true(evidence["stats"]["unresolved_status_codes"] == ["99999999"], "unresolved status evidence must be explicit")
+    assert_true(evidence["stats"]["verified_structured_topic_readbacks"] == 3, "structured topic readback stats drift")
     assert_true(evidence["publication_effect"] == "NONE" and evidence["canonical_corpus_mutation"] is False, "live fetch must remain non-publishing")
     assert_true(all(row["publish_authorized"] is False and row["material_fact_use"] is False for row in rows.values()), "no live record may self-authorize publication")
+
+    # HTML 200 alone is not enough. If the exact structured status disagrees,
+    # the topic cannot be marked authority-url-verified and therefore cannot OPEN.
+    mismatched_structured = dict(structured)
+    mismatched_structured[OPEN_ID] = structured_receipt(OPEN_ID, "31094501", call_identifier="HORIZON-TEST-2026")
+    mismatch = mod.assemble_evidence(
+        search_payload,
+        facet_payloads,
+        fetched_at=FETCHED_AT,
+        run_id=RUN_ID,
+        search_receipt={"url": mod.SEARCH_ENDPOINT, "http_status": 200, "sha256": "d" * 64},
+        facet_receipts={"broad": {"url": mod.FACET_ENDPOINT, "http_status": 200, "sha256": "e" * 64}},
+        readbacks=readbacks,
+        structured_readbacks=mismatched_structured,
+    )
+    mismatch_rows = {row["identifier"]: row for row in mismatch["batch"]["records"]}
+    assert_true(mismatch_rows[OPEN_ID]["authority_url_verified"] is False, "structured status mismatch must remove authority verification")
+    assert_true(mismatch_rows[OPEN_ID]["observation_state"] == "UNKNOWN", "structured status mismatch must fail closed instead of OPEN")
 
     pipeline = dict(flat[0])
     pipeline["statusLabel"] = "Open"
@@ -126,7 +171,7 @@ def main():
     planned = normalize_payload([pipeline], fetched_at=FETCHED_AT, run_id=RUN_ID, verified_authority_urls=[open_url])
     assert_true(planned["records"][0]["observation_state"] == "PROGRAMMING_PIPELINE", "proposal/programming record must never become OPEN_CALL")
 
-    print("PASS Funding & Tenders live boundary: official rawValue/value Facet labels, exact topic readback and zero publication")
+    print("PASS Funding & Tenders live boundary: Facet status + exact structured topic + exact topic page, zero publication")
 
 
 if __name__ == "__main__":
