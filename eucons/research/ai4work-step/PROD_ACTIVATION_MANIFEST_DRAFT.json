@@ -1,11 +1,12 @@
 {
-  "schema_version": "eucons.ai4work_prod_activation_manifest.v0.8",
+  "schema_version": "eucons.ai4work_prod_activation_manifest.v0.9",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "state": "DRAFT_NOT_APPROVED_FOR_PROD",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "approved_for_prod": false,
   "collection_enabled": false,
   "explicit_user_approval_reference": null,
+  "explicit_user_approval_sha256": null,
   "approval_timestamp": null,
   "activation_mode": "PROD_REAL_EVIDENCE_ONLY",
   "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
@@ -13,7 +14,8 @@
     "controller_determination": "CONTROLLER_DETERMINATION_DRAFT.json",
     "collection_frame": "COLLECTION_FRAME_DRAFT.json",
     "form_contract": "form_contract.json",
-    "dpia_screening": "GDPR_DPIA_SCREENING_DRAFT.json"
+    "dpia_screening": "GDPR_DPIA_SCREENING_DRAFT.json",
+    "explicit_user_approval_receipt": "EXPLICIT_USER_APPROVAL_RECEIPT_DRAFT.json"
   },
   "required_external_or_operational_evidence": {
     "privacy_notice": {"status": "OPEN", "reference": null, "sha256": null},
@@ -31,7 +33,7 @@
     "research_only_store_binding": {"status": "OPEN", "reference": null, "sha256": null},
     "provider_bound_test_twin_smoke": {"status": "OPEN", "reference": null, "sha256": null}
   },
-  "activation_rule": "Real collection may be enabled only when this manifest is APPROVED_FOR_PROD, explicit user approval is referenced, all internal gates including DPIA screening are approved and NF06-compatible, every external/operational evidence item has an immutable reference plus SHA-256 and approved/pass status, CRM/commercial analytics remain forbidden, and TEST TWIN remains NON-EVIDENCE. The live provider/service-family mapping may be frozen while account-specific logging/access, controller-to-provider instruction chain, active processor/subprocessor subset, research-store binding and provider-bound smoke remain open. The provider account-role documentary reconciliation may be frozen while billing/account administration never substitutes for verified processor/access binding. A frozen provider-level logging profile never substitutes for the separate account-specific eucons.ro logging binding. The general commercial privacy surface must be reconciled with the dedicated AI4WORK Article 13 notice and the verified live research processor chain before PROD.",
+  "activation_rule": "Real collection may be enabled only when this manifest is APPROVED_FOR_PROD, an immutable local explicit-user-approval receipt is SHA-256-bound and validates as HUMAN_EXPLICIT_USER_APPROVAL for REAL_COLLECTION_PROD_ACTIVATION_ONLY, the receipt binds the exact approved method/frame/form/invitation/channel artifacts and grants no merge/deploy/canonicalization authority, all internal gates including DPIA screening are approved and NF06-compatible, every external/operational evidence item has an immutable reference plus SHA-256 and approved/pass status, CRM/commercial analytics remain forbidden, and TEST TWIN remains NON-EVIDENCE. The live provider/service-family mapping may be frozen while account-specific logging/access, controller-to-provider instruction chain, active processor/subprocessor subset, research-store binding and provider-bound smoke remain open. The provider account-role documentary reconciliation may be frozen while billing/account administration never substitutes for verified processor/access binding. A frozen provider-level logging profile never substitutes for the separate account-specific eucons.ro logging binding. The general commercial privacy surface must be reconciled with the dedicated AI4WORK Article 13 notice and the verified live research processor chain before PROD.",
   "forbidden_shortcuts": [
     "setting form_contract.production_enabled=true by itself",
     "treating a green repository unit test as proof of provider-bound live readiness",
@@ -43,9 +45,12 @@
     "treating the frozen provider-level Raw Access profile as proof of the actual eucons.ro cPanel archive/retention/access configuration",
     "activating collection without an approved data-subject-rights procedure and live receipt-based rights operations",
     "activating collection without a controller-reviewed DPIA screening and, when required, a completed DPIA",
+    "activating collection from an arbitrary non-empty approval string, unhashed approval reference, future-dated approval timestamp, stale method/frame binding, or TEST TWIN fixture",
+    "using collection approval to authorize merge, deploy or canonicalization",
     "activating collection without explicit user approval"
   ],
   "merge_authorized": false,
   "deploy_authorized": false,
+  "canonicalization_authorized": false,
   "real_collection_authorized": false
 }
