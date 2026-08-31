@@ -59,6 +59,7 @@ jobs:
           php -l eucons/runtime/php/src/MailRuntime.php
           php -l eucons/runtime/php/src/ResearchRuntime.php
           php -l eucons/runtime/php/src/ResearchChannelGate.php
+          php -l eucons/runtime/php/src/ResearchExplicitUserApprovalGate.php
           php -l eucons/runtime/php/src/ResearchGovernanceGate.php
           php -l eucons/runtime/php/src/ResearchPersistedBundleExport.php
           php -l eucons/runtime/php/public/index.php
@@ -88,5 +89,7 @@ jobs:
           grep -F "ResearchChannelGate.php" eucons/runtime/php/public/index.php
           grep -F "COLLECTION_CHANNEL_REGISTER_DRAFT.json" eucons/runtime/php/public/index.php
           grep -F "assertApprovedRecord" eucons/runtime/php/public/index.php
+          grep -F "ResearchExplicitUserApprovalGate.php" eucons/runtime/php/src/ResearchGovernanceGate.php
+          grep -F "EuconsResearchExplicitUserApprovalGate" eucons/runtime/php/src/ResearchGovernanceGate.php
       - name: Validate PHP runtime and activated public build
         run: python eucons/validation/validate_php_runtime.py
