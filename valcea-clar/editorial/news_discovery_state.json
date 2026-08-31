@@ -1,10 +1,10 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-08-31T20:05:28+03:00",
+  "observed_at": "2026-08-31T20:10:46+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 20,
+  "sources_ok": 19,
   "facts_admitted": 4,
   "source_notice_briefs": 4,
   "facts_before_cross_source_headline_dedupe": 4,
@@ -62,7 +62,7 @@
       "source_id": "ajofm-valcea-comunicate",
       "listing_ok": true,
       "links_examined": 12,
-      "article_failures": 0,
+      "article_failures": 3,
       "facts": 0
     },
     {
@@ -137,16 +137,15 @@
     },
     {
       "source_id": "isu-valcea-specific-releases",
-      "listing_ok": true,
-      "links_examined": 1,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "TimeoutError: The read operation timed out",
       "facts": 0
     },
     {
       "source_id": "ajofm-valcea-press-releases",
       "listing_ok": true,
       "links_examined": 12,
-      "article_failures": 0,
+      "article_failures": 1,
       "facts": 0
     },
     {
