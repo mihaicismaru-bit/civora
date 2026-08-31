@@ -1,0 +1,62 @@
+{
+  "schema_version": "eucons.ai4work_research_invitation_catalog.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "status": "DRAFT_CONTROLLER_REVIEW_REQUIRED",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "approved_for_prod": false,
+  "purpose": "Freeze the exact neutral recruitment wording that may be referenced by real dissemination-channel entries. This catalog is a control artifact, not evidence of need and not proof that any invitation was distributed.",
+  "entries": [
+    {
+      "invitation_version": "AI4WORK-ADULTS-INV-V1",
+      "audience_scope": [
+        "adults"
+      ],
+      "invitation_text": "EUROCONSULT SRL desfășoară o cercetare pentru analiza nevoilor privind competențele digitale și utilizarea responsabilă a inteligenței artificiale în muncă, în contextul AI4WORK STEP. Dacă aveți peste 29 de ani și vă aflați în una dintre regiunile Sud-Vest Oltenia, Sud-Muntenia sau Centru, vă invităm să completați chestionarul pentru adulți. Participarea este voluntară, neparticiparea nu produce niciun dezavantaj, iar răspunsul nu reprezintă înscriere într-un proiect și nu este folosit pentru marketing sau selecție individuală. Înainte de întrebări veți vedea informarea privind protecția datelor. Vă rugăm să transmiteți un singur răspuns.",
+      "required_safeguards": {
+        "voluntary_participation": true,
+        "no_disadvantage": true,
+        "no_project_enrolment_condition": true,
+        "no_commercial_marketing": true,
+        "no_direct_identifier_request": true,
+        "no_incentive_condition": true,
+        "privacy_notice_before_form": true,
+        "one_response_request": true
+      }
+    },
+    {
+      "invitation_version": "AI4WORK-EMPLOYERS-INV-V1",
+      "audience_scope": [
+        "employers"
+      ],
+      "invitation_text": "EUROCONSULT SRL desfășoară o cercetare pentru analiza nevoilor privind competențele digitale și utilizarea responsabilă a inteligenței artificiale în muncă, în contextul AI4WORK STEP. Reprezentanții angajatorilor din regiunile Sud-Vest Oltenia, Sud-Muntenia și Centru sunt invitați să completeze chestionarul pentru angajatori. Participarea este voluntară, neparticiparea nu produce niciun dezavantaj, iar răspunsul nu reprezintă înscriere într-un proiect și nu este folosit pentru marketing, lead generation sau decizii individuale. Formularul nu solicită numele organizației sau date de contact. Înainte de întrebări veți vedea informarea privind protecția datelor. Vă rugăm să transmiteți un singur răspuns pentru organizația reprezentată.",
+      "required_safeguards": {
+        "voluntary_participation": true,
+        "no_disadvantage": true,
+        "no_project_enrolment_condition": true,
+        "no_commercial_marketing": true,
+        "no_direct_identifier_request": true,
+        "no_incentive_condition": true,
+        "privacy_notice_before_form": true,
+        "one_response_request": true
+      }
+    }
+  ],
+  "transport_policy": {
+    "channel_identifier_mode": "OPAQUE_URL_FRAGMENT_ONLY",
+    "channel_identifier_format": "CH-[A-Z0-9]{8,32}",
+    "query_tracking_parameters_allowed": false,
+    "commercial_tracking_allowed": false,
+    "crm_identifier_allowed": false,
+    "referrer_derived_channel_allowed": false
+  },
+  "approval": {
+    "approved_for_prod": false,
+    "approver_name_or_role": null,
+    "approval_date": null,
+    "notes": "Controller/method review is required before any real dissemination entry can be PROD-bound."
+  },
+  "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false
+}
