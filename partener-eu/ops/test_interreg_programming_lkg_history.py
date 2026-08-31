@@ -112,6 +112,7 @@ def main() -> None:
     assert enriched["historical_lkg_reference_available_count"] == 1
     assert enriched["lkg_reference_available_count"] == 1
     assert enriched["lkg_reference_missing_count"] == 0
+    assert enriched["immediate_lkg_identity_mismatch_invalidated_count"] == 0
     assert enriched["call_alert_authorized"] is False
     assert enriched["open_call_authorized"] is False
     assert enriched["distribution_authorized"] is False
@@ -164,7 +165,45 @@ def main() -> None:
     assert immediate_change["lkg_status"] == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SNAPSHOT"
     assert immediate_change["lkg_reference"]["previous_run_id"] == "IMMEDIATE-HEALTHY"
     assert immediate["historical_lkg_reference_available_count"] == 0
+    assert immediate["immediate_lkg_identity_mismatch_invalidated_count"] == 0
     assert immediate["lkg_reference_available_count"] == 1
+
+    immediate_wrong = _snapshot(base, "IMMEDIATE-WRONG", "2026-08-31T11:00:00Z")
+    immediate_wrong_row = _row(immediate_wrong)
+    _healthy(immediate_wrong_row, "e" * 64)
+    immediate_wrong_row["authority_url"] = immediate_wrong_row["authority_url"] + "?authority-generation=old"
+    _refresh(immediate_wrong_row)
+    immediate_wrong_receipt = pipeline.reconcile_snapshots(
+        current,
+        immediate_wrong,
+        reconciled_at="2026-08-31T12:03:00Z",
+    )
+    pre_guard_change = next(row for row in immediate_wrong_receipt["changes"] if row["source_id"] == SOURCE_ID)
+    assert pre_guard_change["lkg_status"] == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SNAPSHOT"
+
+    guarded_missing = history.enrich_reconciliation_with_history(
+        current,
+        immediate_wrong_receipt,
+        [immediate_wrong],
+    )
+    guarded_missing_change = next(row for row in guarded_missing["changes"] if row["source_id"] == SOURCE_ID)
+    assert guarded_missing_change["lkg_status"] == "REQUIRED_REFERENCE_UNAVAILABLE"
+    assert guarded_missing_change["lkg_reference"] is None
+    assert guarded_missing["immediate_lkg_identity_mismatch_invalidated_count"] == 1
+    assert guarded_missing["lkg_reference_available_count"] == 0
+    assert guarded_missing["lkg_reference_missing_count"] == 1
+
+    guarded_fallback = history.enrich_reconciliation_with_history(
+        current,
+        immediate_wrong_receipt,
+        [immediate_wrong, older_healthy],
+    )
+    guarded_fallback_change = next(row for row in guarded_fallback["changes"] if row["source_id"] == SOURCE_ID)
+    assert guarded_fallback_change["lkg_status"] == "REFERENCE_AVAILABLE_FROM_HISTORICAL_HEALTHY_SNAPSHOT"
+    assert guarded_fallback_change["lkg_reference"]["historical_run_id"] == "OLDER-HEALTHY"
+    assert guarded_fallback["immediate_lkg_identity_mismatch_invalidated_count"] == 1
+    assert guarded_fallback["historical_lkg_reference_available_count"] == 1
+    assert guarded_fallback["lkg_reference_available_count"] == 1
 
     tampered_history = copy.deepcopy(older_healthy)
     tampered_history["open_call_authorized"] = True
@@ -195,6 +234,8 @@ def main() -> None:
         "resolved_historical_run_id": change["lkg_reference"]["historical_run_id"],
         "bounded_history_excludes_older_good": bounded_change["lkg_status"],
         "immediate_previous_preserved": immediate_change["lkg_status"],
+        "authority_identity_mismatch_invalidated": guarded_missing["immediate_lkg_identity_mismatch_invalidated_count"],
+        "identity_safe_historical_fallback": guarded_fallback_change["lkg_status"],
         "open_call_authorized": enriched["open_call_authorized"],
     }, sort_keys=True))
 
