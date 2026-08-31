@@ -91,6 +91,28 @@ class ExternalEvidenceBindingControlTests(unittest.TestCase):
         errors = evidence_binding_errors(manifest)
         self.assertFalse(any(error.endswith(":provider_annex_4_5") for error in errors), errors)
 
+    def test_operational_evidence_cannot_be_frozen(self):
+        manifest = copy.deepcopy(_load(MANIFEST_PATH))
+        path = self._set_promoted_temp_evidence(
+            manifest,
+            key="research_only_store_binding",
+            status="FROZEN",
+            payload={
+                "research_id": manifest["research_id"],
+                "evidence_binding_key": "research_only_store_binding",
+                "evidence_class": "OPERATIONAL_EVIDENCE",
+                "synthetic": False,
+            },
+        )
+        try:
+            errors = evidence_binding_errors(manifest)
+            self.assertIn(
+                "operational_evidence_may_not_be_frozen:research_only_store_binding",
+                errors,
+            )
+        finally:
+            path.unlink(missing_ok=True)
+
     def test_pass_requires_exact_semantic_evidence_key_binding(self):
         manifest = copy.deepcopy(_load(MANIFEST_PATH))
         path = self._set_promoted_temp_evidence(
