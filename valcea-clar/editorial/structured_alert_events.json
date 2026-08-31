@@ -2,34 +2,11 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-08-31T10:46:24+03:00",
+  "generated_at": "2026-08-31T11:06:41+03:00",
   "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
   "events_are_reader_stories": false,
-  "event_count": 4,
+  "event_count": 3,
   "events": [
-    {
-      "event_id": "utility-water-cf195f5fdc45568b63a7",
-      "source_id": "apavil-programmed-water-interruptions",
-      "source_name": "APAVIL S.A. — opriri programate",
-      "source_tier": "T1",
-      "source_url": "https://apavil.ro/materiale/anunturi/2026/intrerupere_300826.pdf",
-      "parser": "RO_UTILITY_WATER_INTERRUPTION_LISTING_V1",
-      "official_title": "Anunț întrerupere furnizare alimentare cu apa potabila a consumatorilor existenți din orasul Băbeni și a comunelor Budești și Galicea în intervalul 30.08.2026 ora 16:00 – 31.08.2026 ora 10:00",
-      "official_category": "întrerupere programată apă potabilă",
-      "official_status": "în desfășurare",
-      "event_start": "2026-08-30T16:00+03:00",
-      "event_end": "2026-08-31T10:00+03:00",
-      "source_time_basis": "official_service_window",
-      "body_sha256": "c6e6aba24271bb2aa2267102d71c5afdb574f6aa8ec9d26f1ecff4d6c6af10a2",
-      "structured": {
-        "utility": "water",
-        "service_state": "scheduled_interruption",
-        "affected_scope": "Anunț întrerupere furnizare alimentare cu apa potabila a consumatorilor existenți din orasul Băbeni și a comunelor Budești și Galicea",
-        "service_window_text": "30.08.2026 ora 16:00 - 31.08.2026 ora 10:00"
-      },
-      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-      "reader_copy_generated": false
-    },
     {
       "event_id": "utility-electricity-660b77282fe0a0dd7a7b",
       "source_id": "distributie-oltenia-planned-electricity-interruptions",
@@ -116,31 +93,7 @@
       "status": "PASS",
       "listing_url": "https://apavil.ro/?page_id=962",
       "candidates": 40,
-      "events": [
-        {
-          "event_id": "utility-water-cf195f5fdc45568b63a7",
-          "source_id": "apavil-programmed-water-interruptions",
-          "source_name": "APAVIL S.A. — opriri programate",
-          "source_tier": "T1",
-          "source_url": "https://apavil.ro/materiale/anunturi/2026/intrerupere_300826.pdf",
-          "parser": "RO_UTILITY_WATER_INTERRUPTION_LISTING_V1",
-          "official_title": "Anunț întrerupere furnizare alimentare cu apa potabila a consumatorilor existenți din orasul Băbeni și a comunelor Budești și Galicea în intervalul 30.08.2026 ora 16:00 – 31.08.2026 ora 10:00",
-          "official_category": "întrerupere programată apă potabilă",
-          "official_status": "în desfășurare",
-          "event_start": "2026-08-30T16:00+03:00",
-          "event_end": "2026-08-31T10:00+03:00",
-          "source_time_basis": "official_service_window",
-          "body_sha256": "c6e6aba24271bb2aa2267102d71c5afdb574f6aa8ec9d26f1ecff4d6c6af10a2",
-          "structured": {
-            "utility": "water",
-            "service_state": "scheduled_interruption",
-            "affected_scope": "Anunț întrerupere furnizare alimentare cu apa potabila a consumatorilor existenți din orasul Băbeni și a comunelor Budești și Galicea",
-            "service_window_text": "30.08.2026 ora 16:00 - 31.08.2026 ora 10:00"
-          },
-          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-          "reader_copy_generated": false
-        }
-      ]
+      "events": []
     },
     {
       "source_id": "cet-govora-thermal-interruptions",
