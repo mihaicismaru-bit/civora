@@ -114,6 +114,7 @@ jobs:
             --dir /tmp/partener-programming-projection/source-registry
           test -s /tmp/partener-programming-projection/source-registry/interreg-programming-pipeline.json
           test -s /tmp/partener-programming-projection/source-registry/interreg-programming-reconciliation.json
+          export SOURCE_RUN_ID SOURCE_ARTIFACT_ID
           python - <<'PY'
           import json, os, pathlib
           root=pathlib.Path('/tmp/partener-programming-projection')
@@ -121,16 +122,14 @@ jobs:
               'binding_id':'PROGRAMMING_PIPELINE_PROJECTION_SOURCE_REGISTRY_BINDING_V1',
               'expected_head_sha':os.environ['EXPECTED_HEAD_SHA'],
               'expected_head_branch':os.environ['EXPECTED_HEAD_BRANCH'],
-              'source_registry_workflow_run_id':os.environ.get('SOURCE_RUN_ID'),
-              'source_registry_artifact_id':os.environ.get('SOURCE_ARTIFACT_ID'),
+              'source_registry_workflow_run_id':os.environ['SOURCE_RUN_ID'],
+              'source_registry_artifact_id':os.environ['SOURCE_ARTIFACT_ID'],
               'source_registry_required_conclusion':'success',
               'projection_uses_persisted_reconciled_receipt':True,
               'duplicate_live_acquisition_in_projection_lane':False,
           }
           (root/'projection-source-binding.json').write_text(json.dumps(binding, indent=2, sort_keys=True)+'\n', encoding='utf-8')
           PY
-        env:
-          SOURCE_RUN_ID: ${{ env.SOURCE_RUN_ID }}
 
       - name: Build read-only PROGRAMARE VIITOARE projection from reconciled receipt
         run: |
