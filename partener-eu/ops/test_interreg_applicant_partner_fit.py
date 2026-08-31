@@ -20,6 +20,7 @@ EXPECTED_IDS = {
     "INTERREG-RORS-2021-2027",
     "INTERREG-ROUA-2021-2027",
     "INTERREG-ROMD-2021-2027",
+    "INTERREG-HUSKROUA-2021-2027",
     "INTERREG-NEXT-BSB-2021-2027",
     "INTERREG-DANUBE-2021-2027",
     "INTERREG-EUROPE-2021-2027",
@@ -33,6 +34,7 @@ ALLOWED_HOSTS = {
     "www.ro-ua.net",
     "ro-md.net",
     "www.ro-md.net",
+    "next.huskroua-cbc.eu",
     "www.blacksea-cbc.net",
     "blacksea-cbc.net",
     "interreg-danube.eu",
@@ -139,6 +141,18 @@ def main() -> None:
     assert rows["INTERREG-DANUBE-2021-2027"]["applicant_signal_state"] == "NO_SUPPORTING_SIGNAL"
     assert rows["INTERREG-DANUBE-2021-2027"]["market_fit_score"] == 60
 
+    maramures_ngo = fit.resolve(
+        "Maramureș",
+        "NGO_NONPROFIT",
+        run_id="regression",
+        observed_at="2026-08-31T00:00:00Z",
+    )
+    assert_non_authorizing(maramures_ngo)
+    rows = by_id(maramures_ngo)
+    assert rows["INTERREG-HUSKROUA-2021-2027"]["applicant_signal_state"] == "SUPPORTED_RECENT_CALL_SIGNAL"
+    assert rows["INTERREG-HUSKROUA-2021-2027"]["market_fit_score"] == 80
+    assert rows["INTERREG-ROUA-2021-2027"]["market_fit_score"] == 80
+
     valcea_company = fit.resolve(
         "Valcea",
         "company",
@@ -161,7 +175,7 @@ def main() -> None:
     else:
         raise AssertionError("unknown applicant type must fail closed")
 
-    print("PASS Interreg applicant/partner market fit: 8 programmes, official signals only, deterministic ranking, zero eligibility authority")
+    print("PASS Interreg applicant/partner market fit: 9 programmes, official signals only, deterministic ranking, zero eligibility authority")
 
 
 if __name__ == "__main__":
