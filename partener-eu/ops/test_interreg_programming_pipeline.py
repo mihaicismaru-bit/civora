@@ -76,6 +76,123 @@ def _make_degraded(row: dict) -> None:
     })
 
 
+class _FakeResponse:
+    def __init__(self, *, status: int, body: str, url: str = "https://example.test/programming") -> None:
+        self.status = status
+        self._body = body.encode("utf-8")
+        self._url = url
+        self.headers = {"Content-Type": "text/html; charset=utf-8"}
+
+    def __enter__(self) -> "_FakeResponse":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> bool:
+        return False
+
+    def read(self) -> bytes:
+        return self._body
+
+    def geturl(self) -> str:
+        return self._url
+
+
+def _probe_fixture() -> dict:
+    return {
+        "authority_url": "https://example.test/programming",
+        "allowed_hosts": ["example.test"],
+        "allowed_path_prefixes": ["/programming"],
+        "required_markers": [["interreg"], ["2028", "2034"]],
+    }
+
+
+def _test_bounded_retry() -> dict:
+    original_urlopen = pipeline.urlopen
+    original_sleep = pipeline.time.sleep
+    sleeps: list[float] = []
+    try:
+        responses = [
+            _FakeResponse(status=202, body="Interreg programming 2028 2034"),
+            _FakeResponse(status=200, body="Interreg programming 2028 2034"),
+        ]
+
+        def recovering_urlopen(request, timeout):
+            return responses.pop(0)
+
+        pipeline.urlopen = recovering_urlopen
+        pipeline.time.sleep = lambda seconds: sleeps.append(seconds)
+        recovered = pipeline._probe(
+            _probe_fixture(),
+            timeout=0.1,
+            max_attempts=3,
+            retry_backoff_seconds=0.01,
+        )
+        assert recovered["health_state"] == "HEALTHY"
+        assert recovered["attempt_count"] == 2
+        assert recovered["retryable_failure_count"] == 1
+        assert recovered["retry_exhausted"] is False
+        assert recovered["attempt_history"] == [
+            {"attempt": 1, "kind": "TRANSIENT_HTTP_STATUS", "http_status": 202}
+        ]
+        assert sleeps == [0.01]
+
+        calls = 0
+        sleeps.clear()
+
+        def certificate_failure(request, timeout):
+            nonlocal calls
+            calls += 1
+            raise pipeline.URLError("[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed")
+
+        pipeline.urlopen = certificate_failure
+        certificate = pipeline._probe(
+            _probe_fixture(),
+            timeout=0.1,
+            max_attempts=3,
+            retry_backoff_seconds=0.01,
+        )
+        assert certificate["health_state"] == "DEGRADED"
+        assert certificate["attempt_count"] == 1
+        assert certificate["retryable_failure_count"] == 0
+        assert certificate["retry_exhausted"] is False
+        assert calls == 1
+        assert sleeps == []
+
+        responses = [
+            _FakeResponse(status=503, body="temporary one"),
+            _FakeResponse(status=503, body="temporary two"),
+            _FakeResponse(status=503, body="temporary three"),
+        ]
+        sleeps.clear()
+
+        def exhausted_urlopen(request, timeout):
+            return responses.pop(0)
+
+        pipeline.urlopen = exhausted_urlopen
+        exhausted = pipeline._probe(
+            _probe_fixture(),
+            timeout=0.1,
+            max_attempts=3,
+            retry_backoff_seconds=0.01,
+        )
+        assert exhausted["health_state"] == "DEGRADED_TRANSIENT_EXHAUSTED"
+        assert exhausted["attempt_count"] == 3
+        assert exhausted["retryable_failure_count"] == 3
+        assert exhausted["retry_exhausted"] is True
+        assert exhausted["http_status"] == 503
+        assert len(exhausted["attempt_history"]) == 3
+        assert sleeps == [0.01, 0.02]
+        assert exhausted["raw_sha256"] is not None
+
+        return {
+            "recovered_attempt_count": recovered["attempt_count"],
+            "certificate_attempt_count": certificate["attempt_count"],
+            "exhausted_attempt_count": exhausted["attempt_count"],
+        }
+    finally:
+        pipeline.urlopen = original_urlopen
+        pipeline.time.sleep = original_sleep
+
+
 def main() -> None:
     registry, _ = pipeline.load_registry()
     result = pipeline.resolve(
@@ -114,10 +231,39 @@ def main() -> None:
         assert row["market_intelligence_only"] is True
         assert "exact_call_or_topic_identifier" in row["missing_for_open_confirmation"]
         assert row["source_health"]["health_state"] == "NOT_PROBED"
+        assert row["source_health"]["attempt_count"] == 0
+        assert row["source_health"]["max_attempts"] == 3
+        assert row["source_health"]["retry_exhausted"] is False
         assert len(row["semantic_fingerprint"]) == 64
         assert len(row["transport_fingerprint"]) == 64
         for forbidden in ("call_status", "call_budget", "call_deadline", "call_eligibility"):
             assert forbidden not in row
+
+    retry_evidence = _test_bounded_retry()
+
+    try:
+        pipeline.resolve(
+            run_id="TEST-BAD-ATTEMPTS",
+            observed_at="2026-08-31T01:49:33Z",
+            live=False,
+            max_attempts=0,
+        )
+    except ValueError as exc:
+        assert "max_attempts" in str(exc)
+    else:
+        raise AssertionError("zero max_attempts must fail closed")
+
+    try:
+        pipeline.resolve(
+            run_id="TEST-BAD-BACKOFF",
+            observed_at="2026-08-31T01:49:33Z",
+            live=False,
+            retry_backoff_seconds=-0.1,
+        )
+    except ValueError as exc:
+        assert "retry_backoff_seconds" in str(exc)
+    else:
+        raise AssertionError("negative retry_backoff_seconds must fail closed")
 
     baseline = pipeline.reconcile_snapshots(
         result,
@@ -298,6 +444,8 @@ def main() -> None:
                 "baseline_reconciliation": baseline["reconciliation_state"],
                 "semantic_reconciliation": semantic_receipt["reconciliation_state"],
                 "lkg_reference_available_count": lkg_receipt["lkg_reference_available_count"],
+                "retry_recovered_attempt_count": retry_evidence["recovered_attempt_count"],
+                "retry_exhausted_attempt_count": retry_evidence["exhausted_attempt_count"],
                 "open_call_authorized": result["open_call_authorized"],
             },
             sort_keys=True,
