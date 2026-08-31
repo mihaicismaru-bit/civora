@@ -5,8 +5,10 @@ on:
     paths:
       - 'partener-eu/ingest/creative_europe_call_index.py'
       - 'partener-eu/ingest/creative_europe_call_fetch.py'
+      - 'partener-eu/ingest/creative_europe_ft_exact.py'
       - 'partener-eu/ops/test_creative_europe_call_index.py'
       - 'partener-eu/ops/test_creative_europe_call_fetch.py'
+      - 'partener-eu/ops/test_creative_europe_ft_exact.py'
       - '.github/workflows/partener-eu-creative-europe-calls.yml'
   workflow_dispatch:
 
@@ -39,42 +41,51 @@ jobs:
         run: |
           python -m py_compile partener-eu/ingest/creative_europe_call_index.py
           python -m py_compile partener-eu/ingest/creative_europe_call_fetch.py
+          python -m py_compile partener-eu/ingest/creative_europe_ft_exact.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_index.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_fetch.py
+          python -m py_compile partener-eu/ops/test_creative_europe_ft_exact.py
 
       - name: Validate mixed-index filter stays non-authorizing
         run: python partener-eu/ops/test_creative_europe_call_index.py
 
-      - name: Validate bounded acquisition fails closed
+      - name: Validate bounded index acquisition and degraded-empty handling
         run: python partener-eu/ops/test_creative_europe_call_fetch.py
+
+      - name: Validate exact structured F&T handoff stays non-authorizing
+        run: python partener-eu/ops/test_creative_europe_ft_exact.py
 
       - name: Capture live official Creative Europe call-index evidence
         run: |
           mkdir -p /tmp/creative-europe
           python partener-eu/ingest/creative_europe_call_fetch.py \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
-            --out /tmp/creative-europe/evidence.json \
+            --out /tmp/creative-europe/index-evidence.json \
             --raw-out /tmp/creative-europe/index.html
 
-      - name: Validate live evidence keeps OPEN/material boundary
+      - name: Validate live index evidence keeps OPEN/material boundary
         run: |
           python - <<'PY'
           import json, re, sys
-          p='/tmp/creative-europe/evidence.json'
+          p='/tmp/creative-europe/index-evidence.json'
           d=json.load(open(p, encoding='utf-8'))
           if d.get('adapter_id') != 'CREATIVE_EUROPE_CALLS_V1':
               print('FAIL adapter identity drift')
               sys.exit(2)
           stats=d.get('stats') or {}
           count=int(stats.get('exact_crea_reference_candidates') or 0)
-          if count < 1:
-              print('FAIL no explicit CREA-* references in official index')
-              sys.exit(2)
           if int(stats.get('records_requiring_ft_reconcile') or 0) != count:
               print('FAIL F&T reconcile gate lost')
               sys.exit(2)
           if int(stats.get('open_call_authorized') or 0) != 0:
               print('FAIL index authorized OPEN')
+              sys.exit(2)
+          health=d.get('source_health')
+          if count == 0 and not (health == 'DEGRADED_EMPTY_RENDERED_INDEX' and d.get('lkg_required') is True):
+              print('FAIL empty rendered index was not persisted as degraded')
+              sys.exit(2)
+          if count > 0 and not (health == 'HEALTHY' and d.get('lkg_required') is False):
+              print('FAIL populated index health drift')
               sys.exit(2)
           for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
               if d.get(key) is not False:
@@ -91,7 +102,44 @@ jobs:
           if not all(isinstance(x,str) and x.startswith('CREA-') for x in refs):
               print('FAIL non-CREA row leaked into Creative Europe evidence', refs)
               sys.exit(2)
-          print(json.dumps({'count':count,'refs':refs[:10],'visible_open_candidates':stats.get('visible_open_candidates'),'open_call_authorized':False}, ensure_ascii=False))
+          print(json.dumps({'source_health':health,'count':count,'refs':refs[:10],'open_call_authorized':False}, ensure_ascii=False))
+          PY
+
+      - name: Capture exact current Creative Europe topic through structured F&T
+        run: |
+          mkdir -p /tmp/creative-europe/ft
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_exact.py \
+            --reference CREA-MEDIA-2026-DEVMINISLATE \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output-dir /tmp/creative-europe/ft
+
+      - name: Validate exact F&T evidence remains non-publishing
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          p='/tmp/creative-europe/ft/ft-exact-evidence.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('reference') != 'CREA-MEDIA-2026-DEVMINISLATE':
+              print('FAIL exact Creative Europe topic identity drift')
+              sys.exit(2)
+          if d.get('authority_url_verified') is not True or d.get('requires_reconcile') is not True:
+              print('FAIL exact topic/reconcile boundary missing')
+              sys.exit(2)
+          if d.get('candidate_observation_state') not in ('OPEN_CALL','FORTHCOMING_CALL','CLOSED_CALL','UNKNOWN'):
+              print('FAIL unexpected candidate state', d.get('candidate_observation_state'))
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL exact F&T evidence became authorizing', key, d.get(key))
+                  sys.exit(2)
+          for key in ('search_raw_sha256','facet_raw_sha256','semantic_fingerprint'):
+              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
+                  print('FAIL exact F&T evidence hash invalid', key)
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
+              print('FAIL exact F&T evidence crossed publication boundary')
+              sys.exit(2)
+          print(json.dumps({'reference':d.get('reference'),'status_label':d.get('status_label'),'candidate_state':d.get('candidate_observation_state'),'open_call_authorized':False}, ensure_ascii=False))
           PY
 
       - name: Upload bounded Creative Europe evidence
