@@ -13,6 +13,8 @@ on:
       - 'partener-eu/ingest/creative_europe_ft_competitive_exact.py'
       - 'partener-eu/ingest/creative_europe_ft_competitive_reconcile.py'
       - 'partener-eu/ingest/creative_europe_ft_competitive_handoff.py'
+      - 'partener-eu/ingest/creative_europe_ft_competitive_admission.py'
+      - 'partener-eu/ingest/creative_europe_ft_competitive_projection.py'
       - 'partener-eu/ops/test_creative_europe_call_index.py'
       - 'partener-eu/ops/test_creative_europe_call_fetch.py'
       - 'partener-eu/ops/test_creative_europe_ft_exact.py'
@@ -21,6 +23,8 @@ on:
       - 'partener-eu/ops/test_creative_europe_ft_handoff.py'
       - 'partener-eu/ops/test_creative_europe_ft_competitive.py'
       - 'partener-eu/ops/test_creative_europe_ft_competitive_handoff.py'
+      - 'partener-eu/ops/test_creative_europe_ft_competitive_admission.py'
+      - 'partener-eu/ops/test_creative_europe_ft_competitive_projection.py'
       - '.github/workflows/partener-eu-creative-europe-calls.yml'
   workflow_dispatch:
 
@@ -66,6 +70,8 @@ jobs:
             partener-eu/ingest/creative_europe_ft_competitive_exact.py \
             partener-eu/ingest/creative_europe_ft_competitive_reconcile.py \
             partener-eu/ingest/creative_europe_ft_competitive_handoff.py \
+            partener-eu/ingest/creative_europe_ft_competitive_admission.py \
+            partener-eu/ingest/creative_europe_ft_competitive_projection.py \
             partener-eu/ops/test_creative_europe_call_index.py \
             partener-eu/ops/test_creative_europe_call_fetch.py \
             partener-eu/ops/test_creative_europe_ft_exact.py \
@@ -73,7 +79,9 @@ jobs:
             partener-eu/ops/test_creative_europe_ft_watch.py \
             partener-eu/ops/test_creative_europe_ft_handoff.py \
             partener-eu/ops/test_creative_europe_ft_competitive.py \
-            partener-eu/ops/test_creative_europe_ft_competitive_handoff.py
+            partener-eu/ops/test_creative_europe_ft_competitive_handoff.py \
+            partener-eu/ops/test_creative_europe_ft_competitive_admission.py \
+            partener-eu/ops/test_creative_europe_ft_competitive_projection.py
 
       - name: Run fail-closed Creative Europe regressions
         shell: bash
@@ -86,6 +94,8 @@ jobs:
           python partener-eu/ops/test_creative_europe_ft_watch.py
           python partener-eu/ops/test_creative_europe_ft_handoff.py
           python partener-eu/ops/test_creative_europe_ft_competitive_handoff.py
+          python partener-eu/ops/test_creative_europe_ft_competitive_admission.py
+          python partener-eu/ops/test_creative_europe_ft_competitive_projection.py
 
       - name: Capture live official Creative Europe call-index evidence
         run: |
@@ -217,6 +227,23 @@ jobs:
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --output-dir /tmp/creative-europe/competitive-handoff
 
+      - name: Build internal NOINDEX competitive/cascading product projection
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXACT=/tmp/creative-europe/competitive-handoff/current/ft-competitive-exact-evidence.json
+          ADMISSION=/tmp/creative-europe/competitive-handoff/material-admission/ft-competitive-material-admission.json
+          OUTPUT=/tmp/creative-europe/product-preview/ft-competitive-product-projection.json
+          if [ -s "$EXACT" ] && [ -s "$ADMISSION" ]; then
+            mkdir -p "$(dirname "$OUTPUT")"
+            PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_competitive_projection.py \
+              --exact "$EXACT" \
+              --admission "$ADMISSION" \
+              --output "$OUTPUT"
+          else
+            echo "No status-admitted competitive/cascading call available for product preview"
+          fi
+
       - name: Capture exact control topic through structured F&T
         run: |
           mkdir -p /tmp/creative-europe/ft
@@ -246,13 +273,15 @@ jobs:
           PYTHONPATH: partener-eu/ingest
         run: |
           python - <<'PY'
-          import json, re
+          import json, os, re
           import creative_europe_ft_exact as exact
           import creative_europe_ft_reconcile as exact_reconcile
           import creative_europe_ft_watch as watch
           import creative_europe_ft_watch_reconcile as watch_reconcile
           import creative_europe_ft_handoff as handoff
           import creative_europe_ft_competitive_handoff as competitive_handoff
+          import creative_europe_ft_competitive_admission as competitive_admission
+          import creative_europe_ft_competitive_projection as competitive_projection
 
           def load(path):
               return json.load(open(path, encoding='utf-8'))
@@ -271,6 +300,27 @@ jobs:
           competitive_handoff.validate_handoff_summary(competitive)
           exact.validate_exact_evidence(control)
           exact_reconcile.validate_receipt(control_receipt)
+
+          preview_state=None
+          preview_robots=None
+          preview_path='/tmp/creative-europe/product-preview/ft-competitive-product-projection.json'
+          if competitive.get('status_fact_admitted') is True:
+              exact_comp=load('/tmp/creative-europe/competitive-handoff/current/ft-competitive-exact-evidence.json')
+              admitted=load('/tmp/creative-europe/competitive-handoff/material-admission/ft-competitive-material-admission.json')
+              preview=load(preview_path)
+              competitive_admission.validate_admission(admitted)
+              competitive_projection.validate_projection(preview)
+              rebuilt=competitive_projection.build_projection(exact_comp, admitted)
+              if rebuilt.get('projection_fingerprint') != preview.get('projection_fingerprint'):
+                  raise SystemExit('FAIL competitive product preview is not deterministic')
+              if preview.get('identity_key') != competitive.get('selected_identity_key'):
+                  raise SystemExit('FAIL competitive product preview identity drift')
+              if preview.get('publish_authorized') is not False or preview.get('distribution_authorized') is not False or preview.get('call_alert_authorized') is not False:
+                  raise SystemExit('FAIL competitive product preview crossed publication/distribution boundary')
+              preview_state=preview.get('observation_state')
+              preview_robots=(preview.get('surface_policy') or {}).get('robots')
+          elif os.path.exists(preview_path):
+              raise SystemExit('FAIL competitive product preview exists without admitted status')
 
           material_flags=(
               'material_fact_use','open_call_authorized','deadline_authorized',
@@ -303,6 +353,9 @@ jobs:
               'competitive_exact_status': competitive.get('exact_status_label'),
               'competitive_reconciliation_state': competitive.get('exact_semantic_reconciliation_state'),
               'competitive_material_ready_for_review': competitive.get('material_admission_ready_for_downstream_review'),
+              'competitive_status_fact_admitted': competitive.get('status_fact_admitted'),
+              'competitive_product_preview_state': preview_state,
+              'competitive_product_preview_robots': preview_robots,
               'control_reconciliation_state': control_receipt.get('reconciliation_state'),
               'open_call_authorized': False,
               'call_alert_authorized': False,
