@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 """Bounded live handoff for Creative Europe competitive/cascading calls.
 
-Consumes one immutable programme-wide watch snapshot, selects at most one bounded
-Funding & Tenders type-8 opportunity, performs an exact competitive-call
+Consumes immutable programme-wide watch evidence, selects at most one useful
+OPEN/FORTHCOMING competitive opportunity, performs exact Funding & Tenders
 readback, and reconciles it against latest same-identity exact evidence.
 
-The F&T Search row identifies the competitive opportunity. Status labels remain
-Facet-derived, but the live handoff deliberately scopes Facet lookup to the
-known parent CREA-* reference: F&T competitive numeric ids are not reliable
-Facet search text, while the parent reference is the official structured search
-anchor that yielded the type-8 row. This does not infer status locally: the
-label must still be returned by the official Facet endpoint for the exact
-structured status code.
+If the current healthy programme scan omits a previously observed active type-8
+record, a previous same-scope active discovery may be replayed strictly as a
+handoff pointer. The exact adapter must then establish current truth itself.
+CLOSED/UNKNOWN discoveries are never fanned out merely because they are new.
+
+F&T status labels remain Facet-derived. For competitive ids, the Facet search is
+scoped to the parent CREA-* reference that produced the type-8 row; the exact
+structured status code is still resolved only from the official Facet payload.
 
 Everything here is evidence-only and non-authorizing. Separate material
 admission remains mandatory.
@@ -38,6 +39,10 @@ NO_HANDOFF_STATE = "NO_BOUNDED_COMPETITIVE_HANDOFF_PENDING_NON_AUTHORIZING"
 EXECUTED_STATE = "COMPETITIVE_HANDOFF_EXECUTED_NON_AUTHORIZING"
 FAILED_STATE = "COMPETITIVE_HANDOFF_FAILED_CLOSED_NON_AUTHORIZING"
 MAX_CANDIDATES = 50
+ACTIVE_STATES = {
+    "OPEN_CANDIDATE_NON_AUTHORIZING",
+    "FORTHCOMING_CANDIDATE_NON_AUTHORIZING",
+}
 
 
 def _sha256(value: Any) -> str:
@@ -64,12 +69,7 @@ def _write(path: pathlib.Path, payload: Mapping[str, Any]) -> None:
 
 
 def _candidate_priority(candidate: Mapping[str, Any]) -> int:
-    state = str(candidate.get("candidate_observation_state") or "")
-    return {
-        "OPEN_CANDIDATE_NON_AUTHORIZING": 100,
-        "FORTHCOMING_CANDIDATE_NON_AUTHORIZING": 90,
-        "CLOSED_OBSERVATION_NON_AUTHORIZING": 30,
-    }.get(state, 20)
+    return 100 if candidate.get("candidate_observation_state") == "OPEN_CANDIDATE_NON_AUTHORIZING" else 90
 
 
 def _validate_bounded_candidate(candidate: Mapping[str, Any]) -> None:
@@ -104,7 +104,7 @@ def _validate_bounded_candidate(candidate: Mapping[str, Any]) -> None:
             raise ValueError(f"competitive handoff candidate hash invalid: {key}")
 
 
-def _bounded_candidates(watch: Mapping[str, Any]) -> list[dict[str, Any]]:
+def _bounded_candidates(watch: Mapping[str, Any], *, active_only: bool = False) -> list[dict[str, Any]]:
     validate_watch_evidence(watch)
     if watch.get("source_health") != "HEALTHY":
         return []
@@ -122,8 +122,10 @@ def _bounded_candidates(watch: Mapping[str, Any]) -> list[dict[str, Any]]:
         if identity in seen:
             raise ValueError(f"duplicate bounded competitive identity in watch: {identity}")
         seen.add(identity)
+        if active_only and candidate.get("candidate_observation_state") not in ACTIVE_STATES:
+            continue
         bounded.append(candidate)
-    bounded.sort(key=lambda item: (-_candidate_priority(item), str(item.get("parent_reference") or ""), str(item.get("identity_key") or "")))
+    bounded.sort(key=lambda item: (-_candidate_priority(item) if item.get("candidate_observation_state") in ACTIVE_STATES else 0, str(item.get("parent_reference") or ""), str(item.get("identity_key") or "")))
     return bounded
 
 
@@ -147,25 +149,60 @@ def _history_exact_evidence(history_root: pathlib.Path | None, identity_key: str
     return found
 
 
+def _history_watches(history_root: pathlib.Path | None, current_watch: Mapping[str, Any]) -> list[tuple[dt.datetime, pathlib.Path, dict[str, Any]]]:
+    if history_root is None or not history_root.exists():
+        return []
+    current_time = _parse_utc(str(current_watch.get("fetched_at") or ""))
+    found: list[tuple[dt.datetime, pathlib.Path, dict[str, Any]]] = []
+    for path in history_root.rglob("ft-programme-watch-evidence.json"):
+        try:
+            previous = _load_json(path)
+            validate_watch_evidence(previous)
+            observed = _parse_utc(str(previous.get("fetched_at") or ""))
+            if observed >= current_time:
+                continue
+            if previous.get("search_text") != current_watch.get("search_text") or previous.get("query") != current_watch.get("query"):
+                continue
+            found.append((observed, path, previous))
+        except Exception:
+            continue
+    found.sort(key=lambda item: (item[0], str(item[1])), reverse=True)
+    return found
+
+
 def select_candidate(watch: Mapping[str, Any], *, history_root: pathlib.Path | None = None) -> tuple[dict[str, Any] | None, str | None]:
-    """Select at most one new/changed candidate, otherwise oldest active refresh."""
-    candidates = _bounded_candidates(watch)
-    if not candidates:
+    """Select at most one active candidate; replay prior active discovery if needed."""
+    validate_watch_evidence(watch)
+    if watch.get("source_health") != "HEALTHY":
         return None, None
+
+    active = _bounded_candidates(watch, active_only=True)
+    current_identities = {str(c.get("identity_key") or "") for c in _bounded_candidates(watch)}
     active_refresh: list[tuple[dt.datetime, dict[str, Any]]] = []
-    for candidate in candidates:
+    for candidate in active:
         identity = str(candidate["identity_key"])
         history = _history_exact_evidence(history_root, identity)
         if not history:
-            return candidate, "NEW_BOUNDED_COMPETITIVE_IDENTITY"
+            return candidate, "NEW_ACTIVE_BOUNDED_COMPETITIVE_IDENTITY"
         observed, _path, previous = history[0]
         if previous.get("source_candidate_semantic_fingerprint") != candidate.get("semantic_fingerprint"):
-            return candidate, "DISCOVERY_SEMANTIC_FINGERPRINT_CHANGED"
-        if candidate.get("candidate_observation_state") in {
-            "OPEN_CANDIDATE_NON_AUTHORIZING",
-            "FORTHCOMING_CANDIDATE_NON_AUTHORIZING",
-        }:
-            active_refresh.append((observed, candidate))
+            return candidate, "ACTIVE_DISCOVERY_SEMANTIC_FINGERPRINT_CHANGED"
+        active_refresh.append((observed, candidate))
+
+    # A volatile programme-wide search may omit a previously observed active
+    # type-8 row. Reuse only the immutable prior candidate as a pointer into an
+    # exact current readback; never treat the prior OPEN candidate as current truth.
+    for _watch_time, _path, previous_watch in _history_watches(history_root, watch):
+        for candidate in _bounded_candidates(previous_watch, active_only=True):
+            identity = str(candidate["identity_key"])
+            if identity in current_identities:
+                continue
+            history = _history_exact_evidence(history_root, identity)
+            previous_watch_time = _parse_utc(str(previous_watch.get("fetched_at") or ""))
+            if any(observed >= previous_watch_time for observed, _p, _e in history):
+                continue
+            return candidate, "PREVIOUS_ACTIVE_DISCOVERY_PENDING_EXACT_RECHECK"
+
     if active_refresh:
         active_refresh.sort(key=lambda item: (item[0], str(item[1].get("identity_key") or "")))
         return active_refresh[0][1], "ACTIVE_CANDIDATE_FRESHNESS_REFRESH"
@@ -173,24 +210,11 @@ def select_candidate(watch: Mapping[str, Any], *, history_root: pathlib.Path | N
 
 
 def _scoped_structured_post(parent_reference: str, base_post: Callable[..., tuple[Any, bytes, dict[str, Any]]]) -> Callable[..., tuple[Any, bytes, dict[str, Any]]]:
-    """Use the official parent CREA-* search anchor for Facet status resolution.
-
-    The status code remains the value being resolved. Only the Facet search text
-    is scoped to the parent reference that produced the exact type-8 row.
-    """
     parent_reference = exact.validate_reference(parent_reference)
 
     def post(endpoint, *, text, page_size, page_number, parts, max_bytes=None, opener=None):
         scoped_text = parent_reference if endpoint == exact.ft.FACET_ENDPOINT else text
-        return base_post(
-            endpoint,
-            text=scoped_text,
-            page_size=page_size,
-            page_number=page_number,
-            parts=parts,
-            max_bytes=max_bytes,
-            opener=opener,
-        )
+        return base_post(endpoint, text=scoped_text, page_size=page_size, page_number=page_number, parts=parts, max_bytes=max_bytes, opener=opener)
 
     return post
 
@@ -215,15 +239,7 @@ def _base_summary(watch: Mapping[str, Any], *, run_id: str) -> dict[str, Any]:
     return summary
 
 
-def execute_handoff(
-    watch: Mapping[str, Any],
-    *,
-    run_id: str,
-    output_dir: pathlib.Path,
-    history_root: pathlib.Path | None = None,
-    post_func: Callable[..., tuple[Any, bytes, dict[str, Any]]] | None = None,
-    readback_func: Callable[..., dict[str, Any]] | None = None,
-) -> dict[str, Any]:
+def execute_handoff(watch: Mapping[str, Any], *, run_id: str, output_dir: pathlib.Path, history_root: pathlib.Path | None = None, post_func: Callable[..., tuple[Any, bytes, dict[str, Any]]] | None = None, readback_func: Callable[..., dict[str, Any]] | None = None) -> dict[str, Any]:
     validate_watch_evidence(watch)
     if not str(run_id or "").strip():
         raise ValueError("run_id is required")
@@ -233,22 +249,14 @@ def execute_handoff(
 
     if candidate is None:
         summary.update({
-            "observation_state": NO_HANDOFF_STATE,
-            "selection_reason": None,
-            "selected_identity_key": None,
-            "selected_parent_reference": None,
-            "selected_competitive_call_id": None,
-            "source_candidate_semantic_fingerprint": None,
-            "exact_evidence_sha256": None,
-            "previous_exact_evidence_sha256": None,
-            "exact_reconciliation_sha256": None,
-            "exact_authority_url": None,
-            "exact_authority_url_verified": False,
-            "exact_candidate_observation_state": None,
-            "exact_status_label": None,
-            "exact_semantic_reconciliation_state": None,
-            "exact_semantic_change_count": 0,
-            "material_admission_ready_for_downstream_review": False,
+            "observation_state": NO_HANDOFF_STATE, "selection_reason": None,
+            "selected_identity_key": None, "selected_parent_reference": None,
+            "selected_competitive_call_id": None, "source_candidate_semantic_fingerprint": None,
+            "exact_evidence_sha256": None, "previous_exact_evidence_sha256": None,
+            "exact_reconciliation_sha256": None, "exact_authority_url": None,
+            "exact_authority_url_verified": False, "exact_candidate_observation_state": None,
+            "exact_status_label": None, "exact_semantic_reconciliation_state": None,
+            "exact_semantic_change_count": 0, "material_admission_ready_for_downstream_review": False,
             "retry_candidate": False,
         })
         validate_handoff_summary(summary)
@@ -289,14 +297,7 @@ def execute_handoff(
     previous_exact: dict[str, Any] | None = None
     reconciliation: dict[str, Any] | None = None
     try:
-        current_exact = exact.collect_exact(
-            parent,
-            competitive_id,
-            run_id=run_id,
-            output_dir=output_dir / "current",
-            source_candidate=candidate,
-            **kwargs,
-        )
+        current_exact = exact.collect_exact(parent, competitive_id, run_id=run_id, output_dir=output_dir / "current", source_candidate=candidate, **kwargs)
         current_time = _parse_utc(str(current_exact.get("fetched_at") or ""))
         history = _history_exact_evidence(history_root, identity, not_after=current_time)
         if history:
@@ -308,26 +309,17 @@ def execute_handoff(
         _write(output_dir / "reconciliation" / "ft-competitive-reconciliation.json", reconciliation)
     except Exception as exc:
         summary.update({
-            "observation_state": FAILED_STATE,
-            "selection_reason": reason,
-            "selected_identity_key": identity,
-            "selected_parent_reference": parent,
+            "observation_state": FAILED_STATE, "selection_reason": reason,
+            "selected_identity_key": identity, "selected_parent_reference": parent,
             "selected_competitive_call_id": competitive_id,
             "source_candidate_semantic_fingerprint": candidate.get("semantic_fingerprint"),
-            "exact_evidence_sha256": None,
-            "previous_exact_evidence_sha256": None,
-            "exact_reconciliation_sha256": None,
-            "exact_authority_url": exact.competitive_url(competitive_id),
-            "exact_authority_url_verified": False,
-            "exact_candidate_observation_state": None,
-            "exact_status_label": None,
-            "exact_semantic_reconciliation_state": None,
-            "exact_semantic_change_count": 0,
-            "material_admission_ready_for_downstream_review": False,
+            "exact_evidence_sha256": None, "previous_exact_evidence_sha256": None,
+            "exact_reconciliation_sha256": None, "exact_authority_url": exact.competitive_url(competitive_id),
+            "exact_authority_url_verified": False, "exact_candidate_observation_state": None,
+            "exact_status_label": None, "exact_semantic_reconciliation_state": None,
+            "exact_semantic_change_count": 0, "material_admission_ready_for_downstream_review": False,
             "failure_stage": "EXACT_COMPETITIVE_FUNDING_TENDERS_ACQUISITION_OR_RECONCILIATION",
-            "failure_type": type(exc).__name__,
-            "failure_message": str(exc)[:1000],
-            "retry_candidate": True,
+            "failure_type": type(exc).__name__, "failure_message": str(exc)[:1000], "retry_candidate": True,
         })
         validate_handoff_summary(summary)
         _write(output_dir / "competitive-handoff-summary.json", summary)
@@ -335,10 +327,8 @@ def execute_handoff(
 
     assert current_exact is not None and reconciliation is not None
     summary.update({
-        "observation_state": EXECUTED_STATE,
-        "selection_reason": reason,
-        "selected_identity_key": identity,
-        "selected_parent_reference": parent,
+        "observation_state": EXECUTED_STATE, "selection_reason": reason,
+        "selected_identity_key": identity, "selected_parent_reference": parent,
         "selected_competitive_call_id": competitive_id,
         "source_candidate_semantic_fingerprint": candidate.get("semantic_fingerprint"),
         "exact_evidence_sha256": _sha256(dict(current_exact)),
@@ -381,8 +371,7 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
         return
 
     competitive_id = exact.validate_competitive_id(str(summary.get("selected_competitive_call_id") or ""))
-    identity = f"FUNDING_TENDERS_COMPETITIVE_CALL:{competitive_id}"
-    if summary.get("selected_identity_key") != identity:
+    if summary.get("selected_identity_key") != f"FUNDING_TENDERS_COMPETITIVE_CALL:{competitive_id}":
         raise ValueError("competitive handoff selected identity drift")
     exact.validate_reference(str(summary.get("selected_parent_reference") or ""))
     if not summary.get("selection_reason"):
@@ -405,11 +394,7 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
         raise ValueError("competitive handoff exact authority verification drift")
     if summary.get("exact_candidate_observation_state") not in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}:
         raise ValueError("competitive handoff exact candidate state invalid")
-    if summary.get("exact_semantic_reconciliation_state") not in {
-        "BASELINE_CAPTURED_NON_AUTHORIZING",
-        "NO_CHANGE",
-        "EXACT_COMPETITIVE_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
-    }:
+    if summary.get("exact_semantic_reconciliation_state") not in {"BASELINE_CAPTURED_NON_AUTHORIZING", "NO_CHANGE", "EXACT_COMPETITIVE_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"}:
         raise ValueError("competitive handoff semantic reconciliation state invalid")
     for key in ("exact_evidence_sha256", "exact_reconciliation_sha256"):
         if not re.fullmatch(r"[0-9a-f]{64}", str(summary.get(key) or "")):
