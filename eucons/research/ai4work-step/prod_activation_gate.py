@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from explicit_user_approval_control import explicit_user_approval_errors
+from security_incident_response_gate import incident_response_errors
 
 HERE = Path(__file__).resolve().parent
 CONTRACT_PATH = HERE / "form_contract.json"
@@ -14,6 +15,7 @@ MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
 CONTROLLER_PATH = HERE / "CONTROLLER_DETERMINATION_DRAFT.json"
 COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
 DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
+INCIDENT_RESPONSE_PATH = HERE / "GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS"}
 DOCUMENTARY_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
@@ -139,6 +141,7 @@ def activation_errors(
     controller: dict[str, Any],
     collection_frame: dict[str, Any],
     dpia_screening: dict[str, Any],
+    incident_response: dict[str, Any] | None = None,
 ) -> list[str]:
     errors: list[str] = []
     research_ids = {
@@ -226,6 +229,25 @@ def activation_errors(
         if not isinstance(completed_ref, str) or not completed_ref.strip():
             errors.append("completed_dpia_reference_missing")
 
+    # PROD activation must independently validate the incident-response procedure semantics.
+    # A green standalone workflow or a SHA-bound human approval receipt is defence in depth,
+    # but neither is allowed to substitute for this activation-time check.
+    if incident_response is None:
+        try:
+            incident_response = _load(INCIDENT_RESPONSE_PATH)
+        except (OSError, json.JSONDecodeError):
+            errors.append("incident_response_artifact_unreadable")
+            incident_response = None
+    if isinstance(incident_response, dict):
+        for incident_error in incident_response_errors(
+            contract=contract,
+            manifest=manifest,
+            procedure=incident_response,
+        ):
+            errors.append(f"incident_response:{incident_error}")
+    elif incident_response is not None:
+        errors.append("incident_response_artifact_shape_invalid")
+
     evidence = manifest.get("required_external_or_operational_evidence")
     if not isinstance(evidence, dict):
         errors.append("external_evidence_map_missing")
@@ -258,18 +280,21 @@ def evaluate_repository_activation(
     controller_path: Path = CONTROLLER_PATH,
     collection_frame_path: Path = COLLECTION_FRAME_PATH,
     dpia_screening_path: Path = DPIA_SCREENING_PATH,
+    incident_response_path: Path = INCIDENT_RESPONSE_PATH,
 ) -> tuple[bool, list[str]]:
     contract = _load(contract_path)
     manifest = _load(manifest_path)
     controller = _load(controller_path)
     collection_frame = _load(collection_frame_path)
     dpia_screening = _load(dpia_screening_path)
+    incident_response = _load(incident_response_path)
     errors = activation_errors(
         contract=contract,
         manifest=manifest,
         controller=controller,
         collection_frame=collection_frame,
         dpia_screening=dpia_screening,
+        incident_response=incident_response,
     )
     return not errors, errors
 
