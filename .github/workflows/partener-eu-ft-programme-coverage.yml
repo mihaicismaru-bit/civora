@@ -14,6 +14,9 @@ on:
       - 'partener-eu/ingest/eu_direct_digital_ft_exact.py'
       - 'partener-eu/ingest/eu_direct_digital_ft_reconcile.py'
       - 'partener-eu/ingest/eu_direct_digital_ft_handoff.py'
+      - 'partener-eu/ingest/eu_direct_smp_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_smp_ft_reconcile.py'
+      - 'partener-eu/ingest/eu_direct_smp_ft_handoff.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
       - 'partener-eu/ops/test_eu_direct_ft_coverage_receipt.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py'
@@ -25,8 +28,12 @@ on:
       - 'partener-eu/ops/test_eu_direct_digital_ft_exact.py'
       - 'partener-eu/ops/test_eu_direct_digital_ft_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_digital_ft_handoff.py'
+      - 'partener-eu/ops/test_eu_direct_smp_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_smp_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_smp_ft_handoff.py'
       - 'partener-eu/ops/validate_eu_direct_ft_programme_live.py'
       - 'partener-eu/ops/validate_eu_direct_digital_live.py'
+      - 'partener-eu/ops/validate_eu_direct_smp_live.py'
       - '.github/workflows/partener-eu-ft-programme-coverage.yml'
   workflow_dispatch:
 
@@ -37,7 +44,7 @@ permissions:
 jobs:
   programme-coverage-watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 14
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -68,6 +75,9 @@ jobs:
             partener-eu/ingest/eu_direct_digital_ft_exact.py \
             partener-eu/ingest/eu_direct_digital_ft_reconcile.py \
             partener-eu/ingest/eu_direct_digital_ft_handoff.py \
+            partener-eu/ingest/eu_direct_smp_ft_exact.py \
+            partener-eu/ingest/eu_direct_smp_ft_reconcile.py \
+            partener-eu/ingest/eu_direct_smp_ft_handoff.py \
             partener-eu/ops/test_eu_direct_ft_programme_watch.py \
             partener-eu/ops/test_eu_direct_ft_coverage_receipt.py \
             partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py \
@@ -79,8 +89,12 @@ jobs:
             partener-eu/ops/test_eu_direct_digital_ft_exact.py \
             partener-eu/ops/test_eu_direct_digital_ft_reconcile.py \
             partener-eu/ops/test_eu_direct_digital_ft_handoff.py \
+            partener-eu/ops/test_eu_direct_smp_ft_exact.py \
+            partener-eu/ops/test_eu_direct_smp_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_smp_ft_handoff.py \
             partener-eu/ops/validate_eu_direct_ft_programme_live.py \
-            partener-eu/ops/validate_eu_direct_digital_live.py
+            partener-eu/ops/validate_eu_direct_digital_live.py \
+            partener-eu/ops/validate_eu_direct_smp_live.py
 
       - name: Validate fail-closed bounded source semantics
         run: |
@@ -95,6 +109,9 @@ jobs:
           python partener-eu/ops/test_eu_direct_digital_ft_exact.py
           python partener-eu/ops/test_eu_direct_digital_ft_reconcile.py
           PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_digital_ft_handoff.py
+          python partener-eu/ops/test_eu_direct_smp_ft_exact.py
+          python partener-eu/ops/test_eu_direct_smp_ft_reconcile.py
+          PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_smp_ft_handoff.py
 
       - name: Capture bounded live official F&T programme coverage
         run: |
@@ -134,7 +151,7 @@ jobs:
           ROOT=/tmp/partener-eu-ft-programme-watch
           HISTORY="$ROOT/history"
           SCRATCH=/tmp/partener-eu-ft-history-scratch
-          mkdir -p "$HISTORY/previous/life-exact" "$HISTORY/previous/cef-exact" "$HISTORY/previous/digital-exact" "$SCRATCH"
+          mkdir -p "$HISTORY/previous/life-exact" "$HISTORY/previous/cef-exact" "$HISTORY/previous/digital-exact" "$HISTORY/previous/smp-exact" "$SCRATCH"
           gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$HISTORY/artifacts.json"
 
           python - <<'PY' > /tmp/partener-ft-history-candidates.tsv
@@ -159,6 +176,34 @@ jobs:
               if run_id in seen:
                   continue
               seen.add(run_id)
+              print(f'{run_id}\t{name}')
+          PY
+
+          python - <<'PY' > /tmp/partener-smp-history-candidates.tsv
+          import json, os
+          data=json.load(open('/tmp/partener-eu-ft-programme-watch/history/artifacts.json', encoding='utf-8'))
+          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
+          current=int(os.environ['GITHUB_RUN_ID'])
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not (name.startswith('partener-eu-ft-programme-coverage-') or name.startswith('partener-eu-smp-bounded-')):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              run_id=int(run.get('id') or 0)
+              if not run_id or run_id == current:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), run_id, name))
+          seen=set()
+          for created, run_id, name in sorted(rows, reverse=True):
+              key=(run_id,name)
+              if key in seen:
+                  continue
+              seen.add(key)
               print(f'{run_id}\t{name}')
           PY
 
@@ -263,6 +308,38 @@ jobs:
             [ "$DIGITAL_DOWNLOADED" -lt 8 ] || break
           done < /tmp/partener-ft-history-candidates.tsv
 
+          SMP_FOUND=""
+          SMP_FOUND_NAME=""
+          SMP_REFERENCE=""
+          SMP_DOWNLOADED=0
+          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            [ "$CONCLUSION" = "success" ] || continue
+            DEST="$SCRATCH/smp-${RUN_ID}-$(printf '%s' "$ARTIFACT_NAME" | sha256sum | cut -c1-8)"
+            mkdir -p "$DEST"
+            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
+              continue
+            fi
+            SMP_DOWNLOADED=$((SMP_DOWNLOADED + 1))
+            PREVIOUS="$(find "$DEST" -type f -path '*/smp-exact/ft-smp-exact-evidence.json' -not -path '*/history/*' -print -quit)"
+            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$SMP_DOWNLOADED" -lt 10 ] && continue || break; }
+            if SMP_REFERENCE="$(PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" <<'PY'
+          import json, sys
+          from eu_direct_smp_ft_exact import validate_evidence
+          previous=json.load(open(sys.argv[1], encoding='utf-8'))
+          validate_evidence(previous)
+          print(previous['reference'])
+          PY
+            )"; then
+              cp "$PREVIOUS" "$HISTORY/previous/smp-exact/ft-smp-exact-evidence.json"
+              SMP_FOUND="$RUN_ID"
+              SMP_FOUND_NAME="$ARTIFACT_NAME"
+              break
+            fi
+            [ "$SMP_DOWNLOADED" -lt 10 ] || break
+          done < /tmp/partener-smp-history-candidates.tsv
+
           if [ -n "$LIFE_FOUND" ]; then
             echo "life_available=true" >> "$GITHUB_OUTPUT"
             echo "life_run_id=$LIFE_FOUND" >> "$GITHUB_OUTPUT"
@@ -285,6 +362,14 @@ jobs:
             echo "digital_reference=$DIGITAL_REFERENCE" >> "$GITHUB_OUTPUT"
           else
             echo "digital_available=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$SMP_FOUND" ]; then
+            echo "smp_available=true" >> "$GITHUB_OUTPUT"
+            echo "smp_run_id=$SMP_FOUND" >> "$GITHUB_OUTPUT"
+            echo "smp_artifact_name=$SMP_FOUND_NAME" >> "$GITHUB_OUTPUT"
+            echo "smp_reference=$SMP_REFERENCE" >> "$GITHUB_OUTPUT"
+          else
+            echo "smp_available=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Reconcile exact LIFE against previous same-identity evidence
@@ -433,6 +518,71 @@ jobs:
           fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_digital_ft_reconcile.py "${ARGS[@]}"
 
+      - name: Resolve bounded Single Market Programme family handoff state
+        id: smp_handoff
+        shell: bash
+        env:
+          PREVIOUS_SMP_AVAILABLE: ${{ steps.previous_exact.outputs.smp_available }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            --taxonomy "$ROOT/programme-taxonomy.json"
+            --output "$ROOT/smp-exact/ft-smp-handoff-state.json"
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          )
+          if [ "$PREVIOUS_SMP_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/smp-exact/ft-smp-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_smp_ft_handoff.py "${ARGS[@]}"
+          python - "$ROOT/smp-exact/ft-smp-handoff-state.json" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          state=json.load(open(sys.argv[1], encoding='utf-8'))
+          print(f"mode={state['observation_state']}")
+          print(f"target_reference={state['target_reference'] or ''}")
+          print(f"exact_recheck_required={'true' if state['exact_recheck_required'] else 'false'}")
+          print(f"previous_same_identity={'true' if state['previous_same_identity'] else 'false'}")
+          PY
+
+      - name: Execute bounded exact-current Single Market Programme handoff
+        if: steps.smp_handoff.outputs.exact_recheck_required == 'true'
+        shell: bash
+        env:
+          SMP_HANDOFF_MODE: ${{ steps.smp_handoff.outputs.mode }}
+          SMP_TARGET_REFERENCE: ${{ steps.smp_handoff.outputs.target_reference }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          if [ "$SMP_HANDOFF_MODE" = "CURRENT_BOUNDED_SAMPLE_CANDIDATE_EXACT_RECHECK" ]; then
+            python partener-eu/ingest/eu_direct_smp_ft_exact.py \
+              --taxonomy "$ROOT/programme-taxonomy.json" \
+              --output-dir "$ROOT/smp-exact" \
+              --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          else
+            python partener-eu/ingest/eu_direct_smp_ft_exact.py \
+              --reference "$SMP_TARGET_REFERENCE" \
+              --output-dir "$ROOT/smp-exact" \
+              --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          fi
+
+      - name: Reconcile exact Single Market Programme against previous same-identity evidence
+        if: steps.smp_handoff.outputs.exact_recheck_required == 'true'
+        shell: bash
+        env:
+          PREVIOUS_SMP_AVAILABLE: ${{ steps.previous_exact.outputs.smp_available }}
+          PREVIOUS_SMP_SAME_IDENTITY: ${{ steps.smp_handoff.outputs.previous_same_identity }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            "$ROOT/smp-exact/ft-smp-exact-evidence.json"
+            --output "$ROOT/smp-exact/ft-smp-reconciliation.json"
+          )
+          if [ "$PREVIOUS_SMP_AVAILABLE" = "true" ] && [ "$PREVIOUS_SMP_SAME_IDENTITY" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/smp-exact/ft-smp-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_smp_ft_reconcile.py "${ARGS[@]}"
+
       - name: Validate live evidence remains bounded and non-authorizing
         shell: bash
         env:
@@ -442,6 +592,8 @@ jobs:
           PREVIOUS_CEF_RUN_ID: ${{ steps.previous_exact.outputs.cef_run_id }}
           PREVIOUS_DIGITAL_AVAILABLE: ${{ steps.previous_exact.outputs.digital_available }}
           PREVIOUS_DIGITAL_RUN_ID: ${{ steps.previous_exact.outputs.digital_run_id }}
+          PREVIOUS_SMP_AVAILABLE: ${{ steps.previous_exact.outputs.smp_available }}
+          PREVIOUS_SMP_RUN_ID: ${{ steps.previous_exact.outputs.smp_run_id }}
         run: |
           set -euo pipefail
           ARGS=(--root /tmp/partener-eu-ft-programme-watch)
@@ -452,23 +604,30 @@ jobs:
             ARGS+=(--previous-cef-available --previous-cef-run-id "$PREVIOUS_CEF_RUN_ID")
           fi
           python partener-eu/ops/validate_eu_direct_ft_programme_live.py "${ARGS[@]}"
+
           DIGITAL_ARGS=(--root /tmp/partener-eu-ft-programme-watch)
           if [ "$PREVIOUS_DIGITAL_AVAILABLE" = "true" ]; then
             DIGITAL_ARGS+=(--previous-digital-available --previous-digital-run-id "$PREVIOUS_DIGITAL_RUN_ID")
           fi
           python partener-eu/ops/validate_eu_direct_digital_live.py "${DIGITAL_ARGS[@]}"
 
+          SMP_ARGS=(--root /tmp/partener-eu-ft-programme-watch)
+          if [ "$PREVIOUS_SMP_AVAILABLE" = "true" ]; then
+            SMP_ARGS+=(--previous-smp-available --previous-smp-run-id "$PREVIOUS_SMP_RUN_ID")
+          fi
+          python partener-eu/ops/validate_eu_direct_smp_live.py "${SMP_ARGS[@]}"
+
       - name: Enforce compact history artifact boundary
         shell: bash
         run: |
           set -euo pipefail
           ROOT=/tmp/partener-eu-ft-programme-watch
-          if find "$ROOT/history" -mindepth 1 -maxdepth 1 -type d \( -name 'download-*' -o -name 'cef-download-*' -o -name 'digital-download-*' \) -print -quit | grep -q .; then
+          if find "$ROOT/history" -mindepth 1 -maxdepth 1 -type d \( -name 'download-*' -o -name 'cef-download-*' -o -name 'digital-download-*' -o -name 'smp-download-*' \) -print -quit | grep -q .; then
             echo 'recursive history download directory leaked into artifact root' >&2
             exit 1
           fi
           HISTORY_FILES="$(find "$ROOT/history" -type f | wc -l | tr -d ' ')"
-          if [ "$HISTORY_FILES" -gt 4 ]; then
+          if [ "$HISTORY_FILES" -gt 5 ]; then
             echo "unexpected history artifact growth: $HISTORY_FILES files" >&2
             find "$ROOT/history" -type f -print >&2
             exit 1
