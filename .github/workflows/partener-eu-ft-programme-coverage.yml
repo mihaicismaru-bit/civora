@@ -18,6 +18,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   programme-coverage-watch:
@@ -94,17 +95,110 @@ jobs:
             --output-dir /tmp/partener-eu-ft-programme-watch/life-exact \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
-      - name: Reconcile exact LIFE baseline without material authorization
+      - name: Restore previous successful same-branch LIFE exact evidence
+        id: previous_life
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          python partener-eu/ingest/eu_direct_life_ft_reconcile.py \
-            /tmp/partener-eu-ft-programme-watch/life-exact/ft-life-exact-evidence.json \
-            --output /tmp/partener-eu-ft-programme-watch/life-exact/ft-life-reconciliation.json
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          HISTORY="$ROOT/history"
+          mkdir -p "$HISTORY/previous/life-exact"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$HISTORY/artifacts.json"
+          python - <<'PY' > /tmp/partener-life-history-candidates.tsv
+          import json, os
+          data=json.load(open('/tmp/partener-eu-ft-programme-watch/history/artifacts.json', encoding='utf-8'))
+          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
+          current=int(os.environ['GITHUB_RUN_ID'])
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not name.startswith('partener-eu-ft-programme-coverage-') or artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              run_id=int(run.get('id') or 0)
+              if not run_id or run_id == current:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), run_id, name))
+          seen=set()
+          for created, run_id, name in sorted(rows, reverse=True):
+              if run_id in seen:
+                  continue
+              seen.add(run_id)
+              print(f'{run_id}\t{name}')
+          PY
+          FOUND=""
+          FOUND_NAME=""
+          DOWNLOADED=0
+          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            [ "$CONCLUSION" = "success" ] || continue
+            DEST="$HISTORY/download-${RUN_ID}"
+            mkdir -p "$DEST"
+            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
+              continue
+            fi
+            DOWNLOADED=$((DOWNLOADED + 1))
+            PREVIOUS="$(find "$DEST" -type f -path '*/life-exact/ft-life-exact-evidence.json' -print -quit)"
+            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$DOWNLOADED" -lt 8 ] && continue || break; }
+            if PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" "$ROOT/life-exact/ft-life-exact-evidence.json" <<'PY'
+          import json, sys
+          from eu_direct_life_ft_exact import validate_evidence
+          from eu_direct_life_ft_reconcile import parse_time
+          previous=json.load(open(sys.argv[1], encoding='utf-8'))
+          current=json.load(open(sys.argv[2], encoding='utf-8'))
+          validate_evidence(previous)
+          validate_evidence(current)
+          if previous.get('reference') != current.get('reference'):
+              raise SystemExit(1)
+          if parse_time(str(previous.get('fetched_at'))) > parse_time(str(current.get('fetched_at'))):
+              raise SystemExit(1)
+          PY
+            then
+              cp "$PREVIOUS" "$HISTORY/previous/life-exact/ft-life-exact-evidence.json"
+              FOUND="$RUN_ID"
+              FOUND_NAME="$ARTIFACT_NAME"
+              break
+            fi
+            [ "$DOWNLOADED" -lt 8 ] || break
+          done < /tmp/partener-life-history-candidates.tsv
+          if [ -n "$FOUND" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "run_id=$FOUND" >> "$GITHUB_OUTPUT"
+            echo "artifact_name=$FOUND_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Reconcile exact LIFE against previous same-identity evidence
+        shell: bash
+        env:
+          PREVIOUS_LIFE_AVAILABLE: ${{ steps.previous_life.outputs.available }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            "$ROOT/life-exact/ft-life-exact-evidence.json"
+            --output "$ROOT/life-exact/ft-life-reconciliation.json"
+          )
+          if [ "$PREVIOUS_LIFE_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/life-exact/ft-life-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_life_ft_reconcile.py "${ARGS[@]}"
 
       - name: Validate live evidence remains bounded and non-authorizing
+        env:
+          PREVIOUS_LIFE_AVAILABLE: ${{ steps.previous_life.outputs.available }}
+          PREVIOUS_LIFE_RUN_ID: ${{ steps.previous_life.outputs.run_id }}
         run: |
           python - <<'PY'
           import hashlib
           import json
+          import os
           from pathlib import Path
 
           root = Path('/tmp/partener-eu-ft-programme-watch')
@@ -113,6 +207,10 @@ jobs:
           t = json.loads((root / 'programme-taxonomy.json').read_text(encoding='utf-8'))
           life = json.loads((root / 'life-exact/ft-life-exact-evidence.json').read_text(encoding='utf-8'))
           rec = json.loads((root / 'life-exact/ft-life-reconciliation.json').read_text(encoding='utf-8'))
+          previous_available = os.environ.get('PREVIOUS_LIFE_AVAILABLE') == 'true'
+          previous = None
+          if previous_available:
+              previous = json.loads((root / 'history/previous/life-exact/ft-life-exact-evidence.json').read_text(encoding='utf-8'))
           assert d['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_WATCH_V1'
           assert c['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_RECEIPT_V1'
           assert t['schema'] == 'PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1'
@@ -169,8 +267,16 @@ jobs:
           assert rec['canonical_corpus_mutation'] is False
           assert rec['publication_effect'] == 'NONE'
           assert rec['reference'] == life['reference']
-          assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
-          assert rec['semantic_change_count'] == 0
+          if previous_available:
+              assert previous is not None
+              assert previous['reference'] == life['reference']
+              expected = 'NO_CHANGE' if previous['exact_semantic_fingerprint'] == life['exact_semantic_fingerprint'] else 'LIFE_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'
+              assert rec['reconciliation_state'] == expected
+              previous_sha = hashlib.sha256(json.dumps(previous, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+              assert rec['previous_evidence_sha256'] == previous_sha
+          else:
+              assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert rec['previous_evidence_sha256'] is None
           current_sha = hashlib.sha256(json.dumps(life, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
           assert rec['current_evidence_sha256'] == current_sha
           assert rec['material_admission_ready_for_downstream_review'] is (life['candidate_state'] == 'OPEN_CALL')
@@ -192,7 +298,10 @@ jobs:
                   'candidate_state': life['candidate_state'],
                   'status_label': life['status_label'],
                   'authority_url_verified': life['authority_url_verified'],
+                  'previous_evidence_available': previous_available,
+                  'previous_evidence_run_id': os.environ.get('PREVIOUS_LIFE_RUN_ID') or None,
                   'reconciliation_state': rec['reconciliation_state'],
+                  'semantic_change_count': rec['semantic_change_count'],
                   'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
                   'open_call_authorized': rec['open_call_authorized'],
               },
@@ -200,8 +309,10 @@ jobs:
           PY
 
       - name: Upload replayable programme-watch evidence
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: partener-eu-ft-programme-coverage-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/partener-eu-ft-programme-watch
           retention-days: 7
+          if-no-files-found: error
