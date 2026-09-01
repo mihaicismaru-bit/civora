@@ -8,6 +8,7 @@ from typing import Any
 
 from explicit_user_approval_control import explicit_user_approval_errors
 from privacy_notice_nf06_binding_control import binding_errors as privacy_notice_binding_errors
+from retention_evidence_control import retention_attestation_errors
 from security_incident_response_gate import incident_response_errors
 
 HERE = Path(__file__).resolve().parent
@@ -285,11 +286,31 @@ def activation_errors(
         if unexpected:
             errors.append("external_evidence_keys_unexpected:" + ",".join(sorted(unexpected)))
         for key in sorted(REQUIRED_EXTERNAL_KEYS):
-            if key not in evidence or not _valid_external_reference(key=key, value=evidence[key]):
+            value = evidence.get(key)
+            reference_valid = key in evidence and _valid_external_reference(key=key, value=value)
+            if not reference_valid:
                 errors.append(f"external_evidence_status_or_binding_invalid:{key}")
-            elif not _valid_promoted_local_binding(
+                continue
+
+            # Retention/deletion is operational evidence, not a documentary checkbox. If it is
+            # promoted, activation itself must evaluate the live attestation semantics. The
+            # dedicated retention workflow remains defence in depth, never a substitute.
+            if key == "retention_and_deletion" and value.get("status") in SEMANTIC_ATTESTATION_STATUSES:
+                candidate = _resolve_local_reference(value.get("reference"))
+                if candidate is None or candidate.suffix.lower() != ".json":
+                    errors.append("retention_semantics:retention_evidence_reference_invalid")
+                else:
+                    try:
+                        retention_artifact = _load(candidate)
+                    except (OSError, json.JSONDecodeError):
+                        errors.append("retention_semantics:retention_evidence_attestation_unreadable")
+                    else:
+                        for retention_error in retention_attestation_errors(retention_artifact):
+                            errors.append(f"retention_semantics:{retention_error}")
+
+            if not _valid_promoted_local_binding(
                 key=key,
-                value=evidence[key],
+                value=value,
                 research_id=research_id,
             ):
                 errors.append(f"external_evidence_binding_invalid:{key}")
