@@ -6,11 +6,15 @@ on:
     paths:
       - 'valcea-clar/scripts/ajofm_valcea_labour_market_reference_adapter.py'
       - '.github/workflows/valcea-clar-ajofm-valcea-labour-market-references.yml'
+      - 'valcea-clar/scripts/ajofm_valcea_labor_market_index_adapter.py'
+      - '.github/workflows/valcea-clar-ajofm-valcea-labor-market-references.yml'
   push:
     branches: [main]
     paths:
       - 'valcea-clar/scripts/ajofm_valcea_labour_market_reference_adapter.py'
       - '.github/workflows/valcea-clar-ajofm-valcea-labour-market-references.yml'
+      - 'valcea-clar/scripts/ajofm_valcea_labor_market_index_adapter.py'
+      - '.github/workflows/valcea-clar-ajofm-valcea-labor-market-references.yml'
 
 permissions:
   contents: read
@@ -27,6 +31,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - name: Reject duplicate legacy AJOFM lane
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e valcea-clar/scripts/ajofm_valcea_labor_market_index_adapter.py
+          test ! -e .github/workflows/valcea-clar-ajofm-valcea-labor-market-references.yml
       - name: Compile AJOFM Vâlcea labour-market reference adapter
         run: python -m py_compile valcea-clar/scripts/ajofm_valcea_labour_market_reference_adapter.py
       - name: Run AJOFM Vâlcea fail-closed regressions
