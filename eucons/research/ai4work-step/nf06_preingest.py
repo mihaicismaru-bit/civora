@@ -4,7 +4,7 @@ import hashlib
 import json
 import re
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from channel_provenance import ChannelProvenanceError, validate_channel_set, validate_recruitment_channel_id
@@ -29,6 +29,7 @@ EXPECTED_RECORD_KEYS = {
     "synthetic",
 }
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+MAX_CLOCK_SKEW = timedelta(minutes=5)
 PROD_ONLY_FRAME_FIELDS = {
     "privacy_notice_version",
     "controller_determination_reference",
@@ -162,6 +163,11 @@ def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, date
     end = _parse_ts(frame.get("collection_closed_at"), field="collection_closed_at")
     if end < start:
         raise NF06PreingestError("collection window is inverted")
+    now = datetime.now(timezone.utc)
+    if start > now + MAX_CLOCK_SKEW:
+        raise NF06PreingestError("collection_started_at cannot be future-dated")
+    if end > now + MAX_CLOCK_SKEW:
+        raise NF06PreingestError("collection_closed_at cannot be future-dated")
 
     if prod:
         if frame.get("frame_status") != PROD_FRAME_STATUS:
