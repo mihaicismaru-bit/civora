@@ -13,6 +13,14 @@ on:
       - 'eucons/research/ai4work-step/form_contract.json'
       - 'eucons/research/ai4work-step/RESEARCH_INVITATION_CATALOG_DRAFT.json'
       - 'eucons/research/ai4work-step/COLLECTION_CHANNEL_REGISTER_DRAFT.json'
+      - 'eucons/research/ai4work-step/CONTROLLER_DETERMINATION_DRAFT.json'
+      - 'eucons/research/ai4work-step/ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_LIA_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_DPIA_SCREENING_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_RETENTION_SCHEDULE_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json'
+      - 'eucons/research/ai4work-step/PROVIDER_STORAGE_CONTRACT.json'
       - '.github/workflows/eucons-ai4work-explicit-user-approval.yml'
   push:
     branches: [main]
@@ -27,6 +35,14 @@ on:
       - 'eucons/research/ai4work-step/form_contract.json'
       - 'eucons/research/ai4work-step/RESEARCH_INVITATION_CATALOG_DRAFT.json'
       - 'eucons/research/ai4work-step/COLLECTION_CHANNEL_REGISTER_DRAFT.json'
+      - 'eucons/research/ai4work-step/CONTROLLER_DETERMINATION_DRAFT.json'
+      - 'eucons/research/ai4work-step/ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_LIA_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_DPIA_SCREENING_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_RETENTION_SCHEDULE_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json'
+      - 'eucons/research/ai4work-step/GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json'
+      - 'eucons/research/ai4work-step/PROVIDER_STORAGE_CONTRACT.json'
       - '.github/workflows/eucons-ai4work-explicit-user-approval.yml'
   workflow_dispatch:
 
@@ -66,6 +82,7 @@ jobs:
           assert manifest.get('deploy_authorized') is False
           assert manifest.get('canonicalization_authorized') is False
           assert manifest.get('real_collection_authorized') is False
+          assert receipt.get('schema_version') == 'eucons.ai4work_explicit_user_approval_receipt.v0.2'
           assert receipt.get('status') == 'DRAFT_NOT_APPROVED'
           assert receipt.get('approved') is False
           assert receipt.get('real_collection_authorized') is False
@@ -73,7 +90,7 @@ jobs:
           assert receipt.get('deploy_authorized') is False
           assert receipt.get('canonicalization_authorized') is False
           assert receipt.get('evidence_use') == 'CONTROL_ONLY_NOT_NEED_EVIDENCE'
-          print('PASS: arbitrary text cannot authorize PROD; explicit approval remains human-only, hash-bound and collection-only')
+          print('PASS: explicit collection approval is human-only, hash-bound to privacy/legal governance, and cannot authorize merge/deploy/canonicalization')
           PY
       - name: Enforce combined PROD activation fail-closed state
         working-directory: eucons/research/ai4work-step
