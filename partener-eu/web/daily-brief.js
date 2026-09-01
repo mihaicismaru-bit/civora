@@ -3,7 +3,13 @@
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const roDate=v=>{try{return new Date(v).toLocaleString('ro-RO',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'})}catch{return String(v||'')}};
 function openInternal(item){
- if(item.dossierId){const nav=document.querySelector('[data-decisionnav]');nav?.click();setTimeout(()=>document.querySelector(`[data-di-dossier="${CSS.escape(item.dossierId)}"]`)?.click(),80);return}
+ if(item.dossierId){
+  const open=()=>window.PARTENER_DECISION_UI?.openDossier?.(item.dossierId)===true;
+  if(open())return;
+  document.querySelector('[data-decisionnav]')?.click();
+  let attempts=0;const retry=setInterval(()=>{attempts+=1;if(open()||attempts>=10)clearInterval(retry)},80);
+  return
+ }
  if(item.newsId){const nav=document.querySelector('[data-decisionnav]');nav?.click();setTimeout(()=>{document.querySelector('[data-di-tab="news"]')?.click();setTimeout(()=>document.querySelector(`[data-di-news="${CSS.escape(item.newsId)}"]`)?.click(),60)},60);return}
 }
 function card(i,n){const internal=!!(i.dossierId||i.newsId);return `<article class="dailyBriefCard ${n===0?'primary':''}" data-brief-id="${esc(i.id)}" tabindex="0"><div class="dailyBriefMeta"><span class="dailyBriefTag ${esc(i.tone||'update')}">${esc(i.label||'ACTUALIZARE')}</span><span class="dailyBriefTag">${esc(i.programme||'')}</span></div><h3>${esc(i.title)}</h3><p>${esc(i.summary)}</p><div class="dailyBriefAction"><span>${esc(i.action)}</span><b>${internal?'Deschide dosarul →':'Sursa oficială ↗'}</b></div></article>`}
