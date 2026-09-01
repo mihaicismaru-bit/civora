@@ -4,7 +4,9 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/eu_direct_ft_programme_watch.py'
+      - 'partener-eu/ingest/eu_direct_ft_coverage_receipt.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
+      - 'partener-eu/ops/test_eu_direct_ft_coverage_receipt.py'
       - '.github/workflows/partener-eu-ft-programme-coverage.yml'
   workflow_dispatch:
 
@@ -31,13 +33,18 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile programme watch
+      - name: Compile programme watch and coverage receipt
         run: |
           python -m py_compile partener-eu/ingest/eu_direct_ft_programme_watch.py
+          python -m py_compile partener-eu/ingest/eu_direct_ft_coverage_receipt.py
           python -m py_compile partener-eu/ops/test_eu_direct_ft_programme_watch.py
+          python -m py_compile partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
 
       - name: Validate fail-closed programme-watch semantics
         run: python partener-eu/ops/test_eu_direct_ft_programme_watch.py
+
+      - name: Validate explicit bounded-coverage semantics
+        run: python partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
 
       - name: Capture bounded live official F&T programme coverage
         run: |
@@ -47,29 +54,44 @@ jobs:
             --page-size 25 \
             --max-pages 8
 
-      - name: Validate live watch remains non-authorizing
+      - name: Bind explicit coverage-completeness receipt
+        run: |
+          python partener-eu/ingest/eu_direct_ft_coverage_receipt.py \
+            /tmp/partener-eu-ft-programme-watch/programme-watch.json \
+            --output /tmp/partener-eu-ft-programme-watch/programme-coverage-receipt.json
+
+      - name: Validate live watch remains non-authorizing and non-exhaustive when capped
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path('/tmp/partener-eu-ft-programme-watch/programme-watch.json')
-          d = json.loads(p.read_text(encoding='utf-8'))
+          root = Path('/tmp/partener-eu-ft-programme-watch')
+          d = json.loads((root / 'programme-watch.json').read_text(encoding='utf-8'))
+          c = json.loads((root / 'programme-coverage-receipt.json').read_text(encoding='utf-8'))
           assert d['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_WATCH_V1'
+          assert c['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_RECEIPT_V1'
           assert d['market_intelligence_only'] is True
-          assert d['material_fact_use'] is False
-          assert d['open_call_authorized'] is False
-          assert d['deadline_authorized'] is False
-          assert d['budget_authorized'] is False
-          assert d['eligibility_authorized'] is False
-          assert d['publish_authorized'] is False
-          assert d['distribution_authorized'] is False
-          assert d['call_alert_authorized'] is False
-          assert d['canonical_corpus_mutation'] is False
-          assert d['publication_effect'] == 'NONE'
+          assert c['market_intelligence_only'] is True
+          for obj in (d, c):
+              assert obj['material_fact_use'] is False
+              assert obj['open_call_authorized'] is False
+              assert obj['deadline_authorized'] is False
+              assert obj['budget_authorized'] is False
+              assert obj['eligibility_authorized'] is False
+              assert obj['publish_authorized'] is False
+              assert obj['distribution_authorized'] is False
+              assert obj['call_alert_authorized'] is False
+              assert obj['canonical_corpus_mutation'] is False
+              assert obj['publication_effect'] == 'NONE'
           assert d['stats']['raw_search_records'] >= d['stats']['accepted_candidates']
           assert d['pagination']['pages_captured'] >= 1
           assert d['page_receipts']
           assert d['facet_receipt']['sha256']
+          if d['pagination']['stop_reason'] == 'MAX_PAGES_REACHED':
+              assert c['coverage_complete'] is False
+              assert c['pagination_truncated'] is True
+              assert c['more_results_possible'] is True
+              assert c['coverage_scope'] == 'BOUNDED_QUERY_SAMPLE_NON_AUTHORIZING'
           for row in d['records']:
               assert row['authority_url_verified'] is False
               assert row['exact_topic_readback_required'] is True
@@ -82,6 +104,12 @@ jobs:
               'programme_family_counts': d['programme_family_counts'],
               'status_candidate_counts': d['status_candidate_counts'],
               'pagination': d['pagination'],
+              'coverage': {
+                  'coverage_complete': c['coverage_complete'],
+                  'pagination_truncated': c['pagination_truncated'],
+                  'more_results_possible': c['more_results_possible'],
+                  'coverage_scope': c['coverage_scope'],
+              },
           }, ensure_ascii=False, sort_keys=True))
           PY
 
