@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Bounded exact handoff for Creative Europe competitive/cascading calls.
 
-Only active OPEN/FORTHCOMING type-8 discovery candidates are worth exact fan-out.
-A previous same-scope active discovery may be replayed only as a pointer into a
-new exact readback when the current healthy programme scan omits it. Neither the
-current nor previous discovery candidate authorizes a material fact.
+Only active OPEN/FORTHCOMING type-8 discovery candidates are worth normal exact
+fan-out. A previous same-scope active discovery that is now absent or non-active
+is also a bounded exact-refresh candidate: disappearance/status churn is never
+interpreted as CLOSED. Neither current nor previous discovery evidence authorizes
+a material fact.
 
 When exact evidence is OPEN and semantic reconciliation has passed, this handoff
 also executes the separate STATUS_ONLY material-admission gate and persists its
@@ -151,8 +152,9 @@ def select_candidate(watch: Mapping[str, Any], *, history_root: pathlib.Path | N
     if watch.get("source_health") != "HEALTHY":
         return None, None
 
-    active = _bounded(watch, active_only=True)
-    current_ids = {str(x.get("identity_key") or "") for x in _bounded(watch)}
+    current_candidates = {str(item.get("identity_key") or ""): item for item in _bounded(watch)}
+    active = [item for item in current_candidates.values() if item.get("candidate_observation_state") in ACTIVE_STATES]
+    active.sort(key=lambda x: (0 if x.get("candidate_observation_state") == "OPEN_CANDIDATE_NON_AUTHORIZING" else 1, str(x.get("identity_key") or "")))
     refresh: list[tuple[dt.datetime, dict[str, Any]]] = []
     for candidate in active:
         identity = str(candidate["identity_key"])
@@ -164,15 +166,28 @@ def select_candidate(watch: Mapping[str, Any], *, history_root: pathlib.Path | N
             return candidate, "ACTIVE_DISCOVERY_SEMANTIC_FINGERPRINT_CHANGED"
         refresh.append((observed, candidate))
 
+    transition_refresh: list[tuple[dt.datetime, str, dict[str, Any], str]] = []
+    previous_seen: set[str] = set()
     for previous_watch in _watch_history(history_root, watch):
-        previous_time = _time(str(previous_watch.get("fetched_at") or ""))
-        for candidate in _bounded(previous_watch, active_only=True):
-            identity = str(candidate["identity_key"])
-            if identity in current_ids:
+        for previous_candidate in _bounded(previous_watch, active_only=True):
+            identity = str(previous_candidate["identity_key"])
+            if identity in previous_seen:
                 continue
-            if any(observed >= previous_time for observed, _p, _e in _exact_history(history_root, identity)):
+            previous_seen.add(identity)
+            current_candidate = current_candidates.get(identity)
+            if current_candidate is not None and current_candidate.get("candidate_observation_state") in ACTIVE_STATES:
                 continue
-            return candidate, "PREVIOUS_ACTIVE_DISCOVERY_PENDING_EXACT_RECHECK"
+            exact_history = _exact_history(history_root, identity)
+            last_exact = exact_history[0][0] if exact_history else dt.datetime.min.replace(tzinfo=dt.timezone.utc)
+            if current_candidate is None:
+                transition_refresh.append((last_exact, identity, previous_candidate, "PREVIOUS_ACTIVE_DISCOVERY_ABSENT_EXACT_RECHECK"))
+            else:
+                transition_refresh.append((last_exact, identity, current_candidate, "PREVIOUS_ACTIVE_DISCOVERY_NOW_NON_ACTIVE_EXACT_RECHECK"))
+
+    if transition_refresh:
+        transition_refresh.sort(key=lambda item: (item[0], item[1]))
+        _observed, _identity, candidate, reason = transition_refresh[0]
+        return candidate, reason
 
     if refresh:
         refresh.sort(key=lambda x: (x[0], str(x[1].get("identity_key") or "")))
