@@ -1,0 +1,32 @@
+name: EUCONS AI4WORK Retention Evidence Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-retention-evidence.yml'
+  push:
+    branches:
+      - 'eucons/ai4work-prod-activation-gate-20260827'
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-retention-evidence.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eucons/research/ai4work-step
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate retention evidence semantics
+        run: python retention_evidence_control.py
+      - name: Run retention evidence TEST TWIN suite
+        run: python -m unittest test_retention_evidence_control.py test_retention_schedule.py
