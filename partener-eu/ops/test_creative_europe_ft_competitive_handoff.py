@@ -63,8 +63,9 @@ def fake_post(endpoint, *, text, page_size, page_number, parts, max_bytes=None, 
     if "search" in endpoint and "facet" not in endpoint:
         payload = SEARCH
     else:
-        # Prove that competitive handoff scopes Facet lookup to the parent reference.
-        payload = FACET if text == PARENT else {"facets": []}
+        # Programme watch resolves through its CREA- scope. Competitive exact
+        # resolution succeeds only when the handoff scopes Facet to the parent.
+        payload = FACET if text in {"CREA-", PARENT} else {"facets": []}
     raw = json.dumps(payload, sort_keys=True).encode()
     return payload, raw, {"url": endpoint, "http_status": 200, "sha256": "a" * 64}
 
@@ -118,10 +119,8 @@ with tempfile.TemporaryDirectory() as tmp:
     )}
     candidate["semantic_fingerprint"] = watch_mod.sha256_bytes(watch_mod.canonical_json(semantic))
     selected, reason = handoff.select_candidate(changed_watch, history_root=root / "history")
-    assert selected is not None
-    assert reason == "ACTIVE_DISCOVERY_SEMANTIC_FINGERPRINT_CHANGED"
+    assert selected is not None and reason == "ACTIVE_DISCOVERY_SEMANTIC_FINGERPRINT_CHANGED"
 
-# Opaque type-8 evidence cannot be promoted into an exact competitive identity.
 opaque_watch = copy.deepcopy(watch)
 opaque = opaque_watch["linked_competitive_discovery"][0]
 opaque["competitive_call_id_candidate"] = None
@@ -132,7 +131,6 @@ opaque["semantic_fingerprint"] = "e" * 64
 selected, reason = handoff.select_candidate(opaque_watch)
 assert selected is None and reason is None
 
-# CLOSED discovery is intentionally not fanned out merely because it is new.
 closed_watch = copy.deepcopy(watch)
 closed = closed_watch["linked_competitive_discovery"][0]
 closed["candidate_observation_state"] = "CLOSED_OBSERVATION_NON_AUTHORIZING"
@@ -146,9 +144,6 @@ closed["semantic_fingerprint"] = watch_mod.sha256_bytes(watch_mod.canonical_json
 selected, reason = handoff.select_candidate(closed_watch)
 assert selected is None and reason is None
 
-# If current healthy discovery omits an active prior candidate and no exact evidence
-# has completed it, reuse only the prior immutable candidate as a pointer to a new
-# exact current readback.
 with tempfile.TemporaryDirectory() as tmp:
     root = Path(tmp)
     previous_dir = root / "download-old" / "watch"
