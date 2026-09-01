@@ -86,6 +86,19 @@ class ExplicitUserApprovalControlTests(unittest.TestCase):
         finally:
             path.unlink(missing_ok=True)
 
+    def test_legacy_v01_receipt_is_rejected(self):
+        payload = self._payload()
+        payload["schema_version"] = "eucons.ai4work_explicit_user_approval_receipt.v0.1"
+        path, digest = self._write_receipt(payload)
+        try:
+            errors = explicit_user_approval_errors(
+                manifest=self._manifest(path, digest),
+                research_id=self.research_id,
+            )
+            self.assertIn("explicit_user_approval_receipt_schema_invalid", errors)
+        finally:
+            path.unlink(missing_ok=True)
+
     def test_arbitrary_nonempty_approval_string_is_not_authority(self):
         manifest = {
             "research_id": self.research_id,
@@ -119,6 +132,32 @@ class ExplicitUserApprovalControlTests(unittest.TestCase):
                 research_id=self.research_id,
             )
             self.assertIn("explicit_user_approval_binding_invalid:need_analysis_plan", errors)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_privacy_governance_binding_drift_is_rejected(self):
+        payload = self._payload()
+        payload["bound_artifacts"]["article13_notice_snapshot"]["sha256"] = "0" * 64
+        path, digest = self._write_receipt(payload)
+        try:
+            errors = explicit_user_approval_errors(
+                manifest=self._manifest(path, digest),
+                research_id=self.research_id,
+            )
+            self.assertIn("explicit_user_approval_binding_invalid:article13_notice_snapshot", errors)
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_missing_governance_binding_key_is_rejected(self):
+        payload = self._payload()
+        payload["bound_artifacts"].pop("security_incident_response")
+        path, digest = self._write_receipt(payload)
+        try:
+            errors = explicit_user_approval_errors(
+                manifest=self._manifest(path, digest),
+                research_id=self.research_id,
+            )
+            self.assertIn("explicit_user_approval_binding_keys_mismatch", errors)
         finally:
             path.unlink(missing_ok=True)
 
