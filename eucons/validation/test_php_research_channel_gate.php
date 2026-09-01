@@ -115,7 +115,7 @@ function write_test_register(array $entries): array
 
 $entry = [
     'channel_id' => 'CH-TESTTWIN01',
-    'channel_type' => 'test_twin',
+    'channel_type' => 'partner_email',
     'region_scope' => ['Centru'],
     'audience_scope' => ['adults'],
     'invitation_version' => 'TEST_TWIN_ADULTS_INV_V1',
@@ -169,6 +169,15 @@ try {
         rrmdir_channel($badRoot);
     }
 
+    $badType = $entry;
+    $badType['channel_type'] = 'unapproved_channel';
+    [$typeRoot, $typePath] = write_test_register([$badType]);
+    try {
+        expect_channel_error(fn() => new EuconsResearchChannelGate($typePath), 'COLLECTION_CHANNEL_REGISTER_INVALID');
+    } finally {
+        rrmdir_channel($typeRoot);
+    }
+
     $badInvitation = $entry;
     $badInvitation['invitation_version'] = 'TEST_TWIN_EMPLOYERS_INV_V1';
     [$audienceRoot, $audiencePath] = write_test_register([$badInvitation]);
@@ -184,4 +193,4 @@ try {
     rrmdir_channel($root);
 }
 
-echo "PASS TEST_TWIN_NON_EVIDENCE research channel gate v0.2 invitation binding\n";
+echo "PASS TEST_TWIN_NON_EVIDENCE research channel gate v0.2 invitation and approved-channel-type binding\n";
