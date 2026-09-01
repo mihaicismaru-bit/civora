@@ -1,0 +1,68 @@
+name: VÂLCEA CLAR Editorial Writing Quality
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/editorial/editorial_writing_quality.py"
+      - ".github/workflows/valcea-clar-editorial-writing-quality.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/editorial/editorial_writing_quality.py"
+      - ".github/workflows/valcea-clar-editorial-writing-quality.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  editorial-writing-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile validator
+        run: python -m py_compile valcea-clar/editorial/editorial_writing_quality.py
+
+      - name: Run deterministic editorial quality regressions
+        run: python valcea-clar/editorial/editorial_writing_quality.py --self-test
+
+      - name: Enforce read-only dependency boundary
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          path = Path("valcea-clar/editorial/editorial_writing_quality.py")
+          tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
+          forbidden = {"requests", "urllib", "http", "socket", "subprocess"}
+          imported = set()
+          for node in ast.walk(tree):
+              if isinstance(node, ast.Import):
+                  imported.update(alias.name.split(".", 1)[0] for alias in node.names)
+              elif isinstance(node, ast.ImportFrom) and node.module:
+                  imported.add(node.module.split(".", 1)[0])
+          bad = sorted(imported & forbidden)
+          if bad:
+              raise SystemExit(f"network/process dependencies forbidden in read-only quality gate: {bad}")
+
+          source = path.read_text(encoding="utf-8")
+          required_false = (
+              '"publication_authorized": False',
+              '"automatic_rewrite_authorized": False',
+              '"fact_inference_authorized": False',
+              '"fact_kernel_mutation_authorized": False',
+              '"breaking_promotion_authorized": False',
+          )
+          missing = [token for token in required_false if token not in source]
+          if missing:
+              raise SystemExit(f"fail-closed capability declarations missing: {missing}")
+          print("read-only dependency/capability boundary: PASS")
+          PY
