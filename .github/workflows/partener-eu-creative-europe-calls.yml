@@ -8,6 +8,7 @@ on:
       - 'partener-eu/ingest/creative_europe_ft_exact.py'
       - 'partener-eu/ingest/creative_europe_ft_reconcile.py'
       - 'partener-eu/ingest/creative_europe_ft_watch.py'
+      - 'partener-eu/ingest/creative_europe_ft_watch_reconcile.py'
       - 'partener-eu/ops/test_creative_europe_call_index.py'
       - 'partener-eu/ops/test_creative_europe_call_fetch.py'
       - 'partener-eu/ops/test_creative_europe_ft_exact.py'
@@ -50,6 +51,7 @@ jobs:
           python -m py_compile partener-eu/ingest/creative_europe_ft_exact.py
           python -m py_compile partener-eu/ingest/creative_europe_ft_reconcile.py
           python -m py_compile partener-eu/ingest/creative_europe_ft_watch.py
+          python -m py_compile partener-eu/ingest/creative_europe_ft_watch_reconcile.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_index.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_fetch.py
           python -m py_compile partener-eu/ops/test_creative_europe_ft_exact.py
@@ -68,7 +70,7 @@ jobs:
       - name: Validate exact-topic semantic reconciliation stays non-authorizing
         run: python partener-eu/ops/test_creative_europe_ft_reconcile.py
 
-      - name: Validate programme-wide structured F&T watch stays non-authorizing
+      - name: Validate programme-wide structured F&T watch and semantic history stay non-authorizing
         run: python partener-eu/ops/test_creative_europe_ft_watch.py
 
       - name: Capture live official Creative Europe call-index evidence
@@ -184,6 +186,171 @@ jobs:
           }, ensure_ascii=False))
           PY
 
+      - name: Restore previous successful Creative Europe observations from this branch
+        id: previous_evidence
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/creative-europe/history/previous/exact
+          mkdir -p /tmp/creative-europe/history/previous/watch
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-creative-europe-call-index-evidence&per_page=100" \
+            > /tmp/creative-europe/history/artifacts.json
+          python - <<'PY' > /tmp/creative-europe/history/candidate-runs.txt
+          import json, os
+          data=json.load(open('/tmp/creative-europe/history/artifacts.json', encoding='utf-8'))
+          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
+          current=int(os.environ['GITHUB_RUN_ID'])
+          candidates=[]
+          seen=set()
+          for artifact in data.get('artifacts') or []:
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              run_id=int(run.get('id') or 0)
+              if not run_id or run_id == current or run_id in seen:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              seen.add(run_id)
+              candidates.append((str(artifact.get('created_at') or ''), run_id))
+          for _created, run_id in sorted(candidates, reverse=True):
+              print(run_id)
+          PY
+          EXACT_FOUND=""
+          WATCH_FOUND=""
+          while IFS= read -r RUN_ID; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            [ "$CONCLUSION" = "success" ] || continue
+            DEST="/tmp/creative-europe/history/download-${RUN_ID}"
+            mkdir -p "$DEST"
+            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" \
+              --name partener-creative-europe-call-index-evidence --dir "$DEST"; then
+              continue
+            fi
+            if [ -z "$WATCH_FOUND" ]; then
+              PREVIOUS_WATCH="$(find "$DEST" -type f -path '*/watch/ft-programme-watch-evidence.json' -print -quit)"
+              if [ -n "$PREVIOUS_WATCH" ] && [ -s "$PREVIOUS_WATCH" ]; then
+                cp "$PREVIOUS_WATCH" /tmp/creative-europe/history/previous/watch/ft-programme-watch-evidence.json
+                WATCH_FOUND="$RUN_ID"
+              fi
+            fi
+            if [ -z "$EXACT_FOUND" ]; then
+              PREVIOUS_EXACT="$(find "$DEST" -type f -path '*/ft/ft-exact-evidence.json' -print -quit)"
+              if [ -n "$PREVIOUS_EXACT" ] && [ -s "$PREVIOUS_EXACT" ]; then
+                cp "$PREVIOUS_EXACT" /tmp/creative-europe/history/previous/exact/ft-exact-evidence.json
+                EXACT_FOUND="$RUN_ID"
+              fi
+            fi
+            if [ -n "$WATCH_FOUND" ] && [ -n "$EXACT_FOUND" ]; then
+              break
+            fi
+          done < /tmp/creative-europe/history/candidate-runs.txt
+          if [ -n "$WATCH_FOUND" ]; then
+            echo "watch_available=true" >> "$GITHUB_OUTPUT"
+            echo "watch_run_id=$WATCH_FOUND" >> "$GITHUB_OUTPUT"
+            echo "Restored previous programme-watch evidence from successful run $WATCH_FOUND"
+          else
+            echo "watch_available=false" >> "$GITHUB_OUTPUT"
+            echo "No prior successful same-branch programme-watch artifact; watch baseline reconciliation will be used."
+          fi
+          if [ -n "$EXACT_FOUND" ]; then
+            echo "exact_available=true" >> "$GITHUB_OUTPUT"
+            echo "exact_run_id=$EXACT_FOUND" >> "$GITHUB_OUTPUT"
+            echo "Restored previous exact-topic evidence from successful run $EXACT_FOUND"
+          else
+            echo "exact_available=false" >> "$GITHUB_OUTPUT"
+            echo "No prior successful same-branch exact-topic artifact; exact baseline reconciliation will be used."
+          fi
+
+      - name: Reconcile programme-wide Creative Europe watch against previous observation
+        shell: bash
+        env:
+          PREVIOUS_WATCH_AVAILABLE: ${{ steps.previous_evidence.outputs.watch_available }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/creative-europe/watch-reconciliation
+          ARGS=(
+            --current /tmp/creative-europe/watch/ft-programme-watch-evidence.json
+            --output /tmp/creative-europe/watch-reconciliation/ft-programme-watch-reconciliation.json
+          )
+          if [ "$PREVIOUS_WATCH_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous /tmp/creative-europe/history/previous/watch/ft-programme-watch-evidence.json)
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_watch_reconcile.py "${ARGS[@]}"
+
+      - name: Validate programme-wide reconciliation and exact handoff queue stay non-authorizing
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          p='/tmp/creative-europe/watch-reconciliation/ft-programme-watch-reconciliation.json'
+          d=json.load(open(p, encoding='utf-8'))
+          allowed={
+              'BASELINE_CAPTURED_NON_AUTHORIZING',
+              'NO_CHANGE',
+              'PROGRAMME_WATCH_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
+              'CURRENT_SOURCE_DEGRADED_LKG_REFERENCED_NON_AUTHORIZING',
+              'CURRENT_SOURCE_DEGRADED_NO_LKG_NON_AUTHORIZING',
+              'SOURCE_RECOVERED_BASELINE_REESTABLISHED_NON_AUTHORIZING',
+          }
+          if d.get('adapter_id') != 'CREATIVE_EUROPE_FT_WATCH_RECONCILE_V1':
+              print('FAIL programme-watch reconciliation identity drift')
+              sys.exit(2)
+          if d.get('reconciliation_state') not in allowed or d.get('semantic_reconciliation_passed') is not True:
+              print('FAIL programme-watch reconciliation state/pass drift', d.get('reconciliation_state'))
+              sys.exit(2)
+          if d.get('market_intelligence_only') is not True or d.get('requires_exact_topic_handoff') is not True or d.get('requires_material_admission') is not True:
+              print('FAIL programme-watch downstream boundary drift')
+              sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL programme-watch reconciliation became authorizing', key, d.get(key))
+                  sys.exit(2)
+          for key in ('source_scope_fingerprint','current_evidence_sha256','current_semantic_fingerprint','reconciliation_fingerprint'):
+              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
+                  print('FAIL programme-watch reconciliation hash invalid', key)
+                  sys.exit(2)
+          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
+              print('FAIL programme-watch reconciliation crossed publication boundary')
+              sys.exit(2)
+          queue=d.get('exact_verification_queue') or []
+          if len(queue) != int(d.get('exact_verification_queue_count') or 0) or len(queue) > 20:
+              print('FAIL exact verification queue count/bound drift')
+              sys.exit(2)
+          seen=set()
+          for item in queue:
+              ref=str(item.get('reference') or '')
+              if not ref.startswith('CREA-') or ref in seen:
+                  print('FAIL invalid/duplicate exact handoff reference', ref)
+                  sys.exit(2)
+              seen.add(ref)
+              if item.get('authority_url_verified') is not False:
+                  print('FAIL exact handoff self-verified authority', ref)
+                  sys.exit(2)
+              if item.get('requires_exact_topic_readback') is not True or item.get('requires_exact_topic_reconcile') is not True or item.get('requires_material_admission') is not True:
+                  print('FAIL exact handoff skipped downstream gates', ref)
+                  sys.exit(2)
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+                  if item.get(key) is not False:
+                      print('FAIL exact handoff became authorizing', ref, key)
+                      sys.exit(2)
+          if d.get('current_source_health') != 'HEALTHY' and queue:
+              print('FAIL degraded programme watch emitted exact handoff queue')
+              sys.exit(2)
+          print(json.dumps({
+              'reconciliation_state': d.get('reconciliation_state'),
+              'semantic_change_count': d.get('semantic_change_count'),
+              'programme_watch_candidate': d.get('programme_watch_candidate'),
+              'source_health_watch_candidate': d.get('source_health_watch_candidate'),
+              'conflict_watch_candidate': d.get('conflict_watch_candidate'),
+              'exact_verification_queue_count': len(queue),
+              'exact_handoffs': [item.get('reference') for item in queue],
+              'open_call_authorized': False,
+          }, ensure_ascii=False))
+          PY
+
       - name: Capture exact current Creative Europe topic through structured F&T
         run: |
           mkdir -p /tmp/creative-europe/ft
@@ -221,75 +388,19 @@ jobs:
           print(json.dumps({'reference':d.get('reference'),'status_label':d.get('status_label'),'candidate_state':d.get('candidate_observation_state'),'open_call_authorized':False}, ensure_ascii=False))
           PY
 
-      - name: Restore previous successful exact-topic observation from this branch
-        id: previous_exact
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/creative-europe/reconciliation/previous
-          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-creative-europe-call-index-evidence&per_page=100" \
-            > /tmp/creative-europe/reconciliation/artifacts.json
-          python - <<'PY' > /tmp/creative-europe/reconciliation/candidate-runs.txt
-          import json, os
-          data=json.load(open('/tmp/creative-europe/reconciliation/artifacts.json', encoding='utf-8'))
-          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
-          current=int(os.environ['GITHUB_RUN_ID'])
-          candidates=[]
-          seen=set()
-          for artifact in data.get('artifacts') or []:
-              if artifact.get('expired') is True:
-                  continue
-              run=artifact.get('workflow_run') or {}
-              run_id=int(run.get('id') or 0)
-              if not run_id or run_id == current or run_id in seen:
-                  continue
-              if branch and str(run.get('head_branch') or '') != branch:
-                  continue
-              seen.add(run_id)
-              candidates.append((str(artifact.get('created_at') or ''), run_id))
-          for _created, run_id in sorted(candidates, reverse=True):
-              print(run_id)
-          PY
-          FOUND=""
-          while IFS= read -r RUN_ID; do
-            [ -n "$RUN_ID" ] || continue
-            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
-            [ "$CONCLUSION" = "success" ] || continue
-            DEST="/tmp/creative-europe/reconciliation/download-${RUN_ID}"
-            mkdir -p "$DEST"
-            if gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" \
-              --name partener-creative-europe-call-index-evidence --dir "$DEST"; then
-              PREVIOUS="$(find "$DEST" -type f -path '*/ft/ft-exact-evidence.json' -print -quit)"
-              if [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ]; then
-                cp "$PREVIOUS" /tmp/creative-europe/reconciliation/previous/ft-exact-evidence.json
-                FOUND="$RUN_ID"
-                break
-              fi
-            fi
-          done < /tmp/creative-europe/reconciliation/candidate-runs.txt
-          if [ -n "$FOUND" ]; then
-            echo "available=true" >> "$GITHUB_OUTPUT"
-            echo "run_id=$FOUND" >> "$GITHUB_OUTPUT"
-            echo "Restored previous exact-topic evidence from successful run $FOUND"
-          else
-            echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "No prior successful same-branch exact-topic artifact; baseline reconciliation will be used."
-          fi
-
       - name: Reconcile exact Creative Europe topic against previous observation
         shell: bash
         env:
-          PREVIOUS_AVAILABLE: ${{ steps.previous_exact.outputs.available }}
+          PREVIOUS_EXACT_AVAILABLE: ${{ steps.previous_evidence.outputs.exact_available }}
         run: |
           set -euo pipefail
+          mkdir -p /tmp/creative-europe/reconciliation
           ARGS=(
             --current /tmp/creative-europe/ft/ft-exact-evidence.json
             --output /tmp/creative-europe/reconciliation/ft-reconciliation.json
           )
-          if [ "$PREVIOUS_AVAILABLE" = "true" ]; then
-            ARGS+=(--previous /tmp/creative-europe/reconciliation/previous/ft-exact-evidence.json)
+          if [ "$PREVIOUS_EXACT_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous /tmp/creative-europe/history/previous/exact/ft-exact-evidence.json)
           fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_reconcile.py "${ARGS[@]}"
 
