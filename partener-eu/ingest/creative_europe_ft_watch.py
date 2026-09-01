@@ -33,7 +33,7 @@ import funding_tenders_fetch as ft
 
 ADAPTER_ID = "CREATIVE_EUROPE_CALLS_V1"
 WATCH_ID = "CREATIVE_EUROPE_FT_PROGRAMME_WATCH_V1"
-PARSER_VERSION = "CREATIVE_EUROPE_FT_WATCH_V1"
+PARSER_VERSION = "CREATIVE_EUROPE_FT_WATCH_V1_1"
 DEFAULT_TEXT = "CREA-"
 MAX_PAGE_SIZE = 100
 MAX_PAGES = 5
@@ -539,22 +539,34 @@ def validate_watch_evidence(evidence: Mapping[str, Any]) -> None:
         if not re.fullmatch(r"[0-9a-f]{64}", str(candidate.get("semantic_fingerprint") or "")):
             raise ValueError(f"Creative Europe watch candidate fingerprint invalid: {ref}")
 
-    linked = list(evidence.get("linked_competitive_discovery") or [])
-    identities: set[str] = set()
-    for candidate in linked:
-        _validate_linked_competitive_candidate(candidate)
-        identity = str(candidate.get("identity_key") or "")
-        if identity in identities:
-            raise ValueError(f"duplicate Creative Europe linked competitive identity: {identity}")
-        identities.add(identity)
-    if evidence.get("linked_competitive_discovery_semantic_reconcile_included") is not False:
-        raise ValueError("Creative Europe linked competitive discovery incorrectly entered parent watch reconcile")
-    if evidence.get("linked_competitive_discovery_requires_separate_reconcile") is not True:
-        raise ValueError("Creative Europe linked competitive discovery lost separate reconcile boundary")
-
-    for conflict in evidence.get("conflicts") or []:
-        if conflict.get("reason") != "CONFLICTING_PRIMARY_TOPIC_METADATA_EXCLUDED":
-            raise ValueError("Creative Europe watch conflict reason drift")
+    legacy_surface_model = "linked_competitive_discovery" not in evidence
+    if legacy_surface_model:
+        # Historical V1 snapshots are immutable replay evidence from before
+        # F&T type-8 rows were split from parent-topic groups. They remain valid
+        # as previous observations, but cannot claim the newer surface model.
+        if evidence.get("parser_version") != "CREATIVE_EUROPE_FT_WATCH_V1":
+            raise ValueError("Creative Europe legacy watch parser identity drift")
+        for conflict in evidence.get("conflicts") or []:
+            if conflict.get("reason") != "CONFLICTING_STRUCTURED_METADATA_EXCLUDED":
+                raise ValueError("Creative Europe legacy watch conflict reason drift")
+    else:
+        if evidence.get("parser_version") != PARSER_VERSION:
+            raise ValueError("Creative Europe programme watch parser identity drift")
+        linked = list(evidence.get("linked_competitive_discovery") or [])
+        identities: set[str] = set()
+        for candidate in linked:
+            _validate_linked_competitive_candidate(candidate)
+            identity = str(candidate.get("identity_key") or "")
+            if identity in identities:
+                raise ValueError(f"duplicate Creative Europe linked competitive identity: {identity}")
+            identities.add(identity)
+        if evidence.get("linked_competitive_discovery_semantic_reconcile_included") is not False:
+            raise ValueError("Creative Europe linked competitive discovery incorrectly entered parent watch reconcile")
+        if evidence.get("linked_competitive_discovery_requires_separate_reconcile") is not True:
+            raise ValueError("Creative Europe linked competitive discovery lost separate reconcile boundary")
+        for conflict in evidence.get("conflicts") or []:
+            if conflict.get("reason") != "CONFLICTING_PRIMARY_TOPIC_METADATA_EXCLUDED":
+                raise ValueError("Creative Europe watch conflict reason drift")
 
     for key in ("facet_raw_sha256", "semantic_fingerprint"):
         if not re.fullmatch(r"[0-9a-f]{64}", str(evidence.get(key) or "")):
