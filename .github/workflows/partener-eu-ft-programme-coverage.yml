@@ -1,0 +1,93 @@
+name: PARTENER.EU F&T Programme Coverage Watch
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_ft_programme_watch.py'
+      - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
+      - '.github/workflows/partener-eu-ft-programme-coverage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  programme-coverage-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile programme watch
+        run: |
+          python -m py_compile partener-eu/ingest/eu_direct_ft_programme_watch.py
+          python -m py_compile partener-eu/ops/test_eu_direct_ft_programme_watch.py
+
+      - name: Validate fail-closed programme-watch semantics
+        run: python partener-eu/ops/test_eu_direct_ft_programme_watch.py
+
+      - name: Capture bounded live official F&T programme coverage
+        run: |
+          rm -rf /tmp/partener-eu-ft-programme-watch
+          python partener-eu/ingest/eu_direct_ft_programme_watch.py \
+            --output-dir /tmp/partener-eu-ft-programme-watch \
+            --page-size 25 \
+            --max-pages 8
+
+      - name: Validate live watch remains non-authorizing
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('/tmp/partener-eu-ft-programme-watch/programme-watch.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_WATCH_V1'
+          assert d['market_intelligence_only'] is True
+          assert d['material_fact_use'] is False
+          assert d['open_call_authorized'] is False
+          assert d['deadline_authorized'] is False
+          assert d['budget_authorized'] is False
+          assert d['eligibility_authorized'] is False
+          assert d['publish_authorized'] is False
+          assert d['distribution_authorized'] is False
+          assert d['call_alert_authorized'] is False
+          assert d['canonical_corpus_mutation'] is False
+          assert d['publication_effect'] == 'NONE'
+          assert d['stats']['raw_search_records'] >= d['stats']['accepted_candidates']
+          assert d['pagination']['pages_captured'] >= 1
+          assert d['page_receipts']
+          assert d['facet_receipt']['sha256']
+          for row in d['records']:
+              assert row['authority_url_verified'] is False
+              assert row['exact_topic_readback_required'] is True
+              assert row['semantic_reconciliation_required'] is True
+              assert row['material_fact_use'] is False
+              assert row['open_call_authorized'] is False
+              assert row['publish_authorized'] is False
+          print(json.dumps({
+              'stats': d['stats'],
+              'programme_family_counts': d['programme_family_counts'],
+              'status_candidate_counts': d['status_candidate_counts'],
+              'pagination': d['pagination'],
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload replayable programme-watch evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-ft-programme-coverage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-ft-programme-watch
+          retention-days: 7
