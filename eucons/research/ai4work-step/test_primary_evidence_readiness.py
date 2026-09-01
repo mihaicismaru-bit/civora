@@ -48,8 +48,12 @@ def channel_register() -> dict:
                 }
             )
     return {
-        "schema_version": "eucons.ai4work_collection_channel_register.v0.1",
+        "schema_version": "eucons.ai4work_collection_channel_register.v0.2",
         "research_id": "AI4WORK-STEP-NF-RUN-001",
+        "invitation_catalog": {
+            "reference": "RESEARCH_INVITATION_CATALOG_DRAFT.json",
+            "sha256": "a" * 64,
+        },
         "entries": entries,
     }
 
@@ -134,6 +138,7 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
         self.assertFalse(result["representativeness_claim_allowed"])
         self.assertTrue(result["thresholds_are_method_rules_not_evidence"])
         self.assertTrue(result["independent_channel_types_per_region_validated"])
+        self.assertTrue(result["invitation_catalog_binding_shape_validated"])
         self.assertTrue(result["form_audience_channel_scope_validated"])
         self.assertTrue(result["channel_concentration_scopes_validated"])
         self.assertFalse(result["dominant_channel_sensitivity_used"])
@@ -190,6 +195,42 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
         register = channel_register()
         manifest = valid_manifest(register)
         manifest["collection_channel_register_sha256"] = "0" * 64
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
+
+    def test_legacy_channel_register_v01_is_rejected(self):
+        register = channel_register()
+        register["schema_version"] = "eucons.ai4work_collection_channel_register.v0.1"
+        manifest = valid_manifest(register)
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
+
+    def test_invalid_invitation_catalog_binding_shape_is_rejected(self):
+        register = channel_register()
+        register["invitation_catalog"] = {
+            "reference": "../catalog.json",
+            "sha256": "a" * 64,
+        }
+        manifest = valid_manifest(register)
+        with self.assertRaises(READY.PrimaryEvidenceReadinessError):
+            READY.assert_primary_evidence_ready_for_synthesis(
+                manifest,
+                method_frame=approved_method_frame(),
+                channel_register=register,
+            )
+
+    def test_invalid_invitation_catalog_digest_is_rejected(self):
+        register = channel_register()
+        register["invitation_catalog"]["sha256"] = "not-a-sha"
+        manifest = valid_manifest(register)
         with self.assertRaises(READY.PrimaryEvidenceReadinessError):
             READY.assert_primary_evidence_ready_for_synthesis(
                 manifest,
