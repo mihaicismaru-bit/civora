@@ -1,17 +1,10 @@
 import { createHash, randomBytes } from "node:crypto";
+import { READ_ONLY_BRIDGE_CAPABILITIES } from "./bridge-capabilities.mjs";
 import { assertNoSensitivePersistence } from "./policy.mjs";
 
 export const BRIDGE_PROTOCOL_VERSION = 1;
 
-export const READ_ONLY_BRIDGE_CAPABILITIES = Object.freeze([
-  "HEALTH",
-  "LIST_PROJECTS",
-  "DISCOVER_ARTIFACTS",
-  "READ_CURRENT_PAGE_DOM",
-  "READ_ROUTE_SCHEMA",
-  "OBSERVE_DOWNLOADS",
-  "READ_COMPLETED_LOCAL_DOWNLOAD"
-]);
+export { READ_ONLY_BRIDGE_CAPABILITIES } from "./bridge-capabilities.mjs";
 
 const OBSERVATION_SOURCES = new Set(["OFFLINE_FIXTURE", "LIVE_BRIDGE_TOOL"]);
 const BROWSER_FAMILIES = new Set(["CHROME", "EDGE"]);

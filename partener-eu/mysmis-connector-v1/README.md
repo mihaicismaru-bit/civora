@@ -19,6 +19,7 @@ MFA data or tokens.
 
 ```sh
 npm test
+npm run verify:extension-browser
 ```
 
 ## Current capability state
@@ -81,6 +82,8 @@ Implemented in this unit:
   the one-command loopback broker to the installed extension, with no persisted absolute mailbox path
 - internal extension options page that stores a configuration only after exact extension/build/pair
   checks and a Web Crypto SHA-256 verification of its canonical configuration identity
+- deterministic MV3 browser-compatibility gate that rejects Node built-ins/globals, bare imports and
+  any relative import outside the exact attested extension payload
 
 Still fail-closed / not implemented:
 

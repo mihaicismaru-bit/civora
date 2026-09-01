@@ -29,5 +29,10 @@ jobs:
           node-version: '20'
       - name: Run connector regression suite
         run: npm test
+      - name: Verify MV3 extension browser compatibility and attested import closure
+        run: npm run verify:extension-browser
+      - name: Syntax-check every attested extension JavaScript module
+        run: |
+          node -e 'const c=require("./build/runtime-files.json"); for (const f of c.EXTENSION.filter((v)=>/\\.(?:js|mjs)$/.test(v))) console.log(f)' | xargs -r -n1 node --check
       - name: Syntax-check bounded loopback broker
         run: node --check native/loopback-broker.mjs

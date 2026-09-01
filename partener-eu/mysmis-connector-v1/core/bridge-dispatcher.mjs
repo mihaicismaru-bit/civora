@@ -1,5 +1,5 @@
 import { assertNoSensitivePersistence } from "./policy.mjs";
-import { READ_ONLY_BRIDGE_CAPABILITIES } from "./bridge-health.mjs";
+import { READ_ONLY_BRIDGE_CAPABILITIES } from "./bridge-capabilities.mjs";
 
 const FIXED_OPERATIONS = new Set(["HEALTH", "DISCOVER_ARTIFACTS"]);
 const SAFE_METHODS = new Set(["GET", "HEAD"]);

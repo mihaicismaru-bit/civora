@@ -9,12 +9,17 @@ Before any installation:
 3. Verify the exact Git source head, paired-build receipt, bundle manifest digest and every payload SHA-256.
 4. Stop if the preflight reports a missing, changed, duplicate, symbolic-link or extra payload/control file.
 5. Confirm that the MCLENOVO session is observable and that the user has authorized the bounded installation.
-6. Do not enable `nativeMessaging`, debugger/CDP or external extension messaging unless a later persisted gate explicitly requires and authorizes it.
-7. Do not read or persist cookies, passwords, MFA data, tokens or request Authorization headers.
-8. MySMIS remains read-only: no Save, Submit, Delete, Sign, Upload or Modify.
-9. The Drive command mailbox component does not authorize installation or live dispatch. Do not
-   place commands in `COMMAND_INBOX` until a later exact-build package binds the poller to the
-   attested fixed dispatcher and persists that authorization.
+6. Load `PAYLOAD` as an unpacked Edge/Chrome extension and record only its public installed extension ID.
+7. Generate the exact-build handoff plan with:
+   `node PAYLOAD\native\mclenovo-handoff-cli.mjs --bundle . --extension-id <installed-extension-id>`
+   The command only reads the two attested bundle controls and prints a deterministic plan; it does not start the runtime.
+8. In the extension options page, paste only the printed `extensionConfig`. A digest or extension-ID mismatch leaves the connector disabled.
+9. Start the agent only with the verified plan and an explicit local Drive mailbox root:
+   `node PAYLOAD\native\mclenovo-runtime-cli.mjs --plan <verified-plan.json> --mailbox-root <local-drive-mailbox-root>`
+10. The first permitted live command is `HEALTH`. Do not place a benchmark command in `COMMAND_INBOX` until its HEALTH result is persisted and read back from Drive.
+11. Do not enable `nativeMessaging`, debugger/CDP or external extension messaging.
+12. Do not read or persist cookies, passwords, MFA data, tokens or request Authorization headers.
+13. MySMIS remains read-only: no Save, Submit, Delete, Sign, Upload or Modify.
 
 Rollback:
 

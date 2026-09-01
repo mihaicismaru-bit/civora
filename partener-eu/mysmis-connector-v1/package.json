@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --test tests/*.test.mjs"
+    "test": "node --test tests/*.test.mjs",
+    "verify:extension-browser": "node scripts/verify-extension-browser-compat.mjs"
   },
   "engines": {
     "node": ">=20"
