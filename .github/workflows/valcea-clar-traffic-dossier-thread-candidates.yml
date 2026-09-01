@@ -1,0 +1,63 @@
+name: VÂLCEA CLAR Traffic Dossier Thread Candidates
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/traffic_dossier_thread_candidate_engine.py"
+      - "valcea-clar/scripts/traffic_reference_correlator.py"
+      - ".github/workflows/valcea-clar-traffic-dossier-thread-candidates.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-traffic-dossier-thread-candidates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile engine
+        run: python -m py_compile valcea-clar/scripts/traffic_dossier_thread_candidate_engine.py
+      - name: Run fail-closed thread candidate self-test
+        run: python valcea-clar/scripts/traffic_dossier_thread_candidate_engine.py --self-test
+      - name: Verify correlator contract and safety boundary
+        run: |
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          root = Path("valcea-clar/scripts")
+
+          def load(name, filename):
+              spec = importlib.util.spec_from_file_location(name, root / filename)
+              module = importlib.util.module_from_spec(spec)
+              assert spec.loader is not None
+              spec.loader.exec_module(module)
+              return module
+
+          correlator = load("traffic_reference_correlator", "traffic_reference_correlator.py")
+          engine = load("traffic_dossier_thread_candidate_engine", "traffic_dossier_thread_candidate_engine.py")
+
+          assert engine.EXPECTED_CORRELATION_CONTRACT == correlator.CONTENT_CONTRACT
+          assert engine.MAX_WINDOW_SECONDS == 6 * 60 * 60
+          for capability in (
+              "same_incident_inference",
+              "active_incident_inference",
+              "active_traffic_disruption_inference",
+              "breaking_news_promotion",
+              "automatic_dossier_promotion",
+              "persistence",
+              "public_projection",
+          ):
+              assert capability in engine.DISABLED_CAPABILITIES
+          assert "same_incident_inference" in correlator.DISABLED_CAPABILITIES
+          print("thread-contracts: compatible")
+          PY

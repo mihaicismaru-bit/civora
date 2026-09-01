@@ -1,0 +1,29 @@
+name: VÂLCEA CLAR Băbeni Municipal Announcement Document References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/babeni_municipal_announcement_document_reference_adapter.py"
+      - ".github/workflows/valcea-clar-babeni-municipal-announcement-document-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-babeni-municipal-announcement-document-references-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile bounded adapter
+        run: python -m py_compile valcea-clar/scripts/babeni_municipal_announcement_document_reference_adapter.py
+      - name: Run fail-closed self-test
+        run: python valcea-clar/scripts/babeni_municipal_announcement_document_reference_adapter.py --self-test

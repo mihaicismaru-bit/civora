@@ -1,0 +1,352 @@
+name: PARTENER.EU F&T Programme Coverage Watch
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_ft_programme_watch.py'
+      - 'partener-eu/ingest/eu_direct_ft_coverage_receipt.py'
+      - 'partener-eu/ingest/eu_direct_ft_programme_taxonomy.py'
+      - 'partener-eu/ingest/eu_direct_life_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_life_ft_reconcile.py'
+      - 'partener-eu/ingest/eu_direct_cef_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_cef_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
+      - 'partener-eu/ops/test_eu_direct_ft_coverage_receipt.py'
+      - 'partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py'
+      - 'partener-eu/ops/test_eu_direct_life_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_life_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_cef_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_cef_ft_reconcile.py'
+      - '.github/workflows/partener-eu-ft-programme-coverage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  programme-coverage-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded EU_DIRECT programme lanes
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_ft_programme_watch.py \
+            partener-eu/ingest/eu_direct_ft_coverage_receipt.py \
+            partener-eu/ingest/eu_direct_ft_programme_taxonomy.py \
+            partener-eu/ingest/eu_direct_life_ft_exact.py \
+            partener-eu/ingest/eu_direct_life_ft_reconcile.py \
+            partener-eu/ingest/eu_direct_cef_ft_exact.py \
+            partener-eu/ingest/eu_direct_cef_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_ft_programme_watch.py \
+            partener-eu/ops/test_eu_direct_ft_coverage_receipt.py \
+            partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py \
+            partener-eu/ops/test_eu_direct_life_ft_exact.py \
+            partener-eu/ops/test_eu_direct_life_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_cef_ft_exact.py \
+            partener-eu/ops/test_eu_direct_cef_ft_reconcile.py
+
+      - name: Validate fail-closed bounded source semantics
+        run: |
+          python partener-eu/ops/test_eu_direct_ft_programme_watch.py
+          python partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
+          python partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py
+          python partener-eu/ops/test_eu_direct_life_ft_exact.py
+          python partener-eu/ops/test_eu_direct_life_ft_reconcile.py
+          python partener-eu/ops/test_eu_direct_cef_ft_exact.py
+          python partener-eu/ops/test_eu_direct_cef_ft_reconcile.py
+
+      - name: Capture bounded live official F&T programme coverage
+        run: |
+          rm -rf /tmp/partener-eu-ft-programme-watch
+          python partener-eu/ingest/eu_direct_ft_programme_watch.py \
+            --output-dir /tmp/partener-eu-ft-programme-watch \
+            --page-size 25 \
+            --max-pages 8
+
+      - name: Bind explicit coverage-completeness receipt
+        run: |
+          python partener-eu/ingest/eu_direct_ft_coverage_receipt.py \
+            /tmp/partener-eu-ft-programme-watch/programme-watch.json \
+            --output /tmp/partener-eu-ft-programme-watch/programme-coverage-receipt.json
+
+      - name: Normalize official programme taxonomy for market intelligence
+        run: |
+          python partener-eu/ingest/eu_direct_ft_programme_taxonomy.py \
+            /tmp/partener-eu-ft-programme-watch/programme-watch.json \
+            --output /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json
+
+      - name: Execute bounded exact-current LIFE handoff
+        run: |
+          python partener-eu/ingest/eu_direct_life_ft_exact.py \
+            --taxonomy /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json \
+            --output-dir /tmp/partener-eu-ft-programme-watch/life-exact \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Restore previous successful same-branch LIFE exact evidence
+        id: previous_life
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          HISTORY="$ROOT/history"
+          mkdir -p "$HISTORY/previous/life-exact"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$HISTORY/artifacts.json"
+          python - <<'PY' > /tmp/partener-life-history-candidates.tsv
+          import json, os
+          data=json.load(open('/tmp/partener-eu-ft-programme-watch/history/artifacts.json', encoding='utf-8'))
+          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
+          current=int(os.environ['GITHUB_RUN_ID'])
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not name.startswith('partener-eu-ft-programme-coverage-') or artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              run_id=int(run.get('id') or 0)
+              if not run_id or run_id == current:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), run_id, name))
+          seen=set()
+          for created, run_id, name in sorted(rows, reverse=True):
+              if run_id in seen:
+                  continue
+              seen.add(run_id)
+              print(f'{run_id}\t{name}')
+          PY
+          FOUND=""
+          FOUND_NAME=""
+          DOWNLOADED=0
+          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            [ "$CONCLUSION" = "success" ] || continue
+            DEST="$HISTORY/download-${RUN_ID}"
+            mkdir -p "$DEST"
+            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
+              continue
+            fi
+            DOWNLOADED=$((DOWNLOADED + 1))
+            PREVIOUS="$(find "$DEST" -type f -path '*/life-exact/ft-life-exact-evidence.json' -print -quit)"
+            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$DOWNLOADED" -lt 8 ] && continue || break; }
+            if PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" "$ROOT/life-exact/ft-life-exact-evidence.json" <<'PY'
+          import json, sys
+          from eu_direct_life_ft_exact import validate_evidence
+          from eu_direct_life_ft_reconcile import parse_time
+          previous=json.load(open(sys.argv[1], encoding='utf-8'))
+          current=json.load(open(sys.argv[2], encoding='utf-8'))
+          validate_evidence(previous)
+          validate_evidence(current)
+          if previous.get('reference') != current.get('reference'):
+              raise SystemExit(1)
+          if parse_time(str(previous.get('fetched_at'))) > parse_time(str(current.get('fetched_at'))):
+              raise SystemExit(1)
+          PY
+            then
+              cp "$PREVIOUS" "$HISTORY/previous/life-exact/ft-life-exact-evidence.json"
+              FOUND="$RUN_ID"
+              FOUND_NAME="$ARTIFACT_NAME"
+              break
+            fi
+            [ "$DOWNLOADED" -lt 8 ] || break
+          done < /tmp/partener-life-history-candidates.tsv
+          if [ -n "$FOUND" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "run_id=$FOUND" >> "$GITHUB_OUTPUT"
+            echo "artifact_name=$FOUND_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Reconcile exact LIFE against previous same-identity evidence
+        shell: bash
+        env:
+          PREVIOUS_LIFE_AVAILABLE: ${{ steps.previous_life.outputs.available }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            "$ROOT/life-exact/ft-life-exact-evidence.json"
+            --output "$ROOT/life-exact/ft-life-reconciliation.json"
+          )
+          if [ "$PREVIOUS_LIFE_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/life-exact/ft-life-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_life_ft_reconcile.py "${ARGS[@]}"
+
+      - name: Execute bounded exact-current CEF handoff
+        run: |
+          python partener-eu/ingest/eu_direct_cef_ft_exact.py \
+            --taxonomy /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json \
+            --output-dir /tmp/partener-eu-ft-programme-watch/cef-exact \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Reconcile exact CEF baseline
+        run: |
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cef_ft_reconcile.py \
+            /tmp/partener-eu-ft-programme-watch/cef-exact/ft-cef-exact-evidence.json \
+            --output /tmp/partener-eu-ft-programme-watch/cef-exact/ft-cef-reconciliation.json
+
+      - name: Validate live evidence remains bounded and non-authorizing
+        env:
+          PREVIOUS_LIFE_AVAILABLE: ${{ steps.previous_life.outputs.available }}
+          PREVIOUS_LIFE_RUN_ID: ${{ steps.previous_life.outputs.run_id }}
+        run: |
+          python - <<'PY'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+
+          root = Path('/tmp/partener-eu-ft-programme-watch')
+          d = json.loads((root / 'programme-watch.json').read_text(encoding='utf-8'))
+          c = json.loads((root / 'programme-coverage-receipt.json').read_text(encoding='utf-8'))
+          t = json.loads((root / 'programme-taxonomy.json').read_text(encoding='utf-8'))
+          life = json.loads((root / 'life-exact/ft-life-exact-evidence.json').read_text(encoding='utf-8'))
+          life_rec = json.loads((root / 'life-exact/ft-life-reconciliation.json').read_text(encoding='utf-8'))
+          cef = json.loads((root / 'cef-exact/ft-cef-exact-evidence.json').read_text(encoding='utf-8'))
+          cef_rec = json.loads((root / 'cef-exact/ft-cef-reconciliation.json').read_text(encoding='utf-8'))
+          previous_available = os.environ.get('PREVIOUS_LIFE_AVAILABLE') == 'true'
+          previous = None
+          if previous_available:
+              previous = json.loads((root / 'history/previous/life-exact/ft-life-exact-evidence.json').read_text(encoding='utf-8'))
+
+          assert d['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_WATCH_V1'
+          assert c['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_RECEIPT_V1'
+          assert t['schema'] == 'PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1'
+          assert life['schema'] == 'PARTENER_EU_LIFE_FT_EXACT_EVIDENCE_V1'
+          assert life_rec['schema'] == 'PARTENER_EU_LIFE_FT_RECONCILIATION_V1'
+          assert cef['schema'] == 'PARTENER_EU_CEF_FT_EXACT_EVIDENCE_V1'
+          assert cef_rec['schema'] == 'PARTENER_EU_CEF_FT_RECONCILIATION_V1'
+
+          for obj in (d, c, t):
+              assert obj['market_intelligence_only'] is True
+              assert obj['material_fact_use'] is False
+              assert obj['open_call_authorized'] is False
+              assert obj['deadline_authorized'] is False
+              assert obj['budget_authorized'] is False
+              assert obj['eligibility_authorized'] is False
+              assert obj['publish_authorized'] is False
+              assert obj['distribution_authorized'] is False
+              assert obj['call_alert_authorized'] is False
+              assert obj['canonical_corpus_mutation'] is False
+              assert obj['publication_effect'] == 'NONE'
+          assert d['stats']['raw_search_records'] >= d['stats']['accepted_candidates']
+          assert t['stats']['source_records'] == d['stats']['accepted_candidates']
+          assert t['stats']['normalized_records'] == d['stats']['accepted_candidates']
+          if d['pagination']['stop_reason'] == 'MAX_PAGES_REACHED':
+              assert c['coverage_complete'] is False
+              assert c['pagination_truncated'] is True
+              assert c['more_results_possible'] is True
+              assert c['coverage_scope'] == 'BOUNDED_QUERY_SAMPLE_NON_AUTHORIZING'
+
+          life_rows = [r for r in t['records'] if r['programme_family_normalized'] == 'LIFE']
+          cef_rows = [r for r in t['records'] if r['programme_family_normalized'] == 'CEF']
+          assert life_rows and cef_rows
+          for row in d['records']:
+              assert row['authority_url_verified'] is False
+              assert row['exact_topic_readback_required'] is True
+              assert row['semantic_reconciliation_required'] is True
+              assert row['material_fact_use'] is False
+              assert row['open_call_authorized'] is False
+              assert row['publish_authorized'] is False
+
+          for exact, rec, family, prefix, label_token in (
+              (life, life_rec, 'LIFE', 'LIFE-', 'environment and climate action'),
+              (cef, cef_rec, 'CEF', 'CEF-', 'connecting europe facility'),
+          ):
+              assert exact['reference'].startswith(prefix)
+              assert exact['programme_family'] == family
+              assert label_token in exact['programme_label_official'].casefold()
+              assert exact['authority_url_verified'] is True
+              assert exact['authority_readback']['verified'] is True
+              assert exact['candidate_state'] in {'OPEN_CALL', 'FORTHCOMING_CALL', 'CLOSED_CALL', 'UNKNOWN'}
+              assert exact['status_label']
+              assert exact['semantic_reconciliation_required'] is True
+              assert exact['field_scoped_material_admission_required'] is True
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+                  assert exact[key] is False
+                  assert rec[key] is False
+              assert exact['canonical_corpus_mutation'] is False
+              assert exact['publication_effect'] == 'NONE'
+              assert rec['canonical_corpus_mutation'] is False
+              assert rec['publication_effect'] == 'NONE'
+              assert rec['reference'] == exact['reference']
+              current_sha = hashlib.sha256(json.dumps(exact, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+              assert rec['current_evidence_sha256'] == current_sha
+              assert rec['material_admission_ready_for_downstream_review'] is (exact['candidate_state'] == 'OPEN_CALL')
+
+          if previous_available:
+              assert previous is not None
+              assert previous['reference'] == life['reference']
+              expected = 'NO_CHANGE' if previous['exact_semantic_fingerprint'] == life['exact_semantic_fingerprint'] else 'LIFE_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'
+              assert life_rec['reconciliation_state'] == expected
+              previous_sha = hashlib.sha256(json.dumps(previous, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+              assert life_rec['previous_evidence_sha256'] == previous_sha
+          else:
+              assert life_rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert life_rec['previous_evidence_sha256'] is None
+
+          assert cef_rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+          assert cef_rec['previous_evidence_sha256'] is None
+
+          print(json.dumps({
+              'stats': d['stats'],
+              'pagination': d['pagination'],
+              'coverage': {
+                  'coverage_complete': c['coverage_complete'],
+                  'pagination_truncated': c['pagination_truncated'],
+                  'more_results_possible': c['more_results_possible'],
+                  'coverage_scope': c['coverage_scope'],
+              },
+              'programme_family_counts_normalized': t['programme_family_counts'],
+              'life_exact': {
+                  'reference': life['reference'],
+                  'candidate_state': life['candidate_state'],
+                  'status_label': life['status_label'],
+                  'previous_evidence_available': previous_available,
+                  'previous_evidence_run_id': os.environ.get('PREVIOUS_LIFE_RUN_ID') or None,
+                  'reconciliation_state': life_rec['reconciliation_state'],
+                  'semantic_change_count': life_rec['semantic_change_count'],
+              },
+              'cef_exact': {
+                  'reference': cef['reference'],
+                  'candidate_state': cef['candidate_state'],
+                  'status_label': cef['status_label'],
+                  'authority_url_verified': cef['authority_url_verified'],
+                  'reconciliation_state': cef_rec['reconciliation_state'],
+                  'semantic_change_count': cef_rec['semantic_change_count'],
+                  'material_admission_ready_for_downstream_review': cef_rec['material_admission_ready_for_downstream_review'],
+                  'open_call_authorized': cef_rec['open_call_authorized'],
+              },
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Upload replayable programme-watch evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-ft-programme-coverage-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-ft-programme-watch
+          retention-days: 7
+          if-no-files-found: error

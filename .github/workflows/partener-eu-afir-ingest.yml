@@ -12,9 +12,14 @@ on:
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ingest/localize_decision_products.py'
+      - 'partener-eu/ingest/apply_afir_current_authoritative_dossiers.py'
+      - 'partener-eu/ingest/sync_decision_products_projection.py'
+      - 'partener-eu/ingest/apply_step_lll_authoritative_dossier.py'
       - 'partener-eu/ops/fix_afir_decision_extraction.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_public_language.py'
+      - 'partener-eu/ops/test_afir_current_dossiers.py'
+      - 'partener-eu/ops/test_step_lll_dossier.py'
       - 'partener-eu/ops/recover_decision_products_lkg.py'
       - 'partener-eu/ops/validate_decision_products_lkg.py'
       - '.github/workflows/partener-eu-afir-ingest.yml'
@@ -24,8 +29,13 @@ on:
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
       - 'partener-eu/ingest/localize_decision_products.py'
+      - 'partener-eu/ingest/apply_afir_current_authoritative_dossiers.py'
+      - 'partener-eu/ingest/sync_decision_products_projection.py'
+      - 'partener-eu/ingest/apply_step_lll_authoritative_dossier.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_public_language.py'
+      - 'partener-eu/ops/test_afir_current_dossiers.py'
+      - 'partener-eu/ops/test_step_lll_dossier.py'
       - 'partener-eu/ops/recover_decision_products_lkg.py'
       - 'partener-eu/ops/validate_decision_products_lkg.py'
       - '.github/workflows/partener-eu-afir-ingest.yml'
@@ -55,8 +65,13 @@ jobs:
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
+          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
+          python partener-eu/ingest/sync_decision_products_projection.py
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
+          python partener-eu/ops/test_afir_current_dossiers.py
+          python partener-eu/ops/test_step_lll_dossier.py
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
               --candidate partener-eu/ingest/state/decision_products.json; then
@@ -99,11 +114,16 @@ jobs:
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
+          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
+          python partener-eu/ingest/sync_decision_products_projection.py
 
       - name: Validate decision products, Romanian public language and LKG continuity
         run: |
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
+          python partener-eu/ops/test_afir_current_dossiers.py
+          python partener-eu/ops/test_step_lll_dossier.py
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
               --candidate partener-eu/ingest/state/decision_products.json; then
