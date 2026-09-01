@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 """Bounded exact-topic handoff for Creative Europe programme-watch changes.
 
-This orchestration layer consumes the fail-closed programme-watch reconciliation,
-selects at most one exact topic for verification, performs the existing exact
-Funding & Tenders readback, and binds the result to the existing exact-topic
-semantic reconciler. It can replay one unprocessed handoff from the immediately
-available same-branch artifact history, but never turns discovery/watch evidence
-into call truth and never authorizes material facts, publication, distribution,
-or alerts.
+Consumes a non-authorizing programme-watch reconciliation, selects at most one
+exact CREA-* topic, and runs the existing structured Funding & Tenders exact
+adapter plus exact semantic reconciliation. A current exact-acquisition failure
+is persisted as explicit fail-closed source evidence instead of being converted
+into call truth or silently losing the pending handoff.
 """
 from __future__ import annotations
 
@@ -30,6 +28,7 @@ HANDOFF_ID = "CREATIVE_EUROPE_FT_EXACT_HANDOFF_V1"
 SCHEMA = "PARTENER_EU_CREATIVE_EUROPE_FT_EXACT_HANDOFF_EXECUTION_V1"
 NO_HANDOFF_STATE = "NO_EXACT_HANDOFF_PENDING_NON_AUTHORIZING"
 EXECUTED_STATE = "EXACT_HANDOFF_EXECUTED_NON_AUTHORIZING"
+FAILED_STATE = "EXACT_HANDOFF_FAILED_CLOSED_NON_AUTHORIZING"
 SELECTION_CURRENT = "CURRENT_RECONCILIATION"
 SELECTION_PREVIOUS = "PREVIOUS_PENDING_RECONCILIATION"
 
@@ -50,6 +49,11 @@ def _parse_utc(value: str) -> dt.datetime:
 
 def _load_json(path: pathlib.Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _write(path: pathlib.Path, payload: Mapping[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(dict(payload), ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
 def _history_watch_receipts(history_root: pathlib.Path | None) -> list[tuple[dt.datetime, pathlib.Path, dict[str, Any]]]:
@@ -99,12 +103,9 @@ def _queue_item_valid(item: Mapping[str, Any]) -> None:
         raise ValueError(f"invalid Creative Europe exact-handoff reference: {reference!r}")
     if item.get("authority_url_verified") is not False:
         raise ValueError(f"programme-watch handoff self-verified authority: {reference}")
-    if item.get("requires_exact_topic_readback") is not True:
-        raise ValueError(f"programme-watch handoff skipped exact readback: {reference}")
-    if item.get("requires_exact_topic_reconcile") is not True:
-        raise ValueError(f"programme-watch handoff skipped exact reconcile: {reference}")
-    if item.get("requires_material_admission") is not True:
-        raise ValueError(f"programme-watch handoff skipped material admission: {reference}")
+    for key in ("requires_exact_topic_readback", "requires_exact_topic_reconcile", "requires_material_admission"):
+        if item.get(key) is not True:
+            raise ValueError(f"programme-watch handoff skipped gate {key}: {reference}")
     for key in MATERIAL_FLAGS:
         if item.get(key) is not False:
             raise ValueError(f"programme-watch handoff became authorizing: {reference} {key}")
@@ -127,10 +128,10 @@ def _pending_already_completed(
 ) -> bool:
     reference = str(item.get("reference") or "").upper()
     source_time = _parse_utc(str(source_receipt.get("current_fetched_at") or ""))
-    for observed, _path, _evidence in _history_exact_evidence(history_root, reference):
-        if observed >= source_time:
-            return True
-    return False
+    return any(
+        observed >= source_time
+        for observed, _path, _evidence in _history_exact_evidence(history_root, reference)
+    )
 
 
 def select_handoff(
@@ -138,34 +139,25 @@ def select_handoff(
     *,
     history_root: pathlib.Path | None = None,
 ) -> tuple[dict[str, Any] | None, str | None, dict[str, Any] | None]:
-    """Select at most one exact handoff.
-
-    Current reconciliation always wins. If the current source is healthy and the
-    current queue is empty, one unprocessed handoff from the latest older
-    same-scope reconciliation in downloaded same-branch history may be replayed.
-    """
+    """Select at most one current or previously pending exact handoff."""
     current_queue = _receipt_queue(current_receipt)
     if str(current_receipt.get("current_source_health") or "") != "HEALTHY":
         if current_queue:
             raise ValueError("degraded current watch unexpectedly emitted exact handoff queue")
         return None, None, None
-
     if current_queue:
         return current_queue[0], SELECTION_CURRENT, dict(current_receipt)
 
     current_time = _parse_utc(str(current_receipt.get("reconciled_at") or ""))
     scope = current_receipt.get("source_scope_fingerprint")
     for prior_time, _path, prior in _history_watch_receipts(history_root):
-        if prior_time >= current_time:
-            continue
-        if prior.get("source_scope_fingerprint") != scope:
+        if prior_time >= current_time or prior.get("source_scope_fingerprint") != scope:
             continue
         if str(prior.get("current_source_health") or "") != "HEALTHY":
             continue
         for item in _receipt_queue(prior):
-            if _pending_already_completed(history_root, item, prior):
-                continue
-            return item, SELECTION_PREVIOUS, prior
+            if not _pending_already_completed(history_root, item, prior):
+                return item, SELECTION_PREVIOUS, prior
     return None, None, None
 
 
@@ -185,6 +177,71 @@ def _base_summary(current_receipt: Mapping[str, Any], *, run_id: str) -> dict[st
     }
     for key in MATERIAL_FLAGS:
         summary[key] = False
+    return summary
+
+
+def _selection_payload(
+    item: Mapping[str, Any],
+    *,
+    reference: str,
+    selection_source: str,
+    source_receipt: Mapping[str, Any],
+    current_receipt_sha256: str,
+) -> dict[str, Any]:
+    selection: dict[str, Any] = {
+        "schema": "PARTENER_EU_CREATIVE_EUROPE_FT_EXACT_HANDOFF_SELECTION_V1",
+        "handoff_id": HANDOFF_ID,
+        "reference": reference,
+        "selection_source": selection_source,
+        "queue_reason": item.get("reason"),
+        "queue_priority": int(item.get("priority") or 0),
+        "source_watch_reconciliation_sha256": _sha256(dict(source_receipt)),
+        "current_watch_reconciliation_sha256": current_receipt_sha256,
+        "authority_url_candidate": item.get("authority_url_candidate"),
+        "authority_url_verified": False,
+        "requires_exact_topic_readback": True,
+        "requires_exact_topic_reconcile": True,
+        "requires_material_admission": True,
+        "publication_effect": "NONE",
+        "canonical_corpus_mutation": False,
+    }
+    for key in MATERIAL_FLAGS:
+        selection[key] = False
+    return selection
+
+
+def _failed_summary(
+    summary: dict[str, Any],
+    *,
+    item: Mapping[str, Any],
+    reference: str,
+    selection_source: str,
+    source_receipt: Mapping[str, Any],
+    exc: Exception,
+) -> dict[str, Any]:
+    summary.update({
+        "observation_state": FAILED_STATE,
+        "selected_reference": reference,
+        "selection_source": selection_source,
+        "queue_reason": item.get("reason"),
+        "queue_priority": int(item.get("priority") or 0),
+        "source_watch_reconciliation_sha256": _sha256(dict(source_receipt)),
+        "exact_evidence_sha256": None,
+        "previous_exact_evidence_sha256": None,
+        "exact_reconciliation_sha256": None,
+        "exact_candidate_observation_state": None,
+        "exact_status_label": None,
+        "exact_authority_url": exact.ft.topic_url(reference),
+        "exact_authority_url_verified": False,
+        "exact_semantic_reconciliation_state": None,
+        "exact_semantic_change_count": 0,
+        "material_admission_ready_for_downstream_review": False,
+        "failure_stage": "EXACT_FUNDING_TENDERS_ACQUISITION_OR_RECONCILIATION",
+        "failure_type": type(exc).__name__,
+        "failure_message": str(exc)[:1000],
+        "retry_candidate": True,
+    })
+    validate_handoff_summary(summary)
     return summary
 
 
@@ -218,36 +275,22 @@ def execute_handoff(
             "exact_semantic_reconciliation_state": None,
             "exact_semantic_change_count": 0,
             "material_admission_ready_for_downstream_review": False,
+            "retry_candidate": False,
         })
         validate_handoff_summary(summary)
-        (output_dir / "handoff-summary.json").write_text(
-            json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-        )
+        _write(output_dir / "handoff-summary.json", summary)
         return summary
 
     assert source_receipt is not None and selection_source is not None
     reference = exact.validate_reference(str(item.get("reference") or ""))
-    selection = {
-        "schema": "PARTENER_EU_CREATIVE_EUROPE_FT_EXACT_HANDOFF_SELECTION_V1",
-        "handoff_id": HANDOFF_ID,
-        "reference": reference,
-        "selection_source": selection_source,
-        "queue_reason": item.get("reason"),
-        "queue_priority": int(item.get("priority") or 0),
-        "source_watch_reconciliation_sha256": _sha256(dict(source_receipt)),
-        "current_watch_reconciliation_sha256": summary["current_watch_reconciliation_sha256"],
-        "authority_url_verified": False,
-        "requires_exact_topic_readback": True,
-        "requires_exact_topic_reconcile": True,
-        "requires_material_admission": True,
-        "publication_effect": "NONE",
-        "canonical_corpus_mutation": False,
-    }
-    for key in MATERIAL_FLAGS:
-        selection[key] = False
-    (output_dir / "handoff-selection.json").write_text(
-        json.dumps(selection, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    selection = _selection_payload(
+        item,
+        reference=reference,
+        selection_source=selection_source,
+        source_receipt=source_receipt,
+        current_receipt_sha256=summary["current_watch_reconciliation_sha256"],
     )
+    _write(output_dir / "handoff-selection.json", selection)
 
     current_dir = output_dir / "current"
     kwargs: dict[str, Any] = {}
@@ -255,29 +298,34 @@ def execute_handoff(
         kwargs["post_func"] = post_func
     if topic_func is not None:
         kwargs["topic_func"] = topic_func
-    current_exact = exact.collect_exact(
-        reference,
-        run_id=run_id,
-        output_dir=current_dir,
-        **kwargs,
-    )
-    current_time = _parse_utc(str(current_exact.get("fetched_at") or ""))
-
-    previous_exact: dict[str, Any] | None = None
-    previous_candidates = _history_exact_evidence(history_root, reference, not_after=current_time)
-    if previous_candidates:
-        _observed, previous_path, previous_exact = previous_candidates[0]
-        previous_dir = output_dir / "previous"
-        previous_dir.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(previous_path, previous_dir / "ft-exact-evidence.json")
-
-    reconciliation = exact_reconcile.reconcile(current_exact, previous_exact)
-    reconciliation_dir = output_dir / "reconciliation"
-    reconciliation_dir.mkdir(parents=True, exist_ok=True)
-    reconciliation_path = reconciliation_dir / "ft-reconciliation.json"
-    reconciliation_path.write_text(
-        json.dumps(reconciliation, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    try:
+        current_exact = exact.collect_exact(
+            reference,
+            run_id=run_id,
+            output_dir=current_dir,
+            **kwargs,
+        )
+        current_time = _parse_utc(str(current_exact.get("fetched_at") or ""))
+        previous_exact: dict[str, Any] | None = None
+        previous_candidates = _history_exact_evidence(history_root, reference, not_after=current_time)
+        if previous_candidates:
+            _observed, previous_path, previous_exact = previous_candidates[0]
+            previous_dir = output_dir / "previous"
+            previous_dir.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(previous_path, previous_dir / "ft-exact-evidence.json")
+        reconciliation = exact_reconcile.reconcile(current_exact, previous_exact)
+        _write(output_dir / "reconciliation" / "ft-reconciliation.json", reconciliation)
+    except Exception as exc:
+        failed = _failed_summary(
+            summary,
+            item=item,
+            reference=reference,
+            selection_source=selection_source,
+            source_receipt=source_receipt,
+            exc=exc,
+        )
+        _write(output_dir / "handoff-summary.json", failed)
+        return failed
 
     summary.update({
         "observation_state": EXECUTED_STATE,
@@ -298,11 +346,10 @@ def execute_handoff(
         "material_admission_ready_for_downstream_review": bool(
             reconciliation.get("material_admission_ready_for_downstream_review")
         ),
+        "retry_candidate": False,
     })
     validate_handoff_summary(summary)
-    (output_dir / "handoff-summary.json").write_text(
-        json.dumps(summary, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    _write(output_dir / "handoff-summary.json", summary)
     return summary
 
 
@@ -323,23 +370,36 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
 
     state = summary.get("observation_state")
     if state == NO_HANDOFF_STATE:
-        if summary.get("selected_reference") is not None:
-            raise ValueError("no-handoff summary contains selected reference")
-        if summary.get("material_admission_ready_for_downstream_review") is not False:
-            raise ValueError("no-handoff summary claims material readiness")
+        if summary.get("selected_reference") is not None or summary.get("material_admission_ready_for_downstream_review") is not False:
+            raise ValueError("no-handoff summary crossed downstream boundary")
         return
-    if state != EXECUTED_STATE:
-        raise ValueError(f"unexpected Creative Europe exact handoff state: {state}")
 
     reference = exact.validate_reference(str(summary.get("selected_reference") or ""))
     if summary.get("selection_source") not in {SELECTION_CURRENT, SELECTION_PREVIOUS}:
         raise ValueError("Creative Europe exact handoff selection source invalid")
     if not summary.get("queue_reason"):
         raise ValueError("Creative Europe exact handoff queue reason missing")
-    if summary.get("exact_authority_url") != exact.ft.topic_url(reference):
-        raise ValueError("Creative Europe exact handoff authority URL drift")
-    if summary.get("exact_authority_url_verified") is not True:
-        raise ValueError("Creative Europe exact handoff exact authority not verified")
+    if not re.fullmatch(r"[0-9a-f]{64}", str(summary.get("source_watch_reconciliation_sha256") or "")):
+        raise ValueError("Creative Europe exact handoff source watch binding missing")
+
+    if state == FAILED_STATE:
+        if summary.get("exact_authority_url") != exact.ft.topic_url(reference):
+            raise ValueError("failed Creative Europe exact handoff authority URL drift")
+        if summary.get("exact_authority_url_verified") is not False:
+            raise ValueError("failed Creative Europe exact handoff claims verified authority")
+        if summary.get("material_admission_ready_for_downstream_review") is not False:
+            raise ValueError("failed Creative Europe exact handoff claims material readiness")
+        if summary.get("retry_candidate") is not True or not summary.get("failure_type") or not summary.get("failure_message"):
+            raise ValueError("failed Creative Europe exact handoff lacks failure evidence")
+        for key in ("exact_evidence_sha256", "previous_exact_evidence_sha256", "exact_reconciliation_sha256"):
+            if summary.get(key) is not None:
+                raise ValueError(f"failed Creative Europe exact handoff fabricated hash: {key}")
+        return
+
+    if state != EXECUTED_STATE:
+        raise ValueError(f"unexpected Creative Europe exact handoff state: {state}")
+    if summary.get("exact_authority_url") != exact.ft.topic_url(reference) or summary.get("exact_authority_url_verified") is not True:
+        raise ValueError("Creative Europe exact handoff authority verification drift")
     if summary.get("exact_candidate_observation_state") not in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}:
         raise ValueError("Creative Europe exact handoff candidate state invalid")
     if summary.get("exact_semantic_reconciliation_state") not in {
@@ -348,7 +408,7 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
         "EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
     }:
         raise ValueError("Creative Europe exact handoff reconciliation state invalid")
-    for key in ("source_watch_reconciliation_sha256", "exact_evidence_sha256", "exact_reconciliation_sha256"):
+    for key in ("exact_evidence_sha256", "exact_reconciliation_sha256"):
         if not re.fullmatch(r"[0-9a-f]{64}", str(summary.get(key) or "")):
             raise ValueError(f"Creative Europe exact handoff hash invalid: {key}")
     previous_hash = summary.get("previous_exact_evidence_sha256")
@@ -377,6 +437,8 @@ def main() -> int:
         "exact_candidate_observation_state": summary.get("exact_candidate_observation_state"),
         "exact_status_label": summary.get("exact_status_label"),
         "exact_semantic_reconciliation_state": summary.get("exact_semantic_reconciliation_state"),
+        "failure_type": summary.get("failure_type"),
+        "failure_message": summary.get("failure_message"),
         "material_admission_ready_for_downstream_review": summary.get("material_admission_ready_for_downstream_review"),
         "open_call_authorized": False,
     }, ensure_ascii=False, sort_keys=True))
