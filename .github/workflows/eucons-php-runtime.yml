@@ -11,6 +11,7 @@ on:
       - 'eucons/validation/test_php_research_runtime.php'
       - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/validation/test_php_research_governance_gate.php'
+      - 'eucons/validation/test_php_research_live_safety_gate.php'
       - 'eucons/validation/test_php_research_external_evidence_status_policy.php'
       - 'eucons/validation/test_php_research_persisted_bundle_export.php'
       - 'eucons/leads/lead_contract.json'
@@ -30,6 +31,7 @@ on:
       - 'eucons/validation/test_php_research_runtime.php'
       - 'eucons/validation/test_php_research_channel_gate.php'
       - 'eucons/validation/test_php_research_governance_gate.php'
+      - 'eucons/validation/test_php_research_live_safety_gate.php'
       - 'eucons/validation/test_php_research_external_evidence_status_policy.php'
       - 'eucons/validation/test_php_research_persisted_bundle_export.php'
       - 'eucons/leads/lead_contract.json'
@@ -63,6 +65,7 @@ jobs:
           php -l eucons/runtime/php/src/ResearchChannelGate.php
           php -l eucons/runtime/php/src/ResearchExplicitUserApprovalGate.php
           php -l eucons/runtime/php/src/ResearchGovernanceGate.php
+          php -l eucons/runtime/php/src/ResearchLiveSafetyGate.php
           php -l eucons/runtime/php/src/ResearchPersistedBundleExport.php
           php -l eucons/runtime/php/public/index.php
           php -l eucons/runtime/php/maintenance.php
@@ -71,6 +74,7 @@ jobs:
           php -l eucons/validation/test_php_research_runtime.php
           php -l eucons/validation/test_php_research_channel_gate.php
           php -l eucons/validation/test_php_research_governance_gate.php
+          php -l eucons/validation/test_php_research_live_safety_gate.php
           php -l eucons/validation/test_php_research_external_evidence_status_policy.php
           php -l eucons/validation/test_php_research_persisted_bundle_export.php
       - name: Test PHP lead runtime fail-closed behavior
@@ -83,6 +87,8 @@ jobs:
         run: php eucons/validation/test_php_research_channel_gate.php
       - name: Test AI4WORK live GDPR governance activation gate
         run: php eucons/validation/test_php_research_governance_gate.php
+      - name: Test AI4WORK live public-security and incident-response activation gate
+        run: php eucons/validation/test_php_research_live_safety_gate.php
       - name: Test AI4WORK external evidence status policy
         run: php eucons/validation/test_php_research_external_evidence_status_policy.php
       - name: Test AI4WORK persisted-bundle export bridge for NF06
@@ -91,6 +97,8 @@ jobs:
         run: |
           grep -F "ResearchGovernanceGate.php" eucons/runtime/php/public/index.php
           grep -F "productionReady" eucons/runtime/php/public/index.php
+          grep -F "ResearchLiveSafetyGate.php" eucons/runtime/php/public/index.php
+          grep -F "EuconsResearchLiveSafetyGate" eucons/runtime/php/public/index.php
           grep -F "ResearchChannelGate.php" eucons/runtime/php/public/index.php
           grep -F "COLLECTION_CHANNEL_REGISTER_DRAFT.json" eucons/runtime/php/public/index.php
           grep -F "assertApprovedRecord" eucons/runtime/php/public/index.php
