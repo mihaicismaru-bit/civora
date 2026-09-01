@@ -71,6 +71,8 @@ assert e["candidate_observation_state"] == "OPEN_CALL"
 assert e["open_call_authorized"] is False
 assert e["requires_reconcile"] is True
 assert e["authority_url_verified"] is True
+assert e["excluded_linked_competitive_record_count"] == 0
+assert e["linked_competitive_evidence_sha256"] is None
 
 bad = dict(e)
 bad["open_call_authorized"] = True
@@ -113,7 +115,7 @@ with tempfile.TemporaryDirectory() as tmp:
     except m.ExactRecordConflict as exc:
         diagnostic = exc.diagnostic
     else:
-        raise AssertionError("conflicting exact records did not fail closed")
+        raise AssertionError("conflicting primary exact records did not fail closed")
 
     assert diagnostic["schema"] == m.CONFLICT_SCHEMA
     assert diagnostic["observation_state"] == m.CONFLICT_STATE
@@ -147,4 +149,84 @@ with tempfile.TemporaryDirectory() as tmp:
     else:
         raise AssertionError("conflict diagnostic self-authorized OPEN")
 
-print("PASS Creative Europe exact structured F&T identity/status/topic + conflict diagnostic regression")
+# F&T may return a type-8 competitive/cascading call that intentionally reuses
+# the parent topic identifier. It is distinct source intelligence, not a second
+# primary-topic truth row, and must not create a false exact-topic conflict.
+PERFORM = "CREA-CULT-2026-PERFORM-EU"
+PRIMARY_URL = m.ft.topic_url(PERFORM)
+competitive_search = {
+    "results": [
+        {
+            "metadata": {
+                "identifier": [PERFORM],
+                "callIdentifier": [PERFORM],
+                "status": ["31094503"],
+                "type": ["1"],
+                "programmePeriod": ["2021 - 2027"],
+                "deadlineDate": ["2026-01-15T00:00:00.000+0000"],
+                "budgetOverview": ["{\"budgetTopicActionMap\":{\"x\":[]}}"],
+                "esST_URL": [PRIMARY_URL],
+            },
+            "url": PRIMARY_URL,
+            "content": "Perform EU",
+        },
+        {
+            "metadata": {
+                "identifier": [PERFORM],
+                "status": ["31094502"],
+                "type": ["8"],
+                "programmePeriod": ["2021 - 2027"],
+                "deadlineDate": ["2026-10-22T23:59:00.000+0000"],
+                "budget": ["1400000"],
+                "esST_URL": ["https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/competitive-calls-cs/49521170"],
+            },
+            "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/competitive-calls-cs/49521170",
+            "content": "Open Call of Perform Europe 2026-2028",
+        },
+    ]
+}
+competitive_facet = {
+    "facets": [{
+        "name": "status",
+        "values": [
+            {"rawValue": "31094502", "value": "Open for submission"},
+            {"rawValue": "31094503", "value": "Closed"},
+        ],
+    }]
+}
+
+
+def competitive_post(endpoint, *, text, page_size, page_number, parts, max_bytes=None, opener=None):
+    payload = competitive_search if "search" in endpoint and "facet" not in endpoint else competitive_facet
+    raw = json.dumps(payload, sort_keys=True).encode()
+    return payload, raw, {"url": endpoint, "http_status": 200, "sha256": "e" * 64}
+
+
+with tempfile.TemporaryDirectory() as tmp:
+    output = Path(tmp)
+    separated = m.collect_exact(
+        PERFORM,
+        run_id="linked-competitive",
+        fetched_at="2026-09-01T06:50:00+00:00",
+        output_dir=output,
+        post_func=competitive_post,
+        topic_func=fake_topic,
+    )
+    assert separated["reference"] == PERFORM
+    assert separated["candidate_observation_state"] == "CLOSED_CALL"
+    assert separated["status_label"] == "Closed"
+    assert separated["excluded_linked_competitive_record_count"] == 1
+    assert separated["linked_competitive_evidence_sha256"]
+    assert separated["open_call_authorized"] is False
+    linked_path = output / "ft-linked-competitive-records.json"
+    assert linked_path.is_file()
+    linked = json.loads(linked_path.read_text(encoding="utf-8"))
+    m.validate_linked_competitive_evidence(linked)
+    assert linked["parent_reference"] == PERFORM
+    assert linked["record_count"] == 1
+    assert linked["records"][0]["material"]["structured_type"] == "8"
+    assert linked["records"][0]["material"]["deadline_candidate"].startswith("2026-10-22")
+    assert linked["requires_separate_competitive_call_adapter"] is True
+    assert linked["open_call_authorized"] is False
+
+print("PASS Creative Europe exact F&T topic/cascade separation + conflict diagnostic regression")
