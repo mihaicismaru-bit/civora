@@ -18,6 +18,10 @@ MATERIAL_FLAGS = (
     "call_alert_authorized",
 )
 
+CURRENT_MODE = "CURRENT_BOUNDED_SAMPLE_CANDIDATE_EXACT_RECHECK"
+OMITTED_RECHECK_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_PREVIOUS_IDENTITY_EXACT_RECHECK"
+OMITTED_SKIP_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_NO_SAFE_IDENTITY_NON_AUTHORIZING"
+
 
 def load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
@@ -39,6 +43,8 @@ def check_non_authorizing(obj: dict[str, Any]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, type=Path)
+    parser.add_argument("--previous-digital-available", action="store_true")
+    parser.add_argument("--previous-digital-run-id")
     args = parser.parse_args()
     root = args.root
 
@@ -49,15 +55,37 @@ def main() -> int:
     check_non_authorizing(handoff)
     assert handoff["bounded_sample_omission_is_material_fact"] is False
     assert handoff["closure_inference_authorized"] is False
+    assert handoff["previous_evidence_available"] is args.previous_digital_available
+
+    previous_path = root / "history/previous/digital-exact/ft-digital-exact-evidence.json"
+    if args.previous_digital_available:
+        assert args.previous_digital_run_id
+        assert previous_path.exists()
+        previous = load(previous_path)
+        assert previous["schema"] == "PARTENER_EU_DIGITAL_FT_EXACT_EVIDENCE_V1"
+        assert canonical_sha(previous) == handoff["previous_evidence_sha256"]
+        assert previous["reference"] == handoff["previous_reference"]
+    else:
+        assert args.previous_digital_run_id is None
+        assert not previous_path.exists()
 
     digital_rows = [
         row for row in taxonomy.get("records") or []
         if row.get("programme_family_normalized") == "DIGITAL_EUROPE"
     ]
     exact_required = handoff["exact_recheck_required"] is True
+    mode = handoff["observation_state"]
     if exact_required:
-        assert digital_rows
-        assert handoff["observation_state"] == "CURRENT_BOUNDED_SAMPLE_CANDIDATE_EXACT_RECHECK"
+        assert mode in {CURRENT_MODE, OMITTED_RECHECK_MODE}
+        if mode == CURRENT_MODE:
+            assert digital_rows
+            assert handoff["current_taxonomy_candidate"] is True
+        else:
+            assert not digital_rows
+            assert handoff["current_taxonomy_candidate"] is False
+            assert handoff["previous_evidence_available"] is True
+            assert handoff["previous_same_identity"] is True
+
         exact = load(root / "digital-exact/ft-digital-exact-evidence.json")
         rec = load(root / "digital-exact/ft-digital-reconciliation.json")
         assert exact["schema"] == "PARTENER_EU_DIGITAL_FT_EXACT_EVIDENCE_V1"
@@ -74,15 +102,31 @@ def main() -> int:
         check_non_authorizing(rec)
         assert rec["reference"] == exact["reference"]
         assert rec["current_evidence_sha256"] == canonical_sha(exact)
-        assert rec["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
-        assert rec["previous_evidence_sha256"] is None
+
+        previous_same_identity = handoff["previous_same_identity"] is True
+        if previous_same_identity:
+            assert args.previous_digital_available
+            previous = load(previous_path)
+            assert previous["reference"] == exact["reference"]
+            assert rec["previous_evidence_sha256"] == canonical_sha(previous)
+            assert rec["reconciliation_state"] in {
+                "NO_CHANGE",
+                "DIGITAL_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
+            }
+        else:
+            assert rec["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
+            assert rec["previous_evidence_sha256"] is None
+
         assert rec["material_admission_ready_for_downstream_review"] is (exact["candidate_state"] == "OPEN_CALL")
         result = {
-            "handoff_state": handoff["observation_state"],
+            "handoff_state": mode,
             "reference": exact["reference"],
             "candidate_state": exact["candidate_state"],
             "status_label": exact["status_label"],
             "authority_url_verified": exact["authority_url_verified"],
+            "previous_evidence_available": args.previous_digital_available,
+            "previous_same_identity": previous_same_identity,
+            "previous_run_id": args.previous_digital_run_id,
             "reconciliation_state": rec["reconciliation_state"],
             "semantic_change_count": rec["semantic_change_count"],
             "material_admission_ready_for_downstream_review": rec["material_admission_ready_for_downstream_review"],
@@ -90,14 +134,17 @@ def main() -> int:
         }
     else:
         assert not digital_rows
-        assert handoff["observation_state"] == "BOUNDED_SAMPLE_FAMILY_OMITTED_NO_SAFE_IDENTITY_NON_AUTHORIZING"
+        assert mode == OMITTED_SKIP_MODE
+        assert handoff["current_taxonomy_candidate"] is False
+        assert handoff["previous_evidence_available"] is False
         assert handoff["target_reference"] is None
         assert not (root / "digital-exact/ft-digital-exact-evidence.json").exists()
         assert not (root / "digital-exact/ft-digital-reconciliation.json").exists()
         result = {
-            "handoff_state": handoff["observation_state"],
+            "handoff_state": mode,
             "reference": None,
             "exact_recheck_required": False,
+            "previous_evidence_available": False,
             "open_call_authorized": False,
         }
 
