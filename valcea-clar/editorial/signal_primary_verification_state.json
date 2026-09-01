@@ -2,19 +2,130 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-01T05:31:53+03:00",
+  "generated_at": "2026-09-01T06:19:39+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-01T05:30:31+03:00",
-  "task_count": 63,
+  "queue_generated_at": "2026-09-01T06:18:22+03:00",
+  "task_count": 67,
   "primary_match_count": 0,
-  "no_match_count": 33,
-  "unrouted_count": 30,
+  "no_match_count": 35,
+  "unrouted_count": 32,
   "target_count": 18,
-  "targets_ok": 14,
+  "targets_ok": 13,
   "results": [
+    {
+      "signal_id": "9d75668c22a5721305104859",
+      "signal_title": "Primarul Constantin Cîrstina aduce încă 4,5 milioane de lei la Orlești! Căminul Cultural va fi modernizat din temelii cu bani europeni",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/primarul-constantin-cirstina-aduce-inca-45-milioane-de-lei-la-orlesti-caminul-cultural-va-fi-modernizat-din-temelii-cu-bani-europeni/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-01T05:32:25+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 500: Internal Server Error",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "a6f5125539c96658963cc480",
+      "signal_title": "IPOCRIZIE MAXIMĂ! Pesedistul Bogdan Ivan plânge acum pentru CET Govora, după ce, ca ministru al Energiei, a împins centrala spre închidere. Vâlcenii plătesc factura!",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/ipocrizie-maxima-pesedistul-bogdan-ivan-plange-acum-pentru-cet-govora-dupa-ce-ca-ministru-al-energiei-a-impins-centrala-spre-inchidere-valcenii-platesc-factura/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-01T05:27:30+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "7269083e0ca492ee3c7992dd",
+      "signal_title": "Sănătatea pe primul loc! Recuperare medicală și tratamente balneare la Hotel Olănești & Spa Medical",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/sanatatea-pe-primul-loc-recuperare-medicala-si-tratamente-balneare-la-hotel-olanesti-spa-medical/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-01T05:18:28+03:00",
+      "verification_route_id": "health",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "dsp-valcea-anunturi",
+            "name": "Direcția de Sănătate Publică Vâlcea",
+            "url": "https://www.aspjvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "spital-horezu-noutati",
+            "name": "Spitalul Orășenesc Horezu",
+            "url": "https://spitalulhorezu.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "560137ae41f3a2c3d026196e",
+      "signal_title": "„Sfântul Ioan Botezătorul a fost vas al Harului și glas al adevărului”, a spus Chiriarhul Râmnicului la Mănăstirea „Sfântul Antim”",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/sfantul-ioan-botezatorul-a-fost-vas-al-harului-si-glas-al-adevarului-a-spus-chiriarhul-ramnicului-la-manastirea-sfantul-antim/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-01T05:15:09+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "a6db6dca7615448c840e5378",
       "signal_title": "Înaltpreasfințitul Părinte Varsanufie a participat la sărbătoarea Cinstirea Icoanei Maicii Domnului de la Craiova",
@@ -116,9 +227,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 500: Internal Server Error",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -189,9 +300,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 500: Internal Server Error",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -342,9 +453,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 500: Internal Server Error",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -418,9 +529,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 500: Internal Server Error",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -694,9 +805,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 500: Internal Server Error",
+          "documents_examined": 0
         },
         {
           "target": {
