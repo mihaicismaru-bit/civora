@@ -35,6 +35,8 @@ jobs:
   distribute:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      VALCEA_FB_TEXT_FALLBACK_ENABLED: "true"
     steps:
       - uses: actions/checkout@v6
         with:
