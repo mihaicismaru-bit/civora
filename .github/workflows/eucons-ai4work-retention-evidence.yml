@@ -29,4 +29,8 @@ jobs:
       - name: Validate retention evidence semantics
         run: python retention_evidence_control.py
       - name: Run retention evidence TEST TWIN suite
-        run: python -m unittest test_retention_evidence_control.py test_retention_schedule.py
+        run: |
+          python -m unittest \
+            test_retention_evidence_control.py \
+            test_retention_schedule.py \
+            test_prod_activation_retention_binding.py
