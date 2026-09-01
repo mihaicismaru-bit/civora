@@ -1,0 +1,88 @@
+name: PARTENER.EU CERV Programme Watch
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_cerv_programme_watch.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_programme_watch.py'
+      - '.github/workflows/partener-eu-cerv-programme-watch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cerv-programme-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded CERV programme watch
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_cerv_programme_watch.py \
+            partener-eu/ops/test_eu_direct_cerv_programme_watch.py
+
+      - name: Validate fail-closed CERV programme semantics
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: python partener-eu/ops/test_eu_direct_cerv_programme_watch.py
+
+      - name: Capture live official CERV programme and Romania NCP evidence
+        run: |
+          rm -rf /tmp/partener-eu-cerv-programme-watch
+          python partener-eu/ingest/eu_direct_cerv_programme_watch.py \
+            --output-dir /tmp/partener-eu-cerv-programme-watch \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Enforce non-authorizing CERV live boundary
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python - <<'PY'
+          import json
+          from eu_direct_cerv_programme_watch import validate_receipt
+          path = "/tmp/partener-eu-cerv-programme-watch/cerv-programme-watch.json"
+          receipt = json.load(open(path, encoding="utf-8"))
+          validate_receipt(receipt)
+          assert receipt["source_health"] == "HEALTHY"
+          assert receipt["market_intelligence_only"] is True
+          assert receipt["open_call_authorized"] is False
+          assert receipt["deadline_authorized"] is False
+          assert receipt["budget_authorized"] is False
+          assert receipt["eligibility_authorized"] is False
+          assert receipt["publish_authorized"] is False
+          assert receipt["distribution_authorized"] is False
+          assert receipt["call_alert_authorized"] is False
+          assert receipt["publication_effect"] == "NONE"
+          assert set(x["observation_state"] for x in receipt["programming_observations"]) <= {
+              "PROGRAMMING", "PLANNED", "CONSULTATION", "PROPOSAL"
+          }
+          print({
+              "programme_fit": receipt["programme_fit_evidence"]["facts"]["fit_state"],
+              "programming_states": [x["observation_state"] for x in receipt["programming_observations"]],
+              "semantic_fingerprint": receipt["semantic_fingerprint"],
+          })
+          PY
+
+      - name: Upload exact-head CERV programme evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-cerv-programme-watch-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-cerv-programme-watch
+          if-no-files-found: error
+          retention-days: 7
