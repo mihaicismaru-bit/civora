@@ -5,11 +5,13 @@ final class EuconsResearchPersistedBundleExport
 {
     private const RESEARCH_ID = 'AI4WORK-STEP-NF-RUN-001';
     private const ALLOWED_FORMS = ['AI4WORK_ADULTS_V1', 'AI4WORK_EMPLOYERS_V1'];
+    private const ALLOWED_HOLDS = ['RESTRICTED_PENDING_REVIEW', 'OBJECTED_PENDING_REVIEW'];
     private const SHA256_RE = '/^[0-9a-f]{64}$/';
     private const CHANNEL_RE = '/^CH-[A-Z0-9]{8,32}$/';
     private const WRAPPER_KEYS = ['normalized_sha256', 'raw_sha256', 'received_at', 'record', 'schema_version'];
     private const RECEIPT_KEYS = ['accepted_at', 'body_sha256', 'form_id', 'normalized_sha256', 'pii_in_receipt', 'raw_sha256', 'response_id', 'schema_version'];
     private const RECORD_KEYS = ['answers', 'form_id', 'form_version', 'profile', 'received_at', 'recruitment_channel_id', 'research_id', 'response_id', 'schema_version', 'synthetic'];
+    private const HOLD_KEYS = ['hold_state', 'response_id', 'schema_version'];
 
     private EuconsResearchRuntime $runtime;
 
@@ -148,6 +150,36 @@ final class EuconsResearchPersistedBundleExport
         }
     }
 
+    private static function assertHoldArtifact(string $holdPath, string $filenameResponseId): void
+    {
+        $hold = self::loadJson($holdPath);
+        if (!self::exactKeys($hold, self::HOLD_KEYS)
+            || ($hold['schema_version'] ?? null) !== 1
+            || ($hold['response_id'] ?? null) !== $filenameResponseId
+            || !in_array($hold['hold_state'] ?? null, self::ALLOWED_HOLDS, true)) {
+            throw new RuntimeException('RESEARCH_EXPORT_HOLD_ARTIFACT_INVALID');
+        }
+    }
+
+    private static function assertHoldCensus(string $root, array $knownResponseIds): void
+    {
+        $holdDir = $root . '/holds';
+        if (!is_dir($holdDir)) {
+            return;
+        }
+
+        foreach (glob($holdDir . '/*.json') ?: [] as $holdPath) {
+            $holdResponseId = pathinfo($holdPath, PATHINFO_FILENAME);
+            if (!preg_match(self::SHA256_RE, $holdResponseId)) {
+                throw new RuntimeException('RESEARCH_EXPORT_HOLD_FILENAME_INVALID');
+            }
+            if (!isset($knownResponseIds[$holdResponseId])) {
+                throw new RuntimeException('RESEARCH_EXPORT_ORPHAN_HOLD');
+            }
+            self::assertHoldArtifact($holdPath, $holdResponseId);
+        }
+    }
+
     public function buildPersistedBundles(): array
     {
         $root = $this->runtime->storageRoot();
@@ -173,12 +205,15 @@ final class EuconsResearchPersistedBundleExport
                 if (!is_file($receiptPath)) {
                     throw new RuntimeException('RESEARCH_EXPORT_RECEIPT_MISSING');
                 }
-                if (is_file($root . '/holds/' . $responseId . '.json')) {
-                    continue;
-                }
                 $wrapper = self::loadJson($responsePath);
                 $receipt = self::loadJson($receiptPath);
                 self::assertBundleIntegrity($responseId, $formId, $wrapper, $receipt);
+
+                $holdPath = $root . '/holds/' . $responseId . '.json';
+                if (is_file($holdPath)) {
+                    self::assertHoldArtifact($holdPath, $responseId);
+                    continue;
+                }
                 $bundles[] = [
                     'filename_response_id' => $responseId,
                     'wrapper' => $wrapper,
@@ -188,6 +223,7 @@ final class EuconsResearchPersistedBundleExport
         }
 
         self::assertReceiptCensus($root, $knownResponseIds);
+        self::assertHoldCensus($root, $knownResponseIds);
 
         usort($bundles, static function (array $left, array $right): int {
             $leftRecord = $left['wrapper']['record'];
