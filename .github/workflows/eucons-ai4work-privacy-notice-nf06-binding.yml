@@ -8,7 +8,9 @@ on:
       - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
       - 'eucons/research/ai4work-step/NF06_PREINGEST_CONTRACT.json'
       - 'eucons/research/ai4work-step/privacy_notice_nf06_binding_control.py'
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
       - 'eucons/research/ai4work-step/test_privacy_notice_nf06_binding_control.py'
+      - 'eucons/research/ai4work-step/test_prod_activation_privacy_binding.py'
       - '.github/workflows/eucons-ai4work-privacy-notice-nf06-binding.yml'
   workflow_dispatch:
 
@@ -26,5 +28,7 @@ jobs:
       - name: Validate Article 13 to NF06 binding
         working-directory: eucons/research/ai4work-step
         run: |
-          python -m unittest -v test_privacy_notice_nf06_binding_control.py
+          python -m unittest -v \
+            test_privacy_notice_nf06_binding_control.py \
+            test_prod_activation_privacy_binding.py
           python privacy_notice_nf06_binding_control.py
