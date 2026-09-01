@@ -5,6 +5,11 @@ Only active OPEN/FORTHCOMING type-8 discovery candidates are worth exact fan-out
 A previous same-scope active discovery may be replayed only as a pointer into a
 new exact readback when the current healthy programme scan omits it. Neither the
 current nor previous discovery candidate authorizes a material fact.
+
+When exact evidence is OPEN and semantic reconciliation has passed, this handoff
+also executes the separate STATUS_ONLY material-admission gate and persists its
+receipt. The handoff object itself remains non-authorizing and never authorizes
+publication, distribution, alerts, deadline, budget or eligibility.
 """
 from __future__ import annotations
 
@@ -18,6 +23,7 @@ import shutil
 import sys
 from typing import Any, Callable, Mapping
 
+import creative_europe_ft_competitive_admission as admission
 import creative_europe_ft_competitive_exact as exact
 import creative_europe_ft_competitive_reconcile as reconcile_exact
 from creative_europe_ft_watch import MATERIAL_FLAGS, canonical_json, validate_watch_evidence
@@ -27,6 +33,7 @@ SCHEMA = "PARTENER_EU_CREATIVE_EUROPE_FT_COMPETITIVE_HANDOFF_EXECUTION_V1"
 NO_HANDOFF_STATE = "NO_BOUNDED_COMPETITIVE_HANDOFF_PENDING_NON_AUTHORIZING"
 EXECUTED_STATE = "COMPETITIVE_HANDOFF_EXECUTED_NON_AUTHORIZING"
 FAILED_STATE = "COMPETITIVE_HANDOFF_FAILED_CLOSED_NON_AUTHORIZING"
+ADMISSION_FAILED_STATE = "COMPETITIVE_HANDOFF_STATUS_ADMISSION_FAILED_CLOSED_NON_PUBLISHING"
 ACTIVE_STATES = {"OPEN_CANDIDATE_NON_AUTHORIZING", "FORTHCOMING_CANDIDATE_NON_AUTHORIZING"}
 MAX_CANDIDATES = 50
 
@@ -194,10 +201,25 @@ def _base(watch: Mapping[str, Any], run_id: str) -> dict[str, Any]:
         "run_id": run_id, "current_watch_evidence_sha256": _sha(dict(watch)),
         "current_watch_semantic_fingerprint": watch.get("semantic_fingerprint"), "market_intelligence_only": True,
         "requires_material_admission": True, "publication_effect": "NONE", "canonical_corpus_mutation": False,
+        "material_admission_receipt_sha256": None, "material_admission_scope": None,
+        "status_fact_admitted": False, "status_fact_open_call_authorized": False,
+        "material_admission_publish_authorized": False, "material_admission_distribution_authorized": False,
+        "material_admission_call_alert_authorized": False,
     }
     for key in MATERIAL_FLAGS:
         summary[key] = False
     return summary
+
+
+def _execute_status_admission(current: Mapping[str, Any], receipt: Mapping[str, Any], *, output_dir: pathlib.Path) -> dict[str, Any] | None:
+    if current.get("candidate_observation_state") != "OPEN_CALL":
+        return None
+    if receipt.get("material_admission_ready_for_downstream_review") is not True:
+        return None
+    admitted = admission.admit_status(current, receipt)
+    admission.validate_admission(admitted)
+    _write(output_dir / "material-admission" / "ft-competitive-material-admission.json", admitted)
+    return admitted
 
 
 def execute_handoff(watch: Mapping[str, Any], *, run_id: str, output_dir: pathlib.Path, history_root: pathlib.Path | None = None, post_func=None, readback_func=None) -> dict[str, Any]:
@@ -241,7 +263,61 @@ def execute_handoff(watch: Mapping[str, Any], *, run_id: str, output_dir: pathli
         _write(output_dir / "competitive-handoff-summary.json", summary)
         return summary
 
-    summary.update({"observation_state": EXECUTED_STATE, "selection_reason": reason, "selected_identity_key": identity, "selected_parent_reference": parent, "selected_competitive_call_id": cid, "source_candidate_semantic_fingerprint": candidate.get("semantic_fingerprint"), "exact_evidence_sha256": _sha(dict(current)), "previous_exact_evidence_sha256": _sha(dict(previous)) if previous else None, "exact_reconciliation_sha256": _sha(dict(receipt)), "exact_authority_url": current.get("authority_url"), "exact_authority_url_verified": current.get("authority_url_verified"), "exact_candidate_observation_state": current.get("candidate_observation_state"), "exact_status_label": current.get("status_label"), "exact_semantic_reconciliation_state": receipt.get("reconciliation_state"), "exact_semantic_change_count": int(receipt.get("semantic_change_count") or 0), "material_admission_ready_for_downstream_review": bool(receipt.get("material_admission_ready_for_downstream_review")), "retry_candidate": False})
+    try:
+        admitted = _execute_status_admission(current, receipt, output_dir=output_dir)
+    except Exception as exc:
+        summary.update({
+            "observation_state": ADMISSION_FAILED_STATE,
+            "selection_reason": reason,
+            "selected_identity_key": identity,
+            "selected_parent_reference": parent,
+            "selected_competitive_call_id": cid,
+            "source_candidate_semantic_fingerprint": candidate.get("semantic_fingerprint"),
+            "exact_evidence_sha256": _sha(dict(current)),
+            "previous_exact_evidence_sha256": _sha(dict(previous)) if previous else None,
+            "exact_reconciliation_sha256": _sha(dict(receipt)),
+            "exact_authority_url": current.get("authority_url"),
+            "exact_authority_url_verified": current.get("authority_url_verified"),
+            "exact_candidate_observation_state": current.get("candidate_observation_state"),
+            "exact_status_label": current.get("status_label"),
+            "exact_semantic_reconciliation_state": receipt.get("reconciliation_state"),
+            "exact_semantic_change_count": int(receipt.get("semantic_change_count") or 0),
+            "material_admission_ready_for_downstream_review": bool(receipt.get("material_admission_ready_for_downstream_review")),
+            "failure_stage": "STATUS_ONLY_MATERIAL_ADMISSION",
+            "failure_type": type(exc).__name__,
+            "failure_message": str(exc)[:1000],
+            "retry_candidate": True,
+        })
+        validate_handoff_summary(summary)
+        _write(output_dir / "competitive-handoff-summary.json", summary)
+        return summary
+
+    summary.update({
+        "observation_state": EXECUTED_STATE,
+        "selection_reason": reason,
+        "selected_identity_key": identity,
+        "selected_parent_reference": parent,
+        "selected_competitive_call_id": cid,
+        "source_candidate_semantic_fingerprint": candidate.get("semantic_fingerprint"),
+        "exact_evidence_sha256": _sha(dict(current)),
+        "previous_exact_evidence_sha256": _sha(dict(previous)) if previous else None,
+        "exact_reconciliation_sha256": _sha(dict(receipt)),
+        "exact_authority_url": current.get("authority_url"),
+        "exact_authority_url_verified": current.get("authority_url_verified"),
+        "exact_candidate_observation_state": current.get("candidate_observation_state"),
+        "exact_status_label": current.get("status_label"),
+        "exact_semantic_reconciliation_state": receipt.get("reconciliation_state"),
+        "exact_semantic_change_count": int(receipt.get("semantic_change_count") or 0),
+        "material_admission_ready_for_downstream_review": bool(receipt.get("material_admission_ready_for_downstream_review")),
+        "material_admission_receipt_sha256": _sha(dict(admitted)) if admitted else None,
+        "material_admission_scope": admitted.get("material_admission_scope") if admitted else None,
+        "status_fact_admitted": admitted is not None,
+        "status_fact_open_call_authorized": bool(admitted and admitted.get("open_call_authorized") is True),
+        "material_admission_publish_authorized": bool(admitted and admitted.get("publish_authorized") is True),
+        "material_admission_distribution_authorized": bool(admitted and admitted.get("distribution_authorized") is True),
+        "material_admission_call_alert_authorized": bool(admitted and admitted.get("call_alert_authorized") is True),
+        "retry_candidate": False,
+    })
     validate_handoff_summary(summary)
     _write(output_dir / "competitive-handoff-summary.json", summary)
     return summary
@@ -259,6 +335,8 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
     for key in MATERIAL_FLAGS:
         if summary.get(key) is not False:
             raise ValueError(f"competitive handoff became authorizing: {key}")
+    if summary.get("material_admission_publish_authorized") is not False or summary.get("material_admission_distribution_authorized") is not False or summary.get("material_admission_call_alert_authorized") is not False:
+        raise ValueError("competitive material admission crossed downstream boundary")
     for key in ("current_watch_evidence_sha256", "current_watch_semantic_fingerprint"):
         if not re.fullmatch(r"[0-9a-f]{64}", str(summary.get(key) or "")):
             raise ValueError(f"competitive handoff watch hash invalid: {key}")
@@ -266,6 +344,8 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
     if state == NO_HANDOFF_STATE:
         if summary.get("selected_identity_key") is not None or summary.get("material_admission_ready_for_downstream_review") is not False:
             raise ValueError("no-handoff summary crossed downstream boundary")
+        if summary.get("material_admission_receipt_sha256") is not None or summary.get("status_fact_admitted") is not False:
+            raise ValueError("no-handoff summary invented status admission")
         return
     cid = exact.validate_competitive_id(str(summary.get("selected_competitive_call_id") or ""))
     if summary.get("selected_identity_key") != f"FUNDING_TENDERS_COMPETITIVE_CALL:{cid}":
@@ -276,6 +356,19 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
     if state == FAILED_STATE:
         if summary.get("exact_authority_url") != exact.competitive_url(cid) or summary.get("exact_authority_url_verified") is not False or summary.get("material_admission_ready_for_downstream_review") is not False or summary.get("retry_candidate") is not True or not summary.get("failure_type"):
             raise ValueError("failed competitive handoff boundary drift")
+        if summary.get("material_admission_receipt_sha256") is not None or summary.get("status_fact_admitted") is not False:
+            raise ValueError("failed competitive handoff invented status admission")
+        return
+    if state == ADMISSION_FAILED_STATE:
+        if summary.get("exact_authority_url") != exact.competitive_url(cid) or summary.get("exact_authority_url_verified") is not True:
+            raise ValueError("admission-failed handoff lost exact authority evidence")
+        if summary.get("material_admission_ready_for_downstream_review") is not True or summary.get("retry_candidate") is not True or not summary.get("failure_type"):
+            raise ValueError("admission-failed handoff boundary drift")
+        for key in ("exact_evidence_sha256", "exact_reconciliation_sha256"):
+            if not re.fullmatch(r"[0-9a-f]{64}", str(summary.get(key) or "")):
+                raise ValueError(f"admission-failed handoff hash invalid: {key}")
+        if summary.get("material_admission_receipt_sha256") is not None or summary.get("status_fact_admitted") is not False or summary.get("status_fact_open_call_authorized") is not False:
+            raise ValueError("admission-failed handoff invented status admission")
         return
     if state != EXECUTED_STATE:
         raise ValueError(f"unexpected competitive handoff state: {state}")
@@ -292,6 +385,19 @@ def validate_handoff_summary(summary: Mapping[str, Any]) -> None:
     if previous is not None and not re.fullmatch(r"[0-9a-f]{64}", str(previous)):
         raise ValueError("competitive previous exact hash invalid")
 
+    if summary.get("exact_candidate_observation_state") == "OPEN_CALL" and summary.get("material_admission_ready_for_downstream_review") is True:
+        if not re.fullmatch(r"[0-9a-f]{64}", str(summary.get("material_admission_receipt_sha256") or "")):
+            raise ValueError("competitive OPEN status admission receipt missing")
+        if summary.get("material_admission_scope") != "STATUS_ONLY":
+            raise ValueError("competitive material admission scope drift")
+        if summary.get("status_fact_admitted") is not True or summary.get("status_fact_open_call_authorized") is not True:
+            raise ValueError("competitive OPEN status was not admitted")
+    else:
+        if summary.get("material_admission_receipt_sha256") is not None or summary.get("material_admission_scope") is not None:
+            raise ValueError("competitive handoff admitted status without OPEN review-ready evidence")
+        if summary.get("status_fact_admitted") is not False or summary.get("status_fact_open_call_authorized") is not False:
+            raise ValueError("competitive handoff invented status admission")
+
 
 def main() -> int:
     parser = argparse.ArgumentParser()
@@ -301,7 +407,24 @@ def main() -> int:
     parser.add_argument("--output-dir", type=pathlib.Path, required=True)
     args = parser.parse_args()
     summary = execute_handoff(_load(args.current_watch), run_id=args.run_id, output_dir=args.output_dir, history_root=args.history_root)
-    print(json.dumps({"observation_state": summary.get("observation_state"), "selection_reason": summary.get("selection_reason"), "selected_identity_key": summary.get("selected_identity_key"), "exact_candidate_observation_state": summary.get("exact_candidate_observation_state"), "exact_status_label": summary.get("exact_status_label"), "exact_semantic_reconciliation_state": summary.get("exact_semantic_reconciliation_state"), "material_admission_ready_for_downstream_review": summary.get("material_admission_ready_for_downstream_review"), "failure_type": summary.get("failure_type"), "failure_message": summary.get("failure_message"), "open_call_authorized": False}, ensure_ascii=False, sort_keys=True))
+    print(json.dumps({
+        "observation_state": summary.get("observation_state"),
+        "selection_reason": summary.get("selection_reason"),
+        "selected_identity_key": summary.get("selected_identity_key"),
+        "exact_candidate_observation_state": summary.get("exact_candidate_observation_state"),
+        "exact_status_label": summary.get("exact_status_label"),
+        "exact_semantic_reconciliation_state": summary.get("exact_semantic_reconciliation_state"),
+        "material_admission_ready_for_downstream_review": summary.get("material_admission_ready_for_downstream_review"),
+        "material_admission_scope": summary.get("material_admission_scope"),
+        "status_fact_admitted": summary.get("status_fact_admitted"),
+        "status_fact_open_call_authorized": summary.get("status_fact_open_call_authorized"),
+        "failure_type": summary.get("failure_type"),
+        "failure_message": summary.get("failure_message"),
+        "handoff_open_call_authorized": False,
+        "publish_authorized": False,
+        "distribution_authorized": False,
+        "call_alert_authorized": False,
+    }, ensure_ascii=False, sort_keys=True))
     return 0
 
 
