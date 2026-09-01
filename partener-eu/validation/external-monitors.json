@@ -1,24 +1,24 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-09-01T08:00:37Z",
-  "validation_run_started": "2026-09-01T08:00:21Z",
+  "observed_at": "2026-09-01T08:37:08Z",
+  "validation_run_started": "2026-09-01T08:36:50Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "52bb011af74e4ad24c33cb857e838fa0c2e90177f98ac2e92782ce23ed0c18bf",
-    "history_sha256": "52bb011af74e4ad24c33cb857e838fa0c2e90177f98ac2e92782ce23ed0c18bf",
-    "history_path": "validation/history/20260901T080021Z.json",
+    "latest_sha256": "678d9c091f60b1c7c7f346b69bc93d3a1ccaa350f5c02ef28bd50f19ef4fa03e",
+    "history_sha256": "678d9c091f60b1c7c7f346b69bc93d3a1ccaa350f5c02ef28bd50f19ef4fa03e",
+    "history_path": "validation/history/20260901T083650Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "e7622fc6b95677afdaa5070ee7f402760350f4e9524499aa2f966e1dab62ec53",
-    "checkpoint_sha256": "e7622fc6b95677afdaa5070ee7f402760350f4e9524499aa2f966e1dab62ec53",
+    "source_state_sha256": "3d08ebc3e6baccfcd9364c29eaf19f5576022fa75cb55d097e320016f2f7d7cb",
+    "checkpoint_sha256": "3d08ebc3e6baccfcd9364c29eaf19f5576022fa75cb55d097e320016f2f7d7cb",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-09-01T06:38:46.255863Z",
-    "age_seconds": 4911,
+    "observed_at": "2026-09-01T08:34:40.488827Z",
+    "age_seconds": 148,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -29,7 +29,7 @@
       "fail": 13,
       "quarantined": 14,
       "low_information": 1,
-      "resolution_tasks_required": 0
+      "resolution_tasks_required": 1
     },
     "tier_counts": {
       "T1": {
@@ -38,7 +38,7 @@
         "degraded": 1,
         "fail": 8,
         "quarantined": 9,
-        "hash_changes": 0
+        "hash_changes": 2
       },
       "T1B": {
         "total": 13,
@@ -46,10 +46,12 @@
         "degraded": 0,
         "fail": 3,
         "quarantined": 3,
-        "hash_changes": 0
+        "hash_changes": 1
       }
     },
-    "changed_source_ids": [],
+    "changed_source_ids": [
+      "SRC-OIRCENTRU-PEO"
+    ],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
@@ -279,7 +281,7 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-09-01T07:33:18.774238+00:00",
+    "observed_at": "2026-09-01T08:35:34.262897+00:00",
     "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "source_available": false,
     "candidate_count": 60,
@@ -363,7 +365,7 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 0,
+    "registry_hash_changes": 1,
     "afir_hash_changes": 1,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
