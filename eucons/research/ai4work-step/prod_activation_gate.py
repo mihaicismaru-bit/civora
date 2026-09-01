@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from explicit_user_approval_control import explicit_user_approval_errors
+from lawful_basis_lia_control import lawful_basis_lia_errors
 from privacy_notice_nf06_binding_control import binding_errors as privacy_notice_binding_errors
 from retention_evidence_control import retention_attestation_errors
 from security_incident_response_gate import incident_response_errors
@@ -17,6 +18,7 @@ MANIFEST_PATH = HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json"
 CONTROLLER_PATH = HERE / "CONTROLLER_DETERMINATION_DRAFT.json"
 COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
 DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
+LIA_PATH = HERE / "GDPR_LIA_DRAFT.json"
 INCIDENT_RESPONSE_PATH = HERE / "GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json"
 ARTICLE13_SNAPSHOT_PATH = HERE / "ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json"
 NF06_CONTRACT_PATH = HERE / "NF06_PREINGEST_CONTRACT.json"
@@ -145,6 +147,7 @@ def activation_errors(
     controller: dict[str, Any],
     collection_frame: dict[str, Any],
     dpia_screening: dict[str, Any],
+    lawful_basis_lia: dict[str, Any] | None = None,
     incident_response: dict[str, Any] | None = None,
 ) -> list[str]:
     errors: list[str] = []
@@ -232,6 +235,27 @@ def activation_errors(
         completed_ref = mandatory.get("if_dpia_required_completed_dpia_reference")
         if not isinstance(completed_ref, str) or not completed_ref.strip():
             errors.append("completed_dpia_reference_missing")
+
+    # PROD activation must independently validate the lawful-basis/LIA semantics. A generic
+    # SHA/evidence-key binding or a human approval receipt is defence in depth, but neither may
+    # substitute for checking the exact controller identity, Article 6(1)(f) tests and final
+    # controller signoff at the authoritative activation boundary.
+    if lawful_basis_lia is None:
+        try:
+            lawful_basis_lia = _load(LIA_PATH)
+        except (OSError, json.JSONDecodeError):
+            errors.append("lawful_basis_lia_artifact_unreadable")
+            lawful_basis_lia = None
+    if isinstance(lawful_basis_lia, dict):
+        for lia_error in lawful_basis_lia_errors(
+            contract=contract,
+            manifest=manifest,
+            controller=controller,
+            lia=lawful_basis_lia,
+        ):
+            errors.append(f"lawful_basis_lia:{lia_error}")
+    elif lawful_basis_lia is not None:
+        errors.append("lawful_basis_lia_artifact_shape_invalid")
 
     # PROD activation must independently validate the incident-response procedure semantics.
     # A green standalone workflow or a SHA-bound human approval receipt is defence in depth,
@@ -327,6 +351,7 @@ def evaluate_repository_activation(
     controller_path: Path = CONTROLLER_PATH,
     collection_frame_path: Path = COLLECTION_FRAME_PATH,
     dpia_screening_path: Path = DPIA_SCREENING_PATH,
+    lawful_basis_lia_path: Path = LIA_PATH,
     incident_response_path: Path = INCIDENT_RESPONSE_PATH,
 ) -> tuple[bool, list[str]]:
     contract = _load(contract_path)
@@ -334,6 +359,7 @@ def evaluate_repository_activation(
     controller = _load(controller_path)
     collection_frame = _load(collection_frame_path)
     dpia_screening = _load(dpia_screening_path)
+    lawful_basis_lia = _load(lawful_basis_lia_path)
     incident_response = _load(incident_response_path)
     errors = activation_errors(
         contract=contract,
@@ -341,6 +367,7 @@ def evaluate_repository_activation(
         controller=controller,
         collection_frame=collection_frame,
         dpia_screening=dpia_screening,
+        lawful_basis_lia=lawful_basis_lia,
         incident_response=incident_response,
     )
     return not errors, errors
