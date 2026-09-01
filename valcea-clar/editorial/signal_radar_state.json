@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-09-01T05:14:03+03:00",
+  "observed_at": "2026-09-01T05:30:31+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 15,
   "sources_ok": 13,
-  "current_signal_count": 12,
+  "current_signal_count": 29,
   "today_signal_count": 4,
   "observations": [
     {
@@ -19,7 +19,7 @@
       "error": null,
       "signals": [],
       "final_url": "https://curierulderamnic.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -52,9 +52,63 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "fbaf068144bf16fc56b085d2",
+          "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
+          "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
+          "signal_publisher": "EuroVâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": null,
+          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-eurovalcea"
+        },
+        {
+          "signal_id": "39266ca28bdfbb4eedb94e0a",
+          "signal_title": "Mircia Gutău anunță finalizarea proiectelor PNRR și clarifică soluția pentru termoficare",
+          "signal_url": "https://www.eurovalcea.ro/2026/08/28/mircia-gutau-anunta-finalizarea-proiectelor-pnrr-si-clarifica-solutia-pentru-termoficare/",
+          "signal_publisher": "EuroVâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": null,
+          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "utilities",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "apavil-comunicate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "apavil-opriri-programate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "cet-govora-termoficare-advisories"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-eurovalcea"
+        }
+      ],
       "final_url": "https://www.eurovalcea.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -65,9 +119,119 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
-      "final_url": "http://www.impactreal.ro/",
-      "links_examined": 0,
+      "signals": [
+        {
+          "signal_id": "091f4ec2f77685022864fbc8",
+          "signal_title": "Ploaia nu i-a trimis acasă pe malaieni, Zilele Comunei au continuat cu muzică, dans și foc de artificii",
+          "signal_url": "https://www.impactreal.ro/2026/08/31/ploaia-nu-i-a-trimis-acasa-pe-malaieni-zilele-comunei-au-continuat-cu-muzica-dans-si-foc-de-artificii/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T21:56:09+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "1a0544653442a233f0ca181c",
+          "signal_title": "50 de ani împreună, cuplurile de aur din Budești, sărbătorite de administrația locală",
+          "signal_url": "https://www.impactreal.ro/2026/08/31/50-de-ani-impreuna-cuplurile-de-aur-din-budesti-sarbatorite-de-administratia-locala/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T21:17:01+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "3388e690df81d7804faac5ad",
+          "signal_title": "Primarul din Cernișoara a premiat valorile la sărbătoarea comunei: cuplurile de aur și elevii de nota 10, aplaudați pe scena de la Modoia",
+          "signal_url": "https://www.impactreal.ro/2026/08/31/primarul-din-cernisoara-a-premiat-valorile-la-sarbatoarea-comunei-cuplurile-de-aur-si-elevii-de-nota-10-aplaudati-pe-scena-de-la-modoia/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T10:35:36+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "education",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "ccd-valcea-noutati"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "isj-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "024d10968ecad9f5b95c77f4",
+          "signal_title": "Ziua Orașului Bălcești, sărbătorită cu muzică, dans și artificii. Constantin Aleca: „Avem 27 de proiecte în lucru și cinci blocuri finalizate”",
+          "signal_url": "https://www.impactreal.ro/2026/08/31/ziua-orasului-balcesti-sarbatorita-cu-muzica-dans-si-artificii-constantin-aleca-avem-27-de-proiecte-in-lucru-si-cinci-blocuri-finalizate/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T07:48:03+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "44879c82917bc3e8127062cf",
+          "signal_title": "Micuțele handbaliste de la AFC Băbeni, la primul turneu național: meciuri cu echipe puternice, medalii și amintiri frumoase de la Craiova",
+          "signal_url": "https://www.impactreal.ro/2026/08/30/micutele-handbaliste-de-la-afc-babeni-la-primul-lor-turneu-national-meciuri-cu-echipe-puternice-medalii-si-o-zi-de-neuitat-la-craiova/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-30T20:24:29+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        }
+      ],
+      "final_url": "https://www.impactreal.ro/",
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -115,7 +279,7 @@
       "error": null,
       "signals": [],
       "final_url": "https://www.primplanpress.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -137,7 +301,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -157,7 +321,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -195,7 +359,7 @@
       "error": null,
       "signals": [],
       "final_url": "https://stirileolteniei.ro/",
-      "links_examined": 0,
+      "links_examined": 12,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -208,7 +372,7 @@
       "error": null,
       "signals": [],
       "final_url": "https://vocea-valcii.ro/category/prima-pagina/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -221,26 +385,6 @@
       "error": null,
       "signals": [
         {
-          "signal_id": "a6db6dca7615448c840e5378",
-          "signal_title": "Înaltpreasfințitul Părinte Varsanufie a participat la sărbătoarea Cinstirea Icoanei Maicii Domnului de la Craiova",
-          "signal_url": "https://ziaruldevalcea.ro/2026/09/inaltpreasfintitul-parinte-varsanufie-a-participat-la-sarbatoarea-cinstirea-icoanei-maicii-domnului-de-la-craiova/",
-          "signal_publisher": "Ziarul de Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": true,
-          "published_at": "2026-09-01T05:12:39+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-ziarul-de-valcea"
-        },
-        {
           "signal_id": "fc52f7db902a2ed1829ab83c",
           "signal_title": "What Makes a Good Crypto Casino in 2026?",
           "signal_url": "https://ziaruldevalcea.ro/2026/09/what-makes-a-good-crypto-casino-in-2026/",
@@ -250,7 +394,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-01T04:49:52+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -270,7 +414,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-01T04:40:37+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -303,7 +447,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-01T04:13:59+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -323,7 +467,7 @@
           "signal_sensitive": true,
           "published_at": "2026-08-31T15:14:59+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -339,16 +483,16 @@
           "signal_seed_id": "press-ziarul-de-valcea"
         },
         {
-          "signal_id": "2eb120dac856fee6fef38e4e",
-          "signal_title": "Credit pentru o nevoie urgentă: fondul de rezervă câștigă doar dacă îl poți reface",
-          "signal_url": "https://ziaruldevalcea.ro/2026/08/credit-pentru-o-nevoie-urgenta-fondul-de-rezerva-castiga-doar-daca-il-poti-reface/",
+          "signal_id": "8abf658dc9bc98a78c8be22e",
+          "signal_title": "Ce înseamnă biodisponibilitate la suplimente de magneziu și cum influențează alegerea produsului?",
+          "signal_url": "https://ziaruldevalcea.ro/2026/08/ce-inseamna-biodisponibilitate-la-suplimente-de-magneziu-si-cum-influenteaza-alegerea-produsului/",
           "signal_publisher": "Ziarul de Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": true,
-          "published_at": "2026-08-31T05:04:45+03:00",
+          "published_at": "2026-08-31T04:57:20+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -359,16 +503,16 @@
           "signal_seed_id": "press-ziarul-de-valcea"
         },
         {
-          "signal_id": "e10b7150ce3bd7f84ceb2471",
-          "signal_title": "Cum alegi corect un termosemineu pe lemne pentru o casă neizolată",
-          "signal_url": "https://ziaruldevalcea.ro/2026/08/cum-alegi-corect-un-termosemineu-pe-lemne-pentru-o-casa-neizolata/",
+          "signal_id": "96bd7b75e34ee3dc061e007b",
+          "signal_title": "Când debitul maxim rămâne pe etichetă: cum afli performanța reală a unei pompe submersibile",
+          "signal_url": "https://ziaruldevalcea.ro/2026/08/cand-debitul-maxim-ramane-pe-eticheta-cum-afli-performanta-reala-a-unei-pompe-submersibile/",
           "signal_publisher": "Ziarul de Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": true,
-          "published_at": "2026-08-31T05:03:08+03:00",
+          "published_at": "2026-08-31T04:55:33+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -379,16 +523,36 @@
           "signal_seed_id": "press-ziarul-de-valcea"
         },
         {
-          "signal_id": "8eb275efd358ec8d73951e5d",
-          "signal_title": "Semnele unei baterii auto uzate nu apar mereu la pornire",
-          "signal_url": "https://ziaruldevalcea.ro/2026/08/semnele-unei-baterii-auto-uzate-nu-apar-mereu-la-pornire/",
+          "signal_id": "00c4355026e24406536d96d3",
+          "signal_title": "Cheltuielile cu instalarea climatizării și încălzirii: factura iernii se pregătește înainte de montaj",
+          "signal_url": "https://ziaruldevalcea.ro/2026/08/cheltuielile-cu-instalarea-climatizarii-si-incalzirii-factura-iernii-se-pregateste-inainte-de-montaj/",
           "signal_publisher": "Ziarul de Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": true,
-          "published_at": "2026-08-31T05:01:36+03:00",
+          "published_at": "2026-08-31T04:53:14+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-ziarul-de-valcea"
+        },
+        {
+          "signal_id": "c8e25d1dbc6612fabde3e231",
+          "signal_title": "Hidroelectrica pune lacăt pe Lacul Drăgășani?! Bun al statului, dat în folosință pentru o afacere privată cu bani europeni. Cetățenilor li se spune: „ACCESUL INTERZIS”!",
+          "signal_url": "https://ziaruldevalcea.ro/2026/08/hidroelectrica-pune-lacat-pe-lacul-dragasani-bun-al-statului-dat-in-folosinta-pentru-o-afacere-privata-cu-bani-europeni-cetatenilor-li-se-spune-accesul-interzis/",
+          "signal_publisher": "Ziarul de Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": true,
+          "published_at": "2026-08-30T23:58:46+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -422,7 +586,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -442,7 +606,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-01T05:14:03+03:00",
+          "observed_at": "2026-09-01T05:30:31+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -465,9 +629,117 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "85a109f4f81d7239fd4f31b5",
+          "signal_title": "Erasmus+ la Școala Gimnazială Măgura – de la experiență la impact! Peste 40 de participanți la conferința de diseminare a rezultatelor proiectului Erasmus+, organizată la Biblioteca Județeană „Antim Ivireanul”",
+          "signal_url": "https://evenimentvalcean.ro/erasmus-la-scoala-gimnaziala-magura-de-la-experienta-la-impact-peste-40-de-participanti-la-conferinta-de-diseminare-a-rezultatelor-proiectului-erasmus-organizata-la-biblioteca-judeteana/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T20:44:24+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "education",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "ccd-valcea-noutati"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "isj-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
+          "signal_id": "af1ba57d544ebd5c017693c2",
+          "signal_title": "Mircea Gutău explică situația încălzirii din Râmnicu Vâlcea: „Pe mine mă interesează ca locuitorii municipiului să aibă căldură”",
+          "signal_url": "https://evenimentvalcean.ro/mircea-gutau-explica-situatia-incalzirii-din-ramnicu-valcea-pe-mine-ma-intereseaza-ca-locuitorii-municipiului-sa-aiba-caldura/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T19:51:14+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
+          "signal_id": "98201033c30c31e0c0bd738f",
+          "signal_title": "FOTO „Ziua Limbii Române”, sărbătorită într-un cadru inedit, la Salina Ocnele Mari. A fost lansată revista „Memoria slovelor”",
+          "signal_url": "https://evenimentvalcean.ro/foto-ziua-limbii-romane-sarbatorita-intr-un-cadru-inedit-la-salina-ocnele-mari-a-fost-lansata-revista-memoria-slovelor/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T14:15:43+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
+          "signal_id": "be532997700ad31a566fd42f",
+          "signal_title": "Căminul Cultural din Orlești va fi modernizat cu peste 4,5 milioane de lei. Investiția este finanțată prin fonduri europene",
+          "signal_url": "https://evenimentvalcean.ro/caminul-cultural-din-orlesti-va-fi-modernizat-cu-peste-45-milioane-de-lei-investitia-este-finantata-prin-fonduri-europene/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T08:46:24+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        }
+      ],
       "final_url": "https://evenimentvalcean.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -478,9 +750,179 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "dd8d89ac5eebe3ad3f04dc96",
+          "signal_title": "Zâmbet pe roți pentru copiii din Dănicei. Primăria a intrat într-un proiect european pentru stomatologie școlară mobilă",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/31/zambet-pe-roti-pentru-copiii-din-danicei-primaria-a-intrat-intr-un-proiect-european-pentru-stomatologie-scolara-mobila/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T23:56:49+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "5eb5346279a3bcc61a0a3977",
+          "signal_title": "Primăria Galicea pregătește o nouă ediție a concursului „Satul meu, vatră frumoasă!”",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/31/primaria-galicea-pregateste-o-noua-editie-a-concursului-satul-meu-vatra-frumoasa/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T21:04:00+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "e87f2bc8cc73bea869f889b0",
+          "signal_title": "FOTO – A dispărut de la Golești. L-ați văzut?",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/31/foto-a-disparut-de-la-golesti-l-ati-vazut/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T19:16:21+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "edaf1994d4052a76097f278d",
+          "signal_title": "Droguri, alcool și conducere fără permis: cinci infracțiuni rutiere în weekend, la Vâlcea",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/31/droguri-alcool-si-conducere-fara-permis-cinci-infractiuni-rutiere-in-weekend-la-valcea/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T18:42:39+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "9b5534273935c24e3d6b3e1b",
+          "signal_title": "Investiție de milioane în Vâlcea. Lucrările care reduc riscul viiturilor au fost finalizate",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/31/investitie-de-milioane-in-valcea-lucrarile-care-reduc-riscul-viiturilor-au-fost-finalizate/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T17:15:15+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "22ae6db1834e73c2a25fac0d",
+          "signal_title": "FOTO: ACCIDENT în zona DOVALI. Pieton lovit în timpul unei manevre de mers înapoi",
+          "signal_url": "https://seintamplainvalcea.ro/2026/08/31/foto-accident-in-zona-dovali-pieton-lovit-in-timpul-unei-manevre-de-mers-inapoi/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-08-31T16:34:50+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-01T05:30:31+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        }
+      ],
       "final_url": "https://seintamplainvalcea.ro/",
-      "links_examined": 0,
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     }
