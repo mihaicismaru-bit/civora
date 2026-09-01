@@ -24,9 +24,10 @@ from urllib.request import Request, urlopen
 
 SOURCE_ID = "signal-dsp-valcea-promovarea-sanatatii"
 SOURCE_NAME = "Direcția de Sănătate Publică Vâlcea — Promovarea sănătății"
-SOURCE_URL = "https://dspvalcea.ro/documente-utile/promovarea-sanatatii.php"
+SOURCE_URL = "https://www.aspjvalcea.ro/documente-utile/promovarea-sanatatii.php"
 SOURCE_TIER = "T1"
 SOURCE_KIND = "PUBLIC_HEALTH_CAMPAIGNS"
+CURRENT_HOSTS = {"aspjvalcea.ro", "www.aspjvalcea.ro"}
 USER_AGENT = "Mozilla/5.0 VÂLCEA-CLAR-DSP-Signal/1.0 (+https://valceaclar.ro/)"
 MAX_BODY_BYTES = 2_000_000
 MIN_SECTION_TEXT = 8
@@ -188,8 +189,8 @@ def signal_id(title: str, period: dict[str, str]) -> str:
 
 def extract_signals(html_text: str, *, final_url: str = SOURCE_URL) -> list[dict[str, Any]]:
     parsed = urlsplit(final_url)
-    host = parsed.netloc.casefold().removeprefix("www.")
-    if host != "dspvalcea.ro":
+    host = parsed.netloc.casefold()
+    if host not in CURRENT_HOSTS:
         raise ValueError(f"DSP adapter refused unexpected final host: {host or '<empty>'}")
 
     parser = SectionParser()
@@ -246,8 +247,8 @@ def fetch_html(url: str = SOURCE_URL) -> tuple[str, str, str]:
     )
     with urlopen(request, timeout=18, context=ssl.create_default_context()) as response:
         final_url = str(response.geturl())
-        host = urlsplit(final_url).netloc.casefold().removeprefix("www.")
-        if host != "dspvalcea.ro":
+        host = urlsplit(final_url).netloc.casefold()
+        if host not in CURRENT_HOSTS:
             raise ValueError(f"DSP adapter refused redirect outside official host: {host or '<empty>'}")
         body = response.read(MAX_BODY_BYTES + 1)
         if len(body) > MAX_BODY_BYTES:
@@ -309,12 +310,18 @@ def self_test() -> int:
     assert html_response_ok("text/html; charset=utf-8", b"plain") is True
     assert html_response_ok("text/plain", b"<HTML><body>ok</body></HTML>") is True
     assert html_response_ok("text/plain", b"not html") is False
-    try:
-        extract_signals(sample, final_url="https://example.com/health")
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("off-domain final URL must fail closed")
+    assert len(extract_signals(sample, final_url="https://aspjvalcea.ro/documente-utile/promovarea-sanatatii.php")) == 3
+    for rejected_url in (
+        "https://example.com/health",
+        "https://dspvalcea.ro/documente-utile/promovarea-sanatatii.php",
+        "https://www.dspvalcea.ro/documente-utile/promovarea-sanatatii.php",
+    ):
+        try:
+            extract_signals(sample, final_url=rejected_url)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"off-domain or legacy final URL must fail closed: {rejected_url}")
     doc = build_document(sample, final_url=SOURCE_URL, content_sha256="abc")
     assert doc["policy"]["signal_only"] is True
     assert doc["policy"]["event_period_is_not_publication_timestamp"] is True

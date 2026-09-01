@@ -98,6 +98,13 @@ def build() -> dict[str, Any]:
     }
     for product in products:
         existing[product["id"]] = product
+    # Preserve historical outbox entries for durable deduplication, but bring
+    # their safety contract forward when the schema evolves.  Otherwise an
+    # older ready item can fail the publication guard before the adapter gets
+    # a chance to select only the current post-activation story.
+    for item in existing.values():
+        if item.get("status") == "outbox_ready":
+            item["verbatim_cross_platform_reuse_allowed"] = False
     outbox["schema_version"] = "1.2"
     outbox["platform"] = "threads"
     outbox["publication_model"] = "continuous_story_first"
@@ -163,6 +170,7 @@ def self_test() -> int:
     assert item["direct_publication_enabled"] is True
     assert item["publication_mode"] == "native_api_fail_closed"
     assert item["generation_mode"] == "threads_editorial_v1"
+    assert item["verbatim_cross_platform_reuse_allowed"] is False
     assert item["identity"]["channel_id"] == "valcea-threads"
     assert item["identity"]["profile_source"] == "valcea-clar/social/profile_identity_system.json"
     held = canonical_item({

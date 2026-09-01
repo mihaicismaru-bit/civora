@@ -12,12 +12,13 @@ import json
 import re
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 OUT_JSON = ROOT / "partener-eu" / "ingest" / "state" / "daily_brief.json"
 OUT_JS = ROOT / "partener-eu" / "web" / "daily-brief-data.js"
-TZ = dt.timezone(dt.timedelta(hours=3))
+TZ = ZoneInfo("Europe/Bucharest")
 MONTHS_RO = ["ianuarie","februarie","martie","aprilie","mai","iunie","iulie","august","septembrie","octombrie","noiembrie","decembrie"]
 NEWS_MAX_AGE_HOURS = 72
 PREPARE_STATUSES = {"EXPECTED", "ANNOUNCED", "PUBLIC_CONSULTATION", "REVIEW", "PREPARE_NOW", "UPCOMING"}

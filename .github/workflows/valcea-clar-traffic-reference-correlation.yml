@@ -1,0 +1,62 @@
+name: VÂLCEA CLAR Traffic Reference Correlation
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/traffic_reference_correlator.py"
+      - "valcea-clar/scripts/infotrafic_valcea_recent_reference_adapter.py"
+      - "valcea-clar/scripts/ipj_valcea_road_traffic_news_reference_adapter.py"
+      - "valcea-clar/scripts/eta_bus_route_directory_reference_adapter.py"
+      - ".github/workflows/valcea-clar-traffic-reference-correlation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-traffic-reference-correlation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile correlator
+        run: python -m py_compile valcea-clar/scripts/traffic_reference_correlator.py
+      - name: Run fail-closed correlation self-test
+        run: python valcea-clar/scripts/traffic_reference_correlator.py --self-test
+      - name: Verify source contract compatibility
+        run: |
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          root = Path("valcea-clar/scripts")
+
+          def load(name, filename):
+              spec = importlib.util.spec_from_file_location(name, root / filename)
+              module = importlib.util.module_from_spec(spec)
+              assert spec.loader is not None
+              spec.loader.exec_module(module)
+              return module
+
+          correlator = load("traffic_reference_correlator", "traffic_reference_correlator.py")
+          infotrafic = load("infotrafic_adapter", "infotrafic_valcea_recent_reference_adapter.py")
+          ipj = load("ipj_adapter", "ipj_valcea_road_traffic_news_reference_adapter.py")
+          eta = load("eta_adapter", "eta_bus_route_directory_reference_adapter.py")
+
+          assert correlator.EXPECTED_CONTRACTS["infotrafic"] == infotrafic.CONTENT_CONTRACT
+          assert correlator.EXPECTED_CONTRACTS["ipj"] == ipj.CONTENT_CONTRACT
+          assert correlator.EXPECTED_CONTRACTS["eta"] == eta.CONTENT_CONTRACT
+          assert "active_incident_inference" in infotrafic.DISABLED_CAPABILITIES
+          assert "active_incident_inference" in ipj.DISABLED_CAPABILITIES
+          assert "active_disruption_inference" in eta.DISABLED_CAPABILITIES
+          assert "same_incident_inference" in correlator.DISABLED_CAPABILITIES
+          assert "eta_service_impact_inference" in correlator.DISABLED_CAPABILITIES
+          print("source-contracts: compatible")
+          PY

@@ -1,0 +1,64 @@
+name: VÂLCEA CLAR Traffic Explicit Temporal Evidence
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/traffic_explicit_temporal_evidence_adapter.py"
+      - "valcea-clar/scripts/traffic_dossier_thread_candidate_engine.py"
+      - ".github/workflows/valcea-clar-traffic-explicit-temporal-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-traffic-explicit-temporal-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile temporal evidence boundary
+        run: |
+          python -m py_compile valcea-clar/scripts/traffic_explicit_temporal_evidence_adapter.py
+          python -m py_compile valcea-clar/scripts/traffic_dossier_thread_candidate_engine.py
+      - name: Run fail-closed temporal evidence self-test
+        run: python valcea-clar/scripts/traffic_explicit_temporal_evidence_adapter.py --self-test
+      - name: Verify dossier contract compatibility and safety boundary
+        run: |
+          python - <<'PY'
+          import importlib.util
+          from pathlib import Path
+
+          root = Path("valcea-clar/scripts")
+
+          def load(name, filename):
+              spec = importlib.util.spec_from_file_location(name, root / filename)
+              module = importlib.util.module_from_spec(spec)
+              assert spec.loader is not None
+              spec.loader.exec_module(module)
+              return module
+
+          temporal = load("traffic_explicit_temporal_evidence_adapter", "traffic_explicit_temporal_evidence_adapter.py")
+          engine = load("traffic_dossier_thread_candidate_engine", "traffic_dossier_thread_candidate_engine.py")
+
+          assert temporal.CONTENT_CONTRACT == engine.TEMPORAL_EVIDENCE_CONTRACT
+          assert temporal.ALLOWED_TIMESTAMP_BASES <= engine.ALLOWED_TIMESTAMP_BASES
+          for capability in (
+              "local_timezone_inference",
+              "same_incident_inference",
+              "active_incident_inference",
+              "active_traffic_disruption_inference",
+              "breaking_news_promotion",
+              "persistence",
+              "public_projection",
+          ):
+              assert capability in temporal.DISABLED_CAPABILITIES
+          print("temporal-contracts: compatible")
+          PY

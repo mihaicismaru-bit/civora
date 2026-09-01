@@ -1,5 +1,7 @@
 name: VÂLCEA CLAR Social Publication Engine
 
+# Operator recovery runs are allowed after canonical site readback.
+
 on:
   workflow_dispatch:
   pull_request:
@@ -35,6 +37,8 @@ jobs:
   distribute:
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    env:
+      VALCEA_FB_TEXT_FALLBACK_ENABLED: "true"
     steps:
       - uses: actions/checkout@v6
         with:

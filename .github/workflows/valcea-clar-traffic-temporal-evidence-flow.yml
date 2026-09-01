@@ -1,0 +1,80 @@
+name: VÂLCEA CLAR Traffic Temporal Evidence Flow
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/traffic_temporal_evidence_flow.py"
+      - "valcea-clar/scripts/infotrafic_valcea_recent_reference_adapter.py"
+      - "valcea-clar/scripts/ipj_valcea_road_traffic_news_reference_adapter.py"
+      - "valcea-clar/scripts/traffic_explicit_temporal_evidence_adapter.py"
+      - "valcea-clar/scripts/traffic_reference_correlator.py"
+      - "valcea-clar/scripts/traffic_dossier_thread_candidate_engine.py"
+      - ".github/workflows/valcea-clar-traffic-temporal-evidence-flow.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-traffic-temporal-evidence-flow-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile bounded traffic intelligence flow
+        run: |
+          python -m py_compile valcea-clar/scripts/traffic_temporal_evidence_flow.py
+          python -m py_compile valcea-clar/scripts/infotrafic_valcea_recent_reference_adapter.py
+          python -m py_compile valcea-clar/scripts/ipj_valcea_road_traffic_news_reference_adapter.py
+          python -m py_compile valcea-clar/scripts/traffic_explicit_temporal_evidence_adapter.py
+          python -m py_compile valcea-clar/scripts/traffic_reference_correlator.py
+          python -m py_compile valcea-clar/scripts/traffic_dossier_thread_candidate_engine.py
+      - name: Run fail-closed flow self-test
+        run: python valcea-clar/scripts/traffic_temporal_evidence_flow.py --self-test
+      - name: Measure live first-party temporal coverage
+        run: |
+          python valcea-clar/scripts/traffic_temporal_evidence_flow.py > /tmp/traffic-temporal-flow.json
+          python - <<'PY'
+          import json
+
+          with open("/tmp/traffic-temporal-flow.json", encoding="utf-8") as handle:
+              data = json.load(handle)
+
+          assert data["state"] == "CLEAR", data
+          assert 0 <= data["selected_reference_count"] <= 8
+          assert 0 <= data["temporal_authorized_count"] <= data["selected_reference_count"]
+          assert 0.0 <= data["temporal_coverage_percent"] <= 100.0
+          for flag in (
+              "current_state_authorized",
+              "same_incident_authorized",
+              "active_incident_authorized",
+              "breaking_news_authorized",
+              "publication_authorized",
+              "eta_service_impact_authorized",
+          ):
+              assert data[flag] is False, (flag, data)
+          print(
+              "live-temporal-coverage:",
+              json.dumps(
+                  {
+                      "selected_reference_counts": data["selected_reference_counts"],
+                      "article_fetch_success_count": data["article_fetch_success_count"],
+                      "article_fetch_failure_count": data["article_fetch_failure_count"],
+                      "temporal_authorized_counts": data["temporal_authorized_counts"],
+                      "temporal_coverage_percent": data["temporal_coverage_percent"],
+                      "temporal_conflict_count": data["temporal_conflict_count"],
+                      "correlation_candidate_count": data["correlation_candidate_count"],
+                      "thread_candidate_count": data["thread_candidate_count"],
+                  },
+                  ensure_ascii=False,
+                  sort_keys=True,
+              ),
+          )
+          PY
