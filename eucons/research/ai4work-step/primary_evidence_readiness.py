@@ -19,7 +19,8 @@ FORM_AUDIENCE = {
 }
 CHANNEL_TYPE_RE = re.compile(r"^[a-z][a-z0-9_]{2,48}$")
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
-REGISTER_KEYS = {"schema_version", "research_id", "entries"}
+REGISTER_KEYS = {"schema_version", "research_id", "invitation_catalog", "entries"}
+CATALOG_BINDING_KEYS = {"reference", "sha256"}
 ENTRY_KEYS = {
     "channel_id",
     "channel_type",
@@ -106,10 +107,29 @@ def _validate_method_frame(frame: Any) -> dict[str, Any]:
 def _validate_channel_register(register: Any) -> dict[str, dict[str, Any]]:
     if not isinstance(register, dict) or set(register) != REGISTER_KEYS:
         raise PrimaryEvidenceReadinessError(f"channel register fields must be exactly {sorted(REGISTER_KEYS)}")
-    if register.get("schema_version") != "eucons.ai4work_collection_channel_register.v0.1":
+    if register.get("schema_version") != "eucons.ai4work_collection_channel_register.v0.2":
         raise PrimaryEvidenceReadinessError("unsupported collection-channel register schema")
     if register.get("research_id") != RESEARCH_ID:
         raise PrimaryEvidenceReadinessError("channel register research_id mismatch")
+
+    catalog_binding = register.get("invitation_catalog")
+    if not isinstance(catalog_binding, dict) or set(catalog_binding) != CATALOG_BINDING_KEYS:
+        raise PrimaryEvidenceReadinessError(
+            f"channel invitation_catalog fields must be exactly {sorted(CATALOG_BINDING_KEYS)}"
+        )
+    reference = catalog_binding.get("reference")
+    if (
+        not isinstance(reference, str)
+        or not reference.strip()
+        or "/" in reference
+        or "\\" in reference
+        or reference in {".", ".."}
+    ):
+        raise PrimaryEvidenceReadinessError("channel invitation catalog reference must be one local filename")
+    digest = catalog_binding.get("sha256")
+    if not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
+        raise PrimaryEvidenceReadinessError("channel invitation catalog binding needs a lowercase SHA-256")
+
     entries = register.get("entries")
     if not isinstance(entries, list) or not entries:
         raise PrimaryEvidenceReadinessError("channel register must contain at least one entry")
@@ -470,6 +490,7 @@ def assert_primary_evidence_ready_for_synthesis(
         "all_three_regions_meet_frozen_population_minima": True,
         "independent_channel_types_per_region_validated": True,
         "channel_register_sha256_validated": True,
+        "invitation_catalog_binding_shape_validated": True,
         "form_audience_channel_scope_validated": True,
         "channel_concentration_scopes_validated": True,
         "dominant_channel_sensitivity_used": sensitivity_used,
