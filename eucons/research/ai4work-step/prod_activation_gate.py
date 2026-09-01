@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from explicit_user_approval_control import explicit_user_approval_errors
+from privacy_notice_nf06_binding_control import binding_errors as privacy_notice_binding_errors
 from security_incident_response_gate import incident_response_errors
 
 HERE = Path(__file__).resolve().parent
@@ -16,6 +17,8 @@ CONTROLLER_PATH = HERE / "CONTROLLER_DETERMINATION_DRAFT.json"
 COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
 DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
 INCIDENT_RESPONSE_PATH = HERE / "GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json"
+ARTICLE13_SNAPSHOT_PATH = HERE / "ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json"
+NF06_CONTRACT_PATH = HERE / "NF06_PREINGEST_CONTRACT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS"}
 DOCUMENTARY_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
@@ -247,6 +250,29 @@ def activation_errors(
             errors.append(f"incident_response:{incident_error}")
     elif incident_response is not None:
         errors.append("incident_response_artifact_shape_invalid")
+
+    # The authoritative activation boundary must also validate the exact Article 13 -> NF06
+    # semantics. A generic SHA/evidence-key check or a green standalone workflow is not enough:
+    # activation itself must reject an unapproved notice, frame-version drift, or a notice that
+    # is not the exact frozen snapshot required by NF06.
+    try:
+        privacy_notice_snapshot = _load(ARTICLE13_SNAPSHOT_PATH)
+        nf06_contract = _load(NF06_CONTRACT_PATH)
+        privacy_notice_snapshot_sha256 = hashlib.sha256(ARTICLE13_SNAPSHOT_PATH.read_bytes()).hexdigest()
+    except (OSError, json.JSONDecodeError):
+        errors.append("privacy_notice_binding_artifact_unreadable")
+    else:
+        if not isinstance(privacy_notice_snapshot, dict) or not isinstance(nf06_contract, dict):
+            errors.append("privacy_notice_binding_artifact_shape_invalid")
+        else:
+            for privacy_error in privacy_notice_binding_errors(
+                snapshot=privacy_notice_snapshot,
+                collection_frame=collection_frame,
+                manifest=manifest,
+                nf06_contract=nf06_contract,
+                snapshot_sha256=privacy_notice_snapshot_sha256,
+            ):
+                errors.append(f"privacy_notice_binding:{privacy_error}")
 
     evidence = manifest.get("required_external_or_operational_evidence")
     if not isinstance(evidence, dict):
