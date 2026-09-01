@@ -376,10 +376,12 @@ jobs:
           if d.get('handoff_id') != 'CREATIVE_EUROPE_FT_EXACT_HANDOFF_V1':
               print('FAIL exact handoff identity drift')
               sys.exit(2)
-          if d.get('observation_state') not in (
+          allowed={
               'NO_EXACT_HANDOFF_PENDING_NON_AUTHORIZING',
               'EXACT_HANDOFF_EXECUTED_NON_AUTHORIZING',
-          ):
+              'EXACT_HANDOFF_FAILED_CLOSED_NON_AUTHORIZING',
+          }
+          if d.get('observation_state') not in allowed:
               print('FAIL exact handoff state drift', d.get('observation_state'))
               sys.exit(2)
           for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
@@ -389,7 +391,8 @@ jobs:
           if not re.fullmatch(r'[0-9a-f]{64}', str(d.get('current_watch_reconciliation_sha256') or '')):
               print('FAIL exact handoff lost current watch binding')
               sys.exit(2)
-          if d.get('observation_state') == 'EXACT_HANDOFF_EXECUTED_NON_AUTHORIZING':
+          state=d.get('observation_state')
+          if state == 'EXACT_HANDOFF_EXECUTED_NON_AUTHORIZING':
               ref=str(d.get('selected_reference') or '')
               if not ref.startswith('CREA-') or d.get('exact_authority_url_verified') is not True:
                   print('FAIL exact handoff authority verification missing', ref)
@@ -405,13 +408,26 @@ jobs:
                   if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
                       print('FAIL exact handoff hash invalid', key)
                       sys.exit(2)
+          elif state == 'EXACT_HANDOFF_FAILED_CLOSED_NON_AUTHORIZING':
+              ref=str(d.get('selected_reference') or '')
+              if not ref.startswith('CREA-') or d.get('exact_authority_url_verified') is not False:
+                  print('FAIL failed exact handoff identity/authority boundary', ref)
+                  sys.exit(2)
+              if d.get('retry_candidate') is not True or not d.get('failure_type') or not d.get('failure_message'):
+                  print('FAIL failed exact handoff lacks durable failure evidence')
+                  sys.exit(2)
+              if d.get('material_admission_ready_for_downstream_review') is not False:
+                  print('FAIL failed exact handoff claims material readiness')
+                  sys.exit(2)
           print(json.dumps({
-              'observation_state': d.get('observation_state'),
+              'observation_state': state,
               'selected_reference': d.get('selected_reference'),
               'selection_source': d.get('selection_source'),
               'exact_candidate_observation_state': d.get('exact_candidate_observation_state'),
               'exact_status_label': d.get('exact_status_label'),
               'exact_semantic_reconciliation_state': d.get('exact_semantic_reconciliation_state'),
+              'failure_type': d.get('failure_type'),
+              'failure_message': d.get('failure_message'),
               'material_admission_ready_for_downstream_review': d.get('material_admission_ready_for_downstream_review'),
               'open_call_authorized': False,
           }, ensure_ascii=False))
