@@ -9,6 +9,7 @@ require_once dirname(__DIR__) . '/src/ResearchRuntime.php';
 require_once dirname(__DIR__) . '/src/ResearchChannelGate.php';
 require_once dirname(__DIR__) . '/src/ResearchGovernanceGate.php';
 require_once dirname(__DIR__) . '/src/ResearchLiveSafetyGate.php';
+require_once dirname(__DIR__) . '/src/ResearchStorageIsolationGate.php';
 
 const AI4WORK_RESEARCH_PATH = '/research/ai4work/v1/submit';
 const AI4WORK_MAX_BODY_BYTES = 65536;
@@ -84,9 +85,11 @@ if ($isResearch) {
     $researchRoot = dirname(__DIR__, 3) . '/research/ai4work-step';
     $researchGovernanceGate = new EuconsResearchGovernanceGate($researchRoot);
     $researchLiveSafetyGate = new EuconsResearchLiveSafetyGate($researchRoot);
+    $researchStorageIsolationGate = new EuconsResearchStorageIsolationGate(dirname(__DIR__, 3));
     if (!$researchRuntime->productionEnabled()
         || !$researchGovernanceGate->productionReady()
-        || !$researchLiveSafetyGate->productionReady()) {
+        || !$researchLiveSafetyGate->productionReady()
+        || !$researchStorageIsolationGate->productionReady()) {
         eucons_json(503, ['status' => 'unavailable', 'code' => 'RESEARCH_COLLECTION_DISABLED']);
     }
 
