@@ -19,6 +19,7 @@ MAX_CLOCK_SKEW = timedelta(minutes=5)
 MAX_LOG_RETENTION_DAYS = 7
 MAX_LIVE_DELETE_DAYS_AFTER_CLOSE = 180
 MAX_REPLAY_MARKER_HOURS = 24
+MAX_RESIDUAL_BACKUP_DAYS = 92
 
 
 class RetentionEvidenceError(ValueError):
@@ -119,6 +120,12 @@ def retention_attestation_errors(
     replay_hours = facts.get("replay_marker_max_hours")
     if not isinstance(replay_hours, int) or isinstance(replay_hours, bool) or replay_hours < 0 or replay_hours > MAX_REPLAY_MARKER_HOURS:
         errors.append("replay_marker_retention_exceeds_policy")
+
+    backup_days = facts.get("backup_max_residual_days")
+    if not isinstance(backup_days, int) or isinstance(backup_days, bool) or backup_days < 0:
+        errors.append("backup_max_residual_days_missing_or_invalid")
+    elif backup_days > MAX_RESIDUAL_BACKUP_DAYS:
+        errors.append("backup_residual_retention_exceeds_approved_92_day_cap")
 
     required_true = (
         "backup_rotation_verified",
