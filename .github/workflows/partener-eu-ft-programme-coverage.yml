@@ -75,6 +75,7 @@ jobs:
       - name: Capture bounded live official F&T programme coverage
         run: |
           rm -rf /tmp/partener-eu-ft-programme-watch
+          rm -rf /tmp/partener-eu-ft-history-scratch
           python partener-eu/ingest/eu_direct_ft_programme_watch.py \
             --output-dir /tmp/partener-eu-ft-programme-watch \
             --page-size 25 \
@@ -141,7 +142,7 @@ jobs:
             [ -n "$RUN_ID" ] || continue
             CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
             [ "$CONCLUSION" = "success" ] || continue
-            DEST="$HISTORY/download-${RUN_ID}"
+            DEST="/tmp/partener-eu-ft-history-scratch/life-${RUN_ID}"
             mkdir -p "$DEST"
             if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
               continue
@@ -242,7 +243,7 @@ jobs:
             [ -n "$RUN_ID" ] || continue
             CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
             [ "$CONCLUSION" = "success" ] || continue
-            DEST="$HISTORY/cef-download-${RUN_ID}"
+            DEST="/tmp/partener-eu-ft-history-scratch/cef-${RUN_ID}"
             mkdir -p "$DEST"
             if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
               continue
@@ -445,6 +446,16 @@ jobs:
               },
           }, ensure_ascii=False, sort_keys=True))
           PY
+
+      - name: Enforce compact history artifact boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          if find "$ROOT/history" -mindepth 1 -maxdepth 1 -type d \( -name 'download-*' -o -name 'cef-download-*' \) -print -quit | grep -q .; then
+            echo 'recursive history download directory leaked into artifact root' >&2
+            exit 1
+          fi
 
       - name: Upload replayable programme-watch evidence
         if: always()
