@@ -63,8 +63,6 @@ def fake_post(endpoint, *, text, page_size, page_number, parts, max_bytes=None, 
     if "search" in endpoint and "facet" not in endpoint:
         payload = SEARCH
     else:
-        # Programme watch resolves through its CREA- scope. Competitive exact
-        # resolution succeeds only when the handoff scopes Facet to the parent.
         payload = FACET if text in {"CREA-", PARENT} else {"facets": []}
     raw = json.dumps(payload, sort_keys=True).encode()
     return payload, raw, {"url": endpoint, "http_status": 200, "sha256": "a" * 64}
@@ -175,3 +173,4 @@ else:
     raise AssertionError("competitive handoff accepted self-authorizing discovery evidence")
 
 print("PASS Creative Europe bounded active competitive handoff + pending replay stays non-authorizing")
+__import__("runpy").run_path(str(Path(__file__).with_name("test_creative_europe_ft_competitive_admission.py")), run_name="__main__")
