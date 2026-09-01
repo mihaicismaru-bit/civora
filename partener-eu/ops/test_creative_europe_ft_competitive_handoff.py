@@ -24,6 +24,7 @@ def load(name: str):
 watch_mod = load("creative_europe_ft_watch")
 handoff = load("creative_europe_ft_competitive_handoff")
 exact = load("creative_europe_ft_competitive_exact")
+admission = load("creative_europe_ft_competitive_admission")
 
 PARENT = "CREA-CULT-2026-PERFORM-EU"
 CID = "49521170"
@@ -90,9 +91,26 @@ with tempfile.TemporaryDirectory() as tmp:
     assert first["exact_status_label"] == "Open"
     assert first["exact_semantic_reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
     assert first["material_admission_ready_for_downstream_review"] is True
+    assert first["material_admission_scope"] == "STATUS_ONLY"
+    assert first["status_fact_admitted"] is True
+    assert first["status_fact_open_call_authorized"] is True
     assert first["open_call_authorized"] is False
+    assert first["material_admission_publish_authorized"] is False
+    assert first["material_admission_distribution_authorized"] is False
+    assert first["material_admission_call_alert_authorized"] is False
     first_exact = root / "run1" / "current" / "ft-competitive-exact-evidence.json"
+    first_admission = root / "run1" / "material-admission" / "ft-competitive-material-admission.json"
     assert first_exact.is_file()
+    assert first_admission.is_file()
+    first_admission_payload = json.loads(first_admission.read_text(encoding="utf-8"))
+    admission.validate_admission(first_admission_payload)
+    assert first_admission_payload["open_call_authorized"] is True
+    assert first_admission_payload["deadline_authorized"] is False
+    assert first_admission_payload["budget_authorized"] is False
+    assert first_admission_payload["eligibility_authorized"] is False
+    assert first_admission_payload["publish_authorized"] is False
+    assert first_admission_payload["distribution_authorized"] is False
+    assert first_admission_payload["call_alert_authorized"] is False
 
     history_exact_dir = root / "history" / "download-1" / "competitive-handoff" / "current"
     history_exact_dir.mkdir(parents=True)
@@ -105,7 +123,18 @@ with tempfile.TemporaryDirectory() as tmp:
     assert second["previous_exact_evidence_sha256"]
     assert second["exact_semantic_reconciliation_state"] == "NO_CHANGE"
     assert second["exact_semantic_change_count"] == 0
+    assert second["material_admission_scope"] == "STATUS_ONLY"
+    assert second["status_fact_admitted"] is True
+    assert second["status_fact_open_call_authorized"] is True
     assert second["open_call_authorized"] is False
+    second_admission = root / "run2" / "material-admission" / "ft-competitive-material-admission.json"
+    assert second_admission.is_file()
+    second_admission_payload = json.loads(second_admission.read_text(encoding="utf-8"))
+    admission.validate_admission(second_admission_payload)
+    assert second_admission_payload["distribution_change_candidate"] is False
+    assert second_admission_payload["publish_authorized"] is False
+    assert second_admission_payload["distribution_authorized"] is False
+    assert second_admission_payload["call_alert_authorized"] is False
 
     changed_watch = copy.deepcopy(watch)
     candidate = changed_watch["linked_competitive_discovery"][0]
@@ -172,5 +201,5 @@ except ValueError:
 else:
     raise AssertionError("competitive handoff accepted self-authorizing discovery evidence")
 
-print("PASS Creative Europe bounded active competitive handoff + pending replay stays non-authorizing")
+print("PASS Creative Europe bounded competitive handoff persists status-only admission while handoff stays non-publishing")
 __import__("runpy").run_path(str(Path(__file__).with_name("test_creative_europe_ft_competitive_admission.py")), run_name="__main__")
