@@ -228,6 +228,18 @@ class NF06PreingestTests(unittest.TestCase):
         with self.assertRaises(NF06.NF06PreingestError):
             NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=True)
 
+    def test_future_dated_collection_frame_is_rejected_in_prod_and_test_twin(self):
+        for prod in (True, False):
+            with self.subTest(prod=prod):
+                records = normalized_records(synthetic=not prod)
+                records[0]["received_at"] = "2099-01-01T09:00:00+00:00"
+                records[1]["received_at"] = "2099-01-01T10:00:00+00:00"
+                frame, source_bytes = collection_frame(records, prod=prod)
+                frame["collection_started_at"] = "2099-01-01T08:00:00+00:00"
+                frame["collection_closed_at"] = "2099-01-01T18:00:00+00:00"
+                with self.assertRaisesRegex(NF06.NF06PreingestError, "future-dated"):
+                    NF06.build_preingest_manifest(records, collection_frame=frame, source_bytes=source_bytes, prod=prod)
+
     def test_noncanonical_identifier_like_value_in_controlled_field_is_rejected_again(self):
         records = normalized_records()
         records[0]["profile"]["occupational_family"] = "test@example.org"
