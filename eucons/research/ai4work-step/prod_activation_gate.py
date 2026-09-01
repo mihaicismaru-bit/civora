@@ -30,6 +30,9 @@ APPROVED_EXTERNAL_STATUSES = {"APPROVED", "PASS"}
 DOCUMENTARY_EXTERNAL_STATUSES = {"APPROVED", "PASS", "FROZEN"}
 SEMANTIC_ATTESTATION_STATUSES = {"APPROVED", "PASS"}
 NON_EVIDENCE_MARKERS = ("TEST_TWIN", "NON_EVIDENCE", "SYNTHETIC")
+# A provider-bound TEST TWIN smoke is a control-only go-live prerequisite, never need evidence.
+# It is the sole operational binding that must be synthetic and explicitly NON-EVIDENCE.
+TEST_TWIN_CONTROL_KEYS = {"provider_bound_test_twin_smoke"}
 FROZEN_DOCUMENTARY_KEYS = {
     "provider_account_role_reconciliation",
     "live_hosting_service_mapping",
@@ -102,14 +105,19 @@ def _resolve_local_reference(reference: Any) -> Path | None:
 
 
 def _valid_promoted_local_binding(*, key: str, value: dict[str, Any], research_id: str) -> bool:
-    """Activation itself must verify immutable and semantically relevant evidence.
+    """Activation itself verifies immutable, semantically relevant gate artifacts.
 
-    A separate CI evidence-binding workflow is useful defence in depth, but PROD activation
+    A separate CI evidence-binding workflow is defence in depth, but PROD activation
     must not depend on that workflow having run. Every promoted external/operational gate is
     therefore re-checked here. FROZEN is accepted only for the explicitly enumerated immutable
     documentary/provider-context keys. Live operational gates require PASS/APPROVED and a JSON
-    attestation bound to this research run and exact evidence key. TEST TWIN / NON-EVIDENCE /
-    SYNTHETIC artifacts are never promotable.
+    attestation bound to this research run and exact evidence key.
+
+    Empirical/operational evidence keys reject TEST TWIN / NON-EVIDENCE / SYNTHETIC artifacts.
+    The sole exception is the dedicated provider-bound TEST TWIN smoke control: because its
+    purpose is to prove the live path safely before real collection, it MUST be synthetic and
+    explicitly marked TEST_TWIN + NON_EVIDENCE. That narrow control-only exception cannot satisfy
+    any other evidence key and never becomes need evidence.
     """
     candidate = _resolve_local_reference(value.get("reference"))
     digest = value.get("sha256")
@@ -132,14 +140,26 @@ def _valid_promoted_local_binding(*, key: str, value: dict[str, Any], research_i
         return False
     if artifact.get("evidence_binding_key") != key:
         return False
+
+    marker_values = [
+        str(artifact.get(field) or "").upper()
+        for field in ("evidence_class", "mode", "artifact_class")
+    ]
+    if key in TEST_TWIN_CONTROL_KEYS:
+        if artifact.get("synthetic") is not True:
+            return False
+        return any(
+            "TEST_TWIN" in marker and "NON_EVIDENCE" in marker
+            for marker in marker_values
+        )
+
     if artifact.get("synthetic") is True:
         return False
-    for field in ("evidence_class", "mode", "artifact_class"):
-        marker_value = artifact.get(field)
-        if isinstance(marker_value, str):
-            normalized = marker_value.upper()
-            if any(marker in normalized for marker in NON_EVIDENCE_MARKERS):
-                return False
+    if any(
+        any(non_evidence_marker in marker for non_evidence_marker in NON_EVIDENCE_MARKERS)
+        for marker in marker_values
+    ):
+        return False
     return True
 
 
