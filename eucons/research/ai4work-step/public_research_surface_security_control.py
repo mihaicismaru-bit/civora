@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import re
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -54,6 +55,8 @@ FORBIDDEN_CSP_TOKENS = {
 REQUIRED_PERMISSION_TOKENS = {"camera=()", "microphone=()", "geolocation=()"}
 REQUIRED_CACHE_TOKENS = {"no-store"}
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+MAX_LIVE_READBACK_AGE = timedelta(hours=24)
+MAX_LIVE_READBACK_FUTURE_SKEW = timedelta(minutes=5)
 
 
 class PublicSurfaceSecurityError(ValueError):
@@ -135,6 +138,28 @@ def validate_header_set(headers: dict[str, Any]) -> None:
         raise PublicSurfaceSecurityError("Cache-Control must include no-store")
 
 
+def validate_live_readback_timestamp(value: Any, *, now_utc: datetime | None = None) -> datetime:
+    if not isinstance(value, str) or not value.strip():
+        raise PublicSurfaceSecurityError("live provider readback verified_at_utc missing")
+    try:
+        verified = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise PublicSurfaceSecurityError("live provider readback verified_at_utc must be ISO-8601") from exc
+    if verified.tzinfo is None:
+        raise PublicSurfaceSecurityError("live provider readback verified_at_utc must include timezone")
+    verified = verified.astimezone(timezone.utc)
+
+    now = now_utc or datetime.now(timezone.utc)
+    if now.tzinfo is None:
+        raise PublicSurfaceSecurityError("live provider readback validation clock must include timezone")
+    now = now.astimezone(timezone.utc)
+    if verified > now + MAX_LIVE_READBACK_FUTURE_SKEW:
+        raise PublicSurfaceSecurityError("live provider readback verified_at_utc is future-dated")
+    if verified < now - MAX_LIVE_READBACK_AGE:
+        raise PublicSurfaceSecurityError("live provider readback is stale; refresh required before PROD")
+    return verified
+
+
 def _validate_binding_definition(binding: dict[str, Any]) -> None:
     if binding.get("schema_version") != "eucons.ai4work_public_surface_security_binding.v0.1":
         raise PublicSurfaceSecurityError("binding schema_version mismatch")
@@ -144,6 +169,14 @@ def _validate_binding_definition(binding: dict[str, Any]) -> None:
         raise PublicSurfaceSecurityError("binding evidence_class mismatch")
     if binding.get("synthetic") is not False:
         raise PublicSurfaceSecurityError("binding control artifact must be non-synthetic")
+
+    freshness = binding.get("live_readback_freshness")
+    if not isinstance(freshness, dict):
+        raise PublicSurfaceSecurityError("live readback freshness policy missing")
+    if freshness.get("max_age_hours") != 24:
+        raise PublicSurfaceSecurityError("live readback max-age policy drift")
+    if freshness.get("max_future_skew_minutes") != 5:
+        raise PublicSurfaceSecurityError("live readback future-skew policy drift")
 
     scope = binding.get("scope")
     if not isinstance(scope, dict):
@@ -213,6 +246,7 @@ def _validate_live_readback(binding: dict[str, Any]) -> None:
     for key in ("provider_account", "verified_at_utc", "verified_by"):
         if _placeholder(readback.get(key)):
             raise PublicSurfaceSecurityError(f"live provider readback {key} missing")
+    validate_live_readback_timestamp(readback.get("verified_at_utc"))
     routes = readback.get("routes")
     if not isinstance(routes, list) or len(routes) != len(EXPECTED_ROUTES):
         raise PublicSurfaceSecurityError("live provider route readback incomplete")
