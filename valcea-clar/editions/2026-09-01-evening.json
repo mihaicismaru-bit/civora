@@ -4,80 +4,186 @@
   "slot": "evening",
   "title": "VÂLCEA CLAR — Ediția de seară",
   "edition_date": "2026-09-01",
-  "updated_local": "2026-09-01T18:28:42+03:00",
+  "updated_local": "2026-09-01T20:53:33+03:00",
   "generator": "deterministic_zero_llm_v2+manual_journalism_v1",
   "status": "auto_approved",
   "publication_intent": "publish",
-  "editorial_fact_count": 32,
-  "editorial_writer_composed_count": 13,
-  "auto_fact_registry_count": 5,
-  "auto_facts_included": 6,
+  "editorial_fact_count": 29,
+  "editorial_writer_composed_count": 15,
+  "auto_fact_registry_count": 0,
+  "auto_facts_included": 1,
   "items": [
-    {
-      "id": "auto-scm-rm-valcea-b30c85d12af3",
-      "section": "SPORT",
-      "priority": 84,
-      "headline": "„Putem aduce prima victorie în fața propriilor suporteri”",
-      "dek": "SCM Râmnicu Vâlcea a publicat această informare la 01.09.2026. VÂLCEA CLAR o semnalează ca noutate din sursă primară și păstrează legătura directă către pagina oficială.",
-      "paragraphs": [
-        "INFORMARE DIN SURSĂ PRIMARĂ. La 01.09.2026, SCM Râmnicu Vâlcea a publicat materialul cu titlul „„Putem aduce prima victorie în fața propriilor suporteri””. În această etapă, VÂLCEA CLAR confirmă automat numai existența publicării, data, titlul furnizat de instituție și adresa sursei oficiale. Detaliile din conținutul sursei nu sunt transformate automat în afirmații editoriale; pentru acestea rămâne necesară verificarea sau compunerea unui material complet."
-      ],
-      "confidence": 91,
-      "material_fact_gate": "PASS_TITLE_DATE_ONLY",
-      "sources": [
-        {
-          "name": "SCM Râmnicu Vâlcea",
-          "url": "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/",
-          "tier": "T1B"
-        }
-      ],
-      "auto_generated": true,
-      "auto_scope": "verified_source_notice_brief",
-      "brief_kind": "primary_source_notice"
-    },
     {
       "id": "auto-raliul-valcii-official-news-f6e28bbb1533",
       "section": "SPORT",
-      "priority": 84,
-      "headline": "Înscrierile la Raliul Vâlcii Nurvil 2026 sunt deschise!",
-      "dek": "Raliul Vâlcii — site oficial a publicat această informare la 01.09.2026. VÂLCEA CLAR o semnalează ca noutate din sursă primară și păstrează legătura directă către pagina oficială.",
+      "priority": 96,
+      "headline": "Raliul Vâlcii 2026: înscrierile sunt deschise până la 18 septembrie",
+      "dek": "Etapa a VII-a a Campionatului Național de Raliuri se desfășoară între 24 și 26 septembrie, la Râmnicu Vâlcea. Programul include 13 probe speciale și o superspecială urbană.",
       "paragraphs": [
-        "INFORMARE DIN SURSĂ PRIMARĂ. La 01.09.2026, Raliul Vâlcii — site oficial a publicat materialul cu titlul „Înscrierile la Raliul Vâlcii Nurvil 2026 sunt deschise!”. În această etapă, VÂLCEA CLAR confirmă automat numai existența publicării, data, titlul furnizat de instituție și adresa sursei oficiale. Detaliile din conținutul sursei nu sunt transformate automat în afirmații editoriale; pentru acestea rămâne necesară verificarea sau compunerea unui material complet."
+        "Înscrierile pentru Raliul Vâlcii Nurvil 2026 sunt deschise pe platforma myfras.ro până vineri, 18 septembrie 2026, la ora 20:00. Competiția este programată între 24 și 26 septembrie, la Râmnicu Vâlcea.",
+        "Shakedown-ul este programat joi, 24 septembrie, între orele 13:00 și 15:00, iar startul festiv va avea loc de la ora 19:00, în centrul municipiului Râmnicu Vâlcea. Recunoașterile sunt prevăzute pentru 23 septembrie.",
+        "Organizatorii au anunțat 13 probe speciale, însumând 120,30 kilometri competitivi, dintr-un traseu total de aproximativ 501 kilometri. Probele se desfășoară pe parcursul a două zile de concurs.",
+        "Programul de vineri cuprinde șapte probe și 72,50 kilometri, inclusiv o probă de noapte la Mihăești. Sâmbătă sunt programate șase probe și 47,80 kilometri, cu Power Stage la Horezu și superspeciala Nurvil Show în centrul Râmnicului.",
+        "Parcul de service va fi amenajat la Vâlcea Shopping City. Regulamentul, programul, itinerariul și hărțile probelor sunt publicate în secțiunea de documente pentru echipaje a site-ului oficial."
       ],
-      "confidence": 91,
-      "material_fact_gate": "PASS_TITLE_DATE_ONLY",
+      "confidence": 99,
+      "material_fact_gate": "PASS",
       "sources": [
         {
-          "name": "Raliul Vâlcii — site oficial",
+          "name": "Raliul Vâlcii — informațiile oficiale pentru înscrieri și traseu",
           "url": "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/",
           "tier": "T1B"
         }
       ],
-      "auto_generated": true,
-      "auto_scope": "verified_source_notice_brief",
-      "brief_kind": "primary_source_notice"
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/"
+        ],
+        "dek_source_urls": [
+          "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "registration",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "87d782af1249f38d2960cabd02daabaa791c0b312b5e01753b114265e9f6a242",
+            "source_urls": [
+              "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/"
+            ]
+          },
+          {
+            "claim_id": "opening",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text_sha256": "324215fe10c238cb33c2f408aea00ff307089f769351ba016e0dca0746722400",
+            "source_urls": [
+              "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/"
+            ]
+          },
+          {
+            "claim_id": "route",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text_sha256": "f0ec6bb741b148cbf6a6f0a3386b77175b5e3844ba5dbfda8b13807cab46d60c",
+            "source_urls": [
+              "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/"
+            ]
+          },
+          {
+            "claim_id": "competition-days",
+            "role": "context",
+            "kind": "reader_service",
+            "text_sha256": "e35268385c97bc94eb4b2a6360093903a56ede8e718fd2c886f6ad8d0049f6bc",
+            "source_urls": [
+              "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/"
+            ]
+          },
+          {
+            "claim_id": "service-documents",
+            "role": "next_watch",
+            "kind": "reader_service",
+            "text_sha256": "e765474703f6b892cb5b7c2caea2e73a40105935d068d7bc250db45757280dd6",
+            "source_urls": [
+              "https://raliulvalcii.ro/stiri/inscrieri-raliul-valcii-2026/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "2efe04851bf0ea8f3b90b6c669f3de0dae98921ac6c5e248e0ef4fa09c207a99"
+      }
     },
     {
-      "id": "auto-raliul-valcii-official-news-8708e420c76b",
+      "id": "auto-scm-rm-valcea-b30c85d12af3",
       "section": "SPORT",
-      "priority": 84,
-      "headline": "Acreditări media Raliul Vâlcii Nurvil 2026 — înscrierile sunt deschise!",
-      "dek": "Raliul Vâlcii — site oficial a publicat această informare la 31.08.2026. VÂLCEA CLAR o semnalează ca noutate din sursă primară și păstrează legătura directă către pagina oficială.",
+      "priority": 95,
+      "headline": "SCM Râmnicu Vâlcea caută prima victorie acasă, sâmbătă, cu CSM Reșița",
+      "dek": "Meciul se joacă pe 5 septembrie, de la ora 11:00, pe Stadionul Municipal. Vâlcenii vin după succesul cu Dumbrăvița și ocupă locul 9; Reșița este pe locul 4.",
       "paragraphs": [
-        "INFORMARE DIN SURSĂ PRIMARĂ. La 31.08.2026, Raliul Vâlcii — site oficial a publicat materialul cu titlul „Acreditări media Raliul Vâlcii Nurvil 2026 — înscrierile sunt deschise!”. În această etapă, VÂLCEA CLAR confirmă automat numai existența publicării, data, titlul furnizat de instituție și adresa sursei oficiale. Detaliile din conținutul sursei nu sunt transformate automat în afirmații editoriale; pentru acestea rămâne necesară verificarea sau compunerea unui material complet."
+        "SCM Râmnicu Vâlcea primește CSM Reșița sâmbătă, 5 septembrie 2026, de la ora 11:00, pe Stadionul Municipal. Pentru formația vâlceană, miza este prima victorie a sezonului în fața propriilor suporteri.",
+        "Înaintea meciului, Teodor Ciobanu, unul dintre foștii jucători importanți ai fotbalului vâlcean, va fi invitat pe teren, potrivit anunțului clubului.",
+        "Echipa vine după victoria cu 1-0 obținută la Dumbrăvița, unde Alexandru Sălcianu a marcat cu capul după o fază fixă. După cinci etape, SCM are 8 puncte, golaveraj 6-5 și ocupă locul 9.",
+        "CSM Reșița se află pe locul 4, cu 12 puncte și golaveraj 9-6. Formația bănățeană a câștigat patru dintre primele cinci partide și a învins CSA Steaua cu 2-1 în etapa precedentă.",
+        "Atacantul Dragoș Huiban a descris partida drept dificilă, dar a spus că echipa vine după două rezultate pozitive și are încredere că poate obține victoria pe teren propriu."
       ],
-      "confidence": 91,
-      "material_fact_gate": "PASS_TITLE_DATE_ONLY",
+      "confidence": 98,
+      "material_fact_gate": "PASS",
       "sources": [
         {
-          "name": "Raliul Vâlcii — site oficial",
-          "url": "https://raliulvalcii.ro/stiri/acreditari-media-raliul-valcii-2026/",
+          "name": "SCM Râmnicu Vâlcea — avancronica meciului cu CSM Reșița",
+          "url": "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/",
           "tier": "T1B"
         }
       ],
-      "auto_generated": true,
-      "auto_scope": "verified_source_notice_brief",
-      "brief_kind": "primary_source_notice"
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "straight_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+        ],
+        "dek_source_urls": [
+          "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "fixture",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "87b579685d685c40c779a736f335b91a00fb5065033c962a52fc428b3e9fb29f",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "ciobanu",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "f88fa185a5523aa1c49ac7595cfe801eb4946d3da9c29e3a522910e6929c97e0",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "valcea-form",
+            "role": "context",
+            "kind": "documented_context",
+            "text_sha256": "33b79b69d574dfa3d1c4fef579b8a83b50a716312f07a4c8f2e3ac53c8899bce",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "resita-form",
+            "role": "context",
+            "kind": "documented_context",
+            "text_sha256": "78b03e9644db5ccd39fab7a56df58e8bb6ea58d7d856cf13064979608a2bcff2",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "huiban",
+            "role": "consequence",
+            "kind": "attributed_statement",
+            "text_sha256": "bba18c9e9ef2d2a3970171b4185c1b9d92c784bc11859e4d7b9deb32f5c3e054",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "c57c35e132473e6d0fb3a97f99be804a56dc3003d04d984978b037f5a56712b2"
+      }
     },
     {
       "id": "scm-program-5aabeba76e53785685fb",
@@ -139,28 +245,6 @@
       }
     },
     {
-      "id": "auto-raliul-valcii-official-news-bef661828bc4",
-      "section": "SPORT",
-      "priority": 84,
-      "headline": "Raliul, la tine în buzunar!",
-      "dek": "Raliul Vâlcii — site oficial a publicat această informare la 30.08.2026. VÂLCEA CLAR o semnalează ca noutate din sursă primară și păstrează legătura directă către pagina oficială.",
-      "paragraphs": [
-        "INFORMARE DIN SURSĂ PRIMARĂ. La 30.08.2026, Raliul Vâlcii — site oficial a publicat materialul cu titlul „Raliul, la tine în buzunar!”. În această etapă, VÂLCEA CLAR confirmă automat numai existența publicării, data, titlul furnizat de instituție și adresa sursei oficiale. Detaliile din conținutul sursei nu sunt transformate automat în afirmații editoriale; pentru acestea rămâne necesară verificarea sau compunerea unui material complet."
-      ],
-      "confidence": 91,
-      "material_fact_gate": "PASS_TITLE_DATE_ONLY",
-      "sources": [
-        {
-          "name": "Raliul Vâlcii — site oficial",
-          "url": "https://raliulvalcii.ro/stiri/aplicatia-oficiala-raliul-valcii/",
-          "tier": "T1B"
-        }
-      ],
-      "auto_generated": true,
-      "auto_scope": "verified_source_notice_brief",
-      "brief_kind": "primary_source_notice"
-    },
-    {
       "id": "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
       "section": "CULTURĂ",
       "priority": 98,
@@ -196,28 +280,6 @@
         "auto_publish_eligible_by_format": true,
         "product_fingerprint_sha256": "22701467cfbb5831373c9c63a7c725b8ad5fe10bc13af6142834807358d9dce8"
       }
-    },
-    {
-      "id": "auto-bjai-valcea-evenimente-def3753e2a99",
-      "section": "CULTURĂ",
-      "priority": 84,
-      "headline": "ZIUA LIMBII ROMÂNE, expozeuri evocări recitaluri poetice interludii muzicale videoproiecții",
-      "dek": "Biblioteca Județeană «Antim Ivireanul» Vâlcea a publicat această informare la 26.08.2026. VÂLCEA CLAR o semnalează ca noutate din sursă primară și păstrează legătura directă către pagina oficială.",
-      "paragraphs": [
-        "INFORMARE DIN SURSĂ PRIMARĂ. La 26.08.2026, Biblioteca Județeană «Antim Ivireanul» Vâlcea a publicat materialul cu titlul „ZIUA LIMBII ROMÂNE, expozeuri evocări recitaluri poetice interludii muzicale videoproiecții”. În această etapă, VÂLCEA CLAR confirmă automat numai existența publicării, data, titlul furnizat de instituție și adresa sursei oficiale. Detaliile din conținutul sursei nu sunt transformate automat în afirmații editoriale; pentru acestea rămâne necesară verificarea sau compunerea unui material complet."
-      ],
-      "confidence": 94,
-      "material_fact_gate": "PASS_TITLE_DATE_ONLY",
-      "sources": [
-        {
-          "name": "Biblioteca Județeană «Antim Ivireanul» Vâlcea",
-          "url": "https://www.bjai.ro/evenimente/ziua-limbii-romane-expozeuri-evocari-recitaluri-poetice-interludii-muzicale-videoproiectii/",
-          "tier": "T1"
-        }
-      ],
-      "auto_generated": true,
-      "auto_scope": "verified_source_notice_brief",
-      "brief_kind": "primary_source_notice"
     },
     {
       "id": "cet-govora-cine-a-decis-oprirea-20260821",
@@ -841,7 +903,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 304/2026-07-23",
@@ -1420,7 +1482,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 305/2026-08-14",
@@ -1575,7 +1637,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 306/2026-08-14",
@@ -1766,7 +1828,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 307/2026-08-14",
@@ -1907,7 +1969,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 308/2026-08-14",
@@ -2048,7 +2110,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 309/2026-08-14",
@@ -2179,7 +2241,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 310/2026-08-14",
@@ -2380,7 +2442,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 311/2026-08-14",
@@ -2523,7 +2585,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f7239200639d31e6c253db467b302015341a5c201ebbc3b31310895ca741d099"
+          "sha256": "740fbe73e66426b5f53ce78619c0ff1484edc499f3b62d4de5b1a1a832385d91"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 312/2026-08-14",
@@ -2973,7 +3035,7 @@
     "editorial_writer": "manual_journalism_v1",
     "new_kernel_claim_level_provenance_required": true,
     "legacy_copy_rewritten": false,
-    "primary_source_auto_scope": "verified_source_notice_brief",
+    "primary_source_auto_scope": "radar_only_until_full_fact_kernel",
     "article_body_material_facts_autopublish": false,
     "shorter_edition_when_evidence_is_sparse": true,
     "last_known_good_fallback": true,
