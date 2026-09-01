@@ -1,0 +1,97 @@
+name: VÂLCEA CLAR Posturi.gov.ro References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py"
+      - ".github/workflows/valcea-clar-posturi-gov-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-posturi-gov-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile adapter
+        run: python -m py_compile valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py
+
+      - name: Run deterministic fail-closed regression
+        run: python valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py --self-test
+
+      - name: Verify bounded implementation boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py"
+          ! grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"
+          ! grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"
+          ! grep -En 'FactKernel|editorial_writer\(|publish\(|runtime_state' "$target"
+
+      - name: Acquire bounded live first-party evidence
+        run: |
+          python valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py \
+            --live-check \
+            --require-reference \
+            --max-details 8 \
+            --output /tmp/posturi_gov_valcea.json
+
+      - name: Validate live receipt boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/posturi_gov_valcea.json').read_text(encoding='utf-8'))
+          assert payload['status'] == 'PASS'
+          assert payload['schema'] == 'POSTURI_GOV_VALCEA_REFERENCE_V1'
+          assert payload['source_family'] == 'POSTURI_GOV_VALCEA'
+          assert payload['authority_class'] == 'FIRST_PARTY_GOVERNMENT_PUBLIC_JOBS_REFERENCE'
+          assert payload['observation_state'] == 'REFERENCE_ONLY_NON_AUTHORIZING'
+          assert 1 <= payload['reference_count'] <= 8
+          assert 1 <= payload['job_links_discovered'] <= 16
+          assert payload['coverage_note'] == 'BOUNDED_COUNTY_INDEX_REFERENCE_DISCOVERY_NOT_EXHAUSTIVE'
+
+          forbidden_true = [
+              'current_vacancy_authorized', 'deadline_authorized', 'eligibility_authorized',
+              'salary_authorized', 'staffing_shortage_authorized', 'service_capacity_authorized',
+              'institution_status_authorized', 'breaking_authorized', 'fact_kernel_write_authorized',
+              'editorial_writer_authorized', 'publication_authorized', 'distribution_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden_true)
+
+          allowed_topics = {
+              'PUBLIC_JOBS_HEALTH_REFERENCE', 'PUBLIC_JOBS_ADMINISTRATION_REFERENCE',
+              'PUBLIC_JOBS_EDUCATION_REFERENCE', 'PUBLIC_JOBS_PUBLIC_SERVICE_REFERENCE',
+              'PUBLIC_JOBS_OTHER_REFERENCE',
+          }
+          for ref in payload['references']:
+              parsed = urlsplit(ref['url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'posturi.gov.ro', 'www.posturi.gov.ro'}
+              assert parsed.path.startswith('/joburi/')
+              assert ref['topic_class'] in allowed_topics
+              assert ref['authority_class'] == payload['authority_class']
+              assert ref['observation_state'] == payload['observation_state']
+              assert len(ref['index_sha256']) == 64
+              assert len(ref['detail_sha256']) == 64
+              assert len(ref['evidence_sha256']) == 64
+          print(f"Validated {payload['reference_count']} bounded Vâlcea public-job references")
+          PY
