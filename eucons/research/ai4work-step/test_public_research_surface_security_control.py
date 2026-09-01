@@ -3,12 +3,14 @@ from __future__ import annotations
 import json
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from public_research_surface_security_control import (
     PublicSurfaceSecurityError,
     evaluate,
     validate_header_set,
+    validate_live_readback_timestamp,
 )
 
 HERE = Path(__file__).resolve().parent
@@ -55,8 +57,6 @@ class PublicResearchSurfaceSecurityControlTests(unittest.TestCase):
                 evaluate(contract_path=contract_path, binding_path=binding_path)
 
     def test_header_policy_accepts_only_strict_test_twin_mechanics(self) -> None:
-        # Synthetic mechanics only. This dictionary is TEST TWIN / NON-EVIDENCE
-        # and never satisfies the live-provider readback gate.
         validate_header_set(good_test_twin_headers())
 
     def test_missing_frame_ancestors_fails_closed(self) -> None:
@@ -72,6 +72,34 @@ class PublicResearchSurfaceSecurityControlTests(unittest.TestCase):
         headers["Content-Security-Policy"] += "; script-src 'self' 'unsafe-inline'"
         with self.assertRaises(PublicSurfaceSecurityError):
             validate_header_set(headers)
+
+    def test_live_readback_timestamp_accepts_fresh_timezone_aware_value(self) -> None:
+        now = datetime(2026, 9, 1, 5, 30, tzinfo=timezone.utc)
+        verified = validate_live_readback_timestamp(
+            "2026-09-01T05:00:00Z",
+            now_utc=now,
+        )
+        self.assertEqual(verified, datetime(2026, 9, 1, 5, 0, tzinfo=timezone.utc))
+
+    def test_stale_live_readback_fails_closed(self) -> None:
+        now = datetime(2026, 9, 1, 5, 30, tzinfo=timezone.utc)
+        with self.assertRaises(PublicSurfaceSecurityError):
+            validate_live_readback_timestamp(
+                (now - timedelta(hours=24, seconds=1)).isoformat(),
+                now_utc=now,
+            )
+
+    def test_future_dated_live_readback_fails_closed(self) -> None:
+        now = datetime(2026, 9, 1, 5, 30, tzinfo=timezone.utc)
+        with self.assertRaises(PublicSurfaceSecurityError):
+            validate_live_readback_timestamp(
+                (now + timedelta(minutes=5, seconds=1)).isoformat(),
+                now_utc=now,
+            )
+
+    def test_naive_live_readback_timestamp_fails_closed(self) -> None:
+        with self.assertRaises(PublicSurfaceSecurityError):
+            validate_live_readback_timestamp("2026-09-01T05:00:00")
 
     def test_test_twin_can_never_satisfy_live_readback(self) -> None:
         contract = json.loads((HERE / "form_contract.json").read_text(encoding="utf-8"))
