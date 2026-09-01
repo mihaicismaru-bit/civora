@@ -248,7 +248,7 @@ jobs:
               continue
             fi
             DOWNLOADED=$((DOWNLOADED + 1))
-            PREVIOUS="$(find "$DEST" -type f -path '*/cef-exact/ft-cef-exact-evidence.json' -print -quit)"
+            PREVIOUS="$DEST/cef-exact/ft-cef-exact-evidence.json"
             [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$DOWNLOADED" -lt 8 ] && continue || break; }
             if PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" "$ROOT/cef-exact/ft-cef-exact-evidence.json" <<'PY'
           import json, sys
