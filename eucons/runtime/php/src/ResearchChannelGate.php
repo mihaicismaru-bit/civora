@@ -8,6 +8,12 @@ final class EuconsResearchChannelGate
     private const CATALOG_SCHEMA = 'eucons.ai4work_research_invitation_catalog.v0.1';
     private const TARGET_REGIONS = ['Centru', 'Sud-Muntenia', 'Sud-Vest Oltenia'];
     private const TARGET_AUDIENCES = ['adults', 'employers'];
+    private const APPROVED_CHANNEL_TYPES = [
+        'eucons_public_link',
+        'partner_email',
+        'project_partner_social',
+        'professional_partner_network',
+    ];
     private const REGISTER_KEYS = ['entries', 'invitation_catalog', 'research_id', 'schema_version'];
     private const CATALOG_BINDING_KEYS = ['reference', 'sha256'];
     private const ENTRY_KEYS = [
@@ -222,7 +228,8 @@ final class EuconsResearchChannelGate
             || isset($this->channelsById[$channelId])) {
             throw new RuntimeException('COLLECTION_CHANNEL_REGISTER_INVALID');
         }
-        if (!is_string($channelType) || !preg_match('/^[a-z][a-z0-9_]{2,48}$/', $channelType)) {
+        if (!is_string($channelType) || !preg_match('/^[a-z][a-z0-9_]{2,48}$/', $channelType)
+            || !in_array($channelType, self::APPROVED_CHANNEL_TYPES, true)) {
             throw new RuntimeException('COLLECTION_CHANNEL_REGISTER_INVALID');
         }
 
