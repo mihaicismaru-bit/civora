@@ -1,0 +1,52 @@
+name: VÂLCEA CLAR INFOTRAFIC Vâlcea References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/infotrafic_valcea_recent_reference_adapter.py"
+      - ".github/workflows/valcea-clar-infotrafic-valcea-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-infotrafic-valcea-references-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile bounded adapter
+        run: python -m py_compile valcea-clar/scripts/infotrafic_valcea_recent_reference_adapter.py
+      - name: Run fail-closed self-test
+        run: python valcea-clar/scripts/infotrafic_valcea_recent_reference_adapter.py --self-test
+      - name: Verify live first-party source health
+        shell: bash
+        run: |
+          python valcea-clar/scripts/infotrafic_valcea_recent_reference_adapter.py > /tmp/infotrafic-valcea.json
+          python - <<'PY'
+          import json
+          with open("/tmp/infotrafic-valcea.json", "r", encoding="utf-8") as handle:
+              data = json.load(handle)
+          assert data["state"] == "CLEAR", data
+          assert data["scanned_page_count"] == 6, data
+          assert data["observed_index_reference_count"] >= 20, data
+          assert data["content_contract"] == "FIRST_PARTY_INFOTRAFIC_RECENT_VALCEA_REFERENCE_ONLY"
+          assert data["source"]["scan_is_exhaustive"] is False
+          assert all(item["current_state_authorized"] is False for item in data["references"])
+          assert all(item["active_status_authorized"] is False for item in data["references"])
+          assert all(item["active_incident_authorized"] is False for item in data["references"])
+          assert all(item["active_traffic_disruption_authorized"] is False for item in data["references"])
+          assert all(item["article_body_authorized"] is False for item in data["references"])
+          print(
+              f"live-source: clear ({data['observed_index_reference_count']} recent index references scanned; "
+              f"{data['reference_count']} explicitly naming Valcea)"
+          )
+          PY
