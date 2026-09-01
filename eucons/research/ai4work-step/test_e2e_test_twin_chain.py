@@ -57,6 +57,7 @@ def submit(payload: dict, store: SQLiteResearchStorage, channel_id: str) -> tupl
 
 def test_twin_frame(records: list[dict]) -> tuple[dict, bytes]:
     source_bytes = NF06.canonical_export_bytes(records)
+    received_at = sorted(record["received_at"] for record in records)
     frame = {
         "research_id": "AI4WORK-STEP-NF-RUN-001",
         "collection_frame_id": "AI4WORK-CF-TEST-E2E-001",
@@ -67,8 +68,8 @@ def test_twin_frame(records: list[dict]) -> tuple[dict, bytes]:
             "AI4WORK_EMPLOYERS_V1": 1,
         },
         **NF06.instrument_definition_hashes(),
-        "collection_started_at": "2026-01-01T00:00:00+00:00",
-        "collection_closed_at": "2026-12-31T23:59:59+00:00",
+        "collection_started_at": received_at[0],
+        "collection_closed_at": received_at[-1],
         "collection_channels": [ADULT_CHANNEL, EMPLOYER_CHANNEL],
         "collection_channel_register_sha256": CHANNEL_REGISTER_SHA,
         "source_system": "eucons.ro",
