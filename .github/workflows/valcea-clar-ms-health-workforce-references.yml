@@ -1,0 +1,92 @@
+name: VÂLCEA CLAR Ministry Health Workforce References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
+      - ".github/workflows/valcea-clar-ms-health-workforce-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-ms-health-workforce-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile adapter
+        run: python -m py_compile valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py
+
+      - name: Run deterministic fail-closed regression
+        run: python valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py --self-test
+
+      - name: Verify bounded implementation boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
+          ! grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"
+          ! grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"
+          ! grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state' "$target"
+
+      - name: Acquire bounded live first-party evidence
+        run: |
+          python valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py \
+            --live-check \
+            --require-reference \
+            --max-pages 6 \
+            --output /tmp/ms_valcea_health_workforce.json
+
+      - name: Validate live receipt boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/ms_valcea_health_workforce.json').read_text(encoding='utf-8'))
+          assert payload['status'] == 'PASS'
+          assert payload['schema'] == 'MS_VALCEA_HEALTH_WORKFORCE_REFERENCE_V1'
+          assert payload['source_family'] == 'MS_HEALTH_WORKFORCE'
+          assert payload['authority_class'] == 'FIRST_PARTY_HEALTH_MINISTRY_CAREER_REFERENCE'
+          assert payload['observation_state'] == 'REFERENCE_ONLY_NON_AUTHORIZING'
+          assert 1 <= payload['reference_count'] <= 16
+          assert 1 <= payload['pages_fetched'] <= 6
+          assert payload['coverage_note'] == 'BOUNDED_FIRST_PARTY_REFERENCE_DISCOVERY_NOT_EXHAUSTIVE'
+
+          forbidden_true = [
+              'current_vacancy_authorized', 'deadline_authorized', 'eligibility_authorized',
+              'salary_authorized', 'staffing_shortage_authorized', 'staffing_level_authorized',
+              'service_capacity_authorized', 'treatment_availability_authorized',
+              'breaking_authorized', 'fact_kernel_write_authorized',
+              'editorial_writer_authorized', 'publication_authorized',
+              'distribution_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden_true)
+
+          for ref in payload['references']:
+              parsed = urlsplit(ref['url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'www.ms.ro', 'ms.ro'}
+              assert parsed.path.startswith('/ro/minister/cariera-medici/')
+              assert ref['authority_class'] == payload['authority_class']
+              assert ref['observation_state'] == payload['observation_state']
+              assert len(ref['source_page_sha256']) == 64
+              assert len(ref['evidence_sha256']) == 64
+          print(f"Validated {payload['reference_count']} bounded Ministry health-workforce references")
+          PY
