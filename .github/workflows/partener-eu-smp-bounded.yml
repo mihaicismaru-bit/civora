@@ -1,0 +1,135 @@
+name: PARTENER.EU SMP Bounded Exact Validation
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_smp_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_smp_ft_reconcile.py'
+      - 'partener-eu/ingest/eu_direct_smp_ft_handoff.py'
+      - 'partener-eu/ops/test_eu_direct_smp_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_smp_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_smp_ft_handoff.py'
+      - '.github/workflows/partener-eu-smp-bounded.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smp-bounded-exact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile SMP bounded lane
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_smp_ft_exact.py \
+            partener-eu/ingest/eu_direct_smp_ft_reconcile.py \
+            partener-eu/ingest/eu_direct_smp_ft_handoff.py \
+            partener-eu/ops/test_eu_direct_smp_ft_exact.py \
+            partener-eu/ops/test_eu_direct_smp_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_smp_ft_handoff.py
+
+      - name: Validate SMP fail-closed semantics
+        run: |
+          python partener-eu/ops/test_eu_direct_smp_ft_exact.py
+          python partener-eu/ops/test_eu_direct_smp_ft_reconcile.py
+          PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_smp_ft_handoff.py
+
+      - name: Capture bounded official F&T programme sample
+        run: |
+          rm -rf /tmp/partener-eu-smp-bounded
+          python partener-eu/ingest/eu_direct_ft_programme_watch.py \
+            --output-dir /tmp/partener-eu-smp-bounded \
+            --page-size 25 \
+            --max-pages 8
+          python partener-eu/ingest/eu_direct_ft_coverage_receipt.py \
+            /tmp/partener-eu-smp-bounded/programme-watch.json \
+            --output /tmp/partener-eu-smp-bounded/programme-coverage-receipt.json
+          python partener-eu/ingest/eu_direct_ft_programme_taxonomy.py \
+            /tmp/partener-eu-smp-bounded/programme-watch.json \
+            --output /tmp/partener-eu-smp-bounded/programme-taxonomy.json
+
+      - name: Resolve bounded SMP family handoff
+        id: smp_handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-smp-bounded
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_smp_ft_handoff.py \
+            --taxonomy "$ROOT/programme-taxonomy.json" \
+            --output "$ROOT/smp-exact/ft-smp-handoff-state.json" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python - "$ROOT/smp-exact/ft-smp-handoff-state.json" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          state=json.load(open(sys.argv[1], encoding='utf-8'))
+          print(f"exact_recheck_required={'true' if state['exact_recheck_required'] else 'false'}")
+          print(f"target_reference={state['target_reference'] or ''}")
+          PY
+
+      - name: Execute exact-current SMP topic readback
+        if: steps.smp_handoff.outputs.exact_recheck_required == 'true'
+        run: |
+          ROOT=/tmp/partener-eu-smp-bounded
+          python partener-eu/ingest/eu_direct_smp_ft_exact.py \
+            --taxonomy "$ROOT/programme-taxonomy.json" \
+            --output-dir "$ROOT/smp-exact" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Reconcile exact SMP baseline
+        if: steps.smp_handoff.outputs.exact_recheck_required == 'true'
+        run: |
+          ROOT=/tmp/partener-eu-smp-bounded
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_smp_ft_reconcile.py \
+            "$ROOT/smp-exact/ft-smp-exact-evidence.json" \
+            --output "$ROOT/smp-exact/ft-smp-reconciliation.json"
+
+      - name: Validate live SMP boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-smp-bounded
+          PYTHONPATH=partener-eu/ingest python - "$ROOT" <<'PY'
+          import json, pathlib, sys
+          from eu_direct_smp_ft_exact import validate_evidence
+          from eu_direct_smp_ft_handoff import validate as validate_handoff
+          from eu_direct_smp_ft_reconcile import validate_receipt
+          root=pathlib.Path(sys.argv[1])
+          handoff=json.load(open(root/'smp-exact/ft-smp-handoff-state.json', encoding='utf-8'))
+          validate_handoff(handoff)
+          exact_path=root/'smp-exact/ft-smp-exact-evidence.json'
+          receipt_path=root/'smp-exact/ft-smp-reconciliation.json'
+          if handoff['exact_recheck_required']:
+              exact=json.load(open(exact_path, encoding='utf-8')); receipt=json.load(open(receipt_path, encoding='utf-8'))
+              validate_evidence(exact); validate_receipt(receipt, current=exact)
+              assert exact['programme_fit_evidence']['facts']['fit_state']=='ROMANIA_PROGRAMME_LEVEL_FIT_DEMONSTRATED_NON_AUTHORIZING'
+              assert exact['eligibility_authorized'] is False and exact['open_call_authorized'] is False
+              assert receipt['open_call_authorized'] is False and receipt['call_alert_authorized'] is False
+          else:
+              assert not exact_path.exists() and not receipt_path.exists()
+              assert handoff['closure_inference_authorized'] is False
+          PY
+
+      - name: Upload replayable SMP evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-smp-bounded-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-smp-bounded
+          retention-days: 7
+          if-no-files-found: error
