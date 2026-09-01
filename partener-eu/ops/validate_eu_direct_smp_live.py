@@ -40,6 +40,15 @@ def check_non_authorizing(obj: dict[str, Any]) -> None:
     assert obj["publication_effect"] == "NONE"
 
 
+def check_fit_binding(exact: dict[str, Any]) -> None:
+    fit = exact["programme_fit_evidence"]
+    assert canonical_sha(fit) == exact["programme_fit_semantic_fingerprint"]
+    assert fit["observation_state"] == "PROGRAMME_FIT_RESEARCH_NON_AUTHORIZING"
+    assert fit["facts"]["fit_state"] == "ROMANIA_PROGRAMME_LEVEL_FIT_DEMONSTRATED_NON_AUTHORIZING"
+    assert fit["eligibility_fact_authorized"] is False
+    assert fit["call_fact_authorized"] is False
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", required=True, type=Path)
@@ -65,8 +74,8 @@ def main() -> int:
         assert previous["schema"] == "PARTENER_EU_SMP_FT_EXACT_EVIDENCE_V1"
         assert canonical_sha(previous) == handoff["previous_evidence_sha256"]
         assert previous["reference"] == handoff["previous_reference"]
-        assert previous["programme_fit_evidence"]["facts"]["fit_state"] == "ROMANIA_PROGRAMME_LEVEL_FIT_DEMONSTRATED_NON_AUTHORIZING"
-        assert previous["programme_fit_evidence"]["eligibility_fact_authorized"] is False
+        check_fit_binding(previous)
+        check_non_authorizing(previous)
     else:
         assert args.previous_smp_run_id is None
         assert not previous_path.exists()
@@ -100,9 +109,7 @@ def main() -> int:
         assert exact["authority_readback"]["verified"] is True
         assert exact["candidate_state"] in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}
         assert exact["status_label"]
-        assert exact["programme_fit_evidence"]["facts"]["fit_state"] == "ROMANIA_PROGRAMME_LEVEL_FIT_DEMONSTRATED_NON_AUTHORIZING"
-        assert exact["programme_fit_evidence"]["eligibility_fact_authorized"] is False
-        assert exact["programme_fit_evidence"]["call_fact_authorized"] is False
+        check_fit_binding(exact)
         check_non_authorizing(exact)
         check_non_authorizing(rec)
         assert rec["reference"] == exact["reference"]
