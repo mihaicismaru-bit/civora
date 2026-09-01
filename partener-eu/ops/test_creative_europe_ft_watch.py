@@ -116,6 +116,88 @@ except ValueError:
 else:
     raise AssertionError("programme watch claimed exact topic verification without readback")
 
+# Opportunity-surface split: a type-8 row inheriting the parent CREA identifier
+# must never create a false primary-topic conflict. A bounded competitive-calls-cs
+# URL receives a stable discovery identity; any other official EC type-8 URL stays
+# opaque and cannot be promoted into exact competitive authority evidence.
+PERFORM = "CREA-CULT-2026-PERFORM-EU"
+COMPETITIVE_URL = "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/competitive-calls-cs/49521170"
+OPAQUE_URL = "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/projects-details/49521170"
+surface_search = {
+    "results": [
+        {"metadata": {
+            "identifier": [PERFORM], "callIdentifier": ["CREA-CULT-2026"], "type": ["1"],
+            "status": ["31094503"], "programAbbreviation": ["CREA"],
+            "programmePeriod": ["2021 - 2027"], "deadlineDate": ["2026-01-15"],
+            "esST_URL": [m.ft.topic_url(PERFORM)],
+        }, "content": "Perform EU parent topic"},
+        {"metadata": {
+            "identifier": [PERFORM], "callIdentifier": ["CREA-CULT-2026"], "type": ["8"],
+            "status": ["31094502"], "programAbbreviation": ["CREA"],
+            "programmePeriod": ["2021 - 2027"], "deadlineDate": ["2026-10-22T23:59:00Z"],
+            "esST_URL": [COMPETITIVE_URL], "title": ["Perform Europe downstream call"],
+        }, "content": "Linked competitive call"},
+        {"metadata": {
+            "identifier": [OPEN], "callIdentifier": ["CREA-MEDIA-2026"], "type": ["8"],
+            "status": ["31094502"], "programAbbreviation": ["CREA"],
+            "programmePeriod": ["2021 - 2027"], "esST_URL": [OPAQUE_URL],
+        }, "content": "Opaque type-8 official EC discovery"},
+    ]
+}
+surface_facet = {
+    "facets": [{"name": "status", "values": [
+        {"rawValue": "31094502", "value": "Open for submission"},
+        {"rawValue": "31094503", "value": "Closed"},
+    ]}]
+}
+
+
+def surface_post(endpoint, *, text, page_size, page_number, parts, max_bytes=None, opener=None):
+    payload = surface_search if "search" in endpoint and "facet" not in endpoint else surface_facet
+    raw = json.dumps(payload, sort_keys=True).encode()
+    return payload, raw, {"url": endpoint, "http_status": 200, "sha256": "e" * 64}
+
+
+surface = m.collect_watch(
+    run_id="surface-split",
+    fetched_at="2026-09-01T08:05:00+00:00",
+    page_size=50,
+    max_pages=1,
+    post_func=surface_post,
+)
+assert [c["reference"] for c in surface["candidates"]] == [PERFORM]
+assert surface["candidates"][0]["candidate_observation_state"] == "CLOSED_OBSERVATION_NON_AUTHORIZING"
+assert surface["stats"]["conflicting_references_excluded"] == 0
+assert surface["stats"]["linked_competitive_records_seen"] == 2
+assert surface["stats"]["linked_competitive_discovery_candidates"] == 2
+assert surface["stats"]["open_linked_competitive_candidates_non_authorizing"] == 2
+bounded = next(x for x in surface["linked_competitive_discovery"] if x["parent_reference"] == PERFORM)
+assert bounded["competitive_call_id_candidate"] == "49521170"
+assert bounded["identity_key"] == "FUNDING_TENDERS_COMPETITIVE_CALL:49521170"
+assert bounded["authority_url_candidate"] == COMPETITIVE_URL
+assert bounded["structured_url_observed"] == COMPETITIVE_URL
+assert bounded["authority_url_verified"] is False
+assert bounded["requires_separate_competitive_call_adapter"] is True
+assert bounded["open_call_authorized"] is False
+opaque = next(x for x in surface["linked_competitive_discovery"] if x["parent_reference"] == OPEN)
+assert opaque["competitive_call_id_candidate"] is None
+assert opaque["authority_url_candidate"] is None
+assert opaque["structured_url_observed"] == OPAQUE_URL
+assert opaque["identity_key"].startswith("OPAQUE_TYPE8_RECORD:")
+assert opaque["authority_url_verified"] is False
+assert opaque["open_call_authorized"] is False
+assert surface["linked_competitive_discovery_semantic_reconcile_included"] is False
+assert surface["linked_competitive_discovery_requires_separate_reconcile"] is True
+
+surface_tampered = copy.deepcopy(surface)
+surface_tampered["linked_competitive_discovery"][0]["authority_url_verified"] = True
+try:
+    m.validate_watch_evidence(surface_tampered)
+except ValueError:
+    pass
+else:
+    raise AssertionError("linked competitive discovery self-verified authority")
+
 
 def empty_post(endpoint, *, text, page_size, page_number, parts, max_bytes=None, opener=None):
     if "search" in endpoint and "facet" not in endpoint:
@@ -299,4 +381,4 @@ except ValueError:
 else:
     raise AssertionError("programme-watch reconciliation self-authorized OPEN")
 
-print("PASS Creative Europe programme-wide structured F&T watch + semantic history stay non-authorizing")
+print("PASS Creative Europe programme-wide structured F&T watch + opportunity-surface split + semantic history stay non-authorizing")
