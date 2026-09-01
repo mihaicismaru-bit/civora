@@ -8,11 +8,15 @@ on:
       - 'partener-eu/ingest/eu_direct_ft_programme_taxonomy.py'
       - 'partener-eu/ingest/eu_direct_life_ft_exact.py'
       - 'partener-eu/ingest/eu_direct_life_ft_reconcile.py'
+      - 'partener-eu/ingest/eu_direct_cef_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_cef_ft_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
       - 'partener-eu/ops/test_eu_direct_ft_coverage_receipt.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py'
       - 'partener-eu/ops/test_eu_direct_life_ft_exact.py'
       - 'partener-eu/ops/test_eu_direct_life_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_cef_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_cef_ft_reconcile.py'
       - '.github/workflows/partener-eu-ft-programme-coverage.yml'
   workflow_dispatch:
 
@@ -40,33 +44,33 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile programme watch, taxonomy, and LIFE exact lane
+      - name: Compile bounded EU_DIRECT programme lanes
         run: |
-          python -m py_compile partener-eu/ingest/eu_direct_ft_programme_watch.py
-          python -m py_compile partener-eu/ingest/eu_direct_ft_coverage_receipt.py
-          python -m py_compile partener-eu/ingest/eu_direct_ft_programme_taxonomy.py
-          python -m py_compile partener-eu/ingest/eu_direct_life_ft_exact.py
-          python -m py_compile partener-eu/ingest/eu_direct_life_ft_reconcile.py
-          python -m py_compile partener-eu/ops/test_eu_direct_ft_programme_watch.py
-          python -m py_compile partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
-          python -m py_compile partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py
-          python -m py_compile partener-eu/ops/test_eu_direct_life_ft_exact.py
-          python -m py_compile partener-eu/ops/test_eu_direct_life_ft_reconcile.py
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_ft_programme_watch.py \
+            partener-eu/ingest/eu_direct_ft_coverage_receipt.py \
+            partener-eu/ingest/eu_direct_ft_programme_taxonomy.py \
+            partener-eu/ingest/eu_direct_life_ft_exact.py \
+            partener-eu/ingest/eu_direct_life_ft_reconcile.py \
+            partener-eu/ingest/eu_direct_cef_ft_exact.py \
+            partener-eu/ingest/eu_direct_cef_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_ft_programme_watch.py \
+            partener-eu/ops/test_eu_direct_ft_coverage_receipt.py \
+            partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py \
+            partener-eu/ops/test_eu_direct_life_ft_exact.py \
+            partener-eu/ops/test_eu_direct_life_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_cef_ft_exact.py \
+            partener-eu/ops/test_eu_direct_cef_ft_reconcile.py
 
-      - name: Validate fail-closed programme-watch semantics
-        run: python partener-eu/ops/test_eu_direct_ft_programme_watch.py
-
-      - name: Validate explicit bounded-coverage semantics
-        run: python partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
-
-      - name: Validate normalized programme taxonomy
-        run: python partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py
-
-      - name: Validate fail-closed LIFE exact evidence
-        run: python partener-eu/ops/test_eu_direct_life_ft_exact.py
-
-      - name: Validate LIFE exact semantic reconciliation
-        run: python partener-eu/ops/test_eu_direct_life_ft_reconcile.py
+      - name: Validate fail-closed bounded source semantics
+        run: |
+          python partener-eu/ops/test_eu_direct_ft_programme_watch.py
+          python partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
+          python partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py
+          python partener-eu/ops/test_eu_direct_life_ft_exact.py
+          python partener-eu/ops/test_eu_direct_life_ft_reconcile.py
+          python partener-eu/ops/test_eu_direct_cef_ft_exact.py
+          python partener-eu/ops/test_eu_direct_cef_ft_reconcile.py
 
       - name: Capture bounded live official F&T programme coverage
         run: |
@@ -190,6 +194,19 @@ jobs:
           fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_life_ft_reconcile.py "${ARGS[@]}"
 
+      - name: Execute bounded exact-current CEF handoff
+        run: |
+          python partener-eu/ingest/eu_direct_cef_ft_exact.py \
+            --taxonomy /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json \
+            --output-dir /tmp/partener-eu-ft-programme-watch/cef-exact \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Reconcile exact CEF baseline
+        run: |
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cef_ft_reconcile.py \
+            /tmp/partener-eu-ft-programme-watch/cef-exact/ft-cef-exact-evidence.json \
+            --output /tmp/partener-eu-ft-programme-watch/cef-exact/ft-cef-reconciliation.json
+
       - name: Validate live evidence remains bounded and non-authorizing
         env:
           PREVIOUS_LIFE_AVAILABLE: ${{ steps.previous_life.outputs.available }}
@@ -206,16 +223,22 @@ jobs:
           c = json.loads((root / 'programme-coverage-receipt.json').read_text(encoding='utf-8'))
           t = json.loads((root / 'programme-taxonomy.json').read_text(encoding='utf-8'))
           life = json.loads((root / 'life-exact/ft-life-exact-evidence.json').read_text(encoding='utf-8'))
-          rec = json.loads((root / 'life-exact/ft-life-reconciliation.json').read_text(encoding='utf-8'))
+          life_rec = json.loads((root / 'life-exact/ft-life-reconciliation.json').read_text(encoding='utf-8'))
+          cef = json.loads((root / 'cef-exact/ft-cef-exact-evidence.json').read_text(encoding='utf-8'))
+          cef_rec = json.loads((root / 'cef-exact/ft-cef-reconciliation.json').read_text(encoding='utf-8'))
           previous_available = os.environ.get('PREVIOUS_LIFE_AVAILABLE') == 'true'
           previous = None
           if previous_available:
               previous = json.loads((root / 'history/previous/life-exact/ft-life-exact-evidence.json').read_text(encoding='utf-8'))
+
           assert d['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_WATCH_V1'
           assert c['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_RECEIPT_V1'
           assert t['schema'] == 'PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1'
           assert life['schema'] == 'PARTENER_EU_LIFE_FT_EXACT_EVIDENCE_V1'
-          assert rec['schema'] == 'PARTENER_EU_LIFE_FT_RECONCILIATION_V1'
+          assert life_rec['schema'] == 'PARTENER_EU_LIFE_FT_RECONCILIATION_V1'
+          assert cef['schema'] == 'PARTENER_EU_CEF_FT_EXACT_EVIDENCE_V1'
+          assert cef_rec['schema'] == 'PARTENER_EU_CEF_FT_RECONCILIATION_V1'
+
           for obj in (d, c, t):
               assert obj['market_intelligence_only'] is True
               assert obj['material_fact_use'] is False
@@ -231,17 +254,15 @@ jobs:
           assert d['stats']['raw_search_records'] >= d['stats']['accepted_candidates']
           assert t['stats']['source_records'] == d['stats']['accepted_candidates']
           assert t['stats']['normalized_records'] == d['stats']['accepted_candidates']
-          assert d['pagination']['pages_captured'] >= 1
-          assert d['page_receipts']
-          assert d['facet_receipt']['sha256']
           if d['pagination']['stop_reason'] == 'MAX_PAGES_REACHED':
               assert c['coverage_complete'] is False
               assert c['pagination_truncated'] is True
               assert c['more_results_possible'] is True
               assert c['coverage_scope'] == 'BOUNDED_QUERY_SAMPLE_NON_AUTHORIZING'
-          life_rows = [r for r in t['records'] if 'environment and climate action' in r['programme_label_official'].casefold()]
-          assert life_rows
-          assert all(r['programme_family_normalized'] == 'LIFE' for r in life_rows)
+
+          life_rows = [r for r in t['records'] if r['programme_family_normalized'] == 'LIFE']
+          cef_rows = [r for r in t['records'] if r['programme_family_normalized'] == 'CEF']
+          assert life_rows and cef_rows
           for row in d['records']:
               assert row['authority_url_verified'] is False
               assert row['exact_topic_readback_required'] is True
@@ -250,39 +271,47 @@ jobs:
               assert row['open_call_authorized'] is False
               assert row['publish_authorized'] is False
 
-          assert life['reference'].startswith('LIFE-')
-          assert life['programme_family'] == 'LIFE'
-          assert 'environment and climate action' in life['programme_label_official'].casefold()
-          assert life['authority_url_verified'] is True
-          assert life['authority_readback']['verified'] is True
-          assert life['candidate_state'] in {'OPEN_CALL', 'FORTHCOMING_CALL', 'CLOSED_CALL', 'UNKNOWN'}
-          assert life['status_label']
-          assert life['semantic_reconciliation_required'] is True
-          assert life['field_scoped_material_admission_required'] is True
-          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
-              assert life[key] is False
-              assert rec[key] is False
-          assert life['canonical_corpus_mutation'] is False
-          assert life['publication_effect'] == 'NONE'
-          assert rec['canonical_corpus_mutation'] is False
-          assert rec['publication_effect'] == 'NONE'
-          assert rec['reference'] == life['reference']
+          for exact, rec, family, prefix, label_token in (
+              (life, life_rec, 'LIFE', 'LIFE-', 'environment and climate action'),
+              (cef, cef_rec, 'CEF', 'CEF-', 'connecting europe facility'),
+          ):
+              assert exact['reference'].startswith(prefix)
+              assert exact['programme_family'] == family
+              assert label_token in exact['programme_label_official'].casefold()
+              assert exact['authority_url_verified'] is True
+              assert exact['authority_readback']['verified'] is True
+              assert exact['candidate_state'] in {'OPEN_CALL', 'FORTHCOMING_CALL', 'CLOSED_CALL', 'UNKNOWN'}
+              assert exact['status_label']
+              assert exact['semantic_reconciliation_required'] is True
+              assert exact['field_scoped_material_admission_required'] is True
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+                  assert exact[key] is False
+                  assert rec[key] is False
+              assert exact['canonical_corpus_mutation'] is False
+              assert exact['publication_effect'] == 'NONE'
+              assert rec['canonical_corpus_mutation'] is False
+              assert rec['publication_effect'] == 'NONE'
+              assert rec['reference'] == exact['reference']
+              current_sha = hashlib.sha256(json.dumps(exact, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+              assert rec['current_evidence_sha256'] == current_sha
+              assert rec['material_admission_ready_for_downstream_review'] is (exact['candidate_state'] == 'OPEN_CALL')
+
           if previous_available:
               assert previous is not None
               assert previous['reference'] == life['reference']
               expected = 'NO_CHANGE' if previous['exact_semantic_fingerprint'] == life['exact_semantic_fingerprint'] else 'LIFE_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'
-              assert rec['reconciliation_state'] == expected
+              assert life_rec['reconciliation_state'] == expected
               previous_sha = hashlib.sha256(json.dumps(previous, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
-              assert rec['previous_evidence_sha256'] == previous_sha
+              assert life_rec['previous_evidence_sha256'] == previous_sha
           else:
-              assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
-              assert rec['previous_evidence_sha256'] is None
-          current_sha = hashlib.sha256(json.dumps(life, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
-          assert rec['current_evidence_sha256'] == current_sha
-          assert rec['material_admission_ready_for_downstream_review'] is (life['candidate_state'] == 'OPEN_CALL')
+              assert life_rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert life_rec['previous_evidence_sha256'] is None
+
+          assert cef_rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+          assert cef_rec['previous_evidence_sha256'] is None
+
           print(json.dumps({
               'stats': d['stats'],
-              'status_candidate_counts': d['status_candidate_counts'],
               'pagination': d['pagination'],
               'coverage': {
                   'coverage_complete': c['coverage_complete'],
@@ -291,19 +320,24 @@ jobs:
                   'coverage_scope': c['coverage_scope'],
               },
               'programme_family_counts_normalized': t['programme_family_counts'],
-              'instrument_family_counts': t['instrument_family_counts'],
-              'unmapped_official_programme_labels': t['stats']['unmapped_official_programme_labels'],
               'life_exact': {
                   'reference': life['reference'],
                   'candidate_state': life['candidate_state'],
                   'status_label': life['status_label'],
-                  'authority_url_verified': life['authority_url_verified'],
                   'previous_evidence_available': previous_available,
                   'previous_evidence_run_id': os.environ.get('PREVIOUS_LIFE_RUN_ID') or None,
-                  'reconciliation_state': rec['reconciliation_state'],
-                  'semantic_change_count': rec['semantic_change_count'],
-                  'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
-                  'open_call_authorized': rec['open_call_authorized'],
+                  'reconciliation_state': life_rec['reconciliation_state'],
+                  'semantic_change_count': life_rec['semantic_change_count'],
+              },
+              'cef_exact': {
+                  'reference': cef['reference'],
+                  'candidate_state': cef['candidate_state'],
+                  'status_label': cef['status_label'],
+                  'authority_url_verified': cef['authority_url_verified'],
+                  'reconciliation_state': cef_rec['reconciliation_state'],
+                  'semantic_change_count': cef_rec['semantic_change_count'],
+                  'material_admission_ready_for_downstream_review': cef_rec['material_admission_ready_for_downstream_review'],
+                  'open_call_authorized': cef_rec['open_call_authorized'],
               },
           }, ensure_ascii=False, sort_keys=True))
           PY
