@@ -1,20 +1,9 @@
 #!/usr/bin/env python3
 """Programme-wide Creative Europe discovery from structured Funding & Tenders evidence.
 
-This adapter is discovery/watch only. It enumerates explicit ``CREA-*`` topic
-references from the official EC Search API, resolves human-readable status labels
-only from official Facet evidence, and keeps different opportunity surfaces
-separate before deduplication.
-
-Primary Funding & Tenders topic rows (types other than 8) may enter the exact-topic
-priority queue. Type-8 competitive/cascading-call rows can inherit a parent CREA
-identifier, so they are retained as linked competitive-call discovery evidence and
-never allowed to create a false parent-topic conflict.
-
-It never authorizes OPEN/status/deadline/budget/eligibility/publication. A primary
-topic must still pass exact topic readback, semantic reconciliation and the separate
-material-admission policy. Linked competitive calls require their own exact
-authority adapter and admission path before any reader-facing fact is allowed.
+Discovery/watch only. Primary Funding & Tenders topics and type-8 competitive or
+cascading-call rows are separated before deduplication. Neither surface authorizes
+OPEN, deadline, budget, eligibility, publication or distribution.
 """
 from __future__ import annotations
 
@@ -33,7 +22,7 @@ import funding_tenders_fetch as ft
 
 ADAPTER_ID = "CREATIVE_EUROPE_CALLS_V1"
 WATCH_ID = "CREATIVE_EUROPE_FT_PROGRAMME_WATCH_V1"
-PARSER_VERSION = "CREATIVE_EUROPE_FT_WATCH_V1_1"
+PARSER_VERSION = "CREATIVE_EUROPE_FT_WATCH_V1_2"
 DEFAULT_TEXT = "CREA-"
 MAX_PAGE_SIZE = 100
 MAX_PAGES = 5
@@ -65,8 +54,6 @@ def sha256_bytes(raw: bytes) -> str:
 
 
 def programme_query() -> dict[str, Any]:
-    # Do not filter status. Programme-wide watch must observe OPEN/FORTHCOMING/
-    # CLOSED transitions instead of encoding one desired state into discovery.
     return {
         "bool": {
             "must": [
@@ -138,16 +125,21 @@ def _candidate_state(status_label: str | None) -> str:
     return "UNKNOWN_STATUS_NON_AUTHORIZING"
 
 
-def _competitive_identity(url: str | None, record: Mapping[str, Any]) -> tuple[str | None, str]:
-    candidate_url = str(url or "").strip() or None
-    competitive_id: str | None = None
-    if candidate_url:
-        parsed = urlparse(candidate_url)
+def _competitive_identity(url: str | None, record: Mapping[str, Any]) -> tuple[str | None, str, str | None]:
+    """Return stable competitive id/identity and a bounded authority URL candidate.
+
+    F&T type-8 rows are not guaranteed to expose a competitive-calls-cs URL. If
+    the structured URL is another EC surface, retain it as observed provenance but
+    do not promote it into an exact competitive authority candidate.
+    """
+    observed_url = str(url or "").strip() or None
+    if observed_url:
+        parsed = urlparse(observed_url)
         match = COMPETITIVE_PATH_RE.search(parsed.path)
         if parsed.scheme == "https" and parsed.hostname == "ec.europa.eu" and match:
             competitive_id = match.group(1)
-            return competitive_id, f"FUNDING_TENDERS_COMPETITIVE_CALL:{competitive_id}"
-    return None, f"OPAQUE_TYPE8_RECORD:{sha256_bytes(canonical_json(record))}"
+            return competitive_id, f"FUNDING_TENDERS_COMPETITIVE_CALL:{competitive_id}", observed_url
+    return None, f"OPAQUE_TYPE8_RECORD:{sha256_bytes(canonical_json(record))}", None
 
 
 def _build_competitive_discovery(
@@ -161,8 +153,8 @@ def _build_competitive_discovery(
         parent_reference = _reference(row)
         if not parent_reference:
             continue
-        structured_url = _structured_url(row)
-        competitive_id, identity_key = _competitive_identity(structured_url, row)
+        structured_url_observed = _structured_url(row)
+        competitive_id, identity_key, authority_url_candidate = _competitive_identity(structured_url_observed, row)
         record_sha = sha256_bytes(canonical_json(row))
         dedup_key = identity_key if not identity_key.startswith("OPAQUE_TYPE8_RECORD:") else record_sha
         if dedup_key in seen:
@@ -175,7 +167,8 @@ def _build_competitive_discovery(
             "parent_reference": parent_reference,
             "structured_type": "8",
             "competitive_call_id_candidate": competitive_id,
-            "authority_url_candidate": structured_url,
+            "authority_url_candidate": authority_url_candidate,
+            "structured_url_observed": structured_url_observed,
             "status_code": status_code,
             "status_label_candidate": status_label,
             "candidate_observation_state": _candidate_state(status_label),
@@ -481,6 +474,7 @@ def _validate_linked_competitive_candidate(candidate: Mapping[str, Any]) -> None
             raise ValueError(f"Creative Europe linked competitive candidate hash invalid: {key}")
 
     url = candidate.get("authority_url_candidate")
+    observed_url = candidate.get("structured_url_observed")
     competitive_id = candidate.get("competitive_call_id_candidate")
     identity_key = str(candidate.get("identity_key") or "")
     if url:
@@ -492,9 +486,15 @@ def _validate_linked_competitive_candidate(candidate: Mapping[str, Any]) -> None
             raise ValueError("Creative Europe linked competitive candidate id/url mismatch")
         if identity_key != f"FUNDING_TENDERS_COMPETITIVE_CALL:{competitive_id}":
             raise ValueError("Creative Europe linked competitive candidate identity drift")
+        if observed_url != url:
+            raise ValueError("Creative Europe linked competitive authority URL lost structured provenance")
     else:
         if competitive_id is not None or not identity_key.startswith("OPAQUE_TYPE8_RECORD:"):
             raise ValueError("Creative Europe opaque type-8 candidate identity drift")
+        if observed_url:
+            parsed = urlparse(str(observed_url))
+            if parsed.scheme != "https" or parsed.hostname != "ec.europa.eu":
+                raise ValueError("Creative Europe opaque type-8 structured provenance is not official EC HTTPS")
 
 
 def validate_watch_evidence(evidence: Mapping[str, Any]) -> None:
@@ -541,20 +541,20 @@ def validate_watch_evidence(evidence: Mapping[str, Any]) -> None:
 
     legacy_surface_model = "linked_competitive_discovery" not in evidence
     if legacy_surface_model:
-        # Historical V1 snapshots are immutable replay evidence from before
-        # F&T type-8 rows were split from parent-topic groups. They remain valid
-        # as previous observations, but cannot claim the newer surface model.
         if evidence.get("parser_version") != "CREATIVE_EUROPE_FT_WATCH_V1":
             raise ValueError("Creative Europe legacy watch parser identity drift")
         for conflict in evidence.get("conflicts") or []:
             if conflict.get("reason") != "CONFLICTING_STRUCTURED_METADATA_EXCLUDED":
                 raise ValueError("Creative Europe legacy watch conflict reason drift")
     else:
-        if evidence.get("parser_version") != PARSER_VERSION:
+        if evidence.get("parser_version") not in {"CREATIVE_EUROPE_FT_WATCH_V1_1", PARSER_VERSION}:
             raise ValueError("Creative Europe programme watch parser identity drift")
         linked = list(evidence.get("linked_competitive_discovery") or [])
         identities: set[str] = set()
         for candidate in linked:
+            if evidence.get("parser_version") == "CREATIVE_EUROPE_FT_WATCH_V1_1" and "structured_url_observed" not in candidate:
+                candidate = dict(candidate)
+                candidate["structured_url_observed"] = candidate.get("authority_url_candidate")
             _validate_linked_competitive_candidate(candidate)
             identity = str(candidate.get("identity_key") or "")
             if identity in identities:
