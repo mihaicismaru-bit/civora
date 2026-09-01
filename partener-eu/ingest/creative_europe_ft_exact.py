@@ -6,6 +6,11 @@ from the mixed Culture & Creativity index. It verifies exact topic identity,
 resolves the current status only from official Facet evidence, and performs an
 exact official topic-page readback. Even a verified OPEN candidate remains
 non-publishing until PARTENER semantic reconciliation/material admission.
+
+When the official Search endpoint returns more than one exact row with
+materially different metadata, the adapter fails closed *and* persists a
+sanitised conflict diagnostic before raising. This makes source disagreement
+observable without selecting an arbitrary row or promoting any candidate fact.
 """
 from __future__ import annotations
 
@@ -25,6 +30,8 @@ from funding_tenders_api import normalize_payload
 ADAPTER_ID = "CREATIVE_EUROPE_CALLS_V1"
 EVIDENCE_LAYER = "EXACT_FUNDING_TENDERS_TOPIC"
 PARSER_VERSION = "CREATIVE_EUROPE_FT_EXACT_V1"
+CONFLICT_SCHEMA = "PARTENER_EU_CREATIVE_EUROPE_FT_EXACT_CONFLICT_V1"
+CONFLICT_STATE = "EXACT_STRUCTURED_RECORD_CONFLICT_NON_AUTHORIZING"
 DEFAULT_REFERENCE = "CREA-MEDIA-2026-DEVMINISLATE"
 REF_RE = re.compile(r"^CREA-[A-Z0-9]+(?:-[A-Z0-9]+)+$", re.IGNORECASE)
 MATERIAL_FLAGS = (
@@ -36,6 +43,15 @@ MATERIAL_FLAGS = (
     "publish_authorized",
     "distribution_authorized",
 )
+
+
+class ExactRecordConflict(ValueError):
+    """Official F&T returned materially different rows for one exact reference."""
+
+    def __init__(self, reference: str, diagnostic: Mapping[str, Any]):
+        super().__init__(f"conflicting exact Funding & Tenders records for {reference}")
+        self.reference = reference
+        self.diagnostic = dict(diagnostic)
 
 
 def utc_now() -> str:
@@ -70,15 +86,144 @@ def reference_query() -> dict[str, Any]:
     }
 
 
-def _metadata_signature(record: Mapping[str, Any]) -> str:
-    useful = {
+def _first_scalar(record: Mapping[str, Any], *keys: str) -> str | None:
+    for key in keys:
+        value = ft._scalar(record.get(key))
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _material_snapshot(record: Mapping[str, Any]) -> dict[str, str | None]:
+    """Fields whose disagreement can change topic identity/material interpretation.
+
+    We intentionally do not include presentation-only fields such as title or
+    search-result snippets. Budget is captured when the structured row exposes a
+    scalar value; otherwise it remains null and cannot be inferred locally.
+    """
+    return {
         "identifier": ft._record_identifier(record),
-        "status": ft._record_status_code(record),
+        "status_code": ft._record_status_code(record),
         "programme": ft._scalar(record.get("programAbbreviation")),
-        "callIdentifier": ft._scalar(record.get("callIdentifier")),
-        "deadlineDate": ft._scalar(record.get("deadlineDate")),
+        "programme_period": ft._scalar(record.get("programmePeriod")),
+        "call_identifier": ft._scalar(record.get("callIdentifier")),
+        "deadline_candidate": _first_scalar(record, "deadlineDate", "deadlineDates"),
+        "budget_candidate": _first_scalar(
+            record,
+            "budget",
+            "budgetOverview",
+            "budgetTopicAction",
+            "topicBudget",
+            "callBudget",
+        ),
     }
-    return sha256_bytes(canonical_json(useful))
+
+
+def _metadata_signature(record: Mapping[str, Any]) -> str:
+    return sha256_bytes(canonical_json(_material_snapshot(record)))
+
+
+def _build_conflict_diagnostic(
+    reference: str,
+    candidates: list[Mapping[str, Any]],
+    *,
+    fetched_at: str,
+    run_id: str,
+    search_receipt: Mapping[str, Any],
+    search_raw: bytes,
+) -> dict[str, Any]:
+    rows: list[dict[str, Any]] = []
+    for index, record in enumerate(candidates):
+        material = _material_snapshot(record)
+        rows.append({
+            "candidate_index": index,
+            "material": material,
+            "material_signature": sha256_bytes(canonical_json(material)),
+            "record_sha256": sha256_bytes(canonical_json(record)),
+        })
+    unique_signatures = sorted({row["material_signature"] for row in rows})
+    conflict_fields: list[str] = []
+    keys = tuple(_material_snapshot({}).keys())
+    for key in keys:
+        values = {json.dumps(row["material"].get(key), ensure_ascii=False, sort_keys=True) for row in rows}
+        if len(values) > 1:
+            conflict_fields.append(key)
+
+    diagnostic: dict[str, Any] = {
+        "schema": CONFLICT_SCHEMA,
+        "adapter_id": ADAPTER_ID,
+        "evidence_layer": EVIDENCE_LAYER,
+        "parser_version": PARSER_VERSION,
+        "source_family": "EU_DIRECT",
+        "programme_family": "CREATIVE_EUROPE",
+        "authority_class": "EU_COMMISSION_FUNDING_TENDERS",
+        "observation_state": CONFLICT_STATE,
+        "reference": reference,
+        "fetched_at": fetched_at,
+        "run_id": run_id,
+        "search_receipt": dict(search_receipt),
+        "search_raw_sha256": sha256_bytes(search_raw),
+        "candidate_count": len(rows),
+        "unique_material_signature_count": len(unique_signatures),
+        "unique_material_signatures": unique_signatures,
+        "conflict_fields": conflict_fields,
+        "candidates": rows,
+        "semantic_equivalence_proven": len(unique_signatures) == 1,
+        "decision": "MATERIAL_CONFLICT_REJECTED",
+        "authority_url": ft.topic_url(reference),
+        "authority_url_verified": False,
+        "market_intelligence_only": True,
+        "requires_exact_topic_recheck": True,
+        "requires_semantic_reconcile": True,
+        "requires_material_admission": True,
+        "publication_effect": "NONE",
+        "canonical_corpus_mutation": False,
+    }
+    for key in MATERIAL_FLAGS:
+        diagnostic[key] = False
+    validate_conflict_diagnostic(diagnostic)
+    return diagnostic
+
+
+def validate_conflict_diagnostic(diagnostic: Mapping[str, Any]) -> None:
+    if diagnostic.get("schema") != CONFLICT_SCHEMA:
+        raise ValueError("Creative Europe exact F&T conflict schema mismatch")
+    reference = validate_reference(str(diagnostic.get("reference") or ""))
+    if diagnostic.get("adapter_id") != ADAPTER_ID or diagnostic.get("evidence_layer") != EVIDENCE_LAYER:
+        raise ValueError("Creative Europe exact F&T conflict identity drift")
+    if diagnostic.get("observation_state") != CONFLICT_STATE:
+        raise ValueError("Creative Europe exact F&T conflict state drift")
+    if diagnostic.get("decision") != "MATERIAL_CONFLICT_REJECTED":
+        raise ValueError("Creative Europe exact F&T conflict decision drift")
+    if diagnostic.get("authority_url") != ft.topic_url(reference) or diagnostic.get("authority_url_verified") is not False:
+        raise ValueError("Creative Europe exact F&T conflict crossed authority-verification boundary")
+    if diagnostic.get("semantic_equivalence_proven") is not False:
+        raise ValueError("Creative Europe exact F&T conflict incorrectly declared equivalent")
+    if diagnostic.get("market_intelligence_only") is not True:
+        raise ValueError("Creative Europe exact F&T conflict lost intelligence-only boundary")
+    for key in ("requires_exact_topic_recheck", "requires_semantic_reconcile", "requires_material_admission"):
+        if diagnostic.get(key) is not True:
+            raise ValueError(f"Creative Europe exact F&T conflict skipped downstream gate: {key}")
+    if diagnostic.get("publication_effect") != "NONE" or diagnostic.get("canonical_corpus_mutation") is not False:
+        raise ValueError("Creative Europe exact F&T conflict crossed publication boundary")
+    for key in MATERIAL_FLAGS:
+        if diagnostic.get(key) is not False:
+            raise ValueError(f"Creative Europe exact F&T conflict became authorizing: {key}")
+    for key in ("search_raw_sha256",):
+        if not re.fullmatch(r"[0-9a-f]{64}", str(diagnostic.get(key) or "")):
+            raise ValueError(f"Creative Europe exact F&T conflict hash invalid: {key}")
+    rows = diagnostic.get("candidates") or []
+    if len(rows) < 2 or int(diagnostic.get("candidate_count") or 0) != len(rows):
+        raise ValueError("Creative Europe exact F&T conflict candidate count invalid")
+    signatures = [str(row.get("material_signature") or "") for row in rows]
+    if any(not re.fullmatch(r"[0-9a-f]{64}", value) for value in signatures):
+        raise ValueError("Creative Europe exact F&T conflict candidate signature invalid")
+    if len(set(signatures)) <= 1:
+        raise ValueError("Creative Europe exact F&T conflict lacks a material disagreement")
+    if int(diagnostic.get("unique_material_signature_count") or 0) != len(set(signatures)):
+        raise ValueError("Creative Europe exact F&T conflict unique signature count drift")
+    if not diagnostic.get("conflict_fields"):
+        raise ValueError("Creative Europe exact F&T conflict fields missing")
 
 
 def collect_exact(
@@ -110,7 +255,22 @@ def collect_exact(
         raise ValueError(f"Funding & Tenders returned no exact record for {reference}")
     signatures = {_metadata_signature(row) for row in candidates}
     if len(signatures) != 1:
-        raise ValueError(f"conflicting exact Funding & Tenders records for {reference}")
+        diagnostic = _build_conflict_diagnostic(
+            reference,
+            candidates,
+            fetched_at=fetched_at,
+            run_id=run_id,
+            search_receipt=search_receipt,
+            search_raw=search_raw,
+        )
+        if output_dir:
+            output_dir.mkdir(parents=True, exist_ok=True)
+            (output_dir / "ft-search-response.json").write_bytes(search_raw)
+            (output_dir / "ft-exact-conflict.json").write_text(
+                json.dumps(diagnostic, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+            )
+        raise ExactRecordConflict(reference, diagnostic)
 
     source = copy.deepcopy(candidates[0])
     status_code = ft._record_status_code(source)
