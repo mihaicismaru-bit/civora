@@ -14,6 +14,11 @@
     ],
     "api_route": "https://api.eucons.ro/research/ai4work/v1/submit"
   },
+  "live_readback_freshness": {
+    "max_age_hours": 24,
+    "max_future_skew_minutes": 5,
+    "rule": "A live provider/security-header readback can satisfy PROD only when its timezone-aware verified_at_utc is no more than 24 hours old at validation time and no more than 5 minutes in the future. Older readbacks must be refreshed; TEST TWIN cannot satisfy this rule."
+  },
   "required_public_response_headers": {
     "content-security-policy": {
       "required_directives": {
@@ -68,5 +73,5 @@
     "can_satisfy_live_readback": false,
     "prod_promotion_eligible": false
   },
-  "activation_rule": "PROD public research pages require account-specific live HTTPS response-header readback for the exact landing/adults/employers routes. The live readback must satisfy the machine-enforced browser-security minimum and bind by SHA-256. TEST TWIN and repository mechanics are NON-EVIDENCE and cannot satisfy the live-provider readback."
+  "activation_rule": "PROD public research pages require account-specific live HTTPS response-header readback for the exact landing/adults/employers routes. The live readback must satisfy the machine-enforced browser-security minimum, bind by SHA-256, be timezone-aware, no more than 24 hours old at validation, and no more than 5 minutes future-dated. TEST TWIN and repository mechanics are NON-EVIDENCE and cannot satisfy the live-provider readback."
 }
