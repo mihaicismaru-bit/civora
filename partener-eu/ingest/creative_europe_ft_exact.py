@@ -10,9 +10,9 @@ non-publishing until PARTENER semantic reconciliation/material admission.
 Funding & Tenders can return both the primary topic record and type-8
 competitive/cascading calls that inherit the same parent identifier. Those are
 different opportunity surfaces and must never be deduped into one call fact.
-The exact-topic layer therefore admits only the primary topic row, retains
-linked competitive rows as non-authorizing intelligence, and still fails closed
-when *primary-topic* rows materially disagree.
+The exact-topic layer therefore admits only non-type-8 exact-identifier rows,
+retains linked competitive rows as non-authorizing intelligence, and still
+fails closed when primary-topic rows materially disagree.
 """
 from __future__ import annotations
 
@@ -79,8 +79,8 @@ def validate_reference(reference: str) -> str:
 
 def reference_query() -> dict[str, Any]:
     # Search keeps all official call-like record types so linked competitive
-    # calls can be observed. Exact-topic admission is performed *after* readback
-    # using structured record type/URL/callIdentifier, never by status filtering.
+    # calls can be observed. Exact-topic admission is performed after structured
+    # readback and never by status filtering.
     return {
         "bool": {
             "must": [
@@ -108,19 +108,19 @@ def _structured_url(record: Mapping[str, Any]) -> str | None:
 
 
 def _is_primary_exact_topic_record(reference: str, record: Mapping[str, Any]) -> bool:
-    """Separate primary F&T topic rows from linked competitive/cascade rows.
+    """Separate exact primary topic rows from linked type-8 competitive rows.
 
-    Type 8 is the F&T competitive-call surface and may intentionally reuse a
-    parent CREA identifier. It is valuable discovery evidence but cannot satisfy
-    the exact `topic-details/<reference>` authority contract. For non-type-8
-    rows, either exact callIdentifier or exact current topic URL is sufficient.
+    F&T type 8 is a distinct competitive/cascading-call surface that may inherit
+    its parent's CREA identifier. For every other structured call type, exact
+    identifier equality is the primary-topic boundary. callIdentifier may be a
+    parent call code (e.g. `CREA-MEDIA-2026`) and is therefore corroborating
+    metadata, not an equality requirement for topic admission.
     """
     reference = validate_reference(reference)
     if _structured_type(record) == "8":
         return False
-    call_identifier = str(ft._scalar(record.get("callIdentifier")) or "").upper()
-    url = str(_structured_url(record) or "")
-    return call_identifier == reference or url == ft.topic_url(reference)
+    identifier = str(ft._record_identifier(record) or "").upper()
+    return identifier == reference
 
 
 def _material_snapshot(record: Mapping[str, Any]) -> dict[str, str | None]:
