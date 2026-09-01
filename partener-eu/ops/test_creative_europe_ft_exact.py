@@ -4,6 +4,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 INGEST = Path(__file__).resolve().parents[1] / "ingest"
@@ -98,11 +99,52 @@ def conflicting_post(endpoint, *, text, page_size, page_number, parts, max_bytes
     return fake_post(endpoint, text=text, page_size=page_size, page_number=page_number, parts=parts)
 
 
-try:
-    m.collect_exact(REF, run_id="conflict", post_func=conflicting_post, topic_func=fake_topic)
-except ValueError:
-    pass
-else:
-    raise AssertionError("conflicting exact records did not fail closed")
+with tempfile.TemporaryDirectory() as tmp:
+    output = Path(tmp)
+    try:
+        m.collect_exact(
+            REF,
+            run_id="conflict",
+            fetched_at="2026-08-31T19:00:00+00:00",
+            output_dir=output,
+            post_func=conflicting_post,
+            topic_func=fake_topic,
+        )
+    except m.ExactRecordConflict as exc:
+        diagnostic = exc.diagnostic
+    else:
+        raise AssertionError("conflicting exact records did not fail closed")
 
-print("PASS Creative Europe exact structured F&T identity/status/topic regression")
+    assert diagnostic["schema"] == m.CONFLICT_SCHEMA
+    assert diagnostic["observation_state"] == m.CONFLICT_STATE
+    assert diagnostic["reference"] == REF
+    assert diagnostic["candidate_count"] == 2
+    assert diagnostic["unique_material_signature_count"] == 2
+    assert diagnostic["semantic_equivalence_proven"] is False
+    assert diagnostic["decision"] == "MATERIAL_CONFLICT_REJECTED"
+    assert diagnostic["conflict_fields"] == ["status_code"]
+    assert diagnostic["authority_url_verified"] is False
+    assert diagnostic["open_call_authorized"] is False
+    assert diagnostic["requires_exact_topic_recheck"] is True
+    assert diagnostic["requires_semantic_reconcile"] is True
+    assert diagnostic["requires_material_admission"] is True
+    m.validate_conflict_diagnostic(diagnostic)
+
+    conflict_path = output / "ft-exact-conflict.json"
+    search_path = output / "ft-search-response.json"
+    assert conflict_path.is_file()
+    assert search_path.is_file()
+    persisted = json.loads(conflict_path.read_text(encoding="utf-8"))
+    m.validate_conflict_diagnostic(persisted)
+    assert persisted["search_raw_sha256"] == m.sha256_bytes(search_path.read_bytes())
+
+    tampered = dict(persisted)
+    tampered["open_call_authorized"] = True
+    try:
+        m.validate_conflict_diagnostic(tampered)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("conflict diagnostic self-authorized OPEN")
+
+print("PASS Creative Europe exact structured F&T identity/status/topic + conflict diagnostic regression")
