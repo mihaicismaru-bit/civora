@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import copy
+import json
+import tempfile
 import unittest
 from datetime import datetime, timezone
+from pathlib import Path
 
 from live_operational_evidence_control import (
     MANIFEST_PATH,
@@ -168,11 +171,14 @@ class LiveOperationalEvidenceControlTests(unittest.TestCase):
             "reference": "processor-chain-draft.json",
             "sha256": None,
         }
-        # Exercise the same invariant directly without creating any synthetic operational file.
-        item = manifest["required_external_or_operational_evidence"]["processor_chain"]
-        self.assertEqual(item["status"], "OPEN")
-        self.assertIsNotNone(item["reference"])
-        self.assertIsNone(item["sha256"])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            manifest_path = Path(tmpdir) / "manifest.json"
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            errors = repository_live_operational_evidence_errors(
+                manifest_path=manifest_path,
+                now_utc=NOW,
+            )
+        self.assertIn("processor_chain:open_binding_partial_or_invalid", errors)
 
 
 if __name__ == "__main__":
