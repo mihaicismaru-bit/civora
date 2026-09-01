@@ -6,6 +6,7 @@ on:
       - "valcea-clar/editorial/editorial_writing_quality.py"
       - "valcea-clar/scripts/editorial_writer.py"
       - "valcea-clar/scripts/editorial_writer_quality_gate.py"
+      - "valcea-clar/scripts/editorial_quality_corpus_audit.py"
       - ".github/workflows/valcea-clar-editorial-writing-quality.yml"
   push:
     branches: [main]
@@ -13,6 +14,7 @@ on:
       - "valcea-clar/editorial/editorial_writing_quality.py"
       - "valcea-clar/scripts/editorial_writer.py"
       - "valcea-clar/scripts/editorial_writer_quality_gate.py"
+      - "valcea-clar/scripts/editorial_quality_corpus_audit.py"
       - ".github/workflows/valcea-clar-editorial-writing-quality.yml"
   workflow_dispatch:
 
@@ -32,10 +34,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Compile writer, adapter and validator
+      - name: Compile writer, adapters, validator and corpus audit
         run: |
           python -m py_compile valcea-clar/scripts/editorial_writer.py
           python -m py_compile valcea-clar/scripts/editorial_writer_quality_gate.py
+          python -m py_compile valcea-clar/scripts/editorial_quality_corpus_audit.py
           python -m py_compile valcea-clar/editorial/editorial_writing_quality.py
 
       - name: Run canonical writer regressions
@@ -47,6 +50,12 @@ jobs:
       - name: Run writer-to-quality integration regressions
         run: python valcea-clar/scripts/editorial_writer_quality_gate.py --self-test
 
+      - name: Run corpus calibration regressions
+        run: python valcea-clar/scripts/editorial_quality_corpus_audit.py --self-test
+
+      - name: Measure current public corpus without authorizing copy
+        run: python valcea-clar/scripts/editorial_quality_corpus_audit.py --max-stories 60
+
       - name: Enforce read-only dependency and capability boundary
         run: |
           python - <<'PY'
@@ -56,6 +65,7 @@ jobs:
           paths = (
               Path("valcea-clar/editorial/editorial_writing_quality.py"),
               Path("valcea-clar/scripts/editorial_writer_quality_gate.py"),
+              Path("valcea-clar/scripts/editorial_quality_corpus_audit.py"),
           )
           forbidden = {"requests", "urllib", "http", "socket", "subprocess"}
           for path in paths:
@@ -92,5 +102,16 @@ jobs:
           missing_adapter = [token for token in required_adapter_semantics if token not in adapter]
           if missing_adapter:
               raise SystemExit(f"writer-quality binding semantics missing: {missing_adapter}")
-          print("writer -> quality read-only dependency/capability boundary: PASS")
+
+          corpus = Path("valcea-clar/scripts/editorial_quality_corpus_audit.py").read_text(encoding="utf-8")
+          required_corpus_semantics = (
+              '"copy_is_not_evidence": True',
+              '"legacy_copy_can_never_receive_pass_from_this_audit": True',
+              '"legacy_copy_can_never_receive_fail_publication_authority_from_this_audit": True',
+              '"runtime_persistence_authorized": False',
+          )
+          missing_corpus = [token for token in required_corpus_semantics if token not in corpus]
+          if missing_corpus:
+              raise SystemExit(f"corpus calibration boundary missing: {missing_corpus}")
+          print("writer -> quality -> corpus read-only dependency/capability boundary: PASS")
           PY
