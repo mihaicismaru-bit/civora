@@ -24,14 +24,14 @@
       "store": "RESEARCH_ANALYTICS_ONLY",
       "retention": "until needs-analysis validation and application evidence freeze, then delete from live/application-accessible storage no later than 180 days after primary collection closes",
       "live_store_hard_stop": "2027-03-31 unless a documented legal claim/audit hold approved by the controller requires a narrower retained subset",
-      "backup_residual_rule": "after live deletion, any residual provider backup copy may persist only through the validated pre-existing backup cycle; it must not be restored into live processing except for documented disaster recovery/legal necessity, and it must expire by provider rotation without creating a new retention cycle",
+      "backup_residual_rule": "after live deletion, any residual provider backup copy may persist only through the validated pre-existing non-renewing backup cycle and for no more than 92 days from deletion; it must not be restored into live processing except for documented disaster recovery/legal necessity, and it must expire by provider rotation without creating a new retention cycle. Production requires account-specific/provider-bound attestation of the numeric maximum residual lifetime before collection.",
       "post_deletion": "retain only anonymised aggregates, disclosure-controlled tables, source/provenance metadata and cryptographic integrity hashes that cannot be used to reconstruct respondent records"
     },
     {
       "data_class": "idempotency receipts",
       "content": "opaque derived response_id + canonical body digest only; no raw key",
       "retention": "same live lifecycle as the corresponding analytical respondent record",
-      "deletion": "delete atomically from live storage with respondent-level records; residual backup treatment follows the same validated provider cycle"
+      "deletion": "delete atomically from live storage with respondent-level records; residual backup treatment follows the same validated provider cycle capped at 92 days from deletion"
     },
     {
       "data_class": "erasure replay-suppression markers",
@@ -50,12 +50,12 @@
       "data_class": "optional follow-up contact records",
       "store": "RESEARCH_CONTACT_SEPARATE_NO_RESPONSE_LINKAGE",
       "retention": "delete from live storage after the requested follow-up is completed and in all cases no later than 90 days after primary collection closes",
-      "post_deletion": "no contact identifier is copied to NF06 or analysis evidence; any residual backup follows only the verified provider rotation"
+      "post_deletion": "no contact identifier is copied to NF06 or analysis evidence; any residual backup follows only the verified provider rotation capped at 92 days from deletion"
     },
     {
       "data_class": "immutable primary export used for NF06 validation",
       "retention": "same live respondent-level hard stop as analytical records",
-      "control": "encrypted/restricted evidence location; SHA-256 retained after export deletion; any backup residual is governed by the same verified non-renewing rotation"
+      "control": "encrypted/restricted evidence location; SHA-256 retained after export deletion; any backup residual is governed by the same verified non-renewing rotation capped at 92 days from deletion"
     },
     {
       "data_class": "TEST TWIN synthetic dataset",
@@ -67,7 +67,7 @@
   "deletion_evidence_required": [
     "timestamped deletion job/run receipt",
     "row/object counts before and after live deletion",
-    "documented account-specific backup schedule and maximum residual lifetime",
+    "documented account-specific backup schedule and numeric maximum residual lifetime not exceeding 92 days from deletion",
     "confirmation that deleted respondent data cannot silently return to live processing through ordinary restore jobs",
     "confirmation that a stale idempotent retry cannot recreate an erased respondent record during the bounded replay-suppression window",
     "confirmation that each non-analytical erasure replay marker is automatically purged no later than 24 hours after successful live erasure",
@@ -78,7 +78,7 @@
   "exceptions": {
     "legal_hold": "must be documented by controller with scope, reason, approver, start date and review date; blanket indefinite retention is forbidden",
     "replay_marker_extension": "a period longer than 24 hours is forbidden by default and requires a documented security necessity plus explicit controller approval before the extension is used",
-    "processor_backup_limit": "Annex 5/account-specific backup terms and restore behavior must be validated before go-live; if provider cannot meet the intended non-renewing residual-backup lifecycle, collection remains NO_GO"
+    "processor_backup_limit": "the account-specific provider backup/restore behavior must be validated before go-live and must attest a non-renewing residual lifetime no greater than 92 days from deletion; no longer derogation is permitted for this research. If the provider cannot meet this ceiling, collection remains NO_GO"
   },
   "controller_approval": false,
   "collection_enabled": false
