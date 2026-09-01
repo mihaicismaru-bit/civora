@@ -75,8 +75,18 @@ def lawful_basis_lia_errors(
     if lia.get("synthetic") is not False:
         errors.append("lia_must_not_be_synthetic")
 
-    controller_identity = controller.get("controller") or {}
-    lia_controller = lia.get("controller") or {}
+    controller_identity_raw = controller.get("controller")
+    if not isinstance(controller_identity_raw, dict):
+        errors.append("lia_controller_record_shape_invalid")
+        controller_identity: dict[str, Any] = {}
+    else:
+        controller_identity = controller_identity_raw
+    lia_controller_raw = lia.get("controller")
+    if not isinstance(lia_controller_raw, dict):
+        errors.append("lia_controller_shape_invalid")
+        lia_controller: dict[str, Any] = {}
+    else:
+        lia_controller = lia_controller_raw
     for key in ("legal_name", "cui"):
         if not _bound(lia_controller.get(key)) or lia_controller.get(key) != controller_identity.get(key):
             errors.append(f"lia_controller_identity_mismatch:{key}")
@@ -86,6 +96,9 @@ def lawful_basis_lia_errors(
         errors.append("lia_candidate_basis_not_article_6_1_f")
 
     purpose = lia.get("purpose_test") or {}
+    if not isinstance(purpose, dict):
+        errors.append("lia_purpose_test_shape_invalid")
+        purpose = {}
     for key in ("legitimate", "specific", "present_and_non_speculative"):
         if purpose.get(key) is not True:
             errors.append(f"lia_purpose_test_not_satisfied:{key}")
@@ -95,6 +108,9 @@ def lawful_basis_lia_errors(
         errors.append("lia_purpose_controller_attribution_mismatch")
 
     necessity = lia.get("necessity_test") or {}
+    if not isinstance(necessity, dict):
+        errors.append("lia_necessity_test_shape_invalid")
+        necessity = {}
     less_intrusive = " ".join(str(item).lower() for item in (necessity.get("less_intrusive_design") or []))
     required_design_markers = {
         "no_direct_identifiers": "no names, contact details, cnp",
@@ -108,6 +124,9 @@ def lawful_basis_lia_errors(
             errors.append(f"lia_minimisation_safeguard_missing:{key}")
 
     balancing = lia.get("balancing_test") or {}
+    if not isinstance(balancing, dict):
+        errors.append("lia_balancing_test_shape_invalid")
+        balancing = {}
     safeguards = " ".join(str(item).lower() for item in (balancing.get("safeguards") or []))
     for key, marker in {
         "right_to_object": "right-to-object",
@@ -140,6 +159,9 @@ def lawful_basis_lia_errors(
             errors.append("lia_not_prod_eligible")
 
         signoff = lia.get("controller_signoff_fields") or {}
+        if not isinstance(signoff, dict):
+            errors.append("lia_controller_signoff_shape_invalid")
+            signoff = {}
         if signoff.get("approved") is not True:
             errors.append("lia_controller_signoff_missing")
         if signoff.get("legal_entity_name") != controller_identity.get("legal_name"):
@@ -152,6 +174,9 @@ def lawful_basis_lia_errors(
             errors.append("lia_privacy_contact_missing")
 
         approval = lia.get("prod_approval") or {}
+        if not isinstance(approval, dict):
+            errors.append("lia_prod_approval_shape_invalid")
+            approval = {}
         if approval.get("state") != "APPROVED_FOR_PROD":
             errors.append("lia_prod_approval_state_invalid")
         if approval.get("lawful_basis_code") != EXPECTED_BASIS_CODE:
