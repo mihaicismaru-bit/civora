@@ -5,8 +5,10 @@ on:
     paths:
       - 'partener-eu/ingest/eu_direct_ft_programme_watch.py'
       - 'partener-eu/ingest/eu_direct_ft_coverage_receipt.py'
+      - 'partener-eu/ingest/eu_direct_ft_programme_taxonomy.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
       - 'partener-eu/ops/test_eu_direct_ft_coverage_receipt.py'
+      - 'partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py'
       - '.github/workflows/partener-eu-ft-programme-coverage.yml'
   workflow_dispatch:
 
@@ -33,18 +35,23 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile programme watch and coverage receipt
+      - name: Compile programme watch, coverage, and taxonomy
         run: |
           python -m py_compile partener-eu/ingest/eu_direct_ft_programme_watch.py
           python -m py_compile partener-eu/ingest/eu_direct_ft_coverage_receipt.py
+          python -m py_compile partener-eu/ingest/eu_direct_ft_programme_taxonomy.py
           python -m py_compile partener-eu/ops/test_eu_direct_ft_programme_watch.py
           python -m py_compile partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
+          python -m py_compile partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py
 
       - name: Validate fail-closed programme-watch semantics
         run: python partener-eu/ops/test_eu_direct_ft_programme_watch.py
 
       - name: Validate explicit bounded-coverage semantics
         run: python partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
+
+      - name: Validate normalized programme taxonomy
+        run: python partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py
 
       - name: Capture bounded live official F&T programme coverage
         run: |
@@ -60,7 +67,13 @@ jobs:
             /tmp/partener-eu-ft-programme-watch/programme-watch.json \
             --output /tmp/partener-eu-ft-programme-watch/programme-coverage-receipt.json
 
-      - name: Validate live watch remains non-authorizing and non-exhaustive when capped
+      - name: Normalize official programme taxonomy for market intelligence
+        run: |
+          python partener-eu/ingest/eu_direct_ft_programme_taxonomy.py \
+            /tmp/partener-eu-ft-programme-watch/programme-watch.json \
+            --output /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json
+
+      - name: Validate live evidence remains bounded and non-authorizing
         run: |
           python - <<'PY'
           import json
@@ -68,11 +81,12 @@ jobs:
           root = Path('/tmp/partener-eu-ft-programme-watch')
           d = json.loads((root / 'programme-watch.json').read_text(encoding='utf-8'))
           c = json.loads((root / 'programme-coverage-receipt.json').read_text(encoding='utf-8'))
+          t = json.loads((root / 'programme-taxonomy.json').read_text(encoding='utf-8'))
           assert d['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_WATCH_V1'
           assert c['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_RECEIPT_V1'
-          assert d['market_intelligence_only'] is True
-          assert c['market_intelligence_only'] is True
-          for obj in (d, c):
+          assert t['schema'] == 'PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1'
+          for obj in (d, c, t):
+              assert obj['market_intelligence_only'] is True
               assert obj['material_fact_use'] is False
               assert obj['open_call_authorized'] is False
               assert obj['deadline_authorized'] is False
@@ -84,6 +98,8 @@ jobs:
               assert obj['canonical_corpus_mutation'] is False
               assert obj['publication_effect'] == 'NONE'
           assert d['stats']['raw_search_records'] >= d['stats']['accepted_candidates']
+          assert t['stats']['source_records'] == d['stats']['accepted_candidates']
+          assert t['stats']['normalized_records'] == d['stats']['accepted_candidates']
           assert d['pagination']['pages_captured'] >= 1
           assert d['page_receipts']
           assert d['facet_receipt']['sha256']
@@ -92,6 +108,8 @@ jobs:
               assert c['pagination_truncated'] is True
               assert c['more_results_possible'] is True
               assert c['coverage_scope'] == 'BOUNDED_QUERY_SAMPLE_NON_AUTHORIZING'
+          life_rows = [r for r in t['records'] if 'environment and climate action' in r['programme_label_official'].casefold()]
+          assert all(r['programme_family_normalized'] == 'LIFE' for r in life_rows)
           for row in d['records']:
               assert row['authority_url_verified'] is False
               assert row['exact_topic_readback_required'] is True
@@ -101,7 +119,6 @@ jobs:
               assert row['publish_authorized'] is False
           print(json.dumps({
               'stats': d['stats'],
-              'programme_family_counts': d['programme_family_counts'],
               'status_candidate_counts': d['status_candidate_counts'],
               'pagination': d['pagination'],
               'coverage': {
@@ -110,6 +127,9 @@ jobs:
                   'more_results_possible': c['more_results_possible'],
                   'coverage_scope': c['coverage_scope'],
               },
+              'programme_family_counts_normalized': t['programme_family_counts'],
+              'instrument_family_counts': t['instrument_family_counts'],
+              'unmapped_official_programme_labels': t['stats']['unmapped_official_programme_labels'],
           }, ensure_ascii=False, sort_keys=True))
           PY
 
