@@ -44,7 +44,10 @@ jobs:
 
       - name: Read bounded live official references
         run: |
+          set +e
           python valcea-clar/scripts/dsp_valcea_public_health_reference_adapter.py > /tmp/dsp-valcea-public-health.json
+          ADAPTER_RC=$?
+          set -e
           cat /tmp/dsp-valcea-public-health.json
           python - <<'PY'
           import json
@@ -87,6 +90,7 @@ jobs:
               raise SystemExit('publication authority must remain NONE')
           print(f"DSP Vâlcea public-health references: PASS ({len(refs)} refs)")
           PY
+          test "$ADAPTER_RC" -eq 0
 
       - name: Enforce bounded read-only capability boundary
         run: |
