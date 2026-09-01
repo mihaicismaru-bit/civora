@@ -17,9 +17,10 @@ OVERVIEW = b"""
 <p>This programme supports civil society organisations active at local, regional,
 national and transnational level.</p>
 <p>Visit the Funding and Tenders portal for proposal calls.</p>
-<a href="/files/cerv-indicative-planning-2026.pdf">CERV Indicative Planning 2026</a>
-<a href="https://commission.europa.eu/files/cerv-work-programme-2026-2027.pdf">
-CERV Work Programme 2026-2027</a>
+<div>CERV Indicative Planning 2026</div>
+<a href="/files/cerv-indicative-planning-2026.pdf" data-untranslated-label="CERV Indicative Planning 2026">Download</a>
+<div>CERV Work Programme 2026-2027</div>
+<a href="https://commission.europa.eu/files/cerv-work-programme-2026-2027.pdf" data-untranslated-label="CERV Work Programme 2026-2027">Download</a>
 </body></html>
 """
 
@@ -79,6 +80,12 @@ def main() -> int:
     assert all(
         row["open_call_authorized"] is False
         for row in receipt["programming_observations"]
+    )
+    assert receipt["programming_observations"][0]["source_url"].endswith(
+        "/files/cerv-indicative-planning-2026.pdf"
+    )
+    assert receipt["programming_observations"][1]["source_url"].endswith(
+        "/files/cerv-work-programme-2026-2027.pdf"
     )
     assert sorted(raw) == [
         "cerv-national-contact-points.html",
