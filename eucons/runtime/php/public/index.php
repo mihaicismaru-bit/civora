@@ -8,6 +8,7 @@ require_once dirname(__DIR__) . '/src/MailRuntime.php';
 require_once dirname(__DIR__) . '/src/ResearchRuntime.php';
 require_once dirname(__DIR__) . '/src/ResearchChannelGate.php';
 require_once dirname(__DIR__) . '/src/ResearchGovernanceGate.php';
+require_once dirname(__DIR__) . '/src/ResearchLiveSafetyGate.php';
 
 const AI4WORK_RESEARCH_PATH = '/research/ai4work/v1/submit';
 const AI4WORK_MAX_BODY_BYTES = 65536;
@@ -80,10 +81,12 @@ if ($isResearch) {
     if ($origin === '' || !$researchRuntime->allowedOrigin($origin)) {
         eucons_json(403, ['status' => 'rejected', 'code' => 'ORIGIN_REQUIRED']);
     }
-    $researchGovernanceGate = new EuconsResearchGovernanceGate(
-        dirname(__DIR__, 3) . '/research/ai4work-step'
-    );
-    if (!$researchRuntime->productionEnabled() || !$researchGovernanceGate->productionReady()) {
+    $researchRoot = dirname(__DIR__, 3) . '/research/ai4work-step';
+    $researchGovernanceGate = new EuconsResearchGovernanceGate($researchRoot);
+    $researchLiveSafetyGate = new EuconsResearchLiveSafetyGate($researchRoot);
+    if (!$researchRuntime->productionEnabled()
+        || !$researchGovernanceGate->productionReady()
+        || !$researchLiveSafetyGate->productionReady()) {
         eucons_json(503, ['status' => 'unavailable', 'code' => 'RESEARCH_COLLECTION_DISABLED']);
     }
 
