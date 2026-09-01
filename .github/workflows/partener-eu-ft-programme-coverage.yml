@@ -134,7 +134,7 @@ jobs:
           ROOT=/tmp/partener-eu-ft-programme-watch
           HISTORY="$ROOT/history"
           SCRATCH=/tmp/partener-eu-ft-history-scratch
-          mkdir -p "$HISTORY/previous/life-exact" "$HISTORY/previous/cef-exact" "$SCRATCH"
+          mkdir -p "$HISTORY/previous/life-exact" "$HISTORY/previous/cef-exact" "$HISTORY/previous/digital-exact" "$SCRATCH"
           gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$HISTORY/artifacts.json"
 
           python - <<'PY' > /tmp/partener-ft-history-candidates.tsv
@@ -231,6 +231,38 @@ jobs:
             [ "$CEF_DOWNLOADED" -lt 8 ] || break
           done < /tmp/partener-ft-history-candidates.tsv
 
+          DIGITAL_FOUND=""
+          DIGITAL_FOUND_NAME=""
+          DIGITAL_REFERENCE=""
+          DIGITAL_DOWNLOADED=0
+          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            [ "$CONCLUSION" = "success" ] || continue
+            DEST="$SCRATCH/digital-${RUN_ID}"
+            mkdir -p "$DEST"
+            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
+              continue
+            fi
+            DIGITAL_DOWNLOADED=$((DIGITAL_DOWNLOADED + 1))
+            PREVIOUS="$(find "$DEST" -type f -path '*/digital-exact/ft-digital-exact-evidence.json' -not -path '*/history/*' -print -quit)"
+            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$DIGITAL_DOWNLOADED" -lt 8 ] && continue || break; }
+            if DIGITAL_REFERENCE="$(PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" <<'PY'
+          import json, sys
+          from eu_direct_digital_ft_exact import validate_evidence
+          previous=json.load(open(sys.argv[1], encoding='utf-8'))
+          validate_evidence(previous)
+          print(previous['reference'])
+          PY
+            )"; then
+              cp "$PREVIOUS" "$HISTORY/previous/digital-exact/ft-digital-exact-evidence.json"
+              DIGITAL_FOUND="$RUN_ID"
+              DIGITAL_FOUND_NAME="$ARTIFACT_NAME"
+              break
+            fi
+            [ "$DIGITAL_DOWNLOADED" -lt 8 ] || break
+          done < /tmp/partener-ft-history-candidates.tsv
+
           if [ -n "$LIFE_FOUND" ]; then
             echo "life_available=true" >> "$GITHUB_OUTPUT"
             echo "life_run_id=$LIFE_FOUND" >> "$GITHUB_OUTPUT"
@@ -245,6 +277,14 @@ jobs:
             echo "cef_reference=$CEF_REFERENCE" >> "$GITHUB_OUTPUT"
           else
             echo "cef_available=false" >> "$GITHUB_OUTPUT"
+          fi
+          if [ -n "$DIGITAL_FOUND" ]; then
+            echo "digital_available=true" >> "$GITHUB_OUTPUT"
+            echo "digital_run_id=$DIGITAL_FOUND" >> "$GITHUB_OUTPUT"
+            echo "digital_artifact_name=$DIGITAL_FOUND_NAME" >> "$GITHUB_OUTPUT"
+            echo "digital_reference=$DIGITAL_REFERENCE" >> "$GITHUB_OUTPUT"
+          else
+            echo "digital_available=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Reconcile exact LIFE against previous same-identity evidence
@@ -331,34 +371,67 @@ jobs:
       - name: Resolve bounded Digital Europe family handoff state
         id: digital_handoff
         shell: bash
+        env:
+          PREVIOUS_DIGITAL_AVAILABLE: ${{ steps.previous_exact.outputs.digital_available }}
         run: |
           set -euo pipefail
           ROOT=/tmp/partener-eu-ft-programme-watch
-          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_digital_ft_handoff.py \
-            --taxonomy "$ROOT/programme-taxonomy.json" \
-            --output "$ROOT/digital-exact/ft-digital-handoff-state.json" \
+          ARGS=(
+            --taxonomy "$ROOT/programme-taxonomy.json"
+            --output "$ROOT/digital-exact/ft-digital-handoff-state.json"
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          )
+          if [ "$PREVIOUS_DIGITAL_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/digital-exact/ft-digital-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_digital_ft_handoff.py "${ARGS[@]}"
           python - "$ROOT/digital-exact/ft-digital-handoff-state.json" <<'PY' >> "$GITHUB_OUTPUT"
           import json, sys
           state=json.load(open(sys.argv[1], encoding='utf-8'))
+          print(f"mode={state['observation_state']}")
           print(f"target_reference={state['target_reference'] or ''}")
           print(f"exact_recheck_required={'true' if state['exact_recheck_required'] else 'false'}")
+          print(f"previous_same_identity={'true' if state['previous_same_identity'] else 'false'}")
           PY
 
       - name: Execute bounded exact-current Digital Europe handoff
         if: steps.digital_handoff.outputs.exact_recheck_required == 'true'
+        shell: bash
+        env:
+          DIGITAL_HANDOFF_MODE: ${{ steps.digital_handoff.outputs.mode }}
+          DIGITAL_TARGET_REFERENCE: ${{ steps.digital_handoff.outputs.target_reference }}
         run: |
-          python partener-eu/ingest/eu_direct_digital_ft_exact.py \
-            --taxonomy /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json \
-            --output-dir /tmp/partener-eu-ft-programme-watch/digital-exact \
-            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          if [ "$DIGITAL_HANDOFF_MODE" = "CURRENT_BOUNDED_SAMPLE_CANDIDATE_EXACT_RECHECK" ]; then
+            python partener-eu/ingest/eu_direct_digital_ft_exact.py \
+              --taxonomy "$ROOT/programme-taxonomy.json" \
+              --output-dir "$ROOT/digital-exact" \
+              --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          else
+            python partener-eu/ingest/eu_direct_digital_ft_exact.py \
+              --reference "$DIGITAL_TARGET_REFERENCE" \
+              --output-dir "$ROOT/digital-exact" \
+              --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          fi
 
-      - name: Reconcile exact Digital Europe baseline
+      - name: Reconcile exact Digital Europe against previous same-identity evidence
         if: steps.digital_handoff.outputs.exact_recheck_required == 'true'
+        shell: bash
+        env:
+          PREVIOUS_DIGITAL_AVAILABLE: ${{ steps.previous_exact.outputs.digital_available }}
+          PREVIOUS_DIGITAL_SAME_IDENTITY: ${{ steps.digital_handoff.outputs.previous_same_identity }}
         run: |
-          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_digital_ft_reconcile.py \
-            /tmp/partener-eu-ft-programme-watch/digital-exact/ft-digital-exact-evidence.json \
-            --output /tmp/partener-eu-ft-programme-watch/digital-exact/ft-digital-reconciliation.json
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            "$ROOT/digital-exact/ft-digital-exact-evidence.json"
+            --output "$ROOT/digital-exact/ft-digital-reconciliation.json"
+          )
+          if [ "$PREVIOUS_DIGITAL_AVAILABLE" = "true" ] && [ "$PREVIOUS_DIGITAL_SAME_IDENTITY" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/digital-exact/ft-digital-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_digital_ft_reconcile.py "${ARGS[@]}"
 
       - name: Validate live evidence remains bounded and non-authorizing
         shell: bash
@@ -367,6 +440,8 @@ jobs:
           PREVIOUS_LIFE_RUN_ID: ${{ steps.previous_exact.outputs.life_run_id }}
           PREVIOUS_CEF_AVAILABLE: ${{ steps.previous_exact.outputs.cef_available }}
           PREVIOUS_CEF_RUN_ID: ${{ steps.previous_exact.outputs.cef_run_id }}
+          PREVIOUS_DIGITAL_AVAILABLE: ${{ steps.previous_exact.outputs.digital_available }}
+          PREVIOUS_DIGITAL_RUN_ID: ${{ steps.previous_exact.outputs.digital_run_id }}
         run: |
           set -euo pipefail
           ARGS=(--root /tmp/partener-eu-ft-programme-watch)
@@ -377,19 +452,23 @@ jobs:
             ARGS+=(--previous-cef-available --previous-cef-run-id "$PREVIOUS_CEF_RUN_ID")
           fi
           python partener-eu/ops/validate_eu_direct_ft_programme_live.py "${ARGS[@]}"
-          python partener-eu/ops/validate_eu_direct_digital_live.py --root /tmp/partener-eu-ft-programme-watch
+          DIGITAL_ARGS=(--root /tmp/partener-eu-ft-programme-watch)
+          if [ "$PREVIOUS_DIGITAL_AVAILABLE" = "true" ]; then
+            DIGITAL_ARGS+=(--previous-digital-available --previous-digital-run-id "$PREVIOUS_DIGITAL_RUN_ID")
+          fi
+          python partener-eu/ops/validate_eu_direct_digital_live.py "${DIGITAL_ARGS[@]}"
 
       - name: Enforce compact history artifact boundary
         shell: bash
         run: |
           set -euo pipefail
           ROOT=/tmp/partener-eu-ft-programme-watch
-          if find "$ROOT/history" -mindepth 1 -maxdepth 1 -type d \( -name 'download-*' -o -name 'cef-download-*' \) -print -quit | grep -q .; then
+          if find "$ROOT/history" -mindepth 1 -maxdepth 1 -type d \( -name 'download-*' -o -name 'cef-download-*' -o -name 'digital-download-*' \) -print -quit | grep -q .; then
             echo 'recursive history download directory leaked into artifact root' >&2
             exit 1
           fi
           HISTORY_FILES="$(find "$ROOT/history" -type f | wc -l | tr -d ' ')"
-          if [ "$HISTORY_FILES" -gt 3 ]; then
+          if [ "$HISTORY_FILES" -gt 4 ]; then
             echo "unexpected history artifact growth: $HISTORY_FILES files" >&2
             find "$ROOT/history" -type f -print >&2
             exit 1
