@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import runpy
 import sys
 import tempfile
 from pathlib import Path
@@ -229,4 +230,8 @@ with tempfile.TemporaryDirectory() as tmp:
     assert linked["requires_separate_competitive_call_adapter"] is True
     assert linked["open_call_authorized"] is False
 
-print("PASS Creative Europe exact F&T topic/cascade separation + conflict diagnostic regression")
+# Reuse the existing exact-topic regression lane to exercise the dedicated
+# competitive/cascading adapter and identity-keyed reconciler as one bounded gate.
+runpy.run_path(str(Path(__file__).with_name("test_creative_europe_ft_competitive.py")), run_name="__main__")
+
+print("PASS Creative Europe exact F&T topic/cascade separation + competitive exact boundary regression")
