@@ -3,7 +3,7 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "07bbe3b7405eaa82149b4155bbd422cdfcd7ef1e0d68ffddaa51206412c91ce0",
+  "candidate_fingerprint": "a084115e336bb27c494259912818cfaca1329992106b020f0512cc6254dafc65",
   "previous_candidate_fingerprint": "07bbe3b7405eaa82149b4155bbd422cdfcd7ef1e0d68ffddaa51206412c91ce0",
   "candidate_count": 1,
   "material_signal_count": 1,
@@ -11,12 +11,12 @@
     {
       "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "1dcb324688b4990e78913de4708b389960b69d35a71440b16583bc07c02abc36",
+      "sha256": "ccb68a6a437f5644401265c6d55fc8a896796b9bd56e5ab076904741a818b2fb",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     }
   ],
-  "auth_dependency_count": 27,
+  "auth_dependency_count": 28,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -152,6 +152,13 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fnomenclator%2Ffirme-de-consultanta%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/instrumente/nomenclator/firme-de-consultanta/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fcontor-fonduri-disponibile%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -210,7 +217,7 @@
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-09-01T09:40:57.506262+00:00",
+  "last_observed_at": "2026-09-01T10:41:33.945167+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
