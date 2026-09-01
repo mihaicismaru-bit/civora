@@ -2,19 +2,68 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-01T11:43:37+03:00",
+  "generated_at": "2026-09-01T12:19:26+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-01T11:42:23+03:00",
-  "task_count": 67,
+  "queue_generated_at": "2026-09-01T12:18:09+03:00",
+  "task_count": 64,
   "primary_match_count": 0,
-  "no_match_count": 34,
-  "unrouted_count": 33,
+  "no_match_count": 33,
+  "unrouted_count": 31,
   "target_count": 18,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "2948ef8288f6e4ec14b70893",
+      "signal_title": "Primarul Gutău dă asigurări: locuitorii din Râmnicu Vâlcea nu vor rămâne fără apă caldă. Cum va fi asigurată și căldura în perioada de tranziție",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/01/primarul-gutau-da-asigurari-locuitorii-din-ramnicu-valcea-nu-vor-ramane-fara-apa-calda-cum-va-fi-asigurata-si-caldura-in-perioada-de-tranzitie/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-01T12:14:43+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "3b48372c4bb254e43daf62b4",
       "signal_title": "Apel către turiștii care vizitează Olăneștiul! Gunoiul nu trebuie lăsat în urma petrecerilor",
@@ -1386,84 +1435,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "c037db46d7b363aef9b58908",
-      "signal_title": "Crima din Crețeni, descoperită după patru ani. Un triunghi amoros și un cadavru ascuns în pădure",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/crima-din-creteni-descoperita-dupa-patru-ani-un-triunghi-amoros-si-un-cadavru-ascuns-in-padure/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-29T16:47:07+03:00",
-      "verification_route_id": "environment_weather",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "e1759f33d9200d47dc44d120",
-      "signal_title": "Confruntări între două grupări pe străzile din Râmnicu Vâlcea. Cinci rețineri…",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/29/confruntari-intre-doua-grupari-pe-strazile-din-ramnicu-valcea-cinci-retineri/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-08-29T12:45:20+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "cdb024409887bcc89f32cce5",
-      "signal_title": "Răfuială în plină stradă la Râmnicu Vâlcea: cinci bărbați, după gratii",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/rafuiala-in-plina-strada-la-ramnicu-valcea-cinci-barbati-dupa-gratii/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_published_at": "2026-08-29T12:40:55+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "fdb7a2a017d206e90e6a7d6c",
-      "signal_title": "FOTO – Oboseala putea provoca un accident grav pe DN 7, în Valea Oltului. Două mașini s-au ciocnit la Robești",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/29/foto-oboseala-putea-provoca-un-accident-grav-pe-dn-7-in-valea-oltului-doua-masini-s-au-ciocnit-la-robesti/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-29T12:27:50+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "fbaf068144bf16fc56b085d2",
