@@ -11,6 +11,9 @@ on:
       - 'partener-eu/ingest/eu_direct_cef_ft_exact.py'
       - 'partener-eu/ingest/eu_direct_cef_ft_reconcile.py'
       - 'partener-eu/ingest/eu_direct_cef_ft_handoff.py'
+      - 'partener-eu/ingest/eu_direct_digital_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_digital_ft_reconcile.py'
+      - 'partener-eu/ingest/eu_direct_digital_ft_handoff.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
       - 'partener-eu/ops/test_eu_direct_ft_coverage_receipt.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py'
@@ -19,7 +22,11 @@ on:
       - 'partener-eu/ops/test_eu_direct_cef_ft_exact.py'
       - 'partener-eu/ops/test_eu_direct_cef_ft_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_cef_ft_handoff.py'
+      - 'partener-eu/ops/test_eu_direct_digital_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_digital_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_digital_ft_handoff.py'
       - 'partener-eu/ops/validate_eu_direct_ft_programme_live.py'
+      - 'partener-eu/ops/validate_eu_direct_digital_live.py'
       - '.github/workflows/partener-eu-ft-programme-coverage.yml'
   workflow_dispatch:
 
@@ -58,6 +65,9 @@ jobs:
             partener-eu/ingest/eu_direct_cef_ft_exact.py \
             partener-eu/ingest/eu_direct_cef_ft_reconcile.py \
             partener-eu/ingest/eu_direct_cef_ft_handoff.py \
+            partener-eu/ingest/eu_direct_digital_ft_exact.py \
+            partener-eu/ingest/eu_direct_digital_ft_reconcile.py \
+            partener-eu/ingest/eu_direct_digital_ft_handoff.py \
             partener-eu/ops/test_eu_direct_ft_programme_watch.py \
             partener-eu/ops/test_eu_direct_ft_coverage_receipt.py \
             partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py \
@@ -66,7 +76,11 @@ jobs:
             partener-eu/ops/test_eu_direct_cef_ft_exact.py \
             partener-eu/ops/test_eu_direct_cef_ft_reconcile.py \
             partener-eu/ops/test_eu_direct_cef_ft_handoff.py \
-            partener-eu/ops/validate_eu_direct_ft_programme_live.py
+            partener-eu/ops/test_eu_direct_digital_ft_exact.py \
+            partener-eu/ops/test_eu_direct_digital_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_digital_ft_handoff.py \
+            partener-eu/ops/validate_eu_direct_ft_programme_live.py \
+            partener-eu/ops/validate_eu_direct_digital_live.py
 
       - name: Validate fail-closed bounded source semantics
         run: |
@@ -78,6 +92,9 @@ jobs:
           python partener-eu/ops/test_eu_direct_cef_ft_exact.py
           python partener-eu/ops/test_eu_direct_cef_ft_reconcile.py
           PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_cef_ft_handoff.py
+          python partener-eu/ops/test_eu_direct_digital_ft_exact.py
+          python partener-eu/ops/test_eu_direct_digital_ft_reconcile.py
+          PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_digital_ft_handoff.py
 
       - name: Capture bounded live official F&T programme coverage
         run: |
@@ -311,6 +328,38 @@ jobs:
           fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cef_ft_reconcile.py "${ARGS[@]}"
 
+      - name: Resolve bounded Digital Europe family handoff state
+        id: digital_handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_digital_ft_handoff.py \
+            --taxonomy "$ROOT/programme-taxonomy.json" \
+            --output "$ROOT/digital-exact/ft-digital-handoff-state.json" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python - "$ROOT/digital-exact/ft-digital-handoff-state.json" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          state=json.load(open(sys.argv[1], encoding='utf-8'))
+          print(f"target_reference={state['target_reference'] or ''}")
+          print(f"exact_recheck_required={'true' if state['exact_recheck_required'] else 'false'}")
+          PY
+
+      - name: Execute bounded exact-current Digital Europe handoff
+        if: steps.digital_handoff.outputs.exact_recheck_required == 'true'
+        run: |
+          python partener-eu/ingest/eu_direct_digital_ft_exact.py \
+            --taxonomy /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json \
+            --output-dir /tmp/partener-eu-ft-programme-watch/digital-exact \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Reconcile exact Digital Europe baseline
+        if: steps.digital_handoff.outputs.exact_recheck_required == 'true'
+        run: |
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_digital_ft_reconcile.py \
+            /tmp/partener-eu-ft-programme-watch/digital-exact/ft-digital-exact-evidence.json \
+            --output /tmp/partener-eu-ft-programme-watch/digital-exact/ft-digital-reconciliation.json
+
       - name: Validate live evidence remains bounded and non-authorizing
         shell: bash
         env:
@@ -328,6 +377,7 @@ jobs:
             ARGS+=(--previous-cef-available --previous-cef-run-id "$PREVIOUS_CEF_RUN_ID")
           fi
           python partener-eu/ops/validate_eu_direct_ft_programme_live.py "${ARGS[@]}"
+          python partener-eu/ops/validate_eu_direct_digital_live.py --root /tmp/partener-eu-ft-programme-watch
 
       - name: Enforce compact history artifact boundary
         shell: bash
