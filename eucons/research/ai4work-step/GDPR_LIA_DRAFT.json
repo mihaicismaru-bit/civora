@@ -1,7 +1,10 @@
 {
-  "schema_version": "eucons.ai4work_gdpr_lia.v0.5",
+  "schema_version": "eucons.ai4work_gdpr_lia.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-29",
+  "date": "2026-09-01",
+  "evidence_binding_key": "lawful_basis_or_lia",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
   "controller": {
     "legal_name": "EUROCONSULT SRL",
     "cui": "14250864",
@@ -91,6 +94,24 @@
     "privacy_contact": null,
     "notes": "Controller identity is fixed; this field remains false until the candidate legal basis and balancing outcome are explicitly approved for PROD."
   },
+  "prod_approval": {
+    "state": "PENDING_CONTROLLER_SIGNOFF",
+    "lawful_basis_code": "GDPR_ARTICLE_6_1_F_LEGITIMATE_INTERESTS",
+    "purpose_test_approved": false,
+    "necessity_test_approved": false,
+    "balancing_test_approved": false,
+    "right_to_object_operational": false,
+    "article13_basis_disclosure_confirmed": false,
+    "employee_no_disadvantage_safeguard_approved": false,
+    "processor_chain_review_complete": false,
+    "logging_linkability_review_complete": false,
+    "retention_executable_confirmed": false,
+    "privacy_contact": null,
+    "approver_name_or_role": null,
+    "approved_at": null,
+    "boundary": "Machine-readable PROD approval remains false until the controller explicitly approves the exact Article 6(1)(f) purpose, necessity and balancing tests and the operational safeguards bound by this artifact. It does not authorize collection, merge, deploy or canonicalization."
+  },
+  "prod_eligible": false,
   "collection_enabled": false,
   "merge_authorized": false,
   "deploy_authorized": false,
