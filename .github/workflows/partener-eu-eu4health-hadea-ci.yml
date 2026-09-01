@@ -65,6 +65,7 @@ jobs:
             --output /tmp/eu4health-hadea/exact-call.json
 
       - name: Validate live exact-call evidence stays non-authorizing
+        id: live_hadea
         run: |
           python - <<'PY'
           import json, string, sys
@@ -122,8 +123,14 @@ jobs:
               'open_call_authorized': d.get('open_call_authorized'),
           }, ensure_ascii=False, sort_keys=True))
           PY
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d=json.load(open('/tmp/eu4health-hadea/exact-call.json', encoding='utf-8'))
+          print('evidence_usable=' + ('true' if d.get('evidence_usable_for_reconciliation') is True else 'false'))
+          PY
 
       - name: Reconcile exact HaDEA reference against live structured Funding & Tenders evidence
+        if: steps.live_hadea.outputs.evidence_usable == 'true'
         run: |
           set -euo pipefail
           python partener-eu/ingest/eu4health_hadea_ft_reconcile.py \
@@ -133,6 +140,7 @@ jobs:
             --output-dir /tmp/eu4health-hadea
 
       - name: Validate live HaDEA to Funding & Tenders reconciliation stays non-authorizing
+        if: steps.live_hadea.outputs.evidence_usable == 'true'
         run: |
           python - <<'PY'
           import json, string, sys
@@ -175,6 +183,27 @@ jobs:
               'reference': expected,
               'funding_tenders_status': d.get('funding_tenders_status'),
               'semantic_reconciliation_passed': d.get('semantic_reconciliation_passed'),
+              'open_call_authorized': d.get('open_call_authorized'),
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Confirm degraded HaDEA evidence remains unreconciled
+        if: steps.live_hadea.outputs.evidence_usable != 'true'
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          d=json.load(open('/tmp/eu4health-hadea/exact-call.json', encoding='utf-8'))
+          health=d.get('source_health') or {}
+          assert str(health.get('health_state') or '').startswith('DEGRADED')
+          assert health.get('lkg_required') is True
+          assert d.get('evidence_usable_for_reconciliation') is False
+          assert d.get('open_call_authorized') is False
+          assert d.get('publish_authorized') is False
+          assert not pathlib.Path('/tmp/eu4health-hadea/hadea-funding-tenders-reconciliation.json').exists()
+          print(json.dumps({
+              'health_state': health.get('health_state'),
+              'lkg_required': health.get('lkg_required'),
+              'semantic_reconciliation_skipped_fail_closed': True,
               'open_call_authorized': d.get('open_call_authorized'),
           }, ensure_ascii=False, sort_keys=True))
           PY
