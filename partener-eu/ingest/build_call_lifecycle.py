@@ -279,15 +279,56 @@ def result_sources(dossier: dict[str, Any], afir: dict[str, Any]) -> list[dict[s
     return out[:20]
 
 
-def lifecycle_history(previous: dict[str, Any], dossier_id: str, stage: str, observed_at: str) -> list[dict[str, Any]]:
+def lifecycle_history(
+    previous: dict[str, Any],
+    dossier_id: str,
+    stage: str,
+    observed_at: str,
+    *,
+    correct_stale_closed: bool = False,
+) -> list[dict[str, Any]]:
     prior = next((x for x in previous.get("calls") or [] if x.get("dossierId") == dossier_id), None)
     history = list(prior.get("transitions") or []) if prior else []
+    if correct_stale_closed and history and history[-1].get("to") == "CLOSED":
+        history.pop()
+        if not history:
+            history.append({
+                "observedAt": observed_at,
+                "from": None,
+                "to": "OPEN",
+                "reason": "AUTHORITATIVE_OPEN_CORRECTION",
+            })
     old_stage = prior.get("stage") if prior else None
+    if correct_stale_closed:
+        old_stage = history[-1].get("to") if history else None
     if not history:
         history.append({"observedAt": observed_at, "from": None, "to": stage, "reason": "INITIAL_CANONICAL_PROJECTION"})
     elif old_stage != stage:
         history.append({"observedAt": observed_at, "from": old_stage, "to": stage, "reason": "NEW_OFFICIAL_EVIDENCE"})
     return history[-50:]
+
+
+def authoritative_open_correction(dossier: dict[str, Any], prior_stage: str, candidate_stage: str) -> bool:
+    """Allow an official deadline extension to correct a stale derived CLOSED state.
+
+    This is a data correction, not a lifecycle regression: only a previous
+    CLOSED state can be superseded, and only when the current publishable
+    dossier explicitly verifies both status and deadline and records the
+    authoritative extension event.
+    """
+    if prior_stage != "CLOSED" or candidate_stage != "OPEN":
+        return False
+    if str(dossier.get("status") or "").upper() != "OPEN":
+        return False
+    if dossier.get("publicationState") != "PUBLISHABLE":
+        return False
+    verified = set((dossier.get("quality") or {}).get("verifiedFactClasses") or [])
+    if not {"status", "deadline"}.issubset(verified):
+        return False
+    return any(
+        str(event.get("kind") or "").upper() == "DEADLINE_EXTENDED"
+        for event in dossier.get("timeline") or []
+    )
 
 
 def monitoring_priority(stage: str) -> str:
@@ -318,14 +359,23 @@ def main() -> int:
             stage = "RESULTS"
         prior_call = next((x for x in previous.get("calls") or [] if x.get("dossierId") == dossier.get("id")), None)
         prior_stage = str(prior_call.get("stage") or "") if prior_call else ""
+        correct_stale_closed = authoritative_open_correction(dossier, prior_stage, stage)
         if prior_stage in STAGE_RANK and STAGE_RANK[prior_stage] > STAGE_RANK[stage]:
-            stage_evidence.append({
-                "type": "MONOTONIC_HISTORY_PRESERVED",
-                "previousStage": prior_stage,
-                "candidateStage": stage,
-                "reason": "Lipsa unei evidențe în snapshotul curent nu retrage o etapă administrativă confirmată anterior.",
-            })
-            stage = prior_stage
+            if correct_stale_closed:
+                stage_evidence.append({
+                    "type": "AUTHORITATIVE_STATUS_CORRECTION",
+                    "previousStage": prior_stage,
+                    "candidateStage": stage,
+                    "reason": "Prelungirea oficială confirmată corectează starea derivată anterior ca închisă.",
+                })
+            else:
+                stage_evidence.append({
+                    "type": "MONOTONIC_HISTORY_PRESERVED",
+                    "previousStage": prior_stage,
+                    "candidateStage": stage,
+                    "reason": "Lipsa unei evidențe în snapshotul curent nu retrage o etapă administrativă confirmată anterior.",
+                })
+                stage = prior_stage
         source_urls = [s.get("url") for s in dossier.get("sources") or [] if s.get("url")]
         source_urls += [x.get("url") for x in result_links if x.get("url")]
         source_urls = list(dict.fromkeys(source_urls))[:30]
@@ -359,7 +409,13 @@ def main() -> int:
             "publicationState": dossier.get("publicationState"),
             "dossierCompleteness": dossier.get("quality", {}).get("completeness"),
             "stageEvidence": stage_evidence + mysmis_evidence,
-            "transitions": lifecycle_history(previous, str(dossier.get("id")), stage, observed_at),
+            "transitions": lifecycle_history(
+                previous,
+                str(dossier.get("id")),
+                stage,
+                observed_at,
+                correct_stale_closed=correct_stale_closed,
+            ),
             "results": result_tracking,
             "monitoring": {
                 "active": stage != "COMPLETED",

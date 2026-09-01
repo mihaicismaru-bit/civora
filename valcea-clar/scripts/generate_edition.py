@@ -37,7 +37,7 @@ POINTER = SITE / "current_edition.json"
 LAST_ATTEMPT = SITE / "last_edition_attempt.json"
 PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
 TZ = ZoneInfo("Europe/Bucharest")
-ALLOWED_GATES = {"PASS", "PASS_DATE_ONLY", "PASS_TITLE_DATE_ONLY", "PASS_EXPLAINER_ONLY", "PASS_WITH_CAUTION"}
+ALLOWED_GATES = {"PASS", "PASS_DATE_ONLY", "PASS_EXPLAINER_ONLY", "PASS_WITH_CAUTION"}
 ALLOWED_STATUSES = {"verified", "approved_carry_forward"}
 PUBLISHABLE_STATUSES = {"auto_approved", "editor_approved"}
 MIN_CONFIDENCE = 90
@@ -174,7 +174,7 @@ def render_markdown(now: datetime, slot: str, items: list[dict], status_note: st
                 continue
             seen.add(key)
             lines.append(f"- {source.get('name')} — {source.get('url')}\n")
-    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Materialele noi compuse de Editorial Writer folosesc exclusiv afirmații legate explicit de surse; materialele vechi sunt validate și păstrate fără rescriere. Pentru fluxul automat din surse primare, sistemul poate publica și un brief transparent de sursă primară care confirmă numai titlul, data, editorul și linkul până când există un fact kernel complet. Copia editorială durabilă folosește date absolute, nu formulări relative de tip «azi/mâine/ieri». Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
+    lines.append("\n**Politică editorială:** această ediție este generată automat numai din fapte structurate care au trecut pragul de verificare. Materialele noi compuse de Editorial Writer folosesc exclusiv afirmații legate explicit de surse; materialele vechi sunt validate și păstrate fără rescriere. Un titlu, o dată și un link rămân semnal intern și nu sunt publicate ca articol până la construirea unui fact kernel complet. Copia editorială durabilă folosește date absolute, nu formulări relative de tip «azi/mâine/ieri». Dacă datele verificate sunt insuficiente, ediția este mai scurtă.\n")
     return "".join(lines)
 
 
@@ -234,7 +234,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "editorial_writer": editorial_writer.WRITER_ID,
             "new_kernel_claim_level_provenance_required": True,
             "legacy_copy_rewritten": False,
-            "primary_source_auto_scope": "verified_source_notice_brief",
+            "primary_source_auto_scope": "radar_only_until_full_fact_kernel",
             "article_body_material_facts_autopublish": False,
             "shorter_edition_when_evidence_is_sparse": True,
             "last_known_good_fallback": True,
@@ -307,13 +307,15 @@ def self_test() -> int:
         "slots": ["morning"], "headline": "Program verificat pentru 15 august 2026",
         "dek": "Programul pentru 15 august 2026 este confirmat de sursa oficială.",
         "paragraphs": ["Informația este formulată cu dată absolută pentru a rămâne corectă în arhivă."],
-        "material_fact_gate": "PASS_TITLE_DATE_ONLY", "sources": [{"name": "S", "url": "https://example.test", "tier": "T1"}]
+        "material_fact_gate": "PASS", "sources": [{"name": "S", "url": "https://example.test", "tier": "T1"}]
     }
     sample = {"facts": [sample_fact]}
     now = datetime(2026, 8, 15, 8, 0, tzinfo=TZ)
     eligible = eligible_facts(sample, now, "morning")
     assert len(eligible) == 1
     assert eligible_facts(sample, now, "evening") == []
+    title_only = {"facts": [{**sample_fact, "id": "title-only", "material_fact_gate": "PASS_TITLE_DATE_ONLY"}]}
+    assert eligible_facts(title_only, now, "morning") == []
     relative = {"facts": [{**sample_fact, "id": "relative", "headline": "Azi are loc programul verificat"}]}
     assert eligible_facts(relative, now, "morning") == []
     assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)

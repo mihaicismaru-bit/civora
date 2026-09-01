@@ -3,6 +3,7 @@ name: VÂLCEA CLAR Threads Editorial
 # Direct Threads publishing remains a separate adapter for now, but it no longer
 # polls or subscribes to another social workflow. A durable story publication
 # event is the trigger; cron recovery is owned by the canonical social engine.
+# Updating this workflow also performs an operator-authorized recovery run.
 on:
   workflow_dispatch:
   pull_request:

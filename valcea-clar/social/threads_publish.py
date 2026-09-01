@@ -144,12 +144,13 @@ def eligible_items(outbox: dict[str, Any], state: dict[str, Any], event: dict[st
     if not baseline:
         return "BASELINE_REQUIRED", []
 
-    # Only stories in the current canonical event can be drained.  Unlike v1,
-    # delivery is not restricted to the fragile `new_story_ids` edge; the
-    # durable state ledger is the dedupe authority.
-    canonical_ids = event.get("story_ids")
-    if not isinstance(canonical_ids, list) or not canonical_ids:
-        canonical_ids = event.get("new_story_ids")
+    # A durable event produced by the current newsroom includes the exact new
+    # story edge.  Prefer it so an operator recovery cannot drain historical
+    # canonical stories.  `story_ids` is only a compatibility fallback for an
+    # older event schema that does not carry `new_story_ids` at all.
+    canonical_ids = event.get("new_story_ids")
+    if not isinstance(canonical_ids, list):
+        canonical_ids = event.get("story_ids")
     if not isinstance(canonical_ids, list) or not canonical_ids:
         return "NO_CANONICAL_STORIES", []
     wanted = {str(value) for value in canonical_ids if str(value).strip()}
@@ -162,6 +163,12 @@ def eligible_items(outbox: dict[str, Any], state: dict[str, Any], event: dict[st
         if is_socially_held(item):
             continue
         if item.get("status") != "outbox_ready":
+            continue
+        # Legacy outbox rows remain durable for deduplication, but were created
+        # before direct Threads delivery existed.  They are never candidates
+        # for the live adapter; only explicitly enabled editorial-v1 rows may
+        # enter validation and publication.
+        if item.get("direct_publication_enabled") is not True:
             continue
         item_id = str(item.get("id") or "").strip()
         if not item_id or item_id in published:
@@ -272,9 +279,18 @@ def self_test() -> int:
     outbox = {"platform": "threads", "publication_model": "continuous_story_first", "items": [item]}
     state = {"direct_publication_enabled": True, "direct_activation_baseline_event_fingerprint": "old", "published": {}, "failures": {}}
     reason, items = eligible_items(outbox, state, {"fingerprint": "new", "story_ids": ["new"], "new_story_ids": []})
+    assert reason == "NO_CANONICAL_STORIES" and not items
+    reason, items = eligible_items(outbox, state, {"fingerprint": "new", "story_ids": ["new"]})
     assert reason == "READY" and [row["id"] for row in items] == ["threads-story-new"]
     state["published"] = {"threads-story-new": {}}
     reason, items = eligible_items(outbox, state, {"fingerprint": "new", "story_ids": ["new"]})
+    assert reason == "NO_ELIGIBLE_ITEMS" and not items
+    legacy = {**item, "id": "threads-story-legacy", "story_id": "legacy", "direct_publication_enabled": False}
+    reason, items = eligible_items(
+        {"platform": "threads", "publication_model": "continuous_story_first", "items": [legacy]},
+        {"direct_publication_enabled": True, "direct_activation_baseline_event_fingerprint": "old", "published": {}, "failures": {}},
+        {"fingerprint": "new", "story_ids": ["legacy"]},
+    )
     assert reason == "NO_ELIGIBLE_ITEMS" and not items
     print("VÂLCEA CLAR Threads direct publisher v1.1 self-test: PASS")
     return 0

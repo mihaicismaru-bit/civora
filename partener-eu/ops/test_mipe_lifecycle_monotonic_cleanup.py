@@ -66,6 +66,27 @@ def main() -> int:
                         "quality": {"completeness": 1.0},
                         "timeline": [],
                         "sources": [],
+                    },
+                    {
+                        "id": "TEST-CALL-REOPENED",
+                        "title": "Apel de test cu termen prelungit oficial",
+                        "programme": "TEST",
+                        "code": "TEST-2",
+                        "region": "RO",
+                        "status": "OPEN",
+                        "publicationState": "PUBLISHABLE",
+                        "quality": {
+                            "completeness": 100,
+                            "verifiedFactClasses": ["status", "deadline"],
+                        },
+                        "timeline": [
+                            {
+                                "date": "2026-08-27",
+                                "kind": "DEADLINE_EXTENDED",
+                                "text": "Termenul a fost prelungit oficial.",
+                            }
+                        ],
+                        "sources": [],
                     }
                 ],
             },
@@ -91,6 +112,24 @@ def main() -> int:
                                 "reason": "NEW_OFFICIAL_EVIDENCE",
                             }
                         ],
+                    },
+                    {
+                        "dossierId": "TEST-CALL-REOPENED",
+                        "stage": "CLOSED",
+                        "transitions": [
+                            {
+                                "observedAt": "2026-08-25T00:00:00Z",
+                                "from": None,
+                                "to": "OPEN",
+                                "reason": "INITIAL_CANONICAL_PROJECTION",
+                            },
+                            {
+                                "observedAt": "2026-08-26T00:00:00Z",
+                                "from": "OPEN",
+                                "to": "CLOSED",
+                                "reason": "NEW_OFFICIAL_EVIDENCE",
+                            },
+                        ],
                     }
                 ]
             },
@@ -106,8 +145,8 @@ def main() -> int:
 
         assert module.main() == 0
         payload = json.loads(out_path.read_text(encoding="utf-8"))
-        assert len(payload.get("calls") or []) == 1
-        call = payload["calls"][0]
+        assert len(payload.get("calls") or []) == 2
+        call = next(row for row in payload["calls"] if row["dossierId"] == "TEST-CALL-1")
         assert call["stage"] == "RESULTS", call
         preserved = [
             row
@@ -125,6 +164,27 @@ def main() -> int:
                 "reason": "NEW_OFFICIAL_EVIDENCE",
             }
         ], call.get("transitions")
+
+        reopened = next(row for row in payload["calls"] if row["dossierId"] == "TEST-CALL-REOPENED")
+        assert reopened["stage"] == "OPEN", reopened
+        corrections = [
+            row
+            for row in reopened.get("stageEvidence") or []
+            if row.get("type") == "AUTHORITATIVE_STATUS_CORRECTION"
+        ]
+        assert len(corrections) == 1, reopened.get("stageEvidence")
+        assert not any(
+            row.get("type") == "MONOTONIC_HISTORY_PRESERVED"
+            for row in reopened.get("stageEvidence") or []
+        ), reopened.get("stageEvidence")
+        assert reopened.get("transitions") == [
+            {
+                "observedAt": "2026-08-25T00:00:00Z",
+                "from": None,
+                "to": "OPEN",
+                "reason": "INITIAL_CANONICAL_PROJECTION",
+            }
+        ], reopened.get("transitions")
 
     print("PARTENER.EU lifecycle monotonic cleanup regression: PASS")
     return 0

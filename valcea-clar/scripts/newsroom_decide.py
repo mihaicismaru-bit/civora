@@ -98,7 +98,11 @@ def story_ready(item: dict) -> tuple[bool, str]:
     if item.get("auto_generated") and item.get("auto_scope") in {
         "source_title_and_publication_date_only",
         "title_date_source_only",
+        "verified_source_notice_brief",
+        "verified_source_notice_radar_only",
     }:
+        return False, "title_date_only_not_full_story"
+    if item.get("material_fact_gate") in {"PASS_TITLE_DATE_ONLY", "HOLD_TITLE_DATE_ONLY"}:
         return False, "title_date_only_not_full_story"
 
     editorial = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
@@ -255,6 +259,10 @@ def main() -> int:
         assert story_ready(relative) == (False, "relative_temporal_language_not_durable")
         title_only = dict(full, auto_generated=True, auto_scope="source_title_and_publication_date_only")
         assert story_ready(title_only)[0] is False
+        leaked_brief = dict(full, auto_generated=True, auto_scope="verified_source_notice_brief")
+        assert story_ready(leaked_brief) == (False, "title_date_only_not_full_story")
+        title_gate = dict(full, material_fact_gate="PASS_TITLE_DATE_ONLY")
+        assert story_ready(title_gate) == (False, "title_date_only_not_full_story")
         held = dict(full, id="olanesti-bridge-monitor")
         assert story_ready(held) == (False, "editorial_publication_hold")
         assert "olanesti-bridge-monitor" in active_publication_holds()
