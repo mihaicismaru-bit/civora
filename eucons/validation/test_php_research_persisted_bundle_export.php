@@ -11,11 +11,21 @@ function fail_bundle_test(string $message): never {
 }
 
 function rrmdir_bundle(string $dir): void {
+    if (is_link($dir)) {
+        @unlink($dir);
+        return;
+    }
     if (!is_dir($dir)) return;
     foreach (scandir($dir) ?: [] as $item) {
         if ($item === '.' || $item === '..') continue;
         $path = $dir . '/' . $item;
-        is_dir($path) ? rrmdir_bundle($path) : @unlink($path);
+        if (is_link($path)) {
+            @unlink($path);
+        } elseif (is_dir($path)) {
+            rrmdir_bundle($path);
+        } else {
+            @unlink($path);
+        }
     }
     @rmdir($dir);
 }
@@ -145,6 +155,39 @@ try {
     if ($e->getMessage() !== 'RESEARCH_EXPORT_ORPHAN_RECEIPT') fail_bundle_test('unexpected orphan-receipt error: ' . $e->getMessage());
 }
 @unlink($root . '/research/receipts/' . $orphanId . '.json');
+
+if (function_exists('symlink')) {
+    $externalReceipt = $root . '/external-employer-receipt.json';
+    write_bundle_json($externalReceipt, $employer['receipt']);
+    $employerReceiptPath = $root . '/research/receipts/' . $employerId . '.json';
+    @unlink($employerReceiptPath);
+    if (@symlink($externalReceipt, $employerReceiptPath)) {
+        try {
+            $exporter->buildPersistedBundles();
+            fail_bundle_test('symlinked receipt artifact did not fail closed');
+        } catch (RuntimeException $e) {
+            if ($e->getMessage() !== 'RESEARCH_EXPORT_STORAGE_ALIAS_FORBIDDEN') fail_bundle_test('unexpected receipt-alias error: ' . $e->getMessage());
+        }
+        @unlink($employerReceiptPath);
+    }
+    write_bundle_json($employerReceiptPath, $employer['receipt']);
+    @unlink($externalReceipt);
+
+    $employerFormDir = $root . '/research/responses/AI4WORK_EMPLOYERS_V1';
+    $employerFormReal = $root . '/research/responses/AI4WORK_EMPLOYERS_V1-real';
+    if (@rename($employerFormDir, $employerFormReal) && @symlink($employerFormReal, $employerFormDir)) {
+        try {
+            $exporter->buildPersistedBundles();
+            fail_bundle_test('symlinked response store directory did not fail closed');
+        } catch (RuntimeException $e) {
+            if ($e->getMessage() !== 'RESEARCH_EXPORT_STORAGE_ALIAS_FORBIDDEN') fail_bundle_test('unexpected response-store-alias error: ' . $e->getMessage());
+        }
+        @unlink($employerFormDir);
+        @rename($employerFormReal, $employerFormDir);
+    } elseif (is_dir($employerFormReal) && !is_dir($employerFormDir)) {
+        @rename($employerFormReal, $employerFormDir);
+    }
+}
 
 $invalidHold = [
     'schema_version' => 1,
