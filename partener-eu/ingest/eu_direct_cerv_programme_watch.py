@@ -90,6 +90,7 @@ class _HTMLProbe(HTMLParser):
         self.links: list[dict[str, str]] = []
         self._href: str | None = None
         self._anchor_parts: list[str] = []
+        self._anchor_label_hint: str | None = None
         self._suppressed = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -98,7 +99,13 @@ class _HTMLProbe(HTMLParser):
             self._suppressed += 1
             return
         if low == "a" and not self._suppressed:
-            self._href = dict(attrs).get("href")
+            attr_map = dict(attrs)
+            self._href = attr_map.get("href")
+            self._anchor_label_hint = (
+                attr_map.get("data-untranslated-label")
+                or attr_map.get("aria-label")
+                or attr_map.get("title")
+            )
             self._anchor_parts = []
 
     def handle_endtag(self, tag: str) -> None:
@@ -107,11 +114,12 @@ class _HTMLProbe(HTMLParser):
             self._suppressed = max(0, self._suppressed - 1)
             return
         if low == "a" and not self._suppressed:
-            label = " ".join(self._anchor_parts).strip()
+            label = (self._anchor_label_hint or " ".join(self._anchor_parts)).strip()
             if self._href and label:
                 self.links.append({"text": label, "href": self._href})
             self._href = None
             self._anchor_parts = []
+            self._anchor_label_hint = None
 
     def handle_data(self, data: str) -> None:
         if self._suppressed:
