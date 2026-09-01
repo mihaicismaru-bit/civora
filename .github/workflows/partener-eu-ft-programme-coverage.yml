@@ -201,16 +201,106 @@ jobs:
             --output-dir /tmp/partener-eu-ft-programme-watch/cef-exact \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
-      - name: Reconcile exact CEF baseline
+      - name: Restore previous successful same-branch CEF exact evidence
+        id: previous_cef
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cef_ft_reconcile.py \
-            /tmp/partener-eu-ft-programme-watch/cef-exact/ft-cef-exact-evidence.json \
-            --output /tmp/partener-eu-ft-programme-watch/cef-exact/ft-cef-reconciliation.json
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          HISTORY="$ROOT/history"
+          mkdir -p "$HISTORY/previous/cef-exact"
+          python - <<'PY' > /tmp/partener-cef-history-candidates.tsv
+          import json, os
+          data=json.load(open('/tmp/partener-eu-ft-programme-watch/history/artifacts.json', encoding='utf-8'))
+          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
+          current=int(os.environ['GITHUB_RUN_ID'])
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not name.startswith('partener-eu-ft-programme-coverage-') or artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              run_id=int(run.get('id') or 0)
+              if not run_id or run_id == current:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), run_id, name))
+          seen=set()
+          for created, run_id, name in sorted(rows, reverse=True):
+              if run_id in seen:
+                  continue
+              seen.add(run_id)
+              print(f'{run_id}\t{name}')
+          PY
+          FOUND=""
+          FOUND_NAME=""
+          DOWNLOADED=0
+          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
+            [ -n "$RUN_ID" ] || continue
+            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+            [ "$CONCLUSION" = "success" ] || continue
+            DEST="$HISTORY/cef-download-${RUN_ID}"
+            mkdir -p "$DEST"
+            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
+              continue
+            fi
+            DOWNLOADED=$((DOWNLOADED + 1))
+            PREVIOUS="$(find "$DEST" -type f -path '*/cef-exact/ft-cef-exact-evidence.json' -print -quit)"
+            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$DOWNLOADED" -lt 8 ] && continue || break; }
+            if PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" "$ROOT/cef-exact/ft-cef-exact-evidence.json" <<'PY'
+          import json, sys
+          from eu_direct_cef_ft_exact import validate_evidence
+          from eu_direct_cef_ft_reconcile import parse_time
+          previous=json.load(open(sys.argv[1], encoding='utf-8'))
+          current=json.load(open(sys.argv[2], encoding='utf-8'))
+          validate_evidence(previous)
+          validate_evidence(current)
+          if previous.get('reference') != current.get('reference'):
+              raise SystemExit(1)
+          if parse_time(str(previous.get('fetched_at'))) > parse_time(str(current.get('fetched_at'))):
+              raise SystemExit(1)
+          PY
+            then
+              cp "$PREVIOUS" "$HISTORY/previous/cef-exact/ft-cef-exact-evidence.json"
+              FOUND="$RUN_ID"
+              FOUND_NAME="$ARTIFACT_NAME"
+              break
+            fi
+            [ "$DOWNLOADED" -lt 8 ] || break
+          done < /tmp/partener-cef-history-candidates.tsv
+          if [ -n "$FOUND" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "run_id=$FOUND" >> "$GITHUB_OUTPUT"
+            echo "artifact_name=$FOUND_NAME" >> "$GITHUB_OUTPUT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Reconcile exact CEF against previous same-identity evidence
+        shell: bash
+        env:
+          PREVIOUS_CEF_AVAILABLE: ${{ steps.previous_cef.outputs.available }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            "$ROOT/cef-exact/ft-cef-exact-evidence.json"
+            --output "$ROOT/cef-exact/ft-cef-reconciliation.json"
+          )
+          if [ "$PREVIOUS_CEF_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/cef-exact/ft-cef-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cef_ft_reconcile.py "${ARGS[@]}"
 
       - name: Validate live evidence remains bounded and non-authorizing
         env:
           PREVIOUS_LIFE_AVAILABLE: ${{ steps.previous_life.outputs.available }}
           PREVIOUS_LIFE_RUN_ID: ${{ steps.previous_life.outputs.run_id }}
+          PREVIOUS_CEF_AVAILABLE: ${{ steps.previous_cef.outputs.available }}
+          PREVIOUS_CEF_RUN_ID: ${{ steps.previous_cef.outputs.run_id }}
         run: |
           python - <<'PY'
           import hashlib
@@ -230,6 +320,10 @@ jobs:
           previous = None
           if previous_available:
               previous = json.loads((root / 'history/previous/life-exact/ft-life-exact-evidence.json').read_text(encoding='utf-8'))
+          previous_cef_available = os.environ.get('PREVIOUS_CEF_AVAILABLE') == 'true'
+          previous_cef = None
+          if previous_cef_available:
+              previous_cef = json.loads((root / 'history/previous/cef-exact/ft-cef-exact-evidence.json').read_text(encoding='utf-8'))
 
           assert d['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_WATCH_V1'
           assert c['schema'] == 'PARTENER_EU_FT_PROGRAMME_COVERAGE_RECEIPT_V1'
@@ -307,8 +401,16 @@ jobs:
               assert life_rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
               assert life_rec['previous_evidence_sha256'] is None
 
-          assert cef_rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
-          assert cef_rec['previous_evidence_sha256'] is None
+          if previous_cef_available:
+              assert previous_cef is not None
+              assert previous_cef['reference'] == cef['reference']
+              expected = 'NO_CHANGE' if previous_cef['exact_semantic_fingerprint'] == cef['exact_semantic_fingerprint'] else 'CEF_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'
+              assert cef_rec['reconciliation_state'] == expected
+              previous_cef_sha = hashlib.sha256(json.dumps(previous_cef, ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+              assert cef_rec['previous_evidence_sha256'] == previous_cef_sha
+          else:
+              assert cef_rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert cef_rec['previous_evidence_sha256'] is None
 
           print(json.dumps({
               'stats': d['stats'],
@@ -334,6 +436,8 @@ jobs:
                   'candidate_state': cef['candidate_state'],
                   'status_label': cef['status_label'],
                   'authority_url_verified': cef['authority_url_verified'],
+                  'previous_evidence_available': previous_cef_available,
+                  'previous_evidence_run_id': os.environ.get('PREVIOUS_CEF_RUN_ID') or None,
                   'reconciliation_state': cef_rec['reconciliation_state'],
                   'semantic_change_count': cef_rec['semantic_change_count'],
                   'material_admission_ready_for_downstream_review': cef_rec['material_admission_ready_for_downstream_review'],
