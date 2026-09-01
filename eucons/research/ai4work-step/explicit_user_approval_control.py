@@ -10,7 +10,7 @@ from typing import Any
 HERE = Path(__file__).resolve().parent
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 CLOCK_SKEW = timedelta(minutes=5)
-APPROVAL_SCHEMA = "eucons.ai4work_explicit_user_approval_receipt.v0.1"
+APPROVAL_SCHEMA = "eucons.ai4work_explicit_user_approval_receipt.v0.2"
 APPROVAL_SOURCE = "HUMAN_EXPLICIT_USER_APPROVAL"
 APPROVAL_ACTION = "REAL_COLLECTION_PROD_ACTIVATION_ONLY"
 REQUIRED_BOUND_ARTIFACTS = {
@@ -19,6 +19,14 @@ REQUIRED_BOUND_ARTIFACTS = {
     "form_contract": HERE / "form_contract.json",
     "invitation_catalog": HERE / "RESEARCH_INVITATION_CATALOG_DRAFT.json",
     "collection_channel_register": HERE / "COLLECTION_CHANNEL_REGISTER_DRAFT.json",
+    "controller_determination": HERE / "CONTROLLER_DETERMINATION_DRAFT.json",
+    "article13_notice_snapshot": HERE / "ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json",
+    "lawful_basis_lia": HERE / "GDPR_LIA_DRAFT.json",
+    "dpia_screening": HERE / "GDPR_DPIA_SCREENING_DRAFT.json",
+    "retention_schedule": HERE / "GDPR_RETENTION_SCHEDULE_DRAFT.json",
+    "data_subject_rights_procedure": HERE / "GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json",
+    "security_incident_response": HERE / "GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json",
+    "provider_storage_contract": HERE / "PROVIDER_STORAGE_CONTRACT.json",
 }
 
 
