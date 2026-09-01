@@ -108,7 +108,7 @@ def valid_register(*, catalog_reference: str = "invitation_catalog.json", catalo
         "entries": [
             {
                 "channel_id": "CH-TESTTWIN01",
-                "channel_type": "institutional",
+                "channel_type": "partner_email",
                 "region_scope": ["Sud-Vest Oltenia"],
                 "audience_scope": ["adults"],
                 "invitation_version": "TEST_TWIN_ADULTS_V1",
@@ -151,6 +151,12 @@ class CollectionChannelRegisterControlTests(unittest.TestCase):
         register = valid_register()
         register["entries"][0]["non_coercion_confirmed"] = False
         with self.assertRaisesRegex(CollectionChannelRegisterError, "non_coercion_confirmed"):
+            validate_register(register, require_nonempty=True)
+
+    def test_channel_type_must_be_one_of_the_approved_dissemination_classes(self):
+        register = valid_register()
+        register["entries"][0]["channel_type"] = "unapproved_channel"
+        with self.assertRaisesRegex(CollectionChannelRegisterError, "approved dissemination class"):
             validate_register(register, require_nonempty=True)
 
     def test_duplicate_channel_ids_fail_closed(self):
