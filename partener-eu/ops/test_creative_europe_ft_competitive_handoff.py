@@ -176,12 +176,24 @@ with tempfile.TemporaryDirectory() as tmp:
     previous_dir = root / "download-old" / "watch"
     previous_dir.mkdir(parents=True)
     previous_watch = copy.deepcopy(watch)
-    previous_watch["fetched_at"] = "2026-09-01T08:00:00+00:00"
+    previous_watch["fetched_at"] = "2026-09-01T12:00:00+00:00"
     previous_watch["run_id"] = "watch-old"
     (previous_dir / "ft-programme-watch-evidence.json").write_text(json.dumps(previous_watch), encoding="utf-8")
 
+    seed = handoff.execute_handoff(
+        previous_watch,
+        run_id="competitive-handoff-seed-before-disappearance",
+        output_dir=root / "seed-exact",
+        history_root=root / "empty-history",
+        post_func=fake_post,
+        readback_func=fake_readback,
+    )
+    assert seed["observation_state"] == handoff.EXECUTED_STATE
+    assert seed["exact_candidate_observation_state"] == "OPEN_CALL"
+    assert (root / "seed-exact" / "current" / "ft-competitive-exact-evidence.json").is_file()
+
     current_without_active = copy.deepcopy(watch)
-    current_without_active["fetched_at"] = "2026-09-01T09:00:00+00:00"
+    current_without_active["fetched_at"] = "2026-09-01T23:00:00+00:00"
     current_without_active["run_id"] = "watch-now"
     current_without_active["linked_competitive_discovery"] = []
     current_without_active["stats"]["linked_competitive_discovery_candidates"] = 0
@@ -190,7 +202,27 @@ with tempfile.TemporaryDirectory() as tmp:
     selected, reason = handoff.select_candidate(current_without_active, history_root=root)
     assert selected is not None
     assert selected["identity_key"] == f"FUNDING_TENDERS_COMPETITIVE_CALL:{CID}"
-    assert reason == "PREVIOUS_ACTIVE_DISCOVERY_PENDING_EXACT_RECHECK"
+    assert reason == "PREVIOUS_ACTIVE_DISCOVERY_ABSENT_EXACT_RECHECK"
+
+    current_non_active = copy.deepcopy(watch)
+    current_non_active["fetched_at"] = "2026-09-01T23:05:00+00:00"
+    current_non_active["run_id"] = "watch-now-non-active"
+    current_non_active["stats"]["open_linked_competitive_candidates_non_authorizing"] = 0
+    transitioned = current_non_active["linked_competitive_discovery"][0]
+    transitioned["status_code"] = CLOSED
+    transitioned["status_label_candidate"] = "Closed"
+    transitioned["candidate_observation_state"] = "CLOSED_OBSERVATION_NON_AUTHORIZING"
+    semantic = {key: transitioned.get(key) for key in (
+        "opportunity_class", "parent_reference", "structured_type", "competitive_call_id_candidate",
+        "authority_url_candidate", "structured_url_observed", "status_code", "status_label_candidate",
+        "candidate_observation_state", "programme_candidate", "call_identifier_candidate", "deadline_candidate", "title_candidate",
+    )}
+    transitioned["semantic_fingerprint"] = watch_mod.sha256_bytes(watch_mod.canonical_json(semantic))
+    selected, reason = handoff.select_candidate(current_non_active, history_root=root)
+    assert selected is not None
+    assert selected["identity_key"] == f"FUNDING_TENDERS_COMPETITIVE_CALL:{CID}"
+    assert selected["candidate_observation_state"] == "CLOSED_OBSERVATION_NON_AUTHORIZING"
+    assert reason == "PREVIOUS_ACTIVE_DISCOVERY_NOW_NON_ACTIVE_EXACT_RECHECK"
 
 bad_watch = copy.deepcopy(watch)
 bad_watch["linked_competitive_discovery"][0]["open_call_authorized"] = True
@@ -201,5 +233,5 @@ except ValueError:
 else:
     raise AssertionError("competitive handoff accepted self-authorizing discovery evidence")
 
-print("PASS Creative Europe bounded competitive handoff persists status-only admission while handoff stays non-publishing")
+print("PASS Creative Europe bounded competitive handoff rechecks disappeared/non-active prior OPEN candidates without inferring CLOSED")
 __import__("runpy").run_path(str(Path(__file__).with_name("test_creative_europe_ft_competitive_admission.py")), run_name="__main__")
