@@ -14,8 +14,8 @@
     "CONSULTATION": 20,
     "FINAL_GUIDE": 2,
     "ANNOUNCED": 34,
-    "OPEN": 8,
-    "CLOSED": 42,
+    "OPEN": 9,
+    "CLOSED": 41,
     "EVALUATION": 0,
     "RESULTS": 1,
     "CONTRACTING": 23,
@@ -261,9 +261,9 @@
       "programme": "Programul Educație și Ocupare 2021-2027",
       "code": "STEP-LLL",
       "region": "Național; minimum 2 regiuni de dezvoltare",
-      "stage": "CLOSED",
-      "stageLabel": "Închis pentru depunere",
-      "maturityRank": 5,
+      "stage": "OPEN",
+      "stageLabel": "Deschis",
+      "maturityRank": 4,
       "publicationState": "PUBLISHABLE",
       "dossierCompleteness": 100,
       "stageEvidence": [
@@ -284,10 +284,10 @@
           "text": "Deschiderea MySMIS pentru apelul STEP-LLL Adulți, ora 16:00."
         },
         {
-          "type": "MONOTONIC_HISTORY_PRESERVED",
+          "type": "AUTHORITATIVE_STATUS_CORRECTION",
           "previousStage": "CLOSED",
           "candidateStage": "OPEN",
-          "reason": "Lipsa unei evidențe în snapshotul curent nu retrage o etapă administrativă confirmată anterior."
+          "reason": "Prelungirea oficială confirmată corectează starea derivată anterior ca închisă."
         }
       ],
       "transitions": [
@@ -296,12 +296,6 @@
           "from": null,
           "to": "OPEN",
           "reason": "INITIAL_CANONICAL_PROJECTION"
-        },
-        {
-          "observedAt": "2026-08-20T14:26:09Z",
-          "from": "OPEN",
-          "to": "CLOSED",
-          "reason": "NEW_OFFICIAL_EVIDENCE"
         }
       ],
       "results": {
@@ -311,12 +305,12 @@
       },
       "monitoring": {
         "active": true,
-        "priority": "MEDIUM",
+        "priority": "HIGH",
         "nextExpectedEvents": [
-          "începerea evaluării",
-          "liste intermediare",
-          "contestații",
-          "rezultate"
+          "corrigendum",
+          "prelungire termen",
+          "clarificări",
+          "închiderea depunerii"
         ],
         "officialSources": [
           "https://oportunitati-ue.gov.ro/apel/step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in-tehnologiile-critice-adulti/",
