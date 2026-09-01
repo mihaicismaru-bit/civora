@@ -146,6 +146,49 @@ try {
 }
 @unlink($root . '/research/receipts/' . $orphanId . '.json');
 
+$invalidHold = [
+    'schema_version' => 1,
+    'response_id' => $heldId,
+    'hold_state' => 'UNBOUNDED_HOLD',
+];
+write_bundle_json($root . '/research/holds/' . $heldId . '.json', $invalidHold);
+try {
+    $exporter->buildPersistedBundles();
+    fail_bundle_test('invalid rights-hold artifact did not fail closed');
+} catch (RuntimeException $e) {
+    if ($e->getMessage() !== 'RESEARCH_EXPORT_HOLD_ARTIFACT_INVALID') fail_bundle_test('unexpected invalid-hold error: ' . $e->getMessage());
+}
+write_bundle_json($root . '/research/holds/' . $heldId . '.json', [
+    'schema_version' => 1,
+    'response_id' => $heldId,
+    'hold_state' => 'RESTRICTED_PENDING_REVIEW',
+]);
+
+$orphanHoldId = str_repeat('e', 64);
+write_bundle_json($root . '/research/holds/' . $orphanHoldId . '.json', [
+    'schema_version' => 1,
+    'response_id' => $orphanHoldId,
+    'hold_state' => 'OBJECTED_PENDING_REVIEW',
+]);
+try {
+    $exporter->buildPersistedBundles();
+    fail_bundle_test('orphan rights-hold artifact did not fail closed');
+} catch (RuntimeException $e) {
+    if ($e->getMessage() !== 'RESEARCH_EXPORT_ORPHAN_HOLD') fail_bundle_test('unexpected orphan-hold error: ' . $e->getMessage());
+}
+@unlink($root . '/research/holds/' . $orphanHoldId . '.json');
+
+$badHeldReceipt = $held['receipt'];
+$badHeldReceipt['normalized_sha256'] = str_repeat('0', 64);
+write_bundle_json($root . '/research/receipts/' . $heldId . '.json', $badHeldReceipt);
+try {
+    $exporter->buildPersistedBundles();
+    fail_bundle_test('held response with corrupt receipt did not fail closed');
+} catch (RuntimeException $e) {
+    if ($e->getMessage() !== 'RESEARCH_EXPORT_HASH_BINDING_MISMATCH') fail_bundle_test('unexpected held-receipt error: ' . $e->getMessage());
+}
+write_bundle_json($root . '/research/receipts/' . $heldId . '.json', $held['receipt']);
+
 $badReceipt = $employer['receipt'];
 $badReceipt['normalized_sha256'] = str_repeat('0', 64);
 write_bundle_json($root . '/research/receipts/' . $employerId . '.json', $badReceipt);
