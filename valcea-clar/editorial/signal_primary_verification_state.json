@@ -2,19 +2,73 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-01T12:19:26+03:00",
+  "generated_at": "2026-09-01T17:18:19+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-01T12:18:09+03:00",
+  "queue_generated_at": "2026-09-01T17:17:00+03:00",
   "task_count": 64,
   "primary_match_count": 0,
-  "no_match_count": 33,
-  "unrouted_count": 31,
-  "target_count": 18,
+  "no_match_count": 34,
+  "unrouted_count": 30,
+  "target_count": 17,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "2f53c70839fc46e1b7a021ff",
+      "signal_title": "FOTO – Copil de 11 ani, căzut cu bicicleta într-o intersecție din Râmnicu Vâlcea. Poliția și ambulanța au intervenit",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/01/foto-copil-de-11-ani-cazut-cu-bicicleta-intr-o-intersectie-din-ramnicu-valcea-politia-si-ambulanta-au-intervenit/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-01T14:38:21+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "155fc7f3aa931e8dd912a902",
+      "signal_title": "Radare fixe vor fi instalate și în Vâlcea, pe DN7 – Valea Oltului și Dealul Negru. Proiectul CNAIR intră într-o nouă etapă",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/01/radare-fixe-vor-fi-instalate-si-in-valcea-pe-dn7-valea-oltului-si-dealul-negru-proiectul-cnair-intra-intr-o-noua-etapa/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-01T12:46:07+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "2948ef8288f6e4ec14b70893",
       "signal_title": "Primarul Gutău dă asigurări: locuitorii din Râmnicu Vâlcea nu vor rămâne fără apă caldă. Cum va fi asigurată și căldura în perioada de tranziție",
@@ -1391,45 +1445,6 @@
       "signal_url": "https://evenimentvalcean.ro/foto-schitul-flamanda-din-galicea-locul-unde-isi-doarme-somnul-de-veci-cronicarul-lui-mihai-viteazul/",
       "signal_publisher": "Eveniment Vâlcean",
       "signal_published_at": "2026-08-29T20:24:26+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "173aca8b4f856b0306bd6c20",
-      "signal_title": "Procurorii DNA intra pe fir! 216.000 de lei pentru \"publicitate\", către aceeași firmă. Ce a cumpărat, de fapt, Primăria Drăgășani?",
-      "signal_url": "https://ziaruldevalcea.ro/2026/08/procurorii-dna-intra-pe-fir-216-000-de-lei-pentru-publicitate-catre-aceeasi-firma-ce-a-cumparat-de-fapt-primaria-dragasani/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-29T17:20:12+03:00",
-      "verification_route_id": "dragasani_administration",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "primaria-dragasani-anunturi-publice",
-            "name": "Primăria Municipiului Drăgășani — Anunțuri publice",
-            "url": "https://www.primariadragasani.ro/informatii-publice/anunturi-publice"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error timed out>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "7e00bb6b6945347a3c3e0653",
-      "signal_title": "Victorie de aur pentru Vâlcea la Dumbrăvița: portarul Crăciun a fost decisiv la debut",
-      "signal_url": "https://www.impactreal.ro/2026/08/29/victorie-de-aur-pentru-valcea-la-dumbravita-portarul-craciun-a-fost-decisiv-la-debut/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-08-29T16:50:13+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
