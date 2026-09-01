@@ -203,7 +203,7 @@ def main() -> None:
     assert result["schema_version"] == "1.0"
     assert result["adapter_id"] == "INTERREG_PROGRAMMING_PIPELINE_V1"
     assert result["observation_state"] == "PROGRAMMING_PIPELINE"
-    assert result["source_count"] == len(registry["sources"]) == 10
+    assert result["source_count"] == len(registry["sources"]) == 11
     assert result["registry_freshness_state"] == "CURRENT_CHECK_30D"
     assert result["health_state"] == "NOT_PROBED"
     assert len(result["snapshot_semantic_fingerprint"]) == 64
@@ -223,6 +223,10 @@ def main() -> None:
     assert by_id["INT-PIPE-INTERACT-POST-2027-2028-2034"]["programme_family"] == "INTERREG_EU_FRAMEWORK"
     assert by_id["INT-PIPE-INTERACT-POST-2027-2028-2034"]["authority_class"] == "T2_OFFICIAL_INTERREG_SUPPORT"
     assert "ROUA" in by_id["INT-PIPE-INTERACT-POST-2027-2028-2034"]["programme_ids"]
+    assert by_id["INT-PIPE-ROUA-POST-2027-RESEARCH"]["observation_state"] == "PROGRAMMING_PROCESS"
+    assert by_id["INT-PIPE-ROUA-POST-2027-RESEARCH"]["programme_family"] == "INTERREG_EU_FRAMEWORK"
+    assert by_id["INT-PIPE-ROUA-POST-2027-RESEARCH"]["authority_class"] == "T2_OFFICIAL_PROGRAMME_POST_2027_RESEARCH"
+    assert by_id["INT-PIPE-ROUA-POST-2027-RESEARCH"]["programme_ids"] == ["ROUA"]
     assert by_id["INT-PIPE-DANUBE-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
     assert by_id["INT-PIPE-INTERREG-EUROPE-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
     assert by_id["INT-PIPE-HUSKROUA-2028-2034"]["observation_state"] == "PROGRAMMING_PROCESS"
@@ -283,7 +287,7 @@ def main() -> None:
     assert baseline["distribution_authorized"] is False
     assert baseline["semantic_change_count"] == 0
     assert baseline["transport_or_content_change_count"] == 0
-    assert baseline["source_count_current"] == 10
+    assert baseline["source_count_current"] == 11
 
     previous = copy.deepcopy(result)
     previous["run_id"] = "TEST-PREVIOUS"
