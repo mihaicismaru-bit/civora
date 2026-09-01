@@ -3,12 +3,18 @@
 
 This adapter is discovery/watch only. It enumerates explicit ``CREA-*`` topic
 references from the official EC Search API, resolves human-readable status labels
-only from official Facet evidence, deduplicates by exact topic identifier and
-emits a priority queue for the existing exact-topic verifier.
+only from official Facet evidence, and keeps different opportunity surfaces
+separate before deduplication.
 
-It never authorizes OPEN/status/deadline/budget/eligibility/publication. A topic
-must still pass exact topic readback, semantic reconciliation and the separate
-material-admission policy before any reader-facing fact is allowed.
+Primary Funding & Tenders topic rows (types other than 8) may enter the exact-topic
+priority queue. Type-8 competitive/cascading-call rows can inherit a parent CREA
+identifier, so they are retained as linked competitive-call discovery evidence and
+never allowed to create a false parent-topic conflict.
+
+It never authorizes OPEN/status/deadline/budget/eligibility/publication. A primary
+topic must still pass exact topic readback, semantic reconciliation and the separate
+material-admission policy. Linked competitive calls require their own exact
+authority adapter and admission path before any reader-facing fact is allowed.
 """
 from __future__ import annotations
 
@@ -21,6 +27,7 @@ import pathlib
 import re
 import sys
 from typing import Any, Callable, Mapping
+from urllib.parse import urlparse
 
 import funding_tenders_fetch as ft
 
@@ -32,6 +39,7 @@ MAX_PAGE_SIZE = 100
 MAX_PAGES = 5
 MAX_STATUS_FALLBACKS = 8
 REF_RE = re.compile(r"^CREA-[A-Z0-9]+(?:-[A-Z0-9]+)+$", re.IGNORECASE)
+COMPETITIVE_PATH_RE = re.compile(r"/competitive-calls-cs/([0-9]+)(?:/|$)", re.IGNORECASE)
 MATERIAL_FLAGS = (
     "material_fact_use",
     "open_call_authorized",
@@ -74,13 +82,35 @@ def _reference(record: Mapping[str, Any]) -> str | None:
     return value if REF_RE.fullmatch(value) else None
 
 
+def _first_scalar(record: Mapping[str, Any], *keys: str) -> str | None:
+    for key in keys:
+        value = ft._scalar(record.get(key))
+        if value not in (None, ""):
+            return value
+    return None
+
+
+def _structured_type(record: Mapping[str, Any]) -> str | None:
+    return ft._scalar(record.get("type"))
+
+
+def _structured_url(record: Mapping[str, Any]) -> str | None:
+    return _first_scalar(record, "esST_URL", "url")
+
+
+def _is_linked_competitive(record: Mapping[str, Any]) -> bool:
+    return _structured_type(record) == "8"
+
+
 def _metadata_signature(record: Mapping[str, Any]) -> str:
     useful = {
         "identifier": _reference(record),
+        "structured_type": _structured_type(record),
+        "structured_url": _structured_url(record),
         "status": ft._record_status_code(record),
         "programme": ft._scalar(record.get("programAbbreviation")),
         "callIdentifier": ft._scalar(record.get("callIdentifier")),
-        "deadlineDate": ft._scalar(record.get("deadlineDate")),
+        "deadlineDate": _first_scalar(record, "deadlineDate", "deadlineDates"),
         "title": ft._scalar(record.get("title")),
     }
     return sha256_bytes(canonical_json(useful))
@@ -106,6 +136,79 @@ def _candidate_state(status_label: str | None) -> str:
     if token == "closed":
         return "CLOSED_OBSERVATION_NON_AUTHORIZING"
     return "UNKNOWN_STATUS_NON_AUTHORIZING"
+
+
+def _competitive_identity(url: str | None, record: Mapping[str, Any]) -> tuple[str | None, str]:
+    candidate_url = str(url or "").strip() or None
+    competitive_id: str | None = None
+    if candidate_url:
+        parsed = urlparse(candidate_url)
+        match = COMPETITIVE_PATH_RE.search(parsed.path)
+        if parsed.scheme == "https" and parsed.hostname == "ec.europa.eu" and match:
+            competitive_id = match.group(1)
+            return competitive_id, f"FUNDING_TENDERS_COMPETITIVE_CALL:{competitive_id}"
+    return None, f"OPAQUE_TYPE8_RECORD:{sha256_bytes(canonical_json(record))}"
+
+
+def _build_competitive_discovery(
+    rows: list[dict[str, Any]],
+    *,
+    status_resolution: Mapping[str, str | None],
+) -> list[dict[str, Any]]:
+    discovery: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for row in rows:
+        parent_reference = _reference(row)
+        if not parent_reference:
+            continue
+        structured_url = _structured_url(row)
+        competitive_id, identity_key = _competitive_identity(structured_url, row)
+        record_sha = sha256_bytes(canonical_json(row))
+        dedup_key = identity_key if not identity_key.startswith("OPAQUE_TYPE8_RECORD:") else record_sha
+        if dedup_key in seen:
+            continue
+        seen.add(dedup_key)
+        status_code = ft._record_status_code(row)
+        status_label = status_resolution.get(status_code) if status_code else None
+        semantic = {
+            "opportunity_class": "COMPETITIVE_CASCADING_CALL",
+            "parent_reference": parent_reference,
+            "structured_type": "8",
+            "competitive_call_id_candidate": competitive_id,
+            "authority_url_candidate": structured_url,
+            "status_code": status_code,
+            "status_label_candidate": status_label,
+            "candidate_observation_state": _candidate_state(status_label),
+            "programme_candidate": ft._scalar(row.get("programAbbreviation")),
+            "call_identifier_candidate": ft._scalar(row.get("callIdentifier")),
+            "deadline_candidate": _first_scalar(row, "deadlineDate", "deadlineDates"),
+            "title_candidate": ft._scalar(row.get("title")),
+        }
+        candidate: dict[str, Any] = {
+            **semantic,
+            "identity_key": identity_key,
+            "record_sha256": record_sha,
+            "authority_url_verified": False,
+            "market_intelligence_only": True,
+            "requires_separate_competitive_call_adapter": True,
+            "requires_exact_competitive_call_authority_readback": True,
+            "requires_semantic_reconcile": True,
+            "requires_material_admission": True,
+            "semantic_fingerprint": sha256_bytes(canonical_json(semantic)),
+            "publication_effect": "NONE",
+            "canonical_corpus_mutation": False,
+        }
+        for key in MATERIAL_FLAGS:
+            candidate[key] = False
+        discovery.append(candidate)
+    discovery.sort(
+        key=lambda item: (
+            -_priority(item.get("status_label_candidate")),
+            str(item.get("parent_reference") or ""),
+            str(item.get("identity_key") or ""),
+        )
+    )
+    return discovery
 
 
 def collect_watch(
@@ -161,11 +264,15 @@ def collect_watch(
             break
 
     groups: dict[str, list[dict[str, Any]]] = {}
+    linked_competitive_rows: list[dict[str, Any]] = []
     non_crea_records = 0
     for row in flattened:
         ref = _reference(row)
         if not ref:
             non_crea_records += 1
+            continue
+        if _is_linked_competitive(row):
+            linked_competitive_rows.append(copy.deepcopy(row))
             continue
         groups.setdefault(ref, []).append(row)
 
@@ -178,13 +285,18 @@ def collect_watch(
                 "reference": ref,
                 "record_count": len(rows),
                 "metadata_signatures": signatures,
-                "reason": "CONFLICTING_STRUCTURED_METADATA_EXCLUDED",
+                "reason": "CONFLICTING_PRIMARY_TOPIC_METADATA_EXCLUDED",
             })
             continue
         unique_rows[ref] = copy.deepcopy(rows[0])
 
     status_codes = sorted({
-        code for code in (ft._record_status_code(row) for row in unique_rows.values()) if code
+        code
+        for code in (
+            ft._record_status_code(row)
+            for row in [*unique_rows.values(), *linked_competitive_rows]
+        )
+        if code
     })
     facet_payload, facet_raw, facet_receipt = post_func(
         ft.FACET_ENDPOINT,
@@ -227,7 +339,7 @@ def collect_watch(
             "candidate_observation_state": _candidate_state(status_label),
             "programme_candidate": ft._scalar(row.get("programAbbreviation")),
             "call_identifier_candidate": ft._scalar(row.get("callIdentifier")),
-            "deadline_candidate": ft._scalar(row.get("deadlineDate")),
+            "deadline_candidate": _first_scalar(row, "deadlineDate", "deadlineDates"),
             "authority_url_candidate": ft.topic_url(ref),
         }
         candidate = {
@@ -248,6 +360,11 @@ def collect_watch(
         for key in MATERIAL_FLAGS:
             candidate[key] = False
         candidates.append(candidate)
+
+    linked_competitive_discovery = _build_competitive_discovery(
+        linked_competitive_rows,
+        status_resolution=status_resolution,
+    )
 
     candidates.sort(key=lambda item: (-int(item["priority"]), item["reference"]))
     unresolved_codes = sorted(code for code, label in status_resolution.items() if not label)
@@ -288,6 +405,9 @@ def collect_watch(
         "status_resolution": status_resolution,
         "candidates": candidates,
         "conflicts": conflicts,
+        "linked_competitive_discovery": linked_competitive_discovery,
+        "linked_competitive_discovery_semantic_reconcile_included": False,
+        "linked_competitive_discovery_requires_separate_reconcile": True,
         "semantic_fingerprint": sha256_bytes(canonical_json(semantic_basis)),
         "stats": {
             "pages_fetched": len(search_pages),
@@ -296,11 +416,22 @@ def collect_watch(
             "explicit_crea_references_seen": len(groups),
             "exact_reference_candidates": len(candidates),
             "conflicting_references_excluded": len(conflicts),
+            "linked_competitive_records_seen": len(linked_competitive_rows),
+            "linked_competitive_discovery_candidates": len(linked_competitive_discovery),
+            "linked_competitive_parent_references": len({
+                str(item.get("parent_reference") or "")
+                for item in linked_competitive_discovery
+                if item.get("parent_reference")
+            }),
             "open_candidates_non_authorizing": sum(
                 c["candidate_observation_state"] == "OPEN_CANDIDATE_NON_AUTHORIZING" for c in candidates
             ),
             "forthcoming_candidates_non_authorizing": sum(
                 c["candidate_observation_state"] == "FORTHCOMING_CANDIDATE_NON_AUTHORIZING" for c in candidates
+            ),
+            "open_linked_competitive_candidates_non_authorizing": sum(
+                c["candidate_observation_state"] == "OPEN_CANDIDATE_NON_AUTHORIZING"
+                for c in linked_competitive_discovery
             ),
             "unresolved_status_codes": unresolved_codes,
             "pagination_repeat_detected": repeated_page_detected,
@@ -320,6 +451,50 @@ def collect_watch(
             json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
         )
     return evidence
+
+
+def _validate_linked_competitive_candidate(candidate: Mapping[str, Any]) -> None:
+    parent_reference = str(candidate.get("parent_reference") or "").upper()
+    if not REF_RE.fullmatch(parent_reference):
+        raise ValueError("Creative Europe linked competitive candidate parent reference invalid")
+    if candidate.get("opportunity_class") != "COMPETITIVE_CASCADING_CALL":
+        raise ValueError("Creative Europe linked competitive opportunity class drift")
+    if candidate.get("structured_type") != "8":
+        raise ValueError("Creative Europe linked competitive type drift")
+    if candidate.get("market_intelligence_only") is not True:
+        raise ValueError("Creative Europe linked competitive candidate lost intelligence boundary")
+    if candidate.get("requires_separate_competitive_call_adapter") is not True:
+        raise ValueError("Creative Europe linked competitive candidate skipped separate adapter")
+    if candidate.get("requires_exact_competitive_call_authority_readback") is not True:
+        raise ValueError("Creative Europe linked competitive candidate skipped exact authority gate")
+    if candidate.get("requires_semantic_reconcile") is not True or candidate.get("requires_material_admission") is not True:
+        raise ValueError("Creative Europe linked competitive candidate skipped downstream gate")
+    if candidate.get("authority_url_verified") is not False:
+        raise ValueError("Creative Europe linked competitive candidate self-verified authority")
+    if candidate.get("publication_effect") != "NONE" or candidate.get("canonical_corpus_mutation") is not False:
+        raise ValueError("Creative Europe linked competitive candidate crossed publication boundary")
+    for key in MATERIAL_FLAGS:
+        if candidate.get(key) is not False:
+            raise ValueError(f"Creative Europe linked competitive candidate became authorizing: {key}")
+    for key in ("record_sha256", "semantic_fingerprint"):
+        if not re.fullmatch(r"[0-9a-f]{64}", str(candidate.get(key) or "")):
+            raise ValueError(f"Creative Europe linked competitive candidate hash invalid: {key}")
+
+    url = candidate.get("authority_url_candidate")
+    competitive_id = candidate.get("competitive_call_id_candidate")
+    identity_key = str(candidate.get("identity_key") or "")
+    if url:
+        parsed = urlparse(str(url))
+        match = COMPETITIVE_PATH_RE.search(parsed.path)
+        if parsed.scheme != "https" or parsed.hostname != "ec.europa.eu" or not match:
+            raise ValueError("Creative Europe linked competitive candidate URL is not a bounded EC competitive-call surface")
+        if competitive_id != match.group(1):
+            raise ValueError("Creative Europe linked competitive candidate id/url mismatch")
+        if identity_key != f"FUNDING_TENDERS_COMPETITIVE_CALL:{competitive_id}":
+            raise ValueError("Creative Europe linked competitive candidate identity drift")
+    else:
+        if competitive_id is not None or not identity_key.startswith("OPAQUE_TYPE8_RECORD:"):
+            raise ValueError("Creative Europe opaque type-8 candidate identity drift")
 
 
 def validate_watch_evidence(evidence: Mapping[str, Any]) -> None:
@@ -363,6 +538,24 @@ def validate_watch_evidence(evidence: Mapping[str, Any]) -> None:
                 raise ValueError(f"Creative Europe watch candidate became authorizing: {ref} {key}")
         if not re.fullmatch(r"[0-9a-f]{64}", str(candidate.get("semantic_fingerprint") or "")):
             raise ValueError(f"Creative Europe watch candidate fingerprint invalid: {ref}")
+
+    linked = list(evidence.get("linked_competitive_discovery") or [])
+    identities: set[str] = set()
+    for candidate in linked:
+        _validate_linked_competitive_candidate(candidate)
+        identity = str(candidate.get("identity_key") or "")
+        if identity in identities:
+            raise ValueError(f"duplicate Creative Europe linked competitive identity: {identity}")
+        identities.add(identity)
+    if evidence.get("linked_competitive_discovery_semantic_reconcile_included") is not False:
+        raise ValueError("Creative Europe linked competitive discovery incorrectly entered parent watch reconcile")
+    if evidence.get("linked_competitive_discovery_requires_separate_reconcile") is not True:
+        raise ValueError("Creative Europe linked competitive discovery lost separate reconcile boundary")
+
+    for conflict in evidence.get("conflicts") or []:
+        if conflict.get("reason") != "CONFLICTING_PRIMARY_TOPIC_METADATA_EXCLUDED":
+            raise ValueError("Creative Europe watch conflict reason drift")
+
     for key in ("facet_raw_sha256", "semantic_fingerprint"):
         if not re.fullmatch(r"[0-9a-f]{64}", str(evidence.get(key) or "")):
             raise ValueError(f"Creative Europe programme watch hash invalid: {key}")
@@ -387,6 +580,8 @@ def main() -> int:
         "source_health": evidence["source_health"],
         "candidates": evidence["stats"]["exact_reference_candidates"],
         "open_candidates_non_authorizing": evidence["stats"]["open_candidates_non_authorizing"],
+        "linked_competitive_discovery_candidates": evidence["stats"]["linked_competitive_discovery_candidates"],
+        "open_linked_competitive_candidates_non_authorizing": evidence["stats"]["open_linked_competitive_candidates_non_authorizing"],
         "forthcoming_candidates_non_authorizing": evidence["stats"]["forthcoming_candidates_non_authorizing"],
         "open_call_authorized": False,
     }, ensure_ascii=False, sort_keys=True))
