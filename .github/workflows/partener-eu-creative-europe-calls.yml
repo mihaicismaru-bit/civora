@@ -7,10 +7,12 @@ on:
       - 'partener-eu/ingest/creative_europe_call_fetch.py'
       - 'partener-eu/ingest/creative_europe_ft_exact.py'
       - 'partener-eu/ingest/creative_europe_ft_reconcile.py'
+      - 'partener-eu/ingest/creative_europe_ft_watch.py'
       - 'partener-eu/ops/test_creative_europe_call_index.py'
       - 'partener-eu/ops/test_creative_europe_call_fetch.py'
       - 'partener-eu/ops/test_creative_europe_ft_exact.py'
       - 'partener-eu/ops/test_creative_europe_ft_reconcile.py'
+      - 'partener-eu/ops/test_creative_europe_ft_watch.py'
       - '.github/workflows/partener-eu-creative-europe-calls.yml'
   workflow_dispatch:
 
@@ -47,10 +49,12 @@ jobs:
           python -m py_compile partener-eu/ingest/creative_europe_call_fetch.py
           python -m py_compile partener-eu/ingest/creative_europe_ft_exact.py
           python -m py_compile partener-eu/ingest/creative_europe_ft_reconcile.py
+          python -m py_compile partener-eu/ingest/creative_europe_ft_watch.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_index.py
           python -m py_compile partener-eu/ops/test_creative_europe_call_fetch.py
           python -m py_compile partener-eu/ops/test_creative_europe_ft_exact.py
           python -m py_compile partener-eu/ops/test_creative_europe_ft_reconcile.py
+          python -m py_compile partener-eu/ops/test_creative_europe_ft_watch.py
 
       - name: Validate mixed-index filter stays non-authorizing
         run: python partener-eu/ops/test_creative_europe_call_index.py
@@ -63,6 +67,9 @@ jobs:
 
       - name: Validate exact-topic semantic reconciliation stays non-authorizing
         run: python partener-eu/ops/test_creative_europe_ft_reconcile.py
+
+      - name: Validate programme-wide structured F&T watch stays non-authorizing
+        run: python partener-eu/ops/test_creative_europe_ft_watch.py
 
       - name: Capture live official Creative Europe call-index evidence
         run: |
@@ -112,6 +119,69 @@ jobs:
               print('FAIL non-CREA row leaked into Creative Europe evidence', refs)
               sys.exit(2)
           print(json.dumps({'source_health':health,'count':count,'refs':refs[:10],'open_call_authorized':False}, ensure_ascii=False))
+          PY
+
+      - name: Capture live programme-wide Creative Europe references through structured F&T
+        run: |
+          mkdir -p /tmp/creative-europe/watch
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_watch.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --text CREA- \
+            --page-size 50 \
+            --max-pages 4 \
+            --output-dir /tmp/creative-europe/watch
+
+      - name: Validate programme-wide F&T watch stays discovery-only
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          p='/tmp/creative-europe/watch/ft-programme-watch-evidence.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('watch_id') != 'CREATIVE_EUROPE_FT_PROGRAMME_WATCH_V1':
+              print('FAIL programme watch identity drift')
+              sys.exit(2)
+          stats=d.get('stats') or {}
+          count=int(stats.get('exact_reference_candidates') or 0)
+          health=d.get('source_health')
+          if count == 0 and not (health == 'DEGRADED_EMPTY_STRUCTURED_DISCOVERY' and d.get('lkg_required') is True):
+              print('FAIL empty structured discovery was not persisted as degraded')
+              sys.exit(2)
+          if count > 0 and health != 'HEALTHY':
+              print('FAIL populated structured discovery health drift')
+              sys.exit(2)
+          refs=[c.get('reference') for c in d.get('candidates') or []]
+          if len(refs) != len(set(refs)) or not all(isinstance(x,str) and x.startswith('CREA-') for x in refs):
+              print('FAIL programme watch identity/dedup drift', refs[:20])
+              sys.exit(2)
+          conflict_refs={c.get('reference') for c in d.get('conflicts') or []}
+          if any(ref in conflict_refs for ref in refs):
+              print('FAIL conflicted structured record entered candidate queue')
+              sys.exit(2)
+          for candidate in d.get('candidates') or []:
+              if candidate.get('authority_url_verified') is not False or candidate.get('requires_exact_topic_readback') is not True:
+                  print('FAIL programme watch skipped exact-topic verification boundary', candidate.get('reference'))
+                  sys.exit(2)
+              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+                  if candidate.get(key) is not False:
+                      print('FAIL programme watch candidate became authorizing', candidate.get('reference'), key)
+                      sys.exit(2)
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              if d.get(key) is not False:
+                  print('FAIL programme watch became authorizing', key)
+                  sys.exit(2)
+          for key in ('facet_raw_sha256','semantic_fingerprint'):
+              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
+                  print('FAIL programme watch hash invalid', key)
+                  sys.exit(2)
+          print(json.dumps({
+              'source_health': health,
+              'candidate_count': count,
+              'open_candidates_non_authorizing': stats.get('open_candidates_non_authorizing'),
+              'forthcoming_candidates_non_authorizing': stats.get('forthcoming_candidates_non_authorizing'),
+              'conflicts_excluded': stats.get('conflicting_references_excluded'),
+              'sample_refs': refs[:12],
+              'open_call_authorized': False,
+          }, ensure_ascii=False))
           PY
 
       - name: Capture exact current Creative Europe topic through structured F&T
