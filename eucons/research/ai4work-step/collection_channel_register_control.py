@@ -12,6 +12,12 @@ REGISTER_SCHEMA = "eucons.ai4work_collection_channel_register.v0.2"
 CATALOG_SCHEMA = "eucons.ai4work_research_invitation_catalog.v0.1"
 TARGET_REGIONS = {"Centru", "Sud-Muntenia", "Sud-Vest Oltenia"}
 TARGET_AUDIENCES = {"adults", "employers"}
+APPROVED_CHANNEL_TYPES = {
+    "eucons_public_link",
+    "partner_email",
+    "project_partner_social",
+    "professional_partner_network",
+}
 CHANNEL_ID_RE = re.compile(r"^CH-[A-Z0-9]{8,32}$")
 CHANNEL_TYPE_RE = re.compile(r"^[a-z][a-z0-9_]{2,48}$")
 INVITATION_VERSION_RE = re.compile(r"^[A-Z0-9][A-Z0-9_-]{5,63}$")
@@ -215,6 +221,8 @@ def validate_register(register: Any, *, require_nonempty: bool) -> dict[str, dic
         channel_type = entry.get("channel_type")
         if not isinstance(channel_type, str) or not CHANNEL_TYPE_RE.fullmatch(channel_type):
             raise CollectionChannelRegisterError("channel_type must be a bounded lowercase code")
+        if channel_type not in APPROVED_CHANNEL_TYPES:
+            raise CollectionChannelRegisterError("channel_type is not an approved dissemination class")
 
         regions = entry.get("region_scope")
         if not isinstance(regions, list) or not regions or any(region not in TARGET_REGIONS for region in regions):
