@@ -23,6 +23,41 @@ from retention_evidence_control import (
 TEST_TWIN_CLASSIFICATION = "TEST_TWIN_NON_EVIDENCE"
 
 
+def valid_live_semantics_fixture() -> dict:
+    return {
+        "schema_version": "eucons.ai4work_retention_deletion_attestation.v0.1",
+        "research_id": RESEARCH_ID,
+        "evidence_binding_key": EVIDENCE_KEY,
+        "evidence_class": "OPERATIONAL_EVIDENCE",
+        "synthetic": False,
+        "artifact_class": "LIVE_ACCOUNT_ATTESTATION_FIXTURE_FOR_UNIT_SHAPE_ONLY",
+        "account_specific": True,
+        "provider_bound": True,
+        "verified_at": "2026-09-01T03:00:00Z",
+        "retention_schedule_reference": SCHEDULE_PATH.name,
+        "retention_schedule_sha256": hashlib.sha256(SCHEDULE_PATH.read_bytes()).hexdigest(),
+        "verified_facts": {
+            "application_log_retention_days": 7,
+            "request_bodies_logged": False,
+            "form_answers_logged": False,
+            "raw_idempotency_key_logged": False,
+            "live_research_delete_deadline_days_after_collection_close": 180,
+            "replay_marker_max_hours": 24,
+            "backup_max_residual_days": 92,
+            "backup_rotation_verified": True,
+            "backup_retention_non_renewing": True,
+            "deletion_receipt_capability_verified": True,
+            "deletion_counts_before_after_verified": True,
+            "replay_marker_auto_purge_verified": True,
+            "research_analytics_store_checked": True,
+            "optional_contact_store_checked": True,
+            "ordinary_restore_recreates_deleted_records": False,
+        },
+        "provider_account_service_reference": "LIVE_ACCOUNT_REFERENCE_REQUIRED_AT_PROMOTION",
+        "deletion_control_reference": "LIVE_DELETION_CONTROL_REFERENCE_REQUIRED_AT_PROMOTION",
+    }
+
+
 class RetentionEvidenceControlTests(unittest.TestCase):
     def test_current_repository_state_is_truthfully_open(self) -> None:
         manifest = _load(MANIFEST_PATH)
@@ -71,6 +106,36 @@ class RetentionEvidenceControlTests(unittest.TestCase):
             now_utc=datetime(2026, 9, 1, 3, 30, tzinfo=timezone.utc),
         )
         self.assertIn("retention_attestation_contains_non_evidence_marker", errors)
+
+    def test_live_semantics_require_numeric_backup_residual_cap_at_or_below_92_days(self) -> None:
+        payload = valid_live_semantics_fixture()
+        self.assertEqual(
+            retention_attestation_errors(
+                payload,
+                now_utc=datetime(2026, 9, 1, 3, 30, tzinfo=timezone.utc),
+            ),
+            [],
+        )
+
+        missing = copy.deepcopy(payload)
+        del missing["verified_facts"]["backup_max_residual_days"]
+        self.assertIn(
+            "backup_max_residual_days_missing_or_invalid",
+            retention_attestation_errors(
+                missing,
+                now_utc=datetime(2026, 9, 1, 3, 30, tzinfo=timezone.utc),
+            ),
+        )
+
+        too_long = copy.deepcopy(payload)
+        too_long["verified_facts"]["backup_max_residual_days"] = 93
+        self.assertIn(
+            "backup_residual_retention_exceeds_approved_92_day_cap",
+            retention_attestation_errors(
+                too_long,
+                now_utc=datetime(2026, 9, 1, 3, 30, tzinfo=timezone.utc),
+            ),
+        )
 
     def test_promoted_manifest_with_only_generic_semantics_is_rejected(self) -> None:
         manifest = copy.deepcopy(_load(MANIFEST_PATH))
