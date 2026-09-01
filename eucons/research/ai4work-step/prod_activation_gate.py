@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from data_subject_rights_control import data_subject_rights_errors
+from dpia_screening_control import dpia_screening_errors
 from explicit_user_approval_control import explicit_user_approval_errors
 from lawful_basis_lia_control import lawful_basis_lia_errors
 from privacy_notice_nf06_binding_control import binding_errors as privacy_notice_binding_errors
@@ -238,6 +239,17 @@ def activation_errors(
         completed_ref = mandatory.get("if_dpia_required_completed_dpia_reference")
         if not isinstance(completed_ref, str) or not completed_ref.strip():
             errors.append("completed_dpia_reference_missing")
+
+    # DPIA screening is a substantive risk-classification boundary, not a boolean or hash-only
+    # checkbox. Revalidate the exact minimised processing design, EDPB/ANSPDCP trigger assessment,
+    # TEST TWIN non-promotability and controller-acceptance semantics during PROD activation.
+    for dpia_error in dpia_screening_errors(
+        contract=contract,
+        manifest=manifest,
+        controller=controller,
+        screening=dpia_screening,
+    ):
+        errors.append(f"dpia_screening:{dpia_error}")
 
     # PROD activation must independently validate the lawful-basis/LIA semantics. A generic
     # SHA/evidence-key binding or a human approval receipt is defence in depth, but neither may
