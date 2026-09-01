@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from data_subject_rights_control import data_subject_rights_errors
 from explicit_user_approval_control import explicit_user_approval_errors
 from lawful_basis_lia_control import lawful_basis_lia_errors
 from privacy_notice_nf06_binding_control import binding_errors as privacy_notice_binding_errors
@@ -20,6 +21,7 @@ COLLECTION_FRAME_PATH = HERE / "COLLECTION_FRAME_DRAFT.json"
 DPIA_SCREENING_PATH = HERE / "GDPR_DPIA_SCREENING_DRAFT.json"
 LIA_PATH = HERE / "GDPR_LIA_DRAFT.json"
 INCIDENT_RESPONSE_PATH = HERE / "GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json"
+RIGHTS_PATH = HERE / "GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json"
 ARTICLE13_SNAPSHOT_PATH = HERE / "ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json"
 NF06_CONTRACT_PATH = HERE / "NF06_PREINGEST_CONTRACT.json"
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -149,6 +151,7 @@ def activation_errors(
     dpia_screening: dict[str, Any],
     lawful_basis_lia: dict[str, Any] | None = None,
     incident_response: dict[str, Any] | None = None,
+    data_subject_rights: dict[str, Any] | None = None,
 ) -> list[str]:
     errors: list[str] = []
     research_ids = {
@@ -276,6 +279,26 @@ def activation_errors(
     elif incident_response is not None:
         errors.append("incident_response_artifact_shape_invalid")
 
+    # Rights handling is also an operational GDPR boundary, not a documentary checkbox.
+    # Activation must verify Article 11 identification minimisation, receipt-only lookup,
+    # separate privacy-case logging, holds/erasure/rectification safeguards and final
+    # controller-approved rights applicability at the exact activation boundary.
+    if data_subject_rights is None:
+        try:
+            data_subject_rights = _load(RIGHTS_PATH)
+        except (OSError, json.JSONDecodeError):
+            errors.append("data_subject_rights_artifact_unreadable")
+            data_subject_rights = None
+    if isinstance(data_subject_rights, dict):
+        for rights_error in data_subject_rights_errors(
+            contract=contract,
+            manifest=manifest,
+            procedure=data_subject_rights,
+        ):
+            errors.append(f"data_subject_rights:{rights_error}")
+    elif data_subject_rights is not None:
+        errors.append("data_subject_rights_artifact_shape_invalid")
+
     # The authoritative activation boundary must also validate the exact Article 13 -> NF06
     # semantics. A generic SHA/evidence-key check or a green standalone workflow is not enough:
     # activation itself must reject an unapproved notice, frame-version drift, or a notice that
@@ -353,6 +376,7 @@ def evaluate_repository_activation(
     dpia_screening_path: Path = DPIA_SCREENING_PATH,
     lawful_basis_lia_path: Path = LIA_PATH,
     incident_response_path: Path = INCIDENT_RESPONSE_PATH,
+    data_subject_rights_path: Path = RIGHTS_PATH,
 ) -> tuple[bool, list[str]]:
     contract = _load(contract_path)
     manifest = _load(manifest_path)
@@ -361,6 +385,7 @@ def evaluate_repository_activation(
     dpia_screening = _load(dpia_screening_path)
     lawful_basis_lia = _load(lawful_basis_lia_path)
     incident_response = _load(incident_response_path)
+    data_subject_rights = _load(data_subject_rights_path)
     errors = activation_errors(
         contract=contract,
         manifest=manifest,
@@ -369,6 +394,7 @@ def evaluate_repository_activation(
         dpia_screening=dpia_screening,
         lawful_basis_lia=lawful_basis_lia,
         incident_response=incident_response,
+        data_subject_rights=data_subject_rights,
     )
     return not errors, errors
 
