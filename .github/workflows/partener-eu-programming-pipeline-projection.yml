@@ -6,7 +6,9 @@ on:
       - 'partener-eu/ingest/interreg_programming_pipeline_registry.json'
       - 'partener-eu/ingest/interreg_programming_pipeline.py'
       - 'partener-eu/web/programming_pipeline_projection.py'
+      - 'partener-eu/web/programming_pipeline_preview.py'
       - 'partener-eu/ops/test_programming_pipeline_projection.py'
+      - 'partener-eu/ops/test_programming_pipeline_preview.py'
       - '.github/workflows/partener-eu-programming-pipeline-projection.yml'
   workflow_dispatch:
 
@@ -40,11 +42,14 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate projection syntax and fail-closed regression
+      - name: Validate projection and accessible-preview syntax and fail-closed regression
         run: |
           python -m py_compile partener-eu/web/programming_pipeline_projection.py
+          python -m py_compile partener-eu/web/programming_pipeline_preview.py
           python -m py_compile partener-eu/ops/test_programming_pipeline_projection.py
+          python -m py_compile partener-eu/ops/test_programming_pipeline_preview.py
           python partener-eu/ops/test_programming_pipeline_projection.py
+          python partener-eu/ops/test_programming_pipeline_preview.py
 
       - name: Restore exact-head reconciled Source Registry evidence
         shell: bash
@@ -142,6 +147,13 @@ jobs:
             --reconciliation /tmp/partener-programming-projection/interreg-programming-reconciliation.json \
             --output /tmp/partener-programming-projection/programming-pipeline-public-projection.json
 
+      - name: Build accessible noindex PROGRAMARE VIITOARE preview
+        run: |
+          python partener-eu/web/programming_pipeline_preview.py \
+            --projection /tmp/partener-programming-projection/programming-pipeline-public-projection.json \
+            --output /tmp/partener-programming-projection/programming-pipeline-preview.html \
+            --manifest /tmp/partener-programming-projection/programming-pipeline-preview-manifest.json
+
       - name: Validate live projection remains preview-only and non-authorizing
         run: |
           python - <<'PY'
@@ -206,6 +218,65 @@ jobs:
               'semantic_change_count': d.get('semantic_change_count'),
               'surface_state': d.get('surface_state'),
               'open_call_authorized': d.get('open_call_authorized'),
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
+      - name: Validate accessible preview artifact stays noindex and bound to projection
+        run: |
+          python - <<'PY'
+          import hashlib, json, pathlib, sys
+          root=pathlib.Path('/tmp/partener-programming-projection')
+          projection_path=root/'programming-pipeline-public-projection.json'
+          preview_path=root/'programming-pipeline-preview.html'
+          manifest_path=root/'programming-pipeline-preview-manifest.json'
+          projection_raw=projection_path.read_bytes()
+          preview_raw=preview_path.read_bytes()
+          preview=preview_raw.decode('utf-8')
+          projection=json.loads(projection_raw.decode('utf-8'))
+          manifest=json.loads(manifest_path.read_text(encoding='utf-8'))
+          if manifest.get('preview_id') != 'PROGRAMMING_PIPELINE_ACCESSIBLE_PREVIEW_V1':
+              print('FAIL accessible preview identity drift')
+              sys.exit(2)
+          if manifest.get('projection_id') != projection.get('projection_id'):
+              print('FAIL accessible preview projection identity mismatch')
+              sys.exit(2)
+          if manifest.get('projection_sha256') != hashlib.sha256(projection_raw).hexdigest():
+              print('FAIL accessible preview projection hash mismatch')
+              sys.exit(2)
+          if manifest.get('preview_html_sha256') != hashlib.sha256(preview_raw).hexdigest():
+              print('FAIL accessible preview HTML hash mismatch')
+              sys.exit(2)
+          if manifest.get('card_count') != projection.get('card_count') or manifest.get('coverage_gap_count') != projection.get('coverage_gap_count'):
+              print('FAIL accessible preview inventory mismatch')
+              sys.exit(2)
+          if '<meta name="robots" content="noindex,nofollow">' not in preview:
+              print('FAIL accessible preview lost noindex')
+              sys.exit(2)
+          if 'Nu este o listă de apeluri deschise.' not in preview or 'Nu este apel deschis.' not in preview:
+              print('FAIL accessible preview lost OPEN boundary copy')
+              sys.exit(2)
+          if any(card.get('observation_state') == 'CONSULTATION' and card.get('consultation_end_date') for card in projection.get('cards') or []):
+              if 'Nu este termen de apel de finanțare.' not in preview:
+                  print('FAIL consultation deadline could be confused with call deadline')
+                  sys.exit(2)
+          if 'OPEN_CALL' in preview:
+              print('FAIL accessible preview renders forbidden OPEN_CALL token')
+              sys.exit(2)
+          for key in ('publish_authorized','distribution_authorized','call_alert_authorized'):
+              if manifest.get(key) is not False:
+                  print('FAIL accessible preview manifest became authorizing:', key)
+                  sys.exit(2)
+          if manifest.get('publication_effect') != 'NONE' or manifest.get('seo_indexing_state') != 'NOINDEX_PREVIEW_ONLY':
+              print('FAIL accessible preview publication boundary drift')
+              sys.exit(2)
+          print(json.dumps({
+              'preview_id': manifest['preview_id'],
+              'card_count': manifest['card_count'],
+              'coverage_gap_count': manifest['coverage_gap_count'],
+              'projection_sha256': manifest['projection_sha256'],
+              'preview_html_sha256': manifest['preview_html_sha256'],
+              'seo_indexing_state': manifest['seo_indexing_state'],
+              'publish_authorized': manifest['publish_authorized'],
           }, ensure_ascii=False, sort_keys=True))
           PY
 
