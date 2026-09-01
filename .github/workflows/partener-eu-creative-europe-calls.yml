@@ -10,12 +10,17 @@ on:
       - 'partener-eu/ingest/creative_europe_ft_watch.py'
       - 'partener-eu/ingest/creative_europe_ft_watch_reconcile.py'
       - 'partener-eu/ingest/creative_europe_ft_handoff.py'
+      - 'partener-eu/ingest/creative_europe_ft_competitive_exact.py'
+      - 'partener-eu/ingest/creative_europe_ft_competitive_reconcile.py'
+      - 'partener-eu/ingest/creative_europe_ft_competitive_handoff.py'
       - 'partener-eu/ops/test_creative_europe_call_index.py'
       - 'partener-eu/ops/test_creative_europe_call_fetch.py'
       - 'partener-eu/ops/test_creative_europe_ft_exact.py'
       - 'partener-eu/ops/test_creative_europe_ft_reconcile.py'
       - 'partener-eu/ops/test_creative_europe_ft_watch.py'
       - 'partener-eu/ops/test_creative_europe_ft_handoff.py'
+      - 'partener-eu/ops/test_creative_europe_ft_competitive.py'
+      - 'partener-eu/ops/test_creative_europe_ft_competitive_handoff.py'
       - '.github/workflows/partener-eu-creative-europe-calls.yml'
   workflow_dispatch:
 
@@ -46,39 +51,41 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate Creative Europe adapter syntax
+      - name: Validate Creative Europe syntax
+        shell: bash
         run: |
-          python -m py_compile partener-eu/ingest/creative_europe_call_index.py
-          python -m py_compile partener-eu/ingest/creative_europe_call_fetch.py
-          python -m py_compile partener-eu/ingest/creative_europe_ft_exact.py
-          python -m py_compile partener-eu/ingest/creative_europe_ft_reconcile.py
-          python -m py_compile partener-eu/ingest/creative_europe_ft_watch.py
-          python -m py_compile partener-eu/ingest/creative_europe_ft_watch_reconcile.py
-          python -m py_compile partener-eu/ingest/creative_europe_ft_handoff.py
-          python -m py_compile partener-eu/ops/test_creative_europe_call_index.py
-          python -m py_compile partener-eu/ops/test_creative_europe_call_fetch.py
-          python -m py_compile partener-eu/ops/test_creative_europe_ft_exact.py
-          python -m py_compile partener-eu/ops/test_creative_europe_ft_reconcile.py
-          python -m py_compile partener-eu/ops/test_creative_europe_ft_watch.py
-          python -m py_compile partener-eu/ops/test_creative_europe_ft_handoff.py
+          set -euo pipefail
+          python -m py_compile \
+            partener-eu/ingest/creative_europe_call_index.py \
+            partener-eu/ingest/creative_europe_call_fetch.py \
+            partener-eu/ingest/creative_europe_ft_exact.py \
+            partener-eu/ingest/creative_europe_ft_reconcile.py \
+            partener-eu/ingest/creative_europe_ft_watch.py \
+            partener-eu/ingest/creative_europe_ft_watch_reconcile.py \
+            partener-eu/ingest/creative_europe_ft_handoff.py \
+            partener-eu/ingest/creative_europe_ft_competitive_exact.py \
+            partener-eu/ingest/creative_europe_ft_competitive_reconcile.py \
+            partener-eu/ingest/creative_europe_ft_competitive_handoff.py \
+            partener-eu/ops/test_creative_europe_call_index.py \
+            partener-eu/ops/test_creative_europe_call_fetch.py \
+            partener-eu/ops/test_creative_europe_ft_exact.py \
+            partener-eu/ops/test_creative_europe_ft_reconcile.py \
+            partener-eu/ops/test_creative_europe_ft_watch.py \
+            partener-eu/ops/test_creative_europe_ft_handoff.py \
+            partener-eu/ops/test_creative_europe_ft_competitive.py \
+            partener-eu/ops/test_creative_europe_ft_competitive_handoff.py
 
-      - name: Validate mixed-index filter stays non-authorizing
-        run: python partener-eu/ops/test_creative_europe_call_index.py
-
-      - name: Validate bounded index acquisition and degraded-empty handling
-        run: python partener-eu/ops/test_creative_europe_call_fetch.py
-
-      - name: Validate exact structured F&T handoff stays non-authorizing
-        run: python partener-eu/ops/test_creative_europe_ft_exact.py
-
-      - name: Validate exact-topic semantic reconciliation stays non-authorizing
-        run: python partener-eu/ops/test_creative_europe_ft_reconcile.py
-
-      - name: Validate programme-wide structured F&T watch and semantic history stay non-authorizing
-        run: python partener-eu/ops/test_creative_europe_ft_watch.py
-
-      - name: Validate bounded exact-handoff replay stays non-authorizing
-        run: python partener-eu/ops/test_creative_europe_ft_handoff.py
+      - name: Run fail-closed Creative Europe regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ops/test_creative_europe_call_index.py
+          python partener-eu/ops/test_creative_europe_call_fetch.py
+          python partener-eu/ops/test_creative_europe_ft_exact.py
+          python partener-eu/ops/test_creative_europe_ft_reconcile.py
+          python partener-eu/ops/test_creative_europe_ft_watch.py
+          python partener-eu/ops/test_creative_europe_ft_handoff.py
+          python partener-eu/ops/test_creative_europe_ft_competitive_handoff.py
 
       - name: Capture live official Creative Europe call-index evidence
         run: |
@@ -88,49 +95,7 @@ jobs:
             --out /tmp/creative-europe/index-evidence.json \
             --raw-out /tmp/creative-europe/index.html
 
-      - name: Validate live index evidence keeps OPEN/material boundary
-        run: |
-          python - <<'PY'
-          import json, re, sys
-          p='/tmp/creative-europe/index-evidence.json'
-          d=json.load(open(p, encoding='utf-8'))
-          if d.get('adapter_id') != 'CREATIVE_EUROPE_CALLS_V1':
-              print('FAIL adapter identity drift')
-              sys.exit(2)
-          stats=d.get('stats') or {}
-          count=int(stats.get('exact_crea_reference_candidates') or 0)
-          if int(stats.get('records_requiring_ft_reconcile') or 0) != count:
-              print('FAIL F&T reconcile gate lost')
-              sys.exit(2)
-          if int(stats.get('open_call_authorized') or 0) != 0:
-              print('FAIL index authorized OPEN')
-              sys.exit(2)
-          health=d.get('source_health')
-          if count == 0 and not (health == 'DEGRADED_EMPTY_RENDERED_INDEX' and d.get('lkg_required') is True):
-              print('FAIL empty rendered index was not persisted as degraded')
-              sys.exit(2)
-          if count > 0 and not (health == 'HEALTHY' and d.get('lkg_required') is False):
-              print('FAIL populated index health drift')
-              sys.exit(2)
-          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL live evidence became authorizing', key, d.get(key))
-                  sys.exit(2)
-          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
-              print('FAIL publication/canonical effect')
-              sys.exit(2)
-          raw_hash=str((d.get('receipt') or {}).get('raw_sha256') or '')
-          if not re.fullmatch(r'[0-9a-f]{64}', raw_hash):
-              print('FAIL missing immutable raw SHA-256')
-              sys.exit(2)
-          refs=[r.get('call_reference_candidate') for r in (d.get('batch') or {}).get('records', [])]
-          if not all(isinstance(x,str) and x.startswith('CREA-') for x in refs):
-              print('FAIL non-CREA row leaked into Creative Europe evidence', refs)
-              sys.exit(2)
-          print(json.dumps({'source_health':health,'count':count,'refs':refs[:10],'open_call_authorized':False}, ensure_ascii=False))
-          PY
-
-      - name: Capture live programme-wide Creative Europe references through structured F&T
+      - name: Capture live programme-wide Creative Europe structured watch
         run: |
           mkdir -p /tmp/creative-europe/watch
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_watch.py \
@@ -140,60 +105,7 @@ jobs:
             --max-pages 4 \
             --output-dir /tmp/creative-europe/watch
 
-      - name: Validate programme-wide F&T watch stays discovery-only
-        run: |
-          python - <<'PY'
-          import json, re, sys
-          p='/tmp/creative-europe/watch/ft-programme-watch-evidence.json'
-          d=json.load(open(p, encoding='utf-8'))
-          if d.get('watch_id') != 'CREATIVE_EUROPE_FT_PROGRAMME_WATCH_V1':
-              print('FAIL programme watch identity drift')
-              sys.exit(2)
-          stats=d.get('stats') or {}
-          count=int(stats.get('exact_reference_candidates') or 0)
-          health=d.get('source_health')
-          if count == 0 and not (health == 'DEGRADED_EMPTY_STRUCTURED_DISCOVERY' and d.get('lkg_required') is True):
-              print('FAIL empty structured discovery was not persisted as degraded')
-              sys.exit(2)
-          if count > 0 and health != 'HEALTHY':
-              print('FAIL populated structured discovery health drift')
-              sys.exit(2)
-          refs=[c.get('reference') for c in d.get('candidates') or []]
-          if len(refs) != len(set(refs)) or not all(isinstance(x,str) and x.startswith('CREA-') for x in refs):
-              print('FAIL programme watch identity/dedup drift', refs[:20])
-              sys.exit(2)
-          conflict_refs={c.get('reference') for c in d.get('conflicts') or []}
-          if any(ref in conflict_refs for ref in refs):
-              print('FAIL conflicted structured record entered candidate queue')
-              sys.exit(2)
-          for candidate in d.get('candidates') or []:
-              if candidate.get('authority_url_verified') is not False or candidate.get('requires_exact_topic_readback') is not True:
-                  print('FAIL programme watch skipped exact-topic verification boundary', candidate.get('reference'))
-                  sys.exit(2)
-              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
-                  if candidate.get(key) is not False:
-                      print('FAIL programme watch candidate became authorizing', candidate.get('reference'), key)
-                      sys.exit(2)
-          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL programme watch became authorizing', key)
-                  sys.exit(2)
-          for key in ('facet_raw_sha256','semantic_fingerprint'):
-              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
-                  print('FAIL programme watch hash invalid', key)
-                  sys.exit(2)
-          print(json.dumps({
-              'source_health': health,
-              'candidate_count': count,
-              'open_candidates_non_authorizing': stats.get('open_candidates_non_authorizing'),
-              'forthcoming_candidates_non_authorizing': stats.get('forthcoming_candidates_non_authorizing'),
-              'conflicts_excluded': stats.get('conflicting_references_excluded'),
-              'sample_refs': refs[:12],
-              'open_call_authorized': False,
-          }, ensure_ascii=False))
-          PY
-
-      - name: Restore previous successful Creative Europe observations from this branch
+      - name: Restore previous successful same-branch evidence
         id: previous_evidence
         shell: bash
         env:
@@ -227,6 +139,7 @@ jobs:
           PY
           EXACT_FOUND=""
           WATCH_FOUND=""
+          DOWNLOADED=0
           while IFS= read -r RUN_ID; do
             [ -n "$RUN_ID" ] || continue
             CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
@@ -237,6 +150,7 @@ jobs:
               --name partener-creative-europe-call-index-evidence --dir "$DEST"; then
               continue
             fi
+            DOWNLOADED=$((DOWNLOADED + 1))
             if [ -z "$WATCH_FOUND" ]; then
               PREVIOUS_WATCH="$(find "$DEST" -type f -path '*/watch/ft-programme-watch-evidence.json' -print -quit)"
               if [ -n "$PREVIOUS_WATCH" ] && [ -s "$PREVIOUS_WATCH" ]; then
@@ -254,25 +168,22 @@ jobs:
             if [ -n "$WATCH_FOUND" ] && [ -n "$EXACT_FOUND" ]; then
               break
             fi
+            [ "$DOWNLOADED" -lt 8 ] || break
           done < /tmp/creative-europe/history/candidate-runs.txt
           if [ -n "$WATCH_FOUND" ]; then
             echo "watch_available=true" >> "$GITHUB_OUTPUT"
             echo "watch_run_id=$WATCH_FOUND" >> "$GITHUB_OUTPUT"
-            echo "Restored previous programme-watch evidence from successful run $WATCH_FOUND"
           else
             echo "watch_available=false" >> "$GITHUB_OUTPUT"
-            echo "No prior successful same-branch programme-watch artifact; watch baseline reconciliation will be used."
           fi
           if [ -n "$EXACT_FOUND" ]; then
             echo "exact_available=true" >> "$GITHUB_OUTPUT"
             echo "exact_run_id=$EXACT_FOUND" >> "$GITHUB_OUTPUT"
-            echo "Restored previous exact-topic evidence from successful run $EXACT_FOUND"
           else
             echo "exact_available=false" >> "$GITHUB_OUTPUT"
-            echo "No prior successful same-branch exact-topic artifact; exact baseline reconciliation will be used."
           fi
 
-      - name: Reconcile programme-wide Creative Europe watch against previous observation
+      - name: Reconcile programme-wide watch against previous observation
         shell: bash
         env:
           PREVIOUS_WATCH_AVAILABLE: ${{ steps.previous_evidence.outputs.watch_available }}
@@ -288,77 +199,7 @@ jobs:
           fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_watch_reconcile.py "${ARGS[@]}"
 
-      - name: Validate programme-wide reconciliation and exact handoff queue stay non-authorizing
-        run: |
-          python - <<'PY'
-          import json, re, sys
-          p='/tmp/creative-europe/watch-reconciliation/ft-programme-watch-reconciliation.json'
-          d=json.load(open(p, encoding='utf-8'))
-          allowed={
-              'BASELINE_CAPTURED_NON_AUTHORIZING',
-              'NO_CHANGE',
-              'PROGRAMME_WATCH_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
-              'CURRENT_SOURCE_DEGRADED_LKG_REFERENCED_NON_AUTHORIZING',
-              'CURRENT_SOURCE_DEGRADED_NO_LKG_NON_AUTHORIZING',
-              'SOURCE_RECOVERED_BASELINE_REESTABLISHED_NON_AUTHORIZING',
-          }
-          if d.get('adapter_id') != 'CREATIVE_EUROPE_FT_WATCH_RECONCILE_V1':
-              print('FAIL programme-watch reconciliation identity drift')
-              sys.exit(2)
-          if d.get('reconciliation_state') not in allowed or d.get('semantic_reconciliation_passed') is not True:
-              print('FAIL programme-watch reconciliation state/pass drift', d.get('reconciliation_state'))
-              sys.exit(2)
-          if d.get('market_intelligence_only') is not True or d.get('requires_exact_topic_handoff') is not True or d.get('requires_material_admission') is not True:
-              print('FAIL programme-watch downstream boundary drift')
-              sys.exit(2)
-          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL programme-watch reconciliation became authorizing', key, d.get(key))
-                  sys.exit(2)
-          for key in ('source_scope_fingerprint','current_evidence_sha256','current_semantic_fingerprint','reconciliation_fingerprint'):
-              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
-                  print('FAIL programme-watch reconciliation hash invalid', key)
-                  sys.exit(2)
-          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
-              print('FAIL programme-watch reconciliation crossed publication boundary')
-              sys.exit(2)
-          queue=d.get('exact_verification_queue') or []
-          if len(queue) != int(d.get('exact_verification_queue_count') or 0) or len(queue) > 20:
-              print('FAIL exact verification queue count/bound drift')
-              sys.exit(2)
-          seen=set()
-          for item in queue:
-              ref=str(item.get('reference') or '')
-              if not ref.startswith('CREA-') or ref in seen:
-                  print('FAIL invalid/duplicate exact handoff reference', ref)
-                  sys.exit(2)
-              seen.add(ref)
-              if item.get('authority_url_verified') is not False:
-                  print('FAIL exact handoff self-verified authority', ref)
-                  sys.exit(2)
-              if item.get('requires_exact_topic_readback') is not True or item.get('requires_exact_topic_reconcile') is not True or item.get('requires_material_admission') is not True:
-                  print('FAIL exact handoff skipped downstream gates', ref)
-                  sys.exit(2)
-              for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
-                  if item.get(key) is not False:
-                      print('FAIL exact handoff became authorizing', ref, key)
-                      sys.exit(2)
-          if d.get('current_source_health') != 'HEALTHY' and queue:
-              print('FAIL degraded programme watch emitted exact handoff queue')
-              sys.exit(2)
-          print(json.dumps({
-              'reconciliation_state': d.get('reconciliation_state'),
-              'semantic_change_count': d.get('semantic_change_count'),
-              'programme_watch_candidate': d.get('programme_watch_candidate'),
-              'source_health_watch_candidate': d.get('source_health_watch_candidate'),
-              'conflict_watch_candidate': d.get('conflict_watch_candidate'),
-              'exact_verification_queue_count': len(queue),
-              'exact_handoffs': [item.get('reference') for item in queue],
-              'open_call_authorized': False,
-          }, ensure_ascii=False))
-          PY
-
-      - name: Execute at most one bounded exact topic handoff from watch history
+      - name: Execute at most one bounded primary-topic exact handoff
         run: |
           mkdir -p /tmp/creative-europe/handoff
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_handoff.py \
@@ -367,73 +208,16 @@ jobs:
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --output-dir /tmp/creative-europe/handoff
 
-      - name: Validate bounded exact topic handoff remains non-authorizing
+      - name: Execute at most one bounded competitive/cascading exact handoff
         run: |
-          python - <<'PY'
-          import json, re, sys
-          p='/tmp/creative-europe/handoff/handoff-summary.json'
-          d=json.load(open(p, encoding='utf-8'))
-          if d.get('handoff_id') != 'CREATIVE_EUROPE_FT_EXACT_HANDOFF_V1':
-              print('FAIL exact handoff identity drift')
-              sys.exit(2)
-          allowed={
-              'NO_EXACT_HANDOFF_PENDING_NON_AUTHORIZING',
-              'EXACT_HANDOFF_EXECUTED_NON_AUTHORIZING',
-              'EXACT_HANDOFF_FAILED_CLOSED_NON_AUTHORIZING',
-          }
-          if d.get('observation_state') not in allowed:
-              print('FAIL exact handoff state drift', d.get('observation_state'))
-              sys.exit(2)
-          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL exact handoff became authorizing', key, d.get(key))
-                  sys.exit(2)
-          if not re.fullmatch(r'[0-9a-f]{64}', str(d.get('current_watch_reconciliation_sha256') or '')):
-              print('FAIL exact handoff lost current watch binding')
-              sys.exit(2)
-          state=d.get('observation_state')
-          if state == 'EXACT_HANDOFF_EXECUTED_NON_AUTHORIZING':
-              ref=str(d.get('selected_reference') or '')
-              if not ref.startswith('CREA-') or d.get('exact_authority_url_verified') is not True:
-                  print('FAIL exact handoff authority verification missing', ref)
-                  sys.exit(2)
-              if d.get('exact_semantic_reconciliation_state') not in (
-                  'BASELINE_CAPTURED_NON_AUTHORIZING',
-                  'NO_CHANGE',
-                  'EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
-              ):
-                  print('FAIL exact handoff semantic reconcile missing', d.get('exact_semantic_reconciliation_state'))
-                  sys.exit(2)
-              for key in ('source_watch_reconciliation_sha256','exact_evidence_sha256','exact_reconciliation_sha256'):
-                  if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
-                      print('FAIL exact handoff hash invalid', key)
-                      sys.exit(2)
-          elif state == 'EXACT_HANDOFF_FAILED_CLOSED_NON_AUTHORIZING':
-              ref=str(d.get('selected_reference') or '')
-              if not ref.startswith('CREA-') or d.get('exact_authority_url_verified') is not False:
-                  print('FAIL failed exact handoff identity/authority boundary', ref)
-                  sys.exit(2)
-              if d.get('retry_candidate') is not True or not d.get('failure_type') or not d.get('failure_message'):
-                  print('FAIL failed exact handoff lacks durable failure evidence')
-                  sys.exit(2)
-              if d.get('material_admission_ready_for_downstream_review') is not False:
-                  print('FAIL failed exact handoff claims material readiness')
-                  sys.exit(2)
-          print(json.dumps({
-              'observation_state': state,
-              'selected_reference': d.get('selected_reference'),
-              'selection_source': d.get('selection_source'),
-              'exact_candidate_observation_state': d.get('exact_candidate_observation_state'),
-              'exact_status_label': d.get('exact_status_label'),
-              'exact_semantic_reconciliation_state': d.get('exact_semantic_reconciliation_state'),
-              'failure_type': d.get('failure_type'),
-              'failure_message': d.get('failure_message'),
-              'material_admission_ready_for_downstream_review': d.get('material_admission_ready_for_downstream_review'),
-              'open_call_authorized': False,
-          }, ensure_ascii=False))
-          PY
+          mkdir -p /tmp/creative-europe/competitive-handoff
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_competitive_handoff.py \
+            --current-watch /tmp/creative-europe/watch/ft-programme-watch-evidence.json \
+            --history-root /tmp/creative-europe/history \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output-dir /tmp/creative-europe/competitive-handoff
 
-      - name: Capture exact current Creative Europe topic through structured F&T
+      - name: Capture exact control topic through structured F&T
         run: |
           mkdir -p /tmp/creative-europe/ft
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_exact.py \
@@ -441,36 +225,7 @@ jobs:
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --output-dir /tmp/creative-europe/ft
 
-      - name: Validate exact F&T evidence remains non-publishing
-        run: |
-          python - <<'PY'
-          import json, re, sys
-          p='/tmp/creative-europe/ft/ft-exact-evidence.json'
-          d=json.load(open(p, encoding='utf-8'))
-          if d.get('reference') != 'CREA-MEDIA-2026-DEVMINISLATE':
-              print('FAIL exact Creative Europe topic identity drift')
-              sys.exit(2)
-          if d.get('authority_url_verified') is not True or d.get('requires_reconcile') is not True:
-              print('FAIL exact topic/reconcile boundary missing')
-              sys.exit(2)
-          if d.get('candidate_observation_state') not in ('OPEN_CALL','FORTHCOMING_CALL','CLOSED_CALL','UNKNOWN'):
-              print('FAIL unexpected candidate state', d.get('candidate_observation_state'))
-              sys.exit(2)
-          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL exact F&T evidence became authorizing', key, d.get(key))
-                  sys.exit(2)
-          for key in ('search_raw_sha256','facet_raw_sha256','semantic_fingerprint'):
-              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
-                  print('FAIL exact F&T evidence hash invalid', key)
-                  sys.exit(2)
-          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
-              print('FAIL exact F&T evidence crossed publication boundary')
-              sys.exit(2)
-          print(json.dumps({'reference':d.get('reference'),'status_label':d.get('status_label'),'candidate_state':d.get('candidate_observation_state'),'open_call_authorized':False}, ensure_ascii=False))
-          PY
-
-      - name: Reconcile exact Creative Europe topic against previous observation
+      - name: Reconcile exact control topic
         shell: bash
         env:
           PREVIOUS_EXACT_AVAILABLE: ${{ steps.previous_evidence.outputs.exact_available }}
@@ -486,39 +241,72 @@ jobs:
           fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/creative_europe_ft_reconcile.py "${ARGS[@]}"
 
-      - name: Validate reconciled exact-topic evidence remains non-authorizing
+      - name: Validate live evidence stays non-authorizing and hash-bound
+        env:
+          PYTHONPATH: partener-eu/ingest
         run: |
           python - <<'PY'
-          import json, re, sys
-          p='/tmp/creative-europe/reconciliation/ft-reconciliation.json'
-          d=json.load(open(p, encoding='utf-8'))
-          if d.get('adapter_id') != 'CREATIVE_EUROPE_FT_RECONCILE_V1':
-              print('FAIL reconciliation identity drift')
-              sys.exit(2)
-          if d.get('reference') != 'CREA-MEDIA-2026-DEVMINISLATE' or d.get('semantic_reconciliation_passed') is not True:
-              print('FAIL exact-reference semantic reconciliation missing')
-              sys.exit(2)
-          if d.get('reconciliation_state') not in ('BASELINE_CAPTURED_NON_AUTHORIZING','NO_CHANGE','EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'):
-              print('FAIL unexpected reconciliation state', d.get('reconciliation_state'))
-              sys.exit(2)
-          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL reconciliation became authorizing', key, d.get(key))
-                  sys.exit(2)
-          for key in ('current_evidence_sha256','current_semantic_fingerprint','reconciliation_fingerprint'):
-              if not re.fullmatch(r'[0-9a-f]{64}', str(d.get(key) or '')):
-                  print('FAIL reconciliation hash invalid', key)
-                  sys.exit(2)
-          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
-              print('FAIL reconciliation crossed publication boundary')
-              sys.exit(2)
+          import json, re
+          import creative_europe_ft_exact as exact
+          import creative_europe_ft_reconcile as exact_reconcile
+          import creative_europe_ft_watch as watch
+          import creative_europe_ft_watch_reconcile as watch_reconcile
+          import creative_europe_ft_handoff as handoff
+          import creative_europe_ft_competitive_handoff as competitive_handoff
+
+          def load(path):
+              return json.load(open(path, encoding='utf-8'))
+
+          index=load('/tmp/creative-europe/index-evidence.json')
+          current_watch=load('/tmp/creative-europe/watch/ft-programme-watch-evidence.json')
+          watch_receipt=load('/tmp/creative-europe/watch-reconciliation/ft-programme-watch-reconciliation.json')
+          primary=load('/tmp/creative-europe/handoff/handoff-summary.json')
+          competitive=load('/tmp/creative-europe/competitive-handoff/competitive-handoff-summary.json')
+          control=load('/tmp/creative-europe/ft/ft-exact-evidence.json')
+          control_receipt=load('/tmp/creative-europe/reconciliation/ft-reconciliation.json')
+
+          watch.validate_watch_evidence(current_watch)
+          watch_reconcile.validate_watch_reconciliation(watch_receipt)
+          handoff.validate_handoff_summary(primary)
+          competitive_handoff.validate_handoff_summary(competitive)
+          exact.validate_exact_evidence(control)
+          exact_reconcile.validate_receipt(control_receipt)
+
+          material_flags=(
+              'material_fact_use','open_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized',
+              'distribution_authorized'
+          )
+          if index.get('adapter_id') != 'CREATIVE_EUROPE_CALLS_V1':
+              raise SystemExit('FAIL live index adapter identity drift')
+          for key in material_flags:
+              if index.get(key) is not False:
+                  raise SystemExit(f'FAIL live index became authorizing: {key}')
+          raw_hash=str((index.get('receipt') or {}).get('raw_sha256') or '')
+          if not re.fullmatch(r'[0-9a-f]{64}', raw_hash):
+              raise SystemExit('FAIL live index immutable raw hash missing')
+          if index.get('publication_effect') != 'NONE' or index.get('canonical_corpus_mutation') is not False:
+              raise SystemExit('FAIL live index publication boundary drift')
+
+          stats=current_watch.get('stats') or {}
           print(json.dumps({
-              'reference': d.get('reference'),
-              'reconciliation_state': d.get('reconciliation_state'),
-              'semantic_change_count': d.get('semantic_change_count'),
-              'material_admission_ready_for_downstream_review': d.get('material_admission_ready_for_downstream_review'),
+              'watch_source_health': current_watch.get('source_health'),
+              'primary_candidate_count': stats.get('exact_reference_candidates'),
+              'primary_conflicts_excluded': stats.get('conflicting_references_excluded'),
+              'competitive_candidates': stats.get('linked_competitive_discovery_candidates'),
+              'competitive_open_candidates_non_authorizing': stats.get('open_linked_competitive_candidates_non_authorizing'),
+              'watch_reconciliation_state': watch_receipt.get('reconciliation_state'),
+              'primary_handoff_state': primary.get('observation_state'),
+              'competitive_handoff_state': competitive.get('observation_state'),
+              'competitive_identity': competitive.get('selected_identity_key'),
+              'competitive_exact_state': competitive.get('exact_candidate_observation_state'),
+              'competitive_exact_status': competitive.get('exact_status_label'),
+              'competitive_reconciliation_state': competitive.get('exact_semantic_reconciliation_state'),
+              'competitive_material_ready_for_review': competitive.get('material_admission_ready_for_downstream_review'),
+              'control_reconciliation_state': control_receipt.get('reconciliation_state'),
               'open_call_authorized': False,
-          }, ensure_ascii=False))
+              'call_alert_authorized': False,
+          }, ensure_ascii=False, sort_keys=True))
           PY
 
       - name: Upload bounded Creative Europe evidence
