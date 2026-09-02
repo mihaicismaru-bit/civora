@@ -70,11 +70,15 @@ jobs:
 
       - name: Acquire bounded live ETA first-party communications
         run: |
-          set -euo pipefail
+          set +e
           python valcea-clar/scripts/eta_valcea_transport_reference_adapter.py \
             --live-check \
             --require-reference \
             --output /tmp/eta_valcea_transport_references.json
+          rc=$?
+          set -e
+          cat /tmp/eta_valcea_transport_references.json || true
+          exit "$rc"
 
       - name: Validate live receipt boundary
         run: |
@@ -135,6 +139,7 @@ jobs:
           PY
 
       - name: Upload bounded ETA transport source evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: valcea-clar-eta-transport-reference-evidence
