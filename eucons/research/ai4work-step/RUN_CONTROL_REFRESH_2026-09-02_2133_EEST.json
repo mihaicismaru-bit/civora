@@ -1,0 +1,72 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T21:33:36+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "observed_pr_head_before_persist": "82928c991f82987468b1c09a19fcdacc4cbf4e72",
+  "secondary_research_refresh": {
+    "regions_checked": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+    "source_register_high_water_mark": "S40",
+    "new_source_promoted": true,
+    "new_source_id": "S40",
+    "new_source_classification": "DIRECT_COMPLEMENTARY_HISTORICAL_EMPLOYER_SURVEY_INTERNAL_RESPONSE_DISCREPANCY_ZERO_H1_H5",
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "daily_refresh_artifact": "SECONDARY_EVIDENCE_REFRESH_2026-09-02.json",
+    "screening_notes": [
+      "Sud-Vest Oltenia: AJOFM Olt official eSPOR forecast is promoted as S40 only for historical employer-side triangulation: 1,218 respondents from 6,804 employers and 39,470 represented employees from 71,419 (55.27%). It is not AI/digital-specific and adds zero H1-H5. The source conflict 506 versus 504 respondents with hires is preserved unreconciled.",
+      "Centru: AJOFM Harghita official forecast was audited as a historical employer benchmark but not promoted because it is materially redundant with existing Centru employer-survey evidence and adds no AI/digital prevalence measure.",
+      "Sud-Muntenia: an AJOFM Ialomita activity report mentions 1,207 surveyed employers, but project activity/output counts are not promoted as need evidence; S38 Prahova remains the stronger direct-complementary employer source."
+    ]
+  },
+  "evidence_registry_refresh": {
+    "source_register_row_added": true,
+    "source_register_high_water_mark": "S40",
+    "prod_h1_h5_row_added": false,
+    "classification": "S40_COMPLEMENTARY_ONLY_ZERO_H1_H5"
+  },
+  "call_requirements_refresh": {
+    "gmail_query": "after:2026/09/02 excluding spam/trash/GitHub; terms 367944, AI4WORK, OMIPE, MIPE, PEO, 1302, Anexa 4, eucons.ro, Claus, GDPR",
+    "matching_new_authority_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_query": "PROD_REAL_EVIDENCE AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 source_export_sha256",
+    "eligible_combined_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "repository_implementation_state": {
+    "forms_schema": "eucons.research_forms.v0.5",
+    "direct_identifier_fields_allowed_in_research_forms": false,
+    "analytical_free_text_allowed": false,
+    "commercial_tracking_allowed": false,
+    "crm_linkage_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+    "need_analysis_plan_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "collection_frame_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "precollection_method_lock_status": "OPEN_NOT_LOCKED",
+    "precollection_plan_sha256_bound": false,
+    "precollection_frame_sha256_bound": false
+  },
+  "remaining_precollection_boundary": [
+    "Approve exact NEED_ANALYSIS_PLAN and COLLECTION_FRAME and bind both SHA-256 values",
+    "Controller approval of Art. 6(1)(f) LIA/lawful basis and acceptance of DPIA screening outcome or completion of DPIA if required",
+    "Final dedicated AI4WORK Article 13 notice with operational EUROCONSULT privacy contact",
+    "Approved requester-authentication and data-subject-rights procedure",
+    "Account-specific eucons.ro/cPanel/Cloudflare readback proving Raw Access <= 7 days and access/security controls",
+    "Provider-bound proof of live research-store separation from CRM/webroot and residual backups <= 92 days",
+    "Active processor/subprocessor, rights-hold and incident-response bindings",
+    "Real CH-* channel entries only after dissemination authorization",
+    "Fresh explicit human collection-only v0.2 approval"
+  ],
+  "downstream_state": "FAIL_CLOSED_UNTIL_SUFFICIENT_IMMUTABLE_REAL_ADULT_AND_EMPLOYER_BATCH",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false,
+  "real_collection_authorized": false
+}
