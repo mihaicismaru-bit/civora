@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR dedicated primary signal verification targets",
   "publication_authority": "NONE",
@@ -64,6 +64,26 @@
       "status": "PRIMARY_VERIFICATION_ONLY",
       "path_hints": ["valcea", "vâlcea", "torent", "viitur", "pnrr", "vale-lunga", "scanteia", "izvorul-govorei"],
       "purpose": "Verify forestry, torrent-control, flood-risk and PNRR signals involving Vâlcea against official Romsilva press releases. A match must explicitly identify Vâlcea or a Vâlcea objective and preserve same-project identity; this target never authorizes publication by itself."
+    },
+    {
+      "id": "igpr-infotrafic-live",
+      "publisher": "Centrul INFOTRAFIC — Poliția Română",
+      "url": "https://politiaromana.ro/ro/info-trafic",
+      "tier": "T1",
+      "section": "MOBILITATE",
+      "status": "PRIMARY_VERIFICATION_ONLY",
+      "path_hints": ["info-trafic", "dn 7", "dn7", "restrict", "circulat", "trafic"],
+      "purpose": "Verify press signals about current national-road traffic restrictions, closures or circulation conditions against the official INFOTRAFIC surface. This target may verify only the operational traffic state explicitly present in the current official notice; it never proves construction progress, project status, cause, duration beyond the stated window or publication eligibility."
+    },
+    {
+      "id": "cj-valcea-roadworks",
+      "publisher": "Consiliul Județean Vâlcea — drumuri județene",
+      "url": "https://cjvalcea.ro/categorie/consiliul-judetean-la-zi/",
+      "tier": "T1",
+      "section": "INFRASTRUCTURĂ",
+      "status": "PRIMARY_VERIFICATION_ONLY",
+      "path_hints": ["dj", "drum judetean", "drum județean", "asfalt", "reabilit", "moderniz", "restrict", "circulat"],
+      "purpose": "Verify county-road works, closures and restriction signals against individually dated official CJ Vâlcea articles. Publication date is never operational status; a current restriction or works state must be explicit in same-item evidence and remains non-authorizing until the normal fact and editorial gates."
     }
   ]
 }
