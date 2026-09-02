@@ -19,6 +19,7 @@ import copy
 import hashlib
 import json
 import re
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date, datetime, time, timedelta
 from pathlib import Path
@@ -30,6 +31,10 @@ import ipj_valcea_public_safety_detail_evidence as ipj_detail
 import isu_valcea_emergency_detail_evidence as isu_detail
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = ROOT.parent
+sys.path.insert(0, str(REPO_ROOT / "local-news-os" / "core"))
+from temporal_freshness import durable_story_temporal_violations
+
 FACTS = ROOT / "editorial" / "facts_registry.json"
 STATE = ROOT / "editorial" / "verified_primary_fast_kernel_state.json"
 TZ = ZoneInfo("Europe/Bucharest")
@@ -237,7 +242,7 @@ def promote_detail(source_key: str, detail: dict[str, Any], *, now: datetime) ->
     date_text = event_date.strftime("%d.%m.%Y")
     dek = (
         f"Comunicarea oficială a {label} conține informații verificabile despre cazul din {date_text}. "
-        "VÂLCEA CLAR publică acum numai elementele atribuite explicit autorității și actualizează materialul când apar date noi."
+        "VÂLCEA CLAR publică numai elementele atribuite explicit autorității și actualizează materialul când apar date noi."
     )
     claims = [attributed_claim(label, row, source_url, index) for index, row in enumerate(fragments)]
 
@@ -282,6 +287,8 @@ def promote_detail(source_key: str, detail: dict[str, Any], *, now: datetime) ->
             "continuous_story_first_update_expected": True,
         },
     }
+    if durable_story_temporal_violations(story, "ro-RO"):
+        return None, "generated_durable_temporal_language_violation"
     story["primary_source_verification"]["promotion_fingerprint_sha256"] = canonical_digest({
         "id": story["id"],
         "source_url": source_url,
@@ -393,6 +400,7 @@ def self_test() -> None:
     assert story["fact_kernel"]["format_hint"] == "straight_news"
     assert len(story["fact_kernel"]["claims"]) == 2
     assert all(claim["kind"] == "attributed_statement" for claim in story["fact_kernel"]["claims"])
+    assert not durable_story_temporal_violations(story, "ro-RO")
 
     allegation_only = copy.deepcopy(good_ipj)
     allegation_only["detail_url"] += "-allegation"
@@ -424,6 +432,7 @@ def self_test() -> None:
     isu_story, isu_reason = promote_detail("isu", good_isu, now=now)
     assert isu_reason == "promoted" and isu_story is not None
     assert isu_story["section"] == "URGENȚE"
+    assert not durable_story_temporal_violations(isu_story, "ro-RO")
 
     doc, changed, duplicates = upsert_all({"facts": []}, [story, isu_story])
     assert set(changed) == {story["id"], isu_story["id"]} and not duplicates
