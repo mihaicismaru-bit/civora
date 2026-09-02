@@ -1,0 +1,148 @@
+name: VÂLCEA CLAR ISJ Education Detail Evidence
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/isj_valcea_education_detail_evidence.py"
+      - "valcea-clar/scripts/isj_valcea_education_reference_adapter.py"
+      - ".github/workflows/valcea-clar-isj-education-detail-evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/isj_valcea_education_detail_evidence.py"
+      - "valcea-clar/scripts/isj_valcea_education_reference_adapter.py"
+      - ".github/workflows/valcea-clar-isj-education-detail-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-isj-education-detail-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regression
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/scripts/isj_valcea_education_reference_adapter.py \
+            valcea-clar/scripts/isj_valcea_education_detail_evidence.py
+          python valcea-clar/scripts/isj_valcea_education_reference_adapter.py --self-test
+          python valcea-clar/scripts/isj_valcea_education_detail_evidence.py --self-test
+
+      - name: Enforce read-only detail-evidence capability boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/isj_valcea_education_detail_evidence.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in ISJ detail verifier" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in ISJ detail verifier" >&2
+            exit 1
+          fi
+          grep -F '"material_fact_use": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire bounded high-value first-party detail evidence
+        run: |
+          set -euo pipefail
+          # Zero first-party high-value targets is a valid, explicit live state:
+          # many ISJ index items currently point to external document hosts, which
+          # this verifier intentionally refuses to fetch or promote to authority.
+          python valcea-clar/scripts/isj_valcea_education_detail_evidence.py \
+            --live-check \
+            --output /tmp/isj_valcea_education_detail_evidence.json
+
+      - name: Validate live detail receipt boundary
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/isj_valcea_education_detail_evidence.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'ISJ_VALCEA_EDUCATION_DETAIL_EVIDENCE_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_COUNTY_EDUCATION_DETAIL_EVIDENCE'
+          assert payload['observation_state'] == 'DETAIL_EVIDENCE_NON_AUTHORIZING'
+          assert payload['coverage_note'] == 'BOUNDED_HIGH_VALUE_FIRST_PARTY_DETAIL_VERIFICATION_NOT_EXHAUSTIVE'
+          assert payload['index_reference_count'] >= 1
+          assert 0 <= payload['detail_evidence_count'] <= 12
+          assert 0 <= payload['eligible_first_party_detail_count'] <= 12
+          assert payload['detail_evidence_count'] + payload['detail_hold_count'] == payload['eligible_first_party_detail_count']
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+          allowed_topics = {'ADMISSIONS', 'EXAMS_RESULTS', 'STAFFING_MANAGEMENT'}
+          allowed_types = {'text/html', 'text/plain', 'application/pdf', 'application/octet-stream'}
+          for item in payload['details']:
+              parsed = urlsplit(item['detail_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'isjvalcea.ro', 'www.isjvalcea.ro'}
+              assert item['detail_host'] == parsed.hostname
+              assert item['topic_class'] in allowed_topics
+              assert item['content_type'] in allowed_types
+              assert 1 <= item['content_length'] <= 3_000_000
+              assert re.fullmatch(r'[0-9a-f]{64}', item['detail_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', item['index_evidence_sha256'])
+              assert item['authority_class'] == payload['authority_class']
+              assert item['observation_state'] == payload['observation_state']
+              assert item['verification_state'] in {
+                  'FIRST_PARTY_BYTES_HASHED_CONTENT_NOT_INTERPRETED',
+                  'FIRST_PARTY_TEXT_EVIDENCE_CAPTURED_NON_AUTHORIZING',
+              }
+              assert len(item['evidence_fragments']) <= 4
+
+          for hold in payload['holds']:
+              assert hold['state'] == 'HOLD_DETAIL_FETCH_FAILED_NON_AUTHORIZING'
+              assert re.fullmatch(r'[0-9a-f]{64}', hold['index_evidence_sha256'])
+
+          forbidden = [
+              'material_fact_use', 'admission_capacity_authorized',
+              'exam_result_authorized', 'current_vacancy_authorized',
+              'deadline_authorized', 'eligibility_authorized',
+              'school_status_authorized', 'same_item_dedupe_authorized',
+              'breaking_authorized', 'fact_kernel_write_authorized',
+              'editorial_writer_authorized', 'publication_authorized',
+              'distribution_authorized', 'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          state = 'DETAIL_EVIDENCE_PRESENT' if payload['detail_evidence_count'] else 'NO_FIRST_PARTY_HIGH_VALUE_DETAIL_CANDIDATE'
+          print(
+              f"ISJ bounded detail state={state}; evidence={payload['detail_evidence_count']}; "
+              f"holds={payload['detail_hold_count']}; index_refs={payload['index_reference_count']}"
+          )
+          PY
+
+      - name: Upload bounded ISJ detail evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-isj-education-detail-evidence
+          path: /tmp/isj_valcea_education_detail_evidence.json
+          retention-days: 7
+          if-no-files-found: error
