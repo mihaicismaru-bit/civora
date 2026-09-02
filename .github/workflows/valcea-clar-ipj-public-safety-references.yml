@@ -1,0 +1,145 @@
+name: VÂLCEA CLAR IPJ Public Safety References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py"
+      - ".github/workflows/valcea-clar-ipj-public-safety-references.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py"
+      - ".github/workflows/valcea-clar-ipj-public-safety-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-ipj-public-safety-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regression
+        run: |
+          set -euo pipefail
+          python -m py_compile valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py
+          python valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py --self-test
+
+      - name: Enforce first-party reference capability boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in IPJ source adapter" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in IPJ source adapter" >&2
+            exit 1
+          fi
+          grep -F '"material_fact_use": False' "$target"
+          grep -F '"criminal_liability_authorized": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire bounded live first-party police indexes
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py \
+            --live-check \
+            --require-reference \
+            --output /tmp/ipj_valcea_public_safety_references.json
+
+      - name: Validate live receipt boundary
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/ipj_valcea_public_safety_references.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'IPJ_VALCEA_PUBLIC_SAFETY_REFERENCE_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_COUNTY_POLICE_MEDIA_INDEX'
+          assert payload['observation_state'] == 'REFERENCE_ONLY_NON_AUTHORIZING'
+          assert payload['coverage_note'] == 'BOUNDED_FIRST_PARTY_MEDIA_INDEX_DISCOVERY_NOT_EXHAUSTIVE'
+          assert payload['source_page_count'] == 3
+          assert 1 <= payload['reference_count'] <= 72
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+          assert set(payload['source_kind_counts']) <= {'NEWS', 'COMMUNIQUES', 'BULLETINS'}
+
+          allowed_topics = {
+              'ROAD_SAFETY', 'ECONOMIC_CRIME', 'CRIME_INVESTIGATION',
+              'MISSING_WANTED', 'PUBLIC_ORDER', 'PREVENTION', 'PUBLIC_SAFETY_OTHER',
+          }
+          expected_paths = {
+              'NEWS': '/ro/stiri-si-media/stiri',
+              'COMMUNIQUES': '/ro/stiri-si-media/comunicate',
+              'BULLETINS': '/ro/stiri-si-media/buletine-de-presa',
+          }
+          for page in payload['source_pages']:
+              parsed = urlsplit(page['source_page_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname == 'vl.politiaromana.ro'
+              assert parsed.path.rstrip('/') == expected_paths[page['source_kind']]
+              assert re.fullmatch(r'[0-9a-f]{64}', page['source_page_sha256'])
+          for ref in payload['references']:
+              source = urlsplit(ref['source_page_url'])
+              target = urlsplit(ref['target_url'])
+              assert source.scheme == target.scheme == 'https'
+              assert source.hostname == target.hostname == 'vl.politiaromana.ro'
+              assert target.path.startswith(expected_paths[ref['source_kind']] + '/')
+              assert ref['topic_class'] in allowed_topics
+              assert ref['authority_class'] == payload['authority_class']
+              assert ref['observation_state'] == payload['observation_state']
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['source_page_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['evidence_sha256'])
+
+          forbidden = [
+              'material_fact_use', 'incident_status_authorized',
+              'suspect_status_authorized', 'criminal_liability_authorized',
+              'casualty_count_authorized', 'sanction_count_authorized',
+              'road_restriction_authorized', 'investigation_status_authorized',
+              'breaking_authorized', 'fact_kernel_write_authorized',
+              'editorial_writer_authorized', 'publication_authorized',
+              'distribution_authorized', 'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          assert payload['limitations']['police_allegation_is_not_criminal_liability'] is True
+          print(
+              f"Validated {payload['reference_count']} bounded IPJ Vâlcea public-safety references "
+              f"across {payload['source_page_count']} first-party indexes"
+          )
+          PY
+
+      - name: Upload bounded police source evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-ipj-public-safety-reference-evidence
+          path: /tmp/ipj_valcea_public_safety_references.json
+          retention-days: 7
+          if-no-files-found: error
