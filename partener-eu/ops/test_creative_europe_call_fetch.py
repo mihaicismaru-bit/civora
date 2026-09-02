@@ -88,4 +88,17 @@ assert degraded["lkg_required"] is True
 assert degraded["open_call_authorized"] is False
 assert degraded["publication_effect"] == "NONE"
 
+transport = m.build_transport_failure_evidence(
+    authority_url=m.DEFAULT_URL,
+    run_id="tls-failure",
+    fetched_at="2026-09-01T18:30:00+00:00",
+    error=OSError("certificate verify failed: hostname mismatch"),
+)
+assert transport["source_health"] == "DEGRADED_TRANSPORT"
+assert transport["lkg_required"] is True
+assert transport["receipt"]["raw_sha256"] is None
+assert transport["receipt"]["transport_error_type"] == "OSError"
+assert transport["open_call_authorized"] is False
+assert transport["publish_authorized"] is False
+
 print("PASS Creative Europe bounded acquisition, degraded-empty persistence and hostile fail-closed regression")
