@@ -125,12 +125,15 @@ jobs:
           assert all(x['territorial_fit_state'] == 'ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING' for x in interreg['programmes'])
 
           interreg_calls = json.loads((root/'interreg-call-surfaces/interreg-romania-call-surface-watch.json').read_text(encoding='utf-8'))
-          assert interreg_calls['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V1'
+          assert interreg_calls['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2'
           assert interreg_calls['source_health'] in {'HEALTHY', 'DEGRADED'}
           assert interreg_calls['market_intelligence_only'] is True
           assert interreg_calls['expected_surface_count'] == 7
           assert len(interreg_calls['surfaces']) == 7
           assert interreg_calls['discovered_call_facts'] == []
+          assert interreg_calls['fallback_configured_count'] == 3
+          assert interreg_calls['fallback_does_not_restore_call_surface_coverage'] is True
+          assert interreg_calls['call_surface_coverage_complete'] is interreg_calls['coverage_complete']
           assert next(x for x in interreg_calls['surfaces'] if x['programme_id'] == 'RO_RS')['observation_state'] == 'PLANNED'
           assert all(
               x['observation_state'] == 'CALL_DISCOVERY_ONLY'
@@ -138,6 +141,15 @@ jobs:
               if x['programme_id'] != 'RO_RS'
           )
           assert next(x for x in interreg_calls['surfaces'] if x['programme_id'] == 'INTERREG_EUROPE')['programme_filter_required'] is True
+          assert all(x['fallback_provenance']['call_surface_authority'] is False for x in interreg_calls['surfaces'])
+          assert all(x['fallback_provenance']['call_fact_authorized'] is False for x in interreg_calls['surfaces'])
+          assert all(
+              x['fallback_provenance']['transport_health'] in {'HEALTHY', 'DEGRADED'}
+              for x in interreg_calls['surfaces']
+              if x['transport_health'] == 'DEGRADED'
+              and x['fallback_provenance']['configured']
+              and x['failure_class'] != 'VALIDATION_ERROR'
+          )
 
           flags = (
               'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
@@ -156,6 +168,11 @@ jobs:
               'interreg_call_surfaces_healthy': interreg_calls['healthy_surface_count'],
               'interreg_call_surfaces_degraded': interreg_calls['degraded_surface_count'],
               'interreg_call_surface_coverage_complete': interreg_calls['coverage_complete'],
+              'interreg_fallback_configured': interreg_calls['fallback_configured_count'],
+              'interreg_fallback_attempted': interreg_calls['fallback_attempted_count'],
+              'interreg_fallback_healthy': interreg_calls['fallback_healthy_count'],
+              'interreg_fallback_degraded': interreg_calls['fallback_degraded_count'],
+              'interreg_degraded_direct_with_healthy_fallback': interreg_calls['degraded_direct_with_healthy_fallback_count'],
               'eea_fingerprint': eea['semantic_fingerprint'],
               'interreg_fingerprint': interreg['semantic_fingerprint'],
               'interreg_call_surface_fingerprint': interreg_calls['semantic_fingerprint'],
