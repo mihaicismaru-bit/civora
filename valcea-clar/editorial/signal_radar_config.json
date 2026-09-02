@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.7",
+  "schema_version": "1.8",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -49,12 +49,12 @@
     },
     {
       "id": "police_public_safety",
-      "keywords": ["ipj", "poliți*", "politi*", "accident", "rutier", "dn7", "dn 7", "autocamion", "răsturn*", "rasturn*", "victim*", "dispăr*", "dispar*", "perchez*", "arme", "muni*", "reținut*", "retinut*", "agres*", "bătaie", "bataie", "scandal", "ordine de protec*"],
+      "keywords": ["ipj", "poliți*", "politi*", "accident", "rutier", "dn7", "dn 7", "autocamion", "atv", "răsturn*", "rasturn*", "victim*", "dispăr*", "dispar*", "perchez*", "arme", "muni*", "reținut*", "retinut*", "agres*", "bătaie", "bataie", "scandal", "ordine de protec*", "fără permis de conducere", "fara permis de conducere", "conducere fără permis", "conducere fara permis", "neînmatric*", "neinmatric*", "alcool la volan", "alcooltest"],
       "verification_targets": [{"ref_type": "manual_watch_source_id", "id": "ipj-valcea-stiri"}]
     },
     {
       "id": "fire_rescue_alert",
-      "keywords": ["incendiu", "pompier*", "flăcăr*", "flacar*", "ro-alert", "urs", "exploz*", "salvare", "înec*", "inec*", "inunda*"],
+      "keywords": ["incendiu", "pompier*", "flăcăr*", "flacar*", "a luat foc", "arde o casă", "arde o casa", "arde un imobil", "ro-alert", "urs", "exploz*", "salvare", "înec*", "inec*", "inunda*"],
       "verification_targets": [
         {"ref_type": "primary_target_id", "id": "isu-valcea-stiri-locale"},
         {"ref_type": "news_source_id", "id": "isu-valcea-comunicate"},
@@ -64,10 +64,12 @@
     {
       "id": "utilities",
       "keywords": ["avarie", "apă", "apa", "canal*", "curent", "energie", "electric*", "termoficare", "întrerup*", "intrerup*", "gigacalorie", "tarif*"],
+      "excluded_keywords": ["polu*", "devers*", "ape uzate", "apă colorată", "apa colorata"],
       "verification_targets": [
         {"ref_type": "news_source_id", "id": "apavil-comunicate"},
         {"ref_type": "manual_watch_source_id", "id": "apavil-opriri-programate"},
-        {"ref_type": "manual_watch_source_id", "id": "cet-govora-termoficare-advisories"}
+        {"ref_type": "manual_watch_source_id", "id": "cet-govora-termoficare-advisories"},
+        {"ref_type": "primary_target_id", "id": "aba-olt-sga-valcea"}
       ]
     },
     {
@@ -142,8 +144,11 @@
     },
     {
       "id": "environment_weather",
-      "keywords": ["cod galben", "cod portocaliu", "alertă", "alerta", "hidrolog*", "inunda*", "mediu", "polu*", "pădur*", "padur*"],
-      "verification_targets": [{"ref_type": "manual_watch_source_id", "id": "inhga-avertizari-hidrologice-valcea"}]
+      "keywords": ["cod galben", "cod portocaliu", "alertă", "alerta", "hidrolog*", "inunda*", "mediu", "polu*", "devers*", "ape uzate", "apă colorată", "apa colorata", "pădur*", "padur*"],
+      "verification_targets": [
+        {"ref_type": "manual_watch_source_id", "id": "inhga-avertizari-hidrologice-valcea"},
+        {"ref_type": "primary_target_id", "id": "aba-olt-sga-valcea"}
+      ]
     }
   ]
 }
