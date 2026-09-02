@@ -8,6 +8,9 @@ const BUILD = "4".repeat(40);
 const NOW = new Date("2026-08-30T08:00:20.000Z");
 const issuedClock = () => new Date("2026-08-30T08:00:00.000Z");
 const dispatchClock = () => new Date(NOW);
+const MYSMIS_TAB_QUERY = {
+  url: ["https://mysmis2021.gov.ro/*", "https://*.mysmis2021.gov.ro/*"]
+};
 
 function storageSession(initial = {}) {
   const state = structuredClone(initial);
@@ -34,15 +37,17 @@ function snapshot(project = "310224", url = `https://mysmis2021.gov.ro/proiect/$
   };
 }
 
-function chromeRuntime({ currentSnapshot = snapshot(), session = storageSession(), tabUrl } = {}) {
+function chromeRuntime({ currentSnapshot = snapshot(), session = storageSession(), tabUrl, tabs } = {}) {
+  const availableTabs = tabs || (tabUrl === null ? [] : [{ id: 17, active: true, url: tabUrl || currentSnapshot.page.url }]);
   return {
     storage: { session },
     tabs: {
-      async query() {
-        return tabUrl === null ? [] : [{ id: 17, url: tabUrl || currentSnapshot.page.url }];
+      async query(queryInfo) {
+        assert.deepEqual(queryInfo, MYSMIS_TAB_QUERY);
+        return structuredClone(availableTabs);
       },
       async sendMessage(id, message) {
-        assert.equal(id, 17);
+        assert.ok(availableTabs.some((tab) => tab.id === id));
         assert.deepEqual(message, { type: "MYSMIS_CAPTURE_CURRENT_PAGE" });
         return { ok: true, snapshot: structuredClone(currentSnapshot) };
       }
@@ -67,7 +72,7 @@ function liveHealthReceipt(value) {
   };
 }
 
-test("live HEALTH reads only the active MySMIS page and reports an authenticated project context", async () => {
+test("live HEALTH reads a MySMIS page and reports an authenticated project context", async () => {
   const dispatch = createLiveExtensionDispatcher({
     chromeApi: chromeRuntime(), sourceHead: BUILD, clock: dispatchClock, userAgent: "Edg/140"
   });
@@ -76,6 +81,24 @@ test("live HEALTH reads only the active MySMIS page and reports an authenticated
   assert.equal(response.runtime.authenticatedSessionPresent, true);
   assert.equal(response.runtime.mysmisOriginPresent, true);
   assert.equal(response.capabilities.length, READ_ONLY_BRIDGE_CAPABILITIES.length);
+  assert.equal(response.safety.mysmisWrites, 0);
+});
+
+test("live HEALTH binds a readable MySMIS tab even when it is not focused", async () => {
+  const currentSnapshot = snapshot();
+  const dispatch = createLiveExtensionDispatcher({
+    chromeApi: chromeRuntime({
+      currentSnapshot,
+      tabs: [{ id: 23, active: false, url: currentSnapshot.page.url }]
+    }),
+    sourceHead: BUILD,
+    clock: dispatchClock,
+    userAgent: "Edg/140"
+  });
+  const response = await dispatch(challenge("88".repeat(32)));
+  assert.equal(response.runtime.authenticatedSessionPresent, true);
+  assert.equal(response.runtime.mysmisOriginPresent, true);
+  assert.equal(response.safety.controlsClicked, 0);
   assert.equal(response.safety.mysmisWrites, 0);
 });
 
@@ -101,7 +124,7 @@ test("DISCOVER_ARTIFACTS binds the visible project and removes sensitive query v
   assert.equal(response.safety.routeMutations, 0);
 });
 
-test("project mismatch and absence of an active MySMIS page fail closed", async () => {
+test("project mismatch and absence of a readable MySMIS page fail closed", async () => {
   const health = challenge("33".repeat(32));
   const command = createDiscoverArtifactsCommand({
     connectorBuildId: BUILD,
@@ -139,4 +162,3 @@ test("replay claims survive recreation of the MV3 service worker", async () => {
   const restarted = createLiveExtensionDispatcher({ chromeApi, sourceHead: BUILD, clock: dispatchClock });
   await assert.rejects(() => restarted(challenge("77".repeat(32))), (error) => error.code === "BRIDGE_REPLAY_DENIED");
 });
-
