@@ -75,21 +75,53 @@ def visual_disclosure(visual: dict | None) -> str:
     return note
 
 
+def clean_text(value: object) -> str:
+    return " ".join(str(value or "").split())
+
+
+def facebook_copy_is_canonical(message: str) -> bool:
+    """Reject the old RSS-like/category-prefixed Facebook caption shape."""
+    blocks = [block.strip() for block in str(message or "").split("\n\n") if block.strip()]
+    if not blocks:
+        return False
+    first = clean_text(blocks[0]).casefold()
+    if first.endswith("| vâlcea clar"):
+        return False
+    return True
+
+
 def facebook_copy(story: dict, visual: dict | None = None) -> str:
-    section = str(story.get("section") or "ȘTIRI").replace("_", " ")
-    headline = str(story.get("headline") or "").strip()
-    dek = str(story.get("dek") or "").strip()
-    parts = [f"{section} | VÂLCEA CLAR", headline, dek]
+    """Build Facebook-native link copy from the canonical story kernel.
+
+    The link preview already carries the article headline. For text+link fallback
+    posts, lead with the useful local consequence/context (normally the dek)
+    instead of duplicating the card title or prepending a mechanical section
+    label. This follows the persisted Facebook rule: consequence first, then
+    context and canonical link.
+    """
+    headline = clean_text(story.get("headline"))
+    dek = clean_text(story.get("dek"))
+    paragraphs = [clean_text(value) for value in story.get("paragraphs", []) if clean_text(value)]
+
+    lead = dek if dek and dek.casefold() != headline.casefold() else headline
+    parts: list[str] = [lead] if lead else []
+    if paragraphs:
+        first = paragraphs[0]
+        seen = {value.casefold() for value in (headline, dek, lead) if value}
+        if first.casefold() not in seen:
+            parts.append(first)
+
     disclosure = visual_disclosure(visual)
     if disclosure:
         parts.append(disclosure)
     if story.get("brief_kind") == "primary_source_notice":
         parts.append("Informare din sursă primară: publicăm numai ceea ce este confirmat în acest stadiu și păstrăm linkul către sursa oficială.")
-    parts.extend([
-        "Detaliile și sursele verificate sunt în articol.",
-        "#ValceaClar #Valcea #RamnicuValcea #StiriValcea",
-    ])
-    return "\n\n".join(part for part in parts if part)
+    parts.append("Detalii, context și surse verificate în articol.")
+
+    message = "\n\n".join(part for part in parts if part)
+    if not facebook_copy_is_canonical(message):
+        raise RuntimeError("facebook copy violates platform-native editorial canon")
+    return message
 
 
 def instagram_copy(story: dict, visual: dict | None = None) -> str:
@@ -196,6 +228,7 @@ def story_item(story: dict, visual: dict | None, existing: dict | None) -> dict:
         "source_story_id": story["id"],
         "generation_mode": "continuous_story_first_social_v1",
         "message": fb,
+        "canonical_headline": clean_text(story.get("headline")),
         "link": link,
         "replace_post_ids": item.get("replace_post_ids", []),
         **({"brief_kind": story.get("brief_kind"), "auto_scope": story.get("auto_scope")} if story.get("auto_generated") else {}),
@@ -312,6 +345,8 @@ def main() -> int:
     policy["tiktok_archival_context_never_counts_as_current_media"] = True
     policy["tiktok_ready_photo_requires_premium_editorial_composite"] = True
     policy["facebook_missing_photo_is_soft_block_for_new_story"] = True
+    policy["facebook_link_copy_rule"] = "local_consequence_first_no_category_prefix_no_generic_hashtag_block"
+    policy["facebook_link_preview_requires_exact_story_og_metadata"] = True
     write(OUTBOX, outbox)
 
     result = {
