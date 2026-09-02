@@ -26,7 +26,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - name: Checkout exact revision
         uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
           python valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py \
             --live-check \
             --require-reference \
-            --max-details 8 \
+            --max-details 16 \
             --output /tmp/posturi_gov_valcea.json
 
       - name: Build cross-source context receipt
@@ -104,9 +104,13 @@ jobs:
           }
           coverage = payload['coverage']
           assert 1 <= coverage['ministry_reference_count'] <= 16
-          assert 0 <= coverage['posturi_health_reference_count'] <= 8
+          assert 0 <= coverage['posturi_reference_count'] <= 16
+          assert 0 <= coverage['posturi_health_reference_count'] <= coverage['posturi_reference_count']
+          assert 0 <= coverage['posturi_explicit_institution_count'] <= coverage['posturi_reference_count']
+          assert 0 <= coverage['posturi_explicit_sju_institution_count'] <= coverage['posturi_health_reference_count']
           assert coverage['posturi_explicit_sju_title_count'] <= coverage['posturi_health_reference_count']
           assert coverage['follow_up_candidate_count'] == len(payload['follow_up_candidates'])
+          assert coverage['follow_up_candidate_count'] == coverage['posturi_explicit_sju_institution_count']
           assert coverage['bounded_non_exhaustive'] is True
           assert re.fullmatch(r'[0-9a-f]{64}', payload['source_fingerprint_sha256'])
 
@@ -124,16 +128,26 @@ jobs:
           assert payload['institution_context']['same_institution_inferred'] is False
           assert payload['institution_context']['same_vacancy_inferred'] is False
           assert payload['institution_context']['same_need_inferred'] is False
+          if coverage['posturi_explicit_sju_institution_count']:
+              assert payload['context_state'] == 'EXPLICIT_SAME_INSTITUTION_REFERENCE_CONTEXT_NON_AUTHORIZING'
+              assert payload['institution_context']['same_institution_explicit_source_count'] == 2
           for item in payload['follow_up_candidates']:
               assert item['candidate_state'] == 'EXACT_DETAIL_RECONCILIATION_REQUIRED_NON_AUTHORIZING'
+              assert item['same_institution_explicit_in_both_source_contracts'] is True
+              assert item['same_institution_inferred'] is False
               assert item['same_vacancy_inferred'] is False
               assert item['same_need_inferred'] is False
               assert item['dedupe_authorized'] is False
               assert item['missing_before_any_same_vacancy_conclusion']
+              ref = item['posturi_reference']
+              assert ref['institution_identity_state'] == 'EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY'
+              assert isinstance(ref['institution_name'], str) and ref['institution_name'].strip()
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['institution_evidence_sha256'])
           print(
               'Validated health-workforce context: '
               f"{coverage['ministry_reference_count']} ministry / "
-              f"{coverage['posturi_health_reference_count']} Posturi health refs; "
+              f"{coverage['posturi_health_reference_count']} Posturi health / "
+              f"{coverage['posturi_explicit_sju_institution_count']} explicit SJU; "
               f"state={payload['context_state']}"
           )
           PY

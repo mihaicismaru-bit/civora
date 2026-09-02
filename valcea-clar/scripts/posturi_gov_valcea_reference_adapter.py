@@ -5,6 +5,11 @@ The county index is used only to discover public-sector job references for Vâlc
 References are non-authorizing: they do not by themselves prove that a vacancy is
 currently open or that any deadline, eligibility, salary, staffing, service-capacity
 or other reader-facing material fact is current.
+
+When the first-party detail summary explicitly names the publishing institution,
+that identity is retained as evidence-bound newsroom context. Institution identity
+does not authorize institution status, vacancy identity, staffing need, deduplication
+or publication.
 """
 from __future__ import annotations
 
@@ -28,8 +33,8 @@ INDEX_URL = "https://posturi.gov.ro/judet/valcea/"
 ALLOWED_HOSTS = {"posturi.gov.ro", "www.posturi.gov.ro"}
 INDEX_PATH = "/judet/valcea/"
 JOB_PATH_PREFIX = "/joburi/"
-MAX_JOB_LINKS = 16
-MAX_DETAILS = 8
+MAX_JOB_LINKS = 24
+MAX_DETAILS = 16
 PARSER_VERSION = "POSTURI_GOV_VALCEA_REFERENCE_V1"
 SOURCE_FAMILY = "POSTURI_GOV_VALCEA"
 AUTHORITY_CLASS = "FIRST_PARTY_GOVERNMENT_PUBLIC_JOBS_REFERENCE"
@@ -42,6 +47,15 @@ TOPIC_EDUCATION = "PUBLIC_JOBS_EDUCATION_REFERENCE"
 TOPIC_PUBLIC_SERVICE = "PUBLIC_JOBS_PUBLIC_SERVICE_REFERENCE"
 TOPIC_OTHER = "PUBLIC_JOBS_OTHER_REFERENCE"
 
+INSTITUTION_EXPLICIT = "EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY"
+INSTITUTION_UNRESOLVED = "UNRESOLVED_FROM_FIRST_PARTY_DETAIL_SUMMARY"
+INSTITUTION_KEYWORDS = (
+    "spital", "primaria", "liceul", "liceu", "scoala", "colegiul", "colegiu",
+    "comuna", "directia", "serviciul", "oficiul", "muzeul", "muzeu",
+    "biblioteca", "agentia", "inspectoratul", "universitatea", "universitate",
+    "centrul", "centru", "casa judeteana", "consiliul judetean",
+)
+
 NON_AUTHORIZING_FLAGS = {
     "current_vacancy_authorized": False,
     "deadline_authorized": False,
@@ -50,6 +64,9 @@ NON_AUTHORIZING_FLAGS = {
     "staffing_shortage_authorized": False,
     "service_capacity_authorized": False,
     "institution_status_authorized": False,
+    "same_vacancy_inference_authorized": False,
+    "same_need_inference_authorized": False,
+    "dedupe_authorized": False,
     "breaking_authorized": False,
     "fact_kernel_write_authorized": False,
     "editorial_writer_authorized": False,
@@ -69,6 +86,9 @@ class Reference:
     title: str
     url: str
     topic_class: str
+    institution_name: str | None
+    institution_identity_state: str
+    institution_evidence_sha256: str | None
     index_url: str
     index_sha256: str
     detail_sha256: str
@@ -86,11 +106,18 @@ class LinkAndHeadingParser(HTMLParser):
         self._anchor_parts: list[str] = []
         self._in_h1 = False
         self._h1_parts: list[str] = []
+        self._ignored_depth = 0
         self.anchors: list[Anchor] = []
         self.headings: list[str] = []
+        self.text_chunks: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         lower = tag.lower()
+        if lower in {"script", "style", "noscript", "svg"}:
+            self._ignored_depth += 1
+            return
+        if self._ignored_depth:
+            return
         if lower == "a" and self._href is None:
             href = dict(attrs).get("href")
             if href:
@@ -101,6 +128,11 @@ class LinkAndHeadingParser(HTMLParser):
             self._h1_parts = []
 
     def handle_data(self, data: str) -> None:
+        if self._ignored_depth:
+            return
+        text = " ".join(data.split())
+        if text:
+            self.text_chunks.append(text)
         if self._href is not None:
             self._anchor_parts.append(data)
         if self._in_h1:
@@ -108,6 +140,12 @@ class LinkAndHeadingParser(HTMLParser):
 
     def handle_endtag(self, tag: str) -> None:
         lower = tag.lower()
+        if lower in {"script", "style", "noscript", "svg"}:
+            if self._ignored_depth:
+                self._ignored_depth -= 1
+            return
+        if self._ignored_depth:
+            return
         if lower == "a" and self._href is not None:
             text = " ".join("".join(self._anchor_parts).split())
             self.anchors.append(Anchor(href=self._href, text=text))
@@ -146,9 +184,14 @@ def _canonical_job_url(base_url: str, href: str) -> str | None:
     return urlunsplit(("https", host, parts.path, "", ""))
 
 
-def _extract_job_urls(html_bytes: bytes, source_url: str) -> list[str]:
+def _parse(html_bytes: bytes) -> LinkAndHeadingParser:
     parser = LinkAndHeadingParser()
     parser.feed(html_bytes.decode("utf-8", errors="replace"))
+    return parser
+
+
+def _extract_job_urls(html_bytes: bytes, source_url: str) -> list[str]:
+    parser = _parse(html_bytes)
     result: list[str] = []
     seen: set[str] = set()
     for anchor in parser.anchors:
@@ -163,13 +206,45 @@ def _extract_job_urls(html_bytes: bytes, source_url: str) -> list[str]:
 
 
 def _extract_title(html_bytes: bytes) -> str | None:
-    parser = LinkAndHeadingParser()
-    parser.feed(html_bytes.decode("utf-8", errors="replace"))
+    parser = _parse(html_bytes)
     for heading in parser.headings:
         normalized = _normalize(heading)
         if normalized and normalized not in {"posturi gov ro", "posturi vacante"}:
             return heading
     return None
+
+
+def _looks_like_institution(value: str) -> bool:
+    normalized = _normalize(value)
+    if not normalized or normalized in {"valcea", "ramnicu valcea"}:
+        return False
+    if len(value) > 220:
+        return False
+    return any(token in normalized for token in INSTITUTION_KEYWORDS)
+
+
+def _extract_institution(html_bytes: bytes, title: str) -> tuple[str | None, str]:
+    """Retain only an institution explicitly visible in the bounded page summary."""
+    parser = _parse(html_bytes)
+    title_norm = _normalize(title)
+    chunks = parser.text_chunks[:120]
+    start = 0
+    for idx, chunk in enumerate(chunks):
+        if _normalize(chunk) == title_norm:
+            start = idx + 1
+            break
+
+    summary: list[str] = []
+    for chunk in chunks[start:start + 32]:
+        normalized = _normalize(chunk)
+        if normalized in {"despre acest post", "despre post"}:
+            break
+        summary.append(chunk)
+
+    for chunk in summary[:16]:
+        if _looks_like_institution(chunk):
+            return " ".join(chunk.split()), INSTITUTION_EXPLICIT
+    return None, INSTITUTION_UNRESOLVED
 
 
 def _classify(title: str, detail_text: str) -> str:
@@ -193,8 +268,24 @@ def _classify(title: str, detail_text: str) -> str:
     return TOPIC_OTHER
 
 
-def _evidence_hash(title: str, url: str, topic: str, index_sha: str, detail_sha: str) -> str:
-    basis = "\n".join((title, url, topic, index_sha, detail_sha, PARSER_VERSION)).encode("utf-8")
+def _institution_evidence_hash(name: str, url: str, detail_sha: str) -> str:
+    return _sha256("\n".join((name, url, detail_sha, PARSER_VERSION, INSTITUTION_EXPLICIT)).encode("utf-8"))
+
+
+def _evidence_hash(
+    title: str,
+    url: str,
+    topic: str,
+    institution_name: str | None,
+    institution_state: str,
+    institution_hash: str | None,
+    index_sha: str,
+    detail_sha: str,
+) -> str:
+    basis = "\n".join((
+        title, url, topic, institution_name or "", institution_state, institution_hash or "",
+        index_sha, detail_sha, PARSER_VERSION,
+    )).encode("utf-8")
     return _sha256(basis)
 
 
@@ -257,15 +348,26 @@ def collect_live(max_details: int = MAX_DETAILS, timeout: float = 20.0) -> dict:
                 continue
             detail_sha = _sha256(detail_body)
             topic = _classify(title, text)
+            institution_name, institution_state = _extract_institution(detail_body, title)
+            institution_hash = (
+                _institution_evidence_hash(institution_name, final_job, detail_sha)
+                if institution_name is not None else None
+            )
             references.append(
                 Reference(
                     title=title,
                     url=final_job,
                     topic_class=topic,
+                    institution_name=institution_name,
+                    institution_identity_state=institution_state,
+                    institution_evidence_sha256=institution_hash,
                     index_url=final_index,
                     index_sha256=index_sha,
                     detail_sha256=detail_sha,
-                    evidence_sha256=_evidence_hash(title, final_job, topic, index_sha, detail_sha),
+                    evidence_sha256=_evidence_hash(
+                        title, final_job, topic, institution_name, institution_state,
+                        institution_hash, index_sha, detail_sha,
+                    ),
                 )
             )
         except (HTTPError, URLError, TimeoutError, ssl.SSLError, RuntimeError) as exc:
@@ -285,6 +387,7 @@ def collect_live(max_details: int = MAX_DETAILS, timeout: float = 20.0) -> dict:
         "detail_errors": detail_errors,
         "references": [asdict(ref) for ref in references],
         "reference_count": len(references),
+        "institution_identity_contract": "EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY_ONLY",
         "coverage_note": "BOUNDED_COUNTY_INDEX_REFERENCE_DISCOVERY_NOT_EXHAUSTIVE",
         **NON_AUTHORIZING_FLAGS,
     }
@@ -316,10 +419,23 @@ def self_test() -> None:
         "https://posturi.gov.ro/joburi/medic-specialist/",
         "https://posturi.gov.ro/joburi/inginer-pedolog/",
     ]
+
     detail = b'''<html><body><h1>6 posturi de asistent medical generalist</h1>
-    <p>Spitalul Judetean de Urgenta Valcea</p></body></html>'''
-    assert _extract_title(detail) == "6 posturi de asistent medical generalist"
+    <div>Spitalul Judetean de Urgenta Valcea</div><div>Valcea</div>
+    <div>Permanent</div><h2>Despre acest post</h2>
+    <p>Spitalul Judetean de Urgenta Valcea organizeaza concurs.</p></body></html>'''
+    title = _extract_title(detail)
+    assert title == "6 posturi de asistent medical generalist"
+    institution, state = _extract_institution(detail, title)
+    assert institution == "Spitalul Judetean de Urgenta Valcea"
+    assert state == INSTITUTION_EXPLICIT
     assert _classify("medic specialist", detail.decode()) == TOPIC_HEALTH
+
+    ambiguous = b'''<html><body><h1>Medic specialist pneumolog</h1>
+    <div>Valcea</div><div>Permanent</div><h2>Despre acest post</h2>
+    <p>Proba se desfasoara la Spitalul de Pneumoftiziologie.</p></body></html>'''
+    assert _extract_institution(ambiguous, "Medic specialist pneumolog") == (None, INSTITUTION_UNRESOLVED)
+
     assert _classify("inspector", "Primaria Municipiului Ramnicu Valcea") == TOPIC_ADMIN
     assert _classify("profesor", "Liceu tehnologic") == TOPIC_EDUCATION
     assert _classify("sofer", "operator transport public") == TOPIC_PUBLIC_SERVICE
@@ -341,15 +457,30 @@ def _validate_live(payload: dict, require_reference: bool) -> None:
         raise AssertionError("invalid reference count")
     if require_reference and count < 1:
         raise AssertionError("NO_CURRENT_BOUNDED_VALCEA_PUBLIC_JOB_REFERENCE_OBSERVED")
+    if payload.get("institution_identity_contract") != "EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY_ONLY":
+        raise AssertionError("institution identity contract drift")
     _assert_non_authorizing(payload)
+
+    allowed_topics = {TOPIC_HEALTH, TOPIC_ADMIN, TOPIC_EDUCATION, TOPIC_PUBLIC_SERVICE, TOPIC_OTHER}
+    allowed_institution_states = {INSTITUTION_EXPLICIT, INSTITUTION_UNRESOLVED}
     for ref in payload.get("references", []):
         parts = urlsplit(ref["url"])
         if parts.scheme != "https" or (parts.hostname or "").lower() not in ALLOWED_HOSTS:
             raise AssertionError("reference escaped host allowlist")
         if not parts.path.startswith(JOB_PATH_PREFIX):
             raise AssertionError("reference escaped job path")
-        if ref.get("topic_class") not in {TOPIC_HEALTH, TOPIC_ADMIN, TOPIC_EDUCATION, TOPIC_PUBLIC_SERVICE, TOPIC_OTHER}:
+        if ref.get("topic_class") not in allowed_topics:
             raise AssertionError("unknown topic class")
+        if ref.get("institution_identity_state") not in allowed_institution_states:
+            raise AssertionError("unknown institution identity state")
+        if ref["institution_identity_state"] == INSTITUTION_EXPLICIT:
+            if not ref.get("institution_name") or not _looks_like_institution(ref["institution_name"]):
+                raise AssertionError("explicit institution identity missing or invalid")
+            if not re.fullmatch(r"[0-9a-f]{64}", ref.get("institution_evidence_sha256", "")):
+                raise AssertionError("invalid institution evidence hash")
+        else:
+            if ref.get("institution_name") is not None or ref.get("institution_evidence_sha256") is not None:
+                raise AssertionError("unresolved institution leaked asserted identity")
         for hash_key in ("index_sha256", "detail_sha256", "evidence_sha256"):
             if not re.fullmatch(r"[0-9a-f]{64}", ref.get(hash_key, "")):
                 raise AssertionError(f"invalid {hash_key}")
@@ -382,7 +513,12 @@ def main(argv: Iterable[str] | None = None) -> int:
     except AssertionError as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1
-    print(f"Posturi.gov.ro Vâlcea live reference check: PASS ({payload['reference_count']} refs)")
+    print(
+        "Posturi.gov.ro Vâlcea live reference check: PASS "
+        f"({payload['reference_count']} refs; "
+        f"{sum(1 for r in payload['references'] if r['institution_identity_state'] == INSTITUTION_EXPLICIT)} "
+        "explicit institutions)"
+    )
     return 0
 
 

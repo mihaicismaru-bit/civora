@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 """Fail-closed cross-source health-workforce context for VÂLCEA CLAR.
 
-The engine consumes already-produced, first-party reference receipts from the
-Romanian Ministry of Health career lane and Posturi.gov.ro Vâlcea lane. It may
-surface bounded newsroom context and follow-up candidates, but it never infers
-that two references describe the same vacancy, never deduplicates evidence and
-never authorizes material facts, Fact Kernel writes, Editorial Writer use,
-publication or distribution.
+Consumes already-produced first-party reference receipts from the Ministry of
+Health career lane and Posturi.gov.ro Vâlcea lane. It may surface bounded
+institution-level newsroom context and exact-detail follow-up candidates, but it
+never infers same vacancy, same staffing need, deduplicates evidence, or
+authorizes material facts, Fact Kernel writes, Editorial Writer use, publication
+or distribution.
 
-A Ministry receipt is SJU Vâlcea-specific by its upstream contract. A Posturi.gov.ro
-health reference is treated only as county-level health-workforce context unless
-its own retained title explicitly names SJU Vâlcea. Even an explicit same-institution
-signal remains non-authorizing and requires detail-level first-party reconciliation
-before any same-vacancy conclusion could be considered elsewhere.
+The Ministry receipt is SJU Vâlcea-specific by its upstream contract.
+Posturi.gov.ro institution identity is admitted only when the upstream adapter
+retains an explicit first-party detail-summary institution with its own evidence
+hash. Even an explicit same-institution signal remains non-authorizing.
 """
 from __future__ import annotations
 
@@ -45,6 +44,8 @@ POSTURI_TOPICS = {
     "PUBLIC_JOBS_PUBLIC_SERVICE_REFERENCE",
     "PUBLIC_JOBS_OTHER_REFERENCE",
 }
+POSTURI_INSTITUTION_EXPLICIT = "EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY"
+POSTURI_INSTITUTION_UNRESOLVED = "UNRESOLVED_FROM_FIRST_PARTY_DETAIL_SUMMARY"
 OBSERVATION_STATE = "REFERENCE_ONLY_NON_AUTHORIZING"
 
 SOURCE_NON_AUTHORIZING_FLAGS = {
@@ -177,10 +178,20 @@ def _validate_posturi(payload: dict[str, Any]) -> list[dict[str, Any]]:
         raise ValueError("posturi_authority_class_mismatch")
     if payload.get("observation_state") != OBSERVATION_STATE:
         raise ValueError("posturi_observation_state_mismatch")
-    _require_source_boundaries(payload, extra_false=("institution_status_authorized",))
+    if payload.get("institution_identity_contract") != "EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY_ONLY":
+        raise ValueError("posturi_institution_identity_contract_mismatch")
+    _require_source_boundaries(
+        payload,
+        extra_false=(
+            "institution_status_authorized",
+            "same_vacancy_inference_authorized",
+            "same_need_inference_authorized",
+            "dedupe_authorized",
+        ),
+    )
 
     references = payload.get("references")
-    if not isinstance(references, list) or len(references) > 8:
+    if not isinstance(references, list) or len(references) > 16:
         raise ValueError("posturi_reference_inventory_invalid")
     if payload.get("reference_count") != len(references):
         raise ValueError("posturi_reference_count_mismatch")
@@ -201,8 +212,27 @@ def _validate_posturi(payload: dict[str, Any]) -> list[dict[str, Any]]:
         for key in ("index_sha256", "detail_sha256", "evidence_sha256"):
             if not _hash_ok(ref.get(key)):
                 raise ValueError(f"posturi_reference_hash_invalid:{key}")
+
+        identity_state = ref.get("institution_identity_state")
+        if identity_state == POSTURI_INSTITUTION_EXPLICIT:
+            if not str(ref.get("institution_name") or "").strip():
+                raise ValueError("posturi_explicit_institution_name_missing")
+            if not _hash_ok(ref.get("institution_evidence_sha256")):
+                raise ValueError("posturi_explicit_institution_hash_invalid")
+        elif identity_state == POSTURI_INSTITUTION_UNRESOLVED:
+            if ref.get("institution_name") is not None or ref.get("institution_evidence_sha256") is not None:
+                raise ValueError("posturi_unresolved_institution_leaked_asserted_identity")
+        else:
+            raise ValueError("posturi_institution_identity_state_unknown")
         validated.append(ref)
     return validated
+
+
+def _posturi_explicit_sju(ref: dict[str, Any]) -> bool:
+    return (
+        ref.get("institution_identity_state") == POSTURI_INSTITUTION_EXPLICIT
+        and _explicit_sju_valcea(ref.get("institution_name"))
+    )
 
 
 def _compact_reference(ref: dict[str, Any], *, source: str) -> dict[str, Any]:
@@ -213,10 +243,13 @@ def _compact_reference(ref: dict[str, Any], *, source: str) -> dict[str, Any]:
         "topic_class": ref.get("topic_class"),
         "evidence_sha256": ref.get("evidence_sha256"),
     }
-    if source == "MS_HEALTH_WORKFORCE":
+    if source == MS_SOURCE_FAMILY:
         item["source_page_sha256"] = ref.get("source_page_sha256")
     else:
         item["detail_sha256"] = ref.get("detail_sha256")
+        item["institution_name"] = ref.get("institution_name")
+        item["institution_identity_state"] = ref.get("institution_identity_state")
+        item["institution_evidence_sha256"] = ref.get("institution_evidence_sha256")
     return item
 
 
@@ -224,7 +257,8 @@ def build_context(ministry: dict[str, Any], posturi: dict[str, Any]) -> dict[str
     ministry_refs = _validate_ministry(ministry)
     posturi_refs = _validate_posturi(posturi)
     posturi_health = [ref for ref in posturi_refs if ref.get("topic_class") == POSTURI_HEALTH_TOPIC]
-    posturi_explicit_sju = [ref for ref in posturi_health if _explicit_sju_valcea(ref.get("title"))]
+    posturi_explicit_sju = [ref for ref in posturi_health if _posturi_explicit_sju(ref)]
+    posturi_explicit_sju_title = [ref for ref in posturi_health if _explicit_sju_valcea(ref.get("title"))]
 
     if posturi_explicit_sju:
         state = STATE_EXPLICIT_SAME_INSTITUTION
@@ -234,13 +268,15 @@ def build_context(ministry: dict[str, Any], posturi: dict[str, Any]) -> dict[str
         state = STATE_MINISTRY_ONLY
 
     follow_up = []
-    for ref in posturi_explicit_sju[:8]:
+    for ref in posturi_explicit_sju[:16]:
         follow_up.append(
             {
                 "candidate_state": "EXACT_DETAIL_RECONCILIATION_REQUIRED_NON_AUTHORIZING",
-                "institution_identity": "SJU_VALCEA_EXPLICIT_IN_BOTH_RETAINED_TITLES",
+                "institution_identity": "SJU_VALCEA_EXPLICIT_IN_POSTURI_FIRST_PARTY_DETAIL_SUMMARY",
                 "posturi_reference": _compact_reference(ref, source=POSTURI_SOURCE_FAMILY),
                 "ministry_reference_count": len(ministry_refs),
+                "same_institution_explicit_in_both_source_contracts": True,
+                "same_institution_inferred": False,
                 "same_vacancy_inferred": False,
                 "same_need_inferred": False,
                 "dedupe_authorized": False,
@@ -257,6 +293,7 @@ def build_context(ministry: dict[str, Any], posturi: dict[str, Any]) -> dict[str
         "posturi_run_id": posturi.get("run_id"),
         "ministry_evidence": [ref.get("evidence_sha256") for ref in ministry_refs],
         "posturi_evidence": [ref.get("evidence_sha256") for ref in posturi_refs],
+        "posturi_institution_evidence": [ref.get("institution_evidence_sha256") for ref in posturi_refs],
     }
     source_fingerprint = hashlib.sha256(
         json.dumps(source_fingerprint_basis, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
@@ -270,10 +307,11 @@ def build_context(ministry: dict[str, Any], posturi: dict[str, Any]) -> dict[str
         "institution_context": {
             "ministry_contract_institution": "SJU_VALCEA",
             "posturi_institution_identity": (
-                "SJU_VALCEA_EXPLICIT_IN_RETAINED_TITLE"
+                "SJU_VALCEA_EXPLICIT_IN_FIRST_PARTY_DETAIL_SUMMARY"
                 if posturi_explicit_sju
-                else "UNRESOLVED_FROM_RETAINED_POSTURI_REFERENCE_FIELDS"
+                else "UNRESOLVED_OR_OTHER_INSTITUTION_IN_BOUNDED_POSTURI_HEALTH_REFERENCES"
             ),
+            "same_institution_explicit_source_count": 2 if posturi_explicit_sju else 1,
             "same_institution_inferred": False,
             "same_vacancy_inferred": False,
             "same_need_inferred": False,
@@ -282,17 +320,21 @@ def build_context(ministry: dict[str, Any], posturi: dict[str, Any]) -> dict[str
             "ministry_reference_count": len(ministry_refs),
             "posturi_reference_count": len(posturi_refs),
             "posturi_health_reference_count": len(posturi_health),
-            "posturi_explicit_sju_title_count": len(posturi_explicit_sju),
+            "posturi_explicit_institution_count": sum(
+                1 for ref in posturi_refs if ref.get("institution_identity_state") == POSTURI_INSTITUTION_EXPLICIT
+            ),
+            "posturi_explicit_sju_institution_count": len(posturi_explicit_sju),
+            "posturi_explicit_sju_title_count": len(posturi_explicit_sju_title),
             "follow_up_candidate_count": len(follow_up),
             "bounded_non_exhaustive": True,
         },
         "ministry_references": [_compact_reference(ref, source=MS_SOURCE_FAMILY) for ref in ministry_refs[:16]],
-        "posturi_health_references": [_compact_reference(ref, source=POSTURI_SOURCE_FAMILY) for ref in posturi_health[:8]],
+        "posturi_health_references": [_compact_reference(ref, source=POSTURI_SOURCE_FAMILY) for ref in posturi_health[:16]],
         "follow_up_candidates": follow_up,
         "source_fingerprint_sha256": source_fingerprint,
-        "coverage_note": "CROSS_SOURCE_CONTEXT_ONLY_NOT_VACANCY_DEDUPLICATION",
+        "coverage_note": "CROSS_SOURCE_INSTITUTION_CONTEXT_ONLY_NOT_VACANCY_DEDUPLICATION",
         "required_next_evidence": (
-            "DETAIL_LEVEL_FIRST_PARTY_RECONCILIATION_BEFORE_ANY_SAME_VACANCY_OR_SAME_NEED_CONCLUSION"
+            "ROLE_AND_PUBLICATION_IDENTITY_RECONCILIATION_BEFORE_ANY_SAME_VACANCY_OR_SAME_NEED_CONCLUSION"
         ),
         **ENGINE_BOUNDARIES,
     }
@@ -330,10 +372,15 @@ def _fixture_ministry() -> dict[str, Any]:
     }
 
 
-def _fixture_posturi(title: str, topic: str = POSTURI_HEALTH_TOPIC) -> dict[str, Any]:
+def _fixture_posturi(
+    title: str,
+    topic: str = POSTURI_HEALTH_TOPIC,
+    institution_name: str | None = None,
+) -> dict[str, Any]:
     h1 = "c" * 64
     h2 = "d" * 64
     h3 = "e" * 64
+    explicit = institution_name is not None
     return {
         "schema": POSTURI_SCHEMA,
         "status": "PASS",
@@ -346,6 +393,11 @@ def _fixture_posturi(title: str, topic: str = POSTURI_HEALTH_TOPIC) -> dict[str,
                 "title": title,
                 "url": "https://posturi.gov.ro/joburi/medic-specialist-psihiatrie-pediatrica/",
                 "topic_class": topic,
+                "institution_name": institution_name,
+                "institution_identity_state": (
+                    POSTURI_INSTITUTION_EXPLICIT if explicit else POSTURI_INSTITUTION_UNRESOLVED
+                ),
+                "institution_evidence_sha256": ("f" * 64 if explicit else None),
                 "index_sha256": h1,
                 "detail_sha256": h2,
                 "evidence_sha256": h3,
@@ -355,7 +407,11 @@ def _fixture_posturi(title: str, topic: str = POSTURI_HEALTH_TOPIC) -> dict[str,
             }
         ],
         "run_id": "posturi-fixture",
+        "institution_identity_contract": "EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY_ONLY",
         "institution_status_authorized": False,
+        "same_vacancy_inference_authorized": False,
+        "same_need_inference_authorized": False,
+        "dedupe_authorized": False,
         **SOURCE_NON_AUTHORIZING_FLAGS,
     }
 
@@ -364,21 +420,37 @@ def self_test() -> None:
     county_only = build_context(_fixture_ministry(), _fixture_posturi("Medic specialist psihiatrie pediatrică"))
     assert county_only["context_state"] == STATE_COUNTY_CONTEXT
     assert county_only["coverage"]["posturi_health_reference_count"] == 1
-    assert county_only["coverage"]["posturi_explicit_sju_title_count"] == 0
+    assert county_only["coverage"]["posturi_explicit_sju_institution_count"] == 0
     assert county_only["follow_up_candidates"] == []
     assert county_only["dedupe_authorized"] is False
     assert county_only["same_vacancy_inference_authorized"] is False
 
     explicit = build_context(
         _fixture_ministry(),
-        _fixture_posturi("Medic specialist psihiatrie pediatrică - Spitalul Județean de Urgență Vâlcea"),
+        _fixture_posturi(
+            "Medic specialist psihiatrie pediatrică",
+            institution_name="Spitalul Județean de Urgență Vâlcea",
+        ),
     )
     assert explicit["context_state"] == STATE_EXPLICIT_SAME_INSTITUTION
-    assert explicit["coverage"]["posturi_explicit_sju_title_count"] == 1
+    assert explicit["coverage"]["posturi_explicit_sju_institution_count"] == 1
+    assert explicit["coverage"]["posturi_explicit_sju_title_count"] == 0
     assert explicit["coverage"]["follow_up_candidate_count"] == 1
     assert explicit["follow_up_candidates"][0]["same_vacancy_inferred"] is False
+    assert explicit["follow_up_candidates"][0]["same_institution_explicit_in_both_source_contracts"] is True
 
-    no_health = build_context(_fixture_ministry(), _fixture_posturi("Inspector", "PUBLIC_JOBS_ADMINISTRATION_REFERENCE"))
+    other_hospital = build_context(
+        _fixture_ministry(),
+        _fixture_posturi("Medic specialist pneumolog", institution_name="Spitalul Municipal Costache Nicolescu Drăgășani"),
+    )
+    assert other_hospital["context_state"] == STATE_COUNTY_CONTEXT
+    assert other_hospital["coverage"]["posturi_explicit_institution_count"] == 1
+    assert other_hospital["coverage"]["posturi_explicit_sju_institution_count"] == 0
+
+    no_health = build_context(
+        _fixture_ministry(),
+        _fixture_posturi("Inspector", "PUBLIC_JOBS_ADMINISTRATION_REFERENCE", institution_name="Primăria Drăgășani"),
+    )
     assert no_health["context_state"] == STATE_MINISTRY_ONLY
 
     bad = _fixture_posturi("Medic specialist")
@@ -390,14 +462,14 @@ def self_test() -> None:
     else:
         raise AssertionError("authorizing source receipt must fail closed")
 
-    bad_hash = _fixture_posturi("Medic specialist")
-    bad_hash["references"][0]["detail_sha256"] = "bad"
+    bad_identity = _fixture_posturi("Medic specialist", institution_name="Spitalul Județean de Urgență Vâlcea")
+    bad_identity["references"][0]["institution_evidence_sha256"] = "bad"
     try:
-        build_context(_fixture_ministry(), bad_hash)
+        build_context(_fixture_ministry(), bad_identity)
     except ValueError as exc:
-        assert "hash_invalid" in str(exc)
+        assert "institution_hash_invalid" in str(exc)
     else:
-        raise AssertionError("invalid evidence hash must fail closed")
+        raise AssertionError("invalid institution evidence hash must fail closed")
 
     print("Health workforce reference context engine self-test: PASS")
 
@@ -437,7 +509,8 @@ def main(argv: Iterable[str] | None = None) -> int:
     print(
         "Health workforce reference context: PASS "
         f"({result['coverage']['ministry_reference_count']} ministry / "
-        f"{result['coverage']['posturi_health_reference_count']} posturi health refs; "
+        f"{result['coverage']['posturi_health_reference_count']} posturi health refs / "
+        f"{result['coverage']['posturi_explicit_sju_institution_count']} explicit SJU; "
         f"state={result['context_state']})"
     )
     return 0
