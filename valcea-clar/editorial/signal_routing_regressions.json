@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3",
+  "schema_version": "1.4",
   "instance_id": "valcea",
   "cases": [
     {
@@ -23,6 +23,32 @@
       "id": "ipj-calimanesti-protection-orders",
       "title": "Reacția IPJ Vâlcea la bătaia din Călimănești: trei persoane agresate și patru ordine de protecție emise",
       "expected_route": "police_public_safety"
+    },
+    {
+      "id": "ipj-atv-without-license",
+      "title": "Tânăr prins cu ATV-ul neînmatriculat și fără permis de conducere în Ionești",
+      "expected_route": "police_public_safety",
+      "reason": "ATV and unlicensed-driving signals must reach IPJ verification without relying on a publisher name in the headline."
+    },
+    {
+      "id": "isu-house-on-fire-plain-language",
+      "title": "Arde o casă pe strada Știrbei Vodă din Râmnicu Vâlcea",
+      "expected_route": "fire_rescue_alert",
+      "reason": "Plain-language fire headlines must reach the official ISU verification lane even when they omit the words incendiu or pompieri."
+    },
+    {
+      "id": "caineni-suspected-discharge",
+      "title": "Deversare suspectă în Olt la Câineni: pescarii reclamă apă colorată și miros greu",
+      "expected_route": "environment_weather",
+      "forbidden_route": "utilities",
+      "reason": "Specific suspected-pollution language outranks the generic word apă; routing never converts an allegation into a fact."
+    },
+    {
+      "id": "utility-water-outage-remains-utility",
+      "title": "APAVIL anunță întreruperea apei pentru remedierea unei avarii în Râmnicu Vâlcea",
+      "expected_route": "utilities",
+      "forbidden_route": "environment_weather",
+      "reason": "The pollution-specific exclusion must not divert ordinary water-service interruption reporting."
     },
     {
       "id": "education-school-directors",
