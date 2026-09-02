@@ -23,6 +23,10 @@ on:
       - 'partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json'
       - 'partener-eu/ingest/eui_innovation_fund_programme_intelligence.py'
       - 'partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_innovation_fund_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_innovation_fund_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_innovation_fund_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_innovation_fund_ft_reconcile.py'
       - '.github/workflows/partener-eu-eu-direct-programme-intelligence.yml'
   workflow_dispatch:
 
@@ -65,13 +69,17 @@ jobs:
             partener-eu/ingest/eu_direct_eic_ft_exact.py \
             partener-eu/ingest/eu_direct_eic_ft_reconcile.py \
             partener-eu/ingest/eui_innovation_fund_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_innovation_fund_ft_exact.py \
+            partener-eu/ingest/eu_direct_innovation_fund_ft_reconcile.py \
             partener-eu/ops/test_erasmus_action_router.py \
             partener-eu/ops/test_eu4health_hadea_call.py \
             partener-eu/ops/test_eu4health_hadea_ft_reconcile.py \
             partener-eu/ops/test_horizon_eic_programme_intelligence.py \
             partener-eu/ops/test_eu_direct_eic_ft_exact.py \
             partener-eu/ops/test_eu_direct_eic_ft_reconcile.py \
-            partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py
+            partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_innovation_fund_ft_exact.py \
+            partener-eu/ops/test_eu_direct_innovation_fund_ft_reconcile.py
 
       - name: Validate fail-closed EU Direct programme semantics
         env:
@@ -84,12 +92,14 @@ jobs:
           python partener-eu/ops/test_eu_direct_eic_ft_exact.py
           python partener-eu/ops/test_eu_direct_eic_ft_reconcile.py
           python partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py
+          python partener-eu/ops/test_eu_direct_innovation_fund_ft_exact.py
+          python partener-eu/ops/test_eu_direct_innovation_fund_ft_reconcile.py
 
       - name: Prepare replay root
         run: |
           ROOT=/tmp/partener-eu-eu-direct-programme-intelligence
           rm -rf "$ROOT"
-          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic" "$ROOT/eic-exact/current" "$ROOT/eic-exact/previous" "$ROOT/eui-innovation-fund"
+          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic" "$ROOT/eic-exact/current" "$ROOT/eic-exact/previous" "$ROOT/eui-innovation-fund" "$ROOT/innovation-fund-exact/current" "$ROOT/innovation-fund-exact/previous"
 
       - name: Acquire fresh official Erasmus application-route intelligence
         run: |
@@ -361,6 +371,161 @@ jobs:
               'semantic_fingerprint':d['semantic_fingerprint'],
               'open_call_authorized':False,
               'publication_effect':'NONE',
+          }, sort_keys=True))
+          PY
+
+      - name: Restore previous successful same-branch Innovation Fund exact receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact
+          SCRATCH=/tmp/partener-eu-innovation-fund-exact-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH" "$ROOT/previous"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          CANDIDATE="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-innovation-fund-exact-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not (name.startswith('partener-eu-eu-direct-programme-intelligence-') or name.startswith('partener-eu-innovation-fund-exact-proof-')):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          print(rows[0][1] if rows else '')
+          PY
+          )"
+          if [ -n "$CANDIDATE" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            mkdir -p "$SCRATCH/unpacked"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'ft-innovation-fund-exact-evidence.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous/ft-innovation-fund-exact-evidence.json"
+              echo "Restored previous bounded exact Innovation Fund receipt from artifact ${CANDIDATE}"
+            else
+              echo "Candidate artifact ${CANDIDATE} contained no exact Innovation Fund receipt; baseline mode retained."
+            fi
+          else
+            echo "No previous same-branch exact Innovation Fund artifact found; baseline mode retained."
+          fi
+
+      - name: Verify exact official CINEA Innovation Fund discovery endpoint
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from urllib.parse import urlparse
+          from urllib.request import Request, urlopen
+          url='https://cinea.ec.europa.eu/funding-opportunities/calls-proposals/innovation-fund-2025-net-zero-technologies-call_en'
+          parsed=urlparse(url)
+          assert parsed.scheme == 'https' and parsed.hostname == 'cinea.ec.europa.eu'
+          req=Request(url, headers={'User-Agent':'Mozilla/5.0 (compatible; PARTENER-EU/1.0)','Accept':'text/html,application/xhtml+xml'})
+          with urlopen(req, timeout=30) as response:
+              final=response.geturl(); status=getattr(response,'status',response.getcode()); ctype=(response.headers.get('Content-Type') or '').lower(); raw=response.read(2*1024*1024+1)
+          finalp=urlparse(final)
+          assert status == 200 and finalp.scheme == 'https' and finalp.hostname == 'cinea.ec.europa.eu' and 'html' in ctype
+          assert len(raw) <= 2*1024*1024
+          text=raw.decode('utf-8','replace')
+          assert 'Innovation Fund 2025 Net-Zero Technologies Call' in text
+          assert 'The call is closed' in text or '>Closed<' in text or 'Closed' in text
+          receipt={'requested_url':url,'final_url':final,'http_status':status,'content_type':ctype,'bytes':len(raw),'raw_sha256':hashlib.sha256(raw).hexdigest(),'authority_class':'CINEA_OFFICIAL_CALL_DISCOVERY','observation_state':'EXACT_CALL_DISCOVERY_SUPPORT_NON_AUTHORIZING','material_fact_use':False,'publication_effect':'NONE'}
+          Path('/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact/current/cinea-discovery-receipt.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+
+      - name: Acquire fresh exact Innovation Fund Funding and Tenders evidence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python partener-eu/ingest/eu_direct_innovation_fund_ft_exact.py \
+            --reference 'INNOVFUND-2025-NZT-GENERAL-LSP' \
+            --expected-call-identifier 'INNOVFUND-2025-NZT' \
+            --discovery-source-url 'https://cinea.ec.europa.eu/funding-opportunities/calls-proposals/innovation-fund-2025-net-zero-technologies-call_en' \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-innovation-fund-exact" \
+            --output-dir /tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact/current
+
+      - name: Reconcile exact Innovation Fund same-identity evidence non-authorizing
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact
+          ARGS=()
+          if [ -f "$ROOT/previous/ft-innovation-fund-exact-evidence.json" ]; then
+            ARGS+=(--previous "$ROOT/previous/ft-innovation-fund-exact-evidence.json")
+          fi
+          python partener-eu/ingest/eu_direct_innovation_fund_ft_reconcile.py \
+            "$ROOT/current/ft-innovation-fund-exact-evidence.json" \
+            "${ARGS[@]}" \
+            --output "$ROOT/current/innovation-fund-exact-reconciliation.json"
+
+      - name: Enforce live exact Innovation Fund boundary and reconciliation
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact')
+          evidence=json.loads((root/'current/ft-innovation-fund-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current/innovation-fund-exact-reconciliation.json').read_text(encoding='utf-8'))
+          cinea=json.loads((root/'current/cinea-discovery-receipt.json').read_text(encoding='utf-8'))
+          previous_exists=(root/'previous/ft-innovation-fund-exact-evidence.json').exists()
+          ref='INNOVFUND-2025-NZT-GENERAL-LSP'
+          call='INNOVFUND-2025-NZT'
+          assert cinea['http_status'] == 200 and re.fullmatch(r'[0-9a-f]{64}',cinea['raw_sha256'])
+          assert cinea['material_fact_use'] is False and cinea['publication_effect'] == 'NONE'
+          assert evidence['schema'] == 'PARTENER_EU_INNOVATION_FUND_FT_EXACT_EVIDENCE_V1'
+          assert evidence['reference'] == ref and evidence['call_identifier'] == call
+          assert evidence['programme_family'] == 'INNOVATION_FUND'
+          assert evidence['authority_url_verified'] is True
+          assert 'innovation fund' in str(evidence['programme_label_official']).casefold()
+          assert evidence['candidate_state'] in {'OPEN_CALL','FORTHCOMING_CALL','CLOSED_CALL','UNKNOWN'}
+          assert evidence['status_label']
+          assert re.fullmatch(r'[0-9a-f]{64}', evidence['exact_semantic_fingerprint'])
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              assert evidence[key] is False, (key,evidence[key])
+          assert rec['schema'] == 'PARTENER_EU_INNOVATION_FUND_FT_RECONCILIATION_V1'
+          assert rec['reference'] == ref and rec['call_identifier'] == call
+          if previous_exists:
+              assert rec['reconciliation_state'] in {'NO_CHANGE','INNOVATION_FUND_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+              assert rec['previous_evidence_sha256'] is not None
+          else:
+              assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert rec['previous_evidence_sha256'] is None
+          assert rec['semantic_reconciliation_passed'] is True
+          assert rec['field_scoped_material_admission_required'] is True
+          assert 'field_scoped_material_admission' in set(rec['missing_for_material_admission'])
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              assert rec[key] is False, (key,rec[key])
+          assert rec['publication_effect'] == 'NONE' and rec['canonical_corpus_mutation'] is False
+          print(json.dumps({
+              'reference': ref,
+              'call_identifier': call,
+              'candidate_state': evidence['candidate_state'],
+              'status_label': evidence['status_label'],
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'previous_same_identity_restored': previous_exists,
+              'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
+              'open_call_authorized': False,
+              'closed_call_authorized': False,
+              'publication_effect': 'NONE',
           }, sort_keys=True))
           PY
 
