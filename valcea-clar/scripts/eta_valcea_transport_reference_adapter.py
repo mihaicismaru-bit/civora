@@ -59,7 +59,7 @@ TOPIC_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
     )),
     ("SERVICE_DISRUPTION", (
         "intrerup", "întrerup", "suspend", "nu vor circula", "anomalii", "indisponibil",
-        "upgrade", "mentenanta", "mentenanță",
+        "upgrade", "mentenanta", "mentenanță", "skayo", "aplicatie", "aplicație",
     )),
     ("EVENT_TRANSPORT", (
         "raliul", "festival", "concert", "eveniment", "we love music", "deep forest",
@@ -81,6 +81,11 @@ GENERIC_ANCHOR_TEXT = {
     "citeste mai mult", "citește mai mult", "descarca", "descarcă", "detalii",
     "comunicate", "urmatoarea", "următoarea", "anterioara", "anterioară",
 }
+
+ADMIN_EXCLUDE_TERMS = (
+    "vanzare", "vânzare", "licitatie", "licitație", "achizitie servicii", "achiziție servicii",
+    "angajare", "recrutare",
+)
 
 
 @dataclass(frozen=True)
@@ -154,12 +159,23 @@ def _canonical_url(url: str) -> str:
     return urlunsplit((parsed.scheme.casefold(), parsed.netloc.casefold(), path, parsed.query, ""))
 
 
+def _clean_title(title: str) -> str:
+    cleaned = " ".join(title.split()).strip()
+    cleaned = re.sub(r"^(?:citește|citeste)\s+mai\s+mult\s*[„\"']?", "", cleaned, flags=re.IGNORECASE)
+    return cleaned.strip(" ”“\"'").strip()
+
+
 def _topic(title: str) -> str:
     normalized = _normalize(title)
     for topic, needles in TOPIC_RULES:
         if any(_normalize(needle) in normalized for needle in needles):
             return topic
     return "OPERATOR_OTHER"
+
+
+def _is_admin_only(title: str) -> bool:
+    normalized = _normalize(title)
+    return any(_normalize(term) in normalized for term in ADMIN_EXCLUDE_TERMS)
 
 
 def _is_article_target(target_url: str) -> bool:
@@ -187,8 +203,11 @@ def parse_source_page(source_url: str, raw: bytes) -> list[Reference]:
 
     by_target: dict[str, Reference] = {}
     for anchor in parser.anchors:
-        title = " ".join(anchor.text.split())
-        if not title or _normalize(title) in generic:
+        raw_title = " ".join(anchor.text.split())
+        if not raw_title or _normalize(raw_title) in generic:
+            continue
+        title = _clean_title(raw_title)
+        if not title or _normalize(title) in generic or _is_admin_only(title):
             continue
         target = _canonical_url(urljoin(source_url, anchor.href))
         if not _is_article_target(target):
@@ -340,6 +359,8 @@ def self_test() -> int:
       <a href="/comunicate/tarife-01-02-2026">Tarife de transport valabile începând cu 01/02/2026</a>
       <a href="/comunicate/anunt-elevi">Anunț privind eliberarea abonamentelor pentru elevi</a>
       <a href="/comunicate/anunt-elevi">Citește mai mult</a>
+      <a href="/comunicate/skayo">Citește mai mult „Comunicat aplicație Skayo AVL”</a>
+      <a href="/comunicate/anunt-vanzare">Anunț vânzare autovehicul</a>
       <a href="/comunicate/page/2">Următoarea</a>
       <a href="/comunicate/2025">Comunicate 2025</a>
       <a href="https://new.eta-bus.ro/files/doc.pdf">Document extern</a>
@@ -347,11 +368,16 @@ def self_test() -> int:
     </body></html>
     """.encode("utf-8")
     refs = parse_source_page(SOURCE_URL, fixture)
-    if len(refs) != 3:
+    if len(refs) != 4:
         raise AssertionError(refs)
     topics = {ref.topic_class for ref in refs}
-    if topics != {"ROUTE_CHANGE", "FARE_TICKETING", "PASSENGER_ENTITLEMENT"}:
+    if topics != {"ROUTE_CHANGE", "FARE_TICKETING", "PASSENGER_ENTITLEMENT", "SERVICE_DISRUPTION"}:
         raise AssertionError(topics)
+    titles = {ref.title for ref in refs}
+    if "Comunicat aplicație Skayo AVL" not in titles:
+        raise AssertionError(titles)
+    if any("vânzare" in ref.title.casefold() or "vanzare" in ref.title.casefold() for ref in refs):
+        raise AssertionError("administrative sales notice leaked into mobility references")
     if not all(ref.target_url.startswith("https://eta-bus.ro/comunicate/") for ref in refs):
         raise AssertionError(refs)
     if not all(re.fullmatch(r"[0-9a-f]{64}", ref.evidence_sha256) for ref in refs):
@@ -365,7 +391,7 @@ def self_test() -> int:
     receipt = build_receipt(fake_fetch)
     if receipt["status"] != "PASS" or receipt["source_page_count"] != 1:
         raise AssertionError(receipt)
-    if receipt["reference_count"] != 3:
+    if receipt["reference_count"] != 4:
         raise AssertionError(receipt)
     if receipt["material_fact_use"] or receipt["publication_authorized"]:
         raise AssertionError("non-authorizing boundary weakened")
