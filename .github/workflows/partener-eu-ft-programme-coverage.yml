@@ -17,6 +17,11 @@ on:
       - 'partener-eu/ingest/eu_direct_smp_ft_exact.py'
       - 'partener-eu/ingest/eu_direct_smp_ft_reconcile.py'
       - 'partener-eu/ingest/eu_direct_smp_ft_handoff.py'
+      - 'partener-eu/ingest/eu_direct_cerv_programme_watch.py'
+      - 'partener-eu/ingest/eu_direct_cerv_ft_discovery.py'
+      - 'partener-eu/ingest/eu_direct_cerv_ft_handoff.py'
+      - 'partener-eu/ingest/eu_direct_cerv_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_cerv_ft_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_watch.py'
       - 'partener-eu/ops/test_eu_direct_ft_coverage_receipt.py'
       - 'partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py'
@@ -31,10 +36,17 @@ on:
       - 'partener-eu/ops/test_eu_direct_smp_ft_exact.py'
       - 'partener-eu/ops/test_eu_direct_smp_ft_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_smp_ft_handoff.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_programme_watch.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_ft_discovery.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_ft_handoff.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_ft_reconcile.py'
       - 'partener-eu/ops/validate_eu_direct_ft_programme_live.py'
       - 'partener-eu/ops/validate_eu_direct_digital_live.py'
       - 'partener-eu/ops/validate_eu_direct_smp_live.py'
+      - 'partener-eu/ops/validate_eu_direct_cerv_live.py'
       - '.github/workflows/partener-eu-ft-programme-coverage.yml'
+      - '.github/workflows/partener-eu-cerv-programme-watch.yml'
   workflow_dispatch:
 
 permissions:
@@ -44,7 +56,7 @@ permissions:
 jobs:
   programme-coverage-watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 14
+    timeout-minutes: 18
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -78,6 +90,11 @@ jobs:
             partener-eu/ingest/eu_direct_smp_ft_exact.py \
             partener-eu/ingest/eu_direct_smp_ft_reconcile.py \
             partener-eu/ingest/eu_direct_smp_ft_handoff.py \
+            partener-eu/ingest/eu_direct_cerv_programme_watch.py \
+            partener-eu/ingest/eu_direct_cerv_ft_discovery.py \
+            partener-eu/ingest/eu_direct_cerv_ft_handoff.py \
+            partener-eu/ingest/eu_direct_cerv_ft_exact.py \
+            partener-eu/ingest/eu_direct_cerv_ft_reconcile.py \
             partener-eu/ops/test_eu_direct_ft_programme_watch.py \
             partener-eu/ops/test_eu_direct_ft_coverage_receipt.py \
             partener-eu/ops/test_eu_direct_ft_programme_taxonomy.py \
@@ -92,11 +109,19 @@ jobs:
             partener-eu/ops/test_eu_direct_smp_ft_exact.py \
             partener-eu/ops/test_eu_direct_smp_ft_reconcile.py \
             partener-eu/ops/test_eu_direct_smp_ft_handoff.py \
+            partener-eu/ops/test_eu_direct_cerv_programme_watch.py \
+            partener-eu/ops/test_eu_direct_cerv_ft_discovery.py \
+            partener-eu/ops/test_eu_direct_cerv_ft_handoff.py \
+            partener-eu/ops/test_eu_direct_cerv_ft_exact.py \
+            partener-eu/ops/test_eu_direct_cerv_ft_reconcile.py \
             partener-eu/ops/validate_eu_direct_ft_programme_live.py \
             partener-eu/ops/validate_eu_direct_digital_live.py \
-            partener-eu/ops/validate_eu_direct_smp_live.py
+            partener-eu/ops/validate_eu_direct_smp_live.py \
+            partener-eu/ops/validate_eu_direct_cerv_live.py
 
       - name: Validate fail-closed bounded source semantics
+        env:
+          PYTHONPATH: partener-eu/ingest
         run: |
           python partener-eu/ops/test_eu_direct_ft_programme_watch.py
           python partener-eu/ops/test_eu_direct_ft_coverage_receipt.py
@@ -105,13 +130,18 @@ jobs:
           python partener-eu/ops/test_eu_direct_life_ft_reconcile.py
           python partener-eu/ops/test_eu_direct_cef_ft_exact.py
           python partener-eu/ops/test_eu_direct_cef_ft_reconcile.py
-          PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_cef_ft_handoff.py
+          python partener-eu/ops/test_eu_direct_cef_ft_handoff.py
           python partener-eu/ops/test_eu_direct_digital_ft_exact.py
           python partener-eu/ops/test_eu_direct_digital_ft_reconcile.py
-          PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_digital_ft_handoff.py
+          python partener-eu/ops/test_eu_direct_digital_ft_handoff.py
           python partener-eu/ops/test_eu_direct_smp_ft_exact.py
           python partener-eu/ops/test_eu_direct_smp_ft_reconcile.py
-          PYTHONPATH=partener-eu/ingest python partener-eu/ops/test_eu_direct_smp_ft_handoff.py
+          python partener-eu/ops/test_eu_direct_smp_ft_handoff.py
+          python partener-eu/ops/test_eu_direct_cerv_programme_watch.py
+          python partener-eu/ops/test_eu_direct_cerv_ft_discovery.py
+          python partener-eu/ops/test_eu_direct_cerv_ft_handoff.py
+          python partener-eu/ops/test_eu_direct_cerv_ft_exact.py
+          python partener-eu/ops/test_eu_direct_cerv_ft_reconcile.py
 
       - name: Capture bounded live official F&T programme coverage
         run: |
@@ -134,6 +164,22 @@ jobs:
             /tmp/partener-eu-ft-programme-watch/programme-watch.json \
             --output /tmp/partener-eu-ft-programme-watch/programme-taxonomy.json
 
+      - name: Capture live official CERV programme and Romania NCP evidence
+        run: |
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          python partener-eu/ingest/eu_direct_cerv_programme_watch.py \
+            --output-dir "$ROOT/cerv" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Discover bounded official structured CERV identities
+        run: |
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          python partener-eu/ingest/eu_direct_cerv_ft_discovery.py \
+            --output-dir "$ROOT/cerv/ft-discovery" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --query-text 'CERV-2026' \
+            --page-size 25
+
       - name: Execute bounded exact-current LIFE handoff
         run: |
           python partener-eu/ingest/eu_direct_life_ft_exact.py \
@@ -151,7 +197,14 @@ jobs:
           ROOT=/tmp/partener-eu-ft-programme-watch
           HISTORY="$ROOT/history"
           SCRATCH=/tmp/partener-eu-ft-history-scratch
-          mkdir -p "$HISTORY/previous/life-exact" "$HISTORY/previous/cef-exact" "$HISTORY/previous/digital-exact" "$HISTORY/previous/smp-exact" "$SCRATCH"
+          mkdir -p \
+            "$HISTORY/previous/life-exact" \
+            "$HISTORY/previous/cef-exact" \
+            "$HISTORY/previous/digital-exact" \
+            "$HISTORY/previous/smp-exact" \
+            "$HISTORY/previous/cerv-exact" \
+            "$SCRATCH"
+
           gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$HISTORY/artifacts.json"
 
           python - <<'PY' > /tmp/partener-ft-history-candidates.tsv
@@ -159,37 +212,15 @@ jobs:
           data=json.load(open('/tmp/partener-eu-ft-programme-watch/history/artifacts.json', encoding='utf-8'))
           branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
           current=int(os.environ['GITHUB_RUN_ID'])
+          prefixes=(
+              'partener-eu-ft-programme-coverage-',
+              'partener-eu-smp-bounded-',
+              'partener-eu-cerv-programme-watch-',
+          )
           rows=[]
           for artifact in data.get('artifacts') or []:
               name=str(artifact.get('name') or '')
-              if not name.startswith('partener-eu-ft-programme-coverage-') or artifact.get('expired') is True:
-                  continue
-              run=artifact.get('workflow_run') or {}
-              run_id=int(run.get('id') or 0)
-              if not run_id or run_id == current:
-                  continue
-              if branch and str(run.get('head_branch') or '') != branch:
-                  continue
-              rows.append((str(artifact.get('created_at') or ''), run_id, name))
-          seen=set()
-          for created, run_id, name in sorted(rows, reverse=True):
-              if run_id in seen:
-                  continue
-              seen.add(run_id)
-              print(f'{run_id}\t{name}')
-          PY
-
-          python - <<'PY' > /tmp/partener-smp-history-candidates.tsv
-          import json, os
-          data=json.load(open('/tmp/partener-eu-ft-programme-watch/history/artifacts.json', encoding='utf-8'))
-          branch=(os.environ.get('GITHUB_HEAD_REF') or os.environ.get('GITHUB_REF_NAME') or '').strip()
-          current=int(os.environ['GITHUB_RUN_ID'])
-          rows=[]
-          for artifact in data.get('artifacts') or []:
-              name=str(artifact.get('name') or '')
-              if not (name.startswith('partener-eu-ft-programme-coverage-') or name.startswith('partener-eu-smp-bounded-')):
-                  continue
-              if artifact.get('expired') is True:
+              if not name.startswith(prefixes) or artifact.get('expired') is True:
                   continue
               run=artifact.get('workflow_run') or {}
               run_id=int(run.get('id') or 0)
@@ -207,170 +238,136 @@ jobs:
               print(f'{run_id}\t{name}')
           PY
 
-          LIFE_FOUND=""
-          LIFE_FOUND_NAME=""
-          LIFE_DOWNLOADED=0
-          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
-            [ -n "$RUN_ID" ] || continue
-            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
-            [ "$CONCLUSION" = "success" ] || continue
-            DEST="$SCRATCH/life-${RUN_ID}"
-            mkdir -p "$DEST"
-            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
-              continue
-            fi
-            LIFE_DOWNLOADED=$((LIFE_DOWNLOADED + 1))
-            PREVIOUS="$(find "$DEST" -type f -path '*/life-exact/ft-life-exact-evidence.json' -not -path '*/history/*' -print -quit)"
-            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$LIFE_DOWNLOADED" -lt 8 ] && continue || break; }
-            if PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" "$ROOT/life-exact/ft-life-exact-evidence.json" <<'PY'
-          import json, sys
-          from eu_direct_life_ft_exact import validate_evidence
-          from eu_direct_life_ft_reconcile import parse_time
-          previous=json.load(open(sys.argv[1], encoding='utf-8'))
-          current=json.load(open(sys.argv[2], encoding='utf-8'))
-          validate_evidence(previous)
-          validate_evidence(current)
-          if previous.get('reference') != current.get('reference'):
-              raise SystemExit(1)
-          if parse_time(str(previous.get('fetched_at'))) > parse_time(str(current.get('fetched_at'))):
-              raise SystemExit(1)
-          PY
-            then
-              cp "$PREVIOUS" "$HISTORY/previous/life-exact/ft-life-exact-evidence.json"
-              LIFE_FOUND="$RUN_ID"
-              LIFE_FOUND_NAME="$ARTIFACT_NAME"
-              break
-            fi
-            [ "$LIFE_DOWNLOADED" -lt 8 ] || break
-          done < /tmp/partener-ft-history-candidates.tsv
+          restore_family () {
+            local FAMILY="$1"
+            local MODULE="$2"
+            local OUT_REL="$3"
+            local PATH_A="$4"
+            local PATH_B="${5:-}"
+            local CURRENT_REL="${6:-}"
+            local MAX_DOWNLOADS="${7:-10}"
+            local EXTRA_PREFIX="${8:-}"
+            local FOUND=""
+            local FOUND_NAME=""
+            local REFERENCE=""
+            local DOWNLOADED=0
 
-          CEF_FOUND=""
-          CEF_FOUND_NAME=""
-          CEF_REFERENCE=""
-          CEF_DOWNLOADED=0
-          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
-            [ -n "$RUN_ID" ] || continue
-            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
-            [ "$CONCLUSION" = "success" ] || continue
-            DEST="$SCRATCH/cef-${RUN_ID}"
-            mkdir -p "$DEST"
-            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
-              continue
-            fi
-            CEF_DOWNLOADED=$((CEF_DOWNLOADED + 1))
-            PREVIOUS="$(find "$DEST" -type f -path '*/cef-exact/ft-cef-exact-evidence.json' -not -path '*/history/*' -print -quit)"
-            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$CEF_DOWNLOADED" -lt 8 ] && continue || break; }
-            if CEF_REFERENCE="$(PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" <<'PY'
-          import json, sys
-          from eu_direct_cef_ft_exact import validate_evidence
-          previous=json.load(open(sys.argv[1], encoding='utf-8'))
-          validate_evidence(previous)
+            while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
+              [ -n "$RUN_ID" ] || continue
+              if [[ "$ARTIFACT_NAME" != partener-eu-ft-programme-coverage-* ]]; then
+                [ -n "$EXTRA_PREFIX" ] && [[ "$ARTIFACT_NAME" == "$EXTRA_PREFIX"* ]] || continue
+              fi
+              local CONCLUSION
+              CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
+              [ "$CONCLUSION" = "success" ] || continue
+
+              local DEST="$SCRATCH/${FAMILY}-${RUN_ID}-$(printf '%s' "$ARTIFACT_NAME" | sha256sum | cut -c1-8)"
+              mkdir -p "$DEST"
+              if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
+                continue
+              fi
+              DOWNLOADED=$((DOWNLOADED + 1))
+
+              local PREVIOUS=""
+              if [ -n "$PATH_B" ]; then
+                PREVIOUS="$(find "$DEST" -type f \( -path "$PATH_A" -o -path "$PATH_B" \) -not -path '*/history/*' -print -quit)"
+              else
+                PREVIOUS="$(find "$DEST" -type f -path "$PATH_A" -not -path '*/history/*' -print -quit)"
+              fi
+              [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$DOWNLOADED" -lt "$MAX_DOWNLOADS" ] && continue || break; }
+
+              local CURRENT=""
+              if [ -n "$CURRENT_REL" ]; then
+                CURRENT="$ROOT/$CURRENT_REL"
+              fi
+
+              if REFERENCE="$(PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" "$MODULE" "$CURRENT" <<'PY'
+          import datetime as dt
+          import importlib
+          import json
+          import sys
+
+          previous_path, module_name, current_path = sys.argv[1:]
+          module=importlib.import_module(module_name)
+          validate=getattr(module, 'validate_evidence')
+          previous=json.load(open(previous_path, encoding='utf-8'))
+          validate(previous)
+
+          if current_path:
+              current=json.load(open(current_path, encoding='utf-8'))
+              validate(current)
+              if previous.get('reference') != current.get('reference'):
+                  raise SystemExit(1)
+              def parse(value):
+                  return dt.datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+              if parse(previous.get('fetched_at')) > parse(current.get('fetched_at')):
+                  raise SystemExit(1)
+
           print(previous['reference'])
           PY
-            )"; then
-              cp "$PREVIOUS" "$HISTORY/previous/cef-exact/ft-cef-exact-evidence.json"
-              CEF_FOUND="$RUN_ID"
-              CEF_FOUND_NAME="$ARTIFACT_NAME"
-              break
-            fi
-            [ "$CEF_DOWNLOADED" -lt 8 ] || break
-          done < /tmp/partener-ft-history-candidates.tsv
+              )"; then
+                cp "$PREVIOUS" "$HISTORY/previous/$OUT_REL"
+                FOUND="$RUN_ID"
+                FOUND_NAME="$ARTIFACT_NAME"
+                break
+              fi
+              [ "$DOWNLOADED" -lt "$MAX_DOWNLOADS" ] || break
+            done < /tmp/partener-ft-history-candidates.tsv
 
-          DIGITAL_FOUND=""
-          DIGITAL_FOUND_NAME=""
-          DIGITAL_REFERENCE=""
-          DIGITAL_DOWNLOADED=0
-          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
-            [ -n "$RUN_ID" ] || continue
-            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
-            [ "$CONCLUSION" = "success" ] || continue
-            DEST="$SCRATCH/digital-${RUN_ID}"
-            mkdir -p "$DEST"
-            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
-              continue
+            if [ -n "$FOUND" ]; then
+              echo "${FAMILY}_available=true" >> "$GITHUB_OUTPUT"
+              echo "${FAMILY}_run_id=$FOUND" >> "$GITHUB_OUTPUT"
+              echo "${FAMILY}_artifact_name=$FOUND_NAME" >> "$GITHUB_OUTPUT"
+              echo "${FAMILY}_reference=$REFERENCE" >> "$GITHUB_OUTPUT"
+            else
+              echo "${FAMILY}_available=false" >> "$GITHUB_OUTPUT"
             fi
-            DIGITAL_DOWNLOADED=$((DIGITAL_DOWNLOADED + 1))
-            PREVIOUS="$(find "$DEST" -type f -path '*/digital-exact/ft-digital-exact-evidence.json' -not -path '*/history/*' -print -quit)"
-            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$DIGITAL_DOWNLOADED" -lt 8 ] && continue || break; }
-            if DIGITAL_REFERENCE="$(PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" <<'PY'
-          import json, sys
-          from eu_direct_digital_ft_exact import validate_evidence
-          previous=json.load(open(sys.argv[1], encoding='utf-8'))
-          validate_evidence(previous)
-          print(previous['reference'])
-          PY
-            )"; then
-              cp "$PREVIOUS" "$HISTORY/previous/digital-exact/ft-digital-exact-evidence.json"
-              DIGITAL_FOUND="$RUN_ID"
-              DIGITAL_FOUND_NAME="$ARTIFACT_NAME"
-              break
-            fi
-            [ "$DIGITAL_DOWNLOADED" -lt 8 ] || break
-          done < /tmp/partener-ft-history-candidates.tsv
+          }
 
-          SMP_FOUND=""
-          SMP_FOUND_NAME=""
-          SMP_REFERENCE=""
-          SMP_DOWNLOADED=0
-          while IFS=$'\t' read -r RUN_ID ARTIFACT_NAME; do
-            [ -n "$RUN_ID" ] || continue
-            CONCLUSION="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${RUN_ID}" --jq '.conclusion // ""')"
-            [ "$CONCLUSION" = "success" ] || continue
-            DEST="$SCRATCH/smp-${RUN_ID}-$(printf '%s' "$ARTIFACT_NAME" | sha256sum | cut -c1-8)"
-            mkdir -p "$DEST"
-            if ! gh run download "$RUN_ID" --repo "$GITHUB_REPOSITORY" --name "$ARTIFACT_NAME" --dir "$DEST"; then
-              continue
-            fi
-            SMP_DOWNLOADED=$((SMP_DOWNLOADED + 1))
-            PREVIOUS="$(find "$DEST" -type f -path '*/smp-exact/ft-smp-exact-evidence.json' -not -path '*/history/*' -print -quit)"
-            [ -n "$PREVIOUS" ] && [ -s "$PREVIOUS" ] || { [ "$SMP_DOWNLOADED" -lt 10 ] && continue || break; }
-            if SMP_REFERENCE="$(PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" <<'PY'
-          import json, sys
-          from eu_direct_smp_ft_exact import validate_evidence
-          previous=json.load(open(sys.argv[1], encoding='utf-8'))
-          validate_evidence(previous)
-          print(previous['reference'])
-          PY
-            )"; then
-              cp "$PREVIOUS" "$HISTORY/previous/smp-exact/ft-smp-exact-evidence.json"
-              SMP_FOUND="$RUN_ID"
-              SMP_FOUND_NAME="$ARTIFACT_NAME"
-              break
-            fi
-            [ "$SMP_DOWNLOADED" -lt 10 ] || break
-          done < /tmp/partener-smp-history-candidates.tsv
+          restore_family \
+            life eu_direct_life_ft_exact \
+            life-exact/ft-life-exact-evidence.json \
+            '*/life-exact/ft-life-exact-evidence.json' \
+            '' \
+            life-exact/ft-life-exact-evidence.json \
+            8 \
+            ''
 
-          if [ -n "$LIFE_FOUND" ]; then
-            echo "life_available=true" >> "$GITHUB_OUTPUT"
-            echo "life_run_id=$LIFE_FOUND" >> "$GITHUB_OUTPUT"
-            echo "life_artifact_name=$LIFE_FOUND_NAME" >> "$GITHUB_OUTPUT"
-          else
-            echo "life_available=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [ -n "$CEF_FOUND" ]; then
-            echo "cef_available=true" >> "$GITHUB_OUTPUT"
-            echo "cef_run_id=$CEF_FOUND" >> "$GITHUB_OUTPUT"
-            echo "cef_artifact_name=$CEF_FOUND_NAME" >> "$GITHUB_OUTPUT"
-            echo "cef_reference=$CEF_REFERENCE" >> "$GITHUB_OUTPUT"
-          else
-            echo "cef_available=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [ -n "$DIGITAL_FOUND" ]; then
-            echo "digital_available=true" >> "$GITHUB_OUTPUT"
-            echo "digital_run_id=$DIGITAL_FOUND" >> "$GITHUB_OUTPUT"
-            echo "digital_artifact_name=$DIGITAL_FOUND_NAME" >> "$GITHUB_OUTPUT"
-            echo "digital_reference=$DIGITAL_REFERENCE" >> "$GITHUB_OUTPUT"
-          else
-            echo "digital_available=false" >> "$GITHUB_OUTPUT"
-          fi
-          if [ -n "$SMP_FOUND" ]; then
-            echo "smp_available=true" >> "$GITHUB_OUTPUT"
-            echo "smp_run_id=$SMP_FOUND" >> "$GITHUB_OUTPUT"
-            echo "smp_artifact_name=$SMP_FOUND_NAME" >> "$GITHUB_OUTPUT"
-            echo "smp_reference=$SMP_REFERENCE" >> "$GITHUB_OUTPUT"
-          else
-            echo "smp_available=false" >> "$GITHUB_OUTPUT"
-          fi
+          restore_family \
+            cef eu_direct_cef_ft_exact \
+            cef-exact/ft-cef-exact-evidence.json \
+            '*/cef-exact/ft-cef-exact-evidence.json' \
+            '' \
+            '' \
+            8 \
+            ''
+
+          restore_family \
+            digital eu_direct_digital_ft_exact \
+            digital-exact/ft-digital-exact-evidence.json \
+            '*/digital-exact/ft-digital-exact-evidence.json' \
+            '' \
+            '' \
+            8 \
+            ''
+
+          restore_family \
+            smp eu_direct_smp_ft_exact \
+            smp-exact/ft-smp-exact-evidence.json \
+            '*/smp-exact/ft-smp-exact-evidence.json' \
+            '' \
+            '' \
+            10 \
+            'partener-eu-smp-bounded-'
+
+          restore_family \
+            cerv eu_direct_cerv_ft_exact \
+            cerv-exact/ft-cerv-exact-evidence.json \
+            '*/ft-exact/ft-cerv-exact-evidence.json' \
+            '*/cerv-exact/ft-cerv-exact-evidence.json' \
+            '' \
+            10 \
+            'partener-eu-cerv-programme-watch-'
 
       - name: Reconcile exact LIFE against previous same-identity evidence
         shell: bash
@@ -583,6 +580,73 @@ jobs:
           fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_smp_ft_reconcile.py "${ARGS[@]}"
 
+      - name: Resolve omission-safe CERV exact handoff state
+        id: cerv_handoff
+        shell: bash
+        env:
+          PREVIOUS_CERV_AVAILABLE: ${{ steps.previous_exact.outputs.cerv_available }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            --discovery "$ROOT/cerv/ft-discovery/ft-cerv-discovery.json"
+            --output "$ROOT/cerv/ft-discovery/ft-cerv-handoff.json"
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          )
+          if [ "$PREVIOUS_CERV_AVAILABLE" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/cerv-exact/ft-cerv-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cerv_ft_handoff.py "${ARGS[@]}"
+          python - "$ROOT/cerv/ft-discovery/ft-cerv-handoff.json" <<'PY' >> "$GITHUB_OUTPUT"
+          import json, sys
+          state=json.load(open(sys.argv[1], encoding='utf-8'))
+          print(f"mode={state['observation_state']}")
+          print(f"exact_recheck_required={'true' if state['exact_recheck_required'] else 'false'}")
+          print(f"target_reference={state['target_reference'] or ''}")
+          print(f"previous_same_identity={'true' if state['previous_same_identity'] else 'false'}")
+          PY
+
+      - name: Execute bounded exact-current CERV handoff
+        if: steps.cerv_handoff.outputs.exact_recheck_required == 'true'
+        shell: bash
+        env:
+          CERV_HANDOFF_MODE: ${{ steps.cerv_handoff.outputs.mode }}
+          CERV_TARGET_REFERENCE: ${{ steps.cerv_handoff.outputs.target_reference }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          if [ "$CERV_HANDOFF_MODE" = "CURRENT_OFFICIAL_STRUCTURED_CERV_IDENTITY_EXACT_RECHECK_REQUIRED" ]; then
+            python partener-eu/ingest/eu_direct_cerv_ft_exact.py \
+              --discovery "$ROOT/cerv/ft-discovery/ft-cerv-discovery.json" \
+              --programme-watch "$ROOT/cerv/cerv-programme-watch.json" \
+              --output-dir "$ROOT/cerv/ft-exact" \
+              --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          else
+            python partener-eu/ingest/eu_direct_cerv_ft_exact.py \
+              --reference "$CERV_TARGET_REFERENCE" \
+              --programme-watch "$ROOT/cerv/cerv-programme-watch.json" \
+              --output-dir "$ROOT/cerv/ft-exact" \
+              --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          fi
+
+      - name: Reconcile exact CERV against previous same-identity evidence
+        if: steps.cerv_handoff.outputs.exact_recheck_required == 'true'
+        shell: bash
+        env:
+          PREVIOUS_CERV_AVAILABLE: ${{ steps.previous_exact.outputs.cerv_available }}
+          PREVIOUS_CERV_SAME_IDENTITY: ${{ steps.cerv_handoff.outputs.previous_same_identity }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ft-programme-watch
+          ARGS=(
+            "$ROOT/cerv/ft-exact/ft-cerv-exact-evidence.json"
+            --output "$ROOT/cerv/ft-exact/ft-cerv-reconciliation.json"
+          )
+          if [ "$PREVIOUS_CERV_AVAILABLE" = "true" ] && [ "$PREVIOUS_CERV_SAME_IDENTITY" = "true" ]; then
+            ARGS+=(--previous "$ROOT/history/previous/cerv-exact/ft-cerv-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cerv_ft_reconcile.py "${ARGS[@]}"
+
       - name: Validate live evidence remains bounded and non-authorizing
         shell: bash
         env:
@@ -594,9 +658,13 @@ jobs:
           PREVIOUS_DIGITAL_RUN_ID: ${{ steps.previous_exact.outputs.digital_run_id }}
           PREVIOUS_SMP_AVAILABLE: ${{ steps.previous_exact.outputs.smp_available }}
           PREVIOUS_SMP_RUN_ID: ${{ steps.previous_exact.outputs.smp_run_id }}
+          PREVIOUS_CERV_AVAILABLE: ${{ steps.previous_exact.outputs.cerv_available }}
+          PREVIOUS_CERV_RUN_ID: ${{ steps.previous_exact.outputs.cerv_run_id }}
         run: |
           set -euo pipefail
-          ARGS=(--root /tmp/partener-eu-ft-programme-watch)
+          ROOT=/tmp/partener-eu-ft-programme-watch
+
+          ARGS=(--root "$ROOT")
           if [ "$PREVIOUS_LIFE_AVAILABLE" = "true" ]; then
             ARGS+=(--previous-life-available --previous-life-run-id "$PREVIOUS_LIFE_RUN_ID")
           fi
@@ -605,29 +673,35 @@ jobs:
           fi
           python partener-eu/ops/validate_eu_direct_ft_programme_live.py "${ARGS[@]}"
 
-          DIGITAL_ARGS=(--root /tmp/partener-eu-ft-programme-watch)
+          DIGITAL_ARGS=(--root "$ROOT")
           if [ "$PREVIOUS_DIGITAL_AVAILABLE" = "true" ]; then
             DIGITAL_ARGS+=(--previous-digital-available --previous-digital-run-id "$PREVIOUS_DIGITAL_RUN_ID")
           fi
           python partener-eu/ops/validate_eu_direct_digital_live.py "${DIGITAL_ARGS[@]}"
 
-          SMP_ARGS=(--root /tmp/partener-eu-ft-programme-watch)
+          SMP_ARGS=(--root "$ROOT")
           if [ "$PREVIOUS_SMP_AVAILABLE" = "true" ]; then
             SMP_ARGS+=(--previous-smp-available --previous-smp-run-id "$PREVIOUS_SMP_RUN_ID")
           fi
           python partener-eu/ops/validate_eu_direct_smp_live.py "${SMP_ARGS[@]}"
+
+          CERV_ARGS=(--root "$ROOT")
+          if [ "$PREVIOUS_CERV_AVAILABLE" = "true" ]; then
+            CERV_ARGS+=(--previous-cerv-available --previous-cerv-run-id "$PREVIOUS_CERV_RUN_ID")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ops/validate_eu_direct_cerv_live.py "${CERV_ARGS[@]}"
 
       - name: Enforce compact history artifact boundary
         shell: bash
         run: |
           set -euo pipefail
           ROOT=/tmp/partener-eu-ft-programme-watch
-          if find "$ROOT/history" -mindepth 1 -maxdepth 1 -type d \( -name 'download-*' -o -name 'cef-download-*' -o -name 'digital-download-*' -o -name 'smp-download-*' \) -print -quit | grep -q .; then
+          if find "$ROOT/history" -mindepth 1 -maxdepth 1 -type d \( -name 'download-*' -o -name 'cef-download-*' -o -name 'digital-download-*' -o -name 'smp-download-*' -o -name 'cerv-download-*' \) -print -quit | grep -q .; then
             echo 'recursive history download directory leaked into artifact root' >&2
             exit 1
           fi
           HISTORY_FILES="$(find "$ROOT/history" -type f | wc -l | tr -d ' ')"
-          if [ "$HISTORY_FILES" -gt 5 ]; then
+          if [ "$HISTORY_FILES" -gt 6 ]; then
             echo "unexpected history artifact growth: $HISTORY_FILES files" >&2
             find "$ROOT/history" -type f -print >&2
             exit 1
