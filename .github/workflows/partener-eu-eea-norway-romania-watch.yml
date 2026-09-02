@@ -1,0 +1,80 @@
+name: PARTENER.EU EEA Norway Romania Watch
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ops/test_eea_norway_romania_programme_watch.py'
+      - '.github/workflows/partener-eu-eea-norway-romania-watch.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eea-norway-romania-watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Compile bounded EEA/Norway adapter and regression
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eea_norway_romania_programme_watch.py \
+            partener-eu/ops/test_eea_norway_romania_programme_watch.py
+
+      - name: Validate fail-closed EEA/Norway semantics
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: python partener-eu/ops/test_eea_norway_romania_programme_watch.py
+
+      - name: Acquire official Romania EEA/Norway evidence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          rm -rf /tmp/partener-eea-norway-romania
+          python partener-eu/ingest/eea_norway_romania_programme_watch.py \
+            --out-dir /tmp/partener-eea-norway-romania \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Enforce live non-authorizing boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('/tmp/partener-eea-norway-romania/eea-norway-romania-programme-watch.json')
+          d = json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_EEA_NORWAY_ROMANIA_PROGRAMME_WATCH_V1'
+          assert d['source_health'] == 'HEALTHY'
+          assert d['market_intelligence_only'] is True
+          assert len(d['programmes']) == 9
+          assert len(d['call_discovery']) >= 1
+          for key in (
+              'material_fact_use', 'open_call_authorized', 'closed_call_authorized',
+              'deadline_authorized', 'budget_authorized', 'eligibility_authorized',
+              'publish_authorized', 'distribution_authorized', 'call_alert_authorized',
+              'canonical_corpus_mutation',
+          ):
+              assert d[key] is False, (key, d[key])
+          assert all(x['observation_state'] == 'PROGRAMMING' for x in d['programming_observations'])
+          assert all(x['observation_state'] == 'CALL_DISCOVERY_ONLY' for x in d['call_discovery'])
+          print({
+              'programme_count': len(d['programmes']),
+              'call_discovery_count': len(d['call_discovery']),
+              'nfp_state': d['national_focal_point_observation']['state'],
+              'semantic_fingerprint': d['semantic_fingerprint'],
+          })
+          PY
+
+      - name: Upload bounded evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-eea-norway-romania-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eea-norway-romania
+          if-no-files-found: error
+          retention-days: 7
