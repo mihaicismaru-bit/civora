@@ -37,8 +37,8 @@ MATERIAL_FLAGS = (
 PROGRAMMES: tuple[dict[str, Any], ...] = (
     {
         "id": "RO_BG", "programme": "Interreg VI-A Romania-Bulgaria", "mode": "CBC_INTERNAL",
-        "url": "https://www.interregrobg.eu/en/arhiva/835-the-interreg-vi-a-romania-bulgaria-programme-was-approved-by-the-european-commission.html",
-        "hosts": ("www.interregrobg.eu", "interregrobg.eu"),
+        "url": "https://www.interregviarobg.eu/en/the-interreg-vi-a-romania-bulgaria-programme-was-approved-by-the-european-commission",
+        "hosts": ("www.interregviarobg.eu", "interregviarobg.eu"),
         "anchors": ("Interreg VI-A Romania Bulgaria", "Mehedinti", "Dolj", "Olt", "Teleorman", "Giurgiu", "Calarasi", "Constanta"),
         "romania_scope": ("Mehedinti", "Dolj", "Olt", "Teleorman", "Giurgiu", "Calarasi", "Constanta"),
     },
