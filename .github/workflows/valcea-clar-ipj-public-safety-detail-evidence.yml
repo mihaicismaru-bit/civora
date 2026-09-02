@@ -1,0 +1,173 @@
+name: VÂLCEA CLAR IPJ Public Safety Detail Evidence
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py"
+      - "valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py"
+      - ".github/workflows/valcea-clar-ipj-public-safety-detail-evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py"
+      - "valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py"
+      - ".github/workflows/valcea-clar-ipj-public-safety-detail-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-ipj-public-safety-detail-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regressions
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py \
+            valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py
+          python valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py --self-test
+          python valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py --self-test
+
+      - name: Enforce read-only police detail-evidence boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in IPJ detail verifier" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in IPJ detail verifier" >&2
+            exit 1
+          fi
+          grep -F '"material_fact_use": False' "$target"
+          grep -F '"independent_fact_verification_authorized": False' "$target"
+          grep -F '"criminal_liability_authorized": False' "$target"
+          grep -F '"procedural_measure_as_guilt_authorized": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire bounded high-value first-party police detail evidence
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py \
+            --live-check \
+            --output /tmp/ipj_valcea_public_safety_detail_evidence.json
+
+      - name: Validate live detail receipt boundary
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/ipj_valcea_public_safety_detail_evidence.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE'
+          assert payload['observation_state'] == 'POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING'
+          assert payload['source_assertion_scope'] == 'POLICE_FIRST_PARTY_STATEMENT_ONLY_NOT_INDEPENDENT_VERIFICATION'
+          assert payload['coverage_note'] == 'BOUNDED_HIGH_VALUE_FIRST_PARTY_POLICE_DETAIL_VERIFICATION_NOT_EXHAUSTIVE'
+          assert payload['index_reference_count'] >= 1
+          assert 1 <= payload['eligible_detail_count'] <= 12
+          assert 1 <= payload['detail_evidence_count'] <= 12
+          assert payload['detail_evidence_count'] + payload['detail_hold_count'] == payload['eligible_detail_count']
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+
+          allowed_topics = {'ROAD_SAFETY', 'CRIME_INVESTIGATION', 'ECONOMIC_CRIME', 'PUBLIC_ORDER'}
+          allowed_tags = {
+              'POLICE_REPORTED_OBSERVATION', 'PROCEDURAL_MEASURE',
+              'ALLEGATION_OR_SUSPICION', 'ROAD_OR_PUBLIC_SAFETY_MEASURE',
+          }
+          allowed_types = {'text/html', 'application/xhtml+xml', 'text/plain'}
+          source_paths = {
+              'NEWS': '/ro/stiri-si-media/stiri/',
+              'COMMUNIQUES': '/ro/stiri-si-media/comunicate/',
+              'BULLETINS': '/ro/stiri-si-media/buletine-de-presa/',
+          }
+
+          for item in payload['details']:
+              parsed = urlsplit(item['detail_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname == 'vl.politiaromana.ro'
+              assert item['detail_host'] == parsed.hostname
+              assert item['source_kind'] in source_paths
+              assert parsed.path.startswith(source_paths[item['source_kind']])
+              assert item['topic_class'] in allowed_topics
+              assert item['content_type'] in allowed_types
+              assert 1 <= item['content_length'] <= 2_500_000
+              assert re.fullmatch(r'[0-9a-f]{64}', item['detail_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', item['index_evidence_sha256'])
+              assert item['authority_class'] == payload['authority_class']
+              assert item['observation_state'] == payload['observation_state']
+              assert item['source_assertion_scope'] == payload['source_assertion_scope']
+              assert item['verification_state'] == 'POLICE_SOURCE_TEXT_EVIDENCE_CAPTURED_NON_AUTHORIZING'
+              assert len(item['field_evidence']) <= 8
+              assert set(item['tag_counts']) <= allowed_tags
+              for field in item['field_evidence']:
+                  assert 1 <= len(field['excerpt']) <= 420
+                  assert field['epistemic_tags']
+                  assert set(field['epistemic_tags']) <= allowed_tags
+                  assert field['source_assertion_scope'] == payload['source_assertion_scope']
+                  assert re.fullmatch(r'[0-9a-f]{64}', field['evidence_sha256'])
+
+          for hold in payload['holds']:
+              assert hold['state'] == 'HOLD_DETAIL_FETCH_FAILED_NON_AUTHORIZING'
+              assert re.fullmatch(r'[0-9a-f]{64}', hold['index_evidence_sha256'])
+
+          forbidden = [
+              'material_fact_use', 'independent_fact_verification_authorized',
+              'incident_status_authorized', 'suspect_status_authorized',
+              'criminal_liability_authorized', 'procedural_measure_as_guilt_authorized',
+              'casualty_count_authorized', 'sanction_count_authorized',
+              'road_restriction_current_status_authorized', 'investigation_status_authorized',
+              'same_event_dedupe_authorized', 'breaking_authorized',
+              'fact_kernel_write_authorized', 'editorial_writer_authorized',
+              'publication_authorized', 'distribution_authorized',
+              'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          assert payload['limitations']['police_statement_is_not_independent_verification'] is True
+          assert payload['limitations']['police_allegation_is_not_criminal_liability'] is True
+          assert payload['limitations']['procedural_measure_is_not_finding_of_guilt'] is True
+          assert payload['limitations']['numeric_counts_require_separate_field_level_verification'] is True
+          assert payload['limitations']['road_restriction_requires_current_status_verification'] is True
+          print(
+              f"IPJ detail evidence PASS; evidence={payload['detail_evidence_count']}; "
+              f"holds={payload['detail_hold_count']}; eligible={payload['eligible_detail_count']}"
+          )
+          PY
+
+      - name: Upload bounded IPJ detail evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-ipj-public-safety-detail-evidence
+          path: /tmp/ipj_valcea_public_safety_detail_evidence.json
+          retention-days: 7
+          if-no-files-found: error
