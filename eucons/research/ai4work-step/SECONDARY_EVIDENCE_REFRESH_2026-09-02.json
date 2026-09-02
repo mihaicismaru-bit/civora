@@ -1,103 +1,68 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.4",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.5",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-02T19:30:56+03:00",
+  "observed_at": "2026-09-02T20:34:33+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
   "prod_need_evidence_eligible": false,
-  "purpose": "Audit the official/institutional secondary-research sweep for Centru, Sud-Muntenia and Sud-Vest Oltenia without promoting project activity, funding supply or technology deployment as evidence of AI4WORK need prevalence.",
+  "purpose": "Audit the official/institutional secondary-research sweep for Centru, Sud-Muntenia and Sud-Vest Oltenia without promoting project activity, funding supply, technology deployment or unread source listings as evidence of AI4WORK need prevalence.",
   "promotion_policy": {
     "source_register_high_water_mark": "S39",
     "source_promoted_today": "S39",
+    "source_promoted_this_refresh": null,
     "h1_h5_numeric_points_added": 0,
     "numeric_rank_changed": false,
     "project_activity_as_need_evidence": false,
-    "decision": "S39_PROMOTED_AS_HISTORICAL_DIRECT_COMPLEMENTARY_ZERO_H1_H5_WITH_INTERNAL_NUMERIC_DISCREPANCY"
+    "decision": "NO_NEW_SOURCE_PROMOTED_COVASNA_2026_FORECAST_DISCOVERED_BUT_CONTENT_NOT_AUDITABLE_IN_REQUIRED_PDF_PATH"
   },
-  "promoted_source": {
+  "retained_promoted_source": {
     "source_id": "S39",
     "region": "Centru / Covasna",
     "publisher": "ANOFM / AJOFM Covasna",
     "title": "Prognoza angajarilor pe termen scurt - Judetul Covasna (eSPOR)",
     "url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Prognoza-angajarilor-pe-termen-scurt-2024-Jud.-Covasna.pdf",
-    "forecast_label": "2024",
-    "respondents_contacted": 737,
-    "respondents_reported": 406,
-    "methodology": "online employer questionnaire with branch-level representation thresholds and staged contact; the report states minimum employer/share thresholds by branch and later emphasis on employers with more than 50 employees",
-    "source_reported_context": [
-      "more than 35% of estimated hires are reported in skilled-worker occupations",
-      "53% of extrapolated hires are reported as not requiring prior experience, only vocational training"
-    ],
-    "internal_discrepancy": "The introduction and employer-size table report 2,029 estimated hires, while the results paragraph and ownership table report 1,371. No hire-total value is reconciled by assumption or used in AI4WORK ranking.",
     "classification": "DIRECT_COMPLEMENTARY_HISTORICAL_EMPLOYER_SURVEY_INTERNAL_NUMERIC_DISCREPANCY",
-    "limitations": [
-      "county-level Covasna only",
-      "historical forecast rather than 2026 AI4WORK primary evidence",
-      "not AI/digital-specific",
-      "later contact emphasis on employers with more than 50 employees may affect response composition",
-      "material source-internal 1,371 versus 2,029 estimated-hire discrepancy",
-      "not a prevalence measure for AI4WORK 2026 target populations"
-    ],
     "h1_h5_numeric_points_added": 0,
     "project_activity_as_need_evidence": false
-  },
-  "retained_source": {
-    "source_id": "S38",
-    "region": "Sud-Muntenia / Prahova",
-    "publisher": "ANOFM / AJOFM Prahova",
-    "classification": "DIRECT_COMPLEMENTARY_HISTORICAL_EMPLOYER_SURVEY",
-    "h1_h5_numeric_points_added": 0
   },
   "fresh_follow_up_screening": [
     {
       "region": "Centru / Covasna",
       "publisher": "ANOFM / AJOFM Covasna",
-      "title": "Prognoza angajarilor pe termen scurt - Judetul Covasna (eSPOR)",
-      "url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Prognoza-angajarilor-pe-termen-scurt-2024-Jud.-Covasna.pdf",
-      "observed_fact": "Actual report content was read back. The report documents 737 employers approached, 406 respondents, explicit branch-level sampling thresholds and staged contact. It also contains a material internal discrepancy between 1,371 and 2,029 estimated hires.",
-      "screening_result": "PROMOTED_S39_DIRECT_COMPLEMENTARY_HISTORICAL_ZERO_H1_H5",
-      "reason": "This is real official employer-survey evidence with auditable methodology, but it is historical, county-level and not AI/digital-specific. The conflicting hire totals are preserved as a source limitation rather than reconciled."
-    },
-    {
-      "region": "Centru / Brasov",
-      "publisher": "ADR Centru",
-      "title": "Proiecte europene pentru administratii publice locale mai conectate cu cetatenii din Brasov, Codlea si Zarnesti",
-      "url": "https://www.adrcentru.ro/comunicare/proiecte-europene-pentru-administratii-publice-locale-mai-conectate-cu-cetatenii-din-municipiile-brasov-si-codlea-si-orasul-zarnesti/",
-      "observed_fact": "The 28 August 2026 institutional communication reports AI, Digital Twin and e-government implementation projects.",
-      "screening_result": "REJECT_FROM_NEED_EVIDENCE",
-      "reason": "Technology deployment and funded implementation do not measure adult or employer need prevalence."
+      "title": "Prognoza angajarilor pe 2026 - Judetul Covasna",
+      "listing_url": "https://www.anofm.ro/covasna/studii/",
+      "pdf_url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Prognoza-angajarilor-pe-2026-Judetul-Covasna.pdf",
+      "observed_fact": "The official AJOFM Covasna studies page lists a new 2026 hiring-forecast PDF ahead of the previously audited 2024 forecast. The current controlled web fetch could not open the PDF because the 21,745,921-byte document exceeded the fetch limit, so its internal methodology, sample, results and limitations were not read back in the required PDF analysis path.",
+      "screening_result": "DISCOVERED_UNREADABLE_NOT_PROMOTED",
+      "reason": "A first-party listing proves the document exists but not what its contents establish. No source-register promotion, H1-H5 point, statistic or need claim is allowed until actual PDF content can be inspected and provenance/method limits classified."
     },
     {
       "region": "Sud-Muntenia / Prahova",
       "publisher": "ANOFM / AJOFM Prahova",
-      "title": "GREEN JOBS PRAHOVA - Tranzitie catre o economie verde",
-      "url": "https://www.anofm.ro/prahova/green-jobs-prahova-tranzitie-catre-o-economie-verde/",
-      "observed_fact": "The current page describes a 2026 transition and skills-update project.",
-      "screening_result": "REJECT_FROM_NEED_EVIDENCE",
-      "reason": "A funded project's objectives, target groups and planned skills activity are supply/implementation context and cannot be used as proof of underlying need."
+      "observed_fact": "Fresh official-page screening found current 2026 labour-market administration and GREEN JOBS project material, but no newly audited target-population employer survey stronger than the already retained historical S38 source.",
+      "screening_result": "NO_NEW_SOURCE_PROMOTED",
+      "reason": "Project implementation, current unemployment administration and training/funding activity are context or supply evidence, not prevalence evidence for AI4WORK adult/employer needs."
     },
     {
-      "region": "Sud-Vest Oltenia / Dolj",
-      "publisher": "ANOFM / AJOFM Dolj",
-      "title": "Lansare proiect - GREEN SPO / tranzitie spre economie verde",
-      "url": "https://www.anofm.ro/dolj/lansare-proiect/",
-      "observed_fact": "The current official page reports a 2026 project launch and planned employment/training measures.",
-      "screening_result": "REJECT_FROM_NEED_EVIDENCE",
-      "reason": "Project launch, target-group and implementation information is explicitly not accepted as proof of need under NF-RUN-001."
+      "region": "Sud-Vest Oltenia",
+      "publisher": "ANOFM county agencies",
+      "observed_fact": "Fresh official-page screening of current Vâlcea/Gorj material returned labour-market administration, employment-service and project/training activity rather than a newly audited 2026 AI/digital-skills need survey for the eligible adult/employer populations.",
+      "screening_result": "NO_NEW_SOURCE_PROMOTED",
+      "reason": "Administrative outcomes, offered courses and project activity are not converted into need prevalence and remain outside H1-H5 evidence."
     }
   ],
-  "refresh_conclusion": "S39 is now the source-register high-water mark. It adds real official employer-survey evidence for Centru, but only as historical direct-complementary context with zero H1-H5 effect. Its internal 1,371 versus 2,029 estimated-hire discrepancy is preserved and prevents use of a reconciled hire total. Current project/funding/digitalisation communications in all three target regions remain context only and are not promoted as need evidence.",
-  "next_refresh_rule": "Promote a new source only when actual content is readable and provides materially stronger target-population evidence with enough provenance and method detail to classify its limits. A listing, project objective, funding offer, technology deployment or training activity is insufficient.",
+  "refresh_conclusion": "S39 remains the Source Register high-water mark. A potentially material first-party 2026 Covasna employer-forecast document is now explicitly tracked as DISCOVERED_UNREADABLE_NOT_PROMOTED because only its official listing could be verified in this run; no content-derived claim is made. No new H1-H5 numeric point is added and project/supply activity remains excluded as evidence of need.",
+  "next_refresh_rule": "Attempt source-exact content inspection of the new Covasna 2026 PDF using an auditable PDF path. Promote only if actual readable content supplies materially stronger target-population evidence with enough provenance and methodology to classify limitations. Never promote from a listing alone.",
   "call_requirements_refresh": {
-    "checked_at": "2026-09-02T19:30:56+03:00",
+    "checked_at": "2026-09-02T20:34:33+03:00",
     "connected_mail_query_scope": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding spam/trash and GitHub notifications",
     "matching_new_authority_messages": 0,
-    "matched_non_authority_messages": "GitHub workflow notifications only",
+    "matched_non_authority_messages": "none",
     "status": "CLOSED_UNCHANGED"
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-02T19:30:56+03:00",
+    "checked_at": "2026-09-02T20:34:33+03:00",
     "drive_queries": [
       "AI4WORK_ADULTS_V1",
       "AI4WORK_EMPLOYERS_V1",
