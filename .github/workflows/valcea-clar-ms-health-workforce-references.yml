@@ -5,6 +5,11 @@ on:
     paths:
       - "valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
       - ".github/workflows/valcea-clar-ms-health-workforce-references.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
+      - ".github/workflows/valcea-clar-ms-health-workforce-references.yml"
   workflow_dispatch:
 
 permissions:
@@ -22,6 +27,7 @@ jobs:
       - name: Checkout exact revision
         uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
 
       - name: Set up Python
@@ -40,9 +46,22 @@ jobs:
         run: |
           set -euo pipefail
           target="valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
-          ! grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"
-          ! grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"
-          ! grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state' "$target"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in Ministry source adapter" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in source-reference adapter" >&2
+            exit 1
+          fi
+          grep -F '"current_vacancy_authorized": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
 
       - name: Acquire bounded live first-party evidence
         run: |
@@ -50,12 +69,14 @@ jobs:
             --live-check \
             --require-reference \
             --max-pages 6 \
+            --max-detail-fetches 8 \
             --output /tmp/ms_valcea_health_workforce.json
 
       - name: Validate live receipt boundary
         run: |
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
           from urllib.parse import urlsplit
 
@@ -67,7 +88,11 @@ jobs:
           assert payload['observation_state'] == 'REFERENCE_ONLY_NON_AUTHORIZING'
           assert 1 <= payload['reference_count'] <= 16
           assert 1 <= payload['pages_fetched'] <= 6
+          assert 1 <= payload['detail_attempt_count'] <= 8
+          assert 1 <= payload['detail_capture_count'] <= payload['detail_attempt_count']
+          assert payload['detail_failure_count'] == payload['detail_attempt_count'] - payload['detail_capture_count']
           assert payload['coverage_note'] == 'BOUNDED_FIRST_PARTY_REFERENCE_DISCOVERY_NOT_EXHAUSTIVE'
+          assert payload['detail_coverage_note'] == 'BOUNDED_FIRST_PARTY_DETAIL_CAPTURE_NOT_EXHAUSTIVE_NON_AUTHORIZING'
 
           forbidden_true = [
               'current_vacancy_authorized', 'deadline_authorized', 'eligibility_authorized',
@@ -79,6 +104,7 @@ jobs:
           ]
           assert all(payload[key] is False for key in forbidden_true)
 
+          captured = 0
           for ref in payload['references']:
               parsed = urlsplit(ref['url'])
               assert parsed.scheme == 'https'
@@ -86,7 +112,40 @@ jobs:
               assert parsed.path.startswith('/ro/minister/cariera-medici/')
               assert ref['authority_class'] == payload['authority_class']
               assert ref['observation_state'] == payload['observation_state']
-              assert len(ref['source_page_sha256']) == 64
-              assert len(ref['evidence_sha256']) == 64
-          print(f"Validated {payload['reference_count']} bounded Ministry health-workforce references")
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['source_page_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['evidence_sha256'])
+
+              if ref['detail_fetch_state'] == 'DETAIL_FIRST_PARTY_CAPTURED_NON_AUTHORIZING':
+                  captured += 1
+                  detail = urlsplit(ref['detail_page_url'])
+                  assert detail.scheme == 'https'
+                  assert detail.hostname in {'www.ms.ro', 'ms.ro'}
+                  assert detail.path.startswith('/ro/minister/cariera-medici/')
+                  assert re.fullmatch(r'[0-9a-f]{64}', ref['detail_page_sha256'])
+                  assert re.fullmatch(r'[0-9a-f]{64}', ref['detail_evidence_sha256'])
+                  assert ref['role_specialty_context_state'] in {
+                      'EXPLICIT_DETAIL_ROLE_TEXT_RETAINED_NON_AUTHORIZING',
+                      'DETAIL_PAGE_CAPTURED_ROLE_TEXT_UNRESOLVED',
+                  }
+                  assert len(ref['detail_context_snippets']) <= 8
+                  assert isinstance(ref['publication_date_text_candidate'], (str, type(None)))
+              else:
+                  assert ref['detail_fetch_state'] in {
+                      'DETAIL_FETCH_FAILED_NON_AUTHORIZING',
+                      'DETAIL_NOT_FETCHED_BOUNDED',
+                  }
+
+          assert captured == payload['detail_capture_count']
+          print(
+              f"Validated {payload['reference_count']} bounded Ministry references / "
+              f"{payload['detail_capture_count']} first-party detail captures"
+          )
           PY
+
+      - name: Upload bounded source evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-ms-health-workforce-reference-evidence
+          path: /tmp/ms_valcea_health_workforce.json
+          retention-days: 7
+          if-no-files-found: error
