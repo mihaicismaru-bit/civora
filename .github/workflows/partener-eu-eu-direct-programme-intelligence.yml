@@ -20,6 +20,9 @@ on:
       - 'partener-eu/ingest/eu_direct_eic_ft_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_eic_ft_exact.py'
       - 'partener-eu/ops/test_eu_direct_eic_ft_reconcile.py'
+      - 'partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eui_innovation_fund_programme_intelligence.py'
+      - 'partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py'
       - '.github/workflows/partener-eu-eu-direct-programme-intelligence.yml'
   workflow_dispatch:
 
@@ -53,6 +56,7 @@ jobs:
           python -m json.tool partener-eu/ingest/erasmus_action_router_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/eu4health_hadea_call_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/horizon_eic_programme_intelligence_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/erasmus_action_router.py \
             partener-eu/ingest/eu4health_hadea_call.py \
@@ -60,12 +64,14 @@ jobs:
             partener-eu/ingest/horizon_eic_programme_intelligence.py \
             partener-eu/ingest/eu_direct_eic_ft_exact.py \
             partener-eu/ingest/eu_direct_eic_ft_reconcile.py \
+            partener-eu/ingest/eui_innovation_fund_programme_intelligence.py \
             partener-eu/ops/test_erasmus_action_router.py \
             partener-eu/ops/test_eu4health_hadea_call.py \
             partener-eu/ops/test_eu4health_hadea_ft_reconcile.py \
             partener-eu/ops/test_horizon_eic_programme_intelligence.py \
             partener-eu/ops/test_eu_direct_eic_ft_exact.py \
-            partener-eu/ops/test_eu_direct_eic_ft_reconcile.py
+            partener-eu/ops/test_eu_direct_eic_ft_reconcile.py \
+            partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py
 
       - name: Validate fail-closed EU Direct programme semantics
         env:
@@ -77,12 +83,13 @@ jobs:
           python partener-eu/ops/test_horizon_eic_programme_intelligence.py
           python partener-eu/ops/test_eu_direct_eic_ft_exact.py
           python partener-eu/ops/test_eu_direct_eic_ft_reconcile.py
+          python partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py
 
       - name: Prepare replay root
         run: |
           ROOT=/tmp/partener-eu-eu-direct-programme-intelligence
           rm -rf "$ROOT"
-          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic" "$ROOT/eic-exact/current" "$ROOT/eic-exact/previous"
+          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic" "$ROOT/eic-exact/current" "$ROOT/eic-exact/previous" "$ROOT/eui-innovation-fund"
 
       - name: Acquire fresh official Erasmus application-route intelligence
         run: |
@@ -293,6 +300,68 @@ jobs:
               assert source['material_fact_use'] is False
           assert {'exact_call_or_topic_identifier','current_official_exact_call_or_topic_endpoint','explicit_current_official_call_status','semantic_reconciliation','field_scoped_material_admission'}.issubset(set(d['missing_for_open_confirmation']))
           print(json.dumps({'health':d['source_health_state'],'healthy_sources':d['healthy_source_count'],'degraded_sources':d['degraded_source_count'],'programmes':d['programme_families'],'open_call_authorized':False,'publication_effect':'NONE'}, sort_keys=True))
+          PY
+
+      - name: Acquire fresh official EUI and Innovation Fund intelligence
+        run: |
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/eui-innovation-fund
+          python partener-eu/ingest/eui_innovation_fund_programme_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eui-innovation-fund" \
+            --live \
+            --output "$ROOT/eui-innovation-fund-programme-intelligence.json"
+          cp partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json "$ROOT/registry.json"
+
+      - name: Enforce live non-authorizing EUI and Innovation Fund boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-eu-direct-programme-intelligence/eui-innovation-fund/eui-innovation-fund-programme-intelligence.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_EUI_INNOVATION_FUND_PROGRAMME_INTELLIGENCE_V1'
+          assert d['source_family'] == 'EU_DIRECT'
+          assert set(d['programme_families']) == {'European Urban Initiative','Innovation Fund'}
+          assert d['source_count'] == 5 and len(d['sources']) == 5 and len(d['programme_intelligence']) == 2
+          assert d['market_intelligence_only'] is True and d['fit_scores_are_not_eligibility'] is True
+          assert d['publication_effect'] == 'NONE'
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          assert all(d[k] is False for k in flags)
+          assert d['exact_call_or_topic_identifier_required'] is True
+          assert d['current_official_exact_endpoint_required'] is True
+          assert d['semantic_reconciliation_required'] is True
+          assert d['field_scoped_material_admission_required'] is True
+          assert re.fullmatch(r'[0-9a-f]{64}', d['registry_sha256'])
+          assert re.fullmatch(r'[0-9a-f]{64}', d['semantic_fingerprint'])
+          states={}
+          for source in d['sources']:
+              assert source['observation_state'] in {'PROGRAMME_INTELLIGENCE','CALL_INDEX_DISCOVERY'}
+              assert source['material_fact_use'] is False
+              assert re.fullmatch(r'[0-9a-f]{64}', source['source_semantic_fingerprint'])
+              health=source['source_health']
+              states[source['source_id']]=health['health_state']
+              if health['health_state'] == 'HEALTHY':
+                  assert health['http_status'] == 200
+                  assert health['lkg_required'] is False
+                  assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
+              else:
+                  assert str(health['health_state']).startswith('DEGRADED')
+                  assert health['lkg_required'] is True
+          for row in d['programme_intelligence']:
+              assert row['market_intelligence_only'] is True
+              assert row['fit_score_is_not_eligibility'] is True
+              assert 0 <= row['fit_score'] <= 1
+          print(json.dumps({
+              'source_health':states,
+              'healthy_source_count':d['healthy_source_count'],
+              'degraded_source_count':d['degraded_source_count'],
+              'semantic_fingerprint':d['semantic_fingerprint'],
+              'open_call_authorized':False,
+              'publication_effect':'NONE',
+          }, sort_keys=True))
           PY
 
       - name: Restore previous successful same-branch exact EIC receipt
