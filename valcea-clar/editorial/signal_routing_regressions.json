@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.6",
+  "schema_version": "1.7",
   "instance_id": "valcea",
   "cases": [
     {
@@ -18,6 +18,27 @@
       "id": "cjas-economat",
       "title": "CJAS Vâlcea anunță informații despre economat și medicamente compensate",
       "expected_route": "health_insurance"
+    },
+    {
+      "id": "a1-project-progress-held-without-infotrafic",
+      "title": "A1 Sibiu-Pitești: stadiul fizic al lucrărilor pe secțiunea Boița-Cornetu a ajuns la 42%",
+      "expected_route": "national_road_project_progress",
+      "forbidden_route": "national_road_restrictions",
+      "reason": "Construction-progress percentages require a dedicated first-party project-progress source; INFOTRAFIC only verifies operational road state."
+    },
+    {
+      "id": "dn7-project-progress-held-without-infotrafic",
+      "title": "Stadiul lucrărilor de reabilitare pe DN 7 la Călimănești: constructorul anunță un nou termen de finalizare",
+      "expected_route": "national_road_project_progress",
+      "forbidden_route": "national_road_restrictions",
+      "reason": "A project-progress or completion-date claim must not inherit operational authority from the traffic-information lane."
+    },
+    {
+      "id": "a1-operational-restriction-stays-infotrafic",
+      "title": "Restricții de circulație pe A1 Sibiu-Pitești în zona Boița pentru lucrări pe carosabil",
+      "expected_route": "national_road_restrictions",
+      "forbidden_route": "national_road_project_progress",
+      "reason": "A concrete live traffic restriction remains an INFOTRAFIC verification case even when roadworks are the cause."
     },
     {
       "id": "dn7-operational-restriction",
