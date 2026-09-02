@@ -61,8 +61,14 @@ jobs:
           for target in \
             valcea-clar/scripts/health_workforce_reference_context_engine.py \
             valcea-clar/scripts/health_workforce_detail_reconciliation.py; do
-            ! grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|urllib|http|socket|subprocess|selenium|playwright)([[:space:].]|$)' "$target"
-            ! grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state|urlopen|Request\(' "$target"
+            if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|socket|subprocess|selenium|playwright|urllib[.]request|http[.]client)([[:space:].]|$)' "$target"; then
+              echo "Forbidden network/process dependency in read-only context engine: $target" >&2
+              exit 1
+            fi
+            if grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state|urlopen|Request\(' "$target"; then
+              echo "Forbidden writer/runtime capability in read-only context engine: $target" >&2
+              exit 1
+            fi
             grep -F '"same_vacancy_inference_authorized": False' "$target"
             grep -F '"same_need_inference_authorized": False' "$target"
             grep -F '"dedupe_authorized": False' "$target"
