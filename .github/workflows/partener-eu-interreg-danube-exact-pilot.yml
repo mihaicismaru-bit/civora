@@ -1,0 +1,102 @@
+name: PARTENER.EU Interreg Danube Exact Pilot
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/interreg_danube_exact_call.py'
+      - 'partener-eu/ops/test_interreg_danube_exact_call.py'
+      - '.github/workflows/partener-eu-interreg-danube-exact-pilot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  danube-exact-pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile exact-call pilot and regression
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/interreg_danube_exact_call.py \
+            partener-eu/ops/test_interreg_danube_exact_call.py
+
+      - name: Validate fail-closed exact-call semantics
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: python partener-eu/ops/test_interreg_danube_exact_call.py
+
+      - name: Acquire exact current Danube call evidence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          ROOT=/tmp/partener-eu-danube-exact
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/interreg_danube_exact_call.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/danube-third-call-exact.json" \
+            --reconciliation-output "$ROOT/danube-third-call-reconciliation.json"
+
+      - name: Enforce live non-authorizing boundary
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-danube-exact')
+          exact=json.loads((root/'danube-third-call-exact.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'danube-third-call-reconciliation.json').read_text(encoding='utf-8'))
+          assert exact['schema']=='PARTENER_EU_INTERREG_DANUBE_EXACT_CALL_V1'
+          assert exact['call_identifier']=='third-call-for-proposals'
+          assert exact['call_identifier_kind']=='OFFICIAL_EXACT_ENDPOINT_SLUG'
+          assert exact['exact_authority_verified'] is True
+          assert exact['current_index_authority_verified'] is True
+          assert exact['candidate_state']=='CLOSED_CALL_CANDIDATE'
+          assert exact['candidate_status_label']=='Closed calls'
+          assert exact['candidate_deadline_text']=='15 December 2025, 14:00 CET'
+          assert rec['schema']=='PARTENER_EU_INTERREG_DANUBE_EXACT_RECONCILIATION_V1'
+          assert rec['reconciliation_state']=='BASELINE_CAPTURED_NON_AUTHORIZING'
+          assert rec['material_admission_ready_for_downstream_review'] is False
+          flags=(
+            'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+            'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+            'call_alert_authorized','canonical_corpus_mutation',
+          )
+          for obj in (exact,rec):
+              assert all(obj[k] is False for k in flags)
+          print({
+            'call_identifier': exact['call_identifier'],
+            'candidate_state': exact['candidate_state'],
+            'candidate_deadline_text': exact['candidate_deadline_text'],
+            'exact_semantic_fingerprint': exact['exact_semantic_fingerprint'],
+            'reconciliation_state': rec['reconciliation_state'],
+            'open_call_authorized': exact['open_call_authorized'],
+            'closed_call_authorized': exact['closed_call_authorized'],
+          })
+          PY
+
+      - name: Upload replayable Danube exact-call evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-interreg-danube-exact-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-danube-exact
+          if-no-files-found: error
+          retention-days: 7
