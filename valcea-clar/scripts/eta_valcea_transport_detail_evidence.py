@@ -113,9 +113,6 @@ TAG_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
             "temporar",
             "temporară",
             "temporara",
-            "perioada ",
-            "în perioada",
-            "in perioada",
         ),
     ),
     (
@@ -220,6 +217,15 @@ NUMERIC_CONTEXT_NEEDLES = (
     "validator",
 )
 
+ETA_BOILERPLATE_EXACT = {
+    "tarife transport curse convenții",
+    "tarife transport curse conventii",
+    "reduceri și gratuități",
+    "reduceri si gratuitati",
+    "cerere gratuitate elevi",
+    "cerere gratuitate pensionari",
+}
+
 ROMANIAN_MONTH_PATTERN = (
     r"ian(?:uarie)?|feb(?:ruarie)?|mar(?:tie)?|apr(?:ilie)?|mai|"
     r"iun(?:ie)?|iul(?:ie)?|aug(?:ust)?|sep(?:tembrie)?|sept(?:embrie)?|"
@@ -265,11 +271,19 @@ class VisibleTextParser(HTMLParser):
         self.skip_depth = 0
         self.in_title = False
         self.h1_depth = 0
+        self.content_scope_depth = 0
         self.tr_depth = 0
         self.title_parts: list[str] = []
         self.h1_parts: list[str] = []
-        self.segments: list[str] = []
+        self.all_segments: list[str] = []
+        self.scoped_segments: list[str] = []
         self._row_parts: list[str] = []
+        self._row_scoped = False
+
+    def _append_segment(self, text: str) -> None:
+        self.all_segments.append(text)
+        if self.content_scope_depth:
+            self.scoped_segments.append(text)
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         name = tag.lower()
@@ -279,10 +293,13 @@ class VisibleTextParser(HTMLParser):
             self.in_title = True
         elif name == "h1" and not self.skip_depth:
             self.h1_depth += 1
+        elif name in {"main", "article"} and not self.skip_depth:
+            self.content_scope_depth += 1
         elif name == "tr" and not self.skip_depth:
             self.tr_depth += 1
             if self.tr_depth == 1:
                 self._row_parts = []
+                self._row_scoped = bool(self.content_scope_depth)
 
     def handle_endtag(self, tag: str) -> None:
         name = tag.lower()
@@ -294,9 +311,14 @@ class VisibleTextParser(HTMLParser):
             if self.tr_depth == 1:
                 row = " ".join(" ".join(self._row_parts).split())
                 if row:
-                    self.segments.append(row)
+                    self.all_segments.append(row)
+                    if self._row_scoped:
+                        self.scoped_segments.append(row)
                 self._row_parts = []
+                self._row_scoped = False
             self.tr_depth -= 1
+        elif name in {"main", "article"} and self.content_scope_depth and not self.skip_depth:
+            self.content_scope_depth -= 1
         elif name in {"script", "style", "noscript", "svg", "template"} and self.skip_depth:
             self.skip_depth -= 1
 
@@ -306,13 +328,16 @@ class VisibleTextParser(HTMLParser):
         text = " ".join(data.split())
         if not text:
             return
-        self.segments.append(text)
+        self._append_segment(text)
         if self.in_title:
             self.title_parts.append(text)
         if self.h1_depth:
             self.h1_parts.append(text)
         if self.tr_depth:
             self._row_parts.append(text)
+
+    def evidence_segments(self) -> list[str]:
+        return self.scoped_segments or self.all_segments
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -390,12 +415,17 @@ def _tags_for_fragment(fragment: str) -> tuple[str, ...]:
     return tuple(dict.fromkeys(tags))
 
 
+def _is_eta_boilerplate(fragment: str) -> bool:
+    normalized = " ".join(fragment.casefold().split()).strip(" -–—")
+    return normalized in ETA_BOILERPLATE_EXACT
+
+
 def _split_candidate_fragments(segments: list[str]) -> list[str]:
     candidates: list[str] = []
     for segment in segments:
         for piece in re.split(r"(?<=[.!?])\s+|\s+[•|]\s+", segment):
             cleaned = " ".join(piece.split()).strip(" -–—")
-            if 18 <= len(cleaned) <= 1800:
+            if 18 <= len(cleaned) <= 1800 and not _is_eta_boilerplate(cleaned):
                 candidates.append(cleaned)
     return candidates
 
@@ -403,20 +433,26 @@ def _split_candidate_fragments(segments: list[str]) -> list[str]:
 def _extract_html_evidence(
     body: bytes,
     detail_sha256: str,
+    index_title: str | None = None,
 ) -> tuple[str | None, str | None, str | None, tuple[FieldEvidence, ...], dict[str, int]]:
     parser = VisibleTextParser()
     parser.feed(body.decode("utf-8", errors="replace"))
     h1 = " ".join(parser.h1_parts).strip()
     title = " ".join(parser.title_parts).strip()
-    visible_title = h1 or title or None
-    visible_text = " ".join(parser.segments)
+    extracted_title = h1 or title or ""
+    if not extracted_title or extracted_title.casefold().startswith("eta bus râmnicu vâlcea"):
+        visible_title = index_title or extracted_title or None
+    else:
+        visible_title = extracted_title
+    segments = parser.evidence_segments()
+    visible_text = " ".join(segments)
     publication_date = _find_publication_date(visible_text)
     effective_date = _find_effective_date(visible_text)
 
     evidence: list[FieldEvidence] = []
     seen: set[str] = set()
     tag_counts: dict[str, int] = {}
-    for fragment in _split_candidate_fragments(parser.segments):
+    for fragment in _split_candidate_fragments(segments):
         tags = _tags_for_fragment(fragment)
         if not tags:
             continue
@@ -571,7 +607,11 @@ def build_live_receipt() -> dict[str, Any]:
                 effective_date,
                 field_evidence,
                 tag_counts,
-            ) = _extract_html_evidence(body, detail_hash)
+            ) = _extract_html_evidence(
+                body,
+                detail_hash,
+                str(ref.get("title") or "") or None,
+            )
             details.append(
                 DetailEvidence(
                     source_kind=str(ref.get("source_kind") or ""),
@@ -655,7 +695,7 @@ def _self_test() -> None:
         raise AssertionError("resource-changing redirect must fail closed")
 
     html = (
-        "<html><head><title>ETA test</title></head><body>"
+        "<html><head><title>ETA test</title></head><body><main>"
         "<script>Tarif inventat 999 lei, valabil la 1 ianuarie 2099.</script>"
         "<h1>Tarife și călătorii gratuite</h1>"
         "<p>Publicat la: 30 Ian 2026</p>"
@@ -665,7 +705,7 @@ def _self_test() -> None:
         "<p>Tariful pentru bilete a fost aprobat prin Hotărâre de Consiliu Local în data de 29.01.2026.</p>"
         "<p>În perioada 17.07.2026 – 20.07.2026 va avea loc un upgrade; pot apărea anomalii temporare.</p>"
         "<p>Linia 5 va avea traseu modificat și stație temporară în centru.</p>"
-        "</body></html>"
+        "</main><footer>Tarife transport curse convenții Cerere gratuitate elevi</footer></body></html>"
     ).encode("utf-8")
     detail_hash = _sha256_bytes(html)
     (
@@ -674,7 +714,7 @@ def _self_test() -> None:
         effective_date,
         field_evidence,
         tag_counts,
-    ) = _extract_html_evidence(html, detail_hash)
+    ) = _extract_html_evidence(html, detail_hash, "Tarife și călătorii gratuite")
     assert title == "Tarife și călătorii gratuite"
     assert publication_date == "Publicat la: 30 Ian 2026"
     assert effective_date == "începând cu data de 01/02/2026"
@@ -691,6 +731,7 @@ def _self_test() -> None:
     assert set(tag_counts) <= ALLOWED_TAGS
     assert all(re.fullmatch(r"[0-9a-f]{64}", item.evidence_sha256) for item in field_evidence)
     assert all("999 lei" not in item.excerpt for item in field_evidence)
+    assert all("Cerere gratuitate elevi" not in item.excerpt for item in field_evidence)
     assert all(value is False for value in NON_AUTHORIZING_FLAGS.values())
     assert _eligible_reference({"source_kind": "COMMUNIQUES", "topic_class": "FARE_TICKETING"})
     assert not _eligible_reference({"source_kind": "COMMUNIQUES", "topic_class": "OPERATOR_OTHER"})
