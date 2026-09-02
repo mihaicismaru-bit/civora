@@ -1,0 +1,178 @@
+name: VÂLCEA CLAR ETA Service News Temporal Gate
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_detail_evidence.py"
+      - "valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py"
+      - "valcea-clar/scripts/eta_valcea_service_news_temporal_gate.py"
+      - ".github/workflows/valcea-clar-eta-service-news-temporal-gate.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_detail_evidence.py"
+      - "valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py"
+      - "valcea-clar/scripts/eta_valcea_service_news_temporal_gate.py"
+      - ".github/workflows/valcea-clar-eta-service-news-temporal-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-eta-service-temporal-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regressions
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/scripts/eta_valcea_transport_reference_adapter.py \
+            valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py \
+            valcea-clar/scripts/eta_valcea_transport_detail_evidence.py \
+            valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py \
+            valcea-clar/scripts/eta_valcea_service_news_temporal_gate.py
+          python valcea-clar/scripts/eta_valcea_transport_detail_evidence.py --self-test
+          python valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py --self-test
+          python valcea-clar/scripts/eta_valcea_service_news_temporal_gate.py --self-test
+
+      - name: Enforce temporal gate fail-closed boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/eta_valcea_service_news_temporal_gate.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in ETA temporal gate" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in ETA temporal gate" >&2
+            exit 1
+          fi
+          grep -F '"announcement_equals_operational_status": False' "$target"
+          grep -F '"historical_state_promoted_to_current": False' "$target"
+          grep -F '"current_operational_status_authorized": False' "$target"
+          grep -F '"route_service_current_authorized": False' "$target"
+          grep -F '"timetable_current_authorized": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire ETA temporal reconciliation receipt
+        run: |
+          set +e
+          python valcea-clar/scripts/eta_valcea_service_news_temporal_gate.py \
+            --live-check \
+            --output /tmp/eta_valcea_service_news_temporal_gate.json
+          rc=$?
+          set -e
+          cat /tmp/eta_valcea_service_news_temporal_gate.json || true
+          exit "$rc"
+
+      - name: Validate temporal reconciliation receipt
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/eta_valcea_service_news_temporal_gate.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'ETA_VALCEA_SERVICE_NEWS_TEMPORAL_GATE_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_TRANSPORT_EVIDENCE_TEMPORAL_RECONCILIATION'
+          assert payload['observation_state'] == 'EDITORIAL_TEMPORAL_RECONCILIATION_NON_AUTHORIZING'
+          assert payload['announcement_max_age_days'] == 7
+          assert set(payload['temporal_lanes']) == {
+              'HISTORICAL_CONTEXT', 'CURRENT_ANNOUNCEMENT',
+              'CURRENT_OPERATIONAL_STATUS', 'UNRESOLVED_TEMPORAL_REFERENCE',
+          }
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['current_detail_run_id'])
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['historical_detail_run_id'])
+          assert payload['records']
+          assert payload['current_operational_status_count'] == 0
+          assert payload['historical_context_count'] >= 1
+
+          counted = {lane: 0 for lane in payload['temporal_lanes']}
+          for item in payload['records']:
+              lane = item['temporal_lane']
+              assert lane in counted
+              counted[lane] += 1
+              parsed = urlsplit(item['detail_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'eta-bus.ro', 'www.eta-bus.ro'}
+              assert parsed.path.startswith('/comunicate/')
+              assert re.fullmatch(r'[0-9a-f]{64}', item['detail_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', item['temporal_evidence_sha256'])
+              assert item['reader_service_status_use'] is False
+              assert item['current_operational_status'] == 'UNRESOLVED_REQUIRES_SEPARATE_FIRST_PARTY_OPERATIONAL_VERIFICATION'
+              assert item['editorial_instruction']
+              if lane == 'CURRENT_ANNOUNCEMENT':
+                  assert isinstance(item['announcement_age_days'], int)
+                  assert 0 <= item['announcement_age_days'] <= payload['announcement_max_age_days']
+                  assert item['publication_date_text']
+              if lane == 'HISTORICAL_CONTEXT' and item['origin'] == 'ETA_HISTORICAL_DETAIL':
+                  assert item['historical_archive_year'] == 2025
+                  assert item['source_date']
+
+          assert counted['HISTORICAL_CONTEXT'] == payload['historical_context_count']
+          assert counted['CURRENT_ANNOUNCEMENT'] == payload['current_announcement_count']
+          assert counted['CURRENT_OPERATIONAL_STATUS'] == payload['current_operational_status_count']
+          assert counted['UNRESOLVED_TEMPORAL_REFERENCE'] == payload['unresolved_temporal_reference_count']
+
+          forbidden = [
+              'material_fact_use', 'current_index_presence_proves_currentness',
+              'announcement_equals_operational_status', 'historical_state_promoted_to_current',
+              'current_operational_status_authorized', 'route_service_current_authorized',
+              'timetable_current_authorized', 'fare_current_authorized',
+              'passenger_entitlement_current_authorized', 'service_disruption_current_authorized',
+              'event_service_current_authorized', 'breaking_authorized',
+              'fact_kernel_write_authorized', 'editorial_writer_authorized',
+              'publication_authorized', 'distribution_authorized', 'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          assert payload['limitations']['recent_publication_does_not_prove_service_is_operational_now'] is True
+          assert payload['limitations']['current_operational_status_requires_separate_live_first_party_attestation'] is True
+          print(
+              'ETA service-news temporal gate PASS; '
+              f"historical={payload['historical_context_count']}; "
+              f"announcements={payload['current_announcement_count']}; "
+              f"operational={payload['current_operational_status_count']}; "
+              f"unresolved={payload['unresolved_temporal_reference_count']}"
+          )
+          PY
+
+      - name: Upload ETA temporal gate evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-eta-service-news-temporal-gate
+          path: /tmp/eta_valcea_service_news_temporal_gate.json
+          retention-days: 7
+          if-no-files-found: warn
