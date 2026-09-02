@@ -72,9 +72,11 @@ jobs:
       - name: Acquire bounded high-value first-party detail evidence
         run: |
           set -euo pipefail
+          # Zero first-party high-value targets is a valid, explicit live state:
+          # many ISJ index items currently point to external document hosts, which
+          # this verifier intentionally refuses to fetch or promote to authority.
           python valcea-clar/scripts/isj_valcea_education_detail_evidence.py \
             --live-check \
-            --require-detail \
             --output /tmp/isj_valcea_education_detail_evidence.json
 
       - name: Validate live detail receipt boundary
@@ -91,7 +93,9 @@ jobs:
           assert payload['authority_class'] == 'FIRST_PARTY_COUNTY_EDUCATION_DETAIL_EVIDENCE'
           assert payload['observation_state'] == 'DETAIL_EVIDENCE_NON_AUTHORIZING'
           assert payload['coverage_note'] == 'BOUNDED_HIGH_VALUE_FIRST_PARTY_DETAIL_VERIFICATION_NOT_EXHAUSTIVE'
-          assert 1 <= payload['detail_evidence_count'] <= 12
+          assert payload['index_reference_count'] >= 1
+          assert 0 <= payload['detail_evidence_count'] <= 12
+          assert 0 <= payload['eligible_first_party_detail_count'] <= 12
           assert payload['detail_evidence_count'] + payload['detail_hold_count'] == payload['eligible_first_party_detail_count']
           assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
           allowed_topics = {'ADMISSIONS', 'EXAMS_RESULTS', 'STAFFING_MANAGEMENT'}
@@ -114,6 +118,10 @@ jobs:
               }
               assert len(item['evidence_fragments']) <= 4
 
+          for hold in payload['holds']:
+              assert hold['state'] == 'HOLD_DETAIL_FETCH_FAILED_NON_AUTHORIZING'
+              assert re.fullmatch(r'[0-9a-f]{64}', hold['index_evidence_sha256'])
+
           forbidden = [
               'material_fact_use', 'admission_capacity_authorized',
               'exam_result_authorized', 'current_vacancy_authorized',
@@ -124,9 +132,10 @@ jobs:
               'distribution_authorized', 'runtime_persistence_authorized',
           ]
           assert all(payload[key] is False for key in forbidden)
+          state = 'DETAIL_EVIDENCE_PRESENT' if payload['detail_evidence_count'] else 'NO_FIRST_PARTY_HIGH_VALUE_DETAIL_CANDIDATE'
           print(
-              f"Validated {payload['detail_evidence_count']} bounded first-party ISJ detail items; "
-              f"holds={payload['detail_hold_count']}"
+              f"ISJ bounded detail state={state}; evidence={payload['detail_evidence_count']}; "
+              f"holds={payload['detail_hold_count']}; index_refs={payload['index_reference_count']}"
           )
           PY
 
