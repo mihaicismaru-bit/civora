@@ -1,0 +1,191 @@
+name: VÂLCEA CLAR ETA Historical Detail Reconciliation
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_detail_evidence.py"
+      - "valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py"
+      - ".github/workflows/valcea-clar-eta-historical-detail-reconciliation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_detail_evidence.py"
+      - "valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py"
+      - ".github/workflows/valcea-clar-eta-historical-detail-reconciliation.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-eta-historical-detail-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regressions
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/scripts/eta_valcea_transport_reference_adapter.py \
+            valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py \
+            valcea-clar/scripts/eta_valcea_transport_detail_evidence.py \
+            valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py
+          python valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py --self-test
+          python valcea-clar/scripts/eta_valcea_transport_detail_evidence.py --self-test
+          python valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py --self-test
+
+      - name: Enforce historical/currentness fail-closed boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in ETA historical reconciler" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in ETA historical reconciler" >&2
+            exit 1
+          fi
+          grep -F '"historical_state_promoted_to_current": False' "$target"
+          grep -F '"currentness_inference_authorized": False' "$target"
+          grep -F '"route_service_current_authorized": False' "$target"
+          grep -F '"fare_current_authorized": False' "$target"
+          grep -F '"passenger_entitlement_current_authorized": False' "$target"
+          grep -F '"service_disruption_current_authorized": False' "$target"
+          grep -F '"event_service_current_authorized": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire ETA historical detail and current-index reconciliation
+        run: |
+          set +e
+          python valcea-clar/scripts/eta_valcea_transport_historical_detail_reconciliation.py \
+            --live-check \
+            --output /tmp/eta_valcea_historical_detail_reconciliation.json
+          rc=$?
+          set -e
+          cat /tmp/eta_valcea_historical_detail_reconciliation.json || true
+          exit "$rc"
+
+      - name: Validate historical reconciliation receipt
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/eta_valcea_historical_detail_reconciliation.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'ETA_VALCEA_TRANSPORT_HISTORICAL_DETAIL_RECONCILIATION_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_LOCAL_PUBLIC_TRANSPORT_OPERATOR_HISTORICAL_DETAIL'
+          assert payload['observation_state'] == 'HISTORICAL_DETAIL_CONTEXT_WITH_CURRENT_INDEX_RECONCILIATION_NON_AUTHORIZING'
+          assert payload['source_assertion_scope'] == 'ETA_HISTORICAL_FIRST_PARTY_STATEMENT_ONLY_CURRENTNESS_NOT_INFERRED'
+          assert payload['coverage_note'] == 'BOUNDED_FIRST_PARTY_ETA_ARCHIVE_DETAIL_WITH_CURRENT_INDEX_RECONCILIATION'
+          assert payload['archive_reference_count'] >= 1
+          assert payload['current_index_reference_count'] >= 1
+          assert 1 <= payload['eligible_historical_detail_count'] <= 12
+          assert 1 <= payload['historical_detail_evidence_count'] <= 12
+          assert payload['historical_detail_evidence_count'] + payload['historical_detail_hold_count'] == payload['eligible_historical_detail_count']
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+
+          reconciliation_states = {
+              'CURRENT_INDEX_EXACT_REFERENCE_PRESENT_NON_AUTHORIZING',
+              'CURRENT_INDEX_TOPIC_REFERENCE_PRESENT_REQUIRES_SEMANTIC_REVIEW',
+              'NO_CURRENT_INDEX_MATCH_HISTORICAL_ONLY',
+          }
+          allowed_tags = {
+              'ROUTE_OR_STOP_CHANGE', 'SERVICE_DISRUPTION_WINDOW',
+              'FARE_OR_TICKETING', 'PASSENGER_ENTITLEMENT',
+              'EFFECTIVE_DATE_OR_VALIDITY_WINDOW', 'APPROVAL_OR_POLICY_BASIS',
+              'ACCESSIBILITY_OR_BOARDING', 'REPORTED_NUMERIC_SERVICE_VALUE',
+          }
+          total_fields = 0
+          for item in payload['details']:
+              parsed = urlsplit(item['detail_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'eta-bus.ro', 'www.eta-bus.ro'}
+              assert parsed.path.startswith('/comunicate/')
+              assert item['source_kind'] == 'COMMUNIQUES_ARCHIVE_DETAIL'
+              assert item['historical_reference'] is True
+              assert item['archive_year'] == 2025
+              assert item['currentness_state'] == 'HISTORICAL_CONTEXT_ONLY_CURRENT_SERVICE_UNRESOLVED'
+              assert item['verification_state'] == 'ETA_HISTORICAL_SOURCE_TEXT_EVIDENCE_CAPTURED_NON_AUTHORIZING'
+              assert re.fullmatch(r'[0-9a-f]{64}', item['detail_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', item['archive_index_evidence_sha256'])
+              assert set(item['tag_counts']) <= allowed_tags
+              recon = item['current_reconciliation']
+              assert recon['reconciliation_state'] in reconciliation_states
+              assert recon['current_service_status'] == 'UNRESOLVED'
+              assert re.fullmatch(r'[0-9a-f]{64}', recon['reconciliation_evidence_sha256'])
+              assert len(recon['current_topic_candidates']) <= 6
+              for candidate in recon['current_topic_candidates']:
+                  p = urlsplit(candidate['target_url'])
+                  assert p.scheme == 'https'
+                  assert p.hostname in {'eta-bus.ro', 'www.eta-bus.ro'}
+              total_fields += len(item['field_evidence'])
+              for field in item['field_evidence']:
+                  assert field['archive_year'] == 2025
+                  assert field['source_assertion_scope'] == payload['source_assertion_scope']
+                  assert set(field['epistemic_tags']) <= allowed_tags
+                  assert re.fullmatch(r'[0-9a-f]{64}', field['detail_extractor_evidence_sha256'])
+                  assert re.fullmatch(r'[0-9a-f]{64}', field['historical_evidence_sha256'])
+          assert total_fields >= 1
+
+          forbidden = [
+              'material_fact_use', 'historical_state_promoted_to_current',
+              'currentness_inference_authorized', 'route_service_current_authorized',
+              'timetable_current_authorized', 'fare_current_authorized',
+              'ticketing_current_authorized', 'passenger_entitlement_current_authorized',
+              'service_disruption_current_authorized', 'event_service_current_authorized',
+              'realtime_arrival_authorized', 'same_event_dedupe_authorized',
+              'fact_kernel_write_authorized', 'editorial_writer_authorized',
+              'publication_authorized', 'distribution_authorized',
+              'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          limits = payload['limitations']
+          assert limits['archive_notice_is_historical_context_not_current_status'] is True
+          assert limits['current_index_presence_does_not_prove_current_service_state'] is True
+          assert limits['same_topic_current_reference_is_not_same_event_or_same_policy'] is True
+          assert limits['absence_from_current_index_does_not_prove_expiry_or_reversal'] is True
+          print(
+              f"ETA historical reconciliation PASS; evidence={payload['historical_detail_evidence_count']}; "
+              f"holds={payload['historical_detail_hold_count']}; fields={total_fields}"
+          )
+          PY
+
+      - name: Upload bounded ETA historical reconciliation evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-eta-historical-detail-reconciliation-evidence
+          path: /tmp/eta_valcea_historical_detail_reconciliation.json
+          retention-days: 7
+          if-no-files-found: warn
