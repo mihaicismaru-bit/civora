@@ -1,0 +1,150 @@
+name: VÂLCEA CLAR Health Workforce Context
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
+      - "valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py"
+      - "valcea-clar/scripts/health_workforce_reference_context_engine.py"
+      - ".github/workflows/valcea-clar-health-workforce-context.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
+      - "valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py"
+      - "valcea-clar/scripts/health_workforce_reference_context_engine.py"
+      - ".github/workflows/valcea-clar-health-workforce-context.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-health-workforce-context-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile source adapters and context engine
+        run: |
+          python -m py_compile valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py
+          python -m py_compile valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py
+          python -m py_compile valcea-clar/scripts/health_workforce_reference_context_engine.py
+
+      - name: Run deterministic source and context regressions
+        run: |
+          python valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py --self-test
+          python valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py --self-test
+          python valcea-clar/scripts/health_workforce_reference_context_engine.py --self-test
+
+      - name: Enforce context read-only capability boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/health_workforce_reference_context_engine.py"
+          ! grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|urllib|http|socket|subprocess|selenium|playwright)([[:space:].]|$)' "$target"
+          ! grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state|urlopen|Request\(' "$target"
+          grep -F '"same_vacancy_inference_authorized": False' "$target"
+          grep -F '"same_need_inference_authorized": False' "$target"
+          grep -F '"dedupe_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire bounded Ministry first-party receipt
+        run: |
+          python valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py \
+            --live-check \
+            --require-reference \
+            --max-pages 6 \
+            --output /tmp/ms_valcea_health_workforce.json
+
+      - name: Acquire bounded Posturi.gov.ro first-party receipt
+        run: |
+          python valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py \
+            --live-check \
+            --require-reference \
+            --max-details 8 \
+            --output /tmp/posturi_gov_valcea.json
+
+      - name: Build cross-source context receipt
+        run: |
+          python valcea-clar/scripts/health_workforce_reference_context_engine.py \
+            --ministry /tmp/ms_valcea_health_workforce.json \
+            --posturi /tmp/posturi_gov_valcea.json \
+            --output /tmp/health_workforce_context.json
+
+      - name: Validate non-authorizing context receipt
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          payload = json.loads(Path('/tmp/health_workforce_context.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'VALCEA_CLAR_HEALTH_WORKFORCE_REFERENCE_CONTEXT_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['observation_state'] == 'CROSS_SOURCE_REFERENCE_CONTEXT_NON_AUTHORIZING'
+          assert payload['context_state'] in {
+              'EXPLICIT_SAME_INSTITUTION_REFERENCE_CONTEXT_NON_AUTHORIZING',
+              'COUNTY_HEALTH_WORKFORCE_CONTEXT_ONLY_INSTITUTION_UNRESOLVED',
+              'MINISTRY_SJU_ONLY_NO_BOUNDED_POSTURI_HEALTH_REFERENCE',
+          }
+          coverage = payload['coverage']
+          assert 1 <= coverage['ministry_reference_count'] <= 16
+          assert 0 <= coverage['posturi_health_reference_count'] <= 8
+          assert coverage['posturi_explicit_sju_title_count'] <= coverage['posturi_health_reference_count']
+          assert coverage['follow_up_candidate_count'] == len(payload['follow_up_candidates'])
+          assert coverage['bounded_non_exhaustive'] is True
+          assert re.fullmatch(r'[0-9a-f]{64}', payload['source_fingerprint_sha256'])
+
+          forbidden = [
+              'material_fact_use', 'same_vacancy_inference_authorized',
+              'same_need_inference_authorized', 'dedupe_authorized',
+              'current_vacancy_authorized', 'deadline_authorized',
+              'eligibility_authorized', 'salary_authorized',
+              'staffing_shortage_authorized', 'service_capacity_authorized',
+              'breaking_authorized', 'fact_kernel_write_authorized',
+              'editorial_writer_authorized', 'publication_authorized',
+              'distribution_authorized', 'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          assert payload['institution_context']['same_institution_inferred'] is False
+          assert payload['institution_context']['same_vacancy_inferred'] is False
+          assert payload['institution_context']['same_need_inferred'] is False
+          for item in payload['follow_up_candidates']:
+              assert item['candidate_state'] == 'EXACT_DETAIL_RECONCILIATION_REQUIRED_NON_AUTHORIZING'
+              assert item['same_vacancy_inferred'] is False
+              assert item['same_need_inferred'] is False
+              assert item['dedupe_authorized'] is False
+              assert item['missing_before_any_same_vacancy_conclusion']
+          print(
+              'Validated health-workforce context: '
+              f"{coverage['ministry_reference_count']} ministry / "
+              f"{coverage['posturi_health_reference_count']} Posturi health refs; "
+              f"state={payload['context_state']}"
+          )
+          PY
+
+      - name: Upload bounded evidence receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-health-workforce-context-evidence
+          path: |
+            /tmp/ms_valcea_health_workforce.json
+            /tmp/posturi_gov_valcea.json
+            /tmp/health_workforce_context.json
+          retention-days: 7
+          if-no-files-found: error
