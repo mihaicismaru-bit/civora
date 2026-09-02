@@ -5,6 +5,12 @@ on:
     paths:
       - 'partener-eu/ingest/eea_norway_romania_programme_watch.py'
       - 'partener-eu/ops/test_eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ingest/eea_romania_programming_intelligence.py'
+      - 'partener-eu/ingest/eea_romania_programming_registry.json'
+      - 'partener-eu/ops/test_eea_romania_programming_intelligence.py'
+      - 'partener-eu/ingest/eea_romania_operator_watch.py'
+      - 'partener-eu/ingest/eea_romania_operator_watch_registry.json'
+      - 'partener-eu/ops/test_eea_romania_operator_watch.py'
       - 'partener-eu/ingest/interreg_romania_programme_matrix.py'
       - 'partener-eu/ops/test_interreg_romania_programme_matrix.py'
       - 'partener-eu/ingest/interreg_romania_call_surface_watch.py'
@@ -31,7 +37,7 @@ permissions:
 jobs:
   official-programme-intelligence:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -51,8 +57,12 @@ jobs:
 
       - name: Compile bounded official-programme adapters and regressions
         run: |
+          python -m json.tool partener-eu/ingest/eea_romania_programming_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eea_romania_operator_watch_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/eea_norway_romania_programme_watch.py \
+            partener-eu/ingest/eea_romania_programming_intelligence.py \
+            partener-eu/ingest/eea_romania_operator_watch.py \
             partener-eu/ingest/interreg_romania_programme_matrix.py \
             partener-eu/ingest/interreg_romania_call_surface_watch.py \
             partener-eu/ingest/interreg_applicant_partner_fit.py \
@@ -61,6 +71,8 @@ jobs:
             partener-eu/web/programme_intelligence_pipeline_projection.py \
             partener-eu/web/programme_intelligence_pipeline_enrichment.py \
             partener-eu/ops/test_eea_norway_romania_programme_watch.py \
+            partener-eu/ops/test_eea_romania_programming_intelligence.py \
+            partener-eu/ops/test_eea_romania_operator_watch.py \
             partener-eu/ops/test_interreg_romania_programme_matrix.py \
             partener-eu/ops/test_interreg_romania_call_surface_watch.py \
             partener-eu/ops/test_interreg_applicant_partner_fit.py \
@@ -74,6 +86,8 @@ jobs:
           PYTHONPATH: partener-eu/ingest:partener-eu/web
         run: |
           python partener-eu/ops/test_eea_norway_romania_programme_watch.py
+          python partener-eu/ops/test_eea_romania_programming_intelligence.py
+          python partener-eu/ops/test_eea_romania_operator_watch.py
           python partener-eu/ops/test_interreg_romania_programme_matrix.py
           python partener-eu/ops/test_interreg_romania_call_surface_watch.py
           python partener-eu/ops/test_interreg_applicant_partner_fit.py
@@ -100,7 +114,7 @@ jobs:
               raise SystemExit(f'Interreg authority transport failures: {failures}')
           PY
 
-      - name: Acquire official Romania EEA/Norway evidence
+      - name: Acquire official Romania EEA/Norway programme evidence
         env:
           PYTHONPATH: partener-eu/ingest
         run: |
@@ -109,6 +123,22 @@ jobs:
           mkdir -p "$ROOT/eea-norway-romania"
           python partener-eu/ingest/eea_norway_romania_programme_watch.py \
             --out-dir "$ROOT/eea-norway-romania" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Acquire official FMO Romania programming/operator intelligence
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/eea-programming"
+          python partener-eu/ingest/eea_romania_programming_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/eea-programming/eea-romania-programming-evidence.json"
+
+      - name: Acquire bounded official EEA Programme/Fund Operator watch
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/eea-operator-watch"
+          python partener-eu/ingest/eea_romania_operator_watch.py \
+            --output-dir "$ROOT/eea-operator-watch" \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
       - name: Acquire official Interreg Romania programme/territory matrix
@@ -301,10 +331,12 @@ jobs:
       - name: Enforce live non-authorizing boundaries
         run: |
           python - <<'PY'
-          import json
+          import json, re
           from pathlib import Path
           root = Path('/tmp/partener-eu-official-programme-intelligence')
           eea = json.loads((root/'eea-norway-romania/eea-norway-romania-programme-watch.json').read_text(encoding='utf-8'))
+          eea_programming = json.loads((root/'eea-programming/eea-romania-programming-evidence.json').read_text(encoding='utf-8'))
+          eea_operator = json.loads((root/'eea-operator-watch/handoff/eea_romania_operator_watch.json').read_text(encoding='utf-8'))
           interreg = json.loads((root/'interreg-romania/interreg-romania-programme-matrix.json').read_text(encoding='utf-8'))
           interreg_calls = json.loads((root/'interreg-call-surfaces/interreg-romania-call-surface-watch.json').read_text(encoding='utf-8'))
           applicant_timis = json.loads((root/'interreg-applicant-fit/timis-public-authority.json').read_text(encoding='utf-8'))
@@ -319,6 +351,45 @@ jobs:
 
           assert eea['schema'] == 'PARTENER_EU_EEA_NORWAY_ROMANIA_PROGRAMME_WATCH_V1'
           assert eea['source_health'] == 'HEALTHY' and len(eea['programmes']) == 9
+
+          assert eea_programming['schema'] == 'PARTENER_EU_EEA_ROMANIA_PROGRAMMING_EVIDENCE_V2'
+          assert eea_programming['observation_state'] == 'PROGRAMMING_PIPELINE'
+          assert eea_programming['stats']['programme_records'] == 9
+          assert eea_programming['stats']['operator_watch_seeds'] == 9
+          assert eea_programming['stats']['fund_operator_watch_seeds'] == 2
+          assert eea_programming['stats']['open_calls_authorized'] == 0
+          assert all(
+              eea_programming[k] is False
+              for k in (
+                  'material_fact_use','open_call_authorized','deadline_authorized','budget_authorized',
+                  'eligibility_authorized','publish_authorized','distribution_authorized','canonical_corpus_mutation'
+              )
+          )
+          assert all(row['observation_state'] == 'PROGRAMMING_PIPELINE' and row['not_a_call'] is True for row in eea_programming['records'])
+          assert all(row['programme_grant_scope'] == 'PROGRAMME_ALLOCATION_NOT_CALL_BUDGET' for row in eea_programming['records'])
+
+          assert eea_operator['adapter_id'] == 'EEA_ROMANIA_OPERATOR_WATCH_V1'
+          assert eea_operator['route_count'] == 8
+          assert eea_operator['healthy_route_count'] >= 1
+          assert all(
+              eea_operator[k] is False
+              for k in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized')
+          )
+          required_open = {'exact_call_or_topic_identifier','current_official_exact_call_endpoint','explicit_current_official_open_status','semantic_reconciliation'}
+          assert required_open.issubset(set(eea_operator['missing_for_open_confirmation']))
+          for row in eea_operator['routes']:
+              assert all(
+                  row[k] is False
+                  for k in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized')
+              )
+              if row['health_state'] == 'HEALTHY':
+                  assert re.fullmatch(r'[0-9a-f]{64}', str(row.get('raw_sha256') or ''))
+                  assert len(row.get('candidates') or []) == row['candidate_count']
+                  assert all(x['candidate_observation_state'] == 'DISCOVERY_ONLY' for x in row.get('candidates') or [])
+              else:
+                  assert row['health_state'] == 'DEGRADED'
+                  assert row['lkg_required'] is True and row['candidate_count'] == 0
+
           assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1' and interreg['programme_count'] == 7
           assert interreg_calls['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2'
           assert interreg_calls['discovered_call_facts'] == [] and interreg_calls['fallback_does_not_restore_call_surface_coverage'] is True
@@ -383,6 +454,9 @@ jobs:
           assert all(all(card[k] is False for k in flags) for card in preview_v2['cards'])
           print({
               'eea_programmes': len(eea['programmes']),
+              'eea_programming_records': eea_programming['stats']['programme_records'],
+              'eea_operator_watch_health': eea_operator['health_state'],
+              'eea_operator_watch_healthy_routes': eea_operator['healthy_route_count'],
               'interreg_programmes': interreg['programme_count'],
               'interreg_call_surface_health': interreg_calls['source_health'],
               'applicant_fit_timis_count': applicant_timis['fit_count'],
