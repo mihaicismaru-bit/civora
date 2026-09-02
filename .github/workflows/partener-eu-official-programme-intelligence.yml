@@ -1,20 +1,22 @@
-name: PARTENER.EU EEA Norway Romania Watch
+name: PARTENER.EU Official Programme Intelligence
 
 on:
   pull_request:
     paths:
       - 'partener-eu/ingest/eea_norway_romania_programme_watch.py'
       - 'partener-eu/ops/test_eea_norway_romania_programme_watch.py'
-      - '.github/workflows/partener-eu-eea-norway-romania-watch.yml'
+      - 'partener-eu/ingest/interreg_romania_programme_matrix.py'
+      - 'partener-eu/ops/test_interreg_romania_programme_matrix.py'
+      - '.github/workflows/partener-eu-official-programme-intelligence.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  eea-norway-romania-watch:
+  official-programme-intelligence:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -22,7 +24,17 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
 
-      - name: Compile bounded EEA/Norway adapter and regression
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded official-programme adapters and regressions
         run: |
           python -m py_compile \
             partener-eu/ingest/eea_norway_romania_programme_watch.py \
@@ -37,17 +49,19 @@ jobs:
         env:
           PYTHONPATH: partener-eu/ingest
         run: |
-          rm -rf /tmp/partener-eea-norway-romania
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/eea-norway-romania"
           python partener-eu/ingest/eea_norway_romania_programme_watch.py \
-            --out-dir /tmp/partener-eea-norway-romania \
+            --out-dir "$ROOT/eea-norway-romania" \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
-      - name: Enforce live non-authorizing boundary
+      - name: Enforce live EEA/Norway non-authorizing boundary
         run: |
           python - <<'PY'
           import json
           from pathlib import Path
-          p = Path('/tmp/partener-eea-norway-romania/eea-norway-romania-programme-watch.json')
+          p = Path('/tmp/partener-eu-official-programme-intelligence/eea-norway-romania/eea-norway-romania-programme-watch.json')
           d = json.loads(p.read_text(encoding='utf-8'))
           assert d['schema'] == 'PARTENER_EU_EEA_NORWAY_ROMANIA_PROGRAMME_WATCH_V1'
           assert d['source_health'] == 'HEALTHY'
@@ -63,6 +77,7 @@ jobs:
               assert d[key] is False, (key, d[key])
           assert all(x['observation_state'] == 'PROGRAMMING' for x in d['programming_observations'])
           assert all(x['observation_state'] == 'CALL_DISCOVERY_ONLY' for x in d['call_discovery'])
+          assert all('/calls/call-' in x['url'] for x in d['call_discovery'])
           print({
               'programme_count': len(d['programmes']),
               'call_discovery_count': len(d['call_discovery']),
@@ -71,10 +86,11 @@ jobs:
           })
           PY
 
-      - name: Upload bounded evidence
-        uses: actions/upload-artifact@v4
+      - name: Upload replayable official-programme evidence
+        if: always()
+        uses: actions/upload-artifact@v6
         with:
-          name: partener-eu-eea-norway-romania-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/partener-eea-norway-romania
+          name: partener-eu-official-programme-intelligence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-official-programme-intelligence
           if-no-files-found: error
           retention-days: 7
