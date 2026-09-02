@@ -57,6 +57,7 @@ def main():
     assert baseline["healthy_source_count"] == 9
     assert baseline["coverage_complete"] is True
     assert all(row["observation_state"] in {"PROPOSAL", "CONSULTATION", "PROGRAMMING_PROCESS"} for row in baseline["watchlist"])
+    assert all("OPEN" not in row["observation_state"] and "CALL" not in row["observation_state"] for row in baseline["watchlist"])
     assert all(row["open_call_authorized"] is False for row in baseline["watchlist"])
     assert all(row["call_alert_authorized"] is False for row in baseline["watchlist"])
     assert next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-ROHU-2028-2034")["consultation_lifecycle"] == "AFTER_WINDOW"
@@ -132,6 +133,7 @@ def main():
         "baseline_reconciliation": base_reconcile["reconciliation_state"],
         "same_identity_lkg_guard": "PASS",
         "open_call_widening_guard": "PASS",
+        "programming_state_never_encodes_open_or_call": "PASS",
     })
 
 
