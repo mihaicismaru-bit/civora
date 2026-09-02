@@ -1,0 +1,148 @@
+name: VÂLCEA CLAR ETA Transport References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - ".github/workflows/valcea-clar-eta-transport-references.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - ".github/workflows/valcea-clar-eta-transport-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-eta-transport-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regression
+        run: |
+          set -euo pipefail
+          python -m py_compile valcea-clar/scripts/eta_valcea_transport_reference_adapter.py
+          python valcea-clar/scripts/eta_valcea_transport_reference_adapter.py --self-test
+
+      - name: Enforce first-party local transport reference capability boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in ETA source adapter" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in ETA source adapter" >&2
+            exit 1
+          fi
+          grep -F '"material_fact_use": False' "$target"
+          grep -F '"route_service_current_authorized": False' "$target"
+          grep -F '"timetable_current_authorized": False' "$target"
+          grep -F '"fare_current_authorized": False' "$target"
+          grep -F '"realtime_arrival_authorized": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire bounded live ETA first-party communications
+        run: |
+          set +e
+          python valcea-clar/scripts/eta_valcea_transport_reference_adapter.py \
+            --live-check \
+            --require-reference \
+            --output /tmp/eta_valcea_transport_references.json
+          rc=$?
+          set -e
+          cat /tmp/eta_valcea_transport_references.json || true
+          exit "$rc"
+
+      - name: Validate live receipt boundary
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/eta_valcea_transport_references.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'ETA_VALCEA_TRANSPORT_REFERENCE_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_LOCAL_PUBLIC_TRANSPORT_OPERATOR_INDEX'
+          assert payload['observation_state'] == 'REFERENCE_ONLY_NON_AUTHORIZING'
+          assert payload['coverage_note'] == 'BOUNDED_FIRST_PARTY_PUBLIC_TRANSPORT_OPERATOR_COMMUNICATIONS_DISCOVERY_NOT_EXHAUSTIVE'
+          assert payload['source_page_count'] == 1
+          assert 1 <= payload['reference_count'] <= 48
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+
+          allowed_topics = {
+              'ROUTE_CHANGE', 'SERVICE_DISRUPTION', 'EVENT_TRANSPORT',
+              'FARE_TICKETING', 'PASSENGER_ENTITLEMENT', 'ACCESSIBILITY',
+              'OPERATOR_OTHER',
+          }
+          for page in payload['source_pages']:
+              parsed = urlsplit(page['source_page_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'eta-bus.ro', 'www.eta-bus.ro'}
+              assert parsed.path.rstrip('/') == '/comunicate'
+              assert re.fullmatch(r'[0-9a-f]{64}', page['source_page_sha256'])
+          for ref in payload['references']:
+              target = urlsplit(ref['target_url'])
+              assert target.scheme == 'https'
+              assert target.hostname in {'eta-bus.ro', 'www.eta-bus.ro'}
+              assert target.path.startswith('/comunicate/')
+              assert ref['topic_class'] in allowed_topics
+              assert ref['authority_class'] == payload['authority_class']
+              assert ref['observation_state'] == payload['observation_state']
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['source_page_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['evidence_sha256'])
+
+          forbidden = [
+              'material_fact_use', 'route_service_current_authorized',
+              'timetable_current_authorized', 'fare_current_authorized',
+              'ticketing_current_authorized', 'passenger_entitlement_current_authorized',
+              'service_disruption_current_authorized', 'realtime_arrival_authorized',
+              'fact_kernel_write_authorized', 'editorial_writer_authorized',
+              'publication_authorized', 'distribution_authorized',
+              'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          assert payload['limitations']['current_routes_and_timetables_require_detail_or_live_verification'] is True
+          assert payload['limitations']['realtime_arrivals_require_separate_live_source'] is True
+          print(
+              f"Validated {payload['reference_count']} bounded ETA transport references "
+              f"from {payload['source_page_count']} first-party communications index"
+          )
+          PY
+
+      - name: Upload bounded ETA transport source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-eta-transport-reference-evidence
+          path: /tmp/eta_valcea_transport_references.json
+          retention-days: 7
+          if-no-files-found: error
