@@ -1,0 +1,139 @@
+name: VÂLCEA CLAR ISJ Education References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/isj_valcea_education_reference_adapter.py"
+      - ".github/workflows/valcea-clar-isj-education-references.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/isj_valcea_education_reference_adapter.py"
+      - ".github/workflows/valcea-clar-isj-education-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-isj-education-references-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regression
+        run: |
+          set -euo pipefail
+          python -m py_compile valcea-clar/scripts/isj_valcea_education_reference_adapter.py
+          python valcea-clar/scripts/isj_valcea_education_reference_adapter.py --self-test
+
+      - name: Enforce source-reference capability boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/isj_valcea_education_reference_adapter.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in ISJ source adapter" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in source-reference adapter" >&2
+            exit 1
+          fi
+          grep -F '"material_fact_use": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire bounded live first-party index evidence
+        run: |
+          set -euo pipefail
+          python valcea-clar/scripts/isj_valcea_education_reference_adapter.py \
+            --live-check \
+            --require-reference \
+            --output /tmp/isj_valcea_education_references.json
+
+      - name: Validate live receipt boundary
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/isj_valcea_education_references.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'ISJ_VALCEA_EDUCATION_REFERENCE_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_COUNTY_EDUCATION_AUTHORITY_INDEX'
+          assert payload['observation_state'] == 'REFERENCE_ONLY_NON_AUTHORIZING'
+          assert payload['coverage_note'] == 'BOUNDED_FIRST_PARTY_INDEX_DISCOVERY_NOT_EXHAUSTIVE'
+          assert 1 <= payload['source_page_count'] <= 2
+          assert 1 <= payload['reference_count'] <= 64
+          assert payload['first_party_target_count'] + payload['external_document_discovery_count'] == payload['reference_count']
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+
+          allowed_topics = {
+              'ADMISSIONS', 'EXAMS_RESULTS', 'STAFFING_MANAGEMENT',
+              'SCHOOL_PROGRAMMES', 'SCHOOL_NETWORK', 'TEACHING_CAREER',
+          }
+          for page in payload['source_pages']:
+              parsed = urlsplit(page['source_page_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'isjvalcea.ro', 'www.isjvalcea.ro'}
+              assert re.fullmatch(r'[0-9a-f]{64}', page['source_page_sha256'])
+          for ref in payload['references']:
+              source = urlsplit(ref['source_page_url'])
+              target = urlsplit(ref['target_url'])
+              assert source.scheme == 'https'
+              assert source.hostname in {'isjvalcea.ro', 'www.isjvalcea.ro'}
+              assert target.scheme == 'https'
+              assert target.hostname
+              assert ref['topic_class'] in allowed_topics
+              assert ref['authority_class'] == payload['authority_class']
+              assert ref['observation_state'] == payload['observation_state']
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['source_page_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['evidence_sha256'])
+              assert ref['target_is_first_party'] is (ref['target_host'] in {'isjvalcea.ro', 'www.isjvalcea.ro'})
+
+          forbidden = [
+              'material_fact_use', 'admission_capacity_authorized',
+              'exam_result_authorized', 'current_vacancy_authorized',
+              'deadline_authorized', 'eligibility_authorized',
+              'school_status_authorized', 'breaking_authorized',
+              'fact_kernel_write_authorized', 'editorial_writer_authorized',
+              'publication_authorized', 'distribution_authorized',
+              'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          print(
+              f"Validated {payload['reference_count']} bounded ISJ Vâlcea education references "
+              f"across {payload['source_page_count']} first-party pages"
+          )
+          PY
+
+      - name: Upload bounded education source evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-isj-education-reference-evidence
+          path: /tmp/isj_valcea_education_references.json
+          retention-days: 7
+          if-no-files-found: error
