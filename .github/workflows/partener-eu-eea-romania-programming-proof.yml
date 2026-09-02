@@ -1,0 +1,91 @@
+name: PARTENER.EU EEA Romania Programming Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_romania_programming_intelligence.py'
+      - 'partener-eu/ingest/eea_romania_programming_registry.json'
+      - 'partener-eu/ops/test_eea_romania_programming_intelligence.py'
+      - '.github/workflows/partener-eu-eea-romania-programming-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eea-romania-programming-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile and validate registry
+        run: |
+          python -m json.tool partener-eu/ingest/eea_romania_programming_registry.json >/dev/null
+          python -m py_compile partener-eu/ingest/eea_romania_programming_intelligence.py partener-eu/ops/test_eea_romania_programming_intelligence.py
+
+      - name: Validate fail-closed programming contract
+        run: python partener-eu/ops/test_eea_romania_programming_intelligence.py
+
+      - name: Acquire fresh official FMO Romania programme evidence
+        run: |
+          ROOT=/tmp/partener-eu-eea-romania-programming-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/eea_romania_programming_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/eea-romania-programming-evidence.json"
+
+      - name: Enforce live non-authorizing boundaries
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-eea-romania-programming-proof/eea-romania-programming-evidence.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_EEA_ROMANIA_PROGRAMMING_EVIDENCE_V2'
+          assert d['observation_state'] == 'PROGRAMMING_PIPELINE'
+          assert d['stats']['programme_records'] == 9
+          assert d['stats']['operator_watch_seeds'] == 9
+          assert d['stats']['fund_operator_watch_seeds'] == 2
+          assert d['stats']['open_calls_authorized'] == 0
+          source=d['source']
+          assert source['http_status'] == 200
+          assert source['published_date'] == '2026-05-12'
+          assert re.fullmatch(r'[0-9a-f]{64}', source['raw_hash'])
+          flags=('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','canonical_corpus_mutation')
+          assert all(d[k] is False for k in flags)
+          required={'exact_call_identifier','official_current_open_status','exact_official_call_endpoint','semantic_reconciliation'}
+          for row in d['records']:
+              assert row['observation_state'] == 'PROGRAMMING_PIPELINE'
+              assert row['not_a_call'] is True
+              assert row['programme_grant_scope'] == 'PROGRAMME_ALLOCATION_NOT_CALL_BUDGET'
+              assert all(row[k] is False for k in flags)
+              assert required.issubset(set(row['missing_to_confirm_call']))
+              assert row['requires_reconciliation'] is True
+              assert re.fullmatch(r'[0-9a-f]{64}', row['semantic_fingerprint'])
+          print({'programmes': len(d['records']), 'fund_operator_seeds': d['stats']['fund_operator_watch_seeds'], 'open_call_authorized': False})
+          PY
+
+      - name: Upload bounded proof evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-eea-romania-programming-proof-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-eea-romania-programming-proof
+          if-no-files-found: warn
+          retention-days: 7
