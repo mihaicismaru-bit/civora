@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5",
+  "schema_version": "1.6",
   "instance_id": "valcea",
   "cases": [
     {
@@ -18,6 +18,34 @@
       "id": "cjas-economat",
       "title": "CJAS Vâlcea anunță informații despre economat și medicamente compensate",
       "expected_route": "health_insurance"
+    },
+    {
+      "id": "dn7-operational-restriction",
+      "title": "Restricții de circulație pe DN 7 în Valea Oltului pentru traficul greu, pe durata lucrărilor",
+      "expected_route": "national_road_restrictions",
+      "forbidden_route": "police_public_safety",
+      "reason": "Operational national-road restriction signals must reach the dedicated INFOTRAFIC verification surface instead of being captured by the generic DN7 police route."
+    },
+    {
+      "id": "dn7-accident-remains-police",
+      "title": "Accident pe DN 7 la Călimănești: două victime, traficul este blocat",
+      "expected_route": "police_public_safety",
+      "forbidden_route": "national_road_restrictions",
+      "reason": "Accident and victim semantics remain public-safety reporting even when the incident causes a traffic restriction."
+    },
+    {
+      "id": "county-roadworks-cj",
+      "title": "Lucrări de asfaltare pe DJ 703 G: circulația va fi restricționată pe sectorul în lucru",
+      "expected_route": "county_roadworks",
+      "forbidden_route": "administration_projects",
+      "reason": "Explicit DJ roadworks belong to the bounded CJ Vâlcea roadworks verification surface, not the generic administration-project route."
+    },
+    {
+      "id": "county-road-accident-remains-police",
+      "title": "Accident rutier pe DJ 703 G, cu o victimă și trafic restricționat",
+      "expected_route": "police_public_safety",
+      "forbidden_route": "county_roadworks",
+      "reason": "A county-road identifier must not divert an accident away from the police verification lane."
     },
     {
       "id": "ipj-calimanesti-protection-orders",
