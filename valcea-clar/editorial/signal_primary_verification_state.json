@@ -2,19 +2,46 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-02T14:53:02+03:00",
+  "generated_at": "2026-09-02T14:56:43+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-02T14:51:44+03:00",
-  "task_count": 65,
+  "queue_generated_at": "2026-09-02T14:55:36+03:00",
+  "task_count": 66,
   "primary_match_count": 0,
-  "no_match_count": 27,
-  "unrouted_count": 38,
-  "target_count": 17,
-  "targets_ok": 14,
+  "no_match_count": 30,
+  "unrouted_count": 36,
+  "target_count": 18,
+  "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "5ce0e8f1a61e09a2e5fb738c",
+      "signal_title": "Rețea de distribuire a materialelor cu pornografie infantilă, destructurată într-un județ vecin. Cinci persoane au fost reținute",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/02/retea-de-distribuire-a-materialelor-cu-pornografie-infantila-destructurata-intr-un-judet-vecin-cinci-persoane-au-fost-retinute/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-02T14:51:56+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "fafc15339a0a473409bd26b6",
       "signal_title": "Medicul Constantin Ionițescu a publicat o carte cu noi ipoteze despre bătălia de la Posada",
@@ -32,12 +59,27 @@
       "signal_title": "FOTO – Doi șoferi de ATV, prinși fără permis în Vâlcea. Unul circula cu un vehicul neînmatriculat, celălalt era băut",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/02/foto-doi-soferi-de-atv-prinsi-fara-permis-in-valcea-unul-circula-cu-un-vehicul-neinmatriculat-celalalt-era-baut/",
       "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
       "signal_published_at": "2026-09-02T11:21:00+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
       "publication_authority": "NONE",
+      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "b4bd99e31df3ba12c8a92260",
@@ -80,6 +122,17 @@
           "status": "PASS",
           "error": null,
           "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -105,12 +158,49 @@
       "signal_title": "ACUM – Arde o casă de pe Știrbei Vodă din Râmnicu Vâlcea",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/02/acum-arde-o-casa-de-pe-stirbei-voda-din-ramnicu-valcea/",
       "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
       "signal_published_at": "2026-09-02T09:32:00+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
       "publication_authority": "NONE",
+      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "6c58e066d3e5b9ba93ab8358",
