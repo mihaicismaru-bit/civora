@@ -2,9 +2,9 @@
 """Official Interreg programme/territory matrix relevant to Romania.
 
 Acquisition-only and non-authorizing. This verifies programme-level Romanian
-territorial fit from official programme authorities or programme-validated
-Interreg registry evidence. It never authorizes a call status, deadline,
-budget, applicant eligibility, publication or alert.
+territorial fit from official programme authorities or Interact/keep.eu
+registry evidence with explicit provenance. It never authorizes a call status,
+deadline, budget, applicant eligibility, publication or alert.
 """
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "hosts": ("keep.eu", "www.keep.eu"),
         "anchors": ("2021 - 2027 Interreg VI-A Romania-Bulgaria", "Eligible geographical area", "Mehedinti", "Dolj", "Olt", "Teleorman", "Giurgiu", "Calarasi", "Constanta"),
         "romania_scope": ("Mehedinti", "Dolj", "Olt", "Teleorman", "Giurgiu", "Calarasi", "Constanta"),
-        "evidence_note": "keep.eu programme data is programme-validated Interreg registry evidence",
+        "evidence_note": "keep.eu Interact registry; programme-validated fundamental information",
     },
     {
         "id": "RO_HU", "programme": "Interreg VI-A Romania-Hungary", "mode": "CBC_INTERNAL",
@@ -62,19 +62,19 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "RO_UA", "programme": "Interreg NEXT Romania-Ukraine", "mode": "CBC_NEXT",
-        "url": "https://ro-ua.net/en/programme",
-        "hosts": ("ro-ua.net", "www.ro-ua.net"),
-        "anchors": ("Interreg NEXT Romania-Ukraine", "Satu Mare", "Maramures", "Suceava", "Botosani", "Tulcea"),
+        "url": "https://keep.eu/programmes/341/2021-2027-Romania-Ukraine/",
+        "hosts": ("keep.eu", "www.keep.eu"),
+        "anchors": ("2021 - 2027 Interreg VI-A NEXT Romania - Ukraine", "Eligible geographical area", "Satu Mare", "Maramures", "Suceava", "Botosani", "Tulcea"),
         "romania_scope": ("Satu Mare", "Maramures", "Suceava", "Botosani", "Tulcea"),
-        "evidence_note": "official programme authority",
+        "evidence_note": "keep.eu Interact registry fallback; direct programme host failed verified TLS in runner; geography research only",
     },
     {
         "id": "RO_MD", "programme": "Interreg NEXT Romania-Republic of Moldova", "mode": "CBC_NEXT",
-        "url": "https://ro-md.net/en/about-us",
-        "hosts": ("ro-md.net", "www.ro-md.net"),
-        "anchors": ("Interreg VI-A NEXT Romania-Republic of Moldova", "Botosani", "Iasi", "Vaslui", "Galati"),
+        "url": "https://keep.eu/programmes/339/2021-2027-Romania-Moldova/",
+        "hosts": ("keep.eu", "www.keep.eu"),
+        "anchors": ("2021 - 2027 Interreg VI-A NEXT Romania - Rep.Moldova", "Eligible geographical area", "Botosani", "Iasi", "Vaslui", "Galati"),
         "romania_scope": ("Botosani", "Iasi", "Vaslui", "Galati"),
-        "evidence_note": "official programme authority",
+        "evidence_note": "keep.eu Interact registry fallback; direct programme host failed verified TLS in runner; geography research only",
     },
     {
         "id": "DANUBE", "programme": "Interreg Danube Region Programme", "mode": "TRANSNATIONAL",
@@ -86,11 +86,11 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "INTERREG_EUROPE", "programme": "Interreg Europe", "mode": "INTERREGIONAL",
-        "url": "https://www.interregeurope.eu/in-my-country/romania/",
-        "hosts": ("www.interregeurope.eu", "interregeurope.eu"),
-        "anchors": ("Romania", "Interreg Europe"),
+        "url": "https://keep.eu/programmes/394/2021-2027-lnterreg-Europe/",
+        "hosts": ("keep.eu", "www.keep.eu"),
+        "anchors": ("2021 - 2027 Interreg VI-C Interreg Europe", "Eligible geographical area", "Romania", "Programme validated the information"),
         "romania_scope": ("ALL_ROMANIA",),
-        "evidence_note": "official programme authority",
+        "evidence_note": "keep.eu Interact registry; programme-validated fundamental information; direct programme page timed out in runner",
     },
 )
 
