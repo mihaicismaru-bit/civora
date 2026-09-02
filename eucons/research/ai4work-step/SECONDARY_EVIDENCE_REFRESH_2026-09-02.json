@@ -1,73 +1,85 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.5",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-02T20:34:33+03:00",
+  "observed_at": "2026-09-02T21:33:36+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
   "prod_need_evidence_eligible": false,
   "purpose": "Audit the official/institutional secondary-research sweep for Centru, Sud-Muntenia and Sud-Vest Oltenia without promoting project activity, funding supply, technology deployment or unread source listings as evidence of AI4WORK need prevalence.",
   "promotion_policy": {
-    "source_register_high_water_mark": "S39",
-    "source_promoted_today": "S39",
-    "source_promoted_this_refresh": null,
+    "source_register_high_water_mark": "S40",
+    "source_promoted_today": "S40",
+    "source_promoted_this_refresh": "S40",
     "h1_h5_numeric_points_added": 0,
     "numeric_rank_changed": false,
     "project_activity_as_need_evidence": false,
-    "decision": "NO_NEW_SOURCE_PROMOTED_COVASNA_2026_FORECAST_DISCOVERED_BUT_CONTENT_NOT_AUDITABLE_IN_REQUIRED_PDF_PATH"
+    "decision": "PROMOTE_S40_OLT_HISTORICAL_EMPLOYER_SURVEY_AS_DIRECT_COMPLEMENTARY_ZERO_H1_H5"
   },
-  "retained_promoted_source": {
-    "source_id": "S39",
-    "region": "Centru / Covasna",
-    "publisher": "ANOFM / AJOFM Covasna",
-    "title": "Prognoza angajarilor pe termen scurt - Judetul Covasna (eSPOR)",
-    "url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Prognoza-angajarilor-pe-termen-scurt-2024-Jud.-Covasna.pdf",
-    "classification": "DIRECT_COMPLEMENTARY_HISTORICAL_EMPLOYER_SURVEY_INTERNAL_NUMERIC_DISCREPANCY",
+  "promoted_source": {
+    "source_id": "S40",
+    "region": "Sud-Vest Oltenia / Olt",
+    "publisher": "ANOFM / AJOFM Olt",
+    "title": "Prognoza angajarilor pe termen scurt - Judetul Olt (eSPOR)",
+    "url": "https://www.anofm.ro/upload2/Olt/27875/Prognoza_pe_termen_scurt_privind_evolutia_pietei_muncii_pentru_anul_2023.pdf",
+    "classification": "DIRECT_COMPLEMENTARY_HISTORICAL_EMPLOYER_SURVEY_INTERNAL_RESPONSE_DISCREPANCY",
+    "observed_facts": {
+      "employers_responded": 1218,
+      "employers_frame_reported": 6804,
+      "respondent_employee_count": 39470,
+      "county_employee_count_reported": 71419,
+      "employee_coverage_percent_reported": 55.27,
+      "estimated_hires_reported": 2789,
+      "respondents_with_hires_conflicting_values": [506, 504]
+    },
+    "limitations": [
+      "County-level Olt only; historical 2022 survey / 2023 forecast.",
+      "Not AI/digital-skills specific and not a prevalence measure for AI4WORK 2026.",
+      "The source internally reports 506 versus 504 respondents with hires in two tables; the discrepancy is preserved and not reconciled by assumption.",
+      "No Olt survey statistic is promoted to H1-H5."
+    ],
     "h1_h5_numeric_points_added": 0,
     "project_activity_as_need_evidence": false
   },
   "fresh_follow_up_screening": [
+    {
+      "region": "Centru / Harghita",
+      "publisher": "ANOFM / AJOFM Harghita",
+      "title": "Prognoza angajarilor pe termen scurt - Judetul Harghita anul 2023",
+      "observed_fact": "Official PDF readback reports 1,264 employer respondents from a 7,920-employer frame and 44,042 employees represented from 75,471 (58.44%). It is a historical non-AI employer forecast of the same eSPOR family as S39.",
+      "screening_result": "AUDITED_NOT_PROMOTED_REDUNDANT_COMPLEMENTARY",
+      "reason": "It adds no materially stronger AI/digital-skills prevalence evidence than existing Centru sources; it remains a screened historical benchmark and adds zero H1-H5."
+    },
+    {
+      "region": "Sud-Muntenia / Ialomita",
+      "publisher": "ANOFM / AJOFM Ialomita",
+      "observed_fact": "An official activity report states that an eSPOR short-term forecast surveyed 1,207 employers, but the screened public artifact is an implementation/activity summary rather than an auditable findings table for AI/digital-skills need prevalence.",
+      "screening_result": "NOT_PROMOTED_PROJECT_ACTIVITY_SUMMARY",
+      "reason": "Project activity/output counts are not used as evidence of need; the already promoted S38 Prahova survey remains the stronger direct-complementary employer source for Sud-Muntenia."
+    },
     {
       "region": "Centru / Covasna",
       "publisher": "ANOFM / AJOFM Covasna",
       "title": "Prognoza angajarilor pe 2026 - Judetul Covasna",
       "listing_url": "https://www.anofm.ro/covasna/studii/",
       "pdf_url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Prognoza-angajarilor-pe-2026-Judetul-Covasna.pdf",
-      "observed_fact": "The official AJOFM Covasna studies page lists a new 2026 hiring-forecast PDF ahead of the previously audited 2024 forecast. The current controlled web fetch could not open the PDF because the 21,745,921-byte document exceeded the fetch limit, so its internal methodology, sample, results and limitations were not read back in the required PDF analysis path.",
+      "observed_fact": "The official listing remains verified, but the 21,745,921-byte PDF still has no completed controlled content readback in the web PDF path.",
       "screening_result": "DISCOVERED_UNREADABLE_NOT_PROMOTED",
-      "reason": "A first-party listing proves the document exists but not what its contents establish. No source-register promotion, H1-H5 point, statistic or need claim is allowed until actual PDF content can be inspected and provenance/method limits classified."
-    },
-    {
-      "region": "Sud-Muntenia / Prahova",
-      "publisher": "ANOFM / AJOFM Prahova",
-      "observed_fact": "Fresh official-page screening found current 2026 labour-market administration and GREEN JOBS project material, but no newly audited target-population employer survey stronger than the already retained historical S38 source.",
-      "screening_result": "NO_NEW_SOURCE_PROMOTED",
-      "reason": "Project implementation, current unemployment administration and training/funding activity are context or supply evidence, not prevalence evidence for AI4WORK adult/employer needs."
-    },
-    {
-      "region": "Sud-Vest Oltenia",
-      "publisher": "ANOFM county agencies",
-      "observed_fact": "Fresh official-page screening of current Vâlcea/Gorj material returned labour-market administration, employment-service and project/training activity rather than a newly audited 2026 AI/digital-skills need survey for the eligible adult/employer populations.",
-      "screening_result": "NO_NEW_SOURCE_PROMOTED",
-      "reason": "Administrative outcomes, offered courses and project activity are not converted into need prevalence and remain outside H1-H5 evidence."
+      "reason": "No internal statistic, methodology or need claim is inferred from a listing alone."
     }
   ],
-  "refresh_conclusion": "S39 remains the Source Register high-water mark. A potentially material first-party 2026 Covasna employer-forecast document is now explicitly tracked as DISCOVERED_UNREADABLE_NOT_PROMOTED because only its official listing could be verified in this run; no content-derived claim is made. No new H1-H5 numeric point is added and project/supply activity remains excluded as evidence of need.",
-  "next_refresh_rule": "Attempt source-exact content inspection of the new Covasna 2026 PDF using an auditable PDF path. Promote only if actual readable content supplies materially stronger target-population evidence with enough provenance and methodology to classify limitations. Never promote from a listing alone.",
+  "refresh_conclusion": "S40 is promoted only as historical direct-complementary employer evidence for Sud-Vest Oltenia. It improves regional employer-side triangulation but adds zero H1-H5 and does not change numeric ranking. Centru and Sud-Muntenia were re-screened; no stronger new AI/digital-skills prevalence source was promoted. Project/supply activity remains excluded as evidence of need.",
+  "next_refresh_rule": "Continue source-exact official/institutional screening, prioritising recent auditable adult/employer instruments that directly measure AI/digital-skills needs in the eligible populations. Preserve internal discrepancies rather than reconstructing them and never promote project activity or a document listing alone.",
   "call_requirements_refresh": {
-    "checked_at": "2026-09-02T20:34:33+03:00",
-    "connected_mail_query_scope": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding spam/trash and GitHub notifications",
+    "checked_at": "2026-09-02T21:33:36+03:00",
+    "connected_mail_query_scope": "after:2026/09/02 excluding spam/trash/GitHub; terms 367944, AI4WORK, OMIPE, MIPE, PEO, 1302, Anexa 4, eucons.ro, Claus, GDPR",
     "matching_new_authority_messages": 0,
     "matched_non_authority_messages": "none",
     "status": "CLOSED_UNCHANGED"
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-02T20:34:33+03:00",
-    "drive_queries": [
-      "AI4WORK_ADULTS_V1",
-      "AI4WORK_EMPLOYERS_V1",
-      "source_export_sha256 PROD_REAL_EVIDENCE"
-    ],
+    "checked_at": "2026-09-02T21:33:36+03:00",
+    "drive_queries": ["PROD_REAL_EVIDENCE AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 source_export_sha256"],
     "eligible_combined_real_batch_found": false,
     "status": "NF06_PROD_FAIL_CLOSED"
   },
