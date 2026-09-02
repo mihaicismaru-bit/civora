@@ -1,5 +1,5 @@
 {
-  "schema_version": "2.0",
+  "schema_version": "2.1",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -48,10 +48,16 @@
       "verification_targets": [{"ref_type": "primary_target_id", "id": "cas-valcea-official"}]
     },
     {
+      "id": "national_road_project_progress",
+      "required_any_keywords": ["dn7", "dn 7", "dn7a", "dn 7a", "dn67c", "dn 67c", "valea oltului", "drum national", "drum național", "a1", "sibiu pitesti", "sibiu-pitesti", "boita", "boița", "cornetu", "tigveni", "curtea de arges", "curtea de argeș"],
+      "keywords": ["stadiu fizic", "stadiul fizic", "stadiu lucrări", "stadiu lucrari", "stadiul lucrărilor", "stadiul lucrarilor", "progres*", "grad de execu*", "avansul lucrărilor", "avansul lucrarilor", "mobilizare pe șantier", "mobilizare pe santier", "termen de finalizare", "termen de deschidere", "inaugur*"],
+      "verification_targets": []
+    },
+    {
       "id": "national_road_restrictions",
       "required_any_keywords": ["dn7", "dn 7", "dn7a", "dn 7a", "dn67c", "dn 67c", "valea oltului", "drum national", "drum național", "a1", "sibiu pitesti", "sibiu-pitesti", "boita", "boița", "cornetu"],
       "keywords": ["restrict*", "inchider*", "închider*", "circula*", "trafic greu", "7,5 tone", "7.5 tone", "lucrar*", "lucrăr*", "consolid*", "versant*"],
-      "excluded_keywords": ["accident", "victim*", "ranit*", "rănit*", "deces", "deced*", "rasturn*", "răsturn*"],
+      "excluded_keywords": ["accident", "victim*", "ranit*", "rănit*", "deces", "deced*", "rasturn*", "răsturn*", "stadiu fizic", "stadiul fizic", "stadiu lucrări", "stadiu lucrari", "stadiul lucrărilor", "stadiul lucrarilor", "progres*", "grad de execu*", "avansul lucrărilor", "avansul lucrarilor", "mobilizare pe șantier", "mobilizare pe santier", "termen de finalizare", "termen de deschidere", "inaugur*"],
       "verification_targets": [{"ref_type": "primary_target_id", "id": "igpr-infotrafic-live"}]
     },
     {
