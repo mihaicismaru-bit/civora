@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-02T17:56:02+03:00",
+  "generated_at": "2026-09-02T18:01:38+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-02T17:54:53+03:00",
+  "queue_generated_at": "2026-09-02T17:59:59+03:00",
   "task_count": 60,
   "primary_match_count": 0,
-  "no_match_count": 27,
-  "unrouted_count": 33,
-  "target_count": 19,
-  "targets_ok": 16,
+  "no_match_count": 29,
+  "unrouted_count": 31,
+  "target_count": 20,
+  "targets_ok": 17,
   "results": [
     {
       "signal_id": "c56bfe0606439e6da6e9fcfb",
@@ -194,12 +194,27 @@
       "signal_title": "Campanie gratuită de sterilizare a câinilor și pisicilor, la Băile Olănești",
       "signal_url": "https://evenimentvalcean.ro/campanie-gratuita-de-sterilizare-a-cainilor-si-pisicilor-la-baile-olanesti/",
       "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
       "signal_published_at": "2026-09-02T09:55:03+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "verification_route_id": "animal_welfare_service",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "smeura-sterilizari-valcea",
+            "name": "Tierhilfe Hoffnung — Smeura Sterilizări Gratuite",
+            "url": "https://smeura.com/events/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
       "publication_authority": "NONE",
+      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "7e6f62c0c2e4c3062ea19f9d",
@@ -292,7 +307,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
@@ -341,7 +356,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
@@ -428,12 +443,27 @@
       "signal_title": "Pe 10 septembrie 2026, campanie gratuită de sterilizare a câinilor și pisicilor la Băile Olănești",
       "signal_url": "https://www.impactreal.ro/2026/09/01/pe-10-septembrie-2026-campanie-gratuita-de-sterilizare-a-cainilor-si-pisicilor-la-baile-olanesti/",
       "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
       "signal_published_at": "2026-09-01T20:24:29+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "verification_route_id": "animal_welfare_service",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "smeura-sterilizari-valcea",
+            "name": "Tierhilfe Hoffnung — Smeura Sterilizări Gratuite",
+            "url": "https://smeura.com/events/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
       "publication_authority": "NONE",
+      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "0667eff56388eaf05317134a",
@@ -800,7 +830,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
@@ -1336,7 +1366,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
