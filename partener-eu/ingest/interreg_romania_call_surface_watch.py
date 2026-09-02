@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Official Interreg call-surface watch for programmes relevant to Romania.
 
-Acquisition-only and non-authorizing. This watches official programme call/planning
-surfaces (plus the central Interreg calls registry where a programme-specific
-surface is not reliably available) without extracting or authorizing call facts.
-A call status, deadline, budget or applicant eligibility can only come from a
-later exact-call adapter bound to a selected identifier and current official
+Acquisition-only and non-authorizing. Direct programme call/planning surfaces are
+preferred. When a direct programme surface fails at transport level, a configured
+central Interreg/Interact programme registry page may be fetched only as fallback
+provenance proving programme identity/continuity. Registry fallback never restores
+call-surface coverage and can never authorize call facts.
+
+A call status, deadline, budget or applicant eligibility can only come from a later
+exact-call adapter bound to a selected identifier and a fresh current official call
 endpoint.
 """
 from __future__ import annotations
@@ -23,12 +26,14 @@ import urllib.request
 from html.parser import HTMLParser
 from typing import Any, Callable, Mapping
 
-SCHEMA = "PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V1"
-PARSER_VERSION = "INTERREG_ROMANIA_CALL_SURFACE_WATCH_V1"
+SCHEMA = "PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2"
+PARSER_VERSION = "INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2"
 SOURCE_FAMILY = "INTERREG"
 PROGRAMME_FAMILY = "INTERREG_ROMANIA_RELEVANT_2021_2027"
 AUTHORITY_CLASS = "INTERREG_OFFICIAL_CALL_DISCOVERY_SURFACE"
+FALLBACK_AUTHORITY_CLASS = "INTERREG_INTERACT_PROGRAMME_REGISTRY_FALLBACK"
 OBSERVATION_STATE = "CALL_SURFACE_DISCOVERY_NON_AUTHORIZING"
+FALLBACK_OBSERVATION_STATE = "PROGRAMME_REGISTRY_FALLBACK_ONLY"
 
 MATERIAL_FLAGS = (
     "material_fact_use", "open_call_authorized", "closed_call_authorized",
@@ -48,6 +53,13 @@ SURFACES: tuple[dict[str, Any], ...] = (
         "observation_state": "CALL_DISCOVERY_ONLY",
         "programme_filter_required": False,
         "authority_note": "official programme call archive/index; call state must be re-read on an exact call page",
+        "fallback": {
+            "url": "https://interreg.eu/programmes/romania-bulgaria/",
+            "hosts": ("interreg.eu", "www.interreg.eu"),
+            "anchors": ("Interreg Romania-Bulgaria", "Programme website", "keep.eu"),
+            "role": "CENTRAL_INTERREG_PROGRAMME_REGISTRY_FALLBACK",
+            "note": "Interact-managed programme registry fallback; validates programme identity/provenance only and is never call authority",
+        },
     },
     {
         "id": "RO_HU",
@@ -81,6 +93,13 @@ SURFACES: tuple[dict[str, Any], ...] = (
         "observation_state": "CALL_DISCOVERY_ONLY",
         "programme_filter_required": False,
         "authority_note": "official programme calls page; status/deadline text remains discovery until exact-call readback",
+        "fallback": {
+            "url": "https://interreg.eu/programmes/next-romania-ukraine/",
+            "hosts": ("interreg.eu", "www.interreg.eu"),
+            "anchors": ("Interreg NEXT Romania - Ukraine", "Programme website", "keep.eu"),
+            "role": "CENTRAL_INTERREG_PROGRAMME_REGISTRY_FALLBACK",
+            "note": "Interact-managed programme registry fallback; validates programme identity/provenance only and is never call authority",
+        },
     },
     {
         "id": "RO_MD",
@@ -92,6 +111,13 @@ SURFACES: tuple[dict[str, Any], ...] = (
         "observation_state": "CALL_DISCOVERY_ONLY",
         "programme_filter_required": False,
         "authority_note": "official programme calls page; status/deadline text remains discovery until exact-call readback",
+        "fallback": {
+            "url": "https://interreg.eu/programmes/next-romania-repmoldova/",
+            "hosts": ("interreg.eu", "www.interreg.eu"),
+            "anchors": ("Interreg NEXT Romania - Rep.Moldova", "Programme website", "keep.eu"),
+            "role": "CENTRAL_INTERREG_PROGRAMME_REGISTRY_FALLBACK",
+            "note": "Interact-managed programme registry fallback; validates programme identity/provenance only and is never call authority",
+        },
     },
     {
         "id": "DANUBE",
@@ -175,7 +201,7 @@ def default_fetch(url: str, timeout: float = 30.0) -> tuple[bytes, dict[str, Any
     with urllib.request.urlopen(req, timeout=timeout) as response:
         raw = response.read(5_000_001)
         if len(raw) > 5_000_000:
-            raise ValueError(f"official Interreg call surface exceeds 5 MB: {url}")
+            raise ValueError(f"official Interreg source exceeds 5 MB: {url}")
         meta = {
             "requested_url": url,
             "final_url": str(response.geturl()),
@@ -183,7 +209,7 @@ def default_fetch(url: str, timeout: float = 30.0) -> tuple[bytes, dict[str, Any
             "content_type": str(response.headers.get("Content-Type") or ""),
         }
     if meta["status"] != 200:
-        raise ValueError(f"official Interreg call surface returned HTTP {meta['status']}: {url}")
+        raise ValueError(f"official Interreg source returned HTTP {meta['status']}: {url}")
     return raw, meta
 
 
@@ -196,7 +222,69 @@ def require(text: str, anchors: tuple[str, ...], *, source: str) -> None:
     hay = normal(text)
     missing = [anchor for anchor in anchors if normal(anchor) not in hay]
     if missing:
-        raise ValueError(f"{source} missing required call-surface anchors: {missing}")
+        raise ValueError(f"{source} missing required provenance anchors: {missing}")
+
+
+def classify_failure(exc: Exception) -> str:
+    text = f"{type(exc).__name__}: {exc}".casefold()
+    if "certificate verify failed" in text or "sslcertverificationerror" in text or ("tls" in text and "certificate" in text):
+        return "TLS_CERTIFICATE_VERIFY_FAILED"
+    if "timed out" in text or "timeout" in text:
+        return "TIMEOUT"
+    if "name or service not known" in text or "temporary failure in name resolution" in text or "getaddrinfo" in text:
+        return "DNS_FAILURE"
+    if "connection refused" in text or "connection reset" in text or "remote end closed" in text:
+        return "CONNECTION_FAILURE"
+    if "httperror" in text or "http error" in text:
+        return "HTTP_ERROR"
+    if isinstance(exc, ValueError):
+        return "VALIDATION_ERROR"
+    return "TRANSPORT_ERROR"
+
+
+def fallback_template(spec: Mapping[str, Any]) -> dict[str, Any]:
+    fallback = spec.get("fallback")
+    if not isinstance(fallback, Mapping):
+        return {
+            "configured": False,
+            "authority_url": None,
+            "authority_class": FALLBACK_AUTHORITY_CLASS,
+            "surface_role": None,
+            "observation_state": FALLBACK_OBSERVATION_STATE,
+            "provenance_note": None,
+            "transport_health": "NOT_CONFIGURED",
+            "requested_url": None,
+            "final_url": None,
+            "status": None,
+            "content_type": None,
+            "source_sha256": None,
+            "programme_identity_verified_non_authorizing": False,
+            "call_surface_authority": False,
+            "call_fact_authorized": False,
+            "error_type": None,
+            "failure_class": None,
+            "error": None,
+        }
+    return {
+        "configured": True,
+        "authority_url": fallback["url"],
+        "authority_class": FALLBACK_AUTHORITY_CLASS,
+        "surface_role": fallback["role"],
+        "observation_state": FALLBACK_OBSERVATION_STATE,
+        "provenance_note": fallback["note"],
+        "transport_health": "NOT_USED_DIRECT_HEALTHY",
+        "requested_url": fallback["url"],
+        "final_url": None,
+        "status": None,
+        "content_type": None,
+        "source_sha256": None,
+        "programme_identity_verified_non_authorizing": False,
+        "call_surface_authority": False,
+        "call_fact_authorized": False,
+        "error_type": None,
+        "failure_class": None,
+        "error": None,
+    }
 
 
 def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[str], tuple[bytes, dict[str, Any]]] = default_fetch) -> tuple[dict[str, Any], dict[str, bytes]]:
@@ -222,6 +310,7 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
             "budget_fact_authorized": False,
             "eligibility_fact_authorized": False,
         }
+        fallback_provenance = fallback_template(spec)
         try:
             raw, meta = fetcher(spec["url"])
             final_url = str(meta.get("final_url") or meta.get("requested_url") or "")
@@ -238,11 +327,14 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
                 "content_type": str(meta.get("content_type") or ""),
                 "source_sha256": sha256_bytes(raw),
                 "error_type": None,
+                "failure_class": None,
                 "error": None,
+                "fallback_provenance": fallback_provenance,
             })
+            continue
         except Exception as exc:
-            surfaces.append({
-                **base,
+            failure_class = classify_failure(exc)
+            direct_error = {
                 "transport_health": "DEGRADED",
                 "requested_url": spec["url"],
                 "final_url": None,
@@ -250,11 +342,66 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
                 "content_type": None,
                 "source_sha256": None,
                 "error_type": type(exc).__name__,
+                "failure_class": failure_class,
                 "error": str(exc)[:1000],
-            })
+            }
+
+        fallback = spec.get("fallback")
+        if isinstance(fallback, Mapping):
+            if failure_class == "VALIDATION_ERROR":
+                fallback_provenance["transport_health"] = "NOT_ATTEMPTED_DIRECT_VALIDATION_FAILURE"
+            else:
+                try:
+                    fallback_raw, fallback_meta = fetcher(str(fallback["url"]))
+                    fallback_final = str(fallback_meta.get("final_url") or fallback_meta.get("requested_url") or "")
+                    if int(fallback_meta.get("status") or 0) != 200 or not host_allowed(fallback_final, tuple(fallback["hosts"])):
+                        raise ValueError(f"{spec['id']} fallback left Interreg/Interact registry authority")
+                    require(html_text(fallback_raw), tuple(fallback["anchors"]), source=f"{spec['programme']} registry fallback")
+                    raw_by_id[f"{spec['id']}__FALLBACK"] = fallback_raw
+                    fallback_provenance.update({
+                        "transport_health": "HEALTHY",
+                        "requested_url": str(fallback_meta.get("requested_url") or fallback["url"]),
+                        "final_url": fallback_final,
+                        "status": int(fallback_meta.get("status") or 200),
+                        "content_type": str(fallback_meta.get("content_type") or ""),
+                        "source_sha256": sha256_bytes(fallback_raw),
+                        "programme_identity_verified_non_authorizing": True,
+                        "error_type": None,
+                        "failure_class": None,
+                        "error": None,
+                    })
+                except Exception as fallback_exc:
+                    fallback_provenance.update({
+                        "transport_health": "DEGRADED",
+                        "requested_url": fallback["url"],
+                        "final_url": None,
+                        "status": None,
+                        "content_type": None,
+                        "source_sha256": None,
+                        "programme_identity_verified_non_authorizing": False,
+                        "error_type": type(fallback_exc).__name__,
+                        "failure_class": classify_failure(fallback_exc),
+                        "error": str(fallback_exc)[:1000],
+                    })
+
+        surfaces.append({
+            **base,
+            **direct_error,
+            "fallback_provenance": fallback_provenance,
+        })
 
     healthy = sum(1 for x in surfaces if x["transport_health"] == "HEALTHY")
     degraded = len(surfaces) - healthy
+    fallback_configured = sum(1 for x in surfaces if x["fallback_provenance"]["configured"])
+    fallback_attempted = sum(1 for x in surfaces if x["fallback_provenance"]["transport_health"] in {"HEALTHY", "DEGRADED"})
+    fallback_healthy = sum(1 for x in surfaces if x["fallback_provenance"]["transport_health"] == "HEALTHY")
+    fallback_degraded = sum(1 for x in surfaces if x["fallback_provenance"]["transport_health"] == "DEGRADED")
+    degraded_with_healthy_fallback = sum(
+        1 for x in surfaces
+        if x["transport_health"] == "DEGRADED" and x["fallback_provenance"]["transport_health"] == "HEALTHY"
+    )
+    degraded_without_healthy_fallback = degraded - degraded_with_healthy_fallback
+
     receipt: dict[str, Any] = {
         "schema": SCHEMA,
         "parser_version": PARSER_VERSION,
@@ -266,9 +413,17 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
         "run_id": run_id,
         "source_health": "HEALTHY" if degraded == 0 else "DEGRADED",
         "coverage_complete": degraded == 0,
+        "call_surface_coverage_complete": degraded == 0,
+        "fallback_does_not_restore_call_surface_coverage": True,
         "expected_surface_count": len(SURFACES),
         "healthy_surface_count": healthy,
         "degraded_surface_count": degraded,
+        "fallback_configured_count": fallback_configured,
+        "fallback_attempted_count": fallback_attempted,
+        "fallback_healthy_count": fallback_healthy,
+        "fallback_degraded_count": fallback_degraded,
+        "degraded_direct_with_healthy_fallback_count": degraded_with_healthy_fallback,
+        "degraded_direct_without_healthy_fallback_count": degraded_without_healthy_fallback,
         "market_intelligence_only": True,
         "surfaces": surfaces,
         "discovered_call_facts": [],
@@ -293,11 +448,23 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
                 "programme_filter_required": x["programme_filter_required"],
                 "transport_health": x["transport_health"],
                 "source_sha256": x["source_sha256"],
-                "error_type": x["error_type"],
+                "failure_class": x["failure_class"],
+                "fallback_provenance": {
+                    "configured": x["fallback_provenance"]["configured"],
+                    "authority_url": x["fallback_provenance"]["authority_url"],
+                    "surface_role": x["fallback_provenance"]["surface_role"],
+                    "observation_state": x["fallback_provenance"]["observation_state"],
+                    "transport_health": x["fallback_provenance"]["transport_health"],
+                    "source_sha256": x["fallback_provenance"]["source_sha256"],
+                    "failure_class": x["fallback_provenance"]["failure_class"],
+                    "programme_identity_verified_non_authorizing": x["fallback_provenance"]["programme_identity_verified_non_authorizing"],
+                    "call_surface_authority": x["fallback_provenance"]["call_surface_authority"],
+                },
             }
             for x in surfaces
         ],
         "coverage_complete": receipt["coverage_complete"],
+        "fallback_does_not_restore_call_surface_coverage": True,
     })
     validate_receipt(receipt)
     return receipt, raw_by_id
@@ -314,6 +481,8 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
         raise ValueError("Interreg call-surface watch crossed non-authorizing boundary")
     if receipt.get("discovered_call_facts") != []:
         raise ValueError("Interreg call-surface watch attempted to emit call facts")
+    if receipt.get("fallback_does_not_restore_call_surface_coverage") is not True:
+        raise ValueError("Interreg fallback attempted to restore call-surface authority")
     for flag in MATERIAL_FLAGS:
         if receipt.get(flag) is not False:
             raise ValueError(f"Interreg call-surface watch attempted authorization: {flag}")
@@ -327,6 +496,12 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
 
     healthy = 0
     degraded = 0
+    fallback_configured = 0
+    fallback_attempted = 0
+    fallback_healthy = 0
+    fallback_degraded = 0
+    degraded_with_healthy_fallback = 0
+
     for row in rows:
         pid = str(row.get("programme_id") or "")
         spec = specs[pid]
@@ -351,25 +526,94 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
                 raise ValueError(f"Interreg call surface {pid} escaped official discovery authority")
             if not re.fullmatch(r"[0-9a-f]{64}", str(row.get("source_sha256") or "")):
                 raise ValueError(f"Interreg call surface {pid} lacks hash-bound evidence")
-            if row.get("error") is not None or row.get("error_type") is not None:
+            if row.get("error") is not None or row.get("error_type") is not None or row.get("failure_class") is not None:
                 raise ValueError(f"Interreg call surface {pid} healthy state carries an error")
         elif state == "DEGRADED":
             degraded += 1
             if row.get("source_sha256") is not None or row.get("status") is not None or row.get("final_url") is not None:
                 raise ValueError(f"Interreg call surface {pid} degraded state retained partial authority facts")
-            if not row.get("error_type") or not row.get("error"):
+            if not row.get("error_type") or not row.get("error") or not row.get("failure_class"):
                 raise ValueError(f"Interreg call surface {pid} degraded state lacks transport evidence")
         else:
             raise ValueError(f"Interreg call surface {pid} invalid transport health")
+
+        fb = row.get("fallback_provenance")
+        if not isinstance(fb, Mapping):
+            raise ValueError(f"Interreg call surface {pid} lacks fallback provenance contract")
+        configured = isinstance(spec.get("fallback"), Mapping)
+        if fb.get("configured") is not configured:
+            raise ValueError(f"Interreg call surface {pid} fallback configuration drift")
+        if fb.get("authority_class") != FALLBACK_AUTHORITY_CLASS or fb.get("observation_state") != FALLBACK_OBSERVATION_STATE:
+            raise ValueError(f"Interreg call surface {pid} fallback authority/observation drift")
+        if fb.get("call_surface_authority") is not False or fb.get("call_fact_authorized") is not False:
+            raise ValueError(f"Interreg call surface {pid} fallback attempted call authority")
+        if configured:
+            fallback_configured += 1
+            fallback = spec["fallback"]
+            if fb.get("authority_url") != fallback["url"] or fb.get("surface_role") != fallback["role"] or fb.get("provenance_note") != fallback["note"]:
+                raise ValueError(f"Interreg call surface {pid} fallback provenance drift")
+        else:
+            if fb.get("authority_url") is not None or fb.get("surface_role") is not None or fb.get("provenance_note") is not None:
+                raise ValueError(f"Interreg call surface {pid} unexpected fallback provenance")
+
+        fb_state = fb.get("transport_health")
+        if state == "HEALTHY":
+            expected_fb_state = "NOT_USED_DIRECT_HEALTHY" if configured else "NOT_CONFIGURED"
+            if fb_state != expected_fb_state:
+                raise ValueError(f"Interreg call surface {pid} healthy direct read unexpectedly used fallback")
+        elif not configured:
+            if fb_state != "NOT_CONFIGURED":
+                raise ValueError(f"Interreg call surface {pid} unconfigured fallback drift")
+        elif row.get("failure_class") == "VALIDATION_ERROR":
+            if fb_state != "NOT_ATTEMPTED_DIRECT_VALIDATION_FAILURE":
+                raise ValueError(f"Interreg call surface {pid} validation failure incorrectly used fallback")
+        elif fb_state not in {"HEALTHY", "DEGRADED"}:
+            raise ValueError(f"Interreg call surface {pid} transport failure lacks fallback attempt")
+
+        if fb_state in {"HEALTHY", "DEGRADED"}:
+            fallback_attempted += 1
+        if fb_state == "HEALTHY":
+            fallback_healthy += 1
+            if int(fb.get("status") or 0) != 200:
+                raise ValueError(f"Interreg call surface {pid} healthy fallback lacks HTTP 200")
+            if not host_allowed(str(fb.get("final_url") or ""), tuple(spec["fallback"]["hosts"])):
+                raise ValueError(f"Interreg call surface {pid} fallback escaped Interreg/Interact authority")
+            if not re.fullmatch(r"[0-9a-f]{64}", str(fb.get("source_sha256") or "")):
+                raise ValueError(f"Interreg call surface {pid} fallback lacks hash-bound evidence")
+            if fb.get("programme_identity_verified_non_authorizing") is not True:
+                raise ValueError(f"Interreg call surface {pid} healthy fallback did not bind programme identity")
+            if fb.get("error") is not None or fb.get("error_type") is not None or fb.get("failure_class") is not None:
+                raise ValueError(f"Interreg call surface {pid} healthy fallback carries an error")
+            if state == "DEGRADED":
+                degraded_with_healthy_fallback += 1
+        elif fb_state == "DEGRADED":
+            fallback_degraded += 1
+            if fb.get("source_sha256") is not None or fb.get("status") is not None or fb.get("final_url") is not None:
+                raise ValueError(f"Interreg call surface {pid} degraded fallback retained partial authority facts")
+            if fb.get("programme_identity_verified_non_authorizing") is not False or not fb.get("error_type") or not fb.get("failure_class") or not fb.get("error"):
+                raise ValueError(f"Interreg call surface {pid} degraded fallback lacks failure evidence")
+        else:
+            if fb.get("source_sha256") is not None or fb.get("status") is not None or fb.get("final_url") is not None:
+                raise ValueError(f"Interreg call surface {pid} unused fallback retained partial evidence")
+            if fb.get("programme_identity_verified_non_authorizing") is not False:
+                raise ValueError(f"Interreg call surface {pid} unused fallback claimed programme identity")
 
     if receipt.get("healthy_surface_count") != healthy or receipt.get("degraded_surface_count") != degraded:
         raise ValueError("Interreg call-surface health counters drift")
     if receipt.get("expected_surface_count") != len(SURFACES):
         raise ValueError("Interreg call-surface expected count drift")
-    if receipt.get("coverage_complete") is not (degraded == 0):
+    if receipt.get("coverage_complete") is not (degraded == 0) or receipt.get("call_surface_coverage_complete") is not (degraded == 0):
         raise ValueError("Interreg call-surface coverage flag drift")
     if receipt.get("source_health") != ("HEALTHY" if degraded == 0 else "DEGRADED"):
         raise ValueError("Interreg call-surface aggregate health drift")
+    if receipt.get("fallback_configured_count") != fallback_configured:
+        raise ValueError("Interreg fallback configured counter drift")
+    if receipt.get("fallback_attempted_count") != fallback_attempted or receipt.get("fallback_healthy_count") != fallback_healthy or receipt.get("fallback_degraded_count") != fallback_degraded:
+        raise ValueError("Interreg fallback health counters drift")
+    if receipt.get("degraded_direct_with_healthy_fallback_count") != degraded_with_healthy_fallback:
+        raise ValueError("Interreg fallback-covered direct degradation counter drift")
+    if receipt.get("degraded_direct_without_healthy_fallback_count") != degraded - degraded_with_healthy_fallback:
+        raise ValueError("Interreg fallback-uncovered direct degradation counter drift")
 
     stable = {
         "surfaces": [
@@ -381,11 +625,23 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
                 "programme_filter_required": x["programme_filter_required"],
                 "transport_health": x["transport_health"],
                 "source_sha256": x["source_sha256"],
-                "error_type": x["error_type"],
+                "failure_class": x["failure_class"],
+                "fallback_provenance": {
+                    "configured": x["fallback_provenance"]["configured"],
+                    "authority_url": x["fallback_provenance"]["authority_url"],
+                    "surface_role": x["fallback_provenance"]["surface_role"],
+                    "observation_state": x["fallback_provenance"]["observation_state"],
+                    "transport_health": x["fallback_provenance"]["transport_health"],
+                    "source_sha256": x["fallback_provenance"]["source_sha256"],
+                    "failure_class": x["fallback_provenance"]["failure_class"],
+                    "programme_identity_verified_non_authorizing": x["fallback_provenance"]["programme_identity_verified_non_authorizing"],
+                    "call_surface_authority": x["fallback_provenance"]["call_surface_authority"],
+                },
             }
             for x in rows
         ],
         "coverage_complete": receipt.get("coverage_complete"),
+        "fallback_does_not_restore_call_surface_coverage": True,
     }
     if receipt.get("semantic_fingerprint") != sha256_json(stable):
         raise ValueError("Interreg call-surface semantic fingerprint mismatch")
@@ -399,7 +655,8 @@ def write_outputs(receipt: Mapping[str, Any], raw_by_id: Mapping[str, bytes], ou
     raw_dir = out_dir / "raw"
     raw_dir.mkdir(exist_ok=True)
     for pid, raw in raw_by_id.items():
-        (raw_dir / f"{pid}.html").write_bytes(raw)
+        safe_pid = pid.replace("__FALLBACK", "-fallback")
+        (raw_dir / f"{safe_pid}.html").write_bytes(raw)
 
 
 def main() -> int:
@@ -414,6 +671,9 @@ def main() -> int:
         "source_health": receipt["source_health"],
         "healthy_surface_count": receipt["healthy_surface_count"],
         "degraded_surface_count": receipt["degraded_surface_count"],
+        "fallback_attempted_count": receipt["fallback_attempted_count"],
+        "fallback_healthy_count": receipt["fallback_healthy_count"],
+        "fallback_degraded_count": receipt["fallback_degraded_count"],
         "coverage_complete": receipt["coverage_complete"],
         "semantic_fingerprint": receipt["semantic_fingerprint"],
     }, sort_keys=True))
