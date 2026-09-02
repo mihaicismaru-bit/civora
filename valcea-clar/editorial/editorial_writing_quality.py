@@ -21,6 +21,14 @@ from typing import Any, Iterable
 CONTRACT = "VALCEA_CLAR_EDITORIAL_WRITING_QUALITY_V1"
 SUPPORTED_STORY_TYPES = {"REPORT", "UPDATE", "EXPLAINER", "SERVICE", "FEATURE", "BREAKING"}
 HARD_NEWS_TYPES = {"REPORT", "UPDATE", "SERVICE", "BREAKING"}
+SENTENCE_WORD_LIMITS = {
+    "BREAKING": 42,
+    "UPDATE": 45,
+    "REPORT": 48,
+    "SERVICE": 48,
+    "EXPLAINER": 56,
+    "FEATURE": 62,
+}
 
 # These are deliberately narrow markers. They identify common bureaucratic or
 # press-release throat-clearing patterns, not a publisher-specific style.
@@ -68,6 +76,7 @@ LOCAL_MARKERS = (
 SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+(?=[A-ZĂÂÎȘȚ0-9„\"])")
 WORD_RE = re.compile(r"[0-9A-Za-zĂÂÎȘȚăâîșț][0-9A-Za-zĂÂÎȘȚăâîșț'’.-]*")
 NUMBER_RE = re.compile(r"(?<!\w)\d+(?:[.,]\d+)?(?:%|\s*(?:lei|euro|km|m|ore|minute|zile))?", re.IGNORECASE)
+DIRECT_QUOTE_RE = re.compile(r"„[^”]*”|“[^”]*”|\"[^\"]*\"")
 
 
 def _text(value: Any) -> str:
@@ -110,6 +119,15 @@ def _add(diagnostics: list[dict[str, Any]], code: str, severity: str, message: s
     diagnostics.append(item)
 
 
+def _narrative_style_corpus(text: str) -> str:
+    """Return narration for style-phrase checks, excluding closed direct quotes.
+
+    Institutional wording may legitimately appear in an attributed direct quote.
+    Unclosed/malformed quotes stay in the corpus, so the guard remains fail-safe.
+    """
+    return " ".join(DIRECT_QUOTE_RE.sub(" ", text).split())
+
+
 def _repeated_sentence_starts(text: str) -> list[str]:
     starts: list[str] = []
     for sentence in _sentences(text):
@@ -120,21 +138,27 @@ def _repeated_sentence_starts(text: str) -> list[str]:
     return sorted(start for start, count in counts.items() if count >= 3)
 
 
-def _repeated_phrases(text: str, n: int = 5) -> list[str]:
+def _repeated_phrases(text: str) -> list[str]:
     words = [w.casefold() for w in _words(text)]
-    if len(words) < n * 2:
+    if len(words) < 10:
         return []
-    grams = Counter(" ".join(words[i : i + n]) for i in range(len(words) - n + 1))
-    # Ignore very short function-word dominated repetitions by requiring at
-    # least two tokens with length >= 5.
-    repeated = []
-    for gram, count in grams.items():
-        if count < 2:
+
+    # Two occurrences of a short five-word fragment are often legitimate
+    # attribution/location scaffolding. Treat them as a duplicate-rhythm signal
+    # only when the short fragment appears at least three times, while still
+    # catching clearly cloned prose when a distinctive eight-word span repeats.
+    candidates: set[str] = set()
+    for n, minimum_count in ((5, 3), (8, 2)):
+        if len(words) < n * 2:
             continue
-        if sum(1 for token in gram.split() if len(token) >= 5) < 2:
-            continue
-        repeated.append(gram)
-    return sorted(repeated)[:8]
+        grams = Counter(" ".join(words[i : i + n]) for i in range(len(words) - n + 1))
+        for gram, count in grams.items():
+            if count < minimum_count:
+                continue
+            if sum(1 for token in gram.split() if len(token) >= 5) < 2:
+                continue
+            candidates.add(gram)
+    return sorted(candidates)[:8]
 
 
 def _has_local_relevance(item: dict[str, Any], corpus: str) -> bool:
@@ -212,25 +236,25 @@ def evaluate(item: dict[str, Any]) -> dict[str, Any]:
             )
 
     full_copy = " ".join(part for part in (headline, lead, body) if part)
-    lower_copy = full_copy.casefold()
+    narrative_copy = _narrative_style_corpus(full_copy).casefold()
 
-    mechanical_hits = sorted({phrase for phrase in MECHANICAL_PHRASES if phrase in lower_copy})
+    mechanical_hits = sorted({phrase for phrase in MECHANICAL_PHRASES if phrase in narrative_copy})
     if mechanical_hits:
         _add(
             diagnostics,
             "MECHANICAL_OR_BUREAUCRATIC_LANGUAGE",
             "WARN",
-            "Copy contains narrow markers of bureaucratic or press-release language.",
+            "Narrative copy contains narrow markers of bureaucratic or press-release language.",
             phrases=mechanical_hits,
         )
 
-    cliche_hits = sorted({phrase for phrase in CLICHE_PHRASES if phrase in lower_copy})
+    cliche_hits = sorted({phrase for phrase in CLICHE_PHRASES if phrase in narrative_copy})
     if cliche_hits:
         _add(
             diagnostics,
             "CLICHE_LANGUAGE",
             "WARN",
-            "Copy contains generic promotional/cliché phrasing that weakens precision.",
+            "Narrative copy contains generic promotional/cliché phrasing that weakens precision.",
             phrases=cliche_hits,
         )
 
@@ -250,20 +274,22 @@ def evaluate(item: dict[str, Any]) -> dict[str, Any]:
             diagnostics,
             "DUPLICATE_PHRASING",
             "WARN",
-            "Five-word phrasing is repeated without being treated as a quotation/evidence field.",
+            "Distinctive phrasing repeats often enough to indicate cloned or mechanical prose.",
             phrases=repeated,
         )
 
     sentence_lengths = [(sentence, len(_words(sentence))) for sentence in _sentences(f"{lead} {body}")]
-    very_long = [length for _sentence, length in sentence_lengths if length > 45]
+    sentence_limit = SENTENCE_WORD_LIMITS.get(story_type, 45)
+    very_long = [length for _sentence, length in sentence_lengths if length > sentence_limit]
     if very_long:
         _add(
             diagnostics,
             "OVERLONG_SENTENCES",
             "WARN",
-            "One or more sentences exceed the conservative 45-word readability threshold.",
+            "One or more sentences exceed the readability target selected for this journalistic form.",
             count=len(very_long),
             longest=max(very_long),
+            target_max=sentence_limit,
         )
 
     paragraphs = _paragraphs(body_raw)
@@ -354,6 +380,7 @@ def evaluate(item: dict[str, Any]) -> dict[str, Any]:
             "lead_words": len(_words(lead)),
             "body_words": body_word_count,
             "sentence_count": len(sentence_lengths),
+            "sentence_word_target_max": sentence_limit,
             "paragraph_count": len(paragraphs),
             "fail_count": fail_count,
             "warn_count": warn_count,
@@ -363,6 +390,8 @@ def evaluate(item: dict[str, Any]) -> dict[str, Any]:
             "publisher_voice_imitation": False,
             "single_template_style_enforced": False,
             "story_type_specific_checks": True,
+            "form_specific_readability_limits": True,
+            "direct_quotes_excluded_from_style_phrase_scans": True,
             "ai_detection_claim": False,
         },
         "capabilities": {
@@ -408,6 +437,16 @@ def self_test() -> int:
     bureaucratic_result = evaluate(bureaucratic)
     _assert_codes(bureaucratic_result, {"BUREAUCRATIC_LEAD", "MECHANICAL_OR_BUREAUCRATIC_LANGUAGE"})
 
+    quoted_bureaucracy = dict(strong_report)
+    quoted_bureaucracy["body"] = (
+        "Operatorul a confirmat intervalul lucrărilor. "
+        "Directorul a declarat: „În vederea executării lucrărilor, echipele vor interveni etapizat”."
+    )
+    quoted_result = evaluate(quoted_bureaucracy)
+    quoted_codes = {diagnostic["code"] for diagnostic in quoted_result["diagnostics"]}
+    if "MECHANICAL_OR_BUREAUCRATIC_LANGUAGE" in quoted_codes:
+        raise AssertionError(quoted_result)
+
     missing_provenance = dict(strong_report)
     missing_provenance["provenance"] = []
     missing_result = evaluate(missing_provenance)
@@ -440,6 +479,36 @@ def self_test() -> int:
     repetitive_result = evaluate(repetitive)
     _assert_codes(repetitive_result, {"REPEATED_SENTENCE_STARTS", "DUPLICATE_PHRASING"})
 
+    incidental_repeat = dict(strong_report)
+    incidental_repeat["body"] = (
+        "Operatorul regional verifică rețeaua de apă marți dimineață în zona centrală. "
+        "Operatorul regional verifică rețeaua de apă înainte de reluarea furnizării."
+    )
+    incidental_result = evaluate(incidental_repeat)
+    incidental_codes = {diagnostic["code"] for diagnostic in incidental_result["diagnostics"]}
+    if "DUPLICATE_PHRASING" in incidental_codes:
+        raise AssertionError(incidental_result)
+
+    long_sentence = (
+        "În centrul orașului, localnicii au urmărit lucrările de-a lungul dimineții, oprindu-se lângă gardurile șantierului pentru a vedea cum muncitorii refac trotuarul, mută temporar mobilierul urban și pregătesc zona verde, în timp ce accesul pietonal rămâne deschis pe partea opusă a străzii, fără schimbări anunțate pentru traseele autobuzelor, potrivit informațiilor publicate de municipalitate."
+    )
+    report_long = dict(strong_report)
+    report_long["body"] = long_sentence
+    report_long_result = evaluate(report_long)
+    _assert_codes(report_long_result, {"OVERLONG_SENTENCES"})
+    if report_long_result["metrics"]["sentence_word_target_max"] != 48:
+        raise AssertionError(report_long_result)
+
+    feature_long = dict(strong_report)
+    feature_long["story_type"] = "FEATURE"
+    feature_long["body"] = long_sentence
+    feature_long_result = evaluate(feature_long)
+    feature_codes = {diagnostic["code"] for diagnostic in feature_long_result["diagnostics"]}
+    if "OVERLONG_SENTENCES" in feature_codes:
+        raise AssertionError(feature_long_result)
+    if feature_long_result["metrics"]["sentence_word_target_max"] != 62:
+        raise AssertionError(feature_long_result)
+
     update = dict(strong_report)
     update["story_type"] = "UPDATE"
     update["what_changed"] = ""
@@ -459,10 +528,14 @@ def self_test() -> int:
     for result in (
         report_result,
         bureaucratic_result,
+        quoted_result,
         missing_result,
         unsupported_number_result,
         explainer_result,
         repetitive_result,
+        incidental_result,
+        report_long_result,
+        feature_long_result,
         update_result,
         service_result,
     ):
@@ -473,7 +546,7 @@ def self_test() -> int:
         if result["quality_semantics"]["ai_detection_claim"]:
             raise AssertionError("no AI-detector claim is permitted")
 
-    print(json.dumps({"contract": CONTRACT, "self_test": "PASS", "cases": 8}, ensure_ascii=False))
+    print(json.dumps({"contract": CONTRACT, "self_test": "PASS", "cases": 12}, ensure_ascii=False))
     return 0
 
 
