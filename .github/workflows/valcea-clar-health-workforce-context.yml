@@ -6,6 +6,7 @@ on:
       - "valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
       - "valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py"
       - "valcea-clar/scripts/health_workforce_reference_context_engine.py"
+      - "valcea-clar/scripts/health_workforce_detail_reconciliation.py"
       - ".github/workflows/valcea-clar-health-workforce-context.yml"
   push:
     branches: [main]
@@ -13,6 +14,7 @@ on:
       - "valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py"
       - "valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py"
       - "valcea-clar/scripts/health_workforce_reference_context_engine.py"
+      - "valcea-clar/scripts/health_workforce_detail_reconciliation.py"
       - ".github/workflows/valcea-clar-health-workforce-context.yml"
   workflow_dispatch:
 
@@ -38,30 +40,42 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Compile source adapters and context engine
+      - name: Compile source adapters and context engines
         run: |
           python -m py_compile valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py
           python -m py_compile valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py
           python -m py_compile valcea-clar/scripts/health_workforce_reference_context_engine.py
+          python -m py_compile valcea-clar/scripts/health_workforce_detail_reconciliation.py
 
       - name: Run deterministic source and context regressions
         run: |
           python valcea-clar/scripts/ms_valcea_health_workforce_reference_adapter.py --self-test
           python valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py --self-test
           python valcea-clar/scripts/health_workforce_reference_context_engine.py --self-test
+          python valcea-clar/scripts/health_workforce_detail_reconciliation.py --self-test
 
       - name: Enforce context read-only capability boundary
         shell: bash
         run: |
           set -euo pipefail
-          target="valcea-clar/scripts/health_workforce_reference_context_engine.py"
-          ! grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|urllib|http|socket|subprocess|selenium|playwright)([[:space:].]|$)' "$target"
-          ! grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state|urlopen|Request\(' "$target"
-          grep -F '"same_vacancy_inference_authorized": False' "$target"
-          grep -F '"same_need_inference_authorized": False' "$target"
-          grep -F '"dedupe_authorized": False' "$target"
-          grep -F '"publication_authorized": False' "$target"
-          grep -F '"runtime_persistence_authorized": False' "$target"
+          for target in \
+            valcea-clar/scripts/health_workforce_reference_context_engine.py \
+            valcea-clar/scripts/health_workforce_detail_reconciliation.py; do
+            if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|socket|subprocess|selenium|playwright|urllib[.]request|http[.]client)([[:space:].]|$)' "$target"; then
+              echo "Forbidden network/process dependency in read-only context engine: $target" >&2
+              exit 1
+            fi
+            if grep -En 'FactKernel|editorial_writer\(|publish\(|social|runtime_state|urlopen|Request\(' "$target"; then
+              echo "Forbidden writer/runtime capability in read-only context engine: $target" >&2
+              exit 1
+            fi
+            grep -F '"same_vacancy_inference_authorized": False' "$target"
+            grep -F '"same_need_inference_authorized": False' "$target"
+            grep -F '"dedupe_authorized": False' "$target"
+            grep -F '"publication_authorized": False' "$target"
+            grep -F '"runtime_persistence_authorized": False' "$target"
+          done
+          grep -F '"same_publication_inference_authorized": False' valcea-clar/scripts/health_workforce_detail_reconciliation.py
 
       - name: Acquire bounded Ministry first-party receipt
         run: |
@@ -86,7 +100,15 @@ jobs:
             --posturi /tmp/posturi_gov_valcea.json \
             --output /tmp/health_workforce_context.json
 
-      - name: Validate non-authorizing context receipt
+      - name: Build bounded role and publication detail reconciliation
+        run: |
+          python valcea-clar/scripts/health_workforce_detail_reconciliation.py \
+            --ministry /tmp/ms_valcea_health_workforce.json \
+            --posturi /tmp/posturi_gov_valcea.json \
+            --context /tmp/health_workforce_context.json \
+            --output /tmp/health_workforce_detail_reconciliation.json
+
+      - name: Validate non-authorizing context receipts
         run: |
           python - <<'PY'
           import json
@@ -143,12 +165,51 @@ jobs:
               assert ref['institution_identity_state'] == 'EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY'
               assert isinstance(ref['institution_name'], str) and ref['institution_name'].strip()
               assert re.fullmatch(r'[0-9a-f]{64}', ref['institution_evidence_sha256'])
+
+          detail = json.loads(Path('/tmp/health_workforce_detail_reconciliation.json').read_text(encoding='utf-8'))
+          assert detail['schema'] == 'VALCEA_CLAR_HEALTH_WORKFORCE_DETAIL_RECONCILIATION_V1'
+          assert detail['status'] == 'PASS'
+          assert detail['observation_state'] == 'DETAIL_ROLE_PUBLICATION_CONTEXT_NON_AUTHORIZING'
+          assert detail['reconciliation_state'] in {
+              'NO_EXPLICIT_SJU_POSTURI_FOLLOW_UP_CANDIDATE',
+              'ROLE_SPECIALTY_LEXICAL_CONTEXT_OBSERVED_NON_AUTHORIZING',
+              'ROLE_SPECIALTY_DETAIL_EVIDENCE_STILL_REQUIRED',
+              'NO_ROLE_SPECIALTY_LEXICAL_OVERLAP_IN_RETAINED_TITLES',
+          }
+          dc = detail['coverage']
+          assert dc['ministry_reference_count'] == coverage['ministry_reference_count']
+          assert dc['posturi_reference_count'] == coverage['posturi_reference_count']
+          assert dc['explicit_sju_follow_up_reference_count'] == coverage['follow_up_candidate_count']
+          assert dc['pair_count'] == len(detail['pair_candidates'])
+          assert dc['pair_count'] <= 256
+          assert (
+              dc['lexical_role_specialty_overlap_pair_count']
+              + dc['role_specialty_unresolved_pair_count']
+              + dc['no_role_specialty_overlap_pair_count']
+              == dc['pair_count']
+          )
+          assert dc['bounded_non_exhaustive'] is True
+          assert re.fullmatch(r'[0-9a-f]{64}', detail['source_fingerprint_sha256'])
+          forbidden_detail = forbidden + ['same_publication_inference_authorized']
+          assert all(detail[key] is False for key in forbidden_detail)
+          for pair in detail['pair_candidates']:
+              assert pair['same_vacancy_inferred'] is False
+              assert pair['same_need_inferred'] is False
+              assert pair['dedupe_authorized'] is False
+              publication = pair['publication_identity_context']
+              assert publication['source_specific_publication_identities_bound'] is True
+              assert publication['shared_cross_source_publication_identifier_retained'] is False
+              assert publication['same_publication_inferred'] is False
+              assert pair['role_specialty_context']['role_identity_match_inferred'] is False
+              assert pair['required_before_any_same_vacancy_conclusion']
           print(
-              'Validated health-workforce context: '
+              'Validated health-workforce context + detail reconciliation: '
               f"{coverage['ministry_reference_count']} ministry / "
               f"{coverage['posturi_health_reference_count']} Posturi health / "
-              f"{coverage['posturi_explicit_sju_institution_count']} explicit SJU; "
-              f"state={payload['context_state']}"
+              f"{coverage['posturi_explicit_sju_institution_count']} explicit SJU / "
+              f"{dc['pair_count']} detail pairs / "
+              f"{dc['lexical_role_specialty_overlap_pair_count']} lexical role overlaps; "
+              f"detail_state={detail['reconciliation_state']}"
           )
           PY
 
@@ -160,5 +221,6 @@ jobs:
             /tmp/ms_valcea_health_workforce.json
             /tmp/posturi_gov_valcea.json
             /tmp/health_workforce_context.json
+            /tmp/health_workforce_detail_reconciliation.json
           retention-days: 7
           if-no-files-found: error
