@@ -1,46 +1,61 @@
 {
-  "schema_version": "eucons.ai4work_live_privacy_surface_reconciliation.v0.2",
+  "schema_version": "eucons.ai4work_live_privacy_surface_reconciliation.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-08-31",
+  "observed_at": "2026-09-02T06:35:47+03:00",
   "status": "OPEN_BEFORE_PROD",
   "evidence_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
-  "purpose": "Prevent the general commercial privacy surface on eucons.ro from being mistaken for the AI4WORK research Article 13 notice or processor chain.",
+  "purpose": "Prevent the general commercial privacy surface on eucons.ro from being mistaken for the AI4WORK research Article 13 notice, privacy contact, storage binding or processor chain.",
   "current_public_surface": {
     "privacy_url": "https://eucons.ro/confidentialitate/",
     "contact_url": "https://eucons.ro/contact/",
     "commercial_controller_statement": "EUROCONSULT SRL, CUI 14250864 is named as controller for commercial requests.",
-    "commercial_receiver_hosting_statement": "The public privacy page states that the commercial-form receiver is hosted separately on infrastructure associated with romania-webhosting.com.",
-    "public_electronic_contact_state": "The Contact page states that the company email channel is attached at production activation; no current AI4WORK privacy/DPO electronic contact is thereby established.",
-    "scope_boundary": "These public statements describe the general/commercial EUCONS surface and do not by themselves establish the AI4WORK research processor chain."
+    "commercial_data_scope": "The public commercial notice permits name, email, organisation, optional phone, project information and transmission/traceability metadata for requested commercial evaluation, consultancy, offers or implementation analysis.",
+    "commercial_receiver_hosting_statement": "The public privacy page states that the commercial-form receiver is hosted separately on infrastructure associated with romania-webhosting.com, exclusively for commercial receipt, storage and processing.",
+    "contact_surface_state": "The Contact page exposes a structured commercial-request form and states that the company email channel is attached at production activation; this does not establish an AI4WORK research privacy/DPO contact.",
+    "scope_boundary": "These statements describe the general/commercial EUCONS surface and must not be inherited as AI4WORK research processor, storage, retention or rights-handler facts without a separate verified binding."
   },
   "public_readback": {
-    "verified_at": "2026-08-31",
+    "verified_at": "2026-09-02T06:35:47+03:00",
     "privacy_page_verified": true,
     "contact_page_verified": true,
+    "general_notice_is_commercial_scope": true,
+    "direct_identifiers_visible_on_commercial_surface": true,
+    "ai4work_article13_notice_verified": false,
     "ai4work_privacy_contact_verified": false,
     "ai4work_processor_chain_verified_from_public_surface": false,
+    "ai4work_research_store_separation_verified_from_public_surface": false,
     "result": "PUBLIC_COMMERCIAL_SURFACE_REVALIDATED_AI4WORK_BINDING_STILL_OPEN"
   },
   "ai4work_controlled_baseline": {
-    "controller": "EUROCONSULT SRL",
+    "controller_candidate": "EUROCONSULT SRL",
+    "controller_determination_status": "PENDING_CONTROLLER_APPROVAL",
     "research_provider_documentary_baseline": "CLAUS WEB Shared Hosting/cPanel DPA v1.0 plus Annex 4 and Annex 5, frozen separately.",
-    "provider_logging_baseline": "Claus Web Raw Access field profile frozen separately; actual eucons.ro account archive/retention/access remains to be read back.",
+    "provider_logging_baseline": "Claus Web Raw Access field profile is documented separately; actual eucons.ro account archive, retention and access settings remain to be read back.",
+    "approved_internal_policy_targets": {
+      "access_log_retention_max_days": 7,
+      "backup_residual_max_days_after_live_deletion": 92,
+      "research_store_separate_from_crm": true
+    },
     "commercial_privacy_hosting_statement_inherited": false,
-    "reason": "The relationship between the commercial romania-webhosting.com wording and the actual AI4WORK processing path has not been verified."
+    "reason": "The relationship between the commercial romania-webhosting.com wording and the actual AI4WORK processing path has not been verified, and the public page does not prove account-specific storage/logging/backup configuration."
   },
   "required_before_prod": [
     "verify the actual active processor/subprocessor and hosting path used by the AI4WORK research endpoint and research-only store",
-    "verify the current eucons.ro account/server logging, retention and access configuration",
+    "verify the current eucons.ro account/server logging, retention and access configuration against the approved maximum-7-day access-log policy",
+    "verify provider-bound deletion and non-renewing backup residual lifetime no greater than 92 days after live deletion",
+    "verify research storage is separate from CRM and webroot at the live provider/account level",
     "freeze an operational EUROCONSULT privacy contact for AI4WORK rights requests",
-    "ensure the final AI4WORK Article 13 notice describes the verified research processor chain and does not inherit the commercial receiver statement by assumption",
+    "ensure the final AI4WORK Article 13 notice describes the verified research processor chain, lawful basis, retention and rights route and does not inherit the commercial receiver statement by assumption",
     "ensure the live general privacy/contact surfaces do not contradict or ambiguously override the dedicated AI4WORK research notice",
-    "provider-bound TEST TWIN smoke passes while remaining TEST_TWIN_NON_EVIDENCE"
+    "provider-bound TEST TWIN smoke passes while remaining TEST_TWIN_NON_EVIDENCE",
+    "obtain fresh explicit collection-only approval only after all precollection controls PASS"
   ],
   "claim_boundaries": [
     "Do not infer that romania-webhosting.com is an AI4WORK processor, subprocessor, server or account.",
     "Do not infer that the Claus Web documentary baseline proves the live AI4WORK account path or configuration.",
     "Do not treat the general commercial privacy page as the final AI4WORK Article 13 notice.",
-    "Do not infer an operational privacy/DPO contact from historical or unpublished email addresses."
+    "Do not infer an operational privacy/DPO contact from historical or unpublished email addresses.",
+    "Do not infer research-store isolation, log retention or backup deletion behavior from public marketing/privacy text."
   ],
   "prod_reconciled": false,
   "merge_authorized": false,
