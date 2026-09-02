@@ -4,7 +4,11 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/eu_direct_cerv_programme_watch.py'
+      - 'partener-eu/ingest/eu_direct_cerv_ft_discovery.py'
+      - 'partener-eu/ingest/eu_direct_cerv_ft_handoff.py'
       - 'partener-eu/ops/test_eu_direct_cerv_programme_watch.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_ft_discovery.py'
+      - 'partener-eu/ops/test_eu_direct_cerv_ft_handoff.py'
       - '.github/workflows/partener-eu-cerv-programme-watch.yml'
   workflow_dispatch:
 
@@ -14,7 +18,7 @@ permissions:
 jobs:
   cerv-programme-watch:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -31,16 +35,23 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile bounded CERV programme watch
+      - name: Compile bounded CERV programme and structured discovery lanes
         run: |
           python -m py_compile \
             partener-eu/ingest/eu_direct_cerv_programme_watch.py \
-            partener-eu/ops/test_eu_direct_cerv_programme_watch.py
+            partener-eu/ingest/eu_direct_cerv_ft_discovery.py \
+            partener-eu/ingest/eu_direct_cerv_ft_handoff.py \
+            partener-eu/ops/test_eu_direct_cerv_programme_watch.py \
+            partener-eu/ops/test_eu_direct_cerv_ft_discovery.py \
+            partener-eu/ops/test_eu_direct_cerv_ft_handoff.py
 
-      - name: Validate fail-closed CERV programme semantics
+      - name: Validate fail-closed CERV programme and structured discovery semantics
         env:
           PYTHONPATH: partener-eu/ingest
-        run: python partener-eu/ops/test_eu_direct_cerv_programme_watch.py
+        run: |
+          python partener-eu/ops/test_eu_direct_cerv_programme_watch.py
+          python partener-eu/ops/test_eu_direct_cerv_ft_discovery.py
+          python partener-eu/ops/test_eu_direct_cerv_ft_handoff.py
 
       - name: Capture live official CERV programme and Romania NCP evidence
         run: |
@@ -49,37 +60,85 @@ jobs:
             --output-dir /tmp/partener-eu-cerv-programme-watch \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
+      - name: Discover bounded official structured CERV identities
+        run: |
+          python partener-eu/ingest/eu_direct_cerv_ft_discovery.py \
+            --output-dir /tmp/partener-eu-cerv-programme-watch/ft-discovery \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --query-text 'CERV-2026' \
+            --page-size 25
+
+      - name: Resolve omission-safe CERV exact handoff state
+        run: |
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_cerv_ft_handoff.py \
+            --discovery /tmp/partener-eu-cerv-programme-watch/ft-discovery/ft-cerv-discovery.json \
+            --output /tmp/partener-eu-cerv-programme-watch/ft-discovery/ft-cerv-handoff.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
       - name: Enforce non-authorizing CERV live boundary
         env:
           PYTHONPATH: partener-eu/ingest
         run: |
           python - <<'PY'
           import json
-          from eu_direct_cerv_programme_watch import validate_receipt
-          path = "/tmp/partener-eu-cerv-programme-watch/cerv-programme-watch.json"
-          receipt = json.load(open(path, encoding="utf-8"))
-          validate_receipt(receipt)
-          assert receipt["source_health"] == "HEALTHY"
-          assert receipt["market_intelligence_only"] is True
-          assert receipt["open_call_authorized"] is False
-          assert receipt["deadline_authorized"] is False
-          assert receipt["budget_authorized"] is False
-          assert receipt["eligibility_authorized"] is False
-          assert receipt["publish_authorized"] is False
-          assert receipt["distribution_authorized"] is False
-          assert receipt["call_alert_authorized"] is False
-          assert receipt["publication_effect"] == "NONE"
-          assert set(x["observation_state"] for x in receipt["programming_observations"]) <= {
+          from eu_direct_cerv_programme_watch import validate_receipt as validate_programme
+          from eu_direct_cerv_ft_discovery import validate_receipt as validate_discovery
+          from eu_direct_cerv_ft_handoff import validate as validate_handoff
+
+          root = "/tmp/partener-eu-cerv-programme-watch"
+          programme = json.load(open(root + "/cerv-programme-watch.json", encoding="utf-8"))
+          discovery = json.load(open(root + "/ft-discovery/ft-cerv-discovery.json", encoding="utf-8"))
+          handoff = json.load(open(root + "/ft-discovery/ft-cerv-handoff.json", encoding="utf-8"))
+          validate_programme(programme)
+          validate_discovery(discovery)
+          validate_handoff(handoff)
+
+          assert programme["source_health"] == "HEALTHY"
+          assert programme["market_intelligence_only"] is True
+          assert programme["open_call_authorized"] is False
+          assert programme["deadline_authorized"] is False
+          assert programme["budget_authorized"] is False
+          assert programme["eligibility_authorized"] is False
+          assert programme["publish_authorized"] is False
+          assert programme["distribution_authorized"] is False
+          assert programme["call_alert_authorized"] is False
+          assert programme["publication_effect"] == "NONE"
+          assert set(x["observation_state"] for x in programme["programming_observations"]) <= {
               "PROGRAMMING", "PLANNED", "CONSULTATION", "PROPOSAL"
           }
+
+          assert discovery["market_intelligence_only"] is True
+          assert discovery["bounded_discovery_absence_is_material_fact"] is False
+          assert discovery["closure_inference_authorized"] is False
+          assert discovery["open_call_authorized"] is False
+          assert discovery["publish_authorized"] is False
+          assert discovery["distribution_authorized"] is False
+          assert discovery["call_alert_authorized"] is False
+          assert handoff["closure_inference_authorized"] is False
+          assert handoff["open_call_authorized"] is False
+          assert handoff["publish_authorized"] is False
+          assert handoff["distribution_authorized"] is False
+          assert handoff["call_alert_authorized"] is False
+          if handoff["exact_recheck_required"]:
+              assert handoff["target_reference"] == discovery["selected_reference"]
+              assert handoff["semantic_reconciliation_required_if_exact"] is True
+              assert handoff["field_scoped_material_admission_required_if_exact"] is True
+          else:
+              assert handoff["target_reference"] is None
+
           print({
-              "programme_fit": receipt["programme_fit_evidence"]["facts"]["fit_state"],
-              "programming_states": [x["observation_state"] for x in receipt["programming_observations"]],
-              "semantic_fingerprint": receipt["semantic_fingerprint"],
+              "programme_fit": programme["programme_fit_evidence"]["facts"]["fit_state"],
+              "programming_states": [x["observation_state"] for x in programme["programming_observations"]],
+              "structured_candidate_count": len(discovery["candidates"]),
+              "selected_reference": discovery["selected_reference"],
+              "handoff_state": handoff["observation_state"],
+              "exact_recheck_required": handoff["exact_recheck_required"],
+              "open_call_authorized": handoff["open_call_authorized"],
           })
           PY
 
-      - name: Upload exact-head CERV programme evidence
+      - name: Upload exact-head CERV programme and structured discovery evidence
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: partener-eu-cerv-programme-watch-${{ github.event.pull_request.head.sha || github.sha }}
