@@ -1,0 +1,126 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T06:35:47+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "purpose": "Persist the run-level evidence-control, Call Requirements, live privacy-surface and NF06 freshness checks without promoting implementation activity, funding supply or synthetic data as need evidence.",
+  "secondary_research_refresh": {
+    "target_regions": [
+      "Sud-Vest Oltenia",
+      "Sud-Muntenia",
+      "Centru"
+    ],
+    "promotion_policy": "Only official/institutional empirical evidence with observed target-population data and traceable method may be promoted as direct need evidence. Project activity, funding calls, service offers and technology deployments are not proof of need prevalence.",
+    "screened_this_run": [
+      {
+        "region": "Centru",
+        "publisher": "ADR Centru",
+        "title": "Două noi contracte pentru digitalizarea administrației publice locale din județul Alba",
+        "publication_date": "2026-09-01",
+        "url": "https://www.adrcentru.ro/comunicare/doua-noi-contracte-pentru-digitalizarea-administratiei-publice-locale-din-judetul-alba/",
+        "screening_result": "REJECT_FROM_NEED_EVIDENCE",
+        "reason": "Current digitalisation implementation activity; no target-population sampling frame, respondent results or AI4WORK training-need prevalence measure."
+      },
+      {
+        "region": "Sud-Muntenia",
+        "publisher": "ADR Sud-Muntenia",
+        "title": "Start preselecției pentru apelul pilot de inovare destinat IMM-urilor din regiunea Sud-Muntenia",
+        "publication_date": "2026-07-20",
+        "url": "https://2021-2027.adrmuntenia.ro/start-preselectiei-pentru-apelul-pilot-de-inovare-destinat-immurilor-din-regiune/article/664",
+        "screening_result": "MONITOR_FUTURE_RESULTS_NOT_CURRENT_NEED_EVIDENCE",
+        "reason": "The official page describes a World Bank/DG REGIO pilot using randomisation to measure programme impacts, but it is the preselection/recruitment stage. No outcome dataset or AI4WORK adult/employer needs-prevalence result is published on the page."
+      },
+      {
+        "region": "Sud-Vest Oltenia",
+        "publisher": "ADR Vest / DIGIVEST consortium including ADR Sud-Vest Oltenia",
+        "title": "Apel de selecție a beneficiarilor de servicii suport pentru digitalizare prin EDIH DIGIVEST",
+        "publication_date": "2026-07-29",
+        "url": "https://adrvest.ro/ghid-in-consultare-publica-apel-de-selectie-a-beneficiarilor-de-servicii-suport-pentru-digitalizare-destinat-imm-urilor-prin-intermediul-edih-digivest-3/",
+        "screening_result": "REJECT_FROM_NEED_EVIDENCE",
+        "reason": "The institutional notice offers AI/digitalisation support services to SMEs and establishes programme supply, not an observed need-prevalence statistic or target-population survey result."
+      }
+    ],
+    "new_source_promoted": false,
+    "source_register_high_water_mark": "S37",
+    "h1_h5_numeric_points_added": 0,
+    "numeric_ranking_changed": false,
+    "project_activity_used_as_need_evidence": false
+  },
+  "call_requirements_refresh": {
+    "connected_mail_query": "newer_than:1d (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding GitHub notifications/spam/trash",
+    "matching_new_messages": 0,
+    "result": "NO_NEW_CALL_REQUIREMENTS_MESSAGE"
+  },
+  "primary_evidence_nf06_refresh": {
+    "drive_queries": [
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE"
+    ],
+    "eligible_combined_real_response_batch_found": false,
+    "observed_result": "Search results are existing governance/SSOT/pre-final analysis artifacts, not a new immutable real-response export eligible for NF06.",
+    "nf06_preingest_state": "FAIL_CLOSED_NO_PROD_REAL_EVIDENCE_BATCH",
+    "test_twin_promotion_allowed": false
+  },
+  "live_privacy_surface_readback": {
+    "privacy_url": "https://eucons.ro/confidentialitate/",
+    "contact_url": "https://eucons.ro/contact/",
+    "verified_at": "2026-09-02T06:35:47+03:00",
+    "privacy_page_scope": "COMMERCIAL_REQUESTS",
+    "commercial_direct_identifiers_visible": [
+      "name",
+      "email",
+      "organisation",
+      "optional phone",
+      "project information"
+    ],
+    "ai4work_article13_notice_present_on_general_privacy_page": false,
+    "ai4work_operational_privacy_contact_present": false,
+    "commercial_receiver_statement_can_be_inherited_for_ai4work": false,
+    "research_store_separation_proven_by_public_page": false,
+    "result": "GENERAL_COMMERCIAL_SURFACE_REVALIDATED_AI4WORK_NOTICE_AND_LIVE_BINDING_STILL_OPEN"
+  },
+  "provider_documentary_recheck": {
+    "thread_reference": "Claus Web support #219320",
+    "known_first_party_baseline_revalidated": true,
+    "raw_access_account_configuration_required": true,
+    "account_specific_retention_readback_present": false,
+    "account_specific_access_readback_present": false,
+    "live_research_store_isolation_proven": false,
+    "backup_residual_numeric_ceiling_proven_for_account": false,
+    "required_backup_residual_ceiling_days": 92,
+    "required_access_log_retention_ceiling_days": 7,
+    "result": "DOCUMENTARY_BASELINE_ONLY_ACCOUNT_SPECIFIC_OPERATIONAL_EVIDENCE_STILL_REQUIRED"
+  },
+  "mechanical_controls_revalidated": {
+    "nf06_contract_prod_class": "PROD_REAL_EVIDENCE",
+    "nf06_contract_test_twin_class": "TEST_TWIN_NON_EVIDENCE",
+    "prod_requires_source_export_sha256": true,
+    "prod_requires_frozen_instrument_hashes": true,
+    "prod_requires_structured_fresh_rights_hold_snapshot": true,
+    "prod_requires_research_only_storage_binding": true,
+    "rights_procedure_forbids_crm_or_contact_cross_reference": true,
+    "rights_procedure_forbids_extra_identity_collection_by_default": true,
+    "retention_schedule_live_store_max_days_after_collection_close": 180,
+    "retention_schedule_backup_residual_ceiling_days": 92,
+    "retention_schedule_erasure_replay_marker_ceiling_hours": 24
+  },
+  "remaining_external_precollection_boundary": [
+    "controller-approved exact method/frame and SHA-256 bindings",
+    "controller-approved final lawful basis/LIA",
+    "controller acceptance of DPIA outcome",
+    "final AI4WORK Article 13 notice with an operational research privacy contact",
+    "controller-approved requester-authentication/rights handling procedure",
+    "account-specific eucons.ro/cPanel/Cloudflare logging, retention, access and security readbacks",
+    "provider-bound proof of research-store separation from CRM/webroot and deletion/backup behavior within approved ceilings",
+    "verified active processor/subprocessor chain, rights-hold binding and incident-response binding",
+    "real approved CH-* dissemination-channel entries",
+    "fresh explicit collection-only v0.2 human approval after all preceding controls PASS"
+  ],
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}
