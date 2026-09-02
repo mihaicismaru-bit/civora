@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.9",
+  "schema_version": "2.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_CONFIG_V1",
   "instance_id": "valcea",
   "publication_authority": "NONE",
@@ -46,6 +46,20 @@
       "required_any_keywords": ["cjas", "cas valcea", "casa judeteana de asigurari", "casa de asigurari"],
       "keywords": ["economat", "medicament*", "compensat*", "farmac*", "asigurat*", "contract*", "furnizor*"],
       "verification_targets": [{"ref_type": "primary_target_id", "id": "cas-valcea-official"}]
+    },
+    {
+      "id": "national_road_restrictions",
+      "required_any_keywords": ["dn7", "dn 7", "dn7a", "dn 7a", "dn67c", "dn 67c", "valea oltului", "drum national", "drum național", "a1", "sibiu pitesti", "sibiu-pitesti", "boita", "boița", "cornetu"],
+      "keywords": ["restrict*", "inchider*", "închider*", "circula*", "trafic greu", "7,5 tone", "7.5 tone", "lucrar*", "lucrăr*", "consolid*", "versant*"],
+      "excluded_keywords": ["accident", "victim*", "ranit*", "rănit*", "deces", "deced*", "rasturn*", "răsturn*"],
+      "verification_targets": [{"ref_type": "primary_target_id", "id": "igpr-infotrafic-live"}]
+    },
+    {
+      "id": "county_roadworks",
+      "required_any_keywords": ["dj*", "drum judetean", "drum județean"],
+      "keywords": ["restrict*", "inchider*", "închider*", "circula*", "lucrar*", "lucrăr*", "asfalt*", "reabilit*", "moderniz*", "reparat*", "refacer*", "pod", "poduri"],
+      "excluded_keywords": ["accident", "victim*", "ranit*", "rănit*", "deces", "deced*", "rasturn*", "răsturn*"],
+      "verification_targets": [{"ref_type": "primary_target_id", "id": "cj-valcea-roadworks"}]
     },
     {
       "id": "police_public_safety",
