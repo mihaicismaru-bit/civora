@@ -169,15 +169,12 @@ class ArticleBodyParser(HTMLParser):
             self.in_title = True
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        # Void/self-closing elements carry no material prose.
         return
 
     def handle_endtag(self, tag: str) -> None:
         name = tag.lower()
         if name == "title":
             self.in_title = False
-        # HTML from institutional sites is not always perfectly nested. Pop back
-        # to the matching tag and unwind any scope/skip state we entered.
         match = None
         for index in range(len(self.stack) - 1, -1, -1):
             if self.stack[index][0] == name:
@@ -360,13 +357,13 @@ def build_live_receipt() -> dict[str, Any]:
                 explicit_date_text=explicit_date,
                 field_evidence=field_evidence,
                 tag_counts=tag_counts,
-                verification_state="POLICE_SOURCE_ARTICLE_BODY_EVIDENCE_CAPTURED_NON_AUTHORIZING",
+                verification_state="POLICE_SOURCE_TEXT_EVIDENCE_CAPTURED_NON_AUTHORIZING",
             ))
         except (HTTPError, URLError, OSError, RuntimeError, ValueError) as exc:
             holds.append({
                 "target_url": target_url,
                 "index_evidence_sha256": str(ref.get("evidence_sha256") or ""),
-                "state": "HOLD_DETAIL_FETCH_OR_ARTICLE_SCOPE_FAILED_NON_AUTHORIZING",
+                "state": "HOLD_DETAIL_FETCH_FAILED_NON_AUTHORIZING",
                 "reason": f"{type(exc).__name__}:{exc}",
             })
 
@@ -380,7 +377,7 @@ def build_live_receipt() -> dict[str, Any]:
         "observation_state": OBSERVATION_STATE,
         "source_assertion_scope": SOURCE_ASSERTION_SCOPE,
         "fetched_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "coverage_note": "BOUNDED_HIGH_VALUE_FIRST_PARTY_POLICE_ARTICLE_BODY_VERIFICATION_NOT_EXHAUSTIVE",
+        "coverage_note": "BOUNDED_HIGH_VALUE_FIRST_PARTY_POLICE_DETAIL_VERIFICATION_NOT_EXHAUSTIVE",
         "index_run_id": index.get("run_id"),
         "index_reference_count": index.get("reference_count", 0),
         "eligible_detail_count": len(candidates),
