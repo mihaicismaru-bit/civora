@@ -51,6 +51,12 @@ def main():
     assert diff["deadline_authorized"] is False
     assert diff["closed_call_authorized"] is False
 
+    try:
+        reconcile(current, previous=same)
+        raise AssertionError("newer previous evidence was accepted as history")
+    except ValueError as exc:
+        assert "newer than current" in str(exc)
+
     bad = copy.deepcopy(no_change)
     bad["publish_authorized"] = True
     try:
