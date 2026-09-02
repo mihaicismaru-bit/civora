@@ -17,7 +17,7 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - name: Checkout exact revision
         uses: actions/checkout@v4
@@ -43,19 +43,23 @@ jobs:
           ! grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"
           ! grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"
           ! grep -En 'FactKernel|editorial_writer\(|publish\(|runtime_state' "$target"
+          grep -F '"same_vacancy_inference_authorized": False' "$target"
+          grep -F '"same_need_inference_authorized": False' "$target"
+          grep -F '"dedupe_authorized": False' "$target"
 
       - name: Acquire bounded live first-party evidence
         run: |
           python valcea-clar/scripts/posturi_gov_valcea_reference_adapter.py \
             --live-check \
             --require-reference \
-            --max-details 8 \
+            --max-details 16 \
             --output /tmp/posturi_gov_valcea.json
 
       - name: Validate live receipt boundary
         run: |
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
           from urllib.parse import urlsplit
 
@@ -65,15 +69,18 @@ jobs:
           assert payload['source_family'] == 'POSTURI_GOV_VALCEA'
           assert payload['authority_class'] == 'FIRST_PARTY_GOVERNMENT_PUBLIC_JOBS_REFERENCE'
           assert payload['observation_state'] == 'REFERENCE_ONLY_NON_AUTHORIZING'
-          assert 1 <= payload['reference_count'] <= 8
-          assert 1 <= payload['job_links_discovered'] <= 16
+          assert payload['institution_identity_contract'] == 'EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY_ONLY'
+          assert 1 <= payload['reference_count'] <= 16
+          assert 1 <= payload['job_links_discovered'] <= 24
           assert payload['coverage_note'] == 'BOUNDED_COUNTY_INDEX_REFERENCE_DISCOVERY_NOT_EXHAUSTIVE'
 
           forbidden_true = [
               'current_vacancy_authorized', 'deadline_authorized', 'eligibility_authorized',
               'salary_authorized', 'staffing_shortage_authorized', 'service_capacity_authorized',
-              'institution_status_authorized', 'breaking_authorized', 'fact_kernel_write_authorized',
-              'editorial_writer_authorized', 'publication_authorized', 'distribution_authorized',
+              'institution_status_authorized', 'same_vacancy_inference_authorized',
+              'same_need_inference_authorized', 'dedupe_authorized', 'breaking_authorized',
+              'fact_kernel_write_authorized', 'editorial_writer_authorized',
+              'publication_authorized', 'distribution_authorized',
           ]
           assert all(payload[key] is False for key in forbidden_true)
 
@@ -82,6 +89,11 @@ jobs:
               'PUBLIC_JOBS_EDUCATION_REFERENCE', 'PUBLIC_JOBS_PUBLIC_SERVICE_REFERENCE',
               'PUBLIC_JOBS_OTHER_REFERENCE',
           }
+          allowed_identity_states = {
+              'EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY',
+              'UNRESOLVED_FROM_FIRST_PARTY_DETAIL_SUMMARY',
+          }
+          explicit_count = 0
           for ref in payload['references']:
               parsed = urlsplit(ref['url'])
               assert parsed.scheme == 'https'
@@ -90,8 +102,20 @@ jobs:
               assert ref['topic_class'] in allowed_topics
               assert ref['authority_class'] == payload['authority_class']
               assert ref['observation_state'] == payload['observation_state']
-              assert len(ref['index_sha256']) == 64
-              assert len(ref['detail_sha256']) == 64
-              assert len(ref['evidence_sha256']) == 64
-          print(f"Validated {payload['reference_count']} bounded Vâlcea public-job references")
+              assert ref['institution_identity_state'] in allowed_identity_states
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['index_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['detail_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', ref['evidence_sha256'])
+              if ref['institution_identity_state'] == 'EXPLICIT_FIRST_PARTY_DETAIL_SUMMARY':
+                  explicit_count += 1
+                  assert isinstance(ref['institution_name'], str) and ref['institution_name'].strip()
+                  assert re.fullmatch(r'[0-9a-f]{64}', ref['institution_evidence_sha256'])
+              else:
+                  assert ref['institution_name'] is None
+                  assert ref['institution_evidence_sha256'] is None
+          assert explicit_count >= 1
+          print(
+              f"Validated {payload['reference_count']} bounded Vâlcea public-job references; "
+              f"explicit institutions={explicit_count}"
+          )
           PY
