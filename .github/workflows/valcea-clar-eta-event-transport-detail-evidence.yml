@@ -1,0 +1,191 @@
+name: VÂLCEA CLAR ETA Event Transport Detail Evidence
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_detail_evidence.py"
+      - "valcea-clar/scripts/eta_valcea_event_transport_detail_evidence.py"
+      - ".github/workflows/valcea-clar-eta-event-transport-detail-evidence.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/eta_valcea_transport_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py"
+      - "valcea-clar/scripts/eta_valcea_transport_detail_evidence.py"
+      - "valcea-clar/scripts/eta_valcea_event_transport_detail_evidence.py"
+      - ".github/workflows/valcea-clar-eta-event-transport-detail-evidence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: valcea-clar-eta-event-transport-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Compile and deterministic regressions
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            valcea-clar/scripts/eta_valcea_transport_reference_adapter.py \
+            valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py \
+            valcea-clar/scripts/eta_valcea_transport_detail_evidence.py \
+            valcea-clar/scripts/eta_valcea_event_transport_detail_evidence.py
+          python valcea-clar/scripts/eta_valcea_transport_archive_reference_adapter.py --self-test
+          python valcea-clar/scripts/eta_valcea_transport_detail_evidence.py --self-test
+          python valcea-clar/scripts/eta_valcea_event_transport_detail_evidence.py --self-test
+
+      - name: Enforce event evidence fail-closed boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="valcea-clar/scripts/eta_valcea_event_transport_detail_evidence.py"
+          if grep -En '(^|[[:space:]])(import|from)[[:space:]]+(requests|httpx|aiohttp|selenium|playwright|subprocess|socket)([[:space:].]|$)' "$target"; then
+            echo "Forbidden network/process dependency in ETA event evidence adapter" >&2
+            exit 1
+          fi
+          if grep -En 'verify_mode|CERT_NONE|check_hostname[[:space:]]*=[[:space:]]*False|unverified_context|shell[[:space:]]*=[[:space:]]*True' "$target"; then
+            echo "TLS/process safety boundary weakened" >&2
+            exit 1
+          fi
+          if grep -En 'FactKernel|editorial_writer\(|publish\(|runtime_state' "$target"; then
+            echo "Writer/runtime capability detected in ETA event evidence adapter" >&2
+            exit 1
+          fi
+          grep -F '"historical_state_promoted_to_current": False' "$target"
+          grep -F '"currentness_inference_authorized": False' "$target"
+          grep -F '"event_service_current_authorized": False' "$target"
+          grep -F '"route_service_current_authorized": False' "$target"
+          grep -F '"timetable_current_authorized": False' "$target"
+          grep -F '"fact_kernel_write_authorized": False' "$target"
+          grep -F '"editorial_writer_authorized": False' "$target"
+          grep -F '"publication_authorized": False' "$target"
+          grep -F '"runtime_persistence_authorized": False' "$target"
+
+      - name: Acquire bounded ETA historical event transport evidence
+        run: |
+          set +e
+          python valcea-clar/scripts/eta_valcea_event_transport_detail_evidence.py \
+            --live-check \
+            --output /tmp/eta_valcea_event_transport_detail_evidence.json
+          rc=$?
+          set -e
+          cat /tmp/eta_valcea_event_transport_detail_evidence.json || true
+          exit "$rc"
+
+      - name: Validate event evidence receipt
+        run: |
+          python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from urllib.parse import urlsplit
+
+          payload = json.loads(Path('/tmp/eta_valcea_event_transport_detail_evidence.json').read_text(encoding='utf-8'))
+          assert payload['schema'] == 'ETA_VALCEA_EVENT_TRANSPORT_DETAIL_EVIDENCE_V1'
+          assert payload['status'] == 'PASS'
+          assert payload['authority_class'] == 'FIRST_PARTY_LOCAL_PUBLIC_TRANSPORT_OPERATOR_HISTORICAL_EVENT_DETAIL'
+          assert payload['observation_state'] == 'HISTORICAL_EVENT_TRANSPORT_EVIDENCE_NON_AUTHORIZING'
+          assert payload['source_assertion_scope'] == 'ETA_HISTORICAL_EVENT_STATEMENT_ONLY_CURRENTNESS_NOT_INFERRED'
+          assert payload['coverage_note'] == 'BOUNDED_ETA_2025_EVENT_TRANSPORT_DETAIL_EVIDENCE_TEXT_AND_INDEX_TITLE_ONLY'
+          assert payload['archive_reference_count'] >= 1
+          assert 1 <= payload['eligible_event_detail_count'] <= 8
+          assert 1 <= payload['event_detail_evidence_count'] <= 8
+          assert payload['event_detail_evidence_count'] + payload['event_detail_hold_count'] == payload['eligible_event_detail_count']
+          assert re.fullmatch(r'[0-9a-f]{24}', payload['run_id'])
+
+          allowed_tags = {
+              'EVENT_CONTEXT', 'EVENT_SERVICE_OFFER', 'EVENT_SERVICE_WINDOW',
+              'EVENT_DEPARTURE_TIME', 'EVENT_ROUTE_OR_STOP',
+              'EVENT_TEMPORARY_DIVERSION', 'FARE_OR_TICKETING_CONTEXT',
+          }
+          allowed_origins = {'INDEX_TITLE', 'DETAIL_TEXT'}
+          allowed_states = {
+              'TEXT_SERVICE_DETAIL_CAPTURED_NON_AUTHORIZING',
+              'TITLE_OR_DATE_CONTEXT_ONLY_SERVICE_DETAIL_UNRESOLVED',
+          }
+
+          total_fields = 0
+          aggregate_tags = set()
+          for item in payload['details']:
+              parsed = urlsplit(item['detail_url'])
+              assert parsed.scheme == 'https'
+              assert parsed.hostname in {'eta-bus.ro', 'www.eta-bus.ro'}
+              assert parsed.path.startswith('/comunicate/')
+              assert item['detail_host'] == parsed.hostname
+              assert item['source_kind'] == 'COMMUNIQUES_ARCHIVE_EVENT_DETAIL'
+              assert item['topic_class'] == 'EVENT_TRANSPORT'
+              assert item['historical_reference'] is True
+              assert item['archive_year'] == 2025
+              assert item['currentness_state'] == 'HISTORICAL_EVENT_CONTEXT_ONLY_CURRENT_SERVICE_UNRESOLVED'
+              assert item['verification_state'] == 'ETA_EVENT_SOURCE_EVIDENCE_CAPTURED_NON_AUTHORIZING'
+              assert item['service_detail_state'] in allowed_states
+              assert re.fullmatch(r'[0-9a-f]{64}', item['detail_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', item['archive_index_evidence_sha256'])
+              assert set(item['tag_counts']) <= allowed_tags
+              total_fields += len(item['field_evidence'])
+              aggregate_tags.update(item['tag_counts'])
+              for field in item['field_evidence']:
+                  assert field['evidence_origin'] in allowed_origins
+                  assert 1 <= len(field['excerpt']) <= 620
+                  assert field['epistemic_tags']
+                  assert set(field['epistemic_tags']) <= allowed_tags
+                  assert field['source_assertion_scope'] == payload['source_assertion_scope']
+                  assert re.fullmatch(r'[0-9a-f]{64}', field['source_evidence_sha256'])
+                  assert re.fullmatch(r'[0-9a-f]{64}', field['evidence_sha256'])
+
+          assert total_fields >= payload['event_detail_evidence_count']
+          assert {'EVENT_CONTEXT', 'EVENT_SERVICE_WINDOW'} <= aggregate_tags
+
+          for hold in payload['holds']:
+              assert hold['state'] == 'HOLD_EVENT_DETAIL_FETCH_FAILED_NON_AUTHORIZING'
+              assert re.fullmatch(r'[0-9a-f]{64}', hold['archive_index_evidence_sha256'])
+
+          forbidden = [
+              'material_fact_use', 'historical_state_promoted_to_current',
+              'currentness_inference_authorized', 'event_service_current_authorized',
+              'route_service_current_authorized', 'timetable_current_authorized',
+              'fare_current_authorized', 'same_event_dedupe_authorized',
+              'breaking_authorized', 'fact_kernel_write_authorized',
+              'editorial_writer_authorized', 'publication_authorized',
+              'distribution_authorized', 'runtime_persistence_authorized',
+          ]
+          assert all(payload[key] is False for key in forbidden)
+          limits = payload['limitations']
+          assert limits['archive_event_notice_is_historical_context_not_current_status'] is True
+          assert limits['index_title_is_reference_evidence_not_service_detail_proof'] is True
+          assert limits['image_only_service_details_are_not_extracted_or_inferred'] is True
+          assert limits['event_date_does_not_authorize_current_or_future_service'] is True
+          assert limits['departure_times_require_fresh_first_party_verification_before_reader_use'] is True
+          print(
+              f"ETA event transport evidence PASS; details={payload['event_detail_evidence_count']}; "
+              f"holds={payload['event_detail_hold_count']}; fields={total_fields}; tags={sorted(aggregate_tags)}"
+          )
+          PY
+
+      - name: Upload bounded ETA event evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: valcea-clar-eta-event-transport-detail-evidence
+          path: /tmp/eta_valcea_event_transport_detail_evidence.json
+          retention-days: 7
+          if-no-files-found: warn
