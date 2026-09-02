@@ -46,7 +46,7 @@ def main() -> int:
     t = copy.deepcopy(receipt); t["programmes"][0]["romania_scope"] = ["ALL_ROMANIA"]
     fail(lambda: validate_receipt(t), "territory/authority drift")
     t = copy.deepcopy(receipt); t["sources"][0]["final_url"] = "https://example.com/not-official"
-    fail(lambda: validate_receipt(t), "escaped official authority")
+    fail(lambda: validate_receipt(t), "escaped official evidence authority")
     t = copy.deepcopy(receipt); t["programmes"][0]["source_sha256"] = "0" * 64
     fail(lambda: validate_receipt(t), "source hash binding drift")
 
