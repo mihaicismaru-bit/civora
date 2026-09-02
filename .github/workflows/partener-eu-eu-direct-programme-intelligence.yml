@@ -12,6 +12,9 @@ on:
       - 'partener-eu/ingest/funding_tenders_fetch.py'
       - 'partener-eu/ops/test_eu4health_hadea_call.py'
       - 'partener-eu/ops/test_eu4health_hadea_ft_reconcile.py'
+      - 'partener-eu/ingest/horizon_eic_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/horizon_eic_programme_intelligence.py'
+      - 'partener-eu/ops/test_horizon_eic_programme_intelligence.py'
       - '.github/workflows/partener-eu-eu-direct-programme-intelligence.yml'
   workflow_dispatch:
 
@@ -21,7 +24,7 @@ permissions:
 jobs:
   eu-direct-programme-intelligence:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -43,13 +46,16 @@ jobs:
         run: |
           python -m json.tool partener-eu/ingest/erasmus_action_router_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/eu4health_hadea_call_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/horizon_eic_programme_intelligence_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/erasmus_action_router.py \
             partener-eu/ingest/eu4health_hadea_call.py \
             partener-eu/ingest/eu4health_hadea_ft_reconcile.py \
+            partener-eu/ingest/horizon_eic_programme_intelligence.py \
             partener-eu/ops/test_erasmus_action_router.py \
             partener-eu/ops/test_eu4health_hadea_call.py \
-            partener-eu/ops/test_eu4health_hadea_ft_reconcile.py
+            partener-eu/ops/test_eu4health_hadea_ft_reconcile.py \
+            partener-eu/ops/test_horizon_eic_programme_intelligence.py
 
       - name: Validate fail-closed EU Direct programme semantics
         env:
@@ -58,12 +64,17 @@ jobs:
           python partener-eu/ops/test_erasmus_action_router.py
           python partener-eu/ops/test_eu4health_hadea_call.py
           python partener-eu/ops/test_eu4health_hadea_ft_reconcile.py
+          python partener-eu/ops/test_horizon_eic_programme_intelligence.py
+
+      - name: Prepare replay root
+        run: |
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic"
 
       - name: Acquire fresh official Erasmus application-route intelligence
         run: |
           ROOT=/tmp/partener-eu-eu-direct-programme-intelligence
-          rm -rf "$ROOT"
-          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea"
           python partener-eu/ingest/erasmus_action_router.py \
             --management-mode CENTRALISED_EACEA \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
@@ -129,17 +140,7 @@ jobs:
           assert central['action_reference_hint_authority'] == 'DISCOVERY_HINT_ONLY_NOT_CALL_IDENTIFIER'
           assert decentral['route']['route_class'] == 'DECENTRALISED_NATIONAL_AGENCY'
           assert decentral['route']['application_gateway_url'] == 'https://webgate.ec.europa.eu/erasmus-esc/index/'
-          print({
-              'programme_family': 'Erasmus+',
-              'central_health': central['source_health_state'],
-              'central_healthy': central['healthy_evidence_source_count'],
-              'central_degraded': central['degraded_evidence_source_count'],
-              'decentral_health': decentral['source_health_state'],
-              'decentral_healthy': decentral['healthy_evidence_source_count'],
-              'decentral_degraded': decentral['degraded_evidence_source_count'],
-              'open_call_authorized': False,
-              'publication_effect': 'NONE',
-          })
+          print({'programme_family':'Erasmus+','open_call_authorized':False,'publication_effect':'NONE'})
           PY
 
       - name: Capture fresh exact HaDEA EU4Health evidence
@@ -159,57 +160,27 @@ jobs:
           import json, string, sys
           p='/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/exact-call.json'
           d=json.load(open(p, encoding='utf-8'))
-          if d.get('adapter_id') != 'EU4HEALTH_HADEA_CALLS_V1':
-              print('FAIL adapter identity drift')
-              sys.exit(2)
-          if d.get('observation_state') != 'EXACT_CALL_EVIDENCE_UNRECONCILED':
-              print('FAIL observation state drift:', d.get('observation_state'))
-              sys.exit(2)
+          if d.get('adapter_id') != 'EU4HEALTH_HADEA_CALLS_V1': sys.exit('FAIL adapter identity drift')
+          if d.get('observation_state') != 'EXACT_CALL_EVIDENCE_UNRECONCILED': sys.exit('FAIL observation state drift')
           for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL EU4Health evidence became authorizing:', key, d.get(key))
-                  sys.exit(2)
-          if d.get('publication_effect') != 'NONE' or d.get('market_intelligence_only') is not True:
-              print('FAIL EU4Health publication/policy drift')
-              sys.exit(2)
-          if d.get('funding_tenders_exact_topic_required') is not True or d.get('semantic_reconciliation_required') is not True:
-              print('FAIL downstream material-admission requirement relaxed')
-              sys.exit(2)
+              if d.get(key) is not False: sys.exit(f'FAIL EU4Health evidence became authorizing: {key}')
+          if d.get('publication_effect') != 'NONE' or d.get('market_intelligence_only') is not True: sys.exit('FAIL EU4Health policy drift')
+          if d.get('funding_tenders_exact_topic_required') is not True or d.get('semantic_reconciliation_required') is not True: sys.exit('FAIL material-admission requirement relaxed')
           reg_hash=str(d.get('registry_sha256') or '')
-          if len(reg_hash) != 64 or any(ch not in string.hexdigits for ch in reg_hash):
-              print('FAIL registry hash invalid:', reg_hash)
-              sys.exit(2)
+          if len(reg_hash) != 64 or any(ch not in string.hexdigits for ch in reg_hash): sys.exit('FAIL registry hash invalid')
           health=(d.get('source_health') or {}).get('health_state')
           if health == 'HEALTHY':
               raw_hash=str((d.get('source_health') or {}).get('raw_sha256') or '')
-              if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
-                  print('FAIL healthy HaDEA evidence missing raw hash')
-                  sys.exit(2)
+              if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash): sys.exit('FAIL healthy HaDEA evidence missing raw hash')
               extracted=d.get('extracted') or {}
-              if extracted.get('call_reference') != 'EU4H-2026-SANTE-PJ-08':
-                  print('FAIL exact call reference mismatch:', extracted.get('call_reference'))
-                  sys.exit(2)
-              if extracted.get('page_kind') != 'CALL_FOR_PROPOSALS' or extracted.get('programme_candidate') != 'EU4Health':
-                  print('FAIL exact call semantic markers incomplete:', extracted)
-                  sys.exit(2)
-              if d.get('evidence_usable_for_reconciliation') is not True:
-                  print('FAIL healthy exact evidence not marked usable for reconciliation')
-                  sys.exit(2)
+              if extracted.get('call_reference') != 'EU4H-2026-SANTE-PJ-08': sys.exit('FAIL exact call reference mismatch')
+              if extracted.get('page_kind') != 'CALL_FOR_PROPOSALS' or extracted.get('programme_candidate') != 'EU4Health': sys.exit('FAIL exact call semantic markers incomplete')
+              if d.get('evidence_usable_for_reconciliation') is not True: sys.exit('FAIL healthy evidence not usable for reconciliation')
           elif not str(health).startswith('DEGRADED'):
-              print('FAIL unexpected live source health:', health)
-              sys.exit(2)
+              sys.exit('FAIL unexpected live source health')
           elif (d.get('source_health') or {}).get('lkg_required') is not True:
-              print('FAIL degraded exact source lacks LKG requirement')
-              sys.exit(2)
-          print(json.dumps({
-              'health_state': health,
-              'call_reference': (d.get('extracted') or {}).get('call_reference'),
-              'status_candidate': (d.get('extracted') or {}).get('status_candidate'),
-              'funding_tenders_link_present': (d.get('extracted') or {}).get('funding_tenders_link_present'),
-              'funding_tenders_exact_topic_url': (d.get('extracted') or {}).get('funding_tenders_exact_topic_url'),
-              'evidence_usable_for_reconciliation': d.get('evidence_usable_for_reconciliation'),
-              'open_call_authorized': d.get('open_call_authorized'),
-          }, ensure_ascii=False, sort_keys=True))
+              sys.exit('FAIL degraded exact source lacks LKG requirement')
+          print(json.dumps({'health_state':health,'call_reference':(d.get('extracted') or {}).get('call_reference'),'open_call_authorized':False}, sort_keys=True))
           PY
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import json
@@ -232,48 +203,23 @@ jobs:
         if: steps.live_hadea.outputs.evidence_usable == 'true'
         run: |
           python - <<'PY'
-          import json, string, sys
+          import json, re
           p='/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/hadea-funding-tenders-reconciliation.json'
           d=json.load(open(p, encoding='utf-8'))
           expected='EU4H-2026-SANTE-PJ-08'
-          if d.get('reconciler_version') != 'EU4HEALTH_HADEA_FT_RECONCILE_V1':
-              print('FAIL reconciler identity drift')
-              sys.exit(2)
-          if d.get('observation_state') != 'EXACT_CALL_REFERENCE_AND_STATUS_RECONCILED_NON_AUTHORIZING':
-              print('FAIL exact semantic reconciliation did not pass:', d.get('observation_state'), d.get('missing_for_open_confirmation'))
-              sys.exit(2)
-          if d.get('hadea_reference') != expected or d.get('funding_tenders_reference') != expected:
-              print('FAIL exact reference binding mismatch:', d.get('hadea_reference'), d.get('funding_tenders_reference'))
-              sys.exit(2)
-          if d.get('identity_match') is not True or d.get('topic_url_match') is not True or d.get('status_match') is not True:
-              print('FAIL semantic binding incomplete')
-              sys.exit(2)
-          if d.get('semantic_reconciliation_passed') is not True or d.get('material_admission_ready_for_downstream_review') is not True:
-              print('FAIL reconciled evidence was not marked ready for downstream review')
-              sys.exit(2)
-          if str(d.get('funding_tenders_status') or '').casefold() != 'closed':
-              print('FAIL historical acceptance fixture is not independently CLOSED:', d.get('funding_tenders_status'))
-              sys.exit(2)
-          if 'current_funding_tenders_status_is_not_open' not in set(d.get('missing_for_open_confirmation') or []):
-              print('FAIL CLOSED fixture lost explicit not-open guard')
-              sys.exit(2)
-          sem_hash=str(d.get('semantic_fingerprint') or '')
-          if len(sem_hash) != 64 or any(ch not in string.hexdigits for ch in sem_hash):
-              print('FAIL reconciliation semantic hash invalid')
-              sys.exit(2)
+          assert d.get('reconciler_version') == 'EU4HEALTH_HADEA_FT_RECONCILE_V1'
+          assert d.get('observation_state') == 'EXACT_CALL_REFERENCE_AND_STATUS_RECONCILED_NON_AUTHORIZING'
+          assert d.get('hadea_reference') == expected and d.get('funding_tenders_reference') == expected
+          assert d.get('identity_match') is True and d.get('topic_url_match') is True and d.get('status_match') is True
+          assert d.get('semantic_reconciliation_passed') is True
+          assert d.get('material_admission_ready_for_downstream_review') is True
+          assert str(d.get('funding_tenders_status') or '').casefold() == 'closed'
+          assert 'current_funding_tenders_status_is_not_open' in set(d.get('missing_for_open_confirmation') or [])
+          assert re.fullmatch(r'[0-9a-f]{64}', str(d.get('semantic_fingerprint') or ''))
           for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
-              if d.get(key) is not False:
-                  print('FAIL reconciliation became authorizing:', key, d.get(key))
-                  sys.exit(2)
-          if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False:
-              print('FAIL reconciliation crossed publication boundary')
-              sys.exit(2)
-          print(json.dumps({
-              'reference': expected,
-              'funding_tenders_status': d.get('funding_tenders_status'),
-              'semantic_reconciliation_passed': d.get('semantic_reconciliation_passed'),
-              'open_call_authorized': d.get('open_call_authorized'),
-          }, ensure_ascii=False, sort_keys=True))
+              assert d.get(key) is False
+          assert d.get('publication_effect') == 'NONE' and d.get('canonical_corpus_mutation') is False
+          print(json.dumps({'reference':expected,'status':d.get('funding_tenders_status'),'open_call_authorized':False}, sort_keys=True))
           PY
 
       - name: Confirm degraded HaDEA evidence remains unreconciled
@@ -289,12 +235,52 @@ jobs:
           assert d.get('open_call_authorized') is False
           assert d.get('publish_authorized') is False
           assert not pathlib.Path('/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/hadea-funding-tenders-reconciliation.json').exists()
-          print(json.dumps({
-              'health_state': health.get('health_state'),
-              'lkg_required': health.get('lkg_required'),
-              'semantic_reconciliation_skipped_fail_closed': True,
-              'open_call_authorized': d.get('open_call_authorized'),
-          }, ensure_ascii=False, sort_keys=True))
+          print(json.dumps({'health_state':health.get('health_state'),'semantic_reconciliation_skipped_fail_closed':True}, sort_keys=True))
+          PY
+
+      - name: Acquire fresh official Horizon EIC programme intelligence
+        run: |
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/horizon-eic
+          python partener-eu/ingest/horizon_eic_programme_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-horizon-eic" \
+            --live \
+            --output "$ROOT/horizon-eic.json"
+
+      - name: Enforce live non-authorizing Horizon EIC boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          p='/tmp/partener-eu-eu-direct-programme-intelligence/horizon-eic/horizon-eic.json'
+          d=json.load(open(p, encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_HORIZON_EIC_PROGRAMME_INTELLIGENCE_V1'
+          assert d['source_family'] == 'EU_DIRECT'
+          assert set(d['programme_families']) == {'Horizon Europe','European Innovation Council'}
+          assert d['source_count'] == 4
+          assert d['source_health_state'] in {'HEALTHY','DEGRADED'}
+          assert d['market_intelligence_only'] is True
+          assert d['publication_effect'] == 'NONE'
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation'):
+              assert d[key] is False, (key,d[key])
+          assert d['exact_call_or_topic_identifier_required'] is True
+          assert d['current_official_exact_endpoint_required'] is True
+          assert d['semantic_reconciliation_required'] is True
+          assert d['field_scoped_material_admission_required'] is True
+          assert re.fullmatch(r'[0-9a-f]{64}', d['registry_sha256'])
+          assert re.fullmatch(r'[0-9a-f]{64}', d['semantic_fingerprint'])
+          assert len(d['sources']) == 4
+          for source in d['sources']:
+              health=source['source_health']
+              if health['health_state'] == 'HEALTHY':
+                  assert health['http_status'] == 200
+                  assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
+                  assert health['lkg_required'] is False
+              else:
+                  assert str(health['health_state']).startswith('DEGRADED')
+                  assert health['lkg_required'] is True
+              assert source['observation_state'] in {'PROGRAMME_INTELLIGENCE','PROGRAMMING_PIPELINE','CALL_INDEX_DISCOVERY'}
+              assert source['material_fact_use'] is False
+          assert {'exact_call_or_topic_identifier','current_official_exact_call_or_topic_endpoint','explicit_current_official_call_status','semantic_reconciliation','field_scoped_material_admission'}.issubset(set(d['missing_for_open_confirmation']))
+          print(json.dumps({'health':d['source_health_state'],'healthy_sources':d['healthy_source_count'],'degraded_sources':d['degraded_source_count'],'programmes':d['programme_families'],'open_call_authorized':False,'publication_effect':'NONE'}, sort_keys=True))
           PY
 
       - name: Upload replayable EU Direct programme evidence
