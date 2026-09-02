@@ -46,6 +46,7 @@ def self_test() -> dict:
         ("council_decision_fulltext_enricher_v2.py", "--self-test"),
         ("council_claim_attribution_normalizer.py", "--self-test"),
         ("compose_structured_alerts.py", "--self-test"),
+        ("verified_primary_fast_kernels.py", "--self-test"),
         ("promote_fact_kernels.py", "--self-test"),
         ("primary_source_admin_kernels.py", "--self-test"),
         ("primary_source_service_kernels.py", "--self-test"),
@@ -85,6 +86,7 @@ def check() -> dict:
         "mode": "check",
         "structured_events_present": structured.is_file(),
         "manual_queue_present": manual.is_file(),
+        "verified_primary_fast_lane_configured": True,
     }
     print(json.dumps(result, ensure_ascii=False))
     return result
@@ -114,6 +116,12 @@ def build() -> dict:
             "--events", str(structured.relative_to(REPO)),
             "--facts-registry", "valcea-clar/editorial/facts_registry.json",
         )
+
+    # Fresh IPJ/ISU first-party detail evidence gets a bounded same-run promotion
+    # path. The bridge itself fails closed per source/story, emits only attributed
+    # kernels and never lets a secondary signal, allegation or title-only row
+    # become publication authority. Normal Writer/Integrity/Newsroom gates remain.
+    run("verified_primary_fast_kernels.py", "--apply", timeout=300)
 
     # Other verified official-source adapters.
     run("primary_source_service_kernels.py", "--apply")
@@ -145,6 +153,7 @@ def build() -> dict:
         "status": "PASS",
         "mode": "build",
         "facts_single_writer": True,
+        "verified_primary_fast_lane": True,
         "structured_events_consumed": structured.is_file(),
         "supplemental_facts_consumed": supplemental.is_file(),
         "manual_queue_consumed": manual.is_file(),
