@@ -20,7 +20,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 from isj_valcea_education_reference_adapter import (
@@ -118,7 +118,9 @@ def _canonical_first_party_target(url: str) -> str:
         raise ValueError("detail_target_not_first_party_https")
     if parts.username or parts.password or parts.port not in (None, 443):
         raise ValueError("detail_target_identity_invalid")
-    return urlunsplit(("https", host, parts.path or "/", parts.query, ""))
+    path = quote(parts.path or "/", safe="/%:@-._~!$&'()*+,;=")
+    query = quote(parts.query, safe="=&;%:+,/?@-._~!$'()*")
+    return urlunsplit(("https", host, path, query, ""))
 
 
 def _validate_final_url(requested: str, final: str) -> str:
@@ -224,6 +226,8 @@ def build_live_receipt() -> dict[str, Any]:
 def _self_test() -> None:
     good = _canonical_first_party_target("https://www.isjvalcea.ro/docs/test.pdf?x=1#fragment")
     assert good == "https://www.isjvalcea.ro/docs/test.pdf?x=1"
+    unicode_url = _canonical_first_party_target("https://www.isjvalcea.ro/examene/admitere-în-licee")
+    assert unicode_url == "https://www.isjvalcea.ro/examene/admitere-%C3%AEn-licee"
     assert _validate_final_url(good, good) == good
     try:
         _canonical_first_party_target("https://drive.google.com/file/d/x")
