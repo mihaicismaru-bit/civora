@@ -1,7 +1,7 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.1",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.2",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-02T02:32:56+03:00",
+  "observed_at": "2026-09-02T04:35:00+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
@@ -61,10 +61,20 @@
       "publisher": "ADR Sud-Muntenia",
       "title": "ADR Sud Muntenia a deschis la Ploiești seria regională de focus grupuri pentru descoperire antreprenorială",
       "publication_date": "2026-07-01",
-      "url": "https://2021-2027.adrmuntenia.ro/adr-sud-muntenia-a-deschis-la-ploiesti-seria-regionala-de-focus-grupuri-pentru-d/news/648",
+      "url": "https://2021-2027.adrmuntenia.ro/adr-sud-muntenia-a-deschis-la-ploiesti-seria-regionala-de-focus-grupuri-pentru-descoperire-antreprenoriala/news/648",
       "observed_fact": "A 40-participant multi-stakeholder focus group was held as part of entrepreneurial-discovery work and discussion of innovation/advanced-technology opportunities.",
       "screening_result": "REJECT_FROM_NEED_PREVALENCE",
       "reason": "Stakeholder consultation/event composition is not a probability sample of AI4WORK adults or employers and the page does not publish a need-prevalence instrument/result suitable for H1-H5."
+    },
+    {
+      "region": "Sud-Vest Oltenia",
+      "publisher": "ADR Sud-Vest Oltenia",
+      "title": "Evaluarea coerenței și relevanței acțiunilor programate și implementate în cadrul PR SV Oltenia 2021-2027 - Evaluarea Intermediară (Mid-Term Review)",
+      "publication_date": "2025-05-16",
+      "url": "https://www.pr2021-2027.adroltenia.ro/assets/upload/684ad315cb79eStudiu%20Evaluarea%20coeren%C8%9Bei%20%C8%99i%20relevan%C8%9Bei%20ac%C8%9Biunilor%20PR%20SV%20Oltenia.pdf",
+      "observed_fact": "The official independent MTR's digitalisation section states that Romania and Sud-Vest Oltenia are among the lowest-ranked digital ecosystems, with low digital literacy/TIC use, weak integration of specialists in SMEs/companies and business digitalisation well below the EU level for cloud, big data and AI. The nearby numeric digital-skills and enterprise-AI percentages are national Romania benchmarks and are not regionalised.",
+      "screening_result": "LOCATOR_ENRICHMENT_EXISTING_S10_NO_NEW_SOURCE",
+      "reason": "This materially sharpens the locator and regional qualitative conclusion for existing S10/F-367944-155 but does not provide an AI4WORK target-population need-prevalence estimate. No S38 and no H1-H5 numeric point are created."
     },
     {
       "region": "Sud-Vest Oltenia",
@@ -97,8 +107,23 @@
       "reason": "Target counts, project objectives and service delivery are activity/supply evidence and do not measure AI4WORK skills-needs prevalence."
     }
   ],
-  "refresh_conclusion": "The fresh official/institutional sweep found current digitalisation, innovation and training activity in all three target regions but no newly published candidate that improves on the registered evidence with a defensible direct 2026 AI4WORK adult/employer target-population need-prevalence measure. No source is promoted solely for recency. Existing S01-S37 remain the source-register set for this refresh, and all registered secondary evidence remains non-numeric for H1-H5 under the source-register contract.",
+  "refresh_conclusion": "The fresh official/institutional sweep found current digitalisation, innovation and training activity in all three target regions but no newly published candidate that improves on the registered evidence with a defensible direct 2026 AI4WORK adult/employer target-population need-prevalence measure. Existing Sud-Vest Oltenia MTR evidence was revalidated at the exact digitalisation section and enriched only as an existing-source locator; national percentages were not regionalised. No source is promoted solely for recency. Existing S01-S37 remain the source-register set for this refresh, and all registered secondary evidence remains non-numeric for H1-H5 under the source-register contract.",
   "next_refresh_rule": "Promote a new source only if it provides materially stronger evidence relevant to the target populations, with enough provenance and sampling/method detail to classify its limits. Otherwise record the screen without inflating the source register.",
+  "call_requirements_refresh": {
+    "checked_at": "2026-09-02T04:35:00+03:00",
+    "connected_mail_query_scope": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding spam/trash",
+    "matching_new_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "checked_at": "2026-09-02T04:35:00+03:00",
+    "drive_queries": [
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE"
+    ],
+    "eligible_combined_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
   "merge_authorized": false,
   "deploy_authorized": false,
   "real_collection_authorized": false
