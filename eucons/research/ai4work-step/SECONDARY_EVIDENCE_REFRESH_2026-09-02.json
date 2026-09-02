@@ -1,7 +1,7 @@
 {
   "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-02T17:35:16+03:00",
+  "observed_at": "2026-09-02T18:34:46+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
@@ -55,6 +55,15 @@
       "reason": "Training supply and point-in-time declared vacancies are contextual administrative activity, not a direct AI4WORK adult/employer need-prevalence measure."
     },
     {
+      "region": "Centru / Alba",
+      "publisher": "ADR Centru",
+      "title": "Doua noi contracte pentru digitalizarea administratiei publice locale din judetul Alba",
+      "url": "https://www.adrcentru.ro/comunicare/doua-noi-contracte-pentru-digitalizarea-administratiei-publice-locale-din-judetul-alba/",
+      "observed_fact": "The official ADR Centru page published 1 September 2026 reports two newly signed local-public-administration digitalisation contracts under Priority 2 - A digital region.",
+      "screening_result": "REJECT_FROM_NEED_EVIDENCE",
+      "reason": "Signed digitalisation investments demonstrate implementation/funding activity, not measured adult or employer need prevalence, and therefore cannot influence H1-H5."
+    },
+    {
       "region": "Sud-Muntenia / Prahova",
       "publisher": "ANOFM / AJOFM Prahova",
       "title": "GREEN JOBS PRAHOVA - Tranzitie catre o economie verde",
@@ -64,6 +73,15 @@
       "reason": "A funded project's objectives, target groups and planned skills activity are supply/implementation context and cannot be used as proof of underlying need."
     },
     {
+      "region": "Sud-Muntenia / Prahova",
+      "publisher": "ANOFM / AJOFM Prahova",
+      "title": "Propuneri cursuri organizate de AJOFM Prahova - 2026",
+      "url": "https://www.anofm.ro/prahova/propuneri-cursuri-organizate-de-ajofm-prahova-2026/",
+      "observed_fact": "The official page currently exposes the county agency's 2026 proposed training-course offer.",
+      "screening_result": "REJECT_FROM_NEED_PREVALENCE",
+      "reason": "A proposed training portfolio is service/supply context. Without respondent-level or methodologically documented demand results it is not evidence of AI4WORK target-population need prevalence."
+    },
+    {
       "region": "Sud-Vest Oltenia / Gorj",
       "publisher": "ANOFM / AJOFM Gorj",
       "title": "eSPOR, intermediar in relatia cu angajatorii - chestionar",
@@ -71,19 +89,28 @@
       "observed_fact": "The official 2023 page documents solicitation of employer input to adapt training and labour-market forecasting.",
       "screening_result": "REJECT_FROM_NEED_PREVALENCE",
       "reason": "This is a survey invitation/process description rather than published respondent results; it cannot be promoted as a measured need result."
+    },
+    {
+      "region": "Sud-Vest Oltenia / Dolj",
+      "publisher": "ANOFM / AJOFM Dolj",
+      "title": "GREEN SPO DOLJ - TRANZITIA CATRE O ECONOMIE VERDE",
+      "url": "https://www.anofm.ro/dolj/",
+      "observed_fact": "The current AJOFM Dolj public page reports the 2026 launch/implementation of the GREEN SPO DOLJ project.",
+      "screening_result": "REJECT_FROM_NEED_EVIDENCE",
+      "reason": "Project launch, target-group and implementation information is explicitly not accepted as proof of need under NF-RUN-001."
     }
   ],
-  "refresh_conclusion": "S38 remains the newest promoted source and stays historical direct-complementary only, with zero H1-H5 numeric effect. Fresh official/institutional follow-up found no defensible S39. The Covasna 2026 report is retained only as a pending-content candidate; current training, vacancy, funding and project pages are not used as evidence of need.",
-  "next_refresh_rule": "Promote a new source only when its actual content can be read and it provides materially stronger target-population evidence with enough provenance and method detail to classify its limits. A listing, project objective, funding offer or training activity is insufficient.",
+  "refresh_conclusion": "S38 remains the newest promoted source and stays historical direct-complementary only, with zero H1-H5 numeric effect. The 18:34 EEST official/institutional follow-up found no defensible S39: the newest Centru digitalisation contracts, Prahova training-course offer and Dolj transition project are implementation/supply context, not need evidence. The Covasna 2026 report remains pending actual content readback.",
+  "next_refresh_rule": "Promote a new source only when its actual content can be read and it provides materially stronger target-population evidence with enough provenance and method detail to classify its limits. A listing, project objective, funding offer, technology deployment or training activity is insufficient.",
   "call_requirements_refresh": {
-    "checked_at": "2026-09-02T17:35:16+03:00",
+    "checked_at": "2026-09-02T18:34:46+03:00",
     "connected_mail_query_scope": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding spam/trash",
     "matching_new_authority_messages": 0,
     "matched_non_authority_messages": "GitHub workflow notifications only",
     "status": "CLOSED_UNCHANGED"
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-02T17:35:16+03:00",
+    "checked_at": "2026-09-02T18:34:46+03:00",
     "drive_queries": [
       "AI4WORK_ADULTS_V1",
       "AI4WORK_EMPLOYERS_V1",
