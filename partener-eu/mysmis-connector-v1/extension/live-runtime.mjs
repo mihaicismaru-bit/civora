@@ -4,6 +4,10 @@ import { ChromeSessionReplayStore } from "./internal-transport.mjs";
 
 const BUILD_PATTERN = /^[a-f0-9]{40}$/u;
 const MYSMIS_HOST = /^(?:[a-z0-9-]+\.)*mysmis2021\.gov\.ro$/iu;
+const MYSMIS_TAB_PATTERNS = Object.freeze([
+  "https://mysmis2021.gov.ro/*",
+  "https://*.mysmis2021.gov.ro/*"
+]);
 const PROJECT_CODE = /(?:^|\D)\d{6}(?:\D|$)/u;
 
 export class LiveExtensionRuntimeError extends Error {
@@ -47,23 +51,26 @@ function validateSnapshot(snapshot) {
   return snapshot;
 }
 
-async function activeMysmisSnapshot(chromeApi) {
+async function readableMysmisSnapshot(chromeApi) {
   let tabs;
   try {
-    tabs = await chromeApi.tabs.query({ active: true, lastFocusedWindow: true });
+    tabs = await chromeApi.tabs.query({ url: [...MYSMIS_TAB_PATTERNS] });
   } catch {
     return null;
   }
-  const tab = Array.isArray(tabs) ? tabs.find((value) => Number.isInteger(value?.id) && isMysmisUrl(value?.url)) : null;
-  if (!tab) return null;
-  let response;
-  try {
-    response = await chromeApi.tabs.sendMessage(tab.id, { type: "MYSMIS_CAPTURE_CURRENT_PAGE" });
-  } catch {
-    return null;
+  if (!Array.isArray(tabs)) return null;
+  const candidates = tabs
+    .filter((value) => Number.isInteger(value?.id) && isMysmisUrl(value?.url))
+    .sort((left, right) => Number(Boolean(right.active)) - Number(Boolean(left.active)) || left.id - right.id);
+  for (const tab of candidates) {
+    try {
+      const response = await chromeApi.tabs.sendMessage(tab.id, { type: "MYSMIS_CAPTURE_CURRENT_PAGE" });
+      if (response?.ok === true) return validateSnapshot(response.snapshot);
+    } catch {
+      // A stale or not-yet-injected MySMIS tab must not block another readable MySMIS tab.
+    }
   }
-  if (response?.ok !== true) return null;
-  return validateSnapshot(response.snapshot);
+  return null;
 }
 
 function authenticatedProjectContext(snapshot) {
@@ -119,7 +126,7 @@ export function createLiveExtensionDispatcher({
     replayStore,
     clock,
     healthHandler: async ({ requiredCapabilities }) => {
-      const snapshot = await activeMysmisSnapshot(chromeApi);
+      const snapshot = await readableMysmisSnapshot(chromeApi);
       return {
         agentBuildId,
         capabilities: requiredCapabilities.map((name) => ({
@@ -137,9 +144,9 @@ export function createLiveExtensionDispatcher({
       };
     },
     discoverHandler: async ({ projectSelector, track }) => {
-      const snapshot = await activeMysmisSnapshot(chromeApi);
+      const snapshot = await readableMysmisSnapshot(chromeApi);
       if (!snapshot) {
-        throw new LiveExtensionRuntimeError("MV3_MYSMIS_PAGE_UNAVAILABLE", "An active readable MySMIS page is required.");
+        throw new LiveExtensionRuntimeError("MV3_MYSMIS_PAGE_UNAVAILABLE", "A readable MySMIS page is required.");
       }
       assertProjectBinding(snapshot, projectSelector);
       const boundedSnapshot = sanitizeSnapshot(snapshot, projectSelector, track);
