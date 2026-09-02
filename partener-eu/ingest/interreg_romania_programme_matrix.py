@@ -2,8 +2,9 @@
 """Official Interreg programme/territory matrix relevant to Romania.
 
 Acquisition-only and non-authorizing. This verifies programme-level Romanian
-territorial fit from official programme authorities. It never authorizes a
-call status, deadline, budget, applicant eligibility, publication or alert.
+territorial fit from official programme authorities or programme-validated
+Interreg registry evidence. It never authorizes a call status, deadline,
+budget, applicant eligibility, publication or alert.
 """
 from __future__ import annotations
 
@@ -24,7 +25,7 @@ SCHEMA = "PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1"
 PARSER_VERSION = "INTERREG_ROMANIA_PROGRAMME_MATRIX_V1"
 SOURCE_FAMILY = "INTERREG"
 PROGRAMME_FAMILY = "INTERREG_ROMANIA_RELEVANT_2021_2027"
-AUTHORITY_CLASS = "INTERREG_OFFICIAL_PROGRAMME_AUTHORITY"
+AUTHORITY_CLASS = "INTERREG_OFFICIAL_PROGRAMME_EVIDENCE"
 OBSERVATION_STATE = "PROGRAMME_GEOGRAPHY_RESEARCH_NON_AUTHORIZING"
 
 MATERIAL_FLAGS = (
@@ -37,10 +38,11 @@ MATERIAL_FLAGS = (
 PROGRAMMES: tuple[dict[str, Any], ...] = (
     {
         "id": "RO_BG", "programme": "Interreg VI-A Romania-Bulgaria", "mode": "CBC_INTERNAL",
-        "url": "https://www.interregviarobg.eu/en/the-interreg-vi-a-romania-bulgaria-programme-was-approved-by-the-european-commission",
-        "hosts": ("www.interregviarobg.eu", "interregviarobg.eu"),
-        "anchors": ("Interreg VI-A Romania Bulgaria", "Mehedinti", "Dolj", "Olt", "Teleorman", "Giurgiu", "Calarasi", "Constanta"),
+        "url": "https://keep.eu/programmes/342/2021-2027-Romania-Bulgaria/",
+        "hosts": ("keep.eu", "www.keep.eu"),
+        "anchors": ("2021 - 2027 Interreg VI-A Romania-Bulgaria", "Eligible geographical area", "Mehedinti", "Dolj", "Olt", "Teleorman", "Giurgiu", "Calarasi", "Constanta"),
         "romania_scope": ("Mehedinti", "Dolj", "Olt", "Teleorman", "Giurgiu", "Calarasi", "Constanta"),
+        "evidence_note": "keep.eu programme data is programme-validated Interreg registry evidence",
     },
     {
         "id": "RO_HU", "programme": "Interreg VI-A Romania-Hungary", "mode": "CBC_INTERNAL",
@@ -48,6 +50,7 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "hosts": ("interreg-rohu.eu", "www.interreg-rohu.eu"),
         "anchors": ("Interreg VI-A Romania-Hungary", "Arad", "Bihor", "Satu Mare", "Timis"),
         "romania_scope": ("Arad", "Bihor", "Satu Mare", "Timis"),
+        "evidence_note": "official programme authority",
     },
     {
         "id": "RO_RS", "programme": "Interreg IPA Romania-Serbia", "mode": "CBC_IPA",
@@ -55,6 +58,7 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "hosts": ("romania-serbia.net", "www.romania-serbia.net"),
         "anchors": ("Interreg IPA Romania-Serbia", "Timis", "Caras-Severin", "Mehedinti", "six districts in Serbia"),
         "romania_scope": ("Timis", "Caras-Severin", "Mehedinti"),
+        "evidence_note": "official programme authority",
     },
     {
         "id": "RO_UA", "programme": "Interreg NEXT Romania-Ukraine", "mode": "CBC_NEXT",
@@ -62,6 +66,7 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "hosts": ("ro-ua.net", "www.ro-ua.net"),
         "anchors": ("Interreg NEXT Romania-Ukraine", "Satu Mare", "Maramures", "Suceava", "Botosani", "Tulcea"),
         "romania_scope": ("Satu Mare", "Maramures", "Suceava", "Botosani", "Tulcea"),
+        "evidence_note": "official programme authority",
     },
     {
         "id": "RO_MD", "programme": "Interreg NEXT Romania-Republic of Moldova", "mode": "CBC_NEXT",
@@ -69,6 +74,7 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "hosts": ("ro-md.net", "www.ro-md.net"),
         "anchors": ("Interreg VI-A NEXT Romania-Republic of Moldova", "Botosani", "Iasi", "Vaslui", "Galati"),
         "romania_scope": ("Botosani", "Iasi", "Vaslui", "Galati"),
+        "evidence_note": "official programme authority",
     },
     {
         "id": "DANUBE", "programme": "Interreg Danube Region Programme", "mode": "TRANSNATIONAL",
@@ -76,6 +82,7 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "hosts": ("interreg-danube.eu", "www.interreg-danube.eu"),
         "anchors": ("14 countries", "Romania", "Danube region", "eligible to apply"),
         "romania_scope": ("ALL_ROMANIA",),
+        "evidence_note": "official programme authority",
     },
     {
         "id": "INTERREG_EUROPE", "programme": "Interreg Europe", "mode": "INTERREGIONAL",
@@ -83,6 +90,7 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "hosts": ("www.interregeurope.eu", "interregeurope.eu"),
         "anchors": ("Romania", "Interreg Europe"),
         "romania_scope": ("ALL_ROMANIA",),
+        "evidence_note": "official programme authority",
     },
 )
 
@@ -178,17 +186,19 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
         raw, meta = fetcher(spec["url"])
         final_url = str(meta.get("final_url") or meta.get("requested_url") or "")
         if int(meta.get("status") or 0) != 200 or not host_allowed(final_url, spec["hosts"]):
-            raise ValueError(f"{spec['id']} left its official Interreg programme authority")
+            raise ValueError(f"{spec['id']} left its official Interreg evidence authority")
         require(html_text(raw), spec["anchors"], source=spec["programme"])
         raw_by_id[spec["id"]] = raw
         source_hash = sha256_bytes(raw)
         sources.append({
             "programme_id": spec["id"], "authority_url": spec["url"], **dict(meta),
             "sha256": source_hash, "authority_class": AUTHORITY_CLASS,
+            "evidence_note": spec["evidence_note"],
         })
         matrix.append({
             "programme_id": spec["id"], "programme": spec["programme"], "cooperation_mode": spec["mode"],
             "authority_url": spec["url"], "authority_class": AUTHORITY_CLASS,
+            "evidence_note": spec["evidence_note"],
             "programme_period": "2021-2027", "romania_scope": list(spec["romania_scope"]),
             "territorial_fit_state": "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING",
             "observation_state": OBSERVATION_STATE, "observed_at": observed,
@@ -246,7 +256,9 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
         if int(source.get("status") or 0) != 200 or not re.fullmatch(r"[0-9a-f]{64}", str(source.get("sha256") or "")):
             raise ValueError(f"Interreg source {pid} lacks healthy hash-bound evidence")
         if not host_allowed(str(source.get("final_url") or source.get("requested_url") or ""), specs[pid]["hosts"]):
-            raise ValueError(f"Interreg source {pid} escaped official authority")
+            raise ValueError(f"Interreg source {pid} escaped official evidence authority")
+        if source.get("evidence_note") != specs[pid]["evidence_note"]:
+            raise ValueError(f"Interreg source {pid} evidence provenance drift")
 
     for row in rows:
         pid = str(row.get("programme_id") or "")
@@ -256,6 +268,8 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
             raise ValueError(f"Interreg programme {pid} attempted call/applicant eligibility authorization")
         if row.get("authority_url") != specs[pid]["url"] or list(row.get("romania_scope") or []) != list(specs[pid]["romania_scope"]):
             raise ValueError(f"Interreg programme {pid} territory/authority drift")
+        if row.get("evidence_note") != specs[pid]["evidence_note"]:
+            raise ValueError(f"Interreg programme {pid} evidence provenance drift")
         source = next(x for x in sources if x.get("programme_id") == pid)
         if row.get("source_sha256") != source.get("sha256"):
             raise ValueError(f"Interreg programme {pid} source hash binding drift")
