@@ -1,0 +1,185 @@
+name: PARTENER.EU MFF 2028-2034 Programming Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_mff_2028_2034_programming_registry.json'
+      - 'partener-eu/ingest/eu_direct_mff_2028_2034_programming_watch.py'
+      - 'partener-eu/ops/test_eu_direct_mff_2028_2034_programming_watch.py'
+      - '.github/workflows/partener-eu-mff-2028-2034-programming-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  mff-programming-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile registry adapter and regression
+        run: |
+          python -m json.tool partener-eu/ingest/eu_direct_mff_2028_2034_programming_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_mff_2028_2034_programming_watch.py \
+            partener-eu/ops/test_eu_direct_mff_2028_2034_programming_watch.py
+
+      - name: Validate fail-closed programming semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_eu_direct_mff_2028_2034_programming_watch.py
+
+      - name: Prepare replay root
+        run: |
+          ROOT=/tmp/partener-eu-mff-2028-2034-programming-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/current" "$ROOT/previous"
+
+      - name: Restore previous same-branch programming snapshot when available
+        id: restore
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          HEAD_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import io, json, os, pathlib, urllib.request, zipfile
+          repo=os.environ['REPOSITORY']; branch=os.environ['HEAD_BRANCH']; token=os.environ['GH_TOKEN']
+          root=pathlib.Path('/tmp/partener-eu-mff-2028-2034-programming-proof/previous')
+          api=f'https://api.github.com/repos/{repo}/actions/artifacts?per_page=100'
+          headers={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}
+          with urllib.request.urlopen(urllib.request.Request(api, headers=headers), timeout=30) as response:
+              artifacts=json.load(response).get('artifacts') or []
+          prefix='partener-eu-mff-2028-2034-programming-history-'
+          chosen=None
+          for artifact in artifacts:
+              workflow_run=artifact.get('workflow_run') or {}
+              if artifact.get('expired') or not str(artifact.get('name') or '').startswith(prefix):
+                  continue
+              if workflow_run.get('head_branch') != branch:
+                  continue
+              chosen=artifact
+              break
+          found=False
+          if chosen:
+              request=urllib.request.Request(chosen['archive_download_url'], headers=headers)
+              with urllib.request.urlopen(request, timeout=60) as response:
+                  payload=response.read()
+              with zipfile.ZipFile(io.BytesIO(payload)) as archive:
+                  candidate=next((name for name in archive.namelist() if name.endswith('eu-direct-mff-2028-2034-programming-snapshot.json')), None)
+                  if candidate:
+                      root.mkdir(parents=True, exist_ok=True)
+                      (root/'eu-direct-mff-2028-2034-programming-snapshot.json').write_bytes(archive.read(candidate))
+                      found=True
+                      (root/'restore-metadata.json').write_text(json.dumps({
+                          'artifact_id':chosen['id'], 'artifact_name':chosen['name'],
+                          'head_sha':(chosen.get('workflow_run') or {}).get('head_sha'), 'head_branch':branch,
+                      }, sort_keys=True, indent=2)+'\n', encoding='utf-8')
+          with pathlib.Path(os.environ['GITHUB_OUTPUT']).open('a', encoding='utf-8') as output:
+              output.write(f'previous_found={str(found).lower()}\n')
+          print(json.dumps({'previous_found':found,'artifact_id':chosen.get('id') if chosen else None}, sort_keys=True))
+          PY
+
+      - name: Acquire fresh official MFF programming evidence
+        env:
+          PREVIOUS_FOUND: ${{ steps.restore.outputs.previous_found }}
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-mff-2028-2034-programming-proof
+          ARGS=()
+          if [[ "$PREVIOUS_FOUND" == "true" ]]; then
+            ARGS+=(--previous "$ROOT/previous/eu-direct-mff-2028-2034-programming-snapshot.json")
+          fi
+          python partener-eu/ingest/eu_direct_mff_2028_2034_programming_watch.py \
+            --registry partener-eu/ingest/eu_direct_mff_2028_2034_programming_registry.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output-dir "$ROOT/current" \
+            "${ARGS[@]}"
+
+      - name: Enforce live programming-only boundary
+        env:
+          PREVIOUS_FOUND: ${{ steps.restore.outputs.previous_found }}
+        run: |
+          python - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-mff-2028-2034-programming-proof/current')
+          snapshot=json.loads((root/'eu-direct-mff-2028-2034-programming-snapshot.json').read_text(encoding='utf-8'))
+          reconciliation=json.loads((root/'eu-direct-mff-2028-2034-programming-reconciliation.json').read_text(encoding='utf-8'))
+          assert snapshot['schema']=='PARTENER_EU_EU_DIRECT_MFF_2028_2034_PROGRAMMING_WATCH_V1'
+          assert snapshot['source_family']=='PROGRAMMING_PIPELINE'
+          assert snapshot['programme_family']=='EU_DIRECT_2028_2034'
+          assert snapshot['observation_state']=='PROGRAMMING_PIPELINE'
+          assert snapshot['source_count']==4 and snapshot['healthy_source_count']==4 and snapshot['degraded_source_count']==0
+          flags=('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation')
+          assert all(snapshot[key] is False for key in flags)
+          assert snapshot['publication_effect']=='NONE'
+          expected={'MFF-2028-2034-COMMISSION-ROOT','ECF-COM-2025-555','HORIZON-2028-2034-COM-2025-543','ERASMUS-2028-2034-COM-2025-549'}
+          assert {row['source_id'] for row in snapshot['evidence']}==expected
+          procedure_rows=0
+          for row in snapshot['evidence']:
+              assert row['observation_state'] in {'PROPOSAL','CONSULTATION','PLANNED','PROGRAMMING_PROCESS'}
+              assert all(row[key] is False for key in flags)
+              health=row['source_health']
+              assert health['health_state']=='HEALTHY' and health['http_status']==200 and health['lkg_required'] is False
+              assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', row['semantic_fingerprint'])
+              if row.get('procedure_identifier'):
+                  procedure_rows += 1
+                  assert row['semantics']['procedure_state'] in {'ONGOING','UNKNOWN_NON_AUTHORIZING'}
+          assert procedure_rows==3
+          previous_found=os.environ.get('PREVIOUS_FOUND')=='true'
+          if previous_found:
+              assert reconciliation['reconciliation_state'] in {'NO_CHANGE','PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+          else:
+              assert reconciliation['reconciliation_state']=='BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert reconciliation['semantic_change_count']==0 and reconciliation['pipeline_watch_candidate'] is False
+          assert all(reconciliation[key] is False for key in flags)
+          assert reconciliation['publication_effect']=='NONE'
+          print(json.dumps({
+              'source_health':snapshot['source_health'], 'sources':4,
+              'reconciliation_state':reconciliation['reconciliation_state'],
+              'semantic_change_count':reconciliation['semantic_change_count'],
+              'open_call_authorized':False, 'publication_effect':'NONE',
+          }, sort_keys=True))
+          PY
+
+      - name: Stage compact comparison history
+        run: |
+          ROOT=/tmp/partener-eu-mff-2028-2034-programming-proof
+          mkdir -p "$ROOT/history"
+          cp "$ROOT/current/eu-direct-mff-2028-2034-programming-snapshot.json" "$ROOT/history/"
+
+      - name: Upload compact programming history
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-mff-2028-2034-programming-history-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-mff-2028-2034-programming-proof/history/
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload bounded replay proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-mff-2028-2034-programming-proof-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-mff-2028-2034-programming-proof/
+          if-no-files-found: error
+          retention-days: 7
