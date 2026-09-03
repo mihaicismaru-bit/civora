@@ -336,19 +336,45 @@ def parse_time(value: str) -> dt.datetime:
 
 def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = None) -> dict[str, Any]:
     validate_snapshot_integrity(current)
-    changes: list[dict[str, Any]] = []
+    semantic_changes: list[dict[str, Any]] = []
+    transport_changes: list[dict[str, Any]] = []
     if previous is None:
         state = "BASELINE_CAPTURED_NON_AUTHORIZING"
     else:
         validate_snapshot_integrity(previous)
         if parse_time(str(previous.get("fetched_at"))) > parse_time(str(current.get("fetched_at"))):
             raise ValueError("previous MFF snapshot is newer than current")
-        before = {row["source_id"]: row.get("semantic_fingerprint") for row in previous.get("evidence") or []}
-        after = {row["source_id"]: row.get("semantic_fingerprint") for row in current.get("evidence") or []}
-        for sid in sorted(set(before) | set(after)):
-            if before.get(sid) != after.get(sid):
-                changes.append({"source_id": sid, "before": before.get(sid), "after": after.get(sid)})
-        state = "NO_CHANGE" if not changes else "PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
+        before = {row["source_id"]: row for row in previous.get("evidence") or []}
+        after = {row["source_id"]: row for row in current.get("evidence") or []}
+        if set(before) != set(after):
+            raise ValueError("MFF same-history source identity set drift")
+        for sid in sorted(before):
+            prior = before[sid]
+            fresh = after[sid]
+            prior_fp = prior.get("semantic_fingerprint")
+            fresh_fp = fresh.get("semantic_fingerprint")
+            prior_health = prior.get("source_health") or {}
+            fresh_health = fresh.get("source_health") or {}
+            if prior_fp is not None and fresh_fp is not None:
+                if prior_fp != fresh_fp:
+                    semantic_changes.append({"source_id": sid, "before": prior_fp, "after": fresh_fp})
+            else:
+                transport_changes.append({
+                    "source_id": sid,
+                    "before_health": prior_health.get("health_state"),
+                    "after_health": fresh_health.get("health_state"),
+                    "before_error_type": prior_health.get("error_type"),
+                    "after_error_type": fresh_health.get("error_type"),
+                    "before_semantic_fingerprint": prior_fp,
+                    "after_semantic_fingerprint": fresh_fp,
+                })
+        if semantic_changes:
+            state = "PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
+        elif transport_changes:
+            state = "TRANSPORT_OR_CONTENT_DRIFT_ONLY"
+        else:
+            state = "NO_CHANGE"
+    current_degraded = int(current.get("degraded_source_count") or 0)
     receipt: dict[str, Any] = {
         "schema": RECONCILIATION_SCHEMA, "parser_version": PARSER_VERSION,
         "source_family": SOURCE_FAMILY, "programme_family": PROGRAMME_FAMILY,
@@ -356,14 +382,57 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = N
         "previous_run_id": previous.get("run_id") if previous else None,
         "current_fetched_at": current.get("fetched_at"),
         "previous_fetched_at": previous.get("fetched_at") if previous else None,
-        "reconciliation_state": state, "semantic_change_count": len(changes),
-        "semantic_changes": changes, "pipeline_watch_candidate": bool(changes),
-        "source_health_watch_candidate": current.get("degraded_source_count", 0) > 0,
+        "reconciliation_state": state,
+        "semantic_change_count": len(semantic_changes), "semantic_changes": semantic_changes,
+        "transport_or_content_change_count": len(transport_changes),
+        "transport_or_content_changes": transport_changes,
+        "pipeline_watch_candidate": bool(semantic_changes),
+        "source_health_watch_candidate": current_degraded > 0 or bool(transport_changes),
+        "lkg_reference_required": current_degraded > 0,
+        "lkg_reference_available": current_degraded > 0 and previous is not None,
+        "lkg_reference_is_current_truth": False,
         "market_intelligence_only": True, "publication_effect": "NONE",
     }
     for flag in MATERIAL_FLAGS:
         receipt[flag] = False
+    validate_reconciliation(receipt, current=current, previous=previous)
     return receipt
+
+
+def validate_reconciliation(
+    receipt: Mapping[str, Any], *, current: Mapping[str, Any], previous: Mapping[str, Any] | None
+) -> None:
+    validate_snapshot_integrity(current)
+    if receipt.get("schema") != RECONCILIATION_SCHEMA or receipt.get("parser_version") != PARSER_VERSION:
+        raise ValueError("MFF reconciliation identity drift")
+    semantic_count = int(receipt.get("semantic_change_count") or 0)
+    transport_count = int(receipt.get("transport_or_content_change_count") or 0)
+    state = receipt.get("reconciliation_state")
+    if previous is None:
+        if state != "BASELINE_CAPTURED_NON_AUTHORIZING" or semantic_count or transport_count:
+            raise ValueError("MFF baseline reconciliation invalid")
+    else:
+        validate_snapshot_integrity(previous)
+        if state == "NO_CHANGE" and (semantic_count or transport_count):
+            raise ValueError("MFF NO_CHANGE carries changes")
+        if state == "TRANSPORT_OR_CONTENT_DRIFT_ONLY" and (semantic_count or not transport_count):
+            raise ValueError("MFF transport drift misclassified")
+        if state == "PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING" and not semantic_count:
+            raise ValueError("MFF semantic-change state lacks semantic changes")
+        if state not in {"NO_CHANGE", "TRANSPORT_OR_CONTENT_DRIFT_ONLY", "PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"}:
+            raise ValueError("MFF unsupported reconciliation state")
+    if receipt.get("pipeline_watch_candidate") is not bool(semantic_count):
+        raise ValueError("MFF pipeline watch candidate disagrees with semantic changes")
+    current_degraded = int(current.get("degraded_source_count") or 0)
+    if receipt.get("lkg_reference_required") is not (current_degraded > 0):
+        raise ValueError("MFF LKG requirement drift")
+    if receipt.get("lkg_reference_is_current_truth") is not False:
+        raise ValueError("MFF LKG crossed current-truth boundary")
+    for flag in MATERIAL_FLAGS:
+        if receipt.get(flag) is not False:
+            raise ValueError(f"MFF reconciliation attempted authorization: {flag}")
+    if receipt.get("publication_effect") != "NONE" or receipt.get("market_intelligence_only") is not True:
+        raise ValueError("MFF reconciliation crossed publication boundary")
 
 
 def main() -> int:
@@ -391,6 +460,7 @@ def main() -> int:
         "degraded_source_count": snapshot["degraded_source_count"],
         "reconciliation_state": reconciliation["reconciliation_state"],
         "semantic_change_count": reconciliation["semantic_change_count"],
+        "transport_or_content_change_count": reconciliation["transport_or_content_change_count"],
         "open_call_authorized": snapshot["open_call_authorized"], "publication_effect": snapshot["publication_effect"],
     }, sort_keys=True))
     return 0
