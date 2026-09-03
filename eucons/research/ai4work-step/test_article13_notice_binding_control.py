@@ -53,6 +53,14 @@ class Article13NoticeBindingControlTest(unittest.TestCase):
         self.assertIn("approved_surface_placeholder:privacy_contact", errors)
         self.assertIn("approved_surface_placeholder:legal_basis", errors)
 
+    def test_retention_surface_discloses_all_bounded_live_and_residual_windows(self) -> None:
+        retention = self.snapshot["surface_fields"]["retention_summary"]
+        self.assertIn("180 de zile", retention)
+        self.assertIn("92 de zile", retention)
+        self.assertIn("24 de ore", retention)
+        self.assertIn("maximum 7 zile", retention)
+        self.assertIn("nereînnoit", retention)
+
     def test_both_rendered_forms_contain_exact_bound_surface_values(self) -> None:
         by_id = {form["id"]: form for form in self.schema["forms"]}
         for form_id in ("AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"):
