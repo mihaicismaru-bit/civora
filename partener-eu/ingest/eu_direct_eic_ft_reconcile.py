@@ -12,7 +12,7 @@ from typing import Any, Mapping
 from eu_direct_eic_ft_exact import SCHEMA as EXACT_SCHEMA, canonical_json, validate_evidence
 
 SCHEMA = "PARTENER_EU_EIC_FT_RECONCILIATION_V1"
-PARSER_VERSION = "EU_DIRECT_EIC_FT_RECONCILE_V1"
+PARSER_VERSION = "EU_DIRECT_EIC_FT_RECONCILE_V1_1"
 MATERIAL_FLAGS = (
     "material_fact_use",
     "open_call_authorized",
@@ -24,6 +24,7 @@ MATERIAL_FLAGS = (
     "distribution_authorized",
     "call_alert_authorized",
 )
+DEGRADED_STATE = "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED"
 
 
 def sha256_json(value: Any) -> str:
@@ -37,6 +38,15 @@ def parse_time(value: str) -> dt.datetime:
     return parsed
 
 
+def _evidence_usable(evidence: Mapping[str, Any]) -> bool:
+    value = evidence.get("evidence_usable_for_reconciliation")
+    if value is None:
+        return True
+    if value not in {True, False}:
+        raise ValueError("EIC evidence usability state invalid")
+    return bool(value)
+
+
 def _validated_semantics(evidence: Mapping[str, Any]) -> dict[str, Any]:
     validate_evidence(evidence)
     semantics = evidence.get("exact_semantics")
@@ -47,36 +57,55 @@ def _validated_semantics(evidence: Mapping[str, Any]) -> dict[str, Any]:
     return dict(semantics)
 
 
+def _validate_previous_identity_and_time(current: Mapping[str, Any], previous: Mapping[str, Any]) -> None:
+    if previous.get("schema") != EXACT_SCHEMA:
+        raise ValueError("previous evidence is not EIC exact evidence")
+    validate_evidence(previous)
+    if previous.get("reference") != current.get("reference"):
+        raise ValueError("EIC reconciliation identity mismatch")
+    if parse_time(str(previous.get("fetched_at"))) > parse_time(str(current.get("fetched_at"))):
+        raise ValueError("previous EIC evidence is newer than current evidence")
+
+
 def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = None) -> dict[str, Any]:
     if current.get("schema") != EXACT_SCHEMA:
         raise ValueError("current evidence is not EIC exact evidence")
     current_semantics = _validated_semantics(current)
+    current_usable = _evidence_usable(current)
     changes: list[dict[str, Any]] = []
 
-    if previous is None:
+    if previous is not None:
+        _validate_previous_identity_and_time(current, previous)
+
+    if not current_usable:
+        state = DEGRADED_STATE
+        semantic_reconciliation_passed = False
+    elif previous is None:
         state = "BASELINE_CAPTURED_NON_AUTHORIZING"
+        semantic_reconciliation_passed = True
+    elif not _evidence_usable(previous):
+        state = "SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING"
+        semantic_reconciliation_passed = True
     else:
-        if previous.get("schema") != EXACT_SCHEMA:
-            raise ValueError("previous evidence is not EIC exact evidence")
         previous_semantics = _validated_semantics(previous)
-        if previous.get("reference") != current.get("reference"):
-            raise ValueError("EIC reconciliation identity mismatch")
-        if parse_time(str(previous.get("fetched_at"))) > parse_time(str(current.get("fetched_at"))):
-            raise ValueError("previous EIC evidence is newer than current evidence")
         for key in sorted(set(previous_semantics) | set(current_semantics)):
             before = previous_semantics.get(key)
             after = current_semantics.get(key)
             if before != after:
                 changes.append({"field": key, "before": before, "after": after})
         state = "NO_CHANGE" if not changes else "EIC_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
+        semantic_reconciliation_passed = True
 
     ready = bool(
-        current.get("candidate_state") == "OPEN_CALL"
+        current_usable
+        and current.get("candidate_state") == "OPEN_CALL"
         and current.get("authority_url_verified") is True
         and str(current.get("status_label") or "").casefold() == "open"
     )
     missing = ["field_scoped_material_admission"]
-    if current.get("candidate_state") != "OPEN_CALL" or str(current.get("status_label") or "").casefold() != "open":
+    if not current_usable:
+        missing.insert(0, "current_exact_authority_unresolved")
+    elif current.get("candidate_state") != "OPEN_CALL" or str(current.get("status_label") or "").casefold() != "open":
         missing.insert(0, "current_funding_tenders_status_is_not_open")
 
     receipt: dict[str, Any] = {
@@ -92,12 +121,17 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = N
         "previous_evidence_sha256": sha256_json(previous) if previous is not None else None,
         "current_exact_semantic_fingerprint": current.get("exact_semantic_fingerprint"),
         "previous_exact_semantic_fingerprint": previous.get("exact_semantic_fingerprint") if previous is not None else None,
+        "current_source_health_state": current.get("source_health_state", "HEALTHY"),
+        "current_evidence_usable_for_reconciliation": current_usable,
         "candidate_state": current.get("candidate_state"),
         "status_label": current.get("status_label"),
         "reconciliation_state": state,
         "semantic_change_count": len(changes),
         "semantic_changes": changes,
-        "semantic_reconciliation_passed": True,
+        "semantic_reconciliation_passed": semantic_reconciliation_passed,
+        "lkg_reference_required": not current_usable,
+        "lkg_reference_available": previous is not None,
+        "lkg_reference_is_current_truth": False,
         "material_admission_ready_for_downstream_review": ready,
         "missing_for_material_admission": missing,
         "field_scoped_material_admission_required": True,
@@ -116,37 +150,66 @@ def validate_receipt(
     if receipt.get("schema") != SCHEMA or receipt.get("parser_version") != PARSER_VERSION:
         raise ValueError("EIC reconciliation schema/parser drift")
     validate_evidence(current)
+    current_usable = _evidence_usable(current)
     if receipt.get("reference") != current.get("reference"):
         raise ValueError("EIC reconciliation current identity binding failed")
     if receipt.get("current_evidence_sha256") != sha256_json(current):
         raise ValueError("EIC reconciliation current evidence hash mismatch")
     if receipt.get("current_exact_semantic_fingerprint") != current.get("exact_semantic_fingerprint"):
         raise ValueError("EIC reconciliation current semantic binding failed")
-    if previous is None:
-        if receipt.get("reconciliation_state") != "BASELINE_CAPTURED_NON_AUTHORIZING":
-            raise ValueError("EIC baseline reconciliation state invalid")
-        if receipt.get("previous_evidence_sha256") is not None:
-            raise ValueError("EIC baseline unexpectedly bound previous evidence")
-    else:
-        validate_evidence(previous)
+    if receipt.get("current_evidence_usable_for_reconciliation") is not current_usable:
+        raise ValueError("EIC reconciliation usability binding failed")
+    if previous is not None:
+        _validate_previous_identity_and_time(current, previous)
         if receipt.get("previous_evidence_sha256") != sha256_json(previous):
             raise ValueError("EIC reconciliation previous evidence hash mismatch")
-        expected = (
-            "NO_CHANGE"
-            if current.get("exact_semantic_fingerprint") == previous.get("exact_semantic_fingerprint")
-            else "EIC_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
-        )
+    elif receipt.get("previous_evidence_sha256") is not None:
+        raise ValueError("EIC baseline unexpectedly bound previous evidence")
+
+    if not current_usable:
+        if receipt.get("reconciliation_state") != DEGRADED_STATE:
+            raise ValueError("EIC degraded reconciliation state invalid")
+        if receipt.get("semantic_reconciliation_passed") is not False:
+            raise ValueError("EIC degraded current evidence pretended semantic reconciliation")
+        if receipt.get("semantic_change_count") != 0 or receipt.get("semantic_changes") != []:
+            raise ValueError("EIC degraded current evidence invented semantic change")
+        if receipt.get("lkg_reference_required") is not True:
+            raise ValueError("EIC degraded current evidence lost LKG requirement")
+        if receipt.get("lkg_reference_available") is not (previous is not None):
+            raise ValueError("EIC degraded current evidence LKG availability drift")
+        if receipt.get("material_admission_ready_for_downstream_review") is not False:
+            raise ValueError("EIC degraded current evidence became review-ready")
+        if "current_exact_authority_unresolved" not in set(receipt.get("missing_for_material_admission") or []):
+            raise ValueError("EIC degraded current evidence omitted unresolved-authority requirement")
+    else:
+        if previous is None:
+            expected = "BASELINE_CAPTURED_NON_AUTHORIZING"
+        elif not _evidence_usable(previous):
+            expected = "SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING"
+        else:
+            expected = (
+                "NO_CHANGE"
+                if current.get("exact_semantic_fingerprint") == previous.get("exact_semantic_fingerprint")
+                else "EIC_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
+            )
         if receipt.get("reconciliation_state") != expected:
-            raise ValueError("EIC reconciliation state disagrees with semantic fingerprints")
-    ready = bool(
-        current.get("candidate_state") == "OPEN_CALL"
-        and current.get("authority_url_verified") is True
-        and str(current.get("status_label") or "").casefold() == "open"
-    )
-    if receipt.get("material_admission_ready_for_downstream_review") is not ready:
-        raise ValueError("EIC reconciliation downstream-review gate drift")
-    if receipt.get("semantic_reconciliation_passed") is not True or receipt.get("field_scoped_material_admission_required") is not True:
-        raise ValueError("EIC reconciliation skipped mandatory gate")
+            raise ValueError("EIC reconciliation state disagrees with evidence health/fingerprints")
+        if receipt.get("semantic_reconciliation_passed") is not True:
+            raise ValueError("EIC healthy evidence failed semantic reconciliation")
+        if receipt.get("lkg_reference_required") is not False:
+            raise ValueError("EIC healthy evidence unexpectedly requires LKG")
+        ready = bool(
+            current.get("candidate_state") == "OPEN_CALL"
+            and current.get("authority_url_verified") is True
+            and str(current.get("status_label") or "").casefold() == "open"
+        )
+        if receipt.get("material_admission_ready_for_downstream_review") is not ready:
+            raise ValueError("EIC reconciliation downstream-review gate drift")
+
+    if receipt.get("lkg_reference_is_current_truth") is not False:
+        raise ValueError("EIC reconciliation promoted LKG to current truth")
+    if receipt.get("field_scoped_material_admission_required") is not True:
+        raise ValueError("EIC reconciliation skipped mandatory admission gate")
     if "field_scoped_material_admission" not in set(receipt.get("missing_for_material_admission") or []):
         raise ValueError("EIC reconciliation omitted final material admission requirement")
     for key in MATERIAL_FLAGS:
@@ -173,6 +236,8 @@ def main() -> int:
         "status_label": receipt["status_label"],
         "reconciliation_state": receipt["reconciliation_state"],
         "semantic_change_count": receipt["semantic_change_count"],
+        "semantic_reconciliation_passed": receipt["semantic_reconciliation_passed"],
+        "lkg_reference_required": receipt["lkg_reference_required"],
         "material_admission_ready_for_downstream_review": receipt["material_admission_ready_for_downstream_review"],
         "open_call_authorized": receipt["open_call_authorized"],
     }, ensure_ascii=False, sort_keys=True))
