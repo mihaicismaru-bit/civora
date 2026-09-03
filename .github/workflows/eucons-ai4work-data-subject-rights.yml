@@ -4,21 +4,33 @@ on:
   pull_request:
     paths:
       - 'eucons/research/ai4work-step/GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json'
+      - 'eucons/research/ai4work-step/RIGHTS_REQUEST_AUTHENTICATION_CONTRACT_2026-09-03.json'
+      - 'eucons/research/ai4work-step/ARTICLE15_CONTEXT_RESPONSE_TEMPLATE_2026-09-03.json'
+      - 'eucons/research/ai4work-step/research_form.js'
       - 'eucons/research/ai4work-step/data_subject_rights_control.py'
       - 'eucons/research/ai4work-step/prod_activation_gate.py'
       - 'eucons/research/ai4work-step/test_data_subject_rights.py'
       - 'eucons/research/ai4work-step/test_data_subject_rights_control.py'
       - 'eucons/research/ai4work-step/test_prod_activation_rights_binding.py'
+      - 'eucons/research/ai4work-step/test_rights_request_authentication_contract.py'
+      - 'eucons/runtime/php/src/ResearchRightsAuth.php'
+      - 'eucons/validation/test_php_research_runtime.php'
       - '.github/workflows/eucons-ai4work-data-subject-rights.yml'
   push:
     branches: [main]
     paths:
       - 'eucons/research/ai4work-step/GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json'
+      - 'eucons/research/ai4work-step/RIGHTS_REQUEST_AUTHENTICATION_CONTRACT_2026-09-03.json'
+      - 'eucons/research/ai4work-step/ARTICLE15_CONTEXT_RESPONSE_TEMPLATE_2026-09-03.json'
+      - 'eucons/research/ai4work-step/research_form.js'
       - 'eucons/research/ai4work-step/data_subject_rights_control.py'
       - 'eucons/research/ai4work-step/prod_activation_gate.py'
       - 'eucons/research/ai4work-step/test_data_subject_rights.py'
       - 'eucons/research/ai4work-step/test_data_subject_rights_control.py'
       - 'eucons/research/ai4work-step/test_prod_activation_rights_binding.py'
+      - 'eucons/research/ai4work-step/test_rights_request_authentication_contract.py'
+      - 'eucons/runtime/php/src/ResearchRightsAuth.php'
+      - 'eucons/validation/test_php_research_runtime.php'
       - '.github/workflows/eucons-ai4work-data-subject-rights.yml'
   workflow_dispatch:
 
@@ -40,7 +52,7 @@ jobs:
           python-version: '3.12'
       - name: Validate data-subject-rights fail-closed semantics
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_data_subject_rights.py test_data_subject_rights_control.py test_prod_activation_rights_binding.py
+        run: python -m unittest -v test_data_subject_rights.py test_data_subject_rights_control.py test_prod_activation_rights_binding.py test_rights_request_authentication_contract.py
       - name: Enforce current rights procedure control state
         working-directory: eucons/research/ai4work-step
         run: python data_subject_rights_control.py
