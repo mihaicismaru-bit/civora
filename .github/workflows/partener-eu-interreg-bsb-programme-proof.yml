@@ -43,6 +43,20 @@ jobs:
           PYTHONPATH: partener-eu/ingest:partener-eu/ops
         run: python partener-eu/ops/test_interreg_bsb_programme_fit.py
 
+      - name: Probe each BSB authority transport independently
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python - <<'PY'
+          from interreg_bsb_programme_fit import SOURCES, default_fetch
+          for spec in SOURCES:
+              try:
+                  raw, meta = default_fetch(spec['url'])
+                  print({'source_id':spec['id'],'transport_health':'HEALTHY','http_status':meta['http_status'],'final_url':meta['final_url'],'bytes':len(raw)})
+              except Exception as exc:
+                  print({'source_id':spec['id'],'transport_health':'DEGRADED','authority_url':spec['url'],'error_type':type(exc).__name__,'error':str(exc)})
+          PY
+
       - name: Acquire fresh BSB evidence or preserve source-health failure
         env:
           PYTHONPATH: partener-eu/ingest
