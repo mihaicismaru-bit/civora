@@ -21,6 +21,7 @@ MATERIAL_FLAGS = (
 CURRENT_MODE = "CURRENT_BOUNDED_SAMPLE_CANDIDATE_EXACT_RECHECK"
 OMITTED_RECHECK_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_PREVIOUS_IDENTITY_EXACT_RECHECK"
 OMITTED_SKIP_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_NO_SAFE_IDENTITY_NON_AUTHORIZING"
+DEGRADED_STATE = "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED"
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -105,37 +106,69 @@ def main() -> int:
         assert exact["programme_family"] == "SINGLE_MARKET_PROGRAMME"
         assert exact["reference"].startswith("SMP-")
         assert "single market programme" in exact["programme_label_official"].casefold()
-        assert exact["authority_url_verified"] is True
-        assert exact["authority_readback"]["verified"] is True
-        assert exact["candidate_state"] in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}
-        assert exact["status_label"]
         check_fit_binding(exact)
         check_non_authorizing(exact)
         check_non_authorizing(rec)
         assert rec["reference"] == exact["reference"]
         assert rec["current_evidence_sha256"] == canonical_sha(exact)
 
+        usable = exact.get("evidence_usable_for_reconciliation")
+        if usable is None:
+            usable = True
         previous_same_identity = handoff["previous_same_identity"] is True
-        if previous_same_identity:
-            assert args.previous_smp_available
-            previous = load(previous_path)
-            assert previous["reference"] == exact["reference"]
-            assert rec["previous_evidence_sha256"] == canonical_sha(previous)
-            assert rec["reconciliation_state"] in {
-                "NO_CHANGE",
-                "SMP_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
-            }
+        if usable:
+            assert exact["authority_url_verified"] is True
+            assert exact["authority_readback"]["verified"] is True
+            assert exact["source_health_state"] == "HEALTHY"
+            assert exact["lkg_required"] is False
+            assert exact["candidate_state"] in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}
+            assert exact["status_label"]
+            if previous_same_identity:
+                assert args.previous_smp_available
+                previous = load(previous_path)
+                assert previous["reference"] == exact["reference"]
+                assert rec["previous_evidence_sha256"] == canonical_sha(previous)
+                assert rec["reconciliation_state"] in {
+                    "NO_CHANGE",
+                    "SMP_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
+                }
+            else:
+                assert rec["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
+                assert rec["previous_evidence_sha256"] is None
+            assert rec["semantic_reconciliation_passed"] is True
+            assert rec["lkg_reference_required"] is False
+            assert rec["material_admission_ready_for_downstream_review"] is (exact["candidate_state"] == "OPEN_CALL")
         else:
-            assert rec["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
-            assert rec["previous_evidence_sha256"] is None
+            assert exact["authority_url_verified"] is False
+            assert exact["authority_readback"]["verified"] is False
+            assert exact["source_health_state"] == "DEGRADED_AUTHORITY_READBACK"
+            assert exact["lkg_required"] is True
+            assert exact["candidate_state"] == "UNKNOWN"
+            assert exact["status_label"] is None
+            assert exact["deadline_candidate"] is None
+            assert exact["budget_candidate"] is None
+            assert rec["reconciliation_state"] == DEGRADED_STATE
+            assert rec["semantic_reconciliation_passed"] is False
+            assert rec["semantic_change_count"] == 0
+            assert rec["lkg_reference_required"] is True
+            assert rec["lkg_reference_available"] is previous_same_identity
+            assert rec["lkg_reference_is_current_truth"] is False
+            assert rec["material_admission_ready_for_downstream_review"] is False
+            if previous_same_identity:
+                previous = load(previous_path)
+                assert rec["previous_evidence_sha256"] == canonical_sha(previous)
+            else:
+                assert rec["previous_evidence_sha256"] is None
 
-        assert rec["material_admission_ready_for_downstream_review"] is (exact["candidate_state"] == "OPEN_CALL")
         result = {
             "handoff_state": mode,
             "reference": exact["reference"],
             "candidate_state": exact["candidate_state"],
             "status_label": exact["status_label"],
             "authority_url_verified": exact["authority_url_verified"],
+            "source_health_state": exact.get("source_health_state", "HEALTHY"),
+            "evidence_usable_for_reconciliation": usable,
+            "lkg_required": exact.get("lkg_required", False),
             "programme_fit_state": exact["programme_fit_evidence"]["facts"]["fit_state"],
             "previous_evidence_available": args.previous_smp_available,
             "previous_same_identity": previous_same_identity,
