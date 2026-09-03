@@ -40,7 +40,9 @@ Formularele nu folosesc advertising pixels, fingerprinting, cross-site tracking,
 
 Răspunsurile sunt destinate unei stocări de cercetare separate de CRM și de fluxurile comerciale. Datele din formular nu trebuie introduse în query string, iar aplicația nu trebuie să logheze corpurile cererilor, răspunsurile sau cheia brută de idempotency.
 
-Pentru retry tehnic se poate utiliza o cheie aleatoare UUIDv4 păstrată numai în starea temporară a aceleiași trimiteri. Serverul poate returna un `response_id` opac ca receipt tehnic. Acesta nu este derivat din nume, e-mail, IP, dispozitiv sau CRM și nu creează un registru identitate–răspuns.
+Pentru retry tehnic, browserul generează un UUIDv4 aleator prin Web Crypto și îl transmite numai într-un header dedicat. Serverul derivă din acesta un `response_id` opac; UUIDv4-ul brut nu este introdus în setul analitic, NF06, CRM sau URL/query string și nu trebuie păstrat în logurile aplicației.
+
+După acceptarea răspunsului, pagina afișează respondentului două valori pe care acesta le poate păstra: `response_id` și **codul privat de verificare** UUIDv4. Același UUIDv4 folosit pentru retry este reutilizat ca dovadă de posesie pentru eventualele cereri ulterioare privind răspunsul, fără colectarea unui nume, e-mail, IP, dispozitiv ori identificator CRM. Codul privat nu este păstrat în clar de aplicația de cercetare și nu poate fi recuperat ulterior de operator. Păstrarea lui de către respondent este opțională și are exclusiv scopul exercitării drepturilor asupra acelui răspuns.
 
 Configurația efectivă a infrastructurii de producție trebuie verificată înainte de activarea colectării reale. Colectarea rămâne blocată până când sunt demonstrate separarea efectivă a stocării de cercetare, controalele de acces și politica de logare/retenție pe contul real.
 
@@ -56,7 +58,7 @@ Lanțul efectiv de procesatori/subprocesatori și orice transfer relevant trebui
 
 Răspunsurile brute și normalizate la nivel de respondent se păstrează în stocarea live numai cât este necesar pentru validarea analizei și înghețarea pachetului de dovezi, dar nu mai mult de **180 de zile după închiderea colectării** și, în lipsa unui hold juridic/audit documentat, nu mai târziu de **31 martie 2027**.
 
-Logurile de acces relevante pentru infrastructura cercetării au o limită aprobată de **maximum 7 zile** și nu trebuie să conțină răspunsurile din chestionar. Respectarea efectivă a acestei limite pe contul real trebuie demonstrată înainte de colectarea PROD.
+Logurile de acces relevante pentru infrastructura cercetării au o limită aprobată de **maximum 7 zile** și nu trebuie să conțină răspunsurile din chestionar sau codul privat de verificare. Respectarea efectivă a acestei limite pe contul real trebuie demonstrată înainte de colectarea PROD.
 
 După ștergerea din stocarea live, orice copie reziduală din backup poate persista numai prin ciclul tehnic preexistent, nereînnoit, și pentru **maximum 92 de zile de la ștergerea live**. Configurația reală a furnizorului trebuie să demonstreze această limită înainte de colectare. Restaurările obișnuite nu trebuie să readucă date șterse în procesarea activă.
 
@@ -72,9 +74,11 @@ După eliminarea datelor la nivel de respondent pot fi păstrate rezultatele agr
 
 Solicitările se transmit la **privacy@eucons.ro**.
 
-Cercetarea este proiectată să nu creeze un registru de identitate. Dacă ați păstrat receipt-ul tehnic `response_id`, acesta poate fi folosit de fluxul aprobat pentru localizarea răspunsului în stocarea separată de cercetare. Receipt-ul nu este, singur, dovadă de identitate. Operatorul trebuie să aplice procedura aprobată de autentificare/verificare adecvată solicitării fără a crea identificare disproporționată și fără a căuta răspunsul în CRM, IP, user-agent sau date de dispozitiv.
+Cercetarea este proiectată să nu creeze un registru de identitate. Pentru o cerere legată de un răspuns, respondentul poate furniza `response_id` împreună cu codul privat de verificare afișat după transmitere. Perechea este verificată criptografic ca dovadă de control asupra credentialului aleator folosit la trimiterea inițială; nu reprezintă o verificare a identității civile și nu este legată de CRM, IP, user-agent ori dispozitiv. `response_id` singur nu este tratat ca dovadă suficientă pentru divulgarea sau modificarea unui răspuns.
 
-Dacă operatorul poate demonstra că nu poate identifica răspunsul fără informații suplimentare, se aplică limitele și regulile GDPR relevante, inclusiv art. 11. Nu sunt colectate date suplimentare exclusiv pentru a construi un registru permanent identitate–răspuns.
+După verificarea perechii, operatorul confirmă separat dacă acel `response_id` mai există în stocarea izolată și aplică procedura corespunzătoare. Pentru acces, răspunsul include copia controlată a propriului record și informațiile de context cerute de art. 15 GDPR. Nu se divulgă metadate interne de stocare, alte răspunsuri, loguri brute sau date comerciale.
+
+Dacă respondentul nu mai deține codul privat și operatorul poate demonstra că nu poate identifica în mod rezonabil răspunsul fără informații suplimentare, se aplică regulile GDPR relevante, inclusiv art. 11. Nu se creează un registru identitate–răspuns și nu se caută în CRM, IP, user-agent sau date de dispozitiv doar pentru a înlocui codul pierdut.
 
 Aveți dreptul de a depune o plângere la **Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal (ANSPDCP)** și dreptul la o cale de atac în condițiile GDPR.
 
