@@ -57,15 +57,20 @@ class ScientificResearchClassificationControlTests(unittest.TestCase):
         self.assertTrue(any("exact legal provision" in item.lower() for item in required))
         self.assertTrue(any("sha-256" in item.lower() for item in required))
 
-    def test_existing_lia_and_rights_procedure_do_not_silently_claim_article_89_privileges(self):
+    def test_approved_lia_and_rights_policy_do_not_silently_claim_article_89_privileges(self):
         lia = load_json("GDPR_LIA_DRAFT.json")
         rights = load_json("GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json")
+        control = load_json("GDPR_SCIENTIFIC_RESEARCH_CLASSIFICATION_CONTROL.json")
 
         self.assertIn("Article 6(1)(f)", lia["candidate_legal_basis"])
-        self.assertFalse(lia["controller_signoff_fields"]["approved"])
+        self.assertTrue(lia["controller_signoff_fields"]["approved"])
+        self.assertFalse(lia["prod_eligible"])
         self.assertFalse(lia["collection_enabled"])
+        self.assertTrue(rights["controller_policy_acceptance"]["approved"])
         self.assertFalse(rights["controller_approval"])
         self.assertFalse(rights["collection_enabled"])
+        self.assertFalse(control["legal_classification"]["article_89_special_derogation_reliance"])
+        self.assertFalse(control["legal_classification"]["scientific_research_rights_limitation_reliance"])
 
         ordinary_rights_text = "\n".join(flatten_strings(rights)).lower()
         self.assertNotIn("article 89", ordinary_rights_text)
