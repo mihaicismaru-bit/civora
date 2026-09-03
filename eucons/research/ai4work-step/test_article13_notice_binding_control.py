@@ -30,6 +30,8 @@ class Article13NoticeBindingControlTest(unittest.TestCase):
         self.assertFalse(self.contract.get("production_enabled"))
         self.assertFalse(self.snapshot.get("approved"))
         self.assertFalse(self.snapshot.get("collection_enabled"))
+        self.assertEqual(self.snapshot["surface_fields"]["operator_contact_details"], "privacy@eucons.ro")
+        self.assertEqual(self.snapshot["surface_fields"]["privacy_contact"], "privacy@eucons.ro")
         self.assertIn("art. 6 alin. (1) lit. (f)", self.snapshot["surface_fields"]["legal_basis"])
         self.assertTrue(self.snapshot["lawful_basis_policy_binding"]["controller_approved"])
 
@@ -45,14 +47,17 @@ class Article13NoticeBindingControlTest(unittest.TestCase):
         errors = binding_errors(contract=self.contract, snapshot=changed, require_approved=False)
         self.assertIn("snapshot_must_be_non_synthetic_control_artifact", errors)
 
-    def test_prod_requires_full_controller_approved_non_placeholder_contact_surface(self) -> None:
+    def test_prod_requires_controller_approval_even_after_contact_placeholder_is_closed(self) -> None:
         errors = binding_errors(contract=self.contract, snapshot=self.snapshot, require_approved=True)
         self.assertIn("snapshot_not_approved_for_prod", errors)
         self.assertIn("snapshot_approval_false", errors)
         self.assertIn("snapshot_collection_disabled", errors)
         self.assertIn("controller_approval_missing", errors)
-        self.assertIn("approved_surface_placeholder:operator_contact_details", errors)
-        self.assertIn("approved_surface_placeholder:privacy_contact", errors)
+        self.assertIn("approval_approved_by_missing", errors)
+        self.assertIn("approval_approved_at_missing", errors)
+        self.assertIn("approval_approval_reference_missing", errors)
+        self.assertNotIn("approved_surface_placeholder:operator_contact_details", errors)
+        self.assertNotIn("approved_surface_placeholder:privacy_contact", errors)
         self.assertNotIn("approved_surface_placeholder:legal_basis", errors)
 
     def test_retention_surface_discloses_all_bounded_live_and_residual_windows(self) -> None:
