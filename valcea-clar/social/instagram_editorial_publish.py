@@ -36,6 +36,7 @@ FACTS = VC / "editorial" / "facts_registry.json"
 RUNTIME = VC / "site" / "runtime" / "media" / "social" / "editorial" / "instagram"
 DIST = VC / "dist" / "chatgpt-sites" / "media" / "social" / "editorial" / "instagram"
 PUBLIC_BASE = "https://valceaclar.ro/media/social/editorial/instagram/"
+DELIVERY_BASE = "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/media/social/editorial/instagram/"
 DEFAULT_GRAPH_VERSION = "v26.0"
 DEFAULT_GRAPH_HOST = "graph.facebook.com"
 LIVE_ENABLE_ENV = "VALCEA_IG_EDITORIAL_LIVE_ENABLED"
@@ -107,6 +108,7 @@ def text_card_asset(
         "slide_index": slide_index,
         "rendered_path": str(rendered.relative_to(ROOT)),
         "public_url": PUBLIC_BASE + rendered.name,
+        "delivery_url": DELIVERY_BASE + rendered.name,
         "sha256": sha256(rendered),
         "product_fingerprint_sha256": product_fingerprint,
         "rights_basis": "original_editorial_layout",
@@ -190,6 +192,7 @@ def render_product(story: dict[str, Any], visual: dict[str, Any], system: dict[s
         public_url=PUBLIC_BASE + cover.name,
     )
     asset_contract.validate_asset(cover_asset)
+    cover_asset["delivery_url"] = DELIVERY_BASE + cover.name
     cover_asset["alt_text"] = f"VÂLCEA CLAR: {plan['hook']}. {cover_asset['source_photo']['alt_text']}"[:1000]
     assets.append(cover_asset)
 
@@ -268,7 +271,7 @@ def plan_products() -> dict[str, Any]:
 def public_urls_ready(product: dict[str, Any], preflight_fn: Callable[[str], None]) -> tuple[bool, str | None]:
     try:
         for asset in product.get("assets", []):
-            preflight_fn(str(asset["public_url"]))
+            preflight_fn(str(asset.get("delivery_url") or asset["public_url"]))
     except Exception as exc:
         return False, str(exc)[:600]
     return True, None
@@ -295,7 +298,7 @@ def publish_product(
                 f"{account_id}/media",
                 token,
                 {
-                    "image_url": str(asset["public_url"]),
+                    "image_url": str(asset.get("delivery_url") or asset["public_url"]),
                     "is_carousel_item": "true",
                     "alt_text": str(asset.get("alt_text") or product["hook"]),
                 },
@@ -328,7 +331,7 @@ def publish_product(
             f"{account_id}/media",
             token,
             {
-                "image_url": str(asset["public_url"]),
+                "image_url": str(asset.get("delivery_url") or asset["public_url"]),
                 "caption": str(product["caption"]),
                 "alt_text": str(asset.get("alt_text") or product["hook"]),
             },
@@ -392,6 +395,7 @@ def persist_publication(state: dict[str, Any], product: dict[str, Any], result: 
                 "sha256": asset["sha256"],
                 "asset_fingerprint_sha256": asset["asset_fingerprint_sha256"],
                 "public_url": asset["public_url"],
+                "delivery_url": asset.get("delivery_url"),
             }
             for asset in product["assets"]
         ],
