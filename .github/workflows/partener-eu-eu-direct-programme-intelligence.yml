@@ -39,6 +39,12 @@ on:
       - 'partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py'
       - 'partener-eu/ops/test_eu_direct_rfcs_programme_reconcile.py'
       - 'partener-eu/ops/run_rfcs_programme_canonical.py'
+      - 'partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eu_direct_edf_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_edf_programme_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_edf_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_edf_programme_reconcile.py'
+      - 'partener-eu/ops/run_edf_programme_canonical.py'
       - '.github/workflows/partener-eu-eu-direct-programme-intelligence.yml'
   workflow_dispatch:
 
@@ -75,6 +81,7 @@ jobs:
           python -m json.tool partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/eu_direct_easi_programme_intelligence_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/eu_direct_rfcs_programme_intelligence_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/erasmus_action_router.py \
             partener-eu/ingest/eu4health_hadea_call.py \
@@ -91,6 +98,9 @@ jobs:
             partener-eu/ingest/eu_direct_rfcs_programme_intelligence.py \
             partener-eu/ingest/eu_direct_rfcs_programme_reconcile.py \
             partener-eu/ops/run_rfcs_programme_canonical.py \
+            partener-eu/ingest/eu_direct_edf_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_edf_programme_reconcile.py \
+            partener-eu/ops/run_edf_programme_canonical.py \
             partener-eu/ops/test_erasmus_action_router.py \
             partener-eu/ops/test_eu4health_hadea_call.py \
             partener-eu/ops/test_eu4health_hadea_ft_reconcile.py \
@@ -103,7 +113,9 @@ jobs:
             partener-eu/ops/test_eu_direct_easi_programme_intelligence.py \
             partener-eu/ops/test_eu_direct_easi_programme_reconcile.py \
             partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py \
-            partener-eu/ops/test_eu_direct_rfcs_programme_reconcile.py
+            partener-eu/ops/test_eu_direct_rfcs_programme_reconcile.py \
+            partener-eu/ops/test_eu_direct_edf_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_edf_programme_reconcile.py
 
       - name: Validate fail-closed EU Direct programme semantics
         env:
@@ -122,12 +134,14 @@ jobs:
           python partener-eu/ops/test_eu_direct_easi_programme_reconcile.py -v
           python partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py -v
           python partener-eu/ops/test_eu_direct_rfcs_programme_reconcile.py -v
+          python partener-eu/ops/test_eu_direct_edf_programme_intelligence.py
+          python partener-eu/ops/test_eu_direct_edf_programme_reconcile.py -v
 
       - name: Prepare replay root
         run: |
           ROOT=/tmp/partener-eu-eu-direct-programme-intelligence
           rm -rf "$ROOT"
-          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic" "$ROOT/eic-exact/current" "$ROOT/eic-exact/previous" "$ROOT/eui-innovation-fund" "$ROOT/innovation-fund-exact/current" "$ROOT/innovation-fund-exact/previous" "$ROOT/easi-programme/current" "$ROOT/easi-programme/previous" "$ROOT/easi-programme/history" "$ROOT/rfcs-programme/current" "$ROOT/rfcs-programme/previous" "$ROOT/rfcs-programme/history"
+          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic" "$ROOT/eic-exact/current" "$ROOT/eic-exact/previous" "$ROOT/eui-innovation-fund" "$ROOT/innovation-fund-exact/current" "$ROOT/innovation-fund-exact/previous" "$ROOT/easi-programme/current" "$ROOT/easi-programme/previous" "$ROOT/easi-programme/history" "$ROOT/rfcs-programme/current" "$ROOT/rfcs-programme/previous" "$ROOT/rfcs-programme/history" "$ROOT/edf-programme/current" "$ROOT/edf-programme/previous" "$ROOT/edf-programme/history"
 
       - name: Acquire fresh official Erasmus application-route intelligence
         run: |
@@ -729,6 +743,14 @@ jobs:
           EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
           RFCS_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-rfcs
         run: python partener-eu/ops/run_rfcs_programme_canonical.py
+
+      - name: Run canonical EDF programme intelligence with history and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EDF_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-edf
+        run: python partener-eu/ops/run_edf_programme_canonical.py
 
       - name: Upload replayable EU Direct programme evidence
         if: always()
