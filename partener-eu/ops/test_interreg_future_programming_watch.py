@@ -97,6 +97,40 @@ def main():
     assert change["lkg_status"] == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SAME_IDENTITY"
     assert change["lkg_reference"]["use_constraint"] == "EVIDENCE_REFERENCE_ONLY_NEVER_CURRENT_CALL_OR_PROGRAMMING_TRUTH"
     assert rec["source_health_watch_candidate"] is True
+    assert rec["pipeline_watch_candidate"] is False
+    assert rec["call_alert_authorized"] is False
+
+    degraded_semantic = copy.deepcopy(baseline)
+    degraded_semantic["run_id"] = "test-3"
+    semantic_row = degraded_semantic["watchlist"][0]
+    semantic_row["signal_basis"] = str(semantic_row["signal_basis"]) + " synthetic registry refresh"
+    semantic_row["source_health"] = {
+        "health_state": "DEGRADED",
+        "requested_url": semantic_row["authority_url"],
+        "final_url": None,
+        "http_status": None,
+        "content_type": None,
+        "raw_sha256": None,
+        "raw_size_bytes": 0,
+        "missing_marker_groups": [],
+        "error_type": "TLS_CERTIFICATE_VERIFY_FAILED",
+        "error": "synthetic",
+    }
+    degraded_semantic["healthy_source_count"] = 8
+    degraded_semantic["degraded_source_count"] = 1
+    degraded_semantic["source_health"] = "DEGRADED"
+    degraded_semantic["coverage_complete"] = False
+    rehash(degraded_semantic)
+    rec = mod.reconcile(degraded_semantic, baseline, reconciled_at="2026-09-02T07:03:30Z")
+    change = next(item for item in rec["changes"] if item["source_id"] == semantic_row["source_id"])
+    assert rec["semantic_change_count"] == 1
+    assert rec["pipeline_evidence_change_count"] == 0
+    assert rec["pipeline_watch_candidate"] is False
+    assert rec["source_health_watch_candidate"] is True
+    assert rec["reconciliation_state"] == "PIPELINE_SEMANTIC_CHANGE_CURRENT_SOURCE_UNUSABLE_NON_AUTHORIZING"
+    assert change["semantic_changed"] is True
+    assert change["pipeline_watch_evidence_usable"] is False
+    assert change["lkg_status"] == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SAME_IDENTITY"
     assert rec["call_alert_authorized"] is False
 
     tampered = copy.deepcopy(baseline)
@@ -132,6 +166,7 @@ def main():
         "sources": baseline["source_count"],
         "baseline_reconciliation": base_reconcile["reconciliation_state"],
         "same_identity_lkg_guard": "PASS",
+        "degraded_semantic_pipeline_watch_suppression": "PASS",
         "open_call_widening_guard": "PASS",
         "programming_state_never_encodes_open_or_call": "PASS",
     })
