@@ -137,7 +137,7 @@ class RightsAccessTests(unittest.TestCase):
         self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
         self.assertFalse(procedure["collection_enabled"])
 
-    def test_rights_applicability_remains_fail_closed_until_final_lawful_basis(self):
+    def test_rights_applicability_is_reconciled_to_approved_lawful_basis_but_live_workflow_remains_fail_closed(self):
         procedure = json.loads(
             (Path(__file__).with_name("GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json")).read_text(
                 encoding="utf-8"
@@ -145,15 +145,30 @@ class RightsAccessTests(unittest.TestCase):
         )
         self.assertIn("gdpr_article_20", procedure["legal_design_anchors"])
         applicability = procedure["rights_applicability"]
-        self.assertEqual(applicability["lawful_basis_status"], "UNRESOLVED_BEFORE_PROD")
-        self.assertIn("LEGITIMATE_INTEREST", applicability["proposed_basis"])
-        self.assertIn("NOT_APPLICABLE_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST", applicability["portability"])
-        self.assertIn("MUST_BE_IMPLEMENTED_BEFORE_PROD", applicability["portability"])
-        self.assertIn("MUST_BE_IMPLEMENTED_BEFORE_PROD", applicability["consent_withdrawal"])
+        self.assertEqual(
+            applicability["lawful_basis_status"],
+            "GDPR_ARTICLE_6_1_F_LEGITIMATE_INTERESTS",
+        )
+        self.assertIn("ARTICLE_6_1_F", applicability["proposed_basis"])
+        self.assertEqual(
+            applicability["portability"],
+            "NOT_APPLICABLE_UNDER_FINAL_LEGITIMATE_INTEREST_BASIS; MUST_BE_IMPLEMENTED BEFORE PROD IF FINAL BASIS CHANGES TO CONSENT OR CONTRACT AND ARTICLE 20 CONDITIONS ARE MET",
+        )
+        self.assertEqual(
+            applicability["consent_withdrawal"],
+            "NOT_APPLICABLE_UNDER_FINAL_LEGITIMATE_INTEREST_BASIS; MUST_BE_IMPLEMENTED BEFORE PROD IF CONSENT BECOMES A LEGAL BASIS",
+        )
         self.assertEqual(
             procedure["research_store_operations"]["portability_reference_adapter"],
-            "NOT_ENABLED_PENDING_FINAL_LEGAL_BASIS_APPLICABILITY_DECISION",
+            "NOT_ENABLED_FINAL_LEGITIMATE_INTEREST_BASIS",
         )
+        self.assertTrue(procedure["controller_policy_acceptance"]["approved"])
+        self.assertFalse(procedure["controller_approval"])
+        self.assertEqual(
+            procedure["research_store_operations"]["access_requester_authentication_reference_adapter"],
+            "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
+        )
+        self.assertIsNone(procedure["request_channel"]["privacy_contact"])
         self.assertFalse(procedure["collection_enabled"])
 
 
