@@ -61,6 +61,19 @@ def topic(url):
     return {"url": url, "final_url": url, "http_status": 200, "content_type": "text/html", "bytes": 10, "body_sha256": "b" * 64, "verified": True}
 
 
+def degraded_topic(url):
+    return {
+        "url": url,
+        "final_url": url,
+        "http_status": 404,
+        "content_type": "text/html",
+        "bytes": 0,
+        "body_sha256": None,
+        "verified": False,
+        "error": "HTTPError: HTTP Error 404: Not Found",
+    }
+
+
 def main():
     taxonomy = {
         "schema": "PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1",
@@ -86,11 +99,36 @@ def main():
     assert evidence["candidate_state"] == "OPEN_CALL"
     assert evidence["status_label"] == "Open"
     assert evidence["authority_url_verified"] is True
+    assert evidence["source_health_state"] == "HEALTHY"
+    assert evidence["evidence_usable_for_reconciliation"] is True
+    assert evidence["lkg_required"] is False
     assert evidence["programme_family"] == "DIGITAL_EUROPE"
     assert evidence["material_fact_use"] is False
     assert evidence["open_call_authorized"] is False
     assert evidence["deadline_authorized"] is False
     assert evidence["publish_authorized"] is False
+
+    degraded = collect_exact(
+        REF,
+        run_id="synthetic-404",
+        fetched_at="2026-09-01T20:11:00+00:00",
+        source_candidate=selected,
+        post_func=make_post(),
+        topic_func=degraded_topic,
+    )
+    validate_evidence(degraded)
+    assert degraded["source_health_state"] == "DEGRADED_AUTHORITY_READBACK"
+    assert degraded["evidence_usable_for_reconciliation"] is False
+    assert degraded["authority_url_verified"] is False
+    assert degraded["candidate_state"] == "UNKNOWN"
+    assert degraded["status_label"] is None
+    assert degraded["deadline_candidate"] is None
+    assert degraded["budget_candidate"] is None
+    assert degraded["structured_candidate_snapshot"]["status_label"] == "Open"
+    assert degraded["structured_candidate_snapshot"]["deadline_candidate"] == "2027-03-03T17:00:00Z"
+    assert degraded["lkg_required"] is True
+    assert degraded["open_call_authorized"] is False
+    assert degraded["publication_effect"] == "NONE"
 
     bad_facet = facet_payload()
     bad_facet["facets"][0]["values"][0]["value"] = "Horizon Europe"
@@ -114,6 +152,14 @@ def main():
         raise AssertionError("self-authorization was accepted")
     except ValueError as exc:
         assert "attempted authorization" in str(exc)
+
+    leaked = copy.deepcopy(degraded)
+    leaked["status_label"] = "Open"
+    try:
+        validate_evidence(leaked)
+        raise AssertionError("degraded exact evidence leaked structured status into current truth")
+    except ValueError as exc:
+        assert "leaked structured status" in str(exc)
 
     print("eu_direct_digital_ft_exact regression: PASS")
 
