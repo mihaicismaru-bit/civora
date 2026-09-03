@@ -3,6 +3,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import re
 import unittest
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from research_storage import canonical_json_bytes
 
 ROOT = Path(__file__).resolve().parent
 UNIT_TEST_FIXTURE_NON_EVIDENCE = True
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 
 
 def load_current():
@@ -50,9 +52,9 @@ def approved_fixture():
 
 
 class PrecollectionAnalysisPlanGateTests(unittest.TestCase):
-    def test_current_repository_state_is_fail_closed_and_safe(self):
+    def test_current_repository_method_is_approved_dual_locked_and_collection_stays_off(self):
         contract, manifest, frame, plan, lock = load_current()
-        self.assertFalse(GATE._activation_requested(contract, manifest, frame))
+        self.assertTrue(GATE._activation_requested(contract, manifest, frame))
         errors = GATE.precollection_errors(
             contract=contract,
             manifest=manifest,
@@ -61,15 +63,30 @@ class PrecollectionAnalysisPlanGateTests(unittest.TestCase):
             plan_lock=lock,
         )
         self.assertEqual(errors, [])
+        self.assertFalse(contract["production_enabled"])
+        self.assertFalse(manifest["approved_for_prod"])
+        self.assertFalse(manifest["collection_enabled"])
+        self.assertFalse(manifest["real_collection_authorized"])
+        self.assertEqual(plan["status"], "APPROVED_FOR_PROD")
+        self.assertTrue(plan["approval"]["approved_for_prod"])
+        self.assertEqual(frame["frame_status"], "APPROVED_FOR_PROD")
+        self.assertTrue(frame["approval"]["approved_for_prod"])
+        self.assertFalse(frame["collection_enabled"])
+        self.assertFalse(frame["nf06_handoff"]["eligible_now"])
         self.assertEqual(lock["schema_version"], "eucons.ai4work_precollection_analysis_plan_lock.v0.2")
+        self.assertEqual(lock["state"], "LOCKED_BEFORE_PROD_ACTIVATION")
         self.assertEqual(lock["collection_frame_reference"], "COLLECTION_FRAME_DRAFT.json")
-        self.assertIsNone(lock["collection_frame_sha256"])
+        self.assertRegex(lock["need_analysis_plan_sha256"], SHA256_RE)
+        self.assertRegex(lock["collection_frame_sha256"], SHA256_RE)
         self.assertEqual(lock["post_hoc_threshold_exception"], "FORBIDDEN")
         GATE.assert_repository_fail_closed_or_prelocked()
 
-    def test_turning_on_production_without_dual_method_lock_is_rejected(self):
-        contract, manifest, frame, plan, lock = load_current()
+    def test_production_claim_with_broken_dual_method_lock_is_rejected(self):
+        contract, manifest, frame, plan, lock = [copy.deepcopy(item) for item in load_current()]
         contract["production_enabled"] = True
+        lock["state"] = "OPEN_NOT_LOCKED"
+        lock["need_analysis_plan_sha256"] = None
+        lock["collection_frame_sha256"] = None
         errors = GATE.precollection_errors(
             contract=contract,
             manifest=manifest,
@@ -77,8 +94,6 @@ class PrecollectionAnalysisPlanGateTests(unittest.TestCase):
             need_analysis_plan=plan,
             plan_lock=lock,
         )
-        self.assertIn("need_analysis_plan_not_approved", errors)
-        self.assertIn("collection_frame_not_approved", errors)
         self.assertIn("plan_lock_not_approved", errors)
         self.assertIn("plan_lock_sha256_missing_or_invalid", errors)
         self.assertIn("collection_frame_lock_sha256_missing_or_invalid", errors)
