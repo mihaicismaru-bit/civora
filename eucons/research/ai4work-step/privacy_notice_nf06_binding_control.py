@@ -70,12 +70,15 @@ def binding_errors(
     frame_approval = collection_frame.get("approval") or {}
     frame_version = frame_approval.get("privacy_notice_version")
     promoted = binding.get("status") in PROMOTED_STATUSES
+    # Method/frame approval is intentionally distinct from activation. A frozen approved
+    # collection method may exist while collection_enabled remains false and the Article 13
+    # live surface is still being operationally bound. Only an actual PROD/collection claim
+    # requires the notice to have been promoted.
     activation_requested = any(
         (
             manifest.get("approved_for_prod") is True,
             manifest.get("collection_enabled") is True,
             manifest.get("real_collection_authorized") is True,
-            collection_frame.get("frame_status") == "APPROVED_FOR_PROD",
             collection_frame.get("collection_enabled") is True,
         )
     )
@@ -104,7 +107,8 @@ def binding_errors(
                 if any(marker in upper for marker in NON_EVIDENCE_MARKERS):
                     errors.append("privacy_notice_promoted_from_non_evidence_artifact")
     else:
-        # Fail-closed draft state is valid only while collection remains disabled.
+        # Fail-closed draft state is valid only while no actual collection/PROD activation
+        # claim exists. Method approval alone is not a collection claim.
         if activation_requested:
             errors.append("privacy_notice_not_promoted_before_prod_activation")
         if binding.get("status") != "OPEN":
