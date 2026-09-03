@@ -43,7 +43,7 @@ jobs:
       - name: Run adversarial QA unit tests (TEST TWIN fixtures are NON-EVIDENCE)
         working-directory: eucons/research/ai4work-step
         run: python -m unittest -v test_adversarial_qa.py
-      - name: Assert repository state still cannot produce a PROD QA claim
+      - name: Assert approved method still cannot produce a PROD QA claim without real collection
         working-directory: eucons/research/ai4work-step
         run: |
           python - <<'PY'
@@ -53,13 +53,20 @@ jobs:
           root = Path('.')
           plan = json.loads((root / 'NEED_ANALYSIS_PLAN_DRAFT.json').read_text(encoding='utf-8'))
           frame = json.loads((root / 'COLLECTION_FRAME_DRAFT.json').read_text(encoding='utf-8'))
-          assert plan.get('status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
-          assert plan.get('approval', {}).get('approved_for_prod') is False
-          assert frame.get('frame_status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
-          assert frame.get('approval', {}).get('approved_for_prod') is not True
+          manifest = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
+          lock = json.loads((root / 'PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json').read_text(encoding='utf-8'))
+          assert plan.get('status') == 'APPROVED_FOR_PROD'
+          assert plan.get('approval', {}).get('approved_for_prod') is True
+          assert frame.get('frame_status') == 'APPROVED_FOR_PROD'
+          assert frame.get('approval', {}).get('approved_for_prod') is True
+          assert lock.get('state') == 'LOCKED_BEFORE_PROD_ACTIVATION'
+          assert frame.get('collection_enabled') is False
           assert frame.get('nf06_handoff', {}).get('eligible_now') is False
+          assert manifest.get('approved_for_prod') is False
+          assert manifest.get('collection_enabled') is False
+          assert manifest.get('real_collection_authorized') is False
           assert frame.get('sampling_design', {}).get('synthetic_records_allowed_in_prod') is False
           assert plan.get('test_twin_evidence_class') == 'TEST_TWIN_NON_EVIDENCE'
           assert plan.get('project_activity_as_need_evidence') is False
-          print('PASS: adversarial QA mechanics are testable while repository PROD analysis remains fail-closed and TEST TWIN remains NON-EVIDENCE')
+          print('PASS: method and frame are approved and locked, while real collection/NF06 PROD remain fail-closed and TEST TWIN remains NON-EVIDENCE')
           PY
