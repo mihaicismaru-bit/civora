@@ -1,10 +1,11 @@
 {
   "schema_version": "eucons.ai4work_data_subject_rights.v0.8",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-28",
+  "date": "2026-09-03",
   "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "controller_approval": false,
+  "controller_approval_semantics": "FULL_OPERATIONAL_PROD_APPROVAL_REQUIRING_LIVE_PRIVACY_CONTACT_REQUESTER_AUTHENTICATION_AND_PROVIDER_BOUND_RIGHTS_PATH; policy acceptance is recorded separately below",
   "collection_enabled": false,
   "legal_design_anchors": {
     "gdpr_article_11": "Do not acquire, maintain or process additional identifying information solely to identify a data subject when identification is not required for the research purpose; where the controller can demonstrate it cannot identify the data subject, rights that require identification are handled in accordance with Article 11 unless the data subject provides additional information enabling identification.",
@@ -12,19 +13,19 @@
     "gdpr_article_15": "The right of access includes confirmation whether personal data are processed, access to the personal data, a copy of the personal data undergoing processing and the contextual information required by Article 15. The reference adapter implements only the receipt-keyed respondent-record-copy component; requester authentication, confirmation and the controller-supplied processing context remain operational/controller responsibilities.",
     "gdpr_article_16": "Where a live response can be located by the opaque receipt and preset analytical values are inaccurate, rectification must be possible without introducing direct identifiers or mutating technical/provenance fields.",
     "gdpr_article_18": "Where restriction applies, the record must not continue through ordinary analytical processing while the restriction is active.",
-    "gdpr_article_20": "Data portability applies only where the processing is based on consent or contract, is carried out by automated means and concerns data provided by the data subject. If legitimate interest is finally approved as proposed, Article 20 portability is not the applicable right for that processing; if the basis changes to consent or contract, a structured machine-readable portability path must be implemented and validated before collection.",
+    "gdpr_article_20": "Data portability applies only where the processing is based on consent or contract, is carried out by automated means and concerns data provided by the data subject. Under the controller-approved legitimate-interest basis, Article 20 portability is not the applicable right for this processing; if the basis changes to consent or contract, a structured machine-readable portability path must be implemented and validated before collection.",
     "gdpr_article_21": "Where processing relies on legitimate interests and a data subject objects, processing must stop while the controller assesses the objection unless a lawful continuation ground is established."
   },
   "rights_applicability": {
-    "lawful_basis_status": "UNRESOLVED_BEFORE_PROD",
-    "proposed_basis": "ARTICLE_6_1_F_LEGITIMATE_INTEREST_SUBJECT_TO_CONTROLLER_APPROVAL_AND_LIA",
+    "lawful_basis_status": "GDPR_ARTICLE_6_1_F_LEGITIMATE_INTERESTS",
+    "proposed_basis": "ARTICLE_6_1_F_LEGITIMATE_INTEREST_CONTROLLER_APPROVED_2026_09_03",
     "access": "APPLIES_SUBJECT_TO_ARTICLE_11_IDENTIFICATION_LIMITS",
     "rectification": "APPLIES_WHERE_INACCURATE_PERSONAL_DATA_CAN_BE_LOCATED",
     "erasure": "APPLIES_SUBJECT_TO_GDPR_EXCEPTIONS_AND_CONTROLLER_DECISION",
     "restriction": "APPLIES_WHERE_ARTICLE_18_CONDITIONS_ARE_MET",
-    "objection": "APPLIES_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST_OR_PUBLIC_TASK",
-    "portability": "NOT_APPLICABLE_IF_FINAL_BASIS_IS_LEGITIMATE_INTEREST; MUST_BE_IMPLEMENTED_BEFORE_PROD_IF_FINAL_BASIS_CHANGES_TO_CONSENT_OR_CONTRACT_AND_ARTICLE_20_CONDITIONS_ARE_MET",
-    "consent_withdrawal": "NOT_APPLICABLE_UNDER_PROPOSED_LEGITIMATE_INTEREST_BASIS; MUST_BE_IMPLEMENTED_BEFORE_PROD_IF_CONSENT_BECOMES_A_LEGAL_BASIS",
+    "objection": "APPLIES_UNDER_FINAL_LEGITIMATE_INTEREST_BASIS",
+    "portability": "NOT_APPLICABLE_UNDER_FINAL_LEGITIMATE_INTEREST_BASIS; MUST_BE_IMPLEMENTED BEFORE PROD IF FINAL BASIS CHANGES TO CONSENT OR CONTRACT AND ARTICLE 20 CONDITIONS ARE MET",
+    "consent_withdrawal": "NOT_APPLICABLE_UNDER_FINAL_LEGITIMATE_INTEREST_BASIS; MUST_BE_IMPLEMENTED BEFORE PROD IF CONSENT BECOMES A LEGAL BASIS",
     "decision_rule": "The approved rights procedure and public notice must match the controller-approved final legal basis. A change of legal basis invalidates this applicability matrix until affected rights and operational paths are re-reviewed and validated."
   },
   "identification_policy": {
@@ -46,7 +47,7 @@
   ],
   "request_channel": {
     "privacy_contact": null,
-    "status": "OPEN_UNTIL_CONTROLLER_AND_PRIVACY_CONTACT_APPROVED",
+    "status": "OPEN_UNTIL_OPERATIONAL_PRIVACY_CONTACT_AND_REQUESTER_AUTHENTICATION_ARE_BOUND",
     "rule": "No public collection until the determined controller publishes an operational privacy contact and request-handling route."
   },
   "research_store_operations": {
@@ -65,15 +66,18 @@
     "erasure_replay_marker_reference_adapter_expiry": "AUTO_PURGE_AT_OR_AFTER_CONFIGURED_BOUNDARY_BEFORE_REPLAY_CHECK",
     "erased_records_replay_blocked": true,
     "erasure_replay_marker_export": "FORBIDDEN",
-    "erasure_replay_marker_prod_retention": "MAXIMUM_24_HOURS_FROM_SUCCESSFUL_LIVE_ERASURE_PENDING_CONTROLLER_ACCEPTANCE; SHORTER_ALLOWED; LONGER_FORBIDDEN_WITHOUT_DOCUMENTED_SECURITY_NECESSITY_AND_EXPLICIT_CONTROLLER_APPROVAL",
+    "erasure_replay_marker_prod_retention": "MAXIMUM_24_HOURS_FROM_SUCCESSFUL_LIVE_ERASURE_CONTROLLER_POLICY_ACCEPTED_2026_09_03; SHORTER_ALLOWED; LONGER_FORBIDDEN_WITHOUT_DOCUMENTED_SECURITY_NECESSITY_AND EXPLICIT CONTROLLER APPROVAL",
     "erasure_replay_marker_prod_binding": "PROD MUST USE PER-MARKER FINITE EXPIRY NOT LATER THAN ERASURE_PLUS_24H_AND AUTOMATIC PURGE; PROVIDER-BOUND TEST TWIN MUST PROVE EXPIRY",
     "restriction_or_objection": "A receipt-keyed bounded analysis hold keeps the record available for rights review but excludes it from analytical export while active.",
     "restriction_or_objection_state_store": "BOUNDED_ENUM_ONLY_NO_CASE_NARRATIVE",
-    "allowed_hold_states": ["RESTRICTED_PENDING_REVIEW", "OBJECTED_PENDING_REVIEW"],
+    "allowed_hold_states": [
+      "RESTRICTED_PENDING_REVIEW",
+      "OBJECTED_PENDING_REVIEW"
+    ],
     "held_records_excluded_from_export": true,
     "case_narrative_in_research_store": "FORBIDDEN",
-    "portability": "No separate portability export is enabled while the legal basis remains unresolved. If the controller selects consent or contract and Article 20 conditions are met, implement and validate a reviewed structured machine-readable export before PROD.",
-    "portability_reference_adapter": "NOT_ENABLED_PENDING_FINAL_LEGAL_BASIS_APPLICABILITY_DECISION"
+    "portability": "No separate portability export is enabled under the final legitimate-interest basis. If the controller changes the basis to consent or contract and Article 20 conditions are met, implement and validate a reviewed structured machine-readable export before PROD.",
+    "portability_reference_adapter": "NOT_ENABLED_FINAL_LEGITIMATE_INTEREST_BASIS"
   },
   "rights_case_logging": {
     "store": "PRIVACY_REQUEST_ADMIN_SEPARATE_FROM_RESEARCH_ANALYTICS",
@@ -89,6 +93,21 @@
   "backup_and_deletion": {
     "retention_reference": "GDPR_RETENTION_SCHEDULE_DRAFT.json",
     "rule": "Live erasure requires a timestamped deletion receipt and before/after counts. Replay suppression is non-analytical, capped at 24 hours after successful erasure and excluded from NF06/export. Provider backups may retain residual copies only for the validated pre-existing non-renewing rotation and must not silently restore deleted or held records into active analysis."
+  },
+  "controller_policy_acceptance": {
+    "approved": true,
+    "approved_at": "2026-09-03T07:29:00+02:00",
+    "approver_name_or_role": "EUROCONSULT SRL controller / project owner",
+    "approval_reference": "CONTROLLER_GOVERNANCE_APPROVAL_2026-09-03.json",
+    "final_lawful_basis_code": "GDPR_ARTICLE_6_1_F_LEGITIMATE_INTERESTS",
+    "identification_minimisation_approved": true,
+    "receipt_only_lookup_policy_approved": true,
+    "crm_identity_cross_reference_forbidden": true,
+    "separate_rights_case_logging_approved": true,
+    "replay_marker_retention_max_hours": 24,
+    "portability_decision": "NOT_APPLICABLE_FINAL_LEGITIMATE_INTEREST_BASIS",
+    "consent_withdrawal_decision": "NOT_APPLICABLE_FINAL_LEGITIMATE_INTEREST_BASIS",
+    "boundary": "Policy and rights-applicability rules are approved. This is not the full operational controller_approval used by the PROD gate: privacy contact, requester authentication, Article 15 confirmation/context handling and provider-bound live rights operations remain required."
   },
   "required_before_prod": [
     "controller determination approved",
