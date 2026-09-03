@@ -18,19 +18,21 @@ class DataSubjectRightsControlTests(unittest.TestCase):
         cls.manifest = json.loads((HERE / "PROD_ACTIVATION_MANIFEST_DRAFT.json").read_text(encoding="utf-8"))
         cls.procedure = json.loads((HERE / "GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json").read_text(encoding="utf-8"))
 
-    def test_current_draft_is_structurally_safe_and_fail_closed(self):
+    def test_current_policy_accepted_state_is_structurally_safe_and_fail_closed(self):
         errors = data_subject_rights_errors(
             contract=self.contract,
             manifest=self.manifest,
             procedure=self.procedure,
         )
         self.assertEqual(errors, [])
+        self.assertTrue(self.procedure["controller_policy_acceptance"]["approved"])
+        self.assertEqual(self.procedure["rights_applicability"]["lawful_basis_status"], EXPECTED_BASIS_CODE)
         self.assertFalse(self.procedure["controller_approval"])
         self.assertFalse(self.procedure["collection_enabled"])
         self.assertEqual(self.procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
         self.assertFalse(self.procedure["test_twin"]["prod_promotion_eligible"])
 
-    def test_activation_claim_cannot_bypass_unapproved_rights_procedure(self):
+    def test_activation_claim_cannot_bypass_missing_live_rights_operations(self):
         contract = copy.deepcopy(self.contract)
         manifest = copy.deepcopy(self.manifest)
         contract["production_enabled"] = True
@@ -42,7 +44,7 @@ class DataSubjectRightsControlTests(unittest.TestCase):
         self.assertIn("rights_controller_approval_missing", errors)
         self.assertIn("rights_request_channel_not_operational", errors)
         self.assertIn("rights_privacy_contact_missing", errors)
-        self.assertIn("rights_final_lawful_basis_not_reconciled", errors)
+        self.assertNotIn("rights_final_lawful_basis_not_reconciled", errors)
         self.assertIn("rights_requester_authentication_not_operational", errors)
         self.assertIn("rights_prod_approval_shape_invalid", errors)
 
