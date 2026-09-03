@@ -24,12 +24,14 @@ class Article13NoticeBindingControlTest(unittest.TestCase):
         self.snapshot = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
         self.schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
 
-    def test_repository_draft_is_consistent_and_fail_closed(self) -> None:
+    def test_repository_draft_is_consistent_with_approved_basis_and_fail_closed_contacts(self) -> None:
         ready, errors = evaluate_repository_notice_binding()
         self.assertTrue(ready, errors)
         self.assertFalse(self.contract.get("production_enabled"))
         self.assertFalse(self.snapshot.get("approved"))
         self.assertFalse(self.snapshot.get("collection_enabled"))
+        self.assertIn("art. 6 alin. (1) lit. (f)", self.snapshot["surface_fields"]["legal_basis"])
+        self.assertTrue(self.snapshot["lawful_basis_policy_binding"]["controller_approved"])
 
     def test_surface_drift_is_rejected(self) -> None:
         changed = copy.deepcopy(self.snapshot)
@@ -43,7 +45,7 @@ class Article13NoticeBindingControlTest(unittest.TestCase):
         errors = binding_errors(contract=self.contract, snapshot=changed, require_approved=False)
         self.assertIn("snapshot_must_be_non_synthetic_control_artifact", errors)
 
-    def test_prod_requires_controller_approved_non_placeholder_snapshot(self) -> None:
+    def test_prod_requires_full_controller_approved_non_placeholder_contact_surface(self) -> None:
         errors = binding_errors(contract=self.contract, snapshot=self.snapshot, require_approved=True)
         self.assertIn("snapshot_not_approved_for_prod", errors)
         self.assertIn("snapshot_approval_false", errors)
@@ -51,7 +53,7 @@ class Article13NoticeBindingControlTest(unittest.TestCase):
         self.assertIn("controller_approval_missing", errors)
         self.assertIn("approved_surface_placeholder:operator_contact_details", errors)
         self.assertIn("approved_surface_placeholder:privacy_contact", errors)
-        self.assertIn("approved_surface_placeholder:legal_basis", errors)
+        self.assertNotIn("approved_surface_placeholder:legal_basis", errors)
 
     def test_retention_surface_discloses_all_bounded_live_and_residual_windows(self) -> None:
         retention = self.snapshot["surface_fields"]["retention_summary"]
