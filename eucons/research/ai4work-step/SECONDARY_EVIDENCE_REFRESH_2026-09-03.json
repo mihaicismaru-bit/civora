@@ -1,96 +1,91 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.8",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.9",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-03T01:32:40+03:00",
+  "observed_at": "2026-09-03T03:34:48+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
   "prod_need_evidence_eligible": false,
-  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting historical employer surveys, project activity, funding supply or benchmark indicators into AI4WORK need-prevalence claims.",
+  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, funding availability, historical employer surveys or non-representative context into AI4WORK need-prevalence claims.",
   "registry_reconciliation": {
-    "issue_detected": "The 00:32 control refresh labelled the EC Regional Innovation Scoreboard 2025 Romania profile as a new S41, but the controlled Drive Source_register already contained the same source and URL as S27 and contained no S41 row.",
-    "resolution": "Treat the earlier S41 label as a duplicate candidate that was not persisted to the controlled Source_register. Preserve S27 as the RIS source and allocate the next actual registry row S41 to the newly verified AJOFM Arges employer survey.",
-    "duplicate_source_preserved_as": "S27",
-    "duplicate_candidate_promoted": false,
-    "source_register_high_water_mark_before_current_promotion": "S40"
+    "source_register_high_water_mark_before_refresh": "S41",
+    "source_register_high_water_mark_after_refresh": "S42",
+    "dashboard_gap_detected": "Controlled Drive Dashboard still stated S01-S40 although Source_register already contained S41.",
+    "dashboard_gap_resolution": "Dashboard was reconciled to S01-S42 in the same controlled spreadsheet and S42 was appended as a new source row.",
+    "duplicate_source_promoted": false
   },
   "promotion_policy": {
-    "source_register_high_water_mark": "S41",
-    "source_promoted_this_refresh": "S41",
+    "source_promoted_this_refresh": "S42",
     "h1_h5_numeric_points_added": 0,
     "numeric_rank_changed": false,
     "project_activity_as_need_evidence": false,
-    "decision": "PROMOTE_S41_AJOFM_ARGES_ESPOR_AS_HISTORICAL_DIRECT_COMPLEMENTARY_EMPLOYER_CONTEXT_ZERO_H1_H5"
+    "decision": "PROMOTE_S42_ANOFM_COMPETENT_ANALYSIS_CONCLUSIONS_AS_CURRENT_DIRECT_COMPLEMENTARY_QUALITATIVE_PARTIAL_REGION_ZERO_H1_H5"
   },
   "promoted_source": {
-    "source_id": "S41",
-    "regions": ["Sud-Muntenia"],
-    "subregion": "Arges",
-    "publisher": "ANOFM / AJOFM Arges",
-    "title": "Prognoza angajarilor pe termen scurt - Judetul Arges (eSPOR)",
-    "survey_period": "2022-09 to 2022-11",
-    "forecast_reference": "2023",
-    "url": "https://www.anofm.ro/upload2/Arge%C8%99/27909/Prognoza_termen_scurt_2023_Arges.pdf",
-    "classification": "DIRECT_COMPLEMENTARY_HISTORICAL_EMPLOYER_SURVEY_QUOTA_SAMPLE_ZERO_H1_H5",
+    "source_id": "S42",
+    "regions": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+    "publisher": "Agenția Națională pentru Ocuparea Forței de Muncă (ANOFM)",
+    "title": "COMPETENT – Newsletter decembrie 2025 / concluziile analizei nevoilor reale de formare profesională",
+    "analysis_period": "2025-08 to 2025-11",
+    "publication_date": "2025-12-23",
+    "url": "https://www.anofm.ro/wp-content/uploads/2025/12/newsletter_V3.pdf",
+    "classification": "DIRECT_COMPLEMENTARY_CURRENT_QUALITATIVE_PARTIAL_REGION_COVERAGE_ZERO_H1_H5",
     "observed_facts": {
-      "respondents": 1238,
-      "employer_universe_reported": 16535,
-      "quota_sample_minimum": 1200,
-      "private_sector_respondent_share_percent": 94.3,
-      "respondents_with_positive_hiring_estimate": 777,
-      "respondents_with_positive_hiring_estimate_share_percent": 62.76,
-      "reported_estimated_hires": 10344,
-      "method": "online eight-question employer survey; quota sample with emphasis on employers with at least 10 employees; telephone/email assisted recruitment"
+      "analysis_jurisdictions_reported": 36,
+      "excluded_counties_reported": ["Dolj", "Gorj", "Galați", "Hunedoara", "Mureș", "Prahova"],
+      "analysis_inputs_reported": [
+        "repeatedly declared employer vacancies",
+        "profiles of registered unemployed persons",
+        "training preferences of persons registered with county employment agencies",
+        "county economic forecasts (CNSP)",
+        "employer estimates of future hiring",
+        "skill deficit/surplus by county",
+        "local economic specificity including traditional and green jobs"
+      ],
+      "digitalisation_finding_reported": "Digitalisation and administrative services are described as having an upward trend in counties with urban agglomerations.",
+      "digitalisation_occupations_examples_reported": ["data operator", "accountant", "HR referent", "DPO", "trainer"]
     },
-    "source_interpretation": "The official employer survey is useful as historical direct-complementary evidence that territorial labour-demand analysis can be built from a bounded employer instrument and as a methodological benchmark for employer sampling. It does not measure digital/AI skills need and does not support an AI4WORK prevalence or ranking claim.",
+    "source_interpretation": "S42 is used only for the conclusions of the reported completed needs analysis. It strengthens current qualitative triangulation that digitalisation/administrative service demand is rising in urban county contexts and that ANOFM used multiple real labour-market inputs. Project objectives, course lists, planned authorisations and participant targets are not treated as need evidence.",
     "limitations": [
-      "County-level Arges evidence, not the whole Sud-Muntenia region.",
-      "Historical 2022 collection / 2023 forecast and not AI- or digital-skills-specific.",
-      "Quota sample and assisted contact, not a probability sample of all employers.",
-      "Hiring estimates and respondent composition are not converted into AI4WORK need prevalence.",
-      "No S41 value enters H1-H5 or changes the deterministic ranking before sufficient real primary AI4WORK evidence exists."
+      "The newsletter is a synthesis rather than the full methodological report and does not publish respondent/sample counts or response rates for the underlying employer input.",
+      "No county-level distribution or prevalence for digital/AI skill need is published in the newsletter.",
+      "The finding is digitalisation/administrative-services oriented and is not specific to generative AI or the exact AI4WORK instruments.",
+      "Coverage is partial within all three target regions because the COMPETENT intervention excludes PTJ counties Dolj and Gorj in Sud-Vest Oltenia, Prahova in Sud-Muntenia and Mureș in Centru.",
+      "No qualitative trend statement is converted into a numeric prevalence or H1-H5 point."
     ],
     "h1_h5_numeric_points_added": 0,
     "project_activity_as_need_evidence": false
   },
   "cross_region_reverification": {
     "Centru": {
-      "source_id": "S39",
-      "publisher": "ANOFM / AJOFM Covasna",
-      "status": "OFFICIAL_PDF_REVERIFIED",
-      "reported_contacted_employers": 737,
-      "reported_responses": 406,
+      "existing_anchor": "S39 AJOFM Covasna eSPOR historical employer survey",
+      "current_complement": "S42 ANOFM COMPETENT qualitative finding, excluding Mureș from the intervention",
       "h1_h5_numeric_points_added": 0
     },
     "Sud-Vest Oltenia": {
-      "source_id": "S40",
-      "publisher": "ANOFM / AJOFM Olt",
-      "status": "OFFICIAL_PDF_REVERIFIED",
-      "reported_employer_universe": 6804,
-      "reported_responses": 1218,
+      "existing_anchor": "S40 AJOFM Olt eSPOR historical employer survey",
+      "current_complement": "S42 ANOFM COMPETENT qualitative finding, excluding Dolj and Gorj from the intervention",
       "h1_h5_numeric_points_added": 0
     },
     "Sud-Muntenia": {
-      "source_id": "S41",
-      "publisher": "ANOFM / AJOFM Arges",
-      "status": "OFFICIAL_PDF_VERIFIED_AND_REGISTRY_PROMOTED",
-      "reported_employer_universe": 16535,
-      "reported_responses": 1238,
+      "existing_anchor": "S41 AJOFM Argeș eSPOR historical employer survey",
+      "current_complement": "S42 ANOFM COMPETENT qualitative finding, excluding Prahova from the intervention",
       "h1_h5_numeric_points_added": 0
     }
   },
   "call_requirements_refresh": {
-    "checked_at": "2026-09-03T01:32:40+03:00",
-    "gmail_query_scope": "after:2026/09/02 excluding spam/trash/GitHub; terms 367944, AI4WORK, OMIPE, MIPE, PEO, 1302, Anexa 4, eucons.ro, Claus, GDPR",
+    "checked_at": "2026-09-03T03:34:48+03:00",
+    "gmail_query_scope": "after:2026/09/02 excluding spam/trash/GitHub; terms AI4WORK, STEP, OMIPE, MIPE, EUROCONSULT, Claus Web, cPanel, Cloudflare, GDPR",
     "matching_new_authority_or_provider_messages": 0,
     "status": "CLOSED_UNCHANGED"
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-03T01:32:40+03:00",
+    "checked_at": "2026-09-03T03:34:48+03:00",
     "drive_queries": [
       "AI4WORK_ADULTS_V1",
-      "PROD_REAL_EVIDENCE source_export_sha256 AI4WORK_EMPLOYERS_V1"
+      "PROD_REAL_EVIDENCE source_export_sha256"
     ],
+    "search_result_class": "CONTROL_SSOT_PRE_FINAL_AND_PRIOR_REFRESH_MATERIAL_ONLY",
     "eligible_combined_real_batch_found": false,
     "source_export_sha256_bound_real_batch_found": false,
     "status": "NF06_PROD_FAIL_CLOSED"
@@ -101,16 +96,16 @@
     "analytical_free_text": false,
     "commercial_tracking": false,
     "crm_linkage": false,
-    "client_credentials_mode": "omit",
-    "client_referrer_policy": "no-referrer",
-    "recruitment_channel_transport": "URL_FRAGMENT_CAPTURED_EPHEMERALLY_AND_SCRUBBED_FROM_ADDRESS_BAR",
     "research_store_separation_required": true,
     "live_provider_bound_separation_proven": false,
     "raw_access_retention_ceiling_days": 7,
     "residual_provider_backup_ceiling_days": 92,
-    "privacy_contact_operationally_bound": false
+    "privacy_contact_operationally_bound": false,
+    "article13_retention_surface_reconciled_this_refresh": true,
+    "article13_retention_surface_note": "The pre-form Article 13 draft, renderer contract and long-form privacy draft now state the same bounded lifecycle: live respondent records max 180 days after close and hard stop 31.03.2027 absent approved hold; residual provider backup max 92 days from live deletion on a non-renewing validated cycle; erasure replay marker max 24 hours; application/access-log retention max 7 days. These remain draft controls and do not prove the actual provider account configuration.",
+    "public_surface_observation": "Current eucons.ro homepage is commercial; no dedicated AI4WORK research surface was discoverable in fresh site search. No deploy or real collection was inferred."
   },
-  "refresh_conclusion": "The controlled source register now has a real non-duplicate S41: AJOFM Arges eSPOR employer survey. S39 Covasna and S40 Olt were reverified against their official PDFs, giving one freshly checked employer-survey anchor in each target region while retaining zero H1-H5 weight because the surveys are historical and not AI/digital-skills-specific. The earlier EC RIS S41 candidate is reconciled as a duplicate of existing S27 and was never persisted to the controlled Source_register. No new authority/provider email or eligible immutable real adult+employer export changes the precollection boundary.",
+  "refresh_conclusion": "S42 closes a current-evidence registry gap with an official ANOFM synthesis of a completed 36-county needs analysis while preserving strict claim limits and zero H1-H5 weight. The controlled Drive dashboard was reconciled from stale S01-S40 wording to S01-S42. Article 13 retention transparency was strengthened and mechanically bound to the existing 7-day log, 24-hour replay-marker and 92-day residual-backup ceilings, but live account/provider proof and controller approvals remain external gates. No eligible immutable real adult+employer export exists, so NF06 PROD and downstream synthesis remain fail-closed.",
   "merge_authorized": false,
   "canonicalization_authorized": false,
   "deploy_authorized": false,
