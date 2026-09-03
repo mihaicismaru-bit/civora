@@ -22,7 +22,8 @@ from urllib.parse import unquote, urljoin, urlparse
 from urllib.request import Request, urlopen
 
 SCHEMA = "PARTENER_EU_EUI_EXACT_CALL_EVIDENCE_V1"
-PARSER_VERSION = "EU_DIRECT_EUI_EXACT_CALL_V1"
+PARSER_VERSION = "EU_DIRECT_EUI_EXACT_CALL_V1_1"
+SUPPORTED_PARSER_VERSIONS = {"EU_DIRECT_EUI_EXACT_CALL_V1", PARSER_VERSION}
 SOURCE_FAMILY = "EU_DIRECT"
 PROGRAMME_FAMILY = "EUROPEAN_URBAN_INITIATIVE"
 AUTHORITY_CLASS = "EUI_EXACT_CALL_DETAIL_AND_TOR"
@@ -148,14 +149,26 @@ def _extract_tor_url(detail_raw: bytes, *, call_url: str) -> str | None:
 
 def _status_from_text(text: str) -> tuple[str, str]:
     folded = text.casefold()
-    if "the call for proposals is closed" in folded:
+    closed_patterns = (
+        r"\bthe call for proposals is closed\b",
+        r"\bcall for proposals status\s*:?\s*closed\b",
+        r"\bcall status\s*:?\s*closed\b",
+    )
+    open_patterns = (
+        r"\bthe call for proposals is open\b",
+        r"\bcall for proposals status\s*:?\s*open\b",
+        r"\bcall status\s*:?\s*open\b",
+    )
+    forthcoming_patterns = (
+        r"\bthe call for proposals is (?:upcoming|forthcoming)\b",
+        r"\b(?:upcoming|forthcoming) call for proposals\b",
+    )
+    if any(re.search(pattern, folded) for pattern in closed_patterns):
         return "CLOSED_CALL", "Closed"
-    if "the call for proposals is open" in folded:
+    if any(re.search(pattern, folded) for pattern in open_patterns):
         return "OPEN_CALL", "Open"
-    if "upcoming" in folded or "forthcoming" in folded:
+    if any(re.search(pattern, folded) for pattern in forthcoming_patterns):
         return "FORTHCOMING_CALL", "Forthcoming"
-    if re.search(r"\bclosed\b", folded):
-        return "CLOSED_CALL", "Closed"
     return "UNKNOWN", "Unknown"
 
 
@@ -279,7 +292,7 @@ def collect_exact(*, run_id: str, discovery_url: str = DEFAULT_DISCOVERY_URL, ca
 
 
 def validate_evidence(evidence: Mapping[str, Any]) -> None:
-    if evidence.get("schema") != SCHEMA or evidence.get("parser_version") != PARSER_VERSION:
+    if evidence.get("schema") != SCHEMA or evidence.get("parser_version") not in SUPPORTED_PARSER_VERSIONS:
         raise ExactEUIEvidenceError("EUI exact evidence schema/parser drift")
     if evidence.get("source_family") != SOURCE_FAMILY or evidence.get("programme_family") != PROGRAMME_FAMILY:
         raise ExactEUIEvidenceError("EUI exact evidence family drift")
