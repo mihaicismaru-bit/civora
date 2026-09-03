@@ -5,17 +5,21 @@ on:
     paths:
       - 'partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json'
       - 'partener-eu/ingest/eu_direct_edf_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_edf_programme_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_edf_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_edf_programme_reconcile.py'
+      - 'partener-eu/ops/run_edf_programme_canonical.py'
       - '.github/workflows/partener-eu-edf-programme-proof.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   edf-programme-proof:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -33,75 +37,36 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile registry adapter and regression
+      - name: Compile EDF canonical programme lane
         run: |
           python -m json.tool partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/eu_direct_edf_programme_intelligence.py \
-            partener-eu/ops/test_eu_direct_edf_programme_intelligence.py
+            partener-eu/ingest/eu_direct_edf_programme_reconcile.py \
+            partener-eu/ops/test_eu_direct_edf_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_edf_programme_reconcile.py \
+            partener-eu/ops/run_edf_programme_canonical.py
 
-      - name: Validate fail-closed EDF programme semantics
+      - name: Validate fail-closed EDF programme semantics and reconciliation
         env:
           PYTHONPATH: partener-eu/ingest:partener-eu/ops
-        run: python partener-eu/ops/test_eu_direct_edf_programme_intelligence.py
-
-      - name: Acquire fresh official EDF programme intelligence
         run: |
-          ROOT=/tmp/partener-eu-edf-programme-proof
-          rm -rf "$ROOT"
-          mkdir -p "$ROOT"
-          python partener-eu/ingest/eu_direct_edf_programme_intelligence.py \
-            --registry partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json \
-            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
-            --output "$ROOT/edf-programme-intelligence.json"
-          cp partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json "$ROOT/registry.json"
+          python partener-eu/ops/test_eu_direct_edf_programme_intelligence.py
+          python partener-eu/ops/test_eu_direct_edf_programme_reconcile.py -v
 
-      - name: Enforce live non-authorizing EDF boundary
-        run: |
-          python - <<'PY'
-          import json, re
-          from pathlib import Path
-          p=Path('/tmp/partener-eu-edf-programme-proof/edf-programme-intelligence.json')
-          d=json.loads(p.read_text(encoding='utf-8'))
-          assert d['schema']=='PARTENER_EU_EDF_PROGRAMME_INTELLIGENCE_V1'
-          assert d['source_family']=='EU_DIRECT'
-          assert d['programme_family']=='European Defence Fund'
-          assert d['programme_id']=='EDF'
-          assert d['source_count']==3
-          assert d['healthy_source_count']==3
-          assert d['degraded_source_count']==0
-          assert d['source_health_state']=='HEALTHY'
-          assert d['market_intelligence_only'] is True
-          assert d['fit_score_is_not_eligibility'] is True
-          flags=(
-              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
-              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
-              'call_alert_authorized','canonical_corpus_mutation',
-          )
-          assert all(d[k] is False for k in flags)
-          assert d['publication_effect']=='NONE'
-          assert {r['observation_state'] for r in d['evidence']}=={
-              'PROGRAMME_INTELLIGENCE','PROGRAMMING_PIPELINE','CALL_INDEX_DISCOVERY'
-          }
-          for row in d['evidence']:
-              assert row['source_health']=='HEALTHY'
-              assert row['http_status']==200
-              assert row['lkg_required'] is False
-              assert re.fullmatch(r'[0-9a-f]{64}', row['raw_sha256'])
-              assert re.fullmatch(r'[0-9a-f]{64}', row['source_semantic_fingerprint'])
-          assert re.fullmatch(r'[0-9a-f]{64}', d['registry_sha256'])
-          assert re.fullmatch(r'[0-9a-f]{64}', d['semantic_fingerprint'])
-          print(json.dumps({
-              'programme':'EDF','healthy_sources':3,'degraded_sources':0,
-              'open_call_authorized':False,'eligibility_authorized':False,
-              'publication_effect':'NONE'
-          }, sort_keys=True))
-          PY
+      - name: Run canonical EDF programme intelligence with history and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EDF_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-edf-proof
+        run: python partener-eu/ops/run_edf_programme_canonical.py
 
-      - name: Upload bounded replay proof
+      - name: Upload bounded EDF replay proof
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: partener-eu-edf-programme-proof-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
-          path: /tmp/partener-eu-edf-programme-proof/
+          path: /tmp/partener-eu-eu-direct-programme-intelligence/edf-programme
           if-no-files-found: error
           retention-days: 7
