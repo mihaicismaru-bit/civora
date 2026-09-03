@@ -142,7 +142,11 @@ jobs:
           assert snapshot['source_family']=='PROGRAMMING_PIPELINE'
           assert snapshot['programme_family']=='EU_DIRECT_2028_2034'
           assert snapshot['observation_state']=='PROGRAMMING_PIPELINE'
-          assert snapshot['source_count']==4 and snapshot['healthy_source_count']==4 and snapshot['degraded_source_count']==0
+          assert snapshot['source_count']==4
+          assert snapshot['healthy_source_count'] + snapshot['degraded_source_count'] == 4
+          previous_found=os.environ.get('PREVIOUS_FOUND')=='true'
+          if not previous_found:
+              assert snapshot['healthy_source_count']==4 and snapshot['degraded_source_count']==0
           flags=('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation')
           assert all(snapshot[key] is False for key in flags)
           assert snapshot['publication_effect']=='NONE'
@@ -153,34 +157,74 @@ jobs:
               assert row['observation_state'] in {'PROPOSAL','CONSULTATION','PLANNED','PROGRAMMING_PROCESS'}
               assert all(row[key] is False for key in flags)
               health=row['source_health']
-              assert health['health_state']=='HEALTHY' and health['http_status']==200 and health['lkg_required'] is False
-              assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
-              assert re.fullmatch(r'[0-9a-f]{64}', row['semantic_fingerprint'])
               if row.get('procedure_identifier'):
                   procedure_rows += 1
-                  assert row['semantics']['procedure_state'] in {'ONGOING','UNKNOWN_NON_AUTHORIZING'}
+              if health['health_state']=='HEALTHY':
+                  assert health['http_status']==200 and health['lkg_required'] is False
+                  assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
+                  assert re.fullmatch(r'[0-9a-f]{64}', row['semantic_fingerprint'])
+                  if row.get('procedure_identifier'):
+                      assert row['semantics']['procedure_state'] in {'ONGOING','UNKNOWN_NON_AUTHORIZING'}
+              else:
+                  assert health['health_state']=='DEGRADED' and health['lkg_required'] is True
+                  assert row['semantic_fingerprint'] is None and row['semantics'] is None
           assert procedure_rows==3
-          previous_found=os.environ.get('PREVIOUS_FOUND')=='true'
           if previous_found:
-              assert reconciliation['reconciliation_state'] in {'NO_CHANGE','PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+              assert reconciliation['reconciliation_state'] in {
+                  'NO_CHANGE','TRANSPORT_OR_CONTENT_DRIFT_ONLY',
+                  'PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+              if snapshot['degraded_source_count'] and reconciliation['semantic_change_count']==0:
+                  assert reconciliation['reconciliation_state']=='TRANSPORT_OR_CONTENT_DRIFT_ONLY'
+                  assert reconciliation['transport_or_content_change_count'] >= 1
+                  assert reconciliation['pipeline_watch_candidate'] is False
+                  assert reconciliation['source_health_watch_candidate'] is True
+                  assert reconciliation['lkg_reference_required'] is True
+                  assert reconciliation['lkg_reference_available'] is True
+                  assert reconciliation['lkg_reference_is_current_truth'] is False
           else:
               assert reconciliation['reconciliation_state']=='BASELINE_CAPTURED_NON_AUTHORIZING'
-              assert reconciliation['semantic_change_count']==0 and reconciliation['pipeline_watch_candidate'] is False
+              assert reconciliation['semantic_change_count']==0
+              assert reconciliation['transport_or_content_change_count']==0
+              assert reconciliation['pipeline_watch_candidate'] is False
           assert all(reconciliation[key] is False for key in flags)
           assert reconciliation['publication_effect']=='NONE'
           print(json.dumps({
-              'source_health':snapshot['source_health'], 'sources':4,
+              'source_health':snapshot['source_health'], 'healthy_sources':snapshot['healthy_source_count'],
+              'degraded_sources':snapshot['degraded_source_count'],
               'reconciliation_state':reconciliation['reconciliation_state'],
               'semantic_change_count':reconciliation['semantic_change_count'],
+              'transport_or_content_change_count':reconciliation['transport_or_content_change_count'],
               'open_call_authorized':False, 'publication_effect':'NONE',
           }, sort_keys=True))
           PY
 
-      - name: Stage compact comparison history
+      - name: Stage compact comparison history with LKG preservation
+        env:
+          PREVIOUS_FOUND: ${{ steps.restore.outputs.previous_found }}
         run: |
-          ROOT=/tmp/partener-eu-mff-2028-2034-programming-proof
-          mkdir -p "$ROOT/history"
-          cp "$ROOT/current/eu-direct-mff-2028-2034-programming-snapshot.json" "$ROOT/history/"
+          python - <<'PY'
+          import json, os, pathlib, shutil
+          root=pathlib.Path('/tmp/partener-eu-mff-2028-2034-programming-proof')
+          current=root/'current'/'eu-direct-mff-2028-2034-programming-snapshot.json'
+          previous=root/'previous'/'eu-direct-mff-2028-2034-programming-snapshot.json'
+          snapshot=json.loads(current.read_text(encoding='utf-8'))
+          history=root/'history'
+          history.mkdir(exist_ok=True)
+          preserve_previous=int(snapshot.get('degraded_source_count') or 0)>0
+          if preserve_previous:
+              assert os.environ.get('PREVIOUS_FOUND')=='true' and previous.exists()
+              shutil.copy2(previous, history/'eu-direct-mff-2028-2034-programming-snapshot.json')
+              selected='PREVIOUS_HEALTHY_LKG'
+          else:
+              shutil.copy2(current, history/'eu-direct-mff-2028-2034-programming-snapshot.json')
+              selected='CURRENT_HEALTHY'
+          (history/'history-selection.json').write_text(json.dumps({
+              'selected':selected,
+              'current_degraded_source_count':snapshot.get('degraded_source_count'),
+              'lkg_is_current_truth':False,
+          }, sort_keys=True, indent=2)+'\n', encoding='utf-8')
+          print(json.dumps({'history_selected':selected,'lkg_is_current_truth':False}, sort_keys=True))
+          PY
 
       - name: Upload compact programming history
         uses: actions/upload-artifact@v4
