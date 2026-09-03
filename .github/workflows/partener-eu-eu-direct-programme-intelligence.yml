@@ -633,34 +633,67 @@ jobs:
           assert evidence['schema'] == 'PARTENER_EU_EIC_FT_EXACT_EVIDENCE_V1'
           assert evidence['reference'] == ref
           assert evidence['programme_family'] == 'HORIZON_EUROPE_EIC'
-          assert evidence['authority_url_verified'] is True
           assert 'horizon europe' in str(evidence['programme_label_official']).casefold()
-          assert evidence['candidate_state'] in {'OPEN_CALL','FORTHCOMING_CALL','CLOSED_CALL','UNKNOWN'}
-          assert evidence['status_label']
           assert re.fullmatch(r'[0-9a-f]{64}', evidence['exact_semantic_fingerprint'])
+          usable=evidence.get('evidence_usable_for_reconciliation')
+          assert usable in {True,False}
+          if usable:
+              assert evidence['authority_url_verified'] is True
+              assert evidence['source_health_state'] == 'HEALTHY'
+              assert evidence['lkg_required'] is False
+              assert evidence['candidate_state'] in {'OPEN_CALL','FORTHCOMING_CALL','CLOSED_CALL','UNKNOWN'}
+              assert evidence['status_label']
+          else:
+              assert evidence['authority_url_verified'] is False
+              assert evidence['source_health_state'] == 'DEGRADED_AUTHORITY_READBACK'
+              assert evidence['lkg_required'] is True
+              assert evidence['candidate_state'] == 'UNKNOWN'
+              assert evidence['status_label'] is None
+              assert evidence['deadline_candidate'] is None
+              assert evidence['budget_candidate'] is None
+              assert evidence['degradation_reason']
           for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
               assert evidence[key] is False, (key,evidence[key])
           assert rec['schema'] == 'PARTENER_EU_EIC_FT_RECONCILIATION_V1'
           assert rec['reference'] == ref
-          if previous_exists:
-              assert rec['reconciliation_state'] in {'NO_CHANGE','EIC_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
-              assert rec['previous_evidence_sha256'] is not None
-          else:
-              assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
-              assert rec['previous_evidence_sha256'] is None
-          assert rec['semantic_reconciliation_passed'] is True
           assert rec['field_scoped_material_admission_required'] is True
           assert 'field_scoped_material_admission' in set(rec['missing_for_material_admission'])
+          assert rec['lkg_reference_is_current_truth'] is False
+          if usable:
+              if previous_exists:
+                  assert rec['reconciliation_state'] in {
+                      'NO_CHANGE',
+                      'EIC_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
+                      'SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING',
+                  }
+                  assert rec['previous_evidence_sha256'] is not None
+              else:
+                  assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+                  assert rec['previous_evidence_sha256'] is None
+              assert rec['semantic_reconciliation_passed'] is True
+              assert rec['lkg_reference_required'] is False
+          else:
+              assert rec['reconciliation_state'] == 'CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED'
+              assert rec['semantic_reconciliation_passed'] is False
+              assert rec['semantic_change_count'] == 0
+              assert rec['semantic_changes'] == []
+              assert rec['lkg_reference_required'] is True
+              assert rec['lkg_reference_available'] is previous_exists
+              assert rec['material_admission_ready_for_downstream_review'] is False
+              assert 'current_exact_authority_unresolved' in set(rec['missing_for_material_admission'])
           for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
               assert rec[key] is False, (key,rec[key])
           assert rec['publication_effect'] == 'NONE' and rec['canonical_corpus_mutation'] is False
           print(json.dumps({
               'reference': ref,
+              'source_health_state': evidence['source_health_state'],
+              'evidence_usable_for_reconciliation': usable,
               'candidate_state': evidence['candidate_state'],
               'status_label': evidence['status_label'],
               'reconciliation_state': rec['reconciliation_state'],
               'semantic_change_count': rec['semantic_change_count'],
               'previous_same_identity_restored': previous_exists,
+              'lkg_reference_required': rec['lkg_reference_required'],
               'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
               'open_call_authorized': False,
               'publication_effect': 'NONE',
