@@ -47,6 +47,7 @@ def main() -> None:
     baseline = watch.reconcile(current, None)
     assert baseline["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
     assert baseline["pipeline_watch_candidate"] is False
+    assert baseline["transport_or_content_change_count"] == 0
 
     same = copy.deepcopy(current)
     same["run_id"] = "test-2"
@@ -54,6 +55,7 @@ def main() -> None:
     no_change = watch.reconcile(same, current)
     assert no_change["reconciliation_state"] == "NO_CHANGE"
     assert no_change["semantic_change_count"] == 0
+    assert no_change["transport_or_content_change_count"] == 0
 
     changed = copy.deepcopy(same)
     changed["evidence"][1]["semantics"]["procedure_state"] = "COMPLETED"
@@ -63,8 +65,34 @@ def main() -> None:
     diff = watch.reconcile(changed, current)
     assert diff["reconciliation_state"] == "PROGRAMMING_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
     assert diff["semantic_change_count"] == 1 and diff["pipeline_watch_candidate"] is True
+    assert diff["transport_or_content_change_count"] == 0
     for flag in watch.MATERIAL_FLAGS:
         assert diff[flag] is False
+
+    transport = copy.deepcopy(same)
+    degraded_row = transport["evidence"][2]
+    degraded_row["source_health"] = {
+        "health_state": "DEGRADED", "lkg_required": True,
+        "requested_url": degraded_row["authority_url"], "final_url": None,
+        "http_status": None, "content_type": None, "raw_size_bytes": 0,
+        "raw_sha256": None, "error_type": "TIMEOUT", "error": "TimeoutError: synthetic",
+    }
+    degraded_row["semantics"] = None
+    degraded_row["semantic_fingerprint"] = None
+    transport["healthy_source_count"] = 3
+    transport["degraded_source_count"] = 1
+    transport["source_health"] = "DEGRADED"
+    transport["semantic_fingerprint"] = watch.sha256_json([
+        row["semantics"] for row in transport["evidence"] if row.get("semantics") is not None])
+    transport_diff = watch.reconcile(transport, current)
+    assert transport_diff["reconciliation_state"] == "TRANSPORT_OR_CONTENT_DRIFT_ONLY"
+    assert transport_diff["semantic_change_count"] == 0
+    assert transport_diff["transport_or_content_change_count"] == 1
+    assert transport_diff["pipeline_watch_candidate"] is False
+    assert transport_diff["source_health_watch_candidate"] is True
+    assert transport_diff["lkg_reference_required"] is True
+    assert transport_diff["lkg_reference_available"] is True
+    assert transport_diff["lkg_reference_is_current_truth"] is False
 
     tampered = copy.deepcopy(changed)
     tampered["evidence"][1]["semantics"]["procedure_state"] = "TAMPERED"
@@ -93,8 +121,13 @@ def main() -> None:
     assert degraded["degraded_source_count"] == 4
     assert all(row["source_health"]["lkg_required"] is True for row in degraded["evidence"])
     assert all(row["semantic_fingerprint"] is None for row in degraded["evidence"])
+    degraded_diff = watch.reconcile(degraded, current)
+    assert degraded_diff["reconciliation_state"] == "TRANSPORT_OR_CONTENT_DRIFT_ONLY"
+    assert degraded_diff["semantic_change_count"] == 0
+    assert degraded_diff["transport_or_content_change_count"] == 4
     print(json.dumps({
         "status": "PASS", "sources": 4, "open_call_authorized": False,
+        "transport_drift_is_not_semantic_change": True,
         "publication_effect": "NONE",
     }, sort_keys=True))
 
