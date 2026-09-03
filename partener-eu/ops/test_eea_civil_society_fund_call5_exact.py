@@ -23,7 +23,7 @@ INDEX_HTML = f"""
 </body></html>
 """.encode("utf-8")
 
-DETAIL_HTML = b"""
+DETAIL_HTML = """
 <html><body>
 <h1>Apel #5 Incluziunea si cresterea capacitatii romilor prin dezvoltarea comunitatilor interetnice</h1>
 <p>EEA Civil Society Fund in Romania</p>
@@ -33,12 +33,12 @@ DETAIL_HTML = b"""
 <p>Data publicarii</p><p>08/07/2026</p>
 <p>Data limita pentru adresarea de intrebari</p><p>29/09/2026</p>
 <p>Data limita de depunere a Cererilor de finantare</p><p>08/10/2026</p>
-<p>Suma disponibila</p><p>EUR 6,500,000</p>
-<p>Valoarea minima a grantului</p><p>EUR 15,000</p>
-<p>Valoarea maxima a grantului</p><p>EUR 350,000</p>
+<p>Suma disponibila</p><p>€6,500,000</p>
+<p>Valoarea minima a grantului</p><p>€15,000</p>
+<p>Valoarea maxima a grantului</p><p>€350,000</p>
 </section>
 </body></html>
-"""
+""".encode("utf-8")
 
 
 def fake_fetch(url: str, *, timeout: float):
