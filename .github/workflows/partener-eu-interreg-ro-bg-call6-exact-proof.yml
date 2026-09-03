@@ -1,0 +1,120 @@
+name: PARTENER.EU Interreg RO-BG Call 6 Exact Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json'
+      - 'partener-eu/ingest/interreg_ro_bg_call6_exact.py'
+      - 'partener-eu/ops/test_interreg_ro_bg_call6_exact.py'
+      - '.github/workflows/partener-eu-interreg-ro-bg-call6-exact-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  interreg-ro-bg-call6-exact-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile registry adapter and regression
+        run: |
+          python -m json.tool partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/interreg_ro_bg_call6_exact.py \
+            partener-eu/ops/test_interreg_ro_bg_call6_exact.py
+
+      - name: Validate exact fail-closed semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_interreg_ro_bg_call6_exact.py
+
+      - name: Acquire first fresh exact authority receipt
+        run: |
+          ROOT=/tmp/partener-eu-interreg-ro-bg-call6-exact-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/first" "$ROOT/second"
+          python partener-eu/ingest/interreg_ro_bg_call6_exact.py \
+            --registry partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-first" \
+            --output-dir "$ROOT/first"
+
+      - name: Acquire second fresh exact authority receipt and reconcile same identity
+        run: |
+          ROOT=/tmp/partener-eu-interreg-ro-bg-call6-exact-proof
+          sleep 1
+          python partener-eu/ingest/interreg_ro_bg_call6_exact.py \
+            --registry partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-second" \
+            --previous "$ROOT/first/interreg-ro-bg-call6-exact-evidence.json" \
+            --output-dir "$ROOT/second"
+
+      - name: Enforce live exact-call boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-interreg-ro-bg-call6-exact-proof/second')
+          evidence=json.loads((root/'interreg-ro-bg-call6-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'interreg-ro-bg-call6-exact-reconciliation.json').read_text(encoding='utf-8'))
+          flags=('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation')
+          assert evidence['source_family']=='INTERREG'
+          assert evidence['programme_family']=='INTERREG_ROMANIA_BULGARIA_2021_2027'
+          assert evidence['official_call_identifier']=='6'
+          assert evidence['official_call_identifier_kind']=='OFFICIAL_CALL_NUMBER'
+          assert all(evidence[k] is False for k in flags)
+          assert all(rec[k] is False for k in flags)
+          assert evidence['territorial_relevance']['programme_area_relevance_only'] is True
+          assert evidence['territorial_relevance']['call_eligibility_authorized'] is False
+          assert rec['lkg_reference_is_current_truth'] is False
+          if evidence['source_health_state']=='HEALTHY':
+              assert evidence['candidate_state']=='CLOSED_CALL_CANDIDATE'
+              assert evidence['candidate_status_label']=='Closed calls for proposals'
+              assert evidence['candidate_deadline_text']=='22 December 2025, 13:00 EET'
+              assert re.fullmatch(r'[0-9a-f]{64}', evidence['exact_semantic_fingerprint'])
+              assert rec['reconciliation_state'] in {'NO_CHANGE','RO_BG_CALL6_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+              assert rec['semantic_reconciliation_passed'] is True
+              assert rec['material_admission_ready_for_downstream_review'] is True
+          else:
+              assert evidence['source_health_state']=='DEGRADED'
+              assert evidence['candidate_state']=='UNKNOWN'
+              assert evidence['lkg_required'] is True
+              assert rec['reconciliation_state']=='CURRENT_SOURCE_DEGRADED_FAIL_CLOSED'
+              assert rec['material_admission_ready_for_downstream_review'] is False
+          print(json.dumps({
+              'source_health_state':evidence['source_health_state'],
+              'official_call_identifier':'6',
+              'candidate_state':evidence['candidate_state'],
+              'reconciliation_state':rec['reconciliation_state'],
+              'semantic_change_count':rec['semantic_change_count'],
+              'closed_call_authorized':False,
+              'deadline_authorized':False,
+              'eligibility_authorized':False,
+              'publication_effect':'NONE',
+          }, sort_keys=True))
+          PY
+
+      - name: Upload bounded replay proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-interreg-ro-bg-call6-exact-proof-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-interreg-ro-bg-call6-exact-proof/
+          if-no-files-found: error
+          retention-days: 7
