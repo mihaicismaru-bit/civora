@@ -25,14 +25,31 @@ def contractor_pair(text: str) -> str | None:
 _base_package = impl.package
 
 
+def _refresh_fingerprint(plan: dict) -> None:
+    plan["rendering_version"] = "facebook-editorial-v1.1"
+    plan["product_fingerprint_sha256"] = impl.digest(
+        {k: v for k, v in plan.items() if k != "product_fingerprint_sha256"}
+    )
+
+
 def package(story: dict, visual: dict) -> dict:
-    """Upgrade verified fact-checks to an evidence-led Facebook-native product."""
+    """Upgrade verified stories to evidence-led Facebook-native products."""
     plan = _base_package(story, visual)
+    story_id = str(story.get("id") or "")
+
+    # The canonical site headline is intentionally information-dense. Facebook's
+    # visual hook has a much tighter word budget, so keep the useful number and
+    # local consequence while moving the list discrepancy into the subline/body.
+    if story_id == "valcea-apa-canal-contract-152m-20260902":
+        plan["hook"] = "152 mil. euro pentru apă și canalizare în Vâlcea"
+        plan["visual_subline"] = "CJ enumeră 12 localități · documentele includ și Râmnicu"
+        _refresh_fingerprint(plan)
+        return plan
+
     if str(story.get("editorial_type") or "").strip().lower() != "fact_check":
         return plan
 
     plan["template_id"] = "fb_investigation_card"
-    story_id = str(story.get("id") or "")
     if story_id == "cet-govora-cine-a-decis-oprirea-20260821":
         hook = "Cine a decis, de fapt, oprirea CET Govora?"
         plan["hook"] = hook
@@ -48,10 +65,7 @@ def package(story: dict, visual: dict) -> dict:
             f"{plan['cta']}\n{link}"
         )
 
-    plan["rendering_version"] = "facebook-editorial-v1.1"
-    plan["product_fingerprint_sha256"] = impl.digest(
-        {k: v for k, v in plan.items() if k != "product_fingerprint_sha256"}
-    )
+    _refresh_fingerprint(plan)
     return plan
 
 
@@ -80,9 +94,21 @@ def self_test() -> int:
     assert product["hook"] == "Cine a decis, de fapt, oprirea CET Govora?"
     assert "31 august 2026" in product["visual_subline"]
     assert "553,15 lei/Gcal" in product["body"]
+
+    water = {
+        "id": "valcea-apa-canal-contract-152m-20260902",
+        "section": "ADMINISTRAȚIE",
+        "headline": "Contract de peste 152 mil. euro pentru apă și canalizare în Vâlcea. CJ indică 12 localități; documentele din aprilie includ și Râmnicu",
+        "dek": "Contractul regional a fost semnat la 2 septembrie 2026.",
+        "paragraphs": ["Consiliul Județean a comunicat valoarea proiectului."],
+    }
+    water_product = package(water, visual)
+    assert water_product["hook"] == "152 mil. euro pentru apă și canalizare în Vâlcea"
+    assert "Râmnicu" in water_product["visual_subline"]
+
     feed_identity.self_test()
     result = impl.self_test()
-    print("VÂLCEA CLAR Facebook editorial v1.1 premium fact-check identity: PASS")
+    print("VÂLCEA CLAR Facebook editorial v1.1 premium identity: PASS")
     return result
 
 
