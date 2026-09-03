@@ -20,7 +20,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
-PARSER_VERSION = "LIFE_PROGRAMME_INTELLIGENCE_V1"
+PARSER_VERSION = "LIFE_PROGRAMME_INTELLIGENCE_V1_1"
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = ROOT / "partener-eu" / "ingest" / "life_programme_intelligence_registry.json"
 MAX_BODY_BYTES = 2 * 1024 * 1024
@@ -147,7 +147,7 @@ def _normalise_source_text(raw: bytes) -> str:
     decoded = re.sub(r"<script\b[^>]*>.*?</script>", " ", decoded, flags=re.I | re.S)
     decoded = re.sub(r"<style\b[^>]*>.*?</style>", " ", decoded, flags=re.I | re.S)
     decoded = re.sub(r"<[^>]+>", " ", decoded)
-    return re.sub(r"\s+", " ", decoded).casefold()
+    return re.sub(r"\s+", " ", decoded).strip().casefold()
 
 
 def _probe_source(source: dict[str, Any], *, timeout: float) -> dict[str, Any]:
@@ -155,7 +155,7 @@ def _probe_source(source: dict[str, Any], *, timeout: float) -> dict[str, Any]:
     request = Request(
         url,
         headers={
-            "User-Agent": "PARTENER.EU-LIFEProgrammeIntelligence/1.0 (+https://partener.eu)",
+            "User-Agent": "PARTENER.EU-LIFEProgrammeIntelligence/1.1 (+https://partener.eu)",
             "Accept": "text/html,application/xhtml+xml,text/plain;q=0.8,*/*;q=0.1",
         },
         method="GET",
@@ -171,71 +171,54 @@ def _probe_source(source: dict[str, Any], *, timeout: float) -> dict[str, Any]:
             hosts=list(source.get("allowed_hosts") or []),
             path_prefixes=list(source.get("allowed_path_prefixes") or []),
         )
+        raw_hash = _sha256(raw)
         if len(raw) > MAX_BODY_BYTES:
             return {
-                "health_state": "DEGRADED_OVERSIZE",
-                "lkg_required": True,
-                "requested_url": url,
-                "final_url": final_url,
-                "http_status": status,
-                "content_type": content_type,
-                "raw_sha256": _sha256(raw),
-                "raw_size_bytes": len(raw),
+                "health_state": "DEGRADED_OVERSIZE", "lkg_required": True,
+                "requested_url": url, "final_url": final_url, "http_status": status,
+                "content_type": content_type, "raw_sha256": raw_hash,
+                "normalized_visible_text_sha256": None, "raw_size_bytes": len(raw),
                 "missing_marker_groups": [],
                 "error": f"response exceeded bounded {MAX_BODY_BYTES}-byte acquisition cap",
             }
         folded_type = content_type.casefold()
         if not any(token in folded_type for token in ("text/html", "application/xhtml+xml", "text/plain")):
             return {
-                "health_state": "DEGRADED_CONTENT_TYPE",
-                "lkg_required": True,
-                "requested_url": url,
-                "final_url": final_url,
-                "http_status": status,
-                "content_type": content_type,
-                "raw_sha256": _sha256(raw),
-                "raw_size_bytes": len(raw),
-                "missing_marker_groups": [],
-                "error": "unexpected content type for LIFE programme intelligence source",
+                "health_state": "DEGRADED_CONTENT_TYPE", "lkg_required": True,
+                "requested_url": url, "final_url": final_url, "http_status": status,
+                "content_type": content_type, "raw_sha256": raw_hash,
+                "normalized_visible_text_sha256": None, "raw_size_bytes": len(raw),
+                "missing_marker_groups": [], "error": "unexpected content type for LIFE programme intelligence source",
             }
         folded = _normalise_source_text(raw)
-        missing = [group for group in source.get("required_marker_groups") or [] if not any(str(marker).casefold() in folded for marker in group)]
+        visible_hash = _sha256(folded.encode("utf-8"))
+        missing = [
+            group for group in source.get("required_marker_groups") or []
+            if not any(str(marker).casefold() in folded for marker in group)
+        ]
         if status != 200 or missing:
             return {
                 "health_state": "DEGRADED_MARKER_MISMATCH" if status == 200 else "DEGRADED_HTTP",
-                "lkg_required": True,
-                "requested_url": url,
-                "final_url": final_url,
-                "http_status": status,
-                "content_type": content_type,
-                "raw_sha256": _sha256(raw),
-                "raw_size_bytes": len(raw),
+                "lkg_required": True, "requested_url": url, "final_url": final_url,
+                "http_status": status, "content_type": content_type, "raw_sha256": raw_hash,
+                "normalized_visible_text_sha256": visible_hash, "raw_size_bytes": len(raw),
                 "missing_marker_groups": missing,
                 "error": None if status == 200 else f"unexpected HTTP status {status}",
             }
         return {
-            "health_state": "HEALTHY",
-            "lkg_required": False,
-            "requested_url": url,
-            "final_url": final_url,
-            "http_status": status,
-            "content_type": content_type,
-            "raw_sha256": _sha256(raw),
-            "raw_size_bytes": len(raw),
-            "missing_marker_groups": [],
-            "error": None,
+            "health_state": "HEALTHY", "lkg_required": False,
+            "requested_url": url, "final_url": final_url, "http_status": status,
+            "content_type": content_type, "raw_sha256": raw_hash,
+            "normalized_visible_text_sha256": visible_hash, "raw_size_bytes": len(raw),
+            "missing_marker_groups": [], "error": None,
         }
     except (HTTPError, URLError, TimeoutError, OSError, ValueError) as exc:
         return {
-            "health_state": "DEGRADED_TRANSPORT",
-            "lkg_required": True,
-            "requested_url": url,
-            "final_url": None,
-            "http_status": getattr(exc, "code", None),
-            "content_type": None,
-            "raw_sha256": None,
-            "raw_size_bytes": 0,
-            "missing_marker_groups": [],
+            "health_state": "DEGRADED_TRANSPORT", "lkg_required": True,
+            "requested_url": url, "final_url": None,
+            "http_status": getattr(exc, "code", None), "content_type": None,
+            "raw_sha256": None, "normalized_visible_text_sha256": None,
+            "raw_size_bytes": 0, "missing_marker_groups": [],
             "error": f"{type(exc).__name__}: {exc}",
         }
 
@@ -256,16 +239,11 @@ def acquire(*, run_id: str, observed_at: str | None = None, registry_path: Path 
     sources: list[dict[str, Any]] = []
     for source in registry["sources"]:
         health = _probe_source(source, timeout=timeout) if live else {
-            "health_state": "NOT_PROBED",
-            "lkg_required": False,
-            "requested_url": source["authority_url"],
-            "final_url": None,
-            "http_status": None,
-            "content_type": None,
-            "raw_sha256": None,
-            "raw_size_bytes": 0,
-            "missing_marker_groups": [],
-            "error": None,
+            "health_state": "NOT_PROBED", "lkg_required": False,
+            "requested_url": source["authority_url"], "final_url": None,
+            "http_status": None, "content_type": None, "raw_sha256": None,
+            "normalized_visible_text_sha256": None, "raw_size_bytes": 0,
+            "missing_marker_groups": [], "error": None,
         }
         semantic_basis = {
             "source_id": source["id"],
@@ -276,10 +254,13 @@ def acquire(*, run_id: str, observed_at: str | None = None, registry_path: Path 
             "market_signals": sorted(set(source.get("market_signals") or [])),
             "applicant_fit_tags": sorted(set(source.get("applicant_fit_tags") or [])),
             "pipeline_signals": sorted(set(source.get("pipeline_signals") or [])),
+            "normalized_visible_text_sha256": health.get("normalized_visible_text_sha256"),
         }
+        degraded = str(health.get("health_state") or "").startswith("DEGRADED")
         sources.append({
-            **semantic_basis,
-            "source_semantic_fingerprint": _fingerprint(semantic_basis),
+            **{k: semantic_basis[k] for k in semantic_basis if k != "normalized_visible_text_sha256"},
+            "normalized_visible_text_sha256": health.get("normalized_visible_text_sha256"),
+            "source_semantic_fingerprint": None if degraded else _fingerprint(semantic_basis),
             "material_fact_use": False,
             "fetched_at": fetched_at,
             "freshness_basis": "LIVE_FETCH_AT_RUN" if live else "NOT_PROBED",
@@ -323,6 +304,8 @@ def acquire(*, run_id: str, observed_at: str | None = None, registry_path: Path 
         "registry_evidence_checked_date": registry["evidence_checked_date"],
         "source_family": "EU_DIRECT",
         "programme_families": ["LIFE"],
+        "programme_id": "LIFE",
+        "programme_family": "LIFE",
         "authority_class": "OFFICIAL_PROGRAMME_CALL_INDEX_APPLICANT_SUPPORT_AND_WORK_PROGRAMME_INTELLIGENCE",
         "observation_state": "MARKET_AND_PROGRAMMING_INTELLIGENCE",
         "source_count": len(sources),
@@ -332,7 +315,7 @@ def acquire(*, run_id: str, observed_at: str | None = None, registry_path: Path 
         "lkg_required": bool(degraded_count),
         "sources": sources,
         "programme_intelligence": [programme_intelligence],
-        "semantic_fingerprint": _fingerprint(semantic_basis),
+        "semantic_fingerprint": None if degraded_count else _fingerprint(semantic_basis),
         "market_intelligence_only": True,
         "fit_scores_are_not_eligibility": True,
         **flags,
@@ -344,10 +327,10 @@ def acquire(*, run_id: str, observed_at: str | None = None, registry_path: Path 
         "missing_for_open_confirmation": list(MISSING_FOR_OPEN_CONFIRMATION),
         "note": (
             "LIFE programme, applicant-support, work-programme and call-index surfaces are market/programming/discovery intelligence only. "
-            "This adapter intentionally does not extract visible call status, deadline, budget or eligibility as material facts. "
+            "Normalized visible-content hashes make healthy semantic snapshots content-sensitive; degraded current evidence has no semantic fingerprint. "
             "OPEN requires an exact call/topic identifier and fresh exact official endpoint, followed by semantic reconciliation and field-scoped admission."
         ),
-        "rollback": "Remove this bounded LIFE adapter/registry/test unit; preserve source-health, checkpoint, replay and LKG evidence.",
+        "rollback": "Revert LIFE V1.1 content-sensitive fingerprinting; preserve source-health, checkpoint, replay and LKG evidence.",
     }
     validate_result(result)
     return result
@@ -360,6 +343,8 @@ def validate_result(result: dict[str, Any]) -> None:
         raise ValueError("LIFE adapter/parser version drift")
     if result.get("source_family") != "EU_DIRECT" or result.get("programme_families") != ["LIFE"]:
         raise ValueError("LIFE source/programme family drift")
+    if result.get("programme_id") != "LIFE" or result.get("programme_family") != "LIFE":
+        raise ValueError("LIFE programme identity drift")
     if result.get("source_count") != 4 or len(result.get("sources") or []) != 4:
         raise ValueError("LIFE source-count drift")
     if result.get("market_intelligence_only") is not True or result.get("fit_scores_are_not_eligibility") is not True:
@@ -370,10 +355,8 @@ def validate_result(result: dict[str, Any]) -> None:
         if result.get(key) is not False:
             raise ValueError(f"LIFE result became authorizing: {key}")
     for key in (
-        "exact_call_or_topic_identifier_required",
-        "current_official_exact_endpoint_required",
-        "semantic_reconciliation_required",
-        "field_scoped_material_admission_required",
+        "exact_call_or_topic_identifier_required", "current_official_exact_endpoint_required",
+        "semantic_reconciliation_required", "field_scoped_material_admission_required",
     ):
         if result.get(key) is not True:
             raise ValueError(f"LIFE material-admission requirement relaxed: {key}")
@@ -381,8 +364,6 @@ def validate_result(result: dict[str, Any]) -> None:
         raise ValueError("LIFE missing-for-open contract drift")
     if not re.fullmatch(r"[0-9a-f]{64}", str(result.get("registry_sha256") or "")):
         raise ValueError("LIFE registry SHA invalid")
-    if not re.fullmatch(r"[0-9a-f]{64}", str(result.get("semantic_fingerprint") or "")):
-        raise ValueError("LIFE semantic fingerprint invalid")
 
     rows = result.get("programme_intelligence") or []
     if len(rows) != 1 or rows[0].get("programme_family") != "LIFE":
@@ -398,22 +379,36 @@ def validate_result(result: dict[str, Any]) -> None:
         states.add(state)
         if state not in ALLOWED_OBSERVATION_STATES or source.get("material_fact_use") is not False:
             raise ValueError("LIFE source observation/material boundary drift")
-        if not re.fullmatch(r"[0-9a-f]{64}", str(source.get("source_semantic_fingerprint") or "")):
-            raise ValueError("LIFE source semantic fingerprint invalid")
         health = source.get("source_health") or {}
         health_state = str(health.get("health_state") or "")
         if health_state == "HEALTHY":
-            if health.get("http_status") != 200 or not re.fullmatch(r"[0-9a-f]{64}", str(health.get("raw_sha256") or "")):
-                raise ValueError("healthy LIFE source provenance incomplete")
+            for key in ("raw_sha256", "normalized_visible_text_sha256"):
+                if not re.fullmatch(r"[0-9a-f]{64}", str(health.get(key) or "")):
+                    raise ValueError(f"healthy LIFE source provenance incomplete: {key}")
+            if not re.fullmatch(r"[0-9a-f]{64}", str(source.get("normalized_visible_text_sha256") or "")):
+                raise ValueError("healthy LIFE source visible-content hash missing")
+            if not re.fullmatch(r"[0-9a-f]{64}", str(source.get("source_semantic_fingerprint") or "")):
+                raise ValueError("healthy LIFE source semantic fingerprint invalid")
             if health.get("lkg_required") is not False:
                 raise ValueError("healthy LIFE source incorrectly requires LKG")
         elif health_state.startswith("DEGRADED"):
             if health.get("lkg_required") is not True:
                 raise ValueError("degraded LIFE source lacks LKG requirement")
-        elif health_state != "NOT_PROBED":
+            if source.get("source_semantic_fingerprint") is not None:
+                raise ValueError("degraded LIFE source emitted semantic fingerprint")
+        elif health_state == "NOT_PROBED":
+            if not re.fullmatch(r"[0-9a-f]{64}", str(source.get("source_semantic_fingerprint") or "")):
+                raise ValueError("unprobed LIFE source semantic fingerprint invalid")
+        else:
             raise ValueError(f"unexpected LIFE source-health state: {health_state}")
     if "CALL_INDEX_DISCOVERY" not in states or "PROGRAMMING_PIPELINE" not in states:
         raise ValueError("LIFE source states lost discovery/pipeline separation")
+
+    if result.get("source_health_state") == "DEGRADED":
+        if result.get("semantic_fingerprint") is not None:
+            raise ValueError("degraded LIFE snapshot emitted semantic fingerprint")
+    elif not re.fullmatch(r"[0-9a-f]{64}", str(result.get("semantic_fingerprint") or "")):
+        raise ValueError("healthy/unprobed LIFE semantic fingerprint invalid")
 
 
 def main() -> int:
@@ -425,22 +420,13 @@ def main() -> int:
     parser.add_argument("--timeout", type=float, default=12.0)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = acquire(
-        run_id=args.run_id,
-        observed_at=args.observed_at,
-        registry_path=args.registry,
-        live=args.live,
-        timeout=args.timeout,
-    )
+    result = acquire(run_id=args.run_id, observed_at=args.observed_at, registry_path=args.registry, live=args.live, timeout=args.timeout)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     print(json.dumps({
-        "schema": result["schema"],
-        "source_count": result["source_count"],
-        "healthy_source_count": result["healthy_source_count"],
-        "degraded_source_count": result["degraded_source_count"],
-        "semantic_fingerprint": result["semantic_fingerprint"],
-        "open_call_authorized": result["open_call_authorized"],
+        "schema": result["schema"], "source_count": result["source_count"],
+        "healthy_source_count": result["healthy_source_count"], "degraded_source_count": result["degraded_source_count"],
+        "semantic_fingerprint": result["semantic_fingerprint"], "open_call_authorized": result["open_call_authorized"],
         "publication_effect": result["publication_effect"],
     }, sort_keys=True))
     return 0
