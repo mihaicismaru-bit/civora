@@ -1,0 +1,72 @@
+name: PARTENER.EU Programming Pipeline
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/mff_2028_2034_programming_pipeline_registry.json'
+      - 'partener-eu/ingest/mff_2028_2034_programming_pipeline.py'
+      - 'partener-eu/ingest/mff_2028_2034_programming_pipeline_reconcile.py'
+      - 'partener-eu/ops/test_mff_2028_2034_programming_pipeline.py'
+      - 'partener-eu/ops/run_mff_programming_pipeline_canonical.py'
+      - 'partener-eu/ingest/eu_direct_mff_2028_2034_programming_registry.json'
+      - 'partener-eu/ingest/eu_direct_mff_2028_2034_programming_watch.py'
+      - 'partener-eu/ops/test_eu_direct_mff_2028_2034_programming_watch.py'
+      - '.github/workflows/partener-eu-mff-2028-2034-programming-proof.yml'
+      - '.github/workflows/partener-eu-programming-pipeline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  programming-pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile canonical MFF programming pipeline
+        run: |
+          python -m json.tool partener-eu/ingest/mff_2028_2034_programming_pipeline_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/mff_2028_2034_programming_pipeline.py \
+            partener-eu/ingest/mff_2028_2034_programming_pipeline_reconcile.py \
+            partener-eu/ops/test_mff_2028_2034_programming_pipeline.py \
+            partener-eu/ops/run_mff_programming_pipeline_canonical.py
+
+      - name: Run fail-closed programming regressions
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_mff_2028_2034_programming_pipeline.py
+
+      - name: Run canonical MFF 2028-2034 programming acquisition reconciliation and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          MFF_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-mff
+        run: python partener-eu/ops/run_mff_programming_pipeline_canonical.py
+
+      - name: Upload replayable canonical programming evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-programming-pipeline-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-programming-pipeline
+          if-no-files-found: error
+          retention-days: 7
