@@ -1,8 +1,8 @@
 {
   "schema_version": "eucons.ai4work_gdpr_data_minimisation.v0.1",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-31",
-  "status": "CONTROL_COMPLETE_PREPROD_NOT_CONTROLLER_APPROVAL",
+  "date": "2026-09-03",
+  "status": "CONTROL_COMPLETE_CONTROLLER_POLICY_ACCEPTED_LIVE_BINDING_PENDING",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "collection_enabled": false,
@@ -136,6 +136,18 @@
     "supporting_items_cannot_change_h1_h5_numeric_order": true,
     "project_activity_as_need_evidence": false
   },
+  "controller_policy_acceptance": {
+    "approved": true,
+    "approved_at": "2026-09-03T07:29:00+02:00",
+    "approver_name_or_role": "EUROCONSULT SRL controller / project owner",
+    "approval_reference": "CONTROLLER_GOVERNANCE_APPROVAL_2026-09-03.json",
+    "data_minimisation_approved": true,
+    "commercial_tracking_forbidden": true,
+    "crm_linkage_forbidden": true,
+    "direct_identifiers_forbidden": true,
+    "analytical_free_text_forbidden": true,
+    "boundary": "Controller accepts the minimisation and purpose-limitation design. Collection remains disabled until the separate live/provider operational gates and final collection-only v0.2 approval pass."
+  },
   "change_control": {
     "fail_closed_if": [
       "a form field is missing from the purpose map",
@@ -148,6 +160,7 @@
       "commercial, CRM or marketing use becomes enabled"
     ],
     "controller_acceptance_required_before_prod": true,
+    "controller_policy_acceptance_recorded": true,
     "merge_authorized": false,
     "deploy_authorized": false,
     "real_collection_authorized": false
