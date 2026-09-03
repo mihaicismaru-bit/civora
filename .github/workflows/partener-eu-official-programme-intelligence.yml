@@ -369,7 +369,7 @@ jobs:
           assert all(row['programme_grant_scope'] == 'PROGRAMME_ALLOCATION_NOT_CALL_BUDGET' for row in eea_programming['records'])
 
           assert eea_operator['adapter_id'] == 'EEA_ROMANIA_OPERATOR_WATCH_V1'
-          assert eea_operator['route_count'] == 8
+          assert eea_operator['route_count'] == 9
           assert eea_operator['healthy_route_count'] >= 1
           assert all(
               eea_operator[k] is False
@@ -377,6 +377,11 @@ jobs:
           )
           required_open = {'exact_call_or_topic_identifier','current_official_exact_call_endpoint','explicit_current_official_open_status','semantic_reconciliation'}
           assert required_open.issubset(set(eea_operator['missing_for_open_confirmation']))
+          routes_by_id = {row['route_id']: row for row in eea_operator['routes']}
+          civil = routes_by_id['EEA-RO-CIVIL-SOCIETY-FUND-CALL-INDEX-WATCH']
+          assert civil['programme_ids'] == ['civil-society-fund']
+          assert civil['authority_class'] == 'T1_OFFICIAL_FUND_OPERATOR'
+          assert civil['requested_url'] == 'https://eeagrants.org/en/eea-civil-society-fund-romania/calls'
           for row in eea_operator['routes']:
               assert all(
                   row[k] is False
@@ -457,6 +462,8 @@ jobs:
               'eea_programming_records': eea_programming['stats']['programme_records'],
               'eea_operator_watch_health': eea_operator['health_state'],
               'eea_operator_watch_healthy_routes': eea_operator['healthy_route_count'],
+              'eea_civil_society_fund_route_health': civil['health_state'],
+              'eea_civil_society_fund_candidate_count': civil['candidate_count'],
               'interreg_programmes': interreg['programme_count'],
               'interreg_call_surface_health': interreg_calls['source_health'],
               'applicant_fit_timis_count': applicant_timis['fit_count'],
