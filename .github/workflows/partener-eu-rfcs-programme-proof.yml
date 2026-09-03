@@ -1,0 +1,118 @@
+name: PARTENER.EU RFCS Programme Intelligence Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_rfcs_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eu_direct_rfcs_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py'
+      - '.github/workflows/partener-eu-rfcs-programme-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rfcs-programme-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile registry adapter and regression
+        run: |
+          python -m json.tool partener-eu/ingest/eu_direct_rfcs_programme_intelligence_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_rfcs_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py
+
+      - name: Validate fail-closed RFCS semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py -v
+
+      - name: Acquire fresh official RFCS programme intelligence
+        run: |
+          ROOT=/tmp/partener-eu-rfcs-programme-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/eu_direct_rfcs_programme_intelligence.py \
+            --registry partener-eu/ingest/eu_direct_rfcs_programme_intelligence_registry.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/rfcs-programme-intelligence.json"
+          cp partener-eu/ingest/eu_direct_rfcs_programme_intelligence_registry.json "$ROOT/registry.json"
+
+      - name: Enforce live non-authorizing RFCS boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-rfcs-programme-proof/rfcs-programme-intelligence.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema']=='PARTENER_EU_RFCS_PROGRAMME_INTELLIGENCE_V1'
+          assert d['source_family']=='EU_DIRECT'
+          assert d['programme_id']=='RFCS'
+          assert d['source_count']==4
+          assert d['healthy_source_count'] + d['degraded_source_count'] == 4
+          assert d['source_health_state'] in {'HEALTHY','DEGRADED'}
+          assert d['market_intelligence_only'] is True
+          assert d['fit_score_is_not_eligibility'] is True
+          assert d['partner_intelligence_is_not_call_eligibility'] is True
+          assert d['romania_programme_fit']=='EU_MEMBER_STATE_APPLICANT_POOL_NON_AUTHORIZING'
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          assert all(d[k] is False for k in flags)
+          assert d['publication_effect']=='NONE'
+          assert {r['observation_state'] for r in d['evidence']}=={
+              'PROGRAMME_INTELLIGENCE','PROGRAMMING_PIPELINE',
+              'CALL_INDEX_DISCOVERY','APPLICANT_FIT_INTELLIGENCE'
+          }
+          for row in d['evidence']:
+              if row['source_health']=='HEALTHY':
+                  assert row['http_status']==200
+                  assert row['lkg_required'] is False
+                  assert re.fullmatch(r'[0-9a-f]{64}', row['raw_sha256'])
+                  assert re.fullmatch(r'[0-9a-f]{64}', row['normalized_visible_text_sha256'])
+                  assert re.fullmatch(r'[0-9a-f]{64}', row['source_semantic_fingerprint'])
+              else:
+                  assert row['source_health']=='DEGRADED'
+                  assert row['lkg_required'] is True
+                  assert row['source_semantic_fingerprint'] is None
+          assert re.fullmatch(r'[0-9a-f]{64}', d['registry_sha256'])
+          assert re.fullmatch(r'[0-9a-f]{64}', d['semantic_fingerprint'])
+          print(json.dumps({
+              'programme':'RFCS',
+              'healthy_sources':d['healthy_source_count'],
+              'degraded_sources':d['degraded_source_count'],
+              'source_health_state':d['source_health_state'],
+              'open_call_authorized':False,
+              'eligibility_authorized':False,
+              'publication_effect':'NONE'
+          }, sort_keys=True))
+          PY
+
+      - name: Upload bounded replay proof
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-rfcs-programme-proof-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-rfcs-programme-proof/
+          if-no-files-found: error
+          retention-days: 7
