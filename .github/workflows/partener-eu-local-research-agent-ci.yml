@@ -1,0 +1,80 @@
+name: PARTENER.EU Local Research Agent CI
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/local-research-agent/**'
+      - '.github/workflows/partener-eu-local-research-agent-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-local-research-agent:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        shell: pwsh
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          if ((git rev-parse HEAD).Trim() -ne $env:EXPECTED_SHA) { throw 'Exact-head checkout mismatch' }
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate source registry and compile
+        shell: pwsh
+        run: |
+          python -m json.tool partener-eu/local-research-agent/sources.json | Out-Null
+          python -m json.tool partener-eu/local-research-agent/control/requests.json | Out-Null
+          python -m py_compile partener-eu/local-research-agent/agent.py partener-eu/local-research-agent/test_agent.py
+
+      - name: Run fail-closed unit tests
+        shell: pwsh
+        run: python partener-eu/local-research-agent/test_agent.py -v
+
+      - name: Validate PowerShell syntax
+        shell: pwsh
+        run: |
+          $files = @(
+            'partener-eu/local-research-agent/install.ps1',
+            'partener-eu/local-research-agent/run.ps1',
+            'partener-eu/local-research-agent/configure-token.ps1',
+            'partener-eu/local-research-agent/uninstall.ps1'
+          )
+          foreach ($file in $files) {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$null, [ref]$errors) | Out-Null
+            if ($errors.Count -gt 0) { $errors | Format-List | Out-String | Write-Error; throw "PowerShell syntax failed: $file" }
+          }
+
+      - name: Enforce non-authorizing registry boundary
+        shell: pwsh
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('partener-eu/local-research-agent/sources.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['policy']['market_intelligence_only'] is True
+          assert d['policy']['material_fact_use'] is False
+          assert d['policy']['open_call_authorized'] is False
+          assert d['policy']['publication_effect'] == 'NONE'
+          assert len(d['sources']) >= 20
+          for row in d['sources']:
+              assert row['url'].startswith('https://')
+              assert row['observation_state'] not in {'OPEN_CALL','CLOSED_CALL'}
+              assert row['allow_hosts']
+          print({'sources':len(d['sources']),'material_fact_use':False,'publication_effect':'NONE'})
+          PY
