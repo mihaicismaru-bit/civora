@@ -20,15 +20,16 @@ FLAGS = (
 SNAPSHOT_SCHEMA = "PARTENER_EU_LIFE_PROGRAMME_INTELLIGENCE_V1"
 RECONCILIATION_SCHEMA = "PARTENER_EU_LIFE_PROGRAMME_RECONCILIATION_V1"
 PROGRAMME_ID = "LIFE"
+GENERIC_ARTIFACT_PREFIX = "partener-eu-eu-direct-programme-intelligence-"
 ARTIFACT_PREFIXES = (
-    "partener-eu-eu-direct-programme-intelligence-",
+    GENERIC_ARTIFACT_PREFIX,
     "partener-eu-life-programme-history-",
     "partener-eu-life-programme-proof-",
 )
 
 
-def run(cmd: list[str], *, stdout=None) -> None:
-    subprocess.run(cmd, check=True, stdout=stdout)
+def run(cmd: list[str], *, stdout=None, env: dict[str, str] | None = None) -> None:
+    subprocess.run(cmd, check=True, stdout=stdout, env=env)
 
 
 def load(path: pathlib.Path) -> dict[str, Any]:
@@ -94,6 +95,9 @@ def restore_previous(root: pathlib.Path, registry: dict[str, Any]) -> dict[str, 
             continue
         rows.append((str(artifact.get("created_at") or ""), int(artifact.get("id") or 0), name))
     rows.sort(reverse=True)
+    # Prefer generic canonical history over a newer temporary proof/history artifact.
+    # Python's stable sort preserves newest-first ordering inside each source kind.
+    rows.sort(key=lambda row: 0 if row[2].startswith(GENERIC_ARTIFACT_PREFIX) else 1)
 
     expected = expected_inventory(registry)
     metadata: dict[str, Any] = {
@@ -128,7 +132,7 @@ def restore_previous(root: pathlib.Path, registry: dict[str, Any]) -> dict[str, 
             if snapshot_inventory(candidate) != expected:
                 continue
             dump(previous_dir / "life-programme-intelligence.json", candidate)
-            restore_source_kind = "GENERIC_EU_DIRECT" if artifact_name.startswith("partener-eu-eu-direct-programme-intelligence-") else "LEGACY_LIFE_PROOF_OR_HISTORY"
+            restore_source_kind = "GENERIC_EU_DIRECT" if artifact_name.startswith(GENERIC_ARTIFACT_PREFIX) else "LEGACY_LIFE_PROOF_OR_HISTORY"
             metadata.update({
                 "previous_found": True,
                 "artifact_id": artifact_id,
@@ -242,6 +246,16 @@ def stage_history(root: pathlib.Path) -> dict[str, Any]:
     return result
 
 
+def run_regressions(repo_root: pathlib.Path) -> None:
+    env = os.environ.copy()
+    paths = [str(repo_root / "partener-eu" / "ingest"), str(repo_root / "partener-eu" / "ops")]
+    if env.get("PYTHONPATH"):
+        paths.append(env["PYTHONPATH"])
+    env["PYTHONPATH"] = os.pathsep.join(paths)
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "test_life_programme_intelligence.py")], env=env)
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "test_life_programme_reconcile.py")], env=env)
+
+
 def main() -> int:
     repo_root = pathlib.Path(__file__).resolve().parents[2]
     ingest = repo_root / "partener-eu" / "ingest"
@@ -253,6 +267,9 @@ def main() -> int:
     (root / "previous").mkdir(parents=True)
     (root / "history").mkdir(parents=True)
 
+    # Keep LIFE's synthetic fail-closed regressions inside the canonical lane so
+    # removal of the temporary proof workflow cannot silently reduce coverage.
+    run_regressions(repo_root)
     restore = restore_previous(root, registry)
     run_id = os.environ.get("LIFE_RUN_ID") or f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-life"
     current_path = root / "current" / "life-programme-intelligence.json"
@@ -279,7 +296,7 @@ def main() -> int:
 
     boundary = enforce_boundary(root)
     history = stage_history(root)
-    print(json.dumps({"restore": restore, "boundary": boundary, "history": history}, sort_keys=True))
+    print(json.dumps({"restore": restore, "boundary": boundary, "history": history, "regressions": "PASS"}, sort_keys=True))
     return 0
 
 
