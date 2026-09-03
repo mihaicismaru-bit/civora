@@ -1,7 +1,7 @@
 {
   "schema_version": "eucons.ai4work_gdpr_lia.v0.6",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-09-01",
+  "date": "2026-09-03",
   "evidence_binding_key": "lawful_basis_or_lia",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
@@ -10,15 +10,15 @@
     "cui": "14250864",
     "determination_reference": "AUTHENTICATED_FIRST_PARTY_USER_DECLARATION_2026_08_28"
   },
-  "controller_role_state": "DETERMINED_PROD_APPROVALS_PENDING",
+  "controller_role_state": "DETERMINED_LAWFUL_BASIS_APPROVED_OPERATIONAL_GATES_PENDING",
   "controller_determination": {
     "rule": "The GDPR controller is the legal entity that determines the purposes and essential means of the AI4WORK needs-analysis research. Authenticated first-party determination fixes EUROCONSULT SRL as controller/operator and owner of eucons.ro for this processing.",
     "reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3",
     "status": "RESOLVED_CONTROLLER_IDENTITY",
     "boundary": "Controller determination does not itself approve the lawful basis, Article 13 notice, privacy contact, retention, rights procedure, DPIA outcome, provider/live-account binding or PROD collection."
   },
-  "candidate_legal_basis": "GDPR Article 6(1)(f) legitimate interests — candidate only; controller signoff is still required before production",
-  "status": "DRAFT_LEGAL_BASIS_CONTROLLER_SIGNOFF_REQUIRED_BEFORE_COLLECTION",
+  "candidate_legal_basis": "GDPR Article 6(1)(f) legitimate interests — controller-approved for the current minimised research design; operational privacy/provider gates remain required before production collection",
+  "status": "CONTROLLER_APPROVED_LEGAL_BASIS_OPERATIONAL_GATES_PENDING",
   "authority_context": [
     "https://commission.europa.eu/law/law-topic/data-protection/information-business-and-organisations/legal-grounds-processing-data_en",
     "https://www.edpb.europa.eu/public-consultations/guidelines-12024-on-processing-of-personal-data-based-on-article-61f-gdpr_ro",
@@ -46,7 +46,7 @@
       "small-cell suppression/combination for reported n < 5",
       "respondent-level records are treated conservatively as personal/potentially linkable rather than being called anonymous merely because direct identifiers are absent"
     ],
-    "conclusion": "PROCESSING_CAN_BE_NECESSARY_IF_THE_CONTROLLER_APPROVES_THE_FINAL_BASIS_AND_THE_MINIMISED_DESIGN_AND_SEPARATION_CONTROLS_REMAIN_ENFORCED"
+    "conclusion": "PROCESSING_IS_NECESSARY_FOR_THE_APPROVED_CURRENT_MINIMISED_DESIGN_SUBJECT_TO_CONTINUED_ENFORCEMENT_OF_SEPARATION_AND_OPERATIONAL_GATES"
   },
   "balancing_test": {
     "reasonable_expectations": "participants are shown a pre-form research notice and make a voluntary positive choice to submit a needs-analysis questionnaire; the data are not reused for enrolment, marketing or individual decisions",
@@ -65,7 +65,7 @@
       "logging minimisation and no IP/user-agent in analytical exports",
       "no raw-response anonymity claim; only aggregate outputs that pass the documented No Record Isolation / No Linkage / No Inference assessment may be labelled anonymous"
     ],
-    "provisional_outcome": "ARTICLE_6_1_F_CAN_BE_SUPPORTED_ON_CURRENT_MINIMISED_DESIGN_BUT_REMAINS_UNAPPROVED_UNTIL_EXPLICIT_CONTROLLER_SIGNOFF_AND_OPERATIONAL_GATES_ARE_COMPLETE"
+    "provisional_outcome": "ARTICLE_6_1_F_APPROVED_BY_CONTROLLER_FOR_CURRENT_MINIMISED_DESIGN; OPERATIONAL_GATES_REMAIN_REQUIRED_BEFORE_COLLECTION"
   },
   "anonymisation_control": {
     "reference": "GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json v0.1",
@@ -86,30 +86,31 @@
     "retention/deletion rule is not executable"
   ],
   "controller_signoff_fields": {
-    "approved": false,
+    "approved": true,
     "legal_entity_name": "EUROCONSULT SRL",
     "role_basis_reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3 / AUTHENTICATED_FIRST_PARTY_USER_DECLARATION_2026_08_28",
-    "approver_name_or_role": null,
-    "approval_date": null,
+    "approver_name_or_role": "EUROCONSULT SRL controller / project owner",
+    "approval_date": "2026-09-03",
     "privacy_contact": null,
-    "notes": "Controller identity is fixed; this field remains false until the candidate legal basis and balancing outcome are explicitly approved for PROD."
+    "approval_reference": "CONTROLLER_GOVERNANCE_APPROVAL_2026-09-03.json",
+    "notes": "Controller approved Article 6(1)(f), the purpose/necessity/balancing outcome and the current minimised design. This does not satisfy the still-open privacy-contact, Article 13, processor, logging or retention execution gates and does not authorize collection."
   },
   "prod_approval": {
-    "state": "PENDING_CONTROLLER_SIGNOFF",
+    "state": "CONTROLLER_APPROVED_OPERATIONAL_GATES_PENDING",
     "lawful_basis_code": "GDPR_ARTICLE_6_1_F_LEGITIMATE_INTERESTS",
-    "purpose_test_approved": false,
-    "necessity_test_approved": false,
-    "balancing_test_approved": false,
+    "purpose_test_approved": true,
+    "necessity_test_approved": true,
+    "balancing_test_approved": true,
     "right_to_object_operational": false,
     "article13_basis_disclosure_confirmed": false,
-    "employee_no_disadvantage_safeguard_approved": false,
+    "employee_no_disadvantage_safeguard_approved": true,
     "processor_chain_review_complete": false,
     "logging_linkability_review_complete": false,
     "retention_executable_confirmed": false,
     "privacy_contact": null,
-    "approver_name_or_role": null,
-    "approved_at": null,
-    "boundary": "Machine-readable PROD approval remains false until the controller explicitly approves the exact Article 6(1)(f) purpose, necessity and balancing tests and the operational safeguards bound by this artifact. It does not authorize collection, merge, deploy or canonicalization."
+    "approver_name_or_role": "EUROCONSULT SRL controller / project owner",
+    "approved_at": "2026-09-03",
+    "boundary": "Controller approval of Article 6(1)(f) and the LIA tests is recorded. PROD eligibility remains false until the operational safeguards are independently live-bound and the separate final collection-only v0.2 approval is recorded. This artifact never authorizes collection, merge, deploy or canonicalization."
   },
   "prod_eligible": false,
   "collection_enabled": false,
