@@ -261,13 +261,21 @@ def main() -> int:
     boundary = enforce_boundary(root)
     history = stage_history(root)
 
-    # EUI exact is a fail-closed member of the same generic EU_DIRECT evidence
-    # transaction. Give it a deterministic run id and let any failure fail the
-    # generic lane rather than being hidden behind a separate proof workflow.
+    # EUI exact and LIFE programme intelligence are fail-closed members of the
+    # same generic EU_DIRECT evidence transaction. Any failure fails the generic
+    # lane rather than being hidden behind temporary proof workflows.
     os.environ["EUI_EXACT_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-eui-call4"
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_exact_canonical.py")])
+    os.environ["LIFE_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-life"
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_life_programme_canonical.py")])
 
-    print(json.dumps({"restore": restore, "boundary": boundary, "history": history, "eui_exact_canonicalized": True}, sort_keys=True))
+    print(json.dumps({
+        "restore": restore,
+        "boundary": boundary,
+        "history": history,
+        "eui_exact_canonicalized": True,
+        "life_programme_canonicalized": True,
+    }, sort_keys=True))
     return 0
 
 
