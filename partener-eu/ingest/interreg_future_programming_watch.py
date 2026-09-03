@@ -373,6 +373,7 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None, *,
     previous_rows = {row["source_id"]: row for row in previous["watchlist"]} if previous else {}
     changes: list[dict[str, Any]] = []
     semantic_changes = transport_changes = inventory_changes = lkg_available = lkg_missing = 0
+    pipeline_evidence_changes = 0
     for sid in sorted(set(current_rows) | set(previous_rows)):
         cur, prev = current_rows.get(sid), previous_rows.get(sid)
         if cur is None or prev is None:
@@ -388,6 +389,9 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None, *,
         semantic_changes += int(semantic_changed)
         transport_changes += int(transport_changed)
         inventory_changes += int(inventory_changed)
+        current_healthy = cur is not None and (cur.get("source_health") or {}).get("health_state") == "HEALTHY"
+        pipeline_watch_evidence_usable = bool(current_healthy and (semantic_changed or inventory_changed))
+        pipeline_evidence_changes += int(pipeline_watch_evidence_usable)
         lkg_status, lkg_reference = "NOT_REQUIRED_CURRENT_SOURCE_USABLE", None
         if cur is not None and (cur.get("source_health") or {}).get("health_state") != "HEALTHY":
             lkg_status = "REQUIRED_REFERENCE_UNAVAILABLE"
@@ -414,6 +418,7 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None, *,
             "source_inventory_changed": inventory_changed,
             "semantic_changed": semantic_changed,
             "transport_or_content_changed": transport_changed,
+            "pipeline_watch_evidence_usable": pipeline_watch_evidence_usable,
             "lkg_status": lkg_status,
             "lkg_reference": lkg_reference,
             "market_intelligence_only": True,
@@ -424,7 +429,14 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None, *,
             "call_alert_authorized": False,
             "publication_effect": "NONE",
         })
-    state = "BASELINE_CAPTURED_NON_AUTHORIZING" if previous is None else "PIPELINE_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING" if semantic_changes or inventory_changes else "TRANSPORT_OR_CONTENT_DRIFT_ONLY" if transport_changes else "NO_CHANGE"
+    if previous is None:
+        state = "BASELINE_CAPTURED_NON_AUTHORIZING"
+    elif semantic_changes or inventory_changes:
+        state = "PIPELINE_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING" if pipeline_evidence_changes else "PIPELINE_SEMANTIC_CHANGE_CURRENT_SOURCE_UNUSABLE_NON_AUTHORIZING"
+    elif transport_changes:
+        state = "TRANSPORT_OR_CONTENT_DRIFT_ONLY"
+    else:
+        state = "NO_CHANGE"
     output = {
         "schema": RECONCILIATION_SCHEMA,
         "parser_version": PARSER_VERSION,
@@ -439,9 +451,10 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None, *,
         "semantic_change_count": semantic_changes,
         "transport_or_content_change_count": transport_changes,
         "source_inventory_change_count": inventory_changes,
+        "pipeline_evidence_change_count": pipeline_evidence_changes,
         "lkg_reference_available_count": lkg_available,
         "lkg_reference_missing_count": lkg_missing,
-        "pipeline_watch_candidate": previous is not None and bool(semantic_changes or inventory_changes),
+        "pipeline_watch_candidate": previous is not None and bool(pipeline_evidence_changes),
         "source_health_watch_candidate": previous is not None and bool(transport_changes),
         "changes": changes,
         "market_intelligence_only": True,
