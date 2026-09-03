@@ -156,9 +156,13 @@ class PrimaryEvidenceReadinessTests(unittest.TestCase):
                 channel_register=register,
             )
 
-    def test_unapproved_method_frame_is_rejected(self):
+    def test_explicitly_unapproved_method_frame_is_rejected(self):
         register = channel_register()
         draft = json.loads((ROOT / "COLLECTION_FRAME_DRAFT.json").read_text(encoding="utf-8"))
+        draft = copy.deepcopy(draft)
+        draft["frame_status"] = "DRAFT_NOT_APPROVED_FOR_PROD"
+        draft["approval"]["approved"] = False
+        draft["approval"]["approved_for_prod"] = False
         with self.assertRaises(READY.PrimaryEvidenceReadinessError):
             READY.assert_primary_evidence_ready_for_synthesis(
                 valid_manifest(register),
