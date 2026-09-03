@@ -1,13 +1,14 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-03T12:55:45+03:00",
+  "observed_at": "2026-09-03T13:03:19+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 18,
+  "sources_ok": 20,
   "facts_admitted": 8,
   "source_notice_briefs": 4,
   "facts_before_cross_source_headline_dedupe": 4,
+  "preserved_full_story_count_before_refresh": 4,
   "host_incident_count": 0,
   "host_incidents": [],
   "sources": [
@@ -25,8 +26,9 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "listing_ok": true,
+      "links_examined": 4,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -129,8 +131,9 @@
     },
     {
       "source_id": "ipj-valcea-news",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "listing_ok": true,
+      "links_examined": 9,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -162,6 +165,7 @@
       "facts": 2
     }
   ],
+  "preservation_postcondition_recovered_ids": [],
   "instance_id": "valcea",
   "source_contract": "SOURCE_PACK_V1",
   "migration_adapter": "local_news_os_primary_source_compat_v1",
