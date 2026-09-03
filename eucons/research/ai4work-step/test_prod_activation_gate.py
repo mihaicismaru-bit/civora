@@ -57,8 +57,13 @@ class ProdActivationGateTests(unittest.TestCase):
         self.assertIn("explicit_user_approval_missing", errors)
         self.assertIn("controller_collection_disabled", errors)
         self.assertIn("controller_not_nf06_eligible", errors)
-        self.assertIn("dpia_screening_not_approved", errors)
-        self.assertIn("dpia_screening_conclusion_unresolved", errors)
+        self.assertIn("collection_frame_collection_disabled", errors)
+        self.assertIn("collection_frame_not_nf06_eligible", errors)
+        self.assertIn("dpia_screening_collection_disabled", errors)
+        self.assertIn("dpia_privacy_review_reference_missing", errors)
+        self.assertNotIn("collection_frame_not_approved", errors)
+        self.assertNotIn("dpia_screening_not_approved", errors)
+        self.assertNotIn("dpia_screening_conclusion_unresolved", errors)
         assert_repository_fail_closed_or_approved()
 
     def test_provider_logging_profile_and_live_account_binding_are_distinct(self):
@@ -118,8 +123,12 @@ class ProdActivationGateTests(unittest.TestCase):
         self.assertIn("controller_collection_disabled", errors)
         self.assertIn("controller_not_nf06_eligible", errors)
         self.assertIn("activation_manifest_not_approved", errors)
-        self.assertIn("collection_frame_not_approved", errors)
-        self.assertIn("dpia_screening_not_approved", errors)
+        self.assertNotIn("collection_frame_not_approved", errors)
+        self.assertIn("collection_frame_collection_disabled", errors)
+        self.assertIn("collection_frame_not_nf06_eligible", errors)
+        self.assertNotIn("dpia_screening_not_approved", errors)
+        self.assertIn("dpia_screening_collection_disabled", errors)
+        self.assertIn("dpia_privacy_review_reference_missing", errors)
         self.assertTrue(any(item.startswith("external_evidence_status_or_binding_invalid:") for item in errors))
 
     def test_external_reference_requires_immutable_sha256(self):
