@@ -1,0 +1,109 @@
+name: PARTENER.EU Interreg BSB Programme Fit Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/interreg_bsb_programme_fit.py'
+      - 'partener-eu/ops/test_interreg_bsb_programme_fit.py'
+      - '.github/workflows/partener-eu-interreg-bsb-programme-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  interreg-bsb-programme-fit-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded BSB adapter and regressions
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/interreg_bsb_programme_fit.py \
+            partener-eu/ops/test_interreg_bsb_programme_fit.py
+
+      - name: Validate fail-closed BSB semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_interreg_bsb_programme_fit.py
+
+      - name: Acquire fresh official BSB programme-fit evidence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          ROOT=/tmp/partener-eu-interreg-bsb-programme-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/interreg_bsb_programme_fit.py \
+            --out-dir "$ROOT" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Enforce live non-authorizing BSB boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-interreg-bsb-programme-proof/interreg-bsb-programme-fit.json')
+          row=json.loads(p.read_text(encoding='utf-8'))
+          assert row['schema'] == 'PARTENER_EU_INTERREG_BSB_PROGRAMME_FIT_V1'
+          assert row['parser_version'] == 'INTERREG_BSB_PROGRAMME_FIT_V1'
+          assert row['source_health'] == 'HEALTHY'
+          assert row['programme_id'] == 'BSB'
+          assert row['programme_cci'] == '2021TC16NXTN002'
+          assert row['romania_programme_region'] == 'Sud-Est'
+          assert row['romania_scope'] == ['Braila','Buzau','Constanta','Galati','Tulcea','Vrancea']
+          assert set(row['supported_applicant_types']) == {'PUBLIC_AUTHORITY','PUBLIC_LAW_BODY','NGO_NONPROFIT'}
+          assert row['historical_call_status_observed'] == 'CLOSED'
+          assert row['historical_call_status_is_current_truth'] is False
+          assert row['market_intelligence_only'] is True and row['fit_is_not_eligibility'] is True
+          assert row['call_specific_applicant_rules_required'] is True
+          assert len(row['source_receipts']) == 3
+          for source in row['source_receipts']:
+              assert source['source_health'] == 'HEALTHY' and source['http_status'] == 200
+              assert re.fullmatch(r'[0-9a-f]{64}', source['raw_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', source['normalized_visible_text_sha256'])
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          assert all(row[key] is False for key in flags)
+          assert row['publication_effect'] == 'NONE'
+          assert {'exact_current_call_or_topic_identifier','fresh_current_official_exact_call_endpoint','explicit_current_official_open_status','same_identity_semantic_reconciliation','field_scoped_material_admission'}.issubset(set(row['missing_for_open_confirmation']))
+          print({
+              'programme_id': row['programme_id'],
+              'programme_cci': row['programme_cci'],
+              'romania_region': row['romania_programme_region'],
+              'romania_scope': row['romania_scope'],
+              'source_receipts': len(row['source_receipts']),
+              'semantic_fingerprint': row['semantic_fingerprint'],
+              'open_call_authorized': False,
+              'eligibility_authorized': False,
+              'publication_effect': 'NONE',
+          })
+          PY
+
+      - name: Upload replayable BSB proof evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-interreg-bsb-programme-proof-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-interreg-bsb-programme-proof
+          if-no-files-found: error
+          retention-days: 7
