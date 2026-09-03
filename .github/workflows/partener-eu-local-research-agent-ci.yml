@@ -38,7 +38,7 @@ jobs:
         run: |
           python -m json.tool partener-eu/local-research-agent/sources.json | Out-Null
           python -m json.tool partener-eu/local-research-agent/control/requests.json | Out-Null
-          python -m py_compile partener-eu/local-research-agent/agent.py partener-eu/local-research-agent/test_agent.py
+          python -m py_compile partener-eu/local-research-agent/agent.py partener-eu/local-research-agent/publish_readable_manifest.py partener-eu/local-research-agent/test_agent.py
 
       - name: Run fail-closed unit tests
         shell: pwsh
