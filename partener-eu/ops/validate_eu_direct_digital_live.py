@@ -21,6 +21,7 @@ MATERIAL_FLAGS = (
 CURRENT_MODE = "CURRENT_BOUNDED_SAMPLE_CANDIDATE_EXACT_RECHECK"
 OMITTED_RECHECK_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_PREVIOUS_IDENTITY_EXACT_RECHECK"
 OMITTED_SKIP_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_NO_SAFE_IDENTITY_NON_AUTHORIZING"
+DEGRADED_RECONCILIATION_STATE = "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED"
 
 
 def load(path: Path) -> dict[str, Any]:
@@ -58,6 +59,7 @@ def main() -> int:
     assert handoff["previous_evidence_available"] is args.previous_digital_available
 
     previous_path = root / "history/previous/digital-exact/ft-digital-exact-evidence.json"
+    previous = None
     if args.previous_digital_available:
         assert args.previous_digital_run_id
         assert previous_path.exists()
@@ -94,40 +96,74 @@ def main() -> int:
         assert exact["programme_family"] == "DIGITAL_EUROPE"
         assert exact["reference"].startswith("DIGITAL-")
         assert "digital europe programme" in exact["programme_label_official"].casefold()
-        assert exact["authority_url_verified"] is True
-        assert exact["authority_readback"]["verified"] is True
-        assert exact["candidate_state"] in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}
-        assert exact["status_label"]
         check_non_authorizing(exact)
         check_non_authorizing(rec)
         assert rec["reference"] == exact["reference"]
         assert rec["current_evidence_sha256"] == canonical_sha(exact)
+        assert rec["lkg_reference_is_current_truth"] is False
 
         previous_same_identity = handoff["previous_same_identity"] is True
-        if previous_same_identity:
-            assert args.previous_digital_available
-            previous = load(previous_path)
-            assert previous["reference"] == exact["reference"]
-            assert rec["previous_evidence_sha256"] == canonical_sha(previous)
-            assert rec["reconciliation_state"] in {
-                "NO_CHANGE",
-                "DIGITAL_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
-            }
-        else:
-            assert rec["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
-            assert rec["previous_evidence_sha256"] is None
+        usable = exact.get("evidence_usable_for_reconciliation")
+        if usable is None:
+            usable = True  # legacy exact receipt compatibility
 
-        assert rec["material_admission_ready_for_downstream_review"] is (exact["candidate_state"] == "OPEN_CALL")
+        if usable:
+            assert exact["authority_url_verified"] is True
+            assert exact["authority_readback"]["verified"] is True
+            assert exact["candidate_state"] in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}
+            assert exact["status_label"]
+            assert rec["semantic_reconciliation_passed"] is True
+            assert rec["lkg_reference_required"] is False
+            if previous_same_identity:
+                assert args.previous_digital_available and previous is not None
+                assert previous["reference"] == exact["reference"]
+                assert rec["previous_evidence_sha256"] == canonical_sha(previous)
+                assert rec["reconciliation_state"] in {
+                    "NO_CHANGE",
+                    "DIGITAL_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
+                }
+            else:
+                assert rec["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
+                assert rec["previous_evidence_sha256"] is None
+            assert rec["material_admission_ready_for_downstream_review"] is (exact["candidate_state"] == "OPEN_CALL")
+        else:
+            assert exact["source_health_state"] == "DEGRADED_AUTHORITY_READBACK"
+            assert exact["lkg_required"] is True
+            assert exact["authority_url_verified"] is False
+            assert exact["authority_readback"].get("verified") is not True
+            assert exact["candidate_state"] == "UNKNOWN"
+            assert exact["status_label"] is None
+            assert exact["deadline_candidate"] is None
+            assert exact["budget_candidate"] is None
+            assert exact["degradation_reason"]
+            assert rec["reconciliation_state"] == DEGRADED_RECONCILIATION_STATE
+            assert rec["semantic_reconciliation_passed"] is False
+            assert rec["semantic_change_count"] == 0
+            assert rec["semantic_changes"] == []
+            assert rec["material_admission_ready_for_downstream_review"] is False
+            assert rec["lkg_reference_required"] is True
+            assert rec["lkg_reference_available"] is previous_same_identity
+            if previous_same_identity:
+                assert args.previous_digital_available and previous is not None
+                assert previous["reference"] == exact["reference"]
+                assert rec["previous_evidence_sha256"] == canonical_sha(previous)
+            else:
+                assert rec["previous_evidence_sha256"] is None
+
         result = {
             "handoff_state": mode,
             "reference": exact["reference"],
             "candidate_state": exact["candidate_state"],
             "status_label": exact["status_label"],
             "authority_url_verified": exact["authority_url_verified"],
+            "source_health_state": exact.get("source_health_state", "HEALTHY_LEGACY"),
+            "evidence_usable_for_reconciliation": usable,
+            "lkg_required": exact.get("lkg_required", False),
             "previous_evidence_available": args.previous_digital_available,
             "previous_same_identity": previous_same_identity,
             "previous_run_id": args.previous_digital_run_id,
             "reconciliation_state": rec["reconciliation_state"],
+            "semantic_reconciliation_passed": rec["semantic_reconciliation_passed"],
             "semantic_change_count": rec["semantic_change_count"],
             "material_admission_ready_for_downstream_review": rec["material_admission_ready_for_downstream_review"],
             "open_call_authorized": rec["open_call_authorized"],
