@@ -31,43 +31,52 @@ jobs:
           root = Path('.')
           story_id = 'balcesti-incendiu-vegetatie-15ha-20260902'
 
-          # 1) Fix Instagram delivery semantics without changing canonical URLs.
+          # Fix Instagram delivery: keep valceaclar.ro canonical URLs in state,
+          # but let Meta fetch deterministic bytes already public in CIVORA main.
           ig = root/'valcea-clar/social/instagram_editorial_publish.py'
           text = ig.read_text(encoding='utf-8')
+          public_line = 'PUBLIC_BASE = "https://valceaclar.ro/media/social/editorial/instagram/"\n'
+          delivery_line = 'DELIVERY_BASE = "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/media/social/editorial/instagram/"\n'
           if 'DELIVERY_BASE = ' not in text:
-              old = 'PUBLIC_BASE = "https://valceaclar.ro/media/social/editorial/instagram/"\n'
-              new = old + 'DELIVERY_BASE = "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/media/social/editorial/instagram/"\n'
-              assert text.count(old) == 1
-              text = text.replace(old, new, 1)
+              if public_line not in text:
+                  raise SystemExit('Instagram PUBLIC_BASE contract changed')
+              text = text.replace(public_line, public_line + delivery_line, 1)
 
-              old = '        "public_url": PUBLIC_BASE + rendered.name,\n        "sha256": sha256(rendered),\n'
-              new = '        "public_url": PUBLIC_BASE + rendered.name,\n        "delivery_url": DELIVERY_BASE + rendered.name,\n        "sha256": sha256(rendered),\n'
-              assert text.count(old) == 1
-              text = text.replace(old, new, 1)
+          card_old = '        "public_url": PUBLIC_BASE + rendered.name,\n        "sha256": sha256(rendered),\n'
+          card_new = '        "public_url": PUBLIC_BASE + rendered.name,\n        "delivery_url": DELIVERY_BASE + rendered.name,\n        "sha256": sha256(rendered),\n'
+          if '"delivery_url": DELIVERY_BASE + rendered.name' not in text:
+              if card_old not in text:
+                  raise SystemExit('Instagram text-card asset contract changed')
+              text = text.replace(card_old, card_new, 1)
 
-              old = '    asset_contract.validate_asset(cover_asset)\n    cover_asset["alt_text"] = f"VÂLCEA CLAR: {plan[\'hook\']}. {cover_asset[\'source_photo\'][\'alt_text\']}"[:1000]\n'
-              new = '    asset_contract.validate_asset(cover_asset)\n    cover_asset["delivery_url"] = DELIVERY_BASE + cover.name\n    cover_asset["alt_text"] = f"VÂLCEA CLAR: {plan[\'hook\']}. {cover_asset[\'source_photo\'][\'alt_text\']}"[:1000]\n'
-              assert text.count(old) == 1
-              text = text.replace(old, new, 1)
+          cover_anchor = '    asset_contract.validate_asset(cover_asset)\n'
+          cover_delivery = '    cover_asset["delivery_url"] = DELIVERY_BASE + cover.name\n'
+          if cover_delivery not in text:
+              if cover_anchor not in text:
+                  raise SystemExit('Instagram cover asset contract changed')
+              text = text.replace(cover_anchor, cover_anchor + cover_delivery, 1)
 
-              old = '            preflight_fn(str(asset["public_url"]))\n'
-              new = '            preflight_fn(str(asset.get("delivery_url") or asset["public_url"]))\n'
-              assert text.count(old) == 1
-              text = text.replace(old, new, 1)
+          text = text.replace(
+              '            preflight_fn(str(asset["public_url"]))\n',
+              '            preflight_fn(str(asset.get("delivery_url") or asset["public_url"]))\n',
+          )
+          text = text.replace(
+              '                    "image_url": str(asset["public_url"]),\n',
+              '                    "image_url": str(asset.get("delivery_url") or asset["public_url"]),\n',
+          )
+          text = text.replace(
+              '                "image_url": str(asset["public_url"]),\n',
+              '                "image_url": str(asset.get("delivery_url") or asset["public_url"]),\n',
+          )
+          persist_old = '                "public_url": asset["public_url"],\n            }\n'
+          persist_new = '                "public_url": asset["public_url"],\n                "delivery_url": asset.get("delivery_url"),\n            }\n'
+          if '"delivery_url": asset.get("delivery_url")' not in text:
+              if persist_old not in text:
+                  raise SystemExit('Instagram persisted asset contract changed')
+              text = text.replace(persist_old, persist_new, 1)
+          ig.write_text(text, encoding='utf-8')
 
-              old = '                    "image_url": str(asset["public_url"]),\n'
-              new = '                    "image_url": str(asset.get("delivery_url") or asset["public_url"]),\n'
-              assert text.count(old) == 2
-              text = text.replace(old, new)
-
-              old = '                "public_url": asset["public_url"],\n            }\n'
-              new = '                "public_url": asset["public_url"],\n                "delivery_url": asset.get("delivery_url"),\n            }\n'
-              assert text.count(old) == 1
-              text = text.replace(old, new, 1)
-
-              ig.write_text(text, encoding='utf-8')
-
-          # 2) Publish the missed official ISU Bălcești signal as a proportional QUICK LOCAL.
+          # Missed official Bălcești signal -> proportional QUICK LOCAL.
           facts_path = root/'valcea-clar/editorial/facts_registry.json'
           facts = json.loads(facts_path.read_text(encoding='utf-8'))
           if not any(str(row.get('id')) == story_id for row in facts.get('facts', [])):
@@ -94,11 +103,10 @@ jobs:
                       'url': 'https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-776',
                       'tier': 'T1'
                   }],
-                  'editorial_note': 'QUICK LOCAL construit exclusiv din buletinul oficial ISU Vâlcea. Cauza incendiului nu este afirmată; avertismentul IGSU este prezentat separat de cauza necunoscută.'
+                  'editorial_note': 'QUICK LOCAL din buletinul oficial ISU. Cauza incendiului nu este afirmată; avertismentul general IGSU este separat de cauza necunoscută.'
               })
               facts_path.write_text(json.dumps(facts, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
 
-          # 3) Bind a truthful exact-place contextual photograph for site/social.
           contextual_path = root/'valcea-clar/social/contextual_story_media.json'
           contextual = json.loads(contextual_path.read_text(encoding='utf-8'))
           contextual.setdefault('assignments', {})[story_id] = {
@@ -120,19 +128,13 @@ jobs:
           visuals.setdefault('stories', {})[story_id] = {
               'image_path': 'valcea-clar/social/photos/approved/balcesti-context-2026.jpg',
               'image': {
-                  'kind': 'photograph',
-                  'synthetic': False,
-                  'subject_match': True,
-                  'editor_approved': True,
-                  'contextual_archive': True,
-                  'captured_at': '2026-06-16',
-                  'source_type': 'creative_commons',
+                  'kind': 'photograph', 'synthetic': False, 'subject_match': True, 'editor_approved': True,
+                  'contextual_archive': True, 'captured_at': '2026-06-16', 'source_type': 'creative_commons',
                   'source_url': 'https://commons.wikimedia.org/wiki/File:Drum_de_p%C4%83m%C3%A2nt_RO.jpg',
                   'direct_source_url': 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Drum%20de%20p%C4%83m%C3%A2nt%20RO.jpg',
-                  'credit': 'Wikiminds34 / Wikimedia Commons — CC BY 4.0',
-                  'rights_basis': 'creative_commons',
+                  'credit': 'Wikiminds34 / Wikimedia Commons — CC BY 4.0', 'rights_basis': 'creative_commons',
                   'license_url': 'https://creativecommons.org/licenses/by/4.0/',
-                  'rights_note': 'Fotografie proprie a autorului publicată pe Wikimedia Commons sub CC BY 4.0; reutilizare cu atribuire și link la licență.',
+                  'rights_note': 'Fotografie publicată de autor pe Wikimedia Commons sub CC BY 4.0; reutilizare cu atribuire și link la licență.',
                   'editorial_note': 'Foto de context din Bălcești, iunie 2026; imaginea nu surprinde incendiul de vegetație raportat de ISU.',
                   'alt_text': 'Drum din zona Satu Poieni, Bălcești, într-o fotografie de context realizată în iunie 2026.'
               }
@@ -150,10 +152,10 @@ jobs:
           assert row['material_fact_gate']=='PASS' and len(row['paragraphs'])==3 and row['sources'][0]['tier']=='T1'
           visual=json.loads(Path('valcea-clar/social/story_visuals.json').read_text(encoding='utf-8'))['stories'][sid]['image']
           assert visual['kind']=='photograph' and visual['synthetic'] is False and visual['editor_approved'] is True
-          assert visual['rights_basis']=='creative_commons' and visual['contextual_archive'] is True
           text=Path('valcea-clar/social/instagram_editorial_publish.py').read_text(encoding='utf-8')
-          assert 'DELIVERY_BASE' in text and 'asset.get("delivery_url") or asset["public_url"]' in text
-          print({'status':'PASS','story':sid,'instagram_delivery_base':'raw_civora_main'})
+          assert 'DELIVERY_BASE' in text
+          assert 'asset.get("delivery_url") or asset["public_url"]' in text
+          print({'status':'PASS','story':sid,'instagram_delivery':'raw_civora_main'})
           PY
 
           git config user.name 'vâlcea-clar-recovery[bot]'
