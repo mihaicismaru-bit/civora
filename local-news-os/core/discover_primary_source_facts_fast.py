@@ -134,7 +134,7 @@ def source_notice_brief(fact: dict, timezone: ZoneInfo) -> dict:
     if not headline:
         return fact
     try:
-        published = _parse_fact_time(str(fact.get("valid_from") or ""), timezone)
+        _parse_fact_time(str(fact.get("valid_from") or ""), timezone)
     except Exception:
         return fact
     section = str(fact.get("section") or "ȘTIRI").upper()
@@ -163,17 +163,13 @@ def materialize_source_notice_briefs(facts: list[dict], timezone: ZoneInfo) -> l
 
 
 def is_preserved_full_story(fact: object) -> bool:
-    """Keep already-verified newsroom stories when the radar snapshot refreshes.
-
-    Discovery owns ephemeral title/date candidates. It must not erase a full
-    story that a downstream autonomous newsroom pass has already verified and
-    authorized for reader-facing publication. This is persistence only: it does
-    not promote radar candidates or weaken any factual/publication gate.
-    """
+    """Keep already-verified newsroom stories when the radar snapshot refreshes."""
     if not isinstance(fact, dict):
         return False
     sources = [row for row in fact.get("sources", []) if isinstance(row, dict) and row.get("url")]
     paragraphs = [str(row).strip() for row in fact.get("paragraphs", []) if str(row).strip()]
+    contract = fact.get("source_notice_contract") if isinstance(fact.get("source_notice_contract"), dict) else {}
+    explicitly_full = contract.get("publication_eligibility") == "full_story_verified"
     return (
         fact.get("status") == "verified"
         and fact.get("reader_facing_copy_authorized") is True
@@ -181,7 +177,17 @@ def is_preserved_full_story(fact: object) -> bool:
         and bool(str(fact.get("headline") or "").strip())
         and bool(paragraphs)
         and bool(sources)
+        and (explicitly_full or str(fact.get("auto_scope") or "").startswith("verified_"))
     )
+
+
+def preserved_full_story_map(previous_doc: object) -> dict[str, dict]:
+    previous_facts = previous_doc.get("facts", []) if isinstance(previous_doc, dict) else []
+    return {
+        str(fact.get("id")): fact
+        for fact in previous_facts
+        if is_preserved_full_story(fact) and str(fact.get("id") or "").strip()
+    }
 
 
 def merge_preserved_full_stories(fresh_facts: list[dict], previous_doc: object) -> list[dict]:
@@ -198,18 +204,39 @@ def merge_preserved_full_stories(fresh_facts: list[dict], previous_doc: object) 
             order.append(story_id)
         merged[story_id] = fact
 
-    previous_facts = previous_doc.get("facts", []) if isinstance(previous_doc, dict) else []
-    for fact in previous_facts:
-        if not is_preserved_full_story(fact):
-            continue
-        story_id = str(fact.get("id") or "").strip()
-        if not story_id:
-            continue
+    for story_id, fact in preserved_full_story_map(previous_doc).items():
         if story_id not in merged:
             order.append(story_id)
-        # A verified full story outranks an ephemeral radar row with the same id.
         merged[story_id] = fact
     return [merged[story_id] for story_id in order]
+
+
+def enforce_preservation_postcondition(output: Path, previous_doc: object) -> list[str]:
+    """Recover any verified full story lost during a radar refresh and report IDs.
+
+    This is a narrow integrity backstop: it can only restore rows that were already
+    fully verified and reader-authorized before discovery. It cannot promote a
+    radar candidate or create new reader-facing claims.
+    """
+    preserved = preserved_full_story_map(previous_doc)
+    if not preserved:
+        return []
+    current = base.load_json(output)
+    current_ids = {
+        str(fact.get("id") or "").strip()
+        for fact in current.get("facts", [])
+        if isinstance(fact, dict)
+    }
+    missing = sorted(story_id for story_id in preserved if story_id not in current_ids)
+    if not missing:
+        return []
+    current["facts"] = merge_preserved_full_stories(
+        list(current.get("facts", [])),
+        {"facts": [preserved[story_id] for story_id in missing]},
+    )
+    current.setdefault("policy", {})["preservation_postcondition_recovered_ids"] = missing
+    output.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return missing
 
 
 def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
@@ -226,8 +253,8 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
     output.parent.mkdir(parents=True, exist_ok=True)
     state.parent.mkdir(parents=True, exist_ok=True)
 
-    # Capture prior verified full stories before discovery refreshes the radar file.
     previous_doc = base.load_json(output) if output.exists() else {"facts": []}
+    preserved_before = preserved_full_story_map(previous_doc)
 
     legacy = base.load_legacy_module()
     timezone = ZoneInfo(str(instance["timezone"]))
@@ -236,7 +263,6 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
     brand_name = str(instance["brand"]["name"])
     now = datetime.now(timezone)
 
-    # Keep the compatibility module's environment identical to the serial path.
     with tempfile.TemporaryDirectory(prefix=f"local-news-os-fast-{instance_id}-") as tmp:
         registry_path = Path(tmp) / "news_sources.json"
         registry_path.write_text(json.dumps(registry, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -260,17 +286,16 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
                 source_id = str(source["id"])
                 try:
                     results[source_id] = future.result()
-                except Exception as exc:  # isolate one failing source, preserving the rest
+                except Exception as exc:
                     errors[source_id] = exc
 
-    # Deterministic fold in SOURCE_PACK order, independent of completion order.
     all_facts: list[dict] = []
     health: list[dict] = []
     for source in sources:
         source_id = str(source["id"])
         if source_id in results:
-            facts, row = results[source_id]
-            all_facts.extend(facts)
+            source_facts, row = results[source_id]
+            all_facts.extend(source_facts)
             health.append(row)
         else:
             exc = errors.get(source_id, RuntimeError("source worker produced no result"))
@@ -303,6 +328,7 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
             "max_parallel_sources": bounded_workers,
             "parallelism_changes_editorial_semantics": False,
             "preserves_verified_full_story_rows": True,
+            "preserved_full_story_count_before_refresh": len(preserved_before),
         },
     }
     output.write_text(json.dumps(result_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -318,6 +344,7 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
         "facts_admitted": len(facts),
         "source_notice_briefs": sum(1 for fact in facts if fact.get("auto_scope") == SOURCE_NOTICE_SCOPE),
         "facts_before_cross_source_headline_dedupe": len(all_facts),
+        "preserved_full_story_count_before_refresh": len(preserved_before),
         "host_incident_count": len(host_incidents),
         "host_incidents": host_incidents,
         "sources": health,
@@ -325,6 +352,23 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
     state.write_text(json.dumps(state_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     base.brand_output(output, instance_id, brand_name)
+    recovered = enforce_preservation_postcondition(output, previous_doc)
+    if recovered:
+        base.brand_output(output, instance_id, brand_name)
+    final_doc = base.load_json(output)
+    final_ids = {
+        str(fact.get("id") or "").strip()
+        for fact in final_doc.get("facts", [])
+        if isinstance(fact, dict)
+    }
+    missing_after_recovery = sorted(story_id for story_id in preserved_before if story_id not in final_ids)
+    if missing_after_recovery:
+        raise RuntimeError(
+            "verified full-story preservation failed after recovery: " + ",".join(missing_after_recovery)
+        )
+    state_doc["preservation_postcondition_recovered_ids"] = recovered
+    state_doc["facts_admitted"] = len(final_doc.get("facts", []))
+    state.write_text(json.dumps(state_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     base.tag_state(state, instance_id)
     print(json.dumps({
         "status": "PASS",
@@ -332,8 +376,10 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
         "workers": bounded_workers,
         "sources_ok": state_doc["sources_ok"],
         "sources_total": state_doc["sources_total"],
-        "facts_admitted": len(facts),
+        "facts_admitted": state_doc["facts_admitted"],
         "source_notice_briefs": state_doc["source_notice_briefs"],
+        "preserved_full_story_count_before_refresh": len(preserved_before),
+        "preservation_postcondition_recovered_ids": recovered,
         "host_incidents": len(host_incidents),
     }, ensure_ascii=False))
     return 0
@@ -378,16 +424,26 @@ def self_test() -> int:
     full_story = {
         "id": "story-test",
         "status": "verified",
+        "auto_scope": "verified_local_event_full_story",
         "headline": "Poveste verificată",
         "paragraphs": ["Fapt material verificat și atribuit."],
         "material_fact_gate": "PASS",
         "reader_facing_copy_authorized": True,
         "sources": [{"name": "Sursă primară", "url": "https://example.test/full", "tier": "T1"}],
+        "source_notice_contract": {"publication_eligibility": "full_story_verified"},
     }
     assert is_preserved_full_story(full_story) is True
     merged = merge_preserved_full_stories([brief], {"facts": [full_story]})
     assert [row["id"] for row in merged] == ["auto-test", "story-test"]
     assert merge_preserved_full_stories([brief], {"facts": [candidate]}) == [brief]
+
+    with tempfile.TemporaryDirectory(prefix="preservation-selftest-") as tmp:
+        output = Path(tmp) / "facts.json"
+        output.write_text(json.dumps({"facts": [brief]}), encoding="utf-8")
+        recovered = enforce_preservation_postcondition(output, {"facts": [full_story]})
+        assert recovered == ["story-test"]
+        after = base.load_json(output)
+        assert {row["id"] for row in after["facts"]} == {"auto-test", "story-test"}
 
     sources = [
         {"id": "one", "url": "https://example.test/news"},
