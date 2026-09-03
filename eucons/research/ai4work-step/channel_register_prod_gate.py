@@ -27,11 +27,12 @@ def evaluate() -> tuple[bool, list[str]]:
         errors.append(f"collection_channel_register_structure_invalid:{exc}")
         return False, errors
 
+    # An approved frozen method/frame is not itself dissemination or collection activation.
+    # Real channel rows may only be created from actual authorised dissemination batches, so
+    # require the non-empty immutable register only when collection/NF06 is actually enabled.
     prod_requested = (
         contract.get("production_enabled") is True
         or frame.get("collection_enabled") is True
-        or frame.get("frame_status") == "APPROVED_FOR_PROD"
-        or (frame.get("approval") or {}).get("approved_for_prod") is True
         or (frame.get("nf06_handoff") or {}).get("eligible_now") is True
     )
     if prod_requested:
@@ -44,10 +45,11 @@ def main() -> int:
     if errors:
         raise SystemExit("REJECTED: " + "; ".join(errors))
     contract = _load(CONTRACT_PATH)
-    if contract.get("production_enabled") is True:
-        print("PASS: approved PROD state is bound to a non-empty frozen collection-channel register")
+    frame = _load(FRAME_PATH)
+    if contract.get("production_enabled") is True or frame.get("collection_enabled") is True:
+        print("PASS: active collection/PROD state is bound to a non-empty frozen collection-channel register")
     else:
-        print("PASS: collection-channel register is structurally valid and PROD remains fail-closed")
+        print("PASS: collection-channel register is structurally valid; approved method exists but real dissemination/collection remains fail-closed")
     return 0
 
 
