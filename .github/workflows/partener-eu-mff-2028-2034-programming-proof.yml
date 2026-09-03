@@ -142,15 +142,22 @@ jobs:
           assert snapshot['source_family']=='PROGRAMMING_PIPELINE'
           assert snapshot['programme_family']=='EU_DIRECT_2028_2034'
           assert snapshot['observation_state']=='PROGRAMMING_PIPELINE'
-          assert snapshot['source_count']==4
-          assert snapshot['healthy_source_count'] + snapshot['degraded_source_count'] == 4
+          assert snapshot['source_count']==6
+          assert snapshot['healthy_source_count'] + snapshot['degraded_source_count'] == 6
           previous_found=os.environ.get('PREVIOUS_FOUND')=='true'
           if not previous_found:
-              assert snapshot['healthy_source_count']==4 and snapshot['degraded_source_count']==0
+              assert snapshot['healthy_source_count']==6 and snapshot['degraded_source_count']==0
           flags=('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation')
           assert all(snapshot[key] is False for key in flags)
           assert snapshot['publication_effect']=='NONE'
-          expected={'MFF-2028-2034-COMMISSION-ROOT','ECF-COM-2025-555','HORIZON-2028-2034-COM-2025-543','ERASMUS-2028-2034-COM-2025-549'}
+          expected={
+              'MFF-2028-2034-COMMISSION-ROOT',
+              'ECF-COM-2025-555',
+              'HORIZON-2028-2034-COM-2025-543',
+              'ERASMUS-2028-2034-COM-2025-549',
+              'CEF-2028-2034-COM-2025-547',
+              'SINGLE-MARKET-CUSTOMS-2028-2034-COM-2025-590',
+          }
           assert {row['source_id'] for row in snapshot['evidence']}==expected
           procedure_rows=0
           for row in snapshot['evidence']:
@@ -168,7 +175,7 @@ jobs:
               else:
                   assert health['health_state']=='DEGRADED' and health['lkg_required'] is True
                   assert row['semantic_fingerprint'] is None and row['semantics'] is None
-          assert procedure_rows==3
+          assert procedure_rows==5
           if previous_found:
               assert reconciliation['reconciliation_state'] in {
                   'NO_CHANGE','TRANSPORT_OR_CONTENT_DRIFT_ONLY',
