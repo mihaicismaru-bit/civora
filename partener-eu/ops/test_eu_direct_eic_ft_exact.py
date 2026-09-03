@@ -61,6 +61,19 @@ def topic(url):
     return {"url": url, "final_url": url, "http_status": 200, "content_type": "text/html", "bytes": 10, "body_sha256": "b" * 64, "verified": True}
 
 
+def topic_degraded(url):
+    return {
+        "url": url,
+        "final_url": url,
+        "http_status": 404,
+        "content_type": "text/html",
+        "bytes": 0,
+        "body_sha256": None,
+        "verified": False,
+        "error": "HTTPError: HTTP Error 404: Not Found",
+    }
+
+
 def main():
     evidence = collect_exact(
         REF,
@@ -74,11 +87,37 @@ def main():
     assert evidence["candidate_state"] == "OPEN_CALL"
     assert evidence["status_label"] == "Open"
     assert evidence["authority_url_verified"] is True
+    assert evidence["source_health_state"] == "HEALTHY"
+    assert evidence["evidence_usable_for_reconciliation"] is True
+    assert evidence["lkg_required"] is False
     assert evidence["programme_family"] == "HORIZON_EUROPE_EIC"
     assert evidence["material_fact_use"] is False
     assert evidence["open_call_authorized"] is False
     assert evidence["deadline_authorized"] is False
     assert evidence["publish_authorized"] is False
+
+    degraded = collect_exact(
+        REF,
+        run_id="synthetic-degraded",
+        fetched_at="2026-09-02T18:00:00+00:00",
+        discovery_source_url="https://eic.ec.europa.eu/eic-funding-opportunities/eic-pathfinder/eic-pathfinder-challenges-2026_en",
+        post_func=make_post(),
+        topic_func=topic_degraded,
+    )
+    validate_evidence(degraded)
+    assert degraded["authority_url_verified"] is False
+    assert degraded["source_health_state"] == "DEGRADED_AUTHORITY_READBACK"
+    assert degraded["evidence_usable_for_reconciliation"] is False
+    assert degraded["lkg_required"] is True
+    assert degraded["candidate_state"] == "UNKNOWN"
+    assert degraded["status_label"] is None
+    assert degraded["deadline_candidate"] is None
+    assert degraded["budget_candidate"] is None
+    assert degraded["structured_candidate_snapshot"]["status_label"] == "Open"
+    assert degraded["structured_candidate_snapshot"]["deadline_candidate"] == "2026-10-28T17:00:00Z"
+    assert degraded["open_call_authorized"] is False
+    assert degraded["deadline_authorized"] is False
+    assert degraded["publish_authorized"] is False
 
     bad_facet = facet_payload()
     bad_facet["facets"][0]["values"][0]["value"] = "Digital Europe Programme"
@@ -102,6 +141,14 @@ def main():
         raise AssertionError("self-authorization was accepted")
     except ValueError as exc:
         assert "attempted authorization" in str(exc)
+
+    leaked = copy.deepcopy(degraded)
+    leaked["status_label"] = "Open"
+    try:
+        validate_evidence(leaked)
+        raise AssertionError("structured status leaked into degraded current truth")
+    except ValueError as exc:
+        assert "leaked structured status" in str(exc)
 
     bad_discovery = copy.deepcopy(evidence)
     bad_discovery["discovery_source_url"] = "https://example.com/not-official"
