@@ -162,6 +162,56 @@ def materialize_source_notice_briefs(facts: list[dict], timezone: ZoneInfo) -> l
     return [source_notice_brief(fact, timezone) for fact in facts]
 
 
+def is_preserved_full_story(fact: object) -> bool:
+    """Keep already-verified newsroom stories when the radar snapshot refreshes.
+
+    Discovery owns ephemeral title/date candidates. It must not erase a full
+    story that a downstream autonomous newsroom pass has already verified and
+    authorized for reader-facing publication. This is persistence only: it does
+    not promote radar candidates or weaken any factual/publication gate.
+    """
+    if not isinstance(fact, dict):
+        return False
+    sources = [row for row in fact.get("sources", []) if isinstance(row, dict) and row.get("url")]
+    paragraphs = [str(row).strip() for row in fact.get("paragraphs", []) if str(row).strip()]
+    return (
+        fact.get("status") == "verified"
+        and fact.get("reader_facing_copy_authorized") is True
+        and fact.get("material_fact_gate") == "PASS"
+        and bool(str(fact.get("headline") or "").strip())
+        and bool(paragraphs)
+        and bool(sources)
+    )
+
+
+def merge_preserved_full_stories(fresh_facts: list[dict], previous_doc: object) -> list[dict]:
+    """Merge fresh radar rows with prior full stories, keyed deterministically by id."""
+    merged: dict[str, dict] = {}
+    order: list[str] = []
+    for fact in fresh_facts:
+        if not isinstance(fact, dict):
+            continue
+        story_id = str(fact.get("id") or "").strip()
+        if not story_id:
+            continue
+        if story_id not in merged:
+            order.append(story_id)
+        merged[story_id] = fact
+
+    previous_facts = previous_doc.get("facts", []) if isinstance(previous_doc, dict) else []
+    for fact in previous_facts:
+        if not is_preserved_full_story(fact):
+            continue
+        story_id = str(fact.get("id") or "").strip()
+        if not story_id:
+            continue
+        if story_id not in merged:
+            order.append(story_id)
+        # A verified full story outranks an ephemeral radar row with the same id.
+        merged[story_id] = fact
+    return [merged[story_id] for story_id in order]
+
+
 def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
     instance_path = ROOT / "local-news-os" / "instances" / instance_id / "instance.json"
     instance = base.load_json(instance_path)
@@ -175,6 +225,9 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
 
     output.parent.mkdir(parents=True, exist_ok=True)
     state.parent.mkdir(parents=True, exist_ok=True)
+
+    # Capture prior verified full stories before discovery refreshes the radar file.
+    previous_doc = base.load_json(output) if output.exists() else {"facts": []}
 
     legacy = base.load_legacy_module()
     timezone = ZoneInfo(str(instance["timezone"]))
@@ -229,7 +282,8 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
             })
 
     deduped_facts = legacy.dedupe_repeated_headlines(all_facts)
-    facts = materialize_source_notice_briefs(deduped_facts, timezone)
+    fresh_facts = materialize_source_notice_briefs(deduped_facts, timezone)
+    facts = merge_preserved_full_stories(fresh_facts, previous_doc)
     result_doc = {
         "schema_version": "1.3",
         "generated_at": now.isoformat(timespec="seconds"),
@@ -248,6 +302,7 @@ def run(instance_id: str, output: Path, state: Path, workers: int) -> int:
             "bounded_parallel_source_discovery": True,
             "max_parallel_sources": bounded_workers,
             "parallelism_changes_editorial_semantics": False,
+            "preserves_verified_full_story_rows": True,
         },
     }
     output.write_text(json.dumps(result_doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -319,6 +374,20 @@ def self_test() -> int:
     assert brief["reader_facing_copy_authorized"] is False
     assert brief["sources"][0]["url"] == candidate["sources"][0]["url"]
     assert brief["source_notice_contract"]["source_body_material_claims_autopublished"] is False
+
+    full_story = {
+        "id": "story-test",
+        "status": "verified",
+        "headline": "Poveste verificată",
+        "paragraphs": ["Fapt material verificat și atribuit."],
+        "material_fact_gate": "PASS",
+        "reader_facing_copy_authorized": True,
+        "sources": [{"name": "Sursă primară", "url": "https://example.test/full", "tier": "T1"}],
+    }
+    assert is_preserved_full_story(full_story) is True
+    merged = merge_preserved_full_stories([brief], {"facts": [full_story]})
+    assert [row["id"] for row in merged] == ["auto-test", "story-test"]
+    assert merge_preserved_full_stories([brief], {"facts": [candidate]}) == [brief]
 
     sources = [
         {"id": "one", "url": "https://example.test/news"},
