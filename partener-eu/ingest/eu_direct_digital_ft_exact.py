@@ -3,7 +3,10 @@
 
 Consumes programme-wide taxonomy only as a non-authorizing handoff pointer,
 then re-queries official EC Search/Facet endpoints for one explicit DIGITAL-*
-topic and verifies the exact official topic URL. No material field is authorized
+topic and verifies the exact official topic URL. If the structured exact record
+exists but the human-facing exact topic endpoint is temporarily/unexpectedly
+unresolvable, emit a degraded immutable receipt instead of inferring a status
+or aborting the whole programme-coverage lane. No material field is authorized
 here; semantic reconciliation and field-scoped admission remain downstream.
 """
 from __future__ import annotations
@@ -20,7 +23,8 @@ import funding_tenders_fetch as ft
 from funding_tenders_api import normalize_payload
 
 SCHEMA = "PARTENER_EU_DIGITAL_FT_EXACT_EVIDENCE_V1"
-PARSER_VERSION = "EU_DIRECT_DIGITAL_FT_EXACT_V1"
+PARSER_VERSION = "EU_DIRECT_DIGITAL_FT_EXACT_V1_1"
+LEGACY_PARSER_VERSION = "EU_DIRECT_DIGITAL_FT_EXACT_V1"
 SOURCE_FAMILY = "EU_DIRECT"
 PROGRAMME_FAMILY = "DIGITAL_EUROPE"
 AUTHORITY_CLASS = "EU_COMMISSION_FUNDING_TENDERS"
@@ -175,6 +179,21 @@ def select_digital_candidate(taxonomy: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _build_degraded_exact_semantics(reference: str, authority_url: str, snapshot: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "identifier": reference,
+        "call_identifier_candidate": snapshot.get("call_identifier"),
+        "title_candidate": snapshot.get("title"),
+        "programme_reference": snapshot.get("programme_reference"),
+        "programme_label": snapshot.get("programme_label"),
+        "status_label_candidate": snapshot.get("status_label"),
+        "authority_url": authority_url,
+        "authority_endpoint_verified": False,
+        "deadline_candidate_structured_only": snapshot.get("deadline_candidate"),
+        "budget_candidate_structured_only": snapshot.get("budget_candidate"),
+    }
+
+
 def collect_exact(
     reference: str,
     *,
@@ -233,34 +252,56 @@ def collect_exact(
 
     authority_url = ft.topic_url(reference)
     readback = topic_func(authority_url)
-    if readback.get("verified") is not True:
-        raise ValueError(f"exact Digital Europe topic authority readback failed for {reference}: {readback.get('error')}")
+    authority_verified = readback.get("verified") is True
 
-    enriched = dict(chosen)
-    enriched["statusLabel"] = snapshot["status_label"]
-    enriched["authorityUrl"] = authority_url
-    batch = normalize_payload(
-        [enriched], fetched_at=fetched_at, run_id=run_id, verified_authority_urls=[authority_url]
-    )
-    records = [row for row in batch.get("records") or [] if str(row.get("identifier") or "").upper() == reference]
-    if len(records) != 1:
-        raise ValueError(f"exact Digital Europe normalizer returned {len(records)} records for {reference}")
-    normalized = records[0]
-    if normalized.get("authority_url_verified") is not True:
-        raise ValueError("exact Digital Europe authority verification was lost during normalization")
+    if authority_verified:
+        enriched = dict(chosen)
+        enriched["statusLabel"] = snapshot["status_label"]
+        enriched["authorityUrl"] = authority_url
+        batch = normalize_payload(
+            [enriched], fetched_at=fetched_at, run_id=run_id, verified_authority_urls=[authority_url]
+        )
+        records = [row for row in batch.get("records") or [] if str(row.get("identifier") or "").upper() == reference]
+        if len(records) != 1:
+            raise ValueError(f"exact Digital Europe normalizer returned {len(records)} records for {reference}")
+        normalized = records[0]
+        if normalized.get("authority_url_verified") is not True:
+            raise ValueError("exact Digital Europe authority verification was lost during normalization")
+        exact_semantics = {
+            "identifier": reference,
+            "call_identifier": normalized.get("call_identifier"),
+            "title": normalized.get("title"),
+            "programme_reference": snapshot.get("programme_reference"),
+            "programme_label": snapshot.get("programme_label"),
+            "status_label": normalized.get("status_label"),
+            "observation_state": normalized.get("observation_state"),
+            "authority_url": authority_url,
+            "deadline_candidate": normalized.get("deadline_candidate"),
+            "budget_candidate": normalized.get("budget_candidate"),
+        }
+        candidate_state = normalized.get("observation_state")
+        status_label = normalized.get("status_label")
+        call_identifier = normalized.get("call_identifier")
+        title = normalized.get("title")
+        deadline_candidate = normalized.get("deadline_candidate")
+        budget_candidate = normalized.get("budget_candidate")
+        source_health_state = "HEALTHY"
+        lkg_required = False
+        evidence_usable_for_reconciliation = True
+        degradation_reason = None
+    else:
+        exact_semantics = _build_degraded_exact_semantics(reference, authority_url, snapshot)
+        candidate_state = "UNKNOWN"
+        status_label = None
+        call_identifier = snapshot.get("call_identifier")
+        title = snapshot.get("title")
+        deadline_candidate = None
+        budget_candidate = None
+        source_health_state = "DEGRADED_AUTHORITY_READBACK"
+        lkg_required = True
+        evidence_usable_for_reconciliation = False
+        degradation_reason = str(readback.get("error") or "exact topic endpoint could not be verified")
 
-    exact_semantics = {
-        "identifier": reference,
-        "call_identifier": normalized.get("call_identifier"),
-        "title": normalized.get("title"),
-        "programme_reference": snapshot.get("programme_reference"),
-        "programme_label": snapshot.get("programme_label"),
-        "status_label": normalized.get("status_label"),
-        "observation_state": normalized.get("observation_state"),
-        "authority_url": authority_url,
-        "deadline_candidate": normalized.get("deadline_candidate"),
-        "budget_candidate": normalized.get("budget_candidate"),
-    }
     evidence: dict[str, Any] = {
         "schema": SCHEMA,
         "parser_version": PARSER_VERSION,
@@ -277,15 +318,20 @@ def collect_exact(
         "facet_raw_sha256": sha256_bytes(facet_raw),
         "authority_url": authority_url,
         "authority_readback": dict(readback),
-        "authority_url_verified": True,
-        "candidate_state": normalized.get("observation_state"),
-        "status_label": normalized.get("status_label"),
-        "call_identifier": normalized.get("call_identifier"),
-        "title": normalized.get("title"),
+        "authority_url_verified": authority_verified,
+        "source_health_state": source_health_state,
+        "lkg_required": lkg_required,
+        "evidence_usable_for_reconciliation": evidence_usable_for_reconciliation,
+        "degradation_reason": degradation_reason,
+        "candidate_state": candidate_state,
+        "status_label": status_label,
+        "call_identifier": call_identifier,
+        "title": title,
         "programme_reference": snapshot.get("programme_reference"),
         "programme_label_official": snapshot.get("programme_label"),
-        "deadline_candidate": normalized.get("deadline_candidate"),
-        "budget_candidate": normalized.get("budget_candidate"),
+        "deadline_candidate": deadline_candidate,
+        "budget_candidate": budget_candidate,
+        "structured_candidate_snapshot": snapshot,
         "exact_semantics": exact_semantics,
         "exact_semantic_fingerprint": sha256_json(exact_semantics),
         "primary_exact_record_count": len(primary),
@@ -313,25 +359,58 @@ def collect_exact(
 
 
 def validate_evidence(evidence: Mapping[str, Any]) -> None:
-    if evidence.get("schema") != SCHEMA or evidence.get("parser_version") != PARSER_VERSION:
+    parser_version = evidence.get("parser_version")
+    if evidence.get("schema") != SCHEMA or parser_version not in {PARSER_VERSION, LEGACY_PARSER_VERSION}:
         raise ValueError("Digital Europe exact evidence schema/parser drift")
     reference = validate_reference(str(evidence.get("reference") or ""))
     if evidence.get("source_family") != SOURCE_FAMILY or evidence.get("programme_family") != PROGRAMME_FAMILY:
         raise ValueError("Digital Europe exact evidence family drift")
     if evidence.get("authority_class") != AUTHORITY_CLASS:
         raise ValueError("Digital Europe exact evidence authority class drift")
-    if evidence.get("authority_url") != ft.topic_url(reference) or evidence.get("authority_url_verified") is not True:
-        raise ValueError("Digital Europe exact evidence lacks verified exact topic authority")
+    if evidence.get("authority_url") != ft.topic_url(reference):
+        raise ValueError("Digital Europe exact evidence exact topic authority URL drift")
+
+    legacy = parser_version == LEGACY_PARSER_VERSION
+    usable = evidence.get("evidence_usable_for_reconciliation")
+    if legacy and usable is None:
+        usable = True
+    if usable not in {True, False}:
+        raise ValueError("Digital Europe exact evidence reconciliation-usability state missing")
+
     readback = evidence.get("authority_readback") or {}
-    if readback.get("verified") is not True or readback.get("url") != evidence.get("authority_url"):
-        raise ValueError("Digital Europe exact readback binding invalid")
+    if usable:
+        if evidence.get("authority_url_verified") is not True:
+            raise ValueError("Digital Europe exact evidence lacks verified exact topic authority")
+        if readback.get("verified") is not True or readback.get("url") != evidence.get("authority_url"):
+            raise ValueError("Digital Europe exact readback binding invalid")
+        if evidence.get("candidate_state") not in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}:
+            raise ValueError("Digital Europe exact candidate state unsupported")
+        if not evidence.get("status_label"):
+            raise ValueError("Digital Europe exact evidence lacks resolved official status label")
+        if not legacy:
+            if evidence.get("source_health_state") != "HEALTHY" or evidence.get("lkg_required") is not False:
+                raise ValueError("Digital Europe healthy exact evidence source-health binding invalid")
+            if evidence.get("degradation_reason") is not None:
+                raise ValueError("Digital Europe healthy exact evidence unexpectedly carries degradation reason")
+    else:
+        if legacy:
+            raise ValueError("legacy Digital Europe exact evidence cannot represent degraded current authority")
+        if evidence.get("authority_url_verified") is not False or readback.get("verified") is True:
+            raise ValueError("Digital Europe degraded exact evidence pretended authority verification")
+        if readback.get("url") and readback.get("url") != evidence.get("authority_url"):
+            raise ValueError("Digital Europe degraded readback URL binding invalid")
+        if evidence.get("source_health_state") != "DEGRADED_AUTHORITY_READBACK" or evidence.get("lkg_required") is not True:
+            raise ValueError("Digital Europe degraded exact evidence lacks LKG/source-health requirement")
+        if not evidence.get("degradation_reason"):
+            raise ValueError("Digital Europe degraded exact evidence lacks failure reason")
+        if evidence.get("candidate_state") != "UNKNOWN" or evidence.get("status_label") is not None:
+            raise ValueError("Digital Europe degraded exact evidence leaked structured status into current truth")
+        if evidence.get("deadline_candidate") is not None or evidence.get("budget_candidate") is not None:
+            raise ValueError("Digital Europe degraded exact evidence leaked structured material candidates")
+
     label = str(evidence.get("programme_label_official") or "")
     if not _is_digital_label(label):
         raise ValueError("Digital Europe exact evidence lost official programme proof")
-    if evidence.get("candidate_state") not in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}:
-        raise ValueError("Digital Europe exact candidate state unsupported")
-    if not evidence.get("status_label"):
-        raise ValueError("Digital Europe exact evidence lacks resolved official status label")
     semantics = evidence.get("exact_semantics")
     if not isinstance(semantics, dict) or sha256_json(semantics) != evidence.get("exact_semantic_fingerprint"):
         raise ValueError("Digital Europe exact semantic fingerprint mismatch")
@@ -345,34 +424,34 @@ def validate_evidence(evidence: Mapping[str, Any]) -> None:
     for receipt_key in ("search_receipt", "facet_receipt"):
         receipt = evidence.get(receipt_key) or {}
         if not re.fullmatch(r"[0-9a-f]{64}", str(receipt.get("sha256") or "")):
-            raise ValueError(f"Digital Europe exact evidence missing immutable {receipt_key}")
+            raise ValueError(f"Digital Europe exact evidence missing immutable {receipt_key} hash")
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--taxonomy", type=pathlib.Path)
     parser.add_argument("--reference")
-    parser.add_argument("--output-dir", required=True, type=pathlib.Path)
+    parser.add_argument("--output-dir", type=pathlib.Path, required=True)
     parser.add_argument("--run-id", default="digital-ft-exact-live")
     args = parser.parse_args()
-
+    if bool(args.taxonomy) == bool(args.reference):
+        raise SystemExit("provide exactly one of --taxonomy or --reference")
     source_candidate = None
-    reference = args.reference
     if args.taxonomy:
         taxonomy = json.loads(args.taxonomy.read_text(encoding="utf-8"))
         source_candidate = select_digital_candidate(taxonomy)
-        if reference and validate_reference(reference) != source_candidate["identifier"]:
-            raise ValueError("explicit Digital Europe reference does not match deterministic taxonomy handoff")
         reference = source_candidate["identifier"]
-    if not reference:
-        raise ValueError("--taxonomy or --reference is required")
-
+    else:
+        reference = validate_reference(args.reference)
     evidence = collect_exact(reference, run_id=args.run_id, source_candidate=source_candidate, output_dir=args.output_dir)
     print(json.dumps({
         "reference": evidence["reference"],
         "candidate_state": evidence["candidate_state"],
         "status_label": evidence["status_label"],
         "authority_url_verified": evidence["authority_url_verified"],
+        "source_health_state": evidence.get("source_health_state"),
+        "evidence_usable_for_reconciliation": evidence.get("evidence_usable_for_reconciliation"),
+        "lkg_required": evidence.get("lkg_required"),
         "exact_semantic_fingerprint": evidence["exact_semantic_fingerprint"],
         "material_fact_use": evidence["material_fact_use"],
         "open_call_authorized": evidence["open_call_authorized"],
