@@ -260,7 +260,13 @@ def main() -> int:
 
     boundary = enforce_boundary(root)
     history = stage_history(root)
-    print(json.dumps({"restore": restore, "boundary": boundary, "history": history}, sort_keys=True))
+
+    # EUI exact is part of the generic EU_DIRECT evidence transaction. Keep this
+    # call here until the workflow orchestration is consolidated around one
+    # canonical runner; any EUI failure fails the generic lane closed.
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_exact_canonical.py")])
+
+    print(json.dumps({"restore": restore, "boundary": boundary, "history": history, "eui_exact_canonicalized": True}, sort_keys=True))
     return 0
 
 
