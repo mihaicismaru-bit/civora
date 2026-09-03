@@ -52,7 +52,7 @@ jobs:
           rm -rf "$ROOT"
           mkdir -p "$ROOT/current" "$ROOT/previous"
 
-      - name: Restore previous same-branch programming snapshot when available
+      - name: Restore previous same-branch programming snapshot when inventory-compatible
         id: restore
         env:
           GH_TOKEN: ${{ github.token }}
@@ -65,6 +65,8 @@ jobs:
 
           repo=os.environ['REPOSITORY']; branch=os.environ['HEAD_BRANCH']; token=os.environ['GH_TOKEN']
           root=pathlib.Path('/tmp/partener-eu-mff-2028-2034-programming-proof/previous')
+          registry=json.loads(pathlib.Path('partener-eu/ingest/eu_direct_mff_2028_2034_programming_registry.json').read_text(encoding='utf-8'))
+          current_ids={str(row['source_id']) for row in registry['sources']}
           api=f'https://api.github.com/repos/{repo}/actions/artifacts?per_page=100'
           headers={'Authorization':f'Bearer {token}','Accept':'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'}
           with urllib.request.urlopen(urllib.request.Request(api, headers=headers), timeout=30) as response:
@@ -92,6 +94,7 @@ jobs:
                   return redirected
 
           found=False
+          metadata={'artifact_id':chosen.get('id') if chosen else None,'artifact_name':chosen.get('name') if chosen else None,'head_sha':(chosen.get('workflow_run') or {}).get('head_sha') if chosen else None,'head_branch':branch,'inventory_compatible':False,'restore_reason':'NO_PREVIOUS_ARTIFACT'}
           if chosen:
               request=urllib.request.Request(chosen['archive_download_url'], headers=headers)
               opener=urllib.request.build_opener(StripCrossHostAuthRedirect())
@@ -100,16 +103,28 @@ jobs:
               with zipfile.ZipFile(io.BytesIO(payload)) as archive:
                   candidate=next((name for name in archive.namelist() if name.endswith('eu-direct-mff-2028-2034-programming-snapshot.json')), None)
                   if candidate:
-                      root.mkdir(parents=True, exist_ok=True)
-                      (root/'eu-direct-mff-2028-2034-programming-snapshot.json').write_bytes(archive.read(candidate))
-                      found=True
-                      (root/'restore-metadata.json').write_text(json.dumps({
-                          'artifact_id':chosen['id'], 'artifact_name':chosen['name'],
-                          'head_sha':(chosen.get('workflow_run') or {}).get('head_sha'), 'head_branch':branch,
-                      }, sort_keys=True, indent=2)+'\n', encoding='utf-8')
+                      raw=archive.read(candidate)
+                      previous=json.loads(raw)
+                      previous_ids={str(row.get('source_id') or '') for row in (previous.get('evidence') or [])}
+                      metadata['previous_source_ids']=sorted(previous_ids)
+                      metadata['current_source_ids']=sorted(current_ids)
+                      if previous_ids == current_ids:
+                          root.mkdir(parents=True, exist_ok=True)
+                          (root/'eu-direct-mff-2028-2034-programming-snapshot.json').write_bytes(raw)
+                          found=True
+                          metadata['inventory_compatible']=True
+                          metadata['restore_reason']='SAME_SOURCE_INVENTORY'
+                      else:
+                          root.mkdir(parents=True, exist_ok=True)
+                          (root/'previous-incompatible-source-inventory.json').write_bytes(raw)
+                          metadata['restore_reason']='SOURCE_INVENTORY_CHANGED_BASELINE_REQUIRED'
+                  else:
+                      metadata['restore_reason']='ARTIFACT_WITHOUT_MFF_SNAPSHOT'
+          root.mkdir(parents=True, exist_ok=True)
+          (root/'restore-metadata.json').write_text(json.dumps(metadata, sort_keys=True, indent=2)+'\n', encoding='utf-8')
           with pathlib.Path(os.environ['GITHUB_OUTPUT']).open('a', encoding='utf-8') as output:
               output.write(f'previous_found={str(found).lower()}\n')
-          print(json.dumps({'previous_found':found,'artifact_id':chosen.get('id') if chosen else None}, sort_keys=True))
+          print(json.dumps({'previous_found':found,'artifact_id':metadata['artifact_id'],'inventory_compatible':metadata['inventory_compatible'],'restore_reason':metadata['restore_reason']}, sort_keys=True))
           PY
 
       - name: Acquire fresh official MFF programming evidence
