@@ -71,11 +71,12 @@ jobs:
           assert contract.get('crm_integration') == 'FORBIDDEN'
           assert contract.get('commercial_analytics') == 'FORBIDDEN'
           notice = contract.get('pre_form_notice') or {}
-          assert notice.get('operator_status') == 'CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN'
+          assert notice.get('operator_status') == 'CONTROLLER_DETERMINED_PRIVACY_CONTACT_BOUND'
           assert notice.get('operator_legal_name') == 'EUROCONSULT SRL'
           assert notice.get('operator_cui') == '14250864'
-          assert notice.get('operator_contact_details') == 'TO_BE_BOUND_BEFORE_PRODUCTION'
-          assert notice.get('privacy_contact') == 'OPEN_BEFORE_PRODUCTION'
+          assert notice.get('operator_contact_details') == 'privacy@eucons.ro'
+          assert notice.get('privacy_contact') == 'privacy@eucons.ro'
+          assert notice.get('privacy_contact_binding_reference') == 'PRIVACY_CONTACT_BINDING_2026-09-03.json'
           assert 'art. 6 alin. (1) lit. (f)' in notice.get('legal_basis', '')
           controller_record = json.loads((root / 'CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
           controller = controller_record.get('controller') or {}
@@ -143,10 +144,13 @@ jobs:
           assert article13.get('evidence_binding_key') == 'privacy_notice'
           assert article13.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
           assert article13.get('synthetic') is False
+          assert article13.get('status') == 'CONTACT_BOUND_RENDERED_SURFACE_VALIDATION_PENDING'
           assert article13.get('approved') is False
           assert article13.get('collection_enabled') is False
-          assert article13.get('surface_fields', {}).get('privacy_contact') == 'DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII'
-          assert article13.get('surface_fields', {}).get('operator_contact_details') == 'DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII'
+          assert article13.get('surface_fields', {}).get('privacy_contact') == 'privacy@eucons.ro'
+          assert article13.get('surface_fields', {}).get('operator_contact_details') == 'privacy@eucons.ro'
+          assert article13.get('privacy_contact_binding', {}).get('reference') == 'PRIVACY_CONTACT_BINDING_2026-09-03.json'
+          assert article13.get('privacy_contact_binding', {}).get('independent_reachability_tested') is False
           assert 'art. 6 alin. (1) lit. (f)' in article13.get('surface_fields', {}).get('legal_basis', '')
           assert article13.get('lawful_basis_policy_binding', {}).get('controller_approved') is True
           anonymisation = json.loads((root / 'GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json').read_text(encoding='utf-8'))
@@ -168,7 +172,7 @@ jobs:
           assert activation.get('required_external_or_operational_evidence', {}).get('account_server_logging_binding', {}).get('status') == 'OPEN'
           assert activation.get('required_external_or_operational_evidence', {}).get('data_subject_rights_procedure', {}).get('status') == 'OPEN'
           assert activation.get('required_external_or_operational_evidence', {}).get('dpia_screening_or_completed_dpia', {}).get('status') == 'OPEN'
-          print('PASS: method/LIA/DPIA/retention-rights policy are approved and frozen while contacts, live provider/account evidence, final collection authorization and NF06 remain fail-closed')
+          print('PASS: method/LIA/DPIA/retention-rights policy and declared privacy contact are frozen while rendered Article 13, live provider/account evidence, final collection authorization and NF06 remain fail-closed')
           PY
       - name: Build combined eucons plus AI4WORK fail-closed candidate
         shell: bash
