@@ -92,6 +92,14 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
         "romania_scope": ("ALL_ROMANIA",),
         "evidence_note": "keep.eu Interact registry; programme-validated fundamental information; direct programme page timed out in runner",
     },
+    {
+        "id": "HUSKROUA", "programme": "Interreg VI-A NEXT Hungary-Slovakia-Romania-Ukraine", "mode": "CBC_NEXT_MULTILATERAL",
+        "url": "https://next.huskroua-cbc.eu/programme/area/",
+        "hosts": ("next.huskroua-cbc.eu",),
+        "anchors": ("Hungary-Slovakia-Romania-Ukraine Interreg NEXT Programme", "Romania", "Maramures", "Satu Mare", "Suceava"),
+        "romania_scope": ("Maramures", "Satu Mare", "Suceava"),
+        "evidence_note": "official programme authority; programme-area page verifies Romanian NUTS III territorial fit",
+    },
 )
 
 
@@ -244,8 +252,8 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
 
     sources = receipt.get("sources")
     rows = receipt.get("programmes")
-    if not isinstance(sources, list) or not isinstance(rows, list) or len(sources) != 7 or len(rows) != 7:
-        raise ValueError("Interreg Romania matrix requires exactly seven verified programme sources")
+    if not isinstance(sources, list) or not isinstance(rows, list) or len(sources) != len(PROGRAMMES) or len(rows) != len(PROGRAMMES):
+        raise ValueError("Interreg Romania matrix requires the complete verified programme source set")
     expected = {x["id"] for x in PROGRAMMES}
     if {x.get("programme_id") for x in rows} != expected or {x.get("programme_id") for x in sources} != expected:
         raise ValueError("Interreg Romania programme set drift")
