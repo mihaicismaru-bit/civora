@@ -1,0 +1,164 @@
+name: VÂLCEA CLAR bounded recovery once
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/valcea-clar-bounded-recovery-once.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Apply bounded newsroom recovery
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          root = Path('.')
+          story_id = 'balcesti-incendiu-vegetatie-15ha-20260902'
+
+          # 1) Fix Instagram delivery semantics without changing canonical URLs.
+          ig = root/'valcea-clar/social/instagram_editorial_publish.py'
+          text = ig.read_text(encoding='utf-8')
+          if 'DELIVERY_BASE = ' not in text:
+              old = 'PUBLIC_BASE = "https://valceaclar.ro/media/social/editorial/instagram/"\n'
+              new = old + 'DELIVERY_BASE = "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/media/social/editorial/instagram/"\n'
+              assert text.count(old) == 1
+              text = text.replace(old, new, 1)
+
+              old = '        "public_url": PUBLIC_BASE + rendered.name,\n        "sha256": sha256(rendered),\n'
+              new = '        "public_url": PUBLIC_BASE + rendered.name,\n        "delivery_url": DELIVERY_BASE + rendered.name,\n        "sha256": sha256(rendered),\n'
+              assert text.count(old) == 1
+              text = text.replace(old, new, 1)
+
+              old = '    asset_contract.validate_asset(cover_asset)\n    cover_asset["alt_text"] = f"VÂLCEA CLAR: {plan[\'hook\']}. {cover_asset[\'source_photo\'][\'alt_text\']}"[:1000]\n'
+              new = '    asset_contract.validate_asset(cover_asset)\n    cover_asset["delivery_url"] = DELIVERY_BASE + cover.name\n    cover_asset["alt_text"] = f"VÂLCEA CLAR: {plan[\'hook\']}. {cover_asset[\'source_photo\'][\'alt_text\']}"[:1000]\n'
+              assert text.count(old) == 1
+              text = text.replace(old, new, 1)
+
+              old = '            preflight_fn(str(asset["public_url"]))\n'
+              new = '            preflight_fn(str(asset.get("delivery_url") or asset["public_url"]))\n'
+              assert text.count(old) == 1
+              text = text.replace(old, new, 1)
+
+              old = '                    "image_url": str(asset["public_url"]),\n'
+              new = '                    "image_url": str(asset.get("delivery_url") or asset["public_url"]),\n'
+              assert text.count(old) == 2
+              text = text.replace(old, new)
+
+              old = '                "public_url": asset["public_url"],\n            }\n'
+              new = '                "public_url": asset["public_url"],\n                "delivery_url": asset.get("delivery_url"),\n            }\n'
+              assert text.count(old) == 1
+              text = text.replace(old, new, 1)
+
+              ig.write_text(text, encoding='utf-8')
+
+          # 2) Publish the missed official ISU Bălcești signal as a proportional QUICK LOCAL.
+          facts_path = root/'valcea-clar/editorial/facts_registry.json'
+          facts = json.loads(facts_path.read_text(encoding='utf-8'))
+          if not any(str(row.get('id')) == story_id for row in facts.get('facts', [])):
+              facts.setdefault('facts', []).append({
+                  'id': story_id,
+                  'status': 'verified',
+                  'section': 'SIGURANȚĂ',
+                  'editorial_type': 'straight_news',
+                  'priority': 96,
+                  'confidence': 99,
+                  'valid_from': '2026-09-02T08:00:00+03:00',
+                  'valid_until': '2026-09-06T23:59:59+03:00',
+                  'slots': ['morning', 'evening'],
+                  'headline': 'Incendiu de vegetație la Bălcești: aproximativ 15 hectare de teren au fost afectate',
+                  'dek': 'Pompierii vâlceni au stins un incendiu de vegetație uscată la Bălcești, iar ISU Vâlcea estimează suprafața afectată la aproximativ 15 hectare. Buletinul oficial nu indică o cauză a incendiului.',
+                  'paragraphs': [
+                      'Un incendiu de vegetație uscată produs la Bălcești a afectat aproximativ 15 hectare de teren, potrivit bilanțului publicat la 2 septembrie de Inspectoratul pentru Situații de Urgență Vâlcea. Pompierii militari au intervenit pentru stingerea focului.',
+                      'Incidentul apare în bilanțul ISU pentru intervalul 31 august, ora 08:00 – 2 septembrie, ora 08:00. În cele 48 de ore, pompierii vâlceni au avut 55 de misiuni, dintre care 49 pentru prim ajutor și transport medical și două pentru stingerea incendiilor.',
+                      'ISU amintește, în același buletin, campania națională „Nu aprinde pericolul”, care avertizează că arderea vegetației uscate este interzisă. Comunicatul nu precizează însă cauza incendiului de la Bălcești, iar VÂLCEA CLAR nu atribuie focul unei arderi intenționate în lipsa unei constatări oficiale.'
+                  ],
+                  'material_fact_gate': 'PASS',
+                  'sources': [{
+                      'name': 'ISU Vâlcea — Misiunile pompierilor vâlceni în ultimele 48 de ore, 02.09.2026',
+                      'url': 'https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-776',
+                      'tier': 'T1'
+                  }],
+                  'editorial_note': 'QUICK LOCAL construit exclusiv din buletinul oficial ISU Vâlcea. Cauza incendiului nu este afirmată; avertismentul IGSU este prezentat separat de cauza necunoscută.'
+              })
+              facts_path.write_text(json.dumps(facts, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+
+          # 3) Bind a truthful exact-place contextual photograph for site/social.
+          contextual_path = root/'valcea-clar/social/contextual_story_media.json'
+          contextual = json.loads(contextual_path.read_text(encoding='utf-8'))
+          contextual.setdefault('assignments', {})[story_id] = {
+              'public_url': 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Drum%20de%20p%C4%83m%C3%A2nt%20RO.jpg',
+              'source_url': 'https://commons.wikimedia.org/wiki/File:Drum_de_p%C4%83m%C3%A2nt_RO.jpg',
+              'credit': 'Wikiminds34 / Wikimedia Commons — CC BY 4.0',
+              'rights_basis': 'creative_commons',
+              'license_url': 'https://creativecommons.org/licenses/by/4.0/',
+              'captured_at': '2026-06-16',
+              'contextual_archive': True,
+              'provenance_status': 'VERIFIED',
+              'alt_text': 'Drum din zona Satu Poieni, Bălcești, într-o fotografie de context realizată în iunie 2026.',
+              'editorial_note': 'Foto de context din Bălcești, iunie 2026; imaginea nu surprinde incendiul de vegetație raportat de ISU.'
+          }
+          contextual_path.write_text(json.dumps(contextual, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+
+          visuals_path = root/'valcea-clar/social/story_visuals.json'
+          visuals = json.loads(visuals_path.read_text(encoding='utf-8'))
+          visuals.setdefault('stories', {})[story_id] = {
+              'image_path': 'valcea-clar/social/photos/approved/balcesti-context-2026.jpg',
+              'image': {
+                  'kind': 'photograph',
+                  'synthetic': False,
+                  'subject_match': True,
+                  'editor_approved': True,
+                  'contextual_archive': True,
+                  'captured_at': '2026-06-16',
+                  'source_type': 'creative_commons',
+                  'source_url': 'https://commons.wikimedia.org/wiki/File:Drum_de_p%C4%83m%C3%A2nt_RO.jpg',
+                  'direct_source_url': 'https://commons.wikimedia.org/wiki/Special:Redirect/file/Drum%20de%20p%C4%83m%C3%A2nt%20RO.jpg',
+                  'credit': 'Wikiminds34 / Wikimedia Commons — CC BY 4.0',
+                  'rights_basis': 'creative_commons',
+                  'license_url': 'https://creativecommons.org/licenses/by/4.0/',
+                  'rights_note': 'Fotografie proprie a autorului publicată pe Wikimedia Commons sub CC BY 4.0; reutilizare cu atribuire și link la licență.',
+                  'editorial_note': 'Foto de context din Bălcești, iunie 2026; imaginea nu surprinde incendiul de vegetație raportat de ISU.',
+                  'alt_text': 'Drum din zona Satu Poieni, Bălcești, într-o fotografie de context realizată în iunie 2026.'
+              }
+          }
+          visuals_path.write_text(json.dumps(visuals, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+          PY
+
+          python -m py_compile valcea-clar/social/instagram_editorial_publish.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          sid='balcesti-incendiu-vegetatie-15ha-20260902'
+          facts=json.loads(Path('valcea-clar/editorial/facts_registry.json').read_text(encoding='utf-8'))
+          row=next(x for x in facts['facts'] if x.get('id')==sid)
+          assert row['material_fact_gate']=='PASS' and len(row['paragraphs'])==3 and row['sources'][0]['tier']=='T1'
+          visual=json.loads(Path('valcea-clar/social/story_visuals.json').read_text(encoding='utf-8'))['stories'][sid]['image']
+          assert visual['kind']=='photograph' and visual['synthetic'] is False and visual['editor_approved'] is True
+          assert visual['rights_basis']=='creative_commons' and visual['contextual_archive'] is True
+          text=Path('valcea-clar/social/instagram_editorial_publish.py').read_text(encoding='utf-8')
+          assert 'DELIVERY_BASE' in text and 'asset.get("delivery_url") or asset["public_url"]' in text
+          print({'status':'PASS','story':sid,'instagram_delivery_base':'raw_civora_main'})
+          PY
+
+          git config user.name 'vâlcea-clar-recovery[bot]'
+          git config user.email 'valcea-clar-recovery@users.noreply.github.com'
+          git rm .github/workflows/valcea-clar-bounded-recovery-once.yml
+          git add valcea-clar/editorial/facts_registry.json valcea-clar/social/contextual_story_media.json valcea-clar/social/story_visuals.json valcea-clar/social/instagram_editorial_publish.py
+          git commit -m 'Recover VÂLCEA CLAR Bălcești story and Instagram delivery'
+          git push origin HEAD:main
