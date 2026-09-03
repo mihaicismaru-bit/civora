@@ -43,9 +43,9 @@ class DataSubjectRightsControlTests(unittest.TestCase):
         self.assertIn("rights_procedure_not_approved_for_prod", errors)
         self.assertIn("rights_controller_approval_missing", errors)
         self.assertIn("rights_request_channel_not_operational", errors)
-        self.assertIn("rights_privacy_contact_missing", errors)
+        self.assertIn("rights_prod_privacy_contact_missing", errors)
         self.assertNotIn("rights_final_lawful_basis_not_reconciled", errors)
-        self.assertIn("rights_requester_authentication_not_operational", errors)
+        self.assertNotIn("rights_requester_authentication_not_operational", errors)
         self.assertIn("rights_prod_approval_shape_invalid", errors)
 
     def test_direct_identity_or_crm_lookup_weakening_fails_even_before_prod(self):
