@@ -16,7 +16,7 @@ from prod_activation_gate import (
 
 
 class ProdActivationLiaBindingTests(unittest.TestCase):
-    def test_prod_claim_cannot_bypass_unapproved_lia_with_generic_evidence_binding(self):
+    def test_prod_claim_cannot_bypass_missing_live_lia_safeguards_after_controller_approval(self):
         contract = copy.deepcopy(_load(CONTRACT_PATH))
         manifest = copy.deepcopy(_load(MANIFEST_PATH))
         controller = _load(CONTROLLER_PATH)
@@ -35,9 +35,13 @@ class ProdActivationLiaBindingTests(unittest.TestCase):
         )
 
         self.assertIn("lawful_basis_lia:lia_not_approved_for_prod", errors)
-        self.assertIn("lawful_basis_lia:lia_controller_signoff_missing", errors)
+        self.assertIn("lawful_basis_lia:lia_not_prod_eligible", errors)
+        self.assertIn("lawful_basis_lia:lia_privacy_contact_missing", errors)
         self.assertIn("lawful_basis_lia:lia_prod_approval_state_invalid", errors)
-        self.assertIn("lawful_basis_lia:lia_candidate_wording_not_finalized", errors)
+        self.assertIn("lawful_basis_lia:lia_prod_approval_not_satisfied:right_to_object_operational", errors)
+        self.assertIn("lawful_basis_lia:lia_prod_approval_not_satisfied:article13_basis_disclosure_confirmed", errors)
+        self.assertNotIn("lawful_basis_lia:lia_controller_signoff_missing", errors)
+        self.assertNotIn("lawful_basis_lia:lia_candidate_wording_not_finalized", errors)
 
     def test_controller_identity_drift_is_rejected_at_authoritative_activation_boundary(self):
         contract = _load(CONTRACT_PATH)
