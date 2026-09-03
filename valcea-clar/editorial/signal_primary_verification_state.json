@@ -2,22 +2,150 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-03T21:03:56+03:00",
+  "generated_at": "2026-09-03T23:59:34+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-03T21:02:25+03:00",
-  "task_count": 82,
+  "queue_generated_at": "2026-09-03T23:58:20+03:00",
+  "task_count": 88,
   "primary_match_count": 0,
-  "no_match_count": 39,
-  "unrouted_count": 43,
+  "no_match_count": 42,
+  "unrouted_count": 46,
   "target_count": 21,
   "targets_ok": 17,
   "results": [
     {
+      "signal_id": "f1496a6e6f0d9d3963c16938",
+      "signal_title": "FOTO/ TRAGEDIE într-o comună din VÂLCEA. Un adult și un minor găsiți carbonizați",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/foto-tragedie-intr-o-comuna-din-valcea-un-adult-si-un-minor-gasiti-carbonizati/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-09-03T23:09:07+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "ab1065c965e4856ec2cea7ba",
+      "signal_title": "Războiul din Primăria Drăgășani se reaprinde. Viceprimarul Ștefan Nedelcu, atac la primar: „Incompetență”",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/razboiul-din-primaria-dragasani-se-reaprinde-viceprimarul-stefan-nedelcu-il-ataca-din-nou-pe-primar-incompetenta/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T22:12:20+03:00",
+      "verification_route_id": "dragasani_administration",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "primaria-dragasani-anunturi-publice",
+            "name": "Primăria Municipiului Drăgășani — Anunțuri publice",
+            "url": "https://www.primariadragasani.ro/informatii-publice/anunturi-publice"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error timed out>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "e6cce1d5c266c8e1fdef2219",
+      "signal_title": "Copiii din Copăceni, trei zile de credință, descoperiri și bucurie la Școala de Vară „Hristos împărtășit copiilor”",
+      "signal_url": "https://www.impactreal.ro/2026/09/03/copiii-din-copaceni-trei-zile-de-credinta-descoperiri-si-bucurie-la-scoala-de-vara-hristos-impartasit-copiilor/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T22:08:51+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "f04c641c2d791ef86b3a222c",
+      "signal_title": "Președintele CJ Vâlcea nu renunță la proiectul Drumului Expres",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/presedintele-cj-valcea-nu-renunt-sa-la-proiectul-drumului-expres/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-09-03T21:45:47+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "99f883471060f64accea3f33",
+      "signal_title": "Aproape 770 de milioane de lei pentru DN73C, Constantin Rădulescu promite că Drumul Expres nu va fi abandonat",
+      "signal_url": "https://www.impactreal.ro/2026/09/03/aproape-770-de-milioane-de-lei-pentru-dn73c-constantin-radulescu-promite-ca-drumul-expres-nu-va-fi-abandonat/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-03T21:34:29+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "be375fa4da3bac2f8eddad1d",
+      "signal_title": "FOTO – Accident de muncă la Spitalul Drăgășani. Un coș de fum demolat s-a prăbușit peste utilajul în care se afla un muncitor",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/foto-accident-de-munca-la-spitalul-dragasani-un-cos-de-fum-demolat-s-a-prabusit-peste-utilajul-in-care-se-afla-un-muncitor/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T21:20:46+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
       "signal_id": "0205a594dd0c0a7309215025",
-      "signal_title": "Râmnicul, mai aproape de autostradă! 770 de milioane de lei pentru drumul spre Tigveni",
+      "signal_title": "Râmnicul mai aproape de autostradă! 770 de milioane de lei pentru drumul spre Tigveni",
       "signal_url": "https://evenimentvalcean.ro/ramnicul-mai-aproape-de-autostrada-770-de-milioane-de-lei-pentru-drumul-spre-tigveni/",
       "signal_publisher": "Eveniment Vâlcean",
       "signal_published_at": "2026-09-03T20:45:15+03:00",
