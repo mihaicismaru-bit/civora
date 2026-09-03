@@ -28,7 +28,11 @@ def fake_fetch(url: str):
 
 def fake_fetch_changed(url: str):
     spec = next(row for row in bsb.SOURCES if row["url"] == url)
-    extra = "Official regional information refreshed without any call-status assertion" if spec["id"] == "ADRSE_REGION_MEMBERSHIP" else ""
+    extra = (
+        "Official programme geography page refreshed without any current call assertion"
+        if spec["id"] == "BSB_EC_PROGRAMME_REGION_GEOGRAPHY"
+        else ""
+    )
     return synthetic_body(spec, extra), {
         "requested_url": url,
         "final_url": url,
@@ -39,7 +43,11 @@ def fake_fetch_changed(url: str):
 
 def fake_fetch_with_lexical_open(url: str):
     spec = next(row for row in bsb.SOURCES if row["url"] == url)
-    extra = "OPEN terminology may occur in navigation or historical material" if spec["id"] == "BSB_KEEP_PROGRAMME_VALIDATED_GEOGRAPHY" else ""
+    extra = (
+        "OPEN wording may occur in a navigation link or programme context"
+        if spec["id"] == "BSB_EC_PROGRAMME_REGION_GEOGRAPHY"
+        else ""
+    )
     return synthetic_body(spec, extra), {
         "requested_url": url,
         "final_url": url,
@@ -65,17 +73,29 @@ def assert_non_authorizing(result: dict) -> None:
     assert result["romania_programme_region"] == "Sud-Est"
     assert result["romania_scope"] == ["Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"]
     assert result["territorial_fit_state"] == "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING"
-    assert set(result["supported_applicant_types"]) == {"PUBLIC_AUTHORITY", "PUBLIC_LAW_BODY", "NGO_NONPROFIT"}
-    assert result["applicant_signal_observation_state"] == "HISTORICAL_CLOSED_CALL_APPLICANT_SIGNAL"
-    assert result["historical_call_status_observed"] == "CLOSED"
+    assert result["supported_applicant_types"] == []
+    assert result["applicant_signal_observation_state"] == "APPLICANT_SIGNAL_INSUFFICIENT"
+    assert result["applicant_signal_basis"].startswith(
+        "NO_STABLE_CURRENT_PROGRAMME_WIDE_APPLICANT_CLASS_AUTHORITY_BOUND"
+    )
+    assert result["historical_call_status_observed"] is None
     assert result["historical_call_status_is_current_truth"] is False
     assert result["market_intelligence_only"] is True
     assert result["fit_is_not_eligibility"] is True
     assert result["call_specific_applicant_rules_required"] is True
     assert result["publication_effect"] == "NONE"
-    assert len(result["source_receipts"]) == 3
-    assert all(row["source_health"] == "HEALTHY" and row["http_status"] == 200 for row in result["source_receipts"])
-    assert all(len(row["raw_sha256"]) == 64 and len(row["normalized_visible_text_sha256"]) == 64 for row in result["source_receipts"])
+    assert len(result["source_receipts"]) == 2
+    assert {row["source_id"] for row in result["source_receipts"]} == {
+        "BSB_EC_PROGRAMME_REGION_GEOGRAPHY", "ADRSE_REGION_MEMBERSHIP"
+    }
+    assert all(
+        row["source_health"] == "HEALTHY" and row["http_status"] == 200
+        for row in result["source_receipts"]
+    )
+    assert all(
+        len(row["raw_sha256"]) == 64 and len(row["normalized_visible_text_sha256"]) == 64
+        for row in result["source_receipts"]
+    )
     for flag in bsb.MATERIAL_FLAGS:
         assert result[flag] is False, (flag, result[flag])
 
@@ -83,16 +103,16 @@ def assert_non_authorizing(result: dict) -> None:
 def main() -> None:
     baseline, raw = bsb.collect(
         run_id="bsb-regression-baseline",
-        fetched_at="2026-09-03T21:50:00+00:00",
+        fetched_at="2026-09-03T23:10:00+00:00",
         fetcher=fake_fetch,
     )
     bsb.validate(baseline)
     assert_non_authorizing(baseline)
-    assert set(raw) == {"BSB_KEEP_PROGRAMME_VALIDATED_GEOGRAPHY", "BSB_OFFICIAL_SECOND_CALL_HISTORY", "ADRSE_REGION_MEMBERSHIP"}
+    assert set(raw) == {"BSB_EC_PROGRAMME_REGION_GEOGRAPHY", "ADRSE_REGION_MEMBERSHIP"}
 
     changed, _ = bsb.collect(
         run_id="bsb-regression-changed",
-        fetched_at="2026-09-03T21:51:00+00:00",
+        fetched_at="2026-09-03T23:11:00+00:00",
         fetcher=fake_fetch_changed,
     )
     assert_non_authorizing(changed)
@@ -100,28 +120,32 @@ def main() -> None:
 
     lexical_open, _ = bsb.collect(
         run_id="bsb-regression-open-word",
-        fetched_at="2026-09-03T21:52:00+00:00",
+        fetched_at="2026-09-03T23:12:00+00:00",
         fetcher=fake_fetch_with_lexical_open,
     )
     assert_non_authorizing(lexical_open)
     assert lexical_open["open_call_authorized"] is False
-    assert lexical_open["historical_call_status_is_current_truth"] is False
+    assert lexical_open["historical_call_status_observed"] is None
 
     t = copy.deepcopy(baseline)
     t["open_call_authorized"] = True
     fail(lambda: bsb.validate(t), "attempted authorization")
 
     t = copy.deepcopy(baseline)
-    t["historical_call_status_is_current_truth"] = True
-    fail(lambda: bsb.validate(t), "widened into current truth")
+    t["historical_call_status_observed"] = "CLOSED"
+    fail(lambda: bsb.validate(t), "historical call status leaked")
 
     t = copy.deepcopy(baseline)
     t["romania_scope"] = ["ALL_ROMANIA"]
     fail(lambda: bsb.validate(t), "territorial scope drift")
 
     t = copy.deepcopy(baseline)
-    t["supported_applicant_types"].append("PRIVATE_BODY")
-    fail(lambda: bsb.validate(t), "applicant signal drift")
+    t["supported_applicant_types"] = ["PUBLIC_AUTHORITY"]
+    fail(lambda: bsb.validate(t), "applicant signal widened")
+
+    t = copy.deepcopy(baseline)
+    t["applicant_signal_observation_state"] = "PROGRAMME_APPLICANT_SIGNAL"
+    fail(lambda: bsb.validate(t), "applicant evidence state drift")
 
     t = copy.deepcopy(baseline)
     t["source_receipts"][0]["final_url"] = "https://example.com/not-approved"
@@ -136,6 +160,8 @@ def main() -> None:
         "programme_id": baseline["programme_id"],
         "romania_region": baseline["romania_programme_region"],
         "romania_scope": baseline["romania_scope"],
+        "source_count": len(baseline["source_receipts"]),
+        "applicant_signal": baseline["applicant_signal_observation_state"],
         "content_sensitive_semantic_hash": changed["semantic_fingerprint"] != baseline["semantic_fingerprint"],
         "lexical_open_non_authorizing": True,
         "eligibility_authorized": False,
