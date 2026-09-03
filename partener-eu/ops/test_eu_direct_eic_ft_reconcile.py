@@ -9,18 +9,18 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ingest"))
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[0]))
 
 from eu_direct_eic_ft_exact import collect_exact
-from eu_direct_eic_ft_reconcile import reconcile, validate_receipt
-from test_eu_direct_eic_ft_exact import REF, facet_payload, make_post, search_payload, topic
+from eu_direct_eic_ft_reconcile import DEGRADED_STATE, reconcile, validate_receipt
+from test_eu_direct_eic_ft_exact import REF, facet_payload, make_post, search_payload, topic, topic_degraded
 
 
-def evidence(fetched_at: str, deadline="2026-10-28T17:00:00Z"):
+def evidence(fetched_at: str, deadline="2026-10-28T17:00:00Z", *, topic_func=topic):
     return collect_exact(
         REF,
         run_id="synthetic",
         fetched_at=fetched_at,
         discovery_source_url="https://eic.ec.europa.eu/eic-funding-opportunities/eic-pathfinder/eic-pathfinder-challenges-2026_en",
         post_func=make_post(search=search_payload(deadline), facet=facet_payload()),
-        topic_func=topic,
+        topic_func=topic_func,
     )
 
 
@@ -31,6 +31,7 @@ def main():
     assert baseline["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
     assert baseline["material_admission_ready_for_downstream_review"] is True
     assert baseline["open_call_authorized"] is False
+    assert baseline["lkg_reference_required"] is False
     assert baseline["missing_for_material_admission"] == ["field_scoped_material_admission"]
 
     same = evidence("2026-09-02T18:00:00+00:00")
@@ -45,6 +46,36 @@ def main():
     assert diff["semantic_change_count"] == 1
     assert diff["semantic_changes"][0]["field"] == "deadline_candidate"
     assert diff["deadline_authorized"] is False
+
+    degraded = evidence("2026-09-02T20:00:00+00:00", topic_func=topic_degraded)
+    degraded_rec = reconcile(degraded, previous=changed)
+    validate_receipt(degraded_rec, current=degraded, previous=changed)
+    assert degraded_rec["reconciliation_state"] == DEGRADED_STATE
+    assert degraded_rec["semantic_reconciliation_passed"] is False
+    assert degraded_rec["semantic_change_count"] == 0
+    assert degraded_rec["semantic_changes"] == []
+    assert degraded_rec["lkg_reference_required"] is True
+    assert degraded_rec["lkg_reference_available"] is True
+    assert degraded_rec["lkg_reference_is_current_truth"] is False
+    assert degraded_rec["material_admission_ready_for_downstream_review"] is False
+    assert "current_exact_authority_unresolved" in degraded_rec["missing_for_material_admission"]
+    assert degraded_rec["open_call_authorized"] is False
+
+    recovered = evidence("2026-09-02T21:00:00+00:00")
+    recovered_rec = reconcile(recovered, previous=degraded)
+    validate_receipt(recovered_rec, current=recovered, previous=degraded)
+    assert recovered_rec["reconciliation_state"] == "SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING"
+    assert recovered_rec["semantic_change_count"] == 0
+    assert recovered_rec["semantic_reconciliation_passed"] is True
+    assert recovered_rec["lkg_reference_required"] is False
+    assert recovered_rec["open_call_authorized"] is False
+
+    future_previous = evidence("2026-09-02T22:00:00+00:00")
+    try:
+        reconcile(recovered, previous=future_previous)
+        raise AssertionError("newer previous EIC evidence was accepted")
+    except ValueError as exc:
+        assert "newer than current" in str(exc)
 
     bad = copy.deepcopy(no_change)
     bad["publish_authorized"] = True
