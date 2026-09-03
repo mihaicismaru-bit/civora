@@ -50,3 +50,10 @@ foreach ($sid in $SourceId) {
 
 & $Python @Args
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+# Mirror the metadata manifest as plain JSON so connected GitHub readers can inspect
+# the latest run without opening the binary ZIP evidence bundle.
+if (-not $NoPublish) {
+    & $Python (Join-Path $AgentDir 'publish_readable_manifest.py')
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
