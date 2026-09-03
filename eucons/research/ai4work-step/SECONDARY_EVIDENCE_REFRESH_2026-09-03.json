@@ -1,91 +1,111 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.9",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.10",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-03T03:34:48+03:00",
+  "observed_at": "2026-09-03T12:32:25+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
   "prod_need_evidence_eligible": false,
-  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, funding availability, historical employer surveys or non-representative context into AI4WORK need-prevalence claims.",
+  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, administrative labour-market context or event-specific recruitment into AI4WORK need-prevalence claims.",
   "registry_reconciliation": {
-    "source_register_high_water_mark_before_refresh": "S41",
-    "source_register_high_water_mark_after_refresh": "S42",
-    "dashboard_gap_detected": "Controlled Drive Dashboard still stated S01-S40 although Source_register already contained S41.",
-    "dashboard_gap_resolution": "Dashboard was reconciled to S01-S42 in the same controlled spreadsheet and S42 was appended as a new source row.",
-    "duplicate_source_promoted": false
+    "source_register_high_water_mark_before_refresh": "S48",
+    "source_register_high_water_mark_after_refresh": "S51",
+    "dashboard_reconciled_to": "S01-S51",
+    "duplicate_source_promoted": false,
+    "new_source_ids": ["S49", "S50", "S51"]
   },
   "promotion_policy": {
-    "source_promoted_this_refresh": "S42",
+    "sources_promoted_this_refresh": ["S49", "S50", "S51"],
     "h1_h5_numeric_points_added": 0,
     "numeric_rank_changed": false,
     "project_activity_as_need_evidence": false,
-    "decision": "PROMOTE_S42_ANOFM_COMPETENT_ANALYSIS_CONCLUSIONS_AS_CURRENT_DIRECT_COMPLEMENTARY_QUALITATIVE_PARTIAL_REGION_ZERO_H1_H5"
+    "decision": "PROMOTE_THREE_SOURCE_EXACT_OFFICIAL_CONTEXT_ROWS_WITH_ZERO_H1_H5"
   },
-  "promoted_source": {
-    "source_id": "S42",
-    "regions": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
-    "publisher": "Agenția Națională pentru Ocuparea Forței de Muncă (ANOFM)",
-    "title": "COMPETENT – Newsletter decembrie 2025 / concluziile analizei nevoilor reale de formare profesională",
-    "analysis_period": "2025-08 to 2025-11",
-    "publication_date": "2025-12-23",
-    "url": "https://www.anofm.ro/wp-content/uploads/2025/12/newsletter_V3.pdf",
-    "classification": "DIRECT_COMPLEMENTARY_CURRENT_QUALITATIVE_PARTIAL_REGION_COVERAGE_ZERO_H1_H5",
-    "observed_facts": {
-      "analysis_jurisdictions_reported": 36,
-      "excluded_counties_reported": ["Dolj", "Gorj", "Galați", "Hunedoara", "Mureș", "Prahova"],
-      "analysis_inputs_reported": [
-        "repeatedly declared employer vacancies",
-        "profiles of registered unemployed persons",
-        "training preferences of persons registered with county employment agencies",
-        "county economic forecasts (CNSP)",
-        "employer estimates of future hiring",
-        "skill deficit/surplus by county",
-        "local economic specificity including traditional and green jobs"
-      ],
-      "digitalisation_finding_reported": "Digitalisation and administrative services are described as having an upward trend in counties with urban agglomerations.",
-      "digitalisation_occupations_examples_reported": ["data operator", "accountant", "HR referent", "DPO", "trainer"]
+  "promoted_sources": [
+    {
+      "source_id": "S49",
+      "region": "Sud-Vest Oltenia / Mehedinti",
+      "publisher": "ANOFM / AJOFM Mehedinti",
+      "title": "Bursa locurilor de munca organizata de AJOFM Mehedinti – 20.06.2025",
+      "publication_date": "2025-06-11",
+      "event_date": "2025-06-20",
+      "url": "https://www.anofm.ro/bursa-locurilor-de-munca-organizata-de-ajofm-mehedinti-20-06-2025/",
+      "classification": "CURRENT_EVENT_SPECIFIC_DEMAND_SNAPSHOT_COUNTER_EVIDENCE_ZERO_H1_H5",
+      "observed_facts": {
+        "vacancies_offered": 310,
+        "quality_controller_vacancies": 30,
+        "production_operator_vacancies": 30,
+        "unskilled_worker_vacancies": 250,
+        "event_context": "ANOFM states that the event was organised following a request from an employer in Medias, Sibiu county."
+      },
+      "claim_boundary": "This is a single recruitment-event snapshot linked to a concrete recruitment request. It is not representative of the county or region, does not measure competence or training need, and contributes zero H1-H5 points."
     },
-    "source_interpretation": "S42 is used only for the conclusions of the reported completed needs analysis. It strengthens current qualitative triangulation that digitalisation/administrative service demand is rising in urban county contexts and that ANOFM used multiple real labour-market inputs. Project objectives, course lists, planned authorisations and participant targets are not treated as need evidence.",
-    "limitations": [
-      "The newsletter is a synthesis rather than the full methodological report and does not publish respondent/sample counts or response rates for the underlying employer input.",
-      "No county-level distribution or prevalence for digital/AI skill need is published in the newsletter.",
-      "The finding is digitalisation/administrative-services oriented and is not specific to generative AI or the exact AI4WORK instruments.",
-      "Coverage is partial within all three target regions because the COMPETENT intervention excludes PTJ counties Dolj and Gorj in Sud-Vest Oltenia, Prahova in Sud-Muntenia and Mureș in Centru.",
-      "No qualitative trend statement is converted into a numeric prevalence or H1-H5 point."
-    ],
-    "h1_h5_numeric_points_added": 0,
-    "project_activity_as_need_evidence": false
-  },
+    {
+      "source_id": "S50",
+      "region": "Sud-Muntenia / Ialomita",
+      "publisher": "ANOFM / AJOFM Ialomita",
+      "title": "5,94% – rata somajului inregistrat in evidentele AJOFM Ialomita in luna decembrie 2025",
+      "publication_date": "2026-02-02",
+      "reference_period": "2025-12",
+      "url": "https://www.anofm.ro/ialomita/594-rata-somajului-inregistrat-in-evidentele-ajofm-ialomita-in-luna-decembrie-2025/",
+      "classification": "CURRENT_LABOUR_MARKET_CONTEXT_ADMINISTRATIVE_ZERO_H1_H5",
+      "observed_facts": {
+        "registered_unemployment_rate_percent": 5.94
+      },
+      "claim_boundary": "Registered unemployment is administrative labour-market context, not a measurement of digital/AI competence, skill-gap prevalence or training demand. It contributes zero H1-H5 points."
+    },
+    {
+      "source_id": "S51",
+      "region": "Centru / Mures",
+      "publisher": "ANOFM / AJOFM Mures",
+      "title": "Raportul de activitate AJOFM Mures pe anul 2025",
+      "publication_date": "2026-02-12",
+      "reference_period": "2025-01-01 to 2025-12-31",
+      "url": "https://www.anofm.ro/mures/wp-content/uploads/sites/30/2026/02/Raport-de-Activitate-AJOFM-Mures-pentru-anul-2025.pdf",
+      "classification": "CURRENT_ADMINISTRATIVE_TRIANGULATION_PARTICIPANT_PREFERENCE_SUPPLY_ENTANGLED_ZERO_H1_H5",
+      "observed_facts": {
+        "identified_vacancies_2025": 5503,
+        "monthly_vacancy_peak_november": 618,
+        "monthly_vacancy_secondary_peak_june": 518,
+        "training_participants": 503,
+        "training_graduates": 431,
+        "training_graduation_rate_percent": 85.69,
+        "training_participants_entered_employment": 99,
+        "reported_employment_rate_percent": 22.97,
+        "computer_operator_programmes": 3,
+        "computer_operator_participants": 59,
+        "digital_competence_programmes": 3,
+        "digital_competence_participants": 61,
+        "preference_wording": "The report describes computer operator and digital competences among the most popular training options expressed by unemployed persons."
+      },
+      "claim_boundary": "AJOFM vacancies cover an administrative segment of the labour market. Training participation and the reported most-requested programmes reflect institutional supply and preferences among people in the agency training circuit, not representative prevalence of digital/AI need. They contribute zero H1-H5 points."
+    }
+  ],
   "cross_region_reverification": {
-    "Centru": {
-      "existing_anchor": "S39 AJOFM Covasna eSPOR historical employer survey",
-      "current_complement": "S42 ANOFM COMPETENT qualitative finding, excluding Mureș from the intervention",
-      "h1_h5_numeric_points_added": 0
-    },
     "Sud-Vest Oltenia": {
-      "existing_anchor": "S40 AJOFM Olt eSPOR historical employer survey",
-      "current_complement": "S42 ANOFM COMPETENT qualitative finding, excluding Dolj and Gorj from the intervention",
+      "current_complement": "S49 event-specific recruitment-demand snapshot in Mehedinti, retained as counter/context evidence only",
       "h1_h5_numeric_points_added": 0
     },
     "Sud-Muntenia": {
-      "existing_anchor": "S41 AJOFM Argeș eSPOR historical employer survey",
-      "current_complement": "S42 ANOFM COMPETENT qualitative finding, excluding Prahova from the intervention",
+      "current_complement": "S50 December 2025 registered-unemployment context in Ialomita",
+      "h1_h5_numeric_points_added": 0
+    },
+    "Centru": {
+      "current_complement": "S51 AJOFM Mures 2025 vacancies and training/preference administrative triangulation",
       "h1_h5_numeric_points_added": 0
     }
   },
   "call_requirements_refresh": {
-    "checked_at": "2026-09-03T03:34:48+03:00",
-    "gmail_query_scope": "after:2026/09/02 excluding spam/trash/GitHub; terms AI4WORK, STEP, OMIPE, MIPE, EUROCONSULT, Claus Web, cPanel, Cloudflare, GDPR",
-    "matching_new_authority_or_provider_messages": 0,
+    "checked_at": "2026-09-03T12:32:25+03:00",
+    "gmail_query_scope": "newer_than:1d excluding spam/trash; OMIPE, MIPE, PEO, Claus Web, ClausWeb, Cloudflare, eucons.ro",
+    "raw_matches": 2,
+    "matching_new_authority_or_provider_messages_after_excluding_github_only_notifications": 0,
     "status": "CLOSED_UNCHANGED"
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-03T03:34:48+03:00",
-    "drive_queries": [
-      "AI4WORK_ADULTS_V1",
-      "PROD_REAL_EVIDENCE source_export_sha256"
-    ],
-    "search_result_class": "CONTROL_SSOT_PRE_FINAL_AND_PRIOR_REFRESH_MATERIAL_ONLY",
+    "checked_at": "2026-09-03T12:32:25+03:00",
+    "drive_query": "AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE",
+    "search_result_class": "CONTROL_PRE_FINAL_MATERIAL_ONLY",
     "eligible_combined_real_batch_found": false,
     "source_export_sha256_bound_real_batch_found": false,
     "status": "NF06_PROD_FAIL_CLOSED"
@@ -98,14 +118,14 @@
     "crm_linkage": false,
     "research_store_separation_required": true,
     "live_provider_bound_separation_proven": false,
+    "privacy_contact": "privacy@eucons.ro",
     "raw_access_retention_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
     "residual_provider_backup_ceiling_days": 92,
-    "privacy_contact_operationally_bound": false,
-    "article13_retention_surface_reconciled_this_refresh": true,
-    "article13_retention_surface_note": "The pre-form Article 13 draft, renderer contract and long-form privacy draft now state the same bounded lifecycle: live respondent records max 180 days after close and hard stop 31.03.2027 absent approved hold; residual provider backup max 92 days from live deletion on a non-renewing validated cycle; erasure replay marker max 24 hours; application/access-log retention max 7 days. These remain draft controls and do not prove the actual provider account configuration.",
-    "public_surface_observation": "Current eucons.ro homepage is commercial; no dedicated AI4WORK research surface was discoverable in fresh site search. No deploy or real collection was inferred."
+    "account_specific_backup_ceiling_proven": false,
+    "public_surface_search_result": "No dedicated AI4WORK research routes were discoverable through fresh public search; this is not represented as a live-route validation."
   },
-  "refresh_conclusion": "S42 closes a current-evidence registry gap with an official ANOFM synthesis of a completed 36-county needs analysis while preserving strict claim limits and zero H1-H5 weight. The controlled Drive dashboard was reconciled from stale S01-S40 wording to S01-S42. Article 13 retention transparency was strengthened and mechanically bound to the existing 7-day log, 24-hour replay-marker and 92-day residual-backup ceilings, but live account/provider proof and controller approvals remain external gates. No eligible immutable real adult+employer export exists, so NF06 PROD and downstream synthesis remain fail-closed.",
+  "refresh_conclusion": "The controlled Source_register and Dashboard now reconcile through S51 with one newly verified official context/triangulation row for each target region. All three additions are zero-weight for H1-H5 and do not use project activity or training supply as evidence of need. No eligible immutable real adult+employer response export exists, therefore NF06 PROD and downstream synthesis remain fail-closed.",
   "merge_authorized": false,
   "canonicalization_authorized": false,
   "deploy_authorized": false,
