@@ -16,7 +16,10 @@ from eu_direct_digital_ft_handoff import (  # noqa: E402
     resolve_handoff,
     validate_state,
 )
-from eu_direct_digital_ft_exact import SCHEMA as DIGITAL_SCHEMA, PARSER_VERSION as DIGITAL_PARSER  # noqa: E402
+from eu_direct_digital_ft_exact import (  # noqa: E402
+    LEGACY_PARSER_VERSION as DIGITAL_LEGACY_PARSER,
+    SCHEMA as DIGITAL_SCHEMA,
+)
 
 
 def taxonomy(records):
@@ -56,7 +59,9 @@ def previous(reference="DIGITAL-2026-AI-DATA-10-COMPLIANCE"):
     }
     obj = {
         "schema": DIGITAL_SCHEMA,
-        "parser_version": DIGITAL_PARSER,
+        # Deliberately construct a V1 history receipt: the V1_1 hardening must
+        # remain replay-compatible with canonical/LKG evidence already stored.
+        "parser_version": DIGITAL_LEGACY_PARSER,
         "source_family": "EU_DIRECT",
         "programme_family": "DIGITAL_EUROPE",
         "authority_class": "EU_COMMISSION_FUNDING_TENDERS",
@@ -158,6 +163,7 @@ def main() -> int:
         "current": current["observation_state"],
         "omitted_with_previous": omitted_recheck["observation_state"],
         "omitted_without_previous": omitted_skip["observation_state"],
+        "legacy_history_replay_compatible": True,
         "material_authorization": False,
     }, sort_keys=True))
     return 0
