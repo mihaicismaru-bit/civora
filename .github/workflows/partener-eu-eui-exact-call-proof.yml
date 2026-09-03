@@ -12,6 +12,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   eui-exact-call-proof:
@@ -49,20 +50,85 @@ jobs:
           python partener-eu/ops/test_eu_direct_eui_exact_call.py
           python partener-eu/ops/test_eu_direct_eui_exact_call_reconcile.py
 
-      - name: Acquire fresh exact official EUI Call 4 chain
+      - name: Prepare bounded EUI exact replay root
         run: |
           ROOT=/tmp/partener-eu-eui-exact-call-proof
           rm -rf "$ROOT"
-          mkdir -p "$ROOT/current"
+          mkdir -p "$ROOT/current" "$ROOT/previous"
+
+      - name: Restore previous successful same-branch EUI exact receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eui-exact-call-proof
+          SCRATCH=/tmp/partener-eu-eui-exact-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH" "$ROOT/previous"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          CANDIDATE="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-eui-exact-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not (
+                  name.startswith('partener-eu-eui-exact-call-proof-')
+                  or name.startswith('partener-eu-eu-direct-programme-intelligence-')
+              ):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          print(rows[0][1] if rows else '')
+          PY
+          )"
+          if [ -n "$CANDIDATE" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            mkdir -p "$SCRATCH/unpacked"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'eui-call4-exact-evidence.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous/eui-call4-exact-evidence.json"
+              echo "Restored previous bounded exact EUI receipt from artifact ${CANDIDATE}"
+            else
+              echo "Candidate artifact ${CANDIDATE} contained no exact EUI receipt; baseline mode retained."
+            fi
+          else
+            echo "No previous same-branch exact EUI artifact found; baseline mode retained."
+          fi
+
+      - name: Acquire fresh exact official EUI Call 4 chain
+        run: |
+          ROOT=/tmp/partener-eu-eui-exact-call-proof
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_eui_exact_call.py \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eui-call4" \
             --output-dir "$ROOT/current"
 
-      - name: Reconcile EUI Call 4 baseline non-authorizing
+      - name: Reconcile EUI Call 4 same-identity evidence non-authorizing
+        shell: bash
         run: |
+          set -euo pipefail
           ROOT=/tmp/partener-eu-eui-exact-call-proof
+          ARGS=()
+          if [ -f "$ROOT/previous/eui-call4-exact-evidence.json" ]; then
+            ARGS+=(--previous "$ROOT/previous/eui-call4-exact-evidence.json")
+          fi
           PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eu_direct_eui_exact_call_reconcile.py \
             "$ROOT/current/eui-call4-exact-evidence.json" \
+            "${ARGS[@]}" \
             --output "$ROOT/current/eui-call4-reconciliation.json"
 
       - name: Enforce live exact EUI boundary
@@ -70,11 +136,14 @@ jobs:
           python - <<'PY'
           import json, re, sys
           from pathlib import Path
-          root=Path('/tmp/partener-eu-eui-exact-call-proof/current')
-          evidence=json.loads((root/'eui-call4-exact-evidence.json').read_text(encoding='utf-8'))
-          rec=json.loads((root/'eui-call4-reconciliation.json').read_text(encoding='utf-8'))
+          root=Path('/tmp/partener-eu-eui-exact-call-proof')
+          evidence=json.loads((root/'current/eui-call4-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current/eui-call4-reconciliation.json').read_text(encoding='utf-8'))
+          previous_exists=(root/'previous/eui-call4-exact-evidence.json').exists()
           if evidence.get('source_health_state') != 'HEALTHY':
               sys.exit('FAIL exact EUI authority chain is not HEALTHY')
+          if evidence.get('parser_version') != 'EU_DIRECT_EUI_EXACT_CALL_V1_1':
+              sys.exit('FAIL EUI current parser version drift')
           if evidence.get('discovery_link_verified') is not True:
               sys.exit('FAIL Portico discovery did not bind the exact EUI call detail')
           if evidence.get('candidate_state') != 'CLOSED_CALL' or str(evidence.get('status_label')).casefold() != 'closed':
@@ -85,8 +154,19 @@ jobs:
               sys.exit('FAIL exact Terms of Reference binding missing')
           if not re.fullmatch(r'[0-9a-f]{64}', str(evidence.get('tor_raw_sha256') or '')):
               sys.exit('FAIL exact Terms of Reference hash missing')
-          if rec.get('reconciliation_state') != 'BASELINE_CAPTURED_NON_AUTHORIZING':
-              sys.exit('FAIL unexpected EUI baseline reconciliation state')
+          if previous_exists:
+              if rec.get('reconciliation_state') not in {
+                  'NO_CHANGE',
+                  'EUI_EXACT_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
+              }:
+                  sys.exit('FAIL EUI same-identity replay did not reconcile')
+              if rec.get('previous_evidence_sha256') is None:
+                  sys.exit('FAIL EUI same-identity replay lost previous evidence binding')
+          else:
+              if rec.get('reconciliation_state') != 'BASELINE_CAPTURED_NON_AUTHORIZING':
+                  sys.exit('FAIL unexpected EUI baseline reconciliation state')
+              if rec.get('previous_evidence_sha256') is not None:
+                  sys.exit('FAIL EUI baseline unexpectedly bound previous evidence')
           if rec.get('material_admission_ready_for_downstream_review') is not True:
               sys.exit('FAIL healthy exact closed candidate did not reach downstream review gate')
           flags=(
@@ -104,7 +184,10 @@ jobs:
               'identity_slug': evidence['identity_slug'],
               'candidate_state': evidence['candidate_state'],
               'source_health_state': evidence['source_health_state'],
+              'parser_version': evidence['parser_version'],
+              'previous_same_identity_restored': previous_exists,
               'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
               'official_call_identifier': None,
               'closed_call_authorized': False,
               'publication_effect': 'NONE',
