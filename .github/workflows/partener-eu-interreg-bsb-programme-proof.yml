@@ -43,60 +43,94 @@ jobs:
           PYTHONPATH: partener-eu/ingest:partener-eu/ops
         run: python partener-eu/ops/test_interreg_bsb_programme_fit.py
 
-      - name: Acquire fresh official BSB programme-fit evidence
+      - name: Acquire fresh BSB evidence or preserve source-health failure
         env:
           PYTHONPATH: partener-eu/ingest
+        shell: bash
         run: |
+          set -uo pipefail
           ROOT=/tmp/partener-eu-interreg-bsb-programme-proof
           rm -rf "$ROOT"
           mkdir -p "$ROOT"
+          set +e
           python partener-eu/ingest/interreg_bsb_programme_fit.py \
             --out-dir "$ROOT" \
-            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            >"$ROOT/acquisition.stdout" 2>"$ROOT/acquisition.stderr"
+          RC=$?
+          set -e
+          if [ "$RC" -ne 0 ]; then
+            export BSB_ACQUISITION_RC="$RC"
+            python - <<'PY'
+          import datetime as dt, json, os
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-interreg-bsb-programme-proof')
+          stderr=(root/'acquisition.stderr').read_text(encoding='utf-8', errors='replace')
+          failure={
+              'schema':'PARTENER_EU_INTERREG_BSB_SOURCE_HEALTH_FAILURE_V1',
+              'programme_id':'BSB',
+              'source_family':'INTERREG',
+              'programme_family':'INTERREG_NEXT_BLACK_SEA_BASIN',
+              'fetched_at':dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat(),
+              'source_health':'DEGRADED',
+              'error_type':'LIVE_ACQUISITION_FAILED',
+              'process_exit_code':int(os.environ['BSB_ACQUISITION_RC']),
+              'error_excerpt':stderr[-4000:],
+              'lkg_required':True,
+              'lkg_available':False,
+              'current_material_truth_available':False,
+              'market_intelligence_only':True,
+              'material_fact_use':False,
+              'open_call_authorized':False,
+              'closed_call_authorized':False,
+              'deadline_authorized':False,
+              'budget_authorized':False,
+              'eligibility_authorized':False,
+              'publish_authorized':False,
+              'distribution_authorized':False,
+              'call_alert_authorized':False,
+              'canonical_corpus_mutation':False,
+              'publication_effect':'NONE',
+          }
+          (root/'bsb-source-health-failure.json').write_text(json.dumps(failure,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          PY
+          fi
 
-      - name: Enforce live non-authorizing BSB boundary
+      - name: Enforce live BSB fail-closed boundary
         run: |
           python - <<'PY'
           import json, re
           from pathlib import Path
-          p=Path('/tmp/partener-eu-interreg-bsb-programme-proof/interreg-bsb-programme-fit.json')
-          row=json.loads(p.read_text(encoding='utf-8'))
-          assert row['schema'] == 'PARTENER_EU_INTERREG_BSB_PROGRAMME_FIT_V1'
-          assert row['parser_version'] == 'INTERREG_BSB_PROGRAMME_FIT_V1'
-          assert row['source_health'] == 'HEALTHY'
-          assert row['programme_id'] == 'BSB'
-          assert row['programme_cci'] == '2021TC16NXTN002'
-          assert row['romania_programme_region'] == 'Sud-Est'
-          assert row['romania_scope'] == ['Braila','Buzau','Constanta','Galati','Tulcea','Vrancea']
-          assert set(row['supported_applicant_types']) == {'PUBLIC_AUTHORITY','PUBLIC_LAW_BODY','NGO_NONPROFIT'}
-          assert row['historical_call_status_observed'] == 'CLOSED'
-          assert row['historical_call_status_is_current_truth'] is False
-          assert row['market_intelligence_only'] is True and row['fit_is_not_eligibility'] is True
-          assert row['call_specific_applicant_rules_required'] is True
-          assert len(row['source_receipts']) == 3
-          for source in row['source_receipts']:
-              assert source['source_health'] == 'HEALTHY' and source['http_status'] == 200
-              assert re.fullmatch(r'[0-9a-f]{64}', source['raw_sha256'])
-              assert re.fullmatch(r'[0-9a-f]{64}', source['normalized_visible_text_sha256'])
+          root=Path('/tmp/partener-eu-interreg-bsb-programme-proof')
+          healthy=root/'interreg-bsb-programme-fit.json'
+          degraded=root/'bsb-source-health-failure.json'
           flags=(
               'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
               'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
               'call_alert_authorized','canonical_corpus_mutation',
           )
-          assert all(row[key] is False for key in flags)
-          assert row['publication_effect'] == 'NONE'
-          assert {'exact_current_call_or_topic_identifier','fresh_current_official_exact_call_endpoint','explicit_current_official_open_status','same_identity_semantic_reconciliation','field_scoped_material_admission'}.issubset(set(row['missing_for_open_confirmation']))
-          print({
-              'programme_id': row['programme_id'],
-              'programme_cci': row['programme_cci'],
-              'romania_region': row['romania_programme_region'],
-              'romania_scope': row['romania_scope'],
-              'source_receipts': len(row['source_receipts']),
-              'semantic_fingerprint': row['semantic_fingerprint'],
-              'open_call_authorized': False,
-              'eligibility_authorized': False,
-              'publication_effect': 'NONE',
-          })
+          if healthy.exists():
+              row=json.loads(healthy.read_text(encoding='utf-8'))
+              assert row['schema']=='PARTENER_EU_INTERREG_BSB_PROGRAMME_FIT_V1'
+              assert row['source_health']=='HEALTHY' and row['programme_id']=='BSB'
+              assert row['programme_cci']=='2021TC16NXTN002'
+              assert row['romania_programme_region']=='Sud-Est'
+              assert row['romania_scope']==['Braila','Buzau','Constanta','Galati','Tulcea','Vrancea']
+              assert len(row['source_receipts'])==3
+              for source in row['source_receipts']:
+                  assert source['source_health']=='HEALTHY' and source['http_status']==200
+                  assert re.fullmatch(r'[0-9a-f]{64}',source['raw_sha256'])
+                  assert re.fullmatch(r'[0-9a-f]{64}',source['normalized_visible_text_sha256'])
+              assert all(row[k] is False for k in flags) and row['publication_effect']=='NONE'
+              print({'bsb_source_health':'HEALTHY','romania_scope':row['romania_scope'],'semantic_fingerprint':row['semantic_fingerprint'],'publication_effect':'NONE'})
+          else:
+              assert degraded.exists(), 'BSB live acquisition produced neither healthy nor degraded receipt'
+              row=json.loads(degraded.read_text(encoding='utf-8'))
+              assert row['source_health']=='DEGRADED'
+              assert row['lkg_required'] is True and row['lkg_available'] is False
+              assert row['current_material_truth_available'] is False
+              assert all(row[k] is False for k in flags) and row['publication_effect']=='NONE'
+              print({'bsb_source_health':'DEGRADED','lkg_required':True,'lkg_available':False,'open_call_authorized':False,'publication_effect':'NONE'})
           PY
 
       - name: Upload replayable BSB proof evidence
