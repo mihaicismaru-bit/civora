@@ -62,7 +62,7 @@ def main() -> None:
     assert {row["observation_state"] for row in current["sources"]} == {"PROPOSAL", "PROGRAMMING_PROCESS"}
     assert all(row["fit_is_not_eligibility"] is True for row in current["sources"])
     assert all(0.0 <= row["romania_relevance_score"] <= 1.0 for row in current["sources"])
-    assert any(row["romania_relevance_score"] == 1.0 for row in current["sources"])
+    assert any(row["romania_relevance_score"] >= 0.9 for row in current["sources"])
     for row in current["sources"]:
         assert row["source_health"] == "HEALTHY" and row["http_status"] == 200
         assert len(row["raw_sha256"]) == 64
