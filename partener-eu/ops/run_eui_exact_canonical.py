@@ -19,9 +19,11 @@ FLAGS = (
 EVIDENCE_SCHEMA = "PARTENER_EU_EUI_EXACT_CALL_EVIDENCE_V1"
 RECONCILIATION_SCHEMA = "PARTENER_EU_EUI_EXACT_CALL_RECONCILIATION_V1"
 IDENTITY_SLUG = "fourth-call-proposals-innovative-actions"
+GENERIC_ARTIFACT_PREFIX = "partener-eu-eu-direct-programme-intelligence-"
+LEGACY_PROOF_ARTIFACT_PREFIX = "partener-eu-eui-exact-call-proof-"
 ARTIFACT_PREFIXES = (
-    "partener-eu-eu-direct-programme-intelligence-",
-    "partener-eu-eui-exact-call-proof-",
+    GENERIC_ARTIFACT_PREFIX,
+    LEGACY_PROOF_ARTIFACT_PREFIX,
 )
 
 
@@ -68,7 +70,7 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
     with artifacts_json.open("wb") as output:
         run(["gh", "api", f"repos/{repo}/actions/artifacts?per_page=100"], stdout=output)
     data = load(artifacts_json)
-    rows: list[tuple[str, int, str]] = []
+    rows: list[tuple[int, str, int, str]] = []
     for artifact in data.get("artifacts") or []:
         name = str(artifact.get("name") or "")
         if artifact.get("expired") is True or not name.startswith(ARTIFACT_PREFIXES):
@@ -78,8 +80,12 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
             continue
         if branch and str(workflow_run.get("head_branch") or "") != branch:
             continue
-        rows.append((str(artifact.get("created_at") or ""), int(artifact.get("id") or 0), name))
-    rows.sort(reverse=True)
+        source_priority = 0 if name.startswith(GENERIC_ARTIFACT_PREFIX) else 1
+        rows.append((source_priority, str(artifact.get("created_at") or ""), int(artifact.get("id") or 0), name))
+    # Prefer canonical generic EU_DIRECT history over legacy proof artifacts even if
+    # a proof artifact is slightly newer. Within each source kind, prefer newest.
+    rows.sort(key=lambda row: row[1], reverse=True)
+    rows.sort(key=lambda row: row[0])
 
     previous_dir = root / "previous"
     previous_dir.mkdir(parents=True, exist_ok=True)
@@ -87,10 +93,11 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
         "previous_found": False,
         "artifact_id": None,
         "artifact_name": None,
+        "restore_source_kind": None,
         "restore_reason": "NO_PREVIOUS_COMPATIBLE_ARTIFACT",
         "identity_slug": IDENTITY_SLUG,
     }
-    for _, artifact_id, artifact_name in rows[:30]:
+    for source_priority, _, artifact_id, artifact_name in rows[:30]:
         archive_path = scratch / f"{artifact_id}.zip"
         with archive_path.open("wb") as output:
             run(["gh", "api", f"repos/{repo}/actions/artifacts/{artifact_id}/zip"], stdout=output)
@@ -111,6 +118,7 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
                 "previous_found": True,
                 "artifact_id": artifact_id,
                 "artifact_name": artifact_name,
+                "restore_source_kind": "GENERIC_EU_DIRECT" if source_priority == 0 else "LEGACY_EUI_PROOF",
                 "restore_reason": "SAME_EXACT_CALL_IDENTITY",
                 "restored_candidate_path": candidate_path.relative_to(unpack).as_posix(),
                 "restored_fetched_at": candidate.get("fetched_at"),
