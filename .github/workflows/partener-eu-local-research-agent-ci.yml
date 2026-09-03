@@ -54,15 +54,16 @@ jobs:
             'partener-eu/local-research-agent/uninstall.ps1'
           )
           foreach ($file in $files) {
+            $tokens = $null
             $errors = $null
-            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$null, [ref]$errors) | Out-Null
+            [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $file), [ref]$tokens, [ref]$errors) | Out-Null
             if ($errors.Count -gt 0) { $errors | Format-List | Out-String | Write-Error; throw "PowerShell syntax failed: $file" }
           }
 
       - name: Enforce non-authorizing registry boundary
         shell: pwsh
         run: |
-          python - <<'PY'
+          @'
           import json
           from pathlib import Path
           p=Path('partener-eu/local-research-agent/sources.json')
@@ -77,4 +78,4 @@ jobs:
               assert row['observation_state'] not in {'OPEN_CALL','CLOSED_CALL'}
               assert row['allow_hosts']
           print({'sources':len(d['sources']),'material_fact_use':False,'publication_effect':'NONE'})
-          PY
+          '@ | python -
