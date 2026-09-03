@@ -20,6 +20,10 @@ def fake_fetch(url: str):
         text = "Horizon Europe Proposal for a Regulation COM_2025_543_1 17 July 2025"
     elif url.endswith("/publications/erasmus_en"):
         text = "Erasmus+ Proposal for a Regulation COM_2025_549_1 18 July 2025"
+    elif url.endswith("/publications/connecting-europe-facility_en"):
+        text = "Connecting Europe Facility Proposal for a Regulation COM_2025_547_1 17 July 2025"
+    elif url.endswith("/publications/single-market-and-customs-programme_en"):
+        text = "Single Market and Customs Programme Proposal for a Regulation COM_2025_590_1 3 September 2025"
     elif "commission.europa.eu" in url:
         text = "The Commission presented its proposal for the 2028-2034 Multiannual Financial Framework including European Competitiveness Fund, Erasmus+ and Horizon Europe."
     else:
@@ -34,11 +38,19 @@ def main() -> None:
     registry = watch.load_registry(REGISTRY)
     current, raw = watch.collect(
         registry, run_id="test-1", fetched_at="2026-09-03T05:00:00+00:00", fetcher=fake_fetch)
-    assert current["source_count"] == 4 and current["healthy_source_count"] == 4
-    assert current["degraded_source_count"] == 0 and len(raw) == 4
+    assert current["source_count"] == 6 and current["healthy_source_count"] == 6
+    assert current["degraded_source_count"] == 0 and len(raw) == 6
     assert current["observation_state"] == "PROGRAMMING_PIPELINE"
     procedure_rows = [row for row in current["evidence"] if row.get("procedure_identifier")]
-    assert len(procedure_rows) == 3
+    assert len(procedure_rows) == 5
+    assert {row["source_id"] for row in current["evidence"]} == {
+        "MFF-2028-2034-COMMISSION-ROOT",
+        "ECF-COM-2025-555",
+        "HORIZON-2028-2034-COM-2025-543",
+        "ERASMUS-2028-2034-COM-2025-549",
+        "CEF-2028-2034-COM-2025-547",
+        "SINGLE-MARKET-CUSTOMS-2028-2034-COM-2025-590",
+    }
     assert all(row["semantics"]["procedure_state"] == "UNKNOWN_NON_AUTHORIZING" for row in procedure_rows)
     for flag in watch.MATERIAL_FLAGS:
         assert current[flag] is False
@@ -79,7 +91,7 @@ def main() -> None:
     }
     degraded_row["semantics"] = None
     degraded_row["semantic_fingerprint"] = None
-    transport["healthy_source_count"] = 3
+    transport["healthy_source_count"] = 5
     transport["degraded_source_count"] = 1
     transport["source_health"] = "DEGRADED"
     transport["semantic_fingerprint"] = watch.sha256_json([
@@ -118,15 +130,15 @@ def main() -> None:
     degraded, _ = watch.collect(
         registry, run_id="test-3", fetched_at="2026-09-03T07:00:00+00:00",
         fetcher=lambda url: (_ for _ in ()).throw(OSError("boom")))
-    assert degraded["degraded_source_count"] == 4
+    assert degraded["degraded_source_count"] == 6
     assert all(row["source_health"]["lkg_required"] is True for row in degraded["evidence"])
     assert all(row["semantic_fingerprint"] is None for row in degraded["evidence"])
     degraded_diff = watch.reconcile(degraded, current)
     assert degraded_diff["reconciliation_state"] == "TRANSPORT_OR_CONTENT_DRIFT_ONLY"
     assert degraded_diff["semantic_change_count"] == 0
-    assert degraded_diff["transport_or_content_change_count"] == 4
+    assert degraded_diff["transport_or_content_change_count"] == 6
     print(json.dumps({
-        "status": "PASS", "sources": 4, "open_call_authorized": False,
+        "status": "PASS", "sources": 6, "open_call_authorized": False,
         "transport_drift_is_not_semantic_change": True,
         "publication_effect": "NONE",
     }, sort_keys=True))
