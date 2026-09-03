@@ -15,7 +15,7 @@ from typing import Any, Mapping
 
 SCHEMA = "PARTENER_EU_EDF_PROGRAMME_INTELLIGENCE_V1"
 REGISTRY_SCHEMA = "PARTENER_EU_EDF_PROGRAMME_INTELLIGENCE_REGISTRY_V1"
-PARSER_VERSION = "EU_DIRECT_EDF_PROGRAMME_INTELLIGENCE_V1"
+PARSER_VERSION = "EU_DIRECT_EDF_PROGRAMME_INTELLIGENCE_V1_1"
 ALLOWED_HOSTS = {"defence-industry-space.ec.europa.eu"}
 MATERIAL_FLAGS = (
     "material_fact_use", "open_call_authorized", "closed_call_authorized",
@@ -143,17 +143,20 @@ def collect(registry: Mapping[str, Any], run_id: str, fetcher=fetch) -> dict[str
             missing = [m for m in source["required_markers"] if normal(m) not in text]
             if missing:
                 raise ValueError(f"MARKER_DRIFT:{missing}")
+            normalized_text_sha256 = sha256_bytes(text.encode("utf-8"))
             semantics = {
                 "source_id": source["source_id"],
                 "programme_id": registry["programme_id"],
                 "observation_state": source["observation_state"],
                 "authority_url": source["url"],
                 "required_markers_present": True,
+                "normalized_visible_text_sha256": normalized_text_sha256,
             }
             row.update({
                 "requested_url": meta["requested_url"], "final_url": meta["final_url"],
                 "http_status": meta["http_status"], "content_type": meta["content_type"],
                 "raw_sha256": sha256_bytes(raw), "source_health": "HEALTHY", "lkg_required": False,
+                "normalized_visible_text_sha256": normalized_text_sha256,
                 "source_semantic_fingerprint": sha256_json(semantics), "error": None,
             })
             healthy += 1
@@ -161,7 +164,8 @@ def collect(registry: Mapping[str, Any], run_id: str, fetcher=fetch) -> dict[str
             row.update({
                 "requested_url": source["url"], "final_url": None, "http_status": None,
                 "content_type": None, "raw_sha256": None, "source_health": "DEGRADED",
-                "lkg_required": True, "source_semantic_fingerprint": None,
+                "lkg_required": True, "normalized_visible_text_sha256": None,
+                "source_semantic_fingerprint": None,
                 "error": f"{type(exc).__name__}: {exc}",
             })
         evidence.append(row)
