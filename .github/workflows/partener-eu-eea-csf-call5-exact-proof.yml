@@ -1,0 +1,205 @@
+name: PARTENER.EU EEA CSF Call 5 Exact Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_civil_society_fund_call5_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call5_reconcile.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call5_exact.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call5_reconcile.py'
+      - '.github/workflows/partener-eu-eea-csf-call5-exact-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  eea-csf-call5-exact-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded EEA CSF Call 5 adapter and reconciliation
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eea_civil_society_fund_call5_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call5_reconcile.py \
+            partener-eu/ops/test_eea_civil_society_fund_call5_exact.py \
+            partener-eu/ops/test_eea_civil_society_fund_call5_reconcile.py
+
+      - name: Run fail-closed EEA CSF Call 5 regressions
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eea_civil_society_fund_call5_exact.py
+          python partener-eu/ops/test_eea_civil_society_fund_call5_reconcile.py
+
+      - name: Prepare bounded EEA CSF Call 5 replay root
+        run: |
+          ROOT=/tmp/partener-eu-eea-csf-call5-exact-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/current" "$ROOT/previous"
+
+      - name: Restore previous successful same-branch EEA CSF Call 5 receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eea-csf-call5-exact-proof
+          SCRATCH=/tmp/partener-eu-eea-csf-call5-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH" "$ROOT/previous"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          python - <<'PY' > "$SCRATCH/candidates.txt"
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-eea-csf-call5-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not name.startswith('partener-eu-eea-csf-call5-exact-proof-'):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          for _, artifact_id in rows[:20]:
+              print(artifact_id)
+          PY
+          RESTORED=""
+          while IFS= read -r CANDIDATE; do
+            [ -n "$CANDIDATE" ] || continue
+            rm -f "$SCRATCH/previous.zip"
+            rm -rf "$SCRATCH/unpacked"
+            mkdir -p "$SCRATCH/unpacked"
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'eea-csf-ro-call5-exact-evidence.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous/eea-csf-ro-call5-exact-evidence.json"
+              RESTORED="$CANDIDATE"
+              echo "Restored previous bounded exact EEA CSF Call 5 receipt from artifact ${CANDIDATE}"
+              break
+            fi
+          done < "$SCRATCH/candidates.txt"
+          if [ -z "$RESTORED" ]; then
+            echo "No previous same-branch exact EEA CSF Call 5 receipt found; baseline mode retained."
+          fi
+
+      - name: Acquire fresh exact official EEA CSF Call 5 chain
+        run: |
+          ROOT=/tmp/partener-eu-eea-csf-call5-exact-proof
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eea_civil_society_fund_call5_exact.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eea-csf-call5" \
+            --output-dir "$ROOT/current"
+
+      - name: Reconcile EEA CSF Call 5 same-identity evidence non-authorizing
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eea-csf-call5-exact-proof
+          ARGS=()
+          if [ -f "$ROOT/previous/eea-csf-ro-call5-exact-evidence.json" ]; then
+            ARGS+=(--previous "$ROOT/previous/eea-csf-ro-call5-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eea_civil_society_fund_call5_reconcile.py \
+            "$ROOT/current/eea-csf-ro-call5-exact-evidence.json" \
+            "${ARGS[@]}" \
+            --output "$ROOT/current/eea-csf-ro-call5-reconciliation.json"
+
+      - name: Enforce live exact EEA CSF Call 5 boundary
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-eea-csf-call5-exact-proof')
+          evidence=json.loads((root/'current/eea-csf-ro-call5-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current/eea-csf-ro-call5-reconciliation.json').read_text(encoding='utf-8'))
+          previous_exists=(root/'previous/eea-csf-ro-call5-exact-evidence.json').exists()
+          if evidence.get('source_health_state') != 'HEALTHY':
+              sys.exit('FAIL exact EEA CSF Call 5 authority chain is not HEALTHY')
+          if evidence.get('discovery_link_verified') is not True:
+              sys.exit('FAIL EEA CSF index did not bind exact Call 5 detail')
+          if evidence.get('official_call_identifier') != '5' or evidence.get('call_identifier_kind') != 'OFFICIAL_CALL_NUMBER':
+              sys.exit('FAIL exact official EEA CSF Call 5 identifier binding lost')
+          if evidence.get('candidate_state') != 'OPEN_CALL' or str(evidence.get('status_label')).casefold() != 'open':
+              sys.exit('FAIL exact current EEA CSF Call 5 open candidate not observed')
+          if evidence.get('deadline_candidate') != '2026-10-08':
+              sys.exit('FAIL exact current EEA CSF Call 5 deadline candidate drift')
+          if evidence.get('budget_candidate') != 'EUR 6,500,000':
+              sys.exit('FAIL exact current EEA CSF Call 5 budget candidate drift')
+          receipts=evidence.get('source_receipts') or {}
+          for key in ('official_calls_index_discovery','official_exact_call_detail'):
+              receipt=receipts.get(key) or {}
+              if receipt.get('health_state') != 'HEALTHY' or receipt.get('http_status') != 200:
+                  sys.exit(f'FAIL EEA CSF source receipt degraded: {key}')
+              if not re.fullmatch(r'[0-9a-f]{64}', str(receipt.get('raw_sha256') or '')):
+                  sys.exit(f'FAIL EEA CSF source receipt lost raw SHA-256: {key}')
+          if previous_exists:
+              if rec.get('reconciliation_state') not in {'NO_CHANGE','EEA_CSF_CALL5_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}:
+                  sys.exit('FAIL EEA CSF same-identity replay did not reconcile')
+              if rec.get('previous_evidence_sha256') is None:
+                  sys.exit('FAIL EEA CSF same-identity replay lost previous evidence binding')
+              if rec.get('material_admission_ready_for_downstream_review') is not True:
+                  sys.exit('FAIL exact EEA CSF same-identity evidence did not reach downstream review gate')
+          else:
+              if rec.get('reconciliation_state') != 'BASELINE_CAPTURED_NON_AUTHORIZING':
+                  sys.exit('FAIL unexpected EEA CSF baseline reconciliation state')
+              if rec.get('material_admission_ready_for_downstream_review') is not False:
+                  sys.exit('FAIL EEA CSF baseline became review-ready without previous same-identity evidence')
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized',
+          )
+          for row in (evidence, rec):
+              for key in flags:
+                  if row.get(key) is not False:
+                      sys.exit(f'FAIL EEA CSF proof crossed material boundary: {key}')
+              if row.get('publication_effect') != 'NONE' or row.get('canonical_corpus_mutation') is not False:
+                  sys.exit('FAIL EEA CSF proof crossed publication boundary')
+          print({
+              'official_call_identifier': evidence['official_call_identifier'],
+              'candidate_state': evidence['candidate_state'],
+              'source_health_state': evidence['source_health_state'],
+              'previous_same_identity_restored': previous_exists,
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'open_call_authorized': False,
+              'publication_effect': 'NONE',
+          })
+          PY
+
+      - name: Upload bounded EEA CSF Call 5 proof
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-eea-csf-call5-exact-proof-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-eea-csf-call5-exact-proof
+          if-no-files-found: error
+          retention-days: 7
