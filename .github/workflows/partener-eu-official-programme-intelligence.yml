@@ -325,6 +325,13 @@ jobs:
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
             --output "$ROOT/interreg-applicant-fit/valcea-private-body.json"
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county "Suceava" \
+            --applicant-type PUBLIC_AUTHORITY \
+            --has-international-partner \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
+            --output "$ROOT/interreg-applicant-fit/suceava-public-authority.json"
 
       - name: Acquire official Interreg Romania call surfaces
         env:
@@ -495,6 +502,7 @@ jobs:
           interreg_calls = json.loads((root/'interreg-call-surfaces/interreg-romania-call-surface-watch.json').read_text(encoding='utf-8'))
           applicant_timis = json.loads((root/'interreg-applicant-fit/timis-public-authority.json').read_text(encoding='utf-8'))
           applicant_valcea = json.loads((root/'interreg-applicant-fit/valcea-private-body.json').read_text(encoding='utf-8'))
+          applicant_suceava = json.loads((root/'interreg-applicant-fit/suceava-public-authority.json').read_text(encoding='utf-8'))
           danube_exact = json.loads((root/'interreg-danube-exact/danube-third-call-exact.json').read_text(encoding='utf-8'))
           danube_reconcile = json.loads((root/'interreg-danube-exact/danube-third-call-reconciliation.json').read_text(encoding='utf-8'))
           danube_previous = (root/'interreg-danube-exact/previous-exact.json').exists()
@@ -549,18 +557,26 @@ jobs:
                   assert row['health_state'] == 'DEGRADED'
                   assert row['lkg_required'] is True and row['candidate_count'] == 0
 
-          assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1' and interreg['programme_count'] == 7
+          assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1' and interreg['programme_count'] == 8
           assert interreg_calls['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2'
           assert interreg_calls['discovered_call_facts'] == [] and interreg_calls['fallback_does_not_restore_call_surface_coverage'] is True
-          for applicant in (applicant_timis, applicant_valcea):
+          for applicant in (applicant_timis, applicant_valcea, applicant_suceava):
               assert applicant['schema'] == 'PARTENER_EU_INTERREG_APPLICANT_PARTNER_FIT_V2'
-              assert applicant['programme_count'] == 7
+              assert applicant['programme_count'] == 8
               assert applicant['market_intelligence_only'] is True and applicant['fit_is_not_eligibility'] is True
               assert applicant['programme_matrix_semantic_fingerprint'] == interreg['semantic_fingerprint']
           assert applicant_valcea['input']['county'] == 'Vâlcea'
           valcea = {x['programme_id']: x for x in applicant_valcea['ranked_programme_fits']}
           assert set(valcea) == {'DANUBE', 'INTERREG_EUROPE'}
           assert valcea['DANUBE']['market_fit_score'] == 100
+          assert applicant_suceava['input']['county'] == 'Suceava'
+          suceava = {x['programme_id']: x for x in applicant_suceava['ranked_programme_fits']}
+          assert suceava['HUSKROUA']['market_fit_score'] == 100
+          assert suceava['HUSKROUA']['applicant_signal_state'] == 'SUPPORTED_PROGRAMME_SIGNAL'
+          assert suceava['HUSKROUA']['matched_territory'] == 'Suceava'
+          assert suceava['HUSKROUA']['eligibility_authorized'] is False
+          assert suceava['RO_UA']['market_fit_score'] == 90
+          assert suceava['RO_UA']['applicant_signal_state'] == 'SUPPORTED_HISTORICAL_CALL_SIGNAL'
 
           assert danube_exact['schema'] == 'PARTENER_EU_INTERREG_DANUBE_EXACT_CALL_V1'
           assert danube_exact['call_identifier'] == 'third-call-for-proposals'
@@ -606,7 +622,7 @@ jobs:
               'call_alert_authorized','canonical_corpus_mutation',
           )
           for obj in (
-              eea, interreg, interreg_calls, applicant_timis, applicant_valcea,
+              eea, interreg, interreg_calls, applicant_timis, applicant_valcea, applicant_suceava,
               danube_exact, danube_reconcile, future, reconcile, preview, preview_v2,
           ):
               assert all(obj[k] is False for k in flags)
@@ -622,6 +638,8 @@ jobs:
               'interreg_call_surface_health': interreg_calls['source_health'],
               'applicant_fit_timis_count': applicant_timis['fit_count'],
               'applicant_fit_valcea_count': applicant_valcea['fit_count'],
+              'applicant_fit_suceava_count': applicant_suceava['fit_count'],
+              'applicant_fit_suceava_huskroua_score': suceava['HUSKROUA']['market_fit_score'],
               'applicant_fit_valcea_top': applicant_valcea['ranked_programme_fits'][0]['programme_id'],
               'danube_exact_previous_restored': danube_previous,
               'danube_exact_candidate_state': danube_exact['candidate_state'],
