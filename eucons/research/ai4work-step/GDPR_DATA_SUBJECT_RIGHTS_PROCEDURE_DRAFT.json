@@ -2,10 +2,10 @@
   "schema_version": "eucons.ai4work_data_subject_rights.v0.8",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "date": "2026-09-03",
-  "status": "CONTACT_BOUND_REQUESTER_AUTHENTICATION_AND_LIVE_BINDING_REQUIRED_BEFORE_COLLECTION",
+  "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "controller_approval": false,
-  "controller_approval_semantics": "FULL_OPERATIONAL_PROD_APPROVAL_REQUIRING_REQUESTER_AUTHENTICATION_ARTICLE15_CONTEXT_AND_PROVIDER_BOUND_RIGHTS_PATH; policy acceptance and privacy-contact binding are recorded separately below",
+  "controller_approval_semantics": "FULL_OPERATIONAL_PROD_APPROVAL_REQUIRING_LIVE_PRIVACY_CONTACT_REQUESTER_AUTHENTICATION_AND_PROVIDER_BOUND_RIGHTS_PATH; policy acceptance is recorded separately below",
   "collection_enabled": false,
   "legal_design_anchors": {
     "gdpr_article_11": "Do not acquire, maintain or process additional identifying information solely to identify a data subject when identification is not required for the research purpose; where the controller can demonstrate it cannot identify the data subject, rights that require identification are handled in accordance with Article 11 unless the data subject provides additional information enabling identification.",
@@ -46,11 +46,9 @@
     "consent_withdrawal_if_consent_is_final_legal_basis"
   ],
   "request_channel": {
-    "privacy_contact": "privacy@eucons.ro",
-    "binding_reference": "RIGHTS_REQUEST_CHANNEL_BINDING_2026-09-03.json",
-    "status": "CONTACT_BOUND_REQUESTER_AUTHENTICATION_PENDING",
-    "reachability_state": "CONTROLLER_DECLARED_CREATED_NOT_INDEPENDENTLY_TESTED",
-    "rule": "The dedicated request-intake contact is bound from the controller declaration. No public collection until requester authentication, Article 15 confirmation/context handling and the provider-bound rights path are operationally validated."
+    "privacy_contact": null,
+    "status": "OPEN_UNTIL_OPERATIONAL_PRIVACY_CONTACT_AND_REQUESTER_AUTHENTICATION_ARE_BOUND",
+    "rule": "No public collection until the determined controller publishes an operational privacy contact and request-handling route."
   },
   "research_store_operations": {
     "lookup": "Locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
@@ -72,7 +70,10 @@
     "erasure_replay_marker_prod_binding": "PROD MUST USE PER-MARKER FINITE EXPIRY NOT LATER THAN ERASURE_PLUS_24H_AND AUTOMATIC PURGE; PROVIDER-BOUND TEST TWIN MUST PROVE EXPIRY",
     "restriction_or_objection": "A receipt-keyed bounded analysis hold keeps the record available for rights review but excludes it from analytical export while active.",
     "restriction_or_objection_state_store": "BOUNDED_ENUM_ONLY_NO_CASE_NARRATIVE",
-    "allowed_hold_states": ["RESTRICTED_PENDING_REVIEW", "OBJECTED_PENDING_REVIEW"],
+    "allowed_hold_states": [
+      "RESTRICTED_PENDING_REVIEW",
+      "OBJECTED_PENDING_REVIEW"
+    ],
     "held_records_excluded_from_export": true,
     "case_narrative_in_research_store": "FORBIDDEN",
     "portability": "No separate portability export is enabled under the final legitimate-interest basis. If the controller changes the basis to consent or contract and Article 20 conditions are met, implement and validate a reviewed structured machine-readable export before PROD.",
@@ -106,9 +107,7 @@
     "replay_marker_retention_max_hours": 24,
     "portability_decision": "NOT_APPLICABLE_FINAL_LEGITIMATE_INTEREST_BASIS",
     "consent_withdrawal_decision": "NOT_APPLICABLE_FINAL_LEGITIMATE_INTEREST_BASIS",
-    "privacy_contact": "privacy@eucons.ro",
-    "privacy_contact_binding_reference": "RIGHTS_REQUEST_CHANNEL_BINDING_2026-09-03.json",
-    "boundary": "Policy and rights-applicability rules are approved and the dedicated privacy-contact intake channel is bound by controller declaration. This is not the full operational controller_approval used by the PROD gate: requester authentication, Article 15 confirmation/context handling and provider-bound live rights operations remain required."
+    "boundary": "Policy and rights-applicability rules are approved. This is not the full operational controller_approval used by the PROD gate: privacy contact, requester authentication, Article 15 confirmation/context handling and provider-bound live rights operations remain required."
   },
   "required_before_prod": [
     "controller determination approved",
