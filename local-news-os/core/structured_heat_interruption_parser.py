@@ -156,12 +156,21 @@ def _affected_consumers(block: str) -> list[str]:
 
 
 def _affected_scope(block: str) -> str | None:
-    match = re.search(
-        r"\b(?:la|pentru)\s+(to(?:ti|ți)\s+consumatorii\s+[^,.;]+)(?=\s*,?\s*(?:din|in|în)\s+data\s+de\b)",
-        block,
-        re.I | re.S,
+    patterns = (
+        re.compile(
+            r"\b(?:la|pentru)\s+(to(?:ti|ți)\s+consumatorii\s+[^,.;]+)(?=\s*,?\s*(?:din|in|în)\s+data\s+de\b)",
+            re.I | re.S,
+        ),
+        re.compile(
+            r"\b(?:in|în)\s+(tot\s+municipiul\s+[^,.;]+?)(?=\s+pentru\b)",
+            re.I | re.S,
+        ),
     )
-    return clean(match.group(1)).strip(" .,-") if match else None
+    for pattern in patterns:
+        match = pattern.search(block)
+        if match:
+            return clean(match.group(1)).strip(" .,-")
+    return None
 
 
 def _service_forms(block: str) -> list[str]:
@@ -312,6 +321,18 @@ def self_test() -> int:
     assert future_events[0]["event_start"] == "2026-08-30T22:00+03:00"
     assert future_events[0]["event_end"] == "2026-09-01T00:00+03:00"
     assert future_events[0]["structured"]["affected_scope"] == "toti consumatorii Municipiului Test"
+
+    whole_city = """
+    Operatorul anunta intreruperea furnizarii agentului termic sub forma de apa fierbinte
+    si apa calda de consum, in data de 04.09.2026, intre orele 01-21, in tot Municipiul
+    Ramnicu Valcea pentru racordarea cazanelor de apa fierbinte la reteaua de termoficare.
+    Ne cerem scuze pentru disconfort.
+    """
+    whole_city_events, whole_city_candidates = parse_heat_interruption_listing(whole_city, tz, now)
+    assert whole_city_candidates == 1 and len(whole_city_events) == 1
+    assert whole_city_events[0]["event_start"] == "2026-09-04T01:00+03:00"
+    assert whole_city_events[0]["event_end"] == "2026-09-04T21:00+03:00"
+    assert whole_city_events[0]["structured"]["affected_scope"] == "tot Municipiul Ramnicu Valcea"
 
     missing_consumers = """
     Operatorul anunta intreruperea furnizarii agentului termic in data de
