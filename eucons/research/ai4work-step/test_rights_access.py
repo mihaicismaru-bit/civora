@@ -62,7 +62,6 @@ class RightsAccessTests(unittest.TestCase):
             self.assertTrue(copy["requester_authentication_not_implemented_here"])
             self.assertEqual(copy["record"], item)
 
-            # Rights-review state and storage/transport internals must not leak.
             serialized_keys = set(copy) | set(copy["record"])
             for forbidden in (
                 "raw_sha256",
@@ -137,7 +136,7 @@ class RightsAccessTests(unittest.TestCase):
         self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
         self.assertFalse(procedure["collection_enabled"])
 
-    def test_rights_applicability_is_reconciled_to_approved_lawful_basis_but_live_workflow_remains_fail_closed(self):
+    def test_rights_applicability_and_contact_are_reconciled_but_live_workflow_remains_fail_closed(self):
         procedure = json.loads(
             (Path(__file__).with_name("GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json")).read_text(
                 encoding="utf-8"
@@ -168,7 +167,11 @@ class RightsAccessTests(unittest.TestCase):
             procedure["research_store_operations"]["access_requester_authentication_reference_adapter"],
             "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
         )
-        self.assertIsNone(procedure["request_channel"]["privacy_contact"])
+        self.assertEqual(procedure["request_channel"]["privacy_contact"], "privacy@eucons.ro")
+        self.assertEqual(
+            procedure["request_channel"]["status"],
+            "CONTACT_BOUND_REQUESTER_AUTHENTICATION_PENDING",
+        )
         self.assertFalse(procedure["collection_enabled"])
 
 
