@@ -261,9 +261,10 @@ def main() -> int:
     boundary = enforce_boundary(root)
     history = stage_history(root)
 
-    # EUI exact is part of the generic EU_DIRECT evidence transaction. Keep this
-    # call here until the workflow orchestration is consolidated around one
-    # canonical runner; any EUI failure fails the generic lane closed.
+    # EUI exact is a fail-closed member of the same generic EU_DIRECT evidence
+    # transaction. Give it a deterministic run id and let any failure fail the
+    # generic lane rather than being hidden behind a separate proof workflow.
+    os.environ["EUI_EXACT_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-eui-call4"
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_exact_canonical.py")])
 
     print(json.dumps({"restore": restore, "boundary": boundary, "history": history, "eui_exact_canonicalized": True}, sort_keys=True))
