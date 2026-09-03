@@ -14,14 +14,14 @@ REGISTRY = pathlib.Path(__file__).resolve().parents[1] / "ingest" / "eu_direct_m
 
 
 def fake_fetch(url: str):
-    if "commission.europa.eu" in url:
+    if url.endswith("/publications/european-competitiveness-fund_en"):
+        text = "European Competitiveness Fund Proposal for a Regulation COM_2025_555_1 17 July 2025"
+    elif url.endswith("/publications/horizon-europe_en"):
+        text = "Horizon Europe Proposal for a Regulation COM_2025_543_1 17 July 2025"
+    elif url.endswith("/publications/erasmus_en"):
+        text = "Erasmus+ Proposal for a Regulation COM_2025_549_1 18 July 2025"
+    elif "commission.europa.eu" in url:
         text = "The Commission presented its proposal for the 2028-2034 Multiannual Financial Framework including European Competitiveness Fund, Erasmus+ and Horizon Europe."
-    elif "2025_555" in url:
-        text = "European Competitiveness Fund 2025/0555/COD Ongoing COM(2025) 555"
-    elif "2025_543" in url:
-        text = "Horizon Europe 2028-2034 2025/0543/COD Ongoing COM(2025) 543"
-    elif "2025_222" in url:
-        text = "Erasmus+ 2028-2034 2025/0222/COD Ongoing COM(2025) 549"
     else:
         raise AssertionError(url)
     return text.encode(), {
@@ -39,7 +39,7 @@ def main() -> None:
     assert current["observation_state"] == "PROGRAMMING_PIPELINE"
     procedure_rows = [row for row in current["evidence"] if row.get("procedure_identifier")]
     assert len(procedure_rows) == 3
-    assert all(row["semantics"]["procedure_state"] == "ONGOING" for row in procedure_rows)
+    assert all(row["semantics"]["procedure_state"] == "UNKNOWN_NON_AUTHORIZING" for row in procedure_rows)
     for flag in watch.MATERIAL_FLAGS:
         assert current[flag] is False
         assert all(row[flag] is False for row in current["evidence"])
