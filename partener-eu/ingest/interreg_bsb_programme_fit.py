@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Bounded Interreg NEXT Black Sea Basin programme/geography/applicant intelligence.
+"""Bounded Interreg NEXT Black Sea Basin programme/geography market intelligence.
 
-Acquisition-only and non-authorizing. This adapter verifies Romania programme fit,
-expands the official Sud-Est NUTS II signal to its six Romanian counties using the
-official ADR Sud-Est region definition, and records historical applicant signals
-from the programme's closed second calls. None of this evidence can establish a
-current call, deadline, budget, or applicant eligibility.
+Acquisition-only and non-authorizing. The adapter binds Romania programme-level
+territorial relevance to a stable European Commission programme page and resolves
+the Sud-Est NUTS II region to its six Romanian counties using ADR Sud-Est.
+
+Applicant-class evidence is deliberately INSUFFICIENT here. Historical call pages
+and unstable programme-host transport are not required for programme geography,
+and no historical applicant signal is promoted into current eligibility.
 """
 from __future__ import annotations
 
@@ -23,7 +25,7 @@ from html.parser import HTMLParser
 from typing import Any, Callable, Mapping
 
 SCHEMA = "PARTENER_EU_INTERREG_BSB_PROGRAMME_FIT_V1"
-PARSER_VERSION = "INTERREG_BSB_PROGRAMME_FIT_V1"
+PARSER_VERSION = "INTERREG_BSB_PROGRAMME_FIT_V1_1"
 SOURCE_FAMILY = "INTERREG"
 PROGRAMME_FAMILY = "INTERREG_NEXT_BLACK_SEA_BASIN"
 PROGRAMME_ID = "BSB"
@@ -38,36 +40,28 @@ MATERIAL_FLAGS = (
 )
 
 ROMANIA_SCOPE = ("Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea")
-SUPPORTED_APPLICANT_TYPES = ("PUBLIC_AUTHORITY", "PUBLIC_LAW_BODY", "NGO_NONPROFIT")
+SUPPORTED_APPLICANT_TYPES: tuple[str, ...] = ()
 
 SOURCES: tuple[dict[str, Any], ...] = (
     {
-        "id": "BSB_KEEP_PROGRAMME_VALIDATED_GEOGRAPHY",
-        "url": "https://keep.eu/programmes/387/2021-2027-Black-Sea-Basin/",
-        "hosts": ("keep.eu", "www.keep.eu"),
-        "authority_class": "T1_INTERACT_PROGRAMME_VALIDATED_REGISTRY",
+        "id": "BSB_EC_PROGRAMME_REGION_GEOGRAPHY",
+        "url": (
+            "https://projects.research-and-innovation.ec.europa.eu/en/funding/"
+            "funding-opportunities/funding-programmes-and-open-calls/horizon-europe/"
+            "eu-missions-horizon-europe/restore-our-ocean-and-waters/"
+            "interreg-black-sea-basin-programme"
+        ),
+        "hosts": (
+            "projects.research-and-innovation.ec.europa.eu",
+            "research-and-innovation.ec.europa.eu",
+        ),
+        "authority_class": "T1_EUROPEAN_COMMISSION_OFFICIAL_PROGRAMME",
         "observation_state": "PROGRAMME_GEOGRAPHY_RESEARCH_NON_AUTHORIZING",
         "markers": (
-            "2021 - 2027 Interreg VI-B NEXT Black Sea Basin",
-            "2021TC16NXTN002",
-            "Eligible geographical area",
-            "RO Romania",
+            "Interreg Black Sea Basin Programme",
+            "Overview of eligibility requirements for applicants",
+            "Romania",
             "Sud-Est",
-            "Programme validated the information",
-        ),
-    },
-    {
-        "id": "BSB_OFFICIAL_SECOND_CALL_HISTORY",
-        "url": "https://blacksea-cbc.net/interreg-next-bsb-2021-2027/calls-for-proposals/second-call-for-proposals",
-        "hosts": ("blacksea-cbc.net", "www.blacksea-cbc.net"),
-        "authority_class": "T1_OFFICIAL_PROGRAMME",
-        "observation_state": "HISTORICAL_CLOSED_CALL_APPLICANT_SIGNAL_NON_AUTHORIZING",
-        "markers": (
-            "Second Calls for Proposals",
-            "CLOSED",
-            "Public authorities",
-            "Bodies governed by public law",
-            "Non-profit organizations",
         ),
     },
     {
@@ -102,7 +96,10 @@ def sha256_json(value: Any) -> str:
 
 def fold(value: str) -> str:
     text = html.unescape(value or "").casefold()
-    text = "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch))
+    text = "".join(
+        ch for ch in unicodedata.normalize("NFKD", text)
+        if not unicodedata.combining(ch)
+    )
     return re.sub(r"\s+", " ", text).strip()
 
 
@@ -134,11 +131,14 @@ def visible_text(raw: bytes) -> str:
 
 
 def default_fetch(url: str, timeout: float = 30.0) -> tuple[bytes, dict[str, Any]]:
-    request = urllib.request.Request(url, headers={
-        "User-Agent": "PARTENER.EU-source-watch/1.0 (+https://partener.eu)",
-        "Accept": "text/html,application/xhtml+xml",
-        "Accept-Language": "en,ro;q=0.8",
-    })
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "PARTENER.EU-source-watch/1.0 (+https://partener.eu)",
+            "Accept": "text/html,application/xhtml+xml",
+            "Accept-Language": "en,ro;q=0.8",
+        },
+    )
     with urllib.request.urlopen(request, timeout=timeout) as response:
         raw = response.read(5_000_001)
         if len(raw) > 5_000_000:
@@ -184,14 +184,13 @@ def collect(
         text = visible_text(raw)
         require_markers(text, spec["markers"], source_id=spec["id"])
         raw_by_id[spec["id"]] = raw
-        normalized_hash = sha256_bytes(fold(text).encode("utf-8"))
         receipts.append({
             "source_id": spec["id"],
             "authority_url": spec["url"],
             **dict(meta),
             "fetched_at": observed,
             "raw_sha256": sha256_bytes(raw),
-            "normalized_visible_text_sha256": normalized_hash,
+            "normalized_visible_text_sha256": sha256_bytes(fold(text).encode("utf-8")),
             "authority_class": spec["authority_class"],
             "observation_state": spec["observation_state"],
             "source_health": "HEALTHY",
@@ -214,12 +213,19 @@ def collect(
         "romania_programme_region": "Sud-Est",
         "romania_scope": list(ROMANIA_SCOPE),
         "territorial_fit_state": "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING",
-        "territory_resolution_basis": "PROGRAMME_VALIDATED_NUTS2_SUD_EST_PLUS_ADRSE_OFFICIAL_COUNTY_MEMBERSHIP",
-        "applicant_signal_observation_state": "HISTORICAL_CLOSED_CALL_APPLICANT_SIGNAL",
-        "supported_applicant_types": list(SUPPORTED_APPLICANT_TYPES),
+        "territory_resolution_basis": (
+            "EUROPEAN_COMMISSION_OFFICIAL_PROGRAMME_NUTS2_SUD_EST"
+            "_PLUS_ADRSE_OFFICIAL_COUNTY_MEMBERSHIP"
+        ),
+        "applicant_signal_observation_state": "APPLICANT_SIGNAL_INSUFFICIENT",
+        "applicant_signal_basis": (
+            "NO_STABLE_CURRENT_PROGRAMME_WIDE_APPLICANT_CLASS_AUTHORITY_BOUND;"
+            "CALL_SPECIFIC_RULES_REQUIRED"
+        ),
+        "supported_applicant_types": [],
         "partnership_signal": "TRANSNATIONAL_PARTNERSHIP_CALL_SPECIFIC_RULES_REQUIRED",
         "call_specific_applicant_rules_required": True,
-        "historical_call_status_observed": "CLOSED",
+        "historical_call_status_observed": None,
         "historical_call_status_is_current_truth": False,
         "market_intelligence_only": True,
         "fit_is_not_eligibility": True,
@@ -235,14 +241,21 @@ def collect(
     }
     for flag in MATERIAL_FLAGS:
         result[flag] = False
+
     result["semantic_fingerprint"] = sha256_json({
         "programme_id": PROGRAMME_ID,
         "programme_cci": CCI,
         "romania_programme_region": result["romania_programme_region"],
         "romania_scope": result["romania_scope"],
+        "applicant_signal_observation_state": result["applicant_signal_observation_state"],
         "supported_applicant_types": result["supported_applicant_types"],
         "source_semantics": [
-            (row["source_id"], row["authority_url"], row["observation_state"], row["normalized_visible_text_sha256"])
+            (
+                row["source_id"],
+                row["authority_url"],
+                row["observation_state"],
+                row["normalized_visible_text_sha256"],
+            )
             for row in receipts
         ],
     })
@@ -259,13 +272,21 @@ def validate(result: Mapping[str, Any]) -> None:
         raise ValueError("BSB programme identity drift")
     if result.get("observation_state") != OBSERVATION_STATE or result.get("source_health") != "HEALTHY":
         raise ValueError("BSB programme-fit health/state drift")
-    if result.get("romania_programme_region") != "Sud-Est" or list(result.get("romania_scope") or []) != list(ROMANIA_SCOPE):
+    if result.get("romania_programme_region") != "Sud-Est":
+        raise ValueError("BSB Romania region drift")
+    if list(result.get("romania_scope") or []) != list(ROMANIA_SCOPE):
         raise ValueError("BSB Romania territorial scope drift")
-    if set(result.get("supported_applicant_types") or []) != set(SUPPORTED_APPLICANT_TYPES):
-        raise ValueError("BSB applicant signal drift")
-    if result.get("applicant_signal_observation_state") != "HISTORICAL_CLOSED_CALL_APPLICANT_SIGNAL":
-        raise ValueError("BSB historical applicant signal state drift")
-    if result.get("historical_call_status_observed") != "CLOSED" or result.get("historical_call_status_is_current_truth") is not False:
+    if list(result.get("supported_applicant_types") or []) != []:
+        raise ValueError("BSB applicant signal widened beyond available evidence")
+    if result.get("applicant_signal_observation_state") != "APPLICANT_SIGNAL_INSUFFICIENT":
+        raise ValueError("BSB applicant evidence state drift")
+    if not str(result.get("applicant_signal_basis") or "").startswith(
+        "NO_STABLE_CURRENT_PROGRAMME_WIDE_APPLICANT_CLASS_AUTHORITY_BOUND"
+    ):
+        raise ValueError("BSB applicant evidence basis drift")
+    if result.get("historical_call_status_observed") is not None:
+        raise ValueError("BSB historical call status leaked into programme-fit current receipt")
+    if result.get("historical_call_status_is_current_truth") is not False:
         raise ValueError("BSB historical call status widened into current truth")
     if result.get("market_intelligence_only") is not True or result.get("fit_is_not_eligibility") is not True:
         raise ValueError("BSB programme-fit crossed market intelligence boundary")
@@ -288,7 +309,9 @@ def validate(result: Mapping[str, Any]) -> None:
             raise ValueError(f"BSB source identity drift: {source_id}")
         if receipt.get("observation_state") != spec["observation_state"] or receipt.get("source_health") != "HEALTHY":
             raise ValueError(f"BSB source state drift: {source_id}")
-        if int(receipt.get("http_status") or 0) != 200 or not host_allowed(str(receipt.get("final_url") or ""), spec["hosts"]):
+        if int(receipt.get("http_status") or 0) != 200:
+            raise ValueError(f"BSB source transport drift: {source_id}")
+        if not host_allowed(str(receipt.get("final_url") or ""), spec["hosts"]):
             raise ValueError(f"BSB source authority/transport drift: {source_id}")
         for key in ("raw_sha256", "normalized_visible_text_sha256"):
             if not re.fullmatch(r"[0-9a-f]{64}", str(receipt.get(key) or "")):
@@ -299,9 +322,15 @@ def validate(result: Mapping[str, Any]) -> None:
         "programme_cci": CCI,
         "romania_programme_region": result["romania_programme_region"],
         "romania_scope": result["romania_scope"],
+        "applicant_signal_observation_state": result["applicant_signal_observation_state"],
         "supported_applicant_types": result["supported_applicant_types"],
         "source_semantics": [
-            (row["source_id"], row["authority_url"], row["observation_state"], row["normalized_visible_text_sha256"])
+            (
+                row["source_id"],
+                row["authority_url"],
+                row["observation_state"],
+                row["normalized_visible_text_sha256"],
+            )
             for row in receipts
         ],
     })
@@ -322,12 +351,16 @@ def main() -> int:
     for source_id, body in raw.items():
         (raw_dir / f"{source_id.casefold()}.html").write_bytes(body)
     target = out / "interreg-bsb-programme-fit.json"
-    target.write_text(json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    target.write_text(
+        json.dumps(result, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
     print(json.dumps({
         "programme_id": result["programme_id"],
         "programme_cci": result["programme_cci"],
         "romania_region": result["romania_programme_region"],
         "romania_scope": result["romania_scope"],
+        "applicant_signal_observation_state": result["applicant_signal_observation_state"],
         "source_health": result["source_health"],
         "semantic_fingerprint": result["semantic_fingerprint"],
         "open_call_authorized": result["open_call_authorized"],
