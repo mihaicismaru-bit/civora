@@ -1,102 +1,111 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.11",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.12",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-03T13:34:29+03:00",
+  "observed_at": "2026-09-03T14:33:15+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
   "prod_need_evidence_eligible": false,
   "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, administrative labour-market context or event-specific recruitment into AI4WORK need-prevalence claims.",
   "registry_reconciliation": {
-    "source_register_high_water_mark_before_refresh": "S51",
-    "source_register_high_water_mark_after_refresh": "S54",
-    "dashboard_reconciled_to": "S01-S54",
+    "source_register_high_water_mark_before_refresh": "S54",
+    "source_register_high_water_mark_after_refresh": "S57",
+    "dashboard_reconciled_to": "S01-S57",
     "duplicate_source_promoted": false,
-    "new_source_ids": ["S52", "S53", "S54"]
+    "new_source_ids": ["S55", "S56", "S57"]
   },
   "promotion_policy": {
-    "sources_promoted_this_refresh": ["S52", "S53", "S54"],
+    "sources_promoted_this_refresh": ["S55", "S56", "S57"],
     "h1_h5_numeric_points_added": 0,
     "numeric_rank_changed": false,
     "project_activity_as_need_evidence": false,
-    "decision": "PROMOTE_THREE_SOURCE_EXACT_OFFICIAL_ADMINISTRATIVE_CONTEXT_ROWS_WITH_ZERO_H1_H5"
+    "training_supply_as_need_prevalence": false,
+    "decision": "PROMOTE_THREE_SOURCE_EXACT_OFFICIAL_SUPPLY_OR_SUPPLY_CONSTRAINT_CONTEXT_ROWS_WITH_ZERO_H1_H5"
   },
   "promoted_sources": [
     {
-      "source_id": "S52",
-      "region": "Sud-Vest Oltenia / Olt",
-      "publisher": "ANOFM / AJOFM Olt",
-      "title": "6,19% – rata somajului inregistrat in evidentele AJOFM Olt in luna decembrie 2025",
-      "publication_date": "2026-01-29",
-      "reference_period": "2025-12",
-      "url": "https://www.anofm.ro/olt/comunicat-de-presa-619-rata-somajului-inregistrat-in-evidentele-ajofm-olt-in-luna-decembrie-2025/",
-      "classification": "CURRENT_LABOUR_MARKET_CONTEXT_ADMINISTRATIVE_ZERO_H1_H5",
+      "source_id": "S55",
+      "region": "Sud-Vest Oltenia / Gorj",
+      "publisher": "ANOFM / AJOFM Gorj",
+      "title": "Cursuri de (re)calificare organizate de AJOFM Gorj in anul 2025",
+      "publication_date": "2024-11-15",
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/gorj/cursuri-de-recalificare-organizate-de-ajofm-gorj-in-anul-2025/",
+      "classification": "CURRENT_TRAINING_SUPPLY_CONTEXT_ZERO_H1_H5",
       "observed_facts": {
-        "registered_unemployment_rate_percent": 6.19
+        "digital_competence_program_listed": true,
+        "digital_competence_program_duration_hours": 90
       },
-      "claim_boundary": "Registered unemployment is administrative labour-market context, not a measurement of digital/AI competence, skill-gap prevalence or training demand. It contributes zero H1-H5 points."
+      "claim_boundary": "The official course offer maps institutional supply only. It does not measure demand, skill-gap prevalence or AI-specific need and contributes zero H1-H5 points."
     },
     {
-      "source_id": "S53",
-      "region": "Sud-Muntenia / Arges",
-      "publisher": "ANOFM / AJOFM Arges",
-      "title": "Situatia somajului inregistrat – ianuarie 2026",
-      "publication_date": "2026-03-19",
-      "reference_period": "2026-01",
-      "url": "https://www.anofm.ro/arges/wp-content/uploads/sites/3/2026/03/Situatia-somajului-inregistrat-ianuarie-2026.pdf",
-      "classification": "CURRENT_LABOUR_MARKET_CONTEXT_ADMINISTRATIVE_PROFILE_ZERO_H1_H5",
+      "source_id": "S56",
+      "region": "Sud-Muntenia / Dambovita",
+      "publisher": "ANOFM / AJOFM Dambovita",
+      "title": "Programe de formare profesionala planificate de AJOFM Dambovita pentru anul 2025",
+      "publication_date": null,
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/dambovita/wp-content/uploads/sites/18/2025/05/Programe-de-formare-profesionala-planificate-pentru-anul-2025.pdf",
+      "classification": "CURRENT_TRAINING_PLAN_SUPPLY_CONTEXT_ZERO_H1_H5",
       "observed_facts": {
-        "registered_unemployment_rate_percent": 4.11,
-        "registered_unemployed_total": 9418,
-        "registered_unemployed_women": 4550,
-        "non_indemnified_unemployed": 6933,
-        "profile_very_hard_to_place": 1501,
-        "profile_hard_to_place": 3076,
-        "profile_medium_to_place": 4073,
-        "profile_easy_to_place": 768
+        "digital_competence_including_internet_safety_and_cybersecurity_listed": true,
+        "digital_competence_program_duration_hours": 80,
+        "data_entry_validation_processing_operator_program_listed": true
       },
-      "claim_boundary": "The registered-unemployment stock and administrative employability profile are not digital/AI competence measures and do not establish AI4WORK training-need prevalence. They contribute zero H1-H5 points."
+      "verification_note": "The official PDF resolved with source-exact parsed text. A screenshot fetch was attempted but the provider returned 404 for the binary image path; no fact was inferred from an unavailable image.",
+      "claim_boundary": "A planned training catalogue is supply context, not a measurement of employer/adult demand, competence deficit or AI4WORK need prevalence. It contributes zero H1-H5 points."
     },
     {
-      "source_id": "S54",
-      "region": "Centru / Brasov",
-      "publisher": "ANOFM / AJOFM Brasov",
-      "title": "2,94% – rata somajului inregistrat in evidentele AJOFM Brasov in luna decembrie 2025",
-      "publication_date": "2026-01-21",
-      "reference_period": "2025-12",
-      "url": "https://www.anofm.ro/brasov/294-rata-somajului-inregistrat-in-evidentele-ajofm-brasov-in-luna-decembrie-2025/",
-      "classification": "CURRENT_LABOUR_MARKET_CONTEXT_ADMINISTRATIVE_ZERO_H1_H5",
+      "source_id": "S57",
+      "region": "Centru / Covasna",
+      "publisher": "ANOFM / AJOFM Covasna",
+      "title": "Raport asupra activitatii AJOFM Covasna, situatiei somajului, programelor de ocupare si formare profesionala, pentru anul 2025",
+      "publication_date": "2026-01-23",
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Raport-anual-2025-AJOFM-Covasna.pdf",
+      "classification": "CURRENT_TRAINING_SUPPLY_CONSTRAINT_TRIANGULATION_ZERO_H1_H5",
       "observed_facts": {
-        "registered_unemployment_rate_percent": 2.94,
-        "registered_unemployed_total": 7576,
-        "registered_unemployed_women": 3666
+        "planned_training_programs": 33,
+        "planned_unemployed_participants": 462,
+        "approved_training_budget_lei": 4000,
+        "report_states_budget_did_not_cover_planned_training_costs": true,
+        "programs_organized_by_year_end": 7,
+        "participants_in_programs_organized_by_year_end": 160,
+        "digital_competence_programs_organized": 1,
+        "digital_competence_participants": 28,
+        "graduates_total": 158,
+        "graduates_employed": 14,
+        "report_identifies_training_offer_restriction": true,
+        "report_identifies_low_activation_into_training": true,
+        "report_identifies_low_post_training_placement_especially_competence_programs": true
       },
-      "claim_boundary": "Registered unemployment is administrative labour-market context, not a measurement of digital/AI competence, skill-gap prevalence or training demand. It contributes zero H1-H5 points."
+      "claim_boundary": "These are administrative training and placement outcomes under an explicitly constrained budget/supply environment. They do not represent population prevalence of digital/AI skill gaps, do not support causal attribution and contribute zero H1-H5 points."
     }
   ],
   "cross_region_reverification": {
     "Sud-Vest Oltenia": {
-      "current_complement": "S52 December 2025 registered-unemployment context in Olt",
+      "current_complement": "S55 maps the 2025 AJOFM Gorj training catalogue, including a 90-hour digital competence program, strictly as supply context.",
       "h1_h5_numeric_points_added": 0
     },
     "Sud-Muntenia": {
-      "current_complement": "S53 January 2026 registered-unemployment and administrative employability-profile context in Arges",
+      "current_complement": "S56 maps the 2025 AJOFM Dambovita training plan, including digital competence and data-entry/processing training, strictly as supply context.",
       "h1_h5_numeric_points_added": 0
     },
     "Centru": {
-      "current_complement": "S54 December 2025 registered-unemployment context in Brasov",
+      "current_complement": "S57 adds source-exact Covasna evidence that the planned training volume materially exceeded realized provision under an insufficient budget and documents restricted offer/low activation/low placement; this is supply-constraint triangulation only.",
       "h1_h5_numeric_points_added": 0
     }
   },
   "call_requirements_refresh": {
-    "checked_at": "2026-09-03T13:34:29+03:00",
+    "checked_at": "2026-09-03T14:33:15+03:00",
     "gmail_query_scope": "newer_than:1d excluding spam/trash; OMIPE, MIPE, PEO, Claus Web, ClausWeb, Cloudflare, eucons.ro, AI4WORK",
-    "matching_new_authority_or_provider_messages_after_excluding_github_only_notifications": 0,
+    "current_page_non_github_authority_or_provider_messages_observed": 0,
     "github_ci_notifications_excluded_from_call_requirements": true,
-    "status": "CLOSED_UNCHANGED"
+    "status": "CLOSED_UNCHANGED",
+    "boundary": "The current screening page contained GitHub CI notifications only. No authority/provider change was inferred from GitHub notifications."
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-03T13:34:29+03:00",
+    "checked_at": "2026-09-03T14:33:15+03:00",
     "drive_query": "AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE",
     "search_result_class": "CONTROL_PRE_FINAL_MATERIAL_ONLY",
     "eligible_combined_real_batch_found": false,
@@ -123,13 +132,13 @@
     "public_surface_search_result": "Dedicated AI4WORK Article 13 live rendered surface has not been independently read back; candidate remains repository-only and collection remains disabled."
   },
   "repo_validation": {
-    "pre_refresh_exact_head": "7f336dd8580ae38b2548dda3c2eb3a53455b587a",
-    "pre_refresh_check_runs": 29,
-    "pre_refresh_failure_conclusions_found": 0,
-    "pre_refresh_null_conclusions_found": 0,
+    "pre_refresh_exact_head": "cbd590047341a53b72919b80e9202b0f87713ecf",
+    "pre_refresh_check_runs": 31,
+    "pre_refresh_failure_conclusions_found_in_current_readback": 0,
+    "pre_refresh_null_conclusions_found_in_current_readback": 0,
     "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
   },
-  "refresh_conclusion": "The controlled Source_register and Dashboard now reconcile through S54 with one newly verified official administrative-context row for each target region. All three additions are zero-weight for H1-H5 and do not use project activity or training supply as evidence of need. Requester-authentication/Article 15 mechanics are now internally implemented and tested without direct identifiers or CRM linkage, but live/provider-bound rights and hosting evidence remain open. No eligible immutable real adult+employer response export exists, therefore NF06 PROD and downstream synthesis remain fail-closed.",
+  "refresh_conclusion": "The controlled Source_register and Dashboard now reconcile through S57 with one new official supply/supply-constraint row for each target region. All three additions are zero-weight for H1-H5 and neither project activity nor training supply is promoted as evidence of need prevalence. No eligible immutable real adult+employer response export exists, therefore NF06 PROD and downstream synthesis/ranking remain fail-closed. The substantive remaining boundary is live/account-specific/provider-bound rather than methodological.",
   "merge_authorized": false,
   "canonicalization_authorized": false,
   "deploy_authorized": false,
