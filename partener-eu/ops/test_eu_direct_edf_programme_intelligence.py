@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import json
 import pathlib
+import re
 import sys
 
 HERE = pathlib.Path(__file__).resolve()
@@ -44,6 +45,9 @@ def main() -> int:
     reg = registry()
     validate_registry(reg)
     snap = collect(reg, "test-healthy", fetcher=fake_fetch)
+    assert snap["parser_version"] == "EU_DIRECT_EDF_PROGRAMME_INTELLIGENCE_V1_1"
+    assert re.fullmatch(r"[0-9a-f]{64}", snap["registry_sha256"])
+    assert re.fullmatch(r"[0-9a-f]{64}", snap["semantic_fingerprint"])
     assert snap["source_count"] == 3
     assert snap["healthy_source_count"] == 3
     assert snap["degraded_source_count"] == 0
@@ -53,6 +57,10 @@ def main() -> int:
     assert {r["observation_state"] for r in snap["evidence"]} == {
         "PROGRAMME_INTELLIGENCE", "PROGRAMMING_PIPELINE", "CALL_INDEX_DISCOVERY"
     }
+    for row in snap["evidence"]:
+        assert re.fullmatch(r"[0-9a-f]{64}", row["raw_sha256"])
+        assert re.fullmatch(r"[0-9a-f]{64}", row["normalized_visible_text_sha256"])
+        assert re.fullmatch(r"[0-9a-f]{64}", row["source_semantic_fingerprint"])
     for key in (
         "material_fact_use", "open_call_authorized", "closed_call_authorized",
         "deadline_authorized", "budget_authorized", "eligibility_authorized",
@@ -62,6 +70,7 @@ def main() -> int:
         assert snap[key] is False
     # Literal Open on the generic official calls index must never promote this layer.
     assert snap["open_call_authorized"] is False
+    assert next(r for r in snap["evidence"] if r["source_id"] == "DG-DEFIS-CALLS-INDEX-DISCOVERY")["observation_state"] == "CALL_INDEX_DISCOVERY"
     assert "exact_call_or_topic_identifier" in snap["missing_for_open_confirmation"]
 
     degraded = collect(reg, "test-degraded", fetcher=degraded_fetch)
@@ -96,6 +105,7 @@ def main() -> int:
 
     print(json.dumps({
         "unit": "EU_DIRECT_EDF_PROGRAMME_INTELLIGENCE",
+        "parser_version": snap["parser_version"],
         "healthy_sources": 3,
         "generic_index_literal_open_authorizes": False,
         "degraded_requires_lkg": True,
