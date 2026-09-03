@@ -53,7 +53,7 @@ class LawfulBasisLiaControlTests(unittest.TestCase):
         )
         self.assertIn("lia_not_approved_for_prod", errors)
         self.assertIn("lia_not_prod_eligible", errors)
-        self.assertIn("lia_signoff_privacy_contact_missing", errors)
+        self.assertIn("lia_privacy_contact_missing", errors)
         self.assertIn("lia_prod_approval_state_invalid", errors)
         self.assertIn("lia_prod_approval_not_satisfied:right_to_object_operational", errors)
         self.assertIn("lia_prod_approval_not_satisfied:article13_basis_disclosure_confirmed", errors)
