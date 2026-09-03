@@ -23,13 +23,17 @@ class DpiaScreeningControlTests(unittest.TestCase):
             _load(DPIA_SCREENING_PATH),
         )
 
-    def test_current_draft_is_structurally_valid_and_fail_closed(self):
+    def test_current_controller_accepted_screening_is_valid_and_collection_stays_fail_closed(self):
         ready, errors = evaluate_repository_dpia()
         self.assertTrue(ready, errors)
         _, _, _, screening = self.load_artifacts()
-        self.assertFalse(screening["approved"])
+        self.assertTrue(screening["approved"])
         self.assertFalse(screening["collection_enabled"])
         self.assertFalse(screening["real_collection_authorized"])
+        self.assertEqual(screening["status"], "CONTROLLER_ACCEPTED_SCREENING_OPERATIONAL_GATES_PENDING")
+        self.assertEqual(screening["screening_conclusion"], "DPIA_NOT_REQUIRED_APPROVED")
+        self.assertTrue(screening["controller_acceptance"]["approved"])
+        self.assertIsNone(screening["controller_acceptance"]["privacy_contact_or_dpo_review_reference"])
         self.assertEqual(screening["evidence_binding_key"], "dpia_screening_or_completed_dpia")
         self.assertFalse(screening["synthetic"])
 
@@ -47,7 +51,7 @@ class DpiaScreeningControlTests(unittest.TestCase):
         self.assertIn("dpia_processing_safeguard_invalid:crm_or_contact_dataset_matching", errors)
         self.assertIn("dpia_processing_safeguard_invalid:special_category_data", errors)
 
-    def test_prod_claim_requires_controller_acceptance_not_boolean_shortcut(self):
+    def test_prod_claim_still_requires_live_privacy_review_and_collection_binding(self):
         contract, manifest, controller, screening = self.load_artifacts()
         contract = copy.deepcopy(contract)
         contract["production_enabled"] = True
@@ -58,13 +62,13 @@ class DpiaScreeningControlTests(unittest.TestCase):
             screening=screening,
         )
         self.assertIn("dpia_not_approved_for_prod", errors)
-        self.assertIn("dpia_approval_missing", errors)
         self.assertIn("dpia_collection_not_enabled", errors)
-        self.assertIn("dpia_conclusion_not_final", errors)
-        self.assertIn("dpia_controller_acceptance_missing", errors)
-        self.assertIn("dpia_controller_acceptance_not_approved", errors)
-        self.assertIn("dpia_controller_approver_missing", errors)
-        self.assertIn("dpia_controller_approval_date_invalid", errors)
+        self.assertIn("dpia_privacy_review_reference_missing", errors)
+        self.assertIn("dpia_controller_privacy_review_binding_missing", errors)
+        self.assertNotIn("dpia_approval_missing", errors)
+        self.assertNotIn("dpia_conclusion_not_final", errors)
+        self.assertNotIn("dpia_controller_acceptance_missing", errors)
+        self.assertNotIn("dpia_controller_acceptance_not_approved", errors)
 
     def test_test_twin_or_synthetic_screening_cannot_promote(self):
         contract, manifest, controller, screening = self.load_artifacts()
