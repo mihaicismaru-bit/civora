@@ -1,46 +1,17 @@
 {
-  "checks": {
-    "all_artist_routes_preserved": true,
-    "all_legacy_story_routes_200_with_content": true,
-    "all_people_routes_preserved": true,
-    "homepage_200": true,
-    "homepage_contains_all_legacy_story_links": true,
-    "leisure_route_200": true,
-    "leisure_verified_places_projected": true,
-    "network_publication_attempted": false,
-    "public_runtime_mutated": false,
-    "shadow_migration_pass": true,
-    "sitemap_200": true,
-    "sitemap_preserves_required_public_urls": true
-  },
   "ci": {
-    "conclusion": "PASS",
-    "execution_exit_code": 0,
-    "head_sha": "33dfbc1d7b278f0dfd601d5abc864ecb40e0bb68",
-    "run_id": "33685947141",
+    "conclusion": "FAIL",
+    "execution_exit_code": 1,
+    "head_sha": "c2947ef8ebca150edb9cccd2ba432bca0e61d5c5",
+    "run_id": "33709262546",
     "workflow": "LOCAL NEWS OS vNext Vâlcea Shadow Projection"
   },
   "contract": "LOCAL_NEWS_OS_VNEXT_VALCEA_P18_SHADOW_PROJECTION_DIFF_V1",
-  "counts": {
-    "artists_checked": 172,
-    "homepage_story_links_expected": 30,
-    "people_checked": 7,
-    "sitemap_required_urls": 213,
-    "stories_checked": 32,
-    "verified_places_checked": 5
+  "failure": {
+    "class": "PROJECTION_EXECUTION_FAILED_BEFORE_REPORT",
+    "log_tail": "Traceback (most recent call last):\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 203, in <module>\n    raise SystemExit(main())\n                     ~~~~^^\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 189, in main\n    result = run_projection_diff(db)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_projection_diff.py\", line 56, in run_projection_diff\n    shadow = run_shadow(db)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 794, in run_shadow\n    publications = import_publications(conn)\n  File \"/home/runner/work/civora/civora/local-news-os/vnext/instances/valcea/migration/p18_shadow_migration.py\", line 210, in import_publications\n    raise MigrationError(f\"publication-event stories missing from live feed: {missing}\")\np18_shadow_migration.MigrationError: publication-event stories missing from live feed: ['cocosul-de-hurez-2026-dosar-complet-20260818']\n"
   },
-  "failures": {
-    "artists": [],
-    "artists_failure_count": 0,
-    "missing_homepage_story_paths": [],
-    "missing_place_names": [],
-    "missing_sitemap_url_count": 0,
-    "missing_sitemap_urls": [],
-    "people": [],
-    "stories": []
-  },
-  "next_gate": "CONTROLLED_LIVE_DEPLOYMENT_PREFLIGHT",
   "production_cutover": false,
   "schema_version": "1.0",
-  "status": "SHADOW_PROJECTION_PASS"
+  "status": "SHADOW_PROJECTION_FAIL"
 }
