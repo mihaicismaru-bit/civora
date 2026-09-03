@@ -1,109 +1,102 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.10",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.11",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-03T12:32:25+03:00",
+  "observed_at": "2026-09-03T13:34:29+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
   "prod_need_evidence_eligible": false,
   "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, administrative labour-market context or event-specific recruitment into AI4WORK need-prevalence claims.",
   "registry_reconciliation": {
-    "source_register_high_water_mark_before_refresh": "S48",
-    "source_register_high_water_mark_after_refresh": "S51",
-    "dashboard_reconciled_to": "S01-S51",
+    "source_register_high_water_mark_before_refresh": "S51",
+    "source_register_high_water_mark_after_refresh": "S54",
+    "dashboard_reconciled_to": "S01-S54",
     "duplicate_source_promoted": false,
-    "new_source_ids": ["S49", "S50", "S51"]
+    "new_source_ids": ["S52", "S53", "S54"]
   },
   "promotion_policy": {
-    "sources_promoted_this_refresh": ["S49", "S50", "S51"],
+    "sources_promoted_this_refresh": ["S52", "S53", "S54"],
     "h1_h5_numeric_points_added": 0,
     "numeric_rank_changed": false,
     "project_activity_as_need_evidence": false,
-    "decision": "PROMOTE_THREE_SOURCE_EXACT_OFFICIAL_CONTEXT_ROWS_WITH_ZERO_H1_H5"
+    "decision": "PROMOTE_THREE_SOURCE_EXACT_OFFICIAL_ADMINISTRATIVE_CONTEXT_ROWS_WITH_ZERO_H1_H5"
   },
   "promoted_sources": [
     {
-      "source_id": "S49",
-      "region": "Sud-Vest Oltenia / Mehedinti",
-      "publisher": "ANOFM / AJOFM Mehedinti",
-      "title": "Bursa locurilor de munca organizata de AJOFM Mehedinti – 20.06.2025",
-      "publication_date": "2025-06-11",
-      "event_date": "2025-06-20",
-      "url": "https://www.anofm.ro/bursa-locurilor-de-munca-organizata-de-ajofm-mehedinti-20-06-2025/",
-      "classification": "CURRENT_EVENT_SPECIFIC_DEMAND_SNAPSHOT_COUNTER_EVIDENCE_ZERO_H1_H5",
-      "observed_facts": {
-        "vacancies_offered": 310,
-        "quality_controller_vacancies": 30,
-        "production_operator_vacancies": 30,
-        "unskilled_worker_vacancies": 250,
-        "event_context": "ANOFM states that the event was organised following a request from an employer in Medias, Sibiu county."
-      },
-      "claim_boundary": "This is a single recruitment-event snapshot linked to a concrete recruitment request. It is not representative of the county or region, does not measure competence or training need, and contributes zero H1-H5 points."
-    },
-    {
-      "source_id": "S50",
-      "region": "Sud-Muntenia / Ialomita",
-      "publisher": "ANOFM / AJOFM Ialomita",
-      "title": "5,94% – rata somajului inregistrat in evidentele AJOFM Ialomita in luna decembrie 2025",
-      "publication_date": "2026-02-02",
+      "source_id": "S52",
+      "region": "Sud-Vest Oltenia / Olt",
+      "publisher": "ANOFM / AJOFM Olt",
+      "title": "6,19% – rata somajului inregistrat in evidentele AJOFM Olt in luna decembrie 2025",
+      "publication_date": "2026-01-29",
       "reference_period": "2025-12",
-      "url": "https://www.anofm.ro/ialomita/594-rata-somajului-inregistrat-in-evidentele-ajofm-ialomita-in-luna-decembrie-2025/",
+      "url": "https://www.anofm.ro/olt/comunicat-de-presa-619-rata-somajului-inregistrat-in-evidentele-ajofm-olt-in-luna-decembrie-2025/",
       "classification": "CURRENT_LABOUR_MARKET_CONTEXT_ADMINISTRATIVE_ZERO_H1_H5",
       "observed_facts": {
-        "registered_unemployment_rate_percent": 5.94
+        "registered_unemployment_rate_percent": 6.19
       },
       "claim_boundary": "Registered unemployment is administrative labour-market context, not a measurement of digital/AI competence, skill-gap prevalence or training demand. It contributes zero H1-H5 points."
     },
     {
-      "source_id": "S51",
-      "region": "Centru / Mures",
-      "publisher": "ANOFM / AJOFM Mures",
-      "title": "Raportul de activitate AJOFM Mures pe anul 2025",
-      "publication_date": "2026-02-12",
-      "reference_period": "2025-01-01 to 2025-12-31",
-      "url": "https://www.anofm.ro/mures/wp-content/uploads/sites/30/2026/02/Raport-de-Activitate-AJOFM-Mures-pentru-anul-2025.pdf",
-      "classification": "CURRENT_ADMINISTRATIVE_TRIANGULATION_PARTICIPANT_PREFERENCE_SUPPLY_ENTANGLED_ZERO_H1_H5",
+      "source_id": "S53",
+      "region": "Sud-Muntenia / Arges",
+      "publisher": "ANOFM / AJOFM Arges",
+      "title": "Situatia somajului inregistrat – ianuarie 2026",
+      "publication_date": "2026-03-19",
+      "reference_period": "2026-01",
+      "url": "https://www.anofm.ro/arges/wp-content/uploads/sites/3/2026/03/Situatia-somajului-inregistrat-ianuarie-2026.pdf",
+      "classification": "CURRENT_LABOUR_MARKET_CONTEXT_ADMINISTRATIVE_PROFILE_ZERO_H1_H5",
       "observed_facts": {
-        "identified_vacancies_2025": 5503,
-        "monthly_vacancy_peak_november": 618,
-        "monthly_vacancy_secondary_peak_june": 518,
-        "training_participants": 503,
-        "training_graduates": 431,
-        "training_graduation_rate_percent": 85.69,
-        "training_participants_entered_employment": 99,
-        "reported_employment_rate_percent": 22.97,
-        "computer_operator_programmes": 3,
-        "computer_operator_participants": 59,
-        "digital_competence_programmes": 3,
-        "digital_competence_participants": 61,
-        "preference_wording": "The report describes computer operator and digital competences among the most popular training options expressed by unemployed persons."
+        "registered_unemployment_rate_percent": 4.11,
+        "registered_unemployed_total": 9418,
+        "registered_unemployed_women": 4550,
+        "non_indemnified_unemployed": 6933,
+        "profile_very_hard_to_place": 1501,
+        "profile_hard_to_place": 3076,
+        "profile_medium_to_place": 4073,
+        "profile_easy_to_place": 768
       },
-      "claim_boundary": "AJOFM vacancies cover an administrative segment of the labour market. Training participation and the reported most-requested programmes reflect institutional supply and preferences among people in the agency training circuit, not representative prevalence of digital/AI need. They contribute zero H1-H5 points."
+      "claim_boundary": "The registered-unemployment stock and administrative employability profile are not digital/AI competence measures and do not establish AI4WORK training-need prevalence. They contribute zero H1-H5 points."
+    },
+    {
+      "source_id": "S54",
+      "region": "Centru / Brasov",
+      "publisher": "ANOFM / AJOFM Brasov",
+      "title": "2,94% – rata somajului inregistrat in evidentele AJOFM Brasov in luna decembrie 2025",
+      "publication_date": "2026-01-21",
+      "reference_period": "2025-12",
+      "url": "https://www.anofm.ro/brasov/294-rata-somajului-inregistrat-in-evidentele-ajofm-brasov-in-luna-decembrie-2025/",
+      "classification": "CURRENT_LABOUR_MARKET_CONTEXT_ADMINISTRATIVE_ZERO_H1_H5",
+      "observed_facts": {
+        "registered_unemployment_rate_percent": 2.94,
+        "registered_unemployed_total": 7576,
+        "registered_unemployed_women": 3666
+      },
+      "claim_boundary": "Registered unemployment is administrative labour-market context, not a measurement of digital/AI competence, skill-gap prevalence or training demand. It contributes zero H1-H5 points."
     }
   ],
   "cross_region_reverification": {
     "Sud-Vest Oltenia": {
-      "current_complement": "S49 event-specific recruitment-demand snapshot in Mehedinti, retained as counter/context evidence only",
+      "current_complement": "S52 December 2025 registered-unemployment context in Olt",
       "h1_h5_numeric_points_added": 0
     },
     "Sud-Muntenia": {
-      "current_complement": "S50 December 2025 registered-unemployment context in Ialomita",
+      "current_complement": "S53 January 2026 registered-unemployment and administrative employability-profile context in Arges",
       "h1_h5_numeric_points_added": 0
     },
     "Centru": {
-      "current_complement": "S51 AJOFM Mures 2025 vacancies and training/preference administrative triangulation",
+      "current_complement": "S54 December 2025 registered-unemployment context in Brasov",
       "h1_h5_numeric_points_added": 0
     }
   },
   "call_requirements_refresh": {
-    "checked_at": "2026-09-03T12:32:25+03:00",
-    "gmail_query_scope": "newer_than:1d excluding spam/trash; OMIPE, MIPE, PEO, Claus Web, ClausWeb, Cloudflare, eucons.ro",
-    "raw_matches": 2,
+    "checked_at": "2026-09-03T13:34:29+03:00",
+    "gmail_query_scope": "newer_than:1d excluding spam/trash; OMIPE, MIPE, PEO, Claus Web, ClausWeb, Cloudflare, eucons.ro, AI4WORK",
     "matching_new_authority_or_provider_messages_after_excluding_github_only_notifications": 0,
+    "github_ci_notifications_excluded_from_call_requirements": true,
     "status": "CLOSED_UNCHANGED"
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-03T12:32:25+03:00",
+    "checked_at": "2026-09-03T13:34:29+03:00",
     "drive_query": "AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE",
     "search_result_class": "CONTROL_PRE_FINAL_MATERIAL_ONLY",
     "eligible_combined_real_batch_found": false,
@@ -116,16 +109,27 @@
     "analytical_free_text": false,
     "commercial_tracking": false,
     "crm_linkage": false,
+    "requester_authentication_internal_mechanics": "IMPLEMENTED_AND_TESTED_FAIL_CLOSED",
+    "requester_authentication_design": "response_id plus respondent-retained private UUIDv4 verification code; server stores only SHA-256 digest; no name/email/CRM/IP/device linkage",
+    "article15_response_template": "ARTICLE15_RESPONSE_TEMPLATE_2026-09-03.md",
     "research_store_separation_required": true,
     "live_provider_bound_separation_proven": false,
     "privacy_contact": "privacy@eucons.ro",
+    "privacy_contact_inbound_delivery_independently_verified": false,
     "raw_access_retention_ceiling_days": 7,
     "account_specific_raw_access_ceiling_proven": false,
     "residual_provider_backup_ceiling_days": 92,
     "account_specific_backup_ceiling_proven": false,
-    "public_surface_search_result": "No dedicated AI4WORK research routes were discoverable through fresh public search; this is not represented as a live-route validation."
+    "public_surface_search_result": "Dedicated AI4WORK Article 13 live rendered surface has not been independently read back; candidate remains repository-only and collection remains disabled."
   },
-  "refresh_conclusion": "The controlled Source_register and Dashboard now reconcile through S51 with one newly verified official context/triangulation row for each target region. All three additions are zero-weight for H1-H5 and do not use project activity or training supply as evidence of need. No eligible immutable real adult+employer response export exists, therefore NF06 PROD and downstream synthesis remain fail-closed.",
+  "repo_validation": {
+    "pre_refresh_exact_head": "7f336dd8580ae38b2548dda3c2eb3a53455b587a",
+    "pre_refresh_check_runs": 29,
+    "pre_refresh_failure_conclusions_found": 0,
+    "pre_refresh_null_conclusions_found": 0,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  },
+  "refresh_conclusion": "The controlled Source_register and Dashboard now reconcile through S54 with one newly verified official administrative-context row for each target region. All three additions are zero-weight for H1-H5 and do not use project activity or training supply as evidence of need. Requester-authentication/Article 15 mechanics are now internally implemented and tested without direct identifiers or CRM linkage, but live/provider-bound rights and hosting evidence remain open. No eligible immutable real adult+employer response export exists, therefore NF06 PROD and downstream synthesis remain fail-closed.",
   "merge_authorized": false,
   "canonicalization_authorized": false,
   "deploy_authorized": false,
