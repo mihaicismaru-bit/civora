@@ -248,12 +248,14 @@ class AdversarialQATests(unittest.TestCase):
                 response_integrity_result=integrity,
             )
 
-    def test_draft_frame_cannot_drive_prod_adversarial_qa(self):
+    def test_explicitly_unapproved_frame_cannot_drive_prod_adversarial_qa(self):
         records = prod_shaped_records(per_region_population=5)
         plan = approved_plan()
-        approved = approved_frame()
-        rank = ranking_result(records, plan, approved)
-        draft = json.loads((ROOT / "COLLECTION_FRAME_DRAFT.json").read_text(encoding="utf-8"))
+        draft = approved_frame()
+        draft["frame_status"] = "DRAFT_NOT_APPROVED_FOR_PROD"
+        draft["approval"]["approved"] = False
+        draft["approval"]["approved_for_prod"] = False
+        rank = ranking_result(records, plan, draft)
         with self.assertRaisesRegex(QA.AdversarialQAError, "APPROVED_FOR_PROD"):
             QA.run_adversarial_qa(
                 records,
