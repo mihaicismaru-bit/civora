@@ -59,6 +59,8 @@ class RightsAccessTests(unittest.TestCase):
             self.assertIsNotNone(copy)
             self.assertEqual(copy["scope"], ACCESS_COPY_SCOPE)
             self.assertTrue(copy["controller_article15_context_required"])
+            # This narrow record-copy adapter still does not authenticate by itself;
+            # the two-part proof is a separate operational precondition.
             self.assertTrue(copy["requester_authentication_not_implemented_here"])
             self.assertEqual(copy["record"], item)
 
@@ -116,7 +118,7 @@ class RightsAccessTests(unittest.TestCase):
             with self.assertRaisesRegex(RightsAccessError, "not approved"):
                 build_receipt_keyed_access_copy(store, item["response_id"])
 
-    def test_rights_procedure_binds_article15_copy_without_claiming_full_access_workflow(self):
+    def test_rights_procedure_binds_article15_copy_and_separate_two_part_auth_candidate(self):
         procedure = json.loads(
             (Path(__file__).with_name("GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json")).read_text(
                 encoding="utf-8"
@@ -131,13 +133,21 @@ class RightsAccessTests(unittest.TestCase):
         )
         self.assertTrue(operations["access_controller_context_required"])
         self.assertEqual(
+            operations["access_controller_context_template"],
+            "ARTICLE15_CONTEXT_RESPONSE_TEMPLATE_2026-09-03.json",
+        )
+        self.assertEqual(
             operations["access_requester_authentication_reference_adapter"],
-            "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
+            "TWO_PART_OPAQUE_PROOF_RESPONSE_ID_PLUS_PRIVATE_UUIDV4_NO_IDENTITY_REGISTRY",
+        )
+        self.assertEqual(
+            operations["access_requester_authentication_php_verifier"],
+            "eucons/runtime/php/src/ResearchRightsAuth.php",
         )
         self.assertEqual(procedure["test_twin"]["classification"], "TEST_TWIN_NON_EVIDENCE")
         self.assertFalse(procedure["collection_enabled"])
 
-    def test_rights_applicability_is_reconciled_to_approved_lawful_basis_but_live_workflow_remains_fail_closed(self):
+    def test_rights_applicability_is_reconciled_but_live_workflow_remains_fail_closed(self):
         procedure = json.loads(
             (Path(__file__).with_name("GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json")).read_text(
                 encoding="utf-8"
@@ -166,9 +176,10 @@ class RightsAccessTests(unittest.TestCase):
         self.assertFalse(procedure["controller_approval"])
         self.assertEqual(
             procedure["research_store_operations"]["access_requester_authentication_reference_adapter"],
-            "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
+            "TWO_PART_OPAQUE_PROOF_RESPONSE_ID_PLUS_PRIVATE_UUIDV4_NO_IDENTITY_REGISTRY",
         )
-        self.assertIsNone(procedure["request_channel"]["privacy_contact"])
+        self.assertEqual(procedure["request_channel"]["privacy_contact"], "privacy@eucons.ro")
+        self.assertEqual(procedure["request_channel"]["status"], "CONFIG_BOUND_LIVE_DELIVERY_UNVERIFIED")
         self.assertFalse(procedure["collection_enabled"])
 
 
