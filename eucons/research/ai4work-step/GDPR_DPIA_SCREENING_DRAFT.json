@@ -39,42 +39,15 @@
     "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
   },
   "edpb_screening_criteria": {
-    "evaluation_or_scoring": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_DESIGN",
-      "reason": "only aggregate research synthesis; no person-level evaluation or scoring"
-    },
-    "automated_decision_with_legal_or_similar_effect": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_DESIGN",
-      "reason": "no decisions concerning an individual are permitted"
-    },
-    "systematic_monitoring": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_DESIGN",
-      "reason": "no monitoring of behaviour or publicly accessible areas"
-    },
-    "sensitive_or_highly_personal_data": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_DESIGN",
-      "reason": "special-category, criminal-conviction, direct-identifier and analytical free-text fields are forbidden"
-    },
-    "large_scale_processing": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_DOCUMENTED_METHOD_SCOPE",
-      "reason": "the current design is a bounded one-off research campaign with narrow preset fields and method thresholds of 120 adult plus 45 employer responses across three regions; it is not a continuous population-scale database. Re-screen if response volume, duration, data breadth or geographic scope materially increases."
-    },
-    "matching_or_combining_datasets": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_DESIGN",
-      "reason": "CRM/contact linkage and cross-dataset identity matching are forbidden"
-    },
-    "vulnerable_data_subjects": {
-      "state": "SAFEGUARDED_NOT_TRIGGERING_MANDATORY_DPIA_ON_CURRENT_DESIGN",
-      "reason": "employee respondents may face a power imbalance, but participation is voluntary, refusal has no consequence, individual results cannot be disclosed to employers and the design performs no automated monitoring or recording of employees"
-    },
-    "innovative_technology_or_organisational_solution": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_PROCESSING",
-      "reason": "AI is the subject matter of the questionnaire; respondent-level processing itself is a conventional first-party form/store/export workflow with no AI/ML scoring, biometric, IoT, fingerprinting or rights-limiting technology"
-    },
-    "prevents_right_or_service_or_contract": {
-      "state": "NOT_TRIGGERED_BY_CURRENT_DESIGN",
-      "reason": "participation is optional and must not condition employment, a service or a contract"
-    }
+    "evaluation_or_scoring": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "only aggregate research synthesis; no person-level evaluation or scoring"},
+    "automated_decision_with_legal_or_similar_effect": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "no decisions concerning an individual are permitted"},
+    "systematic_monitoring": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "no monitoring of behaviour or publicly accessible areas"},
+    "sensitive_or_highly_personal_data": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "special-category, criminal-conviction, direct-identifier and analytical free-text fields are forbidden"},
+    "large_scale_processing": {"state": "NOT_TRIGGERED_BY_CURRENT_DOCUMENTED_METHOD_SCOPE", "reason": "the current design is a bounded one-off research campaign with narrow preset fields and method thresholds of 120 adult plus 45 employer responses across three regions; it is not a continuous population-scale database. Re-screen if response volume, duration, data breadth or geographic scope materially increases."},
+    "matching_or_combining_datasets": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "CRM/contact linkage and cross-dataset identity matching are forbidden"},
+    "vulnerable_data_subjects": {"state": "SAFEGUARDED_NOT_TRIGGERING_MANDATORY_DPIA_ON_CURRENT_DESIGN", "reason": "employee respondents may face a power imbalance, but participation is voluntary, refusal has no consequence, individual results cannot be disclosed to employers and the design performs no automated monitoring or recording of employees"},
+    "innovative_technology_or_organisational_solution": {"state": "NOT_TRIGGERED_BY_CURRENT_PROCESSING", "reason": "AI is the subject matter of the questionnaire; respondent-level processing itself is a conventional first-party form/store/export workflow with no AI/ML scoring, biometric, IoT, fingerprinting or rights-limiting technology"},
+    "prevents_right_or_service_or_contract": {"state": "NOT_TRIGGERED_BY_CURRENT_DESIGN", "reason": "participation is optional and must not condition employment, a service or a contract"}
   },
   "anspdcp_decision_174_2018_check": {
     "systematic_automated_personal_evaluation_with_significant_effect": false,
@@ -98,7 +71,7 @@
   "mandatory_before_prod": {
     "controller_determination_approved": true,
     "controller_determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3",
-    "privacy_contact_or_dpo_review_reference": null,
+    "privacy_contact_or_dpo_review_reference": "PRIVACY_CONTACT_BINDING_2026-09-03.json",
     "final_large_scale_assessment": "NOT_LARGE_SCALE_ON_CURRENT_DOCUMENTED_METHOD_SCOPE; re-screen on material increase in volume, duration, data breadth or geography",
     "employee_power_imbalance_safeguards_approved": true,
     "employee_power_imbalance_safeguards_technical_design_complete": true,
@@ -107,7 +80,7 @@
     "if_dpia_required_completed_dpia_reference": null,
     "if_residual_high_risk_prior_consultation_assessed": true
   },
-  "fail_closed_rule": "EUROCONSULT SRL has accepted DPIA_NOT_REQUIRED on the current minimised design. This does not authorize PROD collection: privacy-contact/DPO applicability, Article 13, provider/account, rights and live operational gates remain fail-closed, and material design changes require re-screening.",
+  "fail_closed_rule": "EUROCONSULT SRL has accepted DPIA_NOT_REQUIRED on the current minimised design and the controller-declared privacy contact is bound. This does not authorize PROD collection: exact Article 13 rendered-surface validation, requester-authentication, provider/account, rights and live operational gates remain fail-closed, and material design changes require re-screening.",
   "re_screen_triggers": [
     "collection volume, duration or geographic scope materially increases",
     "special-category, criminal-conviction, direct-identifier or analytical free-text data are proposed",
@@ -126,7 +99,7 @@
     "approver_name_or_role": "EUROCONSULT SRL controller / project owner",
     "approved_at": "2026-09-03",
     "approval_reference": "CONTROLLER_GOVERNANCE_APPROVAL_2026-09-03.json",
-    "privacy_contact_or_dpo_review_reference": null,
-    "boundary": "The controller accepts the DPIA-not-required outcome for the current minimised design. Collection remains disabled until privacy-contact, Article 13, provider/account, rights and live operational gates pass and a separate final collection-only v0.2 approval is recorded."
+    "privacy_contact_or_dpo_review_reference": "PRIVACY_CONTACT_BINDING_2026-09-03.json",
+    "boundary": "The controller accepts the DPIA-not-required outcome for the current minimised design and the dedicated privacy-contact declaration is bound. Collection remains disabled until exact Article 13 rendered-surface validation, requester-authentication, provider/account, rights and live operational gates pass and a separate final collection-only v0.2 approval is recorded."
   }
 }
