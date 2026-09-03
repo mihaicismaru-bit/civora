@@ -5,7 +5,6 @@ on:
     paths:
       - 'partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json'
       - 'partener-eu/ingest/interreg_ro_bg_call6_exact.py'
-      - 'partener-eu/ingest/interreg_ro_bg_call6_exact_curl.py'
       - 'partener-eu/ops/test_interreg_ro_bg_call6_exact.py'
       - '.github/workflows/partener-eu-interreg-ro-bg-call6-exact-proof.yml'
   workflow_dispatch:
@@ -34,12 +33,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile registry adapter transport and regression
+      - name: Compile registry adapter and regression
         run: |
           python -m json.tool partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/interreg_ro_bg_call6_exact.py \
-            partener-eu/ingest/interreg_ro_bg_call6_exact_curl.py \
             partener-eu/ops/test_interreg_ro_bg_call6_exact.py
 
       - name: Validate exact fail-closed semantics
@@ -48,24 +46,20 @@ jobs:
         run: python partener-eu/ops/test_interreg_ro_bg_call6_exact.py
 
       - name: Acquire first fresh exact authority receipt
-        env:
-          PYTHONPATH: partener-eu/ingest
         run: |
           ROOT=/tmp/partener-eu-interreg-ro-bg-call6-exact-proof
           rm -rf "$ROOT"
           mkdir -p "$ROOT/first" "$ROOT/second"
-          python partener-eu/ingest/interreg_ro_bg_call6_exact_curl.py \
+          python partener-eu/ingest/interreg_ro_bg_call6_exact.py \
             --registry partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-first" \
             --output-dir "$ROOT/first"
 
       - name: Acquire second fresh exact authority receipt and reconcile same identity
-        env:
-          PYTHONPATH: partener-eu/ingest
         run: |
           ROOT=/tmp/partener-eu-interreg-ro-bg-call6-exact-proof
           sleep 1
-          python partener-eu/ingest/interreg_ro_bg_call6_exact_curl.py \
+          python partener-eu/ingest/interreg_ro_bg_call6_exact.py \
             --registry partener-eu/ingest/interreg_ro_bg_call6_exact_registry.json \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-second" \
             --previous "$ROOT/first/interreg-ro-bg-call6-exact-evidence.json" \
@@ -89,8 +83,6 @@ jobs:
           assert evidence['territorial_relevance']['programme_area_relevance_only'] is True
           assert evidence['territorial_relevance']['call_eligibility_authorized'] is False
           assert rec['lkg_reference_is_current_truth'] is False
-          for source in evidence.get('sources') or []:
-              assert source.get('transport')=='CURL_STRICT_TLS'
           if evidence['source_health_state']=='HEALTHY':
               assert evidence['candidate_state']=='CLOSED_CALL_CANDIDATE'
               assert evidence['candidate_status_label']=='Closed calls for proposals'
@@ -106,7 +98,6 @@ jobs:
               assert rec['reconciliation_state']=='CURRENT_SOURCE_DEGRADED_FAIL_CLOSED'
               assert rec['material_admission_ready_for_downstream_review'] is False
           print(json.dumps({
-              'transport':'CURL_STRICT_TLS',
               'source_health_state':evidence['source_health_state'],
               'official_call_identifier':'6',
               'candidate_state':evidence['candidate_state'],
