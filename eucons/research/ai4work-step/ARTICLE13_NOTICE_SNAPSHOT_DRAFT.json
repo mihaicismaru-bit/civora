@@ -17,12 +17,12 @@
     "operator_contact_details": "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII",
     "privacy_contact": "DE COMPLETAT ÎNAINTE DE ACTIVAREA COLECTĂRII",
     "purpose_summary": "Răspunsurile sunt folosite exclusiv pentru fundamentarea și validarea analizei de nevoi AI4WORK STEP, în formă individuală numai cât este necesar pentru controlul calității și al drepturilor, iar în analiză și raportare numai în forme agregate supuse disclosure control.",
-    "legal_basis": "DE APROBAT ÎNAINTE DE ACTIVAREA COLECTĂRII",
-    "legitimate_interest_summary": "Dacă operatorul aprobă art. 6 alin. (1) lit. (f) GDPR, interesul urmărit este fundamentarea proporțională și verificabilă a analizei de nevoi, pe baza LIA aprobate; participarea rămâne voluntară și dreptul la opoziție se aplică potrivit art. 21.",
+    "legal_basis": "GDPR art. 6 alin. (1) lit. (f) — interes legitim al EUROCONSULT SRL pentru fundamentarea proporțională și verificabilă a analizei de nevoi AI4WORK STEP, conform LIA aprobate la 03.09.2026. Confirmarea citirii informării nu este tratată ca temei de consimțământ GDPR.",
+    "legitimate_interest_summary": "Interesul legitim aprobat este fundamentarea proporțională și verificabilă a analizei de nevoi AI4WORK STEP, pe baza LIA aprobate; participarea este voluntară, nu produce dezavantaje, iar dreptul la opoziție se aplică potrivit art. 21 GDPR.",
     "recipients_summary": "Accesul la răspunsuri la nivel de respondent este limitat la personalul autorizat pentru cercetare și la împuterniciții/subîmputerniciții tehnici validați; răspunsurile nu sunt copiate în CRM, nu sunt transmise angajatorilor la nivel individual și nu sunt utilizate pentru marketing.",
     "international_transfer_summary": "Niciun transfer internațional de date la nivel de respondent nu este autorizat prin acest contract; lanțul tehnic și localizarea/subprocesatorii furnizorului trebuie verificate înainte de activarea PROD, iar orice transfer care ar deveni relevant necesită temei și garanții documentate înainte de utilizare.",
     "retention_summary": "Răspunsurile la nivel de respondent se păstrează în stocarea live numai până la validarea analizei și înghețarea dovezilor, dar cel mult 180 de zile după închiderea colectării și, în lipsa unui hold juridic/audit documentat, nu mai târziu de 31.03.2027. După ștergerea din stocarea live, orice copie reziduală din backupul furnizorului poate persista numai în ciclul tehnic preexistent, nereînnoit, validat înainte de PROD și cel mult 92 de zile de la ștergerea live; nu poate fi readusă în procesarea curentă prin restaurări obișnuite. Markerul tehnic anti-replay după ștergere este limitat la maximum 24 de ore; logurile aplicației nu conțin răspunsuri și au retenție de maximum 7 zile.",
-    "rights_summary": "Persoana vizată poate exercita, în condițiile GDPR și ale temeiului juridic final, drepturile de acces, rectificare, ștergere, restricționare și opoziție. Receipt-ul tehnic opac poate fi folosit pentru localizarea răspunsului fără crearea unui registru identitate–răspuns; dacă temeiul final se schimbă, matricea drepturilor se revalidează înainte de colectare.",
+    "rights_summary": "În baza art. 6 alin. (1) lit. (f) GDPR, persoana vizată poate exercita, în condițiile GDPR, drepturile de acces, rectificare, ștergere, restricționare și opoziție. Dreptul la portabilitate și retragerea consimțământului nu sunt aplicabile acestui temei juridic. Receipt-ul tehnic opac poate fi folosit pentru localizarea răspunsului fără crearea unui registru identitate–răspuns; orice schimbare a temeiului juridic impune revalidarea matricei drepturilor înainte de colectare.",
     "complaint_summary": "Persoana vizată are dreptul de a depune o plângere la Autoritatea Națională de Supraveghere a Prelucrării Datelor cu Caracter Personal și dreptul la o cale de atac potrivit GDPR.",
     "provision_consequence_summary": "Participarea este voluntară. Necompletarea sau refuzul de a participa nu afectează un loc de muncă, un serviciu, eligibilitatea într-un proiect ori accesul la formare.",
     "automated_decision_summary": "Răspunsurile nu sunt folosite pentru profilare individuală sau pentru decizii automatizate care produc efecte juridice ori efecte similare semnificative asupra respondentului."
@@ -33,5 +33,12 @@
     "approved_at": null,
     "approval_reference": null
   },
-  "activation_rule": "The exact Article 13 text visible before questions is frozen from the renderer inputs in form_contract.json and forms_definition.json. PROD requires controller approval, non-placeholder operator/privacy contacts and an approved lawful basis. This snapshot is a governance/control artifact and is never evidence of need."
+  "lawful_basis_policy_binding": {
+    "controller_approved": true,
+    "approved_at": "2026-09-03T07:29:00+02:00",
+    "approval_reference": "CONTROLLER_GOVERNANCE_APPROVAL_2026-09-03.json",
+    "basis_code": "GDPR_ARTICLE_6_1_F_LEGITIMATE_INTERESTS",
+    "boundary": "Only the lawful-basis and corresponding rights wording are approved here. Full Article 13 approval remains false until operator contact details and an operational privacy contact are bound and the exact rendered live surface is validated."
+  },
+  "activation_rule": "The exact Article 13 text visible before questions is frozen from the renderer inputs in form_contract.json and forms_definition.json. PROD requires controller approval, non-placeholder operator/privacy contacts and the approved lawful basis already bound here. This snapshot is a governance/control artifact and is never evidence of need."
 }
