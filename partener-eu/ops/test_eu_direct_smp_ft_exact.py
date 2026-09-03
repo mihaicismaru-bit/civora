@@ -16,12 +16,21 @@ def make_post(search=None,facet=None):
         raise AssertionError(endpoint)
     return post
 def topic(url): return {"url":url,"final_url":url,"http_status":200,"content_type":"text/html","bytes":10,"body_sha256":"b"*64,"verified":True}
+def degraded_topic(url): return {"url":url,"final_url":url,"http_status":404,"content_type":"text/html","bytes":0,"body_sha256":None,"verified":False,"error":"HTTPError: HTTP Error 404: Not Found"}
 def main():
     taxonomy={"schema":"PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1","market_intelligence_only":True,"material_fact_use":False,"records":[{"identifier":REF,"programme_family_normalized":"SINGLE_MARKET_PROGRAMME","status_label_candidate":"Open","taxonomy_fingerprint":"3"*64,"source_semantic_fingerprint":"4"*64,"authority_url_candidate":ft.topic_url(REF)}]}
     selected=select_smp_candidate(taxonomy); assert selected["identifier"]==REF
     evidence=collect_exact(REF,run_id="synthetic",fetched_at="2026-09-01T22:10:00+00:00",source_candidate=selected,post_func=make_post(),topic_func=topic)
     validate_evidence(evidence); assert evidence["candidate_state"]=="OPEN_CALL"; assert evidence["programme_family"]=="SINGLE_MARKET_PROGRAMME"; assert evidence["open_call_authorized"] is False; assert evidence["eligibility_authorized"] is False
+    assert evidence["source_health_state"]=="HEALTHY"; assert evidence["evidence_usable_for_reconciliation"] is True; assert evidence["lkg_required"] is False
     assert evidence["programme_fit_evidence"]["facts"]["fit_state"]=="ROMANIA_PROGRAMME_LEVEL_FIT_DEMONSTRATED_NON_AUTHORIZING"
+    degraded=collect_exact(REF,run_id="degraded",fetched_at="2026-09-01T22:20:00+00:00",source_candidate=selected,post_func=make_post(),topic_func=degraded_topic)
+    validate_evidence(degraded); assert degraded["authority_url_verified"] is False; assert degraded["source_health_state"]=="DEGRADED_AUTHORITY_READBACK"; assert degraded["lkg_required"] is True; assert degraded["evidence_usable_for_reconciliation"] is False
+    assert degraded["candidate_state"]=="UNKNOWN"; assert degraded["status_label"] is None; assert degraded["deadline_candidate"] is None; assert degraded["budget_candidate"] is None; assert degraded["open_call_authorized"] is False
+    assert degraded["structured_candidate_snapshot"]["status_label"]=="Open"; assert degraded["structured_candidate_snapshot"]["deadline_candidate"]=="2026-12-31T17:00:00Z"
+    bad_degraded=copy.deepcopy(degraded); bad_degraded["candidate_state"]="OPEN_CALL"
+    try: validate_evidence(bad_degraded); raise AssertionError("degraded authority leaked structured OPEN")
+    except ValueError: pass
     bad=facet_payload(); bad["facets"][0]["values"][0]["value"]="Digital Europe Programme (DIGITAL)"
     try: collect_exact(REF,run_id="bad",fetched_at="2026-09-01T22:10:00+00:00",post_func=make_post(facet=bad),topic_func=topic); raise AssertionError("wrong programme accepted")
     except ValueError as exc: assert "not proven to belong to Single Market Programme" in str(exc)
