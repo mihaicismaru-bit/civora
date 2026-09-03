@@ -5,12 +5,12 @@
   "status": "DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION",
   "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "controller_approval": false,
-  "controller_approval_semantics": "FULL_OPERATIONAL_PROD_APPROVAL_REQUIRING_LIVE_PRIVACY_CONTACT_REQUESTER_AUTHENTICATION_AND_PROVIDER_BOUND_RIGHTS_PATH; policy acceptance is recorded separately below",
+  "controller_approval_semantics": "FULL_OPERATIONAL_PROD_APPROVAL_REQUIRING_LIVE_PRIVACY_CONTACT_DELIVERY_PROVIDER_BOUND_RIGHTS_PATH_AND_PROVIDER_BOUND_TEST_TWIN; policy acceptance is recorded separately below",
   "collection_enabled": false,
   "legal_design_anchors": {
     "gdpr_article_11": "Do not acquire, maintain or process additional identifying information solely to identify a data subject when identification is not required for the research purpose; where the controller can demonstrate it cannot identify the data subject, rights that require identification are handled in accordance with Article 11 unless the data subject provides additional information enabling identification.",
     "gdpr_article_12": "The controller must provide transparent information and facilitate exercise of data-subject rights through the approved privacy contact and procedure.",
-    "gdpr_article_15": "The right of access includes confirmation whether personal data are processed, access to the personal data, a copy of the personal data undergoing processing and the contextual information required by Article 15. The reference adapter implements only the receipt-keyed respondent-record-copy component; requester authentication, confirmation and the controller-supplied processing context remain operational/controller responsibilities.",
+    "gdpr_article_15": "The right of access includes confirmation whether personal data are processed, access to the personal data, a copy of the personal data undergoing processing and the contextual information required by Article 15. The candidate now binds a two-part opaque proof-of-possession verifier, the reviewed respondent-record-copy adapter and a controller context-response template; provider-bound live validation and full operational controller approval remain required before collection.",
     "gdpr_article_16": "Where a live response can be located by the opaque receipt and preset analytical values are inaccurate, rectification must be possible without introducing direct identifiers or mutating technical/provenance fields.",
     "gdpr_article_18": "Where restriction applies, the record must not continue through ordinary analytical processing while the restriction is active.",
     "gdpr_article_20": "Data portability applies only where the processing is based on consent or contract, is carried out by automated means and concerns data provided by the data subject. Under the controller-approved legitimate-interest basis, Article 20 portability is not the applicable right for this processing; if the basis changes to consent or contract, a structured machine-readable portability path must be implemented and validated before collection.",
@@ -34,7 +34,10 @@
     "extra_identity_collection_for_rights_lookup": "FORBIDDEN_BY_DEFAULT",
     "technical_receipt": "The submit route returns an opaque response_id not derived from name, email, IP, device, CRM or employer identity. If retained by the respondent it may locate the corresponding research-only record without creating an identity lookup table.",
     "receipt_is_not_identity_proof": true,
-    "lost_receipt_rule": "If the controller cannot otherwise identify the record, it must not create a new identity-linkage mechanism solely to satisfy lookup; Article 11 and any additional information voluntarily provided by the data subject must be assessed under the approved procedure."
+    "private_verification_code": "The same browser-generated UUIDv4 used as the submission idempotency credential is shown to the respondent after successful acceptance as a private verification code. It is not stored raw in the analytical store, NF06, CRM, URL/query string or application logs and is not persisted in browser storage by the research client.",
+    "requester_authentication": "Before disclosure or mutation, verify proof of possession by checking that response_id cryptographically corresponds to the supplied private UUIDv4 code for one allowed form. This authenticates control of the original submission credential, not civil identity, and requires no CRM/IP/device lookup.",
+    "authentication_contract": "RIGHTS_REQUEST_AUTHENTICATION_CONTRACT_2026-09-03.json",
+    "lost_receipt_rule": "If the requester cannot supply the required opaque values and the controller cannot otherwise identify the record, it must not create a new identity-linkage mechanism solely to satisfy lookup; Article 11 and any additional information voluntarily provided by the data subject must be assessed under the approved procedure."
   },
   "supported_request_types": [
     "access",
@@ -46,21 +49,23 @@
     "consent_withdrawal_if_consent_is_final_legal_basis"
   ],
   "request_channel": {
-    "privacy_contact": null,
-    "status": "OPEN_UNTIL_OPERATIONAL_PRIVACY_CONTACT_AND_REQUESTER_AUTHENTICATION_ARE_BOUND",
-    "rule": "No public collection until the determined controller publishes an operational privacy contact and request-handling route."
+    "privacy_contact": "privacy@eucons.ro",
+    "status": "CONFIG_BOUND_LIVE_DELIVERY_UNVERIFIED",
+    "rule": "The dedicated privacy address is bound in configuration and the candidate Article 13 notice. No public collection until inbound delivery, the exact live notice and provider-bound rights operations are independently validated."
   },
   "research_store_operations": {
-    "lookup": "Locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
-    "access": "After the controller applies the approved requester-authentication procedure, produce only the receipt-keyed copy of the respondent's own stored analytical record through the reviewed allowlist. Storage hashes, idempotency internals, hold state, replay controls and all other respondents are excluded.",
+    "lookup": "After two-part proof verification, locate only by opaque response_id in the isolated research store; do not search CRM, optional-contact records, IP logs, user-agent logs or device data.",
+    "access": "After the two-part opaque proof is verified and live record existence is confirmed, produce only the receipt-keyed copy of the respondent's own stored analytical record through the reviewed allowlist and supplement it with the Article 15 context template. Storage hashes, idempotency internals, hold state, replay controls and all other respondents are excluded.",
     "access_reference_adapter": "RECEIPT_KEYED_RESPONDENT_RECORD_COPY_ALLOWLIST_FAIL_CLOSED_ON_NEW_FIELDS_NO_STORAGE_INTERNALS",
     "access_controller_context_required": true,
-    "access_requester_authentication_reference_adapter": "NOT_IMPLEMENTED_CONTROLLER_OPERATION_REQUIRED",
-    "rectification": "Locate by opaque response_id, revalidate only corrected preset profile/answer values against the frozen form definition, preserve technical/provenance fields, regenerate integrity metadata atomically and preserve active restriction/objection holds. A delayed retry of the original transport body must not overwrite the correction.",
+    "access_controller_context_template": "ARTICLE15_CONTEXT_RESPONSE_TEMPLATE_2026-09-03.json",
+    "access_requester_authentication_reference_adapter": "TWO_PART_OPAQUE_PROOF_RESPONSE_ID_PLUS_PRIVATE_UUIDV4_NO_IDENTITY_REGISTRY",
+    "access_requester_authentication_php_verifier": "eucons/runtime/php/src/ResearchRightsAuth.php",
+    "rectification": "After two-part proof verification, locate by opaque response_id, revalidate only corrected preset profile/answer values against the frozen form definition, preserve technical/provenance fields, regenerate integrity metadata atomically and preserve active restriction/objection holds. A delayed retry of the original transport body must not overwrite the correction.",
     "rectification_reference_adapter": "RECEIPT_KEYED_PRESET_VALUES_ONLY_REVALIDATE_FROZEN_FORM_PRESERVE_TECHNICAL_PROVENANCE",
     "rectification_preserves_active_hold": true,
     "rectification_stale_retry_safe": true,
-    "erasure": "Delete the analytical row, active analysis hold and idempotency receipt atomically from live research storage. A delayed retry must not recreate erased data. The PROD rights-control binding may retain only the opaque response_id plus technical expiry metadata as a non-analytical replay-suppression marker and must expire that marker no later than 24 hours after successful live erasure. The reference SQLite adapter remains TEST/REFERENCE only and does not authorize the PROD binding.",
+    "erasure": "After two-part proof verification and any required controller assessment, delete the analytical row, active analysis hold and idempotency receipt atomically from live research storage. A delayed retry must not recreate erased data. The PROD rights-control binding may retain only the opaque response_id plus technical expiry metadata as a non-analytical replay-suppression marker and must expire that marker no later than 24 hours after successful live erasure. The reference SQLite adapter remains TEST/REFERENCE only and does not authorize the PROD binding.",
     "erasure_replay_suppression": "OPAQUE_RESPONSE_ID_ONLY_NO_ANSWERS_NO_BODY_DIGEST_NOT_ANALYTICAL",
     "erasure_replay_marker_reference_adapter_boundary": "REQUIRED_FINITE_UTC_NOT_AFTER_NO_DEFAULT",
     "erasure_replay_marker_reference_adapter_expiry": "AUTO_PURGE_AT_OR_AFTER_CONFIGURED_BOUNDARY_BEFORE_REPLAY_CHECK",
@@ -68,7 +73,7 @@
     "erasure_replay_marker_export": "FORBIDDEN",
     "erasure_replay_marker_prod_retention": "MAXIMUM_24_HOURS_FROM_SUCCESSFUL_LIVE_ERASURE_CONTROLLER_POLICY_ACCEPTED_2026_09_03; SHORTER_ALLOWED; LONGER_FORBIDDEN_WITHOUT_DOCUMENTED_SECURITY_NECESSITY_AND EXPLICIT CONTROLLER APPROVAL",
     "erasure_replay_marker_prod_binding": "PROD MUST USE PER-MARKER FINITE EXPIRY NOT LATER THAN ERASURE_PLUS_24H_AND AUTOMATIC PURGE; PROVIDER-BOUND TEST TWIN MUST PROVE EXPIRY",
-    "restriction_or_objection": "A receipt-keyed bounded analysis hold keeps the record available for rights review but excludes it from analytical export while active.",
+    "restriction_or_objection": "After two-part proof verification and any required controller assessment, a receipt-keyed bounded analysis hold keeps the record available for rights review but excludes it from analytical export while active.",
     "restriction_or_objection_state_store": "BOUNDED_ENUM_ONLY_NO_CASE_NARRATIVE",
     "allowed_hold_states": [
       "RESTRICTED_PENDING_REVIEW",
@@ -84,6 +89,7 @@
     "allowed": "minimum case metadata needed to demonstrate handling, decision, dates and outcome",
     "forbidden": [
       "copying questionnaire answers into the rights-case log",
+      "persisting the raw private verification code after verification",
       "copying raw Idempotency-Key",
       "adding CRM/customer identifiers to analytical records",
       "using a rights request to build an identity-to-response registry",
@@ -107,19 +113,20 @@
     "replay_marker_retention_max_hours": 24,
     "portability_decision": "NOT_APPLICABLE_FINAL_LEGITIMATE_INTEREST_BASIS",
     "consent_withdrawal_decision": "NOT_APPLICABLE_FINAL_LEGITIMATE_INTEREST_BASIS",
-    "boundary": "Policy and rights-applicability rules are approved. This is not the full operational controller_approval used by the PROD gate: privacy contact, requester authentication, Article 15 confirmation/context handling and provider-bound live rights operations remain required."
+    "boundary": "Policy and rights-applicability rules are approved. The two-part opaque proof and Article 15 context are now implemented as pre-PROD candidates but are not promoted to full operational controller_approval until inbound privacy contact, provider-bound execution and exact live surface are validated."
   },
   "required_before_prod": [
     "controller determination approved",
-    "privacy contact published",
+    "privacy contact inbound delivery independently verified",
     "lawful basis/LIA approved",
     "rights applicability matrix reconciled to the final legal basis",
-    "privacy notice updated with final legal-basis-dependent rights",
+    "privacy notice updated with final legal-basis-dependent rights and two-part opaque proof instructions",
     "processor/subprocessor and provider logging/backup/deletion facts frozen",
     "production research-only adapter supports receipt lookup, reviewed access copy, preset-value rectification, bounded analysis holds, atomic erasure and maximum-24-hour per-marker replay suppression",
     "if Article 20 applies, a structured machine-readable portability path is implemented and provider-bound validated before collection",
     "if consent becomes a legal basis, an operational withdrawal path is implemented before collection",
-    "controller approves requester authentication and the Article 15 confirmation/context response that supplements the reference data copy",
+    "provider-bound TEST TWIN proves the two-part proof is displayed only after acceptance, is not persisted/logged, rejects malformed/non-matching pairs, and gates every respondent-record disclosure or mutation without CRM/IP/device fallback",
+    "controller operationally approves the bound requester-verification and Article 15 context workflow after provider-bound validation",
     "controller accepts the maximum-24-hour replay-marker policy and any shorter live value used by the binding",
     "provider-bound TEST TWIN proves access isolation, rectification stale-retry safety, held-record export exclusion, erasure anti-replay and automatic marker expiry within 24 hours; TEST TWIN remains NON_EVIDENCE",
     "procedure approval reference and SHA-256 are frozen in the PROD activation manifest"
