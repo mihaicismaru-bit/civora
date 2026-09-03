@@ -102,19 +102,20 @@ class ControllerDeterminationContractTests(unittest.TestCase):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, rendered)
 
-    def test_controller_identity_is_propagated_without_fabricating_privacy_contact(self):
+    def test_controller_identity_and_declared_privacy_contact_are_propagated_fail_closed(self):
         notice = self.forms.get("common_notice") or {}
-        self.assertEqual(notice.get("operator_status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN")
+        self.assertEqual(notice.get("operator_status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_BOUND")
         self.assertEqual(notice.get("operator"), "EUROCONSULT SRL")
         self.assertEqual(notice.get("operator_cui"), "14250864")
-        self.assertIn("DE COMPLETAT", notice.get("privacy_contact", ""))
+        self.assertEqual(notice.get("privacy_contact"), "privacy@eucons.ro")
 
         pre_notice = self.form_contract.get("pre_form_notice") or {}
         self.assertEqual(pre_notice.get("operator_legal_name"), "EUROCONSULT SRL")
         self.assertEqual(pre_notice.get("operator_cui"), "14250864")
-        self.assertEqual(pre_notice.get("operator_status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN")
-        self.assertEqual(pre_notice.get("privacy_contact"), "OPEN_BEFORE_PRODUCTION")
-        self.assertEqual(pre_notice.get("operator_contact_details"), "TO_BE_BOUND_BEFORE_PRODUCTION")
+        self.assertEqual(pre_notice.get("operator_status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_BOUND")
+        self.assertEqual(pre_notice.get("privacy_contact"), "privacy@eucons.ro")
+        self.assertEqual(pre_notice.get("operator_contact_details"), "privacy@eucons.ro")
+        self.assertEqual(pre_notice.get("privacy_contact_binding_reference"), "PRIVACY_CONTACT_BINDING_2026-09-03.json")
         self.assertFalse(self.form_contract["production_enabled"])
 
         storage_controller = self.storage_contract.get("controller") or {}
@@ -123,6 +124,11 @@ class ControllerDeterminationContractTests(unittest.TestCase):
         self.assertEqual(storage_controller.get("status"), "CONTROLLER_DETERMINED_PRIVACY_CONTACT_OPEN")
         self.assertEqual(storage_controller.get("privacy_contact"), "OPEN_BEFORE_PRODUCTION")
         self.assertFalse(self.storage_contract["production_enabled"])
+
+        # Binding an explicitly declared contact in the form/notice does not prove the
+        # provider-bound research store, account configuration or collection authority.
+        self.assertFalse(self.contract["collection_enabled"])
+        self.assertFalse(self.contract["real_collection_authorized"])
 
 
 if __name__ == "__main__":
