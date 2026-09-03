@@ -2,19 +2,406 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-03T08:40:48+03:00",
+  "generated_at": "2026-09-03T13:06:53+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-03T08:39:25+03:00",
-  "task_count": 71,
+  "queue_generated_at": "2026-09-03T13:05:36+03:00",
+  "task_count": 75,
   "primary_match_count": 0,
-  "no_match_count": 32,
+  "no_match_count": 36,
   "unrouted_count": 39,
   "target_count": 20,
-  "targets_ok": 17,
+  "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "c2561acd45a2f0a5c868dd11",
+      "signal_title": "„Lotul 6” al autostrăzii Sibiu – Pitești, conexiunea cu Rm. Vâlcea, a fost aprobat în ședință de Guvern: 13 km de drum modernizat",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/03/lotul-6-al-autostrazii-sibiu-pitesti-conexiunea-cu-rm-valcea-a-fost-aprobat-in-sedinta-de-guvern-13-km-de-drum-modernizat/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T13:00:06+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "a0b73dacd54b8f28396ad937",
+      "signal_title": "Continuare about 152 MILIOANE EURO din fonduri europene, pentru apă și canal în județul Vâlcea!",
+      "signal_url": "https://www.curierul.ro/152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T11:42:53+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "9d2c95fd890d5cca215db858",
+      "signal_title": "Continuare about 152 MILIOANE EURO din fonduri europene, pentru apă și canal în județul Vâlcea!",
+      "signal_url": "https://www.curierul.ro/152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T11:42:53+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "f121eea2d1175cb7e4a3d8cc",
+      "signal_title": "Suspiciuni de otrăvire într-o comună din Vâlcea. Trei câini morți în două zile, poliția a deschis dosare penale",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/suspiciuni-de-otravire-intr-o-comuna-din-valcea-trei-caini-morti-in-doua-zile-politia-a-deschis-dosare-penale/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T11:32:47+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "d740f990d8281399687bff14",
+      "signal_title": "Proprietarii de terenuri din Lăpușata, avertizați în privința ambroziei. Primăria anunță controale și amenzi",
+      "signal_url": "https://evenimentvalcean.ro/proprietarii-de-terenuri-din-lapusata-avertizati-in-privinta-ambroziei-primaria-anunta-controale-si-amenzi/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T11:20:40+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "7b796f032620858828ff0289",
+      "signal_title": "CONTRACT SEMNAT. 12 localități din Vâlcea primesc bani europeni pentru apă și canalizare",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/contract-semmat-12-localitati-din-valcea-primesc-bani-europeni-pentru-apa-si-canalizare/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T09:15:56+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "4aafab9c3d7a9834a31c6597",
+      "signal_title": "Ce canale media online sunt vizate de procedura de notificare prevăzută de CNA",
+      "signal_url": "https://stirileolteniei.ro/ce-canale-media-online-sunt-vizate-de-procedura-de-notificare-prevazuta-de-cna/",
+      "signal_publisher": "Știrile Olteniei",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T08:47:51+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "359a3b41c13598e1154430be",
       "signal_title": "VIDEO: Progrese pe Calea Șurii Mari: A început așternerea ultimului strat de asfalt. Se lucrează pe banda de lângă Târgul Obor",
@@ -26,6 +413,66 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "5e0096daf6b5e0d69df5e3b7",
+      "signal_title": "Studiul despre centrul istoric propune eliminarea totală, dar treptată, a circulației auto în următorii 3 – 5 ani. Traseul propus autobuzelor electrice trece și prin Piața Aurarilor",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/03/studiul-despre-centrul-istoric-propune-eliminarea-totala-dar-treptata-a-circulatiei-auto-in-urmatorii-3-5-ani-traseul-propus-autobuzelor-electrice-trece-si-prin-piata-aurarilor/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T06:56:13+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "f4991cb40262f67cc8b51820",
@@ -515,9 +962,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -542,9 +989,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -617,9 +1064,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -668,9 +1115,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -953,9 +1400,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1093,85 +1540,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "155fc7f3aa931e8dd912a902",
-      "signal_title": "Radare fixe vor fi instalate și în Vâlcea, pe DN7 – Valea Oltului și Dealul Negru. Proiectul CNAIR intră într-o nouă etapă",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/01/radare-fixe-vor-fi-instalate-si-in-valcea-pe-dn7-valea-oltului-si-dealul-negru-proiectul-cnair-intra-intr-o-noua-etapa/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-01T12:46:07+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "2948ef8288f6e4ec14b70893",
-      "signal_title": "Primarul Gutău dă asigurări: locuitorii din Râmnicu Vâlcea nu vor rămâne fără apă caldă. Cum va fi asigurată și căldura în perioada de tranziție",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/01/primarul-gutau-da-asigurari-locuitorii-din-ramnicu-valcea-nu-vor-ramane-fara-apa-calda-cum-va-fi-asigurata-si-caldura-in-perioada-de-tranzitie/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-01T12:14:43+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1232,9 +1603,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -1501,9 +1872,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1528,85 +1899,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "1d0f9f2d07369e3bbe9eafd4",
-      "signal_title": "Familia unei femei decedate acuză erori medicale grave la Spitalul Drăgășani: „Nu căutăm răzbunare, ci dreptate”",
-      "signal_url": "https://seintamplainvalcea.ro/2026/08/31/familia-unei-femei-decedate-acuza-erori-medicale-grave-la-spitalul-dragasani-nu-cautam-razbunare-ci-dreptate/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-31T14:44:33+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "3388e690df81d7804faac5ad",
-      "signal_title": "Primarul din Cernișoara a premiat valorile la sărbătoarea comunei: cuplurile de aur și elevii de nota 10, aplaudați pe scena de la Modoia",
-      "signal_url": "https://www.impactreal.ro/2026/08/31/primarul-din-cernisoara-a-premiat-valorile-la-sarbatoarea-comunei-cuplurile-de-aur-si-elevii-de-nota-10-aplaudati-pe-scena-de-la-modoia/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-08-31T10:35:36+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1620,6 +1915,18 @@
       "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
       "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
       "signal_publisher": "EuroVâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "def243266ca689e3d5a6263f",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=152%20MILIOANE%20EURO%20din%20fonduri%20europene%2C%20pentru%20ap%C4%83%20%C8%99i%20canal%20%C3%AEn%20jude%C8%9Bul%20V%C3%A2lcea%21&url=https%3A%2F%2Fwww.curierul.ro%2F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%2F",
+      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
@@ -1677,30 +1984,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "cb4e8cb74586963a0f525b87",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fliga-florilor-scm-ramnicu-valcea-minaur-baia-mare-28-2618-14%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "beb6dc37d4967228249bf482",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=LIGA%20FLORILOR.%20SCM%20R%C3%82MNICU%20V%C3%82LCEA%20-%20MINAUR%20BAIA%20MARE%2028-26%2818-14%29&url=https%3A%2F%2Fwww.curierul.ro%2Fliga-florilor-scm-ramnicu-valcea-minaur-baia-mare-28-2618-14%2F",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "acd6dd07c7b8fb1beb8f487c",
       "signal_title": "Schimbarea la față a Sibiului",
       "signal_url": "https://www.turnulsfatului.ro/exclusiv/schimbarea-la-fata-a-sibiului/",
@@ -1725,6 +2008,18 @@
       "fact_kernel_ready": false
     },
     {
+      "signal_id": "71369ccde4c5d10ce34de3b9",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "51903ee49daef77a112e793c",
       "signal_title": "Investiții PNRR împotriva viiturilor: Romsilva a finalizat 19 obiective, inclusiv în județul Vâlcea",
       "signal_url": "https://www.eurovalcea.ro/2026/09/01/investitii-pnrr-impotriva-viiturilor-romsilva-a-finalizat-19-obiective-inclusiv-in-judetul-valcea/",
@@ -1740,9 +2035,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -1797,9 +2092,9 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "6acb95bf42e585b073eb7ccc",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=LIGA%202.%20VICTORIE%21%20SCM%20R%C3%82MNICU%20V%C3%82LCEA%20BATE%20LA%20DUMBR%C4%82VI%C8%9AA.%201-0%2C%20S%C4%82LCIANU&url=https%3A%2F%2Fwww.curierul.ro%2Fliga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu%2F",
+      "signal_id": "cb4e8cb74586963a0f525b87",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fliga-florilor-scm-ramnicu-valcea-minaur-baia-mare-28-2618-14%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
       "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
@@ -1809,9 +2104,9 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "342eb05360cd935245b2934e",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fliga-2-victorie-scm-ramnicu-valcea-bate-la-dumbravita-1-0-salcianu%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_id": "beb6dc37d4967228249bf482",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=LIGA%20FLORILOR.%20SCM%20R%C3%82MNICU%20V%C3%82LCEA%20-%20MINAUR%20BAIA%20MARE%2028-26%2818-14%29&url=https%3A%2F%2Fwww.curierul.ro%2Fliga-florilor-scm-ramnicu-valcea-minaur-baia-mare-28-2618-14%2F",
       "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
