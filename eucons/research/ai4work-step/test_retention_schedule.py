@@ -23,13 +23,18 @@ class RetentionScheduleTests(unittest.TestCase):
             if isinstance(row, dict) and row.get("data_class")
         }
 
-    def test_schedule_policy_complete_but_prod_still_fail_closed(self) -> None:
+    def test_controller_policy_accepted_but_prod_still_fail_closed_until_provider_binding(self) -> None:
         self.assertEqual(self.schedule.get("research_id"), self.contract.get("research_id"))
         self.assertEqual(self.schedule.get("research_id"), self.activation.get("research_id"))
         self.assertEqual(
             self.schedule.get("status"),
-            "TECHNICAL_POLICY_COMPLETE_CONTROLLER_ACCEPTANCE_AND_PROVIDER_BINDING_REQUIRED_BEFORE_COLLECTION",
+            "CONTROLLER_POLICY_ACCEPTED_PROVIDER_BINDING_REQUIRED_BEFORE_COLLECTION",
         )
+        policy = self.schedule.get("controller_policy_acceptance", {})
+        self.assertTrue(policy.get("approved"))
+        self.assertEqual(policy.get("raw_access_log_retention_max_days"), 7)
+        self.assertEqual(policy.get("backup_residual_max_days"), 92)
+        self.assertEqual(policy.get("replay_marker_max_hours"), 24)
         self.assertIs(self.schedule.get("controller_approval"), False)
         self.assertIs(self.schedule.get("collection_enabled"), False)
         self.assertIs(self.contract.get("production_enabled"), False)
