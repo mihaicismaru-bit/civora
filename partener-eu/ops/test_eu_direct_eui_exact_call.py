@@ -54,6 +54,7 @@ def main() -> int:
         fetcher=fake_fetch,
     )
     assert evidence["schema"] == "PARTENER_EU_EUI_EXACT_CALL_EVIDENCE_V1"
+    assert evidence["parser_version"] == "EU_DIRECT_EUI_EXACT_CALL_V1_1"
     assert evidence["source_family"] == "EU_DIRECT"
     assert evidence["programme_family"] == "EUROPEAN_URBAN_INITIATIVE"
     assert evidence["source_health_state"] == "HEALTHY"
@@ -73,6 +74,10 @@ def main() -> int:
         "call_alert_authorized",
     ):
         assert evidence[key] is False
+
+    legacy = copy.deepcopy(evidence)
+    legacy["parser_version"] = "EU_DIRECT_EUI_EXACT_CALL_V1"
+    validate_evidence(legacy)
 
     tampered = copy.deepcopy(evidence)
     tampered["closed_call_authorized"] = True
@@ -133,7 +138,34 @@ def main() -> int:
     assert opened["official_call_identifier"] is None
     assert opened["open_call_authorized"] is False
 
-    print({"status": "PASS", "adapter": "EUI_EXACT_CALL", "candidate": evidence["candidate_state"], "open_gate_identifier_present": False})
+    unrelated_closed_detail = DETAIL_HTML.replace(
+        b"<p>The Call for Proposals is closed.</p>",
+        b"<p>The support desk is closed on public holidays.</p>",
+    )
+    def unrelated_closed_fetch(url: str, *, timeout: float, accept: str):
+        if url == DEFAULT_CALL_URL:
+            return unrelated_closed_detail, 200, url, "text/html; charset=UTF-8"
+        return fake_fetch(url, timeout=timeout, accept=accept)
+
+    ambiguous = collect_exact(
+        run_id="synthetic-eui-unrelated-closed",
+        fetched_at="2026-09-03T00:04:00+00:00",
+        fetcher=unrelated_closed_fetch,
+    )
+    assert ambiguous["source_health_state"] == "HEALTHY"
+    assert ambiguous["candidate_state"] == "UNKNOWN"
+    assert ambiguous["status_label"] == "Unknown"
+    assert ambiguous["closed_call_authorized"] is False
+
+    print({
+        "status": "PASS",
+        "adapter": "EUI_EXACT_CALL",
+        "candidate": evidence["candidate_state"],
+        "parser_version": evidence["parser_version"],
+        "legacy_parser_accepted_for_replay": True,
+        "unrelated_closed_text_does_not_set_status": True,
+        "open_gate_identifier_present": False,
+    })
     return 0
 
 
