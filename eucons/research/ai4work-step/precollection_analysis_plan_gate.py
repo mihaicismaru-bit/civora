@@ -54,6 +54,8 @@ def _parse_ts(value: Any, *, field: str) -> datetime:
 
 
 def _activation_requested(contract: dict[str, Any], manifest: dict[str, Any], frame: dict[str, Any]) -> bool:
+    # Method/frame approval is intentionally included here so an approved frame must already
+    # have an exact dual lock. It does not mean that collection itself has been authorised.
     return any(
         (
             contract.get("production_enabled") is True,
@@ -63,6 +65,17 @@ def _activation_requested(contract: dict[str, Any], manifest: dict[str, Any], fr
             manifest.get("real_collection_authorized") is True,
             frame.get("frame_status") == "APPROVED_FOR_PROD",
             frame.get("collection_enabled") is True,
+        )
+    )
+
+
+def _manifest_activation_approved(manifest: dict[str, Any]) -> bool:
+    return any(
+        (
+            manifest.get("state") == "APPROVED_FOR_PROD",
+            manifest.get("approved_for_prod") is True,
+            manifest.get("collection_enabled") is True,
+            manifest.get("real_collection_authorized") is True,
         )
     )
 
@@ -208,11 +221,15 @@ def precollection_errors(
         lock_approved_at = None
         errors.append("plan_lock_approved_at_invalid")
 
-    try:
-        activation_approved_at = _parse_ts(manifest.get("approval_timestamp"), field="activation_manifest.approval_timestamp")
-    except PrecollectionAnalysisPlanGateError:
-        activation_approved_at = None
-        errors.append("activation_approval_timestamp_invalid")
+    # The activation manifest timestamp belongs to the separate final PROD/collection approval.
+    # It must remain absent while that manifest is still fail-closed. Only compare lock ordering
+    # once the activation manifest itself makes an approval/enablement claim.
+    activation_approved_at = None
+    if _manifest_activation_approved(manifest):
+        try:
+            activation_approved_at = _parse_ts(manifest.get("approval_timestamp"), field="activation_manifest.approval_timestamp")
+        except PrecollectionAnalysisPlanGateError:
+            errors.append("activation_approval_timestamp_invalid")
 
     if plan_approved_at is not None and lock_approved_at is not None and plan_approved_at > lock_approved_at:
         errors.append("plan_approved_after_lock")
