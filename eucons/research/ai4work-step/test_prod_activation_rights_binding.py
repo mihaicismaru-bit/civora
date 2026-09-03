@@ -37,8 +37,8 @@ class ProdActivationRightsBindingTests(unittest.TestCase):
         self.assertIn("data_subject_rights:rights_procedure_not_approved_for_prod", errors)
         self.assertIn("data_subject_rights:rights_controller_approval_missing", errors)
         self.assertIn("data_subject_rights:rights_request_channel_not_operational", errors)
-        self.assertIn("data_subject_rights:rights_privacy_contact_missing", errors)
-        self.assertIn("data_subject_rights:rights_requester_authentication_not_operational", errors)
+        self.assertIn("data_subject_rights:rights_prod_privacy_contact_missing", errors)
+        self.assertNotIn("data_subject_rights:rights_requester_authentication_not_operational", errors)
 
     def test_identity_linkage_weakening_is_rejected_at_authoritative_activation_boundary(self):
         contract = _load(CONTRACT_PATH)
