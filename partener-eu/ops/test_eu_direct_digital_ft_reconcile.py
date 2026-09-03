@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ingest"))
 
 from eu_direct_digital_ft_exact import sha256_json
-from eu_direct_digital_ft_reconcile import reconcile, validate_receipt
+from eu_direct_digital_ft_reconcile import DEGRADED_STATE, reconcile, validate_receipt
 
 REF = "DIGITAL-2026-AI-DATA-10-COMPLIANCE"
 
@@ -74,6 +74,58 @@ def evidence(ts="2026-09-01T20:10:00+00:00", state="OPEN_CALL", status="Open", d
     }
 
 
+def degraded_evidence(ts="2026-09-01T20:40:00+00:00"):
+    healthy = evidence(ts)
+    authority_url = healthy["authority_url"]
+    structured = {
+        "identifier": REF,
+        "record_type": "1",
+        "programme_reference": "43152860",
+        "programme_label": "Digital Europe Programme (DIGITAL)",
+        "call_identifier": "DIGITAL-2026-AI-DATA-10",
+        "status_code": "31094501",
+        "status_label": "Open",
+        "title": "Synthetic Digital Europe topic",
+        "deadline_candidate": "2027-03-03T17:00:00Z",
+        "budget_candidate": None,
+    }
+    semantics = {
+        "identifier": REF,
+        "call_identifier_candidate": structured["call_identifier"],
+        "title_candidate": structured["title"],
+        "programme_reference": structured["programme_reference"],
+        "programme_label": structured["programme_label"],
+        "status_label_candidate": structured["status_label"],
+        "authority_url": authority_url,
+        "authority_endpoint_verified": False,
+        "deadline_candidate_structured_only": structured["deadline_candidate"],
+        "budget_candidate_structured_only": None,
+    }
+    healthy.update({
+        "parser_version": "EU_DIRECT_DIGITAL_FT_EXACT_V1_1",
+        "authority_readback": {
+            "url": authority_url,
+            "final_url": authority_url,
+            "http_status": 404,
+            "verified": False,
+            "error": "HTTPError: HTTP Error 404: Not Found",
+        },
+        "authority_url_verified": False,
+        "source_health_state": "DEGRADED_AUTHORITY_READBACK",
+        "lkg_required": True,
+        "evidence_usable_for_reconciliation": False,
+        "degradation_reason": "HTTPError: HTTP Error 404: Not Found",
+        "candidate_state": "UNKNOWN",
+        "status_label": None,
+        "deadline_candidate": None,
+        "budget_candidate": None,
+        "structured_candidate_snapshot": structured,
+        "exact_semantics": semantics,
+        "exact_semantic_fingerprint": sha256_json(semantics),
+    })
+    return healthy
+
+
 def main():
     current = evidence()
     baseline = reconcile(current)
@@ -94,6 +146,29 @@ def main():
     assert changed["material_admission_ready_for_downstream_review"] is False
     assert changed["call_alert_authorized"] is False
 
+    degraded = degraded_evidence()
+    degraded_baseline = reconcile(degraded)
+    validate_receipt(degraded_baseline, current=degraded)
+    assert degraded_baseline["reconciliation_state"] == DEGRADED_STATE
+    assert degraded_baseline["semantic_reconciliation_passed"] is False
+    assert degraded_baseline["semantic_change_count"] == 0
+    assert degraded_baseline["semantic_changes"] == []
+    assert degraded_baseline["lkg_reference_required"] is True
+    assert degraded_baseline["lkg_reference_available"] is False
+    assert degraded_baseline["lkg_reference_is_current_truth"] is False
+    assert degraded_baseline["material_admission_ready_for_downstream_review"] is False
+    assert degraded_baseline["open_call_authorized"] is False
+
+    degraded_with_lkg = reconcile(degraded_evidence("2026-09-01T20:50:00+00:00"), current)
+    assert degraded_with_lkg["reconciliation_state"] == DEGRADED_STATE
+    assert degraded_with_lkg["semantic_reconciliation_passed"] is False
+    assert degraded_with_lkg["semantic_change_count"] == 0
+    assert degraded_with_lkg["lkg_reference_required"] is True
+    assert degraded_with_lkg["lkg_reference_available"] is True
+    assert degraded_with_lkg["lkg_reference_is_current_truth"] is False
+    assert degraded_with_lkg["previous_evidence_sha256"] == sha256_json(current)
+    assert degraded_with_lkg["material_admission_ready_for_downstream_review"] is False
+
     tampered = copy.deepcopy(current)
     tampered["exact_semantics"]["status_label"] = "Closed"
     try:
@@ -102,11 +177,11 @@ def main():
     except ValueError as exc:
         assert "fingerprint" in str(exc)
 
-    broadened = copy.deepcopy(baseline)
+    broadened = copy.deepcopy(degraded_baseline)
     broadened["deadline_authorized"] = True
     try:
-        validate_receipt(broadened, current=current)
-        raise AssertionError("reconciliation broadened material scope")
+        validate_receipt(broadened, current=degraded)
+        raise AssertionError("degraded reconciliation broadened material scope")
     except ValueError as exc:
         assert "attempted authorization" in str(exc)
 
