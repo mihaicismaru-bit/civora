@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import copy
 import json
 import pathlib
 import sys
@@ -54,6 +53,25 @@ class RFCSProgrammeIntelligenceTests(unittest.TestCase):
         self.assertTrue(snap["partner_intelligence_is_not_call_eligibility"])
         self.assertEqual(snap["romania_programme_fit"], "EU_MEMBER_STATE_APPLICANT_POOL_NON_AUTHORIZING")
         self.assertIn("field_scoped_material_admission", snap["missing_for_open_confirmation"])
+
+    def test_visible_content_change_changes_semantic_fingerprint_without_authorizing(self):
+        base = rfcs.collect(registry(), "base", fetcher=fake_fetch)
+        target_url = registry()["sources"][2]["url"]
+
+        def changed(url: str):
+            raw, meta = fake_fetch(url)
+            if url == target_url:
+                raw = raw.replace(b"EUR 40 million", b"EUR 41 million")
+            return raw, meta
+
+        newer = rfcs.collect(registry(), "newer", fetcher=changed)
+        self.assertNotEqual(base["semantic_fingerprint"], newer["semantic_fingerprint"])
+        before = next(r for r in base["evidence"] if r["source_id"] == "RFCS-REA-ANNUAL-CALL-INDEX")
+        after = next(r for r in newer["evidence"] if r["source_id"] == "RFCS-REA-ANNUAL-CALL-INDEX")
+        self.assertNotEqual(before["normalized_visible_text_sha256"], after["normalized_visible_text_sha256"])
+        self.assertNotEqual(before["source_semantic_fingerprint"], after["source_semantic_fingerprint"])
+        for flag in rfcs.MATERIAL_FLAGS:
+            self.assertFalse(newer[flag], flag)
 
     def test_registry_cannot_authorize_open(self):
         data = registry()
