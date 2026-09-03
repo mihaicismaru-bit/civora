@@ -26,6 +26,9 @@ on:
       - 'eucons/research/ai4work-step/need_ranking_engine.py'
       - 'eucons/research/ai4work-step/disclosure_control.py'
       - 'eucons/research/ai4work-step/nf06_preingest.py'
+      - 'eucons/research/ai4work-step/NEED_ANALYSIS_PLAN_DRAFT.json'
+      - 'eucons/research/ai4work-step/PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
       - '.github/workflows/eucons-ai4work-final-needs-package.yml'
   workflow_dispatch:
 
@@ -66,24 +69,33 @@ jobs:
           assert rules['test_twin_can_be_promoted'] is False
           print('PASS: source-register snapshot contract preserves the non-evidence/numeric boundary')
           PY
-      - name: Assert repository cannot self-authorize PROD release
+      - name: Assert approved method cannot self-authorize real collection or PROD release
         working-directory: eucons/research/ai4work-step
         run: |
           python - <<'PY'
           import json
+          import re
           from pathlib import Path
 
           root = Path('.')
           plan = json.loads((root / 'NEED_ANALYSIS_PLAN_DRAFT.json').read_text(encoding='utf-8'))
           lock = json.loads((root / 'PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json').read_text(encoding='utf-8'))
+          frame = json.loads((root / 'COLLECTION_FRAME_DRAFT.json').read_text(encoding='utf-8'))
           manifest = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
 
-          assert plan.get('status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
-          assert plan.get('approval', {}).get('approved_for_prod') is False
-          assert lock.get('state') == 'OPEN_NOT_LOCKED'
+          assert plan.get('status') == 'APPROVED_FOR_PROD'
+          assert plan.get('approval', {}).get('approved_for_prod') is True
+          assert frame.get('frame_status') == 'APPROVED_FOR_PROD'
+          assert frame.get('approval', {}).get('approved_for_prod') is True
+          assert lock.get('state') == 'LOCKED_BEFORE_PROD_ACTIVATION'
+          assert re.fullmatch(r'[0-9a-f]{64}', lock.get('need_analysis_plan_sha256', ''))
+          assert re.fullmatch(r'[0-9a-f]{64}', lock.get('collection_frame_sha256', ''))
+          assert frame.get('collection_enabled') is False
+          assert frame.get('nf06_handoff', {}).get('eligible_now') is False
           assert manifest.get('approved_for_prod') is False
           assert manifest.get('collection_enabled') is False
+          assert manifest.get('real_collection_authorized') is False
           assert plan.get('test_twin_evidence_class') == 'TEST_TWIN_NON_EVIDENCE'
           assert plan.get('project_activity_as_need_evidence') is False
-          print('PASS: final NEEDS_ANALYSIS/DOCX packaging mechanics are testable while PROD release remains fail-closed')
+          print('PASS: final package mechanics use an approved locked method while real collection, NF06 and PROD release remain fail-closed')
           PY
