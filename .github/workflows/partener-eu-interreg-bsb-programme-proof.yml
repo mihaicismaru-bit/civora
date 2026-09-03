@@ -43,7 +43,7 @@ jobs:
           PYTHONPATH: partener-eu/ingest:partener-eu/ops
         run: python partener-eu/ops/test_interreg_bsb_programme_fit.py
 
-      - name: Probe each BSB authority transport independently
+      - name: Probe each BSB geography authority transport independently
         env:
           PYTHONPATH: partener-eu/ingest
         run: |
@@ -52,12 +52,24 @@ jobs:
           for spec in SOURCES:
               try:
                   raw, meta = default_fetch(spec['url'])
-                  print({'source_id':spec['id'],'transport_health':'HEALTHY','http_status':meta['http_status'],'final_url':meta['final_url'],'bytes':len(raw)})
+                  print({
+                      'source_id': spec['id'],
+                      'transport_health': 'HEALTHY',
+                      'http_status': meta['http_status'],
+                      'final_url': meta['final_url'],
+                      'bytes': len(raw),
+                  })
               except Exception as exc:
-                  print({'source_id':spec['id'],'transport_health':'DEGRADED','authority_url':spec['url'],'error_type':type(exc).__name__,'error':str(exc)})
+                  print({
+                      'source_id': spec['id'],
+                      'transport_health': 'DEGRADED',
+                      'authority_url': spec['url'],
+                      'error_type': type(exc).__name__,
+                      'error': str(exc),
+                  })
           PY
 
-      - name: Acquire fresh BSB evidence or preserve source-health failure
+      - name: Acquire fresh BSB geography evidence or preserve source-health failure
         env:
           PYTHONPATH: partener-eu/ingest
         shell: bash
@@ -106,7 +118,9 @@ jobs:
               'canonical_corpus_mutation':False,
               'publication_effect':'NONE',
           }
-          (root/'bsb-source-health-failure.json').write_text(json.dumps(failure,indent=2,sort_keys=True)+'\n',encoding='utf-8')
+          (root/'bsb-source-health-failure.json').write_text(
+              json.dumps(failure,indent=2,sort_keys=True)+'\n', encoding='utf-8'
+          )
           PY
           fi
 
@@ -126,17 +140,30 @@ jobs:
           if healthy.exists():
               row=json.loads(healthy.read_text(encoding='utf-8'))
               assert row['schema']=='PARTENER_EU_INTERREG_BSB_PROGRAMME_FIT_V1'
+              assert row['parser_version']=='INTERREG_BSB_PROGRAMME_FIT_V1_1'
               assert row['source_health']=='HEALTHY' and row['programme_id']=='BSB'
               assert row['programme_cci']=='2021TC16NXTN002'
               assert row['romania_programme_region']=='Sud-Est'
               assert row['romania_scope']==['Braila','Buzau','Constanta','Galati','Tulcea','Vrancea']
-              assert len(row['source_receipts'])==3
+              assert row['applicant_signal_observation_state']=='APPLICANT_SIGNAL_INSUFFICIENT'
+              assert row['supported_applicant_types']==[]
+              assert row['historical_call_status_observed'] is None
+              assert len(row['source_receipts'])==2
+              assert {x['source_id'] for x in row['source_receipts']}=={
+                  'BSB_EC_PROGRAMME_REGION_GEOGRAPHY','ADRSE_REGION_MEMBERSHIP'
+              }
               for source in row['source_receipts']:
                   assert source['source_health']=='HEALTHY' and source['http_status']==200
                   assert re.fullmatch(r'[0-9a-f]{64}',source['raw_sha256'])
                   assert re.fullmatch(r'[0-9a-f]{64}',source['normalized_visible_text_sha256'])
               assert all(row[k] is False for k in flags) and row['publication_effect']=='NONE'
-              print({'bsb_source_health':'HEALTHY','romania_scope':row['romania_scope'],'semantic_fingerprint':row['semantic_fingerprint'],'publication_effect':'NONE'})
+              print({
+                  'bsb_source_health':'HEALTHY',
+                  'romania_scope':row['romania_scope'],
+                  'applicant_signal':row['applicant_signal_observation_state'],
+                  'semantic_fingerprint':row['semantic_fingerprint'],
+                  'publication_effect':'NONE',
+              })
           else:
               assert degraded.exists(), 'BSB live acquisition produced neither healthy nor degraded receipt'
               row=json.loads(degraded.read_text(encoding='utf-8'))
@@ -144,7 +171,13 @@ jobs:
               assert row['lkg_required'] is True and row['lkg_available'] is False
               assert row['current_material_truth_available'] is False
               assert all(row[k] is False for k in flags) and row['publication_effect']=='NONE'
-              print({'bsb_source_health':'DEGRADED','lkg_required':True,'lkg_available':False,'open_call_authorized':False,'publication_effect':'NONE'})
+              print({
+                  'bsb_source_health':'DEGRADED',
+                  'lkg_required':True,
+                  'lkg_available':False,
+                  'open_call_authorized':False,
+                  'publication_effect':'NONE',
+              })
           PY
 
       - name: Upload replayable BSB proof evidence
