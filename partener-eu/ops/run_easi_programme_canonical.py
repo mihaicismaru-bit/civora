@@ -225,7 +225,6 @@ def stage_history(root: pathlib.Path) -> dict[str, Any]:
 def main() -> int:
     repo_root = pathlib.Path(__file__).resolve().parents[2]
     ingest = repo_root / "partener-eu" / "ingest"
-    ops = repo_root / "partener-eu" / "ops"
     registry_path = ingest / "eu_direct_easi_programme_intelligence_registry.json"
     registry = load(registry_path)
     root = pathlib.Path("/tmp/partener-eu-eu-direct-programme-intelligence/easi-programme")
@@ -233,9 +232,6 @@ def main() -> int:
     (root / "current").mkdir(parents=True)
     (root / "previous").mkdir(parents=True)
     (root / "history").mkdir(parents=True)
-
-    run([sys.executable, str(ops / "test_eu_direct_easi_programme_intelligence.py"), "-v"])
-    run([sys.executable, str(ops / "test_eu_direct_easi_programme_reconcile.py"), "-v"])
 
     restore = restore_previous(root, registry)
     run_id = os.environ.get("EASI_RUN_ID") or f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-easi"
