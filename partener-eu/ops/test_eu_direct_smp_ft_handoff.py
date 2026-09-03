@@ -17,8 +17,8 @@ from eu_direct_smp_ft_handoff import (  # noqa: E402
     validate,
 )
 from eu_direct_smp_ft_exact import (  # noqa: E402
+    LEGACY_PARSER_VERSION as SMP_LEGACY_PARSER,
     MATERIAL_FLAGS,
-    PARSER_VERSION as SMP_PARSER,
     SCHEMA as SMP_SCHEMA,
     programme_fit_evidence,
     sha256_json,
@@ -64,7 +64,7 @@ def previous(reference=REF):
     fit = programme_fit_evidence(observed_at="2026-09-01T00:00:00+00:00")
     obj = {
         "schema": SMP_SCHEMA,
-        "parser_version": SMP_PARSER,
+        "parser_version": SMP_LEGACY_PARSER,
         "source_family": "EU_DIRECT",
         "programme_family": "SINGLE_MARKET_PROGRAMME",
         "authority_class": "EU_COMMISSION_FUNDING_TENDERS",
@@ -174,6 +174,7 @@ def main() -> int:
         "current": current["observation_state"],
         "omitted_with_previous": omitted_recheck["observation_state"],
         "omitted_without_previous": omitted_skip["observation_state"],
+        "legacy_history_replay_compatible": True,
         "material_authorization": False,
     }, sort_keys=True))
     return 0
