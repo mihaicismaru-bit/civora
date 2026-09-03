@@ -3,7 +3,10 @@
 
 Programme-level Romanian relevance is retained only as non-authorizing market
 intelligence. Exact current call status still requires the official F&T topic
-readback and downstream semantic reconciliation/material admission.
+readback and downstream semantic reconciliation/material admission. If the
+structured exact record exists but the human-facing exact topic endpoint is
+unresolvable, emit a degraded immutable receipt rather than inferring CLOSED,
+withdrawn, removed, or any other material state.
 """
 from __future__ import annotations
 
@@ -19,7 +22,8 @@ import funding_tenders_fetch as ft
 from funding_tenders_api import normalize_payload
 
 SCHEMA = "PARTENER_EU_SMP_FT_EXACT_EVIDENCE_V1"
-PARSER_VERSION = "EU_DIRECT_SMP_FT_EXACT_V1"
+PARSER_VERSION = "EU_DIRECT_SMP_FT_EXACT_V1_1"
+LEGACY_PARSER_VERSION = "EU_DIRECT_SMP_FT_EXACT_V1"
 SOURCE_FAMILY = "EU_DIRECT"
 PROGRAMME_FAMILY = "SINGLE_MARKET_PROGRAMME"
 AUTHORITY_CLASS = "EU_COMMISSION_FUNDING_TENDERS"
@@ -189,6 +193,21 @@ def programme_fit_evidence(*, observed_at: str) -> dict[str, Any]:
     }
 
 
+def _build_degraded_exact_semantics(reference: str, authority_url: str, snapshot: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "identifier": reference,
+        "call_identifier_candidate": snapshot.get("call_identifier"),
+        "title_candidate": snapshot.get("title"),
+        "programme_reference": snapshot.get("programme_reference"),
+        "programme_label": snapshot.get("programme_label"),
+        "status_label_candidate": snapshot.get("status_label"),
+        "authority_url": authority_url,
+        "authority_endpoint_verified": False,
+        "deadline_candidate_structured_only": snapshot.get("deadline_candidate"),
+        "budget_candidate_structured_only": snapshot.get("budget_candidate"),
+    }
+
+
 def collect_exact(
     reference: str, *, run_id: str, fetched_at: str | None = None,
     source_candidate: Mapping[str, Any] | None = None,
@@ -234,26 +253,48 @@ def collect_exact(
 
     authority_url = ft.topic_url(reference)
     readback = topic_func(authority_url)
-    if readback.get("verified") is not True:
-        raise ValueError(f"exact Single Market Programme topic authority readback failed for {reference}: {readback.get('error')}")
-    enriched = dict(chosen)
-    enriched["statusLabel"] = snapshot["status_label"]
-    enriched["authorityUrl"] = authority_url
-    batch = normalize_payload([enriched], fetched_at=fetched_at, run_id=run_id, verified_authority_urls=[authority_url])
-    records = [row for row in batch.get("records") or [] if str(row.get("identifier") or "").upper() == reference]
-    if len(records) != 1:
-        raise ValueError(f"exact Single Market Programme normalizer returned {len(records)} records for {reference}")
-    normalized = records[0]
-    if normalized.get("authority_url_verified") is not True:
-        raise ValueError("exact Single Market Programme authority verification was lost during normalization")
+    authority_verified = readback.get("verified") is True
+    if authority_verified:
+        enriched = dict(chosen)
+        enriched["statusLabel"] = snapshot["status_label"]
+        enriched["authorityUrl"] = authority_url
+        batch = normalize_payload([enriched], fetched_at=fetched_at, run_id=run_id, verified_authority_urls=[authority_url])
+        records = [row for row in batch.get("records") or [] if str(row.get("identifier") or "").upper() == reference]
+        if len(records) != 1:
+            raise ValueError(f"exact Single Market Programme normalizer returned {len(records)} records for {reference}")
+        normalized = records[0]
+        if normalized.get("authority_url_verified") is not True:
+            raise ValueError("exact Single Market Programme authority verification was lost during normalization")
+        exact_semantics = {
+            "identifier": reference, "call_identifier": normalized.get("call_identifier"),
+            "title": normalized.get("title"), "programme_reference": snapshot.get("programme_reference"),
+            "programme_label": snapshot.get("programme_label"), "status_label": normalized.get("status_label"),
+            "observation_state": normalized.get("observation_state"), "authority_url": authority_url,
+            "deadline_candidate": normalized.get("deadline_candidate"), "budget_candidate": normalized.get("budget_candidate"),
+        }
+        candidate_state = normalized.get("observation_state")
+        status_label = normalized.get("status_label")
+        call_identifier = normalized.get("call_identifier")
+        title = normalized.get("title")
+        deadline_candidate = normalized.get("deadline_candidate")
+        budget_candidate = normalized.get("budget_candidate")
+        source_health_state = "HEALTHY"
+        lkg_required = False
+        evidence_usable_for_reconciliation = True
+        degradation_reason = None
+    else:
+        exact_semantics = _build_degraded_exact_semantics(reference, authority_url, snapshot)
+        candidate_state = "UNKNOWN"
+        status_label = None
+        call_identifier = snapshot.get("call_identifier")
+        title = snapshot.get("title")
+        deadline_candidate = None
+        budget_candidate = None
+        source_health_state = "DEGRADED_AUTHORITY_READBACK"
+        lkg_required = True
+        evidence_usable_for_reconciliation = False
+        degradation_reason = str(readback.get("error") or "exact topic endpoint could not be verified")
 
-    exact_semantics = {
-        "identifier": reference, "call_identifier": normalized.get("call_identifier"),
-        "title": normalized.get("title"), "programme_reference": snapshot.get("programme_reference"),
-        "programme_label": snapshot.get("programme_label"), "status_label": normalized.get("status_label"),
-        "observation_state": normalized.get("observation_state"), "authority_url": authority_url,
-        "deadline_candidate": normalized.get("deadline_candidate"), "budget_candidate": normalized.get("budget_candidate"),
-    }
     fit = programme_fit_evidence(observed_at=fetched_at)
     evidence: dict[str, Any] = {
         "schema": SCHEMA, "parser_version": PARSER_VERSION, "source_family": SOURCE_FAMILY,
@@ -261,11 +302,15 @@ def collect_exact(
         "observation_state": OBSERVATION_LAYER, "reference": reference, "fetched_at": fetched_at,
         "run_id": run_id, "search_receipt": dict(search_receipt), "facet_receipt": dict(facet_receipt),
         "search_raw_sha256": sha256_bytes(search_raw), "facet_raw_sha256": sha256_bytes(facet_raw),
-        "authority_url": authority_url, "authority_readback": dict(readback), "authority_url_verified": True,
-        "candidate_state": normalized.get("observation_state"), "status_label": normalized.get("status_label"),
-        "call_identifier": normalized.get("call_identifier"), "title": normalized.get("title"),
+        "authority_url": authority_url, "authority_readback": dict(readback), "authority_url_verified": authority_verified,
+        "source_health_state": source_health_state, "lkg_required": lkg_required,
+        "evidence_usable_for_reconciliation": evidence_usable_for_reconciliation,
+        "degradation_reason": degradation_reason,
+        "candidate_state": candidate_state, "status_label": status_label,
+        "call_identifier": call_identifier, "title": title,
         "programme_reference": snapshot.get("programme_reference"), "programme_label_official": snapshot.get("programme_label"),
-        "deadline_candidate": normalized.get("deadline_candidate"), "budget_candidate": normalized.get("budget_candidate"),
+        "deadline_candidate": deadline_candidate, "budget_candidate": budget_candidate,
+        "structured_candidate_snapshot": snapshot,
         "exact_semantics": exact_semantics, "exact_semantic_fingerprint": sha256_json(exact_semantics),
         "primary_exact_record_count": len(primary), "linked_type8_record_count": len(linked_type8),
         "linked_type8_record_hashes": sorted(sha256_json(row) for row in linked_type8),
@@ -288,22 +333,54 @@ def collect_exact(
 
 
 def validate_evidence(evidence: Mapping[str, Any]) -> None:
-    if evidence.get("schema") != SCHEMA or evidence.get("parser_version") != PARSER_VERSION:
+    parser_version = evidence.get("parser_version")
+    if evidence.get("schema") != SCHEMA or parser_version not in {PARSER_VERSION, LEGACY_PARSER_VERSION}:
         raise ValueError("Single Market Programme exact evidence schema/parser drift")
     reference = validate_reference(str(evidence.get("reference") or ""))
     if evidence.get("source_family") != SOURCE_FAMILY or evidence.get("programme_family") != PROGRAMME_FAMILY:
         raise ValueError("Single Market Programme exact evidence family drift")
     if evidence.get("authority_class") != AUTHORITY_CLASS:
         raise ValueError("Single Market Programme exact evidence authority class drift")
-    if evidence.get("authority_url") != ft.topic_url(reference) or evidence.get("authority_url_verified") is not True:
-        raise ValueError("Single Market Programme exact evidence lacks verified exact topic authority")
+    if evidence.get("authority_url") != ft.topic_url(reference):
+        raise ValueError("Single Market Programme exact evidence exact topic authority URL drift")
+    legacy = parser_version == LEGACY_PARSER_VERSION
+    usable = evidence.get("evidence_usable_for_reconciliation")
+    if legacy and usable is None:
+        usable = True
+    if usable not in {True, False}:
+        raise ValueError("Single Market Programme exact evidence reconciliation-usability state missing")
     readback = evidence.get("authority_readback") or {}
-    if readback.get("verified") is not True or readback.get("url") != evidence.get("authority_url"):
-        raise ValueError("Single Market Programme exact readback binding invalid")
+    if usable:
+        if evidence.get("authority_url_verified") is not True:
+            raise ValueError("Single Market Programme exact evidence lacks verified exact topic authority")
+        if readback.get("verified") is not True or readback.get("url") != evidence.get("authority_url"):
+            raise ValueError("Single Market Programme exact readback binding invalid")
+        if evidence.get("candidate_state") not in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}:
+            raise ValueError("Single Market Programme exact candidate state unsupported")
+        if not evidence.get("status_label"):
+            raise ValueError("Single Market Programme exact evidence lacks resolved official status label")
+        if not legacy:
+            if evidence.get("source_health_state") != "HEALTHY" or evidence.get("lkg_required") is not False:
+                raise ValueError("Single Market Programme healthy exact evidence source-health binding invalid")
+            if evidence.get("degradation_reason") is not None:
+                raise ValueError("Single Market Programme healthy exact evidence unexpectedly carries degradation reason")
+    else:
+        if legacy:
+            raise ValueError("legacy Single Market Programme exact evidence cannot represent degraded current authority")
+        if evidence.get("authority_url_verified") is not False or readback.get("verified") is True:
+            raise ValueError("Single Market Programme degraded exact evidence pretended authority verification")
+        if readback.get("url") and readback.get("url") != evidence.get("authority_url"):
+            raise ValueError("Single Market Programme degraded readback URL binding invalid")
+        if evidence.get("source_health_state") != "DEGRADED_AUTHORITY_READBACK" or evidence.get("lkg_required") is not True:
+            raise ValueError("Single Market Programme degraded exact evidence lacks LKG/source-health requirement")
+        if not evidence.get("degradation_reason"):
+            raise ValueError("Single Market Programme degraded exact evidence lacks failure reason")
+        if evidence.get("candidate_state") != "UNKNOWN" or evidence.get("status_label") is not None:
+            raise ValueError("Single Market Programme degraded exact evidence leaked structured status into current truth")
+        if evidence.get("deadline_candidate") is not None or evidence.get("budget_candidate") is not None:
+            raise ValueError("Single Market Programme degraded exact evidence leaked structured material candidates")
     if not _is_smp_label(str(evidence.get("programme_label_official") or "")):
         raise ValueError("Single Market Programme exact evidence lost official programme proof")
-    if evidence.get("candidate_state") not in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}:
-        raise ValueError("Single Market Programme exact candidate state unsupported")
     semantics = evidence.get("exact_semantics")
     if not isinstance(semantics, dict) or sha256_json(semantics) != evidence.get("exact_semantic_fingerprint"):
         raise ValueError("Single Market Programme exact semantic fingerprint mismatch")
@@ -347,10 +424,17 @@ def main() -> int:
     if not reference:
         raise ValueError("--taxonomy or --reference is required")
     evidence = collect_exact(reference, run_id=args.run_id, source_candidate=source_candidate, output_dir=args.output_dir)
-    print(json.dumps({"reference": evidence["reference"], "candidate_state": evidence["candidate_state"],
-                      "status_label": evidence["status_label"], "authority_url_verified": evidence["authority_url_verified"],
-                      "programme_fit_state": evidence["programme_fit_evidence"]["facts"]["fit_state"],
-                      "open_call_authorized": evidence["open_call_authorized"]}, ensure_ascii=False, sort_keys=True))
+    print(json.dumps({
+        "reference": evidence["reference"],
+        "candidate_state": evidence["candidate_state"],
+        "status_label": evidence["status_label"],
+        "authority_url_verified": evidence["authority_url_verified"],
+        "source_health_state": evidence["source_health_state"],
+        "evidence_usable_for_reconciliation": evidence["evidence_usable_for_reconciliation"],
+        "lkg_required": evidence["lkg_required"],
+        "programme_fit_state": evidence["programme_fit_evidence"]["facts"]["fit_state"],
+        "open_call_authorized": evidence["open_call_authorized"],
+    }, ensure_ascii=False, sort_keys=True))
     return 0
 
 
