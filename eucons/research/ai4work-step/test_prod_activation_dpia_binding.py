@@ -24,7 +24,7 @@ class ProdActivationDpiaBindingTests(unittest.TestCase):
             _load(DPIA_SCREENING_PATH),
         )
 
-    def test_prod_claim_cannot_bypass_controller_unapproved_dpia_screening(self):
+    def test_prod_claim_cannot_bypass_missing_live_privacy_binding_after_controller_acceptance(self):
         contract, manifest, controller, frame, screening = self.load_artifacts()
         contract = copy.deepcopy(contract)
         contract["production_enabled"] = True
@@ -36,8 +36,11 @@ class ProdActivationDpiaBindingTests(unittest.TestCase):
             dpia_screening=screening,
         )
         self.assertIn("dpia_screening:dpia_not_approved_for_prod", errors)
-        self.assertIn("dpia_screening:dpia_controller_acceptance_missing", errors)
-        self.assertIn("dpia_screening:dpia_controller_acceptance_not_approved", errors)
+        self.assertIn("dpia_screening:dpia_collection_not_enabled", errors)
+        self.assertIn("dpia_screening:dpia_privacy_review_reference_missing", errors)
+        self.assertIn("dpia_screening:dpia_controller_privacy_review_binding_missing", errors)
+        self.assertNotIn("dpia_screening:dpia_controller_acceptance_missing", errors)
+        self.assertNotIn("dpia_screening:dpia_controller_acceptance_not_approved", errors)
 
     def test_risk_design_weakening_is_rejected_at_authoritative_activation_boundary(self):
         contract, manifest, controller, frame, screening = self.load_artifacts()
