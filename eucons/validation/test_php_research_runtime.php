@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 // TEST TWIN ONLY — NON-EVIDENCE. Uses only temporary synthetic engineering fixtures.
 require_once dirname(__DIR__) . '/runtime/php/src/ResearchRuntime.php';
+require_once dirname(__DIR__) . '/runtime/php/src/ResearchRightsAuth.php';
 
 function fail_test(string $message): never {
     fwrite(STDERR, $message . PHP_EOL);
@@ -123,6 +124,23 @@ $receipt = $runtime->persist($prepared, $raw);
 if ($receipt['status'] !== 'accepted' || $receipt['inserted'] !== true) fail_test('initial research persistence failed');
 if (!preg_match('/^[0-9a-f]{64}$/', $receipt['response_id'])) fail_test('response_id is not opaque sha256');
 
+// The existing high-entropy UUIDv4 submission credential is reused only as a
+// respondent-held private rights code. It is never stored raw by the research
+// adapter. Verification proves control of that credential, not civil identity.
+$matchedForm = EuconsResearchRightsAuth::authenticate($receipt['response_id'], $key);
+if ($matchedForm !== 'AI4WORK_ADULTS_V1') fail_test('valid two-part rights proof did not authenticate');
+if (EuconsResearchRightsAuth::deriveResponseId('AI4WORK_ADULTS_V1', $key) !== $receipt['response_id']) fail_test('rights proof derivation drifted from submission receipt');
+$wrongRightsCode = '323e4567-e89b-42d3-a456-426614174002';
+if (EuconsResearchRightsAuth::authenticate($receipt['response_id'], $wrongRightsCode) !== null) fail_test('non-matching rights proof authenticated');
+expect_exception(
+    fn() => EuconsResearchRightsAuth::authenticate($receipt['response_id'], 'not-a-private-code'),
+    'INVALID_RIGHTS_PRIVATE_CODE'
+);
+expect_exception(
+    fn() => EuconsResearchRightsAuth::authenticate('not-a-response-id', $key),
+    'INVALID_RESPONSE_ID'
+);
+
 $replay = $runtime->persist($runtime->validateSubmission($payload, $key, $channel), $raw);
 if ($replay['inserted'] !== false || $replay['response_id'] !== $receipt['response_id']) fail_test('idempotent replay failed');
 
@@ -148,12 +166,15 @@ if (count($runtime->exportForm('AI4WORK_ADULTS_V1')) !== 1) fail_test('unheld ro
 
 $receiptPath = $root . '/research/receipts/' . $receipt['response_id'] . '.json';
 $storedReceipt = json_decode(file_get_contents($receiptPath), true, 512, JSON_THROW_ON_ERROR);
-foreach (['profile', 'answers', 'idempotency_key', 'email', 'name', 'ip', 'user_agent'] as $forbiddenField) {
+foreach (['profile', 'answers', 'idempotency_key', 'private_verification_code', 'email', 'name', 'ip', 'user_agent'] as $forbiddenField) {
     if (array_key_exists($forbiddenField, $storedReceipt)) fail_test('forbidden data leaked into receipt: ' . $forbiddenField);
 }
 
 if (!$runtime->deleteByResponseId($receipt['response_id'])) fail_test('erasure failed');
 if ($runtime->getByResponseId($receipt['response_id']) !== null) fail_test('erased row still readable');
+// Proof-of-possession can still be mathematically valid after erasure, but the
+// independent live-record existence check must prevent disclosure or mutation.
+if (EuconsResearchRightsAuth::authenticate($receipt['response_id'], $key) !== 'AI4WORK_ADULTS_V1') fail_test('rights proof unexpectedly changed after erasure');
 expect_exception(fn() => $runtime->persist($prepared, $raw), 'ERASED_RESPONSE_REPLAY_BLOCKED');
 $markerPath = $root . '/research/erased/' . $receipt['response_id'] . '.json';
 $marker = json_decode(file_get_contents($markerPath), true, 512, JSON_THROW_ON_ERROR);
@@ -168,6 +189,7 @@ $employerKey = '223e4567-e89b-42d3-a456-426614174001';
 $employerRaw = json_encode($employer, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
 $employerReceipt = $runtime->persist($runtime->validateSubmission($employer, $employerKey, 'CH-TESTTWIN02'), $employerRaw);
 if ($employerReceipt['inserted'] !== true || count($runtime->exportForm('AI4WORK_EMPLOYERS_V1')) !== 1) fail_test('employer form path failed');
+if (EuconsResearchRightsAuth::authenticate($employerReceipt['response_id'], $employerKey) !== 'AI4WORK_EMPLOYERS_V1') fail_test('employer two-part rights proof failed');
 
 putenv('AI4WORK_RESEARCH_ROOT=' . $root . '/commercial/research');
 expect_exception(fn() => $runtime->storageRoot(), 'RESEARCH_STORAGE_NOT_SEPARATE_FROM_COMMERCIAL');
