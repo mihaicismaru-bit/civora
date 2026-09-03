@@ -1,0 +1,123 @@
+name: PARTENER.EU LIFE Programme Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/life_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/life_programme_intelligence.py'
+      - 'partener-eu/ops/test_life_programme_intelligence.py'
+      - '.github/workflows/partener-eu-life-programme-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  life-programme-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded LIFE programme adapter and regression
+        run: |
+          python -m json.tool partener-eu/ingest/life_programme_intelligence_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/life_programme_intelligence.py \
+            partener-eu/ops/test_life_programme_intelligence.py
+
+      - name: Run fail-closed LIFE programme regression
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_life_programme_intelligence.py
+
+      - name: Acquire fresh official LIFE programme intelligence
+        run: |
+          ROOT=/tmp/partener-eu-life-programme-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/life_programme_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-life-programme" \
+            --live \
+            --output "$ROOT/life-programme-intelligence.json"
+          cp partener-eu/ingest/life_programme_intelligence_registry.json "$ROOT/registry.json"
+
+      - name: Enforce live LIFE non-authorizing boundary
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-life-programme-proof/life-programme-intelligence.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          if d.get('schema') != 'PARTENER_EU_LIFE_PROGRAMME_INTELLIGENCE_V1':
+              sys.exit('FAIL LIFE schema drift')
+          if d.get('source_family') != 'EU_DIRECT' or d.get('programme_families') != ['LIFE']:
+              sys.exit('FAIL LIFE family drift')
+          if d.get('source_count') != 4:
+              sys.exit('FAIL LIFE bounded source count drift')
+          if d.get('source_health_state') != 'HEALTHY' or d.get('healthy_source_count') != 4 or d.get('degraded_source_count') != 0:
+              sys.exit('FAIL LIFE official source set is not fully healthy')
+          if d.get('market_intelligence_only') is not True or d.get('fit_scores_are_not_eligibility') is not True:
+              sys.exit('FAIL LIFE market/fit boundary drift')
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          for key in flags:
+              if d.get(key) is not False:
+                  sys.exit(f'FAIL LIFE became authorizing: {key}')
+          if d.get('publication_effect') != 'NONE':
+              sys.exit('FAIL LIFE publication boundary drift')
+          if not re.fullmatch(r'[0-9a-f]{64}', str(d.get('registry_sha256') or '')):
+              sys.exit('FAIL LIFE registry hash missing')
+          if not re.fullmatch(r'[0-9a-f]{64}', str(d.get('semantic_fingerprint') or '')):
+              sys.exit('FAIL LIFE semantic fingerprint missing')
+          states={row['source_id']:row['observation_state'] for row in d['sources']}
+          if states.get('LIFE_CINEA_CALLS_2026_INDEX') != 'CALL_INDEX_DISCOVERY':
+              sys.exit('FAIL LIFE call index crossed discovery boundary')
+          if states.get('LIFE_CINEA_WORK_PROGRAMME_2025_2027') != 'PROGRAMMING_PIPELINE':
+              sys.exit('FAIL LIFE work programme lost pipeline boundary')
+          for row in d['sources']:
+              health=row['source_health']
+              if health.get('health_state') != 'HEALTHY' or health.get('http_status') != 200:
+                  sys.exit(f"FAIL LIFE source unhealthy: {row['source_id']}")
+              if health.get('lkg_required') is not False:
+                  sys.exit(f"FAIL LIFE healthy source requires LKG: {row['source_id']}")
+              if not re.fullmatch(r'[0-9a-f]{64}', str(health.get('raw_sha256') or '')):
+                  sys.exit(f"FAIL LIFE source raw hash missing: {row['source_id']}")
+          fit=d['programme_intelligence'][0]
+          if fit.get('fit_score_is_not_eligibility') is not True:
+              sys.exit('FAIL LIFE fit became eligibility')
+          print({
+              'programme_family':'LIFE',
+              'healthy_source_count':4,
+              'fit_score':fit.get('fit_score'),
+              'call_index_discovery_only':True,
+              'programming_pipeline_non_authorizing':True,
+              'open_call_authorized':False,
+              'publication_effect':'NONE',
+          })
+          PY
+
+      - name: Upload bounded LIFE programme proof
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-life-programme-proof-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-life-programme-proof
+          if-no-files-found: error
+          retention-days: 7
