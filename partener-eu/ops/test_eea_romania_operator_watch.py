@@ -42,6 +42,7 @@ def main() -> int:
         "EEA-RO-HOME-AFFAIRS-MAI-WATCH",
         "EEA-RO-INSTITUTIONAL-COOPERATION-MIPE-WATCH",
         "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH",
+        "EEA-RO-CIVIL-SOCIETY-FUND-CALL-INDEX-WATCH",
     }
     if set(routes) != expected_routes:
         fail("unexpected bounded route inventory")
@@ -110,6 +111,17 @@ def main() -> int:
     if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
         fail("Innovation Norway route must remain the current official EEA operator surface")
 
+    civil = routes["EEA-RO-CIVIL-SOCIETY-FUND-CALL-INDEX-WATCH"]
+    if (
+        civil["observation_state"] != "OPERATOR_WATCH"
+        or civil["operator_role"] != "Fund Operator"
+        or civil["programme_ids"] != ["civil-society-fund"]
+        or civil["watch_url"] != "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
+        or civil["authority_class"] != "T1_OFFICIAL_FUND_OPERATOR"
+        or civil["freshness_hours"] != 6
+    ):
+        fail("Civil Society Fund route must remain bounded to the current official Romania calls-index discovery surface")
+
     synthetic = b'''<html><body>
       <a href="/eea-grants-2021-2028/open-call-2027">OPEN CALL Romania Research 2027</a>
       <a href="https://example.com/open-call">External open call</a>
@@ -132,6 +144,28 @@ def main() -> int:
     if receipt["candidates"][0]["candidate_observation_state"] != "DISCOVERY_ONLY":
         fail("candidate escaped DISCOVERY_ONLY")
 
+    civil_synthetic = b'''<html><body>
+      <article><a href="/en/eea-civil-society-fund-romania/calls/call-1-strengthening-democracy">Call #1 Strengthening Democracy</a><span>Open</span><time>08/10/2026</time></article>
+      <article><a href="/en/eea-civil-society-fund-romania/calls/call-5-roma-inclusion">Call #5 Roma Inclusion</a><span>Open</span><time>08/10/2026</time></article>
+      <a href="https://example.com/calls/call-99">External call</a>
+    </body></html>'''
+    civil_receipt = mod.build_healthy_receipt(
+        civil_synthetic,
+        civil,
+        final_url=civil["watch_url"],
+        status=200,
+        content_type="text/html",
+        run_id="civil-society-regression",
+        fetched_at="2026-09-03T02:50:00+00:00",
+    )
+    mod.validate_receipt(civil_receipt, civil)
+    if civil_receipt["candidate_count"] != 2:
+        fail(f"expected two bounded Civil Society Fund call discoveries, got {civil_receipt['candidate_count']}")
+    if any(c.get("candidate_observation_state") != "DISCOVERY_ONLY" for c in civil_receipt["candidates"]):
+        fail("Civil Society Fund call-index candidate escaped DISCOVERY_ONLY")
+    if any(civil_receipt.get(key) is not False for key in mod.AUTHORIZATION_KEYS):
+        fail("Civil Society Fund call-index OPEN labels escaped the non-authorizing boundary")
+
     expect_raises(lambda: mod.validate_route_url("http://uefiscdi.gov.ro/eea-grants-2021-2028", research), "HTTP downgrade")
     expect_raises(lambda: mod.validate_route_url("https://example.com/eea-grants-2021-2028", research), "host drift")
     expect_raises(lambda: mod.validate_route_url("https://uefiscdi.gov.ro/other", research, final=True), "path drift")
@@ -142,6 +176,8 @@ def main() -> int:
     expect_raises(lambda: mod.validate_route_url("https://www.just.ro/other/", justice, final=True), "Justice historical landing path drift")
     expect_raises(lambda: mod.validate_route_url("https://www.mai.gov.ro/", home_affairs), "Home Affairs dedicated host drift")
     expect_raises(lambda: mod.validate_route_url("https://www.eeagrants.ro/programe", institutional, final=True), "MIPE historical landing path drift")
+    expect_raises(lambda: mod.validate_route_url("https://example.com/en/eea-civil-society-fund-romania/calls", civil), "Civil Society Fund host drift")
+    expect_raises(lambda: mod.validate_route_url("https://eeagrants.org/en/other-programme/calls", civil, final=True), "Civil Society Fund path drift")
 
     bad_registry = copy.deepcopy(registry)
     bad_registry["policy"]["open_call_authorized"] = True
@@ -156,6 +192,11 @@ def main() -> int:
     inst_routes = {row["route_id"]: row for row in institutional_promoted["routes"]}
     inst_routes["EEA-RO-INSTITUTIONAL-COOPERATION-MIPE-WATCH"]["observation_state"] = "OPEN_CALL"
     expect_raises(lambda: mod.validate_registry(institutional_promoted), "historical MIPE landing promoted to OPEN_CALL")
+
+    civil_promoted = copy.deepcopy(registry)
+    civil_routes = {row["route_id"]: row for row in civil_promoted["routes"]}
+    civil_routes["EEA-RO-CIVIL-SOCIETY-FUND-CALL-INDEX-WATCH"]["observation_state"] = "OPEN_CALL"
+    expect_raises(lambda: mod.validate_registry(civil_promoted), "Civil Society Fund calls index promoted to OPEN_CALL")
 
     degraded = mod.build_degraded_receipt(
         research,
@@ -180,6 +221,7 @@ def main() -> int:
     print(json.dumps({
         "routes": len(routes),
         "synthetic_candidates": receipt["candidate_count"],
+        "civil_society_fund_candidates": civil_receipt["candidate_count"],
         "research_state": research["observation_state"],
         "green_transition_route": green["watch_url"],
         "local_development_route": local["watch_url"],
@@ -188,6 +230,7 @@ def main() -> int:
         "home_affairs_state": home_affairs["observation_state"],
         "institutional_state": institutional["observation_state"],
         "innovation_route": innovation["watch_url"],
+        "civil_society_fund_route": civil["watch_url"],
         "degraded_lkg_required": degraded["lkg_required"],
         "open_call_authorized": receipt["open_call_authorized"],
     }, ensure_ascii=False))
