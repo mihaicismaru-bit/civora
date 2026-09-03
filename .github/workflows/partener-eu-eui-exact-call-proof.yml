@@ -69,7 +69,7 @@ jobs:
           rm -rf "$SCRATCH"
           mkdir -p "$SCRATCH" "$ROOT/previous"
           gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
-          CANDIDATE="$(python - <<'PY'
+          python - <<'PY' > "$SCRATCH/candidates.txt"
           import json, os
           from pathlib import Path
           data=json.loads(Path('/tmp/partener-eu-eui-exact-history-scan/artifacts.json').read_text(encoding='utf-8'))
@@ -92,22 +92,28 @@ jobs:
                   continue
               rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
           rows.sort(reverse=True)
-          print(rows[0][1] if rows else '')
+          for _, artifact_id in rows[:20]:
+              print(artifact_id)
           PY
-          )"
-          if [ -n "$CANDIDATE" ]; then
-            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+          RESTORED=""
+          while IFS= read -r CANDIDATE; do
+            [ -n "$CANDIDATE" ] || continue
+            rm -f "$SCRATCH/previous.zip"
+            rm -rf "$SCRATCH/unpacked"
             mkdir -p "$SCRATCH/unpacked"
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
             unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
             PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'eui-call4-exact-evidence.json' | head -n1 || true)"
             if [ -n "$PREVIOUS" ]; then
               cp "$PREVIOUS" "$ROOT/previous/eui-call4-exact-evidence.json"
+              RESTORED="$CANDIDATE"
               echo "Restored previous bounded exact EUI receipt from artifact ${CANDIDATE}"
-            else
-              echo "Candidate artifact ${CANDIDATE} contained no exact EUI receipt; baseline mode retained."
+              break
             fi
-          else
-            echo "No previous same-branch exact EUI artifact found; baseline mode retained."
+            echo "Candidate artifact ${CANDIDATE} contained no exact EUI receipt; scanning older bounded evidence."
+          done < "$SCRATCH/candidates.txt"
+          if [ -z "$RESTORED" ]; then
+            echo "No previous same-branch exact EUI artifact with a usable receipt found; baseline mode retained."
           fi
 
       - name: Acquire fresh exact official EUI Call 4 chain
