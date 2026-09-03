@@ -61,7 +61,8 @@ jobs:
         run: |
           set -euo pipefail
           python - <<'PY'
-          import io, json, os, pathlib, urllib.request, zipfile
+          import io, json, os, pathlib, urllib.parse, urllib.request, zipfile
+
           repo=os.environ['REPOSITORY']; branch=os.environ['HEAD_BRANCH']; token=os.environ['GH_TOKEN']
           root=pathlib.Path('/tmp/partener-eu-mff-2028-2034-programming-proof/previous')
           api=f'https://api.github.com/repos/{repo}/actions/artifacts?per_page=100'
@@ -78,10 +79,23 @@ jobs:
                   continue
               chosen=artifact
               break
+
+          class StripCrossHostAuthRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, req, fp, code, msg, response_headers, newurl):
+                  redirected=super().redirect_request(req, fp, code, msg, response_headers, newurl)
+                  if redirected is not None:
+                      old_host=(urllib.parse.urlparse(req.full_url).hostname or '').casefold()
+                      new_host=(urllib.parse.urlparse(newurl).hostname or '').casefold()
+                      if old_host != new_host:
+                          for name in ('Authorization','Accept','X-GitHub-Api-Version'):
+                              redirected.remove_header(name)
+                  return redirected
+
           found=False
           if chosen:
               request=urllib.request.Request(chosen['archive_download_url'], headers=headers)
-              with urllib.request.urlopen(request, timeout=60) as response:
+              opener=urllib.request.build_opener(StripCrossHostAuthRedirect())
+              with opener.open(request, timeout=60) as response:
                   payload=response.read()
               with zipfile.ZipFile(io.BytesIO(payload)) as archive:
                   candidate=next((name for name in archive.namelist() if name.endswith('eu-direct-mff-2028-2034-programming-snapshot.json')), None)
