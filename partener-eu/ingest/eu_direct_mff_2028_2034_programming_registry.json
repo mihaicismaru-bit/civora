@@ -1,0 +1,117 @@
+{
+  "schema": "PARTENER_EU_EU_DIRECT_MFF_2028_2034_PROGRAMMING_REGISTRY_V1",
+  "evidence_checked_date": "2026-09-03",
+  "source_family": "PROGRAMMING_PIPELINE",
+  "programme_family": "EU_DIRECT_2028_2034",
+  "programme_period": "2028-2034",
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false,
+    "exact_call_or_topic_identifier_required_for_open": true,
+    "current_official_exact_call_endpoint_required_for_open": true,
+    "semantic_reconciliation_required_for_material_change": true,
+    "field_scoped_material_admission_required": true,
+    "closed_call_authorized": false
+  },
+  "sources": [
+    {
+      "source_id": "MFF-2028-2034-COMMISSION-ROOT",
+      "programme": "EU Multiannual Financial Framework 2028-2034",
+      "programme_tags": [
+        "MFF_2028_2034",
+        "EU_BUDGET"
+      ],
+      "authority_class": "T1_EU_COMMISSION_OFFICIAL",
+      "authority_url": "https://commission.europa.eu/strategy-and-policy/eu-budget/long-term-eu-budget/eu-budget-2028-2034_en",
+      "observation_state": "PROPOSAL",
+      "markers_all": [
+        "2028-2034",
+        "Multiannual Financial Framework",
+        "presented its proposal"
+      ],
+      "markers_any": [
+        "European Competitiveness Fund",
+        "Erasmus+",
+        "Horizon Europe"
+      ],
+      "semantic_basis": "Commission-level proposal and architecture signal only; never a call authority."
+    },
+    {
+      "source_id": "ECF-COM-2025-555",
+      "programme": "European Competitiveness Fund 2028-2034",
+      "programme_tags": [
+        "EU_DIRECT",
+        "ECF",
+        "COMPETITIVENESS"
+      ],
+      "authority_class": "T1_EUR_LEX_LEGISLATIVE_PROPOSAL",
+      "authority_url": "https://eur-lex.europa.eu/procedure/EN/2025_555",
+      "legislative_identifier": "COM(2025) 555",
+      "procedure_identifier": "2025/0555/COD",
+      "observation_state": "PROPOSAL",
+      "markers_all": [
+        "European Competitiveness Fund",
+        "2025/0555/COD"
+      ],
+      "markers_any": [
+        "Ongoing",
+        "COM(2025) 555"
+      ],
+      "semantic_basis": "Legislative proposal intelligence only; does not establish a funding call."
+    },
+    {
+      "source_id": "HORIZON-2028-2034-COM-2025-543",
+      "programme": "Horizon Europe 2028-2034",
+      "programme_tags": [
+        "EU_DIRECT",
+        "HORIZON_EUROPE",
+        "R_I"
+      ],
+      "authority_class": "T1_EUR_LEX_LEGISLATIVE_PROPOSAL",
+      "authority_url": "https://eur-lex.europa.eu/procedure/EN/2025_543",
+      "legislative_identifier": "COM(2025) 543",
+      "procedure_identifier": "2025/0543/COD",
+      "observation_state": "PROPOSAL",
+      "markers_all": [
+        "Horizon Europe",
+        "2025/0543/COD"
+      ],
+      "markers_any": [
+        "Ongoing",
+        "2028-2034"
+      ],
+      "semantic_basis": "Legislative proposal intelligence only; work programmes and exact topics remain separately authoritative."
+    },
+    {
+      "source_id": "ERASMUS-2028-2034-COM-2025-549",
+      "programme": "Erasmus+ 2028-2034",
+      "programme_tags": [
+        "EU_DIRECT",
+        "ERASMUS_PLUS",
+        "SKILLS"
+      ],
+      "authority_class": "T1_EUR_LEX_LEGISLATIVE_PROPOSAL",
+      "authority_url": "https://eur-lex.europa.eu/procedure/EN/2025_222",
+      "legislative_identifier": "COM(2025) 549",
+      "procedure_identifier": "2025/0222/COD",
+      "observation_state": "PROPOSAL",
+      "markers_all": [
+        "Erasmus+",
+        "2025/0222/COD"
+      ],
+      "markers_any": [
+        "Ongoing",
+        "2028-2034"
+      ],
+      "semantic_basis": "Legislative proposal intelligence only; current Erasmus+ calls remain governed by exact current programme/call authorities."
+    }
+  ]
+}
