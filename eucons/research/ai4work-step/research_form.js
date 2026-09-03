@@ -80,9 +80,10 @@
   };
 
   const clearAcceptedClientState = (form) => {
-    // Once the server confirms acceptance, the analytical response no longer
-    // needs to remain in the page DOM and the recruitment token no longer
-    // needs to remain in ephemeral JS memory. Keep only the opaque receipt.
+    // Once the server confirms acceptance, the analytical response and channel
+    // token no longer need to remain in the DOM or ephemeral JS state. The
+    // receipt plus private verification code are shown only in the confirmation
+    // surface; they are never written to browser persistent storage.
     retryState.delete(form);
     recruitmentChannel = null;
     form.reset();
@@ -159,7 +160,7 @@
       const receipt = form.querySelector("[data-ai4work-receipt]");
       if (receipt) {
         receipt.hidden = false;
-        receipt.textContent = `Răspuns înregistrat. Păstrați acest cod opac dacă doriți să formulați ulterior o cerere privind răspunsul: ${result.response_id}`;
+        receipt.textContent = `Răspuns înregistrat. Păstrați separat ambele coduri dacă doriți să formulați ulterior o cerere privind răspunsul. Cod răspuns: ${result.response_id}. Cod privat de verificare: ${idempotencyKey}. Codul privat nu este păstrat în clar de aplicația de cercetare și nu poate fi recuperat ulterior.`;
       }
       statusText(form, "Răspunsul a fost înregistrat.");
     } catch (_error) {
