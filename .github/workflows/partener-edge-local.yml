@@ -1,4 +1,4 @@
-# PARTENER Edge Runner self-test trigger v2
+# PARTENER Edge Runner bounded trigger v3
 name: PARTENER.EU Edge Local Acquisition
 
 on:
@@ -37,7 +37,13 @@ jobs:
           github.ref == 'refs/heads/main' &&
           (github.event_name == 'push' ||
            github.event_name == 'workflow_dispatch' ||
-           (github.event_name == 'issues' && github.event.issue.title == '[PARTENER EDGE SELF TEST]')) }}
+           (github.event_name == 'issues' &&
+            (github.event.issue.title == '[PARTENER EDGE SELF TEST]' ||
+             github.event.issue.title == '[PARTENER EDGE RUN MYSMIS_SCOUT]' ||
+             github.event.issue.title == '[PARTENER EDGE RUN MIPE_REFRESH]' ||
+             github.event.issue.title == '[PARTENER EDGE RUN AFIR_REFRESH]' ||
+             github.event.issue.title == '[PARTENER EDGE RUN SOURCE_HEALTH]' ||
+             github.event.issue.title == '[PARTENER EDGE RUN OPTIMIZE_SOURCES]'))) }}
     runs-on: [self-hosted, Windows, X64, partener-edge]
     timeout-minutes: 45
     steps:
@@ -62,8 +68,24 @@ jobs:
         env:
           REQUESTED_JOB: ${{ inputs.job }}
           EVENT_NAME: ${{ github.event_name }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
         run: |
-          $job = if ($env:EVENT_NAME -eq 'workflow_dispatch' -and $env:REQUESTED_JOB) { $env:REQUESTED_JOB } else { 'health_check' }
+          if ($env:EVENT_NAME -eq 'workflow_dispatch' -and $env:REQUESTED_JOB) {
+            $job = $env:REQUESTED_JOB
+          } elseif ($env:EVENT_NAME -eq 'issues') {
+            $map = @{
+              '[PARTENER EDGE SELF TEST]' = 'health_check'
+              '[PARTENER EDGE RUN MYSMIS_SCOUT]' = 'mysmis_scout'
+              '[PARTENER EDGE RUN MIPE_REFRESH]' = 'mipe_refresh'
+              '[PARTENER EDGE RUN AFIR_REFRESH]' = 'afir_refresh'
+              '[PARTENER EDGE RUN SOURCE_HEALTH]' = 'source_health'
+              '[PARTENER EDGE RUN OPTIMIZE_SOURCES]' = 'optimize_sources'
+            }
+            if (-not $map.ContainsKey($env:ISSUE_TITLE)) { throw "Unsupported Edge issue trigger" }
+            $job = $map[$env:ISSUE_TITLE]
+          } else {
+            $job = 'health_check'
+          }
           "job=$job" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
           Write-Host "Edge job: $job"
 
