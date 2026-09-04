@@ -44,7 +44,8 @@ def main() -> int:
     bsb = next(x for x in receipt["programmes"] if x["programme_id"] == "BSB")
     assert bsb["cooperation_mode"] == "TRANSNATIONAL_NEXT"
     assert bsb["romania_scope"] == ["Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"]
-    assert bsb["authority_url"].startswith("https://projects.research-and-innovation.ec.europa.eu/")
+    assert bsb["authority_url"] == "https://keep.eu/programmes/387/2021-2027-Black-Sea-Basin/"
+    assert "programme-validated" in bsb["evidence_note"]
     assert bsb["call_fact_authorized"] is False
     assert bsb["applicant_eligibility_authorized"] is False
     validate_receipt(receipt)
@@ -73,6 +74,7 @@ def main() -> int:
         "programme_count": receipt["programme_count"],
         "huskroua_romania_scope": huskroua["romania_scope"],
         "bsb_romania_scope": bsb["romania_scope"],
+        "bsb_primary_authority": "KEEP_PROGRAMME_VALIDATED",
         "bsb_fit_non_authorizing": True,
         "open_call_widening_guard": "PASS",
     })
