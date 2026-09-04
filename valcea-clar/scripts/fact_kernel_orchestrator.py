@@ -87,6 +87,7 @@ def self_test() -> dict:
         ("council_decision_fulltext_enricher_v2.py", "--self-test"),
         ("council_claim_attribution_normalizer.py", "--self-test"),
         ("compose_structured_alerts.py", "--self-test"),
+        ("isu_valcea_homepage_summary_kernel.py", "--self-test"),
         ("verified_primary_fast_kernels.py", "--self-test"),
         ("promote_fact_kernels.py", "--self-test"),
         ("primary_source_admin_kernels.py", "--self-test"),
@@ -128,6 +129,7 @@ def check() -> dict:
         "structured_events_present": structured.is_file(),
         "manual_queue_present": manual.is_file(),
         "verified_primary_fast_lane_configured": True,
+        "isu_homepage_summary_lane_configured": True,
     }
     print(json.dumps(result, ensure_ascii=False))
     return result
@@ -157,6 +159,13 @@ def build() -> dict:
             "--events", str(structured.relative_to(REPO)),
             "--facts-registry", "valcea-clar/editorial/facts_registry.json",
         )
+
+    # The official ISU homepage also publishes a compact daily numeric tally.
+    # Promote that low-risk self-reported summary only when all category counters
+    # are present, reconcile exactly to the total and carry a fresh explicit date.
+    # The adapter updates one continuous-story ID and remains inside this single
+    # facts_registry transaction; it is not a parallel publishing lane.
+    run("isu_valcea_homepage_summary_kernel.py", "--apply", timeout=60)
 
     # Fresh IPJ/ISU first-party detail evidence gets a bounded same-run promotion
     # path. The bridge itself fails closed per source/story, emits only attributed
@@ -203,6 +212,7 @@ def build() -> dict:
         "mode": "build",
         "facts_single_writer": True,
         "verified_primary_fast_lane": True,
+        "isu_homepage_summary_lane": True,
         "structured_events_consumed": structured.is_file(),
         "supplemental_facts_consumed": supplemental.is_file(),
         "manual_queue_consumed": manual.is_file(),
