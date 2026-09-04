@@ -63,6 +63,13 @@ def main():
     assert next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-ROHU-2028-2034")["consultation_lifecycle"] == "AFTER_WINDOW"
     assert next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-BSB-2028-2034")["consultation_lifecycle"] in {"END_KNOWN_START_NOT_STATED", "IN_WINDOW"}
 
+    eu_framework = next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-EU-COM-2025-552")
+    assert eu_framework["authority_class"] == "T1_EU_OFFICIAL_PROGRAMMING_ANALYSIS"
+    assert eu_framework["authority_url"].startswith("https://futurium.ec.europa.eu/en/border-focal-point-network/news/")
+    assert eu_framework["supporting_authority_url"] == "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52025PC0552"
+    assert eu_framework["observation_state"] == "PROPOSAL"
+    assert eu_framework["open_call_authorized"] is False
+
     base_reconcile = mod.reconcile(baseline, None, reconciled_at="2026-09-02T07:01:00Z")
     assert base_reconcile["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
     assert base_reconcile["pipeline_watch_candidate"] is False
@@ -153,7 +160,7 @@ def main():
         expect_failure(lambda: mod.load_registry(path), "registry OPEN_CALL")
 
     wrong_identity_previous = copy.deepcopy(baseline)
-    wrong_identity_previous["watchlist"][0]["authority_url"] = "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:52025PC0552&fake=1"
+    wrong_identity_previous["watchlist"][0]["authority_url"] = "https://futurium.ec.europa.eu/en/border-focal-point-network/news/fake"
     rehash(wrong_identity_previous)
     rec = mod.reconcile(degraded, wrong_identity_previous, reconciled_at="2026-09-02T07:04:00Z")
     change = next(item for item in rec["changes"] if item["source_id"] == row["source_id"])
@@ -164,6 +171,8 @@ def main():
         "status": "PASS",
         "schema": baseline["schema"],
         "sources": baseline["source_count"],
+        "eu_framework_primary_authority": "FUTURIUM_EC",
+        "eu_framework_supporting_legal_authority": "EUR_LEX_COM_2025_552",
         "baseline_reconciliation": base_reconcile["reconciliation_state"],
         "same_identity_lkg_guard": "PASS",
         "degraded_semantic_pipeline_watch_suppression": "PASS",
