@@ -7,9 +7,9 @@ import { createBuildAttestation, verifyPairedBuildAttestations } from "../core/b
 import { createInstallBundleManifest, verifyInstallBundlePreflight } from "../native/install-bundle.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const sourceHead = process.env.GITHUB_SHA;
+const sourceHead = process.env.CONNECTOR_SOURCE_HEAD ?? process.env.GITHUB_SHA;
 if (!/^[a-f0-9]{40}$/u.test(sourceHead ?? "")) {
-  throw new Error("Exact GITHUB_SHA is required.");
+  throw new Error("Exact CONNECTOR_SOURCE_HEAD is required.");
 }
 
 const runtimeConfig = JSON.parse(await readFile(path.join(root, "build/runtime-files.json"), "utf8"));
@@ -65,7 +65,8 @@ const manifest = createInstallBundleManifest({
   runtimeConfig
 });
 
-const outputRoot = path.join(root, "dist", `MYSMIS_CONNECTOR_INSTALL_BUNDLE_${sourceHead.slice(0, 12)}`);
+const distRoot = path.join(root, "dist");
+const outputRoot = path.join(distRoot, `MYSMIS_CONNECTOR_INSTALL_BUNDLE_${sourceHead.slice(0, 12)}`);
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(path.join(outputRoot, "CONTROL"), { recursive: true });
 await mkdir(path.join(outputRoot, "PAYLOAD"), { recursive: true });
@@ -90,7 +91,8 @@ const payloadForPreflight = await Promise.all(union.map(async (relative) => ({
   isSymbolicLink: false
 })));
 const preflight = verifyInstallBundlePreflight({ manifest, pairReceipt, bundleFiles: payloadForPreflight });
-await writeFile(path.join(outputRoot, "CONTROL", "CI_PREFLIGHT_RECEIPT.json"), `${JSON.stringify(preflight, null, 2)}\n`);
-await writeFile(path.join(outputRoot, "CONTROL", "BUILD_INFO.json"), `${JSON.stringify({ schemaVersion: 1, sourceHead, pairId: pair.pairId, generatedBy: "GitHub Actions", browserCompatibilityGateRequired: true }, null, 2)}\n`);
+await mkdir(distRoot, { recursive: true });
+await writeFile(path.join(distRoot, `CI_PREFLIGHT_RECEIPT_${sourceHead.slice(0, 12)}.json`), `${JSON.stringify(preflight, null, 2)}\n`);
+await writeFile(path.join(distRoot, `BUILD_INFO_${sourceHead.slice(0, 12)}.json`), `${JSON.stringify({ schemaVersion: 1, sourceHead, pairId: pair.pairId, generatedBy: "GitHub Actions", browserCompatibilityGateRequired: true }, null, 2)}\n`);
 
 process.stdout.write(`${outputRoot}\n`);
