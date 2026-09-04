@@ -31,26 +31,45 @@ def run_many(commands: Iterable[tuple[str, ...]]) -> None:
         run(command[0], *command[1:])
 
 
-def verified_fact_available(fact_id: str) -> bool:
-    """Return whether a specialist enricher's canonical verified target exists.
+def run_scoped_nochange(
+    script: str,
+    *args: str,
+    nochange_message: str,
+    timeout: int = 300,
+) -> bool:
+    """Run one specialist adapter, allowing only its explicit NO_CHANGE outcome.
 
-    Specialist enrichers remain fail-closed when their target exists. A missing
-    target, however, is a scoped NO_CHANGE condition and must not abort unrelated
-    verified facts already assembled in the same transaction.
+    A source/story-specific missing prerequisite must not abort unrelated verified
+    facts in the same transaction. Every other failure remains fail-closed.
     """
-    facts = EDITORIAL / "facts_registry.json"
-    if not facts.is_file() or not facts.stat().st_size:
-        return False
-    try:
-        doc = json.loads(facts.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
-        return False
-    return any(
-        isinstance(row, dict)
-        and row.get("id") == fact_id
-        and row.get("status") == "verified"
-        for row in (doc.get("facts") or [])
+    command = [sys.executable, str(SCRIPTS / script), *args]
+    completed = subprocess.run(
+        command,
+        cwd=REPO,
+        check=False,
+        timeout=timeout,
+        capture_output=True,
+        text=True,
     )
+    if completed.stdout:
+        print(completed.stdout, end="")
+    if completed.returncode == 0:
+        if completed.stderr:
+            print(completed.stderr, end="", file=sys.stderr)
+        return True
+
+    combined = "\n".join(part for part in (completed.stdout, completed.stderr) if part)
+    if nochange_message in combined:
+        print(json.dumps({
+            "status": "NO_CHANGE",
+            "scope": script,
+            "reason": nochange_message.replace(" ", "_"),
+        }, ensure_ascii=False))
+        return False
+
+    if completed.stderr:
+        print(completed.stderr, end="", file=sys.stderr)
+    raise subprocess.CalledProcessError(completed.returncode, command)
 
 
 def self_test() -> dict:
@@ -162,21 +181,15 @@ def build() -> dict:
         run("promote_manual_publish_queue.py", "--apply")
 
     # Durable specialist fact products and lifecycle normalization. The gambling
-    # enricher is scoped to one existing verified explainer. If that target is
-    # absent, record NO_CHANGE and keep unrelated verified facts moving; if the
-    # target exists, both enrichment and its check remain fail-closed.
-    gambling_target_id = "rm-valcea-gambling-authorizations-20260723"
-    gambling_enrichment_applied = verified_fact_available(gambling_target_id)
+    # dossier is scoped to one explainer. Its explicit unavailable-target outcome
+    # is NO_CHANGE for that story only; any other enrichment or temporal-contract
+    # failure still aborts the fact transaction.
+    gambling_enrichment_applied = run_scoped_nochange(
+        "gambling_dossier_enricher_v2.py",
+        nochange_message="canonical verified gambling fact unavailable",
+    )
     if gambling_enrichment_applied:
-        run("gambling_dossier_enricher_v2.py")
         run("gambling_dossier_enricher_v2.py", "--check")
-    else:
-        print(json.dumps({
-            "status": "NO_CHANGE",
-            "scope": "gambling_dossier_enricher_v2",
-            "reason": "canonical_verified_target_unavailable",
-            "story_id": gambling_target_id,
-        }, ensure_ascii=False))
 
     run("editorial_lifecycle_normalizer.py", "--apply")
     run("scm_program_structure_diagnostic.py")
