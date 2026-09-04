@@ -1,6 +1,6 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-04T17:02:51+03:00",
+  "observed_at": "2026-09-04T18:01:08+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
@@ -61,8 +61,9 @@
     },
     {
       "source_id": "ajofm-valcea-comunicate",
-      "listing_ok": false,
-      "error": "ConnectionResetError: [Errno 104] Connection reset by peer",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -158,9 +159,8 @@
     },
     {
       "source_id": "raliul-valcii-official-news",
-      "listing_ok": true,
-      "links_examined": 5,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "TimeoutError: The read operation timed out",
       "facts": 0
     }
   ],
