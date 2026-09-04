@@ -5,6 +5,11 @@ Raw approved photographs remain available for platforms whose native product
 uses them directly. TikTok editorial READY photo stories receive a separate
 1080x1920 newsroom composite; TikTok HOLD/HOLD_MEDIA stories never receive a
 premium publication asset.
+
+Rights, provenance, approved-root and JPEG validation remain fail-closed. A
+rights-approved remote photograph that could not be materialized in the current
+run is isolated to that story instead of aborting media production for every
+other story/channel.
 """
 from __future__ import annotations
 
@@ -18,6 +23,7 @@ from typing import Any
 import tiktok_editorial_v1 as tiktok_editorial
 from social_common import (
     OUTBOX,
+    PHOTO_ROOT,
     load_json,
     local_image_path,
     photo_metadata,
@@ -58,6 +64,43 @@ def tiktok_config(item: dict[str, Any]) -> dict[str, Any] | None:
     platforms = item.get("platforms") if isinstance(item.get("platforms"), dict) else {}
     value = platforms.get("tiktok")
     return value if isinstance(value, dict) else None
+
+
+def approved_source_if_materialized(item: dict[str, Any]) -> Path | None:
+    """Return the approved source photo, or None only for a missing local file.
+
+    Metadata, rights, path confinement, generated-path and extension checks are
+    intentionally performed before treating absence as a transient runtime
+    condition. Existing files then pass through local_image_path for JPEG
+    signature validation. This means malformed or unsafe media still fails the
+    workflow rather than being silently skipped.
+    """
+    photo_metadata(item)
+    raw = str(item.get("image_path", "")).strip()
+    if not raw:
+        raise ValueError(f"social item {item.get('id')} has no image_path")
+    path = (ROOT / raw).resolve()
+    if path != PHOTO_ROOT and PHOTO_ROOT not in path.parents:
+        raise ValueError(f"photo must be approved under {PHOTO_ROOT}: {raw}")
+    if any(
+        part.lower() in {"generated", "synthetic", "cards", "ai"}
+        for part in path.parts
+    ):
+        raise ValueError(f"generated/card path is forbidden: {raw}")
+    if path.suffix.lower() not in {".jpg", ".jpeg"}:
+        raise ValueError(f"approved social photo must be JPEG: {raw}")
+    if not path.is_file():
+        return None
+    return local_image_path(item)
+
+
+def unavailable_record(item: dict[str, Any]) -> dict[str, str]:
+    return {
+        "item_id": str(item.get("id") or ""),
+        "story_id": str(item.get("source_story_id") or ""),
+        "image_path": str(item.get("image_path") or ""),
+        "status": "source_photo_not_materialized_this_run",
+    }
 
 
 def premium_tiktok_asset(
@@ -113,6 +156,7 @@ def build() -> dict[str, Any]:
     stories = current_stories()
     records: dict[str, dict[str, Any]] = {}
     sources: dict[str, Path] = {}
+    unavailable: dict[str, dict[str, str]] = {}
 
     for item in outbox.get("items", []):
         if not isinstance(item, dict):
@@ -127,7 +171,11 @@ def build() -> dict[str, Any]:
             or platform_ready(item, "tiktok")
         ):
             continue
-        source = local_image_path(item)
+        source = approved_source_if_materialized(item)
+        if source is None:
+            record = unavailable_record(item)
+            unavailable[record["item_id"] or record["story_id"]] = record
+            continue
         metadata = photo_metadata(item)
         filename = source.name
         source_digest = sha256(source)
@@ -172,12 +220,26 @@ def build() -> dict[str, Any]:
         if not config or config.get("editorial_product_status") != "READY":
             if config:
                 config.pop("editorial_asset", None)
+                config.pop("runtime_media_status", None)
             continue
         story_id = str(item.get("source_story_id") or "")
         story = stories.get(story_id)
         if not isinstance(story, dict):
             raise RuntimeError(f"TikTok READY story missing from current edition: {story_id}")
-        source = local_image_path(item)
+        source = approved_source_if_materialized(item)
+        if source is None:
+            record = unavailable_record(item)
+            unavailable[record["item_id"] or record["story_id"]] = record
+            config.pop("editorial_asset", None)
+            config.pop("photo_url", None)
+            config["premium_asset_required"] = True
+            config["runtime_media_status"] = "source_photo_not_materialized_this_run"
+            # Isolate only this channel/story. A later outbox rebuild retries it;
+            # never fall back from a required TikTok composite to synthetic media.
+            config["status"] = "hold_media"
+            config["reason"] = "approved_source_photo_temporarily_unavailable"
+            continue
+        config.pop("runtime_media_status", None)
         metadata = photo_metadata(item)
         filename, asset = premium_tiktok_asset(
             item=item,
@@ -199,14 +261,16 @@ def build() -> dict[str, Any]:
 
     write_json(OUTBOX, outbox)
     manifest = {
-        "schema_version": "1.2",
-        "generation": "deterministic_native_social_assets_v1_2",
+        "schema_version": "1.3",
+        "generation": "deterministic_native_social_assets_v1_3",
         "execution_owner": "civora_site_engine",
         "publication_model": "continuous_story_first",
         "held_channels_are_not_asset_errors": True,
+        "missing_materialized_photo_isolated_per_story": True,
         "canonical_base_url": PUBLIC_BASE,
         "tiktok_editorial_product_version": "tiktok-editorial-v1.1",
         "tiktok_premium_assets": premium_count,
+        "unavailable_source_photos": [unavailable[key] for key in sorted(unavailable)],
         "assets": [records[key] for key in sorted(records)],
     }
     write_json(MANIFEST, manifest)
@@ -220,7 +284,7 @@ def self_test() -> int:
     assert len(DESTINATIONS) == 2
     assert PUBLIC_BASE == "https://valceaclar.ro/media/social/"
     assert tiktok_editorial.product_identity("tiktok")["visual"]["brand_mark"] == "VC."
-    print("VÂLCEA CLAR social media asset builder v1.2 self-test: PASS")
+    print("VÂLCEA CLAR social media asset builder v1.3 self-test: PASS")
     return 0
 
 
