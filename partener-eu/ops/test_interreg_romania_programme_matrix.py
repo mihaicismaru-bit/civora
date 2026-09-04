@@ -42,9 +42,13 @@ def main() -> int:
     assert huskroua["romania_scope"] == ["Maramures", "Satu Mare", "Suceava"]
 
     bsb = next(x for x in receipt["programmes"] if x["programme_id"] == "BSB")
+    bsb_source = next(x for x in receipt["sources"] if x["programme_id"] == "BSB")
     assert bsb["cooperation_mode"] == "TRANSNATIONAL_NEXT"
     assert bsb["romania_scope"] == ["Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"]
-    assert bsb["authority_url"] == "https://keep.eu/programmes/387/2021-2027-Black-Sea-Basin/"
+    assert bsb["authority_url"].startswith("https://projects.research-and-innovation.ec.europa.eu/")
+    assert bsb["acquisition_url"] == "https://keep.eu/programmes/387/2021-2027-Black-Sea-Basin/"
+    assert bsb_source["authority_url"] == bsb["authority_url"]
+    assert bsb_source["acquisition_url"] == bsb["acquisition_url"]
     assert "programme-validated" in bsb["evidence_note"]
     assert bsb["call_fact_authorized"] is False
     assert bsb["applicant_eligibility_authorized"] is False
@@ -64,6 +68,9 @@ def main() -> int:
     t = copy.deepcopy(receipt)
     next(x for x in t["programmes"] if x["programme_id"] == "BSB")["romania_scope"] = ["ALL_ROMANIA"]
     fail(lambda: validate_receipt(t), "territory/authority drift")
+    t = copy.deepcopy(receipt)
+    next(x for x in t["programmes"] if x["programme_id"] == "BSB")["acquisition_url"] = "https://example.com/not-official"
+    fail(lambda: validate_receipt(t), "territory/authority drift")
     t = copy.deepcopy(receipt); t["sources"][0]["final_url"] = "https://example.com/not-official"
     fail(lambda: validate_receipt(t), "escaped official evidence authority")
     t = copy.deepcopy(receipt); t["programmes"][0]["source_sha256"] = "0" * 64
@@ -74,7 +81,8 @@ def main() -> int:
         "programme_count": receipt["programme_count"],
         "huskroua_romania_scope": huskroua["romania_scope"],
         "bsb_romania_scope": bsb["romania_scope"],
-        "bsb_primary_authority": "KEEP_PROGRAMME_VALIDATED",
+        "bsb_semantic_authority": "EUROPEAN_COMMISSION",
+        "bsb_acquisition_authority": "KEEP_PROGRAMME_VALIDATED",
         "bsb_fit_non_authorizing": True,
         "open_call_widening_guard": "PASS",
     })
