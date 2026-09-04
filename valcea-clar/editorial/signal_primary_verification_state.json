@@ -2,19 +2,208 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-04T13:49:46+03:00",
+  "generated_at": "2026-09-04T17:36:51+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-04T13:48:18+03:00",
-  "task_count": 91,
+  "queue_generated_at": "2026-09-04T17:35:21+03:00",
+  "task_count": 93,
   "primary_match_count": 0,
-  "no_match_count": 46,
-  "unrouted_count": 45,
-  "target_count": 16,
-  "targets_ok": 12,
+  "no_match_count": 45,
+  "unrouted_count": 48,
+  "target_count": 20,
+  "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "53855880ccb5ec9b8d700b2a",
+      "signal_title": "FOTO/VIDEO. ACCIDENT CUMPLIT pe DEx 12, Craiova – Pitești. Trei morți și trei răniți",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/foto-video-accident-cumplit-pe-dex-12-craiova-pitesti-trei-morti-si-trei-raniti/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-04T17:31:46+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "362103e8a5eefce434be57f9",
+      "signal_title": "FOTO – Incendiu de vegetație la Bălcești, în apropierea Bisericii Gorunești. Pompierii intervin…",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/foto-incendiu-de-vegetatie-la-balcesti-in-apropierea-bisericii-gorunesti-pompierii-intervin/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-04T17:07:18+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "0589de95ae7df0d6808ba9be",
+      "signal_title": "Horezu, la 539 de ani de istorie. Orașul olarilor își sărbătorește rădăcinile",
+      "signal_url": "https://evenimentvalcean.ro/horezu-la-539-de-ani-de-istorie-orasul-olarilor-isi-sarbatoreste-radacinile/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-04T16:55:03+03:00",
+      "verification_route_id": "horezu_administration",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-horezu-anunturi",
+            "name": "Primăria Orașului Horezu",
+            "url": "https://www.orasul-horezu.ro/anunturi"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "b55f78df1057531020b7fb2c",
+      "signal_title": "Echipa filmului „3 zile în septembrie” vine la Craiova pe 10 septembrie",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/echipa-filmului-3-zile-in-septembrie-vine-la-craiova-pe-10-septembrie/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-09-04T16:18:37+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "5c8a0892575f54bc26ecd0a2",
+      "signal_title": "IMAGINI. De la acte sexuale între minori la școală la viol și tentative repetate. Povestea copilului care terorizează o comună din Vâlcea, iar legea nu-l poate opri",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/imagini-de-la-acte-sexuale-intre-minori-la-scoala-la-viol-si-tentative-repetate-povestea-copilului-care-terorizeaza-o-comuna-din-valcea-iar-legea-nu-l-poate-opri/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-04T15:30:56+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "a189044fa241a331e6ea8a74",
+      "signal_title": "CÂINENIUL IESE ÎN STRADĂ! Oamenii protestează împotriva violatorului minor",
+      "signal_url": "https://vocea-valcii.ro/dezvaluiri/caineniul-iese-in-strada-oamenii-protesteaza-impotriva-violatorului-minor/",
+      "signal_publisher": "Vocea Vâlcii",
+      "signal_published_at": "2026-09-04T14:56:11+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "2e42265b561d972ef03faf29",
+      "signal_title": "Deputatul Eugen Neață, vocea care a ținut vie tema drumului expres spre Râmnicu Vâlcea",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/deputatul-eugen-neata-vocea-care-a-tinut-vie-tema-drumului-expres-spre-ramnicu-valcea/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-09-04T14:49:13+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "903edd4bf412e8212e999c0f",
+      "signal_title": "„Am plecat toți și am luat viața în piept”. Absolvenții Liceului Agricol s-au reîntâlnit la Sibiu, după 50 de ani, în costume tradiționale",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/04/am-plecat-toti-si-am-luat-viata-in-piept-absolventii-liceului-agricol-s-au-reintalnit-la-sibiu-dupa-50-de-ani-in-costume-traditionale/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-04T14:11:55+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "8d3b5870956fffab43354c0c",
       "signal_title": "Șoc în Vâlcea: un copil de 13 ani, acuzat de mai multe agresiuni sexuale. Un dosar de viol a fost clasat pentru că minorul nu răspunde penal",
@@ -31,9 +220,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -70,9 +259,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -180,6 +369,18 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
+      "signal_id": "e5736388dd5f7d41c0b33c5b",
+      "signal_title": "„Nu există infrastructură” și „se intenționează să se construiască blocuri între case”. Reacția locatarilor la proiectul cu sute de apartamente lângă Parcul Belvedere",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/04/nu-exista-infrastructura-si-se-intentioneaza-sa-se-construiasca-blocuri-intre-case-reactia-locatarilor-la-proiectul-cu-sute-de-apartamente-langa-parcul-belvedere/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-04T09:52:34+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "6882d30ace061feecefc3a2f",
       "signal_title": "FOTO/VIDEO Slătioara investește în sport! Sală modernă pentru copii și comunitate",
       "signal_url": "https://evenimentvalcean.ro/foto-video-slatioara-investeste-in-sport-sala-moderna-pentru-copii-si-comunitate/",
@@ -219,9 +420,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -315,9 +516,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -342,9 +543,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -470,9 +671,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -656,9 +857,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -740,9 +941,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -997,9 +1198,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -1177,9 +1378,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -1204,9 +1405,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -1611,56 +1812,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "d78090beac10a5533dbc4feb",
-      "signal_title": "ANCHETĂ | Dezastrul balastierelor ilegale și întrebările care duc la șefa ABA Olt, Mădălina Ion-Duca. 6,67 milioane mc de agregate exploatate ilegal, controale inexistente și un mandat care expiră chiar azi",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/ancheta-dezastrul-balastierelor-ilegale-si-intrebarile-care-duc-la-sefa-aba-olt-madalina-ion-duca-667-milioane-mc-de-agregate-exploatate-ilegal-controale-inexistente-si-un-mandat-care-expira-chi/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-02T23:32:48+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "413ec40ed90ccfbe3e3934b4",
-      "signal_title": "În Muzeul Satului din Sibiu se află o școală veche de 100 de ani, adusă din Ticera, satul pe care localnicii îl credeau blestemat",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/02/in-muzeul-satului-din-sibiu-se-afla-o-scoala-veche-de-100-de-ani-adusa-din-ticera-satul-pe-care-localnicii-il-credeau-blestemat/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-02T21:44:31+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "434527bcabcaa0ecfaa7e6b3",
       "signal_title": "Noile semafoare din sensurile giratorii din Sibiu vor porni în teste după începerea școlii",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/02/noile-semafoare-din-sensurile-giratorii-din-sibiu-vor-porni-in-teste-dupa-inceperea-scolii/",
@@ -1928,9 +2079,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -2003,9 +2154,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -2042,69 +2193,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "b4bd99e31df3ba12c8a92260",
-      "signal_title": "ALERTĂ pe Valea Oltului! Conductă suspectă descoperită la Câineni: apă cu miros puternic și culoare neobișnuită ajunge direct în râul Olt",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/alerta-pe-valea-oltului-conducta-suspecta-descoperita-la-caineni-apa-cu-miros-puternic-si-culoare-neobisnuita-ajunge-direct-in-raul-olt/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-02T10:37:35+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -2139,18 +2230,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "6c58e066d3e5b9ba93ab8358",
-      "signal_title": "Septembrie 2026, Luna Sfântului Ierarh Antim Ivireanul în Eparhia Râmnicului și a prieteniei între poporul român și cel georgian",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/septembrie-2026-luna-sfantului-ierarh-antim-ivireanul-in-eparhia-ramnicului-si-a-prieteniei-intre-poporul-roman-si-cel-georgian/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-02T04:04:59+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "e42e94aa619cc28dd20094c1",
@@ -2266,9 +2345,9 @@
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -2300,98 +2379,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "3ac27910fc4629a8740b359c",
-      "signal_title": "Pe 10 septembrie 2026, campanie gratuită de sterilizare a câinilor și pisicilor la Băile Olănești",
-      "signal_url": "https://www.impactreal.ro/2026/09/01/pe-10-septembrie-2026-campanie-gratuita-de-sterilizare-a-cainilor-si-pisicilor-la-baile-olanesti/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-01T20:24:29+03:00",
-      "verification_route_id": "animal_welfare_service",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "smeura-sterilizari-valcea",
-            "name": "Tierhilfe Hoffnung — Smeura Sterilizări Gratuite",
-            "url": "https://smeura.com/events/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "0667eff56388eaf05317134a",
-      "signal_title": "FOTO Școala din Geamăna – Stoilești, modernizată și pregătită pentru noul an școlar",
-      "signal_url": "https://evenimentvalcean.ro/foto-scoala-din-geamana-stoilesti-modernizata-si-pregatita-pentru-noul-an-scolar/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-01T20:18:44+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "2f53c70839fc46e1b7a021ff",
-      "signal_title": "FOTO – Copil de 11 ani, căzut cu bicicleta într-o intersecție din Râmnicu Vâlcea. Poliția și ambulanța au intervenit",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/01/foto-copil-de-11-ani-cazut-cu-bicicleta-intr-o-intersectie-din-ramnicu-valcea-politia-si-ambulanta-au-intervenit/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-01T14:38:21+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "fbaf068144bf16fc56b085d2",
@@ -2506,9 +2493,9 @@
             "name": "Instituția Prefectului — Județul Vâlcea",
             "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
         },
         {
           "target": {
