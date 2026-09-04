@@ -36,3 +36,21 @@ jobs:
           node -e 'const c=require("./build/runtime-files.json"); for (const f of c.EXTENSION.filter((v)=>/\\.(?:js|mjs)$/.test(v))) console.log(f)' | xargs -r -n1 node --check
       - name: Syntax-check bounded loopback broker
         run: node --check native/loopback-broker.mjs
+      - name: Build exact-head install bundle
+        run: node scripts/build-install-bundle.mjs
+      - name: Verify generated install bundle offline
+        run: |
+          BUNDLE="$(find dist -mindepth 1 -maxdepth 1 -type d | head -n1)"
+          test -n "$BUNDLE"
+          node native/install-preflight-cli.mjs --bundle "$BUNDLE" --attempt-id CI-EXACT-HEAD-BUNDLE
+      - name: Archive exact-head install bundle
+        run: |
+          BUNDLE="$(find dist -mindepth 1 -maxdepth 1 -type d | head -n1)"
+          (cd dist && zip -qr "MYSMIS_CONNECTOR_INSTALL_BUNDLE_${GITHUB_SHA:0:12}.zip" "$(basename "$BUNDLE")")
+      - name: Upload exact-head install bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MYSMIS_CONNECTOR_INSTALL_BUNDLE_${{ github.sha }}
+          path: partener-eu/mysmis-connector-v1/dist/MYSMIS_CONNECTOR_INSTALL_BUNDLE_*.zip
+          if-no-files-found: error
+          retention-days: 14
