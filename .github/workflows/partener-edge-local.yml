@@ -1,0 +1,83 @@
+name: PARTENER.EU Edge Local Acquisition
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/partener-edge-local.yml'
+  workflow_dispatch:
+    inputs:
+      job:
+        description: Safe allowlisted PARTENER Edge job
+        required: true
+        default: health_check
+        type: choice
+        options:
+          - health_check
+          - mysmis_scout
+          - mipe_refresh
+          - afir_refresh
+          - source_health
+          - optimize_sources
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-edge-local-acquisition
+  cancel-in-progress: false
+
+jobs:
+  edge:
+    if: ${{ github.repository == 'mihaicismaru-bit/civora' && github.ref == 'refs/heads/main' }}
+    runs-on: [self-hosted, Windows, X64, partener-edge]
+    timeout-minutes: 45
+    steps:
+      - name: Checkout canonical main without write credentials
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify exact canonical checkout
+        shell: pwsh
+        run: |
+          $branch = git branch --show-current
+          if ($branch -ne 'main') { throw "Expected main checkout, got $branch" }
+          git status --short
+          git rev-parse HEAD
+
+      - name: Resolve allowlisted job
+        id: job
+        shell: pwsh
+        env:
+          REQUESTED_JOB: ${{ inputs.job }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          $job = if ($env:EVENT_NAME -eq 'workflow_dispatch' -and $env:REQUESTED_JOB) { $env:REQUESTED_JOB } else { 'health_check' }
+          "job=$job" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          Write-Host "Edge job: $job"
+
+      - name: Run allowlisted PARTENER Edge job
+        shell: pwsh
+        env:
+          PARTENER_EDGE_JOB: ${{ steps.job.outputs.job }}
+        run: |
+          if (-not $env:PARTENER_EDGE_HOME) { throw 'PARTENER_EDGE_HOME is not configured on runner' }
+          if (-not $env:PARTENER_EDGE_PYTHON) { throw 'PARTENER_EDGE_PYTHON is not configured on runner' }
+          $out = Join-Path $env:GITHUB_WORKSPACE 'partener-edge-out'
+          & $env:PARTENER_EDGE_PYTHON (Join-Path $env:PARTENER_EDGE_HOME 'dispatcher\edge_job.py') `
+            --job $env:PARTENER_EDGE_JOB `
+            --workspace $env:GITHUB_WORKSPACE `
+            --out $out
+          if ($LASTEXITCODE -ne 0) { throw "Edge job failed with exit code $LASTEXITCODE" }
+
+      - name: Upload immutable local evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-edge-${{ steps.job.outputs.job }}-${{ github.run_id }}
+          path: partener-edge-out/**
+          if-no-files-found: warn
+          retention-days: 14
