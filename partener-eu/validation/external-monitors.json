@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-09-04T01:26:30Z",
-  "validation_run_started": "2026-09-04T01:26:13Z",
+  "observed_at": "2026-09-04T04:35:41Z",
+  "validation_run_started": "2026-09-04T04:35:32Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "e7fbcdb67aa5fd57242337e945924a5cfa59f0b7b2de6a350be7f83282aee7e8",
-    "history_sha256": "e7fbcdb67aa5fd57242337e945924a5cfa59f0b7b2de6a350be7f83282aee7e8",
-    "history_path": "validation/history/20260904T012613Z.json",
+    "latest_sha256": "73e3485f0b2e3adf120613efa22b6607faf9cb3ff90b6fa7c0c603553bc9a28b",
+    "history_sha256": "73e3485f0b2e3adf120613efa22b6607faf9cb3ff90b6fa7c0c603553bc9a28b",
+    "history_path": "validation/history/20260904T043532Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "07ad9ffa9fcdc185d688d1c0b9f5112f544f7c75e85c0d954038a375dc865886",
-    "checkpoint_sha256": "07ad9ffa9fcdc185d688d1c0b9f5112f544f7c75e85c0d954038a375dc865886",
+    "source_state_sha256": "446243c8e3de1209535ffcce74eb1b037945dc58a7cf169e046326f786724b32",
+    "checkpoint_sha256": "446243c8e3de1209535ffcce74eb1b037945dc58a7cf169e046326f786724b32",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-09-04T00:10:42.475691Z",
-    "age_seconds": 4548,
+    "age_seconds": 15899,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -294,14 +294,16 @@
     "health": "PASS"
   },
   "mff_2028_2034": {
-    "observed_at": "2026-09-03T21:02:59.482936Z",
+    "observed_at": "2026-09-04T04:34:58.088500Z",
     "summary": {
       "total": 8,
       "pass": 2,
       "fail": 6,
-      "review_required": 0
+      "review_required": 1
     },
-    "hash_changed_source_ids": [],
+    "hash_changed_source_ids": [
+      "SRC-RO-MAI-EU-2028"
+    ],
     "unsafe_auto_promotions": [],
     "fail_closed": true
   },
