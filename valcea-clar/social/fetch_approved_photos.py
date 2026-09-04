@@ -4,8 +4,11 @@
 Static editorial assets remain supported, while story-specific media is loaded
 from story_visuals.json so a newly approved visual does not require a second
 hard-coded downloader edit. Every remote image must have explicit provenance
-and rights metadata in the registry. Downloads fail closed on path, HTTP, file
-type or size errors.
+and rights metadata in the registry. Rights/provenance and local-path errors
+remain fail-closed. Remote fetch failures are isolated per asset so one
+rate-limited or unavailable image cannot suppress distribution for unrelated
+stories; the affected story remains without that photo and downstream media
+eligibility/fallback rules decide its channel treatment.
 """
 from __future__ import annotations
 
@@ -45,6 +48,10 @@ HEADERS = {
     "User-Agent": "VâlceaClarEditorialPhotoFetcher/1.1 (+https://valceaclar.ro)",
     "Accept": "image/avif,image/webp,image/apng,image/*,*/*;q=0.8",
 }
+
+
+class AssetFetchUnavailable(RuntimeError):
+    """A rights-approved remote asset could not be fetched in this run."""
 
 
 def load_registry() -> dict[str, Any]:
@@ -124,31 +131,45 @@ def download(url: str) -> bytes:
 
 
 def fetch_one(filename: str, urls: list[str]) -> None:
+    target = (DEST / filename).resolve()
+    if target.parent != DEST:
+        raise RuntimeError(f"invalid approved photo filename: {filename}")
+
     errors: list[str] = []
     for attempt, url in enumerate(urls, start=1):
         try:
             data = download(url)
-            target = (DEST / filename).resolve()
-            if target.parent != DEST:
-                raise RuntimeError(f"invalid approved photo filename: {filename}")
-            temporary = target.with_suffix(target.suffix + ".tmp")
-            temporary.write_bytes(data)
-            os.replace(temporary, target)
-            digest = hashlib.sha256(data).hexdigest()
-            print(f"PHOTO_READY {filename} bytes={len(data)} sha256={digest} source={url}")
-            return
         except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, RuntimeError) as exc:
             errors.append(f"{url}: {exc}")
             time.sleep(min(attempt * 2, 6))
-    raise RuntimeError(f"unable to fetch {filename}: " + " | ".join(errors))
+            continue
+
+        temporary = target.with_suffix(target.suffix + ".tmp")
+        temporary.write_bytes(data)
+        os.replace(temporary, target)
+        digest = hashlib.sha256(data).hexdigest()
+        print(f"PHOTO_READY {filename} bytes={len(data)} sha256={digest} source={url}")
+        return
+
+    raise AssetFetchUnavailable(f"unable to fetch {filename}: " + " | ".join(errors))
 
 
 def main() -> int:
     DEST.mkdir(parents=True, exist_ok=True)
     assets = all_assets()
+    unavailable: list[tuple[str, str]] = []
     for filename, urls in assets.items():
-        fetch_one(filename, urls)
-    print(f"PHOTO_REGISTRY_READY assets={len(assets)} story_assets={len(registry_assets())}")
+        try:
+            fetch_one(filename, urls)
+        except AssetFetchUnavailable as exc:
+            unavailable.append((filename, str(exc)))
+            print(f"PHOTO_UNAVAILABLE {filename} reason={exc}")
+
+    story_asset_count = len(registry_assets())
+    print(
+        f"PHOTO_REGISTRY_READY assets={len(assets)} story_assets={story_asset_count} "
+        f"unavailable={len(unavailable)}"
+    )
     return 0
 
 
