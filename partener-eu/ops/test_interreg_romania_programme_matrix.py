@@ -28,18 +28,25 @@ def fail(fn, needle: str) -> None:
 
 
 def main() -> int:
-    receipt, raw = collect(run_id="synthetic-interreg-1", fetched_at="2026-09-02T05:00:00+00:00", fetcher=fake_fetch)
+    receipt, raw = collect(run_id="synthetic-interreg-1", fetched_at="2026-09-04T00:00:00+00:00", fetcher=fake_fetch)
     assert receipt["schema"] == "PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1"
     assert receipt["source_family"] == "INTERREG"
-    assert receipt["programme_count"] == len(PROGRAMMES) == 8 and len(raw) == 8
-    assert {x["programme_id"] for x in receipt["programmes"]} == {"RO_BG","RO_HU","RO_RS","RO_UA","RO_MD","DANUBE","INTERREG_EUROPE","HUSKROUA"}
+    assert receipt["programme_count"] == len(PROGRAMMES) == 9 and len(raw) == 9
+    expected = {"RO_BG","RO_HU","RO_RS","RO_UA","RO_MD","DANUBE","INTERREG_EUROPE","HUSKROUA","BSB"}
+    assert {x["programme_id"] for x in receipt["programmes"]} == expected
     assert all(x["territorial_fit_state"] == "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING" for x in receipt["programmes"])
     assert all(x["call_fact_authorized"] is False and x["applicant_eligibility_authorized"] is False for x in receipt["programmes"])
+
     huskroua = next(x for x in receipt["programmes"] if x["programme_id"] == "HUSKROUA")
     assert huskroua["cooperation_mode"] == "CBC_NEXT_MULTILATERAL"
     assert huskroua["romania_scope"] == ["Maramures", "Satu Mare", "Suceava"]
-    assert huskroua["call_fact_authorized"] is False
-    assert huskroua["applicant_eligibility_authorized"] is False
+
+    bsb = next(x for x in receipt["programmes"] if x["programme_id"] == "BSB")
+    assert bsb["cooperation_mode"] == "TRANSNATIONAL_NEXT"
+    assert bsb["romania_scope"] == ["Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"]
+    assert bsb["authority_url"].startswith("https://projects.research-and-innovation.ec.europa.eu/")
+    assert bsb["call_fact_authorized"] is False
+    assert bsb["applicant_eligibility_authorized"] is False
     validate_receipt(receipt)
 
     t = copy.deepcopy(receipt); t["open_call_authorized"] = True
@@ -53,6 +60,9 @@ def main() -> int:
     t = copy.deepcopy(receipt)
     next(x for x in t["programmes"] if x["programme_id"] == "HUSKROUA")["romania_scope"] = ["ALL_ROMANIA"]
     fail(lambda: validate_receipt(t), "territory/authority drift")
+    t = copy.deepcopy(receipt)
+    next(x for x in t["programmes"] if x["programme_id"] == "BSB")["romania_scope"] = ["ALL_ROMANIA"]
+    fail(lambda: validate_receipt(t), "territory/authority drift")
     t = copy.deepcopy(receipt); t["sources"][0]["final_url"] = "https://example.com/not-official"
     fail(lambda: validate_receipt(t), "escaped official evidence authority")
     t = copy.deepcopy(receipt); t["programmes"][0]["source_sha256"] = "0" * 64
@@ -62,7 +72,8 @@ def main() -> int:
         "status": "PASS",
         "programme_count": receipt["programme_count"],
         "huskroua_romania_scope": huskroua["romania_scope"],
-        "huskroua_fit_non_authorizing": True,
+        "bsb_romania_scope": bsb["romania_scope"],
+        "bsb_fit_non_authorizing": True,
         "open_call_widening_guard": "PASS",
     })
     return 0

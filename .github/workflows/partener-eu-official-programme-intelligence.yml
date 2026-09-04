@@ -332,6 +332,12 @@ jobs:
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
             --output "$ROOT/interreg-applicant-fit/suceava-public-authority.json"
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county "Tulcea" \
+            --applicant-type NGO_NONPROFIT \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
+            --output "$ROOT/interreg-applicant-fit/tulcea-ngo.json"
 
       - name: Acquire official Interreg Romania call surfaces
         env:
@@ -503,6 +509,7 @@ jobs:
           applicant_timis = json.loads((root/'interreg-applicant-fit/timis-public-authority.json').read_text(encoding='utf-8'))
           applicant_valcea = json.loads((root/'interreg-applicant-fit/valcea-private-body.json').read_text(encoding='utf-8'))
           applicant_suceava = json.loads((root/'interreg-applicant-fit/suceava-public-authority.json').read_text(encoding='utf-8'))
+          applicant_tulcea = json.loads((root/'interreg-applicant-fit/tulcea-ngo.json').read_text(encoding='utf-8'))
           danube_exact = json.loads((root/'interreg-danube-exact/danube-third-call-exact.json').read_text(encoding='utf-8'))
           danube_reconcile = json.loads((root/'interreg-danube-exact/danube-third-call-reconciliation.json').read_text(encoding='utf-8'))
           danube_previous = (root/'interreg-danube-exact/previous-exact.json').exists()
@@ -557,12 +564,20 @@ jobs:
                   assert row['health_state'] == 'DEGRADED'
                   assert row['lkg_required'] is True and row['candidate_count'] == 0
 
-          assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1' and interreg['programme_count'] == 8
+          expected_interreg_ids = {'RO_BG','RO_HU','RO_RS','RO_UA','RO_MD','DANUBE','INTERREG_EUROPE','HUSKROUA','BSB'}
+          assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1'
+          assert interreg['programme_count'] == len(interreg['programmes']) == len(interreg['sources']) == len(expected_interreg_ids)
+          interreg_by_id = {row['programme_id']: row for row in interreg['programmes']}
+          assert set(interreg_by_id) == expected_interreg_ids
+          bsb = interreg_by_id['BSB']
+          assert bsb['romania_scope'] == ['Braila','Buzau','Constanta','Galati','Tulcea','Vrancea']
+          assert bsb['authority_url'].startswith('https://projects.research-and-innovation.ec.europa.eu/')
+          assert bsb['call_fact_authorized'] is False and bsb['applicant_eligibility_authorized'] is False
           assert interreg_calls['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2'
           assert interreg_calls['discovered_call_facts'] == [] and interreg_calls['fallback_does_not_restore_call_surface_coverage'] is True
-          for applicant in (applicant_timis, applicant_valcea, applicant_suceava):
+          for applicant in (applicant_timis, applicant_valcea, applicant_suceava, applicant_tulcea):
               assert applicant['schema'] == 'PARTENER_EU_INTERREG_APPLICANT_PARTNER_FIT_V2'
-              assert applicant['programme_count'] == 8
+              assert applicant['programme_count'] == interreg['programme_count']
               assert applicant['market_intelligence_only'] is True and applicant['fit_is_not_eligibility'] is True
               assert applicant['programme_matrix_semantic_fingerprint'] == interreg['semantic_fingerprint']
           assert applicant_valcea['input']['county'] == 'Vâlcea'
@@ -577,6 +592,12 @@ jobs:
           assert suceava['HUSKROUA']['eligibility_authorized'] is False
           assert suceava['RO_UA']['market_fit_score'] == 90
           assert suceava['RO_UA']['applicant_signal_state'] == 'SUPPORTED_HISTORICAL_CALL_SIGNAL'
+          assert applicant_tulcea['input']['county'] == 'Tulcea'
+          tulcea = {x['programme_id']: x for x in applicant_tulcea['ranked_programme_fits']}
+          assert tulcea['BSB']['market_fit_score'] == 60
+          assert tulcea['BSB']['applicant_signal_state'] == 'INSUFFICIENT_EVIDENCE'
+          assert tulcea['BSB']['matched_territory'] == 'Tulcea'
+          assert tulcea['BSB']['eligibility_authorized'] is False
 
           assert danube_exact['schema'] == 'PARTENER_EU_INTERREG_DANUBE_EXACT_CALL_V1'
           assert danube_exact['call_identifier'] == 'third-call-for-proposals'
@@ -622,7 +643,7 @@ jobs:
               'call_alert_authorized','canonical_corpus_mutation',
           )
           for obj in (
-              eea, interreg, interreg_calls, applicant_timis, applicant_valcea, applicant_suceava,
+              eea, interreg, interreg_calls, applicant_timis, applicant_valcea, applicant_suceava, applicant_tulcea,
               danube_exact, danube_reconcile, future, reconcile, preview, preview_v2,
           ):
               assert all(obj[k] is False for k in flags)
@@ -635,10 +656,13 @@ jobs:
               'eea_civil_society_fund_route_health': civil['health_state'],
               'eea_civil_society_fund_candidate_count': civil['candidate_count'],
               'interreg_programmes': interreg['programme_count'],
+              'interreg_bsb_scope': bsb['romania_scope'],
               'interreg_call_surface_health': interreg_calls['source_health'],
               'applicant_fit_timis_count': applicant_timis['fit_count'],
               'applicant_fit_valcea_count': applicant_valcea['fit_count'],
               'applicant_fit_suceava_count': applicant_suceava['fit_count'],
+              'applicant_fit_tulcea_count': applicant_tulcea['fit_count'],
+              'applicant_fit_tulcea_bsb_score': tulcea['BSB']['market_fit_score'],
               'applicant_fit_suceava_huskroua_score': suceava['HUSKROUA']['market_fit_score'],
               'applicant_fit_valcea_top': applicant_valcea['ranked_programme_fits'][0]['programme_id'],
               'danube_exact_previous_restored': danube_previous,
