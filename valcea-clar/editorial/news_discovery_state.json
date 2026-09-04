@@ -1,10 +1,10 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-04T16:59:46+03:00",
+  "observed_at": "2026-09-04T17:02:51+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 20,
+  "sources_ok": 19,
   "facts_admitted": 5,
   "source_notice_briefs": 1,
   "facts_before_cross_source_headline_dedupe": 1,
@@ -61,9 +61,8 @@
     },
     {
       "source_id": "ajofm-valcea-comunicate",
-      "listing_ok": true,
-      "links_examined": 12,
-      "article_failures": 2,
+      "listing_ok": false,
+      "error": "ConnectionResetError: [Errno 104] Connection reset by peer",
       "facts": 0
     },
     {
@@ -147,7 +146,7 @@
       "source_id": "ajofm-valcea-press-releases",
       "listing_ok": true,
       "links_examined": 12,
-      "article_failures": 1,
+      "article_failures": 0,
       "facts": 0
     },
     {
