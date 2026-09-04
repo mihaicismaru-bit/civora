@@ -64,7 +64,7 @@ jobs:
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --out-dir "$ROOT"
 
-      - name: Restore previous successful same-branch HUSKROUA Call 2 exact receipt
+      - name: Restore previous healthy same-branch HUSKROUA Call 2 exact receipt
         env:
           GH_TOKEN: ${{ github.token }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -113,15 +113,38 @@ jobs:
             gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
             unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
             PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'huskroua-call2-exact-evidence.json' | head -n1 || true)"
-            if [ -n "$PREVIOUS" ]; then
+            [ -n "$PREVIOUS" ] || continue
+            VALID="$(PYTHONPATH=partener-eu/ingest python - "$PREVIOUS" "$ROOT/huskroua-call2-exact-evidence.json" <<'PY'
+          import json, sys
+          from pathlib import Path
+          import interreg_huskroua_call2_exact as exact
+          import interreg_huskroua_call2_reconcile as rec
+          try:
+              previous=json.loads(Path(sys.argv[1]).read_text(encoding='utf-8'))
+              current=json.loads(Path(sys.argv[2]).read_text(encoding='utf-8'))
+              exact.validate_evidence(previous)
+              exact.validate_evidence(current)
+              if previous.get('source_health_state') != 'HEALTHY':
+                  raise ValueError('previous receipt is not HEALTHY')
+              if rec.identity(previous) != rec.identity(current):
+                  raise ValueError('previous receipt identity mismatch')
+              if rec.parse_time(str(previous.get('fetched_at'))) >= rec.parse_time(str(current.get('fetched_at'))):
+                  raise ValueError('previous receipt is not older than current')
+              print('YES')
+          except Exception as exc:
+              print(f'NO:{type(exc).__name__}:{exc}')
+          PY
+          )"
+            if [ "$VALID" = "YES" ]; then
               cp "$PREVIOUS" "$ROOT/previous/huskroua-call2-exact-evidence.json"
               RESTORED="$CANDIDATE"
-              echo "Restored previous same-identity HUSKROUA Call 2 receipt from artifact ${CANDIDATE}"
+              echo "Restored previous healthy same-identity HUSKROUA Call 2 receipt from artifact ${CANDIDATE}"
               break
             fi
+            echo "Skipped HUSKROUA history artifact ${CANDIDATE}: ${VALID}"
           done < "$SCRATCH/candidates.txt"
           if [ -z "$RESTORED" ]; then
-            echo "No previous same-branch HUSKROUA Call 2 receipt found; baseline mode retained."
+            echo "No previous healthy same-branch HUSKROUA Call 2 receipt found; baseline mode retained."
           fi
 
       - name: Reconcile HUSKROUA Call 2 same-identity evidence non-authorizing
