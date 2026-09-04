@@ -4,13 +4,16 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/interreg_huskroua_call2_exact.py'
+      - 'partener-eu/ingest/interreg_huskroua_call2_reconcile.py'
       - 'partener-eu/ingest/interreg_huskroua_call2_exact_registry.json'
       - 'partener-eu/ops/test_interreg_huskroua_call2_exact.py'
+      - 'partener-eu/ops/test_interreg_huskroua_call2_reconcile.py'
       - '.github/workflows/partener-eu-interreg-huskroua-call2-exact-proof.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   huskroua-call2-exact-proof:
@@ -33,17 +36,21 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile registry, adapter and regressions
+      - name: Compile registry, adapter, reconciler and regressions
         run: |
           python -m json.tool partener-eu/ingest/interreg_huskroua_call2_exact_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/interreg_huskroua_call2_exact.py \
-            partener-eu/ops/test_interreg_huskroua_call2_exact.py
+            partener-eu/ingest/interreg_huskroua_call2_reconcile.py \
+            partener-eu/ops/test_interreg_huskroua_call2_exact.py \
+            partener-eu/ops/test_interreg_huskroua_call2_reconcile.py
 
-      - name: Validate fail-closed exact-call semantics
+      - name: Validate fail-closed exact-call semantics and same-identity reconciliation
         env:
           PYTHONPATH: partener-eu/ingest:partener-eu/ops
-        run: python partener-eu/ops/test_interreg_huskroua_call2_exact.py
+        run: |
+          python partener-eu/ops/test_interreg_huskroua_call2_exact.py
+          python partener-eu/ops/test_interreg_huskroua_call2_reconcile.py
 
       - name: Acquire fresh official HUSKROUA Call 2 lifecycle evidence
         env:
@@ -57,13 +64,91 @@ jobs:
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --out-dir "$ROOT"
 
-      - name: Enforce live exact-authority non-authorizing boundary
+      - name: Restore previous successful same-branch HUSKROUA Call 2 exact receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-huskroua-call2-exact-proof
+          SCRATCH=/tmp/partener-eu-huskroua-call2-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH" "$ROOT/previous"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          python - <<'PY' > "$SCRATCH/candidates.txt"
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-huskroua-call2-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not (
+                  name == 'partener-eu-interreg-huskroua-call2-exact-history'
+                  or name.startswith('partener-eu-interreg-huskroua-call2-exact-proof-')
+                  or name.startswith('partener-eu-official-programme-intelligence-')
+              ):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          for _, artifact_id in rows[:20]:
+              print(artifact_id)
+          PY
+          RESTORED=""
+          while IFS= read -r CANDIDATE; do
+            [ -n "$CANDIDATE" ] || continue
+            rm -f "$SCRATCH/previous.zip"
+            rm -rf "$SCRATCH/unpacked"
+            mkdir -p "$SCRATCH/unpacked"
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'huskroua-call2-exact-evidence.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous/huskroua-call2-exact-evidence.json"
+              RESTORED="$CANDIDATE"
+              echo "Restored previous same-identity HUSKROUA Call 2 receipt from artifact ${CANDIDATE}"
+              break
+            fi
+          done < "$SCRATCH/candidates.txt"
+          if [ -z "$RESTORED" ]; then
+            echo "No previous same-branch HUSKROUA Call 2 receipt found; baseline mode retained."
+          fi
+
+      - name: Reconcile HUSKROUA Call 2 same-identity evidence non-authorizing
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-huskroua-call2-exact-proof
+          ARGS=()
+          if [ -f "$ROOT/previous/huskroua-call2-exact-evidence.json" ]; then
+            ARGS+=(--previous "$ROOT/previous/huskroua-call2-exact-evidence.json")
+          fi
+          python partener-eu/ingest/interreg_huskroua_call2_reconcile.py \
+            "$ROOT/huskroua-call2-exact-evidence.json" \
+            "${ARGS[@]}" \
+            --output "$ROOT/huskroua-call2-reconciliation.json"
+
+      - name: Enforce live exact-authority and reconciliation non-authorizing boundary
         run: |
           python - <<'PY'
           import json, re, sys
           from pathlib import Path
-          p=Path('/tmp/partener-eu-huskroua-call2-exact-proof/huskroua-call2-exact-evidence.json')
-          x=json.loads(p.read_text(encoding='utf-8'))
+          root=Path('/tmp/partener-eu-huskroua-call2-exact-proof')
+          x=json.loads((root/'huskroua-call2-exact-evidence.json').read_text(encoding='utf-8'))
+          r=json.loads((root/'huskroua-call2-reconciliation.json').read_text(encoding='utf-8'))
+          previous_exists=(root/'previous/huskroua-call2-exact-evidence.json').exists()
           if x.get('source_health_state') != 'HEALTHY':
               sys.exit(f"FAIL HUSKROUA Call 2 authority chain degraded: {x.get('degraded_reason')}")
           if x.get('official_call_identifier') != '2' or x.get('official_call_identifier_kind') != 'OFFICIAL_CALL_NUMBER':
@@ -81,11 +166,32 @@ jobs:
                   sys.exit(f"FAIL HUSKROUA source degraded: {row.get('kind')}")
               if not re.fullmatch(r'[0-9a-f]{64}', str(row.get('raw_sha256') or '')):
                   sys.exit(f"FAIL HUSKROUA source hash missing: {row.get('kind')}")
+          if r.get('schema') != 'PARTENER_EU_INTERREG_HUSKROUA_CALL2_RECONCILIATION_V1':
+              sys.exit('FAIL HUSKROUA reconciliation schema drift')
+          if r.get('semantic_reconciliation_passed') is not True:
+              sys.exit('FAIL HUSKROUA healthy current evidence did not pass reconciliation')
+          if previous_exists:
+              if r.get('reconciliation_state') not in {'NO_CHANGE','HUSKROUA_CALL2_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}:
+                  sys.exit('FAIL HUSKROUA same-identity replay did not reconcile')
+              if r.get('previous_evidence_sha256') is None or r.get('previous_identity_match') is not True:
+                  sys.exit('FAIL HUSKROUA previous same-identity binding missing')
+              if r.get('material_admission_ready_for_downstream_review') is not True:
+                  sys.exit('FAIL HUSKROUA same-identity reconciliation not downstream-review ready')
+          else:
+              if r.get('reconciliation_state') != 'BASELINE_CAPTURED_NON_AUTHORIZING':
+                  sys.exit('FAIL HUSKROUA baseline reconciliation drift')
+              if r.get('material_admission_ready_for_downstream_review') is not False:
+                  sys.exit('FAIL HUSKROUA baseline became material-ready')
           flags=('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation')
-          if any(x.get(k) is not False for k in flags):
-              sys.exit('FAIL HUSKROUA exact evidence crossed authorization boundary')
+          for obj in (x, r):
+              if any(obj.get(k) is not False for k in flags):
+                  sys.exit('FAIL HUSKROUA exact/reconciliation crossed authorization boundary')
+              if obj.get('publication_effect') != 'NONE':
+                  sys.exit('FAIL HUSKROUA exact/reconciliation crossed publication boundary')
           if x.get('current_material_truth_available') is not False or x.get('previous_or_lkg_is_current_truth') is not False:
               sys.exit('FAIL HUSKROUA exact evidence/history promoted to current material truth')
+          if r.get('previous_or_lkg_is_current_truth') is not False or r.get('lkg_reference_is_current_truth') is not False:
+              sys.exit('FAIL HUSKROUA reconciliation promoted previous/LKG to current truth')
           if x.get('semantic_reconciliation_required') is not True or x.get('field_scoped_material_admission_required') is not True:
               sys.exit('FAIL HUSKROUA exact evidence weakened downstream admission')
           print({
@@ -93,9 +199,30 @@ jobs:
               'candidate_state': x['candidate_state'],
               'source_health_state': x['source_health_state'],
               'semantic_fingerprint': x['exact_semantic_fingerprint'],
+              'previous_restored': previous_exists,
+              'reconciliation_state': r['reconciliation_state'],
+              'semantic_change_count': r['semantic_change_count'],
+              'material_admission_ready_for_downstream_review': r['material_admission_ready_for_downstream_review'],
               'publication_effect': x['publication_effect'],
           })
           PY
+
+      - name: Stage compact HUSKROUA Call 2 exact history receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-huskroua-call2-exact-proof
+          mkdir -p "$ROOT/history-publish"
+          cp "$ROOT/huskroua-call2-exact-evidence.json" "$ROOT/history-publish/"
+          cp "$ROOT/huskroua-call2-reconciliation.json" "$ROOT/history-publish/"
+
+      - name: Upload compact HUSKROUA Call 2 exact history
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-interreg-huskroua-call2-exact-history
+          path: /tmp/partener-eu-huskroua-call2-exact-proof/history-publish
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Upload replayable HUSKROUA Call 2 proof
         if: always()
