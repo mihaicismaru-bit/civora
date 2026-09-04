@@ -1,0 +1,126 @@
+{
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.14",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-04T07:34:49+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply or administrative labour-market context into AI4WORK need-prevalence claims.",
+  "registry_reconciliation": {
+    "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
+    "controlled_source_register_high_water_mark": "S72",
+    "dashboard_reconciled_to_observed": "S01-S72",
+    "existing_branch_candidate_high_water_before_refresh": "S83",
+    "branch_candidate_high_water_after_refresh": "S84",
+    "candidate_rows_canonicalized": false,
+    "new_branch_candidate_ids": ["S84"],
+    "duplicate_source_promoted": false
+  },
+  "new_branch_candidates": [
+    {
+      "source_id": "S84",
+      "region": "Sud-Muntenia / Ialomita",
+      "publisher": "ANOFM / AJOFM Ialomita",
+      "title": "5,80% – rata somajului inregistrat in evidentele AJOFM Ialomita in luna iulie 2026",
+      "publication_date": "2026-09-01",
+      "reference_period": "2026-07",
+      "official_page_url": "https://www.anofm.ro/ialomita/580-rata-somajului-inregistrat-in-evidentele-ajofm-ialomita-in-luna-iulie-2026/",
+      "source_exact_page_readback_completed": true,
+      "downloadable_document_body_readback_completed": false,
+      "observed_facts": {
+        "page_title_exposes_registered_unemployment_rate_percent": 5.80,
+        "page_exposes_publication_date": "2026-09-01",
+        "page_links_downloadable_source_document": true,
+        "downloadable_document_numeric_details_promoted": false
+      },
+      "classification": "CURRENT_ADMINISTRATIVE_LABOUR_MARKET_CONTEXT_ZERO_H1_H5",
+      "claim_boundary": "The official AJOFM Ialomita page source-exactly exposes the July-2026 registered-unemployment rate in its title and publication date. Registered unemployment is administrative labour-market context, not a measurement of digital/AI competence, skill-gap prevalence, unmet employer demand or willingness to train. No value from the linked document body is inferred or promoted because the document body was not source-exactly read in this refresh. S84 contributes zero H1-H5 points.",
+      "canonicalization_status": "BRANCH_ONLY_NOT_CANONICALIZED"
+    }
+  ],
+  "cross_region_reverification": {
+    "Sud-Vest Oltenia": {
+      "status": "REVERIFIED_NO_NEW_NEED_EVIDENCE",
+      "detail": "The current AJOFM Olt July-2026 registered-unemployment item remains already represented in the controlled registry as S61 and S70, so no duplicate candidate is added. Current training/project surfaces remain supply/activity context only.",
+      "h1_h5_numeric_points_added": 0
+    },
+    "Sud-Muntenia": {
+      "status": "REVERIFIED_NEW_BRANCH_CONTEXT_CANDIDATE",
+      "detail": "The official AJOFM Ialomita surface now source-exactly exposes the 01.09.2026 publication for July-2026 registered unemployment; it is retained as S84 branch-only administrative context with zero H1-H5. S82 Teleorman remains administrative context only.",
+      "h1_h5_numeric_points_added": 0
+    },
+    "Centru": {
+      "status": "REVERIFIED_NO_DUPLICATE_PROMOTION",
+      "detail": "The official AJOFM Harghita 28.08.2026 July-2026 registered-unemployment surface remains source-exact and is already controlled as S63. The Mures August-2026 bulletin remains S83 branch-only. No duplicate row is added.",
+      "h1_h5_numeric_points_added": 0
+    }
+  },
+  "promotion_policy": {
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "administrative_context_as_need_prevalence": false,
+    "representativeness_claim_allowed": false,
+    "causal_claim_allowed": false,
+    "decision": "RETAIN_S84_BRANCH_ONLY_ZERO_WEIGHT_CONTEXT_NO_CANONICALIZATION"
+  },
+  "call_requirements_refresh": {
+    "checked_at": "2026-09-04T07:34:49+03:00",
+    "gmail_query": "after:2026/09/04 -in:spam -in:trash -from:notifications@github.com (AI4WORK OR eucons OR Cloudflare OR cPanel OR Claus OR OMIPE OR MIPE OR PEO)",
+    "matching_authority_or_provider_messages_observed": 0,
+    "github_ci_notifications_excluded": true,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "checked_at": "2026-09-04T07:34:49+03:00",
+    "controlled_drive_query": "PROD_REAL_EVIDENCE AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 source_export_sha256",
+    "search_result_class": "CONTROL_OR_PRE_FINAL_MATERIAL_ONLY",
+    "eligible_immutable_combined_real_adult_employer_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "forms_and_gdpr_refresh": {
+    "forms_definition_sha": "01efe3bafd0da2d6b953baed704850f28bba2585",
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
+    "residual_provider_backup_ceiling_days": 92,
+    "account_specific_backup_ceiling_proven": false,
+    "privacy_contact_inbound_independently_verified": false,
+    "public_surface_readback": "Fresh 04.09.2026 readback of eucons.ro exposes the commercial site and does not expose AI4WORK text on the homepage. This observation is not proof that a dedicated route is absent and provides no live provider/account PASS evidence."
+  },
+  "method_and_nf06_refresh": {
+    "need_analysis_plan_status": "APPROVED_FOR_PROD_METHOD_ONLY",
+    "collection_frame_status": "APPROVED_FOR_PROD_METHOD_ONLY",
+    "core_rank_scope": "H1-H5_REAL_PRIMARY_ONLY",
+    "secondary_evidence_can_change_numeric_order": false,
+    "missing_direct_indicator_imputation_allowed": false,
+    "nf06_preingest_status": "PREPARED_FAIL_CLOSED",
+    "nf06_prod_ingest_allowed": false,
+    "need_synthesis_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  },
+  "remaining_external_blocker": {
+    "class": "LIVE_ACCOUNT_SPECIFIC_PROVIDER_BOUND",
+    "items": [
+      "exact rendered AI4WORK Article 13 readback on the live research surface and independently working privacy/rights inbound channel",
+      "actual eucons.ro cPanel/Cloudflare Raw Access/archive/access-security/retention readback proving the <=7-day policy on the live account",
+      "current service/account mapping and active processor/subprocessor chain",
+      "provider-bound proof that the research-only store is outside webroot and separate from CRM/commercial storage with authorised access only",
+      "account-specific confirmation of no backup override above <=92 days plus deletion/restore semantics that do not silently reintroduce erased/held records",
+      "provider-bound rights-hold/erasure and incident-response smoke evidence in TEST_TWIN_NON_EVIDENCE"
+    ]
+  },
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}
