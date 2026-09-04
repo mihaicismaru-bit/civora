@@ -1,73 +1,80 @@
 {
   "schema_version": "1.0",
   "instance_id": "valcea",
-  "requested_at": "2026-09-04T08:41:47+03:00",
+  "requested_at": "2026-09-04T18:45:00+03:00",
   "requested_by": "authorized_editorial_cycle",
   "publication_intent": "publish",
   "facts": [
     {
-      "id": "ramnicu-cet-govora-oprire-apa-calda-20260904",
+      "id": "ramnicu-uap-atelier-35-artex-20260904",
       "status": "verified",
-      "section": "UTIL",
-      "editorial_type": "service",
-      "priority": 100,
+      "section": "CULTURĂ",
+      "editorial_type": "event",
+      "priority": 82,
       "confidence": 100,
-      "valid_from": "2026-09-04T01:00:00+03:00",
-      "valid_until": "2026-09-04T22:00:00+03:00",
-      "slots": ["morning", "evening"],
-      "headline": "Apa caldă este oprită în tot Râmnicu Vâlcea pe 4 septembrie, până la ora 21:00",
-      "dek": "CET Govora anunță întreruperea furnizării apei fierbinți și a apei calde de consum în întreg municipiul, între orele 01:00 și 21:00. Sunt programate racordări la rețeaua de termoficare și remedierea unei avarii pe conducta primară DN600, în zona Gara–Comisariat.",
+      "headline": "Două evenimente culturale la Râmnicu Vâlcea pe 4 septembrie: «Atelier 35» la Cozia, apoi expoziție și lansare la Artex",
+      "dek": "Filiala Râmnicu Vâlcea a UAP a programat pentru 4 septembrie o expoziție de grup la Galeriile Cozia 1 și 2 și, de la ora 18:00, un dublu eveniment la Galeria Artex: retrospectiva Mariei Constantin și lansarea unui roman al Ioanei Drăgan.",
       "paragraphs": [
-        "Locuitorii racordați la sistemul centralizat de termoficare din Râmnicu Vâlcea nu au apă caldă vineri, 4 septembrie 2026, între orele 01:00 și 21:00, potrivit unui anunț oficial al CET Govora. Oprirea vizează întreg municipiul.",
-        "Compania precizează că întreruperea este necesară pentru racordarea cazanelor de apă fierbinte ale centralei aparținând Consiliului Județean Vâlcea la rețeaua de termoficare și pentru eliminarea unei avarii apărute pe conducta circuitului primar DN600, în zona Gara–Comisariat.",
-        "CET Govora indică ora 21:00 ca termen al intervalului anunțat pentru întrerupere și spune că va lua măsuri pentru executarea lucrărilor și reluarea furnizării într-un timp cât mai scurt. VÂLCEA CLAR va actualiza această informare dacă operatorul publică o modificare a intervalului sau confirmarea reluării serviciului."
+        "Râmnicu Vâlcea are două întâlniri culturale programate în 4 septembrie 2026, potrivit anunțului publicat de Uniunea Artiștilor Plastici din România. De la ora 17:30, la Pasajul Cultural «Dinu Săraru» — Galeriile Cozia 1 și 2, este programată expoziția de grup «Atelier 35 (+/-)», dedicată tinerilor artiști aspiranți sau deja membri ai Filialei Râmnicu Vâlcea a UAP.",
+        "De la ora 18:00, la Galeria Artex, UAP anunță un dublu eveniment: vernisajul expoziției retrospective de acuarelă și desen «Nu sunt omul mileniului trei…» a Mariei Constantin și lansarea romanului «În căutarea nefericirii» al Ioanei Drăgan. La eveniment sunt anunțate Mihaela Constantin, fiica artistei Maria Constantin, și scriitoarea Ioana Drăgan.",
+        "Curatorul și prezentatorul anunțat este criticul de artă Luiza Barcan, iar coordonatorul proiectului este Gheorghe Dican. Organizatorii indicați de UAP sunt Filiala Râmnicu Vâlcea a UAP, Uniunea Artiștilor Plastici din România și Primăria Municipiului Râmnicu Vâlcea. Anunțul consultat nu precizează orele de încheiere ale celor două evenimente."
       ],
       "material_fact_gate": "PASS",
       "sources": [
         {
-          "name": "CET Govora — Anunț întrerupere agent termic, 4 septembrie 2026",
-          "url": "https://cetgovora.ro/anunturi-cet-govora",
+          "name": "Uniunea Artiștilor Plastici din România — Evenimente artistice @ Râmnicu Vâlcea",
+          "url": "https://uap.ro/evenimente-artistice-ramnicu-valcea/",
           "tier": "T1"
         }
       ],
       "fact_kernel": {
-        "format_hint": "service_news",
+        "format_hint": "event_note",
         "headline": {
-          "text": "Apa caldă este oprită în tot Râmnicu Vâlcea pe 4 septembrie, până la ora 21:00",
-          "source_urls": ["https://cetgovora.ro/anunturi-cet-govora"]
+          "text": "Două evenimente culturale la Râmnicu Vâlcea pe 4 septembrie: «Atelier 35» la Cozia, apoi expoziție și lansare la Artex",
+          "source_urls": [
+            "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+          ]
         },
         "dek": {
-          "text": "CET Govora anunță întreruperea furnizării apei fierbinți și a apei calde de consum în întreg municipiul, între orele 01:00 și 21:00. Sunt programate racordări la rețeaua de termoficare și remedierea unei avarii pe conducta primară DN600, în zona Gara–Comisariat.",
-          "source_urls": ["https://cetgovora.ro/anunturi-cet-govora"]
+          "text": "Filiala Râmnicu Vâlcea a UAP a programat pentru 4 septembrie o expoziție de grup la Galeriile Cozia 1 și 2 și, de la ora 18:00, un dublu eveniment la Galeria Artex: retrospectiva Mariei Constantin și lansarea unui roman al Ioanei Drăgan.",
+          "source_urls": [
+            "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+          ]
         },
         "claims": [
           {
-            "id": "cet-20260904-1",
+            "id": "uap-rmvl-20260904-1",
             "role": "material_change",
-            "kind": "fact",
-            "attribution": "CET Govora",
-            "text": "CET Govora a anunțat întreruperea furnizării agentului termic sub formă de apă fierbinte și apă caldă de consum în tot municipiul Râmnicu Vâlcea în 4 septembrie 2026, între orele 01:00 și 21:00.",
-            "source_urls": ["https://cetgovora.ro/anunturi-cet-govora"]
+            "kind": "attributed_statement",
+            "attribution": "Uniunea Artiștilor Plastici din România",
+            "text": "UAP anunță pentru 4 septembrie 2026, ora 17:30, la Pasajul Cultural «Dinu Săraru» — Galeriile Cozia 1 și 2, expoziția de grup «Atelier 35 (+/-)», dedicată tinerilor artiști aspiranți sau membri ai Filialei Râmnicu Vâlcea.",
+            "source_urls": [
+              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+            ]
           },
           {
-            "id": "cet-20260904-2",
-            "role": "why",
+            "id": "uap-rmvl-20260904-2",
+            "role": "material_change",
             "kind": "attributed_statement",
-            "attribution": "CET Govora",
-            "text": "Operatorul spune că oprirea este necesară pentru racordarea cazanelor de apă fierbinte ale centralei aparținând Consiliului Județean Vâlcea la rețeaua de termoficare și pentru eliminarea unei avarii pe circuitul primar DN600, în zona Gara–Comisariat.",
-            "source_urls": ["https://cetgovora.ro/anunturi-cet-govora"]
+            "attribution": "Uniunea Artiștilor Plastici din România",
+            "text": "UAP anunță pentru ora 18:00, la Galeria Artex, vernisajul retrospectivei de acuarelă și desen «Nu sunt omul mileniului trei…» a Mariei Constantin și lansarea romanului «În căutarea nefericirii» al Ioanei Drăgan.",
+            "source_urls": [
+              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+            ]
           },
           {
-            "id": "cet-20260904-3",
-            "role": "next_watch",
+            "id": "uap-rmvl-20260904-3",
+            "role": "context",
             "kind": "attributed_statement",
-            "attribution": "CET Govora",
-            "text": "Intervalul oficial anunțat se încheie la ora 21:00; o eventuală modificare sau confirmare a reluării furnizării trebuie tratată ca actualizare a aceleiași povești canonice.",
-            "source_urls": ["https://cetgovora.ro/anunturi-cet-govora"]
+            "attribution": "Uniunea Artiștilor Plastici din România",
+            "text": "UAP îi indică pe Luiza Barcan ca curator și prezentator și pe Gheorghe Dican drept coordonator al proiectului; organizarea este atribuită Filialei Râmnicu Vâlcea a UAP, UAP România și Primăriei Municipiului Râmnicu Vâlcea.",
+            "source_urls": [
+              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+            ]
           }
         ]
       },
-      "editorial_note": "SERVICE UPDATE low-risk construit direct din sursa primară CET Govora. Aria afectată, intervalul și motivele sunt explicit declarate de operator. Nu se inferă consumatori individuali și nu se publică o imagine a unei avarii ca și cum ar reprezenta incidentul curent fără dovadă exactă; Visual Desk poate folosi un asset contextual CET/termoficare deja rights-cleared cu disclosure de arhivă sau un vizual editorial neutru."
+      "editorial_note": "EVENT NOTE low-risk construit din sursa primară UAP. Nu se afirmă program de închidere, acces gratuit sau prezența efectivă a participanților dincolo de ce anunță organizatorul. Imaginile afișate pe pagina UAP nu sunt reutilizate automat doar pentru că sunt publice; Visual Desk trebuie să folosească numai un asset cu drepturi verificabile sau un vizual editorial neutru care nu pretinde că reprezintă evenimentul."
     }
   ]
 }
