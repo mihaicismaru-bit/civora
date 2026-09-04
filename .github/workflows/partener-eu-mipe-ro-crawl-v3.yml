@@ -57,7 +57,7 @@ jobs:
           fetch-depth: 0
 
       - name: Bootstrap Python 3.12
-        shell: pwsh
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference='Stop'
           $python=$null
@@ -86,7 +86,7 @@ jobs:
           & $python --version
 
       - name: Prepare Edge + Playwright + document extraction
-        shell: pwsh
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference='Stop'
           & $env:PYTHON_EXE -m pip install --disable-pip-version-check playwright pypdf
@@ -108,7 +108,7 @@ jobs:
           }
 
       - name: Resolve crawl budget and snapshot non-acquisition outputs
-        shell: pwsh
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $pages='120'; $depth='3'; $persist='true'
           if('${{ github.event_name }}' -eq 'workflow_dispatch'){
@@ -126,11 +126,11 @@ jobs:
           Write-Host "SURFACEMC acquisition: max_pages=$pages max_depth=$depth persist_requested=$persist"
 
       - name: Acquire official MIPE corpus from Romania
-        shell: pwsh
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: '& $env:PYTHON_EXE partener-eu/ingest/mipe_windows_crawl_v3_entry.py'
 
       - name: Enforce acquisition-only boundary and build immutable handoff
-        shell: pwsh
+        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
           $ErrorActionPreference='Stop'
           $state=(Get-FileHash 'partener-eu/ingest/state/mipe_state.json' -Algorithm SHA256).Hash.ToLower()
