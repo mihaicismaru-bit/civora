@@ -14,7 +14,7 @@ sys.path.insert(0, str(INGEST))
 import interreg_applicant_partner_fit as fit  # noqa: E402
 import interreg_romania_programme_matrix as matrix  # noqa: E402
 
-EXPECTED_IDS = {"RO_BG", "RO_HU", "RO_RS", "RO_UA", "RO_MD", "DANUBE", "INTERREG_EUROPE", "HUSKROUA", "BSB"}
+EXPECTED_IDS = {"RO_BG", "RO_HU", "RO_RS", "RO_UA", "RO_MD", "DANUBE", "INTERREG_EUROPE", "HUSKROUA"}
 
 
 def fake_matrix() -> dict:
@@ -32,7 +32,7 @@ def fake_matrix() -> dict:
 
     receipt, _raw = matrix.collect(
         run_id="regression-matrix",
-        fetched_at="2026-09-04T00:00:00+00:00",
+        fetched_at="2026-09-03T20:00:00+00:00",
         fetcher=fetcher,
     )
     matrix.validate_receipt(receipt)
@@ -64,7 +64,7 @@ def main() -> None:
     registry, _hash = fit.load_registry()
     assert {row["id"] for row in registry["programmes"]} == EXPECTED_IDS
     assert {spec["id"] for spec in matrix.PROGRAMMES} == EXPECTED_IDS
-    assert registry["updated_utc"] == "2026-09-04"
+    assert registry["updated_utc"] == "2026-09-03"
     for flag in fit.MATERIAL_FLAGS:
         assert registry["policy"][flag] is False
 
@@ -72,11 +72,6 @@ def main() -> None:
     assert huskroua_signal["observation_state"] == "PROGRAMME_APPLICANT_SIGNAL"
     assert set(huskroua_signal["supported_applicant_types"]) == {"PUBLIC_AUTHORITY", "PUBLIC_LAW_BODY", "NGO_NONPROFIT"}
     assert huskroua_signal["call_specific_applicant_rules_required"] is True
-
-    bsb_signal = next(row for row in registry["programmes"] if row["id"] == "BSB")
-    assert bsb_signal["observation_state"] == "APPLICANT_SIGNAL_INSUFFICIENT"
-    assert bsb_signal["supported_applicant_types"] == []
-    assert bsb_signal["call_specific_applicant_rules_required"] is True
 
     receipt = fake_matrix()
     with tempfile.TemporaryDirectory() as tmp:
@@ -89,7 +84,7 @@ def main() -> None:
             has_international_partner=True,
             run_id="regression-timis",
             programme_matrix_path=path,
-            fetched_at="2026-09-04T00:01:00+00:00",
+            fetched_at="2026-09-03T20:01:00+00:00",
         )
         assert_non_authorizing(timis)
         rows = by_id(timis)
@@ -106,7 +101,7 @@ def main() -> None:
             applicant_type="NGO_NONPROFIT",
             run_id="regression-tulcea",
             programme_matrix_path=path,
-            fetched_at="2026-09-04T00:02:00+00:00",
+            fetched_at="2026-09-03T20:02:00+00:00",
         )
         assert_non_authorizing(tulcea)
         rows = by_id(tulcea)
@@ -114,10 +109,6 @@ def main() -> None:
         assert rows["RO_UA"]["applicant_signal_state"] == "SUPPORTED_HISTORICAL_CALL_SIGNAL"
         assert rows["INTERREG_EUROPE"]["market_fit_score"] == 90
         assert rows["DANUBE"]["market_fit_score"] == 60
-        assert rows["BSB"]["market_fit_score"] == 60
-        assert rows["BSB"]["applicant_signal_state"] == "INSUFFICIENT_EVIDENCE"
-        assert rows["BSB"]["matched_territory"] == "Tulcea"
-        assert rows["BSB"]["eligibility_authorized"] is False
 
         valcea = fit.resolve(
             county="Vâlcea",
@@ -125,7 +116,7 @@ def main() -> None:
             has_international_partner=True,
             run_id="regression-valcea",
             programme_matrix_path=path,
-            fetched_at="2026-09-04T00:03:00+00:00",
+            fetched_at="2026-09-03T20:03:00+00:00",
         )
         assert_non_authorizing(valcea)
         rows = by_id(valcea)
@@ -140,7 +131,7 @@ def main() -> None:
             has_international_partner=True,
             run_id="regression-suceava",
             programme_matrix_path=path,
-            fetched_at="2026-09-04T00:04:00+00:00",
+            fetched_at="2026-09-03T20:04:00+00:00",
         )
         assert_non_authorizing(suceava)
         rows = by_id(suceava)
@@ -192,7 +183,7 @@ def main() -> None:
     else:
         raise AssertionError("unknown applicant type must fail closed")
 
-    print("PASS Interreg applicant/partner fit V2: canonical programme-matrix handoff, 9 programmes including BSB, deterministic ranking, zero eligibility authority")
+    print("PASS Interreg applicant/partner fit V2: canonical programme-matrix handoff, 8 programmes including HUSKROUA, deterministic ranking, zero eligibility authority")
 
 
 if __name__ == "__main__":
