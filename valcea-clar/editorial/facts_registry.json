@@ -186,6 +186,83 @@
       "editorial_note": "Human-approved Monday service story. AGERPRES reproduces the current IPJ Vâlcea traffic restriction and quotes the county road police; copy preserves the 08:00–17:30 interval and does not frame the planned restriction as a new incident."
     },
     {
+      "id": "ramnicu-cet-govora-oprire-apa-calda-20260904",
+      "status": "verified",
+      "section": "UTIL",
+      "editorial_type": "service_update",
+      "priority": 100,
+      "confidence": 100,
+      "valid_from": "2026-09-04T01:00:00+03:00",
+      "valid_until": "2026-09-04T22:00:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "headline": "Apa caldă este oprită în tot Râmnicu Vâlcea pe 4 septembrie, până la ora 21:00",
+      "dek": "CET Govora anunță întreruperea furnizării apei fierbinți și a apei calde de consum în întreg municipiul, între orele 01:00 și 21:00. Sunt programate racordări la rețeaua de termoficare și remedierea unei avarii pe conducta primară DN600, în zona Gara–Comisariat.",
+      "paragraphs": [
+        "Locuitorii racordați la sistemul centralizat de termoficare din Râmnicu Vâlcea nu au apă caldă vineri, 4 septembrie 2026, între orele 01:00 și 21:00, potrivit unui anunț oficial al CET Govora. Oprirea vizează întreg municipiul.",
+        "Compania precizează că întreruperea este necesară pentru racordarea cazanelor de apă fierbinte ale centralei aparținând Consiliului Județean Vâlcea la rețeaua de termoficare și pentru eliminarea unei avarii apărute pe conducta circuitului primar DN600, în zona Gara–Comisariat.",
+        "CET Govora indică ora 21:00 ca termen al intervalului anunțat pentru întrerupere și spune că va lua măsuri pentru executarea lucrărilor și reluarea furnizării într-un timp cât mai scurt. VÂLCEA CLAR va actualiza această informare dacă operatorul publică o modificare a intervalului sau confirmarea reluării serviciului."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "CET Govora — Anunț întrerupere agent termic, 4 septembrie 2026",
+          "url": "https://cetgovora.ro/anunturi-cet-govora",
+          "tier": "T1"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "service_update",
+        "headline": {
+          "text": "Apa caldă este oprită în tot Râmnicu Vâlcea pe 4 septembrie, până la ora 21:00",
+          "source_urls": [
+            "https://cetgovora.ro/anunturi-cet-govora"
+          ]
+        },
+        "dek": {
+          "text": "CET Govora anunță întreruperea furnizării apei fierbinți și a apei calde de consum în întreg municipiul, între orele 01:00 și 21:00. Sunt programate racordări la rețeaua de termoficare și remedierea unei avarii pe conducta primară DN600, în zona Gara–Comisariat.",
+          "source_urls": [
+            "https://cetgovora.ro/anunturi-cet-govora"
+          ]
+        },
+        "claims": [
+          {
+            "id": "cet-20260904-1",
+            "role": "material_change",
+            "kind": "fact",
+            "attribution": "CET Govora",
+            "text": "CET Govora a anunțat întreruperea furnizării agentului termic sub formă de apă fierbinte și apă caldă de consum în tot municipiul Râmnicu Vâlcea în 4 septembrie 2026, între orele 01:00 și 21:00.",
+            "source_urls": [
+              "https://cetgovora.ro/anunturi-cet-govora"
+            ]
+          },
+          {
+            "id": "cet-20260904-2",
+            "role": "why",
+            "kind": "attributed_statement",
+            "attribution": "CET Govora",
+            "text": "Operatorul spune că oprirea este necesară pentru racordarea cazanelor de apă fierbinte ale centralei aparținând Consiliului Județean Vâlcea la rețeaua de termoficare și pentru eliminarea unei avarii pe circuitul primar DN600, în zona Gara–Comisariat.",
+            "source_urls": [
+              "https://cetgovora.ro/anunturi-cet-govora"
+            ]
+          },
+          {
+            "id": "cet-20260904-3",
+            "role": "next_watch",
+            "kind": "attributed_statement",
+            "attribution": "CET Govora",
+            "text": "Intervalul oficial anunțat se încheie la ora 21:00; o eventuală modificare sau confirmare a reluării furnizării trebuie tratată ca actualizare a aceleiași povești canonice.",
+            "source_urls": [
+              "https://cetgovora.ro/anunturi-cet-govora"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "SERVICE UPDATE low-risk construit direct din sursa primară CET Govora. Aria afectată, intervalul și motivele sunt explicit declarate de operator. Nu se inferă consumatori individuali și nu se publică o imagine a unei avarii ca și cum ar reprezenta incidentul curent fără dovadă exactă; Visual Desk poate folosi un asset contextual CET/termoficare deja rights-cleared cu disclosure de arhivă sau un vizual editorial neutru."
+    },
+    {
       "id": "valcea-apa-canal-contract-152m-20260902",
       "status": "verified",
       "section": "ADMINISTRAȚIE",
@@ -927,7 +1004,7 @@
       "confidence": 97,
       "material_fact_gate": "PASS",
       "valid_from": "2026-09-02T00:00:00+03:00",
-      "valid_until": "2026-09-18T08:55:31+03:00",
+      "valid_until": "2026-09-18T09:00:30+03:00",
       "slots": [
         "morning",
         "evening"
@@ -982,24 +1059,24 @@
         ]
       },
       "primary_source_verification": {
-        "verified_at": "2026-09-04T08:55:31+03:00",
+        "verified_at": "2026-09-04T09:00:30+03:00",
         "promotion_gate": "VERIFIED_PRIMARY_MINIMUM_V1",
         "source_family": "ISU",
         "direct_first_party_detail": true,
         "fresh_explicit_date_required": true,
         "freshness_window_days": 2,
-        "detail_sha256": "85b8b2014428446ec086f5d2ec7637ab45c8ff949904933455f234d269b71dde",
-        "index_evidence_sha256": "b59eb46e111681330d29064446b6480ac7884fe757a785dbdc27860b22f3d823",
+        "detail_sha256": "c4c34c2fedcb57e710894a72e29a7d2a7d60b31381592e280edac392acd20913",
+        "index_evidence_sha256": "34f6efa07421749a5cfe8512b3dbb57b1c58a8a8be54dfa518b107f3afd8af4c",
         "field_evidence_sha256": [
-          "31978be158c801b9b733f09b02050dc98ed619553bee3691b9ab6df93c91940e",
-          "15b71c0700f7a3adaae117e602fbcaef7a4655adff99eb35db604fd619df6062"
+          "bae235c5ef70e656ceeea749cee92f31f6ac41b97d91e52e625826f563ec67e2",
+          "6d5f207a947ac7bba9cdb8cf5c9b900a7e529b846b235afa058e25ce02ed812c"
         ],
         "secondary_signal_used_as_fact": false,
         "allegation_only_promotion_allowed": false,
         "title_date_only_promotion_allowed": false,
         "source_statement_presented_as_independent_verification": false,
         "continuous_story_first_update_expected": true,
-        "promotion_fingerprint_sha256": "c42577fc11bc20134c2928eda7127750d47994a61ae5139a8a3b395d613d1c38"
+        "promotion_fingerprint_sha256": "e0492d262d95a3a9cc1d8329a59a5920b9736459b11c464ac3dcabf42ea993b8"
       }
     },
     {
@@ -1462,6 +1539,100 @@
         "source_statement_presented_as_independent_verification": false,
         "continuous_story_first_update_expected": true,
         "promotion_fingerprint_sha256": "310a6c53658e2a0d760086d69531d75c36b02240640d2385810a30b49e2d1de7"
+      }
+    },
+    {
+      "id": "fast-ipj-actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64-aaf8eb1c11",
+      "status": "verified",
+      "section": "SIGURANȚĂ",
+      "priority": 96,
+      "confidence": 97,
+      "material_fact_gate": "PASS",
+      "valid_from": "2026-09-03T00:00:00+03:00",
+      "valid_until": "2026-09-18T09:00:30+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "headline": "IPJ Vâlcea: ACȚIUNE PENTRU CREȘTEREA SIGURANȚEI RUTIERE PE DN 64",
+      "dek": "Comunicarea oficială a IPJ Vâlcea conține informații verificabile despre cazul din 03.09.2026. VÂLCEA CLAR publică numai elementele atribuite explicit autorității și actualizează materialul când apar date noi.",
+      "paragraphs": [],
+      "sources": [
+        {
+          "name": "IPJ Vâlcea — comunicare oficială",
+          "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "verified_primary_fast_brief",
+      "fact_kernel": {
+        "format_hint": "straight_news",
+        "headline": {
+          "text": "IPJ Vâlcea: ACȚIUNE PENTRU CREȘTEREA SIGURANȚEI RUTIERE PE DN 64",
+          "source_urls": [
+            "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
+          ]
+        },
+        "dek": {
+          "text": "Comunicarea oficială a IPJ Vâlcea conține informații verificabile despre cazul din 03.09.2026. VÂLCEA CLAR publică numai elementele atribuite explicit autorității și actualizează materialul când apar date noi.",
+          "source_urls": [
+            "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
+          ]
+        },
+        "claims": [
+          {
+            "id": "primary-1",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "attribution": "IPJ Vâlcea",
+            "text": "IPJ Vâlcea precizează în comunicarea oficială: În cadrul acțiunii, polițiștii au controlat peste 70 de autovehicule și au legitimat aproximativ 80 de persoane.",
+            "source_urls": [
+              "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
+            ]
+          },
+          {
+            "id": "primary-2",
+            "role": "context",
+            "kind": "attributed_statement",
+            "attribution": "IPJ Vâlcea",
+            "text": "IPJ Vâlcea precizează în comunicarea oficială: VÂLCEA - ACȚIUNE PENTRU CREȘTEREA SIGURANȚEI RUTIERE PE DN 64",
+            "source_urls": [
+              "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
+            ]
+          },
+          {
+            "id": "primary-3",
+            "role": "consequence",
+            "kind": "attributed_statement",
+            "attribution": "IPJ Vâlcea",
+            "text": "IPJ Vâlcea precizează în comunicarea oficială: Program Centrul de Reţinere și Arest Preventiv",
+            "source_urls": [
+              "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
+            ]
+          }
+        ]
+      },
+      "primary_source_verification": {
+        "verified_at": "2026-09-04T09:00:30+03:00",
+        "promotion_gate": "VERIFIED_PRIMARY_MINIMUM_V1",
+        "source_family": "IPJ",
+        "direct_first_party_detail": true,
+        "fresh_explicit_date_required": true,
+        "freshness_window_days": 2,
+        "detail_sha256": "7530e16d2cf56833a26ae5cb9531f886b695b3fd4a456279a992bf9d8d7798cd",
+        "index_evidence_sha256": "8a34b58e8ff8986e72f2d4eaf43eae3d1fe73f9e0f9722807f1482247419295b",
+        "field_evidence_sha256": [
+          "08540ee812edfe4c2d395fb80b07097668304f3c68bc2791813c1861b050c327",
+          "697a1832d739f1eba23c31ea10f55faca70a9318e152d22247b99a5846a3e4f3",
+          "78783aa4db17cb9ef20874bffadb3a0942a81d1933eab5004551a4883971b294"
+        ],
+        "secondary_signal_used_as_fact": false,
+        "allegation_only_promotion_allowed": false,
+        "title_date_only_promotion_allowed": false,
+        "source_statement_presented_as_independent_verification": false,
+        "continuous_story_first_update_expected": true,
+        "promotion_fingerprint_sha256": "7a8ee50afc70521c8a5d7f731c84159762d3657d492b1cc8e9dcfddcb11bed6d"
       }
     },
     {
@@ -3611,7 +3782,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 313/2026-08-31",
@@ -3776,7 +3947,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 314/2026-08-31",
@@ -3931,7 +4102,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 315/2026-08-31",
@@ -4094,7 +4265,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 316/2026-08-31",
@@ -4237,7 +4408,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 317/2026-08-31",
@@ -4382,7 +4553,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 318/2026-08-31",
@@ -4547,7 +4718,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 319/2026-08-31",
@@ -4712,7 +4883,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 320/2026-08-31",
@@ -4996,7 +5167,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899"
+          "sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 304/2026-07-23",
@@ -5103,7 +5274,7 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-07-23",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "e979b2b8cf2ffad0106518c8f34d166559aa3f07c3093750e3b621527ea66899",
+        "register_sha256": "afaf9a9f78275bf8ea11b6b26a15d8e1cb049e3248e15b1cd98460a2c78ae426",
         "latest_decision_window": 25,
         "matching_decisions": 5,
         "verified_official_documents": 5,
@@ -5784,177 +5955,6 @@
           "tier": "T1B"
         }
       ]
-    },
-    {
-      "id": "fast-ipj-actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64-aaf8eb1c11",
-      "status": "verified",
-      "section": "SIGURANȚĂ",
-      "priority": 96,
-      "confidence": 97,
-      "material_fact_gate": "PASS",
-      "valid_from": "2026-09-03T00:00:00+03:00",
-      "valid_until": "2026-09-18T08:55:31+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
-      "headline": "IPJ Vâlcea: ACȚIUNE PENTRU CREȘTEREA SIGURANȚEI RUTIERE PE DN 64",
-      "dek": "Comunicarea oficială a IPJ Vâlcea conține informații verificabile despre cazul din 03.09.2026. VÂLCEA CLAR publică numai elementele atribuite explicit autorității și actualizează materialul când apar date noi.",
-      "paragraphs": [],
-      "sources": [
-        {
-          "name": "IPJ Vâlcea — comunicare oficială",
-          "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64",
-          "tier": "T1"
-        }
-      ],
-      "auto_generated": true,
-      "auto_scope": "verified_primary_fast_brief",
-      "fact_kernel": {
-        "format_hint": "straight_news",
-        "headline": {
-          "text": "IPJ Vâlcea: ACȚIUNE PENTRU CREȘTEREA SIGURANȚEI RUTIERE PE DN 64",
-          "source_urls": [
-            "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
-          ]
-        },
-        "dek": {
-          "text": "Comunicarea oficială a IPJ Vâlcea conține informații verificabile despre cazul din 03.09.2026. VÂLCEA CLAR publică numai elementele atribuite explicit autorității și actualizează materialul când apar date noi.",
-          "source_urls": [
-            "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
-          ]
-        },
-        "claims": [
-          {
-            "id": "primary-1",
-            "role": "material_change",
-            "kind": "attributed_statement",
-            "attribution": "IPJ Vâlcea",
-            "text": "IPJ Vâlcea precizează în comunicarea oficială: În cadrul acțiunii, polițiștii au controlat peste 70 de autovehicule și au legitimat aproximativ 80 de persoane.",
-            "source_urls": [
-              "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
-            ]
-          },
-          {
-            "id": "primary-2",
-            "role": "context",
-            "kind": "attributed_statement",
-            "attribution": "IPJ Vâlcea",
-            "text": "IPJ Vâlcea precizează în comunicarea oficială: VÂLCEA - ACȚIUNE PENTRU CREȘTEREA SIGURANȚEI RUTIERE PE DN 64",
-            "source_urls": [
-              "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
-            ]
-          },
-          {
-            "id": "primary-3",
-            "role": "consequence",
-            "kind": "attributed_statement",
-            "attribution": "IPJ Vâlcea",
-            "text": "IPJ Vâlcea precizează în comunicarea oficială: Program Centrul de Reţinere și Arest Preventiv",
-            "source_urls": [
-              "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64"
-            ]
-          }
-        ]
-      },
-      "primary_source_verification": {
-        "verified_at": "2026-09-04T08:55:31+03:00",
-        "promotion_gate": "VERIFIED_PRIMARY_MINIMUM_V1",
-        "source_family": "IPJ",
-        "direct_first_party_detail": true,
-        "fresh_explicit_date_required": true,
-        "freshness_window_days": 2,
-        "detail_sha256": "7530e16d2cf56833a26ae5cb9531f886b695b3fd4a456279a992bf9d8d7798cd",
-        "index_evidence_sha256": "8a34b58e8ff8986e72f2d4eaf43eae3d1fe73f9e0f9722807f1482247419295b",
-        "field_evidence_sha256": [
-          "08540ee812edfe4c2d395fb80b07097668304f3c68bc2791813c1861b050c327",
-          "697a1832d739f1eba23c31ea10f55faca70a9318e152d22247b99a5846a3e4f3",
-          "78783aa4db17cb9ef20874bffadb3a0942a81d1933eab5004551a4883971b294"
-        ],
-        "secondary_signal_used_as_fact": false,
-        "allegation_only_promotion_allowed": false,
-        "title_date_only_promotion_allowed": false,
-        "source_statement_presented_as_independent_verification": false,
-        "continuous_story_first_update_expected": true,
-        "promotion_fingerprint_sha256": "7a8ee50afc70521c8a5d7f731c84159762d3657d492b1cc8e9dcfddcb11bed6d"
-      }
-    },
-    {
-      "id": "ramnicu-cet-govora-oprire-apa-calda-20260904",
-      "status": "verified",
-      "section": "UTIL",
-      "editorial_type": "service_update",
-      "priority": 100,
-      "confidence": 100,
-      "valid_from": "2026-09-04T01:00:00+03:00",
-      "valid_until": "2026-09-04T22:00:00+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
-      "headline": "Apa caldă este oprită în tot Râmnicu Vâlcea pe 4 septembrie, până la ora 21:00",
-      "dek": "CET Govora anunță întreruperea furnizării apei fierbinți și a apei calde de consum în întreg municipiul, între orele 01:00 și 21:00. Sunt programate racordări la rețeaua de termoficare și remedierea unei avarii pe conducta primară DN600, în zona Gara–Comisariat.",
-      "paragraphs": [
-        "Locuitorii racordați la sistemul centralizat de termoficare din Râmnicu Vâlcea nu au apă caldă vineri, 4 septembrie 2026, între orele 01:00 și 21:00, potrivit unui anunț oficial al CET Govora. Oprirea vizează întreg municipiul.",
-        "Compania precizează că întreruperea este necesară pentru racordarea cazanelor de apă fierbinte ale centralei aparținând Consiliului Județean Vâlcea la rețeaua de termoficare și pentru eliminarea unei avarii apărute pe conducta circuitului primar DN600, în zona Gara–Comisariat.",
-        "CET Govora indică ora 21:00 ca termen al intervalului anunțat pentru întrerupere și spune că va lua măsuri pentru executarea lucrărilor și reluarea furnizării într-un timp cât mai scurt. VÂLCEA CLAR va actualiza această informare dacă operatorul publică o modificare a intervalului sau confirmarea reluării serviciului."
-      ],
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "CET Govora — Anunț întrerupere agent termic, 4 septembrie 2026",
-          "url": "https://cetgovora.ro/anunturi-cet-govora",
-          "tier": "T1"
-        }
-      ],
-      "fact_kernel": {
-        "format_hint": "service_update",
-        "headline": {
-          "text": "Apa caldă este oprită în tot Râmnicu Vâlcea pe 4 septembrie, până la ora 21:00",
-          "source_urls": [
-            "https://cetgovora.ro/anunturi-cet-govora"
-          ]
-        },
-        "dek": {
-          "text": "CET Govora anunță întreruperea furnizării apei fierbinți și a apei calde de consum în întreg municipiul, între orele 01:00 și 21:00. Sunt programate racordări la rețeaua de termoficare și remedierea unei avarii pe conducta primară DN600, în zona Gara–Comisariat.",
-          "source_urls": [
-            "https://cetgovora.ro/anunturi-cet-govora"
-          ]
-        },
-        "claims": [
-          {
-            "id": "cet-20260904-1",
-            "role": "material_change",
-            "kind": "fact",
-            "attribution": "CET Govora",
-            "text": "CET Govora a anunțat întreruperea furnizării agentului termic sub formă de apă fierbinte și apă caldă de consum în tot municipiul Râmnicu Vâlcea în 4 septembrie 2026, între orele 01:00 și 21:00.",
-            "source_urls": [
-              "https://cetgovora.ro/anunturi-cet-govora"
-            ]
-          },
-          {
-            "id": "cet-20260904-2",
-            "role": "why",
-            "kind": "attributed_statement",
-            "attribution": "CET Govora",
-            "text": "Operatorul spune că oprirea este necesară pentru racordarea cazanelor de apă fierbinte ale centralei aparținând Consiliului Județean Vâlcea la rețeaua de termoficare și pentru eliminarea unei avarii pe circuitul primar DN600, în zona Gara–Comisariat.",
-            "source_urls": [
-              "https://cetgovora.ro/anunturi-cet-govora"
-            ]
-          },
-          {
-            "id": "cet-20260904-3",
-            "role": "next_watch",
-            "kind": "attributed_statement",
-            "attribution": "CET Govora",
-            "text": "Intervalul oficial anunțat se încheie la ora 21:00; o eventuală modificare sau confirmare a reluării furnizării trebuie tratată ca actualizare a aceleiași povești canonice.",
-            "source_urls": [
-              "https://cetgovora.ro/anunturi-cet-govora"
-            ]
-          }
-        ]
-      },
-      "editorial_note": "SERVICE UPDATE low-risk construit direct din sursa primară CET Govora. Aria afectată, intervalul și motivele sunt explicit declarate de operator. Nu se inferă consumatori individuali și nu se publică o imagine a unei avarii ca și cum ar reprezenta incidentul curent fără dovadă exactă; Visual Desk poate folosi un asset contextual CET/termoficare deja rights-cleared cu disclosure de arhivă sau un vizual editorial neutru."
     },
     {
       "id": "scm-program-5aabeba76e53785685fb",
