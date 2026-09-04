@@ -41,10 +41,49 @@ def run_script(script: str, *args: str) -> None:
     )
 
 
+def run_scoped_nochange(script: str, *args: str, nochange_prefix: str) -> bool:
+    """Allow only one explicit story-scoped prerequisite miss to be NO_CHANGE.
+
+    This keeps an optional specialist presentation from blocking unrelated live
+    stories while preserving fail-closed behavior for every other error.
+    """
+    command = [sys.executable, str(ROOT / "scripts" / script), *args]
+    completed = subprocess.run(
+        command,
+        cwd=REPO,
+        check=False,
+        timeout=180,
+        capture_output=True,
+        text=True,
+    )
+    if completed.stdout:
+        print(completed.stdout, end="")
+    if completed.returncode == 0:
+        if completed.stderr:
+            print(completed.stderr, end="", file=sys.stderr)
+        return True
+
+    combined = "\n".join(part for part in (completed.stdout, completed.stderr) if part)
+    if nochange_prefix in combined:
+        print(json.dumps({
+            "status": "NO_CHANGE",
+            "scope": script,
+            "reason": "specialist_enrichment_prerequisite_unavailable",
+        }, ensure_ascii=False))
+        return False
+
+    if completed.stderr:
+        print(completed.stderr, end="", file=sys.stderr)
+    raise subprocess.CalledProcessError(completed.returncode, command)
+
+
 def apply_reader_presentation() -> None:
     """Fold post-render presentation writers into the canonical runtime."""
     run_script("render_rich_story_sections.py")
-    run_script("gambling_story_presentation.py")
+    run_scoped_nochange(
+        "gambling_story_presentation.py",
+        nochange_prefix="missing enriched claims:",
+    )
 
     stages = (
         "public_ux_currentness.py",
