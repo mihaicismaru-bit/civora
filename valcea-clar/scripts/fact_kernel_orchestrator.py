@@ -31,6 +31,28 @@ def run_many(commands: Iterable[tuple[str, ...]]) -> None:
         run(command[0], *command[1:])
 
 
+def verified_fact_available(fact_id: str) -> bool:
+    """Return whether a specialist enricher's canonical verified target exists.
+
+    Specialist enrichers remain fail-closed when their target exists. A missing
+    target, however, is a scoped NO_CHANGE condition and must not abort unrelated
+    verified facts already assembled in the same transaction.
+    """
+    facts = EDITORIAL / "facts_registry.json"
+    if not facts.is_file() or not facts.stat().st_size:
+        return False
+    try:
+        doc = json.loads(facts.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False
+    return any(
+        isinstance(row, dict)
+        and row.get("id") == fact_id
+        and row.get("status") == "verified"
+        for row in (doc.get("facts") or [])
+    )
+
+
 def self_test() -> dict:
     commands = (
         ("council_watch_rm_valcea.py", "--self-test"),
@@ -139,9 +161,23 @@ def build() -> dict:
     if manual.is_file() and manual.stat().st_size:
         run("promote_manual_publish_queue.py", "--apply")
 
-    # Durable specialist fact products and lifecycle normalization.
-    run("gambling_dossier_enricher_v2.py")
-    run("gambling_dossier_enricher_v2.py", "--check")
+    # Durable specialist fact products and lifecycle normalization. The gambling
+    # enricher is scoped to one existing verified explainer. If that target is
+    # absent, record NO_CHANGE and keep unrelated verified facts moving; if the
+    # target exists, both enrichment and its check remain fail-closed.
+    gambling_target_id = "rm-valcea-gambling-authorizations-20260723"
+    gambling_enrichment_applied = verified_fact_available(gambling_target_id)
+    if gambling_enrichment_applied:
+        run("gambling_dossier_enricher_v2.py")
+        run("gambling_dossier_enricher_v2.py", "--check")
+    else:
+        print(json.dumps({
+            "status": "NO_CHANGE",
+            "scope": "gambling_dossier_enricher_v2",
+            "reason": "canonical_verified_target_unavailable",
+            "story_id": gambling_target_id,
+        }, ensure_ascii=False))
+
     run("editorial_lifecycle_normalizer.py", "--apply")
     run("scm_program_structure_diagnostic.py")
     run("scm_program_fact_kernel.py")
@@ -158,6 +194,7 @@ def build() -> dict:
         "supplemental_facts_consumed": supplemental.is_file(),
         "manual_queue_consumed": manual.is_file(),
         "council_document_corpus_present": corpus.is_file(),
+        "gambling_enrichment_applied": gambling_enrichment_applied,
     }
     print(json.dumps(result, ensure_ascii=False))
     return result
