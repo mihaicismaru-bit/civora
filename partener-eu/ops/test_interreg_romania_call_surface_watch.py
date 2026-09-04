@@ -82,6 +82,12 @@ def main() -> int:
     assert receipt["fallback_does_not_restore_call_surface_coverage"] is True
     assert next(x for x in receipt["surfaces"] if x["programme_id"] == "RO_RS")["observation_state"] == "PLANNED"
     assert next(x for x in receipt["surfaces"] if x["programme_id"] == "INTERREG_EUROPE")["programme_filter_required"] is True
+    robg = next(x for x in receipt["surfaces"] if x["programme_id"] == "RO_BG")
+    romd = next(x for x in receipt["surfaces"] if x["programme_id"] == "RO_MD")
+    assert robg["authority_url"] == "https://jems-robg.mdlpa.ro/"
+    assert romd["authority_url"] == "https://jems-romd.mdlpa.ro/"
+    assert robg["surface_role"] == romd["surface_role"] == "PROGRAMME_CALL_SUBMISSION_DISCOVERY"
+    assert robg["call_fact_authorized"] is False and romd["call_fact_authorized"] is False
     validate_receipt(receipt)
 
     degraded, raw2 = collect(
@@ -153,7 +159,7 @@ def main() -> int:
     t["coverage_complete"] = True
     fail(lambda: validate_receipt(t), "coverage flag drift")
 
-    print("Interreg Romania call-surface fallback provenance fail-closed regression: PASS")
+    print("Interreg Romania call-surface official JEMS discovery + fallback provenance fail-closed regression: PASS")
     return 0
 
 
