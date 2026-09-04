@@ -1,4 +1,4 @@
-# PARTENER Edge Runner bounded trigger v3
+# PARTENER Edge Runner bounded trigger v4
 name: PARTENER.EU Edge Local Acquisition
 
 on:
@@ -55,7 +55,7 @@ jobs:
           persist-credentials: false
 
       - name: Verify exact canonical checkout
-        shell: pwsh
+        shell: powershell
         run: |
           $branch = git branch --show-current
           if ($branch -ne 'main') { throw "Expected main checkout, got $branch" }
@@ -64,7 +64,7 @@ jobs:
 
       - name: Resolve allowlisted job
         id: job
-        shell: pwsh
+        shell: powershell
         env:
           REQUESTED_JOB: ${{ inputs.job }}
           EVENT_NAME: ${{ github.event_name }}
@@ -90,7 +90,7 @@ jobs:
           Write-Host "Edge job: $job"
 
       - name: Run allowlisted PARTENER Edge job
-        shell: pwsh
+        shell: powershell
         env:
           PARTENER_EDGE_JOB: ${{ steps.job.outputs.job }}
         run: |
