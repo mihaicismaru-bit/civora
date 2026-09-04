@@ -103,10 +103,11 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
     {
         "id": "BSB", "programme": "Interreg NEXT Black Sea Basin", "mode": "TRANSNATIONAL_NEXT",
         "url": "https://keep.eu/programmes/387/2021-2027-Black-Sea-Basin/",
+        "canonical_authority_url": "https://projects.research-and-innovation.ec.europa.eu/en/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe/eu-missions-horizon-europe/restore-our-ocean-and-waters/interreg-next-black-sea-basin-programme",
         "hosts": ("keep.eu", "www.keep.eu"),
         "anchors": ("2021 - 2027 Interreg VI-B NEXT Black Sea Basin", "Eligible geographical area", "Romania", "Sud-Est", "Programme validated the information"),
         "romania_scope": ("Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"),
-        "evidence_note": "keep.eu Interact registry; programme-validated fundamental information confirms Romania Sud-Est; county resolution retained from the previously verified European Commission geography receipt",
+        "evidence_note": "European Commission programme geography remains canonical semantic authority; acquisition fails over to keep.eu Interact programme-validated Romania Sud-Est evidence; county resolution retained from the previously verified Commission geography receipt",
     },
 )
 
@@ -206,15 +207,17 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
         require(html_text(raw), spec["anchors"], source=spec["programme"])
         raw_by_id[spec["id"]] = raw
         source_hash = sha256_bytes(raw)
+        semantic_authority_url = str(spec.get("canonical_authority_url") or spec["url"])
         sources.append({
-            "programme_id": spec["id"], "authority_url": spec["url"], **dict(meta),
+            "programme_id": spec["id"], "authority_url": semantic_authority_url,
+            "acquisition_url": spec["url"], **dict(meta),
             "sha256": source_hash, "authority_class": AUTHORITY_CLASS,
             "evidence_note": spec["evidence_note"],
         })
         matrix.append({
             "programme_id": spec["id"], "programme": spec["programme"], "cooperation_mode": spec["mode"],
-            "authority_url": spec["url"], "authority_class": AUTHORITY_CLASS,
-            "evidence_note": spec["evidence_note"],
+            "authority_url": semantic_authority_url, "acquisition_url": spec["url"],
+            "authority_class": AUTHORITY_CLASS, "evidence_note": spec["evidence_note"],
             "programme_period": "2021-2027", "romania_scope": list(spec["romania_scope"]),
             "territorial_fit_state": "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING",
             "observation_state": OBSERVATION_STATE, "observed_at": observed,
@@ -269,22 +272,28 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
     specs = {x["id"]: x for x in PROGRAMMES}
     for source in sources:
         pid = str(source.get("programme_id") or "")
+        spec = specs[pid]
+        semantic_authority_url = str(spec.get("canonical_authority_url") or spec["url"])
         if int(source.get("status") or 0) != 200 or not re.fullmatch(r"[0-9a-f]{64}", str(source.get("sha256") or "")):
             raise ValueError(f"Interreg source {pid} lacks healthy hash-bound evidence")
-        if not host_allowed(str(source.get("final_url") or source.get("requested_url") or ""), specs[pid]["hosts"]):
+        if source.get("authority_url") != semantic_authority_url or source.get("acquisition_url") != spec["url"]:
+            raise ValueError(f"Interreg source {pid} authority/acquisition provenance drift")
+        if not host_allowed(str(source.get("final_url") or source.get("requested_url") or ""), spec["hosts"]):
             raise ValueError(f"Interreg source {pid} escaped official evidence authority")
-        if source.get("evidence_note") != specs[pid]["evidence_note"]:
+        if source.get("evidence_note") != spec["evidence_note"]:
             raise ValueError(f"Interreg source {pid} evidence provenance drift")
 
     for row in rows:
         pid = str(row.get("programme_id") or "")
+        spec = specs[pid]
+        semantic_authority_url = str(spec.get("canonical_authority_url") or spec["url"])
         if row.get("observation_state") != OBSERVATION_STATE or row.get("territorial_fit_state") != "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING":
             raise ValueError(f"Interreg programme {pid} escaped programme-level geography research")
         if row.get("market_intelligence_only") is not True or row.get("call_fact_authorized") is not False or row.get("applicant_eligibility_authorized") is not False:
             raise ValueError(f"Interreg programme {pid} attempted call/applicant eligibility authorization")
-        if row.get("authority_url") != specs[pid]["url"] or list(row.get("romania_scope") or []) != list(specs[pid]["romania_scope"]):
+        if row.get("authority_url") != semantic_authority_url or row.get("acquisition_url") != spec["url"] or list(row.get("romania_scope") or []) != list(spec["romania_scope"]):
             raise ValueError(f"Interreg programme {pid} territory/authority drift")
-        if row.get("evidence_note") != specs[pid]["evidence_note"]:
+        if row.get("evidence_note") != spec["evidence_note"]:
             raise ValueError(f"Interreg programme {pid} evidence provenance drift")
         source = next(x for x in sources if x.get("programme_id") == pid)
         if row.get("source_sha256") != source.get("sha256"):
