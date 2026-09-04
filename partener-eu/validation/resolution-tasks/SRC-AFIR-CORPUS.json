@@ -3,7 +3,7 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "c223025a4aa3878d07d1cee7baeba50a2cb4d186fd341473e41750708a3155a8",
+  "candidate_fingerprint": "baae9d6710b3041a72c51dd2fc5c80b5e0701141e366d39ea4166e1a0b7baf9d",
   "previous_candidate_fingerprint": "c223025a4aa3878d07d1cee7baeba50a2cb4d186fd341473e41750708a3155a8",
   "candidate_count": 1,
   "material_signal_count": 1,
@@ -11,12 +11,12 @@
     {
       "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "ae396c1e05f487eedde01cc6d07d1a2fbbeee6bccb242428868b8e9e06b4b865",
+      "sha256": "a8afe47f9ee5500f5354c622f5581802974672b8b0879230837934b241094d23",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     }
   ],
-  "auth_dependency_count": 27,
+  "auth_dependency_count": 28,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -145,6 +145,13 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fetape-accesare-fonduri-europene%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/finantare/etape-accesare-fonduri-europene/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fnomenclator%2Ffirme-de-consultanta%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/instrumente/nomenclator/firme-de-consultanta/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -210,7 +217,7 @@
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-09-04T09:51:24.553080+00:00",
+  "last_observed_at": "2026-09-04T14:29:28.114231+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,

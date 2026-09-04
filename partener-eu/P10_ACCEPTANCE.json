@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-09-04T13:34:20Z",
+    "utc": "2026-09-04T14:30:16Z",
     "source_pass": 4,
     "source_degraded": 1,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-PR-CENTRU-DIGITAL-2 — ADR Centru — Întreprinderi digitale Apel 2; dependent material facts blocked fail-closed; SRC-PR-CENTRU-ACTIUNI — ADR Centru — Acțiuni; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-09-04T13:34:33Z",
+    "utc": "2026-09-04T14:30:31Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260904T133433Z",
+    "final_url": "https://partener.eu/?p10_probe=20260904T143031Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260904T133433Z",
+        "final_url": "https://partener.eu/?p10_probe=20260904T143031Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260904T133433Z",
+        "final_url": "https://partener.eu/?p10_probe=20260904T143031Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260904T133433Z",
-            "to_url": "https://partener.eu/?p10_probe=20260904T133433Z"
+            "from_url": "http://partener.eu/?p10_probe=20260904T143031Z",
+            "to_url": "https://partener.eu/?p10_probe=20260904T143031Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260904T133433Z",
+        "final_url": "https://partener.eu/?p10_probe=20260904T143031Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260904T133433Z",
-            "to_url": "https://partener.eu/?p10_probe=20260904T133433Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260904T143031Z",
+            "to_url": "https://partener.eu/?p10_probe=20260904T143031Z"
           }
         ],
         "content_verified": true,
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-09-04T13:34:33Z",
-    "validation_run_started": "2026-09-04T13:34:20Z",
+    "utc": "2026-09-04T14:30:31Z",
+    "validation_run_started": "2026-09-04T14:30:16Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "ea0d2a544b60e44b30209859b646b7d527cdef2a1eb013cd7c6599ab2b4ed720",
-      "history_sha256": "ea0d2a544b60e44b30209859b646b7d527cdef2a1eb013cd7c6599ab2b4ed720",
-      "history_path": "validation/history/20260904T133420Z.json",
+      "latest_sha256": "d45cc6672063e518b68a4d0f8d72c895c5286291aa0bbb39a03b5d039f77fa11",
+      "history_sha256": "d45cc6672063e518b68a4d0f8d72c895c5286291aa0bbb39a03b5d039f77fa11",
+      "history_path": "validation/history/20260904T143016Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "e68327b28745eef34999539b625d5b33b9f374755d6385e2f4e7ed4c9be47564",
-      "checkpoint_sha256": "e68327b28745eef34999539b625d5b33b9f374755d6385e2f4e7ed4c9be47564",
+      "source_state_sha256": "eef97de32b32ce8ec71c18fab32b0b0dffcd50224ccfd5916bab87a7c9e2ebed",
+      "checkpoint_sha256": "eef97de32b32ce8ec71c18fab32b0b0dffcd50224ccfd5916bab87a7c9e2ebed",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-09-04T11:29:15.142414Z",
-      "age_seconds": 7518,
+      "age_seconds": 10876,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -182,13 +182,13 @@
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-09-04T09:51:24.553080+00:00",
+      "observed_at": "2026-09-04T14:29:28.114231+00:00",
       "status": "PASS",
-      "item_count": 29,
-      "error_count": 45,
+      "item_count": 31,
+      "error_count": 43,
       "hash_change_candidates": 1,
       "material_signal_candidates": 1,
-      "auth_dependency_count": 27,
+      "auth_dependency_count": 28,
       "auth_dependencies": [
         {
           "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -312,6 +312,13 @@
         {
           "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ftransfer-de-cunostinte-dr37%2F&culture=ro",
           "sourcePage": "https://www.afir.ro/finantare/transfer-de-cunostinte-dr37/",
+          "status": "AUTH_OR_ACCESS_DEPENDENT",
+          "materialFactAction": "NONE",
+          "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+        },
+        {
+          "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fetape-accesare-fonduri-europene%2F&culture=ro",
+          "sourcePage": "https://www.afir.ro/finantare/etape-accesare-fonduri-europene/",
           "status": "AUTH_OR_ACCESS_DEPENDENT",
           "materialFactAction": "NONE",
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
