@@ -1,4 +1,4 @@
-# PARTENER Edge Runner self-test trigger v1
+# PARTENER Edge Runner self-test trigger v2
 name: PARTENER.EU Edge Local Acquisition
 
 on:
@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/partener-edge-local.yml'
+  issues:
+    types: [opened]
   workflow_dispatch:
     inputs:
       job:
@@ -30,7 +32,12 @@ concurrency:
 
 jobs:
   edge:
-    if: ${{ github.repository == 'mihaicismaru-bit/civora' && github.ref == 'refs/heads/main' }}
+    if: >-
+      ${{ github.repository == 'mihaicismaru-bit/civora' &&
+          github.ref == 'refs/heads/main' &&
+          (github.event_name == 'push' ||
+           github.event_name == 'workflow_dispatch' ||
+           (github.event_name == 'issues' && github.event.issue.title == '[PARTENER EDGE SELF TEST]')) }}
     runs-on: [self-hosted, Windows, X64, partener-edge]
     timeout-minutes: 45
     steps:
