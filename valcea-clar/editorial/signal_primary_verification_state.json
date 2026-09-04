@@ -2,19 +2,43 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-04T04:05:18+03:00",
+  "generated_at": "2026-09-04T08:52:12+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-04T04:03:49+03:00",
-  "task_count": 87,
+  "queue_generated_at": "2026-09-04T08:50:41+03:00",
+  "task_count": 86,
   "primary_match_count": 0,
-  "no_match_count": 44,
-  "unrouted_count": 43,
-  "target_count": 21,
-  "targets_ok": 17,
+  "no_match_count": 42,
+  "unrouted_count": 44,
+  "target_count": 16,
+  "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "b82289711d2a2862deb23c94",
+      "signal_title": "Continuare about S-a încheiat cu ambuteiajele la Spitalul de Urgență",
+      "signal_url": "https://www.curierul.ro/s-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": "2026-09-04T08:27:46+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "1ca171a4075365495c22ca9e",
+      "signal_title": "Ce facem în weekend? Sibiu Guitar Meeting, Târgul Olarilor, Festivalul Meșteșugarilor Romi, Jazz Festival, Zilele Mocăniței, drumeții și karaoke",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/04/ce-facem-in-weekend-sibiu-guitar-meeting-targul-olarilor-festivalul-mestesugarilor-romi-jazz-festival-zilele-mocanitei-drumetii-si-karaoke/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-04T07:01:23+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "eeb02ebfd502848229afc53a",
       "signal_title": "EXCLUSIV | Silviu Boțone vine la conducerea ABA Olt în plin scandal al balastierelor. Ce știe despre exploatările de pe Valea Lotrului și despre activitatea CAZICOM...",
@@ -310,6 +334,44 @@
           "status": "PASS",
           "error": null,
           "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "4f0080ca6fd79d39cea17c46",
+      "signal_title": "Cristiana Sofia Damian, eleva de la Lazăr care face muzică de la 5 ani și visează la un conservator în străinătate: „Muzica îmi curge prin vene, este viitorul meu”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/03/cristiana-sofia-damian-eleva-de-la-lazar-care-face-muzica-de-la-5-ani-si-viseaza-la-un-conservator-in-strainatate-muzica-imi-curge-prin-vene-este-viitorul-meu/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-03T18:49:18+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
         }
       ],
       "publication_authority": "NONE",
@@ -1858,55 +1920,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "7e6f62c0c2e4c3062ea19f9d",
-      "signal_title": "ACUM – Arde o casă de pe Știrbei Vodă din Râmnicu Vâlcea",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/02/acum-arde-o-casa-de-pe-stirbei-voda-din-ramnicu-valcea/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-02T09:32:00+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "6c58e066d3e5b9ba93ab8358",
       "signal_title": "Septembrie 2026, Luna Sfântului Ierarh Antim Ivireanul în Eparhia Râmnicului și a prieteniei între poporul român și cel georgian",
       "signal_url": "https://ziaruldevalcea.ro/2026/09/septembrie-2026-luna-sfantului-ierarh-antim-ivireanul-in-eparhia-ramnicului-si-a-prieteniei-intre-poporul-roman-si-cel-georgian/",
@@ -2184,140 +2197,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "9d75668c22a5721305104859",
-      "signal_title": "Primarul Constantin Cîrstina aduce încă 4,5 milioane de lei la Orlești! Căminul Cultural va fi modernizat din temelii cu bani europeni",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/primarul-constantin-cirstina-aduce-inca-45-milioane-de-lei-la-orlesti-caminul-cultural-va-fi-modernizat-din-temelii-cu-bani-europeni/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-01T05:32:25+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "a6f5125539c96658963cc480",
-      "signal_title": "IPOCRIZIE MAXIMĂ! Pesedistul Bogdan Ivan plânge acum pentru CET Govora, după ce, ca ministru al Energiei, a împins centrala spre închidere. Vâlcenii plătesc factura!",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/ipocrizie-maxima-pesedistul-bogdan-ivan-plange-acum-pentru-cet-govora-dupa-ce-ca-ministru-al-energiei-a-impins-centrala-spre-inchidere-valcenii-platesc-factura/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-01T05:27:30+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "7269083e0ca492ee3c7992dd",
-      "signal_title": "Sănătatea pe primul loc! Recuperare medicală și tratamente balneare la Hotel Olănești & Spa Medical",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/sanatatea-pe-primul-loc-recuperare-medicala-si-tratamente-balneare-la-hotel-olanesti-spa-medical/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-01T05:18:28+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "560137ae41f3a2c3d026196e",
-      "signal_title": "„Sfântul Ioan Botezătorul a fost vas al Harului și glas al adevărului”, a spus Chiriarhul Râmnicului la Mănăstirea „Sfântul Antim”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/sfantul-ioan-botezatorul-a-fost-vas-al-harului-si-glas-al-adevarului-a-spus-chiriarhul-ramnicului-la-manastirea-sfantul-antim/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-01T05:15:09+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "a6db6dca7615448c840e5378",
-      "signal_title": "Înaltpreasfințitul Părinte Varsanufie a participat la sărbătoarea Cinstirea Icoanei Maicii Domnului de la Craiova",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/inaltpreasfintitul-parinte-varsanufie-a-participat-la-sarbatoarea-cinstirea-icoanei-maicii-domnului-de-la-craiova/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-01T05:12:39+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "fbaf068144bf16fc56b085d2",
       "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
       "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
@@ -2330,9 +2209,9 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "def243266ca689e3d5a6263f",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=152%20MILIOANE%20EURO%20din%20fonduri%20europene%2C%20pentru%20ap%C4%83%20%C8%99i%20canal%20%C3%AEn%20jude%C8%9Bul%20V%C3%A2lcea%21&url=https%3A%2F%2Fwww.curierul.ro%2F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%2F",
+      "signal_id": "d3ae5cdc0b0ef0c44870c2c4",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
       "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
@@ -2415,18 +2294,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "71369ccde4c5d10ce34de3b9",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "51903ee49daef77a112e793c",
       "signal_title": "Investiții PNRR împotriva viiturilor: Romsilva a finalizat 19 obiective, inclusiv în județul Vâlcea",
       "signal_url": "https://www.eurovalcea.ro/2026/09/01/investitii-pnrr-impotriva-viiturilor-romsilva-a-finalizat-19-obiective-inclusiv-in-judetul-valcea/",
@@ -2487,10 +2354,46 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
+      "signal_id": "485561d3bd66859354c995c9",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=S-a%20%C3%AEncheiat%20cu%20ambuteiajele%20la%20Spitalul%20de%20Urgen%C8%9B%C4%83&url=https%3A%2F%2Fwww.curierul.ro%2Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%2F",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "0a9f0e5efa5edfde1c95a354",
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
       "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "def243266ca689e3d5a6263f",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=152%20MILIOANE%20EURO%20din%20fonduri%20europene%2C%20pentru%20ap%C4%83%20%C8%99i%20canal%20%C3%AEn%20jude%C8%9Bul%20V%C3%A2lcea%21&url=https%3A%2F%2Fwww.curierul.ro%2F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%2F",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "71369ccde4c5d10ce34de3b9",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
