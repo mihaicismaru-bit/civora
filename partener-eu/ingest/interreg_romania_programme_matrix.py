@@ -102,11 +102,11 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
     },
     {
         "id": "BSB", "programme": "Interreg NEXT Black Sea Basin", "mode": "TRANSNATIONAL_NEXT",
-        "url": "https://projects.research-and-innovation.ec.europa.eu/en/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe/eu-missions-horizon-europe/restore-our-ocean-and-waters/interreg-next-black-sea-basin-programme",
-        "hosts": ("projects.research-and-innovation.ec.europa.eu", "research-and-innovation.ec.europa.eu"),
-        "anchors": ("Interreg NEXT Black Sea Basin Programme", "Applicants from the following countries and regions are eligible", "Romania", "Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"),
+        "url": "https://keep.eu/programmes/387/2021-2027-Black-Sea-Basin/",
+        "hosts": ("keep.eu", "www.keep.eu"),
+        "anchors": ("2021 - 2027 Interreg VI-B NEXT Black Sea Basin", "Eligible geographical area", "Romania", "Sud-Est", "Programme validated the information"),
         "romania_scope": ("Braila", "Buzau", "Constanta", "Galati", "Tulcea", "Vrancea"),
-        "evidence_note": "European Commission official programme page; exact Romanian eligible counties; programme geography only",
+        "evidence_note": "keep.eu Interact registry; programme-validated fundamental information confirms Romania Sud-Est; county resolution retained from the previously verified European Commission geography receipt",
     },
 )
 
