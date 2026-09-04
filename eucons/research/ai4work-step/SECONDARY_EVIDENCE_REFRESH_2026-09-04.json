@@ -1,58 +1,74 @@
 {
-  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.14",
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.15",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "observed_at": "2026-09-04T07:34:49+03:00",
+  "observed_at": "2026-09-04T08:31:04+03:00",
   "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
   "synthetic": false,
   "test_twin": false,
   "prod_need_evidence_eligible": false,
-  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply or administrative labour-market context into AI4WORK need-prevalence claims.",
+  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, registered-unemployment context or generic vacancy counts into AI4WORK need-prevalence claims.",
   "registry_reconciliation": {
     "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
     "controlled_source_register_high_water_mark": "S72",
     "dashboard_reconciled_to_observed": "S01-S72",
-    "existing_branch_candidate_high_water_before_refresh": "S83",
-    "branch_candidate_high_water_after_refresh": "S84",
+    "existing_branch_candidate_high_water_before_refresh": "S84",
+    "branch_candidate_high_water_after_refresh": "S86",
     "candidate_rows_canonicalized": false,
-    "new_branch_candidate_ids": ["S84"],
+    "retained_prior_branch_candidate_ids": ["S73", "S74", "S75", "S76", "S77", "S78", "S79", "S80", "S81", "S82", "S83", "S84"],
+    "new_branch_candidate_ids": ["S85", "S86"],
     "duplicate_source_promoted": false
   },
   "new_branch_candidates": [
     {
-      "source_id": "S84",
-      "region": "Sud-Muntenia / Ialomita",
-      "publisher": "ANOFM / AJOFM Ialomita",
-      "title": "5,80% – rata somajului inregistrat in evidentele AJOFM Ialomita in luna iulie 2026",
-      "publication_date": "2026-09-01",
-      "reference_period": "2026-07",
-      "official_page_url": "https://www.anofm.ro/ialomita/580-rata-somajului-inregistrat-in-evidentele-ajofm-ialomita-in-luna-iulie-2026/",
-      "source_exact_page_readback_completed": true,
-      "downloadable_document_body_readback_completed": false,
+      "source_id": "S85",
+      "region": "Sud-Muntenia / Dambovita",
+      "publisher": "ANOFM / AJOFM Dambovita",
+      "title": "Locuri de munca – 03.09.2026",
+      "publication_date": "2026-09-03",
+      "official_page_url": "https://www.anofm.ro/dambovita/locuri-de-munca-03-09-2026/",
+      "official_search_surface_readback_completed": true,
+      "source_exact_page_body_readback_completed": false,
       "observed_facts": {
-        "page_title_exposes_registered_unemployment_rate_percent": 5.80,
-        "page_exposes_publication_date": "2026-09-01",
-        "page_links_downloadable_source_document": true,
-        "downloadable_document_numeric_details_promoted": false
+        "official_surface_exposes_title_and_publication_date": true,
+        "numeric_vacancy_detail_promoted": false
       },
-      "classification": "CURRENT_ADMINISTRATIVE_LABOUR_MARKET_CONTEXT_ZERO_H1_H5",
-      "claim_boundary": "The official AJOFM Ialomita page source-exactly exposes the July-2026 registered-unemployment rate in its title and publication date. Registered unemployment is administrative labour-market context, not a measurement of digital/AI competence, skill-gap prevalence, unmet employer demand or willingness to train. No value from the linked document body is inferred or promoted because the document body was not source-exactly read in this refresh. S84 contributes zero H1-H5 points.",
+      "classification": "CURRENT_VACANCY_SURFACE_CONTEXT_ZERO_H1_H5",
+      "claim_boundary": "The official AJOFM Dambovita surface exposes a current 03.09.2026 vacancy publication. The underlying body was not source-exactly read in this refresh, so no vacancy count, occupational structure or other numeric detail is extracted or inferred. A vacancy-list surface is labour-demand context only and does not measure AI/digital competence, skill-gap prevalence, unmet AI-specific employer demand or willingness to train. S85 contributes zero H1-H5 points.",
+      "canonicalization_status": "BRANCH_ONLY_NOT_CANONICALIZED"
+    },
+    {
+      "source_id": "S86",
+      "region": "Centru / Mures",
+      "publisher": "ANOFM / AJOFM Mures",
+      "title": "Locuri de munca vacante la nivel judetean si in reteaua EURES",
+      "publication_date": "2026-09-02",
+      "official_page_url": "https://www.anofm.ro/mures/locuri-de-munca-vacante-la-nivel-judetean-si-in-reteaua-eures-14/",
+      "source_exact_page_readback_completed": true,
+      "observed_facts": {
+        "employer_reported_vacancies_total": 650,
+        "vacancies_for_higher_education_total": 41,
+        "higher_education_engineering_and_production_vacancies": 13,
+        "publisher_states_data_are_from_economic_agents": true
+      },
+      "classification": "CURRENT_EMPLOYER_REPORTED_VACANCY_CONTEXT_ZERO_H1_H5",
+      "claim_boundary": "AJOFM Mures source-exactly reports 650 current vacancies supplied by economic agents, including 41 for higher-education profiles and 13 of those in engineering/production. These are current declared job openings, not a survey of AI/digital competence, skill-gap prevalence, AI-specific unmet demand or training willingness. The item is retained as labour-demand context only and contributes zero H1-H5 points.",
       "canonicalization_status": "BRANCH_ONLY_NOT_CANONICALIZED"
     }
   ],
   "cross_region_reverification": {
     "Sud-Vest Oltenia": {
       "status": "REVERIFIED_NO_NEW_NEED_EVIDENCE",
-      "detail": "The current AJOFM Olt July-2026 registered-unemployment item remains already represented in the controlled registry as S61 and S70, so no duplicate candidate is added. Current training/project surfaces remain supply/activity context only.",
+      "detail": "Fresh official AJOFM checks found the Olt July-2026 registered-unemployment item published 31.08.2026, but this item is already represented in the controlled registry as S61 and S70. It is not duplicated. Current training/project surfaces remain supply/activity context only.",
       "h1_h5_numeric_points_added": 0
     },
     "Sud-Muntenia": {
       "status": "REVERIFIED_NEW_BRANCH_CONTEXT_CANDIDATE",
-      "detail": "The official AJOFM Ialomita surface now source-exactly exposes the 01.09.2026 publication for July-2026 registered unemployment; it is retained as S84 branch-only administrative context with zero H1-H5. S82 Teleorman remains administrative context only.",
+      "detail": "AJOFM Dambovita exposes a fresh 03.09.2026 vacancy surface, retained as S85 branch-only context. No body-derived numeric detail is promoted because source-exact body readback was unavailable in this refresh. S84 Ialomita remains branch-only administrative context.",
       "h1_h5_numeric_points_added": 0
     },
     "Centru": {
-      "status": "REVERIFIED_NO_DUPLICATE_PROMOTION",
-      "detail": "The official AJOFM Harghita 28.08.2026 July-2026 registered-unemployment surface remains source-exact and is already controlled as S63. The Mures August-2026 bulletin remains S83 branch-only. No duplicate row is added.",
+      "status": "REVERIFIED_NEW_BRANCH_CONTEXT_CANDIDATE",
+      "detail": "AJOFM Mures source-exactly reports 650 employer-declared vacancies on 02.09.2026, including 41 higher-education vacancies and 13 in engineering/production. Retained as S86 branch-only labour-demand context; no AI/digital skill-gap inference is allowed. S83 remains the August bulletin candidate.",
       "h1_h5_numeric_points_added": 0
     }
   },
@@ -62,20 +78,21 @@
     "project_activity_as_need_evidence": false,
     "training_supply_as_need_prevalence": false,
     "administrative_context_as_need_prevalence": false,
+    "generic_vacancy_counts_as_ai_digital_need_prevalence": false,
     "representativeness_claim_allowed": false,
     "causal_claim_allowed": false,
-    "decision": "RETAIN_S84_BRANCH_ONLY_ZERO_WEIGHT_CONTEXT_NO_CANONICALIZATION"
+    "decision": "RETAIN_S85_S86_BRANCH_ONLY_ZERO_WEIGHT_CONTEXT_NO_CANONICALIZATION"
   },
   "call_requirements_refresh": {
-    "checked_at": "2026-09-04T07:34:49+03:00",
+    "checked_at": "2026-09-04T08:31:04+03:00",
     "gmail_query": "after:2026/09/04 -in:spam -in:trash -from:notifications@github.com (AI4WORK OR eucons OR Cloudflare OR cPanel OR Claus OR OMIPE OR MIPE OR PEO)",
     "matching_authority_or_provider_messages_observed": 0,
     "github_ci_notifications_excluded": true,
     "status": "CLOSED_UNCHANGED"
   },
   "primary_evidence_refresh": {
-    "checked_at": "2026-09-04T07:34:49+03:00",
-    "controlled_drive_query": "PROD_REAL_EVIDENCE AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 source_export_sha256",
+    "checked_at": "2026-09-04T08:31:04+03:00",
+    "controlled_drive_queries": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"],
     "search_result_class": "CONTROL_OR_PRE_FINAL_MATERIAL_ONLY",
     "eligible_immutable_combined_real_adult_employer_batch_found": false,
     "source_export_sha256_bound_real_batch_found": false,
@@ -94,8 +111,7 @@
     "account_specific_raw_access_ceiling_proven": false,
     "residual_provider_backup_ceiling_days": 92,
     "account_specific_backup_ceiling_proven": false,
-    "privacy_contact_inbound_independently_verified": false,
-    "public_surface_readback": "Fresh 04.09.2026 readback of eucons.ro exposes the commercial site and does not expose AI4WORK text on the homepage. This observation is not proof that a dedicated route is absent and provides no live provider/account PASS evidence."
+    "privacy_contact_inbound_independently_verified": false
   },
   "method_and_nf06_refresh": {
     "need_analysis_plan_status": "APPROVED_FOR_PROD_METHOD_ONLY",
