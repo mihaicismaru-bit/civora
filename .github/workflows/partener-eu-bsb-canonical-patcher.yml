@@ -1,0 +1,67 @@
+name: PARTENER.EU BSB Canonical Boundary Patcher
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/partener-eu-bsb-canonical-patcher.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch-canonical-boundary:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout writable PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 1
+
+      - name: Remove stale Interreg programme-count assumptions
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('.github/workflows/partener-eu-official-programme-intelligence.yml')
+          s=p.read_text(encoding='utf-8')
+          old="assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1' and interreg['programme_count'] == 8"
+          new="assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1'\n          assert interreg['programme_count'] == len(interreg['programmes']) == len(interreg['sources'])\n          interreg_by_id = {row['programme_id']: row for row in interreg['programmes']}\n          assert set(interreg_by_id) == {'RO_BG','RO_HU','RO_RS','RO_UA','RO_MD','DANUBE','INTERREG_EUROPE','HUSKROUA','BSB'}\n          bsb = interreg_by_id['BSB']\n          assert bsb['romania_scope'] == ['Braila','Buzau','Constanta','Galati','Tulcea','Vrancea']\n          assert bsb['authority_url'].startswith('https://projects.research-and-innovation.ec.europa.eu/')\n          assert bsb['call_fact_authorized'] is False and bsb['applicant_eligibility_authorized'] is False"
+          if old not in s:
+              raise SystemExit('expected stale Interreg programme-count boundary not found')
+          s=s.replace(old,new,1)
+          old_app="assert applicant['programme_count'] == 8"
+          if old_app not in s:
+              raise SystemExit('expected stale applicant programme-count boundary not found')
+          s=s.replace(old_app,"assert applicant['programme_count'] == interreg['programme_count']",1)
+          old_print="'interreg_programmes': interreg['programme_count'],"
+          if old_print not in s:
+              raise SystemExit('expected Interreg readback marker not found')
+          s=s.replace(old_print,old_print+"\n              'interreg_bsb_scope': bsb['romania_scope'],",1)
+          if "programme_count'] == 8" in s or "applicant['programme_count'] == 8" in s:
+              raise SystemExit('stale 8-programme assumption remains')
+          p.write_text(s,encoding='utf-8')
+          PY
+          python - <<'PY'
+          import yaml
+          from pathlib import Path
+          p=Path('.github/workflows/partener-eu-official-programme-intelligence.yml')
+          data=yaml.safe_load(p.read_text(encoding='utf-8'))
+          assert data['name']=='PARTENER.EU Official Programme Intelligence'
+          print({'yaml_parse':'PASS','canonical_boundary':'DYNAMIC_PROGRAMME_COUNT','bsb_readback':True})
+          PY
+
+      - name: Commit bounded canonical workflow repair
+        shell: bash
+        env:
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add .github/workflows/partener-eu-official-programme-intelligence.yml
+          git diff --cached --check
+          git commit -m 'PARTENER: remove stale Interreg programme-count boundary'
+          git push origin HEAD:"$BRANCH"
