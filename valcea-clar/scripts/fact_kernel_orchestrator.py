@@ -204,7 +204,10 @@ def build() -> dict:
     run("scm_program_structure_diagnostic.py")
     run("scm_program_fact_kernel.py")
 
-    # One final registry-wide editorial contract gate.
+    # Persist editorial products from the final canonical fact registry before
+    # validating the registry-wide contract. Without --apply, verified facts and
+    # manual queue promotions can remain stranded upstream of Live Newsroom.
+    run("editorial_writer.py", "--apply")
     run("editorial_writer.py", "--check")
 
     result = {
