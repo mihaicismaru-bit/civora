@@ -5,6 +5,10 @@ This adapter forward-ports only still-relevant official programming evidence fro
 older Interreg lane. PROGRAMMING/PROPOSAL/CONSULTATION observations are never call
 facts. Transport failures preserve evidence boundaries and may reference a validated
 same-identity previous healthy receipt as LKG evidence only.
+
+The CLI also stages the canonical HUSKROUA Call 2 exact-evidence sidecar. That sidecar
+is operationally co-located with the compact Interreg history artifact but remains a
+separate exact-call receipt/reconciliation and never becomes programming evidence.
 """
 from __future__ import annotations
 
@@ -12,6 +16,7 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping
@@ -24,6 +29,7 @@ RECONCILIATION_SCHEMA = "PARTENER_EU_INTERREG_FUTURE_PROGRAMMING_RECONCILIATION_
 PARSER_VERSION = "INTERREG_FUTURE_PROGRAMMING_WATCH_V1"
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_REGISTRY = ROOT / "partener-eu" / "ingest" / "interreg_future_programming_registry.json"
+HUSKROUA_CALL2_REGISTRY = ROOT / "partener-eu" / "ingest" / "interreg_huskroua_call2_exact_registry.json"
 ALLOWED_STATES = {"PROPOSAL", "CONSULTATION", "PROGRAMMING_PROCESS"}
 MATERIAL_FLAGS = (
     "material_fact_use",
@@ -476,6 +482,111 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None, *,
     return output
 
 
+def _select_huskroua_previous(history_root: Path, current: Mapping[str, Any]) -> tuple[dict[str, Any] | None, Path | None]:
+    """Select newest HEALTHY, same-identity, strictly older canonical HUSKROUA receipt."""
+    import interreg_huskroua_call2_exact as husk_exact
+    import interreg_huskroua_call2_reconcile as husk_reconcile
+
+    if not history_root.exists():
+        return None, None
+    current_identity = husk_reconcile.identity(current)
+    current_time = husk_reconcile.parse_time(str(current.get("fetched_at")))
+    candidates: list[tuple[datetime, Path, dict[str, Any]]] = []
+    for path in history_root.rglob("huskroua-call2-exact-evidence.json"):
+        try:
+            value = json.loads(path.read_text(encoding="utf-8"))
+            husk_exact.validate_evidence(value)
+            if value.get("source_health_state") != "HEALTHY":
+                continue
+            if husk_reconcile.identity(value) != current_identity:
+                continue
+            observed = husk_reconcile.parse_time(str(value.get("fetched_at")))
+            if observed >= current_time:
+                continue
+            candidates.append((observed, path, value))
+        except (OSError, ValueError, json.JSONDecodeError, TypeError):
+            continue
+    if not candidates:
+        return None, None
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    _, path, value = candidates[0]
+    return value, path
+
+
+def _stage_huskroua_call2_canonical_sidecar(*, run_id: str, future_output: Path) -> dict[str, Any]:
+    """Acquire/reconcile HUSKROUA Call 2 and stage independent compact history sidecars.
+
+    The existing compact Interreg history artifact is reused only as an immutable
+    transport container. HUSKROUA exact evidence remains in separate JSON files and is
+    never inserted into the future-programming snapshot or semantic fingerprint.
+    """
+    import interreg_huskroua_call2_exact as husk_exact
+    import interreg_huskroua_call2_reconcile as husk_reconcile
+
+    canonical_root = future_output.parent.parent
+    lane_root = canonical_root / "interreg-huskroua-call2-exact"
+    current_dir = lane_root / "current"
+    previous_dir = lane_root / "previous"
+    for path in (current_dir, previous_dir):
+        if path.exists():
+            shutil.rmtree(path)
+        path.mkdir(parents=True, exist_ok=True)
+
+    registry = husk_exact.load_registry(HUSKROUA_CALL2_REGISTRY)
+    current, raws = husk_exact.collect(
+        registry=registry,
+        run_id=f"{run_id}-huskroua-call2",
+    )
+    husk_exact.write_outputs(current, raws, current_dir)
+
+    history_root = future_output.parent / "history-scan" / "unpacked"
+    previous, previous_path = _select_huskroua_previous(history_root, current)
+    if previous is not None and previous_path is not None:
+        shutil.copy2(previous_path, previous_dir / "huskroua-call2-exact-evidence.json")
+
+    reconciliation = husk_reconcile.reconcile(current, previous)
+    reconciliation_path = current_dir / "huskroua-call2-reconciliation.json"
+    reconciliation_path.write_text(
+        json.dumps(reconciliation, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+
+    if current.get("official_call_identifier") != "2" or current.get("official_call_identifier_kind") != "OFFICIAL_CALL_NUMBER":
+        raise ValueError("canonical HUSKROUA sidecar lost exact Call 2 identity")
+    if current.get("source_health_state") == "HEALTHY" and current.get("candidate_state") != "CLOSED_CALL_CANDIDATE":
+        raise ValueError("canonical HUSKROUA sidecar healthy evidence lost closure candidate")
+    if current.get("source_health_state") != "HEALTHY" and current.get("candidate_state") != "UNKNOWN":
+        raise ValueError("canonical HUSKROUA sidecar degraded current retained candidate truth")
+    for row in (current, reconciliation):
+        for flag in MATERIAL_FLAGS:
+            if row.get(flag) is not False:
+                raise ValueError(f"canonical HUSKROUA sidecar crossed material boundary: {flag}")
+        if row.get("publication_effect") != "NONE":
+            raise ValueError("canonical HUSKROUA sidecar crossed publication boundary")
+    if reconciliation.get("previous_or_lkg_is_current_truth") is not False:
+        raise ValueError("canonical HUSKROUA sidecar promoted history/LKG to current truth")
+
+    history_publish = canonical_root / "history-publish"
+    history_publish.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(current_dir / "huskroua-call2-exact-evidence.json", history_publish / "huskroua-call2-exact-evidence.json")
+    shutil.copy2(reconciliation_path, history_publish / "huskroua-call2-reconciliation.json")
+
+    return {
+        "schema": "PARTENER_EU_INTERREG_HUSKROUA_CALL2_CANONICAL_SIDECAR_V1",
+        "official_call_identifier": current["official_call_identifier"],
+        "source_health_state": current["source_health_state"],
+        "candidate_state": current["candidate_state"],
+        "previous_same_identity_restored": previous is not None,
+        "previous_source_path": str(previous_path) if previous_path else None,
+        "reconciliation_state": reconciliation["reconciliation_state"],
+        "semantic_change_count": reconciliation["semantic_change_count"],
+        "material_admission_ready_for_downstream_review": reconciliation["material_admission_ready_for_downstream_review"],
+        "open_call_authorized": False,
+        "closed_call_authorized": False,
+        "publication_effect": "NONE",
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-id", required=True)
@@ -493,6 +604,8 @@ def main() -> None:
     args.output.write_text(json.dumps(current, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     args.reconciliation_output.parent.mkdir(parents=True, exist_ok=True)
     args.reconciliation_output.write_text(json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    sidecar = _stage_huskroua_call2_canonical_sidecar(run_id=args.run_id, future_output=args.output)
+    print(json.dumps(sidecar, sort_keys=True))
 
 
 if __name__ == "__main__":
