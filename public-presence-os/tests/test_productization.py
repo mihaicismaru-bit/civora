@@ -40,7 +40,7 @@ def test_registry_unique_ids():
     r=load_json(ROOT/"config"/"module_registry.json")
     ids=[m["id"] for m in r["modules"]]
     assert len(ids)==len(set(ids))
-    assert r["checkpoint"]=="CP30"
+    assert r["checkpoint"]=="CP31"
 
 def test_no_paid_or_live_runtime_dependencies():
     txt="\n".join(p.read_text(encoding="utf-8") for p in (ROOT/"src").rglob("*.py"))
