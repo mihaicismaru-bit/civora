@@ -74,14 +74,20 @@ def main() -> int:
     )
     assert receipt["schema"] == "PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2"
     assert receipt["source_health"] == "HEALTHY" and receipt["coverage_complete"] is True
-    assert receipt["healthy_surface_count"] == 7 and receipt["degraded_surface_count"] == 0
+    assert receipt["healthy_surface_count"] == 8 and receipt["degraded_surface_count"] == 0
     assert receipt["fallback_configured_count"] == 3 and receipt["fallback_attempted_count"] == 0
     assert receipt["fallback_healthy_count"] == 0 and receipt["fallback_degraded_count"] == 0
-    assert len(raw) == 7 and len(receipt["surfaces"]) == 7
+    assert len(raw) == 8 and len(receipt["surfaces"]) == 8
     assert receipt["discovered_call_facts"] == []
     assert receipt["fallback_does_not_restore_call_surface_coverage"] is True
     assert next(x for x in receipt["surfaces"] if x["programme_id"] == "RO_RS")["observation_state"] == "PLANNED"
     assert next(x for x in receipt["surfaces"] if x["programme_id"] == "INTERREG_EUROPE")["programme_filter_required"] is True
+    husk = next(x for x in receipt["surfaces"] if x["programme_id"] == "HUSKROUA")
+    assert husk["authority_url"] == "https://next.huskroua-cbc.eu/calls/"
+    assert husk["surface_role"] == "PROGRAMME_CALL_INDEX"
+    assert husk["observation_state"] == "CALL_DISCOVERY_ONLY"
+    assert husk["fallback_provenance"]["configured"] is False
+    assert husk["call_fact_authorized"] is False and husk["status_fact_authorized"] is False
     validate_receipt(receipt)
 
     degraded, raw2 = collect(
@@ -90,11 +96,11 @@ def main() -> int:
         fetcher=degraded_fetch,
     )
     assert degraded["source_health"] == "DEGRADED" and degraded["coverage_complete"] is False
-    assert degraded["healthy_surface_count"] == 6 and degraded["degraded_surface_count"] == 1
+    assert degraded["healthy_surface_count"] == 7 and degraded["degraded_surface_count"] == 1
     assert degraded["fallback_attempted_count"] == 1 and degraded["fallback_healthy_count"] == 1
     assert degraded["degraded_direct_with_healthy_fallback_count"] == 1
     assert degraded["degraded_direct_without_healthy_fallback_count"] == 0
-    assert len(raw2) == 7
+    assert len(raw2) == 8
     ua = next(x for x in degraded["surfaces"] if x["programme_id"] == "RO_UA")
     assert ua["transport_health"] == "DEGRADED" and ua["source_sha256"] is None
     assert ua["failure_class"] == "TLS_CERTIFICATE_VERIFY_FAILED"
