@@ -4,138 +4,153 @@
   "slot": "morning",
   "title": "VÂLCEA CLAR — Ediția de dimineață",
   "edition_date": "2026-09-05",
-  "updated_local": "2026-09-05T10:01:50+03:00",
+  "updated_local": "2026-09-05T12:17:23+03:00",
   "generator": "deterministic_zero_llm_v2+manual_journalism_v1",
   "status": "auto_approved",
   "publication_intent": "publish",
-  "editorial_fact_count": 68,
-  "editorial_writer_composed_count": 53,
+  "editorial_fact_count": 69,
+  "editorial_writer_composed_count": 54,
   "auto_fact_registry_count": 4,
   "auto_facts_included": 6,
   "items": [
     {
-      "id": "isu-valcea-interventii-zilnice",
-      "section": "URGENȚE",
-      "priority": 94,
-      "headline": "ISU Vâlcea: 30 de intervenții pe 4 septembrie 2026, dintre care 23 de prim ajutor",
-      "dek": "ISU Vâlcea raportează pentru 4 septembrie 2026 un total de 30 de intervenții: 3 incendii, 23 de prim ajutor și 4 alte intervenții.",
+      "id": "babeni-izvorul-dorului-program-20260903",
+      "section": "EVENIMENTE",
+      "priority": 92,
+      "headline": "Băbeni, în weekend: concerte sâmbătă și parada portului popular duminică la «La Izvorul Dorului»",
+      "dek": "Festivalul continuă pe 5 septembrie, între 17:00 și 23:00, cu artiști locali și invitați. Duminică, programul publicat începe la 10:30 cu deschiderea festivalului și Parada Portului Popular.",
       "paragraphs": [
-        "ISU Vâlcea raportează 30 de intervenții pentru data de 4 septembrie 2026.",
-        "Bilanțul oficial indică 3 incendii, 23 intervenții de prim ajutor, 0 descarcerări, 0 salvări și 4 alte intervenții."
+        "Agenda Culturală Vâlceană indică pentru Festivalul «La Izvorul Dorului» din Băbeni un program desfășurat între 3 și 6 septembrie 2026.",
+        "Pentru sâmbătă, 5 septembrie, programul publicat se desfășoară între orele 17:00 și 23:00 și include artiști locali, invitați și DJ.",
+        "Pentru duminică, 6 septembrie, programul publicat începe la 10:30 cu deschiderea oficială, Parada Portului Popular și un microrecital al Fanfarei Județene «Constantin Brâncoveanu».",
+        "Site-ul oficial al Primăriei Orașului Băbeni listează Festivalul Folcloric «La izvorul dorului» între evenimentele culturale ale orașului."
       ],
-      "confidence": 98,
+      "confidence": 96,
       "material_fact_gate": "PASS",
       "sources": [
         {
-          "name": "ISU Vâlcea — pagina oficială",
-          "url": "https://isuvl.igsu.ro/",
+          "name": "Primăria Orașului Băbeni — site oficial, evenimente culturale",
+          "url": "https://www.orasbabeni.ro/",
           "tier": "T1"
+        },
+        {
+          "name": "Agenda Culturală Vâlceană — programul 3–6 septembrie",
+          "url": "https://www.opiniavl.ro/2026/08/31/agenda-culturala-valceana/",
+          "tier": "T3"
+        }
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.opiniavl.ro/2026/08/31/agenda-culturala-valceana/"
+        ],
+        "dek_source_urls": [
+          "https://www.opiniavl.ro/2026/08/31/agenda-culturala-valceana/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "babeni-festival-20260905-1",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "7753fa302fd0c1a2106dc0e66e22f6803f37a55a80bb008c704605085b0afacb",
+            "source_urls": [
+              "https://www.opiniavl.ro/2026/08/31/agenda-culturala-valceana/"
+            ]
+          },
+          {
+            "claim_id": "babeni-festival-20260905-2",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text_sha256": "1d5a22ab8e339c13f6b175226b1b6f8498a65d1d2f32b2ebdbab03c87fda98e8",
+            "source_urls": [
+              "https://www.opiniavl.ro/2026/08/31/agenda-culturala-valceana/"
+            ]
+          },
+          {
+            "claim_id": "babeni-festival-20260905-3",
+            "role": "who_what_when_where",
+            "kind": "attributed_statement",
+            "text_sha256": "65110106a198785c9a60357de38cb94b7916c5f75a96d5db9bc58015b6a7ac93",
+            "source_urls": [
+              "https://www.opiniavl.ro/2026/08/31/agenda-culturala-valceana/"
+            ]
+          },
+          {
+            "claim_id": "babeni-festival-20260905-4",
+            "role": "context",
+            "kind": "fact",
+            "text_sha256": "a55ef573790682ae9f8f9a39cb72f72da77a444d692159c2612195314a9afef8",
+            "source_urls": [
+              "https://www.orasbabeni.ro/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "d9c6f7ee709baebe5466d3c746eea86714b46d56b25c7b2ef8e6ea6705bff31e"
+      }
+    },
+    {
+      "id": "scm-program-0cb45a2feafdd06bea9b",
+      "section": "SPORT",
+      "priority": 88,
+      "headline": "Cetatea Suceava – SCM Râmnicu Vâlcea: meci programat pe 12 septembrie 2026, de la 11:00",
+      "dek": "Programul oficial al SCM Râmnicu Vâlcea listează partida la Areni Stadium. Informația este verificată direct în calendarul clubului.",
+      "paragraphs": [
+        "În programul oficial al SCM Râmnicu Vâlcea, partida Cetatea Suceava – SCM Râmnicu Vâlcea este programată pe 12 septembrie 2026, la ora 11:00.",
+        "Programul oficial indică pentru această partidă locația Areni Stadium."
+      ],
+      "confidence": 99,
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "SCM Râmnicu Vâlcea — program oficial",
+          "url": "https://scmramnicuvalcea.ro/program/",
+          "tier": "T1B"
         }
       ],
       "auto_generated": true,
-      "auto_scope": "isu_valcea_homepage_daily_summary",
+      "auto_scope": "scm_official_program_fact_kernel",
       "brief_kind": null,
       "editorial_product": {
         "writer_id": "manual_journalism_v1",
         "writer_mode": "FACT_KERNEL_COMPOSED",
-        "format": "straight_news",
+        "format": "service_news",
         "claim_trace_complete": true,
         "source_level_trace": true,
         "headline_source_urls": [
-          "https://isuvl.igsu.ro/"
+          "https://scmramnicuvalcea.ro/program/"
         ],
         "dek_source_urls": [
-          "https://isuvl.igsu.ro/"
+          "https://scmramnicuvalcea.ro/program/"
         ],
         "claim_trace": [
           {
-            "claim_id": "primary-1",
-            "role": "material_change",
-            "kind": "attributed_statement",
-            "text_sha256": "2996a30012b36a431af0fa05aecb0613f94f7c03dd0b242cae7cb26c4af8cd41",
+            "claim_id": "fixture",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text_sha256": "f5912fb582fb9c5d5b3e517cd9daed1d2309e341d4f6cc20bb25754ad997a163",
             "source_urls": [
-              "https://isuvl.igsu.ro/"
+              "https://scmramnicuvalcea.ro/program/"
             ]
           },
           {
-            "claim_id": "primary-2",
-            "role": "context",
-            "kind": "attributed_statement",
-            "text_sha256": "93837a2fce58e0c17c0c7ce263699cfebc9769a11030283ba51eda08f572cef3",
+            "claim_id": "venue",
+            "role": "reader_service",
+            "kind": "reader_service",
+            "text_sha256": "d37d81e96b5fe8bdf5f6c3d8ec55bc7eed8ec91879d875528a5fa9554124ddee",
             "source_urls": [
-              "https://isuvl.igsu.ro/"
+              "https://scmramnicuvalcea.ro/program/"
             ]
           }
         ],
         "auto_publish_eligible_by_format": true,
         "additional_gate": null,
-        "product_fingerprint_sha256": "3c1d0bade196a5148a39e7337e723d9cc00fe82164532d01bd2c82a31f9c439e"
-      }
-    },
-    {
-      "id": "ramnicu-uap-atelier-35-artex-20260904",
-      "section": "CULTURĂ",
-      "priority": 82,
-      "headline": "Două evenimente culturale la Râmnicu Vâlcea pe 4 septembrie: «Atelier 35» la Cozia, apoi expoziție și lansare la Artex",
-      "dek": "Filiala Râmnicu Vâlcea a UAP a programat pentru 4 septembrie o expoziție de grup la Galeriile Cozia 1 și 2 și, de la ora 18:00, un dublu eveniment la Galeria Artex: retrospectiva Mariei Constantin și lansarea unui roman al Ioanei Drăgan.",
-      "paragraphs": [
-        "UAP anunță pentru 4 septembrie 2026, ora 17:30, la Pasajul Cultural «Dinu Săraru» — Galeriile Cozia 1 și 2, expoziția de grup «Atelier 35 (+/-)», dedicată tinerilor artiști aspiranți sau membri ai Filialei Râmnicu Vâlcea.",
-        "UAP anunță pentru ora 18:00, la Galeria Artex, vernisajul retrospectivei de acuarelă și desen «Nu sunt omul mileniului trei…» a Mariei Constantin și lansarea romanului «În căutarea nefericirii» al Ioanei Drăgan.",
-        "UAP îi indică pe Luiza Barcan ca curator și prezentator și pe Gheorghe Dican drept coordonator al proiectului; organizarea este atribuită Filialei Râmnicu Vâlcea a UAP, UAP România și Primăriei Municipiului Râmnicu Vâlcea."
-      ],
-      "confidence": 100,
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "Uniunea Artiștilor Plastici din România — Evenimente artistice @ Râmnicu Vâlcea",
-          "url": "https://uap.ro/evenimente-artistice-ramnicu-valcea/",
-          "tier": "T1"
-        }
-      ],
-      "editorial_product": {
-        "writer_id": "manual_journalism_v1",
-        "writer_mode": "FACT_KERNEL_COMPOSED",
-        "format": "straight_news",
-        "claim_trace_complete": true,
-        "source_level_trace": true,
-        "headline_source_urls": [
-          "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
-        ],
-        "dek_source_urls": [
-          "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
-        ],
-        "claim_trace": [
-          {
-            "claim_id": "uap-rmvl-20260904-1",
-            "role": "material_change",
-            "kind": "attributed_statement",
-            "text_sha256": "3e9cfd5c7f655d26d3b1398254cce703ccc102c6f7e3306c6e9e6b4719331405",
-            "source_urls": [
-              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
-            ]
-          },
-          {
-            "claim_id": "uap-rmvl-20260904-2",
-            "role": "material_change",
-            "kind": "attributed_statement",
-            "text_sha256": "303dbffbe7321ea3b00a563cd8bb92503aeb3919e6cb51106b06fc61b6f24a34",
-            "source_urls": [
-              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
-            ]
-          },
-          {
-            "claim_id": "uap-rmvl-20260904-3",
-            "role": "context",
-            "kind": "attributed_statement",
-            "text_sha256": "8148dfcc77f5eee3daaff169ec22467969fa71f0653821bc94810dd276dd573f",
-            "source_urls": [
-              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
-            ]
-          }
-        ],
-        "auto_publish_eligible_by_format": true,
-        "additional_gate": null,
-        "product_fingerprint_sha256": "dbf4c1b1810cb18af6e0a53a86c6cae344174886c793c8515809c3539a7b745d"
+        "product_fingerprint_sha256": "918c90568670487ee70d7042cab397bbdf8c1941759300c63c298320a0d810df"
       }
     },
     {
@@ -525,6 +540,65 @@
       }
     },
     {
+      "id": "isu-valcea-interventii-zilnice",
+      "section": "URGENȚE",
+      "priority": 94,
+      "headline": "ISU Vâlcea: 30 de intervenții pe 4 septembrie 2026, dintre care 23 de prim ajutor",
+      "dek": "ISU Vâlcea raportează pentru 4 septembrie 2026 un total de 30 de intervenții: 3 incendii, 23 de prim ajutor și 4 alte intervenții.",
+      "paragraphs": [
+        "ISU Vâlcea raportează 30 de intervenții pentru data de 4 septembrie 2026.",
+        "Bilanțul oficial indică 3 incendii, 23 intervenții de prim ajutor, 0 descarcerări, 0 salvări și 4 alte intervenții."
+      ],
+      "confidence": 98,
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "ISU Vâlcea — pagina oficială",
+          "url": "https://isuvl.igsu.ro/",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "isu_valcea_homepage_daily_summary",
+      "brief_kind": null,
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "straight_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://isuvl.igsu.ro/"
+        ],
+        "dek_source_urls": [
+          "https://isuvl.igsu.ro/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "primary-1",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "2996a30012b36a431af0fa05aecb0613f94f7c03dd0b242cae7cb26c4af8cd41",
+            "source_urls": [
+              "https://isuvl.igsu.ro/"
+            ]
+          },
+          {
+            "claim_id": "primary-2",
+            "role": "context",
+            "kind": "attributed_statement",
+            "text_sha256": "93837a2fce58e0c17c0c7ce263699cfebc9769a11030283ba51eda08f572cef3",
+            "source_urls": [
+              "https://isuvl.igsu.ro/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "3c1d0bade196a5148a39e7337e723d9cc00fe82164532d01bd2c82a31f9c439e"
+      }
+    },
+    {
       "id": "valcea-atv-ionesti-pausesti-maglasi-fara-permis-20260902",
       "section": "SIGURANȚĂ",
       "priority": 94,
@@ -726,6 +800,72 @@
       "brief_kind": "document_decoder"
     },
     {
+      "id": "ramnicu-uap-atelier-35-artex-20260904",
+      "section": "CULTURĂ",
+      "priority": 82,
+      "headline": "Două evenimente culturale la Râmnicu Vâlcea pe 4 septembrie: «Atelier 35» la Cozia, apoi expoziție și lansare la Artex",
+      "dek": "Filiala Râmnicu Vâlcea a UAP a programat pentru 4 septembrie o expoziție de grup la Galeriile Cozia 1 și 2 și, de la ora 18:00, un dublu eveniment la Galeria Artex: retrospectiva Mariei Constantin și lansarea unui roman al Ioanei Drăgan.",
+      "paragraphs": [
+        "UAP anunță pentru 4 septembrie 2026, ora 17:30, la Pasajul Cultural «Dinu Săraru» — Galeriile Cozia 1 și 2, expoziția de grup «Atelier 35 (+/-)», dedicată tinerilor artiști aspiranți sau membri ai Filialei Râmnicu Vâlcea.",
+        "UAP anunță pentru ora 18:00, la Galeria Artex, vernisajul retrospectivei de acuarelă și desen «Nu sunt omul mileniului trei…» a Mariei Constantin și lansarea romanului «În căutarea nefericirii» al Ioanei Drăgan.",
+        "UAP îi indică pe Luiza Barcan ca curator și prezentator și pe Gheorghe Dican drept coordonator al proiectului; organizarea este atribuită Filialei Râmnicu Vâlcea a UAP, UAP România și Primăriei Municipiului Râmnicu Vâlcea."
+      ],
+      "confidence": 100,
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Uniunea Artiștilor Plastici din România — Evenimente artistice @ Râmnicu Vâlcea",
+          "url": "https://uap.ro/evenimente-artistice-ramnicu-valcea/",
+          "tier": "T1"
+        }
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "straight_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+        ],
+        "dek_source_urls": [
+          "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "uap-rmvl-20260904-1",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "3e9cfd5c7f655d26d3b1398254cce703ccc102c6f7e3306c6e9e6b4719331405",
+            "source_urls": [
+              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+            ]
+          },
+          {
+            "claim_id": "uap-rmvl-20260904-2",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "303dbffbe7321ea3b00a563cd8bb92503aeb3919e6cb51106b06fc61b6f24a34",
+            "source_urls": [
+              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+            ]
+          },
+          {
+            "claim_id": "uap-rmvl-20260904-3",
+            "role": "context",
+            "kind": "attributed_statement",
+            "text_sha256": "8148dfcc77f5eee3daaff169ec22467969fa71f0653821bc94810dd276dd573f",
+            "source_urls": [
+              "https://uap.ro/evenimente-artistice-ramnicu-valcea/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "dbf4c1b1810cb18af6e0a53a86c6cae344174886c793c8515809c3539a7b745d"
+      }
+    },
+    {
       "id": "auto-raliul-valcii-official-news-f6e28bbb1533",
       "section": "SPORT",
       "priority": 96,
@@ -832,7 +972,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 313/2026-08-31",
@@ -959,7 +1099,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 314/2026-08-31",
@@ -1074,7 +1214,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 316/2026-08-31",
@@ -1179,7 +1319,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 317/2026-08-31",
@@ -1286,7 +1426,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 318/2026-08-31",
@@ -1413,7 +1553,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 319/2026-08-31",
@@ -1540,7 +1680,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 320/2026-08-31",
@@ -1667,7 +1807,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 321/2026-08-31",
@@ -1784,7 +1924,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 322/2026-08-31",
@@ -1912,7 +2052,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 323/2026-08-31",
@@ -2037,7 +2177,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 324/2026-08-31",
@@ -2143,7 +2283,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 325/2026-08-31",
@@ -2259,7 +2399,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 326/2026-08-31",
@@ -2375,7 +2515,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 327/2026-08-31",
@@ -2492,7 +2632,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 328/2026-08-31",
@@ -2619,7 +2759,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 329/2026-08-31",
@@ -2745,7 +2885,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 330/2026-08-31",
@@ -2862,7 +3002,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 331/2026-08-31",
@@ -2989,7 +3129,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -3113,7 +3253,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 333/2026-08-31",
@@ -3209,7 +3349,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 334/2026-08-31",
@@ -3324,7 +3464,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 335/2026-08-31",
@@ -3429,7 +3569,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 336/2026-08-31",
@@ -3536,7 +3676,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 337/2026-08-31",
@@ -3661,7 +3801,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 339/2026-08-31",
@@ -3768,7 +3908,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 340/2026-08-31",
@@ -3896,7 +4036,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 341/2026-08-31",
@@ -4024,7 +4164,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 342/2026-08-31",
@@ -4149,7 +4289,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "5e4b303b9bdca49f7e4a4d520bae90ffd3e9dd16e80abf5f4c12eda444bae4c3"
+          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -4251,65 +4391,6 @@
         "auto_publish_eligible_by_format": true,
         "additional_gate": null,
         "product_fingerprint_sha256": "a1536648be2aea7b38a4d958e67c8125e22ef62dd0a1e7f0156c1139221454ce"
-      }
-    },
-    {
-      "id": "scm-program-5aabeba76e53785685fb",
-      "section": "SPORT",
-      "priority": 88,
-      "headline": "SCM Râmnicu Vâlcea – CSM Reşiţa: meci programat pe 5 septembrie 2026, de la 11:00",
-      "dek": "Programul oficial al SCM Râmnicu Vâlcea listează partida la Stadionul Municipal. Informația este verificată direct în calendarul clubului.",
-      "paragraphs": [
-        "În programul oficial al SCM Râmnicu Vâlcea, partida SCM Râmnicu Vâlcea – CSM Reşiţa este programată pe 5 septembrie 2026, la ora 11:00.",
-        "Programul oficial indică pentru această partidă locația Stadionul Municipal."
-      ],
-      "confidence": 99,
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "SCM Râmnicu Vâlcea — program oficial",
-          "url": "https://scmramnicuvalcea.ro/program/",
-          "tier": "T1B"
-        }
-      ],
-      "auto_generated": true,
-      "auto_scope": "scm_official_program_fact_kernel",
-      "brief_kind": null,
-      "editorial_product": {
-        "writer_id": "manual_journalism_v1",
-        "writer_mode": "FACT_KERNEL_COMPOSED",
-        "format": "service_news",
-        "claim_trace_complete": true,
-        "source_level_trace": true,
-        "headline_source_urls": [
-          "https://scmramnicuvalcea.ro/program/"
-        ],
-        "dek_source_urls": [
-          "https://scmramnicuvalcea.ro/program/"
-        ],
-        "claim_trace": [
-          {
-            "claim_id": "fixture",
-            "role": "who_what_when_where",
-            "kind": "fact",
-            "text_sha256": "c7cf74c67265a4000d8ef3a4a5bd39c0461601007f9d18824f326c747d796df2",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/program/"
-            ]
-          },
-          {
-            "claim_id": "venue",
-            "role": "reader_service",
-            "kind": "reader_service",
-            "text_sha256": "d92c02a72410fcb94e55273d9215343312b181e36410760d6a5ce6cd3447b8e4",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/program/"
-            ]
-          }
-        ],
-        "auto_publish_eligible_by_format": true,
-        "additional_gate": null,
-        "product_fingerprint_sha256": "1c54c8a17e5b671c41fae3be02b9d6282d347e7bef77d733dc821072a4cc5bad"
       }
     },
     {
