@@ -4,15 +4,81 @@
   "slot": "evening",
   "title": "VÂLCEA CLAR — Ediția de seară",
   "edition_date": "2026-09-05",
-  "updated_local": "2026-09-05T16:17:54+03:00",
+  "updated_local": "2026-09-05T16:45:00+03:00",
   "generator": "deterministic_zero_llm_v2+manual_journalism_v1",
   "status": "auto_approved",
   "publication_intent": "publish",
-  "editorial_fact_count": 71,
-  "editorial_writer_composed_count": 56,
+  "editorial_fact_count": 72,
+  "editorial_writer_composed_count": 57,
   "auto_fact_registry_count": 4,
   "auto_facts_included": 6,
   "items": [
+    {
+      "id": "valcea-cod-galben-canicula-vant-5-6-septembrie-2026",
+      "section": "UTIL",
+      "priority": 94,
+      "headline": "Vâlcea: Cod galben de caniculă până la 21:00; de la 21:00, vânt de 70–90 km/h la munte",
+      "dek": "ANM menține sâmbătă alerta de căldură pentru Vâlcea, iar de la ora 21:00 intră în vigoare o atenționare de vânt pentru zona montană.",
+      "paragraphs": [
+        "Vâlcea este vizat de Cod galben pentru temperaturi deosebit de ridicate și local caniculă până sâmbătă, 5 septembrie, ora 21:00; maximele în regiunile afectate sunt de 30–36°C, cu cele mai mari valori în Banat și Oltenia.",
+        "În zona de munte din Vâlcea, Codul galben de vânt este valabil din 5 septembrie, ora 21:00, până în 6 septembrie, ora 06:00, cu viteze de 70–90 km/h.",
+        "Duminică, 6 septembrie, între orele 09:00 și 21:00, zona montană înaltă din Vâlcea este sub Cod galben, cu rafale de peste 80–90 km/h."
+      ],
+      "confidence": 99,
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Administrația Națională de Meteorologie — Avertizări meteorologice, 05.09.2026",
+          "url": "https://www.meteoromania.ro/avertizari/",
+          "tier": "T1"
+        }
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "straight_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.meteoromania.ro/avertizari/"
+        ],
+        "dek_source_urls": [
+          "https://www.meteoromania.ro/avertizari/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "anm-valcea-20260905-heat",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "c4126fd461aa028eeced1fc6b2595e37d787c6ad925481520a53dd7c7c7f0551",
+            "source_urls": [
+              "https://www.meteoromania.ro/avertizari/"
+            ]
+          },
+          {
+            "claim_id": "anm-valcea-20260905-wind",
+            "role": "who_what_when_where",
+            "kind": "attributed_statement",
+            "text_sha256": "70c677ded91e7fd55f5bcba6942266be74545f280b288e20d5af75ed8eb2d409",
+            "source_urls": [
+              "https://www.meteoromania.ro/avertizari/"
+            ]
+          },
+          {
+            "claim_id": "anm-valcea-20260906-wind",
+            "role": "detail",
+            "kind": "attributed_statement",
+            "text_sha256": "862714aeb0cfe53bc16e0ece01df1ed98421071aa5f44e14f8b181838e9c4c95",
+            "source_urls": [
+              "https://www.meteoromania.ro/avertizari/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "17cf515d5443a5f305397a9130079dd89bc45236f0bb8f0d719506250d0a7d3e"
+      }
+    },
     {
       "id": "babeni-izvorul-dorului-program-20260903",
       "section": "EVENIMENTE",
@@ -638,92 +704,6 @@
       }
     },
     {
-      "id": "auto-scm-rm-valcea-b30c85d12af3",
-      "section": "SPORT",
-      "priority": 95,
-      "headline": "SCM Râmnicu Vâlcea caută prima victorie acasă, sâmbătă, cu CSM Reșița",
-      "dek": "Meciul se joacă pe 5 septembrie, de la ora 11:00, pe Stadionul Municipal. Vâlcenii vin după succesul cu Dumbrăvița și ocupă locul 9; Reșița este pe locul 4.",
-      "paragraphs": [
-        "SCM Râmnicu Vâlcea primește CSM Reșița sâmbătă, 5 septembrie 2026, de la ora 11:00, pe Stadionul Municipal. Pentru formația vâlceană, miza este prima victorie a sezonului în fața propriilor suporteri.",
-        "Înaintea meciului, Teodor Ciobanu, unul dintre foștii jucători importanți ai fotbalului vâlcean, va fi invitat pe teren, potrivit anunțului clubului.",
-        "Echipa vine după victoria cu 1-0 obținută la Dumbrăvița, unde Alexandru Sălcianu a marcat cu capul după o fază fixă. După cinci etape, SCM are 8 puncte, golaveraj 6-5 și ocupă locul 9.",
-        "CSM Reșița se află pe locul 4, cu 12 puncte și golaveraj 9-6. Formația bănățeană a câștigat patru dintre primele cinci partide și a învins CSA Steaua cu 2-1 în etapa precedentă.",
-        "Atacantul Dragoș Huiban a descris partida drept dificilă, dar a spus că echipa vine după două rezultate pozitive și are încredere că poate obține victoria pe teren propriu."
-      ],
-      "confidence": 98,
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "SCM Râmnicu Vâlcea — avancronica meciului cu CSM Reșița",
-          "url": "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/",
-          "tier": "T1B"
-        }
-      ],
-      "editorial_product": {
-        "writer_id": "manual_journalism_v1",
-        "writer_mode": "FACT_KERNEL_COMPOSED",
-        "format": "straight_news",
-        "claim_trace_complete": true,
-        "source_level_trace": true,
-        "headline_source_urls": [
-          "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
-        ],
-        "dek_source_urls": [
-          "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
-        ],
-        "claim_trace": [
-          {
-            "claim_id": "fixture",
-            "role": "material_change",
-            "kind": "fact",
-            "text_sha256": "87b579685d685c40c779a736f335b91a00fb5065033c962a52fc428b3e9fb29f",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
-            ]
-          },
-          {
-            "claim_id": "ciobanu",
-            "role": "who_what_when_where",
-            "kind": "reader_service",
-            "text_sha256": "f88fa185a5523aa1c49ac7595cfe801eb4946d3da9c29e3a522910e6929c97e0",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
-            ]
-          },
-          {
-            "claim_id": "valcea-form",
-            "role": "context",
-            "kind": "documented_context",
-            "text_sha256": "33b79b69d574dfa3d1c4fef579b8a83b50a716312f07a4c8f2e3ac53c8899bce",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
-            ]
-          },
-          {
-            "claim_id": "resita-form",
-            "role": "context",
-            "kind": "documented_context",
-            "text_sha256": "78b03e9644db5ccd39fab7a56df58e8bb6ea58d7d856cf13064979608a2bcff2",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
-            ]
-          },
-          {
-            "claim_id": "huiban",
-            "role": "consequence",
-            "kind": "attributed_statement",
-            "text_sha256": "bba18c9e9ef2d2a3970171b4185c1b9d92c784bc11859e4d7b9deb32f5c3e054",
-            "source_urls": [
-              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
-            ]
-          }
-        ],
-        "auto_publish_eligible_by_format": true,
-        "additional_gate": null,
-        "product_fingerprint_sha256": "c57c35e132473e6d0fb3a97f99be804a56dc3003d04d984978b037f5a56712b2"
-      }
-    },
-    {
       "id": "isu-valcea-interventii-zilnice",
       "section": "URGENȚE",
       "priority": 94,
@@ -1136,6 +1116,92 @@
       }
     },
     {
+      "id": "auto-scm-rm-valcea-b30c85d12af3",
+      "section": "SPORT",
+      "priority": 95,
+      "headline": "SCM Râmnicu Vâlcea caută prima victorie acasă, sâmbătă, cu CSM Reșița",
+      "dek": "Meciul se joacă pe 5 septembrie, de la ora 11:00, pe Stadionul Municipal. Vâlcenii vin după succesul cu Dumbrăvița și ocupă locul 9; Reșița este pe locul 4.",
+      "paragraphs": [
+        "SCM Râmnicu Vâlcea primește CSM Reșița sâmbătă, 5 septembrie 2026, de la ora 11:00, pe Stadionul Municipal. Pentru formația vâlceană, miza este prima victorie a sezonului în fața propriilor suporteri.",
+        "Înaintea meciului, Teodor Ciobanu, unul dintre foștii jucători importanți ai fotbalului vâlcean, va fi invitat pe teren, potrivit anunțului clubului.",
+        "Echipa vine după victoria cu 1-0 obținută la Dumbrăvița, unde Alexandru Sălcianu a marcat cu capul după o fază fixă. După cinci etape, SCM are 8 puncte, golaveraj 6-5 și ocupă locul 9.",
+        "CSM Reșița se află pe locul 4, cu 12 puncte și golaveraj 9-6. Formația bănățeană a câștigat patru dintre primele cinci partide și a învins CSA Steaua cu 2-1 în etapa precedentă.",
+        "Atacantul Dragoș Huiban a descris partida drept dificilă, dar a spus că echipa vine după două rezultate pozitive și are încredere că poate obține victoria pe teren propriu."
+      ],
+      "confidence": 98,
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "SCM Râmnicu Vâlcea — avancronica meciului cu CSM Reșița",
+          "url": "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/",
+          "tier": "T1B"
+        }
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "straight_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+        ],
+        "dek_source_urls": [
+          "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "fixture",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "87b579685d685c40c779a736f335b91a00fb5065033c962a52fc428b3e9fb29f",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "ciobanu",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "f88fa185a5523aa1c49ac7595cfe801eb4946d3da9c29e3a522910e6929c97e0",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "valcea-form",
+            "role": "context",
+            "kind": "documented_context",
+            "text_sha256": "33b79b69d574dfa3d1c4fef579b8a83b50a716312f07a4c8f2e3ac53c8899bce",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "resita-form",
+            "role": "context",
+            "kind": "documented_context",
+            "text_sha256": "78b03e9644db5ccd39fab7a56df58e8bb6ea58d7d856cf13064979608a2bcff2",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          },
+          {
+            "claim_id": "huiban",
+            "role": "consequence",
+            "kind": "attributed_statement",
+            "text_sha256": "bba18c9e9ef2d2a3970171b4185c1b9d92c784bc11859e4d7b9deb32f5c3e054",
+            "source_urls": [
+              "https://scmramnicuvalcea.ro/putem-aduce-prima-victorie-in-fata-propriilor-suporteri-scm-ramnicu-valcea-inaintea-meciului-cu-resita/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "c57c35e132473e6d0fb3a97f99be804a56dc3003d04d984978b037f5a56712b2"
+      }
+    },
+    {
       "id": "rm-valcea-hcl-313-20260831",
       "section": "ADMINISTRAȚIE",
       "priority": 92,
@@ -1156,7 +1222,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 313/2026-08-31",
@@ -1283,7 +1349,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 314/2026-08-31",
@@ -1398,7 +1464,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 316/2026-08-31",
@@ -1503,7 +1569,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 317/2026-08-31",
@@ -1610,7 +1676,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 318/2026-08-31",
@@ -1737,7 +1803,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 319/2026-08-31",
@@ -1864,7 +1930,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 320/2026-08-31",
@@ -1991,7 +2057,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 321/2026-08-31",
@@ -2108,7 +2174,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 322/2026-08-31",
@@ -2236,7 +2302,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 323/2026-08-31",
@@ -2361,7 +2427,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 324/2026-08-31",
@@ -2467,7 +2533,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 325/2026-08-31",
@@ -2583,7 +2649,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 326/2026-08-31",
@@ -2699,7 +2765,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 327/2026-08-31",
@@ -2816,7 +2882,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 328/2026-08-31",
@@ -2943,7 +3009,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 329/2026-08-31",
@@ -3069,7 +3135,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 330/2026-08-31",
@@ -3186,7 +3252,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 331/2026-08-31",
@@ -3313,7 +3379,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -3437,7 +3503,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 333/2026-08-31",
@@ -3533,7 +3599,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 334/2026-08-31",
@@ -3648,7 +3714,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 335/2026-08-31",
@@ -3753,7 +3819,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 336/2026-08-31",
@@ -3860,7 +3926,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 337/2026-08-31",
@@ -3985,7 +4051,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 339/2026-08-31",
@@ -4092,7 +4158,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 340/2026-08-31",
@@ -4220,7 +4286,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 341/2026-08-31",
@@ -4348,7 +4414,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 342/2026-08-31",
@@ -4473,7 +4539,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "6800cd3d749bf806db262db60abd4e516ca2bc80c0568f98e5229bdca5657123"
+          "sha256": "d43535ef79b12767424cf561c34920c3ea9ffaa557ee7017ec0c8f4973ceb611"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
