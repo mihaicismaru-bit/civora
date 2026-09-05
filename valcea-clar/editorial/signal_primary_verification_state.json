@@ -2,19 +2,80 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-05T15:04:51+03:00",
+  "generated_at": "2026-09-05T18:10:33+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-05T15:03:12+03:00",
-  "task_count": 85,
+  "queue_generated_at": "2026-09-05T18:09:02+03:00",
+  "task_count": 79,
   "primary_match_count": 0,
-  "no_match_count": 41,
-  "unrouted_count": 44,
+  "no_match_count": 37,
+  "unrouted_count": 42,
   "target_count": 20,
   "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "e40e4b7ad9ec758332a71fc4",
+      "signal_title": "VIDEO. Intrarea Sudului din Râmnicu Vâlcea, inundată complet",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/05/video-intrarea-sudului-din-ramnicu-valcea-inundata-complet/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-05T16:14:00+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "fe9889551a053b608d21223b",
+      "signal_title": "Ipostază inedită: Înaltpreasfințitul Varsanufie a aruncat la cosul de baschet pe noul teren de la Colegiul Forestier",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/ipostaza-inedita-inaltpreasfintitul-varsanufie-a-aruncat-la-cosul-de-baschet-pe-noul-teren-de-la-colegiul-forestier/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-05T15:04:26+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "0b589ea8673210cbe38bb15f",
       "signal_title": "FOTO – Incendiu de pădure la Vaideeni. Pompierii intervin cu autospeciale, dronă și sprijin din partea SVSU",
@@ -117,7 +178,7 @@
     },
     {
       "signal_id": "61d795a971be2c4333eb5ca2",
-      "signal_title": "Ultima oră 2 ore in urma Zilele Orașului Horezu sunt în plină desfășurare: 539 de ani de istorie sărbătoriți între 4 și 6 septembrie",
+      "signal_title": "Ultima oră 5 ore in urma Zilele Orașului Horezu sunt în plină desfășurare: 539 de ani de istorie sărbătoriți între 4 și 6 septembrie",
       "signal_url": "https://www.primplanpress.ro/zilele-orasului-horezu-sunt-in-plina-desfasurare-539-de-ani-de-istorie-sarbatoriti-intre-4-si-6-septembrie/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -144,7 +205,7 @@
     },
     {
       "signal_id": "1394e7ede2438183be56828c",
-      "signal_title": "Ultima oră 2 ore in urma Aproape 30 km de canalizare nouă pentru Păușești-Măglași, printr-un proiect european major",
+      "signal_title": "Ultima oră 6 ore in urma Aproape 30 km de canalizare nouă pentru Păușești-Măglași, printr-un proiect european major",
       "signal_url": "https://www.primplanpress.ro/aproape-30-km-de-canalizare-noua-pentru-pausesti-maglasi-printr-un-proiect-european-major/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -1674,78 +1735,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "9cb05420e4b66ac473fd2297",
-      "signal_title": "Consiliul Județean i-a suspendat contractul lui Cristian Lupeș, după ce a fost trimis în judecată pentru fapte de corupție",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/03/consiliul-judetean-i-a-suspendat-contractul-lui-cristian-lupes-dupa-ce-a-fost-trimis-in-judecata-pentru-fapte-de-coruptie/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T17:04:31+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "15d2237997a78f49ab1db834",
-      "signal_title": "O asociere condusă de Geiger Transilvania e singura ofertă pentru reabilitarea străzii Mitropoliei. Muzeul Național Brukenthal, printre subcontractanți",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/03/o-asociere-condusa-de-geiger-transilvania-e-singura-oferta-pentru-reabilitarea-strazii-mitropoliei-muzeul-national-brukenthal-printre-subcontractanti/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-03T16:30:15+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "08c64a42b89ed9d07cc08208",
       "signal_title": "Școala din Mădulari va fi refăcută din temelii, licitația a fost lansată, grădinița intră și ea în modernizare",
       "signal_url": "https://www.impactreal.ro/2026/09/03/scoala-din-madulari-va-fi-refacuta-din-temelii-licitatia-a-fost-lansata-gradinita-intra-si-ea-in-modernizare/",
@@ -1818,126 +1807,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "a0b73dacd54b8f28396ad937",
-      "signal_title": "Continuare about 152 MILIOANE EURO din fonduri europene, pentru apă și canal în județul Vâlcea!",
-      "signal_url": "https://www.curierul.ro/152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea/",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T11:42:53+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "9d2c95fd890d5cca215db858",
-      "signal_title": "Continuare about 152 MILIOANE EURO din fonduri europene, pentru apă și canal în județul Vâlcea!",
-      "signal_url": "https://www.curierul.ro/152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea/",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T11:42:53+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "4aafab9c3d7a9834a31c6597",
@@ -2094,126 +1963,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "bf958ea8d09621f54001bf86",
-      "signal_title": "152 MILIOANE EURO din fonduri europene, pentru apă și canal în județul Vâlcea!",
-      "signal_url": "https://curierulderamnic.ro/2026/09/02/152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-02T20:00:55+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "888e15473fc8a6e8f86c31ca",
-      "signal_title": "Constantin Rădulescu: 152 de milioane de euro pentru apă și canalizare în 12 localități din Vâlcea",
-      "signal_url": "https://evenimentvalcean.ro/constantin-radulescu-152-de-milioane-de-euro-pentru-apa-si-canalizare-in-12-localitati-din-valcea/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-02T18:57:29+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "fbaf068144bf16fc56b085d2",
@@ -2389,30 +2138,6 @@
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
       "signal_publisher": "Realitatea Vâlceană",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "def243266ca689e3d5a6263f",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=152%20MILIOANE%20EURO%20din%20fonduri%20europene%2C%20pentru%20ap%C4%83%20%C8%99i%20canal%20%C3%AEn%20jude%C8%9Bul%20V%C3%A2lcea%21&url=https%3A%2F%2Fwww.curierul.ro%2F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%2F",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "71369ccde4c5d10ce34de3b9",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252F152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
