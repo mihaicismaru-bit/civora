@@ -1,0 +1,33 @@
+{
+  "backup": {
+    "enabled": true,
+    "retention_count": 7,
+    "verify_after_copy": true
+  },
+  "database": {
+    "backend": "sqlite",
+    "path": "var/public_presence_os.sqlite3"
+  },
+  "directories": [
+    "var",
+    "var/artifacts",
+    "var/backups",
+    "var/logs"
+  ],
+  "evidence_mode": "SYNTHETIC_ONLY",
+  "mode": "PRE_PILOT_LOCAL",
+  "network": {
+    "allow_live_api_calls": false,
+    "allow_oauth": false
+  },
+  "operator": {
+    "approval_surface": "LOCAL_ONLY",
+    "kill_switch_required": true
+  },
+  "python_min": "3.11",
+  "recovery": {
+    "require_preflight_after_restore": true,
+    "require_verified_backup": true
+  },
+  "schema_version": "PPOS_OPERATOR_PROFILE_V1"
+}
