@@ -2,19 +2,206 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-05T11:37:16+03:00",
+  "generated_at": "2026-09-05T15:04:51+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-05T11:36:01+03:00",
-  "task_count": 84,
+  "queue_generated_at": "2026-09-05T15:03:12+03:00",
+  "task_count": 85,
   "primary_match_count": 0,
-  "no_match_count": 37,
-  "unrouted_count": 47,
+  "no_match_count": 41,
+  "unrouted_count": 44,
   "target_count": 20,
   "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "0b589ea8673210cbe38bb15f",
+      "signal_title": "FOTO – Incendiu de pădure la Vaideeni. Pompierii intervin cu autospeciale, dronă și sprijin din partea SVSU",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/05/foto-incendiu-de-padure-la-vaideeni-pompierii-intervin-cu-autospeciale-drona-si-sprijin-din-partea-svsu/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-05T14:59:45+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "c08bcd94db3d23730955cf4f",
+      "signal_title": "Autostrada Sibiu-Pitești ar putea fi gata în 2030-2031. Valea Oltului, punctul critic. Horațiu Cosma: „Acolo va fi dată ora exactă a finalizării proiectului”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/05/autostrada-sibiu-pitesti-ar-putea-fi-gata-in-2030-2031-valea-oltului-punctul-critic-horatiu-cosma-acolo-va-fi-data-ora-exacta-a-finalizarii-proiectului/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-05T14:31:52+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "8b1e1c318f075186d132d481",
+      "signal_title": "Prima zi la Târgul de Toamnă al Producătorilor la Obor: marfă vândută rapid, dar și tarabe care așteaptă clienți. Vânzător: „Trebuie să avem puțină răbdare, oamenii abia acum încep să afle despre noi”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/05/targul-de-toamna-obor-sibiu-prima-zi/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-05T14:14:22+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "bc1e445f4011cb6444786030",
+      "signal_title": "FOTO – Accident pe Aleea Izvoarelor din Băile Olănești. O adolescentă e cercetată într-un dosar penal",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/05/foto-accident-pe-aleea-izvoarelor-din-baile-olanesti-o-adolescenta-e-cercetata-intr-un-dosar-penal/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-05T13:45:37+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "61d795a971be2c4333eb5ca2",
+      "signal_title": "Ultima oră 2 ore in urma Zilele Orașului Horezu sunt în plină desfășurare: 539 de ani de istorie sărbătoriți între 4 și 6 septembrie",
+      "signal_url": "https://www.primplanpress.ro/zilele-orasului-horezu-sunt-in-plina-desfasurare-539-de-ani-de-istorie-sarbatoriti-intre-4-si-6-septembrie/",
+      "signal_publisher": "Primplan Press",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-05T13:17:59+03:00",
+      "verification_route_id": "horezu_administration",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-horezu-anunturi",
+            "name": "Primăria Orașului Horezu",
+            "url": "https://www.orasul-horezu.ro/anunturi"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "1394e7ede2438183be56828c",
+      "signal_title": "Ultima oră 2 ore in urma Aproape 30 km de canalizare nouă pentru Păușești-Măglași, printr-un proiect european major",
+      "signal_url": "https://www.primplanpress.ro/aproape-30-km-de-canalizare-noua-pentru-pausesti-maglasi-printr-un-proiect-european-major/",
+      "signal_publisher": "Primplan Press",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-05T12:38:35+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "c1ed995a731fa2a3fd69291b",
       "signal_title": "Vreme extrem de caldă în Vâlcea. Cod galben și disconfort termic accentuat",
@@ -1909,30 +2096,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "5ee8dd843b994e7531209930",
-      "signal_title": "Deputatul AUR Nicolae Mîndrescu cere Guvernului soluții urgente pentru termoficarea din Râmnicu Vâlcea: „Decarbonizarea nu trebuie făcută cu prețul înghețării oamenilor în case!”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/deputatul-aur-nicolae-mindrescu-cere-guvernului-solutii-urgente-pentru-termoficarea-din-ramnicu-valcea-decarbonizarea-nu-trebuie-facuta-cu-pretul-inghetarii-oamenilor-in-case/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-03T00:48:51+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "1a3929e3fc9e2481e5a416bf",
-      "signal_title": "Eugen Neață: Stoilești – locul copilăriei, al rădăcinilor și al revederilor",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/eugen-neata-stoilesti-locul-copilariei-al-radacinilor-si-al-revederilor/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-03T00:43:28+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "bf958ea8d09621f54001bf86",
       "signal_title": "152 MILIOANE EURO din fonduri europene, pentru apă și canal în județul Vâlcea!",
       "signal_url": "https://curierulderamnic.ro/2026/09/02/152-milioane-euro-din-fonduri-europene-pentru-apa-si-canal-in-judetul-valcea/",
@@ -2051,42 +2214,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "c56bfe0606439e6da6e9fcfb",
-      "signal_title": "Uniunea Societăților de Expediții din România solicită intervenția urgentă a autorităților române și europene pentru evitarea blocării frontierelor UE – Balcanii de Vest din...",
-      "signal_url": "https://stirileolteniei.ro/uniunea-societatilor-de-expeditii-din-romania-solicita-interventia-urgenta-a-autoritatilor-romane-si-europene-pentru-evitarea-blocarii-frontierelor-ue-balcanii-de-vest-din-14-septembrie-2026/",
-      "signal_publisher": "Știrile Olteniei",
-      "signal_published_at": "2026-09-02T15:31:39+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "e4d7b44a1d14b08a113d90ed",
-      "signal_title": "FPIOR: HoReCa a pierdut 25.000 de angajați în doi ani. Federația propune Guvernului 10 măsuri pentru perioada 2026-2029",
-      "signal_url": "https://stirileolteniei.ro/fpior-horeca-a-pierdut-25-000-de-angajati-in-doi-ani-federatia-propune-guvernului-10-masuri-pentru-perioada-2026-2029/",
-      "signal_publisher": "Știrile Olteniei",
-      "signal_published_at": "2026-09-02T15:30:08+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "bf0613422aad0a1b4e443255",
-      "signal_title": "Marian Vasile, chestor al Senatului",
-      "signal_url": "https://www.indiscret.ro/2026/09/02/marian-vasile-chestor-al-senatului/",
-      "signal_publisher": "Indiscret în Oltenia",
-      "signal_published_at": "2026-09-02T15:05:28+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "fbaf068144bf16fc56b085d2",
