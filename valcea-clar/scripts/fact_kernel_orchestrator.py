@@ -205,9 +205,9 @@ def build() -> dict:
     run("scm_program_fact_kernel.py")
 
     # Persist editorial products from the final canonical fact registry before
-    # validating the registry-wide contract. Without --apply, verified facts and
-    # manual queue promotions can remain stranded upstream of Live Newsroom.
-    run("editorial_writer.py", "--apply")
+    # validating the registry-wide contract. The writer's normal mode writes the
+    # product registry; --check is intentionally read-only validation only.
+    run("editorial_writer.py")
     run("editorial_writer.py", "--check")
 
     result = {
