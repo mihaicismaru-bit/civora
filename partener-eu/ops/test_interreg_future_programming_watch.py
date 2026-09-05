@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "partener-eu" / "ingest"))
 
 import interreg_future_programming_watch as mod  # noqa: E402
+import interreg_huskroua_call2_exact as husk_exact  # noqa: E402
 
 
 def healthy_fetch(row, timeout):
@@ -43,6 +44,30 @@ def rehash(snapshot):
         row["transport_fingerprint"] = mod._fingerprint(mod._transport_payload(row))
     snapshot["semantic_fingerprint"] = mod._fingerprint([[r["source_id"], r["semantic_fingerprint"]] for r in snapshot["watchlist"]])
     snapshot["transport_fingerprint"] = mod._fingerprint([[r["source_id"], r["transport_fingerprint"]] for r in snapshot["watchlist"]])
+
+
+def build_huskroua_receipt(fetched_at: str):
+    registry = husk_exact.load_registry(mod.HUSKROUA_CALL2_REGISTRY)
+
+    def fake_fetch(url):
+        markers = registry["required_exact_markers"] if url == registry["exact_call_url"] else registry["required_closure_markers"]
+        raw = ("<html><body>" + " | ".join(markers) + "</body></html>").encode("utf-8")
+        return raw, {
+            "requested_url": url,
+            "final_url": url,
+            "http_status": 200,
+            "content_type": "text/html; charset=utf-8",
+        }
+
+    receipt, _ = husk_exact.collect(
+        registry=registry,
+        run_id=f"test-husk-{fetched_at}",
+        fetched_at=fetched_at,
+        fetcher=fake_fetch,
+    )
+    assert receipt["source_health_state"] == "HEALTHY"
+    assert receipt["candidate_state"] == "CLOSED_CALL_CANDIDATE"
+    return receipt
 
 
 def main():
@@ -167,6 +192,25 @@ def main():
     assert change["lkg_status"] == "REQUIRED_REFERENCE_UNAVAILABLE"
     assert change["lkg_reference"] is None
 
+    husk_current = build_huskroua_receipt("2026-09-05T05:00:00+00:00")
+    husk_previous = build_huskroua_receipt("2026-09-05T04:00:00+00:00")
+    husk_too_new = build_huskroua_receipt("2026-09-05T06:00:00+00:00")
+    with tempfile.TemporaryDirectory() as tmp:
+        history = Path(tmp)
+        older_dir = history / "older"
+        newer_dir = history / "newer"
+        bad_dir = history / "bad"
+        older_dir.mkdir()
+        newer_dir.mkdir()
+        bad_dir.mkdir()
+        (older_dir / "huskroua-call2-exact-evidence.json").write_text(json.dumps(husk_previous), encoding="utf-8")
+        (newer_dir / "huskroua-call2-exact-evidence.json").write_text(json.dumps(husk_too_new), encoding="utf-8")
+        (bad_dir / "huskroua-call2-exact-evidence.json").write_text("{not-json", encoding="utf-8")
+        selected, selected_path = mod._select_huskroua_previous(history, husk_current)
+        assert selected is not None and selected_path is not None
+        assert selected["fetched_at"] == husk_previous["fetched_at"]
+        assert selected_path.parent.name == "older"
+
     print({
         "status": "PASS",
         "schema": baseline["schema"],
@@ -178,6 +222,7 @@ def main():
         "degraded_semantic_pipeline_watch_suppression": "PASS",
         "open_call_widening_guard": "PASS",
         "programming_state_never_encodes_open_or_call": "PASS",
+        "huskroua_canonical_history_selection": "HEALTHY_SAME_IDENTITY_STRICTLY_OLDER",
     })
 
 
