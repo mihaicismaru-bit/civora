@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-05T03:12:17+03:00",
+  "generated_at": "2026-09-05T07:39:51+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-05T03:10:31+03:00",
-  "task_count": 90,
+  "queue_generated_at": "2026-09-05T07:38:31+03:00",
+  "task_count": 85,
   "primary_match_count": 0,
-  "no_match_count": 45,
-  "unrouted_count": 45,
-  "target_count": 21,
-  "targets_ok": 16,
+  "no_match_count": 39,
+  "unrouted_count": 46,
+  "target_count": 20,
+  "targets_ok": 15,
   "results": [
     {
       "signal_id": "00ccf5fef1af6450346e739f",
@@ -399,6 +399,18 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "1f2695546e70e8ddc29f2f79",
+      "signal_title": "Elefantul de la Ursuline. S-a deschis SCAF",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/04/elefantul-de-la-ursuline-s-a-deschis-scaf/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-04T20:15:23+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "668d6139a45050295d9dab9b",
@@ -1434,66 +1446,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "4c13a68ee02c012847cb6ab8",
-      "signal_title": "Apă Canal detaliază stadiul șantierelor din Sibiu: Pe 40 de străzi s-au încheiat lucrările, o parte vor fi gata la jumătatea lunii septembrie, restul în octombrie",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/03/apa-canal-detaliaza-stadiul-santierelor-din-sibiu-pe-40-de-strazi-s-au-incheiat-lucrarile-o-parte-vor-fi-gata-la-jumatatea-lunii-septembrie-restul-in-octombrie/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T16:47:32+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "15d2237997a78f49ab1db834",
       "signal_title": "O asociere condusă de Geiger Transilvania e singura ofertă pentru reabilitarea străzii Mitropoliei. Muzeul Național Brukenthal, printre subcontractanți",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/03/o-asociere-condusa-de-geiger-transilvania-e-singura-oferta-pentru-reabilitarea-strazii-mitropoliei-muzeul-national-brukenthal-printre-subcontractanti/",
@@ -1778,126 +1730,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "d740f990d8281399687bff14",
-      "signal_title": "Proprietarii de terenuri din Lăpușata, avertizați în privința ambroziei. Primăria anunță controale și amenzi",
-      "signal_url": "https://evenimentvalcean.ro/proprietarii-de-terenuri-din-lapusata-avertizati-in-privinta-ambroziei-primaria-anunta-controale-si-amenzi/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T11:20:40+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "7b796f032620858828ff0289",
-      "signal_title": "CONTRACT SEMNAT. 12 localități din Vâlcea primesc bani europeni pentru apă și canalizare",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/contract-semmat-12-localitati-din-valcea-primesc-bani-europeni-pentru-apa-si-canalizare/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T09:15:56+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "4aafab9c3d7a9834a31c6597",
       "signal_title": "Ce canale media online sunt vizate de procedura de notificare prevăzută de CNA",
       "signal_url": "https://stirileolteniei.ro/ce-canale-media-online-sunt-vizate-de-procedura-de-notificare-prevazuta-de-cna/",
@@ -2076,44 +1908,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "4272118960dd8c18a496c75c",
-      "signal_title": "Senatorul Andra Bică: „Nevoile copiilor nu intră în vacanță, iar profesorii merită respect și salarii decente”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/senatorul-andra-bica-nevoile-copiilor-nu-intra-in-vacanta-iar-profesorii-merita-respect-si-salarii-decente/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T00:18:20+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "bf958ea8d09621f54001bf86",
@@ -2296,66 +2090,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "debcfc75966657bd0ac80730",
-      "signal_title": "Vestea mult așteptată la Păușești-Măglași: rețeaua de canalizare primește finanțare europeană",
-      "signal_url": "https://www.impactreal.ro/2026/09/02/vestea-mult-asteptata-la-pausesti-maglasi-reteaua-de-canalizare-primeste-finantare-europeana/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-02T18:55:12+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "c56bfe0606439e6da6e9fcfb",
       "signal_title": "Uniunea Societăților de Expediții din România solicită intervenția urgentă a autorităților române și europene pentru evitarea blocării frontierelor UE – Balcanii de Vest din...",
       "signal_url": "https://stirileolteniei.ro/uniunea-societatilor-de-expeditii-din-romania-solicita-interventia-urgenta-a-autoritatilor-romane-si-europene-pentru-evitarea-blocarii-frontierelor-ue-balcanii-de-vest-din-14-septembrie-2026/",
@@ -2406,33 +2140,6 @@
             "id": "ipj-valcea-stiri",
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "e96c60957a78de70e081dbba",
-      "signal_title": "Campanie gratuită de sterilizare a câinilor și pisicilor, la Băile Olănești",
-      "signal_url": "https://evenimentvalcean.ro/campanie-gratuita-de-sterilizare-a-cainilor-si-pisicilor-la-baile-olanesti/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-02T09:55:03+03:00",
-      "verification_route_id": "animal_welfare_service",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "smeura-sterilizari-valcea",
-            "name": "Tierhilfe Hoffnung — Smeura Sterilizări Gratuite",
-            "url": "https://smeura.com/events/"
           },
           "status": "PASS",
           "error": null,
