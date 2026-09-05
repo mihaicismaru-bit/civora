@@ -141,6 +141,17 @@ SURFACES: tuple[dict[str, Any], ...] = (
         "programme_filter_required": True,
         "authority_note": "central Interreg/Interact calls registry based on programme data; an exact Interreg Europe programme/call endpoint is still required",
     },
+    {
+        "id": "HUSKROUA",
+        "programme": "Interreg VI-A NEXT Hungary-Slovakia-Romania-Ukraine",
+        "url": "https://next.huskroua-cbc.eu/calls/",
+        "hosts": ("next.huskroua-cbc.eu",),
+        "anchors": ("Calls", "1st Call for Proposals", "2nd Call for Proposals"),
+        "surface_role": "PROGRAMME_CALL_INDEX",
+        "observation_state": "CALL_DISCOVERY_ONLY",
+        "programme_filter_required": False,
+        "authority_note": "official programme calls index; historic call labels remain discovery-only and exact Call 2 lifecycle is reconciled separately",
+    },
 )
 
 
@@ -489,7 +500,7 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
 
     rows = receipt.get("surfaces")
     if not isinstance(rows, list) or len(rows) != len(SURFACES):
-        raise ValueError("Interreg call-surface watch requires exactly seven programme surfaces")
+        raise ValueError("Interreg call-surface watch requires the canonical programme-surface set")
     specs = {x["id"]: x for x in SURFACES}
     if {x.get("programme_id") for x in rows} != set(specs):
         raise ValueError("Interreg call-surface programme set drift")
