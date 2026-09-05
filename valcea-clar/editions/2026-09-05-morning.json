@@ -4,14 +4,14 @@
   "slot": "morning",
   "title": "VÂLCEA CLAR — Ediția de dimineață",
   "edition_date": "2026-09-05",
-  "updated_local": "2026-09-05T12:18:47+03:00",
+  "updated_local": "2026-09-05T13:15:56+03:00",
   "generator": "deterministic_zero_llm_v2+manual_journalism_v1",
   "status": "auto_approved",
   "publication_intent": "publish",
   "editorial_fact_count": 69,
   "editorial_writer_composed_count": 54,
   "auto_fact_registry_count": 4,
-  "auto_facts_included": 6,
+  "auto_facts_included": 5,
   "items": [
     {
       "id": "babeni-izvorul-dorului-program-20260903",
@@ -354,6 +354,82 @@
       }
     },
     {
+      "id": "isu-valcea-interventii-zilnice",
+      "section": "URGENȚE",
+      "priority": 96,
+      "headline": "ISU Vâlcea: 57 de misiuni în 48 de ore. Patru incendii de vegetație au afectat circa 12,8 hectare",
+      "dek": "Bilanțul oficial pentru intervalul 2 septembrie, ora 08:00 – 4 septembrie, ora 08:00 include 47 de intervenții de prim ajutor și transport medical, 6 intervenții la incendii și 4 alte situații de urgență. SMURD a asistat 50 de persoane.",
+      "paragraphs": [
+        "ISU Vâlcea raportează 57 de misiuni în intervalul 2 septembrie 2026, ora 08:00 – 4 septembrie 2026, ora 08:00.",
+        "Din total, 47 de intervenții au vizat primul ajutor calificat și transportul medical, 6 au fost pentru stingerea incendiilor, iar 4 au vizat alte tipuri de situații de urgență.",
+        "În perioada de referință, echipajele SMURD au intervenit în 47 de situații și au asistat 50 de persoane.",
+        "ISU Vâlcea menționează patru incendii de vegetație uscată în Șirineasa, Drăgășani, Budești și Laloșu, cu aproximativ 12,8 hectare afectate în total."
+      ],
+      "confidence": 99,
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "ISU Vâlcea — «Misiunile pompierilor vâlceni în ultimele 48 de ore», 4 septembrie 2026",
+          "url": "https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-782",
+          "tier": "T1"
+        }
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "straight_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-782"
+        ],
+        "dek_source_urls": [
+          "https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-782"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "isu-valcea-20260904-48h-1",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "89197869f363aa3e31d0f7521ebd2ab40995c68d644fa1cb15db42be2cf7e938",
+            "source_urls": [
+              "https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-782"
+            ]
+          },
+          {
+            "claim_id": "isu-valcea-20260904-48h-2",
+            "role": "who_what_when_where",
+            "kind": "attributed_statement",
+            "text_sha256": "82ede66c177109e3d33bbe3621fb921bb7d6f0242402a6a0381a1d0011acdef8",
+            "source_urls": [
+              "https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-782"
+            ]
+          },
+          {
+            "claim_id": "isu-valcea-20260904-48h-3",
+            "role": "context",
+            "kind": "attributed_statement",
+            "text_sha256": "08787b8069c1df08eebed511af12e0e71bd11d62f4b4086828544bcde71e2123",
+            "source_urls": [
+              "https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-782"
+            ]
+          },
+          {
+            "claim_id": "isu-valcea-20260904-48h-4",
+            "role": "local_detail",
+            "kind": "attributed_statement",
+            "text_sha256": "1ebe7938079251c2d46870e710d15913e06b0a70792723a55368689e19ceb2bf",
+            "source_urls": [
+              "https://isuvl.igsu.ro/comunicate-de-presa/misiunile-pompierilor-valceni-in-ultimele-48-de-ore-782"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "e0a963f328df4d209b8d96ca8a9b1d89e944ca6f41d8223132b80abcfec01b85"
+      }
+    },
+    {
       "id": "fast-ipj-actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64-aaf8eb1c11",
       "section": "SIGURANȚĂ",
       "priority": 96,
@@ -537,65 +613,6 @@
         "auto_publish_eligible_by_format": true,
         "additional_gate": null,
         "product_fingerprint_sha256": "c57c35e132473e6d0fb3a97f99be804a56dc3003d04d984978b037f5a56712b2"
-      }
-    },
-    {
-      "id": "isu-valcea-interventii-zilnice",
-      "section": "URGENȚE",
-      "priority": 94,
-      "headline": "ISU Vâlcea: 30 de intervenții pe 4 septembrie 2026, dintre care 23 de prim ajutor",
-      "dek": "ISU Vâlcea raportează pentru 4 septembrie 2026 un total de 30 de intervenții: 3 incendii, 23 de prim ajutor și 4 alte intervenții.",
-      "paragraphs": [
-        "ISU Vâlcea raportează 30 de intervenții pentru data de 4 septembrie 2026.",
-        "Bilanțul oficial indică 3 incendii, 23 intervenții de prim ajutor, 0 descarcerări, 0 salvări și 4 alte intervenții."
-      ],
-      "confidence": 98,
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "ISU Vâlcea — pagina oficială",
-          "url": "https://isuvl.igsu.ro/",
-          "tier": "T1"
-        }
-      ],
-      "auto_generated": true,
-      "auto_scope": "isu_valcea_homepage_daily_summary",
-      "brief_kind": null,
-      "editorial_product": {
-        "writer_id": "manual_journalism_v1",
-        "writer_mode": "FACT_KERNEL_COMPOSED",
-        "format": "straight_news",
-        "claim_trace_complete": true,
-        "source_level_trace": true,
-        "headline_source_urls": [
-          "https://isuvl.igsu.ro/"
-        ],
-        "dek_source_urls": [
-          "https://isuvl.igsu.ro/"
-        ],
-        "claim_trace": [
-          {
-            "claim_id": "primary-1",
-            "role": "material_change",
-            "kind": "attributed_statement",
-            "text_sha256": "2996a30012b36a431af0fa05aecb0613f94f7c03dd0b242cae7cb26c4af8cd41",
-            "source_urls": [
-              "https://isuvl.igsu.ro/"
-            ]
-          },
-          {
-            "claim_id": "primary-2",
-            "role": "context",
-            "kind": "attributed_statement",
-            "text_sha256": "93837a2fce58e0c17c0c7ce263699cfebc9769a11030283ba51eda08f572cef3",
-            "source_urls": [
-              "https://isuvl.igsu.ro/"
-            ]
-          }
-        ],
-        "auto_publish_eligible_by_format": true,
-        "additional_gate": null,
-        "product_fingerprint_sha256": "3c1d0bade196a5148a39e7337e723d9cc00fe82164532d01bd2c82a31f9c439e"
       }
     },
     {
@@ -972,7 +989,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 313/2026-08-31",
@@ -1099,7 +1116,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 314/2026-08-31",
@@ -1214,7 +1231,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 316/2026-08-31",
@@ -1319,7 +1336,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 317/2026-08-31",
@@ -1426,7 +1443,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 318/2026-08-31",
@@ -1553,7 +1570,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 319/2026-08-31",
@@ -1680,7 +1697,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 320/2026-08-31",
@@ -1807,7 +1824,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 321/2026-08-31",
@@ -1924,7 +1941,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 322/2026-08-31",
@@ -2052,7 +2069,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 323/2026-08-31",
@@ -2177,7 +2194,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 324/2026-08-31",
@@ -2283,7 +2300,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 325/2026-08-31",
@@ -2399,7 +2416,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 326/2026-08-31",
@@ -2515,7 +2532,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 327/2026-08-31",
@@ -2632,7 +2649,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 328/2026-08-31",
@@ -2759,7 +2776,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 329/2026-08-31",
@@ -2885,7 +2902,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 330/2026-08-31",
@@ -3002,7 +3019,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 331/2026-08-31",
@@ -3129,7 +3146,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -3253,7 +3270,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 333/2026-08-31",
@@ -3349,7 +3366,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 334/2026-08-31",
@@ -3464,7 +3481,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 335/2026-08-31",
@@ -3569,7 +3586,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 336/2026-08-31",
@@ -3676,7 +3693,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 337/2026-08-31",
@@ -3801,7 +3818,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 339/2026-08-31",
@@ -3908,7 +3925,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 340/2026-08-31",
@@ -4036,7 +4053,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 341/2026-08-31",
@@ -4164,7 +4181,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 342/2026-08-31",
@@ -4289,7 +4306,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "c97ca0128882aa37a4d78487af33939b3e09b67ab4a76110ae9c411e1df461f5"
+          "sha256": "d23f7aa5a9b3a34bd15e7933c7f383a78c5e199064be96c7457ad6ba851c164f"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
