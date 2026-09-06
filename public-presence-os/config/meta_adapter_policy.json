@@ -1,0 +1,71 @@
+{
+  "checkpoint": "CP50",
+  "schema_version": "PPOS_META_ADAPTER_POLICY_V1",
+  "engine_version": "ppos-meta-offline-request-compiler-v1.0.0",
+  "transport_mode": "OFFLINE_COMPILE_ONLY",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "symbolic_bindings": {
+    "destination": "DESTINATION_ID_REQUIRED",
+    "api_version": "API_VERSION_REQUIRED",
+    "media_staging": "STAGING_URL_REQUIRED",
+    "facebook_auth_reference_kind": "PAGE_ACCESS_TOKEN_REF",
+    "instagram_auth_reference_kind": "INSTAGRAM_USER_TOKEN_REF",
+    "threads_auth_reference_kind": "THREADS_USER_TOKEN_REF"
+  },
+  "platform_contracts": {
+    "FACEBOOK_PAGE": {
+      "host": "graph.facebook.com",
+      "modes": ["TEXT", "SINGLE_IMAGE"],
+      "required_permissions": ["pages_show_list", "pages_read_engagement", "pages_manage_posts"],
+      "live_reverification_required": true,
+      "evidence_state": "AUTH_CURRENT_2026_09_06_PUBLISH_TEMPLATE_CANON_REVERIFY_BEFORE_LIVE"
+    },
+    "INSTAGRAM_PROFESSIONAL": {
+      "host": "graph.instagram.com",
+      "modes": ["SINGLE_IMAGE"],
+      "required_permissions": ["instagram_business_basic", "instagram_business_content_publish"],
+      "live_reverification_required": true,
+      "evidence_state": "PUBLISH_CONTRACT_CURRENT_2026_09_06_REVERIFY_BEFORE_LIVE"
+    },
+    "THREADS": {
+      "host": "graph.threads.net",
+      "modes": ["TEXT", "SINGLE_IMAGE"],
+      "required_permissions": ["threads_basic", "threads_content_publish"],
+      "live_reverification_required": true,
+      "evidence_state": "PUBLISH_CONTRACT_CURRENT_2026_09_06_REVERIFY_BEFORE_LIVE"
+    }
+  },
+  "compiler_rules": {
+    "source_binding_sha256_required": true,
+    "single_image_asset_sha256_required": true,
+    "single_image_alt_text_required": true,
+    "literal_destination_ids_forbidden": true,
+    "literal_api_versions_forbidden": true,
+    "literal_staging_urls_forbidden": true,
+    "credential_parameters_forbidden": true,
+    "api_versions_are_runtime_future_bindings": true,
+    "wire_idempotency_headers_disabled": true,
+    "endpoint_contract_must_be_reverified_before_live_transport": true
+  },
+  "global_kill_switch_required": true,
+  "authority": {
+    "offline_request_compile_authority": true,
+    "network_allowed": false,
+    "credential_resolution_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false,
+    "wire_idempotency_headers_allowed": false
+  }
+}
