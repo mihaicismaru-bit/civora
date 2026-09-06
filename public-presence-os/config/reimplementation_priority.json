@@ -1,5 +1,5 @@
 {
-  "checkpoint": "CP55",
+  "checkpoint": "CP56",
   "order": [
     {"depends_on": [], "module_id": "M01_RADAR", "rank": 1, "state": "CP34_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M01_RADAR"], "module_id": "M02_RESEARCH", "rank": 2, "state": "CP35_MINIMAL_EXECUTABLE_SLICE"},
@@ -21,7 +21,8 @@
     {"depends_on": ["M19_META_ADAPTERS", "M20_META_CONNECTIONS"], "module_id": "M21_META_PREFLIGHT", "rank": 18, "state": "CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY"},
     {"depends_on": ["M20_META_CONNECTIONS", "M21_META_PREFLIGHT"], "module_id": "M22_META_OPERATOR_PROVISIONING", "rank": 19, "state": "CP53_OFFLINE_OPERATOR_PACKET_CHECKLIST"},
     {"depends_on": ["M19_META_ADAPTERS", "M21_META_PREFLIGHT", "M22_META_OPERATOR_PROVISIONING"], "module_id": "M23_META_TRANSPORT_TWIN", "rank": 20, "state": "CP54_SYNTHETIC_TRANSPORT_TEST_TWIN_ONLY"},
-    {"depends_on": ["M20_META_CONNECTIONS", "M21_META_PREFLIGHT", "M22_META_OPERATOR_PROVISIONING", "M23_META_TRANSPORT_TWIN"], "module_id": "M24_META_READ_ONLY_GATE", "rank": 21, "state": "CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"}
+    {"depends_on": ["M20_META_CONNECTIONS", "M21_META_PREFLIGHT", "M22_META_OPERATOR_PROVISIONING", "M23_META_TRANSPORT_TWIN"], "module_id": "M24_META_READ_ONLY_GATE", "rank": 21, "state": "CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"},
+    {"depends_on": ["M24_META_READ_ONLY_GATE"], "module_id": "M25_META_LIVE_READ_ONLY_PROBE_RUNBOOK", "rank": 22, "state": "CP56_LIVE_READ_ONLY_PROBE_RUNBOOK_CONTRACT_LOCAL_ONLY"}
   ],
   "policy": "CLEAN_ROOM_FROM_CANON_ONLY",
   "rules": {
@@ -30,6 +31,6 @@
     "no_live_network_or_accounts_pre_pilot": true,
     "respect_pipeline_dependencies": true
   },
-  "next": "CP56_META_LIVE_READ_ONLY_PROBE_RUNBOOK_AND_EVIDENCE_CAPTURE_CONTRACT",
+  "next": "CP57_META_READ_ONLY_EVIDENCE_VALIDATOR_AND_SYNTHETIC_FIXTURE_PACK",
   "schema_version": "PPOS_REIMPLEMENTATION_PRIORITY_V1"
 }
