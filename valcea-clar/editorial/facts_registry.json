@@ -1764,7 +1764,7 @@
       "confidence": 97,
       "material_fact_gate": "PASS",
       "valid_from": "2026-09-05T00:00:00+03:00",
-      "valid_until": "2026-09-21T00:40:42+03:00",
+      "valid_until": "2026-09-21T01:26:24+03:00",
       "slots": [
         "morning",
         "evening"
@@ -1829,7 +1829,7 @@
         ]
       },
       "primary_source_verification": {
-        "verified_at": "2026-09-07T00:40:42+03:00",
+        "verified_at": "2026-09-07T01:26:24+03:00",
         "promotion_gate": "VERIFIED_PRIMARY_MINIMUM_V1",
         "source_family": "IPJ",
         "direct_first_party_detail": true,
@@ -2205,7 +2205,7 @@
         ]
       },
       "primary_source_verification": {
-        "verified_at": "2026-09-07T01:12:33+03:00",
+        "verified_at": "2026-09-07T01:26:22+03:00",
         "promotion_gate": "ISU_HOMEPAGE_NUMERIC_SUMMARY_V1",
         "source_family": "ISU",
         "direct_first_party_homepage_numeric_readback": true,
@@ -2457,6 +2457,92 @@
           "tier": "T1"
         }
       ]
+    },
+    {
+      "id": "ocnele-mari-salina-program-septembrie-20260907",
+      "status": "verified",
+      "section": "UTIL",
+      "editorial_type": "service_news",
+      "editorial_form": "service_update",
+      "priority": 93,
+      "confidence": 99,
+      "publication_lifecycle": "new_story",
+      "valid_from": "2026-09-07T00:00:00+03:00",
+      "valid_until": "2026-09-30T23:59:59+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "headline": "Salina Ocnele Mari își schimbă programul din 7 septembrie: închis luni și marți",
+      "dek": "SALROM anunță un program nou pentru Salina Ocnele Mari în perioada 7–30 septembrie 2026: baza turistică este închisă lunea și marțea, iar miercuri–vineri funcționează între 10:00 și 16:00.",
+      "paragraphs": [
+        "Salina Ocnele Mari intră din 7 septembrie 2026 într-un program de toamnă. Potrivit programului oficial publicat de Societatea Națională a Sării — SALROM, baza turistică este închisă lunea și marțea în perioada 7–30 septembrie.",
+        "Miercuri, joi și vineri, salina este deschisă între orele 10:00 și 16:00, iar ultima intrare în subteran este la 14:30. Sâmbăta și duminica programul este 09:00–17:00, cu ultima intrare la 15:30.",
+        "Programul se schimbă față de primele șase zile din septembrie, când salina a funcționat zilnic între 09:00 și 17:00. Pentru cei care plănuiesc o vizită după 7 septembrie, diferența importantă este că luni și marți nu se fac vizite turistice.",
+        "SALROM mai precizează că, în perioada 7–30 septembrie, linia de autoservire este închisă de luni până vineri și funcționează sâmbăta și duminica. Cafeneaua din baza de agrement rămâne deschisă pe durata programului de vizitare."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Societatea Națională a Sării — SALROM, Salina Ocnele Mari — program septembrie 2026",
+          "url": "https://salrom.ro/salina-ocnele-mari-rm-valcea/",
+          "tier": "T1"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Salina Ocnele Mari își schimbă programul din 7 septembrie: închis luni și marți",
+          "source_urls": [
+            "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
+          ]
+        },
+        "dek": {
+          "text": "SALROM anunță un program nou pentru Salina Ocnele Mari în perioada 7–30 septembrie 2026: baza turistică este închisă lunea și marțea, iar miercuri–vineri funcționează între 10:00 și 16:00.",
+          "source_urls": [
+            "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
+          ]
+        },
+        "claims": [
+          {
+            "id": "ocnele-mari-salina-septembrie-2026-closed",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text": "În perioada 7–30 septembrie 2026, Salina Ocnele Mari este închisă pentru vizitare lunea și marțea.",
+            "source_urls": [
+              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
+            ]
+          },
+          {
+            "id": "ocnele-mari-salina-septembrie-2026-weekdays",
+            "role": "reader_action",
+            "kind": "fact",
+            "text": "Miercuri–vineri, Salina Ocnele Mari este deschisă între 10:00 și 16:00, iar ultima intrare în subteran este la 14:30.",
+            "source_urls": [
+              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
+            ]
+          },
+          {
+            "id": "ocnele-mari-salina-septembrie-2026-weekend",
+            "role": "reader_action",
+            "kind": "fact",
+            "text": "Sâmbătă–duminică, Salina Ocnele Mari este deschisă între 09:00 și 17:00, iar ultima intrare în subteran este la 15:30.",
+            "source_urls": [
+              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
+            ]
+          },
+          {
+            "id": "ocnele-mari-salina-septembrie-2026-food-service",
+            "role": "context",
+            "kind": "fact",
+            "text": "În perioada 7–30 septembrie, linia de autoservire este închisă de luni până vineri și deschisă sâmbăta și duminica, iar cafeneaua funcționează pe durata programului de vizitare.",
+            "source_urls": [
+              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "SERVICE UPDATE low-risk, verificat direct în sursa primară SALROM. Programul este explicit valabil 7–30 septembrie 2026 și este util imediat în prima zi a schimbării. Nu se reutilizează automat fotografiile SALROM fără o bază de drepturi documentată; dacă nu există asset rights-cleared, materialul poate fi publicat fără fotografie sau cu un visual editorial neutru care nu pretinde că reprezintă scena curentă."
     },
     {
       "id": "valcea-apa-canal-contract-152m-20260902",
@@ -4322,7 +4408,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 313/2026-08-31",
@@ -4487,7 +4573,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 314/2026-08-31",
@@ -4642,7 +4728,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 315/2026-08-31",
@@ -4805,7 +4891,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 316/2026-08-31",
@@ -4948,7 +5034,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 317/2026-08-31",
@@ -5093,7 +5179,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 318/2026-08-31",
@@ -5258,7 +5344,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 319/2026-08-31",
@@ -5423,7 +5509,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 320/2026-08-31",
@@ -5588,7 +5674,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 321/2026-08-31",
@@ -5743,7 +5829,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 322/2026-08-31",
@@ -5909,7 +5995,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 323/2026-08-31",
@@ -6072,7 +6158,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 324/2026-08-31",
@@ -6216,7 +6302,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 325/2026-08-31",
@@ -6370,7 +6456,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 326/2026-08-31",
@@ -6524,7 +6610,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 327/2026-08-31",
@@ -6679,7 +6765,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 328/2026-08-31",
@@ -6844,7 +6930,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 329/2026-08-31",
@@ -7008,7 +7094,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 330/2026-08-31",
@@ -7163,7 +7249,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 331/2026-08-31",
@@ -7328,7 +7414,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -7490,7 +7576,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 333/2026-08-31",
@@ -7624,7 +7710,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 334/2026-08-31",
@@ -7777,7 +7863,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 335/2026-08-31",
@@ -7920,7 +8006,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 336/2026-08-31",
@@ -8065,7 +8151,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 337/2026-08-31",
@@ -8229,7 +8315,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 338/2026-08-31",
@@ -8382,7 +8468,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 339/2026-08-31",
@@ -8527,7 +8613,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 340/2026-08-31",
@@ -8693,7 +8779,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 341/2026-08-31",
@@ -8859,7 +8945,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 342/2026-08-31",
@@ -9504,7 +9590,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43"
+          "sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -9611,7 +9697,7 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-08-31",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "e300ffa70af5d47cd751e7b5ae4dfa4efcb424358952b34c67c2a3fa0e8cba43",
+        "register_sha256": "4acd7d0af6ab994ab2bb95fbe761342879f28e76cba69529c2025d56a200d46b",
         "latest_decision_window": 25,
         "matching_decisions": 5,
         "verified_official_documents": 5,
@@ -11257,92 +11343,6 @@
         ]
       },
       "editorial_note": "QUICK LOCAL / PROJECT EXPLAINER low-risk, construit exclusiv din surse primare Romsilva. Nu se atribuie județului Vâlcea întreaga valoare a proiectului și nu se deduce numărul actual de obiective din județ dincolo de cele trei nominalizate oficial în 2025. Visual Desk trebuie să folosească numai fotografie cu drepturi verificabile sau vizual editorial neutru."
-    },
-    {
-      "id": "ocnele-mari-salina-program-septembrie-20260907",
-      "status": "verified",
-      "section": "UTIL",
-      "editorial_type": "service_news",
-      "editorial_form": "service_update",
-      "priority": 93,
-      "confidence": 99,
-      "publication_lifecycle": "new_story",
-      "valid_from": "2026-09-07T00:00:00+03:00",
-      "valid_until": "2026-09-30T23:59:59+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
-      "headline": "Salina Ocnele Mari își schimbă programul din 7 septembrie: închis luni și marți",
-      "dek": "SALROM anunță un program nou pentru Salina Ocnele Mari în perioada 7–30 septembrie 2026: baza turistică este închisă lunea și marțea, iar miercuri–vineri funcționează între 10:00 și 16:00.",
-      "paragraphs": [
-        "Salina Ocnele Mari intră din 7 septembrie 2026 într-un program de toamnă. Potrivit programului oficial publicat de Societatea Națională a Sării — SALROM, baza turistică este închisă lunea și marțea în perioada 7–30 septembrie.",
-        "Miercuri, joi și vineri, salina este deschisă între orele 10:00 și 16:00, iar ultima intrare în subteran este la 14:30. Sâmbăta și duminica programul este 09:00–17:00, cu ultima intrare la 15:30.",
-        "Programul se schimbă față de primele șase zile din septembrie, când salina a funcționat zilnic între 09:00 și 17:00. Pentru cei care plănuiesc o vizită după 7 septembrie, diferența importantă este că luni și marți nu se fac vizite turistice.",
-        "SALROM mai precizează că, în perioada 7–30 septembrie, linia de autoservire este închisă de luni până vineri și funcționează sâmbăta și duminica. Cafeneaua din baza de agrement rămâne deschisă pe durata programului de vizitare."
-      ],
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "Societatea Națională a Sării — SALROM, Salina Ocnele Mari — program septembrie 2026",
-          "url": "https://salrom.ro/salina-ocnele-mari-rm-valcea/",
-          "tier": "T1"
-        }
-      ],
-      "fact_kernel": {
-        "format_hint": "service_news",
-        "headline": {
-          "text": "Salina Ocnele Mari își schimbă programul din 7 septembrie: închis luni și marți",
-          "source_urls": [
-            "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
-          ]
-        },
-        "dek": {
-          "text": "SALROM anunță un program nou pentru Salina Ocnele Mari în perioada 7–30 septembrie 2026: baza turistică este închisă lunea și marțea, iar miercuri–vineri funcționează între 10:00 și 16:00.",
-          "source_urls": [
-            "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
-          ]
-        },
-        "claims": [
-          {
-            "id": "ocnele-mari-salina-septembrie-2026-closed",
-            "role": "who_what_when_where",
-            "kind": "fact",
-            "text": "În perioada 7–30 septembrie 2026, Salina Ocnele Mari este închisă pentru vizitare lunea și marțea.",
-            "source_urls": [
-              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
-            ]
-          },
-          {
-            "id": "ocnele-mari-salina-septembrie-2026-weekdays",
-            "role": "reader_action",
-            "kind": "fact",
-            "text": "Miercuri–vineri, Salina Ocnele Mari este deschisă între 10:00 și 16:00, iar ultima intrare în subteran este la 14:30.",
-            "source_urls": [
-              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
-            ]
-          },
-          {
-            "id": "ocnele-mari-salina-septembrie-2026-weekend",
-            "role": "reader_action",
-            "kind": "fact",
-            "text": "Sâmbătă–duminică, Salina Ocnele Mari este deschisă între 09:00 și 17:00, iar ultima intrare în subteran este la 15:30.",
-            "source_urls": [
-              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
-            ]
-          },
-          {
-            "id": "ocnele-mari-salina-septembrie-2026-food-service",
-            "role": "context",
-            "kind": "fact",
-            "text": "În perioada 7–30 septembrie, linia de autoservire este închisă de luni până vineri și deschisă sâmbăta și duminica, iar cafeneaua funcționează pe durata programului de vizitare.",
-            "source_urls": [
-              "https://salrom.ro/salina-ocnele-mari-rm-valcea/"
-            ]
-          }
-        ]
-      },
-      "editorial_note": "SERVICE UPDATE low-risk, verificat direct în sursa primară SALROM. Programul este explicit valabil 7–30 septembrie 2026 și este util imediat în prima zi a schimbării. Nu se reutilizează automat fotografiile SALROM fără o bază de drepturi documentată; dacă nu există asset rights-cleared, materialul poate fi publicat fără fotografie sau cu un visual editorial neutru care nu pretinde că reprezintă scena curentă."
     },
     {
       "id": "scm-program-0cb45a2feafdd06bea9b",
