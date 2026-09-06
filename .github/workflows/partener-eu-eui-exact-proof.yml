@@ -1,0 +1,108 @@
+name: PARTENER.EU EUI Exact Call Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_eui_exact_registry.json'
+      - 'partener-eu/ingest/eu_direct_eui_exact.py'
+      - 'partener-eu/ops/test_eu_direct_eui_exact.py'
+      - '.github/workflows/partener-eu-eui-exact-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partener-eu-eui-exact-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eui-exact-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded EUI exact adapter and registry
+        run: |
+          python -m json.tool partener-eu/ingest/eu_direct_eui_exact_registry.json >/dev/null
+          python -m py_compile partener-eu/ingest/eu_direct_eui_exact.py partener-eu/ops/test_eu_direct_eui_exact.py
+
+      - name: Run EUI exact fail-closed regressions
+        run: python partener-eu/ops/test_eu_direct_eui_exact.py
+
+      - name: Acquire exact current EUI Call 4 authority
+        env:
+          RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
+        run: |
+          rm -rf .partener-eui-exact-proof
+          python partener-eu/ingest/eu_direct_eui_exact.py \
+            --run-id "$RUN_ID" \
+            --output-dir .partener-eui-exact-proof
+
+      - name: Enforce exact EUI non-authorizing boundary
+        run: |
+          python - <<'PY'
+          import json, pathlib, re
+          path=pathlib.Path('.partener-eui-exact-proof/eui-call-4-exact-evidence.json')
+          if not path.exists():
+              raise SystemExit('FAIL EUI exact evidence missing')
+          e=json.loads(path.read_text(encoding='utf-8'))
+          if e.get('source_health_state') != 'HEALTHY':
+              raise SystemExit(f"FAIL EUI exact source not healthy: {e.get('source_health_state')}")
+          if e.get('call_id') != 'EUI-IA-CALL-4-2026':
+              raise SystemExit('FAIL EUI exact bounded call identity drift')
+          if e.get('official_identity_label') != 'EUI-IA Call 4':
+              raise SystemExit('FAIL EUI exact official identity marker drift')
+          if e.get('candidate_state') != 'CLOSED_CALL' or e.get('status_label') != 'Closed':
+              raise SystemExit('FAIL EUI exact current closed candidate unresolved')
+          if e.get('evidence_usable_for_reconciliation') is not True or e.get('lkg_required') is not False:
+              raise SystemExit('FAIL EUI exact health/reconciliation boundary drift')
+          if e.get('current_material_truth_available') is not False or e.get('material_admission_ready_for_downstream_review') is not False:
+              raise SystemExit('FAIL EUI exact acquisition bypassed downstream gates')
+          for key in (
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation'
+          ):
+              if e.get(key) is not False:
+                  raise SystemExit(f'FAIL EUI exact became authorizing: {key}')
+          if e.get('publication_effect') != 'NONE':
+              raise SystemExit('FAIL EUI exact publication boundary drift')
+          raw_hash=str((e.get('receipt') or {}).get('raw_sha256') or '')
+          semantic_hash=str(e.get('exact_semantic_fingerprint') or '')
+          if not re.fullmatch(r'[0-9a-f]{64}', raw_hash) or not re.fullmatch(r'[0-9a-f]{64}', semantic_hash):
+              raise SystemExit('FAIL EUI exact immutable hashes missing')
+          print(json.dumps({
+              'call_id': e.get('call_id'),
+              'health': e.get('source_health_state'),
+              'candidate_state': e.get('candidate_state'),
+              'status_label': e.get('status_label'),
+              'deadline_candidate': e.get('deadline_candidate'),
+              'budget_candidate': e.get('budget_candidate'),
+              'semantic_fingerprint': e.get('exact_semantic_fingerprint'),
+              'publication_effect': e.get('publication_effect'),
+          }, sort_keys=True))
+          PY
+
+      - name: Upload bounded EUI exact evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-eui-exact-${{ github.sha }}
+          path: .partener-eui-exact-proof/
+          if-no-files-found: error
+          retention-days: 7
