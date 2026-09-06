@@ -47,4 +47,4 @@ def test_report_contract():
     assert p["golden_path_complete"] is False
     assert p["pilot_state"]=="HOLD_PILOT_VALIDATION_GATES"
     assert len(p["stages"])==16
-    assert p["blockers"]==["HOLD_IDENTITY_EQUIVALENCE"]
+    assert p["blockers"]==["HOLD_OPERATOR_EXACT_LOCAL_FONT_FILES_REQUIRED"]
