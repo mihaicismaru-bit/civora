@@ -1,0 +1,70 @@
+{
+  "checkpoint": "CP47",
+  "schema_version": "PPOS_LOCAL_CONTROL_EXPERIMENT_POLICY_V1",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "input_contract": {
+    "required_module": "M11_LEARNING",
+    "required_state": "LOCAL_SHADOW_LEARNING_RECORD_ONLY",
+    "required_experiment_scope": "LOCAL_CONTROL_VALIDATION_ONLY",
+    "require_experiment_input_ready": true,
+    "require_external_experiment_ready": false,
+    "require_performance_evidence_state": "UNAVAILABLE_NOT_CONNECTED",
+    "require_performance_conclusion": "NO_PERFORMANCE_CONCLUSION",
+    "require_optimization_recommendation": "NO_OPTIMIZATION_RECOMMENDATION"
+  },
+  "experiment": {
+    "mode": "LOCAL_CONTROL_VALIDATION_ONLY",
+    "control_checks": [
+      "LEARNING_RECORD_HASH_BOUND",
+      "NO_PERFORMANCE_EVIDENCE",
+      "NO_CONTENT_VARIANTS",
+      "ZERO_EXTERNAL_AUTHORITY"
+    ],
+    "content_variant_generation": false,
+    "performance_metric_selection": false,
+    "audience_segmentation": false,
+    "performance_hypothesis": "NO_PERFORMANCE_HYPOTHESIS",
+    "optimization_recommendation": "NO_OPTIMIZATION_RECOMMENDATION",
+    "external_experiment_execution": false
+  },
+  "storage": {
+    "backend": "SQLITE_LOCAL",
+    "learning_inputs_immutable": true,
+    "experiment_plans_append_only": true,
+    "event_log_append_only": true,
+    "request_id_idempotency": true,
+    "one_plan_per_learning_record": true
+  },
+  "privacy": {
+    "aggregate_content_level_only": true,
+    "individual_profiling": false,
+    "demographic_dimensions": false,
+    "audience_segmentation": false
+  },
+  "authority": {
+    "local_experiment_ledger_authority": true,
+    "local_control_plan_authority": true,
+    "performance_experiment_authority": false,
+    "content_mutation_authority": false,
+    "strategy_mutation_authority": false,
+    "network_authority": false,
+    "real_account_connection_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "deploy_authority": false
+  },
+  "platform_policy": {
+    "FACEBOOK_PAGE": "ACTIVE_LOCAL_CONTROL_ONLY",
+    "INSTAGRAM_PROFESSIONAL": "ACTIVE_LOCAL_CONTROL_ONLY",
+    "THREADS": "ACTIVE_LOCAL_CONTROL_ONLY",
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "pilot_gate": {
+    "all_pipeline_modules_executable_after_cp47": true,
+    "production_identity_equivalence_required": true,
+    "network_and_account_activation_deferred": true
+  },
+  "next_dependency": "PILOT_VALIDATION_GATES"
+}

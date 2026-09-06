@@ -1,5 +1,5 @@
 {
-  "checkpoint": "CP46",
+  "checkpoint": "CP47",
   "order": [
     {"depends_on": [], "module_id": "M01_RADAR", "rank": 1, "state": "CP34_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M01_RADAR"], "module_id": "M02_RESEARCH", "rank": 2, "state": "CP35_MINIMAL_EXECUTABLE_SLICE"},
@@ -14,7 +14,7 @@
     {"depends_on": ["M08_QUEUE"], "module_id": "M09_PUBLISHER", "rank": 11, "state": "CP44_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M09_PUBLISHER"], "module_id": "M10_ANALYTICS", "rank": 12, "state": "CP45_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M10_ANALYTICS"], "module_id": "M11_LEARNING", "rank": 13, "state": "CP46_MINIMAL_EXECUTABLE_SLICE"},
-    {"depends_on": ["M11_LEARNING"], "module_id": "M14_EXPERIMENTS", "rank": 14, "state": "NEXT"}
+    {"depends_on": ["M11_LEARNING"], "module_id": "M14_EXPERIMENTS", "rank": 14, "state": "CP47_MINIMAL_EXECUTABLE_SLICE"}
   ],
   "policy": "CLEAN_ROOM_FROM_CANON_ONLY",
   "rules": {
@@ -23,5 +23,6 @@
     "no_live_network_or_accounts_pre_pilot": true,
     "respect_pipeline_dependencies": true
   },
+  "next": "PILOT_VALIDATION_GATES",
   "schema_version": "PPOS_REIMPLEMENTATION_PRIORITY_V1"
 }
