@@ -1,5 +1,5 @@
 {
-  "checkpoint": "CP50",
+  "checkpoint": "CP51",
   "order": [
     {"depends_on": [], "module_id": "M01_RADAR", "rank": 1, "state": "CP34_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M01_RADAR"], "module_id": "M02_RESEARCH", "rank": 2, "state": "CP35_MINIMAL_EXECUTABLE_SLICE"},
@@ -16,7 +16,8 @@
     {"depends_on": ["M10_ANALYTICS"], "module_id": "M11_LEARNING", "rank": 13, "state": "CP46_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M11_LEARNING"], "module_id": "M14_EXPERIMENTS", "rank": 14, "state": "CP47_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M06_VISUAL", "M07_QA"], "module_id": "M18_VISUAL_IDENTITY", "rank": 15, "state": "CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"},
-    {"depends_on": ["M09_PUBLISHER"], "module_id": "M19_META_ADAPTERS", "rank": 16, "state": "CP50_OFFLINE_REQUEST_COMPILER"}
+    {"depends_on": ["M09_PUBLISHER"], "module_id": "M19_META_ADAPTERS", "rank": 16, "state": "CP50_OFFLINE_REQUEST_COMPILER"},
+    {"depends_on": ["M19_META_ADAPTERS"], "module_id": "M20_META_CONNECTIONS", "rank": 17, "state": "CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY"}
   ],
   "policy": "CLEAN_ROOM_FROM_CANON_ONLY",
   "rules": {
@@ -25,6 +26,6 @@
     "no_live_network_or_accounts_pre_pilot": true,
     "respect_pipeline_dependencies": true
   },
-  "next": "CP51_META_CONNECTION_PROFILE_SECRET_REFERENCE_VAULT_MINIMAL_EXECUTABLE_SLICE",
+  "next": "CP52_META_CONNECTION_PREFLIGHT_SYNTHETIC_PROVISIONING_READBACK",
   "schema_version": "PPOS_REIMPLEMENTATION_PRIORITY_V1"
 }
