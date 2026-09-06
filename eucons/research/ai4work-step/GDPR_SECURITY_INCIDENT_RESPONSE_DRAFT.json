@@ -1,0 +1,154 @@
+{
+  "schema_version": "eucons.ai4work_gdpr_security_incident_response.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "evidence_binding_key": "security_incident_response_procedure",
+  "date": "2026-08-31",
+  "status": "TECHNICAL_PROCEDURE_READY_CONTROLLER_APPROVAL_REQUIRED_BEFORE_PROD",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "controller": "EUROCONSULT SRL",
+  "controller_approval": false,
+  "prod_eligible": false,
+  "collection_enabled": false,
+  "privacy_contact": "OPEN_BEFORE_PRODUCTION",
+  "incident_owner": "TO_BE_ASSIGNED_AND_APPROVED_BEFORE_PRODUCTION",
+  "breach_register_location": "TO_BE_BOUND_BEFORE_PRODUCTION",
+  "anspdcp_notification_route": "TO_BE_LIVE_VERIFIED_BEFORE_PRODUCTION",
+  "processor_escalation_route": "TO_BE_BOUND_BEFORE_PRODUCTION",
+  "legal_and_guidance_basis": [
+    {
+      "authority": "EUR-Lex",
+      "reference": "GDPR Article 32 — Security of processing",
+      "url": "https://eur-lex.europa.eu/eli/reg/2016/679/art_32/oj/eng"
+    },
+    {
+      "authority": "European Data Protection Board",
+      "reference": "Guidelines 9/2022 on personal data breach notification under GDPR, version 2.0",
+      "url": "https://www.edpb.europa.eu/our-work-tools/our-documents/guidelines/guidelines-92022-personal-data-breach-notification-under_en"
+    },
+    {
+      "authority": "European Data Protection Board",
+      "reference": "Data breaches — SME data protection guide",
+      "url": "https://www.edpb.europa.eu/sme/assess-the-risks/data-breaches_en"
+    }
+  ],
+  "scope": {
+    "covered_data": [
+      "raw and normalised AI4WORK respondent records",
+      "receipt-keyed rights-operation records",
+      "canonical respondent-level exports before terminal disclosure control",
+      "research-only storage and backups containing respondent-level data",
+      "server or application logs if they contain or can be linked to personal data"
+    ],
+    "excluded_from_need_evidence": [
+      "incident records",
+      "breach register entries",
+      "security logs",
+      "controller notifications",
+      "TEST TWIN incident simulations"
+    ],
+    "crm_or_commercial_reuse": "FORBIDDEN",
+    "test_twin_policy": "TEST_TWIN_INCIDENT_SIMULATIONS_ARE_NON_EVIDENCE_AND_MUST_USE_NO_REAL_RESPONDENT_DATA"
+  },
+  "breach_definition": "A security incident leading to accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to personal data is handled as a potential personal data breach until assessed and documented.",
+  "mandatory_response_sequence": [
+    "DETECT_AND_RECORD_INITIAL_SIGNAL",
+    "CONTAIN_WITHOUT_DESTROYING_NECESSARY_AUDIT_EVIDENCE",
+    "ESTABLISH_AWARENESS_TIMESTAMP_WHEN_REASONABLE_CERTAINTY_EXISTS",
+    "ASSESS_CONFIDENTIALITY_INTEGRITY_AVAILABILITY_AND_DATA_SUBJECT_RISK",
+    "NOTIFY_CONTROLLER_WITHOUT_UNDUE_DELAY_IF_DETECTED_BY_PROCESSOR_OR_SERVICE_PROVIDER",
+    "DOCUMENT_DECISION_FOR_EVERY_PERSONAL_DATA_BREACH_IN_BREACH_REGISTER",
+    "IF_RISK_IS_NOT_UNLIKELY_PREPARE_AND_ESCALATE_SUPERVISORY_AUTHORITY_NOTIFICATION_FOR_CONTROLLER_ACTION_WITHIN_72_HOURS_WHERE_FEASIBLE",
+    "IF_HIGH_RISK_PREPARE_AND_ESCALATE_DATA_SUBJECT_COMMUNICATION_WITHOUT_UNDUE_DELAY_UNLESS_AN_ARTICLE_34_EXCEPTION_IS_DOCUMENTED",
+    "REMEDIATE_VALIDATE_RECOVERY_AND_RECORD_CLOSURE",
+    "TRIGGER_CONTROL_REASSESSMENT_BEFORE_COLLECTION_RESUMES_WHERE_THE_INCIDENT_AFFECTS_PROD_ASSUMPTIONS"
+  ],
+  "awareness_and_clock": {
+    "awareness_rule": "Record the earliest timestamp at which there is a reasonable degree of certainty that a security incident occurred and compromised personal data.",
+    "supervisory_authority_target": "WITHOUT_UNDUE_DELAY_AND_WHERE_FEASIBLE_WITHIN_72_HOURS_AFTER_CONTROLLER_AWARENESS_WHEN_NOTIFICATION_IS_REQUIRED",
+    "delay_rule": "If notification is required and occurs after 72 hours, the delay reason must be documented and supplied with the notification.",
+    "phased_notification_supported": true
+  },
+  "risk_decision": {
+    "dpa_notification": "Notify the competent supervisory authority unless the personal data breach is unlikely to result in a risk to the rights and freedoms of natural persons.",
+    "data_subject_communication": "Communicate without undue delay when the personal data breach is likely to result in a high risk to the rights and freedoms of natural persons, unless a documented Article 34 exception applies.",
+    "minimum_assessment_dimensions": [
+      "nature and sensitivity of affected data",
+      "approximate number and categories of affected data subjects",
+      "approximate number and categories of affected records",
+      "confidentiality impact",
+      "integrity impact",
+      "availability impact",
+      "ease of identification or linkage",
+      "likely consequences and severity",
+      "effectiveness of encryption or other protection",
+      "containment and mitigation already applied"
+    ]
+  },
+  "breach_register_minimum": [
+    "incident_id",
+    "detected_at",
+    "controller_awareness_at",
+    "facts_and_nature_of_breach",
+    "affected_data_categories",
+    "approximate_data_subject_count_if_known",
+    "approximate_record_count_if_known",
+    "effects_and_likely_consequences",
+    "risk_assessment_and_rationale",
+    "containment_and_remedial_actions",
+    "dpa_notification_required_and_rationale",
+    "dpa_notification_timestamp_or_delay_reason_if_applicable",
+    "data_subject_communication_required_and_rationale",
+    "data_subject_communication_timestamp_if_applicable",
+    "processor_notifications_and_timestamps_if_applicable",
+    "recovery_validation",
+    "closure_and_follow_up_actions"
+  ],
+  "security_and_data_minimisation": {
+    "no_direct_identifier_expansion_for_incident_tracking": true,
+    "incident_register_separate_from_crm": true,
+    "commercial_tracking_forbidden": true,
+    "incident_evidence_access": "NEED_TO_KNOW_ROLE_BASED",
+    "preserve_only_security_evidence_needed_for_INVESTIGATION_LEGAL_COMPLIANCE_AND_ACCOUNTABILITY": true,
+    "retention_rule": "Incident/breach documentation retention must be separately approved and justified; the ordinary research respondent-retention schedule must not be silently extended for all respondent records merely because an incident occurred.",
+    "rights_hold_rule": "Any incident-specific legal or audit hold must use the authoritative rights-hold mechanism and must be purpose-bounded, documented and approved."
+  },
+  "external_communication_boundary": {
+    "automatic_external_notification": false,
+    "rule": "Automation may detect, contain where pre-authorised, calculate deadlines, assemble factual drafts and escalate. It must not submit a supervisory-authority notification or contact affected individuals in the controller's name without explicit human/controller authorization.",
+    "urgency_rule": "The human authorization boundary must not suppress or delay escalation of a potentially notifiable breach; escalation must surface the 72-hour legal clock immediately."
+  },
+  "resume_collection_gate": {
+    "automatic_resume": false,
+    "required_before_resume_after_material_incident": [
+      "incident contained",
+      "affected PROD assumptions revalidated",
+      "security remediation validated",
+      "processor/access/logging bindings rechecked when implicated",
+      "controller records resume decision",
+      "DPIA/LIA/Article 13 reassessed when the incident changes risk or processing facts"
+    ]
+  },
+  "mandatory_before_prod": {
+    "controller_approval": false,
+    "privacy_contact_bound": false,
+    "incident_owner_assigned": false,
+    "breach_register_location_bound": false,
+    "anspdcp_notification_route_live_verified": false,
+    "processor_escalation_route_bound": false,
+    "restore_and_recovery_control_live_verified": false,
+    "access_and_logging_control_live_verified": false,
+    "provider_breach_notification_contract_path_verified": false
+  },
+  "forbidden_shortcuts": [
+    "treating repository CI as proof of live incident-readiness",
+    "treating provider marketing documentation as proof of account-specific breach escalation",
+    "writing breach or incident records into commercial CRM",
+    "using TEST TWIN incident simulations as evidence of real respondent behaviour or real breach handling",
+    "automatically notifying ANSPDCP or data subjects without controller authorization",
+    "resuming collection automatically after a material security incident"
+  ],
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

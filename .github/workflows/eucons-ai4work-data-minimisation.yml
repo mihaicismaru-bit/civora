@@ -1,0 +1,27 @@
+name: EUCONS AI4WORK Data Minimisation Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-data-minimisation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  data-minimisation:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eucons/research/ai4work-step
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run GDPR data minimisation control
+        run: python data_minimisation_control.py --json
+      - name: Run GDPR data minimisation tests
+        run: python -m unittest -v test_data_minimisation_control.py

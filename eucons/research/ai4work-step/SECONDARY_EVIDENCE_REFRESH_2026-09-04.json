@@ -1,0 +1,165 @@
+{
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.16",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-04T10:41:36+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, employment-support funding, registered-unemployment context or generic vacancy counts into AI4WORK need-prevalence claims.",
+  "registry_reconciliation": {
+    "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
+    "controlled_source_register_high_water_mark": "S72",
+    "dashboard_reconciled_to_observed": "S01-S72",
+    "existing_branch_candidate_high_water_before_refresh": "S86",
+    "branch_candidate_high_water_after_refresh": "S87",
+    "candidate_rows_canonicalized": false,
+    "retained_prior_branch_candidate_ids": ["S73", "S74", "S75", "S76", "S77", "S78", "S79", "S80", "S81", "S82", "S83", "S84", "S85", "S86"],
+    "new_branch_candidate_ids": ["S87"],
+    "duplicate_source_promoted": false
+  },
+  "new_branch_candidates": [
+    {
+      "source_id": "S87",
+      "region": "Sud-Vest Oltenia / Dolj + Gorj",
+      "publisher": "ADR Sud-Vest Oltenia / OI Programul Dezvoltare Durabila si Tranzitie Justa",
+      "title": "16,5 milioane de euro pentru locuri de munca in Dolj si Gorj",
+      "publication_date": "2026-09-01",
+      "official_page_url": "https://ptj2021-2027.adroltenia.ro/165-milioane-de-euro-pentru-locuri-de-munca-in-dolj-si-gorj/",
+      "source_exact_page_readback_completed": true,
+      "publication_date_cross_checked_on_official_adrsvo_listing": true,
+      "observed_facts": {
+        "employment_support_funding_total_eur_approx": 16500000,
+        "gorj_allocation_eur": 9300000,
+        "dolj_allocation_eur": 7200000,
+        "monthly_subsidy_per_eligible_hire_lei": 2250,
+        "delivery_via_anofm_and_ajofm": true,
+        "application_deadline": "2026-09-22T17:00:00+03:00"
+      },
+      "classification": "CURRENT_EMPLOYMENT_SUPPORT_FUNDING_CONTEXT_ZERO_H1_H5",
+      "claim_boundary": "The official ADR Sud-Vest Oltenia / PDDTJ surface documents a current employment-support funding intervention for Dolj and Gorj. Funding allocation, subsidy design and implementation channels are policy/supply context only. They do not measure digital or AI competence, AI-specific skill-gap prevalence, unmet AI-specific employer demand, willingness to train, representativeness or causality. S87 contributes zero H1-H5 points and project/program activity is not used as evidence of need.",
+      "canonicalization_status": "BRANCH_ONLY_NOT_CANONICALIZED"
+    }
+  ],
+  "retained_branch_candidates_reverified": [
+    {
+      "source_id": "S85",
+      "region": "Sud-Muntenia / Dambovita",
+      "publisher": "ANOFM / AJOFM Dambovita",
+      "title": "Locuri de munca – 03.09.2026",
+      "publication_date": "2026-09-03",
+      "classification": "CURRENT_VACANCY_SURFACE_CONTEXT_ZERO_H1_H5",
+      "canonicalization_status": "BRANCH_ONLY_NOT_CANONICALIZED"
+    },
+    {
+      "source_id": "S86",
+      "region": "Centru / Mures",
+      "publisher": "ANOFM / AJOFM Mures",
+      "title": "Locuri de munca vacante la nivel judetean si in reteaua EURES",
+      "publication_date": "2026-09-02",
+      "observed_facts": {
+        "employer_reported_vacancies_total": 650,
+        "vacancies_for_higher_education_total": 41,
+        "higher_education_engineering_and_production_vacancies": 13
+      },
+      "classification": "CURRENT_EMPLOYER_REPORTED_VACANCY_CONTEXT_ZERO_H1_H5",
+      "canonicalization_status": "BRANCH_ONLY_NOT_CANONICALIZED"
+    }
+  ],
+  "cross_region_reverification": {
+    "Sud-Vest Oltenia": {
+      "status": "REVERIFIED_NEW_BRANCH_CONTEXT_CANDIDATE",
+      "detail": "S87 records the official 01.09.2026 ADR Sud-Vest Oltenia employment-support funding intervention for Dolj and Gorj strictly as zero-weight policy/supply context. The 31.08.2026 Olt July-unemployment item remains already represented as S61/S70 and is not duplicated.",
+      "h1_h5_numeric_points_added": 0
+    },
+    "Sud-Muntenia": {
+      "status": "REVERIFIED_NO_NEW_NEED_EVIDENCE_EXISTING_BRANCH_CONTEXT_RETAINED",
+      "detail": "S85 Dambovita remains current branch-only vacancy-surface context. Fresh institutional checks did not yield a source that directly measures AI/digital competence, AI-specific skill-gap prevalence, unmet AI-specific demand or willingness to train.",
+      "h1_h5_numeric_points_added": 0
+    },
+    "Centru": {
+      "status": "REVERIFIED_NO_NEW_NEED_EVIDENCE_EXISTING_BRANCH_CONTEXT_RETAINED",
+      "detail": "S86 Mures remains current branch-only employer-reported vacancy context. Fresh institutional checks did not yield a source that directly measures AI/digital competence, AI-specific skill-gap prevalence, unmet AI-specific demand or willingness to train.",
+      "h1_h5_numeric_points_added": 0
+    }
+  },
+  "promotion_policy": {
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "employment_support_funding_as_need_prevalence": false,
+    "administrative_context_as_need_prevalence": false,
+    "generic_vacancy_counts_as_ai_digital_need_prevalence": false,
+    "representativeness_claim_allowed": false,
+    "causal_claim_allowed": false,
+    "decision": "RETAIN_S73_S87_BRANCH_ONLY_ZERO_WEIGHT_CONTEXT_NO_CANONICALIZATION"
+  },
+  "call_requirements_refresh": {
+    "checked_at": "2026-09-04T10:41:36+03:00",
+    "gmail_query": "after:2026/09/04 -in:spam -in:trash -from:notifications@github.com (AI4WORK OR eucons OR Cloudflare OR cPanel OR Claus OR OMIPE OR MIPE OR PEO)",
+    "matching_authority_or_provider_messages_observed": 0,
+    "github_ci_notifications_excluded": true,
+    "current_ai4work_call_identity": "PEO/1160 / STEP-LLL Adults",
+    "fresh_pddtj_workforce_training_update_observed": true,
+    "fresh_pddtj_update_treated_as_ai4work_call_change": false,
+    "anti_conflation_note": "The 03.09.2026 PDDTJ/Tranzitie Justa modification concerning accredited training providers is a different programme/call family from AI4WORK STEP PEO/1160. It is deliberately excluded from AI4WORK Call Requirements and cannot change the controlled PEO/1160 rule set.",
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "checked_at": "2026-09-04T10:41:36+03:00",
+    "controlled_drive_queries": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1"],
+    "search_result_class": "CONTROL_OR_PRE_FINAL_MATERIAL_ONLY",
+    "eligible_immutable_combined_real_adult_employer_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "forms_and_gdpr_refresh": {
+    "forms_definition_sha": "01efe3bafd0da2d6b953baed704850f28bba2585",
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
+    "residual_provider_backup_ceiling_days": 92,
+    "account_specific_backup_ceiling_proven": false,
+    "privacy_contact_inbound_independently_verified": false,
+    "public_surface_status": "No live AI4WORK provider/account PASS is available; repository definition remains frozen and not deployed. Public commercial EUCONS surfaces are not substituted for the dedicated research Article 13 surface or provider-bound controls."
+  },
+  "method_and_nf06_refresh": {
+    "need_analysis_plan_status": "APPROVED_FOR_PROD_METHOD_ONLY",
+    "collection_frame_status": "APPROVED_FOR_PROD_METHOD_ONLY",
+    "core_rank_scope": "H1-H5_REAL_PRIMARY_ONLY",
+    "secondary_evidence_can_change_numeric_order": false,
+    "missing_direct_indicator_imputation_allowed": false,
+    "nf06_preingest_status": "PREPARED_FAIL_CLOSED",
+    "nf06_prod_ingest_allowed": false,
+    "need_synthesis_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  },
+  "adversarial_quality_notes": [
+    "The fresh Sud-Vest Oltenia funding item is not promoted as evidence of need; intervention scale is not treated as prevalence or demand measurement.",
+    "A fresh PDDTJ workforce-training guide modification is not conflated with the AI4WORK PEO/1160 Call Requirements.",
+    "No project activity, training supply, administrative labour-market figure or generic vacancy count is converted into H1-H5 evidence.",
+    "No synthetic or TEST_TWIN record is promoted or made eligible for PROD evidence."
+  ],
+  "remaining_external_blocker": {
+    "class": "LIVE_ACCOUNT_SPECIFIC_PROVIDER_BOUND",
+    "items": [
+      "exact rendered AI4WORK Article 13 readback on the live research surface and independently working privacy/rights inbound channel",
+      "actual eucons.ro cPanel/Cloudflare Raw Access/archive/access-security/retention readback proving the <=7-day policy on the live account",
+      "current service/account mapping and active processor/subprocessor chain",
+      "provider-bound proof that the research-only store is outside webroot and separate from CRM/commercial storage with authorised access only",
+      "account-specific confirmation of no backup override above <=92 days plus deletion/restore semantics that do not silently reintroduce erased/held records",
+      "provider-bound rights-hold/erasure and incident-response smoke evidence in TEST_TWIN_NON_EVIDENCE"
+    ]
+  },
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

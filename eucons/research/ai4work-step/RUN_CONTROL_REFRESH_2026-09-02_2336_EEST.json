@@ -1,0 +1,109 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T23:36:13+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "observed_pr_head_before_persist": "24dea2cc3c053b02a3a877fbcf44b6504d93f59a",
+  "secondary_research_refresh": {
+    "regions_checked": [
+      "Sud-Vest Oltenia",
+      "Sud-Muntenia",
+      "Centru"
+    ],
+    "source_register_high_water_mark": "S40",
+    "new_source_promoted": false,
+    "new_source_id": null,
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "screening_notes": [
+      "Sud-Vest Oltenia: fresh official ANOFM/AJOFM/CRFPA screening surfaced current placement, training-supply and project-implementation material, including AJOFM Valcea 2026 placement reporting and CRFPA Valcea CD Future. These are labour-market context or service/project supply, not a source-exact recent adult/employer AI/digital-skills needs instrument, and are not promoted as evidence of need prevalence.",
+      "Sud-Muntenia: fresh official ANOFM/AJOFM screening surfaced current unemployment/programme implementation material, including AJOFM Calarasi January 2026 statistics and AJOFM Arges 2026 programme-realisation reporting. No materially stronger source-exact AI/digital-skills needs instrument was identified; activity/output statistics are not promoted as need evidence.",
+      "Centru: fresh official ANOFM/AJOFM screening surfaced current placement/unemployment/programme material, including AJOFM Harghita 2026 placement reporting and AJOFM Alba 2026 programme material. The known official AJOFM Covasna 2026 forecast remains listing-verified but without controlled source-exact PDF content readback, so no internal finding is inferred or promoted."
+    ],
+    "fresh_official_urls": [
+      "https://www.anofm.ro/valcea/persoane-incadrate-prin-intermediul-ajofm-valcea-in-primele-doua-luni-ale-anului-2026/",
+      "https://www.anofm.ro/crfpa-valcea/cd-future-competente-digitale-un-viitor-performant-pentru-firma-ta-prin-angajati-competitivi/",
+      "https://www.anofm.ro/calarasi/date-statistice-ianuarie-2026/",
+      "https://www.anofm.ro/arges/realizari-program-de-ocuparea-fortei-de-munca-la-data-de-31-martie-2026/",
+      "https://www.anofm.ro/harghita/numar-de-someri-angajati-prin-intermediul-ajofm-harghita-la-30-iunie-2026/",
+      "https://www.anofm.ro/alba/programul-national-de-ocupare-a-fortei-de-munca-pentru-anul-2026/",
+      "https://www.anofm.ro/covasna/studii/"
+    ]
+  },
+  "evidence_registry_refresh": {
+    "source_register_row_added": false,
+    "source_register_high_water_mark": "S40",
+    "prod_h1_h5_row_added": false,
+    "classification": "NO_NEW_PROMOTABLE_SOURCE_NO_EVIDENCE_INFLATION"
+  },
+  "call_requirements_refresh": {
+    "gmail_query": "after:2026/09/02 -in:spam -in:trash -from:notifications@github.com (367944 OR AI4WORK OR OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR eucons.ro OR Claus OR GDPR)",
+    "matching_new_authority_or_provider_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "gdpr_refresh": {
+    "forms_schema": "eucons.research_forms.v0.5",
+    "forms_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields_allowed_in_research_forms": false,
+    "analytical_free_text_allowed": false,
+    "commercial_tracking_allowed": false,
+    "crm_linkage_allowed": false,
+    "article13_snapshot_status": "DRAFT_CONTROLLER_APPROVAL_REQUIRED",
+    "article13_binding_control": "SHA256_FAIL_CLOSED_BINDING_IMPLEMENTED_BRANCH_ONLY",
+    "privacy_contact_operationally_bound": false,
+    "controller_approval_inferred": false,
+    "live_provider_configuration_inferred": false,
+    "canonical_export_integrity_control": "IMPLEMENTED_BRANCH_ONLY",
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE"
+  },
+  "primary_evidence_refresh": {
+    "drive_queries": [
+      "AI4WORK_ADULTS_V1",
+      "PROD_REAL_EVIDENCE source_export_sha256",
+      "response_id CH- AI4WORK employer adult"
+    ],
+    "eligible_combined_real_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "nf06_readiness_refresh": {
+    "preingest_contract": "eucons.ai4work_nf06_preingest_contract.v1.0",
+    "canonical_source_export": "UTF-8 NDJSON sorted form_id/received_at/response_id, newline terminated",
+    "prod_record_schema_exact_allowlist": true,
+    "privacy_notice_version_required_in_prod_collection_frame": true,
+    "privacy_notice_snapshot_sha256_promotion_binding_implemented": true,
+    "sufficient_real_adult_and_employer_batch_available": false,
+    "synthesis_authorized": false
+  },
+  "repository_implementation_state": {
+    "need_analysis_plan_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "collection_frame_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "precollection_method_lock_status": "OPEN_NOT_LOCKED",
+    "precollection_plan_sha256_bound": false,
+    "precollection_frame_sha256_bound": false,
+    "research_runtime_production_enabled": false,
+    "research_store_runtime_isolation_checks_implemented_branch_only": true,
+    "provider_bound_storage_isolation_proven": false
+  },
+  "remaining_precollection_boundary": [
+    "Approve exact NEED_ANALYSIS_PLAN and COLLECTION_FRAME and bind both SHA-256 values",
+    "Controller approval of Art. 6(1)(f) LIA/lawful basis and acceptance of DPIA screening outcome or completion of DPIA if required",
+    "Final dedicated AI4WORK Article 13 notice with operational EUROCONSULT privacy contact",
+    "Approved requester-authentication and data-subject-rights procedure",
+    "Account-specific eucons.ro/cPanel/Cloudflare readback proving Raw Access <= 7 days and access/security controls",
+    "Provider-bound proof of live research-store separation from CRM/webroot and residual backups <= 92 days",
+    "Active processor/subprocessor, rights-hold and incident-response bindings",
+    "Real CH-* channel entries only after dissemination authorization",
+    "Fresh explicit human collection-only v0.2 approval"
+  ],
+  "downstream_state": "FAIL_CLOSED_UNTIL_SUFFICIENT_IMMUTABLE_REAL_ADULT_AND_EMPLOYER_BATCH",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false,
+  "real_collection_authorized": false
+}

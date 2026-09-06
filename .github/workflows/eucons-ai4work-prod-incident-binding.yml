@@ -1,0 +1,42 @@
+name: EUCONS AI4WORK PROD Incident Binding
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/security_incident_response_gate.py'
+      - 'eucons/research/ai4work-step/GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json'
+      - 'eucons/research/ai4work-step/test_prod_activation_incident_binding.py'
+      - '.github/workflows/eucons-ai4work-prod-incident-binding.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/security_incident_response_gate.py'
+      - 'eucons/research/ai4work-step/GDPR_SECURITY_INCIDENT_RESPONSE_DRAFT.json'
+      - 'eucons/research/ai4work-step/test_prod_activation_incident_binding.py'
+      - '.github/workflows/eucons-ai4work-prod-incident-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-prod-incident-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  prod-incident-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify incident-response semantics are enforced by PROD activation itself
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_prod_activation_incident_binding.py
+      - name: Verify current repository remains fail-closed
+        working-directory: eucons/research/ai4work-step
+        run: python prod_activation_gate.py

@@ -1,0 +1,126 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.3",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T22:30:20+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "branch_parent_head": "168fb78a3145850c8c12c2c422e6a9b4617b060f",
+  "secondary_evidence_refresh": {
+    "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
+    "high_water_mark_observed": "S72",
+    "candidate_rows_canonicalized": false,
+    "official_reverification": [
+      {
+        "region": "Sud-Vest Oltenia / Olt",
+        "publisher": "ANOFM / AJOFM Olt",
+        "url": "https://www.anofm.ro/olt/categorie/statistica-somaj/",
+        "observed_fact": "The official Olt statistics surface continues to expose the July-2026 unemployment publication in the current institutional listing.",
+        "classification": "CURRENT_ADMINISTRATIVE_CONTEXT_ZERO_H1_H5"
+      },
+      {
+        "region": "Sud-Muntenia / Arges",
+        "publisher": "ANOFM / AJOFM Arges",
+        "url": "https://www.anofm.ro/arges/categorie/comunicate-de-presa/",
+        "observed_fact": "The official press listing exposes SOMAJ IULIE 2026 dated 20.08.2026; no numeric value is inferred from the listing wrapper.",
+        "classification": "CURRENT_ADMINISTRATIVE_PUBLICATION_SURFACE_ZERO_H1_H5"
+      },
+      {
+        "region": "Centru / Sibiu",
+        "publisher": "ANOFM / AJOFM Sibiu",
+        "url": "https://www.anofm.ro/sibiu/oferta-cursuri-formare-profesionala-2026/",
+        "observed_fact": "The official 2026 training-offer surface is still available and includes, among other programmes, data-entry/processing/validation operator training. It is supply context only.",
+        "classification": "CURRENT_TRAINING_SUPPLY_CONTEXT_ZERO_H1_H5"
+      }
+    ],
+    "national_context_reverification": {
+      "publisher": "ANOFM",
+      "url": "https://www.anofm.ro/raport-formare-profesionala-iulie-2026/",
+      "publication_date": "2026-08-17",
+      "observed_fact": "ANOFM reports 11,632 persons included in vocational-training programmes and competence-assessment processes during January-July 2026.",
+      "classification": "NATIONAL_TRAINING_ACTIVITY_CONTEXT_ZERO_H1_H5",
+      "claim_boundary": "Training activity and supply are not need-prevalence evidence and add zero H1-H5 weight."
+    },
+    "duplicate_registry_rows_observed": [
+      ["S61", "S70"],
+      ["S62", "S71"],
+      ["S66", "S72"]
+    ],
+    "duplicate_handling": "NO_CANONICALIZATION_WITHOUT_EXPLICIT_USER_APPROVAL; ZERO_WEIGHT_ROWS_MUST_NOT_BE_DOUBLE_COUNTED",
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "administrative_labour_market_data_as_need_prevalence": false
+  },
+  "call_requirements_refresh": {
+    "gmail_query": "newer_than:1d -in:spam -in:trash -from:(notifications@github.com) (AI4WORK OR eucons.ro OR Cloudflare OR cPanel OR Claus Web OR ClausWeb OR OMIPE OR MIPE OR PEO)",
+    "matching_messages_observed": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "controlled_drive_queries": [
+      "PROD_REAL_EVIDENCE AI4WORK",
+      "AI4WORK_ADULTS_V1"
+    ],
+    "search_result_class": "CONTROL_OR_PRE_FINAL_MATERIAL_ONLY",
+    "eligible_immutable_combined_real_adult_employer_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "public_surface_refresh": {
+    "eucons_home": "LIVE_COMMERCIAL_SITE_ONLY",
+    "contact_surface": "LIVE_COMMERCIAL_CONTACT_ONLY",
+    "privacy_surface": "LIVE_COMMERCIAL_PRIVACY_NOTICE_ONLY",
+    "dedicated_ai4work_article13_live_verified": false,
+    "privacy_contact_inbound_independently_verified": false,
+    "observation": "The live Contact page still describes a commercial request form and states that the company email channel is attached at production activation. The live Privacy page describes commercial processing and does not expose the dedicated AI4WORK Article 13 notice or independently prove privacy@eucons.ro inbound operation."
+  },
+  "forms_gdpr_nf06_refresh": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifiers_in_analytical_forms": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
+    "residual_provider_backup_ceiling_days": 92,
+    "account_specific_backup_ceiling_proven": false,
+    "nf06_preingest_status": "PREPARED_FAIL_CLOSED",
+    "nf06_prod_ingest_allowed": false,
+    "need_synthesis_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  },
+  "repository_controls": {
+    "exact_head_before_this_receipt": "168fb78a3145850c8c12c2c422e6a9b4617b060f",
+    "associated_pr_triggered_workflow_runs_observed": 29,
+    "failed_conclusions_observed": 0,
+    "null_conclusions_observed": 0,
+    "interpretation": "Repository controls are green at the parent exact head. CI is not evidence of live provider/account configuration or real need prevalence."
+  },
+  "non_blocking_internal_qa_observation": {
+    "file": "eucons/research/ai4work-step/build_research_pages.py",
+    "issue": "The rendered label 'Interes legitim propus, daca acesta este temeiul final' is semantically stale relative to the already-approved art. 6(1)(f) LIA in form_contract.json and ARTICLE13_NOTICE_CANDIDATE_2026-09-03.md.",
+    "risk": "CLARITY_ONLY_WHILE_COLLECTION_DISABLED",
+    "prod_effect": "NONE_CURRENTLY_COLLECTION_DISABLED",
+    "required_before_live_article13_readback": "Align the rendered label with the approved legal-basis state; do not change the legal basis or enable collection through this correction."
+  },
+  "remaining_external_blocker": {
+    "class": "LIVE_ACCOUNT_SPECIFIC_PROVIDER_BOUND",
+    "items": [
+      "exact rendered AI4WORK Article 13 readback and independently working privacy/rights inbound channel",
+      "actual eucons.ro cPanel/Cloudflare Raw Access/archive/access-security/retention readback proving the <=7-day policy on the live account",
+      "current service/account mapping and active processor/subprocessor chain",
+      "provider-bound proof that the research-only store is outside webroot and separate from CRM/commercial storage with authorised access only",
+      "account-specific confirmation of no backup override above <=92 days plus deletion/restore semantics that do not silently reintroduce erased/held records",
+      "provider-bound rights-hold/erasure and incident-response smoke evidence in TEST_TWIN_NON_EVIDENCE"
+    ]
+  },
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

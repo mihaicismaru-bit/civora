@@ -1,0 +1,28 @@
+name: EUCONS AI4WORK Public Surface Security Binding
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - 'eucons/web/**'
+      - '.github/workflows/eucons-ai4work-public-surface-security.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-surface-security:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: eucons/research/ai4work-step
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate fail-closed public research response-header binding
+        run: python public_research_surface_security_control.py --json
+      - name: Run public research response-header binding tests
+        run: python -m unittest -v test_public_research_surface_security_control.py
