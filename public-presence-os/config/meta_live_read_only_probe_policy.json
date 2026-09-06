@@ -1,0 +1,101 @@
+{
+  "schema_version": "PPOS_META_LIVE_READ_ONLY_PROBE_POLICY_V1",
+  "checkpoint": "CP56",
+  "module_id": "M25_META_LIVE_READ_ONLY_PROBE",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "contract": {
+    "runbook_contract_only": true,
+    "exact_cp55_gate_binding_required": true,
+    "global_kill_switch_must_be_engaged": true,
+    "method_allowlist": ["GET"],
+    "mutating_methods_forbidden": ["POST", "PUT", "PATCH", "DELETE"],
+    "api_version_pin_required_later": true,
+    "api_version_must_be_operator_verified_against_current_official_meta_docs": true,
+    "endpoint_must_be_operator_verified_against_current_official_meta_docs": true,
+    "redaction_before_persistence_required_later": true,
+    "sha256_evidence_binding_required_later": true,
+    "zero_write_proof_required_later": true,
+    "operator_timestamp_required_later": true,
+    "live_reverification_required": true,
+    "automatic_live_retry_allowed": false,
+    "raw_secret_or_token_persistence_allowed": false,
+    "external_evidence_upload_allowed": false,
+    "pilot_publish_ready": false
+  },
+  "platform_probe_classes": {
+    "FACEBOOK_PAGE": [
+      "TOKEN_DEBUG_READ_ONLY",
+      "PAGE_IDENTITY_READ_ONLY",
+      "PAGE_PERMISSION_CAPABILITY_READBACK"
+    ],
+    "INSTAGRAM_PROFESSIONAL": [
+      "TOKEN_DEBUG_READ_ONLY",
+      "IG_PROFESSIONAL_IDENTITY_READ_ONLY",
+      "IG_PERMISSION_CAPABILITY_READBACK"
+    ],
+    "THREADS": [
+      "TOKEN_DEBUG_READ_ONLY",
+      "THREADS_PROFILE_IDENTITY_READ_ONLY",
+      "THREADS_PERMISSION_CAPABILITY_READBACK"
+    ]
+  },
+  "required_evidence_codes": [
+    "LIVE_TOKEN_DEBUG_REDACTED",
+    "LIVE_ACCOUNT_IDENTITY_MATCH_REDACTED",
+    "LIVE_PERMISSION_SET_EXACT",
+    "LIVE_CAPABILITY_SET_EXACT",
+    "LIVE_EXPIRY_STATE",
+    "LIVE_READ_ONLY_RESPONSE_HASH",
+    "OPERATOR_TIMESTAMP_UTC",
+    "API_VERSION_PIN",
+    "ZERO_WRITE_CONFIRMATION"
+  ],
+  "evidence_rules": {
+    "hash_algorithm": "SHA256",
+    "canonicalization_required": true,
+    "redaction_required": true,
+    "raw_secret_bytes_allowed": false,
+    "raw_token_persistence_allowed": false,
+    "only_redacted_hash_bound_evidence_may_persist": true,
+    "evidence_state_in_cp56": "NOT_CAPTURED"
+  },
+  "recovery": {
+    "keep_global_kill_switch_engaged": true,
+    "abort_on_non_get_method": true,
+    "abort_on_endpoint_drift": true,
+    "abort_on_api_version_drift": true,
+    "abort_on_permission_or_identity_mismatch": true,
+    "discard_unredacted_working_material": true,
+    "preserve_only_redacted_hash_bound_evidence": true,
+    "auto_retry_live_probe_allowed": false,
+    "rollback_mutation_required": false
+  },
+  "authority": {
+    "real_secret_reference_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "oauth_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "network_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "safety": {
+    "no_publication": true,
+    "no_real_accounts": true,
+    "no_paid_services": true,
+    "live_probe_not_authorized_by_cp56": true,
+    "contract_does_not_establish_live_entitlement": true
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  }
+}

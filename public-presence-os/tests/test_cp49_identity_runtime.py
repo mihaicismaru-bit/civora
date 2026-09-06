@@ -204,12 +204,13 @@ def test_cp49_policy_and_registry_are_local_only_and_exact_binding():
     ):
         assert policy["authority"][key] is False
 
-    assert registry["checkpoint"] == "CP55"
+    assert registry["checkpoint"] == "CP56"
     by_id = {row["id"]: row["status"] for row in registry["modules"]}
     assert by_id["M06_VISUAL"] == "CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
     assert by_id["M07_QA"] == "CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"
     assert by_id["M18_VISUAL_IDENTITY"] == "CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"
     assert by_id["M24_META_READ_ONLY_GATE"] == "CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"
+    assert by_id["M25_META_LIVE_READ_ONLY_PROBE"] == "CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"
 
     assert runtime["global_kill_switch_engaged"] is True
     assert runtime["network_enabled"] is False
