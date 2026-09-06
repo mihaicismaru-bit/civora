@@ -154,6 +154,8 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
             existing = best[ref]
             if existing is None or stamp > existing[0]:
                 best[ref] = (stamp, path, artifact_id, artifact_name)
+        if all(best.values()):
+            break
 
     restored: dict[str, Any] = {}
     for ref, cfg in CALLS.items():
@@ -203,12 +205,6 @@ def enforce_boundary(root: pathlib.Path) -> dict[str, Any]:
             raise SystemExit(f"FAIL I3 canonical exact identity drift: {reference}")
         if current.get("source_family") != "EU_DIRECT" or current.get("programme_family") != PROGRAMME_FAMILY:
             raise SystemExit(f"FAIL I3 canonical family drift: {reference}")
-        if current.get("source_health_state") != "HEALTHY" or current.get("evidence_usable_for_reconciliation") is not True:
-            raise SystemExit(f"FAIL I3 canonical current exact authority chain degraded: {reference}")
-        if current.get("funding_tenders_authority_verified") is not True or (current.get("eismea_receipt") or {}).get("health_state") != "HEALTHY":
-            raise SystemExit(f"FAIL I3 canonical current authority proof incomplete: {reference}")
-        if current.get("cross_authority_status_consistent") is not True:
-            raise SystemExit(f"FAIL I3 canonical cross-authority status conflict: {reference}")
         if not re.fullmatch(r"[0-9a-f]{64}", str(current.get("exact_semantic_fingerprint") or "")):
             raise SystemExit(f"FAIL I3 canonical semantic fingerprint missing: {reference}")
         if any(current.get(flag) is not False for flag in FLAGS):
@@ -217,8 +213,6 @@ def enforce_boundary(root: pathlib.Path) -> dict[str, Any]:
             raise SystemExit(f"FAIL I3 canonical evidence crossed publication boundary: {reference}")
         if rec.get("schema") != RECONCILIATION_SCHEMA or rec.get("reference") != reference:
             raise SystemExit(f"FAIL I3 canonical reconciliation identity drift: {reference}")
-        if rec.get("semantic_reconciliation_passed") is not True:
-            raise SystemExit(f"FAIL I3 canonical semantic reconciliation did not pass: {reference}")
         if rec.get("field_scoped_material_admission_required") is not True or "field_scoped_material_admission" not in set(rec.get("missing_for_material_admission") or []):
             raise SystemExit(f"FAIL I3 canonical final material gate relaxed: {reference}")
         if rec.get("lkg_reference_is_current_truth") is not False:
@@ -227,24 +221,55 @@ def enforce_boundary(root: pathlib.Path) -> dict[str, Any]:
             raise SystemExit(f"FAIL I3 canonical reconciliation became authorizing: {reference}")
         if rec.get("publication_effect") != "NONE" or rec.get("canonical_corpus_mutation") is not False:
             raise SystemExit(f"FAIL I3 canonical reconciliation crossed publication boundary: {reference}")
+
+        healthy = current.get("source_health_state") == "HEALTHY" and current.get("evidence_usable_for_reconciliation") is True
+        previous_healthy = False
         if previous_path.exists():
             previous = load(previous_path)
-            if not healthy_same_identity(previous, current):
+            previous_healthy = healthy_same_identity(previous, current)
+            if not previous_healthy:
                 raise SystemExit(f"FAIL I3 canonical previous receipt selection invalid: {reference}")
             if rec.get("previous_identity_match") is not True or rec.get("previous_evidence_sha256") is None:
                 raise SystemExit(f"FAIL I3 canonical reconciliation lost previous binding: {reference}")
-            if rec.get("reconciliation_state") not in {"NO_CHANGE", "I3_EXACT_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"}:
-                raise SystemExit(f"FAIL I3 canonical reconciled state invalid: {reference}")
-        elif rec.get("reconciliation_state") != "BASELINE_CAPTURED_NON_AUTHORIZING":
-            raise SystemExit(f"FAIL I3 canonical baseline state invalid: {reference}")
+
+        if healthy:
+            if current.get("funding_tenders_authority_verified") is not True or (current.get("eismea_receipt") or {}).get("health_state") != "HEALTHY":
+                raise SystemExit(f"FAIL I3 canonical current authority proof incomplete: {reference}")
+            if current.get("cross_authority_status_consistent") is not True:
+                raise SystemExit(f"FAIL I3 canonical cross-authority status conflict: {reference}")
+            if rec.get("semantic_reconciliation_passed") is not True or rec.get("lkg_reference_required") is not False:
+                raise SystemExit(f"FAIL I3 canonical healthy reconciliation semantics drift: {reference}")
+            if previous_path.exists():
+                if rec.get("reconciliation_state") not in {"NO_CHANGE", "I3_EXACT_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"}:
+                    raise SystemExit(f"FAIL I3 canonical reconciled state invalid: {reference}")
+            elif rec.get("reconciliation_state") != "BASELINE_CAPTURED_NON_AUTHORIZING":
+                raise SystemExit(f"FAIL I3 canonical baseline state invalid: {reference}")
+        else:
+            if current.get("source_health_state") != "DEGRADED_EXACT_AUTHORITY_CHAIN" or current.get("evidence_usable_for_reconciliation") is not False or current.get("lkg_required") is not True:
+                raise SystemExit(f"FAIL I3 canonical degraded source-health state invalid: {reference}")
+            if current.get("candidate_state") != "UNKNOWN" or current.get("status_label") is not None:
+                raise SystemExit(f"FAIL I3 canonical degraded evidence leaked status: {reference}")
+            if current.get("deadline_candidate") is not None or current.get("budget_candidate") is not None:
+                raise SystemExit(f"FAIL I3 canonical degraded evidence leaked material candidates: {reference}")
+            if rec.get("reconciliation_state") != "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED":
+                raise SystemExit(f"FAIL I3 canonical degraded current did not fail closed: {reference}")
+            if rec.get("semantic_reconciliation_passed") is not False or rec.get("semantic_change_count") != 0:
+                raise SystemExit(f"FAIL I3 canonical degraded reconciliation fabricated semantic change: {reference}")
+            if rec.get("lkg_reference_required") is not True or rec.get("lkg_reference_available") is not previous_healthy:
+                raise SystemExit(f"FAIL I3 canonical degraded LKG availability drift: {reference}")
+            if rec.get("material_admission_ready_for_downstream_review") is not False:
+                raise SystemExit(f"FAIL I3 canonical degraded current reached material review gate: {reference}")
+
         summaries.append({
             "reference": reference,
+            "source_health_state": current.get("source_health_state"),
             "candidate_state": current.get("candidate_state"),
             "status_label": current.get("status_label"),
             "semantic_fingerprint": current.get("exact_semantic_fingerprint"),
             "reconciliation_state": rec.get("reconciliation_state"),
             "semantic_change_count": rec.get("semantic_change_count"),
             "previous_same_identity_restored": previous_path.exists(),
+            "lkg_reference_required": rec.get("lkg_reference_required"),
             "material_admission_ready_for_downstream_review": rec.get("material_admission_ready_for_downstream_review"),
             "open_call_authorized": False,
             "publication_effect": "NONE",
@@ -256,16 +281,25 @@ def stage_history(root: pathlib.Path) -> dict[str, Any]:
     result: dict[str, Any] = {}
     for reference, config in CALLS.items():
         folder = root / str(config["folder"])
-        current = folder / "current" / "ft-i3-exact-evidence.json"
-        rec = folder / "current" / "i3-exact-reconciliation.json"
+        current_path = folder / "current" / "ft-i3-exact-evidence.json"
+        rec_path = folder / "current" / "i3-exact-reconciliation.json"
+        previous_path = folder / "previous" / "ft-i3-exact-evidence.json"
         history = folder / "history"
         history.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(current, history / "ft-i3-exact-evidence.json")
-        shutil.copy2(rec, history / "i3-exact-reconciliation.json")
+        current = load(current_path)
+        if current.get("source_health_state") == "HEALTHY" and current.get("evidence_usable_for_reconciliation") is True:
+            shutil.copy2(current_path, history / "ft-i3-exact-evidence.json")
+            selected = "CURRENT_HEALTHY"
+        elif previous_path.exists() and healthy_same_identity(load(previous_path), current):
+            shutil.copy2(previous_path, history / "ft-i3-exact-evidence.json")
+            selected = "PREVIOUS_HEALTHY_LKG"
+        else:
+            selected = "NO_HEALTHY_LKG_AVAILABLE"
+        shutil.copy2(rec_path, history / "i3-exact-reconciliation.json")
         result[reference] = {
-            "selected": "CURRENT_HEALTHY",
+            "selected": selected,
             "lkg_is_current_truth": False,
-            "current_source_health_state": load(current).get("source_health_state"),
+            "current_source_health_state": current.get("source_health_state"),
         }
     dump(root / "history-selection.json", result)
     return result
