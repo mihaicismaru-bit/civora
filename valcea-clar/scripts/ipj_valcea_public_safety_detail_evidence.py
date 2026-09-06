@@ -33,7 +33,7 @@ from ipj_valcea_public_safety_reference_adapter import (
 )
 
 SCHEMA = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_V1"
-PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_02"
+PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_06_NAV_FILTER"
 SOURCE_FAMILY = "IPJ_VALCEA_PUBLIC_SAFETY"
 AUTHORITY_CLASS = "FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE"
 OBSERVATION_STATE = "POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING"
@@ -50,6 +50,14 @@ MAX_FIELD_EVIDENCE = 8
 MAX_FRAGMENT_CHARS = 420
 ALLOWED_CONTENT_TYPES = {"text/html", "application/xhtml+xml", "text/plain"}
 USER_AGENT = "CIVORA-Valcea-Clar-IPJ-Detail-Evidence/1.0"
+
+# Exact first-party chrome labels that can contain evidence keywords but are not
+# article evidence. Keep this denylist deliberately narrow so legitimate police
+# prose containing terms such as "arest" or "reținere" remains eligible.
+IGNORED_VISIBLE_TEXT_SEGMENTS = {
+    "program centrul de reţinere și arest preventiv".casefold(),
+    "program centrul de reținere și arest preventiv".casefold(),
+}
 
 NON_AUTHORIZING_FLAGS = {
     "material_fact_use": False,
@@ -170,6 +178,8 @@ class VisibleTextParser(HTMLParser):
             return
         text = " ".join(data.split())
         if not text:
+            return
+        if text.casefold() in IGNORED_VISIBLE_TEXT_SEGMENTS:
             return
         self.segments.append(text)
         if self.in_title:
@@ -409,6 +419,7 @@ def _self_test() -> None:
     html = (
         "<html><head><title>IPJ Vâlcea - test</title></head><body>"
         "<script>Bărbatul ar fi făcut ceva 1 ianuarie 2099.</script>"
+        "<nav><a>Program Centrul de Reţinere și Arest Preventiv</a></nav>"
         "<p>2 septembrie 2026</p>"
         "<p>Polițiștii au oprit un autoturism pentru verificări în trafic.</p>"
         "<p>Din verificări, conducătorul auto ar fi folosit un document necorespunzător.</p>"
@@ -421,6 +432,7 @@ def _self_test() -> None:
     assert date_text == "2 septembrie 2026"
     observed_tags = {tag for item in field_evidence for tag in item.epistemic_tags}
     assert {"POLICE_REPORTED_OBSERVATION", "ALLEGATION_OR_SUSPICION", "PROCEDURAL_MEASURE", "ROAD_OR_PUBLIC_SAFETY_MEASURE"} <= observed_tags
+    assert not any("Program Centrul de Reţinere" in item.excerpt for item in field_evidence)
     assert set(tag_counts) <= ALLOWED_TAGS
     assert all(re.fullmatch(r"[0-9a-f]{64}", item.evidence_sha256) for item in field_evidence)
     assert all(value is False for value in NON_AUTHORIZING_FLAGS.values())
