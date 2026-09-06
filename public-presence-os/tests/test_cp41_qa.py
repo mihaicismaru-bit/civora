@@ -157,7 +157,7 @@ def test_qa_rejects_svg_active_content_even_if_manifest_hash_is_forged(tmp_path)
         svg_size=len(bad_svg),
     )
     forged = RenderedVisual(forged_manifest, bad_svg, rendered.png_bytes)
-    with pytest.raises(visual.VisualHold, match="HOLD_SVG_EXTERNAL_OR_ACTIVE_CONTENT"):
+    with pytest.raises(VisualQAHold, match="HOLD_SVG_PARSE"):
         audit_visual(VisualQARequest(forged, bundle))
 
 
