@@ -1,5 +1,5 @@
 {
-  "checkpoint": "CP48",
+  "checkpoint": "CP49",
   "order": [
     {"depends_on": [], "module_id": "M01_RADAR", "rank": 1, "state": "CP34_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M01_RADAR"], "module_id": "M02_RESEARCH", "rank": 2, "state": "CP35_MINIMAL_EXECUTABLE_SLICE"},
@@ -7,15 +7,15 @@
     {"depends_on": ["M03_SCORING"], "module_id": "M04_MASTER_DRAFT", "rank": 4, "state": "CP37_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M04_MASTER_DRAFT"], "module_id": "M05_NATIVE_ADAPT", "rank": 5, "state": "CP38_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M05_NATIVE_ADAPT"], "module_id": "M13_RIGHTS", "rank": 6, "state": "CP39_MINIMAL_EXECUTABLE_SLICE"},
-    {"depends_on": ["M05_NATIVE_ADAPT", "M13_RIGHTS"], "module_id": "M06_VISUAL", "rank": 7, "state": "CP40_MINIMAL_EXECUTABLE_SLICE"},
-    {"depends_on": ["M06_VISUAL"], "module_id": "M07_QA", "rank": 8, "state": "CP41_MINIMAL_EXECUTABLE_SLICE"},
+    {"depends_on": ["M05_NATIVE_ADAPT", "M13_RIGHTS"], "module_id": "M06_VISUAL", "rank": 7, "state": "CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"},
+    {"depends_on": ["M06_VISUAL"], "module_id": "M07_QA", "rank": 8, "state": "CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"},
     {"depends_on": ["M07_QA"], "module_id": "M12_APPROVAL", "rank": 9, "state": "CP42_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M12_APPROVAL"], "module_id": "M08_QUEUE", "rank": 10, "state": "CP43_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M08_QUEUE"], "module_id": "M09_PUBLISHER", "rank": 11, "state": "CP44_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M09_PUBLISHER"], "module_id": "M10_ANALYTICS", "rank": 12, "state": "CP45_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M10_ANALYTICS"], "module_id": "M11_LEARNING", "rank": 13, "state": "CP46_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M11_LEARNING"], "module_id": "M14_EXPERIMENTS", "rank": 14, "state": "CP47_MINIMAL_EXECUTABLE_SLICE"},
-    {"depends_on": ["M06_VISUAL", "M07_QA"], "module_id": "M18_VISUAL_IDENTITY", "rank": 15, "state": "CP48_V2_EXACT_FONT_LICENSE_CONTRACT_STAGED"}
+    {"depends_on": ["M06_VISUAL", "M07_QA"], "module_id": "M18_VISUAL_IDENTITY", "rank": 15, "state": "CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"}
   ],
   "policy": "CLEAN_ROOM_FROM_CANON_ONLY",
   "rules": {
@@ -24,6 +24,6 @@
     "no_live_network_or_accounts_pre_pilot": true,
     "respect_pipeline_dependencies": true
   },
-  "next": "CP49_IDENTITY_RUNTIME_ACTIVATION_AND_QA_BINDING",
+  "next": "CP50_META_FREE_API_ADAPTER_CONTRACT_OFFLINE_REQUEST_COMPILER",
   "schema_version": "PPOS_REIMPLEMENTATION_PRIORITY_V1"
 }

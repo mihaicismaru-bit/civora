@@ -18,8 +18,8 @@ EXECUTABLE_STAGE_STATUSES = {
     "M03_SCORING": {"CP36_MINIMAL_EXECUTABLE_SLICE"},
     "M04_MASTER_DRAFT": {"CP37_MINIMAL_EXECUTABLE_SLICE"},
     "M05_NATIVE_ADAPT": {"CP38_MINIMAL_EXECUTABLE_SLICE"},
-    "M06_VISUAL": {"CP40_MINIMAL_EXECUTABLE_SLICE"},
-    "M07_QA": {"CP41_MINIMAL_EXECUTABLE_SLICE"},
+    "M06_VISUAL": {"CP40_MINIMAL_EXECUTABLE_SLICE", "CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"},
+    "M07_QA": {"CP41_MINIMAL_EXECUTABLE_SLICE", "CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"},
     "M08_QUEUE": {"CP43_MINIMAL_EXECUTABLE_SLICE"},
     "M09_PUBLISHER": {"CP44_MINIMAL_EXECUTABLE_SLICE"},
     "M10_ANALYTICS": {"CP45_MINIMAL_EXECUTABLE_SLICE"},
@@ -98,17 +98,39 @@ def run_synthetic_rehearsal(root: Path) -> RehearsalReport:
     if platforms != EXPECTED_ACTIVE:
         blockers.append("ACTIVE_PLATFORM_SET_MISMATCH")
 
-    identity_path = root / "config" / "visual_identity_policy.json"
-    if not identity_path.is_file():
-        blockers.append("HOLD_VISUAL_IDENTITY_POLICY_MISSING")
+    identity_runtime_path = root / "config" / "identity_runtime_policy.json"
+    identity_runtime_status = status_by_id.get("M18_VISUAL_IDENTITY")
+    if identity_runtime_status == "CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY":
+        if not identity_runtime_path.is_file():
+            blockers.append("HOLD_IDENTITY_RUNTIME_POLICY_MISSING")
+        else:
+            identity_runtime = load_json(identity_runtime_path)
+            exact_runtime_contract = (
+                identity_runtime.get("checkpoint") == "CP49"
+                and identity_runtime.get("identity_name") == "EDITORIAL_LEDGER_V2"
+                and identity_runtime.get("activation_state") == "LOCAL_RUNTIME_ACTIVE_EXACT_BINDING_ONLY"
+                and identity_runtime.get("legacy_identity_hold_supersession", {}).get("only_when_exact_v2_manifest_passes") is True
+                and identity_runtime.get("authority", {}).get("network_fetch_allowed") is False
+                and identity_runtime.get("authority", {}).get("real_account_connection_allowed") is False
+                and identity_runtime.get("authority", {}).get("public_publish_allowed") is False
+                and identity_runtime.get("authority", {}).get("deploy_allowed") is False
+            )
+            if exact_runtime_contract:
+                blockers.append("HOLD_OPERATOR_EXACT_LOCAL_FONT_FILES_REQUIRED")
+            else:
+                blockers.append("HOLD_IDENTITY_V2_RUNTIME_CONTRACT")
     else:
-        identity = load_json(identity_path)
-        identity_bound = (
-            identity.get("production_identity_equivalence_asserted") is True
-            and not str(identity.get("font_binding_state", "")).startswith("HOLD_")
-        )
-        if not identity_bound:
-            blockers.append("HOLD_IDENTITY_EQUIVALENCE")
+        identity_path = root / "config" / "visual_identity_policy.json"
+        if not identity_path.is_file():
+            blockers.append("HOLD_VISUAL_IDENTITY_POLICY_MISSING")
+        else:
+            identity = load_json(identity_path)
+            identity_bound = (
+                identity.get("production_identity_equivalence_asserted") is True
+                and not str(identity.get("font_binding_state", "")).startswith("HOLD_")
+            )
+            if not identity_bound:
+                blockers.append("HOLD_IDENTITY_EQUIVALENCE")
 
     control_ok = preflight.ok and reg_result.ok and platforms == EXPECTED_ACTIVE
     pilot_ok = control_ok and not blockers
