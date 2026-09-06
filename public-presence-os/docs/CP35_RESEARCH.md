@@ -11,7 +11,7 @@ M02 accepts only canonical M01 `RadarSignal` values with:
 - `publish_authority=false`;
 - `network_fetch_performed=false`.
 
-Any authorizing or non-RADAR input fails closed.
+Before research materialization, M02 reconstructs the M01 observation and re-materializes the signal through the canonical RADAR code path. `signal_id`, `observation_hash`, normalized URL/text fields, enum values and safety flags must match exactly. A hand-built or tampered `RadarSignal` fails closed even when its authority flags remain false.
 
 ## Evidence binding
 
@@ -25,9 +25,9 @@ Evidence is supplied as local `ResearchEvidence` metadata only. CP35 never fetch
 - lowercase SHA-256 of the captured bytes;
 - explicit synthetic marker.
 
-Production evidence must use HTTPS. Synthetic evidence must use `synthetic://` and can never claim `PRIMARY_SOURCE` authority.
+Production evidence must use HTTPS. Synthetic evidence must use `synthetic://` and can never claim `PRIMARY_SOURCE` authority. Production RADAR signals cannot bind synthetic evidence, and synthetic RADAR fixtures cannot bind real production evidence.
 
-For `PRIMARY_PUBLIC` RADAR signals, at least one non-synthetic primary evidence record from the same host is required for `EVIDENCE_BOUND`. For `SECONDARY_DISCOVERY`, an independent non-synthetic primary evidence record is required. Synthetic RADAR fixtures always remain `SYNTHETIC_NON_EVIDENCE`.
+For `PRIMARY_PUBLIC` RADAR signals, at least one non-synthetic primary evidence record from the same host is required for `EVIDENCE_BOUND`. For `SECONDARY_DISCOVERY`, the confirming primary evidence must be non-synthetic and come from a different host from the discovery signal. Synthetic RADAR fixtures always remain `SYNTHETIC_NON_EVIDENCE`.
 
 ## Research states
 
