@@ -1,11 +1,11 @@
 {
-  "checkpoint": "CP36",
+  "checkpoint": "CP37",
   "order": [
     {"depends_on": [], "module_id": "M01_RADAR", "rank": 1, "state": "CP34_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M01_RADAR"], "module_id": "M02_RESEARCH", "rank": 2, "state": "CP35_MINIMAL_EXECUTABLE_SLICE"},
     {"depends_on": ["M02_RESEARCH"], "module_id": "M03_SCORING", "rank": 3, "state": "CP36_MINIMAL_EXECUTABLE_SLICE"},
-    {"depends_on": ["M03_SCORING"], "module_id": "M04_MASTER_DRAFT", "rank": 4, "state": "NEXT"},
-    {"depends_on": ["M04_MASTER_DRAFT"], "module_id": "M05_NATIVE_ADAPT", "rank": 5, "state": "WAITING"},
+    {"depends_on": ["M03_SCORING"], "module_id": "M04_MASTER_DRAFT", "rank": 4, "state": "CP37_MINIMAL_EXECUTABLE_SLICE"},
+    {"depends_on": ["M04_MASTER_DRAFT"], "module_id": "M05_NATIVE_ADAPT", "rank": 5, "state": "NEXT"},
     {"depends_on": ["M05_NATIVE_ADAPT"], "module_id": "M13_RIGHTS", "rank": 6, "state": "WAITING"},
     {"depends_on": ["M05_NATIVE_ADAPT", "M13_RIGHTS"], "module_id": "M06_VISUAL", "rank": 7, "state": "WAITING"},
     {"depends_on": ["M06_VISUAL"], "module_id": "M07_QA", "rank": 8, "state": "WAITING"},

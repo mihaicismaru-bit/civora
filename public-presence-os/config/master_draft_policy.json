@@ -1,0 +1,51 @@
+{
+  "authority": {
+    "fact_authority": false,
+    "internal_draft_brief_authority": true,
+    "network_fetch_allowed": false,
+    "publish_authority": false,
+    "queue_authority": false
+  },
+  "checkpoint": "CP37",
+  "direct_context_rule": {
+    "attribution_required": true,
+    "exact_primary_url_match_required": true,
+    "nonempty_source_excerpt_required": true,
+    "source_class": "PRIMARY_PUBLIC",
+    "support_class": "DIRECT_PRIMARY_CONTEXT",
+    "support_items": [
+      "SOURCE_TITLE",
+      "SOURCE_EXCERPT"
+    ]
+  },
+  "forbidden_inference": [
+    "missing_names",
+    "missing_dates",
+    "missing_numbers",
+    "causes",
+    "outcomes",
+    "editorial_impact",
+    "virality",
+    "audience_fit"
+  ],
+  "input_contract": {
+    "requires_exact_m02_research_packet": true,
+    "requires_exact_m03_scorecard": true,
+    "scorecard_revalidated_against_packet": true,
+    "synthetic_allowed": false
+  },
+  "model_version": "PPOS_MASTER_DRAFT_BRIEF_V1",
+  "purpose": "Build an evidence-bound master-draft brief without inventing semantic claims.",
+  "schema_version": "PPOS_MASTER_DRAFT_POLICY_V1",
+  "secondary_discovery": {
+    "draft_status": "HOLD_DIRECT_PRIMARY_CONTEXT",
+    "native_adaptation_input_ready": false,
+    "reason": "M02 proves primary confirmation but does not carry semantically extracted primary-source text."
+  },
+  "unknowns": {
+    "append": [
+      "NO_SEMANTIC_CLAIM_EXTRACTION_BEYOND_DIRECT_BOUND_SOURCE_CONTEXT"
+    ],
+    "preserve_m02_unresolved_questions": true
+  }
+}
