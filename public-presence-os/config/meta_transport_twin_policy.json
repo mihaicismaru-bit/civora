@@ -1,0 +1,67 @@
+{
+  "schema_version": "PPOS_META_TRANSPORT_TEST_TWIN_POLICY_V1",
+  "checkpoint": "CP54",
+  "module_id": "M23_META_TRANSPORT_TWIN",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "transport_twin_contract": {
+    "synthetic_credentials_only": true,
+    "test_marker_required": "PPOS_TEST_ONLY",
+    "synthetic_destination_only": true,
+    "synthetic_api_version_only": true,
+    "nonroutable_image_staging_only": true,
+    "exact_cp50_plan_binding_required": true,
+    "exact_cp52_preflight_binding_required": true,
+    "exact_cp53_operator_packet_binding_required": true,
+    "authorization_boundary": "SYNTHETIC_BEARER_HASH_ONLY",
+    "request_signing_boundary": "TWIN_INTERNAL_HMAC_SHA256_ONLY",
+    "production_signing_semantics_asserted": false,
+    "request_signature_sent_on_wire": false,
+    "idempotency_scope": "LOCAL_DETERMINISTIC_KEY_ONLY",
+    "production_idempotency_semantics_asserted": false,
+    "wire_idempotency_header_allowed": false,
+    "retry_classification_scope": "SYNTHETIC_STATUS_ONLY",
+    "network_target_materialized": false,
+    "transport_mode": "SYNTHETIC_TEST_TWIN_ONLY",
+    "live_transport_ready": false,
+    "pilot_publish_ready": false
+  },
+  "retry_policy": {
+    "success": [200, 201, 202, 204],
+    "retry_rate_limit": [429],
+    "retry_transient": [408, 500, 502, 503, 504],
+    "no_retry_auth": [401, 403],
+    "other_4xx": "NO_RETRY_CLIENT_SYNTHETIC",
+    "other_status": "HOLD_UNKNOWN_SYNTHETIC_STATUS",
+    "live_error_semantics_asserted": false
+  },
+  "authority": {
+    "real_secret_reference_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "oauth_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "network_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "safety": {
+    "global_kill_switch_required": true,
+    "global_kill_switch_must_remain_engaged": true,
+    "live_reverification_required": true,
+    "test_credentials_must_never_be_accepted_by_live_transport": true,
+    "no_publication": true,
+    "no_real_accounts": true,
+    "no_paid_services": true
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  }
+}
