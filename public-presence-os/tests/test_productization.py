@@ -40,7 +40,7 @@ def test_registry_unique_ids():
     r=load_json(ROOT/"config"/"module_registry.json")
     ids=[m["id"] for m in r["modules"]]
     assert len(ids)==len(set(ids))
-    assert r["checkpoint"]=="CP49"
+    assert r["checkpoint"]=="CP50"
     assert any(m["id"]=="M01_RADAR" and m["status"]=="CP34_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M02_RESEARCH" and m["status"]=="CP35_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M03_SCORING" and m["status"]=="CP36_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
@@ -58,17 +58,19 @@ def test_registry_unique_ids():
     assert any(m["id"]=="M16_OPERATIONS" and m["status"]=="CP32_PREFLIGHT_MANUAL_LOCKED" for m in r["modules"])
     assert any(m["id"]=="M17_REHEARSAL" and m["status"]=="CP33_CONTROL_PLANE_PASS_PILOT_VALIDATION_GATES_HOLD" for m in r["modules"])
     assert any(m["id"]=="M18_VISUAL_IDENTITY" and m["status"]=="CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY" for m in r["modules"])
+    assert any(m["id"]=="M19_META_ADAPTERS" and m["status"]=="CP50_OFFLINE_REQUEST_COMPILER" for m in r["modules"])
 
 def test_reimplementation_priority_closes_executable_source_backlog():
     p=load_json(ROOT/"config"/"reimplementation_priority.json")
-    assert p["checkpoint"]=="CP49"
+    assert p["checkpoint"]=="CP50"
     states={row["module_id"]:row["state"] for row in p["order"]}
     assert states["M06_VISUAL"]=="CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
     assert states["M07_QA"]=="CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"
     assert states["M11_LEARNING"]=="CP46_MINIMAL_EXECUTABLE_SLICE"
     assert states["M14_EXPERIMENTS"]=="CP47_MINIMAL_EXECUTABLE_SLICE"
     assert states["M18_VISUAL_IDENTITY"]=="CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"
-    assert p["next"]=="CP50_META_FREE_API_ADAPTER_CONTRACT_OFFLINE_REQUEST_COMPILER"
+    assert states["M19_META_ADAPTERS"]=="CP50_OFFLINE_REQUEST_COMPILER"
+    assert p["next"]=="CP51_META_CONNECTION_PROFILE_SECRET_REFERENCE_VAULT_MINIMAL_EXECUTABLE_SLICE"
 
 def test_no_paid_or_live_runtime_dependencies():
     txt="\n".join(p.read_text(encoding="utf-8") for p in (ROOT/"src").rglob("*.py"))
