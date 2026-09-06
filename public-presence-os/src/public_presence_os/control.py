@@ -73,11 +73,13 @@ def validate_repo(root: Path) -> ValidationResult:
     checks, errors = [], []
     expected = [
         "README.md","pyproject.toml","config/runtime_policy.json","config/module_registry.json",
-        "config/operator_profile.example.json",
+        "config/operator_profile.example.json","config/reimplementation_priority.json",
         "src/public_presence_os/control.py","src/public_presence_os/cli.py","src/public_presence_os/preflight.py",
+        "src/public_presence_os/radar.py","src/public_presence_os/rehearsal.py",
         "scripts/build_release.py","scripts/preflight.py",
-        "tests/test_productization.py","tests/test_preflight.py",
+        "tests/test_productization.py","tests/test_preflight.py","tests/test_cp34_radar.py",
         "docs/CP30_PRODUCTIZATION.md","docs/OPERATOR_INSTALLATION_CONFIGURATION_RECOVERY.md",
+        "docs/CP34_RADAR_MINIMAL_EXECUTABLE_SLICE.md",
         ".github/workflows/public-presence-os-ci.yml",
     ]
     for rel in expected:
