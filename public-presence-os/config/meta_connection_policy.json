@@ -1,0 +1,67 @@
+{
+  "checkpoint": "CP51",
+  "schema_version": "PPOS_META_CONNECTION_PROFILE_POLICY_V1",
+  "engine_version": "ppos-meta-connection-profile-vault-v1.0.0",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "allowed_secret_reference_schemes": [
+    "ENV",
+    "OS_KEYCHAIN"
+  ],
+  "secret_reference_rules": {
+    "store_references_only": true,
+    "resolve_secret_material": false,
+    "read_environment": false,
+    "read_os_keychain": false,
+    "literal_secret_material_forbidden": true,
+    "repository_secret_material_forbidden": true
+  },
+  "symbolic_bindings": {
+    "destination": "DESTINATION_ID_REQUIRED",
+    "api_version": "API_VERSION_REQUIRED"
+  },
+  "evidence_rules": {
+    "states": [
+      "STAGED_UNVERIFIED",
+      "OFFLINE_EVIDENCE_BOUND"
+    ],
+    "artifact_sha256_required_when_bound": true,
+    "required_permissions_must_match_cp50_contract": true,
+    "required_capabilities_must_match_cp50_contract": true,
+    "expiry_state_must_be_explicit": true,
+    "bound_evidence_is_immutable": true,
+    "bound_evidence_does_not_assert_live_entitlement": true,
+    "live_reverification_required_before_connection": true
+  },
+  "vault": {
+    "backend": "LOCAL_SQLITE",
+    "stores_secret_material": false,
+    "stores_secret_references": true,
+    "profile_records_immutable": true,
+    "event_log_append_only": true,
+    "request_id_idempotency": true
+  },
+  "global_kill_switch_required": true,
+  "authority": {
+    "local_profile_compile_authority": true,
+    "local_secret_reference_stage_authority": true,
+    "offline_evidence_binding_authority": true,
+    "secret_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "network_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  }
+}

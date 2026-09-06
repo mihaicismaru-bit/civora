@@ -175,10 +175,10 @@ def test_cp50_policy_registry_and_runtime_remain_fail_closed():
     ):
         assert policy["authority"][key] is False
 
-    assert registry["checkpoint"] == "CP50"
+    assert registry["checkpoint"] == "CP51"
     assert any(m["id"] == "M19_META_ADAPTERS" and m["status"] == "CP50_OFFLINE_REQUEST_COMPILER" for m in registry["modules"])
-    assert priority["checkpoint"] == "CP50"
-    assert priority["next"] == "CP51_META_CONNECTION_PROFILE_SECRET_REFERENCE_VAULT_MINIMAL_EXECUTABLE_SLICE"
+    assert priority["checkpoint"] == "CP51"
+    assert priority["next"] == "CP52_META_CONNECTION_PREFLIGHT_SYNTHETIC_PROVISIONING_READBACK"
 
     assert runtime["global_kill_switch_engaged"] is True
     assert runtime["network_enabled"] is False
