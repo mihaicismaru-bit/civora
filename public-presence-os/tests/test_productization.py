@@ -40,7 +40,7 @@ def test_registry_unique_ids():
     r=load_json(ROOT/"config"/"module_registry.json")
     ids=[m["id"] for m in r["modules"]]
     assert len(ids)==len(set(ids))
-    assert r["checkpoint"]=="CP51"
+    assert r["checkpoint"]=="CP52"
     assert any(m["id"]=="M01_RADAR" and m["status"]=="CP34_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M02_RESEARCH" and m["status"]=="CP35_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M03_SCORING" and m["status"]=="CP36_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
@@ -60,10 +60,11 @@ def test_registry_unique_ids():
     assert any(m["id"]=="M18_VISUAL_IDENTITY" and m["status"]=="CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY" for m in r["modules"])
     assert any(m["id"]=="M19_META_ADAPTERS" and m["status"]=="CP50_OFFLINE_REQUEST_COMPILER" for m in r["modules"])
     assert any(m["id"]=="M20_META_CONNECTIONS" and m["status"]=="CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY" for m in r["modules"])
+    assert any(m["id"]=="M21_META_PREFLIGHT" and m["status"]=="CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY" for m in r["modules"])
 
 def test_reimplementation_priority_closes_executable_source_backlog():
     p=load_json(ROOT/"config"/"reimplementation_priority.json")
-    assert p["checkpoint"]=="CP51"
+    assert p["checkpoint"]=="CP52"
     states={row["module_id"]:row["state"] for row in p["order"]}
     assert states["M06_VISUAL"]=="CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
     assert states["M07_QA"]=="CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"
@@ -72,7 +73,8 @@ def test_reimplementation_priority_closes_executable_source_backlog():
     assert states["M18_VISUAL_IDENTITY"]=="CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"
     assert states["M19_META_ADAPTERS"]=="CP50_OFFLINE_REQUEST_COMPILER"
     assert states["M20_META_CONNECTIONS"]=="CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY"
-    assert p["next"]=="CP52_META_CONNECTION_PREFLIGHT_SYNTHETIC_PROVISIONING_READBACK"
+    assert states["M21_META_PREFLIGHT"]=="CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY"
+    assert p["next"]=="CP53_META_OPERATOR_PROVISIONING_PACKET_OFFLINE_CHECKLIST"
 
 def test_no_paid_or_live_runtime_dependencies():
     txt="\n".join(p.read_text(encoding="utf-8") for p in (ROOT/"src").rglob("*.py"))
