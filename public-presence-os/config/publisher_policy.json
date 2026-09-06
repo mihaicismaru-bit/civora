@@ -1,0 +1,60 @@
+{
+  "checkpoint": "CP44",
+  "schema_version": "PPOS_LOCAL_DRY_RUN_PUBLISHER_POLICY_V1",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "input_contract": {
+    "required_module": "M08_QUEUE",
+    "required_state": "LOCAL_OUTBOX_ONLY",
+    "required_queue_state": "QUEUED_LOCAL",
+    "require_publisher_input_ready": true,
+    "require_exact_outbox_sha256": true,
+    "require_zero_external_authority_on_input": true
+  },
+  "execution": {
+    "mode": "LOCAL_DRY_RUN_ONLY",
+    "global_kill_switch_must_remain_engaged": true,
+    "network_attempted": false,
+    "external_write_performed": false,
+    "real_account_connected": false,
+    "delivered": false,
+    "external_post_id": null,
+    "public_publish_eligible": false
+  },
+  "storage": {
+    "backend": "SQLITE_LOCAL",
+    "outbox_input_snapshots_append_only": true,
+    "dry_run_receipts_append_only": true,
+    "attempt_event_log_append_only": true,
+    "one_receipt_per_outbox_item": true
+  },
+  "retry_idempotency": {
+    "caller_request_id_required": true,
+    "same_request_same_item_same_timestamp_returns_same_receipt": true,
+    "request_id_payload_drift_fails_closed": true,
+    "duplicate_outbox_item_with_new_request_id_fails_closed": true
+  },
+  "receipt_truth": {
+    "publisher_state": "DRY_RUN_RECORDED",
+    "analytics_input_ready_for_local_m10_only": true,
+    "network_attempted": false,
+    "external_write_performed": false,
+    "account_connected": false,
+    "delivered": false,
+    "external_post_id": null
+  },
+  "authority": {
+    "local_dry_run_publisher_authority": true,
+    "external_publisher_authority": false,
+    "publish_authority": false,
+    "network_authority": false,
+    "real_account_connection_authority": false,
+    "deploy_authority": false
+  },
+  "forbidden_runtime_clients": ["requests", "httpx", "urllib.request", "socket"],
+  "platform_policy": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "next_dependency": "M10_ANALYTICS"
+}
