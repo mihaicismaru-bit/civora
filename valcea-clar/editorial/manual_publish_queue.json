@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "instance_id": "valcea",
-  "requested_at": "2026-09-06T09:58:00+03:00",
+  "requested_at": "2026-09-06T10:12:00+03:00",
   "requested_by": "authorized_editorial_cycle",
   "publication_intent": "publish",
   "facts": [
@@ -23,7 +23,7 @@
         "Locuitori din șase localități ale județului Vâlcea trebuie să țină cont luni, 7 septembrie, de întreruperi programate ale alimentării cu energie electrică. Distribuție Oltenia include în programul săptămânii 7–13 septembrie lucrări în Călimănești, Bujoreni, Dăești, Roești, Râmnicu Vâlcea și Frâncești.",
         "În Călimănești, oprirea este programată între 08:30 și 16:30 în zonele Ostroveni, Neagoe Basarab, Țiglari și Bivolari. În Bujoreni, același interval vizează Gura Văii și DC 171, iar în Dăești sunt anunțate lucrări în Dăești–Malul Alb, strada Căminului și Valea Albă.",
         "Între 09:00 și 17:00 sunt programate întreruperi în Bărbărigești, comuna Roești; în Râmnicu Vâlcea, în zona Nord, pe străzile Matei Basarab și Republicii și la PTA FEDERALCOOP; precum și în satul Coșani din comuna Frâncești.",
-        "Programul este unul planificat și poate fi actualizat de operator. Înainte de intervalul anunțat, utilizatorii pot verifica pagina Distribuție Oltenia pentru Vâlcea; pentru deranjamente, operatorul pune la dispoziție numărul gratuit 0800 500 000 și numerele 0251 408 006, 0251 408 007 și 0251 408 008."
+        "Programul este unul planificat și poate fi actualizat de operator. Înainte de intervalul anunțat, utilizatorii pot verifica pagina Distribuție Oltenia pentru Vâlcea pentru eventuale modificări ale lucrărilor programate."
       ],
       "material_fact_gate": "PASS",
       "sources": [
@@ -84,13 +84,12 @@
             ]
           },
           {
-            "id": "valcea-intreruperi-curent-7-septembrie-2026-action",
+            "id": "valcea-intreruperi-curent-7-septembrie-2026-check",
             "role": "reader_action",
             "kind": "reader_service",
-            "text": "Utilizatorii pot verifica programul actualizat pe pagina Distribuție Oltenia pentru Vâlcea; pentru deranjamente sunt disponibile 0800 500 000 și 0251 408 006/007/008.",
+            "text": "Utilizatorii pot verifica pagina Distribuție Oltenia pentru Vâlcea înainte de intervalul anunțat, pentru eventuale actualizări ale lucrărilor programate.",
             "source_urls": [
-              "https://www.distributieoltenia.ro/ro/valcea/intreruperi-pentru-lucrari-programate.html",
-              "https://www.distributieoltenia.ro/ro/suport/transmiterea-deranjamentelor.html"
+              "https://www.distributieoltenia.ro/ro/valcea/intreruperi-pentru-lucrari-programate.html"
             ]
           }
         ]
