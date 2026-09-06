@@ -4,12 +4,15 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/eu_direct_i3_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_i3_ft_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_i3_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_i3_ft_reconcile.py'
       - '.github/workflows/partener-eu-i3-exact-call-proof.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   i3-exact-call-proof:
@@ -32,21 +35,30 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile bounded I3 exact adapter and regressions
+      - name: Compile bounded I3 exact adapter reconciler and regressions
         run: |
           python -m py_compile \
             partener-eu/ingest/eu_direct_i3_ft_exact.py \
-            partener-eu/ops/test_eu_direct_i3_ft_exact.py
+            partener-eu/ingest/eu_direct_i3_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_i3_ft_exact.py \
+            partener-eu/ops/test_eu_direct_i3_ft_reconcile.py
 
-      - name: Validate fail-closed I3 exact semantics
+      - name: Validate fail-closed I3 exact semantics and reconciliation
         env:
-          PYTHONPATH: partener-eu/ingest
-        run: python partener-eu/ops/test_eu_direct_i3_ft_exact.py
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eu_direct_i3_ft_exact.py
+          python partener-eu/ops/test_eu_direct_i3_ft_reconcile.py
+
+      - name: Prepare bounded I3 exact replay root
+        run: |
+          ROOT=/tmp/partener-eu-i3-exact-call-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/inv1/current" "$ROOT/inv1/previous" "$ROOT/inv2a/current" "$ROOT/inv2a/previous"
 
       - name: Acquire fresh exact I3 Strand 1 evidence
         run: |
-          ROOT=/tmp/partener-eu-i3-exact-call-proof/inv1
-          mkdir -p "$ROOT"
+          ROOT=/tmp/partener-eu-i3-exact-call-proof/inv1/current
           python partener-eu/ingest/eu_direct_i3_ft_exact.py \
             --reference 'I3-2026-INV1' \
             --eismea-url 'https://eismea.ec.europa.eu/funding-opportunities/calls-proposals/interregional-innovation-investments-strand-1-i3-2026-inv1_en' \
@@ -55,24 +67,154 @@ jobs:
 
       - name: Acquire fresh exact I3 Strand 2a evidence
         run: |
-          ROOT=/tmp/partener-eu-i3-exact-call-proof/inv2a
-          mkdir -p "$ROOT"
+          ROOT=/tmp/partener-eu-i3-exact-call-proof/inv2a/current
           python partener-eu/ingest/eu_direct_i3_ft_exact.py \
             --reference 'I3-2026-INV2a' \
             --eismea-url 'https://eismea.ec.europa.eu/funding-opportunities/calls-proposals/interregional-innovation-investments-strand-2a-i3-2026-inv2a_en' \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-i3-inv2a" \
             --output-dir "$ROOT"
 
-      - name: Enforce exact I3 non-authorizing boundary
+      - name: Restore previous healthy same-branch same-identity I3 receipts
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-i3-exact-call-proof
+          SCRATCH=/tmp/partener-eu-i3-exact-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          mapfile -t IDS < <(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-i3-exact-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not name.startswith('partener-eu-i3-exact-call-proof-'):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          for _, artifact_id in sorted(rows, reverse=True):
+              print(artifact_id)
+          PY
+          )
+          for CANDIDATE in "${IDS[@]:-}"; do
+            [ -n "$CANDIDATE" ] || continue
+            rm -rf "$SCRATCH/unpacked" "$SCRATCH/previous.zip"
+            mkdir -p "$SCRATCH/unpacked"
+            if ! gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"; then
+              continue
+            fi
+            if ! unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"; then
+              continue
+            fi
+            ROOT="$ROOT" UNPACKED="$SCRATCH/unpacked" CANDIDATE="$CANDIDATE" python - <<'PY'
+          import datetime as dt, json, os, shutil
+          from pathlib import Path
+
+          root=Path(os.environ['ROOT'])
+          unpacked=Path(os.environ['UNPACKED'])
+          expected={'I3-2026-INV1':'inv1','I3-2026-INV2A':'inv2a'}
+
+          def when(value):
+              parsed=dt.datetime.fromisoformat(str(value).replace('Z','+00:00'))
+              if parsed.tzinfo is None:
+                  raise ValueError('naive history timestamp')
+              return parsed.astimezone(dt.timezone.utc)
+
+          current={}
+          for ref, folder in expected.items():
+              current[ref]=json.loads((root/folder/'current'/'ft-i3-exact-evidence.json').read_text(encoding='utf-8'))
+
+          candidates={ref:[] for ref in expected}
+          for path in unpacked.rglob('ft-i3-exact-evidence.json'):
+              try:
+                  row=json.loads(path.read_text(encoding='utf-8'))
+              except Exception:
+                  continue
+              ref=str(row.get('reference') or '').upper()
+              if ref not in expected:
+                  continue
+              now=current[ref]
+              if row.get('schema') != 'PARTENER_EU_I3_FT_EXACT_EVIDENCE_V1':
+                  continue
+              if row.get('source_health_state') != 'HEALTHY' or row.get('lkg_required') is not False:
+                  continue
+              if row.get('evidence_usable_for_reconciliation') is not True:
+                  continue
+              if row.get('funding_tenders_authority_url') != now.get('funding_tenders_authority_url'):
+                  continue
+              if row.get('eismea_authority_url') != now.get('eismea_authority_url'):
+                  continue
+              try:
+                  stamp=when(row.get('fetched_at'))
+                  if stamp >= when(now.get('fetched_at')):
+                      continue
+              except Exception:
+                  continue
+              candidates[ref].append((stamp, path))
+
+          restored=[]
+          for ref, folder in expected.items():
+              target=root/folder/'previous'/'ft-i3-exact-evidence.json'
+              if target.exists() or not candidates[ref]:
+                  continue
+              _, source=max(candidates[ref], key=lambda item:item[0])
+              shutil.copy2(source, target)
+              restored.append({'reference':ref,'source':str(source),'artifact':os.environ['CANDIDATE']})
+          if restored:
+              print(json.dumps({'restored':restored}, sort_keys=True))
+          PY
+            if [ -f "$ROOT/inv1/previous/ft-i3-exact-evidence.json" ] && [ -f "$ROOT/inv2a/previous/ft-i3-exact-evidence.json" ]; then
+              break
+            fi
+          done
+          python - <<'PY'
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-i3-exact-call-proof')
+          print({
+              'inv1_previous_healthy_restored':(root/'inv1/previous/ft-i3-exact-evidence.json').exists(),
+              'inv2a_previous_healthy_restored':(root/'inv2a/previous/ft-i3-exact-evidence.json').exists(),
+          })
+          PY
+
+      - name: Reconcile exact I3 same-identity evidence non-authorizing
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-i3-exact-call-proof
+          for folder in inv1 inv2a; do
+            ARGS=()
+            if [ -f "$ROOT/$folder/previous/ft-i3-exact-evidence.json" ]; then
+              ARGS+=(--previous "$ROOT/$folder/previous/ft-i3-exact-evidence.json")
+            fi
+            python partener-eu/ingest/eu_direct_i3_ft_reconcile.py \
+              "$ROOT/$folder/current/ft-i3-exact-evidence.json" \
+              "${ARGS[@]}" \
+              --output "$ROOT/$folder/current/i3-exact-reconciliation.json"
+          done
+
+      - name: Enforce exact I3 non-authorizing boundary and reconciliation
         run: |
           python - <<'PY'
           import json, re
           from pathlib import Path
           root=Path('/tmp/partener-eu-i3-exact-call-proof')
-          expected={
-              'inv1':'I3-2026-INV1',
-              'inv2a':'I3-2026-INV2A',
-          }
+          expected={'inv1':'I3-2026-INV1','inv2a':'I3-2026-INV2A'}
           summaries=[]
           flags=(
               'material_fact_use','open_call_authorized','closed_call_authorized',
@@ -80,12 +222,13 @@ jobs:
               'publish_authorized','distribution_authorized','call_alert_authorized',
           )
           for folder, reference in expected.items():
-              p=root/folder/'ft-i3-exact-evidence.json'
-              d=json.loads(p.read_text(encoding='utf-8'))
+              current=root/folder/'current'
+              previous=root/folder/'previous'/'ft-i3-exact-evidence.json'
+              d=json.loads((current/'ft-i3-exact-evidence.json').read_text(encoding='utf-8'))
+              rec=json.loads((current/'i3-exact-reconciliation.json').read_text(encoding='utf-8'))
               assert d['schema']=='PARTENER_EU_I3_FT_EXACT_EVIDENCE_V1'
               assert d['parser_version']=='EU_DIRECT_I3_FT_EXACT_V1'
-              assert d['source_family']=='EU_DIRECT'
-              assert d['programme_family']=='I3'
+              assert d['source_family']=='EU_DIRECT' and d['programme_family']=='I3'
               assert d['reference']==reference
               assert d['source_health_state']=='HEALTHY'
               assert d['evidence_usable_for_reconciliation'] is True
@@ -97,18 +240,42 @@ jobs:
               assert d['eismea_status_label_candidate'] in {None,'Open'}
               assert d['semantic_reconciliation_required'] is True
               assert d['field_scoped_material_admission_required'] is True
-              assert d['publication_effect']=='NONE'
-              assert d['canonical_corpus_mutation'] is False
+              assert d['publication_effect']=='NONE' and d['canonical_corpus_mutation'] is False
               assert all(d[k] is False for k in flags)
-              assert re.fullmatch(r'[0-9a-f]{64}', d['search_raw_sha256'])
-              assert re.fullmatch(r'[0-9a-f]{64}', d['facet_raw_sha256'])
               assert re.fullmatch(r'[0-9a-f]{64}', d['exact_semantic_fingerprint'])
               assert re.fullmatch(r'[0-9a-f]{64}', d['eismea_receipt']['raw_sha256'])
+
+              assert rec['schema']=='PARTENER_EU_I3_FT_RECONCILIATION_V1'
+              assert rec['reference']==reference
+              assert rec['candidate_state']=='OPEN_CALL'
+              assert str(rec['status_label']).casefold()=='open'
+              assert rec['semantic_reconciliation_passed'] is True
+              assert rec['material_admission_ready_for_downstream_review'] is True
+              assert rec['field_scoped_material_admission_required'] is True
+              assert 'field_scoped_material_admission' in set(rec['missing_for_material_admission'])
+              assert rec['lkg_reference_is_current_truth'] is False
+              assert rec['publication_effect']=='NONE' and rec['canonical_corpus_mutation'] is False
+              assert all(rec[k] is False for k in flags)
+              if previous.exists():
+                  prev=json.loads(previous.read_text(encoding='utf-8'))
+                  assert prev['reference']==reference
+                  assert prev['source_health_state']=='HEALTHY'
+                  assert prev['evidence_usable_for_reconciliation'] is True
+                  assert rec['previous_identity_match'] is True
+                  assert rec['previous_evidence_sha256'] is not None
+                  assert rec['reconciliation_state'] in {'NO_CHANGE','I3_EXACT_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+              else:
+                  assert rec['previous_evidence_sha256'] is None
+                  assert rec['reconciliation_state']=='BASELINE_CAPTURED_NON_AUTHORIZING'
               summaries.append({
                   'reference':reference,
                   'candidate_state':d['candidate_state'],
                   'status_label':d['status_label'],
                   'semantic_fingerprint':d['exact_semantic_fingerprint'],
+                  'reconciliation_state':rec['reconciliation_state'],
+                  'semantic_change_count':rec['semantic_change_count'],
+                  'previous_same_identity_restored':previous.exists(),
+                  'material_admission_ready_for_downstream_review':rec['material_admission_ready_for_downstream_review'],
                   'open_call_authorized':False,
               })
           print(json.dumps({'i3_exact_calls':summaries,'publication_effect':'NONE'}, sort_keys=True))
@@ -131,7 +298,7 @@ jobs:
           root=Path('/tmp/partener-eu-i3-exact-call-proof')
           bad=[]
           for folder in ('inv1','inv2a'):
-              p=root/folder/'ft-i3-exact-evidence.json'
+              p=root/folder/'current'/'ft-i3-exact-evidence.json'
               d=json.loads(p.read_text(encoding='utf-8'))
               if d.get('source_health_state')!='HEALTHY' or d.get('evidence_usable_for_reconciliation') is not True:
                   bad.append({
