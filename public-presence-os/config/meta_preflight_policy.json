@@ -1,0 +1,65 @@
+{
+  "checkpoint": "CP52",
+  "schema_version": "PPOS_META_CONNECTION_SYNTHETIC_PREFLIGHT_POLICY_V1",
+  "engine_version": "ppos-meta-connection-synthetic-preflight-v1.0.0",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "inputs": {
+    "cp50_request_plan_required": true,
+    "cp51_connection_profile_required": true,
+    "cp51_vault_receipt_required": true,
+    "cp51_exact_profile_readback_required": true,
+    "offline_contract_evidence_complete_required": true,
+    "synthetic_identifiers_only": true
+  },
+  "binding_rules": {
+    "platform_exact": true,
+    "mode_exact": true,
+    "auth_reference_kind_exact": true,
+    "permissions_exact": true,
+    "capabilities_exact": true,
+    "plan_hash_bound": true,
+    "profile_hash_bound": true,
+    "vault_event_hash_bound": true,
+    "stored_profile_payload_hash_bound": true,
+    "symbolic_destination_only": true,
+    "symbolic_api_version_only": true
+  },
+  "result_contract": {
+    "pass_state": "PASS_SYNTHETIC_PREFLIGHT_ONLY",
+    "live_entitlement_verified": false,
+    "live_transport_ready": false,
+    "pilot_publish_ready": false,
+    "live_reverification_required": true
+  },
+  "ledger": {
+    "backend": "LOCAL_SQLITE",
+    "receipt_records_immutable": true,
+    "event_log_append_only": true,
+    "request_id_idempotency": true,
+    "stores_secret_material": false
+  },
+  "authority": {
+    "local_preflight_authority": true,
+    "local_readback_authority": true,
+    "local_receipt_record_authority": true,
+    "secret_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "network_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "global_kill_switch_required": true
+}
