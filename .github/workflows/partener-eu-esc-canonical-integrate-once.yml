@@ -32,6 +32,22 @@ jobs:
           path = Path('.github/workflows/partener-eu-eu-direct-programme-intelligence.yml')
           text = path.read_text(encoding='utf-8')
 
+          expr_token = '$' + '{{ github.token }}'
+          expr_head = '$' + '{{ github.event.pull_request.head.sha || github.sha }}'
+          expr_branch = '$' + '{{ github.event.pull_request.head.ref || github.ref_name }}'
+          expr_run_id = '$' + '{{ github.run_id }}'
+          expr_attempt = '$' + '{{ github.run_attempt }}'
+          esc_step = (
+              "      - name: Run canonical ESC programme intelligence with history and LKG\n"
+              "        env:\n"
+              f"          GH_TOKEN: {expr_token}\n"
+              f"          EXPECTED_HEAD_SHA: {expr_head}\n"
+              f"          EXPECTED_HEAD_BRANCH: {expr_branch}\n"
+              f"          ESC_RUN_ID: {expr_run_id}-{expr_attempt}-esc\n"
+              "        run: python partener-eu/ops/run_esc_programme_canonical.py\n\n"
+              "      - name: Upload replayable EU Direct programme evidence\n"
+          )
+
           replacements = [
               (
                   "      - 'partener-eu/ops/run_edf_programme_canonical.py'\n      - '.github/workflows/partener-eu-eu-direct-programme-intelligence.yml'",
@@ -51,7 +67,7 @@ jobs:
               ),
               (
                   "      - name: Upload replayable EU Direct programme evidence\n",
-                  "      - name: Run canonical ESC programme intelligence with history and LKG\n        env:\n          GH_TOKEN: ${{ github.token }}\n          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}\n          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}\n          ESC_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-esc\n        run: python partener-eu/ops/run_esc_programme_canonical.py\n\n      - name: Upload replayable EU Direct programme evidence\n",
+                  esc_step,
               ),
           ]
 
@@ -66,10 +82,19 @@ jobs:
               "python partener-eu/ops/test_eu_direct_esc_programme_intelligence.py -v",
               "python partener-eu/ops/test_eu_direct_esc_programme_reconcile.py -v",
               "Run canonical ESC programme intelligence with history and LKG",
+              expr_token,
+              expr_head,
+              expr_branch,
+              f"{expr_run_id}-{expr_attempt}-esc",
           ]
           for needle in required:
               if needle not in text:
                   raise SystemExit(f'missing required integrated ESC marker: {needle}')
+
+          forbidden = ('ghs_', 'EXPECTED_HEAD_SHA: ba42d02c', 'ESC_RUN_ID: 340500')
+          for needle in forbidden:
+              if needle in text:
+                  raise SystemExit(f'unsafe runtime materialization detected: {needle}')
 
           path.write_text(text, encoding='utf-8')
           PY
@@ -85,7 +110,7 @@ jobs:
           PYTHONPATH=partener-eu/ingest:partener-eu/ops python partener-eu/ops/test_eu_direct_esc_programme_reconcile.py -v
           git diff --check
 
-      - name: Commit canonical integration and remove one-shot patcher
+      - name: Commit safe canonical integration and remove one-shot patcher
         shell: bash
         env:
           BRANCH: partener/cef-ft-history-restore-v1-20260901
