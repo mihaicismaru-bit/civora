@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-09-06T19:20:59Z",
-  "validation_run_started": "2026-09-06T19:20:45Z",
+  "observed_at": "2026-09-06T19:25:51Z",
+  "validation_run_started": "2026-09-06T19:25:37Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "903d0f2f95650a005cc46a3cc86feb1e2ad8cf1b410d49f039870c0bd45b4481",
-    "history_sha256": "903d0f2f95650a005cc46a3cc86feb1e2ad8cf1b410d49f039870c0bd45b4481",
-    "history_path": "validation/history/20260906T192045Z.json",
+    "latest_sha256": "6bbf132a42136e255e81044883a35e11c51157969317e24942c7b13916ebd211",
+    "history_sha256": "6bbf132a42136e255e81044883a35e11c51157969317e24942c7b13916ebd211",
+    "history_path": "validation/history/20260906T192537Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "31d0825ca1396c24481165369d53eb5ba6baeb8f66f20e543e5f2aace9179ebd",
-    "checkpoint_sha256": "31d0825ca1396c24481165369d53eb5ba6baeb8f66f20e543e5f2aace9179ebd",
+    "source_state_sha256": "aa309cb642b7f7647bb2451ae2371db197d20201b4685aa82dc5f53eb22aa70b",
+    "checkpoint_sha256": "aa309cb642b7f7647bb2451ae2371db197d20201b4685aa82dc5f53eb22aa70b",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-09-06T18:25:15.814061Z",
-    "age_seconds": 3343,
+    "age_seconds": 3635,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -55,12 +55,12 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-09-06T17:15:10.812277+00:00",
+    "observed_at": "2026-09-06T19:24:56.801128+00:00",
     "status": "PASS",
     "item_count": 31,
     "error_count": 43,
-    "hash_change_candidates": 1,
-    "material_signal_candidates": 1,
+    "hash_change_candidates": 0,
+    "material_signal_candidates": 0,
     "auth_dependency_count": 28,
     "auth_dependencies": [
       {
@@ -260,7 +260,7 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       }
     ],
-    "resolution_task_required": true,
+    "resolution_task_required": false,
     "resolution_task_present_fail_closed": true,
     "material_facts_auto_promoted": false
   },
@@ -364,7 +364,7 @@
     "integrity_pass": true,
     "registry_health": "DEGRADED",
     "registry_hash_changes": 0,
-    "afir_hash_changes": 1,
+    "afir_hash_changes": 0,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": true,
