@@ -40,12 +40,13 @@ def test_registry_unique_ids():
     r=load_json(ROOT/"config"/"module_registry.json")
     ids=[m["id"] for m in r["modules"]]
     assert len(ids)==len(set(ids))
-    assert r["checkpoint"]=="CP38"
+    assert r["checkpoint"]=="CP39"
     assert any(m["id"]=="M01_RADAR" and m["status"]=="CP34_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M02_RESEARCH" and m["status"]=="CP35_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M03_SCORING" and m["status"]=="CP36_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M04_MASTER_DRAFT" and m["status"]=="CP37_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M05_NATIVE_ADAPT" and m["status"]=="CP38_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
+    assert any(m["id"]=="M13_RIGHTS" and m["status"]=="CP39_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M16_OPERATIONS" and m["status"]=="CP32_PREFLIGHT_MANUAL_LOCKED" for m in r["modules"])
     assert any(m["id"]=="M17_REHEARSAL" and m["status"]=="CP33_CONTROL_PLANE_PASS_PILOT_EXECUTABLE_GAPS_HOLD" for m in r["modules"])
 
