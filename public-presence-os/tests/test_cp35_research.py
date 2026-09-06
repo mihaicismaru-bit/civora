@@ -58,6 +58,12 @@ def test_secondary_can_bind_independent_primary():
     assert p.research_status=="EVIDENCE_BOUND"
 
 
+def test_secondary_same_host_primary_is_not_independent():
+    p=build_research_packet(signal(RadarSourceClass.SECONDARY_DISCOVERY),[ev(url="https://example.org/primary-looking")])
+    assert p.research_status=="HOLD_PRIMARY_CONFIRMATION"
+    assert not p.scoring_input_ready
+
+
 def test_secondary_context_only_does_not_bind():
     p=build_research_packet(signal(RadarSourceClass.SECONDARY_DISCOVERY),[
         ev(authority=EvidenceAuthority.SECONDARY_CONTEXT,url="https://context.example/story")
@@ -77,6 +83,13 @@ def test_synthetic_cannot_bind_real_evidence():
     s=signal(RadarSourceClass.MANUAL_SYNTHETIC,synthetic=True)
     with pytest.raises(ValueError):
         build_research_packet(s,[ev(url="https://example.org/real")])
+
+
+def test_production_signal_cannot_bind_synthetic_evidence():
+    with pytest.raises(ValueError):
+        build_research_packet(signal(),[
+            ev(authority=EvidenceAuthority.SECONDARY_CONTEXT,url="synthetic://fixture/context",synthetic=True)
+        ])
 
 
 def test_synthetic_evidence_cannot_claim_primary_authority():
@@ -163,6 +176,18 @@ def test_only_radar_signal_is_accepted():
 def test_mutated_authorizing_radar_signal_rejected():
     s=signal()
     bad=s.__class__(**(s.to_dict()|{"fact_authority":True}))
+    with pytest.raises(ValueError): build_research_packet(bad)
+
+
+def test_tampered_radar_content_rejected_even_if_authority_flags_remain_false():
+    s=signal()
+    bad=s.__class__(**(s.to_dict()|{"title":"Tampered title"}))
+    with pytest.raises(ValueError): build_research_packet(bad)
+
+
+def test_tampered_radar_identity_rejected():
+    s=signal()
+    bad=s.__class__(**(s.to_dict()|{"signal_id":"0"*64}))
     with pytest.raises(ValueError): build_research_packet(bad)
 
 
