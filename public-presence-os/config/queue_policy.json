@@ -1,0 +1,50 @@
+{
+  "checkpoint": "CP43",
+  "schema_version": "PPOS_LOCAL_QUEUE_POLICY_V1",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "input_contract": {
+    "required_module": "M12_APPROVAL",
+    "required_state": "LOCAL_APPROVAL_REVIEW_ONLY",
+    "required_current_state": "APPROVED_LOCAL",
+    "required_qa_verdict": "PASS",
+    "require_zero_qa_holds": true,
+    "require_local_approval_complete": true,
+    "require_queue_input_ready": true,
+    "require_exact_receipt_sha256": true,
+    "require_bound_approval_event": true
+  },
+  "storage": {
+    "backend": "SQLITE_LOCAL",
+    "approval_receipts_immutable": true,
+    "outbox_items_append_only": true,
+    "event_log_append_only": true,
+    "one_outbox_item_per_approval_receipt": true
+  },
+  "retry_idempotency": {
+    "caller_request_id_required": true,
+    "same_request_same_receipt_same_timestamp_returns_same_item": true,
+    "request_id_payload_drift_fails_closed": true,
+    "duplicate_receipt_with_new_request_id_fails_closed": true
+  },
+  "outbox": {
+    "mode": "LOCAL_DRY_RUN_ONLY",
+    "queue_state": "QUEUED_LOCAL",
+    "publisher_input_ready_for_local_m09_only": true,
+    "public_publish_eligible": false,
+    "network_delivery_performed": false
+  },
+  "authority": {
+    "local_queue_authority": true,
+    "publisher_authority": false,
+    "publish_authority": false,
+    "network_authority": false,
+    "real_account_connection_authority": false,
+    "deploy_authority": false
+  },
+  "platform_policy": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "next_dependency": "M09_PUBLISHER"
+}
