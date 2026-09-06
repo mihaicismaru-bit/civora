@@ -12,6 +12,15 @@ REQUIRED_PIPELINE = (
     "M07_QA","M08_QUEUE","M09_PUBLISHER","M10_ANALYTICS","M11_LEARNING","M12_APPROVAL","M13_RIGHTS","M14_EXPERIMENTS"
 )
 
+EXECUTABLE_STAGE_STATUSES = {
+    "M01_RADAR": {"CP34_MINIMAL_EXECUTABLE_SLICE"},
+}
+
+HISTORICAL_ONLY_STATUSES = {
+    "VALIDATED_PREVIOUS_CHECKPOINTS","CP29_LOCKED","DRY_RUN_ONLY","SYNTHETIC_ONLY",
+    "SHADOW_ONLY","LOCAL_ONLY","DOCUMENTARY_ONLY"
+}
+
 @dataclass(frozen=True)
 class StageResult:
     module_id: str
@@ -55,7 +64,10 @@ def run_synthetic_rehearsal(root: Path) -> RehearsalReport:
 
     for module_id in REQUIRED_PIPELINE:
         status = status_by_id.get(module_id)
-        if status in {"VALIDATED_PREVIOUS_CHECKPOINTS","CP29_LOCKED","DRY_RUN_ONLY","SYNTHETIC_ONLY","SHADOW_ONLY","LOCAL_ONLY","DOCUMENTARY_ONLY"}:
+        if status in EXECUTABLE_STAGE_STATUSES.get(module_id, set()):
+            state = "PASS_EXECUTABLE_SOURCE"
+            reason = f"{module_id} has canonical executable source in GitHub"
+        elif status in HISTORICAL_ONLY_STATUSES:
             state = "HOLD_EXECUTABLE_SOURCE_UNAVAILABLE"
             reason = f"{module_id} has historical maturity evidence but no canonical executable source imported into GitHub"
             blockers.append(f"{module_id}:EXECUTABLE_SOURCE_UNAVAILABLE")
