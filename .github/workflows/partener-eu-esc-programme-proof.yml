@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: partener-eu-esc-programme-proof-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   esc-programme-intelligence-proof:
     runs-on: ubuntu-latest
