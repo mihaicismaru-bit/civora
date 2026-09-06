@@ -1,0 +1,144 @@
+name: PARTENER.EU I3 Programme Intelligence Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_i3_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eu_direct_i3_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_i3_programme_intelligence.py'
+      - '.github/workflows/partener-eu-i3-programme-intelligence-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  i3-programme-intelligence-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded I3 adapter and regressions
+        run: |
+          python -m json.tool partener-eu/ingest/eu_direct_i3_programme_intelligence_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_i3_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_i3_programme_intelligence.py
+
+      - name: Validate fail-closed I3 programme semantics
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: python partener-eu/ops/test_eu_direct_i3_programme_intelligence.py -v
+
+      - name: Acquire fresh official I3 programme intelligence
+        run: |
+          ROOT=/tmp/partener-eu-i3-programme-intelligence-proof
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/eu_direct_i3_programme_intelligence.py \
+            --registry partener-eu/ingest/eu_direct_i3_programme_intelligence_registry.json \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-i3" \
+            --output "$ROOT/i3-programme-intelligence.json"
+          cp partener-eu/ingest/eu_direct_i3_programme_intelligence_registry.json "$ROOT/registry.json"
+
+      - name: Enforce live I3 non-authorizing boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-i3-programme-intelligence-proof/i3-programme-intelligence.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_I3_PROGRAMME_INTELLIGENCE_V1'
+          assert d['source_family'] == 'EU_DIRECT'
+          assert d['programme_id'] == 'I3'
+          assert d['source_count'] == 5 and len(d['evidence']) == 5
+          assert d['healthy_source_count'] + d['degraded_source_count'] == 5
+          assert d['source_health_state'] in {'HEALTHY','DEGRADED'}
+          assert d['market_intelligence_only'] is True
+          assert d['fit_score_is_not_eligibility'] is True
+          assert d['geography_fit_is_not_eligibility'] is True
+          assert d['partner_intelligence_is_not_call_eligibility'] is True
+          assert d['structured_funding_tenders_reconciliation_required'] is True
+          assert d['publication_effect'] == 'NONE'
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized',
+              'deadline_authorized','budget_authorized','eligibility_authorized',
+              'publish_authorized','distribution_authorized','call_alert_authorized',
+              'canonical_corpus_mutation',
+          )
+          assert all(d[key] is False for key in flags)
+          hints={}
+          for row in d['evidence']:
+              health=row['source_health']
+              if health == 'HEALTHY':
+                  assert row['http_status'] == 200
+                  assert row['lkg_required'] is False
+                  assert re.fullmatch(r'[0-9a-f]{64}', str(row['raw_sha256']))
+                  assert re.fullmatch(r'[0-9a-f]{64}', str(row['normalized_visible_text_sha256']))
+                  assert re.fullmatch(r'[0-9a-f]{64}', str(row['source_semantic_fingerprint']))
+              else:
+                  assert health == 'DEGRADED'
+                  assert row['lkg_required'] is True
+                  assert row['source_semantic_fingerprint'] is None
+              if row.get('call_reference_hint'):
+                  assert row['observation_state'] == 'CALL_INDEX_DISCOVERY'
+                  assert row['call_reference_hint_authority'] == 'DISCOVERY_HINT_ONLY_NOT_CALL_IDENTIFIER'
+                  hints[row['source_id']] = row['call_reference_hint']
+          assert set(hints.values()) == {'I3-2026-INV1','I3-2026-INV2a'}
+          assert re.fullmatch(r'[0-9a-f]{64}', str(d['semantic_fingerprint']))
+          print(json.dumps({
+              'programme_id':'I3',
+              'source_health_state':d['source_health_state'],
+              'healthy_source_count':d['healthy_source_count'],
+              'degraded_source_count':d['degraded_source_count'],
+              'discovery_reference_hints':sorted(hints.values()),
+              'open_call_authorized':False,
+              'publication_effect':'NONE',
+          }, sort_keys=True))
+          PY
+
+      - name: Upload bounded I3 proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-i3-programme-intelligence-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-i3-programme-intelligence-proof
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Require healthy I3 official-source proof
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='/tmp/partener-eu-i3-programme-intelligence-proof/i3-programme-intelligence.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('source_health_state') != 'HEALTHY' or d.get('healthy_source_count') != d.get('source_count'):
+              bad=[{
+                  'source_id':r.get('source_id'),
+                  'authority_url':r.get('authority_url'),
+                  'failure_class':r.get('failure_class'),
+                  'error':r.get('error'),
+              } for r in d.get('evidence',[]) if r.get('source_health') != 'HEALTHY']
+              sys.exit('FAIL I3 proof source health degraded: '+json.dumps(bad, sort_keys=True))
+          print(json.dumps({
+              'source_health_state':'HEALTHY',
+              'source_count':d['source_count'],
+              'semantic_fingerprint':d['semantic_fingerprint'],
+              'material_authorization':False,
+          }, sort_keys=True))
+          PY
