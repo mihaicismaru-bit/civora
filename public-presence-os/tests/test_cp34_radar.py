@@ -124,25 +124,23 @@ def test_json_output_contains_no_authority():
     assert '"network_fetch_performed": false' in text
 
 
-def test_priority_map_closes_m01_and_points_to_m02():
+def test_priority_map_preserves_m01_lock_and_progresses_forward():
     p=load_json(ROOT/"config"/"reimplementation_priority.json")
-    assert p["checkpoint"]=="CP34"
     assert p["order"][0]["module_id"]=="M01_RADAR"
     assert p["order"][0]["state"]=="CP34_MINIMAL_EXECUTABLE_SLICE"
     assert p["order"][1]["module_id"]=="M02_RESEARCH"
-    assert p["order"][1]["state"]=="NEXT"
+    assert p["order"][1]["state"] in {"NEXT","CP35_MINIMAL_EXECUTABLE_SLICE"}
 
 
-def test_module_registry_cp34_state():
+def test_module_registry_preserves_cp34_m01_state():
     r=load_json(ROOT/"config"/"module_registry.json")
-    assert r["checkpoint"]=="CP34"
     m={x["id"]:x for x in r["modules"]}
     assert m["M01_RADAR"]["status"]=="CP34_MINIMAL_EXECUTABLE_SLICE"
 
 
-def test_rehearsal_reduces_executable_gap_by_one():
+def test_rehearsal_keeps_m01_executable_as_later_stages_arrive():
     r=run_synthetic_rehearsal(ROOT)
     stages={s.module_id:s.state for s in r.stages}
     assert stages["M01_RADAR"]=="PASS_EXECUTABLE_SOURCE"
     assert "M01_RADAR:EXECUTABLE_SOURCE_UNAVAILABLE" not in r.blockers
-    assert sum(1 for x in r.blockers if x.endswith(":EXECUTABLE_SOURCE_UNAVAILABLE"))==13
+    assert sum(1 for x in r.blockers if x.endswith(":EXECUTABLE_SOURCE_UNAVAILABLE")) <= 13
