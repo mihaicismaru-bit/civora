@@ -95,6 +95,33 @@ def merged_registry() -> tuple[dict, int]:
     return {"facts": list(combined.values())}, len(automatic.get("facts", []))
 
 
+def previously_published_ids() -> set[str]:
+    """Return story IDs that have already entered a publishable edition.
+
+    Edition slots are discovery/scheduling hints for *new* facts, not a reason
+    to silently withdraw an already-published, still-valid story. The current
+    registry remains authoritative for status, evidence and validity, so an ID
+    found here is retained only if it still passes every other eligibility gate.
+    """
+    published: set[str] = set()
+    if not EDITIONS.is_dir():
+        return published
+    for path in EDITIONS.glob("*.json"):
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if payload.get("publication_intent") != "publish" or payload.get("status") not in PUBLISHABLE_STATUSES:
+            continue
+        for row in payload.get("items") or []:
+            if not isinstance(row, dict):
+                continue
+            story_id = str(row.get("id") or "").strip()
+            if story_id:
+                published.add(story_id)
+    return published
+
+
 def freshness_bucket(item: dict, now: datetime) -> int:
     """Group current stories by age so a live homepage behaves like a newsroom.
 
@@ -120,11 +147,13 @@ def editorial_sort_key(item: dict, now: datetime) -> tuple:
     )
 
 
-def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
+def eligible_facts(registry: dict, now: datetime, slot: str, retained_ids: set[str] | None = None) -> list[dict]:
     output = []
     held = active_publication_holds()
+    retained_ids = retained_ids or set()
     for fact in registry.get("facts", []):
-        if str(fact.get("id") or "") in held:
+        fact_id = str(fact.get("id") or "")
+        if fact_id in held:
             continue
         if fact.get("status") not in ALLOWED_STATUSES:
             continue
@@ -132,7 +161,11 @@ def eligible_facts(registry: dict, now: datetime, slot: str) -> list[dict]:
             continue
         if fact.get("material_fact_gate") not in ALLOWED_GATES:
             continue
-        if slot not in fact.get("slots", []):
+        # Slot membership gates first publication only. Once a story has been
+        # published, keep it in the canonical set while it remains valid and
+        # passes all evidence/status/hold gates. This prevents morning/evening
+        # regeneration from silently deleting still-live URLs.
+        if slot not in fact.get("slots", []) and fact_id not in retained_ids:
             continue
         sources = fact.get("sources") or []
         if not sources or any(not source.get("url") for source in sources):
@@ -189,6 +222,10 @@ def compact_item(item: dict) -> dict:
         "confidence": item["confidence"],
         "material_fact_gate": item["material_fact_gate"],
         "sources": item.get("sources", []),
+        "valid_from": item.get("valid_from"),
+        "valid_until": item.get("valid_until"),
+        "lifecycle_status": item.get("lifecycle_status") or item.get("status"),
+        **({"replacement_id": item["replacement_id"]} if item.get("replacement_id") else {}),
         **({"auto_generated": True, "auto_scope": item.get("auto_scope"), "brief_kind": item.get("brief_kind")} if item.get("auto_generated") else {}),
         **({"visual": item["visual"]} if item.get("visual") else {}),
         **({"factbox": item["factbox"]} if item.get("factbox") else {}),
@@ -213,7 +250,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
     eid = edition_id(now, slot)
     title_slot = "dimineață" if slot == "morning" else "seară"
     payload = {
-        "schema_version": "2.6",
+        "schema_version": "2.7",
         "edition_id": eid,
         "slot": slot,
         "title": f"VÂLCEA CLAR — Ediția de {title_slot}",
@@ -238,6 +275,8 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "article_body_material_facts_autopublish": False,
             "shorter_edition_when_evidence_is_sparse": True,
             "last_known_good_fallback": True,
+            "published_story_retention_until_ineligible": True,
+            "slot_gate_applies_to_first_publication_only": True,
             "human_override_available": True,
             "internal_operational_telemetry_public": False,
             "ranking_policy": "freshness_bucket_then_priority_then_publication_time",
@@ -314,6 +353,7 @@ def self_test() -> int:
     eligible = eligible_facts(sample, now, "morning")
     assert len(eligible) == 1
     assert eligible_facts(sample, now, "evening") == []
+    assert [row["id"] for row in eligible_facts(sample, now, "evening", retained_ids={"x"})] == ["x"]
     title_only = {"facts": [{**sample_fact, "id": "title-only", "material_fact_gate": "PASS_TITLE_DATE_ONLY"}]}
     assert eligible_facts(title_only, now, "morning") == []
     relative = {"facts": [{**sample_fact, "id": "relative", "headline": "Azi are loc programul verificat"}]}
@@ -369,7 +409,8 @@ def main() -> int:
         now = datetime.combine(parsed_date, now.timetz()).astimezone(TZ)
     slot = choose_slot(now, args.slot)
     registry, auto_registry_count = merged_registry()
-    facts = eligible_facts(registry, now, slot)
+    retained_ids = previously_published_ids()
+    facts = eligible_facts(registry, now, slot, retained_ids=retained_ids)
     json_path, md_path, payload = write_outputs(now, slot, facts, auto_registry_count)
     print(json.dumps({
         "status": payload["status"],
@@ -379,9 +420,11 @@ def main() -> int:
         "editorial_writer_composed_count": payload["editorial_writer_composed_count"],
         "auto_fact_registry_count": payload["auto_fact_registry_count"],
         "auto_facts_included": payload["auto_facts_included"],
+        "retained_published_story_ids": len(retained_ids),
         "json": str(json_path.relative_to(ROOT)),
         "markdown": str(md_path.relative_to(ROOT)),
         "public_pointer_preserves_last_known_good_on_hold": True,
+        "published_story_retention_until_ineligible": True,
         "public_items_are_editorial_only": True,
         "ranking_policy": payload["policy"]["ranking_policy"],
         "durable_temporal_language_contract": TEMPORAL_CONTRACT,
