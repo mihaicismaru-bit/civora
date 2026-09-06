@@ -1,0 +1,97 @@
+{
+  "checkpoint": "CP45",
+  "schema_version": "PPOS_LOCAL_RECEIPT_TELEMETRY_POLICY_V1",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "input_contract": {
+    "required_module": "M09_PUBLISHER",
+    "required_state": "LOCAL_DRY_RUN_PUBLISH_RECEIPT_ONLY",
+    "required_publisher_state": "DRY_RUN_RECORDED",
+    "require_analytics_input_ready": true,
+    "require_exact_receipt_sha256": true,
+    "require_no_delivery_claim": true,
+    "require_no_external_post_id": true
+  },
+  "collection": {
+    "mode": "LOCAL_RECEIPT_TELEMETRY_ONLY",
+    "global_kill_switch_must_remain_engaged": true,
+    "network_analytics_lookup": false,
+    "real_account_connected": false,
+    "external_post_lookup": false,
+    "learning_feedback_write": false,
+    "strategy_mutation": false
+  },
+  "remote_metrics": {
+    "availability": "NOT_CONNECTED",
+    "null_is_not_zero": true,
+    "metric_names": [
+      "VIEWS",
+      "REACH",
+      "IMPRESSIONS",
+      "LIKES",
+      "REACTIONS",
+      "COMMENTS",
+      "REPLIES",
+      "SHARES",
+      "REPOSTS",
+      "QUOTES",
+      "SAVES",
+      "CLICKS",
+      "CONVERSIONS"
+    ],
+    "derived_metrics_state": "NOT_COMPUTABLE_NOT_CONNECTED",
+    "performance_evidence_ready": false
+  },
+  "learning_handoff": {
+    "learning_input_ready": true,
+    "scope": "LOCAL_OPERATIONAL_TELEMETRY_ONLY",
+    "performance_learning_allowed": false,
+    "automatic_strategy_mutation_allowed": false
+  },
+  "privacy": {
+    "aggregate_content_level_only": true,
+    "individual_profiling": false,
+    "demographic_dimensions": false,
+    "person_level_identifiers": false
+  },
+  "storage": {
+    "backend": "SQLITE_LOCAL",
+    "receipt_inputs_append_only": true,
+    "snapshots_append_only": true,
+    "event_log_append_only": true,
+    "one_snapshot_per_receipt": true
+  },
+  "retry_idempotency": {
+    "caller_request_id_required": true,
+    "same_request_same_receipt_same_timestamp_returns_same_snapshot": true,
+    "request_id_payload_drift_fails_closed": true,
+    "duplicate_receipt_with_new_request_id_fails_closed": true
+  },
+  "authority": {
+    "local_analytics_authority": true,
+    "external_analytics_authority": false,
+    "learning_write_authority": false,
+    "strategy_mutation_authority": false,
+    "network_authority": false,
+    "real_account_connection_authority": false,
+    "publish_authority": false,
+    "deploy_authority": false
+  },
+  "forbidden_runtime_clients": [
+    "requests",
+    "httpx",
+    "aiohttp",
+    "urllib.request",
+    "http.client",
+    "socket"
+  ],
+  "platform_policy": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "next_dependency": "M11_LEARNING"
+}
