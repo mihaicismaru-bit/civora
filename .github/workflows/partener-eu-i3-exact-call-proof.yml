@@ -1,0 +1,147 @@
+name: PARTENER.EU I3 Exact Call Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_i3_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_i3_ft_exact.py'
+      - '.github/workflows/partener-eu-i3-exact-call-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  i3-exact-call-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded I3 exact adapter and regressions
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_i3_ft_exact.py \
+            partener-eu/ops/test_eu_direct_i3_ft_exact.py
+
+      - name: Validate fail-closed I3 exact semantics
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: python partener-eu/ops/test_eu_direct_i3_ft_exact.py
+
+      - name: Acquire fresh exact I3 Strand 1 evidence
+        run: |
+          ROOT=/tmp/partener-eu-i3-exact-call-proof/inv1
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/eu_direct_i3_ft_exact.py \
+            --reference 'I3-2026-INV1' \
+            --eismea-url 'https://eismea.ec.europa.eu/funding-opportunities/calls-proposals/interregional-innovation-investments-strand-1-i3-2026-inv1_en' \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-i3-inv1" \
+            --output-dir "$ROOT"
+
+      - name: Acquire fresh exact I3 Strand 2a evidence
+        run: |
+          ROOT=/tmp/partener-eu-i3-exact-call-proof/inv2a
+          mkdir -p "$ROOT"
+          python partener-eu/ingest/eu_direct_i3_ft_exact.py \
+            --reference 'I3-2026-INV2a' \
+            --eismea-url 'https://eismea.ec.europa.eu/funding-opportunities/calls-proposals/interregional-innovation-investments-strand-2a-i3-2026-inv2a_en' \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-i3-inv2a" \
+            --output-dir "$ROOT"
+
+      - name: Enforce exact I3 non-authorizing boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-i3-exact-call-proof')
+          expected={
+              'inv1':'I3-2026-INV1',
+              'inv2a':'I3-2026-INV2A',
+          }
+          summaries=[]
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized',
+              'deadline_authorized','budget_authorized','eligibility_authorized',
+              'publish_authorized','distribution_authorized','call_alert_authorized',
+          )
+          for folder, reference in expected.items():
+              p=root/folder/'ft-i3-exact-evidence.json'
+              d=json.loads(p.read_text(encoding='utf-8'))
+              assert d['schema']=='PARTENER_EU_I3_FT_EXACT_EVIDENCE_V1'
+              assert d['parser_version']=='EU_DIRECT_I3_FT_EXACT_V1'
+              assert d['source_family']=='EU_DIRECT'
+              assert d['programme_family']=='I3'
+              assert d['reference']==reference
+              assert d['source_health_state']=='HEALTHY'
+              assert d['evidence_usable_for_reconciliation'] is True
+              assert d['funding_tenders_authority_verified'] is True
+              assert d['eismea_receipt']['health_state']=='HEALTHY'
+              assert d['cross_authority_status_consistent'] is True
+              assert d['candidate_state']=='OPEN_CALL'
+              assert str(d['status_label']).casefold()=='open'
+              assert d['eismea_status_label_candidate'] in {None,'Open'}
+              assert d['semantic_reconciliation_required'] is True
+              assert d['field_scoped_material_admission_required'] is True
+              assert d['publication_effect']=='NONE'
+              assert d['canonical_corpus_mutation'] is False
+              assert all(d[k] is False for k in flags)
+              assert re.fullmatch(r'[0-9a-f]{64}', d['search_raw_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', d['facet_raw_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', d['exact_semantic_fingerprint'])
+              assert re.fullmatch(r'[0-9a-f]{64}', d['eismea_receipt']['raw_sha256'])
+              summaries.append({
+                  'reference':reference,
+                  'candidate_state':d['candidate_state'],
+                  'status_label':d['status_label'],
+                  'semantic_fingerprint':d['exact_semantic_fingerprint'],
+                  'open_call_authorized':False,
+              })
+          print(json.dumps({'i3_exact_calls':summaries,'publication_effect':'NONE'}, sort_keys=True))
+          PY
+
+      - name: Upload bounded I3 exact-call proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-i3-exact-call-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-i3-exact-call-proof
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Require healthy I3 exact authority chain
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-i3-exact-call-proof')
+          bad=[]
+          for folder in ('inv1','inv2a'):
+              p=root/folder/'ft-i3-exact-evidence.json'
+              d=json.loads(p.read_text(encoding='utf-8'))
+              if d.get('source_health_state')!='HEALTHY' or d.get('evidence_usable_for_reconciliation') is not True:
+                  bad.append({
+                      'reference':d.get('reference'),
+                      'source_health_state':d.get('source_health_state'),
+                      'degradation_reason':d.get('degradation_reason'),
+                      'eismea_health':(d.get('eismea_receipt') or {}).get('health_state'),
+                      'ft_verified':d.get('funding_tenders_authority_verified'),
+                  })
+          if bad:
+              sys.exit('FAIL I3 exact proof degraded: '+json.dumps(bad, sort_keys=True))
+          print(json.dumps({'i3_exact_authority_chain':'HEALTHY','references':['I3-2026-INV1','I3-2026-INV2A'],'material_authorization':False}, sort_keys=True))
+          PY
