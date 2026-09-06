@@ -5,12 +5,16 @@ on:
     paths:
       - 'partener-eu/ingest/eu_direct_esc_programme_intelligence_registry.json'
       - 'partener-eu/ingest/eu_direct_esc_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_esc_programme_reconcile.py'
       - 'partener-eu/ops/test_eu_direct_esc_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_esc_programme_reconcile.py'
+      - 'partener-eu/ops/run_esc_programme_canonical.py'
       - '.github/workflows/partener-eu-esc-programme-proof.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: partener-eu-esc-programme-proof-${{ github.event.pull_request.number || github.ref }}
@@ -37,104 +41,95 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile ESC registry adapter and regressions
+      - name: Compile ESC registry adapter reconciler runner and regressions
         run: |
           python -m json.tool partener-eu/ingest/eu_direct_esc_programme_intelligence_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/eu_direct_esc_programme_intelligence.py \
-            partener-eu/ops/test_eu_direct_esc_programme_intelligence.py
+            partener-eu/ingest/eu_direct_esc_programme_reconcile.py \
+            partener-eu/ops/run_esc_programme_canonical.py \
+            partener-eu/ops/test_eu_direct_esc_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_esc_programme_reconcile.py
 
       - name: Validate fail-closed ESC programme semantics
         env:
           PYTHONPATH: partener-eu/ingest:partener-eu/ops
-        run: python partener-eu/ops/test_eu_direct_esc_programme_intelligence.py -v
-
-      - name: Acquire fresh official ESC programme intelligence
         run: |
-          ROOT=/tmp/partener-eu-esc-programme-intelligence
-          rm -rf "$ROOT"
-          mkdir -p "$ROOT"
-          python partener-eu/ingest/eu_direct_esc_programme_intelligence.py \
-            --registry partener-eu/ingest/eu_direct_esc_programme_intelligence_registry.json \
-            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-esc-programme" \
-            --output "$ROOT/esc-programme-intelligence.json"
-          cp partener-eu/ingest/eu_direct_esc_programme_intelligence_registry.json "$ROOT/registry.json"
+          python partener-eu/ops/test_eu_direct_esc_programme_intelligence.py -v
+          python partener-eu/ops/test_eu_direct_esc_programme_reconcile.py -v
 
-      - name: Enforce live ESC non-authorizing boundary
+      - name: Acquire reconcile and stage ESC history through canonical runner
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ESC_ROOT: /tmp/partener-eu-esc-programme-intelligence
+          ESC_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-esc-programme
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: python partener-eu/ops/run_esc_programme_canonical.py
+
+      - name: Enforce replayable ESC non-authorizing boundary
         run: |
           python - <<'PY'
           import json, re
           from pathlib import Path
           root=Path('/tmp/partener-eu-esc-programme-intelligence')
-          d=json.loads((root/'esc-programme-intelligence.json').read_text(encoding='utf-8'))
-          assert d['schema']=='PARTENER_EU_ESC_PROGRAMME_INTELLIGENCE_V1'
-          assert d['parser_version']=='EU_DIRECT_ESC_PROGRAMME_INTELLIGENCE_V1'
-          assert d['source_family']=='EU_DIRECT'
-          assert d['programme_family']=='European Solidarity Corps'
-          assert d['programme_id']=='EUROPEAN_SOLIDARITY_CORPS'
-          assert d['authority_class']=='T1_OFFICIAL_EU_PROGRAMME'
-          assert d['programme_context']['management_mode']=='DIRECT_AND_INDIRECT_MANAGEMENT'
-          assert d['programme_context']['current_programming_period']=='2021-2027'
-          assert d['programme_context']['programme_fit_is_not_call_eligibility'] is True
-          assert d['source_count']==3 and len(d['evidence'])==3
-          assert d['source_health_state'] in {'HEALTHY','DEGRADED'}
-          assert d['market_intelligence_only'] is True
-          assert d['fit_score_is_not_eligibility'] is True
-          assert d['route_intelligence_is_not_call_eligibility'] is True
-          assert d['current_material_truth_available'] is False
-          assert d['exact_call_or_topic_identifier_required'] is True
-          assert d['current_official_exact_endpoint_required'] is True
-          assert d['semantic_reconciliation_required'] is True
-          assert d['field_scoped_material_admission_required'] is True
-          assert re.fullmatch(r'[0-9a-f]{64}', d['registry_sha256'])
-          assert re.fullmatch(r'[0-9a-f]{64}', d['semantic_fingerprint'])
+          current=json.loads((root/'current'/'esc-programme-intelligence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current'/'esc-programme-reconciliation.json').read_text(encoding='utf-8'))
+          restore=json.loads((root/'previous'/'restore-metadata.json').read_text(encoding='utf-8'))
+          history=json.loads((root/'history'/'history-selection.json').read_text(encoding='utf-8'))
+          assert current['schema']=='PARTENER_EU_ESC_PROGRAMME_INTELLIGENCE_V1'
+          assert rec['schema']=='PARTENER_EU_ESC_PROGRAMME_RECONCILIATION_V1'
+          assert current['programme_id']==rec['programme_id']=='EUROPEAN_SOLIDARITY_CORPS'
+          assert current['source_count']==3
+          assert current['source_health_state'] in {'HEALTHY','DEGRADED'}
+          assert current['current_material_truth_available'] is False
+          assert rec['lkg_reference_is_current_truth'] is False
+          assert rec['material_admission_ready_for_downstream_review'] is False
+          assert rec['pipeline_watch_candidate'] is False
           flags=(
               'material_fact_use','open_call_authorized','closed_call_authorized',
               'deadline_authorized','budget_authorized','eligibility_authorized',
               'publish_authorized','distribution_authorized','call_alert_authorized',
               'canonical_corpus_mutation',
           )
-          assert all(d[key] is False for key in flags)
-          assert d['publication_effect']=='NONE'
-          assert {
-              'exact_call_or_topic_identifier',
-              'current_official_exact_call_or_topic_endpoint',
-              'explicit_current_official_call_status',
-              'semantic_reconciliation',
-              'field_scoped_material_admission',
-          }.issubset(set(d['missing_for_open_confirmation']))
-          states={}
-          for row in d['evidence']:
-              assert row['source_family']=='EU_DIRECT'
-              assert row['programme_id']=='EUROPEAN_SOLIDARITY_CORPS'
-              assert row['observation_state'] in {'PROGRAMME_INTELLIGENCE','CALL_INDEX_DISCOVERY'}
-              assert row['authority_class']=='T1_OFFICIAL_EU_PROGRAMME'
-              assert row['material_fact_use'] is False
-              assert row['current_material_truth_available'] is False
-              states[row['source_id']]=row['source_health']
-              if row['source_health']=='HEALTHY':
-                  assert row['http_status']==200
-                  assert row['lkg_required'] is False
-                  assert row['evidence_usable_for_reconciliation'] is True
-                  assert re.fullmatch(r'[0-9a-f]{64}', row['raw_sha256'])
-                  assert re.fullmatch(r'[0-9a-f]{64}', row['normalized_visible_text_sha256'])
-                  assert re.fullmatch(r'[0-9a-f]{64}', row['source_semantic_fingerprint'])
-              else:
-                  assert row['source_health']=='DEGRADED'
-                  assert row['lkg_required'] is True
-                  assert row['evidence_usable_for_reconciliation'] is False
-                  assert row['source_semantic_fingerprint'] is None
+          assert all(current[key] is False for key in flags)
+          assert all(rec[key] is False for key in flags)
+          assert current['publication_effect']==rec['publication_effect']=='NONE'
+          assert re.fullmatch(r'[0-9a-f]{64}', current['semantic_fingerprint'])
+          assert re.fullmatch(r'[0-9a-f]{64}', rec['reconciliation_fingerprint'])
+          if current['source_health_state']=='HEALTHY':
+              assert rec['semantic_reconciliation_passed'] is True
+              assert rec['reconciliation_state'] in {
+                  'BASELINE_CAPTURED_NON_AUTHORIZING','NO_CHANGE',
+                  'ESC_PROGRAMME_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
+                  'SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING',
+              }
+              assert history['selected']=='CURRENT_HEALTHY'
+          else:
+              assert rec['reconciliation_state']=='CURRENT_SOURCE_HEALTH_DEGRADED_LKG_REQUIRED'
+              assert rec['semantic_reconciliation_passed'] is False
+              assert rec['lkg_reference_required'] is True
+              assert history['selected'] in {'PREVIOUS_HEALTHY_LKG','NO_HEALTHY_LKG_AVAILABLE'}
+          if restore['previous_found']:
+              assert rec['previous_identity_match'] is True
+              assert rec['lkg_reference_is_current_truth'] is False
           print(json.dumps({
-              'source_health':states,
-              'healthy_source_count':d['healthy_source_count'],
-              'degraded_source_count':d['degraded_source_count'],
-              'semantic_fingerprint':d['semantic_fingerprint'],
+              'source_health_state':current['source_health_state'],
+              'healthy_source_count':current['healthy_source_count'],
+              'degraded_source_count':current['degraded_source_count'],
+              'previous_found':restore['previous_found'],
+              'previous_artifact_id':restore['artifact_id'],
+              'reconciliation_state':rec['reconciliation_state'],
+              'semantic_change_count':rec['semantic_change_count'],
+              'market_watch_candidate':rec['market_watch_candidate'],
+              'call_index_discovery_watch_candidate':rec['call_index_discovery_watch_candidate'],
+              'history_selected':history['selected'],
               'open_call_authorized':False,
               'publication_effect':'NONE',
           }, sort_keys=True))
           PY
 
-      - name: Upload bounded ESC programme-intelligence proof
+      - name: Upload bounded ESC programme-intelligence history proof
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -148,8 +143,17 @@ jobs:
           python - <<'PY'
           import json
           from pathlib import Path
-          d=json.loads(Path('/tmp/partener-eu-esc-programme-intelligence/esc-programme-intelligence.json').read_text(encoding='utf-8'))
-          assert d['source_health_state']=='HEALTHY', d
-          assert d['healthy_source_count']==3 and d['degraded_source_count']==0, d
-          print({'esc_source_qualification':'HEALTHY','source_count':3,'open_call_authorized':False})
+          root=Path('/tmp/partener-eu-esc-programme-intelligence')
+          current=json.loads((root/'current'/'esc-programme-intelligence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current'/'esc-programme-reconciliation.json').read_text(encoding='utf-8'))
+          assert current['source_health_state']=='HEALTHY', current
+          assert current['healthy_source_count']==3 and current['degraded_source_count']==0, current
+          assert rec['semantic_reconciliation_passed'] is True, rec
+          print({
+              'esc_source_qualification':'HEALTHY',
+              'source_count':3,
+              'reconciliation_state':rec['reconciliation_state'],
+              'semantic_change_count':rec['semantic_change_count'],
+              'open_call_authorized':False,
+          })
           PY
