@@ -17,15 +17,17 @@ def test_active_platforms_exact():
     assert r.active_platforms==("FACEBOOK_PAGE","INSTAGRAM_PROFESSIONAL","THREADS")
 
 
-def test_m01_m05_are_executable_but_remaining_historical_modules_hold():
+def test_m01_m05_and_m13_are_executable_but_remaining_historical_modules_hold():
     r=run_synthetic_rehearsal(ROOT)
     pipeline={s.module_id:s for s in r.stages}
-    for module_id in ("M01_RADAR","M02_RESEARCH","M03_SCORING","M04_MASTER_DRAFT","M05_NATIVE_ADAPT"):
+    executable=("M01_RADAR","M02_RESEARCH","M03_SCORING","M04_MASTER_DRAFT","M05_NATIVE_ADAPT","M13_RIGHTS")
+    for module_id in executable:
         assert pipeline[module_id].state=="PASS_EXECUTABLE_SOURCE"
         assert f"{module_id}:EXECUTABLE_SOURCE_UNAVAILABLE" not in r.blockers
-    for module_id in REQUIRED_PIPELINE[5:]:
-        assert pipeline[module_id].state=="HOLD_EXECUTABLE_SOURCE_UNAVAILABLE"
-        assert f"{module_id}:EXECUTABLE_SOURCE_UNAVAILABLE" in r.blockers
+    for module_id in REQUIRED_PIPELINE:
+        if module_id not in executable:
+            assert pipeline[module_id].state=="HOLD_EXECUTABLE_SOURCE_UNAVAILABLE"
+            assert f"{module_id}:EXECUTABLE_SOURCE_UNAVAILABLE" in r.blockers
 
 
 def test_current_canonical_modules_execute():
@@ -50,4 +52,4 @@ def test_report_contract():
     assert p["golden_path_complete"] is False
     assert p["pilot_state"]=="HOLD_PILOT_EXECUTABLE_GAPS"
     assert len(p["stages"])==16
-    assert len(p["blockers"])>=9
+    assert len(p["blockers"])>=8
