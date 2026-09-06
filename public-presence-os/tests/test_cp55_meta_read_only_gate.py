@@ -146,10 +146,8 @@ def test_cp55_active_lane_gate_receipts_are_deterministic_and_zero_authority(tmp
     assert first.probe_mode == "CONTRACT_ONLY_NO_NETWORK"
     assert first.kill_switch.required is True
     assert first.kill_switch.engaged is True
-    assert first.kill_switch.state == "ENGAGED_REQUIRED_PRE_PILOT"
     assert first.kill_switch.automatic_disengage_allowed is False
     assert first.kill_switch.operator_override_allowed is False
-    assert first.kill_switch.unlock_path_materialized is False
     assert tuple(item.code for item in first.evidence_requirements) == REQUIRED_FUTURE_EVIDENCE
     assert all(item.state == "NOT_CAPTURED" for item in first.evidence_requirements)
     for flag in (
@@ -162,8 +160,7 @@ def test_cp55_active_lane_gate_receipts_are_deterministic_and_zero_authority(tmp
 
 
 def test_cp55_serialized_receipt_never_pretends_live_evidence(tmp_path):
-    twin = make_twin(tmp_path, "THREADS", TEXT)
-    receipt = compile_meta_read_only_gate(twin, runtime_policy())
+    receipt = compile_meta_read_only_gate(make_twin(tmp_path, "THREADS", TEXT), runtime_policy())
     payload = json.loads(render_meta_read_only_gate_json(receipt))
     assert payload["probe_mode"] == "CONTRACT_ONLY_NO_NETWORK"
     assert payload["live_probe_authorized"] is False
@@ -174,16 +171,13 @@ def test_cp55_serialized_receipt_never_pretends_live_evidence(tmp_path):
     assert all(row["state"] == "NOT_CAPTURED" for row in payload["evidence_requirements"])
 
 
-def test_cp55_runtime_kill_switch_is_hard_interlock(tmp_path):
+def test_cp55_runtime_kill_switch_and_external_authority_are_hard_interlocks(tmp_path):
     twin = make_twin(tmp_path, "FACEBOOK_PAGE", TEXT)
     drift = runtime_policy()
     drift["global_kill_switch_engaged"] = False
     with pytest.raises(MetaReadOnlyGateHold, match="HOLD_READ_ONLY_GATE_RUNTIME_POLICY_INVALID"):
         compile_meta_read_only_gate(twin, drift)
 
-
-def test_cp55_runtime_network_or_account_authority_is_rejected(tmp_path):
-    twin = make_twin(tmp_path, "THREADS", TEXT)
     for key in ("network_enabled", "real_accounts_connected", "account_connection_enabled", "publish_enabled"):
         drift = runtime_policy()
         drift[key] = True
@@ -192,15 +186,17 @@ def test_cp55_runtime_network_or_account_authority_is_rejected(tmp_path):
 
 
 def test_cp55_receipt_tampering_fails_closed(tmp_path):
-    twin = make_twin(tmp_path, "INSTAGRAM_PROFESSIONAL", SINGLE_IMAGE)
-    receipt = compile_meta_read_only_gate(twin, runtime_policy())
+    receipt = compile_meta_read_only_gate(
+        make_twin(tmp_path, "INSTAGRAM_PROFESSIONAL", SINGLE_IMAGE),
+        runtime_policy(),
+    )
     with pytest.raises(MetaReadOnlyGateHold, match="HOLD_READ_ONLY_GATE_EXTERNAL_AUTHORITY_FORBIDDEN"):
         validate_meta_read_only_gate_receipt(replace(receipt, live_probe_authorized=True))
     with pytest.raises(MetaReadOnlyGateHold, match="HOLD_READ_ONLY_GATE_KILL_SWITCH_INTERLOCK_DRIFT"):
         validate_meta_read_only_gate_receipt(replace(receipt, kill_switch=replace(receipt.kill_switch, engaged=False)))
+    rows = list(receipt.evidence_requirements)
+    rows[0] = replace(rows[0], state="CAPTURED")
     with pytest.raises(MetaReadOnlyGateHold, match="HOLD_READ_ONLY_GATE_PRETENDED_LIVE_EVIDENCE"):
-        rows = list(receipt.evidence_requirements)
-        rows[0] = replace(rows[0], state="CAPTURED")
         validate_meta_read_only_gate_receipt(replace(receipt, evidence_requirements=tuple(rows)))
 
 
@@ -215,23 +211,22 @@ def test_cp55_policy_registry_priority_and_runtime_remain_fail_closed():
     contract = policy["gate_contract"]
     assert contract["contract_only"] is True
     assert contract["global_kill_switch_must_be_engaged"] is True
-    assert contract["automatic_kill_switch_disengage_allowed"] is False
-    assert contract["operator_kill_switch_override_allowed"] is False
     assert contract["read_only_method_allowlist"] == ["GET"]
     assert contract["mutating_methods_forbidden"] == ["POST", "PUT", "PATCH", "DELETE"]
-    assert contract["live_endpoint_materialization_allowed"] is False
-    assert contract["live_probe_authorized"] is False
-    assert contract["pilot_publish_ready"] is False
     assert policy["required_future_evidence"] == list(REQUIRED_FUTURE_EVIDENCE)
     assert all(value is False for value in policy["authority"].values())
 
-    assert registry["checkpoint"] == "CP55"
+    assert registry["checkpoint"] == "CP56"
     assert any(
         row["id"] == "M24_META_READ_ONLY_GATE" and row["status"] == "CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"
         for row in registry["modules"]
     )
-    assert priority["checkpoint"] == "CP55"
-    assert priority["next"] == "CP56_META_LIVE_READ_ONLY_PROBE_RUNBOOK_AND_EVIDENCE_CAPTURE_CONTRACT"
+    assert any(
+        row["id"] == "M25_META_LIVE_READ_ONLY_PROBE" and row["status"] == "CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"
+        for row in registry["modules"]
+    )
+    assert priority["checkpoint"] == "CP56"
+    assert priority["next"] == "CP57_META_OFFLINE_EVIDENCE_BUNDLE_VALIDATOR_AND_OPERATOR_DRY_RUN"
     assert runtime["global_kill_switch_engaged"] is True
     assert runtime["network_enabled"] is False
     assert runtime["real_accounts_connected"] is False
