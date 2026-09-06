@@ -1,0 +1,52 @@
+{
+  "checkpoint": "CP41",
+  "model_version": "PPOS_VISUAL_QA_V1",
+  "engine_version": "ppos-visual-qa-v1.0.0",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "integrity_gates": {
+    "m05_binding": "EXACT_BUNDLE_AND_ADAPTATION_BINDING_REQUIRED",
+    "m06_manifest": "EXACT_RENDER_KEY_ASSET_ID_HASH_SIZE_REQUIRED",
+    "svg": "SELF_CONTAINED_INACTIVE_EXACT_DIMENSIONS",
+    "png": "STATIC_PNG_EXACT_DIMENSIONS",
+    "text_card": "EXACT_FIRST_SOURCE_BOUND_LINE_HASH",
+    "photo_frame": "NO_FACTUAL_OVERLAY"
+  },
+  "alt_text": {
+    "text_card": "EXACT_DISPLAY_TEXT",
+    "photo_frame": "REVIEW_BOUND_REQUIRED",
+    "max_chars": 500
+  },
+  "photo_semantic_gate": {
+    "reviewer_modes": ["HUMAN_REVIEW", "LOCAL_VISION_REVIEW"],
+    "relevance_pass": "CONFIRMED_RELEVANT",
+    "subject_safe_zone_pass": "PASS",
+    "review_evidence_sha256_required": true,
+    "story_fit_is_not_inferred_from_rights": true
+  },
+  "rights_gate": {
+    "requires_m13_for_photo_frame": true,
+    "accepted_rights_statuses": ["OWNED", "LICENSED", "PUBLIC_DOMAIN"],
+    "attribution_if_required_must_be_rendered": true
+  },
+  "identity_equivalence": {
+    "state": "HOLD_HISTORICAL_EXACT_FONT_HASHES_UNRECOVERED",
+    "manifest_boolean_is_not_sufficient_authority": true,
+    "pilot_production_identity_pass": false,
+    "resolution": "RECOVER_EXACT_CP29_FONT_HASHES_OR_VERSIONED_IDENTITY_SUPERSESSION"
+  },
+  "result_state": "VISUAL_QA_ONLY",
+  "authority": {
+    "visual_qa_authority": true,
+    "approval_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "network_fetch_allowed": false,
+    "real_account_connection_allowed": false,
+    "deploy_allowed": false
+  }
+}
