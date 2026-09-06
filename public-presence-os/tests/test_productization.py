@@ -40,14 +40,14 @@ def test_registry_unique_ids():
     r=load_json(ROOT/"config"/"module_registry.json")
     ids=[m["id"] for m in r["modules"]]
     assert len(ids)==len(set(ids))
-    assert r["checkpoint"]=="CP48"
+    assert r["checkpoint"]=="CP49"
     assert any(m["id"]=="M01_RADAR" and m["status"]=="CP34_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M02_RESEARCH" and m["status"]=="CP35_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M03_SCORING" and m["status"]=="CP36_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M04_MASTER_DRAFT" and m["status"]=="CP37_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M05_NATIVE_ADAPT" and m["status"]=="CP38_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
-    assert any(m["id"]=="M06_VISUAL" and m["status"]=="CP40_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
-    assert any(m["id"]=="M07_QA" and m["status"]=="CP41_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
+    assert any(m["id"]=="M06_VISUAL" and m["status"]=="CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING" for m in r["modules"])
+    assert any(m["id"]=="M07_QA" and m["status"]=="CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE" for m in r["modules"])
     assert any(m["id"]=="M08_QUEUE" and m["status"]=="CP43_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M09_PUBLISHER" and m["status"]=="CP44_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M10_ANALYTICS" and m["status"]=="CP45_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
@@ -57,16 +57,18 @@ def test_registry_unique_ids():
     assert any(m["id"]=="M14_EXPERIMENTS" and m["status"]=="CP47_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M16_OPERATIONS" and m["status"]=="CP32_PREFLIGHT_MANUAL_LOCKED" for m in r["modules"])
     assert any(m["id"]=="M17_REHEARSAL" and m["status"]=="CP33_CONTROL_PLANE_PASS_PILOT_VALIDATION_GATES_HOLD" for m in r["modules"])
-    assert any(m["id"]=="M18_VISUAL_IDENTITY" and m["status"]=="CP48_V2_EXACT_FONT_LICENSE_CONTRACT_STAGED" for m in r["modules"])
+    assert any(m["id"]=="M18_VISUAL_IDENTITY" and m["status"]=="CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY" for m in r["modules"])
 
 def test_reimplementation_priority_closes_executable_source_backlog():
     p=load_json(ROOT/"config"/"reimplementation_priority.json")
-    assert p["checkpoint"]=="CP48"
+    assert p["checkpoint"]=="CP49"
     states={row["module_id"]:row["state"] for row in p["order"]}
+    assert states["M06_VISUAL"]=="CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
+    assert states["M07_QA"]=="CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"
     assert states["M11_LEARNING"]=="CP46_MINIMAL_EXECUTABLE_SLICE"
     assert states["M14_EXPERIMENTS"]=="CP47_MINIMAL_EXECUTABLE_SLICE"
-    assert states["M18_VISUAL_IDENTITY"]=="CP48_V2_EXACT_FONT_LICENSE_CONTRACT_STAGED"
-    assert p["next"]=="CP49_IDENTITY_RUNTIME_ACTIVATION_AND_QA_BINDING"
+    assert states["M18_VISUAL_IDENTITY"]=="CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"
+    assert p["next"]=="CP50_META_FREE_API_ADAPTER_CONTRACT_OFFLINE_REQUEST_COMPILER"
 
 def test_no_paid_or_live_runtime_dependencies():
     txt="\n".join(p.read_text(encoding="utf-8") for p in (ROOT/"src").rglob("*.py"))
