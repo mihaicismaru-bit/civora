@@ -47,7 +47,7 @@ jobs:
 
       - name: Acquire exact current EUI Call 4 authority
         env:
-          RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           rm -rf .partener-eui-exact-proof
           python partener-eu/ingest/eu_direct_eui_exact.py \
@@ -102,7 +102,7 @@ jobs:
       - name: Upload bounded EUI exact evidence
         uses: actions/upload-artifact@v4
         with:
-          name: partener-eu-eui-exact-${{ github.sha }}
+          name: partener-eu-eui-exact-${{ github.event.pull_request.head.sha || github.sha }}
           path: .partener-eui-exact-proof/
           if-no-files-found: error
           include-hidden-files: true
