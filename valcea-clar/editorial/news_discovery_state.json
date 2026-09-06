@@ -1,16 +1,31 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-06T11:22:43+03:00",
+  "observed_at": "2026-09-06T11:52:02+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 20,
+  "sources_ok": 17,
   "facts_admitted": 5,
   "source_notice_briefs": 1,
   "facts_before_cross_source_headline_dedupe": 1,
   "preserved_full_story_count_before_refresh": 4,
-  "host_incident_count": 0,
-  "host_incidents": [],
+  "host_incident_count": 1,
+  "host_incidents": [
+    {
+      "host": "anofm.ro",
+      "status": "DEGRADED_HOST",
+      "failed_source_count": 2,
+      "failed_source_ids": [
+        "ajofm-valcea-comunicate",
+        "ajofm-valcea-press-releases"
+      ],
+      "error_categories": [
+        "TIMEOUT"
+      ],
+      "correlated_failure": true,
+      "editorial_semantics_changed": false
+    }
+  ],
   "sources": [
     {
       "source_id": "primaria-rm-valcea-comunicate",
@@ -61,9 +76,8 @@
     },
     {
       "source_id": "ajofm-valcea-comunicate",
-      "listing_ok": true,
-      "links_examined": 12,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "URLError: <urlopen error timed out>",
       "facts": 0
     },
     {
@@ -145,9 +159,8 @@
     },
     {
       "source_id": "ajofm-valcea-press-releases",
-      "listing_ok": true,
-      "links_examined": 12,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "URLError: <urlopen error timed out>",
       "facts": 0
     },
     {
@@ -159,9 +172,8 @@
     },
     {
       "source_id": "raliul-valcii-official-news",
-      "listing_ok": true,
-      "links_examined": 5,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "TimeoutError: The read operation timed out",
       "facts": 0
     }
   ],
