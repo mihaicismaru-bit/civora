@@ -26,6 +26,7 @@ EXECUTABLE_STAGE_STATUSES = {
     "M11_LEARNING": {"CP46_MINIMAL_EXECUTABLE_SLICE"},
     "M12_APPROVAL": {"CP42_MINIMAL_EXECUTABLE_SLICE"},
     "M13_RIGHTS": {"CP39_MINIMAL_EXECUTABLE_SLICE"},
+    "M14_EXPERIMENTS": {"CP47_MINIMAL_EXECUTABLE_SLICE"},
 }
 
 HISTORICAL_ONLY_STATUSES = {
@@ -97,11 +98,33 @@ def run_synthetic_rehearsal(root: Path) -> RehearsalReport:
     if platforms != EXPECTED_ACTIVE:
         blockers.append("ACTIVE_PLATFORM_SET_MISMATCH")
 
+    identity_path = root / "config" / "visual_identity_policy.json"
+    if not identity_path.is_file():
+        blockers.append("HOLD_VISUAL_IDENTITY_POLICY_MISSING")
+    else:
+        identity = load_json(identity_path)
+        identity_bound = (
+            identity.get("production_identity_equivalence_asserted") is True
+            and not str(identity.get("font_binding_state", "")).startswith("HOLD_")
+        )
+        if not identity_bound:
+            blockers.append("HOLD_IDENTITY_EQUIVALENCE")
+
     control_ok = preflight.ok and reg_result.ok and platforms == EXPECTED_ACTIVE
     pilot_ok = control_ok and not blockers
+    executable_gap = any(
+        blocker.endswith(":EXECUTABLE_SOURCE_UNAVAILABLE") or blocker.endswith(":REGISTRY_STATE")
+        for blocker in blockers
+    )
+    if pilot_ok:
+        pilot_state = "PASS_PILOT_PREFLIGHT"
+    elif executable_gap:
+        pilot_state = "HOLD_PILOT_EXECUTABLE_GAPS"
+    else:
+        pilot_state = "HOLD_PILOT_VALIDATION_GATES"
     return RehearsalReport(
         control_plane_state="PASS_SYNTHETIC_CONTROL_PLANE" if control_ok else "HOLD_CONTROL_PLANE",
-        pilot_state="PASS_PILOT_PREFLIGHT" if pilot_ok else "HOLD_PILOT_EXECUTABLE_GAPS",
+        pilot_state=pilot_state,
         stages=tuple(stages),
         blockers=tuple(dict.fromkeys(blockers)),
         active_platforms=platforms,
