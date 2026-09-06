@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "public-presence-os"
-version = "0.30.0"
+version = "0.40.0"
 description = "Pre-pilot TEXT/PHOTO public presence control plane"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["Pillow==12.3.0"]
 
 [project.scripts]
 public-presence-os = "public_presence_os.cli:main"
