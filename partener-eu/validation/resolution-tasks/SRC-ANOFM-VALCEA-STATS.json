@@ -1,19 +1,14 @@
 {
-  "source_name": "official_county_employment_statistics",
-  "source_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/",
-  "source_tier": "T1B",
-  "previous_semantic_sha256": "cb3abe4f758fc92376a52cd3beea2d8302a233df7a479b943f2ffab3e5ad7373",
-  "candidate_semantic_sha256": "e5cf0a79dc9401e59f2697602144bca6dc59e82b78c7c136c05d9a686b4dbd96",
-  "current_semantic_sha256": "e5cf0a79dc9401e59f2697602144bca6dc59e82b78c7c136c05d9a686b4dbd96",
-  "first_observed_at": "2026-08-21T21:03:31.736109Z",
-  "last_observed_at": "2026-09-05T22:06:15.313478Z",
-  "registry_class": "official_county_employment_statistics",
-  "schema_version": "1.2",
-  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "schema_version": "1.1",
+  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "source_id": "SRC-ANOFM-VALCEA-STATS",
+  "source_tier": "T1B",
+  "source_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/",
   "status": "OPEN",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false,
+  "first_observed_at": "2026-08-21T21:03:31.736109Z",
+  "last_observed_at": "2026-09-06T22:10:25.290039Z",
+  "previous_semantic_sha256": "e5cf0a79dc9401e59f2697602144bca6dc59e82b78c7c136c05d9a686b4dbd96",
+  "current_semantic_sha256": "fe0468365783fd6142808911d110ed88ad0130a30bb2e7c843ac9bc606b841d3",
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -23,5 +18,6 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ]
+  ],
+  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
 }
