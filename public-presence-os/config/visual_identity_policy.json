@@ -1,0 +1,73 @@
+{
+  "checkpoint": "CP40",
+  "model_version": "PPOS_VISUAL_RENDER_V1",
+  "renderer_version": "ppos-visual-v1.0.0",
+  "identity_name": "EDITORIAL_LEDGER_V1",
+  "identity_source_checkpoint": "CP29",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "palette": {
+    "paper": "#F4F0E8",
+    "ink": "#171717",
+    "muted_ink": "#62605B",
+    "signal": "#B33A2B",
+    "note_blue": "#2F5D8A",
+    "rule": "#A79F93",
+    "photo_matte": "#E3DDD2"
+  },
+  "grid": {
+    "outer_margin": 0.06,
+    "text_inset": 0.10,
+    "marginalia_rail_width": 0.08,
+    "photo_subject_inset": 0.06,
+    "caption_band_max_height": 0.22,
+    "corners_px": 0,
+    "spacing_px": [8, 12, 16, 24, 32, 48, 64, 96],
+    "strokes_px": [2, 4, 8]
+  },
+  "canvases": {
+    "FACEBOOK_PAGE": [1080, 1080],
+    "INSTAGRAM_PROFESSIONAL": [1080, 1350],
+    "THREADS": [1080, 1350]
+  },
+  "font_roles": {
+    "DISPLAY": {"family": "Inter Display", "style": "SemiBold", "canonical_sha256": null},
+    "EDITORIAL": {"family": "Noto Serif", "style": "Regular", "canonical_sha256": null},
+    "EDITORIAL_ITALIC": {"family": "Noto Serif", "style": "Italic", "canonical_sha256": null},
+    "MARGINALIA": {"family": "Noto Sans Mono", "style": "Medium", "canonical_sha256": null}
+  },
+  "font_binding_state": "HOLD_HISTORICAL_EXACT_FONT_HASHES_UNRECOVERED",
+  "production_identity_equivalence_asserted": false,
+  "font_bytes_packaged": false,
+  "local_preview_font_contract": "EXACT_LOCAL_SHA256_PER_RENDER_ENVIRONMENT",
+  "marginalia": {
+    "hooks": ["RAIL_RULE", "FOLIO_MARK", "SOURCE_TICK", "ANNOTATION_BRACKET", "SOURCE_LABEL", "UPDATE_MARK"],
+    "procedural_microcopy": ["SURSA", "CONTEXT", "DE URMARIT", "CE NU STIM", "DETALIU", "DOCUMENT", "CIFRA", "LOC", "DATA", "UPDATE"],
+    "may_introduce_new_fact": false
+  },
+  "components": {
+    "TEXT_CARD": "AUTO_ALLOWED_EXACT_SOURCE_BOUND_TEXT",
+    "PHOTO_FRAME": "AUTO_ALLOWED_ONLY_WITH_M13_RIGHTS_BINDING_NO_FACTUAL_OVERLAY"
+  },
+  "photo_policy": {
+    "factual_overlay_allowed": false,
+    "caption_credit_outside_photo": true,
+    "accepted_raster_formats": ["PNG", "JPEG", "WEBP"],
+    "source_byte_cap": 20971520,
+    "decoded_pixel_cap": 40000000,
+    "subject_safe_zone_after_render": "PENDING_VISUAL_QA"
+  },
+  "authority": {
+    "visual_render_authority": true,
+    "visual_qa_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "network_fetch_allowed": false,
+    "real_account_connection_allowed": false,
+    "deploy_allowed": false
+  }
+}
