@@ -8,7 +8,13 @@ import json
 import re
 from urllib.parse import urlsplit, urlunsplit
 
-from .radar import RadarSignal, RadarSourceClass
+from .radar import (
+    RadarKind,
+    RadarObservation,
+    RadarSignal,
+    RadarSourceClass,
+    materialize_signal,
+)
 
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 EVIDENCE_ID_RE = re.compile(r"^[A-Za-z0-9._:/-]{1,160}$")
@@ -151,6 +157,32 @@ def _normalize_evidence(e: ResearchEvidence, *, observed_at_utc: str) -> Evidenc
     )
 
 
+def _validate_radar_integrity(signal: RadarSignal) -> None:
+    if not isinstance(signal, RadarSignal):
+        raise ValueError("research input must be a RadarSignal")
+    if signal.state != "DISCOVERY_ONLY" or signal.fact_authority or signal.publish_authority or signal.network_fetch_performed:
+        raise ValueError("research accepts fail-closed DISCOVERY_ONLY radar signals only")
+    try:
+        source_class = RadarSourceClass(signal.source_class)
+        kind = RadarKind(signal.kind)
+    except ValueError as exc:
+        raise ValueError("radar signal enum value is invalid") from exc
+    expected = materialize_signal(RadarObservation(
+        external_ref=signal.external_ref,
+        source_url=signal.source_url,
+        source_class=source_class,
+        kind=kind,
+        observed_at_utc=signal.observed_at_utc,
+        title=signal.title,
+        excerpt=signal.excerpt,
+        topic=signal.topic,
+        locality=signal.locality,
+        synthetic=signal.synthetic,
+    ))
+    if expected != signal:
+        raise ValueError("radar signal integrity mismatch")
+
+
 def _evidence_requirements(signal: RadarSignal) -> tuple[str, ...]:
     if signal.synthetic:
         return ("REPLACE_SYNTHETIC_WITH_REAL_PRIMARY_EVIDENCE", "NO_PRODUCTION_USE")
@@ -177,10 +209,7 @@ def _same_host(url_a: str, url_b: str) -> bool:
 
 
 def build_research_packet(signal: RadarSignal, evidence=()) -> ResearchPacket:
-    if not isinstance(signal, RadarSignal):
-        raise ValueError("research input must be a RadarSignal")
-    if signal.state != "DISCOVERY_ONLY" or signal.fact_authority or signal.publish_authority or signal.network_fetch_performed:
-        raise ValueError("research accepts fail-closed DISCOVERY_ONLY radar signals only")
+    _validate_radar_integrity(signal)
 
     evidence = tuple(evidence)
     if len(evidence) > MAX_EVIDENCE:
@@ -200,12 +229,15 @@ def build_research_packet(signal: RadarSignal, evidence=()) -> ResearchPacket:
             raise ValueError("synthetic radar fixture cannot bind real production evidence")
         status = ResearchStatus.SYNTHETIC_NON_EVIDENCE
     else:
-        primary = tuple(e for e in refs if e.authority == EvidenceAuthority.PRIMARY_SOURCE.value and not e.synthetic)
+        if any(e.synthetic for e in refs):
+            raise ValueError("production radar signal cannot bind synthetic evidence")
+        primary = tuple(e for e in refs if e.authority == EvidenceAuthority.PRIMARY_SOURCE.value)
         if signal.source_class == RadarSourceClass.PRIMARY_PUBLIC.value:
             matching = tuple(e for e in primary if _same_host(signal.source_url, e.source_url))
             status = ResearchStatus.EVIDENCE_BOUND if matching else ResearchStatus.HOLD_PRIMARY_EVIDENCE
         elif signal.source_class == RadarSourceClass.SECONDARY_DISCOVERY.value:
-            status = ResearchStatus.EVIDENCE_BOUND if primary else ResearchStatus.HOLD_PRIMARY_CONFIRMATION
+            independent = tuple(e for e in primary if not _same_host(signal.source_url, e.source_url))
+            status = ResearchStatus.EVIDENCE_BOUND if independent else ResearchStatus.HOLD_PRIMARY_CONFIRMATION
         else:
             raise ValueError("unsupported radar source_class")
 
