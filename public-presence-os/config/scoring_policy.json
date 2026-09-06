@@ -1,0 +1,35 @@
+{
+  "schema_version": "PPOS_EVIDENCE_SCORING_POLICY_V1",
+  "checkpoint": "CP36",
+  "model_version": "PPOS_EVIDENCE_READINESS_SCORE_V1",
+  "score_type": "EVIDENCE_READINESS_ONLY",
+  "maximum_score": 100,
+  "dimensions": [
+    {"name": "evidence_quality", "maximum": 30},
+    {"name": "source_directness", "maximum": 15},
+    {"name": "corroboration", "maximum": 15},
+    {"name": "research_timeliness", "maximum": 20},
+    {"name": "provenance_completeness", "maximum": 20}
+  ],
+  "bands": {
+    "EVIDENCE_READY_STRONG": {"min": 85, "max": 100},
+    "EVIDENCE_READY_STANDARD": {"min": 70, "max": 84},
+    "EVIDENCE_READY_LIMITED": {"min": 0, "max": 69}
+  },
+  "explicitly_unscored": [
+    "editorial_impact",
+    "virality",
+    "audience_fit",
+    "political_value",
+    "persuasion_value",
+    "predicted_engagement"
+  ],
+  "authority": {
+    "internal_scoring_only": true,
+    "fact_authority": false,
+    "draft_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "network_fetch_allowed": false
+  }
+}
