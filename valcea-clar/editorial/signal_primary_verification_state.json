@@ -2,19 +2,31 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-06T19:21:40+03:00",
+  "generated_at": "2026-09-06T21:27:43+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-06T19:20:12+03:00",
-  "task_count": 71,
+  "queue_generated_at": "2026-09-06T21:25:55+03:00",
+  "task_count": 64,
   "primary_match_count": 0,
-  "no_match_count": 34,
-  "unrouted_count": 37,
+  "no_match_count": 33,
+  "unrouted_count": 31,
   "target_count": 21,
-  "targets_ok": 16,
+  "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "62c717b4e083eacf7640924d",
+      "signal_title": "„Izvorul Dorului” a adus împreună, la Băbeni, tradițiile locului și prietenii din Polonia",
+      "signal_url": "https://www.impactreal.ro/2026/09/06/la-babeni-dorul-a-adunat-romania-si-a-trecut-granita-pana-in-polonia/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-06T19:45:56+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "6e15af8e0da718e1fe742133",
       "signal_title": "EGGCELENT, dar cu un mic ou în plus la capitolul echilibru",
@@ -481,6 +493,44 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
+      "signal_id": "9844ab1272e52910c742646f",
+      "signal_title": "Constantin Coropetchi, directorul Liceului Tehnologic Mârșa, s-a pensionat după 40 de ani de carieră: „Nu mai pot spune am lucrat la această școală. Pot spune această școală a făcut parte din viața mea”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/06/constantin-coropetchi-directorul-liceului-tehnologic-marsa-s-a-pensionat-dupa-40-de-ani-de-cariera-nu-mai-pot-spune-am-lucrat-la-aceasta-scoala-pot-spune-aceasta-scoala-a-facut-parte-din/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-06T08:21:20+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
       "signal_id": "e67a78965a518eaa92695581",
       "signal_title": "VIDEO Record la Guitar Meeting Festival: peste 1.200 de chitariști au cântat la unison. Cel mai tânăr a avut 4 ani",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/05/record-concertul-manifest-guitar-meeting-festival-2026/",
@@ -519,9 +569,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
         }
       ],
       "publication_authority": "NONE",
@@ -1340,18 +1390,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "1f2695546e70e8ddc29f2f79",
-      "signal_title": "Elefantul de la Ursuline. S-a deschis SCAF",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/04/elefantul-de-la-ursuline-s-a-deschis-scaf/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-04T20:15:23+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "668d6139a45050295d9dab9b",
       "signal_title": "ATENȚIE! Marți, 8 septembrie, de Sfânta Maria Mică, restricții de circulație pe DN 67 și DJ 646E, la Bărbătești",
       "signal_url": "https://www.impactreal.ro/2026/09/04/atentie-marti-8-septembrie-de-sfanta-maria-mica-restrictii-de-circulatie-pe-dn-67-si-dj-646e-la-barbatesti/",
@@ -1482,18 +1520,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "b55f78df1057531020b7fb2c",
-      "signal_title": "Echipa filmului „3 zile în septembrie” vine la Craiova pe 10 septembrie",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/echipa-filmului-3-zile-in-septembrie-vine-la-craiova-pe-10-septembrie/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-04T16:18:37+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "5c8a0892575f54bc26ecd0a2",
       "signal_title": "IMAGINI. De la acte sexuale între minori la școală la viol și tentative repetate. Povestea copilului care terorizează o comună din Vâlcea, iar legea nu-l poate opri",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/04/imagini-de-la-acte-sexuale-intre-minori-la-scoala-la-viol-si-tentative-repetate-povestea-copilului-care-terorizeaza-o-comuna-din-valcea-iar-legea-nu-l-poate-opri/",
@@ -1537,30 +1563,6 @@
       "signal_url": "https://vocea-valcii.ro/dezvaluiri/caineniul-iese-in-strada-oamenii-protesteaza-impotriva-violatorului-minor/",
       "signal_publisher": "Vocea Vâlcii",
       "signal_published_at": "2026-09-04T14:56:11+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "2e42265b561d972ef03faf29",
-      "signal_title": "Deputatul Eugen Neață, vocea care a ținut vie tema drumului expres spre Râmnicu Vâlcea",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/deputatul-eugen-neata-vocea-care-a-tinut-vie-tema-drumului-expres-spre-ramnicu-valcea/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-04T14:49:13+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "4f4a4263e4f7d246c88c4419",
-      "signal_title": "Arhiepiscopia Sibiului răspunde protestului lui Doru Apostol: solicitările privind caterisirea lui Dumitrean și demisia mitropolitului se analizează în cadrul Bisericii",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/04/arhiepiscopia-sibiului-raspunde-protestului-lui-doru-apostol-solicitarile-privind-caterisirea-lui-dumitrean-si-demisia-mitropolitului-se-analizeaza-in-cadrul-bisericii/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-04T14:42:27+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -1634,18 +1636,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "c3d5a78aff5e8bb04d166ef7",
-      "signal_title": "Anunț important pentru proprietarii de terenuri din satul Vaideeni",
-      "signal_url": "https://evenimentvalcean.ro/anunt-important-pentru-proprietarii-de-terenuri-din-satul-vaideeni/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_published_at": "2026-09-04T08:58:58+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "b82289711d2a2862deb23c94",
       "signal_title": "Continuare about S-a încheiat cu ambuteiajele la Spitalul de Urgență",
       "signal_url": "https://www.curierul.ro/s-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta/",
@@ -1656,117 +1646,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "f1496a6e6f0d9d3963c16938",
-      "signal_title": "FOTO/ TRAGEDIE într-o comună din VÂLCEA. Un adult și un minor găsiți carbonizați",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/03/foto-tragedie-intr-o-comuna-din-valcea-un-adult-si-un-minor-gasiti-carbonizati/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-03T23:09:07+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "e6cce1d5c266c8e1fdef2219",
-      "signal_title": "Copiii din Copăceni, trei zile de credință, descoperiri și bucurie la Școala de Vară „Hristos împărtășit copiilor”",
-      "signal_url": "https://www.impactreal.ro/2026/09/03/copiii-din-copaceni-trei-zile-de-credinta-descoperiri-si-bucurie-la-scoala-de-vara-hristos-impartasit-copiilor/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T22:08:51+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "99f883471060f64accea3f33",
-      "signal_title": "Aproape 770 de milioane de lei pentru DN73C, Constantin Rădulescu promite că Drumul Expres nu va fi abandonat",
-      "signal_url": "https://www.impactreal.ro/2026/09/03/aproape-770-de-milioane-de-lei-pentru-dn73c-constantin-radulescu-promite-ca-drumul-expres-nu-va-fi-abandonat/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-09-03T21:34:29+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "d6d8689a751c1302ef400216",
-      "signal_title": "Daniel Tudor, despre investițiile pentru copiii din Șușani: școală modernizată, grădiniță nouă și complex sportiv la Râmești",
-      "signal_url": "https://www.impactreal.ro/2026/09/03/daniel-tudor-despre-investitiile-pentru-copiii-din-susani-scoala-modernizata-gradinita-noua-si-complex-sportiv-la-ramesti/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T20:36:44+03:00",
-      "verification_route_id": "sport",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "scm-rm-valcea",
-            "name": "SCM Râmnicu Vâlcea",
-            "url": "https://scmramnicuvalcea.ro/category/stiri/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cs-valcea-1924-social-feed",
-            "name": "Clubul Sportiv Vâlcea 1924",
-            "url": "https://www.csvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ajf-valcea-comunicate",
-            "name": "Asociația Județeană de Fotbal Vâlcea",
-            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
-          },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "fbaf068144bf16fc56b085d2",
