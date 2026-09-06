@@ -2,19 +2,277 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-06T12:43:31+03:00",
+  "generated_at": "2026-09-06T16:13:17+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-06T12:41:50+03:00",
-  "task_count": 67,
+  "queue_generated_at": "2026-09-06T16:11:52+03:00",
+  "task_count": 68,
   "primary_match_count": 0,
-  "no_match_count": 32,
-  "unrouted_count": 35,
+  "no_match_count": 34,
+  "unrouted_count": 34,
   "target_count": 21,
   "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "e125f0d3e7df5b326b906095",
+      "signal_title": "”Lupii negri” au câștigat Cupa Corona. Urmează un turneu internațional la Rm. Vâlcea",
+      "signal_url": "https://www.impactreal.ro/2026/09/06/lupii-negri-au-castigat-cupa-corona-urmeaza-un-turneu-international-la-rm-valcea/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-06T16:05:02+03:00",
+      "verification_route_id": "sport",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "scm-rm-valcea",
+            "name": "SCM Râmnicu Vâlcea",
+            "url": "https://scmramnicuvalcea.ro/category/stiri/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cs-valcea-1924-social-feed",
+            "name": "Clubul Sportiv Vâlcea 1924",
+            "url": "https://www.csvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ajf-valcea-comunicate",
+            "name": "Asociația Județeană de Fotbal Vâlcea",
+            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "e0e4e8678bc3037d76501b4b",
+      "signal_title": "FOTO. O autoutilitară a luat foc lângă Școala Nr.10 din Râmnicu Vâlcea",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/06/foto-o-autoutilitara-a-luat-foc-langa-scoala-nr-10-din-ramnicu-valcea/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-06T15:38:10+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "5825a5e166da0d9c0c1a4390",
+      "signal_title": "Video / David, un vlogger american, impresionat de Sibiu. A mâncat mici în Piața Cibin, a mers la Bujorul de munte și a vizitat centrul istoric. David Hoffman: „Țara asta mă face atât de fericit”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/06/david-un-vlogger-american-impresionat-de-sibiu-a-mancat-mici-in-piata-cibin-a-mers-la-bujorul-de-munte-si-a-vizitat-centrul-istoric-david-hoffman-tara-asta-ma-face-atat-de-fericit/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-06T14:05:37+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "7a106c82aec18f0a87477377",
+      "signal_title": "ACUM – Incendiu de vegetație pe 3 hectare la Sinești. E și un grajd în flăcări…",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/06/acum-incendiu-de-vegetatie-pe-3-hectare-la-sinesti-e-si-un-grajd-in-flacari/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-06T14:02:22+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "3371a0a60363cbf4e2106bca",
+      "signal_title": "ACSO Filiași, înfrângere cu CSM Târgu Jiu. Dragoș Bon: „Trebuie să eliminăm greșelile”",
+      "signal_url": "https://stirileolteniei.ro/acso-filiasi-infrangere-cu-csm-targu-jiu-dragos-bon-trebuie-sa-eliminam-greselile/",
+      "signal_publisher": "Știrile Olteniei",
+      "signal_published_at": "2026-09-06T13:57:44+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "2eb72fa369c4e11b8ba45d0a",
+      "signal_title": "FOTO. Vâlceanul din imagine e dat dispărut! Dacă îl vedeți sunați la 112",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/06/foto-valceanul-din-imagine-e-dat-disparut-daca-il-vedeti-sunati-la-112/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-06T13:21:50+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "07b2dfe793ee461d4149cf88",
+      "signal_title": "Victorie clară pentru Vâlcea în meciul cu Zalău. ”Echipa e pe un drum bun”",
+      "signal_url": "https://www.impactreal.ro/2026/09/06/victorie-clara-pentru-valcea-in-meciul-cu-zalau-echipa-e-pe-un-drum-bun/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-06T12:50:06+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "c8409ccb2f3e1edf20b9373b",
       "signal_title": "Vâlcea, învinsă de Reșița. Antrenorul Schumacher anunță: ”Mai aducem 1-2 jucători” / foto",
@@ -450,7 +708,7 @@
     },
     {
       "signal_id": "61d795a971be2c4333eb5ca2",
-      "signal_title": "Ultima oră 23 de ore in urma Zilele Orașului Horezu sunt în plină desfășurare: 539 de ani de istorie sărbătoriți între 4 și 6 septembrie",
+      "signal_title": "Ultima oră o zi in urma Zilele Orașului Horezu sunt în plină desfășurare: 539 de ani de istorie sărbătoriți între 4 și 6 septembrie",
       "signal_url": "https://www.primplanpress.ro/zilele-orasului-horezu-sunt-in-plina-desfasurare-539-de-ani-de-istorie-sarbatoriti-intre-4-si-6-septembrie/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -1085,18 +1343,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "22fa83f76e203a6c011bc4d4",
-      "signal_title": "Un lector de la ULBS a câștigat cel mai important grant european pentru cercetători tineri. Va măsura 150 de ani de literatură în patru țări: „Sunt lucruri noi de descoperit, mai ales când ni se spune că totul se știe deja”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/04/un-lector-de-la-ulbs-a-castigat-cel-mai-important-grant-european-pentru-cercetatori-tineri-va-masura-150-de-ani-de-literatura-in-patru-tari-sunt-lucruri-noi-de-descoperit-mai-ales-cand-ni/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-04T18:07:09+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "53855880ccb5ec9b8d700b2a",
       "signal_title": "FOTO/VIDEO. ACCIDENT CUMPLIT pe DEx 12, Craiova – Pitești. Trei morți și trei răniți",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/04/foto-video-accident-cumplit-pe-dex-12-craiova-pitesti-trei-morti-si-trei-raniti/",
@@ -1376,60 +1622,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "eeb02ebfd502848229afc53a",
-      "signal_title": "EXCLUSIV | Silviu Boțone vine la conducerea ABA Olt în plin scandal al balastierelor. Ce știe despre exploatările de pe Valea Lotrului și despre activitatea CAZICOM...",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/exclusiv-silviu-botone-vine-la-conducerea-aba-olt-in-plin-scandal-al-balastierelor-ce-stie-despre-exploatarile-de-pe-valea-lotrului-si-despre-activitatea-cazicom/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-04T01:27:47+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "438f876d8a8b21b98a6ce420",
-      "signal_title": "SCANDAL la Primăria Drăgășani! Viceprimarul Ștefan Nedelcu acuză: lucrări lăsate neterminate și bani cheltuiți pe studii. „Orașul arată ca după bombardament!”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/scandal-la-primaria-dragasani-viceprimarul-stefan-nedelcu-acuza-lucrari-lasate-neterminate-si-bani-cheltuiti-pe-studii-orasul-arata-ca-dupa-bombardament/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-04T01:02:57+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "f1496a6e6f0d9d3963c16938",
       "signal_title": "FOTO/ TRAGEDIE într-o comună din VÂLCEA. Un adult și un minor găsiți carbonizați",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/03/foto-tragedie-intr-o-comuna-din-valcea-un-adult-si-un-minor-gasiti-carbonizati/",
@@ -1539,68 +1731,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "bb5609eac4628fe319a71ef9",
-      "signal_title": "Părinții copiilor cu dizabilități de la Centrul „Andreea” din Râmnicu Vâlcea, revoltați: „Ni se propune mutarea la Băbeni! Nu se gândește nimeni la efortul acestor copii și al familiilor”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/parintii-copiilor-cu-dizabilitati-de-la-centrul-andreea-din-ramnicu-valcea-revoltati-ni-se-propune-mutarea-la-babeni-nu-se-gandeste-nimeni-la-efortul-acestor-copii-si-al/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-03T17:32:29+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "08c64a42b89ed9d07cc08208",
-      "signal_title": "Școala din Mădulari va fi refăcută din temelii, licitația a fost lansată, grădinița intră și ea în modernizare",
-      "signal_url": "https://www.impactreal.ro/2026/09/03/scoala-din-madulari-va-fi-refacuta-din-temelii-licitatia-a-fost-lansata-gradinita-intra-si-ea-in-modernizare/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-03T15:12:56+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "4682810bcb5602d82c950b7b",
-      "signal_title": "George Simion, în mijlocul angajaților CET Govora: „Oamenii nu trebuie sacrificați!” Vizită în plin val de concedieri și după închiderea centralei",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/george-simion-in-mijlocul-angajatilor-cet-govora-oamenii-nu-trebuie-sacrificati-vizita-in-plin-val-de-concedieri-si-dupa-inchiderea-centralei/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-03T13:58:44+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "fbaf068144bf16fc56b085d2",
