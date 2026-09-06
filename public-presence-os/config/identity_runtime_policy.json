@@ -1,0 +1,70 @@
+{
+  "checkpoint": "CP49",
+  "schema_version": "PPOS_VISUAL_IDENTITY_RUNTIME_POLICY_V1",
+  "identity_runtime_version": "PPOS_VISUAL_IDENTITY_RUNTIME_V1",
+  "identity_name": "EDITORIAL_LEDGER_V2",
+  "activation_state": "LOCAL_RUNTIME_ACTIVE_EXACT_BINDING_ONLY",
+  "supersedes_runtime_identity_gate": {
+    "renderer_checkpoint": "CP40",
+    "qa_checkpoint": "CP41",
+    "legacy_identity_name": "EDITORIAL_LEDGER_V1",
+    "legacy_hold": "HOLD_IDENTITY_EQUIVALENCE",
+    "reason": "CP48 established EDITORIAL_LEDGER_V2 as a versioned exact-byte successor; CP49 activates that contract only for local M06/M07 runtime paths that satisfy every exact binding gate"
+  },
+  "historical_cp29_byte_equivalence_asserted": false,
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "font_profile_scope": "EDITORIAL_LEDGER_V2_EXACT_LOCAL",
+  "expected_font_binding_hash": "a3edbdb93a494a9dcac436e3395be078d746a731c1fbb75caad7300d65c7d4af",
+  "expected_identity_profile_hash": "8678c85bb7addc1c1d4ccabf9c6116c2a1f74a89c8146d240b877a9b86eb90bf",
+  "exact_binding_requirements": {
+    "font_roles": [
+      "DISPLAY",
+      "EDITORIAL",
+      "EDITORIAL_ITALIC",
+      "MARGINALIA"
+    ],
+    "family_style_sha256_match_cp48": true,
+    "font_profile_scope_match_cp48": true,
+    "renderer_schema_match_cp48": true,
+    "palette_match_cp48": true,
+    "grid_match_cp48": true,
+    "marginalia_match_cp48": true,
+    "procedural_microcopy_match_cp48": true,
+    "caller_supplied_noncanonical_expected_hashes_forbidden": true,
+    "font_bytes_packaged": false,
+    "runtime_font_rule": "OPERATOR_SUPPLIES_LOCAL_FONT_FILES_MATCHING_CP48_EXACT_SHA256"
+  },
+  "legacy_identity_hold_supersession": {
+    "only_when_exact_v2_manifest_passes": true,
+    "pass_status": "PASS_EDITORIAL_LEDGER_V2_EXACT_BINDING",
+    "failure_status": "HOLD_EDITORIAL_LEDGER_V2_EXACT_BINDING_REQUIRED",
+    "other_qa_holds_preserved": true,
+    "historical_cp40_cp41_entrypoints_modified": false
+  },
+  "entrypoints": {
+    "visual": "public_presence_os.identity_runtime.render_visual_v2",
+    "qa": "public_presence_os.identity_runtime.audit_visual_v2"
+  },
+  "result_scope": "LOCAL_PRE_PILOT_RENDER_AND_QA_ONLY",
+  "authority": {
+    "identity_runtime_activation_authority": true,
+    "local_visual_render_authority": true,
+    "local_visual_qa_authority": true,
+    "approval_authority": false,
+    "queue_authority": false,
+    "publisher_authority": false,
+    "network_fetch_allowed": false,
+    "real_account_connection_allowed": false,
+    "public_publish_allowed": false,
+    "deploy_allowed": false
+  }
+}
