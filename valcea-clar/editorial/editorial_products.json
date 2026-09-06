@@ -2652,7 +2652,7 @@
         ]
       },
       "primary_source_verification": {
-        "verified_at": "2026-09-06T08:02:04+03:00",
+        "verified_at": "2026-09-06T08:07:59+03:00",
         "promotion_gate": "ISU_HOMEPAGE_NUMERIC_SUMMARY_V1",
         "source_family": "ISU",
         "direct_first_party_homepage_numeric_readback": true,
@@ -3350,6 +3350,140 @@
         "auto_publish_eligible_by_format": true,
         "additional_gate": null,
         "product_fingerprint_sha256": "daa4f0dac5cc47b58a2f6b5082d8a0025d26aeb58e168143e739b26cca430e2e"
+      }
+    },
+    {
+      "id": "valcea-scoala-incepe-7-septembrie-2026",
+      "status": "verified",
+      "section": "EDUCAȚIE",
+      "editorial_type": "service",
+      "editorial_form": "service_update",
+      "priority": 93,
+      "confidence": 100,
+      "publication_lifecycle": "new_story",
+      "valid_from": "2026-09-06T07:58:00+03:00",
+      "valid_until": "2026-09-08T23:59:59+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "headline": "Școala începe luni, 7 septembrie: calendarul 2026–2027 pentru elevii și părinții din Vâlcea",
+      "dek": "Cursurile încep luni și, pentru majoritatea elevilor, se încheie pe 18 iunie 2027. Clasa a VIII-a termină pe 11 iunie, iar clasele terminale de liceu pe 4 iunie.",
+      "paragraphs": [
+        "Cursurile anului școlar 2026–2027 încep luni, 7 septembrie 2026, iar pentru majoritatea claselor se încheie pe 18 iunie 2027.",
+        "Prima vacanță este 24 octombrie–1 noiembrie 2026, iar vacanța de iarnă 23 decembrie 2026–10 ianuarie 2027. Săptămâna flexibilă din februarie–martie este decisă la nivelul inspectoratului, iar programul primei zile la nivelul fiecărei școli.",
+        "Clasa a VIII-a încheie cursurile pe 11 iunie 2027, iar clasele a XII-a zi și a XIII-a seral sau cu frecvență redusă pe 4 iunie 2027; pentru o parte dintre clasele tehnologice și învățământul profesional, finalul este 25 iunie 2027."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Ministerul Educației și Cercetării — Structura anului școlar 2026–2027, avizată și aprobată, 12.02.2026",
+          "url": "https://www.edu.ro/press_rel_10_2026",
+          "tier": "T1"
+        },
+        {
+          "name": "Ministerul Educației și Cercetării — Ordin privind structura anului școlar 2026–2027",
+          "url": "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf",
+          "tier": "T1"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Școala începe luni, 7 septembrie: calendarul 2026–2027 pentru elevii și părinții din Vâlcea",
+          "source_urls": [
+            "https://www.edu.ro/press_rel_10_2026",
+            "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Cursurile încep luni și, pentru majoritatea elevilor, se încheie pe 18 iunie 2027. Clasa a VIII-a termină pe 11 iunie, iar clasele terminale de liceu pe 4 iunie.",
+          "source_urls": [
+            "https://www.edu.ro/press_rel_10_2026",
+            "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "valcea-scoala-incepe-7-septembrie-2026-start",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Cursurile anului școlar 2026–2027 încep luni, 7 septembrie 2026, iar pentru majoritatea claselor se încheie pe 18 iunie 2027.",
+            "source_urls": [
+              "https://www.edu.ro/press_rel_10_2026",
+              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+            ]
+          },
+          {
+            "id": "valcea-scoala-incepe-7-septembrie-2026-terminale",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text": "Clasa a VIII-a încheie cursurile pe 11 iunie 2027, iar clasele a XII-a zi și a XIII-a seral sau cu frecvență redusă pe 4 iunie 2027; pentru o parte dintre clasele tehnologice și învățământul profesional, finalul este 25 iunie 2027.",
+            "source_urls": [
+              "https://www.edu.ro/press_rel_10_2026",
+              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+            ]
+          },
+          {
+            "id": "valcea-scoala-incepe-7-septembrie-2026-vacante",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "Prima vacanță este 24 octombrie–1 noiembrie 2026, iar vacanța de iarnă 23 decembrie 2026–10 ianuarie 2027. Săptămâna flexibilă din februarie–martie este decisă la nivelul inspectoratului, iar programul primei zile la nivelul fiecărei școli.",
+            "source_urls": [
+              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "SERVICE UPDATE de utilitate județeană, publicat în ajunul începerii cursurilor. Faptele provin din surse primare ale Ministerului Educației. Nu se inventează programul festivităților sau săptămâna flexibilă specifică Vâlcii. Dacă nu există fotografie rights-cleared relevantă, publicarea pe site nu se blochează: se folosește un visual editorial neutru care nu pretinde că reprezintă o școală anume.",
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.edu.ro/press_rel_10_2026",
+          "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.edu.ro/press_rel_10_2026",
+          "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "valcea-scoala-incepe-7-septembrie-2026-start",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "5f9d0d2344d699eb92be493111f461b1948df1390156dcd34e5c3cd8025574ce",
+            "source_urls": [
+              "https://www.edu.ro/press_rel_10_2026",
+              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+            ]
+          },
+          {
+            "claim_id": "valcea-scoala-incepe-7-septembrie-2026-vacante",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text_sha256": "326a32418b0564ce4a744a3330fdd551e3bef25c2e1c296595b2a4f77fa490d5",
+            "source_urls": [
+              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+            ]
+          },
+          {
+            "claim_id": "valcea-scoala-incepe-7-septembrie-2026-terminale",
+            "role": "who_what_when_where",
+            "kind": "fact",
+            "text_sha256": "83416159c8bf20e7643f5dfc94b9d217096fb0ffdbd1da83baa25bb4ffefbe89",
+            "source_urls": [
+              "https://www.edu.ro/press_rel_10_2026",
+              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "a2ba88c9fa63578e09cec7fd64f772271e3eec43187a3c0e6490253f5de11dd4"
       }
     },
     {
@@ -5739,7 +5873,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 313/2026-08-31",
@@ -5976,7 +6110,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 314/2026-08-31",
@@ -6194,7 +6328,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 315/2026-08-31",
@@ -6366,7 +6500,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 316/2026-08-31",
@@ -6563,7 +6697,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 317/2026-08-31",
@@ -6762,7 +6896,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 318/2026-08-31",
@@ -6999,7 +7133,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 319/2026-08-31",
@@ -7236,7 +7370,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 320/2026-08-31",
@@ -7473,7 +7607,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 321/2026-08-31",
@@ -7691,7 +7825,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 322/2026-08-31",
@@ -7929,7 +8063,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 323/2026-08-31",
@@ -8164,7 +8298,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 324/2026-08-31",
@@ -8362,7 +8496,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 325/2026-08-31",
@@ -8579,7 +8713,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 326/2026-08-31",
@@ -8796,7 +8930,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 327/2026-08-31",
@@ -9014,7 +9148,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 328/2026-08-31",
@@ -9251,7 +9385,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 329/2026-08-31",
@@ -9487,7 +9621,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 330/2026-08-31",
@@ -9705,7 +9839,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 331/2026-08-31",
@@ -9942,7 +10076,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -10176,7 +10310,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 333/2026-08-31",
@@ -10355,7 +10489,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 334/2026-08-31",
@@ -10571,7 +10705,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 335/2026-08-31",
@@ -10768,7 +10902,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 336/2026-08-31",
@@ -10967,7 +11101,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 337/2026-08-31",
@@ -11203,7 +11337,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 338/2026-08-31",
@@ -11365,7 +11499,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 339/2026-08-31",
@@ -11564,7 +11698,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 340/2026-08-31",
@@ -11802,7 +11936,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 341/2026-08-31",
@@ -12040,7 +12174,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 342/2026-08-31",
@@ -12834,7 +12968,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81"
+          "sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -12941,7 +13075,7 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-08-31",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "fc2795a0980e51b001ebcd7e7a3b6409cfc085b3892a27a251e21710697cdb81",
+        "register_sha256": "66131738dce50fc83fefe99ecf1beef5189d570bad64a2cd15cc56161a382b20",
         "latest_decision_window": 25,
         "matching_decisions": 5,
         "verified_official_documents": 5,
@@ -15098,140 +15232,6 @@
       }
     },
     {
-      "id": "valcea-scoala-incepe-7-septembrie-2026",
-      "status": "verified",
-      "section": "EDUCAȚIE",
-      "editorial_type": "service",
-      "editorial_form": "service_update",
-      "priority": 93,
-      "confidence": 100,
-      "publication_lifecycle": "new_story",
-      "valid_from": "2026-09-06T07:58:00+03:00",
-      "valid_until": "2026-09-08T23:59:59+03:00",
-      "slots": [
-        "morning",
-        "evening"
-      ],
-      "headline": "Școala începe luni, 7 septembrie: calendarul 2026–2027 pentru elevii și părinții din Vâlcea",
-      "dek": "Cursurile încep luni și, pentru majoritatea elevilor, se încheie pe 18 iunie 2027. Clasa a VIII-a termină pe 11 iunie, iar clasele terminale de liceu pe 4 iunie.",
-      "paragraphs": [
-        "Cursurile anului școlar 2026–2027 încep luni, 7 septembrie 2026, iar pentru majoritatea claselor se încheie pe 18 iunie 2027.",
-        "Prima vacanță este 24 octombrie–1 noiembrie 2026, iar vacanța de iarnă 23 decembrie 2026–10 ianuarie 2027. Săptămâna flexibilă din februarie–martie este decisă la nivelul inspectoratului, iar programul primei zile la nivelul fiecărei școli.",
-        "Clasa a VIII-a încheie cursurile pe 11 iunie 2027, iar clasele a XII-a zi și a XIII-a seral sau cu frecvență redusă pe 4 iunie 2027; pentru o parte dintre clasele tehnologice și învățământul profesional, finalul este 25 iunie 2027."
-      ],
-      "material_fact_gate": "PASS",
-      "sources": [
-        {
-          "name": "Ministerul Educației și Cercetării — Structura anului școlar 2026–2027, avizată și aprobată, 12.02.2026",
-          "url": "https://www.edu.ro/press_rel_10_2026",
-          "tier": "T1"
-        },
-        {
-          "name": "Ministerul Educației și Cercetării — Ordin privind structura anului școlar 2026–2027",
-          "url": "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf",
-          "tier": "T1"
-        }
-      ],
-      "fact_kernel": {
-        "format_hint": "service_news",
-        "headline": {
-          "text": "Școala începe luni, 7 septembrie: calendarul 2026–2027 pentru elevii și părinții din Vâlcea",
-          "source_urls": [
-            "https://www.edu.ro/press_rel_10_2026",
-            "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-          ]
-        },
-        "dek": {
-          "text": "Cursurile încep luni și, pentru majoritatea elevilor, se încheie pe 18 iunie 2027. Clasa a VIII-a termină pe 11 iunie, iar clasele terminale de liceu pe 4 iunie.",
-          "source_urls": [
-            "https://www.edu.ro/press_rel_10_2026",
-            "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-          ]
-        },
-        "claims": [
-          {
-            "id": "valcea-scoala-incepe-7-septembrie-2026-start",
-            "role": "material_change",
-            "kind": "fact",
-            "text": "Cursurile anului școlar 2026–2027 încep luni, 7 septembrie 2026, iar pentru majoritatea claselor se încheie pe 18 iunie 2027.",
-            "source_urls": [
-              "https://www.edu.ro/press_rel_10_2026",
-              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-            ]
-          },
-          {
-            "id": "valcea-scoala-incepe-7-septembrie-2026-terminale",
-            "role": "who_what_when_where",
-            "kind": "fact",
-            "text": "Clasa a VIII-a încheie cursurile pe 11 iunie 2027, iar clasele a XII-a zi și a XIII-a seral sau cu frecvență redusă pe 4 iunie 2027; pentru o parte dintre clasele tehnologice și învățământul profesional, finalul este 25 iunie 2027.",
-            "source_urls": [
-              "https://www.edu.ro/press_rel_10_2026",
-              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-            ]
-          },
-          {
-            "id": "valcea-scoala-incepe-7-septembrie-2026-vacante",
-            "role": "reader_action",
-            "kind": "reader_service",
-            "text": "Prima vacanță este 24 octombrie–1 noiembrie 2026, iar vacanța de iarnă 23 decembrie 2026–10 ianuarie 2027. Săptămâna flexibilă din februarie–martie este decisă la nivelul inspectoratului, iar programul primei zile la nivelul fiecărei școli.",
-            "source_urls": [
-              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-            ]
-          }
-        ]
-      },
-      "editorial_note": "SERVICE UPDATE de utilitate județeană, publicat în ajunul începerii cursurilor. Faptele provin din surse primare ale Ministerului Educației. Nu se inventează programul festivităților sau săptămâna flexibilă specifică Vâlcii. Dacă nu există fotografie rights-cleared relevantă, publicarea pe site nu se blochează: se folosește un visual editorial neutru care nu pretinde că reprezintă o școală anume.",
-      "editorial_product": {
-        "writer_id": "manual_journalism_v1",
-        "writer_mode": "FACT_KERNEL_COMPOSED",
-        "format": "service_news",
-        "claim_trace_complete": true,
-        "source_level_trace": true,
-        "headline_source_urls": [
-          "https://www.edu.ro/press_rel_10_2026",
-          "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-        ],
-        "dek_source_urls": [
-          "https://www.edu.ro/press_rel_10_2026",
-          "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-        ],
-        "claim_trace": [
-          {
-            "claim_id": "valcea-scoala-incepe-7-septembrie-2026-start",
-            "role": "material_change",
-            "kind": "fact",
-            "text_sha256": "5f9d0d2344d699eb92be493111f461b1948df1390156dcd34e5c3cd8025574ce",
-            "source_urls": [
-              "https://www.edu.ro/press_rel_10_2026",
-              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-            ]
-          },
-          {
-            "claim_id": "valcea-scoala-incepe-7-septembrie-2026-vacante",
-            "role": "reader_action",
-            "kind": "reader_service",
-            "text_sha256": "326a32418b0564ce4a744a3330fdd551e3bef25c2e1c296595b2a4f77fa490d5",
-            "source_urls": [
-              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-            ]
-          },
-          {
-            "claim_id": "valcea-scoala-incepe-7-septembrie-2026-terminale",
-            "role": "who_what_when_where",
-            "kind": "fact",
-            "text_sha256": "83416159c8bf20e7643f5dfc94b9d217096fb0ffdbd1da83baa25bb4ffefbe89",
-            "source_urls": [
-              "https://www.edu.ro/press_rel_10_2026",
-              "https://www.edu.ro/sites/default/files/PO_structura_an_scolar_2026_2027.pdf"
-            ]
-          }
-        ],
-        "auto_publish_eligible_by_format": true,
-        "additional_gate": null,
-        "product_fingerprint_sha256": "a2ba88c9fa63578e09cec7fd64f772271e3eec43187a3c0e6490253f5de11dd4"
-      }
-    },
-    {
       "id": "scm-program-0cb45a2feafdd06bea9b",
       "status": "verified",
       "section": "SPORT",
@@ -15355,5 +15355,5 @@
     "reputational_formats_fail_closed": true,
     "satire_routed_separately": true
   },
-  "registry_fingerprint_sha256": "29844bda5becdf249ce804ede53c2c9916f2b6ddbebe96654f409ea1c66b661f"
+  "registry_fingerprint_sha256": "e1c8c3146f3f237b33349c96ee71fbb425bdbe05ce3303619d3387588fc6316f"
 }
