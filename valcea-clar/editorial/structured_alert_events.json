@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-07T00:39:13+03:00",
+  "generated_at": "2026-09-07T02:07:39+03:00",
   "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
   "events_are_reader_stories": false,
   "event_count": 3,
@@ -83,8 +83,9 @@
   "sources": [
     {
       "source_id": "igpr-infotrafic",
-      "status": "DEGRADED",
-      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "status": "PASS",
+      "listing_url": "https://politiaromana.ro/ro/info-trafic",
+      "candidates": 0,
       "events": []
     },
     {
@@ -106,7 +107,7 @@
       "status": "PASS",
       "listing_url": "https://www.distributieoltenia.ro/en/support/planned-maintenance-and-fault-correction/valcea.html",
       "documents_discovered": 245,
-      "documents_selected": 3,
+      "documents_selected": 2,
       "documents": [
         {
           "label": "Valcea - Intreruperi 07.09 - 13.09.2026",
@@ -116,15 +117,6 @@
           "body_sha256": "76f18ec1f3cfde5f15da4d03a4dd87c2495cae23179a2b939cea358a288dd39e",
           "candidates": 3,
           "events": 3
-        },
-        {
-          "label": "Valcea - Intreruperi 31.08 - 06.09.2026",
-          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F31.08-06.09.2026%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2031_08%20-%2006_09_2026%20-%20Valcea.pdf",
-          "content_type": "application/pdf",
-          "extraction_method": "pdf_pypdf_layout",
-          "body_sha256": "ed99f5d90fdaa51456d23230be446231e0ce140c3e3fec703bdeb2905a3df357",
-          "candidates": 1,
-          "events": 0
         },
         {
           "label": "Valcea - Intreruperi 14.09 - 20.09.2026",
