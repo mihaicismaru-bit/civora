@@ -177,7 +177,7 @@ def test_font_binding_hash_mismatch_fails_closed(tmp_path):
 
 
 def test_exact_text_is_not_truncated_to_fit(tmp_path):
-    bundle = make_bundle(title="X" * 700)
+    bundle = make_bundle(title="X" * 280)
     with pytest.raises(VisualHold, match="HOLD_GEOMETRY"):
         render_visual(VisualRenderRequest(bundle, "FACEBOOK_PAGE", "TEXT_CARD", make_fonts(tmp_path)))
 
