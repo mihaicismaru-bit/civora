@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.2",
+  "instance_id": "craiova",
+  "sources": [
+    {
+      "id": "cao-anunturi-comunicate",
+      "name": "Compania de Apă Oltenia",
+      "url": "https://www.apaoltenia.ro/index.php/category/anunturi/",
+      "feed_url": "https://www.apaoltenia.ro/index.php/category/anunturi/feed/",
+      "authority": "primary",
+      "vertical": "UTILITY",
+      "priority": 100,
+      "enabled": true,
+      "allowed_localities": ["Craiova", "craiovean", "craioveană"],
+      "area_prefixes": ["craiovean", "craioveană"],
+      "max_items": 12,
+      "max_age_hours": 72
+    },
+    {
+      "id": "isu-dolj-comunicate",
+      "name": "ISU Dolj",
+      "url": "https://isudj.igsu.ro/stiri-locale",
+      "listing_url": "https://isudj.igsu.ro/stiri-locale",
+      "link_prefixes": ["/stiri-locale/"],
+      "authority": "primary",
+      "vertical": "PUBLIC_SAFETY",
+      "priority": 90,
+      "enabled": true,
+      "max_items": 1,
+      "max_age_hours": 720,
+      "facebook_max_age_hours": 72,
+      "enabled_after": "UTILITY_PASS"
+    }
+  ]
+}
