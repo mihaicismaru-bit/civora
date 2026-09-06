@@ -11,6 +11,7 @@ import sys
 import zipfile
 from typing import Any
 
+# Executed by the canonical EU Direct workflow; the legacy proof workflow is intentionally retired.
 FLAGS = (
     "material_fact_use", "open_call_authorized", "closed_call_authorized",
     "deadline_authorized", "budget_authorized", "eligibility_authorized",
