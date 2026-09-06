@@ -17,10 +17,10 @@ def test_active_platforms_exact():
     assert r.active_platforms==("FACEBOOK_PAGE","INSTAGRAM_PROFESSIONAL","THREADS")
 
 
-def test_m01_m07_and_m13_are_executable_but_remaining_historical_modules_hold():
+def test_m01_m07_m12_and_m13_are_executable_but_remaining_historical_modules_hold():
     r=run_synthetic_rehearsal(ROOT)
     pipeline={s.module_id:s for s in r.stages}
-    executable=("M01_RADAR","M02_RESEARCH","M03_SCORING","M04_MASTER_DRAFT","M05_NATIVE_ADAPT","M06_VISUAL","M07_QA","M13_RIGHTS")
+    executable=("M01_RADAR","M02_RESEARCH","M03_SCORING","M04_MASTER_DRAFT","M05_NATIVE_ADAPT","M06_VISUAL","M07_QA","M12_APPROVAL","M13_RIGHTS")
     for module_id in executable:
         assert pipeline[module_id].state=="PASS_EXECUTABLE_SOURCE"
         assert f"{module_id}:EXECUTABLE_SOURCE_UNAVAILABLE" not in r.blockers
@@ -52,4 +52,4 @@ def test_report_contract():
     assert p["golden_path_complete"] is False
     assert p["pilot_state"]=="HOLD_PILOT_EXECUTABLE_GAPS"
     assert len(p["stages"])==16
-    assert len(p["blockers"])==6
+    assert len(p["blockers"])==5

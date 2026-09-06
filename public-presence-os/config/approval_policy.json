@@ -1,0 +1,60 @@
+{
+  "checkpoint": "CP42",
+  "schema_version": "PPOS_LOCAL_APPROVAL_POLICY_V1",
+  "model_version": "PPOS_LOCAL_APPROVAL_V1",
+  "engine_version": "ppos-local-approval-v1.0.0",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "input_contract": {
+    "required_module": "M07_QA",
+    "required_report_model": "PPOS_VISUAL_QA_V1",
+    "hash_binding_required": true,
+    "all_hold_reasons_must_be_preserved": true,
+    "qa_hold_can_be_overridden": false
+  },
+  "storage": {
+    "backend": "SQLITE_LOCAL",
+    "report_rows_immutable": true,
+    "event_log_append_only": true,
+    "request_id_idempotency_required": true,
+    "network_storage_allowed": false
+  },
+  "states": [
+    "PENDING_REVIEW",
+    "HOLD_REVIEW",
+    "HOLD_ACKNOWLEDGED",
+    "APPROVED_LOCAL",
+    "REJECTED_LOCAL",
+    "DEFERRED_LOCAL"
+  ],
+  "decisions": [
+    "APPROVE_LOCAL",
+    "REJECT_LOCAL",
+    "ACKNOWLEDGE_HOLD",
+    "DEFER_LOCAL",
+    "REOPEN_LOCAL"
+  ],
+  "approval_gate": {
+    "approve_local_requires_qa_pass": true,
+    "approve_local_requires_zero_holds": true,
+    "approve_local_requires_approval_input_ready": true,
+    "hold_reports_may_only_be_acknowledged_rejected_deferred_or_reopened": true,
+    "identity_equivalence_hold_is_not_overridable": true
+  },
+  "dashboard": {
+    "format": "SELF_CONTAINED_STATIC_HTML",
+    "must_show_all_holds": true,
+    "must_show_event_history": true,
+    "external_scripts_allowed": false,
+    "remote_assets_allowed": false
+  },
+  "authority": {
+    "local_review_authority": true,
+    "queue_authority": false,
+    "publisher_authority": false,
+    "publish_authority": false,
+    "network_authority": false,
+    "real_account_connection_authority": false,
+    "deploy_authority": false
+  },
+  "next_dependency": "M08_QUEUE"
+}
