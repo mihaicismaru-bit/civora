@@ -204,7 +204,7 @@ def test_cp49_policy_and_registry_are_local_only_and_exact_binding():
     ):
         assert policy["authority"][key] is False
 
-    assert registry["checkpoint"] == "CP52"
+    assert registry["checkpoint"] == "CP53"
     by_id = {row["id"]: row["status"] for row in registry["modules"]}
     assert by_id["M06_VISUAL"] == "CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
     assert by_id["M07_QA"] == "CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"

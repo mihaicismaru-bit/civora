@@ -1,0 +1,59 @@
+{
+  "checkpoint": "CP53",
+  "schema_version": "PPOS_META_OPERATOR_PROVISIONING_POLICY_V1",
+  "engine_version": "ppos-meta-operator-provisioning-packet-v1.0.0",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "inputs": {
+    "cp52_exact_preflight_receipt_required": true,
+    "cp51_exact_connection_profile_required": true,
+    "profile_hash_binding_required": true,
+    "platform_mode_auth_permissions_capabilities_exact_required": true,
+    "offline_contract_evidence_complete_required": true
+  },
+  "packet_contract": {
+    "deterministic_sha256_bound": true,
+    "symbolic_secret_reference_only": true,
+    "secret_material_forbidden": true,
+    "lane_specific_prerequisites_required": true,
+    "operator_evidence_checklist_required": true,
+    "live_blockers_explicit": true,
+    "pass_state": "OFFLINE_OPERATOR_PACKET_READY",
+    "live_connection_ready": false,
+    "pilot_publish_ready": false,
+    "live_reverification_required": true
+  },
+  "operator_gates": {
+    "ownership_and_role_evidence_required": true,
+    "meta_app_configuration_evidence_required": true,
+    "permission_live_reverification_required": true,
+    "capability_live_reverification_required": true,
+    "token_expiry_rotation_evidence_required": true,
+    "destination_binding_deferred": true,
+    "api_version_binding_deferred": true,
+    "read_only_connection_test_deferred": true,
+    "recovery_and_revocation_evidence_required": true,
+    "fresh_final_pilot_authorization_required": true
+  },
+  "authority": {
+    "local_packet_compile_authority": true,
+    "secret_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "network_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "global_kill_switch_required": true
+}
