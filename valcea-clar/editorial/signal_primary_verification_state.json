@@ -2,19 +2,31 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-06T21:27:43+03:00",
+  "generated_at": "2026-09-06T23:42:55+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-06T21:25:55+03:00",
-  "task_count": 64,
+  "queue_generated_at": "2026-09-06T23:41:24+03:00",
+  "task_count": 62,
   "primary_match_count": 0,
-  "no_match_count": 33,
-  "unrouted_count": 31,
+  "no_match_count": 32,
+  "unrouted_count": 30,
   "target_count": 21,
   "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "d2f13745fa828059362c33f2",
+      "signal_title": "Istoria Mădulariului ajunge la Universitatea de Vest din Timișoara și la Academia Română",
+      "signal_url": "https://www.impactreal.ro/2026/09/06/istoria-madulariului-ajunge-la-universitatea-de-vest-din-timisoara-si-la-academia-romana/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-06T21:26:57+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "62c717b4e083eacf7640924d",
       "signal_title": "„Izvorul Dorului” a adus împreună, la Băbeni, tradițiile locului și prietenii din Polonia",
@@ -571,7 +583,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 8
+          "documents_examined": 9
         }
       ],
       "publication_authority": "NONE",
@@ -967,30 +979,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "c2b419016ef8854b00f697b3",
-      "signal_title": "CJ confirmă: banii pentru bătrânii relocați din Bihor n-au ajuns la centrele private din Marpod și Mediaș. „Urmărim identificarea și aplicarea unei soluții”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/05/cj-confirma-banii-pentru-batranii-relocati-din-bihor-n-au-ajuns-la-centrele-private-din-marpod-si-medias-urmarim-identificarea-si-aplicarea-unei-solutii/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-05T09:23:42+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "9ed55e2ec4abe5722262aae7",
-      "signal_title": "Palatul Copiilor Sibiu reduce locurile la opt cercuri, din cauza restricțiilor bugetare. Încep înscrierile",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/05/palatul-copiilor-sibiu-reduce-locurile-la-opt-cercuri-din-cauza-restrictiilor-bugetare-incep-inscrierile/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-05T07:52:45+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "5af962f85cfeab78da510458",
@@ -1431,55 +1419,6 @@
             "id": "ipj-valcea-stiri",
             "name": "Inspectoratul de Poliție Județean Vâlcea",
             "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "362103e8a5eefce434be57f9",
-      "signal_title": "FOTO – Incendiu de vegetație la Bălcești, în apropierea Bisericii Gorunești. Pompierii intervin…",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/04/foto-incendiu-de-vegetatie-la-balcesti-in-apropierea-bisericii-gorunesti-pompierii-intervin/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-04T17:07:18+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 7
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
           },
           "status": "PASS",
           "error": null,
