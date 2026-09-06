@@ -8,7 +8,7 @@ import re
 import sqlite3
 from pathlib import Path
 
-from .analytics import LocalAnalyticsSnapshot, AnalyticsHold, validate_analytics_snapshot
+from .analytics import AnalyticsHold, LocalAnalyticsSnapshot, validate_analytics_snapshot
 from .control import EXPECTED_ACTIVE, canonical_json
 
 LEARNING_MODEL_VERSION = "PPOS_LOCAL_SHADOW_LEARNING_V1"
@@ -112,6 +112,12 @@ def _iso(value: str) -> str:
     return _parse_iso(value).isoformat().replace("+00:00", "Z")
 
 
+def _record_from_json(payload: str) -> ShadowLearningRecord:
+    data = json.loads(payload)
+    data["observations"] = tuple(data["observations"])
+    return ShadowLearningRecord(**data)
+
+
 def validate_learning_input(snapshot: LocalAnalyticsSnapshot) -> None:
     if not isinstance(snapshot, LocalAnalyticsSnapshot):
         raise LearningHold("HOLD_M10_SNAPSHOT_TYPE")
@@ -135,10 +141,10 @@ def validate_learning_input(snapshot: LocalAnalyticsSnapshot) -> None:
         raise LearningHold("HOLD_M10_DERIVED_METRICS_STATE_INVALID")
 
 
-def _expected_observations(local_receipt_age_seconds: int) -> tuple[str, ...]:
+def _expected_observations(age_seconds: int) -> tuple[str, ...]:
     return (
         "LOCAL_DRY_RUN_RECEIPT_TELEMETRY_PRESENT",
-        f"LOCAL_RECEIPT_AGE_SECONDS:{local_receipt_age_seconds}",
+        f"LOCAL_RECEIPT_AGE_SECONDS:{age_seconds}",
         "REMOTE_ANALYTICS_NOT_CONNECTED",
         "PERFORMANCE_EVIDENCE_UNAVAILABLE",
     )
@@ -195,7 +201,7 @@ def _record_body_from_record(record: ShadowLearningRecord) -> dict:
 def validate_learning_record(record: ShadowLearningRecord) -> None:
     if not isinstance(record, ShadowLearningRecord):
         raise LearningHold("HOLD_LEARNING_RECORD_TYPE")
-    if record.model_version != LEARNING_MODEL_VERSION or record.engine_version != LEARNING_ENGINE_VERSION:
+    if (record.model_version, record.engine_version) != (LEARNING_MODEL_VERSION, LEARNING_ENGINE_VERSION):
         raise LearningHold("HOLD_LEARNING_RECORD_VERSION")
     if record.platform not in EXPECTED_ACTIVE:
         raise LearningHold("HOLD_LEARNING_PLATFORM_NOT_ACTIVE")
@@ -221,15 +227,9 @@ def validate_learning_record(record: ShadowLearningRecord) -> None:
         raise LearningHold("HOLD_LEARNING_RECEIPT_AGE_INVALID")
     if _parse_iso(record.learned_at_utc) < _parse_iso(record.source_observed_at_utc):
         raise LearningHold("HOLD_LEARNING_TIMESTAMP_ORDER_INVALID")
-    if any((
-        record.performance_learning_authority,
-        record.strategy_mutation_authority,
-        record.experiment_execution_authority,
-        record.network_authority,
-        record.account_connection_authority,
-        record.publish_authority,
-        record.deploy_authority,
-    )):
+    if any((record.performance_learning_authority, record.strategy_mutation_authority,
+            record.experiment_execution_authority, record.network_authority,
+            record.account_connection_authority, record.publish_authority, record.deploy_authority)):
         raise LearningHold("HOLD_LEARNING_EXTERNAL_AUTHORITY")
     if not HEX64.fullmatch(record.snapshot_hash) or not HEX64.fullmatch(record.receipt_hash):
         raise LearningHold("HOLD_LEARNING_BINDING_INVALID")
@@ -274,15 +274,9 @@ def validate_learning_event(event: LearningEvent) -> None:
         raise LearningHold("HOLD_LEARNING_EVENT_STATE_INVALID")
     if event.outcome != "NO_PERFORMANCE_CONCLUSION" or event.performance_evidence_state != "UNAVAILABLE_NOT_CONNECTED":
         raise LearningHold("HOLD_LEARNING_EVENT_FALSE_PERFORMANCE_STATE")
-    if any((
-        event.performance_learning_authority,
-        event.strategy_mutation_authority,
-        event.experiment_execution_authority,
-        event.network_authority,
-        event.account_connection_authority,
-        event.publish_authority,
-        event.deploy_authority,
-    )):
+    if any((event.performance_learning_authority, event.strategy_mutation_authority,
+            event.experiment_execution_authority, event.network_authority,
+            event.account_connection_authority, event.publish_authority, event.deploy_authority)):
         raise LearningHold("HOLD_LEARNING_EVENT_EXTERNAL_AUTHORITY")
     body = event.to_dict()
     body.pop("event_id")
@@ -317,21 +311,18 @@ class LocalShadowLearningStore:
     def _init_schema(self) -> None:
         self.connection.executescript("""
             CREATE TABLE IF NOT EXISTS learning_analytics_inputs (
-                snapshot_hash TEXT PRIMARY KEY, snapshot_id TEXT NOT NULL UNIQUE,
-                snapshot_json TEXT NOT NULL
+                snapshot_hash TEXT PRIMARY KEY, snapshot_id TEXT NOT NULL UNIQUE, snapshot_json TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS learning_records (
                 record_hash TEXT PRIMARY KEY, record_id TEXT NOT NULL UNIQUE,
                 snapshot_hash TEXT NOT NULL UNIQUE REFERENCES learning_analytics_inputs(snapshot_hash),
-                request_id TEXT NOT NULL UNIQUE, learned_at_utc TEXT NOT NULL,
-                record_json TEXT NOT NULL
+                request_id TEXT NOT NULL UNIQUE, learned_at_utc TEXT NOT NULL, record_json TEXT NOT NULL
             );
             CREATE TABLE IF NOT EXISTS learning_events (
                 event_hash TEXT PRIMARY KEY, event_id TEXT NOT NULL UNIQUE,
                 record_hash TEXT NOT NULL REFERENCES learning_records(record_hash),
-                sequence INTEGER NOT NULL, event_type TEXT NOT NULL,
-                event_at_utc TEXT NOT NULL, event_json TEXT NOT NULL,
-                UNIQUE(record_hash, sequence)
+                sequence INTEGER NOT NULL, event_type TEXT NOT NULL, event_at_utc TEXT NOT NULL,
+                event_json TEXT NOT NULL, UNIQUE(record_hash, sequence)
             );
             CREATE TRIGGER IF NOT EXISTS learning_analytics_inputs_no_update BEFORE UPDATE ON learning_analytics_inputs BEGIN SELECT RAISE(ABORT, 'learning_analytics_inputs_append_only'); END;
             CREATE TRIGGER IF NOT EXISTS learning_analytics_inputs_no_delete BEFORE DELETE ON learning_analytics_inputs BEGIN SELECT RAISE(ABORT, 'learning_analytics_inputs_append_only'); END;
@@ -346,18 +337,15 @@ class LocalShadowLearningStore:
         validate_learning_input(snapshot)
         payload = canonical_json(snapshot.to_dict())
         row = self.connection.execute(
-            "SELECT snapshot_json FROM learning_analytics_inputs WHERE snapshot_hash=?",
-            (snapshot.snapshot_hash,),
+            "SELECT snapshot_json FROM learning_analytics_inputs WHERE snapshot_hash=?", (snapshot.snapshot_hash,)
         ).fetchone()
         if row is not None:
             if row["snapshot_json"] != payload:
                 raise LearningHold("HOLD_M10_SNAPSHOT_HASH_COLLISION_OR_DRIFT")
             return
-        id_row = self.connection.execute(
-            "SELECT snapshot_hash, snapshot_json FROM learning_analytics_inputs WHERE snapshot_id=?",
-            (snapshot.snapshot_id,),
-        ).fetchone()
-        if id_row is not None:
+        if self.connection.execute(
+            "SELECT 1 FROM learning_analytics_inputs WHERE snapshot_id=?", (snapshot.snapshot_id,)
+        ).fetchone() is not None:
             raise LearningHold("HOLD_M10_SNAPSHOT_ID_REUSE_MISMATCH")
         self.connection.execute(
             "INSERT INTO learning_analytics_inputs(snapshot_hash,snapshot_id,snapshot_json) VALUES(?,?,?)",
@@ -372,30 +360,21 @@ class LocalShadowLearningStore:
         body = _record_body(snapshot, request_id, learned_at)
         digest = _hash(body)
         candidate = ShadowLearningRecord(
-            record_id="lrn_" + digest[:24],
-            record_hash=digest,
-            model_version=LEARNING_MODEL_VERSION,
-            engine_version=LEARNING_ENGINE_VERSION,
+            record_id="lrn_" + digest[:24], record_hash=digest,
+            model_version=LEARNING_MODEL_VERSION, engine_version=LEARNING_ENGINE_VERSION,
             **{k: v for k, v in body.items() if k not in {"schema_version", "engine_version"}},
         )
         validate_learning_record(candidate)
 
-        existing_request = self.connection.execute(
-            "SELECT record_json FROM learning_records WHERE request_id=?",
-            (request_id,),
-        ).fetchone()
-        if existing_request is not None:
-            existing = ShadowLearningRecord(**json.loads(existing_request["record_json"]))
+        row = self.connection.execute("SELECT record_json FROM learning_records WHERE request_id=?", (request_id,)).fetchone()
+        if row is not None:
+            existing = _record_from_json(row["record_json"])
             if existing == candidate:
                 return existing
             raise LearningHold("HOLD_LEARNING_REQUEST_ID_REUSE_MISMATCH")
-
-        existing_snapshot = self.connection.execute(
-            "SELECT record_json FROM learning_records WHERE snapshot_hash=?",
-            (snapshot.snapshot_hash,),
-        ).fetchone()
-        if existing_snapshot is not None:
-            existing = ShadowLearningRecord(**json.loads(existing_snapshot["record_json"]))
+        row = self.connection.execute("SELECT record_json FROM learning_records WHERE snapshot_hash=?", (snapshot.snapshot_hash,)).fetchone()
+        if row is not None:
+            existing = _record_from_json(row["record_json"])
             if existing == candidate:
                 return existing
             raise LearningHold("HOLD_M10_SNAPSHOT_ALREADY_LEARNED")
@@ -403,22 +382,22 @@ class LocalShadowLearningStore:
         event_body = _event_body(candidate)
         event_digest = _hash(event_body)
         event = LearningEvent(
-            event_id="lev_" + event_digest[:24],
-            event_hash=event_digest,
+            event_id="lev_" + event_digest[:24], event_hash=event_digest,
             **{k: v for k, v in event_body.items() if k not in {"schema_version", "engine_version"}},
         )
         validate_learning_event(event)
-
         try:
             self.connection.execute("BEGIN")
             self.register_snapshot(snapshot)
             self.connection.execute(
                 "INSERT INTO learning_records(record_hash,record_id,snapshot_hash,request_id,learned_at_utc,record_json) VALUES(?,?,?,?,?,?)",
-                (candidate.record_hash, candidate.record_id, candidate.snapshot_hash, candidate.request_id, candidate.learned_at_utc, canonical_json(candidate.to_dict())),
+                (candidate.record_hash, candidate.record_id, candidate.snapshot_hash, candidate.request_id,
+                 candidate.learned_at_utc, canonical_json(candidate.to_dict())),
             )
             self.connection.execute(
                 "INSERT INTO learning_events(event_hash,event_id,record_hash,sequence,event_type,event_at_utc,event_json) VALUES(?,?,?,?,?,?,?)",
-                (event.event_hash, event.event_id, candidate.record_hash, event.sequence, event.event_type, event.event_at_utc, canonical_json(event.to_dict())),
+                (event.event_hash, event.event_id, candidate.record_hash, event.sequence, event.event_type,
+                 event.event_at_utc, canonical_json(event.to_dict())),
             )
             self.connection.commit()
         except Exception:
@@ -428,12 +407,11 @@ class LocalShadowLearningStore:
 
     def records(self) -> tuple[ShadowLearningRecord, ...]:
         rows = self.connection.execute("SELECT record_json FROM learning_records ORDER BY rowid").fetchall()
-        return tuple(ShadowLearningRecord(**json.loads(row["record_json"])) for row in rows)
+        return tuple(_record_from_json(row["record_json"]) for row in rows)
 
     def events_for(self, record: ShadowLearningRecord) -> tuple[LearningEvent, ...]:
         validate_learning_record(record)
         rows = self.connection.execute(
-            "SELECT event_json FROM learning_events WHERE record_hash=? ORDER BY sequence",
-            (record.record_hash,),
+            "SELECT event_json FROM learning_events WHERE record_hash=? ORDER BY sequence", (record.record_hash,)
         ).fetchall()
         return tuple(LearningEvent(**json.loads(row["event_json"])) for row in rows)
