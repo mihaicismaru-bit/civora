@@ -1,0 +1,66 @@
+{
+  "checkpoint": "CP46",
+  "schema_version": "PPOS_LOCAL_SHADOW_LEARNING_POLICY_V1",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "input_contract": {
+    "required_module": "M10_ANALYTICS",
+    "required_state": "LOCAL_ANALYTICS_SNAPSHOT_ONLY",
+    "required_learning_scope": "LOCAL_OPERATIONAL_TELEMETRY_ONLY",
+    "require_learning_input_ready": true,
+    "require_performance_evidence_ready": false,
+    "require_external_analytics_state": "NOT_CONNECTED"
+  },
+  "learning": {
+    "mode": "LOCAL_SHADOW_LEARNING_ONLY",
+    "allowed_observations": [
+      "LOCAL_DRY_RUN_RECEIPT_TELEMETRY_PRESENT",
+      "LOCAL_RECEIPT_AGE_SECONDS",
+      "REMOTE_ANALYTICS_NOT_CONNECTED",
+      "PERFORMANCE_EVIDENCE_UNAVAILABLE"
+    ],
+    "performance_conclusion": "NO_PERFORMANCE_CONCLUSION",
+    "optimization_recommendation": "NO_OPTIMIZATION_RECOMMENDATION",
+    "auto_strategy_mutation": false,
+    "auto_content_mutation": false,
+    "auto_platform_mutation": false,
+    "external_learning_lookup": false
+  },
+  "experiment_handoff": {
+    "experiment_input_ready": true,
+    "scope": "LOCAL_CONTROL_VALIDATION_ONLY",
+    "external_experiment_ready": false,
+    "experiment_execution_authority": false
+  },
+  "storage": {
+    "backend": "SQLITE_LOCAL",
+    "analytics_inputs_immutable": true,
+    "learning_records_append_only": true,
+    "event_log_append_only": true,
+    "request_id_idempotency": true,
+    "one_record_per_snapshot": true
+  },
+  "privacy": {
+    "aggregate_content_level_only": true,
+    "individual_profiling": false,
+    "demographic_dimensions": false
+  },
+  "authority": {
+    "local_learning_authority": true,
+    "performance_learning_authority": false,
+    "strategy_mutation_authority": false,
+    "experiment_execution_authority": false,
+    "network_authority": false,
+    "real_account_connection_authority": false,
+    "publish_authority": false,
+    "deploy_authority": false
+  },
+  "platform_policy": {
+    "FACEBOOK_PAGE": "ACTIVE_LOCAL_SHADOW_ONLY",
+    "INSTAGRAM_PROFESSIONAL": "ACTIVE_LOCAL_SHADOW_ONLY",
+    "THREADS": "ACTIVE_LOCAL_SHADOW_ONLY",
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "next_dependency": "M14_EXPERIMENTS"
+}
