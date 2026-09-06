@@ -1,0 +1,96 @@
+{
+  "checkpoint": "CP48",
+  "schema_version": "PPOS_VISUAL_IDENTITY_POLICY_V2",
+  "identity_name": "EDITORIAL_LEDGER_V2",
+  "decision_state": "CANONICAL_SUPERSESSION_ACCEPTED",
+  "activation_state": "STAGED_FAIL_CLOSED_RUNTIME_ACTIVATION_REQUIRED",
+  "supersedes": {
+    "identity_name": "EDITORIAL_LEDGER_V1",
+    "checkpoint": "CP29",
+    "reason": "CP29 historical exact font hashes are unavailable; CP48 creates a new exact-byte identity rather than asserting historical byte equivalence"
+  },
+  "historical_cp29_byte_equivalence_asserted": false,
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "palette": {
+    "paper": "#F4F0E8",
+    "ink": "#171717",
+    "muted_ink": "#62605B",
+    "signal": "#B33A2B",
+    "note_blue": "#2F5D8A",
+    "rule": "#A79F93",
+    "photo_matte": "#E3DDD2"
+  },
+  "grid": {
+    "outer_margin": 0.06,
+    "text_inset": 0.10,
+    "marginalia_rail_width": 0.08,
+    "photo_subject_inset": 0.06,
+    "caption_band_max_height": 0.22,
+    "corners_px": 0,
+    "spacing_px": [8, 12, 16, 24, 32, 48, 64, 96],
+    "strokes_px": [2, 4, 8]
+  },
+  "font_profile_scope": "EDITORIAL_LEDGER_V2_EXACT_LOCAL",
+  "font_roles": {
+    "DISPLAY": {
+      "family": "Inter Display",
+      "style": "SemiBold",
+      "postscript_name": "InterDisplay-SemiBold",
+      "version": "Version 4.001;git-9221beed3",
+      "sha256": "991234562ac06b47aefa2ca4d4ff74360a164a5653ec05357816fc4ffe3ca8a2",
+      "license_spdx": "OFL-1.1"
+    },
+    "EDITORIAL": {
+      "family": "Noto Serif",
+      "style": "Regular",
+      "postscript_name": "NotoSerif-Regular",
+      "version": "Version 2.004; ttfautohint (v1.8.3) -l 8 -r 50 -G 200 -x 14 -D latn -f none -a qsq -X \"\"",
+      "sha256": "9d7583b7dc9e812afd32a14280c5cac3160012efe50c8d08938f4fea266ff67f",
+      "license_spdx": "OFL-1.1"
+    },
+    "EDITORIAL_ITALIC": {
+      "family": "Noto Serif",
+      "style": "Italic",
+      "postscript_name": "NotoSerif-Italic",
+      "version": "Version 2.004; ttfautohint (v1.8.3) -l 8 -r 50 -G 200 -x 14 -D latn -f none -a qsq -X \"\"",
+      "sha256": "bc25600aa27cd409e1e5b3d86340df3a329bb860fcfbe57a03a95070b229e1b0",
+      "license_spdx": "OFL-1.1"
+    },
+    "MARGINALIA": {
+      "family": "Noto Sans Mono",
+      "style": "Medium",
+      "postscript_name": "NotoSansMono-Medium",
+      "version": "Version 2.006; ttfautohint (v1.8.3) -l 8 -r 50 -G 200 -x 14 -D latn -f none -a qsq -X \"\"",
+      "sha256": "c6107a9c14e9d33db347299fc467fb52c473919050d1be7c661869107eeffc06",
+      "license_spdx": "OFL-1.1"
+    }
+  },
+  "expected_font_binding_hash": "a3edbdb93a494a9dcac436e3395be078d746a731c1fbb75caad7300d65c7d4af",
+  "expected_identity_profile_hash": "8678c85bb7addc1c1d4ccabf9c6116c2a1f74a89c8146d240b877a9b86eb90bf",
+  "font_binding_state": "LOCKED_CP48_EXACT_SHA256",
+  "font_bytes_packaged": false,
+  "runtime_font_rule": "OPERATOR_SUPPLIES_LOCAL_FONT_FILES_MATCHING_EXACT_SHA256",
+  "marginalia": {
+    "hooks": ["RAIL_RULE", "FOLIO_MARK", "SOURCE_TICK", "ANNOTATION_BRACKET", "SOURCE_LABEL", "UPDATE_MARK"],
+    "procedural_microcopy": ["SURSA", "CONTEXT", "DE URMARIT", "CE NU STIM", "DETALIU", "DOCUMENT", "CIFRA", "LOC", "DATA", "UPDATE"],
+    "may_introduce_new_fact": false
+  },
+  "photo_policy": {
+    "factual_overlay_allowed": false,
+    "caption_credit_outside_photo": true
+  },
+  "authority": {
+    "identity_contract_authority": true,
+    "runtime_activation_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "network_fetch_allowed": false,
+    "real_account_connection_allowed": false,
+    "deploy_allowed": false
+  }
+}
