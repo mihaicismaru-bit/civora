@@ -1,0 +1,61 @@
+{
+  "schema_version": "PPOS_META_READ_ONLY_CONNECTION_GATE_POLICY_V1",
+  "checkpoint": "CP55",
+  "module_id": "M24_META_READ_ONLY_GATE",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "gate_contract": {
+    "contract_only": true,
+    "exact_cp54_transport_twin_binding_required": true,
+    "exact_runtime_policy_binding_required": true,
+    "global_kill_switch_must_be_engaged": true,
+    "automatic_kill_switch_disengage_allowed": false,
+    "operator_kill_switch_override_allowed": false,
+    "read_only_method_allowlist": ["GET"],
+    "mutating_methods_forbidden": ["POST", "PUT", "PATCH", "DELETE"],
+    "minimal_identity_probe_required_later": true,
+    "live_endpoint_materialization_allowed": false,
+    "live_probe_authorized": false,
+    "live_entitlement_verified": false,
+    "live_connection_verified": false,
+    "pilot_publish_ready": false
+  },
+  "required_future_evidence": [
+    "LIVE_TOKEN_DEBUG_REDACTED",
+    "LIVE_ACCOUNT_IDENTITY_MATCH_REDACTED",
+    "LIVE_PERMISSION_SET_EXACT",
+    "LIVE_CAPABILITY_SET_EXACT",
+    "LIVE_EXPIRY_STATE",
+    "LIVE_READ_ONLY_RESPONSE_HASH",
+    "OPERATOR_TIMESTAMP_UTC",
+    "API_VERSION_PIN",
+    "ZERO_WRITE_CONFIRMATION"
+  ],
+  "authority": {
+    "real_secret_reference_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "oauth_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "network_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "safety": {
+    "live_reverification_required": true,
+    "evidence_defaults_to_not_captured": true,
+    "no_publication": true,
+    "no_real_accounts": true,
+    "no_paid_services": true
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  }
+}
