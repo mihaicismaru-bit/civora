@@ -268,6 +268,9 @@ def main() -> int:
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_exact_canonical.py")])
     os.environ["LIFE_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-life"
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_life_programme_canonical.py")])
+    i3_proof = repo_root / ".github" / "workflows" / "partener-eu-i3-programme-intelligence-proof.yml"
+    if i3_proof.exists():
+        raise SystemExit("FAIL temporary I3 proof workflow still present after canonical integration")
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "test_eu_direct_i3_programme_intelligence.py"), "-v"])
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "test_eu_direct_i3_programme_reconcile.py"), "-v"])
     os.environ["I3_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-i3"
@@ -280,6 +283,7 @@ def main() -> int:
         "eui_exact_canonicalized": True,
         "life_programme_canonicalized": True,
         "i3_programme_canonicalized": True,
+        "i3_temporary_proof_absent": True,
     }, sort_keys=True))
     return 0
 
