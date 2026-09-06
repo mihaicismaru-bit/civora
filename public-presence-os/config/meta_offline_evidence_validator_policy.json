@@ -1,0 +1,71 @@
+{
+  "schema_version": "PPOS_META_OFFLINE_EVIDENCE_VALIDATOR_POLICY_V1",
+  "checkpoint": "CP57",
+  "module_id": "M26_META_OFFLINE_EVIDENCE_VALIDATOR",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "validator_contract": {
+    "offline_only": true,
+    "exact_cp56_contract_binding_required": true,
+    "synthetic_fixture_only": true,
+    "evidence_code_set_must_be_exact": true,
+    "canonical_json_required": true,
+    "sha256_binding_required": true,
+    "redaction_guard_required": true,
+    "operator_dry_run_required": true,
+    "global_kill_switch_must_be_engaged": true,
+    "method_allowlist": ["GET"],
+    "mutating_methods_forbidden": ["POST", "PUT", "PATCH", "DELETE"],
+    "synthetic_api_version_only": true,
+    "live_evidence_claim_allowed": false,
+    "pilot_publish_ready": false
+  },
+  "required_evidence_codes": [
+    "LIVE_TOKEN_DEBUG_REDACTED",
+    "LIVE_ACCOUNT_IDENTITY_MATCH_REDACTED",
+    "LIVE_PERMISSION_SET_EXACT",
+    "LIVE_CAPABILITY_SET_EXACT",
+    "LIVE_EXPIRY_STATE",
+    "LIVE_READ_ONLY_RESPONSE_HASH",
+    "OPERATOR_TIMESTAMP_UTC",
+    "API_VERSION_PIN",
+    "ZERO_WRITE_CONFIRMATION"
+  ],
+  "synthetic_fixture": {
+    "scope": "SYNTHETIC_OFFLINE_ONLY",
+    "api_version_literal": "TEST_API_VERSION_V1",
+    "endpoint_selector": "SYNTHETIC_OFFLINE_ENDPOINT_ONLY",
+    "identity_reference": "SYNTHETIC_ACCOUNT_REFERENCE",
+    "expiry_state": "SYNTHETIC_KNOWN",
+    "expiry_utc": "2099-12-31T23:59:59Z"
+  },
+  "authority": {
+    "real_secret_reference_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "oauth_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "network_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "safety": {
+    "global_kill_switch_remains_engaged": true,
+    "no_publication": true,
+    "no_real_accounts": true,
+    "no_paid_services": true,
+    "synthetic_pass_is_not_live_entitlement": true,
+    "synthetic_pass_is_not_connection_authority": true,
+    "synthetic_pass_is_not_publish_authority": true
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  }
+}
