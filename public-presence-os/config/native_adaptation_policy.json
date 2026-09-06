@@ -1,0 +1,61 @@
+{
+  "checkpoint": "CP38",
+  "model_version": "PPOS_NATIVE_ADAPTATION_BUNDLE_V1",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "input_contract": {
+    "required_stage": "M04_MASTER_DRAFT",
+    "required_state": "MASTER_DRAFT_BRIEF_ONLY",
+    "native_adaptation_input_ready": true,
+    "source_class": "PRIMARY_PUBLIC",
+    "support_text_policy": "VERBATIM_M04_SUPPORT_ONLY"
+  },
+  "house_length_budgets": {
+    "FACEBOOK_PAGE": {
+      "max_chars": 1800,
+      "classification": "INTERNAL_EDITORIAL_HOUSE_LIMIT_NOT_PLATFORM_API_LIMIT"
+    },
+    "INSTAGRAM_PROFESSIONAL": {
+      "max_chars": 1800,
+      "classification": "INTERNAL_EDITORIAL_HOUSE_LIMIT_NOT_PLATFORM_API_LIMIT"
+    },
+    "THREADS": {
+      "max_chars": 500,
+      "classification": "INTERNAL_EDITORIAL_HOUSE_LIMIT_NOT_PLATFORM_API_LIMIT"
+    }
+  },
+  "visual_requirements": {
+    "FACEBOOK_PAGE": "PREFERRED_DOWNSTREAM_M06",
+    "INSTAGRAM_PROFESSIONAL": "REQUIRED_DOWNSTREAM_M06",
+    "THREADS": "OPTIONAL_DOWNSTREAM_M06"
+  },
+  "adaptation_rules": {
+    "truncation_allowed": false,
+    "paraphrase_allowed": false,
+    "hashtag_inference_allowed": false,
+    "entity_inference_allowed": false,
+    "cta_inference_allowed": false,
+    "unknowns_must_be_preserved": true,
+    "attribution_labels_only_extra_text": true,
+    "lane_length_failure": "HOLD_LENGTH_BUDGET",
+    "rights_input_requires_all_active_lanes_ready": true
+  },
+  "authority": {
+    "native_adaptation_authority": true,
+    "fact_authority": false,
+    "visual_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "network_fetch_allowed": false,
+    "real_account_connection_allowed": false,
+    "api_write_allowed": false
+  }
+}
