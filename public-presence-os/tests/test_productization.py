@@ -40,7 +40,7 @@ def test_registry_unique_ids():
     r=load_json(ROOT/"config"/"module_registry.json")
     ids=[m["id"] for m in r["modules"]]
     assert len(ids)==len(set(ids))
-    assert r["checkpoint"]=="CP53"
+    assert r["checkpoint"]=="CP54"
     assert any(m["id"]=="M01_RADAR" and m["status"]=="CP34_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M02_RESEARCH" and m["status"]=="CP35_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M03_SCORING" and m["status"]=="CP36_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
@@ -62,10 +62,11 @@ def test_registry_unique_ids():
     assert any(m["id"]=="M20_META_CONNECTIONS" and m["status"]=="CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY" for m in r["modules"])
     assert any(m["id"]=="M21_META_PREFLIGHT" and m["status"]=="CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY" for m in r["modules"])
     assert any(m["id"]=="M22_META_OPERATOR_PROVISIONING" and m["status"]=="CP53_OFFLINE_OPERATOR_PACKET_CHECKLIST" for m in r["modules"])
+    assert any(m["id"]=="M23_META_TRANSPORT_TWIN" and m["status"]=="CP54_SYNTHETIC_TRANSPORT_TEST_TWIN_ONLY" for m in r["modules"])
 
 def test_reimplementation_priority_closes_executable_source_backlog():
     p=load_json(ROOT/"config"/"reimplementation_priority.json")
-    assert p["checkpoint"]=="CP53"
+    assert p["checkpoint"]=="CP54"
     states={row["module_id"]:row["state"] for row in p["order"]}
     assert states["M06_VISUAL"]=="CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
     assert states["M07_QA"]=="CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"
@@ -76,7 +77,8 @@ def test_reimplementation_priority_closes_executable_source_backlog():
     assert states["M20_META_CONNECTIONS"]=="CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY"
     assert states["M21_META_PREFLIGHT"]=="CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY"
     assert states["M22_META_OPERATOR_PROVISIONING"]=="CP53_OFFLINE_OPERATOR_PACKET_CHECKLIST"
-    assert p["next"]=="CP54_META_TRANSPORT_TEST_TWIN_AND_REQUEST_SIGNING_BOUNDARY"
+    assert states["M23_META_TRANSPORT_TWIN"]=="CP54_SYNTHETIC_TRANSPORT_TEST_TWIN_ONLY"
+    assert p["next"]=="CP55_META_READ_ONLY_CONNECTION_GATE_CONTRACT_AND_KILL_SWITCH_INTERLOCK"
 
 def test_no_paid_or_live_runtime_dependencies():
     txt="\n".join(p.read_text(encoding="utf-8") for p in (ROOT/"src").rglob("*.py"))
