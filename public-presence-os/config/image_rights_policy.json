@@ -1,0 +1,71 @@
+{
+  "schema_version": "PPOS_IMAGE_RIGHTS_POLICY_V1",
+  "checkpoint": "CP39",
+  "model_version": "PPOS_IMAGE_RIGHTS_BOUND_VISUAL_V1",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "auto_eligible_rights_statuses": [
+    "OWNED",
+    "LICENSED",
+    "PUBLIC_DOMAIN"
+  ],
+  "hold_rights_statuses": [
+    "UNKNOWN"
+  ],
+  "human_review_statuses": [
+    "FAIR_USE_REVIEW"
+  ],
+  "blocked_rights_statuses": [
+    "BLOCKED"
+  ],
+  "authorized_acquisition_routes": [
+    "LOCAL_OWNED",
+    "LICENSED_DIRECT",
+    "OPEN_LICENSE_DIRECT",
+    "PUBLIC_DOMAIN_DIRECT",
+    "SYNTHETIC_FIXTURE"
+  ],
+  "forbidden_acquisition_routes": [
+    "SOCIAL_DOWNLOAD_UNCLEARED",
+    "SEARCH_ENGINE_DOWNLOAD",
+    "PRESS_COPY_UNCLEARED",
+    "MAP_SCREENSHOT_AS_PHOTO"
+  ],
+  "rules": {
+    "public_visibility_is_reuse_permission": false,
+    "url_alone_is_rights_evidence": false,
+    "exact_asset_sha256_required": true,
+    "exact_current_rights_revision_required": true,
+    "evidence_snapshot_hash_required": true,
+    "platform_scope_required": true,
+    "purpose_scope_required": true,
+    "territory_scope_required": true,
+    "commercial_scope_required": true,
+    "modification_scope_required": true,
+    "attribution_text_required_when_applicable": true,
+    "sharealike_output_license_required_when_applicable": true,
+    "subject_clearance_fail_closed": true,
+    "profile_photo_as_social_editorial_media_allowed": false,
+    "source_original_rights_evidence_derivative_append_only": true,
+    "rights_bound_visual_requires_all_active_lanes_eligible": true
+  },
+  "authority": {
+    "rights_authority": true,
+    "fact_authority": false,
+    "visual_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "network_fetch_allowed": false,
+    "real_account_connection_allowed": false,
+    "api_write_allowed": false,
+    "deploy_allowed": false
+  }
+}
