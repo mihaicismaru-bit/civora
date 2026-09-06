@@ -1,0 +1,79 @@
+{
+  "schema_version": "PPOS_META_LIVE_READ_ONLY_PROBE_RUNBOOK_POLICY_V1",
+  "checkpoint": "CP56",
+  "module_id": "M25_META_LIVE_READ_ONLY_PROBE_RUNBOOK",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "runbook_contract": {
+    "contract_only": true,
+    "exact_cp55_gate_binding_required": true,
+    "exact_runtime_policy_binding_required": true,
+    "global_kill_switch_must_be_engaged": true,
+    "execution_authorized": false,
+    "endpoint_materialization_allowed": false,
+    "secret_resolution_allowed": false,
+    "network_allowed": false,
+    "read_only_method_allowlist": ["GET"],
+    "mutating_methods_forbidden": ["POST", "PUT", "PATCH", "DELETE"],
+    "evidence_capture_state": "SCHEMA_ONLY_NOT_CAPTURED",
+    "raw_response_persistence_allowed": false,
+    "raw_secret_persistence_allowed": false,
+    "live_connection_verified": false,
+    "pilot_publish_ready": false
+  },
+  "evidence_schema": [
+    {"code":"LIVE_TOKEN_DEBUG_REDACTED","representation":"REDACTED_METADATA_SHA256","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"LIVE_ACCOUNT_IDENTITY_MATCH_REDACTED","representation":"REDACTED_IDENTITY_SHA256","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"LIVE_PERMISSION_SET_EXACT","representation":"SORTED_STRING_SET","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"LIVE_CAPABILITY_SET_EXACT","representation":"SORTED_STRING_SET","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"LIVE_EXPIRY_STATE","representation":"ENUM_AND_OPTIONAL_UTC","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"LIVE_READ_ONLY_RESPONSE_HASH","representation":"SHA256_OF_REDACTED_RESPONSE","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"OPERATOR_TIMESTAMP_UTC","representation":"UTC_TIMESTAMP","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"API_VERSION_PIN","representation":"NON_SECRET_VERSION_STRING","state":"NOT_CAPTURED","raw_value_persistence_allowed":false},
+    {"code":"ZERO_WRITE_CONFIRMATION","representation":"BOOLEAN_ATTESTATION_PLUS_LOCAL_AUDIT_SHA256","state":"NOT_CAPTURED","raw_value_persistence_allowed":false}
+  ],
+  "redaction": {
+    "forbidden_persisted_keys": [
+      "access_token",
+      "app_secret",
+      "authorization",
+      "client_secret",
+      "code",
+      "cookie",
+      "refresh_token",
+      "session",
+      "set-cookie"
+    ],
+    "redact_before_hash": true,
+    "raw_headers_persistence_allowed": false,
+    "raw_account_identifier_persistence_allowed": false,
+    "token_fragment_persistence_allowed": false
+  },
+  "recovery": {
+    "rollback_target": "CP55",
+    "kill_switch_must_remain_engaged": true,
+    "evidence_invalidated_on_abort": true,
+    "publish_remains_disabled": true,
+    "deploy_remains_disabled": true
+  },
+  "authority": {
+    "real_secret_reference_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "oauth_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "network_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  }
+}
