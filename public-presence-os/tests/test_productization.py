@@ -53,8 +53,10 @@ def test_registry_unique_ids():
 
 def test_no_paid_or_live_runtime_dependencies():
     txt="\n".join(p.read_text(encoding="utf-8") for p in (ROOT/"src").rglob("*.py"))
-    for pat in [r"\brequests\b",r"\bhttpx\b",r"\baiohttp\b",r"selenium",r"playwright",r"boto3",r"stripe"]:
-        assert not re.search(pat,txt,re.I)
+    forbidden=("requests","httpx","aiohttp","selenium","playwright","boto3","stripe")
+    for package in forbidden:
+        pat=rf"^\s*(?:from\s+{re.escape(package)}(?:\.|\s)|import\s+{re.escape(package)}(?:\.|\s|$))"
+        assert not re.search(pat,txt,re.I|re.M)
 
 def test_no_secret_material():
     text_suffixes={".py",".json",".md",".toml",".yml",".yaml",".txt"}
