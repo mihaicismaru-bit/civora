@@ -233,13 +233,17 @@ def test_cp51_policy_registry_priority_and_runtime_remain_fail_closed():
     ):
         assert policy["authority"][key] is False
 
-    assert registry["checkpoint"] == "CP51"
+    assert registry["checkpoint"] == "CP52"
     assert any(
         m["id"] == "M20_META_CONNECTIONS" and m["status"] == "CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY"
         for m in registry["modules"]
     )
-    assert priority["checkpoint"] == "CP51"
-    assert priority["next"] == "CP52_META_CONNECTION_PREFLIGHT_SYNTHETIC_PROVISIONING_READBACK"
+    assert any(
+        m["id"] == "M21_META_PREFLIGHT" and m["status"] == "CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY"
+        for m in registry["modules"]
+    )
+    assert priority["checkpoint"] == "CP52"
+    assert priority["next"] == "CP53_META_OPERATOR_PROVISIONING_PACKET_OFFLINE_CHECKLIST"
     assert runtime["global_kill_switch_engaged"] is True
     assert runtime["network_enabled"] is False
     assert runtime["real_accounts_connected"] is False
