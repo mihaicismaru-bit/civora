@@ -261,13 +261,17 @@ def main() -> int:
     boundary = enforce_boundary(root)
     history = stage_history(root)
 
-    # EUI exact and LIFE programme intelligence are fail-closed members of the
-    # same generic EU_DIRECT evidence transaction. Any failure fails the generic
-    # lane rather than being hidden behind temporary proof workflows.
+    # EUI exact, LIFE and I3 programme intelligence are fail-closed members of
+    # the same generic EU_DIRECT evidence transaction. Any failure fails the
+    # generic lane rather than being hidden behind permanent proof workflows.
     os.environ["EUI_EXACT_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-eui-call4"
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_exact_canonical.py")])
     os.environ["LIFE_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-life"
     run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_life_programme_canonical.py")])
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "test_eu_direct_i3_programme_intelligence.py"), "-v"])
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "test_eu_direct_i3_programme_reconcile.py"), "-v"])
+    os.environ["I3_RUN_ID"] = f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-i3"
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_i3_programme_canonical.py")])
 
     print(json.dumps({
         "restore": restore,
@@ -275,6 +279,7 @@ def main() -> int:
         "history": history,
         "eui_exact_canonicalized": True,
         "life_programme_canonicalized": True,
+        "i3_programme_canonicalized": True,
     }, sort_keys=True))
     return 0
 
