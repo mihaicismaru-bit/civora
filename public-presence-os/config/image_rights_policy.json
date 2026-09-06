@@ -1,0 +1,94 @@
+{
+  "schema_version": "PPOS_IMAGE_RIGHTS_POLICY_V1",
+  "checkpoint": "CP39",
+  "model_version": "PPOS_RIGHTS_BOUND_VISUAL_INPUT_V1",
+  "purpose": "Bind an exact image original, provenance, snapshot evidence, current rights revision and per-lane usage decision before M06 visual materialization.",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "deferred_platforms": {
+    "LINKEDIN": "PRODUCTION_API_ACCESS_REQUIRED",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "input_contract": {
+    "required_stage": "M05_NATIVE_ADAPT",
+    "required_state": "NATIVE_ADAPTATION_ONLY",
+    "rights_input_ready": true,
+    "exact_bundle_integrity_revalidated": true,
+    "snapshot_evidence_required": true,
+    "url_alone_is_evidence": false
+  },
+  "acquisition": {
+    "allowed_routes": [
+      "OWNED_CAPTURE",
+      "LICENSED_DIRECT_DOWNLOAD",
+      "PUBLIC_DOMAIN_DIRECT_DOWNLOAD"
+    ],
+    "prohibited_or_discovery_only_routes": [
+      "SOCIAL_DOWNLOAD_UNCLEARED",
+      "SEARCH_ENGINE_DOWNLOAD",
+      "PRESS_COPY_UNCLEARED",
+      "MAP_SCREENSHOT_AS_PHOTO"
+    ],
+    "provider_policy": {
+      "OPENVERSE": "DISCOVERY_ONLY",
+      "WIKIMEDIA_COMMONS": "PER_FILE_RIGHTS_REVIEW_REQUIRED",
+      "EUROPEANA": "PER_RIGHTS_STATEMENT_REVIEW_REQUIRED",
+      "SOCIAL_MEDIA": "LEAD_ONLY_UNLESS_INDEPENDENT_REUSE_GRANT",
+      "PRESS_MEDIA": "PROHIBITED_BY_DEFAULT_WITHOUT_INDEPENDENT_REUSE_GRANT"
+    }
+  },
+  "rights": {
+    "auto_eligible_statuses": ["OWNED", "LICENSED", "PUBLIC_DOMAIN"],
+    "human_review_statuses": ["FAIR_USE_REVIEW"],
+    "hold_statuses": ["UNKNOWN"],
+    "hard_stop_statuses": ["BLOCKED"],
+    "public_domain_bases": ["PUBLIC_DOMAIN_DETERMINATION", "CC0_DEDICATION"],
+    "licensed_scope_must_explicitly_cover": [
+      "platform",
+      "purpose",
+      "territory",
+      "commercial_use",
+      "modification_policy",
+      "attribution",
+      "validity_or_review",
+      "share_alike_output_license_if_applicable"
+    ],
+    "subject_clearance": {
+      "PENDING": "HOLD_HUMAN_REVIEW",
+      "REQUIRED": "HOLD_HUMAN_REVIEW",
+      "BLOCKED": "BLOCKED"
+    },
+    "profile_photo_social_editorial": "BLOCKED",
+    "superseded_rights": "HOLD_STALE_RIGHTS",
+    "revocation_propagates_to_new_usage": true
+  },
+  "visual_handoff": {
+    "required_visual_platforms": ["INSTAGRAM_PROFESSIONAL"],
+    "preferred_visual_platforms": ["FACEBOOK_PAGE"],
+    "optional_visual_platforms": ["THREADS"],
+    "required_lane_must_be_ELIGIBLE_RENDER_QA": true,
+    "optional_lane_failure_does_not_grant_usage": true,
+    "publish_eligible": false
+  },
+  "persistence": {
+    "historical_cp13_sqlite_source_bytes_available": false,
+    "persistent_append_only_db_store_claimed_by_cp39": false,
+    "db_and_event_log": "DEFERRED_TO_SEPARATE_EXECUTABLE_UNIT",
+    "cp39_scope": "DETERMINISTIC_CONTRACT_LAYER_ONLY"
+  },
+  "authority": {
+    "rights_authority": true,
+    "fact_authority": false,
+    "visual_authority": false,
+    "approval_authority": false,
+    "queue_authority": false,
+    "publish_authority": false,
+    "api_write_allowed": false,
+    "network_fetch_allowed": false,
+    "real_account_connection_allowed": false
+  }
+}
