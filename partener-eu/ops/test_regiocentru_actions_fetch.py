@@ -54,7 +54,7 @@ def main() -> int:
     )
     mod.validate_evidence(evidence)
     assert evidence["adapter_id"] == "REGIOCENTRU_ACTIONS_V1"
-    assert evidence["parser_version"] == "REGIOCENTRU_ACTIONS_FETCH_V1"
+    assert evidence["parser_version"] == "REGIOCENTRU_ACTIONS_FETCH_V2"
     assert evidence["source_id"] == "SRC-ADR-CENTRU-PR-ACTIONS"
     assert evidence["source_family"] == "ROMANIA_ADR"
     assert evidence["programme_family"] == "PROGRAMUL_REGIUNEA_CENTRU_2021_2027"
@@ -64,6 +64,12 @@ def main() -> int:
     assert evidence["action_candidate_count"] == 2
     assert evidence["raw_sha256"] == mod.sha256_bytes(FIXTURE)
     assert evidence["observation_state"] == "CALL_INDEX_DISCOVERY"
+    assert evidence["source_health_state"] == "HEALTHY"
+    assert evidence["lkg_required"] is False
+    assert evidence["evidence_usable_for_reconciliation"] is True
+    assert evidence["current_material_truth_available"] is False
+    assert evidence["publication_effect"] == "NONE"
+    assert evidence["canonical_corpus_mutation"] is False
     assert evidence["material_fact_use"] is False
     assert evidence["open_call_authorized"] is False
     assert evidence["publish_authorized"] is False
@@ -79,6 +85,39 @@ def main() -> int:
     hostile["open_call_authorized"] = True
     expect_value_error(mod.validate_evidence, hostile)
 
+    degraded = mod.build_degraded_evidence(
+        requested_url=mod.DEFAULT_URL,
+        fetched_at="2026-09-06T11:56:34+00:00",
+        run_id="test-403",
+        failure_class="HTTP_403_FORBIDDEN",
+        http_status=403,
+    )
+    mod.validate_evidence(degraded)
+    assert degraded["source_health_state"] == "DEGRADED"
+    assert degraded["failure_class"] == "HTTP_403_FORBIDDEN"
+    assert degraded["http_status"] == 403
+    assert degraded["final_url"] is None
+    assert degraded["raw_sha256"] is None
+    assert degraded["content_type"] is None
+    assert degraded["action_candidate_count"] == 0
+    assert degraded["action_candidates"] == []
+    assert degraded["lkg_required"] is True
+    assert degraded["evidence_usable_for_reconciliation"] is False
+    assert degraded["current_material_truth_available"] is False
+    assert degraded["publication_effect"] == "NONE"
+    assert degraded["canonical_corpus_mutation"] is False
+    assert all(degraded[key] is False for key in mod.MATERIAL_FLAGS)
+
+    fabricated = dict(degraded)
+    fabricated["raw_sha256"] = "0" * 64
+    expect_value_error(mod.validate_evidence, fabricated)
+    widened = dict(degraded)
+    widened["evidence_usable_for_reconciliation"] = True
+    expect_value_error(mod.validate_evidence, widened)
+    materialized = dict(degraded)
+    materialized["current_material_truth_available"] = True
+    expect_value_error(mod.validate_evidence, materialized)
+
     source = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))["source"]
     assert source["id"] == mod.SOURCE_ID
     assert source["url"] == mod.DEFAULT_URL
@@ -89,7 +128,7 @@ def main() -> int:
     assert source["material_fact_use"] is False
     assert set(source["source_families"]) >= {"ROMANIA", "ADR", "CALL_REGISTRY"}
 
-    print("PASS Regiunea Centru action-index acquisition is official, bounded and discovery-only")
+    print("PASS Regiunea Centru action-index acquisition: healthy evidence plus auditable degraded/LKG-required fail-closed receipt")
     return 0
 
 
