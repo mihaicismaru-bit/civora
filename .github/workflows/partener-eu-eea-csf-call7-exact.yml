@@ -67,9 +67,9 @@ jobs:
           from pathlib import Path
           text=Path('.github/workflows/partener-eu-eea-csf-call7-exact.yml').read_text(encoding='utf-8')
           forbidden=(
-              'run_eea_csf_exact_canonical.py --call-id',
-              'actions/upload-artifact',
-              '--allow-legacy-history',
+              'run_eea_csf_exact_canonical.py ' + '--call-id',
+              'actions/' + 'upload-artifact',
+              '--allow-' + 'legacy-history',
           )
           for marker in forbidden:
               if marker in text:
