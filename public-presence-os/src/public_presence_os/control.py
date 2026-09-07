@@ -83,6 +83,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "config/control_plane_authorization_intake_policy.json","config/authorization_receipt_validator_policy.json",
         "config/live_read_only_probe_session_policy.json","config/live_read_only_probe_evidence_import_policy.json",
         "config/live_read_only_probe_execution_admission_policy.json","config/live_read_only_probe_single_session_harness_policy.json",
+        "config/live_read_only_probe_authorized_session_request_policy.json",
         "src/public_presence_os/control.py","src/public_presence_os/cli.py","src/public_presence_os/preflight.py",
         "src/public_presence_os/radar.py","src/public_presence_os/rehearsal.py","src/public_presence_os/rights.py",
         "src/public_presence_os/visual.py","src/public_presence_os/qa.py","src/public_presence_os/approval.py",
@@ -96,6 +97,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "src/public_presence_os/authorization_receipt_validator.py","src/public_presence_os/live_read_only_probe_session.py",
         "src/public_presence_os/live_read_only_probe_evidence_import.py","src/public_presence_os/live_read_only_probe_execution_admission.py",
         "src/public_presence_os/live_read_only_probe_single_session_harness.py",
+        "src/public_presence_os/live_read_only_probe_authorized_session_request.py",
         "scripts/build_release.py","scripts/preflight.py",
         "tests/test_productization.py","tests/test_preflight.py","tests/test_cp34_radar.py","tests/test_cp39_rights.py",
         "tests/test_cp40_visual.py","tests/test_cp41_qa.py","tests/test_cp42_approval.py","tests/test_cp43_queue.py",
@@ -107,6 +109,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "tests/test_cp61_control_plane_authorization_intake.py","tests/test_cp62_authorization_receipt_validator.py",
         "tests/test_cp63_live_read_only_probe_session.py","tests/test_cp64_live_read_only_probe_evidence_import.py",
         "tests/test_cp65_live_read_only_probe_execution_admission.py","tests/test_cp66_live_read_only_probe_single_session_harness.py",
+        "tests/test_cp67_live_read_only_probe_authorized_session_request.py",
         "docs/CP30_PRODUCTIZATION.md","docs/OPERATOR_INSTALLATION_CONFIGURATION_RECOVERY.md",
         "docs/CP34_RADAR_MINIMAL_EXECUTABLE_SLICE.md","docs/CP39_IMAGE_RIGHTS_ASSET_PROVENANCE.md",
         "docs/CP40_VISUAL_RENDERER.md","docs/CP41_VISUAL_QA.md","docs/CP42_APPROVAL_DASHBOARD.md","docs/CP43_QUEUE.md",
@@ -119,6 +122,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "docs/CP61_CONTROL_PLANE_AUTHORIZATION_INTAKE.md","docs/CP62_AUTHORIZATION_RECEIPT_VALIDATOR.md",
         "docs/CP63_LIVE_READ_ONLY_PROBE_SESSION.md","docs/CP64_LIVE_READ_ONLY_PROBE_EVIDENCE_IMPORT.md",
         "docs/CP65_LIVE_READ_ONLY_PROBE_EXECUTION_ADMISSION.md","docs/CP66_LIVE_READ_ONLY_PROBE_SINGLE_SESSION_HARNESS.md",
+        "docs/CP67_LIVE_READ_ONLY_PROBE_AUTHORIZED_SESSION_REQUEST.md",
         ".github/workflows/public-presence-os-ci.yml",
     ]
     for rel in expected:
