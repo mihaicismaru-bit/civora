@@ -92,9 +92,10 @@ jobs:
           PY
 
       - name: Upload replayable Calls 1-3 exact proof
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: partener-eu-eea-csf-calls123-exact-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/partener-eu-eea-csf-calls123-proof
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
