@@ -4,7 +4,10 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ingest/eea_norway_romania_programme_watch_reconcile.py'
+      - 'partener-eu/ops/run_eea_norway_romania_watch_canonical.py'
       - 'partener-eu/ops/test_eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py'
       - 'partener-eu/ingest/eea_romania_programming_intelligence.py'
       - 'partener-eu/ingest/eea_romania_programming_registry.json'
       - 'partener-eu/ops/test_eea_romania_programming_intelligence.py'
@@ -65,6 +68,8 @@ jobs:
           python -m json.tool partener-eu/ingest/eea_romania_operator_watch_registry.json >/dev/null
           python -m py_compile \
             partener-eu/ingest/eea_norway_romania_programme_watch.py \
+            partener-eu/ingest/eea_norway_romania_programme_watch_reconcile.py \
+            partener-eu/ops/run_eea_norway_romania_watch_canonical.py \
             partener-eu/ingest/eea_romania_programming_intelligence.py \
             partener-eu/ingest/eea_romania_operator_watch.py \
             partener-eu/ingest/eea_civil_society_fund_call5_exact.py \
@@ -77,6 +82,7 @@ jobs:
             partener-eu/web/programme_intelligence_pipeline_projection.py \
             partener-eu/web/programme_intelligence_pipeline_enrichment.py \
             partener-eu/ops/test_eea_norway_romania_programme_watch.py \
+            partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py \
             partener-eu/ops/test_eea_romania_programming_intelligence.py \
             partener-eu/ops/test_eea_romania_operator_watch.py \
             partener-eu/ops/test_eea_civil_society_fund_call5_exact.py \
@@ -94,6 +100,7 @@ jobs:
           PYTHONPATH: partener-eu/ingest:partener-eu/web:partener-eu/ops
         run: |
           python partener-eu/ops/test_eea_norway_romania_programme_watch.py
+          python partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py
           python partener-eu/ops/test_eea_romania_programming_intelligence.py
           python partener-eu/ops/test_eea_romania_operator_watch.py
           python partener-eu/ops/test_eea_civil_society_fund_call5_exact.py
@@ -124,16 +131,18 @@ jobs:
               raise SystemExit(f'Interreg authority transport failures: {failures}')
           PY
 
-      - name: Acquire official Romania EEA/Norway programme evidence
+      - name: Acquire and reconcile official Romania EEA/Norway programme evidence with history/LKG
         env:
-          PYTHONPATH: partener-eu/ingest
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EEA_NORWAY_WATCH_ROOT: /tmp/partener-eu-official-programme-intelligence/eea-norway-romania
+          EEA_NORWAY_WATCH_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-eea-norway-romania-watch
         run: |
-          ROOT=/tmp/partener-eu-official-programme-intelligence
-          rm -rf "$ROOT"
-          mkdir -p "$ROOT/eea-norway-romania"
-          python partener-eu/ingest/eea_norway_romania_programme_watch.py \
-            --out-dir "$ROOT/eea-norway-romania" \
-            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ops/run_eea_norway_romania_watch_canonical.py
+          cp /tmp/partener-eu-official-programme-intelligence/eea-norway-romania/current/eea-norway-romania-programme-watch.json \
+             /tmp/partener-eu-official-programme-intelligence/eea-norway-romania/eea-norway-romania-programme-watch.json
 
       - name: Acquire official FMO Romania programming/operator intelligence
         run: |
