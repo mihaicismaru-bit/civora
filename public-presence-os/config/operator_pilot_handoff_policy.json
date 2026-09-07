@@ -1,0 +1,135 @@
+{
+  "schema_version": "PPOS_OPERATOR_PILOT_HANDOFF_POLICY_V1",
+  "checkpoint": "CP60",
+  "module_id": "M29_OPERATOR_PILOT_HANDOFF",
+  "parent_acceptance_checkpoint": "CP59",
+  "parent_control_checkpoint": "CP58",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "handoff_contract": {
+    "offline_only": true,
+    "cp59_final_offline_acceptance_required": true,
+    "exact_cp59_receipt_binding_required": true,
+    "operator_checklist_required": true,
+    "authorization_packet_defaults_to_hold": true,
+    "authorization_must_be_explicit_external_human": true,
+    "authorization_may_not_be_inferred": true,
+    "authorization_must_be_scope_bound": true,
+    "authorization_must_be_platform_bound": true,
+    "read_only_connection_probe_authorization_separate_from_publish_authorization": true,
+    "global_kill_switch_must_remain_engaged": true,
+    "secret_resolution_forbidden": true,
+    "environment_read_forbidden": true,
+    "keychain_read_forbidden": true,
+    "oauth_forbidden": true,
+    "real_account_lookup_forbidden": true,
+    "account_connection_forbidden": true,
+    "network_forbidden": true,
+    "publish_execution_forbidden": true,
+    "external_write_forbidden": true,
+    "deploy_forbidden": true,
+    "paid_service_forbidden": true,
+    "rollback_to_cp59_required": true
+  },
+  "operator_checklist": [
+    {
+      "code": "VERIFY_CP59_ACCEPTANCE",
+      "description": "Verify the exact CP59 final offline acceptance receipt and source binding.",
+      "required": true
+    },
+    {
+      "code": "VERIFY_KILL_SWITCH_ENGAGED",
+      "description": "Confirm the global kill switch remains engaged before any future live probe.",
+      "required": true
+    },
+    {
+      "code": "VERIFY_ACTIVE_LANES",
+      "description": "Confirm only Facebook Page, Instagram Professional and Threads are active lanes.",
+      "required": true
+    },
+    {
+      "code": "VERIFY_SECRET_REFERENCES_SYMBOLIC_ONLY",
+      "description": "Confirm connection profiles still contain only symbolic ENV:/OS_KEYCHAIN: references and no resolved secrets.",
+      "required": true
+    },
+    {
+      "code": "VERIFY_LIVE_EVIDENCE_NOT_CAPTURED_YET",
+      "description": "Confirm live evidence remains absent at handoff and cannot be inferred from synthetic evidence.",
+      "required": true
+    },
+    {
+      "code": "VERIFY_READ_ONLY_AUTHORIZATION_ABSENT",
+      "description": "Confirm no live read-only connection/probe authorization has been granted by this packet.",
+      "required": true
+    },
+    {
+      "code": "VERIFY_PUBLISH_AUTHORIZATION_ABSENT",
+      "description": "Confirm no pilot publishing authorization has been granted by this packet.",
+      "required": true
+    },
+    {
+      "code": "VERIFY_RECOVERY_PATH",
+      "description": "Confirm rollback and recovery remain source-only and return to the CP59 offline boundary.",
+      "required": true
+    }
+  ],
+  "authorization_gates": [
+    {
+      "gate_code": "LIVE_READ_ONLY_CONNECTION_PROBE",
+      "default_state": "NOT_GRANTED",
+      "decision_source": "EXTERNAL_HUMAN_ONLY",
+      "allowed_platforms": [
+        "FACEBOOK_PAGE",
+        "INSTAGRAM_PROFESSIONAL",
+        "THREADS"
+      ],
+      "scope": "READ_ONLY_CONNECTION_AND_EVIDENCE_CAPTURE_ONLY",
+      "may_publish": false,
+      "may_deploy": false
+    },
+    {
+      "gate_code": "PILOT_PUBLISH",
+      "default_state": "NOT_GRANTED",
+      "decision_source": "EXTERNAL_HUMAN_ONLY",
+      "allowed_platforms": [
+        "FACEBOOK_PAGE",
+        "INSTAGRAM_PROFESSIONAL",
+        "THREADS"
+      ],
+      "scope": "PILOT_PUBLISH_ONLY_AFTER_SEPARATE_LIVE_VALIDATION",
+      "may_publish": false,
+      "may_deploy": false
+    }
+  ],
+  "required_blockers": [
+    "HOLD_LIVE_EVIDENCE_NOT_CAPTURED",
+    "HOLD_SECRET_REFERENCE_NOT_RESOLVED",
+    "HOLD_REAL_ACCOUNT_NOT_CONNECTED",
+    "HOLD_LIVE_READ_ONLY_AUTHORIZATION_NOT_GRANTED",
+    "HOLD_PILOT_PUBLISH_AUTHORIZATION_NOT_GRANTED",
+    "HOLD_GLOBAL_CONTROL_CHECKPOINT_PROMOTION"
+  ],
+  "authority": {
+    "real_secret_reference_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "oauth_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "network_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false,
+    "paid_service_allowed": false,
+    "self_authorization_allowed": false
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  },
+  "next_after_cp60": "CP61_CONTROL_PLANE_PROMOTION_AND_AUTHORIZATION_INTAKE_CONTRACT"
+}
