@@ -20,6 +20,7 @@ import interreg_ro_rs_calls_planning_reconcile as planning_reconcile
 CANONICAL_SIDECAR_SCHEMA = "PARTENER_EU_INTERREG_RO_RS_CALLS_PLANNING_CANONICAL_SIDECAR_V1"
 HISTORY_FILENAME = "interreg-ro-rs-calls-planning.json"
 RECONCILIATION_FILENAME = "interreg-ro-rs-calls-planning-reconciliation.json"
+RESTORE_SOURCE_KIND = "INTERREG_FUTURE_CANONICAL"
 
 
 def _parse_time(value: Any) -> dt.datetime:
@@ -124,6 +125,7 @@ def stage(*, run_id: str, future_output: Path) -> dict[str, Any]:
         "calendar_date": latest.get("calendar_date"),
         "calendar_url": latest.get("calendar_url"),
         "previous_same_identity_restored": previous is not None,
+        "restore_source_kind": RESTORE_SOURCE_KIND if previous is not None else None,
         "previous_source_path": str(previous_path) if previous_path else None,
         "reconciliation_state": reconciliation.get("reconciliation_state"),
         "semantic_change_count": reconciliation.get("semantic_change_count"),
