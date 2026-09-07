@@ -108,34 +108,49 @@ jobs:
           root=Path('/tmp/partener-eu-ro-md-call2-exact')
           current=json.loads((root/'ro-md-call2-exact.json').read_text(encoding='utf-8'))
           rec=json.loads((root/'ro-md-call2-reconciliation.json').read_text(encoding='utf-8'))
+          print({
+              'source_health_state': current['source_health_state'],
+              'official_call_identifier': current['official_call_identifier'],
+              'candidate_state': current['candidate_state'],
+              'candidate_deadline_text': current['candidate_deadline_text'],
+              'degraded_reason': current.get('degraded_reason'),
+              'sources': [
+                  {
+                      'kind': row.get('kind'),
+                      'health_state': row.get('health_state'),
+                      'http_status': row.get('http_status'),
+                      'final_url': row.get('final_url'),
+                      'error': row.get('error'),
+                  }
+                  for row in current.get('sources', [])
+              ],
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'lkg_is_current_truth': rec['lkg_is_current_truth'],
+              'publication_effect': rec['publication_effect'],
+          })
           if current['source_health_state'] != 'HEALTHY':
               raise SystemExit(f"RO-MD Call 2 current source is not HEALTHY: {current['source_health_state']}")
           if current['candidate_state'] != 'CALL_WINDOW_EXPIRED_CANDIDATE':
               raise SystemExit(f"unexpected candidate state: {current['candidate_state']}")
           if current['open_call_authorized'] is not False or current['deadline_authorized'] is not False:
               raise SystemExit('material authorization widened')
-          print({
-              'source_health_state': current['source_health_state'],
-              'official_call_identifier': current['official_call_identifier'],
-              'candidate_state': current['candidate_state'],
-              'candidate_deadline_text': current['candidate_deadline_text'],
-              'reconciliation_state': rec['reconciliation_state'],
-              'semantic_change_count': rec['semantic_change_count'],
-              'lkg_is_current_truth': rec['lkg_is_current_truth'],
-              'publication_effect': rec['publication_effect'],
-          })
           PY
 
       - name: Stage compact exact history
+        if: always()
         shell: bash
         run: |
           set -euo pipefail
           ROOT=/tmp/partener-eu-ro-md-call2-exact
           mkdir -p "$ROOT/publish"
+          test -f "$ROOT/ro-md-call2-exact.json"
+          test -f "$ROOT/ro-md-call2-reconciliation.json"
           cp "$ROOT/ro-md-call2-exact.json" "$ROOT/publish/"
           cp "$ROOT/ro-md-call2-reconciliation.json" "$ROOT/publish/"
 
       - name: Upload compact exact history
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: partener-eu-interreg-ro-md-call2-exact-history
