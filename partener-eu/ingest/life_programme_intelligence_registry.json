@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "LIFE_PROGRAMME_INTELLIGENCE_REGISTRY_V1",
+  "evidence_checked_date": "2026-09-03",
+  "source_family": "EU_DIRECT",
+  "programme_families": ["LIFE"],
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "closed_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false,
+    "publication_effect": "NONE",
+    "exact_call_or_topic_identifier_required": true,
+    "current_official_exact_endpoint_required": true,
+    "semantic_reconciliation_required": true,
+    "field_scoped_material_admission_required": true
+  },
+  "sources": [
+    {
+      "id": "LIFE_CINEA_PROGRAMME",
+      "programme_family": "LIFE",
+      "authority_class": "CINEA_OFFICIAL_PROGRAMME",
+      "authority_url": "https://cinea.ec.europa.eu/programmes/life_en",
+      "allowed_hosts": ["cinea.ec.europa.eu"],
+      "allowed_path_prefixes": ["/programmes/life"],
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "material_fact_use": false,
+      "required_marker_groups": [["LIFE"], ["Nature and Biodiversity", "Nature and biodiversity"], ["Clean Energy Transition", "clean energy transition"]],
+      "market_signals": ["NATURE_AND_BIODIVERSITY", "CIRCULAR_ECONOMY_AND_QUALITY_OF_LIFE", "CLIMATE_CHANGE_MITIGATION_AND_ADAPTATION", "CLEAN_ENERGY_TRANSITION"],
+      "applicant_fit_tags": ["PUBLIC_BODY", "MUNICIPALITY", "PRIVATE_LEGAL_ENTITY", "NGO", "SME", "COMPANY"],
+      "pipeline_signals": []
+    },
+    {
+      "id": "LIFE_CINEA_CALLS_2026_INDEX",
+      "programme_family": "LIFE",
+      "authority_class": "CINEA_OFFICIAL_CALL_INDEX_DISCOVERY",
+      "authority_url": "https://cinea.ec.europa.eu/life-calls-proposals-2026_en",
+      "allowed_hosts": ["cinea.ec.europa.eu"],
+      "allowed_path_prefixes": ["/life-calls-proposals-2026"],
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "material_fact_use": false,
+      "required_marker_groups": [["LIFE Calls for proposals 2026"], ["Funding & Tenders Portal", "Funding & Tender"]],
+      "market_signals": ["STANDARD_ACTION_PROJECTS", "STRATEGIC_PROJECTS", "CLEAN_ENERGY_TRANSITION_ACTIONS", "OPERATING_GRANTS"],
+      "applicant_fit_tags": ["PUBLIC_BODY", "PRIVATE_LEGAL_ENTITY", "NGO", "SME", "COMPANY", "CONSORTIUM"],
+      "pipeline_signals": ["ANNUAL_CALL_CYCLE_2026_OBSERVED_NON_AUTHORIZING"]
+    },
+    {
+      "id": "LIFE_CINEA_APPLICANT_SUPPORT",
+      "programme_family": "LIFE",
+      "authority_class": "CINEA_OFFICIAL_APPLICANT_SUPPORT",
+      "authority_url": "https://cinea.ec.europa.eu/programmes/life/life-support-applicants_en",
+      "allowed_hosts": ["cinea.ec.europa.eu"],
+      "allowed_path_prefixes": ["/programmes/life/life-support-applicants"],
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "material_fact_use": false,
+      "required_marker_groups": [["Who can apply", "who can apply"], ["public or private legal entity", "legal entity registered in the EU"]],
+      "market_signals": ["NATIONAL_CONTACT_POINT_SUPPORT", "APPLICANT_GUIDANCE", "INFO_DAYS"],
+      "applicant_fit_tags": ["PUBLIC_BODY", "PRIVATE_LEGAL_ENTITY", "NGO", "SME", "COMPANY", "EU_LEGAL_ENTITY", "INTERNATIONAL_ORGANISATION"],
+      "pipeline_signals": []
+    },
+    {
+      "id": "LIFE_CINEA_WORK_PROGRAMME_2025_2027",
+      "programme_family": "LIFE",
+      "authority_class": "CINEA_OFFICIAL_WORK_PROGRAMME",
+      "authority_url": "https://cinea.ec.europa.eu/programmes/life/life-legal-basis/life-multiannual-work-programme-2025-2027_en",
+      "allowed_hosts": ["cinea.ec.europa.eu"],
+      "allowed_path_prefixes": ["/programmes/life/life-legal-basis/life-multiannual-work-programme-2025-2027"],
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "material_fact_use": false,
+      "required_marker_groups": [["LIFE Multiannual Work Programme 2025-2027"], ["English language version", "English"]],
+      "market_signals": ["MULTIANNUAL_WORK_PROGRAMME", "PROGRAMME_PRIORITIES"],
+      "applicant_fit_tags": ["PUBLIC_BODY", "PRIVATE_LEGAL_ENTITY", "NGO", "SME", "COMPANY"],
+      "pipeline_signals": ["WORK_PROGRAMME_2025_2027", "PROGRAMME_PRIORITIES_NON_AUTHORIZING", "PROGRAMME_BUDGET_ENVELOPES_NON_AUTHORIZING"]
+    }
+  ]
+}

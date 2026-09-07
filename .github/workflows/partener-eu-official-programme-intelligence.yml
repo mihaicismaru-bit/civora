@@ -1,0 +1,754 @@
+name: PARTENER.EU Official Programme Intelligence
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ingest/eea_norway_romania_programme_watch_reconcile.py'
+      - 'partener-eu/ops/run_eea_norway_romania_watch_canonical.py'
+      - 'partener-eu/ops/test_eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py'
+      - 'partener-eu/ingest/eea_romania_programming_intelligence.py'
+      - 'partener-eu/ingest/eea_romania_programming_registry.json'
+      - 'partener-eu/ops/test_eea_romania_programming_intelligence.py'
+      - 'partener-eu/ingest/eea_romania_operator_watch.py'
+      - 'partener-eu/ingest/eea_romania_operator_watch_registry.json'
+      - 'partener-eu/ops/test_eea_romania_operator_watch.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call5_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call5_reconcile.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call5_exact.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call5_reconcile.py'
+      - 'partener-eu/ingest/interreg_romania_programme_matrix.py'
+      - 'partener-eu/ops/test_interreg_romania_programme_matrix.py'
+      - 'partener-eu/ingest/interreg_romania_call_surface_watch.py'
+      - 'partener-eu/ops/test_interreg_romania_call_surface_watch.py'
+      - 'partener-eu/ingest/interreg_applicant_partner_fit.py'
+      - 'partener-eu/ingest/interreg_applicant_partner_fit_registry.json'
+      - 'partener-eu/ops/test_interreg_applicant_partner_fit.py'
+      - 'partener-eu/ingest/interreg_danube_exact_call.py'
+      - 'partener-eu/ops/test_interreg_danube_exact_call.py'
+      - 'partener-eu/ingest/interreg_future_programming_registry.json'
+      - 'partener-eu/ingest/interreg_future_programming_watch.py'
+      - 'partener-eu/ops/test_interreg_future_programming_watch.py'
+      - 'partener-eu/web/programme_intelligence_pipeline_projection.py'
+      - 'partener-eu/ops/test_programme_intelligence_pipeline_projection.py'
+      - 'partener-eu/web/programme_intelligence_pipeline_enrichment.py'
+      - 'partener-eu/ops/test_programme_intelligence_pipeline_enrichment.py'
+      - '.github/workflows/partener-eu-official-programme-intelligence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  official-programme-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded official-programme adapters and regressions
+        run: |
+          python -m json.tool partener-eu/ingest/eea_romania_programming_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eea_romania_operator_watch_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/eea_norway_romania_programme_watch.py \
+            partener-eu/ingest/eea_norway_romania_programme_watch_reconcile.py \
+            partener-eu/ops/run_eea_norway_romania_watch_canonical.py \
+            partener-eu/ingest/eea_romania_programming_intelligence.py \
+            partener-eu/ingest/eea_romania_operator_watch.py \
+            partener-eu/ingest/eea_civil_society_fund_call5_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call5_reconcile.py \
+            partener-eu/ingest/interreg_romania_programme_matrix.py \
+            partener-eu/ingest/interreg_romania_call_surface_watch.py \
+            partener-eu/ingest/interreg_applicant_partner_fit.py \
+            partener-eu/ingest/interreg_danube_exact_call.py \
+            partener-eu/ingest/interreg_future_programming_watch.py \
+            partener-eu/web/programme_intelligence_pipeline_projection.py \
+            partener-eu/web/programme_intelligence_pipeline_enrichment.py \
+            partener-eu/ops/test_eea_norway_romania_programme_watch.py \
+            partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py \
+            partener-eu/ops/test_eea_romania_programming_intelligence.py \
+            partener-eu/ops/test_eea_romania_operator_watch.py \
+            partener-eu/ops/test_eea_civil_society_fund_call5_exact.py \
+            partener-eu/ops/test_eea_civil_society_fund_call5_reconcile.py \
+            partener-eu/ops/test_interreg_romania_programme_matrix.py \
+            partener-eu/ops/test_interreg_romania_call_surface_watch.py \
+            partener-eu/ops/test_interreg_applicant_partner_fit.py \
+            partener-eu/ops/test_interreg_danube_exact_call.py \
+            partener-eu/ops/test_interreg_future_programming_watch.py \
+            partener-eu/ops/test_programme_intelligence_pipeline_projection.py \
+            partener-eu/ops/test_programme_intelligence_pipeline_enrichment.py
+
+      - name: Validate fail-closed official-programme semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/web:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eea_norway_romania_programme_watch.py
+          python partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py
+          python partener-eu/ops/test_eea_romania_programming_intelligence.py
+          python partener-eu/ops/test_eea_romania_operator_watch.py
+          python partener-eu/ops/test_eea_civil_society_fund_call5_exact.py
+          python partener-eu/ops/test_eea_civil_society_fund_call5_reconcile.py
+          python partener-eu/ops/test_interreg_romania_programme_matrix.py
+          python partener-eu/ops/test_interreg_romania_call_surface_watch.py
+          python partener-eu/ops/test_interreg_applicant_partner_fit.py
+          python partener-eu/ops/test_interreg_danube_exact_call.py
+          python partener-eu/ops/test_interreg_future_programming_watch.py
+          python partener-eu/ops/test_programme_intelligence_pipeline_projection.py
+          python partener-eu/ops/test_programme_intelligence_pipeline_enrichment.py
+
+      - name: Probe Interreg authority transport health
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python - <<'PY'
+          from interreg_romania_programme_matrix import PROGRAMMES, default_fetch
+          failures = []
+          for spec in PROGRAMMES:
+              try:
+                  raw, meta = default_fetch(spec['url'])
+                  print({'programme_id': spec['id'], 'status': meta['status'], 'final_url': meta['final_url'], 'bytes': len(raw)})
+              except Exception as exc:
+                  failures.append((spec['id'], spec['url'], type(exc).__name__, str(exc)))
+                  print({'programme_id': spec['id'], 'transport_health': 'FAIL', 'url': spec['url'], 'error_type': type(exc).__name__, 'error': str(exc)})
+          if failures:
+              raise SystemExit(f'Interreg authority transport failures: {failures}')
+          PY
+
+      - name: Acquire and reconcile official Romania EEA/Norway programme evidence with history/LKG
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EEA_NORWAY_WATCH_ROOT: /tmp/partener-eu-official-programme-intelligence/eea-norway-romania
+          EEA_NORWAY_WATCH_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-eea-norway-romania-watch
+        run: |
+          python partener-eu/ops/run_eea_norway_romania_watch_canonical.py
+          cp /tmp/partener-eu-official-programme-intelligence/eea-norway-romania/current/eea-norway-romania-programme-watch.json \
+             /tmp/partener-eu-official-programme-intelligence/eea-norway-romania/eea-norway-romania-programme-watch.json
+
+      - name: Acquire official FMO Romania programming/operator intelligence
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/eea-programming"
+          python partener-eu/ingest/eea_romania_programming_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/eea-programming/eea-romania-programming-evidence.json"
+
+      - name: Acquire bounded official EEA Programme/Fund Operator watch
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/eea-operator-watch"
+          python partener-eu/ingest/eea_romania_operator_watch.py \
+            --output-dir "$ROOT/eea-operator-watch" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Restore previous successful same-branch EEA CSF Call 5 exact receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence/eea-csf-call5
+          SCRATCH=/tmp/partener-eu-eea-csf-call5-canonical-history-scan
+          rm -rf "$SCRATCH" "$ROOT"
+          mkdir -p "$SCRATCH" "$ROOT/current" "$ROOT/previous"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          python - <<'PY' > "$SCRATCH/candidates.txt"
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-eea-csf-call5-canonical-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not (
+                  name == 'partener-eu-eea-csf-call5-exact-history'
+                  or name.startswith('partener-eu-eea-csf-call5-exact-proof-')
+                  or name.startswith('partener-eu-official-programme-intelligence-')
+              ):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          for _, artifact_id in rows[:20]:
+              print(artifact_id)
+          PY
+          RESTORED=""
+          while IFS= read -r CANDIDATE; do
+            [ -n "$CANDIDATE" ] || continue
+            rm -f "$SCRATCH/previous.zip"
+            rm -rf "$SCRATCH/unpacked"
+            mkdir -p "$SCRATCH/unpacked"
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'eea-csf-ro-call5-exact-evidence.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous/eea-csf-ro-call5-exact-evidence.json"
+              RESTORED="$CANDIDATE"
+              echo "Restored previous same-identity EEA CSF Call 5 receipt from artifact ${CANDIDATE}"
+              break
+            fi
+          done < "$SCRATCH/candidates.txt"
+          if [ -z "$RESTORED" ]; then
+            echo "No previous same-branch exact EEA CSF Call 5 receipt found; baseline mode retained."
+          fi
+
+      - name: Acquire fresh exact official EEA CSF Call 5 chain
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence/eea-csf-call5
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eea_civil_society_fund_call5_exact.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eea-csf-call5" \
+            --output-dir "$ROOT/current"
+
+      - name: Reconcile EEA CSF Call 5 same-identity evidence non-authorizing
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence/eea-csf-call5
+          ARGS=()
+          if [ -f "$ROOT/previous/eea-csf-ro-call5-exact-evidence.json" ]; then
+            ARGS+=(--previous "$ROOT/previous/eea-csf-ro-call5-exact-evidence.json")
+          fi
+          PYTHONPATH=partener-eu/ingest python partener-eu/ingest/eea_civil_society_fund_call5_reconcile.py \
+            "$ROOT/current/eea-csf-ro-call5-exact-evidence.json" \
+            "${ARGS[@]}" \
+            --output "$ROOT/current/eea-csf-ro-call5-reconciliation.json"
+
+      - name: Enforce exact EEA CSF Call 5 non-authorizing boundary
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-official-programme-intelligence/eea-csf-call5')
+          evidence=json.loads((root/'current/eea-csf-ro-call5-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current/eea-csf-ro-call5-reconciliation.json').read_text(encoding='utf-8'))
+          previous_exists=(root/'previous/eea-csf-ro-call5-exact-evidence.json').exists()
+          if evidence.get('source_health_state') != 'HEALTHY':
+              sys.exit('FAIL exact EEA CSF Call 5 authority chain is not HEALTHY')
+          if evidence.get('discovery_link_verified') is not True:
+              sys.exit('FAIL EEA CSF index did not bind exact Call 5 detail')
+          if evidence.get('official_call_identifier') != '5' or evidence.get('call_identifier_kind') != 'OFFICIAL_CALL_NUMBER':
+              sys.exit('FAIL exact official EEA CSF Call 5 identifier binding lost')
+          if evidence.get('candidate_state') != 'OPEN_CALL' or str(evidence.get('status_label')).casefold() != 'open':
+              sys.exit('FAIL exact current EEA CSF Call 5 open candidate not observed')
+          if evidence.get('deadline_candidate') != '2026-10-08':
+              sys.exit('FAIL exact current EEA CSF Call 5 deadline candidate drift')
+          if evidence.get('budget_candidate') != 'EUR 6,500,000':
+              sys.exit('FAIL exact current EEA CSF Call 5 budget candidate drift')
+          receipts=evidence.get('source_receipts') or {}
+          for key in ('official_calls_index_discovery','official_exact_call_detail'):
+              receipt=receipts.get(key) or {}
+              if receipt.get('health_state') != 'HEALTHY' or receipt.get('http_status') != 200:
+                  sys.exit(f'FAIL EEA CSF source receipt degraded: {key}')
+              if not re.fullmatch(r'[0-9a-f]{64}', str(receipt.get('raw_sha256') or '')):
+                  sys.exit(f'FAIL EEA CSF source receipt lost raw SHA-256: {key}')
+          if previous_exists:
+              if rec.get('reconciliation_state') not in {'NO_CHANGE','EEA_CSF_CALL5_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}:
+                  sys.exit('FAIL EEA CSF same-identity replay did not reconcile')
+              if rec.get('previous_evidence_sha256') is None:
+                  sys.exit('FAIL EEA CSF same-identity replay lost previous evidence binding')
+              if rec.get('material_admission_ready_for_downstream_review') is not True:
+                  sys.exit('FAIL exact EEA CSF same-identity evidence did not reach downstream review gate')
+          else:
+              if rec.get('reconciliation_state') != 'BASELINE_CAPTURED_NON_AUTHORIZING':
+                  sys.exit('FAIL unexpected EEA CSF baseline reconciliation state')
+              if rec.get('material_admission_ready_for_downstream_review') is not False:
+                  sys.exit('FAIL EEA CSF baseline became review-ready without previous same-identity evidence')
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized',
+          )
+          for row in (evidence, rec):
+              for key in flags:
+                  if row.get(key) is not False:
+                      sys.exit(f'FAIL EEA CSF exact lane crossed material boundary: {key}')
+              if row.get('publication_effect') != 'NONE' or row.get('canonical_corpus_mutation') is not False:
+                  sys.exit('FAIL EEA CSF exact lane crossed publication boundary')
+          print({
+              'official_call_identifier': evidence['official_call_identifier'],
+              'candidate_state': evidence['candidate_state'],
+              'source_health_state': evidence['source_health_state'],
+              'previous_same_identity_restored': previous_exists,
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'open_call_authorized': False,
+              'publication_effect': 'NONE',
+          })
+          PY
+
+      - name: Acquire official Interreg Romania programme/territory matrix
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/interreg-romania"
+          python partener-eu/ingest/interreg_romania_programme_matrix.py \
+            --out-dir "$ROOT/interreg-romania" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Build Interreg applicant/partner market-fit smoke receipts
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/interreg-applicant-fit"
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county "Timiș" \
+            --applicant-type PUBLIC_AUTHORITY \
+            --has-international-partner \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
+            --output "$ROOT/interreg-applicant-fit/timis-public-authority.json"
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county "Vâlcea" \
+            --applicant-type PRIVATE_BODY \
+            --has-international-partner \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
+            --output "$ROOT/interreg-applicant-fit/valcea-private-body.json"
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county "Suceava" \
+            --applicant-type PUBLIC_AUTHORITY \
+            --has-international-partner \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
+            --output "$ROOT/interreg-applicant-fit/suceava-public-authority.json"
+          python partener-eu/ingest/interreg_applicant_partner_fit.py \
+            --county "Tulcea" \
+            --applicant-type NGO_NONPROFIT \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --programme-matrix "$ROOT/interreg-romania/interreg-romania-programme-matrix.json" \
+            --output "$ROOT/interreg-applicant-fit/tulcea-ngo.json"
+
+      - name: Acquire official Interreg Romania call surfaces
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/interreg-call-surfaces"
+          python partener-eu/ingest/interreg_romania_call_surface_watch.py \
+            --out-dir "$ROOT/interreg-call-surfaces" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Restore previous successful same-branch Danube exact receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          SCRATCH=/tmp/partener-eu-danube-exact-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH"
+          mkdir -p "$ROOT/interreg-danube-exact"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          CANDIDATE="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-danube-exact-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if name != 'partener-eu-interreg-danube-exact-history' and not name.startswith('partener-eu-interreg-danube-exact-'):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          print(rows[0][1] if rows else '')
+          PY
+          )"
+          if [ -n "$CANDIDATE" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            mkdir -p "$SCRATCH/unpacked"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'danube-third-call-exact.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/interreg-danube-exact/previous-exact.json"
+              echo "Restored previous bounded Danube exact receipt from artifact ${CANDIDATE}"
+            fi
+          else
+            echo "No previous same-branch Danube exact artifact found; baseline mode retained."
+          fi
+
+      - name: Acquire fresh exact current Danube call evidence and reconcile
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence/interreg-danube-exact
+          ARGS=()
+          if [ -f "$ROOT/previous-exact.json" ]; then
+            ARGS+=(--previous "$ROOT/previous-exact.json")
+          fi
+          python partener-eu/ingest/interreg_danube_exact_call.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/danube-third-call-exact.json" \
+            --reconciliation-output "$ROOT/danube-third-call-reconciliation.json" \
+            "${ARGS[@]}"
+
+      - name: Restore previous successful Interreg future-programming snapshot
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/interreg-future/history-scan"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-eu-interreg-future-programming-history&per_page=100" > "$ROOT/interreg-future/history-scan/artifacts.json"
+          CANDIDATE="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-official-programme-intelligence/interreg-future/history-scan/artifacts.json')
+          data=json.loads(p.read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          print(rows[0][1] if rows else '')
+          PY
+          )"
+          if [ -n "$CANDIDATE" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$ROOT/interreg-future/history-scan/previous.zip"
+            mkdir -p "$ROOT/interreg-future/history-scan/unpacked"
+            unzip -q "$ROOT/interreg-future/history-scan/previous.zip" -d "$ROOT/interreg-future/history-scan/unpacked"
+            PREVIOUS="$(find "$ROOT/interreg-future/history-scan/unpacked" -type f -name 'interreg-future-programming-snapshot.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/interreg-future/previous-snapshot.json"
+              echo "Restored previous bounded snapshot from artifact ${CANDIDATE}"
+            fi
+          else
+            echo "No previous successful same-branch bounded snapshot available; baseline reconciliation will be used."
+          fi
+
+      - name: Acquire and reconcile Interreg 2028-2034 programming intelligence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/interreg-future"
+          ARGS=()
+          if [ -f "$ROOT/interreg-future/previous-snapshot.json" ]; then
+            ARGS+=(--previous "$ROOT/interreg-future/previous-snapshot.json")
+          fi
+          python partener-eu/ingest/interreg_future_programming_watch.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/interreg-future/interreg-future-programming-snapshot.json" \
+            --reconciliation-output "$ROOT/interreg-future/interreg-future-programming-reconciliation.json" \
+            "${ARGS[@]}"
+
+      - name: Build read-only PROGRAMARE VIITOARE / PIPELINE preview
+        env:
+          PYTHONPATH: partener-eu/web
+        run: |
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/product"
+          python partener-eu/web/programme_intelligence_pipeline_projection.py \
+            --eea "$ROOT/eea-norway-romania/eea-norway-romania-programme-watch.json" \
+            --interreg-calls "$ROOT/interreg-call-surfaces/interreg-romania-call-surface-watch.json" \
+            --output "$ROOT/product/programare-viitoare-pipeline-preview.json"
+          PYTHONPATH=partener-eu/ingest:partener-eu/web python partener-eu/web/programme_intelligence_pipeline_enrichment.py \
+            --base-preview "$ROOT/product/programare-viitoare-pipeline-preview.json" \
+            --future-snapshot "$ROOT/interreg-future/interreg-future-programming-snapshot.json" \
+            --future-reconciliation "$ROOT/interreg-future/interreg-future-programming-reconciliation.json" \
+            --output "$ROOT/product/programare-viitoare-pipeline-preview-v2.json"
+
+      - name: Enforce live non-authorizing boundaries
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root = Path('/tmp/partener-eu-official-programme-intelligence')
+          eea = json.loads((root/'eea-norway-romania/eea-norway-romania-programme-watch.json').read_text(encoding='utf-8'))
+          eea_programming = json.loads((root/'eea-programming/eea-romania-programming-evidence.json').read_text(encoding='utf-8'))
+          eea_operator = json.loads((root/'eea-operator-watch/handoff/eea_romania_operator_watch.json').read_text(encoding='utf-8'))
+          interreg = json.loads((root/'interreg-romania/interreg-romania-programme-matrix.json').read_text(encoding='utf-8'))
+          interreg_calls = json.loads((root/'interreg-call-surfaces/interreg-romania-call-surface-watch.json').read_text(encoding='utf-8'))
+          applicant_timis = json.loads((root/'interreg-applicant-fit/timis-public-authority.json').read_text(encoding='utf-8'))
+          applicant_valcea = json.loads((root/'interreg-applicant-fit/valcea-private-body.json').read_text(encoding='utf-8'))
+          applicant_suceava = json.loads((root/'interreg-applicant-fit/suceava-public-authority.json').read_text(encoding='utf-8'))
+          applicant_tulcea = json.loads((root/'interreg-applicant-fit/tulcea-ngo.json').read_text(encoding='utf-8'))
+          danube_exact = json.loads((root/'interreg-danube-exact/danube-third-call-exact.json').read_text(encoding='utf-8'))
+          danube_reconcile = json.loads((root/'interreg-danube-exact/danube-third-call-reconciliation.json').read_text(encoding='utf-8'))
+          danube_previous = (root/'interreg-danube-exact/previous-exact.json').exists()
+          future = json.loads((root/'interreg-future/interreg-future-programming-snapshot.json').read_text(encoding='utf-8'))
+          reconcile = json.loads((root/'interreg-future/interreg-future-programming-reconciliation.json').read_text(encoding='utf-8'))
+          preview = json.loads((root/'product/programare-viitoare-pipeline-preview.json').read_text(encoding='utf-8'))
+          preview_v2 = json.loads((root/'product/programare-viitoare-pipeline-preview-v2.json').read_text(encoding='utf-8'))
+
+          assert eea['schema'] == 'PARTENER_EU_EEA_NORWAY_ROMANIA_PROGRAMME_WATCH_V1'
+          assert eea['source_health'] == 'HEALTHY' and len(eea['programmes']) == 9
+
+          assert eea_programming['schema'] == 'PARTENER_EU_EEA_ROMANIA_PROGRAMMING_EVIDENCE_V2'
+          assert eea_programming['observation_state'] == 'PROGRAMMING_PIPELINE'
+          assert eea_programming['stats']['programme_records'] == 9
+          assert eea_programming['stats']['operator_watch_seeds'] == 9
+          assert eea_programming['stats']['fund_operator_watch_seeds'] == 2
+          assert eea_programming['stats']['open_calls_authorized'] == 0
+          assert all(
+              eea_programming[k] is False
+              for k in (
+                  'material_fact_use','open_call_authorized','deadline_authorized','budget_authorized',
+                  'eligibility_authorized','publish_authorized','distribution_authorized','canonical_corpus_mutation'
+              )
+          )
+          assert all(row['observation_state'] == 'PROGRAMMING_PIPELINE' and row['not_a_call'] is True for row in eea_programming['records'])
+          assert all(row['programme_grant_scope'] == 'PROGRAMME_ALLOCATION_NOT_CALL_BUDGET' for row in eea_programming['records'])
+
+          assert eea_operator['adapter_id'] == 'EEA_ROMANIA_OPERATOR_WATCH_V1'
+          assert eea_operator['route_count'] == 9
+          assert eea_operator['healthy_route_count'] >= 1
+          assert all(
+              eea_operator[k] is False
+              for k in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized')
+          )
+          required_open = {'exact_call_or_topic_identifier','current_official_exact_call_endpoint','explicit_current_official_open_status','semantic_reconciliation'}
+          assert required_open.issubset(set(eea_operator['missing_for_open_confirmation']))
+          routes_by_id = {row['route_id']: row for row in eea_operator['routes']}
+          civil = routes_by_id['EEA-RO-CIVIL-SOCIETY-FUND-CALL-INDEX-WATCH']
+          assert civil['programme_ids'] == ['civil-society-fund']
+          assert civil['authority_class'] == 'T1_OFFICIAL_FUND_OPERATOR'
+          assert civil['requested_url'] == 'https://eeagrants.org/en/eea-civil-society-fund-romania/calls'
+          for row in eea_operator['routes']:
+              assert all(
+                  row[k] is False
+                  for k in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized')
+              )
+              if row['health_state'] == 'HEALTHY':
+                  assert re.fullmatch(r'[0-9a-f]{64}', str(row.get('raw_sha256') or ''))
+                  assert len(row.get('candidates') or []) == row['candidate_count']
+                  assert all(x['candidate_observation_state'] == 'DISCOVERY_ONLY' for x in row.get('candidates') or [])
+              else:
+                  assert row['health_state'] == 'DEGRADED'
+                  assert row['lkg_required'] is True and row['candidate_count'] == 0
+
+          expected_interreg_ids = {'RO_BG','RO_HU','RO_RS','RO_UA','RO_MD','DANUBE','INTERREG_EUROPE','HUSKROUA','BSB'}
+          assert interreg['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1'
+          assert interreg['programme_count'] == len(interreg['programmes']) == len(interreg['sources']) == len(expected_interreg_ids)
+          interreg_by_id = {row['programme_id']: row for row in interreg['programmes']}
+          assert set(interreg_by_id) == expected_interreg_ids
+          bsb = interreg_by_id['BSB']
+          assert bsb['romania_scope'] == ['Braila','Buzau','Constanta','Galati','Tulcea','Vrancea']
+          assert bsb['authority_url'].startswith('https://projects.research-and-innovation.ec.europa.eu/')
+          assert bsb['call_fact_authorized'] is False and bsb['applicant_eligibility_authorized'] is False
+          assert interreg_calls['schema'] == 'PARTENER_EU_INTERREG_ROMANIA_CALL_SURFACE_WATCH_V2'
+          assert interreg_calls['discovered_call_facts'] == [] and interreg_calls['fallback_does_not_restore_call_surface_coverage'] is True
+          for applicant in (applicant_timis, applicant_valcea, applicant_suceava, applicant_tulcea):
+              assert applicant['schema'] == 'PARTENER_EU_INTERREG_APPLICANT_PARTNER_FIT_V2'
+              assert applicant['programme_count'] == interreg['programme_count']
+              assert applicant['market_intelligence_only'] is True and applicant['fit_is_not_eligibility'] is True
+              assert applicant['programme_matrix_semantic_fingerprint'] == interreg['semantic_fingerprint']
+          assert applicant_valcea['input']['county'] == 'Vâlcea'
+          valcea = {x['programme_id']: x for x in applicant_valcea['ranked_programme_fits']}
+          assert set(valcea) == {'DANUBE', 'INTERREG_EUROPE'}
+          assert valcea['DANUBE']['market_fit_score'] == 100
+          assert applicant_suceava['input']['county'] == 'Suceava'
+          suceava = {x['programme_id']: x for x in applicant_suceava['ranked_programme_fits']}
+          assert suceava['HUSKROUA']['market_fit_score'] == 100
+          assert suceava['HUSKROUA']['applicant_signal_state'] == 'SUPPORTED_PROGRAMME_SIGNAL'
+          assert suceava['HUSKROUA']['matched_territory'] == 'Suceava'
+          assert suceava['HUSKROUA']['eligibility_authorized'] is False
+          assert suceava['RO_UA']['market_fit_score'] == 90
+          assert suceava['RO_UA']['applicant_signal_state'] == 'SUPPORTED_HISTORICAL_CALL_SIGNAL'
+          assert applicant_tulcea['input']['county'] == 'Tulcea'
+          tulcea = {x['programme_id']: x for x in applicant_tulcea['ranked_programme_fits']}
+          assert tulcea['BSB']['market_fit_score'] == 60
+          assert tulcea['BSB']['applicant_signal_state'] == 'INSUFFICIENT_EVIDENCE'
+          assert tulcea['BSB']['matched_territory'] == 'Tulcea'
+          assert tulcea['BSB']['eligibility_authorized'] is False
+
+          assert danube_exact['schema'] == 'PARTENER_EU_INTERREG_DANUBE_EXACT_CALL_V1'
+          assert danube_exact['call_identifier'] == 'third-call-for-proposals'
+          assert danube_exact['call_identifier_kind'] == 'OFFICIAL_EXACT_ENDPOINT_SLUG'
+          assert danube_exact['exact_authority_verified'] is True
+          assert danube_exact['current_index_authority_verified'] is True
+          assert danube_exact['candidate_state'] == 'CLOSED_CALL_CANDIDATE'
+          assert danube_exact['candidate_status_label'] == 'Closed calls'
+          assert danube_reconcile['schema'] == 'PARTENER_EU_INTERREG_DANUBE_EXACT_RECONCILIATION_V1'
+          if danube_previous:
+              assert danube_reconcile['reconciliation_state'] in {'NO_CHANGE','DANUBE_EXACT_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+              assert danube_reconcile['material_admission_ready_for_downstream_review'] is True
+              assert danube_reconcile['previous_evidence_sha256'] is not None
+          else:
+              assert danube_reconcile['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert danube_reconcile['material_admission_ready_for_downstream_review'] is False
+
+          assert future['schema'] == 'PARTENER_EU_INTERREG_FUTURE_PROGRAMMING_WATCH_V1'
+          assert future['source_count'] == 9
+          assert future['source_health'] in {'HEALTHY', 'DEGRADED'}
+          assert all(x['observation_state'] in {'PROPOSAL','CONSULTATION','PROGRAMMING_PROCESS'} for x in future['watchlist'])
+          assert all(x['market_intelligence_only'] is True for x in future['watchlist'])
+          assert reconcile['schema'] == 'PARTENER_EU_INTERREG_FUTURE_PROGRAMMING_RECONCILIATION_V1'
+          assert reconcile['reconciliation_state'] in {
+              'BASELINE_CAPTURED_NON_AUTHORIZING', 'NO_CHANGE',
+              'TRANSPORT_OR_CONTENT_DRIFT_ONLY', 'PIPELINE_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'
+          }
+
+          assert preview['schema'] == 'PARTENER_EU_FUTURE_PROGRAMMING_PROJECTION_V1'
+          assert preview_v2['schema'] == 'PARTENER_EU_FUTURE_PROGRAMMING_PROJECTION_V2'
+          assert preview_v2['surface_state'] == 'PREVIEW_READ_ONLY_NOT_PUBLISHED'
+          assert preview_v2['seo_indexing_state'] == 'NOINDEX_PREVIEW_ONLY'
+          assert preview_v2['open_upcoming_separation'] == 'STRICT'
+          assert preview_v2['future_programming_card_count'] == 9
+          assert {'PROPOSAL','CONSULTATION','PROGRAMMING_PROCESS'}.issubset({x['observation_state'] for x in preview_v2['cards']})
+          assert preview_v2['material_change_claimed'] is False
+          assert preview_v2['semantic_reconciliation_present'] is True
+          assert preview_v2['semantic_reconciliation_material_authority'] is False
+
+          flags = (
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          for obj in (
+              eea, interreg, interreg_calls, applicant_timis, applicant_valcea, applicant_suceava, applicant_tulcea,
+              danube_exact, danube_reconcile, future, reconcile, preview, preview_v2,
+          ):
+              assert all(obj[k] is False for k in flags)
+          assert all(all(card[k] is False for k in flags) for card in preview_v2['cards'])
+          print({
+              'eea_programmes': len(eea['programmes']),
+              'eea_programming_records': eea_programming['stats']['programme_records'],
+              'eea_operator_watch_health': eea_operator['health_state'],
+              'eea_operator_watch_healthy_routes': eea_operator['healthy_route_count'],
+              'eea_civil_society_fund_route_health': civil['health_state'],
+              'eea_civil_society_fund_candidate_count': civil['candidate_count'],
+              'interreg_programmes': interreg['programme_count'],
+              'interreg_bsb_scope': bsb['romania_scope'],
+              'interreg_call_surface_health': interreg_calls['source_health'],
+              'applicant_fit_timis_count': applicant_timis['fit_count'],
+              'applicant_fit_valcea_count': applicant_valcea['fit_count'],
+              'applicant_fit_suceava_count': applicant_suceava['fit_count'],
+              'applicant_fit_tulcea_count': applicant_tulcea['fit_count'],
+              'applicant_fit_tulcea_bsb_score': tulcea['BSB']['market_fit_score'],
+              'applicant_fit_suceava_huskroua_score': suceava['HUSKROUA']['market_fit_score'],
+              'applicant_fit_valcea_top': applicant_valcea['ranked_programme_fits'][0]['programme_id'],
+              'danube_exact_previous_restored': danube_previous,
+              'danube_exact_candidate_state': danube_exact['candidate_state'],
+              'danube_exact_reconciliation': danube_reconcile['reconciliation_state'],
+              'danube_exact_semantic_changes': danube_reconcile['semantic_change_count'],
+              'future_programming_sources': future['source_count'],
+              'future_programming_healthy': future['healthy_source_count'],
+              'future_programming_degraded': future['degraded_source_count'],
+              'future_reconciliation': reconcile['reconciliation_state'],
+              'future_semantic_changes': reconcile['semantic_change_count'],
+              'future_transport_changes': reconcile['transport_or_content_change_count'],
+              'future_lkg_available': reconcile['lkg_reference_available_count'],
+              'future_lkg_missing': reconcile['lkg_reference_missing_count'],
+              'preview_v2_cards': preview_v2['card_count'],
+              'preview_v2_future_cards': preview_v2['future_programming_card_count'],
+              'preview_v2_states': sorted({x['observation_state'] for x in preview_v2['cards']}),
+              'preview_v2_fingerprint': preview_v2['semantic_fingerprint'],
+          })
+          PY
+
+      - name: Stage compact EEA CSF Call 5 exact history receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/eea-csf-call5-history-publish"
+          cp "$ROOT/eea-csf-call5/current/eea-csf-ro-call5-exact-evidence.json" "$ROOT/eea-csf-call5-history-publish/"
+          cp "$ROOT/eea-csf-call5/current/eea-csf-ro-call5-reconciliation.json" "$ROOT/eea-csf-call5-history-publish/"
+
+      - name: Upload compact EEA CSF Call 5 exact history
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-eea-csf-call5-exact-history
+          path: /tmp/partener-eu-official-programme-intelligence/eea-csf-call5-history-publish
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stage compact Danube exact history receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/danube-history-publish"
+          cp "$ROOT/interreg-danube-exact/danube-third-call-exact.json" "$ROOT/danube-history-publish/"
+          cp "$ROOT/interreg-danube-exact/danube-third-call-reconciliation.json" "$ROOT/danube-history-publish/"
+
+      - name: Upload compact Danube exact history
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-interreg-danube-exact-history
+          path: /tmp/partener-eu-official-programme-intelligence/danube-history-publish
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stage compact future-programming history receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-official-programme-intelligence
+          mkdir -p "$ROOT/history-publish"
+          cp "$ROOT/interreg-future/interreg-future-programming-snapshot.json" "$ROOT/history-publish/"
+          cp "$ROOT/interreg-future/interreg-future-programming-reconciliation.json" "$ROOT/history-publish/"
+
+      - name: Upload compact Interreg future-programming history
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-interreg-future-programming-history
+          path: /tmp/partener-eu-official-programme-intelligence/history-publish
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload replayable official-programme evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-official-programme-intelligence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-official-programme-intelligence
+          if-no-files-found: error
+          retention-days: 7

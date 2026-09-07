@@ -1,0 +1,87 @@
+{
+  "schema": "PARTENER_EU_EASI_PROGRAMME_INTELLIGENCE_REGISTRY_V1",
+  "source_family": "EU_DIRECT",
+  "programme_family": "ESF+ Employment and Social Innovation (EaSI)",
+  "programme_id": "ESF_PLUS_EASI",
+  "authority_class": "T1_OFFICIAL_EC_PROGRAMME",
+  "policy": {
+    "market_intelligence_only": true,
+    "exact_call_or_topic_identifier_required": true,
+    "current_official_exact_endpoint_required": true,
+    "semantic_reconciliation_required": true,
+    "field_scoped_material_admission_required": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "closed_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false
+  },
+  "applicant_fit": {
+    "fit_is_not_eligibility": true,
+    "tags": [
+      "public_authorities",
+      "civil_society_organisations",
+      "social_partners",
+      "employment_services",
+      "research_and_policy_organisations",
+      "social_innovation_actors",
+      "social_enterprises",
+      "transnational_partnerships"
+    ]
+  },
+  "partner_intelligence": {
+    "partner_intelligence_is_not_call_eligibility": true,
+    "tags": [
+      "funding_tenders_partner_search",
+      "transnational_cooperation_common",
+      "prior_awardee_discovery"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "EASI-DIRECT-MANAGEMENT-PROGRAMME",
+      "url": "https://european-social-fund-plus.ec.europa.eu/en/direct-management-easi",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_markers": [
+        "Employment and Social Innovation",
+        "762 million",
+        "European Pillar of Social Rights"
+      ]
+    },
+    {
+      "source_id": "EASI-DIRECT-MANAGEMENT-ROUTING",
+      "url": "https://european-social-fund-plus.ec.europa.eu/en/how-direct-management-works",
+      "observation_state": "APPLICATION_ROUTE_INTELLIGENCE",
+      "required_markers": [
+        "calls for proposals",
+        "annual work programmes",
+        "Funding and Tenders portal"
+      ]
+    },
+    {
+      "source_id": "EASI-ANNUAL-WORK-PROGRAMMES",
+      "url": "https://european-social-fund-plus.ec.europa.eu/en/easi-practitioners",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "required_markers": [
+        "EaSI Annual Work Programmes",
+        "calls for proposals",
+        "Funding and Tenders Portal"
+      ]
+    },
+    {
+      "source_id": "EASI-PARTNER-INTELLIGENCE",
+      "url": "https://european-social-fund-plus.ec.europa.eu/en/find-partners",
+      "observation_state": "PARTNER_INTELLIGENCE",
+      "required_markers": [
+        "Funding and Tenders portal",
+        "partner search",
+        "Projects & Results"
+      ]
+    }
+  ]
+}

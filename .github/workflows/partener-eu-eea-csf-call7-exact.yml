@@ -1,0 +1,87 @@
+name: PARTENER.EU EEA CSF Exact Calls 6-7
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_civil_society_fund_call6_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call6_reconcile.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call6_exact.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call6_reconcile.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call7_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call7_reconcile.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call7_exact.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call7_reconcile.py'
+      - 'partener-eu/ops/run_eea_csf_exact_canonical.py'
+      - '.github/workflows/partener-eu-eea-csf-call7-exact.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  eea-csf-exact:
+    strategy:
+      fail-fast: false
+      matrix:
+        call_id: ['6', '7']
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile shared runner and Call 6-7 contracts
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eea_civil_society_fund_call6_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call6_reconcile.py \
+            partener-eu/ops/test_eea_civil_society_fund_call6_exact.py \
+            partener-eu/ops/test_eea_civil_society_fund_call6_reconcile.py \
+            partener-eu/ingest/eea_civil_society_fund_call7_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call7_reconcile.py \
+            partener-eu/ops/test_eea_civil_society_fund_call7_exact.py \
+            partener-eu/ops/test_eea_civil_society_fund_call7_reconcile.py \
+            partener-eu/ops/run_eea_csf_exact_canonical.py
+
+      - name: Validate fail-closed Call 6-7 semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eea_civil_society_fund_call6_exact.py
+          python partener-eu/ops/test_eea_civil_society_fund_call6_reconcile.py
+          python partener-eu/ops/test_eea_civil_society_fund_call7_exact.py
+          python partener-eu/ops/test_eea_civil_society_fund_call7_reconcile.py
+
+      - name: Run shared exact CSF runner
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: |
+          python partener-eu/ops/run_eea_csf_exact_canonical.py \
+            --call-id "${{ matrix.call_id }}" \
+            --root "/tmp/partener-eu-eea-csf-call${{ matrix.call_id }}-exact" \
+            --allow-legacy-history
+
+      - name: Upload replayable exact evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-eea-csf-call${{ matrix.call_id }}-exact-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-eea-csf-call${{ matrix.call_id }}-exact
+          if-no-files-found: error
+          retention-days: 7
