@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Semantic-neutral replay marker: verify same-identity history restoration from the canonical Call 7 lane.
 from __future__ import annotations
 
 import copy
