@@ -312,7 +312,7 @@ def test_cp52_policy_registry_priority_and_runtime_remain_fail_closed():
     ):
         assert policy["authority"][key] is False
 
-    assert registry["checkpoint"] == "CP56"
+    assert registry["checkpoint"] == "CP57"
     assert any(
         m["id"] == "M21_META_PREFLIGHT" and m["status"] == "CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY"
         for m in registry["modules"]
@@ -333,8 +333,8 @@ def test_cp52_policy_registry_priority_and_runtime_remain_fail_closed():
         m["id"] == "M25_META_LIVE_READ_ONLY_PROBE" and m["status"] == "CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"
         for m in registry["modules"]
     )
-    assert priority["checkpoint"] == "CP56"
-    assert priority["next"] == "CP57_META_OFFLINE_EVIDENCE_BUNDLE_VALIDATOR_AND_OPERATOR_DRY_RUN"
+    assert priority["checkpoint"] == "CP57"
+    assert priority["next"] == "CP58_META_PILOT_READINESS_AGGREGATOR_AND_LIVE_CONNECTION_AUTHORIZATION_GATE"
     assert runtime["global_kill_switch_engaged"] is True
     assert runtime["network_enabled"] is False
     assert runtime["real_accounts_connected"] is False

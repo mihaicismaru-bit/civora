@@ -40,7 +40,7 @@ def test_registry_unique_ids():
     r=load_json(ROOT/"config"/"module_registry.json")
     ids=[m["id"] for m in r["modules"]]
     assert len(ids)==len(set(ids))
-    assert r["checkpoint"]=="CP56"
+    assert r["checkpoint"]=="CP57"
     assert any(m["id"]=="M01_RADAR" and m["status"]=="CP34_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M02_RESEARCH" and m["status"]=="CP35_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
     assert any(m["id"]=="M03_SCORING" and m["status"]=="CP36_MINIMAL_EXECUTABLE_SLICE" for m in r["modules"])
@@ -65,10 +65,11 @@ def test_registry_unique_ids():
     assert any(m["id"]=="M23_META_TRANSPORT_TWIN" and m["status"]=="CP54_SYNTHETIC_TRANSPORT_TEST_TWIN_ONLY" for m in r["modules"])
     assert any(m["id"]=="M24_META_READ_ONLY_GATE" and m["status"]=="CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY" for m in r["modules"])
     assert any(m["id"]=="M25_META_LIVE_READ_ONLY_PROBE" and m["status"]=="CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY" for m in r["modules"])
+    assert any(m["id"]=="M26_META_OFFLINE_EVIDENCE_VALIDATOR" and m["status"]=="CP57_SYNTHETIC_EVIDENCE_BUNDLE_VALIDATOR_DRY_RUN_LOCAL_ONLY" for m in r["modules"])
 
 def test_reimplementation_priority_closes_executable_source_backlog():
     p=load_json(ROOT/"config"/"reimplementation_priority.json")
-    assert p["checkpoint"]=="CP56"
+    assert p["checkpoint"]=="CP57"
     states={row["module_id"]:row["state"] for row in p["order"]}
     assert states["M06_VISUAL"]=="CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
     assert states["M07_QA"]=="CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"
@@ -82,7 +83,8 @@ def test_reimplementation_priority_closes_executable_source_backlog():
     assert states["M23_META_TRANSPORT_TWIN"]=="CP54_SYNTHETIC_TRANSPORT_TEST_TWIN_ONLY"
     assert states["M24_META_READ_ONLY_GATE"]=="CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"
     assert states["M25_META_LIVE_READ_ONLY_PROBE"]=="CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"
-    assert p["next"]=="CP57_META_OFFLINE_EVIDENCE_BUNDLE_VALIDATOR_AND_OPERATOR_DRY_RUN"
+    assert states["M26_META_OFFLINE_EVIDENCE_VALIDATOR"]=="CP57_SYNTHETIC_EVIDENCE_BUNDLE_VALIDATOR_DRY_RUN_LOCAL_ONLY"
+    assert p["next"]=="CP58_META_PILOT_READINESS_AGGREGATOR_AND_LIVE_CONNECTION_AUTHORIZATION_GATE"
 
 def test_no_paid_or_live_runtime_dependencies():
     txt="\n".join(p.read_text(encoding="utf-8") for p in (ROOT/"src").rglob("*.py"))
