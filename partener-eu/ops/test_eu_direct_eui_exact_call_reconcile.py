@@ -128,6 +128,15 @@ def main() -> int:
     else:
         raise AssertionError("EUI reconciliation accepted identity drift")
 
+    authorization_drift = copy.deepcopy(previous)
+    authorization_drift["open_call_authorized"] = True
+    try:
+        reconcile(current, authorization_drift)
+    except ValueError as exc:
+        assert "authoriz" in str(exc).casefold()
+    else:
+        raise AssertionError("EUI reconciliation accepted previous authorization widening")
+
     open_current = copy.deepcopy(current)
     open_current["candidate_state"] = "OPEN_CALL"
     open_current["status_label"] = "Open"
@@ -146,6 +155,7 @@ def main() -> int:
         "same_identity": "NO_CHANGE",
         "degraded_current": "LKG_REQUIRED",
         "health_recovery": "BASELINE_REFRESH",
+        "previous_authorization_widening_rejected": True,
         "open_without_identifier_review_ready": False,
     })
     return 0
