@@ -1,0 +1,71 @@
+name: PARTENER.EU EEA CSF Call 4 Exact Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_civil_society_fund_call4_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call4_reconcile.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call4_exact.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call4_reconcile.py'
+      - 'partener-eu/ops/run_eea_csf_call4_proof.py'
+      - 'partener-eu/ops/run_eea_csf_exact_canonical.py'
+      - '.github/workflows/partener-eu-eea-csf-call4-exact-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  eea-csf-call4-exact-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile Call 4 exact contracts and shared-runner proof
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eea_civil_society_fund_call4_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call4_reconcile.py \
+            partener-eu/ops/test_eea_civil_society_fund_call4_exact.py \
+            partener-eu/ops/test_eea_civil_society_fund_call4_reconcile.py \
+            partener-eu/ops/run_eea_csf_exact_canonical.py \
+            partener-eu/ops/run_eea_csf_call4_proof.py
+
+      - name: Validate fail-closed Call 4 semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eea_civil_society_fund_call4_exact.py
+          python partener-eu/ops/test_eea_civil_society_fund_call4_reconcile.py
+
+      - name: Run Call 4 through shared exact runner
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        run: python partener-eu/ops/run_eea_csf_call4_proof.py
+
+      - name: Upload replayable Call 4 exact evidence
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-eea-csf-call4-exact-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-eea-csf-call4-exact
+          if-no-files-found: error
+          retention-days: 7
