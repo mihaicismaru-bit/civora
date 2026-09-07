@@ -64,6 +64,11 @@ def normalize_text(raw: bytes, content_type: str) -> str:
     text = text.replace("\u00a0", " ")
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{2,}", "\n", text)
+    # Joomla-style article hit counters are volatile presentation metadata, not
+    # editorial content. Remove only a standalone numeric counter immediately
+    # before the explicit user-rating label so dates, prices and other numbers
+    # elsewhere on the page remain part of the material-change hash.
+    text = re.sub(r"(?m)^\d{1,9}\n(?=Evaluare utilizator:)", "", text)
     return text.strip()
 
 
@@ -214,6 +219,13 @@ def self_test() -> None:
     assert "Concert" in text and "40 lei" in text
     assert keyword_hits(text, ["concert","premier"]) == ["concert"]
     assert queue_key("x","y") == queue_key("x","y")
+    volatile_a = b"<html><body><div>Categorie: Teatru</div><div>22070</div><div>Evaluare utilizator: 5 / 5</div><p>Concert 21 septembrie 2026, bilete 40 lei</p></body></html>"
+    volatile_b = b"<html><body><div>Categorie: Teatru</div><div>22071</div><div>Evaluare utilizator: 5 / 5</div><p>Concert 21 septembrie 2026, bilete 40 lei</p></body></html>"
+    normalized_a = normalize_text(volatile_a, "text/html")
+    normalized_b = normalize_text(volatile_b, "text/html")
+    assert normalized_a == normalized_b
+    assert "22070" not in normalized_a and "22071" not in normalized_b
+    assert "21 septembrie 2026" in normalized_a and "40 lei" in normalized_a
     print("VÂLCEA CLAR performing arts source monitor self-test: PASS")
 
 
