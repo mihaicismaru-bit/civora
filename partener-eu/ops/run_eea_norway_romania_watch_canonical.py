@@ -48,6 +48,7 @@ EXPECTED_AUTHORITY_URLS = (
     NFP_DIRECTORY_URL,
     CIVIL_SOCIETY_CALLS_URL,
 )
+EXACT_CSF_CALL_IDS = ("6", "7")
 
 
 def run(cmd: list[str], *, stdout=None) -> None:
@@ -209,6 +210,43 @@ def enforce_boundary(current: dict[str, Any], rec: dict[str, Any], history: dict
         raise SystemExit("FAIL EEA/Norway Romania watch degradation did not fail closed")
 
 
+def run_exact_csf_migration_bridge(root: pathlib.Path) -> dict[str, Any]:
+    """Run exact CSF Calls 6-7 inside the canonical Official Programme artifact.
+
+    Legacy history is allowed only for this migration bridge. Once a successful
+    Official Programme artifact contains both call histories, this flag is removed
+    and subsequent replays become canonical-only.
+    """
+    repo_root = pathlib.Path(__file__).resolve().parents[2]
+    shared_runner = repo_root / "partener-eu" / "ops" / "run_eea_csf_exact_canonical.py"
+    canonical_root = root.parent
+    results: dict[str, Any] = {}
+    for call_id in EXACT_CSF_CALL_IDS:
+        call_root = canonical_root / f"eea-csf-call{call_id}"
+        run([
+            "python",
+            str(shared_runner),
+            "--call-id",
+            call_id,
+            "--root",
+            str(call_root),
+            "--allow-legacy-history",
+        ])
+        history = load(call_root / "history" / "history-selection.json")
+        rec = load(call_root / "current" / f"eea-csf-ro-call{call_id}-reconciliation.json")
+        restore = load(call_root / "previous" / "restore-metadata.json")
+        results[call_id] = {
+            "history_selected": history.get("selected"),
+            "reconciliation_state": rec.get("reconciliation_state"),
+            "semantic_change_count": rec.get("semantic_change_count"),
+            "previous_artifact_id": restore.get("artifact_id"),
+            "restore_source_kind": restore.get("restore_source_kind"),
+            "open_call_authorized": False,
+            "publication_effect": "NONE",
+        }
+    return results
+
+
 def main() -> int:
     root = ROOT
     shutil.rmtree(root, ignore_errors=True)
@@ -239,6 +277,7 @@ def main() -> int:
     dump(root / "current" / RECON_NAME, rec)
     history = stage_history(root)
     enforce_boundary(current, rec, history)
+    exact_calls = run_exact_csf_migration_bridge(root)
     print(json.dumps({
         "source_health": current["source_health"],
         "programme_count": len(current.get("programmes") or []),
@@ -250,6 +289,7 @@ def main() -> int:
         "programming_watch_candidate": rec["programming_watch_candidate"],
         "call_index_discovery_watch_candidate": rec["call_index_discovery_watch_candidate"],
         "history_selected": history["selected"],
+        "exact_csf_calls": exact_calls,
         "open_call_authorized": False,
         "publication_effect": "NONE",
     }, sort_keys=True))
