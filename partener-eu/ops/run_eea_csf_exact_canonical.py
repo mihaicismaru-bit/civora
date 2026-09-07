@@ -58,6 +58,14 @@ CONFIGS = {
             "partener-eu-eea-csf-call5-exact-history",
         ),
     ),
+    "6": CallConfig(
+        call_id="6",
+        exact_module="eea_civil_society_fund_call6_exact",
+        reconcile_module="eea_civil_society_fund_call6_reconcile",
+        evidence_filename="eea-csf-ro-call6-exact-evidence.json",
+        reconciliation_filename="eea-csf-ro-call6-reconciliation.json",
+        legacy_artifact_prefixes=("partener-eu-eea-csf-call6-exact-",),
+    ),
     "7": CallConfig(
         call_id="7",
         exact_module="eea_civil_society_fund_call7_exact",
