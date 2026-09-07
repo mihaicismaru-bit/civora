@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+# Replay marker: keep the bounded EEA/Norway programme+discovery proof on the exact PR head.
 import copy
 from eea_norway_romania_programme_watch import (
     CIVIL_SOCIETY_CALLS_URL, EEA_MOU_URL, NFP_DIRECTORY_URL, NORWAY_MOU_URL,
