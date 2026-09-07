@@ -16,13 +16,14 @@ import json
 import pathlib
 import re
 import unicodedata
+import urllib.error
 import urllib.parse
 import urllib.request
 from html.parser import HTMLParser
 from typing import Any, Callable, Mapping
 
 SCHEMA = "PARTENER_EU_INTERREG_ROMANIA_PROGRAMME_MATRIX_V1"
-PARSER_VERSION = "INTERREG_ROMANIA_PROGRAMME_MATRIX_V1"
+PARSER_VERSION = "INTERREG_ROMANIA_PROGRAMME_MATRIX_V1_1"
 SOURCE_FAMILY = "INTERREG"
 PROGRAMME_FAMILY = "INTERREG_ROMANIA_RELEVANT_2021_2027"
 AUTHORITY_CLASS = "INTERREG_OFFICIAL_PROGRAMME_EVIDENCE"
@@ -95,10 +96,13 @@ PROGRAMMES: tuple[dict[str, Any], ...] = (
     {
         "id": "HUSKROUA", "programme": "Interreg VI-A NEXT Hungary-Slovakia-Romania-Ukraine", "mode": "CBC_NEXT_MULTILATERAL",
         "url": "https://next.huskroua-cbc.eu/programme/area/",
+        "canonical_authority_url": "https://next.huskroua-cbc.eu/programme/area/",
+        "fallback_urls": ("https://next.huskroua-cbc.eu/calls/1st-call-for-proposals/",),
+        "fallback_anchors": ("Interreg VI-A NEXT Hungary-Slovakia-Romania-Ukraine Programme", "Programme area", "Romania", "Maramures", "Satu Mare", "Suceava"),
         "hosts": ("next.huskroua-cbc.eu",),
         "anchors": ("Hungary-Slovakia-Romania-Ukraine Interreg NEXT Programme", "Romania", "Maramures", "Satu Mare", "Suceava"),
         "romania_scope": ("Maramures", "Satu Mare", "Suceava"),
-        "evidence_note": "official programme authority; programme-area page verifies Romanian NUTS III territorial fit",
+        "evidence_note": "official programme-area page remains canonical semantic authority; acquisition may fail over on the same official programme host to the 1st Call page programme-area section when the canonical page returns anti-bot or marker-incomplete HTML; geography research only",
     },
     {
         "id": "BSB", "programme": "Interreg NEXT Black Sea Basin", "mode": "TRANSNATIONAL_NEXT",
@@ -193,6 +197,47 @@ def host_allowed(url: str, allowed: tuple[str, ...]) -> bool:
     return host in {x.casefold() for x in allowed}
 
 
+def acquisition_routes(spec: Mapping[str, Any]) -> tuple[tuple[str, tuple[str, ...], str], ...]:
+    routes: list[tuple[str, tuple[str, ...], str]] = [
+        (str(spec["url"]), tuple(spec["anchors"]), "PRIMARY"),
+    ]
+    fallback_anchors = tuple(spec.get("fallback_anchors") or spec["anchors"])
+    for url in tuple(spec.get("fallback_urls") or ()):
+        routes.append((str(url), fallback_anchors, "OFFICIAL_FALLBACK"))
+    return tuple(routes)
+
+
+def acquire_programme(
+    spec: Mapping[str, Any],
+    *,
+    fetcher: Callable[[str], tuple[bytes, dict[str, Any]]],
+) -> tuple[bytes, dict[str, Any], str, str, list[dict[str, Any]]]:
+    attempts: list[dict[str, Any]] = []
+    for url, anchors, route_kind in acquisition_routes(spec):
+        attempt: dict[str, Any] = {"requested_url": url, "route_kind": route_kind}
+        try:
+            raw, meta = fetcher(url)
+            final_url = str(meta.get("final_url") or meta.get("requested_url") or "")
+            attempt.update({
+                "final_url": final_url,
+                "status": int(meta.get("status") or 0),
+                "content_type": str(meta.get("content_type") or ""),
+            })
+            if int(meta.get("status") or 0) != 200 or not host_allowed(final_url, tuple(spec["hosts"])):
+                raise ValueError(f"{spec['id']} left its official Interreg evidence authority")
+            require(html_text(raw), anchors, source=str(spec["programme"]))
+            attempt["outcome"] = "ACCEPTED"
+            attempts.append(attempt)
+            return raw, dict(meta), url, route_kind, attempts
+        except (ValueError, OSError, urllib.error.URLError) as exc:
+            attempt["outcome"] = "REJECTED_FAIL_CLOSED"
+            attempt["error"] = f"{type(exc).__name__}: {exc}"
+            attempts.append(attempt)
+    raise ValueError(
+        f"{spec['programme']} exhausted declared official acquisition routes without verified territorial anchors: {attempts}"
+    )
+
+
 def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[str], tuple[bytes, dict[str, Any]]] = default_fetch) -> tuple[dict[str, Any], dict[str, bytes]]:
     observed = fetched_at or utc_now()
     raw_by_id: dict[str, bytes] = {}
@@ -200,23 +245,22 @@ def collect(*, run_id: str, fetched_at: str | None = None, fetcher: Callable[[st
     matrix: list[dict[str, Any]] = []
 
     for spec in PROGRAMMES:
-        raw, meta = fetcher(spec["url"])
+        raw, meta, acquisition_url, route_kind, attempts = acquire_programme(spec, fetcher=fetcher)
         final_url = str(meta.get("final_url") or meta.get("requested_url") or "")
-        if int(meta.get("status") or 0) != 200 or not host_allowed(final_url, spec["hosts"]):
-            raise ValueError(f"{spec['id']} left its official Interreg evidence authority")
-        require(html_text(raw), spec["anchors"], source=spec["programme"])
         raw_by_id[spec["id"]] = raw
         source_hash = sha256_bytes(raw)
         semantic_authority_url = str(spec.get("canonical_authority_url") or spec["url"])
         sources.append({
             "programme_id": spec["id"], "authority_url": semantic_authority_url,
-            "acquisition_url": spec["url"], **dict(meta),
+            "acquisition_url": acquisition_url, "acquisition_route_kind": route_kind,
+            "acquisition_attempts": attempts, **dict(meta),
             "sha256": source_hash, "authority_class": AUTHORITY_CLASS,
             "evidence_note": spec["evidence_note"],
         })
         matrix.append({
             "programme_id": spec["id"], "programme": spec["programme"], "cooperation_mode": spec["mode"],
-            "authority_url": semantic_authority_url, "acquisition_url": spec["url"],
+            "authority_url": semantic_authority_url, "acquisition_url": acquisition_url,
+            "acquisition_route_kind": route_kind,
             "authority_class": AUTHORITY_CLASS, "evidence_note": spec["evidence_note"],
             "programme_period": "2021-2027", "romania_scope": list(spec["romania_scope"]),
             "territorial_fit_state": "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING",
@@ -274,10 +318,17 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
         pid = str(source.get("programme_id") or "")
         spec = specs[pid]
         semantic_authority_url = str(spec.get("canonical_authority_url") or spec["url"])
+        allowed_urls = {url for url, _, _ in acquisition_routes(spec)}
         if int(source.get("status") or 0) != 200 or not re.fullmatch(r"[0-9a-f]{64}", str(source.get("sha256") or "")):
             raise ValueError(f"Interreg source {pid} lacks healthy hash-bound evidence")
-        if source.get("authority_url") != semantic_authority_url or source.get("acquisition_url") != spec["url"]:
+        if source.get("authority_url") != semantic_authority_url or source.get("acquisition_url") not in allowed_urls:
             raise ValueError(f"Interreg source {pid} authority/acquisition provenance drift")
+        expected_kind = "PRIMARY" if source.get("acquisition_url") == spec["url"] else "OFFICIAL_FALLBACK"
+        if source.get("acquisition_route_kind") != expected_kind:
+            raise ValueError(f"Interreg source {pid} acquisition-route provenance drift")
+        attempts = source.get("acquisition_attempts")
+        if not isinstance(attempts, list) or not attempts or attempts[-1].get("outcome") != "ACCEPTED" or attempts[-1].get("requested_url") != source.get("acquisition_url"):
+            raise ValueError(f"Interreg source {pid} acquisition-attempt provenance drift")
         if not host_allowed(str(source.get("final_url") or source.get("requested_url") or ""), spec["hosts"]):
             raise ValueError(f"Interreg source {pid} escaped official evidence authority")
         if source.get("evidence_note") != spec["evidence_note"]:
@@ -287,15 +338,18 @@ def validate_receipt(receipt: Mapping[str, Any]) -> None:
         pid = str(row.get("programme_id") or "")
         spec = specs[pid]
         semantic_authority_url = str(spec.get("canonical_authority_url") or spec["url"])
+        allowed_urls = {url for url, _, _ in acquisition_routes(spec)}
         if row.get("observation_state") != OBSERVATION_STATE or row.get("territorial_fit_state") != "ROMANIA_PROGRAMME_TERRITORY_VERIFIED_NON_AUTHORIZING":
             raise ValueError(f"Interreg programme {pid} escaped programme-level geography research")
         if row.get("market_intelligence_only") is not True or row.get("call_fact_authorized") is not False or row.get("applicant_eligibility_authorized") is not False:
             raise ValueError(f"Interreg programme {pid} attempted call/applicant eligibility authorization")
-        if row.get("authority_url") != semantic_authority_url or row.get("acquisition_url") != spec["url"] or list(row.get("romania_scope") or []) != list(spec["romania_scope"]):
+        if row.get("authority_url") != semantic_authority_url or row.get("acquisition_url") not in allowed_urls or list(row.get("romania_scope") or []) != list(spec["romania_scope"]):
             raise ValueError(f"Interreg programme {pid} territory/authority drift")
+        source = next(x for x in sources if x.get("programme_id") == pid)
+        if row.get("acquisition_url") != source.get("acquisition_url") or row.get("acquisition_route_kind") != source.get("acquisition_route_kind"):
+            raise ValueError(f"Interreg programme {pid} acquisition provenance drift")
         if row.get("evidence_note") != spec["evidence_note"]:
             raise ValueError(f"Interreg programme {pid} evidence provenance drift")
-        source = next(x for x in sources if x.get("programme_id") == pid)
         if row.get("source_sha256") != source.get("sha256"):
             raise ValueError(f"Interreg programme {pid} source hash binding drift")
 
