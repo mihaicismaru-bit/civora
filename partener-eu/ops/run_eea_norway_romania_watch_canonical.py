@@ -49,11 +49,10 @@ EXPECTED_AUTHORITY_URLS = (
     CIVIL_SOCIETY_CALLS_URL,
 )
 EXACT_CSF_CALL_IDS = ("1", "2", "3", "4", "5", "6", "7")
-# One-time migration bridge: Calls 1-3 have replay-qualified proof history but
-# are not yet present in an Official Programme artifact. Calls 4-7 remain
-# canonical-only. Close this tuple immediately after the first integrated
-# artifact contains healthy history for Calls 1-3.
-LEGACY_HISTORY_MIGRATION_IDS: tuple[str, ...] = ("1", "2", "3")
+# Migration is complete: Calls 1-7 must restore exact-call history only from
+# canonical Official Programme artifacts. Legacy proof artifacts remain archived
+# evidence but are no longer eligible as operational previous/LKG inputs.
+LEGACY_HISTORY_MIGRATION_IDS: tuple[str, ...] = ()
 
 
 def run(cmd: list[str], *, stdout=None) -> None:
