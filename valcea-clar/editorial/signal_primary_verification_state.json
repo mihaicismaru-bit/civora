@@ -2,19 +2,91 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-07T03:15:09+03:00",
+  "generated_at": "2026-09-07T07:54:56+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-07T03:13:12+03:00",
-  "task_count": 60,
+  "queue_generated_at": "2026-09-07T07:53:15+03:00",
+  "task_count": 61,
   "primary_match_count": 0,
-  "no_match_count": 31,
-  "unrouted_count": 29,
+  "no_match_count": 33,
+  "unrouted_count": 28,
   "target_count": 21,
   "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "0942603e69bd7bddb2a37db5",
+      "signal_title": "Din 25 august, casa se construiește după alte reguli: ce aduce noul Cod al urbanismului pentru sibieni",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/07/din-25-august-casa-se-construieste-dupa-alte-reguli-ce-aduce-noul-cod-al-urbanismului-pentru-sibieni/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-07T07:03:40+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "178b3200080ad269000c46bf",
+      "signal_title": "Mircia Gutău nu va mai câștiga Primăria Râmnicu Vâlcea în 2028. Vezi cine are șansele cele mai mari",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/mircia-gutau-nu-va-mai-castiga-primaria-ramnicu-valcea-in-2028-vezi-cine-are-sansele-cele-mai-mari/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-07T05:18:57+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "d2f13745fa828059362c33f2",
       "signal_title": "Istoria Mădulariului ajunge la Universitatea de Vest din Timișoara și la Academia Română",
@@ -38,6 +110,44 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "34406948eacaf68982657d8d",
+      "signal_title": "De la lanul de porumb la inima producției globale de senzori. Interviu cu Herbert Oprea, directorul general al Wenglor Sibiu, la ceas aniversar: „Mă văd ieșind la pensie de aici”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/06/de-la-lanul-de-porumb-la-inima-productiei-globale-de-senzori-interviu-cu-herbert-oprea-directorul-general-al-wenglor-sibiu-la-ceas-aniversar-ma-vad-iesind-la-pensie-de-aici/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-06T19:28:22+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "6e15af8e0da718e1fe742133",
@@ -583,7 +693,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -752,18 +862,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "c08bcd94db3d23730955cf4f",
-      "signal_title": "Autostrada Sibiu-Pitești ar putea fi gata în 2030-2031. Valea Oltului, punctul critic. Horațiu Cosma: „Acolo va fi dată ora exactă a finalizării proiectului”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/05/autostrada-sibiu-pitesti-ar-putea-fi-gata-in-2030-2031-valea-oltului-punctul-critic-horatiu-cosma-acolo-va-fi-data-ora-exacta-a-finalizarii-proiectului/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-05T14:31:52+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "8b1e1c318f075186d132d481",
@@ -1511,18 +1609,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "6882d30ace061feecefc3a2f",
-      "signal_title": "FOTO/VIDEO Slătioara investește în sport! Sală modernă pentru copii și comunitate",
-      "signal_url": "https://evenimentvalcean.ro/foto-video-slatioara-investeste-in-sport-sala-moderna-pentru-copii-si-comunitate/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_published_at": "2026-09-04T09:09:20+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "b82289711d2a2862deb23c94",
