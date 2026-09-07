@@ -1,4 +1,4 @@
-name: PARTENER.EU EEA CSF Exact Calls 6-7
+name: PARTENER.EU EEA CSF Exact Calls 6-7 Contract CI
 
 on:
   pull_request:
@@ -17,16 +17,11 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
-  eea-csf-exact:
-    strategy:
-      fail-fast: false
-      matrix:
-        call_id: ['6', '7']
+  eea-csf-contract-ci:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 8
     steps:
       - name: Checkout exact event head
         uses: actions/checkout@v6
@@ -66,22 +61,18 @@ jobs:
           python partener-eu/ops/test_eea_civil_society_fund_call7_exact.py
           python partener-eu/ops/test_eea_civil_society_fund_call7_reconcile.py
 
-      - name: Run shared exact CSF runner
-        env:
-          PYTHONPATH: partener-eu/ingest:partener-eu/ops
-          GH_TOKEN: ${{ github.token }}
-          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+      - name: Enforce acquisition ownership boundary
         run: |
-          python partener-eu/ops/run_eea_csf_exact_canonical.py \
-            --call-id "${{ matrix.call_id }}" \
-            --root "/tmp/partener-eu-eea-csf-call${{ matrix.call_id }}-exact" \
-            --allow-legacy-history
-
-      - name: Upload replayable exact evidence
-        uses: actions/upload-artifact@v6
-        with:
-          name: partener-eu-eea-csf-call${{ matrix.call_id }}-exact-${{ github.event.pull_request.head.sha || github.sha }}
-          path: /tmp/partener-eu-eea-csf-call${{ matrix.call_id }}-exact
-          if-no-files-found: error
-          retention-days: 7
+          python - <<'PY'
+          from pathlib import Path
+          text=Path('.github/workflows/partener-eu-eea-csf-call7-exact.yml').read_text(encoding='utf-8')
+          forbidden=(
+              'run_eea_csf_exact_canonical.py --call-id',
+              'actions/upload-artifact',
+              '--allow-legacy-history',
+          )
+          for marker in forbidden:
+              if marker in text:
+                  raise SystemExit(f'FAIL standalone CSF contract CI regained live acquisition/history ownership: {marker}')
+          print({'status':'PASS','lane':'CSF_CALL6_7_CONTRACT_CI_ONLY','live_acquisition_owner':'OFFICIAL_PROGRAMME_INTELLIGENCE'})
+          PY
