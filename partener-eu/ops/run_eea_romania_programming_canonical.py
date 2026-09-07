@@ -33,6 +33,7 @@ CANONICAL_ARTIFACT_PREFIX = "partener-eu-programming-pipeline-"
 ROOT = pathlib.Path("/tmp/partener-eu-programming-pipeline/eea-romania")
 CURRENT_NAME = "eea-romania-programming-intelligence.json"
 RECON_NAME = "eea-romania-programming-reconciliation.json"
+# Replay marker: this canonical lane intentionally persists EEA programming history inside the shared artifact.
 
 
 def run(cmd: list[str], *, stdout=None, env: dict[str, str] | None = None) -> None:
