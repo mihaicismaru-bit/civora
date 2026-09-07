@@ -605,7 +605,9 @@ def main() -> None:
     args.reconciliation_output.parent.mkdir(parents=True, exist_ok=True)
     args.reconciliation_output.write_text(json.dumps(receipt, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     sidecar = _stage_huskroua_call2_canonical_sidecar(run_id=args.run_id, future_output=args.output)
-    print(json.dumps(sidecar, sort_keys=True))
+    import interreg_ro_rs_calls_planning_canonical as ro_rs_canonical
+    ro_rs_sidecar = ro_rs_canonical.stage(run_id=args.run_id, future_output=args.output)
+    print(json.dumps({"huskroua_call2": sidecar, "ro_rs_calls_planning": ro_rs_sidecar}, sort_keys=True))
 
 
 if __name__ == "__main__":
