@@ -216,7 +216,7 @@ def test_cp55_policy_registry_priority_and_runtime_remain_fail_closed():
     assert policy["required_future_evidence"] == list(REQUIRED_FUTURE_EVIDENCE)
     assert all(value is False for value in policy["authority"].values())
 
-    assert registry["checkpoint"] == "CP57"
+    assert registry["checkpoint"] == "CP58"
     assert any(
         row["id"] == "M24_META_READ_ONLY_GATE" and row["status"] == "CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"
         for row in registry["modules"]
@@ -225,8 +225,8 @@ def test_cp55_policy_registry_priority_and_runtime_remain_fail_closed():
         row["id"] == "M25_META_LIVE_READ_ONLY_PROBE" and row["status"] == "CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"
         for row in registry["modules"]
     )
-    assert priority["checkpoint"] == "CP57"
-    assert priority["next"] == "CP58_META_PILOT_READINESS_AGGREGATOR_AND_LIVE_CONNECTION_AUTHORIZATION_GATE"
+    assert priority["checkpoint"] == "CP58"
+    assert priority["next"] == "CP59_PILOT_PACKAGE_COMPLETENESS_MANIFEST_AND_FINAL_OFFLINE_ACCEPTANCE_SUITE"
     assert runtime["global_kill_switch_engaged"] is True
     assert runtime["network_enabled"] is False
     assert runtime["real_accounts_connected"] is False
