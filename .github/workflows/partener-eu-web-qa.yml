@@ -14,6 +14,7 @@ on:
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
+      - 'partener-eu/ops/test_home_freshness_explainability.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
@@ -32,6 +33,7 @@ on:
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
+      - 'partener-eu/ops/test_home_freshness_explainability.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
@@ -82,6 +84,7 @@ jobs:
         run: |
           python partener-eu/ops/test_public_language.py
           node partener-eu/ops/test_home_freshness_guard.mjs
+          node partener-eu/ops/test_home_freshness_explainability.mjs
           python partener-eu/ops/test_decision_products.py
 
       - name: Syntax-check active web control modules
@@ -94,6 +97,7 @@ jobs:
           node --check partener-eu/web/consultant-mysmis-v1.js
           node --check partener-eu/web/decision-intelligence-v2.js
           node --check partener-eu/web/home-freshness-guard-v1.js
+          node --check partener-eu/web/home-freshness-explainability-v1.js
           node --check partener-eu/web/home-novice-v1.js
           node --check partener-eu/web/home-go-to-v2.js
           node --check partener-eu/web/public-product-v3.js
