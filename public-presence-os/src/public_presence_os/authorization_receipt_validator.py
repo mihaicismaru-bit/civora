@@ -336,10 +336,12 @@ def compile_immutable_authorization_receipt(
         "state": "VALIDATED_IMMUTABLE_RECEIPT_NO_AUTHORITY",
     }
     receipt_hash = _hash(body)
+    receipt_payload = dict(body)
+    receipt_payload["allowed_platforms"] = tuple(receipt_payload["allowed_platforms"])
     receipt = ImmutableAuthorizationReceipt(
         receipt_id=f"cp62_receipt_{receipt_hash[:24]}",
         receipt_hash=receipt_hash,
-        **body,
+        **receipt_payload,
     )
     validate_immutable_authorization_receipt(cp61_contract, shape_receipt, receipt)
     return receipt
@@ -442,10 +444,12 @@ def simulate_control_promotion_dry_run(
         "state": "DRY_RUN_ONLY_NO_CONTROL_PROMOTION",
     }
     dry_run_hash = _hash(body)
+    dry_run_payload = dict(body)
+    dry_run_payload["allowed_platforms"] = tuple(dry_run_payload["allowed_platforms"])
     dry_run = ControlPromotionDryRunReceipt(
         dry_run_id=f"cp62_dryrun_{dry_run_hash[:24]}",
         dry_run_hash=dry_run_hash,
-        **body,
+        **dry_run_payload,
     )
     validate_control_promotion_dry_run_receipt(receipt, dry_run)
     return dry_run
@@ -576,10 +580,13 @@ def compile_authorization_receipt_validator(
         "state": STATE,
     }
     contract_hash = _hash(body)
+    contract_payload = dict(body)
+    contract_payload["active_platforms"] = tuple(contract_payload["active_platforms"])
+    contract_payload["blockers"] = tuple(contract_payload["blockers"])
     contract = AuthorizationReceiptValidatorContract(
         contract_id=f"cp62_contract_{contract_hash[:24]}",
         contract_hash=contract_hash,
-        **body,
+        **contract_payload,
     )
     validate_authorization_receipt_validator_contract(contract)
     return contract
