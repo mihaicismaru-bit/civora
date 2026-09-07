@@ -66,11 +66,11 @@ def normalize_text(raw: bytes, content_type: str) -> str:
     text = re.sub(r"\n{2,}", "\n", text)
     # Joomla-style article hit counters are volatile presentation metadata, not
     # editorial content. Remove only a standalone 4-9 digit counter immediately
-    # before the explicit user-rating label. Leading/trailing horizontal space is
-    # allowed because Joomla templates can wrap the counter text with whitespace.
-    # Dates, prices and unrelated numbers elsewhere remain in the material hash.
+    # before the explicit user-rating label. Template indentation around both
+    # nodes is consumed so equivalent pages normalize identically. Dates, prices
+    # and unrelated numbers elsewhere remain in the material-change hash.
     text = re.sub(
-        r"(?m)^[ \t]*\d{4,9}[ \t]*\n(?=[ \t]*Evaluare utilizator:)",
+        r"(?m)^[ \t]*\d{4,9}[ \t]*\n[ \t]*(?=Evaluare utilizator:)",
         "",
         text,
     )
