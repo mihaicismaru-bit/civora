@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Semantic-neutral canonical replay marker: verify post-retirement Official Programme artifact restores Calls 4-7.
 from __future__ import annotations
 
 import copy
