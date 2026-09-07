@@ -65,10 +65,15 @@ def normalize_text(raw: bytes, content_type: str) -> str:
     text = re.sub(r"[ \t]+", " ", text)
     text = re.sub(r"\n{2,}", "\n", text)
     # Joomla-style article hit counters are volatile presentation metadata, not
-    # editorial content. Remove only a standalone numeric counter immediately
-    # before the explicit user-rating label so dates, prices and other numbers
-    # elsewhere on the page remain part of the material-change hash.
-    text = re.sub(r"(?m)^\d{1,9}\n(?=Evaluare utilizator:)", "", text)
+    # editorial content. Remove only a standalone 4-9 digit counter immediately
+    # before the explicit user-rating label. Leading/trailing horizontal space is
+    # allowed because Joomla templates can wrap the counter text with whitespace.
+    # Dates, prices and unrelated numbers elsewhere remain in the material hash.
+    text = re.sub(
+        r"(?m)^[ \t]*\d{4,9}[ \t]*\n(?=[ \t]*Evaluare utilizator:)",
+        "",
+        text,
+    )
     return text.strip()
 
 
@@ -219,13 +224,18 @@ def self_test() -> None:
     assert "Concert" in text and "40 lei" in text
     assert keyword_hits(text, ["concert","premier"]) == ["concert"]
     assert queue_key("x","y") == queue_key("x","y")
-    volatile_a = b"<html><body><div>Categorie: Teatru</div><div>22070</div><div>Evaluare utilizator: 5 / 5</div><p>Concert 21 septembrie 2026, bilete 40 lei</p></body></html>"
-    volatile_b = b"<html><body><div>Categorie: Teatru</div><div>22071</div><div>Evaluare utilizator: 5 / 5</div><p>Concert 21 septembrie 2026, bilete 40 lei</p></body></html>"
+    volatile_a = b"<html><body><div>Categorie: Teatru</div><div> 22070 </div><div>Evaluare utilizator: 5 / 5</div><p>Concert 21 septembrie 2026, bilete 40 lei</p></body></html>"
+    volatile_b = b"<html><body><div>Categorie: Teatru</div><div>\t22071\t</div><div> Evaluare utilizator: 5 / 5</div><p>Concert 21 septembrie 2026, bilete 40 lei</p></body></html>"
     normalized_a = normalize_text(volatile_a, "text/html")
     normalized_b = normalize_text(volatile_b, "text/html")
     assert normalized_a == normalized_b
     assert "22070" not in normalized_a and "22071" not in normalized_b
     assert "21 septembrie 2026" in normalized_a and "40 lei" in normalized_a
+    protected = normalize_text(
+        b"<html><body><div>2026</div><div>Program</div><div>50 lei</div><div>Evaluare utilizator: 5 / 5</div></body></html>",
+        "text/html",
+    )
+    assert "2026" in protected and "50 lei" in protected
     print("VÂLCEA CLAR performing arts source monitor self-test: PASS")
 
 
