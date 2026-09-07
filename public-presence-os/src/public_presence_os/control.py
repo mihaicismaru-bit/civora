@@ -88,6 +88,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "config/live_read_only_probe_authority_activation_precondition_policy.json",
         "config/live_read_only_probe_authority_activation_transaction_policy.json",
         "config/live_read_only_probe_authority_lease_expiry_revocation_policy.json",
+        "config/live_read_only_probe_authority_lease_replay_stale_receipt_policy.json",
         "src/public_presence_os/control.py","src/public_presence_os/cli.py","src/public_presence_os/preflight.py",
         "src/public_presence_os/radar.py","src/public_presence_os/rehearsal.py","src/public_presence_os/rights.py",
         "src/public_presence_os/visual.py","src/public_presence_os/qa.py","src/public_presence_os/approval.py",
@@ -106,6 +107,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "src/public_presence_os/live_read_only_probe_authority_activation_precondition.py",
         "src/public_presence_os/live_read_only_probe_authority_activation_transaction.py",
         "src/public_presence_os/live_read_only_probe_authority_lease_expiry_revocation.py",
+        "src/public_presence_os/live_read_only_probe_authority_lease_replay_stale_receipt.py",
         "scripts/build_release.py","scripts/preflight.py",
         "tests/test_productization.py","tests/test_preflight.py","tests/test_cp34_radar.py","tests/test_cp39_rights.py",
         "tests/test_cp40_visual.py","tests/test_cp41_qa.py","tests/test_cp42_approval.py","tests/test_cp43_queue.py",
@@ -122,6 +124,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "tests/test_cp69_live_read_only_probe_authority_activation_precondition.py",
         "tests/test_cp70_live_read_only_probe_authority_activation_transaction.py",
         "tests/test_cp71_live_read_only_probe_authority_lease_expiry_revocation.py",
+        "tests/test_cp72_live_read_only_probe_authority_lease_replay_stale_receipt.py",
         "docs/CP30_PRODUCTIZATION.md","docs/OPERATOR_INSTALLATION_CONFIGURATION_RECOVERY.md",
         "docs/CP34_RADAR_MINIMAL_EXECUTABLE_SLICE.md","docs/CP39_IMAGE_RIGHTS_ASSET_PROVENANCE.md",
         "docs/CP40_VISUAL_RENDERER.md","docs/CP41_VISUAL_QA.md","docs/CP42_APPROVAL_DASHBOARD.md","docs/CP43_QUEUE.md",
@@ -139,6 +142,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "docs/CP69_LIVE_READ_ONLY_PROBE_AUTHORITY_ACTIVATION_PRECONDITION_MATRIX.md",
         "docs/CP70_LIVE_READ_ONLY_PROBE_AUTHORITY_ACTIVATION_TRANSACTION_DRY_RUN.md",
         "docs/CP71_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_EXPIRY_REVOCATION_DRY_RUN.md",
+        "docs/CP72_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_REPLAY_STALE_RECEIPT_REJECTION_DRY_RUN.md",
         ".github/workflows/public-presence-os-ci.yml",
     ]
     for rel in expected:
