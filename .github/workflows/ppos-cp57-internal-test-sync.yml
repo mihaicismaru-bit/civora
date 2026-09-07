@@ -61,8 +61,8 @@ jobs:
               path.write_text(text, encoding="utf-8")
           if total_checkpoint != 15:
               raise SystemExit(f"expected 15 checkpoint assertion edits, got {total_checkpoint}")
-          if total_next != 6:
-              raise SystemExit(f"expected 6 next-unit assertion edits, got {total_next}")
+          if total_next != 7:
+              raise SystemExit(f"expected 7 next-unit assertion edits, got {total_next}")
           PY
           git diff --check
           git diff -- public-presence-os/tests/test_cp49_identity_runtime.py \
