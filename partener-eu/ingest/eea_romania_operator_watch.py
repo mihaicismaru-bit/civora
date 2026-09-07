@@ -13,7 +13,7 @@ from datetime import datetime, timezone
 from html.parser import HTMLParser
 from pathlib import Path
 
-PARSER_VERSION = "EEA_ROMANIA_OPERATOR_WATCH_V1"
+PARSER_VERSION = "EEA_ROMANIA_OPERATOR_WATCH_V1_1"
 ADAPTER_ID = "EEA_ROMANIA_OPERATOR_WATCH_V1"
 PROGRAMME_FAMILY = "EEA_NORWAY"
 SOURCE_FAMILY = "EEA_NORWAY_OPERATOR_WATCH"
@@ -37,6 +37,15 @@ AUTHORIZATION_KEYS = (
     "distribution_authorized",
 )
 
+# Same-authority, semantically equivalent official surface. This is intentionally
+# bounded to one route and is consulted only when the primary official page
+# returns HTTP 403. The first failure remains in per-attempt provenance.
+BOUNDED_ALTERNATE_OFFICIAL_URLS: dict[str, tuple[str, ...]] = {
+    "EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH": (
+        "https://www.innovasjonnorge.no/en/seksjon/eos-midlene",
+    ),
+}
+
 
 def sha256_bytes(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -54,6 +63,36 @@ def load_registry(path: Path) -> dict:
     data = json.loads(path.read_text(encoding="utf-8"))
     validate_registry(data)
     return data
+
+
+def alternate_official_urls(route: dict) -> tuple[str, ...]:
+    return BOUNDED_ALTERNATE_OFFICIAL_URLS.get(str(route.get("route_id") or ""), ())
+
+
+def allowed_hosts(route: dict) -> set[str]:
+    return {str(host).lower() for host in route.get("allowed_hosts") or []}
+
+
+def allowed_final_path_prefixes(route: dict) -> tuple[str, ...]:
+    prefixes = [str(p) for p in route.get("allowed_final_path_prefixes") or []]
+    for url in alternate_official_urls(route):
+        path = urllib.parse.urlparse(url).path or "/"
+        if path not in prefixes:
+            prefixes.append(path)
+    return tuple(prefixes)
+
+
+def validate_route_url(url: str, route: dict, *, final: bool = False) -> None:
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https":
+        raise ValueError("operator-watch acquisition requires HTTPS")
+    if (parsed.hostname or "").lower() not in allowed_hosts(route):
+        raise ValueError(f"unexpected operator-watch host: {parsed.hostname!r}")
+    if final:
+        prefixes = allowed_final_path_prefixes(route)
+        path = parsed.path or "/"
+        if not prefixes or not any(path.startswith(prefix) for prefix in prefixes):
+            raise ValueError(f"unexpected final operator-watch path: {path!r}")
 
 
 def validate_registry(data: dict) -> None:
@@ -84,23 +123,8 @@ def validate_registry(data: dict) -> None:
         if not route.get("programme_ids") or not route.get("candidate_keywords"):
             raise ValueError(f"route lacks programme mapping or bounded discovery keywords: {route_id}")
         validate_route_url(str(route.get("watch_url") or ""), route)
-
-
-def allowed_hosts(route: dict) -> set[str]:
-    return {str(host).lower() for host in route.get("allowed_hosts") or []}
-
-
-def validate_route_url(url: str, route: dict, *, final: bool = False) -> None:
-    parsed = urllib.parse.urlparse(url)
-    if parsed.scheme != "https":
-        raise ValueError("operator-watch acquisition requires HTTPS")
-    if (parsed.hostname or "").lower() not in allowed_hosts(route):
-        raise ValueError(f"unexpected operator-watch host: {parsed.hostname!r}")
-    if final:
-        prefixes = tuple(str(p) for p in route.get("allowed_final_path_prefixes") or [])
-        path = parsed.path or "/"
-        if not prefixes or not any(path.startswith(prefix) for prefix in prefixes):
-            raise ValueError(f"unexpected final operator-watch path: {path!r}")
+        for alternate_url in alternate_official_urls(route):
+            validate_route_url(alternate_url, route, final=True)
 
 
 class StrictRedirectHandler(urllib.request.HTTPRedirectHandler):
@@ -165,9 +189,8 @@ def extract_candidates(raw: bytes, final_url: str, route: dict) -> list[dict[str
     return [unique[url] for url in sorted(unique)[:MAX_CANDIDATES]]
 
 
-def fetch_route(route: dict) -> tuple[bytes, str, int, str]:
-    requested_url = str(route["watch_url"])
-    validate_route_url(requested_url, route)
+def _fetch_exact_url(route: dict, requested_url: str) -> tuple[bytes, str, int, str]:
+    validate_route_url(requested_url, route, final=requested_url in alternate_official_urls(route))
     opener = urllib.request.build_opener(
         urllib.request.HTTPSHandler(context=ssl.create_default_context()),
         StrictRedirectHandler(route),
@@ -194,6 +217,44 @@ def fetch_route(route: dict) -> tuple[bytes, str, int, str]:
         raise RuntimeError(f"HTTP {exc.code} while acquiring {route.get('route_id')}") from exc
 
 
+def fetch_route(route: dict) -> tuple[bytes, str, int, str, list[dict]]:
+    primary_url = str(route["watch_url"])
+    candidate_urls = (primary_url,) + alternate_official_urls(route)
+    attempts: list[dict] = []
+    for index, requested_url in enumerate(candidate_urls):
+        try:
+            raw, final_url, status, content_type = _fetch_exact_url(route, requested_url)
+        except Exception as exc:
+            message = normalize_space(str(exc))[:500]
+            attempts.append({
+                "attempt_index": index + 1,
+                "url": requested_url,
+                "outcome": "ERROR",
+                "error_class": type(exc).__name__,
+                "error_message": message,
+            })
+            has_alternate = index + 1 < len(candidate_urls)
+            # This is not a retry of the same endpoint. Only a primary HTTP 403
+            # may move to the explicit same-authority equivalent surface.
+            if has_alternate and message.startswith("HTTP 403 while acquiring "):
+                continue
+            wrapped = RuntimeError(message)
+            wrapped.acquisition_attempts = attempts  # type: ignore[attr-defined]
+            raise wrapped from exc
+        attempts.append({
+            "attempt_index": index + 1,
+            "url": requested_url,
+            "outcome": "SUCCESS",
+            "http_status": status,
+            "final_url": final_url,
+            "content_type": content_type,
+        })
+        return raw, final_url, status, content_type, attempts
+    wrapped = RuntimeError(f"all bounded official surfaces failed for {route.get('route_id')}")
+    wrapped.acquisition_attempts = attempts  # type: ignore[attr-defined]
+    raise wrapped
+
+
 def base_receipt(route: dict, *, run_id: str, fetched_at: str) -> dict:
     receipt = {
         "route_id": route["route_id"],
@@ -215,8 +276,19 @@ def base_receipt(route: dict, *, run_id: str, fetched_at: str) -> dict:
     return receipt
 
 
-def build_healthy_receipt(raw: bytes, route: dict, *, final_url: str, status: int, content_type: str, run_id: str, fetched_at: str) -> dict:
+def build_healthy_receipt(
+    raw: bytes,
+    route: dict,
+    *,
+    final_url: str,
+    status: int,
+    content_type: str,
+    run_id: str,
+    fetched_at: str,
+    acquisition_attempts: list[dict] | None = None,
+) -> dict:
     receipt = base_receipt(route, run_id=run_id, fetched_at=fetched_at)
+    attempts = list(acquisition_attempts or [])
     receipt.update({
         "health_state": "HEALTHY",
         "final_url": final_url,
@@ -226,6 +298,8 @@ def build_healthy_receipt(raw: bytes, route: dict, *, final_url: str, status: in
         "candidate_count": 0,
         "candidates": [],
         "lkg_required": False,
+        "acquisition_attempts": attempts,
+        "recovered_via_alternate_official_surface": len(attempts) > 1,
     })
     candidates = extract_candidates(raw, final_url, route)
     receipt["candidate_count"] = len(candidates)
@@ -233,8 +307,16 @@ def build_healthy_receipt(raw: bytes, route: dict, *, final_url: str, status: in
     return receipt
 
 
-def build_degraded_receipt(route: dict, *, run_id: str, fetched_at: str, error: Exception) -> dict:
+def build_degraded_receipt(
+    route: dict,
+    *,
+    run_id: str,
+    fetched_at: str,
+    error: Exception,
+    acquisition_attempts: list[dict] | None = None,
+) -> dict:
     receipt = base_receipt(route, run_id=run_id, fetched_at=fetched_at)
+    attempts = list(acquisition_attempts or [])
     receipt.update({
         "health_state": "DEGRADED",
         "final_url": None,
@@ -246,8 +328,41 @@ def build_degraded_receipt(route: dict, *, run_id: str, fetched_at: str, error: 
         "lkg_required": True,
         "error_class": type(error).__name__,
         "error_message": normalize_space(str(error))[:500],
+        "acquisition_attempts": attempts,
+        "recovered_via_alternate_official_surface": False,
     })
     return receipt
+
+
+def validate_acquisition_attempts(receipt: dict, route: dict) -> None:
+    attempts = receipt.get("acquisition_attempts") or []
+    if not attempts:
+        if receipt.get("recovered_via_alternate_official_surface") is not False:
+            raise ValueError("alternate-surface recovery flag lacks acquisition provenance")
+        return
+    permitted = {str(route.get("watch_url") or ""), *alternate_official_urls(route)}
+    for expected_index, attempt in enumerate(attempts, start=1):
+        if attempt.get("attempt_index") != expected_index:
+            raise ValueError("operator-watch acquisition attempt order drift")
+        url = str(attempt.get("url") or "")
+        if url not in permitted:
+            raise ValueError("operator-watch acquisition attempt escaped bounded official surfaces")
+        validate_route_url(url, route, final=url in alternate_official_urls(route))
+        if attempt.get("outcome") not in {"SUCCESS", "ERROR"}:
+            raise ValueError("operator-watch acquisition attempt has unknown outcome")
+    if receipt.get("health_state") == "HEALTHY":
+        if attempts[-1].get("outcome") != "SUCCESS":
+            raise ValueError("healthy operator-watch receipt lacks successful final acquisition attempt")
+        recovered = receipt.get("recovered_via_alternate_official_surface") is True
+        if recovered:
+            if len(attempts) < 2 or attempts[0].get("outcome") != "ERROR" or not str(attempts[0].get("error_message") or "").startswith("HTTP 403 while acquiring "):
+                raise ValueError("alternate official surface recovery did not preserve the primary HTTP 403")
+            if str(attempts[-1].get("url") or "") not in set(alternate_official_urls(route)):
+                raise ValueError("alternate official surface recovery escaped configured equivalent endpoint")
+        elif len(attempts) != 1:
+            raise ValueError("multiple acquisition attempts require explicit alternate-surface recovery state")
+    elif any(attempt.get("outcome") == "SUCCESS" for attempt in attempts):
+        raise ValueError("degraded operator-watch receipt contains a successful acquisition attempt")
 
 
 def validate_receipt(receipt: dict, route: dict) -> None:
@@ -263,6 +378,7 @@ def validate_receipt(receipt: dict, route: dict) -> None:
     if set(MISSING_FOR_OPEN) - set(receipt.get("missing_for_open_confirmation") or []):
         raise ValueError("operator-watch receipt is missing OPEN proof requirements")
     validate_route_url(str(receipt.get("requested_url") or ""), route)
+    validate_acquisition_attempts(receipt, route)
     if receipt.get("health_state") == "HEALTHY":
         validate_route_url(str(receipt.get("final_url") or ""), route, final=True)
         digest = str(receipt.get("raw_sha256") or "")
@@ -303,8 +419,9 @@ def main() -> int:
     receipts: list[dict] = []
     healthy = 0
     for route in registry["routes"]:
+        attempts: list[dict] = []
         try:
-            raw, final_url, status, content_type = fetch_route(route)
+            raw, final_url, status, content_type, attempts = fetch_route(route)
             receipt = build_healthy_receipt(
                 raw,
                 route,
@@ -313,13 +430,21 @@ def main() -> int:
                 content_type=content_type,
                 run_id=args.run_id,
                 fetched_at=fetched_at,
+                acquisition_attempts=attempts,
             )
             raw_path = raw_dir / f"{route['route_id']}.html"
             raw_path.write_bytes(raw)
             receipt["raw_path"] = raw_path.as_posix()
             healthy += 1
         except Exception as exc:
-            receipt = build_degraded_receipt(route, run_id=args.run_id, fetched_at=fetched_at, error=exc)
+            attempts = list(getattr(exc, "acquisition_attempts", attempts) or [])
+            receipt = build_degraded_receipt(
+                route,
+                run_id=args.run_id,
+                fetched_at=fetched_at,
+                error=exc,
+                acquisition_attempts=attempts,
+            )
         validate_receipt(receipt, route)
         receipts.append(receipt)
 
@@ -336,6 +461,7 @@ def main() -> int:
         "health_state": "HEALTHY" if healthy == len(receipts) else ("DEGRADED" if healthy else "UNAVAILABLE"),
         "route_count": len(receipts),
         "healthy_route_count": healthy,
+        "recovered_route_count": sum(1 for receipt in receipts if receipt.get("recovered_via_alternate_official_surface") is True),
         "routes": receipts,
         "material_fact_use": False,
         "open_call_authorized": False,
@@ -351,8 +477,10 @@ def main() -> int:
     evidence_path.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "adapter_id": ADAPTER_ID,
+        "parser_version": PARSER_VERSION,
         "route_count": len(receipts),
         "healthy_route_count": healthy,
+        "recovered_route_count": evidence["recovered_route_count"],
         "health_state": evidence["health_state"],
         "open_call_authorized": False,
         "evidence_path": evidence_path.as_posix(),
