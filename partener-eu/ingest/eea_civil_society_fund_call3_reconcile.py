@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# Import exact wrapper first so its bounded official Call #3 authority binding
+# is active in the shared validation module in this subprocess as well.
+import eea_civil_society_fund_call3_exact  # noqa: F401
 from eea_civil_society_fund_reconcile_common import main_for, parser_version, reconcile as _reconcile, schema, validate_receipt as _validate
 SCHEMA = schema("3")
 PARSER_VERSION = parser_version("3")
