@@ -1,0 +1,77 @@
+{
+  "schema_version": "PPOS_AUTHORIZATION_RECEIPT_VALIDATOR_POLICY_V1",
+  "checkpoint": "CP62",
+  "module_id": "M31_AUTHORIZATION_RECEIPT_VALIDATOR",
+  "parent_intake_checkpoint": "CP61",
+  "parent_control_checkpoint": "CP58",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "receipt_contract": {
+    "offline_only": true,
+    "exact_cp61_contract_binding_required": true,
+    "exact_cp61_shape_receipt_binding_required": true,
+    "exact_cp60_packet_binding_required": true,
+    "immutable_receipt_required": true,
+    "authorizer_reference_sha256_only": true,
+    "authorization_evidence_sha256_only": true,
+    "nonce_sha256_only": true,
+    "raw_authorizer_reference_persistence_forbidden": true,
+    "raw_authorization_evidence_persistence_forbidden": true,
+    "raw_nonce_persistence_forbidden": true,
+    "synthetic_fixture_required_for_repo_validation": true,
+    "global_kill_switch_must_remain_engaged": true,
+    "secret_resolution_forbidden": true,
+    "environment_read_forbidden": true,
+    "keychain_read_forbidden": true,
+    "oauth_forbidden": true,
+    "real_account_lookup_forbidden": true,
+    "account_connection_forbidden": true,
+    "network_forbidden": true,
+    "live_probe_execution_forbidden": true,
+    "publish_execution_forbidden": true,
+    "external_write_forbidden": true,
+    "deploy_forbidden": true,
+    "paid_service_forbidden": true,
+    "rollback_to_cp61_required": true
+  },
+  "control_promotion_dry_run": {
+    "enabled": true,
+    "local_only": true,
+    "registry_mutation_forbidden": true,
+    "runtime_policy_mutation_forbidden": true,
+    "authority_activation_forbidden": true,
+    "promotion_commit_forbidden": true,
+    "global_kill_switch_must_remain_engaged": true,
+    "read_only_grant_outcome": "PASS_CANDIDATE_ONLY_NO_AUTHORITY",
+    "publish_grant_outcome": "HOLD_LIVE_EVIDENCE_AND_LATER_GATE_REQUIRED",
+    "deny_outcome": "HOLD_EXTERNAL_AUTHORIZATION_DENIED"
+  },
+  "authority": {
+    "authorization_ingested": false,
+    "authorization_activated": false,
+    "control_plane_promoted": false,
+    "live_read_only_probe_allowed": false,
+    "publish_allowed": false,
+    "deploy_allowed": false,
+    "network_allowed": false,
+    "account_connection_allowed": false
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  },
+  "required_blockers": [
+    "HOLD_EXTERNAL_AUTHORIZATION_NOT_INGESTED",
+    "HOLD_LIVE_EVIDENCE_NOT_CAPTURED",
+    "HOLD_SECRET_REFERENCE_NOT_RESOLVED",
+    "HOLD_REAL_ACCOUNT_NOT_CONNECTED",
+    "HOLD_CONTROL_PLANE_PROMOTION_NOT_EXECUTED",
+    "HOLD_LIVE_READ_ONLY_PROBE_NOT_EXECUTED",
+    "HOLD_PILOT_PUBLISH_NOT_AUTHORIZED"
+  ],
+  "next_after_cp62": "CP63_LIVE_READ_ONLY_PROBE_SESSION_ENVELOPE_AND_ZERO_WRITE_RECORDER_DRY_RUN"
+}
