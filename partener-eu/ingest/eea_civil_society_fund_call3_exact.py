@@ -1,4 +1,17 @@
 #!/usr/bin/env python3
+import eea_civil_society_fund_exact_common as _common
+
+# Official RO index binds Call #3 to this exact current detail path.
+_common.SPECS["3"] = _common.CallSpec(
+    call_id="3",
+    slug="call-3-community-driven-projects-human-rights-and-social-justice",
+    title_ro="Apel #3 Proiecte comunitare pentru drepturile omului și justiție socială",
+    title_en="Call #3 Community-Driven Projects for Human Rights and Social Justice",
+    budget="EUR 6,300,000",
+    grant_min="EUR 200,001",
+    grant_max="EUR 350,000",
+)
+
 from eea_civil_society_fund_exact_common import (
     AUTHORITY_CLASS, CALL_IDENTIFIER_KIND, INDEX_URL, MATERIAL_FLAGS, OBSERVATION_STATE,
     PROGRAMME_FAMILY, PROGRAMME_ID, SOURCE_FAMILY, canonical_json, collect_exact as _collect,
