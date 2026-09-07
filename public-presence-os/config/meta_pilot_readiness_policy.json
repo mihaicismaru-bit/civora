@@ -1,0 +1,67 @@
+{
+  "schema_version": "PPOS_META_PILOT_READINESS_POLICY_V1",
+  "checkpoint": "CP58",
+  "module_id": "M27_META_PILOT_READINESS",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "required_lineage": [
+    "CP50_META_ADAPTERS",
+    "CP51_META_CONNECTIONS",
+    "CP52_META_PREFLIGHT",
+    "CP53_META_OPERATOR_PROVISIONING",
+    "CP54_META_TRANSPORT_TWIN",
+    "CP55_META_READ_ONLY_GATE",
+    "CP56_META_LIVE_READ_ONLY_PROBE",
+    "CP57_META_OFFLINE_EVIDENCE_VALIDATOR"
+  ],
+  "readiness_contract": {
+    "offline_aggregation_only": true,
+    "exact_lineage_binding_required": true,
+    "validate_each_input_receipt_required": true,
+    "global_kill_switch_must_be_engaged": true,
+    "synthetic_cp57_pass_required": true,
+    "live_evidence_required_before_connection_authorization": true,
+    "fresh_explicit_final_authorization_required": true,
+    "automatic_authorization_forbidden": true,
+    "self_authorization_forbidden": true,
+    "live_connection_authorization_default": "HOLD",
+    "pilot_publish_ready": false
+  },
+  "required_blockers": [
+    "HOLD_LIVE_EVIDENCE_NOT_CAPTURED",
+    "HOLD_LIVE_PERMISSION_CAPABILITY_NOT_VERIFIED",
+    "HOLD_LIVE_API_VERSION_AND_DESTINATION_UNBOUND",
+    "HOLD_SECRET_REFERENCE_NOT_RESOLVED",
+    "HOLD_REAL_ACCOUNT_NOT_CONNECTED",
+    "HOLD_FINAL_PILOT_AUTHORIZATION_REQUIRED"
+  ],
+  "authority": {
+    "real_secret_reference_resolution_allowed": false,
+    "environment_read_allowed": false,
+    "keychain_read_allowed": false,
+    "oauth_allowed": false,
+    "real_account_lookup_allowed": false,
+    "account_connection_allowed": false,
+    "network_allowed": false,
+    "publish_execution_allowed": false,
+    "external_write_allowed": false,
+    "deploy_allowed": false
+  },
+  "safety": {
+    "global_kill_switch_remains_engaged": true,
+    "no_publication": true,
+    "no_real_accounts": true,
+    "no_paid_services": true,
+    "offline_pass_is_not_live_entitlement": true,
+    "offline_pass_is_not_connection_authority": true,
+    "offline_pass_is_not_publish_authority": true
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  }
+}
