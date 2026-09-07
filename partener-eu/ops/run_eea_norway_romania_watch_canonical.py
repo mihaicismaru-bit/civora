@@ -29,7 +29,6 @@ from eea_norway_romania_programme_watch_reconcile import (
 )
 
 ARTIFACT_PREFIXES = (
-    "partener-eu-eea-norway-romania-watch-proof-",
     "partener-eu-official-programme-intelligence-",
 )
 ROOT = pathlib.Path(os.environ.get("EEA_NORWAY_WATCH_ROOT", "/tmp/partener-eu-eea-norway-romania-watch-proof"))
@@ -244,6 +243,8 @@ def main() -> int:
         "source_health": current["source_health"],
         "programme_count": len(current.get("programmes") or []),
         "call_discovery_count": len(current.get("call_discovery") or []),
+        "previous_artifact_id": restore.get("artifact_id"),
+        "previous_artifact_name": restore.get("artifact_name"),
         "reconciliation_state": rec["reconciliation_state"],
         "semantic_change_count": rec["semantic_change_count"],
         "programming_watch_candidate": rec["programming_watch_candidate"],
