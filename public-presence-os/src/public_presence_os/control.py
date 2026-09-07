@@ -122,7 +122,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "tests/test_cp44_publisher.py","tests/test_cp45_analytics.py","tests/test_cp46_learning.py","tests/test_cp50_meta_adapters.py",
         "tests/test_cp51_connection_profiles.py","tests/test_cp52_connection_preflight.py","tests/test_cp53_operator_provisioning.py",
         "tests/test_cp54_meta_transport_twin.py","tests/test_cp55_meta_read_only_gate.py","tests/test_cp56_meta_live_read_only_probe.py",
-        "tests/test57_meta_offline_evidence.py","tests/test_cp58_meta_pilot_readiness.py",
+        "tests/test_cp57_meta_offline_evidence.py","tests/test_cp58_meta_pilot_readiness.py",
         "tests/test_cp59_pilot_package_acceptance.py","tests/test_cp60_operator_pilot_handoff.py",
         "tests/test_cp61_control_plane_authorization_intake.py","tests/test_cp62_authorization_receipt_validator.py",
         "tests/test_cp63_live_read_only_probe_session.py","tests/test_cp64_live_read_only_probe_evidence_import.py",
