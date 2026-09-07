@@ -1,0 +1,123 @@
+{
+  "schema_version": "PPOS_CONTROL_PLANE_AUTHORIZATION_INTAKE_POLICY_V1",
+  "checkpoint": "CP61",
+  "module_id": "M30_CONTROL_PLANE_AUTHORIZATION_INTAKE",
+  "parent_handoff_checkpoint": "CP60",
+  "parent_control_checkpoint": "CP58",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "intake_contract": {
+    "offline_only": true,
+    "exact_cp60_packet_binding_required": true,
+    "global_control_checkpoint_must_remain_parent": true,
+    "authorization_intake_schema_only": true,
+    "authorization_decision_activation_forbidden": true,
+    "authorization_must_be_explicit_external_human": true,
+    "authorization_may_not_be_inferred": true,
+    "authorization_must_be_scope_bound": true,
+    "authorization_must_be_platform_bound": true,
+    "authorization_must_be_evidence_hash_bound": true,
+    "authorization_must_be_time_bound": true,
+    "authorization_must_be_nonce_bound": true,
+    "read_only_and_publish_gates_must_remain_separate": true,
+    "publish_grant_requires_later_live_evidence_validation": true,
+    "global_kill_switch_must_remain_engaged": true,
+    "secret_resolution_forbidden": true,
+    "environment_read_forbidden": true,
+    "keychain_read_forbidden": true,
+    "oauth_forbidden": true,
+    "real_account_lookup_forbidden": true,
+    "account_connection_forbidden": true,
+    "network_forbidden": true,
+    "live_probe_execution_forbidden": true,
+    "publish_execution_forbidden": true,
+    "external_write_forbidden": true,
+    "deploy_forbidden": true,
+    "paid_service_forbidden": true,
+    "control_plane_promotion_execution_forbidden": true,
+    "rollback_to_cp60_required": true
+  },
+  "submission_schema": {
+    "required_fields": [
+      "authorization_id",
+      "gate_code",
+      "decision",
+      "allowed_platforms",
+      "scope",
+      "authorizer_reference",
+      "authorized_at",
+      "expires_at",
+      "authorization_evidence_sha256",
+      "cp60_packet_id",
+      "cp60_packet_hash",
+      "nonce"
+    ],
+    "allowed_decisions": ["GRANT", "DENY"],
+    "authorizer_reference_prefix": "HUMAN:",
+    "authorization_id_prefix": "auth_",
+    "minimum_nonce_length": 16,
+    "unknown_fields_forbidden": true,
+    "raw_secret_fields_forbidden": true,
+    "structural_validation_does_not_activate_authority": true
+  },
+  "authorization_gates": [
+    {
+      "gate_code": "LIVE_READ_ONLY_CONNECTION_PROBE",
+      "scope": "READ_ONLY_CONNECTION_AND_EVIDENCE_CAPTURE_ONLY",
+      "allowed_platforms": [
+        "FACEBOOK_PAGE",
+        "INSTAGRAM_PROFESSIONAL",
+        "THREADS"
+      ],
+      "default_state": "AWAITING_EXTERNAL_HUMAN_DECISION",
+      "decision_source": "EXTERNAL_HUMAN_ONLY",
+      "grant_effect": "ELIGIBLE_FOR_CP62_VALIDATION_ONLY",
+      "live_evidence_prerequisite": "NOT_REQUIRED_FOR_SHAPE_VALIDATION",
+      "may_publish": false,
+      "may_deploy": false
+    },
+    {
+      "gate_code": "PILOT_PUBLISH",
+      "scope": "PILOT_PUBLISH_ONLY_AFTER_SEPARATE_LIVE_VALIDATION",
+      "allowed_platforms": [
+        "FACEBOOK_PAGE",
+        "INSTAGRAM_PROFESSIONAL",
+        "THREADS"
+      ],
+      "default_state": "AWAITING_EXTERNAL_HUMAN_DECISION",
+      "decision_source": "EXTERNAL_HUMAN_ONLY",
+      "grant_effect": "HOLD_UNTIL_LIVE_EVIDENCE_AND_LATER_PROMOTION_GATE",
+      "live_evidence_prerequisite": "REQUIRED_BEFORE_ANY_EFFECTIVE_PUBLISH_AUTHORITY",
+      "may_publish": false,
+      "may_deploy": false
+    }
+  ],
+  "authority": {
+    "authorization_ingested": false,
+    "authorization_activated": false,
+    "control_plane_promoted": false,
+    "live_read_only_probe_allowed": false,
+    "publish_allowed": false,
+    "deploy_allowed": false,
+    "network_allowed": false,
+    "account_connection_allowed": false
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  },
+  "required_blockers": [
+    "HOLD_EXTERNAL_AUTHORIZATION_NOT_INGESTED",
+    "HOLD_LIVE_EVIDENCE_NOT_CAPTURED",
+    "HOLD_SECRET_REFERENCE_NOT_RESOLVED",
+    "HOLD_REAL_ACCOUNT_NOT_CONNECTED",
+    "HOLD_CONTROL_PLANE_PROMOTION_NOT_EXECUTED",
+    "HOLD_LIVE_READ_ONLY_PROBE_NOT_EXECUTED",
+    "HOLD_PILOT_PUBLISH_NOT_AUTHORIZED"
+  ],
+  "next_after_cp61": "CP62_AUTHORIZATION_RECEIPT_VALIDATOR_AND_CONTROL_PROMOTION_DRY_RUN"
+}
