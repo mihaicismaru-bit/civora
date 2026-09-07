@@ -40,6 +40,36 @@ jobs:
           python -m py_compile partener-eu/ingest/interreg_ro_md_call2_exact.py partener-eu/ops/test_interreg_ro_md_call2_exact.py
           python partener-eu/ops/test_interreg_ro_md_call2_exact.py
 
+      - name: Probe official RO-MD TLS route variants
+        shell: bash
+        run: |
+          python - <<'PY'
+          import urllib.request
+          urls = [
+              'https://ro-md.net/en/funding/calls-for-proposals/guidelines-for-applicants-small-scale-projects-open-call-2',
+              'https://www.ro-md.net/en/funding/calls-for-proposals/guidelines-for-applicants-small-scale-projects-open-call-2',
+              'https://ro-md.net/en/funding/calls-for-proposals',
+              'https://www.ro-md.net/en/funding/calls-for-proposals',
+          ]
+          for url in urls:
+              req = urllib.request.Request(url, headers={
+                  'User-Agent': 'PARTENER.EU-tls-probe/1.0 (+https://partener.eu)',
+                  'Accept': 'text/html,application/xhtml+xml',
+              })
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as response:
+                      response.read(1024)
+                      print({
+                          'url': url,
+                          'ok': True,
+                          'status': int(getattr(response, 'status', 200) or 200),
+                          'final_url': str(response.geturl()),
+                          'content_type': str(response.headers.get('Content-Type') or ''),
+                      })
+              except Exception as exc:
+                  print({'url': url, 'ok': False, 'error': f'{type(exc).__name__}: {exc}'})
+          PY
+
       - name: Restore previous successful same-branch exact receipt
         env:
           GH_TOKEN: ${{ github.token }}
