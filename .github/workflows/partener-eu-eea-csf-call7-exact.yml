@@ -5,6 +5,7 @@ on:
     paths:
       - 'partener-eu/ingest/eea_civil_society_fund_call7_exact.py'
       - 'partener-eu/ingest/eea_civil_society_fund_call7_reconcile.py'
+      - 'partener-eu/ops/run_eea_csf_exact_canonical.py'
       - 'partener-eu/ops/test_eea_civil_society_fund_call7_exact.py'
       - 'partener-eu/ops/test_eea_civil_society_fund_call7_reconcile.py'
       - '.github/workflows/partener-eu-eea-csf-call7-exact.yml'
@@ -35,208 +36,36 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Compile bounded exact-call adapter and reconciliation
+      - name: Compile shared exact runner and Call 7 contracts
         run: |
           python -m py_compile \
             partener-eu/ingest/eea_civil_society_fund_call7_exact.py \
             partener-eu/ingest/eea_civil_society_fund_call7_reconcile.py \
+            partener-eu/ops/run_eea_csf_exact_canonical.py \
             partener-eu/ops/test_eea_civil_society_fund_call7_exact.py \
             partener-eu/ops/test_eea_civil_society_fund_call7_reconcile.py
 
-      - name: Validate fail-closed exact-call semantics
+      - name: Validate fail-closed Call 7 semantics
         env:
           PYTHONPATH: partener-eu/ingest:partener-eu/ops
         run: |
           python partener-eu/ops/test_eea_civil_society_fund_call7_exact.py
           python partener-eu/ops/test_eea_civil_society_fund_call7_reconcile.py
 
-      - name: Restore previous successful same-branch Call 7 exact receipt
+      - name: Run shared exact CSF runner for Call 7
         env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
           GH_TOKEN: ${{ github.token }}
           EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
           EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
-        shell: bash
         run: |
-          set -euo pipefail
-          ROOT=/tmp/partener-eu-eea-csf-call7-exact
-          SCRATCH=/tmp/partener-eu-eea-csf-call7-history-scan
-          rm -rf "$ROOT" "$SCRATCH"
-          mkdir -p "$ROOT/current" "$ROOT/previous" "$ROOT/history" "$SCRATCH"
-          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
-          python - <<'PY' > "$SCRATCH/candidates.txt"
-          import json, os
-          from pathlib import Path
-          data=json.loads(Path('/tmp/partener-eu-eea-csf-call7-history-scan/artifacts.json').read_text(encoding='utf-8'))
-          head=os.environ['EXPECTED_HEAD_SHA']
-          branch=os.environ['EXPECTED_HEAD_BRANCH']
-          rows=[]
-          for artifact in data.get('artifacts') or []:
-              name=str(artifact.get('name') or '')
-              if not name.startswith('partener-eu-eea-csf-call7-exact-'):
-                  continue
-              if artifact.get('expired') is True:
-                  continue
-              run=artifact.get('workflow_run') or {}
-              if str(run.get('head_sha') or '') == head:
-                  continue
-              if branch and str(run.get('head_branch') or '') != branch:
-                  continue
-              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0), name))
-          rows.sort(reverse=True)
-          for _, artifact_id, _ in rows[:20]:
-              print(artifact_id)
-          PY
-          RESTORED=""
-          while IFS= read -r CANDIDATE; do
-            [ -n "$CANDIDATE" ] || continue
-            rm -f "$SCRATCH/previous.zip"
-            rm -rf "$SCRATCH/unpacked"
-            mkdir -p "$SCRATCH/unpacked"
-            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
-            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
-            PREVIOUS="$(PYTHONPATH=partener-eu/ingest python - <<'PY'
-          import json
-          from pathlib import Path
-          from eea_civil_society_fund_call7_exact import validate_evidence
-          root=Path('/tmp/partener-eu-eea-csf-call7-history-scan/unpacked')
-          candidates=sorted(
-              root.rglob('eea-csf-ro-call7-exact-evidence.json'),
-              key=lambda p: (0 if '/history/' in p.as_posix() else 1 if '/current/' in p.as_posix() else 2, p.as_posix()),
-          )
-          for path in candidates:
-              try:
-                  value=json.loads(path.read_text(encoding='utf-8'))
-                  validate_evidence(value)
-              except Exception:
-                  continue
-              if value.get('source_health_state') == 'HEALTHY' and value.get('lkg_required') is False:
-                  print(path)
-                  break
-          PY
-          )"
-            if [ -n "$PREVIOUS" ]; then
-              cp "$PREVIOUS" "$ROOT/previous/eea-csf-ro-call7-exact-evidence.json"
-              RESTORED="$CANDIDATE"
-              printf '{"artifact_id":%s,"restore_reason":"SAME_IDENTITY_HEALTHY_CALL7","lkg_is_current_truth":false}\n' "$CANDIDATE" > "$ROOT/previous/restore-metadata.json"
-              echo "Restored previous same-identity healthy Call 7 evidence from artifact ${CANDIDATE}"
-              break
-            fi
-          done < "$SCRATCH/candidates.txt"
-          if [ -z "$RESTORED" ]; then
-            printf '{"artifact_id":null,"restore_reason":"NO_PREVIOUS_HEALTHY_CALL7","lkg_is_current_truth":false}\n' > "$ROOT/previous/restore-metadata.json"
-            echo "No previous same-branch healthy Call 7 artifact found; baseline mode retained."
-          fi
-
-      - name: Acquire fresh exact official EEA CSF Call 7 chain
-        env:
-          PYTHONPATH: partener-eu/ingest
-        run: |
-          ROOT=/tmp/partener-eu-eea-csf-call7-exact
-          python partener-eu/ingest/eea_civil_society_fund_call7_exact.py \
-            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eea-csf-call7" \
-            --output-dir "$ROOT/current"
-
-      - name: Reconcile Call 7 same-identity evidence non-authorizing
-        env:
-          PYTHONPATH: partener-eu/ingest
-        shell: bash
-        run: |
-          set -euo pipefail
-          ROOT=/tmp/partener-eu-eea-csf-call7-exact
-          ARGS=()
-          if [ -f "$ROOT/previous/eea-csf-ro-call7-exact-evidence.json" ]; then
-            ARGS+=(--previous "$ROOT/previous/eea-csf-ro-call7-exact-evidence.json")
-          fi
-          python partener-eu/ingest/eea_civil_society_fund_call7_reconcile.py \
-            "$ROOT/current/eea-csf-ro-call7-exact-evidence.json" \
-            "${ARGS[@]}" \
-            --output "$ROOT/current/eea-csf-ro-call7-reconciliation.json"
-
-      - name: Enforce Call 7 exact non-authorizing boundary and stage history/LKG
-        env:
-          PYTHONPATH: partener-eu/ingest
-        run: |
-          python - <<'PY'
-          import json, re, shutil, sys
-          from pathlib import Path
-          from eea_civil_society_fund_call7_exact import validate_evidence
-          from eea_civil_society_fund_call7_reconcile import validate_receipt
-
-          root=Path('/tmp/partener-eu-eea-csf-call7-exact')
-          current_path=root/'current/eea-csf-ro-call7-exact-evidence.json'
-          previous_path=root/'previous/eea-csf-ro-call7-exact-evidence.json'
-          evidence=json.loads(current_path.read_text(encoding='utf-8'))
-          previous=json.loads(previous_path.read_text(encoding='utf-8')) if previous_path.exists() else None
-          rec=json.loads((root/'current/eea-csf-ro-call7-reconciliation.json').read_text(encoding='utf-8'))
-          validate_evidence(evidence)
-          validate_receipt(rec, current=evidence, previous=previous)
-
-          if evidence.get('official_call_identifier') != '7' or evidence.get('call_identifier_kind') != 'OFFICIAL_CALL_NUMBER':
-              sys.exit('FAIL exact official EEA CSF Call 7 identifier binding lost')
-          if evidence.get('observation_state') != 'EXACT_CURRENT_CALL_NON_AUTHORIZING':
-              sys.exit('FAIL Call 7 observation-state drift')
-          if not re.fullmatch(r'[0-9a-f]{64}', str(evidence.get('identity_key') or '')):
-              sys.exit('FAIL Call 7 exact identity hash missing')
-          if not re.fullmatch(r'[0-9a-f]{64}', str(evidence.get('exact_semantic_fingerprint') or '')):
-              sys.exit('FAIL Call 7 exact semantic hash missing')
-
-          flags=(
-              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
-              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
-              'call_alert_authorized',
-          )
-          for row in (evidence, rec):
-              for key in flags:
-                  if row.get(key) is not False:
-                      sys.exit(f'FAIL Call 7 exact lane crossed material boundary: {key}')
-              if row.get('publication_effect') != 'NONE' or row.get('canonical_corpus_mutation') is not False:
-                  sys.exit('FAIL Call 7 exact lane crossed publication boundary')
-          if rec.get('lkg_reference_is_current_truth') is not False:
-              sys.exit('FAIL Call 7 LKG promoted to current truth')
-
-          history=root/'history'
-          history.mkdir(parents=True, exist_ok=True)
-          if evidence.get('source_health_state') == 'HEALTHY' and evidence.get('lkg_required') is False:
-              if evidence.get('discovery_link_verified') is not True:
-                  sys.exit('FAIL healthy Call 7 current lost discovery binding')
-              if evidence.get('candidate_state') not in {'OPEN_CALL','CLOSED_CALL','UNKNOWN'}:
-                  sys.exit('FAIL healthy Call 7 candidate state drift')
-              receipts=evidence.get('source_receipts') or {}
-              for key in ('official_calls_index_discovery','official_exact_call_detail'):
-                  row=receipts.get(key) or {}
-                  if row.get('health_state') != 'HEALTHY' or row.get('http_status') != 200:
-                      sys.exit(f'FAIL healthy Call 7 source receipt degraded: {key}')
-                  if not re.fullmatch(r'[0-9a-f]{64}', str(row.get('raw_sha256') or '')):
-                      sys.exit(f'FAIL healthy Call 7 source receipt raw SHA missing: {key}')
-              shutil.copy2(current_path, history/'eea-csf-ro-call7-exact-evidence.json')
-              selected='CURRENT_HEALTHY'
-          elif previous is not None and previous.get('source_health_state') == 'HEALTHY' and previous.get('lkg_required') is False:
-              if rec.get('reconciliation_state') != 'CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED':
-                  sys.exit('FAIL degraded Call 7 current did not reconcile fail-closed')
-              shutil.copy2(previous_path, history/'eea-csf-ro-call7-exact-evidence.json')
-              selected='PREVIOUS_HEALTHY_LKG'
-          else:
-              if evidence.get('source_health_state') != 'DEGRADED' or evidence.get('lkg_required') is not True:
-                  sys.exit('FAIL Call 7 health/LKG contract drift')
-              selected='NO_HEALTHY_LKG_AVAILABLE'
-
-          selection={
-              'selected': selected,
-              'current_source_health_state': evidence.get('source_health_state'),
-              'current_candidate_state': evidence.get('candidate_state'),
-              'previous_same_identity_present': previous is not None,
-              'reconciliation_state': rec.get('reconciliation_state'),
-              'semantic_change_count': rec.get('semantic_change_count'),
-              'lkg_is_current_truth': False,
-              'open_call_authorized': False,
-              'publication_effect': 'NONE',
-          }
-          (history/'history-selection.json').write_text(json.dumps(selection, sort_keys=True, indent=2)+'\n', encoding='utf-8')
-          print(selection)
-          PY
+          python partener-eu/ops/run_eea_csf_exact_canonical.py \
+            --call-id 7 \
+            --root /tmp/partener-eu-eea-csf-call7-exact \
+            --allow-legacy-history
 
       - name: Upload replayable Call 7 exact evidence
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: partener-eu-eea-csf-call7-exact-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/partener-eu-eea-csf-call7-exact
