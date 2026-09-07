@@ -45,6 +45,32 @@ def main():
     assert closed["confidence"] == "HIGH"
     assert_non_authorizing(closed)
 
+    # Current ROHU 2028-2034 authority uses Romanian open-copy even though the
+    # explicit consultation window ended on 01.08.2026. Freshness must override
+    # the lingering wording without turning the programming item into a call.
+    rohu_ro = build(
+        "2026-09-08T00:00:00Z",
+        "Programare 2027+. Chestionarul este deschis în perioada 08.06.2026 – 01.08.2026. "
+        "Contribuiți la definirea priorităților pentru perioada 2028-2034.",
+        url="https://interreg-rohu.eu/ro/programare-2027/",
+    )
+    assert rohu_ro["observation_state"] == "CONSULTATION_CLOSED", rohu_ro
+    assert rohu_ro["consultation_start"] == "2026-06-08"
+    assert rohu_ro["consultation_end"] == "2026-08-01"
+    assert rohu_ro["stale_open_copy"] is True
+    assert rohu_ro["parser_version"] == "INTERREG_PROGRAMMING_INTELLIGENCE_V1_1"
+    assert_non_authorizing(rohu_ro)
+
+    active_ro = build(
+        "2026-07-15T12:00:00Z",
+        "Programare 2027+. Chestionarul este deschis în perioada 08.06.2026 – 01.08.2026. "
+        "Contribuiți la definirea priorităților pentru perioada 2028-2034.",
+        url="https://interreg-rohu.eu/ro/programare-2027/",
+    )
+    assert active_ro["observation_state"] == "CONSULTATION"
+    assert active_ro["stale_open_copy"] is False
+    assert_non_authorizing(active_ro)
+
     active = build("2026-07-15T12:00:00Z")
     assert active["observation_state"] == "CONSULTATION"
     assert active["stale_open_copy"] is False
@@ -83,7 +109,7 @@ def main():
     else:
         raise AssertionError("naive fetched_at must fail closed")
 
-    print("PASS Interreg programming intelligence: date-over-copy reconciliation; pipeline never authorizes OPEN_CALL")
+    print("PASS Interreg programming intelligence: multilingual date-over-copy reconciliation; pipeline never authorizes OPEN_CALL")
 
 
 if __name__ == "__main__":
