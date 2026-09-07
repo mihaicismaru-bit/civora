@@ -1,0 +1,103 @@
+name: PARTENER.EU Interreg RO-RS Planned Calls Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/interreg_ro_rs_calls_planning.py'
+      - 'partener-eu/ops/test_interreg_ro_rs_calls_planning.py'
+      - '.github/workflows/partener-eu-interreg-ro-rs-calls-planning-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ro-rs-planned-calls-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile and regress fail-closed planned-calls adapter
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/interreg_ro_rs_calls_planning.py \
+            partener-eu/ops/test_interreg_ro_rs_calls_planning.py
+          python partener-eu/ops/test_interreg_ro_rs_calls_planning.py
+
+      - name: Acquire latest official RO-RS planned-calls calendar
+        run: |
+          rm -rf /tmp/partener-eu-ro-rs-calls-planning
+          python partener-eu/ingest/interreg_ro_rs_calls_planning.py \
+            --output-dir /tmp/partener-eu-ro-rs-calls-planning \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Enforce current HEALTHY non-authorizing proof boundary
+        run: |
+          python - <<'PY'
+          import datetime as dt
+          import json
+          import urllib.parse
+
+          path='/tmp/partener-eu-ro-rs-calls-planning/interreg-ro-rs-calls-planning.json'
+          data=json.load(open(path, encoding='utf-8'))
+          assert data['source_health_state'] == 'HEALTHY', data
+          assert data['observation_state'] == 'PLANNED', data
+          assert data['market_intelligence_only'] is True
+          assert data['planning_evidence_non_authorizing'] is True
+          assert data['lkg_required'] is False
+          calendar=data['latest_calendar']
+          assert calendar and calendar['calendar_url'].endswith('.xlsx'), calendar
+          assert urllib.parse.urlparse(calendar['calendar_url']).hostname in {'romania-serbia.net','www.romania-serbia.net'}
+          assert dt.date.fromisoformat(calendar['calendar_date']) >= dt.date(2026, 6, 9), calendar
+          assert calendar['workbook_sha256'] and calendar['nonempty_cell_count'] > 0, calendar
+          for flag in (
+              'material_fact_use','open_call_authorized','closed_call_authorized',
+              'deadline_authorized','budget_authorized','eligibility_authorized',
+              'publish_authorized','distribution_authorized','call_alert_authorized',
+              'canonical_corpus_mutation',
+          ):
+              assert data[flag] is False, (flag, data[flag])
+          assert data['publication_effect'] == 'NONE'
+          print({
+              'calendar_date': calendar['calendar_date'],
+              'calendar_url': calendar['calendar_url'],
+              'sheet_count': calendar['sheet_count'],
+              'nonempty_cell_count': calendar['nonempty_cell_count'],
+              'semantic_fingerprint': data['semantic_fingerprint'],
+          })
+          PY
+
+      - name: Stage proof evidence even on strict-gate failure
+        if: always()
+        run: |
+          mkdir -p /tmp/partener-eu-ro-rs-calls-planning-artifact
+          if [ -d /tmp/partener-eu-ro-rs-calls-planning ]; then
+            cp -a /tmp/partener-eu-ro-rs-calls-planning/. /tmp/partener-eu-ro-rs-calls-planning-artifact/
+          fi
+          printf '%s\n' "${GITHUB_SHA}" > /tmp/partener-eu-ro-rs-calls-planning-artifact/exact-head.txt
+
+      - name: Upload bounded proof evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-interreg-ro-rs-calls-planning-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-ro-rs-calls-planning-artifact
+          if-no-files-found: error
+          retention-days: 7
