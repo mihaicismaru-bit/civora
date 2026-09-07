@@ -48,7 +48,11 @@ EXPECTED_AUTHORITY_URLS = (
     NFP_DIRECTORY_URL,
     CIVIL_SOCIETY_CALLS_URL,
 )
-EXACT_CSF_CALL_IDS = ("6", "7")
+EXACT_CSF_CALL_IDS = ("4", "6", "7")
+# One bounded migration bridge: Call 4 has two successful proof receipts but no
+# Official Programme history yet. Remove this tuple entry immediately after the
+# first integrated artifact contains Call 4 history.
+LEGACY_HISTORY_MIGRATION_IDS = ("4",)
 
 
 def run(cmd: list[str], *, stdout=None) -> None:
@@ -211,34 +215,41 @@ def enforce_boundary(current: dict[str, Any], rec: dict[str, Any], history: dict
 
 
 def run_exact_csf_canonical(root: pathlib.Path) -> dict[str, Any]:
-    """Run exact CSF Calls 6-7 from canonical Official Programme history only."""
+    """Run exact CSF Calls 4, 6 and 7 inside canonical Official Programme ownership."""
     repo_root = pathlib.Path(__file__).resolve().parents[2]
     shared_runner = repo_root / "partener-eu" / "ops" / "run_eea_csf_exact_canonical.py"
     canonical_root = root.parent
     results: dict[str, Any] = {}
     for call_id in EXACT_CSF_CALL_IDS:
         call_root = canonical_root / f"eea-csf-call{call_id}"
-        run([
+        cmd = [
             "python",
             str(shared_runner),
             "--call-id",
             call_id,
             "--root",
             str(call_root),
-        ])
+        ]
+        if call_id in LEGACY_HISTORY_MIGRATION_IDS:
+            cmd.append("--allow-legacy-history")
+        run(cmd)
         history = load(call_root / "history" / "history-selection.json")
         rec = load(call_root / "current" / f"eea-csf-ro-call{call_id}-reconciliation.json")
         restore = load(call_root / "previous" / "restore-metadata.json")
         if restore.get("previous_found") is not True:
             raise SystemExit(f"FAIL canonical EEA CSF Call {call_id} lost previous same-identity history")
-        if restore.get("restore_source_kind") != "OFFICIAL_PROGRAMME_CANONICAL":
-            raise SystemExit(f"FAIL canonical EEA CSF Call {call_id} restored non-canonical history")
+        allowed_restore_kinds = {"OFFICIAL_PROGRAMME_CANONICAL"}
+        if call_id in LEGACY_HISTORY_MIGRATION_IDS:
+            allowed_restore_kinds.add("LEGACY_CALL_PROOF")
+        if restore.get("restore_source_kind") not in allowed_restore_kinds:
+            raise SystemExit(f"FAIL canonical EEA CSF Call {call_id} restored unauthorized history source")
         results[call_id] = {
             "history_selected": history.get("selected"),
             "reconciliation_state": rec.get("reconciliation_state"),
             "semantic_change_count": rec.get("semantic_change_count"),
             "previous_artifact_id": restore.get("artifact_id"),
             "restore_source_kind": restore.get("restore_source_kind"),
+            "migration_bridge_allowed": call_id in LEGACY_HISTORY_MIGRATION_IDS,
             "open_call_authorized": False,
             "publication_effect": "NONE",
         }
