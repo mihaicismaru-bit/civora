@@ -79,7 +79,7 @@ SPECS: dict[str, CallSpec] = {
     ),
     "2": CallSpec(
         call_id="2",
-        slug="empowering-civic-participation-underserved-communities",
+        slug="call-2-empowering-civic-participation-underserved-communities",
         title_ro="Apel #2 Consolidarea participării civice în comunitățile insuficient deservite",
         title_en="Call #2 Empowering Civic Participation in Underserved Communities",
         budget="EUR 4,500,000",
@@ -261,10 +261,25 @@ def _status(text: str) -> tuple[str, str]:
 
 def _number_present(folded: str, label_ro: str, label_en: str, value: str) -> bool:
     escaped = re.escape(value)
-    return bool(
-        re.search(rf"{label_ro}\s+€?\s*{escaped}", folded)
-        or re.search(rf"{label_en}\s+€?\s*{escaped}", folded)
-    )
+    return bool(re.search(rf"{label_ro}\s+€?\s*{escaped}", folded) or re.search(rf"{label_en}\s+€?\s*{escaped}", folded))
+
+
+def _unknown_semantics(spec: CallSpec) -> dict[str, Any]:
+    return {
+        "programme_id": PROGRAMME_ID,
+        "official_call_identifier": spec.call_id,
+        "call_identifier_kind": CALL_IDENTIFIER_KIND,
+        "title": spec.title_ro,
+        "authority_url": spec.exact_url,
+        "candidate_state": "UNKNOWN",
+        "status_label": "Unknown",
+        "publication_date_candidate": None,
+        "questions_deadline_candidate": None,
+        "deadline_candidate": None,
+        "budget_candidate": None,
+        "grant_min_candidate": None,
+        "grant_max_candidate": None,
+    }
 
 
 def _detail_semantics(spec: CallSpec, raw: bytes) -> dict[str, Any]:
@@ -278,18 +293,9 @@ def _detail_semantics(spec: CallSpec, raw: bytes) -> dict[str, Any]:
         raise ExactCSFCommonError(f"exact EEA CSF detail lost official Call number {spec.call_id}")
 
     candidate_state, status_label = _status(text)
-    deadline = "2026-10-08" if (
-        re.search(r"data limita de depunere a cererilor de finantare\s+08/10/2026", folded)
-        or re.search(r"submission deadline\s*:?\s*08/10/2026", folded)
-    ) else None
-    publication_date = "2026-07-08" if (
-        re.search(r"data publicarii\s+08/07/2026", folded)
-        or re.search(r"publication date\s+08/07/2026", folded)
-    ) else None
-    questions_deadline = "2026-09-29" if (
-        re.search(r"data limita pentru adresarea de intrebari\s+29/09/2026", folded)
-        or re.search(r"questions deadline date\s+29/09/2026", folded)
-    ) else None
+    deadline = "2026-10-08" if (re.search(r"data limita de depunere a cererilor de finantare\s+08/10/2026", folded) or re.search(r"submission deadline\s*:?\s*08/10/2026", folded)) else None
+    publication_date = "2026-07-08" if (re.search(r"data publicarii\s+08/07/2026", folded) or re.search(r"publication date\s+08/07/2026", folded)) else None
+    questions_deadline = "2026-09-29" if (re.search(r"data limita pentru adresarea de intrebari\s+29/09/2026", folded) or re.search(r"questions deadline date\s+29/09/2026", folded)) else None
     budget_value = spec.budget.removeprefix("EUR ")
     min_value = spec.grant_min.removeprefix("EUR ")
     max_value = spec.grant_max.removeprefix("EUR ")
@@ -341,21 +347,7 @@ def collect_exact(
 
     healthy = discovery_link_verified and semantics is not None and index_receipt.get("health_state") == "HEALTHY" and detail_receipt.get("health_state") == "HEALTHY"
     source_health_state = "HEALTHY" if healthy else "DEGRADED"
-    exact_semantics = semantics or {
-        "programme_id": PROGRAMME_ID,
-        "official_call_identifier": spec.call_id,
-        "call_identifier_kind": CALL_IDENTIFIER_KIND,
-        "title": spec.title_ro,
-        "authority_url": spec.exact_url,
-        "candidate_state": "UNKNOWN",
-        "status_label": "Unknown",
-        "publication_date_candidate": None,
-        "questions_deadline_candidate": None,
-        "deadline_candidate": None,
-        "budget_candidate": None,
-        "grant_min_candidate": None,
-        "grant_max_candidate": None,
-    }
+    exact_semantics = semantics if healthy and semantics is not None else _unknown_semantics(spec)
     identity_basis = {
         "programme_id": PROGRAMME_ID,
         "official_call_identifier": spec.call_id,
@@ -392,10 +384,7 @@ def collect_exact(
         "exact_semantic_fingerprint": sha256_json(exact_semantics),
         "source_health_state": source_health_state,
         "lkg_required": source_health_state != "HEALTHY",
-        "source_receipts": {
-            "official_calls_index_discovery": index_receipt,
-            "official_exact_call_detail": detail_receipt,
-        },
+        "source_receipts": {"official_calls_index_discovery": index_receipt, "official_exact_call_detail": detail_receipt},
         "semantic_reconciliation_required": True,
         "field_scoped_material_admission_required": True,
         "missing_for_material_admission": missing,
@@ -412,9 +401,7 @@ def collect_exact(
             (output_dir / "eea-csf-ro-calls-index.html").write_bytes(index_raw)
         if detail_raw is not None:
             (output_dir / f"eea-csf-ro-call{spec.call_id}-detail.html").write_bytes(detail_raw)
-        (output_dir / f"eea-csf-ro-call{spec.call_id}-exact-evidence.json").write_text(
-            json.dumps(evidence, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-        )
+        (output_dir / f"eea-csf-ro-call{spec.call_id}-exact-evidence.json").write_text(json.dumps(evidence, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
     return evidence
 
 
@@ -432,12 +419,7 @@ def validate_evidence(call_id: str, evidence: Mapping[str, Any]) -> None:
     _validate_url(spec, str(evidence.get("authority_url") or ""), exact=True)
     if evidence.get("official_call_identifier") != spec.call_id or evidence.get("call_identifier_kind") != CALL_IDENTIFIER_KIND:
         raise ExactCSFCommonError(f"EEA CSF official Call #{spec.call_id} identifier drift")
-    identity_basis = {
-        "programme_id": PROGRAMME_ID,
-        "official_call_identifier": spec.call_id,
-        "call_identifier_kind": CALL_IDENTIFIER_KIND,
-        "authority_url": spec.exact_url,
-    }
+    identity_basis = {"programme_id": PROGRAMME_ID, "official_call_identifier": spec.call_id, "call_identifier_kind": CALL_IDENTIFIER_KIND, "authority_url": spec.exact_url}
     if evidence.get("identity_key") != sha256_json(identity_basis):
         raise ExactCSFCommonError("EEA CSF exact identity fingerprint mismatch")
     semantics = evidence.get("exact_semantics")
@@ -458,8 +440,14 @@ def validate_evidence(call_id: str, evidence: Mapping[str, Any]) -> None:
                 raise ExactCSFCommonError("healthy EEA CSF aggregate contains degraded receipt")
             if not re.fullmatch(r"[0-9a-f]{64}", str(receipt.get("raw_sha256") or "")):
                 raise ExactCSFCommonError("healthy EEA CSF receipt lost raw SHA-256")
-    elif evidence.get("lkg_required") is not True:
-        raise ExactCSFCommonError("degraded EEA CSF exact chain did not require LKG/reference handling")
+    else:
+        if evidence.get("lkg_required") is not True:
+            raise ExactCSFCommonError("degraded EEA CSF exact chain did not require LKG/reference handling")
+        if evidence.get("candidate_state") != "UNKNOWN" or evidence.get("status_label") != "Unknown":
+            raise ExactCSFCommonError("degraded EEA CSF exact chain retained material candidate state")
+        for key in ("deadline_candidate", "budget_candidate", "grant_min_candidate", "grant_max_candidate"):
+            if evidence.get(key) is not None:
+                raise ExactCSFCommonError(f"degraded EEA CSF exact chain retained candidate field: {key}")
     missing = set(evidence.get("missing_for_material_admission") or [])
     if "semantic_reconciliation" not in missing or "field_scoped_material_admission" not in missing:
         raise ExactCSFCommonError("EEA CSF exact evidence weakened downstream gates")
@@ -480,13 +468,5 @@ def main_for(call_id: str) -> int:
     parser.add_argument("--output-dir", required=True, type=pathlib.Path)
     args = parser.parse_args()
     evidence = collect_exact(call_id, run_id=args.run_id, fetched_at=args.fetched_at, timeout=args.timeout, output_dir=args.output_dir)
-    print(json.dumps({
-        "official_call_identifier": evidence["official_call_identifier"],
-        "candidate_state": evidence["candidate_state"],
-        "status_label": evidence["status_label"],
-        "deadline_candidate": evidence["deadline_candidate"],
-        "source_health_state": evidence["source_health_state"],
-        "open_call_authorized": False,
-        "publication_effect": "NONE",
-    }, ensure_ascii=False, sort_keys=True))
+    print(json.dumps({"official_call_identifier": evidence["official_call_identifier"], "candidate_state": evidence["candidate_state"], "status_label": evidence["status_label"], "deadline_candidate": evidence["deadline_candidate"], "source_health_state": evidence["source_health_state"], "open_call_authorized": False, "publication_effect": "NONE"}, ensure_ascii=False, sort_keys=True))
     return 0
