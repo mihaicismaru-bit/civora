@@ -1,0 +1,114 @@
+{
+  "schema_version": "PPOS_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_IDEMPOTENCY_ROLLBACK_POLICY_V1",
+  "checkpoint": "CP75",
+  "module_id": "M44_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_IDEMPOTENCY_ROLLBACK",
+  "parent_activation_checkpoint": "CP74",
+  "parent_control_checkpoint": "CP58",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "idempotency_rollback_guard": {
+    "local_only": true,
+    "zero_io_required": true,
+    "synthetic_cp74_recovery_only": true,
+    "canonical_json_required": true,
+    "sha256_binding_required": true,
+    "exact_cp74_contract_binding_required": true,
+    "exact_cp74_dry_run_binding_required": true,
+    "exact_lease_binding_required": true,
+    "identical_recovery_replay_required": true,
+    "duplicate_recovery_effect_forbidden": true,
+    "rollback_baseline_exact_restore_required": true,
+    "rollback_after_simulated_apply_only": true,
+    "simulated_restore_only": true,
+    "storage_write_forbidden": true,
+    "runtime_mutation_forbidden": true,
+    "registry_mutation_forbidden": true,
+    "policy_mutation_forbidden": true,
+    "global_kill_switch_must_remain_engaged": true,
+    "runtime_network_must_remain_disabled": true,
+    "account_connection_must_remain_disabled": true,
+    "publish_must_remain_disabled": true,
+    "deploy_must_remain_disabled": true,
+    "control_plane_must_remain_unpromoted": true,
+    "secret_resolution_forbidden": true,
+    "environment_read_forbidden": true,
+    "keychain_read_forbidden": true,
+    "oauth_forbidden": true,
+    "real_account_lookup_forbidden": true,
+    "network_forbidden": true,
+    "live_probe_execution_forbidden": true,
+    "publish_forbidden": true,
+    "external_write_forbidden": true,
+    "control_plane_promotion_forbidden": true,
+    "deploy_forbidden": true,
+    "paid_service_forbidden": true,
+    "authority_activation_forbidden": true,
+    "method_allowlist": [
+      "GET"
+    ]
+  },
+  "validation_cases": [
+    [
+      "EXPIRY_PATH",
+      "MISSING_TOMBSTONE"
+    ],
+    [
+      "EXPIRY_PATH",
+      "CORRUPTED_TOMBSTONE"
+    ],
+    [
+      "REVOCATION_PATH",
+      "MISSING_TOMBSTONE"
+    ],
+    [
+      "REVOCATION_PATH",
+      "CORRUPTED_TOMBSTONE"
+    ]
+  ],
+  "validation_phases": [
+    "CP74_PARENT_EXACT_BOUND",
+    "EXPIRY_MISSING_RECOVERY_IDEMPOTENCY_VALIDATED",
+    "EXPIRY_CORRUPTED_RECOVERY_IDEMPOTENCY_VALIDATED",
+    "REVOCATION_MISSING_RECOVERY_IDEMPOTENCY_VALIDATED",
+    "REVOCATION_CORRUPTED_RECOVERY_IDEMPOTENCY_VALIDATED",
+    "NO_DUPLICATE_RECOVERY_EFFECT_VALIDATED",
+    "ROLLBACK_BASELINE_EXACTLY_RESTORED",
+    "SIMULATED_ONLY_NO_STORAGE_WRITE",
+    "ZERO_IO_OBSERVED",
+    "AUTHORITY_REMAINS_INACTIVE"
+  ],
+  "authority": {
+    "external_authorization_ingested": false,
+    "authorization_granted": false,
+    "runtime_authorization_effective": false,
+    "control_plane_promoted": false,
+    "network_allowed": false,
+    "live_read_only_probe_allowed": false,
+    "account_connection_allowed": false,
+    "publish_allowed": false,
+    "external_write_allowed": false,
+    "storage_write_allowed": false,
+    "deploy_allowed": false,
+    "authority_activated": false
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_IS_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  },
+  "required_blockers": [
+    "HOLD_REAL_EXTERNAL_AUTHORIZATION_RECEIPT_NOT_INGESTED",
+    "HOLD_SECRET_REFERENCE_NOT_RESOLVED",
+    "HOLD_REAL_ACCOUNT_NOT_CONNECTED",
+    "HOLD_CONTROL_PLANE_PROMOTION_NOT_EXECUTED",
+    "HOLD_LIVE_READ_ONLY_PROBE_NOT_EXECUTED",
+    "HOLD_PILOT_PUBLISH_NOT_AUTHORIZED",
+    "HOLD_CP75_RECOVERY_SOURCE_SYNTHETIC_ONLY",
+    "HOLD_CP75_IDEMPOTENCY_ROLLBACK_PASS_IS_NOT_RUNTIME_AUTHORITY"
+  ],
+  "rollback_target": "CP74",
+  "next_after_cp75": "CP76_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_CRASH_CONSISTENCY_DRY_RUN"
+}
