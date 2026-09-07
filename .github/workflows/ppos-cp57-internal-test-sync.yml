@@ -59,8 +59,8 @@ jobs:
               total_checkpoint += n1 + n2
               total_next += n3
               path.write_text(text, encoding="utf-8")
-          if total_checkpoint != 13:
-              raise SystemExit(f"expected 13 checkpoint assertion edits, got {total_checkpoint}")
+          if total_checkpoint != 15:
+              raise SystemExit(f"expected 15 checkpoint assertion edits, got {total_checkpoint}")
           if total_next != 6:
               raise SystemExit(f"expected 6 next-unit assertion edits, got {total_next}")
           PY
