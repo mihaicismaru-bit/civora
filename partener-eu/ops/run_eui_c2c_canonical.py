@@ -11,17 +11,14 @@ import sys
 import zipfile
 from typing import Any
 
-# Executed by the canonical EU Direct workflow; legacy proof history is no longer
-# an operational restore source. Canonical generic EU_DIRECT artifacts are the
-# sole previous/LKG owner.
 FLAGS = (
     "material_fact_use", "open_call_authorized", "closed_call_authorized",
     "deadline_authorized", "budget_authorized", "eligibility_authorized",
     "publish_authorized", "distribution_authorized", "call_alert_authorized",
 )
-EVIDENCE_SCHEMA = "PARTENER_EU_EUI_EXACT_CALL_EVIDENCE_V1"
-RECONCILIATION_SCHEMA = "PARTENER_EU_EUI_EXACT_CALL_RECONCILIATION_V1"
-IDENTITY_SLUG = "fourth-call-proposals-innovative-actions"
+EVIDENCE_SCHEMA = "PARTENER_EU_EUI_C2C_EXACT_EVIDENCE_V1"
+RECONCILIATION_SCHEMA = "PARTENER_EU_EUI_C2C_RECONCILIATION_V1"
+IDENTITY_SLUG = "eui-city-to-city-exchanges"
 GENERIC_ARTIFACT_PREFIX = "partener-eu-eu-direct-programme-intelligence-"
 
 
@@ -52,8 +49,9 @@ def compatible(candidate: dict[str, Any]) -> bool:
         candidate.get("schema") == EVIDENCE_SCHEMA
         and candidate.get("source_family") == "EU_DIRECT"
         and candidate.get("programme_family") == "EUROPEAN_URBAN_INITIATIVE"
+        and candidate.get("opportunity_family") == "CITY_TO_CITY_EXCHANGES"
         and candidate.get("identity_slug") == IDENTITY_SLUG
-        and candidate.get("authority_class") == "EUI_EXACT_CALL_DETAIL_AND_TOR"
+        and candidate.get("authority_class") == "EUI_EXACT_C2C_PAGE_AND_CURRENT_GUIDANCE"
     )
 
 
@@ -61,15 +59,14 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
     repo = os.environ["GITHUB_REPOSITORY"]
     head = os.environ.get("EXPECTED_HEAD_SHA") or os.environ.get("GITHUB_SHA", "")
     branch = os.environ.get("EXPECTED_HEAD_BRANCH") or os.environ.get("GITHUB_HEAD_REF") or os.environ.get("GITHUB_REF_NAME", "")
-    scratch = pathlib.Path("/tmp/partener-eu-eui-exact-canonical-history-scan")
+    scratch = pathlib.Path("/tmp/partener-eu-eui-c2c-history-scan")
     shutil.rmtree(scratch, ignore_errors=True)
     scratch.mkdir(parents=True)
     artifacts_json = scratch / "artifacts.json"
     with artifacts_json.open("wb") as output:
         run(["gh", "api", f"repos/{repo}/actions/artifacts?per_page=100"], stdout=output)
-    data = load(artifacts_json)
     rows: list[tuple[str, int, str]] = []
-    for artifact in data.get("artifacts") or []:
+    for artifact in (load(artifacts_json).get("artifacts") or []):
         name = str(artifact.get("name") or "")
         if artifact.get("expired") is True or not name.startswith(GENERIC_ARTIFACT_PREFIX):
             continue
@@ -84,9 +81,7 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
     previous_dir = root / "previous"
     previous_dir.mkdir(parents=True, exist_ok=True)
     metadata: dict[str, Any] = {
-        "previous_found": False,
-        "artifact_id": None,
-        "artifact_name": None,
+        "previous_found": False, "artifact_id": None, "artifact_name": None,
         "restore_source_kind": None,
         "restore_reason": "NO_PREVIOUS_COMPATIBLE_CANONICAL_ARTIFACT",
         "identity_slug": IDENTITY_SLUG,
@@ -99,7 +94,7 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
         unpack.mkdir()
         with zipfile.ZipFile(archive_path) as archive:
             archive.extractall(unpack)
-        candidates = sorted(unpack.rglob("eui-call4-exact-evidence.json"), key=candidate_priority)
+        candidates = sorted(unpack.rglob("eui-c2c-exact-evidence.json"), key=candidate_priority)
         for candidate_path in candidates:
             try:
                 candidate = load(candidate_path)
@@ -107,13 +102,13 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
                 continue
             if not compatible(candidate):
                 continue
-            dump(previous_dir / "eui-call4-exact-evidence.json", candidate)
+            dump(previous_dir / "eui-c2c-exact-evidence.json", candidate)
             metadata.update({
                 "previous_found": True,
                 "artifact_id": artifact_id,
                 "artifact_name": artifact_name,
                 "restore_source_kind": "GENERIC_EU_DIRECT",
-                "restore_reason": "SAME_EXACT_CALL_IDENTITY",
+                "restore_reason": "SAME_EXACT_C2C_IDENTITY",
                 "restored_candidate_path": candidate_path.relative_to(unpack).as_posix(),
                 "restored_fetched_at": candidate.get("fetched_at"),
                 "restored_source_health_state": candidate.get("source_health_state"),
@@ -125,105 +120,95 @@ def restore_previous(root: pathlib.Path) -> dict[str, Any]:
 
 
 def enforce_boundary(root: pathlib.Path) -> dict[str, Any]:
-    evidence = load(root / "current" / "eui-call4-exact-evidence.json")
-    reconciliation = load(root / "current" / "eui-call4-reconciliation.json")
+    evidence = load(root / "current" / "eui-c2c-exact-evidence.json")
+    reconciliation = load(root / "current" / "eui-c2c-reconciliation.json")
     if not compatible(evidence):
-        raise SystemExit("FAIL canonical EUI exact identity drift")
-    if evidence.get("parser_version") != "EU_DIRECT_EUI_EXACT_CALL_V1_1":
-        raise SystemExit("FAIL canonical EUI exact parser drift")
-    if reconciliation.get("schema") != RECONCILIATION_SCHEMA or reconciliation.get("parser_version") != "EU_DIRECT_EUI_EXACT_CALL_RECONCILE_V1_1":
-        raise SystemExit("FAIL canonical EUI exact reconciliation identity drift")
-    if reconciliation.get("identity_slug") != IDENTITY_SLUG or reconciliation.get("identity_key") != evidence.get("identity_key"):
-        raise SystemExit("FAIL canonical EUI reconciliation lost exact identity binding")
+        raise SystemExit("FAIL canonical EUI C2C identity drift")
+    if evidence.get("parser_version") != "EU_DIRECT_EUI_C2C_EXACT_V1":
+        raise SystemExit("FAIL canonical EUI C2C parser drift")
+    if reconciliation.get("schema") != RECONCILIATION_SCHEMA or reconciliation.get("parser_version") != "EU_DIRECT_EUI_C2C_RECONCILE_V1":
+        raise SystemExit("FAIL canonical EUI C2C reconciliation drift")
+    if reconciliation.get("identity_key") != evidence.get("identity_key"):
+        raise SystemExit("FAIL canonical EUI C2C reconciliation lost identity")
+    if evidence.get("official_call_identifier") is not None or evidence.get("deadline_candidate") is not None:
+        raise SystemExit("FAIL canonical EUI C2C fabricated formal ID/deadline")
     if any(evidence.get(flag) is not False for flag in FLAGS) or any(reconciliation.get(flag) is not False for flag in FLAGS):
-        raise SystemExit("FAIL canonical EUI exact lane became materially authorizing")
-    if evidence.get("publication_effect") != "NONE" or reconciliation.get("publication_effect") != "NONE":
-        raise SystemExit("FAIL canonical EUI exact publication boundary drift")
-    if evidence.get("canonical_corpus_mutation") is not False or reconciliation.get("canonical_corpus_mutation") is not False:
-        raise SystemExit("FAIL canonical EUI exact corpus mutation drift")
-    if evidence.get("observation_state") != "EXACT_CURRENT_CALL_NON_AUTHORIZING":
-        raise SystemExit("FAIL canonical EUI exact observation-state drift")
-    if not re.fullmatch(r"[0-9a-f]{64}", str(evidence.get("identity_key") or "")):
-        raise SystemExit("FAIL canonical EUI exact identity hash missing")
-    if not re.fullmatch(r"[0-9a-f]{64}", str(evidence.get("exact_semantic_fingerprint") or "")):
-        raise SystemExit("FAIL canonical EUI exact semantic hash missing")
-    if evidence.get("official_call_identifier") is not None:
-        raise SystemExit("FAIL canonical EUI exact lane fabricated official identifier")
-    if reconciliation.get("field_scoped_material_admission_required") is not True:
-        raise SystemExit("FAIL canonical EUI exact lane skipped field-scoped admission")
+        raise SystemExit("FAIL canonical EUI C2C became materially authorizing")
+    if reconciliation.get("material_admission_ready_for_downstream_review") is not False:
+        raise SystemExit("FAIL canonical EUI C2C without formal ID reached material review")
     if reconciliation.get("lkg_reference_is_current_truth") is not False:
-        raise SystemExit("FAIL canonical EUI exact lane promoted LKG to current truth")
+        raise SystemExit("FAIL canonical EUI C2C promoted LKG to current truth")
+    if evidence.get("publication_effect") != "NONE" or reconciliation.get("publication_effect") != "NONE":
+        raise SystemExit("FAIL canonical EUI C2C publication boundary drift")
+    if evidence.get("canonical_corpus_mutation") is not False or reconciliation.get("canonical_corpus_mutation") is not False:
+        raise SystemExit("FAIL canonical EUI C2C corpus mutation drift")
+    if not re.fullmatch(r"[0-9a-f]{64}", str(evidence.get("identity_key") or "")):
+        raise SystemExit("FAIL canonical EUI C2C identity hash missing")
+    if not re.fullmatch(r"[0-9a-f]{64}", str(evidence.get("exact_semantic_fingerprint") or "")):
+        raise SystemExit("FAIL canonical EUI C2C semantic hash missing")
 
     healthy = evidence.get("source_health_state") == "HEALTHY" and evidence.get("lkg_required") is False
     if healthy:
-        if evidence.get("discovery_link_verified") is not True:
-            raise SystemExit("FAIL healthy canonical EUI exact chain lost discovery binding")
-        if evidence.get("candidate_state") not in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}:
-            raise SystemExit("FAIL healthy canonical EUI candidate state drift")
-        receipts = evidence.get("source_receipts") or {}
-        if set(receipts) != {"portico_call_index", "exact_call_detail", "terms_of_reference"}:
-            raise SystemExit("FAIL healthy canonical EUI source receipt inventory drift")
-        for row in receipts.values():
+        if evidence.get("candidate_state") != "CONTINUOUS_OPPORTUNITY":
+            raise SystemExit("FAIL healthy canonical EUI C2C candidate-state drift")
+        if evidence.get("deadline_semantics") != "NO_CURRENTLY_FIXED_END_DATE":
+            raise SystemExit("FAIL healthy canonical EUI C2C fixed-deadline precedence drift")
+        for name in ("exact_c2c_page", "current_guidance"):
+            row = (evidence.get("source_receipts") or {}).get(name) or {}
             if row.get("health_state") != "HEALTHY" or row.get("http_status") != 200 or row.get("lkg_required") is not False:
-                raise SystemExit("FAIL healthy canonical EUI source receipt inconsistent")
+                raise SystemExit(f"FAIL healthy canonical EUI C2C receipt drift: {name}")
             if not re.fullmatch(r"[0-9a-f]{64}", str(row.get("raw_sha256") or "")):
-                raise SystemExit("FAIL healthy canonical EUI source receipt raw hash missing")
-        if not re.fullmatch(r"[0-9a-f]{64}", str(evidence.get("tor_raw_sha256") or "")):
-            raise SystemExit("FAIL healthy canonical EUI Terms of Reference hash missing")
+                raise SystemExit(f"FAIL healthy canonical EUI C2C raw hash missing: {name}")
         allowed = {
-            "BASELINE_CAPTURED_NON_AUTHORIZING",
-            "NO_CHANGE",
-            "EUI_EXACT_CALL_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
+            "BASELINE_CAPTURED_NON_AUTHORIZING", "NO_CHANGE",
+            "EUI_C2C_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
             "SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING",
         }
         if reconciliation.get("reconciliation_state") not in allowed or reconciliation.get("semantic_reconciliation_passed") is not True:
-            raise SystemExit("FAIL healthy canonical EUI reconciliation state drift")
+            raise SystemExit("FAIL healthy canonical EUI C2C reconciliation-state drift")
         if reconciliation.get("lkg_reference_required") is not False:
-            raise SystemExit("FAIL healthy canonical EUI exact current incorrectly requires LKG")
-        if evidence.get("candidate_state") == "OPEN_CALL" and reconciliation.get("material_admission_ready_for_downstream_review") is not False:
-            raise SystemExit("FAIL EUI OPEN without official identifier reached material review gate")
+            raise SystemExit("FAIL healthy canonical EUI C2C incorrectly requires LKG")
     else:
         if evidence.get("source_health_state") != "DEGRADED" or evidence.get("lkg_required") is not True:
-            raise SystemExit("FAIL degraded canonical EUI exact health contract drift")
+            raise SystemExit("FAIL degraded canonical EUI C2C health drift")
         if evidence.get("candidate_state") != "UNKNOWN":
-            raise SystemExit("FAIL degraded canonical EUI exact current retained material candidate state")
+            raise SystemExit("FAIL degraded canonical EUI C2C retained current semantics")
         if reconciliation.get("reconciliation_state") != "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED":
-            raise SystemExit("FAIL degraded canonical EUI exact current did not fail closed")
-        if reconciliation.get("semantic_reconciliation_passed") is not False or reconciliation.get("semantic_change_count") != 0 or reconciliation.get("semantic_changes") != []:
-            raise SystemExit("FAIL degraded canonical EUI exact current fabricated semantic reconciliation")
-        if reconciliation.get("lkg_reference_required") is not True or reconciliation.get("material_admission_ready_for_downstream_review") is not False:
-            raise SystemExit("FAIL degraded canonical EUI exact LKG/admission boundary drift")
+            raise SystemExit("FAIL degraded canonical EUI C2C did not fail closed")
+        if reconciliation.get("lkg_reference_required") is not True:
+            raise SystemExit("FAIL degraded canonical EUI C2C did not require LKG/reference")
 
     return {
         "programme": "European Urban Initiative",
-        "identity_slug": evidence["identity_slug"],
+        "opportunity": "City-to-City Exchanges",
         "source_health_state": evidence["source_health_state"],
         "candidate_state": evidence["candidate_state"],
         "status_label": evidence["status_label"],
-        "official_call_identifier": evidence["official_call_identifier"],
+        "deadline_candidate": None,
+        "portico_deadline_observed": (evidence.get("portico_metadata_observation") or {}).get("deadline_observed"),
+        "authority_discrepancy": evidence.get("authority_discrepancy"),
         "reconciliation_state": reconciliation["reconciliation_state"],
         "semantic_change_count": reconciliation["semantic_change_count"],
         "lkg_reference_required": reconciliation["lkg_reference_required"],
-        "material_admission_ready_for_downstream_review": reconciliation["material_admission_ready_for_downstream_review"],
+        "material_admission_ready_for_downstream_review": False,
         "open_call_authorized": False,
-        "closed_call_authorized": False,
         "publication_effect": "NONE",
     }
 
 
 def stage_history(root: pathlib.Path) -> dict[str, Any]:
-    current_path = root / "current" / "eui-call4-exact-evidence.json"
-    previous_path = root / "previous" / "eui-call4-exact-evidence.json"
+    current_path = root / "current" / "eui-c2c-exact-evidence.json"
+    previous_path = root / "previous" / "eui-c2c-exact-evidence.json"
     current = load(current_path)
     history = root / "history"
     history.mkdir(parents=True, exist_ok=True)
     if current.get("source_health_state") == "HEALTHY" and current.get("lkg_required") is False:
-        shutil.copy2(current_path, history / "eui-call4-exact-evidence.json")
+        shutil.copy2(current_path, history / "eui-c2c-exact-evidence.json")
         selected = "CURRENT_HEALTHY"
     elif previous_path.exists():
         previous = load(previous_path)
         if previous.get("source_health_state") == "HEALTHY" and previous.get("lkg_required") is False:
-            shutil.copy2(previous_path, history / "eui-call4-exact-evidence.json")
+            shutil.copy2(previous_path, history / "eui-c2c-exact-evidence.json")
             selected = "PREVIOUS_HEALTHY_LKG"
         else:
             selected = "NO_HEALTHY_LKG_AVAILABLE"
@@ -241,44 +226,35 @@ def stage_history(root: pathlib.Path) -> dict[str, Any]:
 def main() -> int:
     repo_root = pathlib.Path(__file__).resolve().parents[2]
     ingest = repo_root / "partener-eu" / "ingest"
-    root = pathlib.Path("/tmp/partener-eu-eu-direct-programme-intelligence/eui-exact")
+    root = pathlib.Path("/tmp/partener-eu-eu-direct-programme-intelligence/eui-c2c")
     shutil.rmtree(root, ignore_errors=True)
     (root / "current").mkdir(parents=True)
     (root / "previous").mkdir(parents=True)
     (root / "history").mkdir(parents=True)
 
-    restore = restore_previous(root)
-    run_id = os.environ.get("EUI_EXACT_RUN_ID") or f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-eui-call4"
     env = os.environ.copy()
-    env["PYTHONPATH"] = str(ingest)
+    env["PYTHONPATH"] = f"{ingest}:{repo_root / 'partener-eu' / 'ops'}"
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "test_eu_direct_eui_c2c_exact.py")], env=env)
+
+    restore = restore_previous(root)
+    run_id = os.environ.get("EUI_C2C_RUN_ID") or f"{os.environ.get('GITHUB_RUN_ID','local')}-{os.environ.get('GITHUB_RUN_ATTEMPT','1')}-eui-c2c"
     run([
-        sys.executable,
-        str(ingest / "eu_direct_eui_exact_call.py"),
-        "--run-id", run_id,
-        "--output-dir", str(root / "current"),
+        sys.executable, str(ingest / "eu_direct_eui_c2c_exact.py"),
+        "--run-id", run_id, "--output-dir", str(root / "current"),
     ], env=env)
 
     reconcile_cmd = [
-        sys.executable,
-        str(ingest / "eu_direct_eui_exact_call_reconcile.py"),
-        str(root / "current" / "eui-call4-exact-evidence.json"),
+        sys.executable, str(ingest / "eu_direct_eui_c2c_reconcile.py"),
+        str(root / "current" / "eui-c2c-exact-evidence.json"),
     ]
-    previous_path = root / "previous" / "eui-call4-exact-evidence.json"
+    previous_path = root / "previous" / "eui-c2c-exact-evidence.json"
     if restore.get("previous_found") is True and previous_path.exists():
         reconcile_cmd += ["--previous", str(previous_path)]
-    reconcile_cmd += ["--output", str(root / "current" / "eui-call4-reconciliation.json")]
+    reconcile_cmd += ["--output", str(root / "current" / "eui-c2c-reconciliation.json")]
     run(reconcile_cmd, env=env)
 
     boundary = enforce_boundary(root)
     history = stage_history(root)
-
-    # City-to-City Exchanges is a distinct EUI capacity-building opportunity.
-    # Run it inside the same canonical EU Direct artifact boundary instead of
-    # creating a second live workflow.
-    c2c_env = os.environ.copy()
-    c2c_env["PYTHONPATH"] = f"{ingest}:{repo_root / 'partener-eu' / 'ops'}"
-    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_c2c_canonical.py")], env=c2c_env)
-
     print(json.dumps({"restore": restore, "boundary": boundary, "history": history}, sort_keys=True))
     return 0
 
