@@ -107,19 +107,22 @@ jobs:
             valcea-clar/editorial/scm_program_structure.json
           )
 
-          json_files=()
-          for file in "${files[@]}"; do
-            if [ -f "$file" ]; then json_files+=("$file"); fi
-          done
-          if [ "${#json_files[@]}" -gt 0 ]; then
-            python valcea-clar/scripts/prune_volatile_json_changes.py \
-              --profile fact_kernel_products \
-              "${json_files[@]}"
-          fi
+          prune_and_stage() {
+            json_files=()
+            for file in "${files[@]}"; do
+              if [ -f "$file" ]; then json_files+=("$file"); fi
+            done
+            if [ "${#json_files[@]}" -gt 0 ]; then
+              python valcea-clar/scripts/prune_volatile_json_changes.py \
+                --profile fact_kernel_products \
+                "${json_files[@]}"
+            fi
+            for file in "${files[@]}"; do
+              if [ -e "$file" ]; then git add "$file"; fi
+            done
+          }
 
-          for file in "${files[@]}"; do
-            if [ -e "$file" ]; then git add "$file"; fi
-          done
+          prune_and_stage
 
           if git diff --cached --quiet; then
             echo 'No semantic verified fact change to persist.'
@@ -128,8 +131,18 @@ jobs:
 
           git commit -m 'Refresh VÂLCEA CLAR verified fact products'
           for attempt in 1 2 3; do
-            if git pull --rebase origin main && git push origin HEAD:main; then
-              exit 0
+            if git pull --rebase origin main; then
+              # Generated editorial JSON must be recomputed on the fresh main
+              # after every rebase. A textual rebase can otherwise succeed while
+              # silently dropping a concurrent semantic fact transaction.
+              python valcea-clar/scripts/fact_kernel_orchestrator.py --build
+              prune_and_stage
+              if ! git diff --cached --quiet; then
+                git commit --amend --no-edit
+              fi
+              if git push origin HEAD:main; then
+                exit 0
+              fi
             fi
             git rebase --abort || true
             if [ "$attempt" -eq 3 ]; then
