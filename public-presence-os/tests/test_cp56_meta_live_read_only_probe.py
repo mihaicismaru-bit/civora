@@ -255,14 +255,14 @@ def test_cp56_policy_registry_priority_and_runtime_are_fail_closed():
     assert policy["required_evidence_codes"] == list(REQUIRED_FUTURE_EVIDENCE)
     assert all(value is False for value in policy["authority"].values())
 
-    assert registry["checkpoint"] == "CP56"
+    assert registry["checkpoint"] == "CP57"
     assert any(
         row["id"] == "M25_META_LIVE_READ_ONLY_PROBE"
         and row["status"] == "CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"
         for row in registry["modules"]
     )
-    assert priority["checkpoint"] == "CP56"
-    assert priority["next"] == "CP57_META_OFFLINE_EVIDENCE_BUNDLE_VALIDATOR_AND_OPERATOR_DRY_RUN"
+    assert priority["checkpoint"] == "CP57"
+    assert priority["next"] == "CP58_META_PILOT_READINESS_AGGREGATOR_AND_LIVE_CONNECTION_AUTHORIZATION_GATE"
     assert runtime["global_kill_switch_engaged"] is True
     assert runtime["network_enabled"] is False
     assert runtime["real_accounts_connected"] is False
