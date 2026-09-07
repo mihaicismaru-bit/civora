@@ -108,8 +108,13 @@ def main() -> int:
         fail("MIPE Institutional Cooperation route must remain a historical national EEA landing watch until current-period operator/call evidence appears")
 
     innovation = routes["EEA-RO-INNOVATION-NORWAY-FUND-OPERATOR-WATCH"]
-    if innovation["observation_state"] != "OPERATOR_WATCH" or innovation["watch_url"] != "https://www.innovasjonnorge.no/seksjon/eos-midlene":
-        fail("Innovation Norway route must remain the current official EEA operator surface")
+    if (
+        innovation["observation_state"] != "OPERATOR_WATCH"
+        or innovation["watch_url"] != "https://www.innovasjonnorge.no/tjeneste/eos-midlene"
+        or innovation["programme_ids"] != ["clean-energy-transition", "green-business-and-innovation"]
+        or "/tjeneste/eos-midlene" not in set(innovation.get("allowed_final_path_prefixes") or [])
+    ):
+        fail("Innovation Norway route must remain bounded to the current official EEA Grants 2021-2028 service surface")
 
     civil = routes["EEA-RO-CIVIL-SOCIETY-FUND-CALL-INDEX-WATCH"]
     if (
@@ -176,6 +181,7 @@ def main() -> int:
     expect_raises(lambda: mod.validate_route_url("https://www.just.ro/other/", justice, final=True), "Justice historical landing path drift")
     expect_raises(lambda: mod.validate_route_url("https://www.mai.gov.ro/", home_affairs), "Home Affairs dedicated host drift")
     expect_raises(lambda: mod.validate_route_url("https://www.eeagrants.ro/programe", institutional, final=True), "MIPE historical landing path drift")
+    expect_raises(lambda: mod.validate_route_url("https://www.innovasjonnorge.no/other", innovation, final=True), "Innovation Norway path drift")
     expect_raises(lambda: mod.validate_route_url("https://example.com/en/eea-civil-society-fund-romania/calls", civil), "Civil Society Fund host drift")
     expect_raises(lambda: mod.validate_route_url("https://eeagrants.org/en/other-programme/calls", civil, final=True), "Civil Society Fund path drift")
 
