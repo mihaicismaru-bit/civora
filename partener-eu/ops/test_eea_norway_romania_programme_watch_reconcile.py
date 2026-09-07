@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+# Independent replay marker: current live evidence must reconcile against the prior same-identity proof.
 import copy
 
 from eea_norway_romania_programme_watch import CIVIL_SOCIETY_CALLS_URL, ROMANIA_COOPERATION_URL, collect
