@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Semantic-neutral replay marker: verify Call #6 restores its first healthy exact baseline.
 from __future__ import annotations
 
 import copy
