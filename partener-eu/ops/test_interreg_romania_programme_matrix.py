@@ -6,16 +6,42 @@ import copy
 from interreg_romania_programme_matrix import PROGRAMMES, collect, validate_receipt
 
 
-def synthetic_body(spec: dict) -> bytes:
-    return ("<html><body>" + " | ".join(str(x) for x in spec["anchors"]) + "</body></html>").encode()
+def route_anchors(spec: dict, url: str) -> tuple[str, ...]:
+    if url == spec["url"]:
+        return tuple(spec["anchors"])
+    if url in tuple(spec.get("fallback_urls") or ()):
+        return tuple(spec.get("fallback_anchors") or spec["anchors"])
+    raise AssertionError(f"undeclared synthetic route: {url}")
 
 
-def fake_fetch(url: str):
-    spec = next(x for x in PROGRAMMES if x["url"] == url)
-    return synthetic_body(spec), {
+def spec_for_url(url: str) -> dict:
+    for spec in PROGRAMMES:
+        if url == spec["url"] or url in tuple(spec.get("fallback_urls") or ()):
+            return spec
+    raise AssertionError(url)
+
+
+def synthetic_body(spec: dict, url: str) -> bytes:
+    return ("<html><body>" + " | ".join(str(x) for x in route_anchors(spec, url)) + "</body></html>").encode()
+
+
+def healthy_meta(url: str) -> dict:
+    return {
         "requested_url": url, "final_url": url, "status": 200,
         "content_type": "text/html; charset=utf-8",
     }
+
+
+def fake_fetch(url: str):
+    spec = spec_for_url(url)
+    return synthetic_body(spec, url), healthy_meta(url)
+
+
+def huskroua_primary_marker_drift_fetch(url: str):
+    spec = spec_for_url(url)
+    if spec["id"] == "HUSKROUA" and url == spec["url"]:
+        return b"<html><body>Please wait while your request is being verified...</body></html>", healthy_meta(url)
+    return synthetic_body(spec, url), healthy_meta(url)
 
 
 def fail(fn, needle: str) -> None:
@@ -38,8 +64,33 @@ def main() -> int:
     assert all(x["call_fact_authorized"] is False and x["applicant_eligibility_authorized"] is False for x in receipt["programmes"])
 
     huskroua = next(x for x in receipt["programmes"] if x["programme_id"] == "HUSKROUA")
+    huskroua_source = next(x for x in receipt["sources"] if x["programme_id"] == "HUSKROUA")
     assert huskroua["cooperation_mode"] == "CBC_NEXT_MULTILATERAL"
     assert huskroua["romania_scope"] == ["Maramures", "Satu Mare", "Suceava"]
+    assert huskroua["acquisition_route_kind"] == "PRIMARY"
+    assert huskroua_source["acquisition_attempts"][-1]["outcome"] == "ACCEPTED"
+
+    fallback_receipt, _ = collect(
+        run_id="synthetic-interreg-huskroua-fallback",
+        fetched_at="2026-09-07T14:15:00+00:00",
+        fetcher=huskroua_primary_marker_drift_fetch,
+    )
+    fallback_huskroua = next(x for x in fallback_receipt["programmes"] if x["programme_id"] == "HUSKROUA")
+    fallback_source = next(x for x in fallback_receipt["sources"] if x["programme_id"] == "HUSKROUA")
+    husk_spec = next(x for x in PROGRAMMES if x["id"] == "HUSKROUA")
+    assert fallback_huskroua["authority_url"] == husk_spec["canonical_authority_url"] == husk_spec["url"]
+    assert fallback_huskroua["acquisition_url"] == husk_spec["fallback_urls"][0]
+    assert fallback_huskroua["acquisition_route_kind"] == "OFFICIAL_FALLBACK"
+    assert fallback_huskroua["romania_scope"] == ["Maramures", "Satu Mare", "Suceava"]
+    assert fallback_huskroua["call_fact_authorized"] is False
+    assert fallback_huskroua["applicant_eligibility_authorized"] is False
+    assert len(fallback_source["acquisition_attempts"]) == 2
+    assert fallback_source["acquisition_attempts"][0]["route_kind"] == "PRIMARY"
+    assert fallback_source["acquisition_attempts"][0]["outcome"] == "REJECTED_FAIL_CLOSED"
+    assert "missing required official territorial anchors" in fallback_source["acquisition_attempts"][0]["error"]
+    assert fallback_source["acquisition_attempts"][1]["route_kind"] == "OFFICIAL_FALLBACK"
+    assert fallback_source["acquisition_attempts"][1]["outcome"] == "ACCEPTED"
+    validate_receipt(fallback_receipt)
 
     bsb = next(x for x in receipt["programmes"] if x["programme_id"] == "BSB")
     bsb_source = next(x for x in receipt["sources"] if x["programme_id"] == "BSB")
@@ -80,6 +131,8 @@ def main() -> int:
         "status": "PASS",
         "programme_count": receipt["programme_count"],
         "huskroua_romania_scope": huskroua["romania_scope"],
+        "huskroua_primary_route": huskroua["acquisition_route_kind"],
+        "huskroua_official_fallback_guard": "PASS",
         "bsb_romania_scope": bsb["romania_scope"],
         "bsb_semantic_authority": "EUROPEAN_COMMISSION",
         "bsb_acquisition_authority": "KEEP_PROGRAMME_VALIDATED",
