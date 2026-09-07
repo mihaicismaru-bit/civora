@@ -210,13 +210,8 @@ def enforce_boundary(current: dict[str, Any], rec: dict[str, Any], history: dict
         raise SystemExit("FAIL EEA/Norway Romania watch degradation did not fail closed")
 
 
-def run_exact_csf_migration_bridge(root: pathlib.Path) -> dict[str, Any]:
-    """Run exact CSF Calls 6-7 inside the canonical Official Programme artifact.
-
-    Legacy history is allowed only for this migration bridge. Once a successful
-    Official Programme artifact contains both call histories, this flag is removed
-    and subsequent replays become canonical-only.
-    """
+def run_exact_csf_canonical(root: pathlib.Path) -> dict[str, Any]:
+    """Run exact CSF Calls 6-7 from canonical Official Programme history only."""
     repo_root = pathlib.Path(__file__).resolve().parents[2]
     shared_runner = repo_root / "partener-eu" / "ops" / "run_eea_csf_exact_canonical.py"
     canonical_root = root.parent
@@ -230,11 +225,14 @@ def run_exact_csf_migration_bridge(root: pathlib.Path) -> dict[str, Any]:
             call_id,
             "--root",
             str(call_root),
-            "--allow-legacy-history",
         ])
         history = load(call_root / "history" / "history-selection.json")
         rec = load(call_root / "current" / f"eea-csf-ro-call{call_id}-reconciliation.json")
         restore = load(call_root / "previous" / "restore-metadata.json")
+        if restore.get("previous_found") is not True:
+            raise SystemExit(f"FAIL canonical EEA CSF Call {call_id} lost previous same-identity history")
+        if restore.get("restore_source_kind") != "OFFICIAL_PROGRAMME_CANONICAL":
+            raise SystemExit(f"FAIL canonical EEA CSF Call {call_id} restored non-canonical history")
         results[call_id] = {
             "history_selected": history.get("selected"),
             "reconciliation_state": rec.get("reconciliation_state"),
@@ -277,7 +275,7 @@ def main() -> int:
     dump(root / "current" / RECON_NAME, rec)
     history = stage_history(root)
     enforce_boundary(current, rec, history)
-    exact_calls = run_exact_csf_migration_bridge(root)
+    exact_calls = run_exact_csf_canonical(root)
     print(json.dumps({
         "source_health": current["source_health"],
         "programme_count": len(current.get("programmes") or []),
