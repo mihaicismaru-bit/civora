@@ -21,7 +21,7 @@ from eea_civil_society_fund_call5_exact import (
 )
 
 SCHEMA = "PARTENER_EU_EEA_CSF_RO_CALL5_RECONCILIATION_V1"
-PARSER_VERSION = "EEA_CSF_RO_CALL5_RECONCILE_V1"
+PARSER_VERSION = "EEA_CSF_RO_CALL5_RECONCILE_V1_1"
 MATERIAL_FLAGS = (
     "material_fact_use",
     "open_call_authorized",
@@ -57,15 +57,21 @@ def _validated_semantics(evidence: Mapping[str, Any]) -> dict[str, Any]:
     return row
 
 
+def _healthy(evidence: Mapping[str, Any] | None) -> bool:
+    return bool(
+        evidence is not None
+        and evidence.get("source_health_state") == "HEALTHY"
+        and evidence.get("lkg_required") is False
+    )
+
+
 def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = None) -> dict[str, Any]:
     if current.get("schema") != EXACT_SCHEMA:
         raise ValueError("current evidence is not EEA CSF Call #5 exact evidence")
     current_semantics = _validated_semantics(current)
-    changes: list[dict[str, Any]] = []
+    previous_semantics: dict[str, Any] | None = None
 
-    if previous is None:
-        state = "BASELINE_CAPTURED_NON_AUTHORIZING"
-    else:
+    if previous is not None:
         if previous.get("schema") != EXACT_SCHEMA:
             raise ValueError("previous evidence is not EEA CSF Call #5 exact evidence")
         previous_semantics = _validated_semantics(previous)
@@ -73,8 +79,24 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = N
             raise ValueError("EEA CSF exact reconciliation identity mismatch")
         if previous.get("official_call_identifier") != OFFICIAL_CALL_IDENTIFIER:
             raise ValueError("EEA CSF previous evidence lost Call #5 identifier")
-        if parse_time(str(previous.get("fetched_at"))) > parse_time(str(current.get("fetched_at"))):
-            raise ValueError("previous EEA CSF exact evidence is newer than current evidence")
+        if parse_time(str(previous.get("fetched_at"))) >= parse_time(str(current.get("fetched_at"))):
+            raise ValueError("previous EEA CSF exact evidence is not strictly older than current evidence")
+
+    changes: list[dict[str, Any]] = []
+    current_healthy = _healthy(current)
+    previous_healthy = _healthy(previous)
+    semantic_reconciliation_passed = current_healthy
+    lkg_reference_required = not current_healthy
+    lkg_reference_available = bool(lkg_reference_required and previous_healthy)
+
+    if not current_healthy:
+        state = "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED"
+    elif previous is None:
+        state = "BASELINE_CAPTURED_NON_AUTHORIZING"
+    elif not previous_healthy:
+        state = "SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING"
+    else:
+        assert previous_semantics is not None
         for key in sorted(set(previous_semantics) | set(current_semantics)):
             before = previous_semantics.get(key)
             after = current_semantics.get(key)
@@ -85,20 +107,22 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = N
     candidate = current.get("candidate_state")
     status = str(current.get("status_label") or "").casefold()
     exact_current_status_proven = bool(
-        current.get("source_health_state") == "HEALTHY"
+        current_healthy
         and current.get("discovery_link_verified") is True
         and current.get("official_call_identifier") == OFFICIAL_CALL_IDENTIFIER
         and candidate in {"OPEN_CALL", "CLOSED_CALL"}
         and status in {"open", "closed"}
     )
-    previous_same_identity_present = previous is not None
-    review_ready = exact_current_status_proven and previous_same_identity_present
+    previous_same_identity_healthy = bool(previous is not None and previous_healthy)
+    review_ready = exact_current_status_proven and previous_same_identity_healthy
 
     missing = ["field_scoped_material_admission"]
-    if not previous_same_identity_present:
-        missing.insert(0, "previous_same_identity_exact_receipt_or_reviewed_baseline_exception")
+    if not previous_same_identity_healthy:
+        missing.insert(0, "previous_same_identity_healthy_exact_receipt_or_reviewed_baseline_exception")
     if not exact_current_status_proven:
         missing.insert(0, "exact_current_status_not_materially_proven")
+    if lkg_reference_required:
+        missing.insert(0, "fresh_exact_current_authority")
 
     receipt: dict[str, Any] = {
         "schema": SCHEMA,
@@ -122,7 +146,10 @@ def reconcile(current: Mapping[str, Any], previous: Mapping[str, Any] | None = N
         "reconciliation_state": state,
         "semantic_change_count": len(changes),
         "semantic_changes": changes,
-        "semantic_reconciliation_passed": True,
+        "semantic_reconciliation_passed": semantic_reconciliation_passed,
+        "lkg_reference_required": lkg_reference_required,
+        "lkg_reference_available": lkg_reference_available,
+        "lkg_reference_is_current_truth": False,
         "material_admission_ready_for_downstream_review": review_ready,
         "missing_for_material_admission": missing,
         "field_scoped_material_admission_required": True,
@@ -139,7 +166,7 @@ def validate_receipt(
     receipt: Mapping[str, Any], *, current: Mapping[str, Any], previous: Mapping[str, Any] | None = None
 ) -> None:
     if receipt.get("schema") != SCHEMA or receipt.get("parser_version") != PARSER_VERSION:
-        raise ValueError("EEA CSF reconciliation schema/parser drift")
+        raise ValueError("EEA CSF Call #5 reconciliation schema/parser drift")
     validate_evidence(current)
     if receipt.get("source_family") != SOURCE_FAMILY or receipt.get("programme_family") != PROGRAMME_FAMILY:
         raise ValueError("EEA CSF reconciliation family drift")
@@ -151,18 +178,42 @@ def validate_receipt(
         raise ValueError("EEA CSF reconciliation current evidence hash mismatch")
     if receipt.get("current_exact_semantic_fingerprint") != current.get("exact_semantic_fingerprint"):
         raise ValueError("EEA CSF reconciliation current semantic binding failed")
+    if receipt.get("lkg_reference_is_current_truth") is not False:
+        raise ValueError("EEA CSF reconciliation promoted LKG to current truth")
 
-    if previous is None:
-        if receipt.get("reconciliation_state") != "BASELINE_CAPTURED_NON_AUTHORIZING":
-            raise ValueError("EEA CSF baseline reconciliation state invalid")
-        if receipt.get("previous_evidence_sha256") is not None:
-            raise ValueError("EEA CSF baseline unexpectedly bound previous evidence")
-        if receipt.get("material_admission_ready_for_downstream_review") is not False:
-            raise ValueError("EEA CSF baseline unexpectedly became review-ready")
-    else:
+    current_healthy = _healthy(current)
+    previous_healthy = _healthy(previous)
+    if previous is not None:
         validate_evidence(previous)
+        if previous.get("identity_key") != current.get("identity_key"):
+            raise ValueError("EEA CSF reconciliation previous identity drift")
+        if parse_time(str(previous.get("fetched_at"))) >= parse_time(str(current.get("fetched_at"))):
+            raise ValueError("EEA CSF reconciliation accepted non-older previous evidence")
         if receipt.get("previous_evidence_sha256") != sha256_json(previous):
             raise ValueError("EEA CSF reconciliation previous evidence hash mismatch")
+
+    if not current_healthy:
+        if receipt.get("reconciliation_state") != "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED":
+            raise ValueError("degraded EEA CSF current did not fail closed")
+        if receipt.get("semantic_reconciliation_passed") is not False:
+            raise ValueError("degraded EEA CSF current fabricated semantic reconciliation")
+        if receipt.get("semantic_change_count") != 0 or receipt.get("semantic_changes") != []:
+            raise ValueError("degraded EEA CSF current fabricated semantic changes")
+        if receipt.get("lkg_reference_required") is not True:
+            raise ValueError("degraded EEA CSF current did not require LKG/reference handling")
+        if receipt.get("lkg_reference_available") is not previous_healthy:
+            raise ValueError("EEA CSF LKG availability drift")
+    elif previous is None:
+        if receipt.get("reconciliation_state") != "BASELINE_CAPTURED_NON_AUTHORIZING":
+            raise ValueError("EEA CSF baseline reconciliation state invalid")
+        if receipt.get("material_admission_ready_for_downstream_review") is not False:
+            raise ValueError("EEA CSF baseline unexpectedly became review-ready")
+        if receipt.get("lkg_reference_required") is not False:
+            raise ValueError("healthy EEA CSF baseline incorrectly required LKG")
+    elif not previous_healthy:
+        if receipt.get("reconciliation_state") != "SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING":
+            raise ValueError("EEA CSF source recovery state invalid")
+    else:
         expected = (
             "NO_CHANGE"
             if current.get("exact_semantic_fingerprint") == previous.get("exact_semantic_fingerprint")
@@ -174,22 +225,20 @@ def validate_receipt(
     candidate = current.get("candidate_state")
     status = str(current.get("status_label") or "").casefold()
     exact_current_status_proven = bool(
-        current.get("source_health_state") == "HEALTHY"
+        current_healthy
         and current.get("discovery_link_verified") is True
         and current.get("official_call_identifier") == OFFICIAL_CALL_IDENTIFIER
         and candidate in {"OPEN_CALL", "CLOSED_CALL"}
         and status in {"open", "closed"}
     )
-    expected_ready = exact_current_status_proven and previous is not None
+    expected_ready = exact_current_status_proven and previous_healthy
     if receipt.get("material_admission_ready_for_downstream_review") is not expected_ready:
         raise ValueError("EEA CSF downstream-review gate drift")
     missing = set(receipt.get("missing_for_material_admission") or [])
     if "field_scoped_material_admission" not in missing:
         raise ValueError("EEA CSF reconciliation omitted final material admission requirement")
-    if previous is None and "previous_same_identity_exact_receipt_or_reviewed_baseline_exception" not in missing:
-        raise ValueError("EEA CSF baseline omitted previous-evidence requirement")
-    if receipt.get("semantic_reconciliation_passed") is not True or receipt.get("field_scoped_material_admission_required") is not True:
-        raise ValueError("EEA CSF reconciliation skipped mandatory gate")
+    if receipt.get("field_scoped_material_admission_required") is not True:
+        raise ValueError("EEA CSF reconciliation skipped mandatory material gate")
     for key in MATERIAL_FLAGS:
         if receipt.get(key) is not False:
             raise ValueError(f"EEA CSF reconciliation attempted authorization: {key}")
@@ -213,6 +262,7 @@ def main() -> int:
         "candidate_state": receipt["candidate_state"],
         "reconciliation_state": receipt["reconciliation_state"],
         "semantic_change_count": receipt["semantic_change_count"],
+        "lkg_reference_required": receipt["lkg_reference_required"],
         "material_admission_ready_for_downstream_review": receipt["material_admission_ready_for_downstream_review"],
         "open_call_authorized": False,
     }, ensure_ascii=False, sort_keys=True))
