@@ -49,10 +49,9 @@ EXPECTED_AUTHORITY_URLS = (
     CIVIL_SOCIETY_CALLS_URL,
 )
 EXACT_CSF_CALL_IDS = ("4", "6", "7")
-# One bounded migration bridge: Call 4 has two successful proof receipts but no
-# Official Programme history yet. Remove this tuple entry immediately after the
-# first integrated artifact contains Call 4 history.
-LEGACY_HISTORY_MIGRATION_IDS = ("4",)
+# Migration bridge is closed: all exact CSF identities executed here must restore
+# previous history only from canonical Official Programme artifacts.
+LEGACY_HISTORY_MIGRATION_IDS: tuple[str, ...] = ()
 
 
 def run(cmd: list[str], *, stdout=None) -> None:
