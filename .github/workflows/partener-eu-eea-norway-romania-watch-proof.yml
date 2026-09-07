@@ -1,0 +1,128 @@
+name: PARTENER.EU EEA Norway Romania Programme Watch Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ingest/eea_norway_romania_programme_watch_reconcile.py'
+      - 'partener-eu/ops/run_eea_norway_romania_watch_canonical.py'
+      - 'partener-eu/ops/test_eea_norway_romania_programme_watch.py'
+      - 'partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py'
+      - '.github/workflows/partener-eu-eea-norway-romania-watch-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: partener-eu-eea-norway-romania-watch-proof-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  eea-norway-romania-watch-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded EEA Norway Romania watch unit
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eea_norway_romania_programme_watch.py \
+            partener-eu/ingest/eea_norway_romania_programme_watch_reconcile.py \
+            partener-eu/ops/run_eea_norway_romania_watch_canonical.py \
+            partener-eu/ops/test_eea_norway_romania_programme_watch.py \
+            partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py
+
+      - name: Validate acquisition and semantic reconciliation fail closed
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eea_norway_romania_programme_watch.py
+          python partener-eu/ops/test_eea_norway_romania_programme_watch_reconcile.py
+
+      - name: Run canonical history and LKG proof
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EEA_NORWAY_WATCH_ROOT: /tmp/partener-eu-eea-norway-romania-watch-proof
+          EEA_NORWAY_WATCH_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-eea-norway-romania-watch
+        run: python partener-eu/ops/run_eea_norway_romania_watch_canonical.py
+
+      - name: Upload replayable EEA Norway Romania watch proof
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-eea-norway-romania-watch-proof-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-eea-norway-romania-watch-proof
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Enforce healthy non-authorizing proof boundary
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, re, sys
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-eea-norway-romania-watch-proof')
+          current_path=root/'current/eea-norway-romania-programme-watch.json'
+          rec_path=root/'current/eea-norway-romania-programme-watch-reconciliation.json'
+          history_path=root/'history/history-selection.json'
+          if not current_path.exists() or not rec_path.exists() or not history_path.exists():
+              sys.exit('FAIL EEA/Norway Romania watch proof outputs missing')
+          current=json.loads(current_path.read_text(encoding='utf-8'))
+          rec=json.loads(rec_path.read_text(encoding='utf-8'))
+          history=json.loads(history_path.read_text(encoding='utf-8'))
+          if current.get('source_health') != 'HEALTHY':
+              sys.exit(f"FAIL EEA/Norway Romania official chain degraded: {current.get('failure_class')}")
+          if len(current.get('sources') or []) != 5 or len(current.get('programmes') or []) != 9:
+              sys.exit('FAIL EEA/Norway Romania bounded source/programme inventory drift')
+          if not current.get('call_discovery'):
+              sys.exit('FAIL EEA/Norway Romania official call index exposed no numbered discovery links')
+          for source in current.get('sources') or []:
+              if int(source.get('status') or 0) != 200 or not re.fullmatch(r'[0-9a-f]{64}', str(source.get('sha256') or '')):
+                  sys.exit('FAIL EEA/Norway Romania source receipt is not hash-bound HEALTHY evidence')
+          allowed={
+              'BASELINE_CAPTURED_NON_AUTHORIZING',
+              'NO_CHANGE',
+              'EEA_NORWAY_ROMANIA_DISCOVERY_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
+              'SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING',
+          }
+          if rec.get('reconciliation_state') not in allowed or rec.get('semantic_reconciliation_passed') is not True:
+              sys.exit('FAIL EEA/Norway Romania healthy watch did not reconcile')
+          if history.get('selected') != 'CURRENT_HEALTHY' or history.get('lkg_is_current_truth') is not False:
+              sys.exit('FAIL EEA/Norway Romania history/LKG boundary drift')
+          material=('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation')
+          if any(current.get(k) is not False or rec.get(k) is not False for k in material):
+              sys.exit('FAIL EEA/Norway Romania watch crossed material authorization boundary')
+          if current.get('current_material_truth_available') is not False or rec.get('current_material_truth_available') is not False:
+              sys.exit('FAIL EEA/Norway Romania watch became current material truth')
+          print({
+              'source_health': current.get('source_health'),
+              'programme_count': len(current.get('programmes') or []),
+              'call_discovery_count': len(current.get('call_discovery') or []),
+              'nfp_state': (current.get('national_focal_point_observation') or {}).get('state'),
+              'reconciliation_state': rec.get('reconciliation_state'),
+              'semantic_change_count': rec.get('semantic_change_count'),
+              'history_selected': history.get('selected'),
+              'open_call_authorized': False,
+              'publication_effect': 'NONE',
+          })
+          PY
