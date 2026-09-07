@@ -2,18 +2,15 @@
 from __future__ import annotations
 
 import copy
+from urllib.error import URLError
 
 from eea_civil_society_fund_call5_exact import EXACT_URL, INDEX_URL, collect_exact, sha256_json
 from eea_civil_society_fund_call5_reconcile import reconcile
 
 INDEX_HTML = f"""
-<html><body>
-<h1>Calls</h1>
-<article>
+<html><body><h1>Calls</h1>
 <h2>Apel #5 Incluziunea și creșterea capacității romilor prin dezvoltarea comunităților interetnice</h2>
-<p>Apeluri de proiecte</p><p>Deschis</p>
 <a href="{EXACT_URL}">Detalii apel #5</a>
-</article>
 </body></html>
 """.encode("utf-8")
 
@@ -22,7 +19,6 @@ DETAIL_HTML = """
 <h1>Apel #5 Incluziunea si cresterea capacitatii romilor prin dezvoltarea comunitatilor interetnice</h1>
 <p>EEA Civil Society Fund in Romania</p>
 <p>Apeluri de proiecte</p><p>Deschis</p>
-<section><h2>Call details</h2>
 <p>Numarul Apelului de proiecte</p><p>5</p>
 <p>Data publicarii</p><p>08/07/2026</p>
 <p>Data limita pentru adresarea de intrebari</p><p>29/09/2026</p>
@@ -30,12 +26,11 @@ DETAIL_HTML = """
 <p>Suma disponibila</p><p>€6,500,000</p>
 <p>Valoarea minima a grantului</p><p>€15,000</p>
 <p>Valoarea maxima a grantului</p><p>€350,000</p>
-</section>
 </body></html>
 """.encode("utf-8")
 
 
-def fake_fetch(url: str, *, timeout: float):
+def healthy_fetch(url: str, *, timeout: float):
     del timeout
     if url == INDEX_URL:
         return INDEX_HTML, 200, url, "text/html; charset=UTF-8"
@@ -44,61 +39,98 @@ def fake_fetch(url: str, *, timeout: float):
     raise AssertionError(url)
 
 
-def make(at: str):
-    return collect_exact(run_id="reconcile-test", fetched_at=at, fetcher=fake_fetch)
+def degraded_fetch(url: str, *, timeout: float):
+    if url == EXACT_URL:
+        raise URLError("synthetic exact authority outage")
+    return healthy_fetch(url, timeout=timeout)
+
+
+def exact(at: str, *, fetcher=healthy_fetch):
+    return collect_exact(run_id=f"synthetic-{at}", fetched_at=at, fetcher=fetcher)
 
 
 def main() -> int:
-    previous = make("2026-09-03T03:40:00+00:00")
-    current = make("2026-09-03T03:41:00+00:00")
+    previous = exact("2026-09-07T05:00:00+00:00")
+    current = exact("2026-09-07T05:05:00+00:00")
 
     baseline = reconcile(previous)
     assert baseline["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
+    assert baseline["semantic_reconciliation_passed"] is True
     assert baseline["material_admission_ready_for_downstream_review"] is False
-    assert "previous_same_identity_exact_receipt_or_reviewed_baseline_exception" in baseline["missing_for_material_admission"]
-    assert baseline["open_call_authorized"] is False
+    assert baseline["lkg_reference_required"] is False
 
     same = reconcile(current, previous)
     assert same["reconciliation_state"] == "NO_CHANGE"
     assert same["semantic_change_count"] == 0
+    assert same["semantic_reconciliation_passed"] is True
     assert same["material_admission_ready_for_downstream_review"] is True
-    assert same["open_call_authorized"] is False
-    assert "field_scoped_material_admission" in same["missing_for_material_admission"]
+    assert same["lkg_reference_required"] is False
+    assert same["lkg_reference_is_current_truth"] is False
 
     changed = copy.deepcopy(current)
-    changed["fetched_at"] = "2026-09-03T03:42:00+00:00"
-    changed["exact_semantics"] = dict(changed["exact_semantics"])
+    changed["fetched_at"] = "2026-09-07T05:06:00+00:00"
     changed["exact_semantics"]["budget_candidate"] = "EUR 6,600,000"
     changed["budget_candidate"] = "EUR 6,600,000"
     changed["exact_semantic_fingerprint"] = sha256_json(changed["exact_semantics"])
-    diff = reconcile(changed, current)
-    assert diff["reconciliation_state"] == "EEA_CSF_CALL5_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
-    assert diff["semantic_change_count"] == 1
-    assert diff["budget_authorized"] is False
-    assert diff["publication_effect"] == "NONE"
+    changed_rec = reconcile(changed, previous)
+    assert changed_rec["reconciliation_state"] == "EEA_CSF_CALL5_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING"
+    assert changed_rec["semantic_change_count"] == 1
+    assert changed_rec["semantic_changes"][0]["field"] == "budget_candidate"
+    assert changed_rec["open_call_authorized"] is False
+    assert changed_rec["budget_authorized"] is False
 
+    degraded = exact("2026-09-07T05:07:00+00:00", fetcher=degraded_fetch)
+    degraded_rec = reconcile(degraded, previous)
+    assert degraded_rec["reconciliation_state"] == "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED"
+    assert degraded_rec["semantic_reconciliation_passed"] is False
+    assert degraded_rec["semantic_change_count"] == 0
+    assert degraded_rec["semantic_changes"] == []
+    assert degraded_rec["lkg_reference_required"] is True
+    assert degraded_rec["lkg_reference_available"] is True
+    assert degraded_rec["lkg_reference_is_current_truth"] is False
+    assert degraded_rec["material_admission_ready_for_downstream_review"] is False
+
+    recovered = exact("2026-09-07T05:08:00+00:00")
+    degraded_previous = exact("2026-09-07T05:07:30+00:00", fetcher=degraded_fetch)
+    recovered_rec = reconcile(recovered, degraded_previous)
+    assert recovered_rec["reconciliation_state"] == "SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING"
+    assert recovered_rec["semantic_reconciliation_passed"] is True
+    assert recovered_rec["material_admission_ready_for_downstream_review"] is False
+
+    equal_time = copy.deepcopy(previous)
+    equal_time["fetched_at"] = current["fetched_at"]
     try:
-        reconcile(previous, current)
+        reconcile(current, equal_time)
     except ValueError as exc:
-        assert "newer than current" in str(exc)
+        assert "strictly older" in str(exc)
     else:
-        raise AssertionError("EEA CSF reconciliation accepted inverted history")
+        raise AssertionError("EEA CSF Call 5 reconciliation accepted equal-time previous evidence")
 
-    wrong_identity = copy.deepcopy(previous)
-    wrong_identity["identity_key"] = "0" * 64
+    identity_drift = copy.deepcopy(previous)
+    identity_drift["identity_key"] = "0" * 64
     try:
-        reconcile(current, wrong_identity)
-    except Exception:
+        reconcile(current, identity_drift)
+    except ValueError:
         pass
     else:
-        raise AssertionError("EEA CSF reconciliation accepted identity drift")
+        raise AssertionError("EEA CSF Call 5 reconciliation accepted identity drift")
+
+    widened = copy.deepcopy(current)
+    widened["open_call_authorized"] = True
+    try:
+        reconcile(widened, previous)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("EEA CSF Call 5 reconciliation accepted authorization widening")
 
     print({
         "status": "PASS",
-        "reconciler": "EEA_CSF_RO_CALL5",
-        "same_identity": "NO_CHANGE",
-        "baseline_review_ready": False,
-        "same_identity_review_ready": True,
+        "reconciler": "EEA_CSF_RO_CALL5_RECONCILIATION",
+        "same_identity": same["reconciliation_state"],
+        "semantic_change_guarded": True,
+        "degraded_uses_lkg_reference_only": True,
+        "strictly_older_previous_required": True,
         "material_authorization": False,
     })
     return 0
