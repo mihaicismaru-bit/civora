@@ -47,6 +47,14 @@ class CallConfig:
 
 
 CONFIGS = {
+    "4": CallConfig(
+        call_id="4",
+        exact_module="eea_civil_society_fund_call4_exact",
+        reconcile_module="eea_civil_society_fund_call4_reconcile",
+        evidence_filename="eea-csf-ro-call4-exact-evidence.json",
+        reconciliation_filename="eea-csf-ro-call4-reconciliation.json",
+        legacy_artifact_prefixes=("partener-eu-eea-csf-call4-exact-",),
+    ),
     "5": CallConfig(
         call_id="5",
         exact_module="eea_civil_society_fund_call5_exact",
