@@ -48,9 +48,9 @@ EXPECTED_AUTHORITY_URLS = (
     NFP_DIRECTORY_URL,
     CIVIL_SOCIETY_CALLS_URL,
 )
-EXACT_CSF_CALL_IDS = ("4", "6", "7")
-# Migration bridge is closed: all exact CSF identities executed here must restore
-# previous history only from canonical Official Programme artifacts.
+EXACT_CSF_CALL_IDS = ("4", "5", "6", "7")
+# Migration bridges are closed: all exact CSF identities executed here must
+# restore previous history only from canonical Official Programme artifacts.
 LEGACY_HISTORY_MIGRATION_IDS: tuple[str, ...] = ()
 
 
@@ -214,7 +214,7 @@ def enforce_boundary(current: dict[str, Any], rec: dict[str, Any], history: dict
 
 
 def run_exact_csf_canonical(root: pathlib.Path) -> dict[str, Any]:
-    """Run exact CSF Calls 4, 6 and 7 inside canonical Official Programme ownership."""
+    """Run exact CSF Calls 4-7 inside canonical Official Programme ownership."""
     repo_root = pathlib.Path(__file__).resolve().parents[2]
     shared_runner = repo_root / "partener-eu" / "ops" / "run_eea_csf_exact_canonical.py"
     canonical_root = root.parent
