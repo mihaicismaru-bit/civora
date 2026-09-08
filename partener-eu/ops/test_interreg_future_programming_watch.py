@@ -74,18 +74,20 @@ def main():
     original_fetch = mod._fetch
     mod._fetch = healthy_fetch
     try:
-        baseline = mod.build_snapshot(run_id="test-1", observed_at="2026-09-02T07:00:00Z")
+        baseline = mod.build_snapshot(run_id="test-1", observed_at="2026-09-08T02:00:00Z")
     finally:
         mod._fetch = original_fetch
 
-    assert baseline["source_count"] == 9
-    assert baseline["healthy_source_count"] == 9
+    assert baseline["source_count"] == 10
+    assert baseline["healthy_source_count"] == 10
     assert baseline["coverage_complete"] is True
     assert all(row["observation_state"] in {"PROPOSAL", "CONSULTATION", "PROGRAMMING_PROCESS"} for row in baseline["watchlist"])
     assert all("OPEN" not in row["observation_state"] and "CALL" not in row["observation_state"] for row in baseline["watchlist"])
     assert all(row["open_call_authorized"] is False for row in baseline["watchlist"])
     assert all(row["call_alert_authorized"] is False for row in baseline["watchlist"])
     assert next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-ROHU-2028-2034")["consultation_lifecycle"] == "AFTER_WINDOW"
+    assert next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-ROUA-POST2027")["consultation_lifecycle"] == "AFTER_WINDOW"
+    assert next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-ROUA-POST2027")["open_call_authorized"] is False
     assert next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-BSB-2028-2034")["consultation_lifecycle"] in {"END_KNOWN_START_NOT_STATED", "IN_WINDOW"}
 
     eu_framework = next(row for row in baseline["watchlist"] if row["source_id"] == "INT-FUTURE-EU-COM-2025-552")
@@ -95,12 +97,12 @@ def main():
     assert eu_framework["observation_state"] == "PROPOSAL"
     assert eu_framework["open_call_authorized"] is False
 
-    base_reconcile = mod.reconcile(baseline, None, reconciled_at="2026-09-02T07:01:00Z")
+    base_reconcile = mod.reconcile(baseline, None, reconciled_at="2026-09-08T02:01:00Z")
     assert base_reconcile["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
     assert base_reconcile["pipeline_watch_candidate"] is False
     assert base_reconcile["call_alert_authorized"] is False
 
-    no_change = mod.reconcile(copy.deepcopy(baseline), baseline, reconciled_at="2026-09-02T07:02:00Z")
+    no_change = mod.reconcile(copy.deepcopy(baseline), baseline, reconciled_at="2026-09-08T02:02:00Z")
     assert no_change["reconciliation_state"] == "NO_CHANGE"
     assert no_change["semantic_change_count"] == 0
 
@@ -119,12 +121,12 @@ def main():
         "error_type": "TLS_CERTIFICATE_VERIFY_FAILED",
         "error": "synthetic",
     }
-    degraded["healthy_source_count"] = 8
+    degraded["healthy_source_count"] = 9
     degraded["degraded_source_count"] = 1
     degraded["source_health"] = "DEGRADED"
     degraded["coverage_complete"] = False
     rehash(degraded)
-    rec = mod.reconcile(degraded, baseline, reconciled_at="2026-09-02T07:03:00Z")
+    rec = mod.reconcile(degraded, baseline, reconciled_at="2026-09-08T02:03:00Z")
     change = next(item for item in rec["changes"] if item["source_id"] == row["source_id"])
     assert change["lkg_status"] == "REFERENCE_AVAILABLE_FROM_PREVIOUS_HEALTHY_SAME_IDENTITY"
     assert change["lkg_reference"]["use_constraint"] == "EVIDENCE_REFERENCE_ONLY_NEVER_CURRENT_CALL_OR_PROGRAMMING_TRUTH"
@@ -148,12 +150,12 @@ def main():
         "error_type": "TLS_CERTIFICATE_VERIFY_FAILED",
         "error": "synthetic",
     }
-    degraded_semantic["healthy_source_count"] = 8
+    degraded_semantic["healthy_source_count"] = 9
     degraded_semantic["degraded_source_count"] = 1
     degraded_semantic["source_health"] = "DEGRADED"
     degraded_semantic["coverage_complete"] = False
     rehash(degraded_semantic)
-    rec = mod.reconcile(degraded_semantic, baseline, reconciled_at="2026-09-02T07:03:30Z")
+    rec = mod.reconcile(degraded_semantic, baseline, reconciled_at="2026-09-08T02:03:30Z")
     change = next(item for item in rec["changes"] if item["source_id"] == semantic_row["source_id"])
     assert rec["semantic_change_count"] == 1
     assert rec["pipeline_evidence_change_count"] == 0
@@ -187,14 +189,14 @@ def main():
     wrong_identity_previous = copy.deepcopy(baseline)
     wrong_identity_previous["watchlist"][0]["authority_url"] = "https://futurium.ec.europa.eu/en/border-focal-point-network/news/fake"
     rehash(wrong_identity_previous)
-    rec = mod.reconcile(degraded, wrong_identity_previous, reconciled_at="2026-09-02T07:04:00Z")
+    rec = mod.reconcile(degraded, wrong_identity_previous, reconciled_at="2026-09-08T02:04:00Z")
     change = next(item for item in rec["changes"] if item["source_id"] == row["source_id"])
     assert change["lkg_status"] == "REQUIRED_REFERENCE_UNAVAILABLE"
     assert change["lkg_reference"] is None
 
-    husk_current = build_huskroua_receipt("2026-09-05T05:00:00+00:00")
-    husk_previous = build_huskroua_receipt("2026-09-05T04:00:00+00:00")
-    husk_too_new = build_huskroua_receipt("2026-09-05T06:00:00+00:00")
+    husk_current = build_huskroua_receipt("2026-09-08T05:00:00+00:00")
+    husk_previous = build_huskroua_receipt("2026-09-08T04:00:00+00:00")
+    husk_too_new = build_huskroua_receipt("2026-09-08T06:00:00+00:00")
     with tempfile.TemporaryDirectory() as tmp:
         history = Path(tmp)
         older_dir = history / "older"
@@ -217,6 +219,8 @@ def main():
         "sources": baseline["source_count"],
         "eu_framework_primary_authority": "FUTURIUM_EC",
         "eu_framework_supporting_legal_authority": "EUR_LEX_COM_2025_552",
+        "ro_ua_post_2027_programme_source": "OFFICIAL_PROGRAMME_MANAGING_AUTHORITY",
+        "ro_ua_consultation_lifecycle": "AFTER_WINDOW",
         "baseline_reconciliation": base_reconcile["reconciliation_state"],
         "same_identity_lkg_guard": "PASS",
         "degraded_semantic_pipeline_watch_suppression": "PASS",
