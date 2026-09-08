@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import unicodedata
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -51,7 +53,85 @@ def location_label(structured: dict[str, Any]) -> str:
     return ", ".join(parts) if parts else "în sectorul indicat de alerta oficială"
 
 
+def slugify(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value)
+    ascii_value = "".join(char for char in normalized if not unicodedata.combining(char))
+    return re.sub(r"[^a-z0-9]+", "-", ascii_value.casefold()).strip("-")
+
+
+def make_electricity_fact(event: dict[str, Any]) -> dict[str, Any] | None:
+    structured = event.get("structured") or {}
+    locality = str(structured.get("affected_locality") or "").strip()
+    scope = str(structured.get("affected_scope") or "").strip()
+    source_url = str(event.get("source_url") or "").strip()
+    if not locality or not scope or not source_url or not event.get("event_start") or not event.get("event_end"):
+        return None
+
+    start = datetime.fromisoformat(str(event["event_start"]))
+    end = datetime.fromisoformat(str(event["event_end"]))
+    if end <= start:
+        return None
+    date_label = ro_date(start)
+    interval = f"{start.strftime('%H:%M')}–{end.strftime('%H:%M')}"
+    story_id = f"valcea-intrerupere-curent-{start.date().isoformat()}-{slugify(locality)}"
+    headline = f"{locality}: întrerupere de curent programată pe {date_label}, între {interval}"
+    dek = f"Distribuție Oltenia include {scope} în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este {interval}."
+    source = {
+        "name": str(event.get("source_name") or "Distribuție Oltenia — întreruperi programate Vâlcea"),
+        "url": source_url,
+        "tier": "T1",
+    }
+    claims = [
+        {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": f"Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în {locality}, pe {date_label}, între orele {start.strftime('%H:%M')} și {end.strftime('%H:%M')}.",
+            "source_urls": [source_url],
+        },
+        {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": f"Zona indicată în documentul oficial este {scope}.",
+            "source_urls": [source_url],
+        },
+    ]
+    observed_at = datetime.fromisoformat(str(event.get("generated_at") or start.isoformat(timespec="minutes")))
+    return {
+        "id": story_id,
+        "status": "verified",
+        "section": "UTIL",
+        "priority": 94 if start.date() <= (observed_at + timedelta(days=1)).date() else 88,
+        "confidence": 99,
+        "valid_from": observed_at.isoformat(timespec="minutes"),
+        "valid_until": end.isoformat(timespec="minutes"),
+        "slots": ["morning", "evening"],
+        "editorial_type": "service",
+        "publication_lifecycle": "new_story",
+        "material_fact_gate": "PASS",
+        "sources": [source],
+        "auto_generated": True,
+        "auto_scope": AUTO_SCOPE,
+        "structured_primary_event": {
+            "source_id": event.get("source_id"),
+            "parser": event.get("parser"),
+            "event_start": event.get("event_start"),
+            "event_end": event.get("event_end"),
+            "body_sha256": event.get("body_sha256"),
+        },
+        "fact_kernel": {
+            "format_hint": "service_news",
+            "headline": {"text": headline, "source_urls": [source_url]},
+            "dek": {"text": dek, "source_urls": [source_url]},
+            "claims": claims,
+        },
+    }
+
+
 def make_fact(event: dict[str, Any]) -> dict[str, Any] | None:
+    if event.get("parser") == "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1":
+        return make_electricity_fact(event)
     structured = event.get("structured") or {}
     road = str(structured.get("road") or "").strip()
     traffic_state = str(structured.get("traffic_state") or "").strip()
@@ -158,7 +238,9 @@ def compose(events_path: Path, facts_path: Path, *, write: bool) -> dict[str, An
     accepted: list[dict[str, Any]] = []
     rejected: list[dict[str, str]] = []
     for event in events_doc.get("events") or []:
-        fact = make_fact(event)
+        enriched_event = dict(event)
+        enriched_event.setdefault("generated_at", events_doc.get("generated_at"))
+        fact = make_fact(enriched_event)
         if fact is None:
             rejected.append({"event_id": str(event.get("event_id")), "reason": "insufficient_structured_fields"})
             continue
@@ -213,6 +295,31 @@ def self_test() -> int:
     assert ok is True, reason
     assert fact["auto_scope"] == AUTO_SCOPE
     assert "azi" not in str((fact["fact_kernel"]["headline"] or {}).get("text") or "").casefold()
+    electricity_event = {
+        "event_id": "utility-electricity-test",
+        "source_id": "electricity-primary-test",
+        "source_name": "Operator energie test",
+        "source_tier": "T1",
+        "source_url": "https://example.test/electricity.pdf",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-09-08T09:00+03:00",
+        "event_end": "2026-09-08T17:00+03:00",
+        "generated_at": "2026-09-08T06:00+03:00",
+        "body_sha256": "b" * 64,
+        "structured": {
+            "utility": "electricity",
+            "service_state": "scheduled_interruption",
+            "affected_locality": "Fârtăţeşti",
+            "affected_scope": "LEA JT PTAB Fârtăţeşti 3",
+        },
+    }
+    electricity_fact = make_fact(electricity_event)
+    assert electricity_fact is not None
+    ok, reason = validate_fact(electricity_fact, manual)
+    assert ok is True, reason
+    assert electricity_fact["id"] == "valcea-intrerupere-curent-2026-09-08-fartatesti"
+    assert electricity_fact["valid_from"] == "2026-09-08T06:00+03:00"
+    assert electricity_fact["valid_until"] == "2026-09-08T17:00+03:00"
     print("VÂLCEA CLAR structured alert composition self-test: PASS")
     return 0
 
