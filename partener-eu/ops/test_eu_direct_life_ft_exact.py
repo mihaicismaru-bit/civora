@@ -10,8 +10,10 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ingest"))
 import funding_tenders_fetch as ft
 from eu_direct_life_ft_exact import (
     ExactLifeConflict,
+    PRIORITY_EXACT_WATCH_REFERENCES,
     collect_exact,
     select_life_candidate,
+    select_life_execution_target,
     validate_evidence,
     validate_reference,
 )
@@ -80,6 +82,20 @@ def main():
     }
     selected = select_life_candidate(taxonomy)
     assert selected["identifier"] == REF
+
+    # The bounded programme sample deliberately omits the priority BUILDUP topic.
+    # The canonical LIFE lane must still route it into an exact F&T re-check,
+    # while preserving the sample candidate only as a non-authorizing fallback.
+    execution = select_life_execution_target(taxonomy)
+    assert PRIORITY_EXACT_WATCH_REFERENCES == (PRIORITY_WATCH_REF,)
+    assert execution["identifier"] == PRIORITY_WATCH_REF
+    assert execution["handoff_mode"] == "EXPLICIT_PRIORITY_EXACT_RECHECK"
+    assert execution["priority_rank"] == 0
+    assert execution["bounded_sample_contains_target"] is False
+    assert execution["bounded_sample_fallback"]["identifier"] == REF
+    assert execution["material_fact_use"] is False
+    assert execution["exact_recheck_required"] is True
+    assert execution["source_authority_url_candidate"] == ft.topic_url(PRIORITY_WATCH_REF)
 
     evidence = collect_exact(
         REF,
