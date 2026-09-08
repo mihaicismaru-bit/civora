@@ -61,6 +61,12 @@
       "minimum_claims": 2,
       "minimum_distinct_source_urls": 1
     },
+    "continuous_update": {
+      "auto_publish_eligible": true,
+      "role_order": ["material_change", "who_what_when_where", "context", "consequence", "reader_action", "next_watch"],
+      "minimum_claims": 2,
+      "minimum_distinct_source_urls": 1
+    },
     "investigation": {
       "auto_publish_eligible": false,
       "role_order": ["documented_finding", "evidence", "context", "response", "what_is_unknown", "next_watch"],
@@ -79,6 +85,7 @@
   "format_selection": [
     {"when": "section=INVESTIGAȚII", "format": "investigation"},
     {"when": "material_fact_gate=PASS_EXPLAINER_ONLY", "format": "explainer"},
+    {"when": "editorial_form=continuous_update", "format": "continuous_update"},
     {"when": "editorial_type=service", "format": "service_news"},
     {"when": "editorial_type=analysis", "format": "analysis"},
     {"when": "default", "format": "straight_news"}
