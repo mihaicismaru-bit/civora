@@ -41,7 +41,7 @@ def base_preview():
         "observation_label_ro": "Programare",
         "authority_class": "T1_OFFICIAL_FMO",
         "authority_url": "https://eeagrants.org/countries/romania",
-        "observed_at": "2026-09-02T07:00:00Z",
+        "observed_at": "2026-09-08T02:00:00Z",
         "source_health": "HEALTHY",
         "confidence": "HIGH",
         "confidence_reason": "CURRENT_OFFICIAL_FMO_PROGRAMMING_EVIDENCE_VERIFIED_NON_AUTHORIZING",
@@ -111,17 +111,17 @@ def main():
     original_fetch = future._fetch
     future._fetch = healthy_fetch
     try:
-        snapshot = future.build_snapshot(run_id="future-1", observed_at="2026-09-02T07:00:00Z")
+        snapshot = future.build_snapshot(run_id="future-1", observed_at="2026-09-08T02:00:00Z")
     finally:
         future._fetch = original_fetch
-    reconciliation = future.reconcile(snapshot, None, reconciled_at="2026-09-02T07:01:00Z")
+    reconciliation = future.reconcile(snapshot, None, reconciled_at="2026-09-08T02:01:00Z")
     output = enrich_mod.enrich(base_preview(), snapshot, reconciliation)
 
     assert output["schema"] == enrich_mod.SCHEMA
     assert output["surface_state"] == "PREVIEW_READ_ONLY_NOT_PUBLISHED"
     assert output["seo_indexing_state"] == "NOINDEX_PREVIEW_ONLY"
     assert output["open_upcoming_separation"] == "STRICT"
-    assert output["future_programming_card_count"] == 9
+    assert output["future_programming_card_count"] == 10
     states = {card["observation_state"] for card in output["cards"]}
     assert {"PROGRAMMING", "PROPOSAL", "CONSULTATION", "PROGRAMMING_PROCESS"}.issubset(states)
     future_cards = [card for card in output["cards"] if card["card_id"].startswith("INTERREG_FUTURE_")]
@@ -133,6 +133,12 @@ def main():
     bsb = next(card for card in future_cards if card["programme_family"] == "INTERREG_NEXT_BLACK_SEA_BASIN")
     assert bsb["observation_state"] == "CONSULTATION"
     assert bsb["open_confirmation_state"] == "NOT_CONFIRMED_PROGRAMMING_PIPELINE_ONLY"
+    ro_ua = next(card for card in future_cards if card["programme_family"] == "INTERREG_NEXT_RO_UA")
+    assert ro_ua["observation_state"] == "CONSULTATION"
+    assert ro_ua["authority_url"] == "https://www.ro-ua.net/en/post-2027"
+    assert ro_ua["open_confirmation_state"] == "NOT_CONFIRMED_PROGRAMMING_PIPELINE_ONLY"
+    assert ro_ua["open_call_authorized"] is False
+    assert ro_ua["publish_authorized"] is False
 
     tampered = copy.deepcopy(output)
     tampered["cards"][0]["open_call_authorized"] = True
@@ -162,6 +168,7 @@ def main():
         "cards": output["card_count"],
         "future_cards": output["future_programming_card_count"],
         "states": sorted(states),
+        "ro_ua_post_2027_projection": "NON_AUTHORIZING_CONSULTATION_HISTORY",
         "open_upcoming_separation": output["open_upcoming_separation"],
     })
 
