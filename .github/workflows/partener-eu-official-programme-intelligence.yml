@@ -551,10 +551,16 @@ jobs:
               assert danube_reconcile['material_admission_ready_for_downstream_review'] is False
 
           assert future['schema'] == 'PARTENER_EU_INTERREG_FUTURE_PROGRAMMING_WATCH_V1'
-          assert future['source_count'] == 9
+          assert future['source_count'] == 10
           assert future['source_health'] in {'HEALTHY', 'DEGRADED'}
           assert all(x['observation_state'] in {'PROPOSAL','CONSULTATION','PROGRAMMING_PROCESS'} for x in future['watchlist'])
           assert all(x['market_intelligence_only'] is True for x in future['watchlist'])
+          future_by_id = {x['source_id']: x for x in future['watchlist']}
+          ro_ua_future = future_by_id['INT-FUTURE-ROUA-POST2027']
+          assert ro_ua_future['authority_url'] == 'https://www.ro-ua.net/en/post-2027'
+          assert ro_ua_future['observation_state'] == 'CONSULTATION'
+          assert ro_ua_future['consultation_lifecycle'] == 'AFTER_WINDOW'
+          assert ro_ua_future['open_call_authorized'] is False and ro_ua_future['publish_authorized'] is False
           assert reconcile['schema'] == 'PARTENER_EU_INTERREG_FUTURE_PROGRAMMING_RECONCILIATION_V1'
           assert reconcile['reconciliation_state'] in {
               'BASELINE_CAPTURED_NON_AUTHORIZING', 'NO_CHANGE',
@@ -566,8 +572,12 @@ jobs:
           assert preview_v2['surface_state'] == 'PREVIEW_READ_ONLY_NOT_PUBLISHED'
           assert preview_v2['seo_indexing_state'] == 'NOINDEX_PREVIEW_ONLY'
           assert preview_v2['open_upcoming_separation'] == 'STRICT'
-          assert preview_v2['future_programming_card_count'] == 9
+          assert preview_v2['future_programming_card_count'] == 10
           assert {'PROPOSAL','CONSULTATION','PROGRAMMING_PROCESS'}.issubset({x['observation_state'] for x in preview_v2['cards']})
+          ro_ua_cards = [x for x in preview_v2['cards'] if x.get('programme_family') == 'INTERREG_NEXT_RO_UA']
+          assert len(ro_ua_cards) == 1
+          assert ro_ua_cards[0]['open_confirmation_state'] == 'NOT_CONFIRMED_PROGRAMMING_PIPELINE_ONLY'
+          assert ro_ua_cards[0]['open_call_authorized'] is False and ro_ua_cards[0]['publish_authorized'] is False
           assert preview_v2['material_change_claimed'] is False
           assert preview_v2['semantic_reconciliation_present'] is True
           assert preview_v2['semantic_reconciliation_material_authority'] is False
@@ -601,6 +611,7 @@ jobs:
               'danube_exact_reconciliation': danube_reconcile['reconciliation_state'],
               'danube_exact_semantic_changes': danube_reconcile['semantic_change_count'],
               'future_programming_sources': future['source_count'],
+              'future_programming_ro_ua_lifecycle': ro_ua_future['consultation_lifecycle'],
               'future_programming_healthy': future['healthy_source_count'],
               'future_programming_degraded': future['degraded_source_count'],
               'future_reconciliation': reconcile['reconciliation_state'],
