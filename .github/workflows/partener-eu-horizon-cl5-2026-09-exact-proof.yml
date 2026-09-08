@@ -101,7 +101,8 @@ jobs:
           assert current['candidate_state'] == 'OPEN_CALL'
           assert current['status_label'] == 'Open'
           assert current['structured_snapshot']['topic_count'] >= 1
-          assert current['structured_snapshot']['programme_label'] == 'Horizon Europe'
+          assert current['structured_snapshot']['programme_reference'] == '43108390'
+          assert 'horizon europe' in current['structured_snapshot']['programme_label'].casefold()
           assert current['evidence_usable_for_reconciliation'] is True
           assert current['lkg_required'] is False
           assert re.fullmatch(r'[0-9a-f]{64}', current['exact_semantic_fingerprint'])
@@ -122,6 +123,8 @@ jobs:
               'status_label': current['status_label'],
               'deadline_candidate': current['deadline_candidate'],
               'topic_count': current['structured_snapshot']['topic_count'],
+              'programme_reference': current['structured_snapshot']['programme_reference'],
+              'programme_label': current['structured_snapshot']['programme_label'],
               'reconciliation_state': rec['reconciliation_state'],
               'semantic_change_count': rec['semantic_change_count'],
               'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
