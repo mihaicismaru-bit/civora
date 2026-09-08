@@ -1,0 +1,149 @@
+name: PARTENER.EU Horizon CL5 2026 09 Exact Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_horizon_cl5_2026_09_exact.py'
+      - 'partener-eu/ingest/eu_direct_horizon_cl5_2026_09_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_horizon_cl5_2026_09_exact.py'
+      - '.github/workflows/partener-eu-horizon-cl5-2026-09-exact-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  horizon-cl5-exact-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded exact adapter and regression
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/funding_tenders_fetch.py \
+            partener-eu/ingest/eu_direct_horizon_cl5_2026_09_exact.py \
+            partener-eu/ingest/eu_direct_horizon_cl5_2026_09_reconcile.py \
+            partener-eu/ops/test_eu_direct_horizon_cl5_2026_09_exact.py
+
+      - name: Validate fail-closed exact-call semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_eu_direct_horizon_cl5_2026_09_exact.py
+
+      - name: Prepare bounded replay root
+        run: |
+          ROOT=/tmp/partener-eu-horizon-cl5-2026-09
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/baseline" "$ROOT/current" "$ROOT/history"
+
+      - name: Acquire fresh official baseline evidence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          ROOT=/tmp/partener-eu-horizon-cl5-2026-09
+          python partener-eu/ingest/eu_direct_horizon_cl5_2026_09_exact.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-baseline" \
+            --output-dir "$ROOT/baseline"
+
+      - name: Re-acquire exact current evidence for replay
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          sleep 2
+          ROOT=/tmp/partener-eu-horizon-cl5-2026-09
+          python partener-eu/ingest/eu_direct_horizon_cl5_2026_09_exact.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-replay" \
+            --output-dir "$ROOT/current"
+
+      - name: Reconcile live same-identity replay
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          ROOT=/tmp/partener-eu-horizon-cl5-2026-09
+          python partener-eu/ingest/eu_direct_horizon_cl5_2026_09_reconcile.py \
+            --previous "$ROOT/baseline/horizon-cl5-2026-09-exact-evidence.json" \
+            --current "$ROOT/current/horizon-cl5-2026-09-exact-evidence.json" \
+            --output "$ROOT/history/horizon-cl5-2026-09-reconciliation.json"
+
+      - name: Enforce exact-current non-authorizing proof gate
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-horizon-cl5-2026-09')
+          current=json.loads((root/'current/horizon-cl5-2026-09-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'history/horizon-cl5-2026-09-reconciliation.json').read_text(encoding='utf-8'))
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          assert current['call_identifier'] == 'HORIZON-CL5-2026-09'
+          assert current['source_health_state'] == 'HEALTHY'
+          assert current['authority_agreement_verified'] is True
+          assert current['candidate_state'] == 'OPEN_CALL'
+          assert current['status_label'] == 'Open'
+          assert current['structured_snapshot']['topic_count'] >= 1
+          assert current['structured_snapshot']['programme_label'] == 'Horizon Europe'
+          assert current['evidence_usable_for_reconciliation'] is True
+          assert current['lkg_required'] is False
+          assert re.fullmatch(r'[0-9a-f]{64}', current['exact_semantic_fingerprint'])
+          assert all(current[k] is False for k in flags)
+          assert current['material_admission_ready_for_downstream_review'] is False
+          assert current['publication_effect'] == 'NONE'
+          assert rec['reconciliation_state'] == 'NO_CHANGE'
+          assert rec['semantic_change_count'] == 0
+          assert rec['previous_same_identity_restored'] is True
+          assert rec['previous_strictly_older'] is True
+          assert rec['material_admission_ready_for_downstream_review'] is True
+          assert rec['lkg_is_current_truth'] is False
+          assert all(rec[k] is False for k in flags)
+          assert rec['publication_effect'] == 'NONE'
+          print(json.dumps({
+              'call_identifier': current['call_identifier'],
+              'candidate_state': current['candidate_state'],
+              'status_label': current['status_label'],
+              'deadline_candidate': current['deadline_candidate'],
+              'topic_count': current['structured_snapshot']['topic_count'],
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
+              'open_call_authorized': rec['open_call_authorized'],
+              'publication_effect': rec['publication_effect'],
+          }, sort_keys=True))
+          PY
+
+      - name: Stage compact proof artifact
+        if: always()
+        run: |
+          ROOT=/tmp/partener-eu-horizon-cl5-2026-09
+          mkdir -p "$ROOT/artifact"
+          cp -a "$ROOT/current/." "$ROOT/artifact/" 2>/dev/null || true
+          cp -a "$ROOT/history/." "$ROOT/artifact/" 2>/dev/null || true
+          printf '%s\n' "${GITHUB_SHA}" > "$ROOT/artifact/exact-head.txt"
+
+      - name: Upload compact proof artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-horizon-cl5-2026-09-exact-proof
+          path: /tmp/partener-eu-horizon-cl5-2026-09/artifact
+          if-no-files-found: warn
+          retention-days: 7
