@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-ANOFM-VALCEA-STATS",
-  "source_tier": "T1B",
+  "source_name": "official_county_employment_statistics",
   "source_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/",
-  "status": "OPEN",
+  "source_tier": "T1B",
+  "previous_semantic_sha256": "9dd4ffe18bb3ed8ac0639bbeb8f2e47b59e2415c4defa2fd1e901d7ec0992630",
+  "candidate_semantic_sha256": "fc2f9afc9068b7d8ab43c68a3e1301107ca966061ad0c4fee11e9aceb8fcb2d7",
+  "current_semantic_sha256": "fc2f9afc9068b7d8ab43c68a3e1301107ca966061ad0c4fee11e9aceb8fcb2d7",
   "first_observed_at": "2026-08-21T21:03:31.736109Z",
   "last_observed_at": "2026-09-08T21:16:19.381350Z",
-  "previous_semantic_sha256": "9dd4ffe18bb3ed8ac0639bbeb8f2e47b59e2415c4defa2fd1e901d7ec0992630",
-  "current_semantic_sha256": "fc2f9afc9068b7d8ab43c68a3e1301107ca966061ad0c4fee11e9aceb8fcb2d7",
+  "registry_class": "official_county_employment_statistics",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-ANOFM-VALCEA-STATS",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
