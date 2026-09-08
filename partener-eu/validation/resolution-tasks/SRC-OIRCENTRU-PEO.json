@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-OIRCENTRU-PEO",
-  "source_tier": "T1B",
+  "source_name": "official_intermediate_body",
   "source_url": "https://oircentru.ro/peo-2021-2027/",
-  "status": "OPEN",
+  "source_tier": "T1B",
+  "previous_semantic_sha256": "87108f0ab9cad95f543347ff7c7852c8cc39054de5dc9c2ba8d06ddcfff1c1dc",
+  "candidate_semantic_sha256": "31313e5447faa0f3902a1c04a64a8ac331be71647013a0c6474a402f0a91a1d9",
+  "current_semantic_sha256": "31313e5447faa0f3902a1c04a64a8ac331be71647013a0c6474a402f0a91a1d9",
   "first_observed_at": "2026-08-12T05:24:02.872428Z",
   "last_observed_at": "2026-09-08T11:29:28.593240Z",
-  "previous_semantic_sha256": "87108f0ab9cad95f543347ff7c7852c8cc39054de5dc9c2ba8d06ddcfff1c1dc",
-  "current_semantic_sha256": "31313e5447faa0f3902a1c04a64a8ac331be71647013a0c6474a402f0a91a1d9",
+  "registry_class": "official_intermediate_body",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-OIRCENTRU-PEO",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
