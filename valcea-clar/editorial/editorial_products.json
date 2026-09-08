@@ -3350,6 +3350,115 @@
       }
     },
     {
+      "id": "valcea-intrerupere-curent-2026-09-08-fartatesti",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 94,
+      "confidence": 99,
+      "valid_from": "2026-09-08T13:25+03:00",
+      "valid_until": "2026-09-08T17:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-09-08T09:00+03:00",
+        "event_end": "2026-09-08T17:00+03:00",
+        "body_sha256": "dcc207991f6c242ef604db2ab974e90c8775c088134a40a1cedaf20521e9d9b0"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Fârtăţeşti: întrerupere de curent programată pe 8 septembrie 2026, între 09:00–17:00",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include LEA JT PTAB Fârtăţeşti 3 în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Fârtăţeşti, pe 8 septembrie 2026, între orele 09:00 și 17:00.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este LEA JT PTAB Fârtăţeşti 3.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Fârtăţeşti: întrerupere de curent programată pe 8 septembrie 2026, între 09:00–17:00",
+      "dek": "Distribuție Oltenia include LEA JT PTAB Fârtăţeşti 3 în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este LEA JT PTAB Fârtăţeşti 3.",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Fârtăţeşti, pe 8 septembrie 2026, între orele 09:00 și 17:00."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "a62c4bf5fb1fc49818e510972815523d3ade824c02672cbc09c6d2874496bac2",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "ab08cfa472c1711a460f9b3e46ae02c1f9ba08ea54afd53a0e679d5c97661dad",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "7ad20725db71238079210ac3d497cd2efece05d277345c48567303a302153f2d"
+      }
+    },
+    {
       "id": "florile-govorei-20260816",
       "status": "verified",
       "section": "CULTURĂ",
@@ -6176,7 +6285,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 313/2026-08-31",
@@ -6413,7 +6522,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 314/2026-08-31",
@@ -6631,7 +6740,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 315/2026-08-31",
@@ -6803,7 +6912,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 316/2026-08-31",
@@ -7000,7 +7109,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 317/2026-08-31",
@@ -7199,7 +7308,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 318/2026-08-31",
@@ -7436,7 +7545,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 319/2026-08-31",
@@ -7673,7 +7782,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 320/2026-08-31",
@@ -7910,7 +8019,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 321/2026-08-31",
@@ -8128,7 +8237,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 322/2026-08-31",
@@ -8366,7 +8475,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 323/2026-08-31",
@@ -8601,7 +8710,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 324/2026-08-31",
@@ -8799,7 +8908,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 325/2026-08-31",
@@ -9016,7 +9125,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 326/2026-08-31",
@@ -9233,7 +9342,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 327/2026-08-31",
@@ -9451,7 +9560,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 328/2026-08-31",
@@ -9688,7 +9797,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 329/2026-08-31",
@@ -9924,7 +10033,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 330/2026-08-31",
@@ -10142,7 +10251,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 331/2026-08-31",
@@ -10379,7 +10488,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -10613,7 +10722,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 333/2026-08-31",
@@ -10792,7 +10901,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 334/2026-08-31",
@@ -11008,7 +11117,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 335/2026-08-31",
@@ -11205,7 +11314,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 336/2026-08-31",
@@ -11404,7 +11513,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 337/2026-08-31",
@@ -11640,7 +11749,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 338/2026-08-31",
@@ -11802,7 +11911,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 339/2026-08-31",
@@ -12001,7 +12110,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 340/2026-08-31",
@@ -12239,7 +12348,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 341/2026-08-31",
@@ -12477,7 +12586,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 342/2026-08-31",
@@ -13406,7 +13515,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1"
+          "sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 332/2026-08-31",
@@ -13513,7 +13622,7 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-08-31",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "f528f951fc59b60b070841b5ad35df7acae75f6e8cca1b9984087841d9d426d1",
+        "register_sha256": "372d7359edcf52794032b1f733733b18f5c36af4806586668fa558c13de90b74",
         "latest_decision_window": 25,
         "matching_decisions": 5,
         "verified_official_documents": 5,
@@ -15385,6 +15494,115 @@
       }
     },
     {
+      "id": "valcea-intrerupere-curent-2026-09-10-baile-govora",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-09-08T13:25+03:00",
+      "valid_until": "2026-09-10T18:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-09-10T10:00+03:00",
+        "event_end": "2026-09-10T18:00+03:00",
+        "body_sha256": "e9742ff6c63856e86bfb110fc97e2f973c92276f5a57a0786da7c1931e03ebf8"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Băile Govora: întrerupere de curent programată pe 10 septembrie 2026, între 10:00–18:00",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include LEA JT PTCZ Palace Govora - circuitul 2 (spre MFA) în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 10:00–18:00.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Băile Govora, pe 10 septembrie 2026, între orele 10:00 și 18:00.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este LEA JT PTCZ Palace Govora - circuitul 2 (spre MFA).",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Băile Govora: întrerupere de curent programată pe 10 septembrie 2026, între 10:00–18:00",
+      "dek": "Distribuție Oltenia include LEA JT PTCZ Palace Govora - circuitul 2 (spre MFA) în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 10:00–18:00.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este LEA JT PTCZ Palace Govora - circuitul 2 (spre MFA).",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Băile Govora, pe 10 septembrie 2026, între orele 10:00 și 18:00."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "df32e9fa7bb480a570fdf51f2ad9453793deec4fde413e0fc1c1e8894a275475",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "d54630560e26e73a2399919937fef4984f751422ed6c52d56f28f223114b5d82",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F07.09-13.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2007_09%20-%2013_09_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "47ae6adf1365311ce491a93a018cfa15f11d23452cf20404d4a6da6269179ba7"
+      }
+    },
+    {
       "id": "galicea-satul-meu-vatra-frumoasa-20260906",
       "status": "verified",
       "section": "EVENIMENTE",
@@ -16904,8 +17122,8 @@
     }
   ],
   "stats": {
-    "story_count": 107,
-    "fact_kernel_composed": 79,
+    "story_count": 109,
+    "fact_kernel_composed": 81,
     "legacy_passthrough": 25,
     "editorial_holds": 3
   },
@@ -16916,5 +17134,5 @@
     "reputational_formats_fail_closed": true,
     "satire_routed_separately": true
   },
-  "registry_fingerprint_sha256": "1900b908d63d25fa521b610fa1879cf429172ec7453b2405f410c924b1c7c969"
+  "registry_fingerprint_sha256": "174d05f7482697f0f50876e6182def061a5d0ca3920dd450e97df3a98c410e31"
 }
