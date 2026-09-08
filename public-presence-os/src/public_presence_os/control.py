@@ -95,6 +95,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "config/live_read_only_probe_authority_lease_terminal_tombstone_recovery_crash_consistency_policy.json",
         "config/live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_corruption_rejection_policy.json",
         "config/live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_partial_write_truncation_rejection_policy.json",
+        "config/live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_complete_write_atomic_visibility_policy.json",
         "src/public_presence_os/control.py","src/public_presence_os/cli.py","src/public_presence_os/preflight.py",
         "src/public_presence_os/radar.py","src/public_presence_os/rehearsal.py","src/public_presence_os/rights.py",
         "src/public_presence_os/visual.py","src/public_presence_os/qa.py","src/public_presence_os/approval.py",
@@ -120,6 +121,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "src/public_presence_os/live_read_only_probe_authority_lease_terminal_tombstone_recovery_crash_consistency.py",
         "src/public_presence_os/live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_corruption_rejection.py",
         "src/public_presence_os/live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_partial_write_truncation_rejection.py",
+        "src/public_presence_os/live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_complete_write_atomic_visibility.py",
         "scripts/build_release.py","scripts/preflight.py",
         "tests/test_productization.py","tests/test_preflight.py","tests/test_cp34_radar.py","tests/test_cp39_rights.py",
         "tests/test_cp40_visual.py","tests/test_cp41_qa.py","tests/test_cp42_approval.py","tests/test_cp43_queue.py",
@@ -143,6 +145,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "tests/test_cp76_live_read_only_probe_authority_lease_terminal_tombstone_recovery_crash_consistency.py",
         "tests/test_cp77_live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_corruption_rejection.py",
         "tests/test_cp78_live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_partial_write_truncation_rejection.py",
+        "tests/test_cp79_live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_complete_write_atomic_visibility.py",
         "docs/CP30_PRODUCTIZATION.md","docs/OPERATOR_INSTALLATION_CONFIGURATION_RECOVERY.md",
         "docs/CP34_RADAR_MINIMAL_EXECUTABLE_SLICE.md","docs/CP39_IMAGE_RIGHTS_ASSET_PROVENANCE.md",
         "docs/CP40_VISUAL_RENDERER.md","docs/CP41_VISUAL_QA.md","docs/CP42_APPROVAL_DASHBOARD.md","docs/CP43_QUEUE.md",
@@ -167,6 +170,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "docs/CP76_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_CRASH_CONSISTENCY_DRY_RUN.md",
         "docs/CP77_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_CORRUPTION_REJECTION_DRY_RUN.md",
         "docs/CP78_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_PARTIAL_WRITE_TRUNCATION_REJECTION_DRY_RUN.md",
+        "docs/CP79_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_COMPLETE_WRITE_ATOMIC_VISIBILITY_DRY_RUN.md",
         ".github/workflows/public-presence-os-ci.yml",
     ]
     for rel in expected:
