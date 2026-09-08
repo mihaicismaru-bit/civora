@@ -39,6 +39,7 @@ CANONICAL_HOSTS = {"valceaclar.ro", "www.valceaclar.ro"}
 ENABLE_ENV = "VALCEA_FB_TEXT_FALLBACK_ENABLED"
 PUBLIC_UA = "facebookexternalhit/1.1 (+https://www.facebook.com/externalhit_uatext.php)"
 PUBLIC_PAGE_MAX_BYTES = 750_000
+OG_TITLE_SUFFIX = " — VÂLCEA CLAR"
 GITHUB_404_MARKERS = (
     "page not found · github pages",
     "page not found - github pages",
@@ -110,6 +111,13 @@ def _normal_text(value: str) -> str:
     return " ".join(html.unescape(str(value or "")).split()).casefold()
 
 
+def _og_title_matches(value: str, expected_headline: str) -> bool:
+    actual = _normal_text(value)
+    expected = _normal_text(expected_headline)
+    branded = _normal_text(f"{expected_headline}{OG_TITLE_SUFFIX}")
+    return bool(expected) and actual in {expected, branded}
+
+
 def native_copy_ok(message: str) -> bool:
     """Require platform-native copy and reject the legacy category masthead."""
     blocks = [block.strip() for block in str(message or "").split("\n\n") if block.strip()]
@@ -168,7 +176,7 @@ def public_story_ready(
         return False, "og_type_not_article"
     if _normal_url(parser.meta.get("og:url", "")) != _normal_url(url):
         return False, "og_url_mismatch"
-    if _normal_text(parser.meta.get("og:title", "")) != _normal_text(expected_headline):
+    if not _og_title_matches(parser.meta.get("og:title", ""), expected_headline):
         return False, "og_title_mismatch"
     if not _normal_text(parser.meta.get("og:description", "")):
         return False, "og_description_missing"
@@ -339,6 +347,18 @@ def self_test() -> int:
                     f'<meta property="og:description" content="Descriere verificată"></head></html>'
                 ).encode()
 
+        class BrandedTitleResponse(FakePublicResponse):
+            def read(self, *args):
+                url = sample["link"]
+                title = sample["canonical_headline"] + OG_TITLE_SUFFIX
+                return (
+                    f'<html><head><link rel="canonical" href="{url}">'
+                    f'<meta property="og:type" content="article">'
+                    f'<meta property="og:url" content="{url}">'
+                    f'<meta property="og:title" content="{title}">'
+                    f'<meta property="og:description" content="Descriere verificată"></head></html>'
+                ).encode()
+
         class FakeGraphResponse:
             status = 200
             def __enter__(self): return self
@@ -356,6 +376,7 @@ def self_test() -> int:
             return FakeGraphResponse()
 
         assert public_story_ready(sample["link"], sample["canonical_headline"], request_fn=fake_open) == (True, "ready")
+        assert public_story_ready(sample["link"], sample["canonical_headline"], request_fn=lambda request, timeout=0: BrandedTitleResponse()) == (True, "ready")
         assert public_story_ready(sample["link"], sample["canonical_headline"], request_fn=lambda request, timeout=0: WrongTitleResponse()) == (False, "og_title_mismatch")
         post_id = graph_feed_post(page_id="123", token="fixture-token", version="v26.0", item=sample, request_fn=fake_open)
         assert post_id == "123_page_456"
