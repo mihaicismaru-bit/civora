@@ -13,7 +13,7 @@ from typing import Any
 
 # Executed by the canonical EU Direct workflow; legacy proof history is no longer
 # an operational restore source. Canonical generic EU_DIRECT artifacts are the
-# sole previous/LKG owner.
+# sole previous/LKG owner after bounded bootstrap migration.
 FLAGS = (
     "material_fact_use", "open_call_authorized", "closed_call_authorized",
     "deadline_authorized", "budget_authorized", "eligibility_authorized",
@@ -272,12 +272,12 @@ def main() -> int:
     boundary = enforce_boundary(root)
     history = stage_history(root)
 
-    # City-to-City Exchanges is a distinct EUI capacity-building opportunity.
-    # Run it inside the same canonical EU Direct artifact boundary instead of
-    # creating a second live workflow.
-    c2c_env = os.environ.copy()
-    c2c_env["PYTHONPATH"] = f"{ingest}:{repo_root / 'partener-eu' / 'ops'}"
-    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_c2c_canonical.py")], env=c2c_env)
+    # Distinct exact EU Direct sidecars share this canonical workflow/artifact
+    # boundary instead of creating permanent parallel workflows.
+    sidecar_env = os.environ.copy()
+    sidecar_env["PYTHONPATH"] = f"{ingest}:{repo_root / 'partener-eu' / 'ops'}"
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_eui_c2c_canonical.py")], env=sidecar_env)
+    run([sys.executable, str(repo_root / "partener-eu" / "ops" / "run_horizon_cl5_2026_09_canonical.py")], env=sidecar_env)
 
     print(json.dumps({"restore": restore, "boundary": boundary, "history": history}, sort_keys=True))
     return 0
