@@ -24,6 +24,7 @@ SOURCE_FAMILY = "EU_DIRECT"
 PROGRAMME_FAMILY = "LIFE"
 AUTHORITY_CLASS = "EU_COMMISSION_FUNDING_TENDERS"
 OBSERVATION_LAYER = "EXACT_CURRENT_TOPIC_NON_AUTHORIZING"
+PRIORITY_EXACT_WATCH_REFERENCES = ("LIFE-2026-CET-BUILDSKILLS",)
 REF_RE = re.compile(r"^LIFE-[A-Z0-9]+(?:-[A-Z0-9]+)+$", re.IGNORECASE)
 DIRECT_TYPES = {"1", "2"}
 MATERIAL_FLAGS = (
@@ -171,6 +172,36 @@ def select_life_candidate(taxonomy: Mapping[str, Any]) -> dict[str, Any]:
         "source_semantic_fingerprint": row.get("source_semantic_fingerprint"),
         "source_status_label_candidate": row.get("status_label_candidate"),
         "source_authority_url_candidate": row.get("authority_url_candidate"),
+    }
+
+
+def select_life_execution_target(taxonomy: Mapping[str, Any]) -> dict[str, Any]:
+    """Select the bounded exact LIFE identity to re-check now.
+
+    The programme taxonomy remains discovery-only and may omit a high-value topic
+    from its bounded sample. Priority identities therefore enter only as explicit
+    exact-recheck pointers; the structured F&T Search/Facet responses plus exact
+    topic readback remain the authority for all observed current semantics.
+    """
+    fallback = select_life_candidate(taxonomy)
+    reference = validate_reference(PRIORITY_EXACT_WATCH_REFERENCES[0])
+    sample_rows = [
+        row for row in taxonomy.get("records") or []
+        if str(row.get("identifier") or "").strip().upper() == reference
+    ]
+    return {
+        "identifier": reference,
+        "handoff_mode": "EXPLICIT_PRIORITY_EXACT_RECHECK",
+        "priority_rank": 0,
+        "priority_watch_references": list(PRIORITY_EXACT_WATCH_REFERENCES),
+        "bounded_sample_contains_target": bool(sample_rows),
+        "bounded_sample_fallback": fallback,
+        "source_taxonomy_fingerprint": sample_rows[0].get("taxonomy_fingerprint") if sample_rows else None,
+        "source_semantic_fingerprint": sample_rows[0].get("source_semantic_fingerprint") if sample_rows else None,
+        "source_status_label_candidate": sample_rows[0].get("status_label_candidate") if sample_rows else None,
+        "source_authority_url_candidate": ft.topic_url(reference),
+        "material_fact_use": False,
+        "exact_recheck_required": True,
     }
 
 
@@ -367,10 +398,14 @@ def main() -> int:
     reference = args.reference
     if args.taxonomy:
         taxonomy = json.loads(args.taxonomy.read_text(encoding="utf-8"))
-        source_candidate = select_life_candidate(taxonomy)
-        if reference and validate_reference(reference) != source_candidate["identifier"]:
-            raise ValueError("explicit LIFE reference does not match deterministic taxonomy handoff")
-        reference = source_candidate["identifier"]
+        if reference:
+            source_candidate = select_life_candidate(taxonomy)
+            if validate_reference(reference) != source_candidate["identifier"]:
+                raise ValueError("explicit LIFE reference does not match deterministic taxonomy handoff")
+            reference = source_candidate["identifier"]
+        else:
+            source_candidate = select_life_execution_target(taxonomy)
+            reference = source_candidate["identifier"]
     if not reference:
         raise ValueError("--taxonomy or --reference is required")
 
