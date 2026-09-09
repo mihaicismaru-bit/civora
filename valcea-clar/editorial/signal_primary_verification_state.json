@@ -2,19 +2,70 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-09T21:34:00+03:00",
+  "generated_at": "2026-09-10T00:11:03+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-09T21:32:51+03:00",
-  "task_count": 71,
+  "queue_generated_at": "2026-09-10T00:09:36+03:00",
+  "task_count": 75,
   "primary_match_count": 0,
-  "no_match_count": 36,
-  "unrouted_count": 35,
-  "target_count": 16,
-  "targets_ok": 13,
+  "no_match_count": 38,
+  "unrouted_count": 37,
+  "target_count": 17,
+  "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "7a1e821b075c4338839b5f42",
+      "signal_title": "Un vis devenit realitate la Orlești: Centrul „Sfânta Maria” a fost inaugurat în zi de mare sărbătoare",
+      "signal_url": "https://www.impactreal.ro/2026/09/09/un-vis-devenit-realitate-la-orlesti-centrul-sfanta-maria-a-fost-inaugurat-in-zi-de-mare-sarbatoare/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-09T22:58:01+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "7813c493840ab545a27be714",
+      "signal_title": "Vreme mai caldă decât normalul perioadei, cu ploi izolate la munte",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/09/vreme-mai-calda-decat-normalul-perioadei-cu-ploi-izolate-la-munte/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-09T22:42:14+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "4b21a0ceaeddca47eab38903",
+      "signal_title": "Percheziții în dosarul vacanțelor plătite, dar inexistente. Păgubiți din mai multe județe",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/09/perchezitii-in-dosarul-vacantelor-platite-dar-inexistente-pagubiti-din-mai-multe-judete/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-09T21:36:41+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "b28a91c9226396605b6f9ad4",
       "signal_title": "Dumitru Cîmpean, profesorul din Gura Râului care a renunțat la strung pentru catedră. El știe povestea satului mai bine ca oricine",
@@ -678,6 +729,44 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
+      "signal_id": "f99220895a1ca8abb00c708b",
+      "signal_title": "Metoda Miyawaki, în versiune sibiană: „pădurea urbană” de 3.700 de arbori plantată acum aproape trei ani s-a redus la câțiva puieți. „Nu a avut nimeni răbdare cu ei”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/09/padure-urbana-cartierul-tineretului-sibiu-disparuta/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-09T12:28:21+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
       "signal_id": "cd8b93d57cd9604e4eb59c28",
       "signal_title": "Femeie din Râmnicu Vâlcea, reținută după ce ar fi furat 175.000 de lei din gestiunea unei firme",
       "signal_url": "https://vocea-valcii.ro/dezvaluiri/femeie-din-ramnicu-valcea-retinuta-dupa-ce-ar-fi-furat-175-000-de-lei-din-gestiunea-unei-firme/",
@@ -951,7 +1040,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 9
         }
       ],
       "publication_authority": "NONE",
@@ -1341,7 +1430,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 9
         }
       ],
       "publication_authority": "NONE",
