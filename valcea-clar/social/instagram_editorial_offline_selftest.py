@@ -46,7 +46,17 @@ def main() -> int:
     assert str(image.get("source_url") or "").startswith("https://")
     assert str(image.get("direct_source_url") or "").startswith("https://")
 
-    product = adapter._fixture_product(FIXTURE_STORY_ID)
+    story = {
+        "id": FIXTURE_STORY_ID,
+        "editorial_type": "fact_check",
+        "section": "ENERGIE",
+        "headline": "CET Govora: cine a decis oprirea",
+        "dek": "Documentele oficiale permit verificarea afirmațiilor publice despre oprire.",
+        "paragraphs": ["Document verificat suficient pentru test." for _ in range(5)],
+    }
+    product = adapter.render_product(story, visual, adapter.load(adapter.SYSTEM))
+    if product.get("status") != "READY":
+        raise AssertionError(f"hermetic fixture not READY: {product}")
     assert product["native_format"] == "carousel"
     assert 2 <= len(product["assets"]) <= 10
     assert product["assets"][0]["kind"] == "editorial_composite"
