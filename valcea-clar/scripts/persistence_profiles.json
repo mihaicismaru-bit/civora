@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "product": "VÂLCEA CLAR semantic persistence profiles",
-  "policy": "Only explicitly listed volatile metadata may be ignored. Source hashes, statuses, counters, candidate sets and list ordering remain semantic.",
+  "policy": "Only explicitly listed volatile metadata may be ignored. Source hashes, statuses, counters, candidate sets and list ordering remain semantic unless a named profile explicitly classifies a field as volatile.",
   "profiles": {
     "structured_alerts": [
       "generated_at"
@@ -44,6 +44,7 @@
     ],
     "source_discovery": [
       "checked_at_epoch",
+      "content_sha256",
       "generated_at",
       "observed_at",
       "updated_at"
