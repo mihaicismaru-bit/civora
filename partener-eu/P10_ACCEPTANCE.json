@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-09-10T08:12:04Z",
+    "utc": "2026-09-10T09:58:45Z",
     "source_pass": 4,
     "source_degraded": 1,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-PR-CENTRU-DIGITAL-2 — ADR Centru — Întreprinderi digitale Apel 2; dependent material facts blocked fail-closed; SRC-PR-CENTRU-ACTIUNI — ADR Centru — Acțiuni; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-09-10T08:15:55Z",
+    "utc": "2026-09-10T09:59:00Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260910T081555Z",
+    "final_url": "https://partener.eu/?p10_probe=20260910T095900Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260910T081555Z",
+        "final_url": "https://partener.eu/?p10_probe=20260910T095900Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260910T081555Z",
+        "final_url": "https://partener.eu/?p10_probe=20260910T095900Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260910T081555Z",
-            "to_url": "https://partener.eu/?p10_probe=20260910T081555Z"
+            "from_url": "http://partener.eu/?p10_probe=20260910T095900Z",
+            "to_url": "https://partener.eu/?p10_probe=20260910T095900Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260910T081555Z",
+        "final_url": "https://partener.eu/?p10_probe=20260910T095900Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260910T081555Z",
-            "to_url": "https://partener.eu/?p10_probe=20260910T081555Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260910T095900Z",
+            "to_url": "https://partener.eu/?p10_probe=20260910T095900Z"
           }
         ],
         "content_verified": true,
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-09-10T08:15:55Z",
-    "validation_run_started": "2026-09-10T08:12:04Z",
+    "utc": "2026-09-10T09:59:00Z",
+    "validation_run_started": "2026-09-10T09:58:45Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "e977d3d661272b598acf8f47724cdd5905a2bcc266dd4b93c0b6a66ce813915c",
-      "history_sha256": "e977d3d661272b598acf8f47724cdd5905a2bcc266dd4b93c0b6a66ce813915c",
-      "history_path": "validation/history/20260910T081204Z.json",
+      "latest_sha256": "706ba1681f782b60a77a8433e662e63f5dd6b231d262f14eab14f7c1f2c0550d",
+      "history_sha256": "706ba1681f782b60a77a8433e662e63f5dd6b231d262f14eab14f7c1f2c0550d",
+      "history_path": "validation/history/20260910T095845Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "1deb92fdacf89d2534befee57917592c144a136966737c3897a5c1362288d781",
-      "checkpoint_sha256": "1deb92fdacf89d2534befee57917592c144a136966737c3897a5c1362288d781",
+      "source_state_sha256": "c130ce1aa05cb6b0126a96d9e252121f4d779f2066625bf1a1331c19d50cc395",
+      "checkpoint_sha256": "c130ce1aa05cb6b0126a96d9e252121f4d779f2066625bf1a1331c19d50cc395",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-09-10T04:56:15.055146Z",
-      "age_seconds": 11980,
+      "age_seconds": 18165,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -181,12 +181,12 @@
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-09-10T05:03:08.165672+00:00",
+      "observed_at": "2026-09-10T09:57:58.584558+00:00",
       "status": "PASS",
       "item_count": 32,
       "error_count": 41,
-      "hash_change_candidates": 0,
-      "material_signal_candidates": 0,
+      "hash_change_candidates": 27,
+      "material_signal_candidates": 27,
       "auth_dependency_count": 29,
       "auth_dependencies": [
         {
@@ -260,8 +260,8 @@
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
         },
         {
-          "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Fschema-de-energie%2F&culture=ro",
-          "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/schema-de-energie/",
+          "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Ffondul-pentru-modernizare%2F&culture=ro",
+          "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/fondul-pentru-modernizare/",
           "status": "AUTH_OR_ACCESS_DEPENDENT",
           "materialFactAction": "NONE",
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -393,7 +393,7 @@
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
         }
       ],
-      "resolution_task_required": false,
+      "resolution_task_required": true,
       "resolution_task_present_fail_closed": true,
       "material_facts_auto_promoted": false
     },
@@ -486,7 +486,7 @@
       "integrity_pass": true,
       "registry_health": "DEGRADED",
       "registry_hash_changes": 1,
-      "afir_hash_changes": 0,
+      "afir_hash_changes": 27,
       "peo_calendar_changes": 0,
       "mipe_health": "PASS",
       "autonomous_orchestration_configured": true,
