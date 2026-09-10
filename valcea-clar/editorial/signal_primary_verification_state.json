@@ -2,19 +2,118 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-10T04:11:05+03:00",
+  "generated_at": "2026-09-10T09:00:19+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-10T04:09:48+03:00",
+  "queue_generated_at": "2026-09-10T08:58:46+03:00",
   "task_count": 74,
   "primary_match_count": 0,
-  "no_match_count": 37,
-  "unrouted_count": 37,
+  "no_match_count": 38,
+  "unrouted_count": 36,
   "target_count": 17,
-  "targets_ok": 13,
+  "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "1958b4495b8938c8eee3ef2b",
+      "signal_title": "FOTO: Patru tineri răniți într-un ACCIDENT, noaptea trecută, la BUDEȘTI. Au intrat cu mașina într-un cap de pod",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/10/foto-patru-tineri-raniti-intr-un-accident-noaptea-trecuta-la-budesti-au-intrat-cu-masina-intr-un-cap-de-pod/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-10T08:55:45+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "028c97f1af207aa10e63f0cf",
+      "signal_title": "Primăria Râmnicului vine în sprijinul copiilor cu dizabilități relocați de la Centrul „Andreea”",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/10/primaria-ramnicului-vine-in-sprijinul-copiilor-cu-dizabilitati-relocati-de-la-centrul-andreea/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-10T07:57:13+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "242ba9318ec77a26c9b9ca14",
+      "signal_title": "Bănci la cerere pentru locuitorii din Turnu Roșu: proiectul vrea să creeze „insulițe de socializare” în comunitate. Primar: „Trăim în vremuri în care oamenii sunt afectați de singurătate”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/10/banci-la-cerere-pentru-locuitorii-din-turnu-rosu-proiectul-vrea-sa-creeze-insulite-de-socializare-in-comunitate-primar-traim-in-vremuri-in-care-oamenii-sunt-afectati-de-s/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-10T07:40:17+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "3d7a5720b8e9155b442cee50",
       "signal_title": "PAMFLET | „Regele Râmnicului” și misterul ochilor negri: când imobiliarele devin... sport de contact",
@@ -50,6 +149,44 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "b9add9084e5526269eb52695",
+      "signal_title": "Cristian, elevul de clasa a X-a care a câștigat 10.000 de euro pentru un proiect social: „Mi-ar plăcea să fim mai deschiși ca societate, să judecăm mai puțin și să ne așezăm la nivelul persoanei din fața noastră”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/09/cristian-elevul-de-clasa-a-x-a-care-a-castigat-10-000-de-euro-pentru-un-proiect-social-mi-ar-placea-sa-fim-mai-deschisi-ca-societate-sa-judecam-mai-putin-si-sa-ne-asezam-la-nivelul-persoan/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-09T22:14:48+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "4b21a0ceaeddca47eab38903",
@@ -217,7 +354,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -289,7 +426,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -373,7 +510,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -476,7 +613,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -547,7 +684,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -619,7 +756,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -693,7 +830,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -769,7 +906,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -856,7 +993,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -954,7 +1091,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1014,7 +1151,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1050,9 +1187,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 9
         }
       ],
       "publication_authority": "NONE",
@@ -1148,7 +1285,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1208,7 +1345,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1280,7 +1417,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1440,9 +1577,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 9
         }
       ],
       "publication_authority": "NONE",
@@ -1502,7 +1639,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1510,18 +1647,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "9a9c4b92bfe8010e59aff371",
-      "signal_title": "Județul Sibiu are șase locații în Top 100 cele mai recenzate afaceri HoReCa din România. Castelul de Lut de la Porumbacu de Sus, pe locul 3 la nivel național",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/08/judetul-sibiu-are-sase-locatii-in-top-100-cele-mai-recenzate-afaceri-horeca-din-romania-castelul-de-lut-de-la-porumbacu-de-sus-pe-locul-3-la-nivel-national/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-08T15:20:20+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "f4ed4f7e470e862f2a3d9d76",
@@ -1534,44 +1659,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "06ee04ab138522c93709ee9e",
-      "signal_title": "Primăria Sibiu anunță că monitorizează deja traficul. Semafoarele din giratoriile centrale pornesc după colectarea datelor din prima săptămână de școală",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/08/primaria-sibiu-anunta-ca-monitorizeaza-deja-traficul-semafoarele-din-giratoriile-centrale-pornesc-dupa-colectarea-datelor-din-prima-saptamana-de-scoala/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-08T13:06:50+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "fdcac12717165f1c82465b93",
@@ -1626,7 +1713,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -1664,18 +1751,6 @@
       "signal_url": "https://seintamplainvalcea.ro/2026/09/08/un-valcean-s-a-ales-cu-dosar-penal-dupa-ce-a-urcat-un-minor-de-15-ani-la-volan/",
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_published_at": "2026-09-08T10:07:34+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "a6781d72035c682e57e3007d",
-      "signal_title": "Baschet european la Vâlcea! CS Vâlcea 1924 întâlnește două echipe cu tradiție la Boromir Autumn Cup",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/07/baschet-european-la-valcea-cs-valcea-1924-intalneste-doua-echipe-cu-traditie-la-boromir-autumn-cup/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-07T22:37:14+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -1889,7 +1964,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -1922,64 +1997,16 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "178b3200080ad269000c46bf",
-      "signal_title": "Mircia Gutău nu va mai câștiga Primăria Râmnicu Vâlcea în 2028. Vezi cine are șansele cele mai mari",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/mircia-gutau-nu-va-mai-castiga-primaria-ramnicu-valcea-in-2028-vezi-cine-are-sansele-cele-mai-mari/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-07T05:18:57+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        }
-      ],
+      "signal_id": "fbaf068144bf16fc56b085d2",
+      "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
+      "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
+      "signal_publisher": "EuroVâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
-      "signal_is_fact": false,
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d3ae5cdc0b0ef0c44870c2c4",
@@ -2022,7 +2049,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -2059,42 +2086,6 @@
       "signal_title": "Micile afaceri din Sibiu",
       "signal_url": "https://www.turnulsfatului.ro/exclusiv/micile-afaceri-din-sibiu/",
       "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "485561d3bd66859354c995c9",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=S-a%20%C3%AEncheiat%20cu%20ambuteiajele%20la%20Spitalul%20de%20Urgen%C8%9B%C4%83&url=https%3A%2F%2Fwww.curierul.ro%2Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%2F",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "0a9f0e5efa5edfde1c95a354",
-      "signal_title": "Declaratie de accesibilitate",
-      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-      "signal_publisher": "Realitatea Vâlceană",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "fbaf068144bf16fc56b085d2",
-      "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
-      "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
-      "signal_publisher": "EuroVâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
@@ -2153,7 +2144,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -2161,6 +2152,30 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "485561d3bd66859354c995c9",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=S-a%20%C3%AEncheiat%20cu%20ambuteiajele%20la%20Spitalul%20de%20Urgen%C8%9B%C4%83&url=https%3A%2F%2Fwww.curierul.ro%2Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%2F",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "0a9f0e5efa5edfde1c95a354",
+      "signal_title": "Declaratie de accesibilitate",
+      "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
     }
   ],
   "verification_policy": {
