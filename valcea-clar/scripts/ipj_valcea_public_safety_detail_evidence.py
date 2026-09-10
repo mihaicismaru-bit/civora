@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
-"""Bounded first-party IPJ Vâlcea detail evidence for VÂLCEA CLAR.
+"""Bounded first-party IPJ Vâlcea article-body evidence for VÂLCEA CLAR.
 
-This verifier follows only allow-listed first-party IPJ Vâlcea article URLs that
-were discovered by the public-safety reference adapter. It hashes the exact
-article bytes and captures small, evidence-bound text fragments with explicit
-epistemic tags. The tags distinguish what the police source reports observing,
-procedural measures, allegations/suspicion language and road/public-safety
-measures. None of those tags turns a police statement into an independently
-verified fact, a finding of criminal liability or publication authorization.
+Only text inside an explicit article/content scope may become field evidence.
+Navigation, headers, footers, sidebars and other page chrome are ignored even if
+they contain police-related keywords. If an article body cannot be identified,
+the detail stays fail-closed instead of falling back to whole-page text.
 """
 from __future__ import annotations
 
@@ -33,31 +30,18 @@ from ipj_valcea_public_safety_reference_adapter import (
 )
 
 SCHEMA = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_V1"
-PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_06_NAV_FILTER"
+PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_10_P0_ARTICLE_SCOPE_RECONCILED"
 SOURCE_FAMILY = "IPJ_VALCEA_PUBLIC_SAFETY"
 AUTHORITY_CLASS = "FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE"
 OBSERVATION_STATE = "POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING"
 SOURCE_ASSERTION_SCOPE = "POLICE_FIRST_PARTY_STATEMENT_ONLY_NOT_INDEPENDENT_VERIFICATION"
-HIGH_VALUE_TOPICS = {
-    "ROAD_SAFETY",
-    "CRIME_INVESTIGATION",
-    "ECONOMIC_CRIME",
-    "PUBLIC_ORDER",
-}
+HIGH_VALUE_TOPICS = {"ROAD_SAFETY", "CRIME_INVESTIGATION", "ECONOMIC_CRIME", "PUBLIC_ORDER"}
 MAX_DETAILS = 12
 MAX_BYTES = 2_500_000
 MAX_FIELD_EVIDENCE = 8
 MAX_FRAGMENT_CHARS = 420
 ALLOWED_CONTENT_TYPES = {"text/html", "application/xhtml+xml", "text/plain"}
-USER_AGENT = "CIVORA-Valcea-Clar-IPJ-Detail-Evidence/1.0"
-
-# Exact first-party chrome labels that can contain evidence keywords but are not
-# article evidence. Keep this denylist deliberately narrow so legitimate police
-# prose containing terms such as "arest" or "reținere" remains eligible.
-IGNORED_VISIBLE_TEXT_SEGMENTS = {
-    "program centrul de reţinere și arest preventiv".casefold(),
-    "program centrul de reținere și arest preventiv".casefold(),
-}
+USER_AGENT = "CIVORA-Valcea-Clar-IPJ-Detail-Evidence/1.1"
 
 NON_AUTHORIZING_FLAGS = {
     "material_fact_use": False,
@@ -80,45 +64,43 @@ NON_AUTHORIZING_FLAGS = {
 }
 
 TAG_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
-    (
-        "ALLEGATION_OR_SUSPICION",
-        (
-            "ar fi", "bănuit", "banuit", "suspect", "suspici", "presupus",
-            "acuzat", "indicii", "cercetat pentru", "cercetată pentru",
-            "cercetata pentru", "cercetat sub aspectul", "cercetată sub aspectul",
-        ),
-    ),
-    (
-        "PROCEDURAL_MEASURE",
-        (
-            "reținut", "retinut", "reținere", "retinere", "arest", "control judiciar",
-            "perchezi", "mandat", "dosar penal", "măsură preventivă", "masura preventiva",
-            "cercetările continuă", "cercetarile continua", "sesizat parchetul",
-        ),
-    ),
-    (
-        "ROAD_OR_PUBLIC_SAFETY_MEASURE",
-        (
-            "trafic", "circula", "restric", "rutier", "dn 7", "dn7", "filtru",
-            "acțiune", "actiune", "control", "ordine publică", "ordine publica",
-            "siguranță publică", "siguranta publica", "sancți", "sancti",
-        ),
-    ),
-    (
-        "POLICE_REPORTED_OBSERVATION",
-        (
-            "polițiștii au", "politistii au", "polițiștii din", "politistii din",
-            "au depistat", "au identificat", "au oprit", "au constatat", "au intervenit",
-            "a fost depistat", "a fost identificat", "în urma verificărilor", "in urma verificarilor",
-        ),
-    ),
+    ("ALLEGATION_OR_SUSPICION", (
+        "ar fi", "bănuit", "banuit", "suspect", "suspici", "presupus", "acuzat",
+        "indicii", "cercetat pentru", "cercetată pentru", "cercetata pentru",
+        "cercetat sub aspectul", "cercetată sub aspectul",
+    )),
+    ("PROCEDURAL_MEASURE", (
+        "reținut", "retinut", "reținere", "retinere", "arest", "control judiciar",
+        "perchezi", "mandat", "dosar penal", "măsură preventivă", "masura preventiva",
+        "cercetările continuă", "cercetarile continua", "sesizat parchetul",
+    )),
+    ("ROAD_OR_PUBLIC_SAFETY_MEASURE", (
+        "trafic", "circula", "restric", "rutier", "dn 7", "dn7", "filtru",
+        "acțiune", "actiune", "control", "ordine publică", "ordine publica",
+        "siguranță publică", "siguranta publica", "sancți", "sancti",
+    )),
+    ("POLICE_REPORTED_OBSERVATION", (
+        "polițiștii au", "politistii au", "polițiștii din", "politistii din",
+        "au depistat", "au identificat", "au oprit", "au constatat", "au intervenit",
+        "a fost depistat", "a fost identificat", "în urma verificărilor", "in urma verificarilor",
+    )),
 )
 ALLOWED_TAGS = {tag for tag, _ in TAG_RULES}
-
 ROMANIAN_MONTHS = (
     "ianuarie", "februarie", "martie", "aprilie", "mai", "iunie",
     "iulie", "august", "septembrie", "octombrie", "noiembrie", "decembrie",
 )
+
+SKIP_TAGS = {
+    "script", "style", "noscript", "svg", "template", "nav", "header",
+    "footer", "aside", "form", "button",
+}
+CONTENT_HINTS = {
+    "article", "article-body", "article-content", "article-detail", "article-text",
+    "news", "news-body", "news-content", "news-detail", "news-article",
+    "stire", "stiri", "stire-content", "stire-detalii", "stire-text",
+    "post-content", "entry-content", "content-article", "page-content",
+}
 
 
 @dataclass(frozen=True)
@@ -151,39 +133,77 @@ class DetailEvidence:
     parser_version: str = PARSER_VERSION
 
 
-class VisibleTextParser(HTMLParser):
+class ArticleBodyParser(HTMLParser):
+    """Collect title globally but evidence text only under explicit content roots."""
+
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
+        self.stack: list[tuple[str, bool, bool]] = []
         self.skip_depth = 0
+        self.scope_depth = 0
+        self.scope_seen = False
         self.in_title = False
         self.title_parts: list[str] = []
         self.segments: list[str] = []
 
+    @staticmethod
+    def _starts_scope(tag: str, attrs: list[tuple[str, str | None]]) -> bool:
+        if tag in {"main", "article"}:
+            return True
+        if tag not in {"div", "section"}:
+            return False
+        values = " ".join(
+            value or "" for key, value in attrs
+            if key.lower() in {"id", "class", "role"}
+        ).casefold()
+        tokens = {token for token in re.split(r"[^a-z0-9ăâîșşțţ_-]+", values) if token}
+        if "article" in tokens or "main" in tokens:
+            return True
+        return any(hint in values for hint in CONTENT_HINTS)
+
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         name = tag.lower()
-        if name in {"script", "style", "noscript", "svg", "template"}:
+        skip_start = name in SKIP_TAGS
+        scope_start = False if self.skip_depth or skip_start else self._starts_scope(name, attrs)
+        self.stack.append((name, skip_start, scope_start))
+        if skip_start:
             self.skip_depth += 1
-        elif name == "title" and not self.skip_depth:
+        if scope_start:
+            self.scope_depth += 1
+            self.scope_seen = True
+        if name == "title" and not self.skip_depth:
             self.in_title = True
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        return
 
     def handle_endtag(self, tag: str) -> None:
         name = tag.lower()
         if name == "title":
             self.in_title = False
-        elif name in {"script", "style", "noscript", "svg", "template"} and self.skip_depth:
-            self.skip_depth -= 1
+        match = None
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == name:
+                match = index
+                break
+        if match is None:
+            return
+        for _name, skip_start, scope_start in reversed(self.stack[match:]):
+            if scope_start and self.scope_depth:
+                self.scope_depth -= 1
+            if skip_start and self.skip_depth:
+                self.skip_depth -= 1
+        del self.stack[match:]
 
     def handle_data(self, data: str) -> None:
-        if self.skip_depth:
-            return
         text = " ".join(data.split())
         if not text:
             return
-        if text.casefold() in IGNORED_VISIBLE_TEXT_SEGMENTS:
-            return
-        self.segments.append(text)
         if self.in_title:
             self.title_parts.append(text)
+        if self.skip_depth or self.scope_depth <= 0:
+            return
+        self.segments.append(text)
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -233,17 +253,20 @@ def _find_explicit_date(text: str) -> str | None:
     if numeric:
         return numeric.group(0)
     months = "|".join(ROMANIAN_MONTHS)
-    textual = re.search(rf"\b(?:0?[1-9]|[12][0-9]|3[01])\s+(?:{months})\s+20\d{{2}}\b", text, re.IGNORECASE)
+    textual = re.search(
+        rf"\b(?:0?[1-9]|[12][0-9]|3[01])\s+(?:{months})\s+20\d{{2}}\b",
+        text,
+        re.IGNORECASE,
+    )
     return textual.group(0) if textual else None
 
 
 def _tags_for_fragment(fragment: str) -> tuple[str, ...]:
     lowered = fragment.casefold()
-    tags: list[str] = []
-    for tag, needles in TAG_RULES:
-        if any(needle.casefold() in lowered for needle in needles):
-            tags.append(tag)
-    return tuple(tags)
+    return tuple(
+        tag for tag, needles in TAG_RULES
+        if any(needle.casefold() in lowered for needle in needles)
+    )
 
 
 def _split_candidate_fragments(segments: list[str]) -> list[str]:
@@ -256,17 +279,13 @@ def _split_candidate_fragments(segments: list[str]) -> list[str]:
     return candidates
 
 
-def _extract_html_evidence(body: bytes) -> tuple[str | None, str | None, tuple[FieldEvidence, ...], dict[str, int]]:
-    parser = VisibleTextParser()
-    parser.feed(body.decode("utf-8", errors="replace"))
-    visible_title = " ".join(parser.title_parts).strip() or None
-    visible_text = " ".join(parser.segments)
-    explicit_date = _find_explicit_date(visible_text)
-
+def _evidence_from_segments(
+    segments: list[str],
+) -> tuple[tuple[FieldEvidence, ...], dict[str, int]]:
     evidence: list[FieldEvidence] = []
     seen: set[str] = set()
     tag_counts: dict[str, int] = {}
-    for fragment in _split_candidate_fragments(parser.segments):
+    for fragment in _split_candidate_fragments(segments):
         tags = _tags_for_fragment(fragment)
         if not tags:
             continue
@@ -285,17 +304,50 @@ def _extract_html_evidence(body: bytes) -> tuple[str | None, str | None, tuple[F
             sort_keys=True,
             separators=(",", ":"),
         )
-        evidence.append(FieldEvidence(excerpt=excerpt, epistemic_tags=tags, evidence_sha256=_sha256_text(basis)))
+        evidence.append(FieldEvidence(excerpt, tags, _sha256_text(basis)))
         for tag in tags:
             tag_counts[tag] = tag_counts.get(tag, 0) + 1
         if len(evidence) == MAX_FIELD_EVIDENCE:
             break
-    return visible_title, explicit_date, tuple(evidence), dict(sorted(tag_counts.items()))
+    return tuple(evidence), dict(sorted(tag_counts.items()))
+
+
+def _extract_html_evidence(
+    body: bytes,
+) -> tuple[str | None, str | None, tuple[FieldEvidence, ...], dict[str, int]]:
+    parser = ArticleBodyParser()
+    parser.feed(body.decode("utf-8", errors="replace"))
+    if not parser.scope_seen or not parser.segments:
+        raise RuntimeError("article_body_scope_not_found")
+    article_text = " ".join(parser.segments)
+    explicit_date = _find_explicit_date(article_text)
+    evidence, tag_counts = _evidence_from_segments(parser.segments)
+    visible_title = " ".join(parser.title_parts).strip() or None
+    return visible_title, explicit_date, evidence, tag_counts
+
+
+def _extract_plaintext_evidence(
+    body: bytes,
+) -> tuple[str | None, str | None, tuple[FieldEvidence, ...], dict[str, int]]:
+    text = body.decode("utf-8", errors="replace")
+    segments = [
+        " ".join(line.split())
+        for line in text.splitlines()
+        if " ".join(line.split())
+    ]
+    evidence, tag_counts = _evidence_from_segments(segments)
+    return None, _find_explicit_date(" ".join(segments)), evidence, tag_counts
 
 
 def _fetch_detail(url: str, source_kind: str, timeout: float = 20.0) -> tuple[bytes, str, str]:
     canonical = _canonical_first_party_target(url, source_kind)
-    request = Request(canonical, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml,text/plain"})
+    request = Request(
+        canonical,
+        headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "text/html,application/xhtml+xml,text/plain",
+        },
+    )
     context = ssl.create_default_context()
     with urlopen(request, timeout=timeout, context=context) as response:
         final_url = _validate_final_url(canonical, response.geturl(), source_kind)
@@ -315,7 +367,8 @@ def build_live_receipt() -> dict[str, Any]:
     if index.get("status") != "PASS":
         raise RuntimeError(f"index_receipt_not_pass:{index.get('status')}")
     candidates = [
-        ref for ref in index.get("references", [])
+        ref
+        for ref in index.get("references", [])
         if ref.get("topic_class") in HIGH_VALUE_TOPICS
     ][:MAX_DETAILS]
 
@@ -326,7 +379,14 @@ def build_live_receipt() -> dict[str, Any]:
         target_url = str(ref.get("target_url") or "")
         try:
             body, final_url, content_type = _fetch_detail(target_url, source_kind)
-            visible_title, explicit_date, field_evidence, tag_counts = _extract_html_evidence(body)
+            extractor = (
+                _extract_plaintext_evidence
+                if content_type == "text/plain"
+                else _extract_html_evidence
+            )
+            visible_title, explicit_date, field_evidence, tag_counts = extractor(body)
+            if not field_evidence:
+                raise RuntimeError("article_body_has_no_tagged_material_evidence")
             details.append(
                 DetailEvidence(
                     source_kind=source_kind,
@@ -379,9 +439,11 @@ def build_live_receipt() -> dict[str, Any]:
             "procedural_measure_is_not_finding_of_guilt": True,
             "numeric_counts_require_separate_field_level_verification": True,
             "road_restriction_requires_current_status_verification": True,
+            "article_body_scope_is_required": True,
+            "whole_page_fallback_for_evidence_is_forbidden": True,
             "sample_is_bounded_and_non_exhaustive": True,
         },
-        "interpretation": "DETAIL_BYTES_AND_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT_ONLY;MATERIAL_FIELDS_REQUIRE_SEPARATE_VERIFICATION",
+        "interpretation": "ONLY_SCOPED_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;PAGE_CHROME_IS_EXCLUDED",
         **NON_AUTHORIZING_FLAGS,
     }
     stable = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -397,20 +459,30 @@ def _self_test() -> None:
     )
     assert good == "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/ac%C8%9Biune-rutier%C4%83?x=1"
     assert _validate_final_url(good, good, news) == good
+
     try:
         _canonical_first_party_target("https://politiaromana.ro/ro/stiri/test", news)
     except ValueError:
         pass
     else:
         raise AssertionError("external police host must not be promoted to IPJ detail authority")
+
     try:
-        _canonical_first_party_target("https://vl.politiaromana.ro/ro/stiri-si-media/comunicate/test", news)
+        _canonical_first_party_target(
+            "https://vl.politiaromana.ro/ro/stiri-si-media/comunicate/test",
+            news,
+        )
     except ValueError:
         pass
     else:
         raise AssertionError("cross-section detail identity must fail closed")
+
     try:
-        _validate_final_url(good, "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/alta-resursa?x=1", news)
+        _validate_final_url(
+            good,
+            "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/alta-resursa?x=1",
+            news,
+        )
     except RuntimeError:
         pass
     else:
@@ -419,28 +491,56 @@ def _self_test() -> None:
     html = (
         "<html><head><title>IPJ Vâlcea - test</title></head><body>"
         "<script>Bărbatul ar fi făcut ceva 1 ianuarie 2099.</script>"
-        "<nav><a>Program Centrul de Reţinere și Arest Preventiv</a></nav>"
+        "<header><nav><p>Polițiștii au control trafic și sancțiuni în meniu 1 ianuarie 2099.</p></nav></header>"
+        "<main><article>"
         "<p>2 septembrie 2026</p>"
         "<p>Polițiștii au oprit un autoturism pentru verificări în trafic.</p>"
         "<p>Din verificări, conducătorul auto ar fi folosit un document necorespunzător.</p>"
         "<p>Persoana a fost reținută pentru 24 de ore, iar cercetările continuă.</p>"
         "<p>Traficul a fost restricționat temporar pe sectorul verificat.</p>"
+        "</article></main>"
+        "<aside><p>Polițiștii au identificat alte știri și acțiuni.</p></aside>"
         "</body></html>"
     ).encode("utf-8")
     title, date_text, field_evidence, tag_counts = _extract_html_evidence(html)
     assert title == "IPJ Vâlcea - test"
     assert date_text == "2 septembrie 2026"
+    observed = " ".join(item.excerpt for item in field_evidence)
+    assert "meniu" not in observed and "alte știri" not in observed
     observed_tags = {tag for item in field_evidence for tag in item.epistemic_tags}
-    assert {"POLICE_REPORTED_OBSERVATION", "ALLEGATION_OR_SUSPICION", "PROCEDURAL_MEASURE", "ROAD_OR_PUBLIC_SAFETY_MEASURE"} <= observed_tags
-    assert not any("Program Centrul de Reţinere" in item.excerpt for item in field_evidence)
+    assert {
+        "POLICE_REPORTED_OBSERVATION",
+        "ALLEGATION_OR_SUSPICION",
+        "PROCEDURAL_MEASURE",
+        "ROAD_OR_PUBLIC_SAFETY_MEASURE",
+    } <= observed_tags
     assert set(tag_counts) <= ALLOWED_TAGS
     assert all(re.fullmatch(r"[0-9a-f]{64}", item.evidence_sha256) for item in field_evidence)
+
+    chrome_only = b"<html><body><nav><p>Politistii au control trafic si sanctiuni.</p></nav></body></html>"
+    try:
+        _extract_html_evidence(chrome_only)
+    except RuntimeError as exc:
+        assert str(exc) == "article_body_scope_not_found"
+    else:
+        raise AssertionError("whole-page fallback must remain fail-closed")
+
+    plaintext = (
+        "10 septembrie 2026\n"
+        "Polițiștii au oprit un autoturism pentru verificări în trafic.\n"
+    ).encode("utf-8")
+    _, plain_date, plain_evidence, _ = _extract_plaintext_evidence(plaintext)
+    assert plain_date == "10 septembrie 2026"
+    assert plain_evidence
+
     assert all(value is False for value in NON_AUTHORIZING_FLAGS.values())
-    print("IPJ Vâlcea public-safety detail evidence self-test PASS")
+    print("IPJ Vâlcea article-body detail evidence self-test PASS")
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Bounded IPJ Vâlcea first-party public-safety detail evidence")
+    parser = argparse.ArgumentParser(
+        description="Bounded IPJ Vâlcea first-party article-body evidence"
+    )
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--live-check", action="store_true")
     parser.add_argument("--output", type=Path)
