@@ -1,0 +1,39 @@
+{
+  "schema_version": "eucons.ai4work_source_register_snapshot.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "artifact_class": "CONTROL_SCHEMA_NOT_EVIDENCE",
+  "purpose": "Define the canonical machine-readable source-register snapshot that must be hash-bound into the final NEEDS_ANALYSIS package after the exact PROD_REAL_EVIDENCE batch has passed NF06, deterministic ranking and adversarial QA.",
+  "prod_status_required": "VERIFIED_FOR_FINAL_PACKAGE",
+  "test_twin_status": "TEST_TWIN_NON_EVIDENCE",
+  "test_twin_evidence_eligible": false,
+  "source_id_pattern": "^S\\d{2,}$",
+  "required_entry_fields": [
+    "source_id",
+    "publisher",
+    "title",
+    "publication_date",
+    "url",
+    "evidence_role",
+    "h1_h5_numeric_points",
+    "project_activity_as_need_evidence",
+    "numeric_rank_eligible"
+  ],
+  "prod_rules": {
+    "unique_source_ids": true,
+    "https_required_for_external_urls": true,
+    "secondary_evidence_h1_h5_numeric_points": 0,
+    "project_activity_as_need_evidence": false,
+    "source_register_numeric_rank_eligible": false,
+    "source_register_may_contextualize_or_challenge_interpretation": true,
+    "source_register_may_change_numeric_h1_h5_order": false,
+    "missing_source_provenance_fails_closed": true,
+    "test_twin_can_be_promoted": false
+  },
+  "final_package_binding": {
+    "canonical_json_sha256_required": true,
+    "needs_analysis_must_embed_source_register_sha256": true,
+    "final_manifest_must_embed_source_register_sha256": true,
+    "respondent_level_records_forbidden_in_source_register": true
+  },
+  "scope_boundary": "This schema is a provenance/control contract, not evidence of need. Official/institutional secondary research may be registered for context and triangulation but contributes zero numeric points to H1-H5. Project activity, funding and training supply cannot be promoted as proof that an AI4WORK need exists."
+}

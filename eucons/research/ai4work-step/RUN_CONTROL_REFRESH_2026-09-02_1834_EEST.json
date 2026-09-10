@@ -1,0 +1,78 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T18:34:46+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "observed_pr_head_before_persist": "4fa0386d302cd8436aa6c26c8b8c2da3ee01df13",
+  "secondary_research_refresh": {
+    "regions_checked": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+    "source_register_high_water_mark": "S38",
+    "new_source_promoted": false,
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "daily_refresh_artifact_reconciled": true,
+    "daily_refresh_artifact": "SECONDARY_EVIDENCE_REFRESH_2026-09-02.json",
+    "screening_notes": [
+      "Centru: ADR Centru's official 1 September 2026 Alba digitalisation-contract update was screened and rejected from need evidence because implementation/funding activity does not measure adult or employer need prevalence.",
+      "Centru: AJOFM Covasna's 2026 hiring-forecast listing remains CANDIDATE_PENDING_SOURCE_CONTENT_READBACK; no finding is inferred without actual report content.",
+      "Sud-Muntenia: AJOFM Prahova's current 2026 proposed course offer was screened as service/supply context and adds zero need-prevalence evidence.",
+      "Sud-Vest Oltenia: AJOFM Dolj's current GREEN SPO DOLJ project information was screened as implementation context and rejected from need evidence; AJOFM Gorj eSPOR solicitation remains process-only context."
+    ]
+  },
+  "call_requirements_refresh": {
+    "gmail_query": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK) -in:spam -in:trash",
+    "matching_new_authority_messages": 0,
+    "matched_non_authority_messages": "GitHub workflow notifications only",
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_queries": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1", "source_export_sha256 PROD_REAL_EVIDENCE"],
+    "eligible_combined_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "public_live_surface_refresh": {
+    "research_routes_expected_from_branch": [
+      "https://eucons.ro/cercetare/ai4work-step/",
+      "https://eucons.ro/cercetare/ai4work-step/adulti/",
+      "https://eucons.ro/cercetare/ai4work-step/angajatori/"
+    ],
+    "research_route_external_readback": "UNVERIFIED_THIS_REFRESH",
+    "research_route_note": "Public search still returned no indexed AI4WORK research route. A secondary direct runtime check could not resolve eucons.ro from the isolated execution environment, so no live-compliance claim is made from that technical failure.",
+    "live_ai4work_article13_verified": false,
+    "live_dedicated_research_form_verified": false
+  },
+  "repository_implementation_state": {
+    "forms_schema": "eucons.research_forms.v0.5",
+    "direct_identifier_fields_allowed_in_research_forms": false,
+    "analytical_free_text_allowed": false,
+    "commercial_tracking_allowed": false,
+    "crm_linkage_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+    "need_analysis_plan_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "collection_frame_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "precollection_method_lock_status": "OPEN_NOT_LOCKED",
+    "precollection_plan_sha256_bound": false,
+    "precollection_frame_sha256_bound": false
+  },
+  "remaining_precollection_boundary": [
+    "Approve exact NEED_ANALYSIS_PLAN and COLLECTION_FRAME and bind both SHA-256 values",
+    "Controller approval of Art. 6(1)(f) LIA/lawful basis and acceptance of the DPIA screening outcome or completion of a DPIA if required",
+    "Final dedicated AI4WORK Article 13 notice with an operational EUROCONSULT privacy contact",
+    "Approved requester-authentication and data-subject-rights procedure",
+    "Account-specific eucons.ro/cPanel/Cloudflare logging-retention-access-security readback proving Raw Access <= 7 days",
+    "Provider-bound proof that live research storage is separate from CRM/webroot and residual backups meet the <= 92-day ceiling",
+    "Active processor/subprocessor, rights-hold and incident-response bindings",
+    "Real CH-* channel entries created only after dissemination authorization",
+    "Fresh explicit human collection-only v0.2 approval"
+  ],
+  "downstream_state": "FAIL_CLOSED_UNTIL_SUFFICIENT_IMMUTABLE_REAL_ADULT_AND_EMPLOYER_BATCH",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false,
+  "real_collection_authorized": false
+}

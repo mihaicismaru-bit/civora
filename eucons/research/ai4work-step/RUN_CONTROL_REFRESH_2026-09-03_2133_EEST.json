@@ -1,0 +1,118 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T21:33:40+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "branch_parent_head": "912ef004494f295a93468ff04d053a112876a325",
+  "secondary_evidence_refresh": {
+    "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
+    "high_water_mark": "S72",
+    "dashboard_expected_reconciliation": "S01-S72",
+    "current_official_reverification": [
+      {
+        "region": "Sud-Vest Oltenia / Olt",
+        "publisher": "ANOFM / AJOFM Olt",
+        "url": "https://www.anofm.ro/olt/categorie/statistica-somaj/",
+        "observed_fact": "The official statistics surface lists STATISTICA SOMAJULUI la data de 31 iulie 2026, published 24.08.2026, corroborating the freshness of the existing July-2026 Olt administrative context.",
+        "classification": "CURRENT_ADMINISTRATIVE_CONTEXT_ZERO_H1_H5"
+      },
+      {
+        "region": "Sud-Muntenia / Arges",
+        "publisher": "ANOFM / AJOFM Arges",
+        "url": "https://www.anofm.ro/arges/categorie/comunicate-de-presa/",
+        "observed_fact": "The official press surface exposes SOMAJ IULIE 2026, dated 20.08.2026. No source-exact numeric value was promoted from the listing wrapper.",
+        "classification": "CURRENT_ADMINISTRATIVE_PUBLICATION_SURFACE_ZERO_H1_H5"
+      },
+      {
+        "region": "Centru / Alba",
+        "publisher": "ADR Centru",
+        "url": "https://www.adrcentru.ro/comunicare/doua-noi-contracte-pentru-digitalizarea-administratiei-publice-locale-din-judetul-alba/",
+        "observed_fact": "ADR Centru reports on 01.09.2026 two new local-public-administration digitalisation contracts for Aiud-Miraslau and Cugir-Sibot, introducing digital solutions for access to public services.",
+        "classification": "CURRENT_DIGITALISATION_INVESTMENT_CONTEXT_ZERO_H1_H5"
+      }
+    ],
+    "candidate_rows_canonicalized": false,
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "administrative_labour_market_data_as_need_prevalence": false,
+    "registry_hygiene_observation": {
+      "duplicate_source_surfaces_observed": [
+        ["S61", "S70"],
+        ["S62", "S71"],
+        ["S66", "S72"]
+      ],
+      "action": "NO_CANONICALIZATION_WITHOUT_EXPLICIT_USER_APPROVAL",
+      "safety_rule": "Duplicates must not be double-counted or used to create additional H1-H5 weight; all listed rows are already zero-weight context."
+    }
+  },
+  "call_requirements_refresh": {
+    "checked_at": "2026-09-03T21:33:40+03:00",
+    "gmail_scope": "newer_than:1d excluding spam/trash and GitHub notifications; AI4WORK, eucons.ro, Cloudflare, Claus Web/ClausWeb, OMIPE, MIPE, PEO",
+    "matching_non_github_authority_or_provider_messages_observed": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "checked_at": "2026-09-03T21:33:40+03:00",
+    "controlled_drive_queries": [
+      "PROD_REAL_EVIDENCE",
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1",
+      "source_export_sha256"
+    ],
+    "search_result_class": "CONTROL_OR_PRE_FINAL_MATERIAL_ONLY",
+    "eligible_immutable_combined_real_adult_employer_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "repo_control_refresh": {
+    "exact_head_before_this_receipt": "912ef004494f295a93468ff04d053a112876a325",
+    "associated_pr_triggered_workflow_runs_observed": 29,
+    "completed_success": 29,
+    "failed_or_null": 0,
+    "interpretation": "All associated current-head repository controls are green, including GDPR, NF06, adversarial QA, public-surface, live-operational, TEST TWIN, final-package and PHP-runtime gates. CI success validates repository controls only; it is not evidence of live provider/account configuration or real need prevalence."
+  },
+  "gdpr_nf06_registry_refresh": {
+    "controller_gate": "CLOSED",
+    "lia_gate": "CLOSED_CONTROLLER_APPROVED",
+    "dpia_gate": "CLOSED_CONTROLLER_ACCEPTED",
+    "privacy_contact_gate": "LIVE_REACHABILITY_OPEN",
+    "rights_retention_gate": "POLICY_AUTH_MECHANICS_CLOSED_LIVE_BINDING_OPEN",
+    "raw_access_live_gate": "OPEN",
+    "processor_chain_gate": "OPEN",
+    "research_only_store_gate": "OPEN",
+    "test_twin_repo_reference_chain": "CLOSED_REPO_REFERENCE_CHAIN",
+    "primary_real_data_gate": "OPEN",
+    "nf06_prod_gate": "OPEN_FAIL_CLOSED",
+    "final_collection_only_approval": "OPEN_NOT_YET_REQUESTED",
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  },
+  "nf06_and_downstream": {
+    "nf06_preingest_implementation": "PREPARED_FAIL_CLOSED",
+    "nf06_prod_ingest_allowed": false,
+    "need_synthesis_allowed": false,
+    "deterministic_h1_h5_ranking_allowed": false,
+    "adversarial_qa_prod_allowed": false,
+    "needs_analysis_finalisation_allowed": false,
+    "reason": "No eligible immutable schema-valid real adult+employer PROD_REAL_EVIDENCE batch exists and live provider/account gates are not yet proven."
+  },
+  "remaining_external_blocker": {
+    "class": "LIVE_ACCOUNT_SPECIFIC_PROVIDER_BOUND",
+    "items": [
+      "exact rendered AI4WORK Article 13 readback and independently working privacy/rights inbound channel",
+      "actual eucons.ro cPanel/Cloudflare Raw Access/archive/access-security/retention readback proving the <=7-day policy on the live account",
+      "current service/account mapping and active processor/subprocessor chain",
+      "provider-bound proof that the research-only store is outside webroot and separate from CRM/commercial storage with authorised access only",
+      "account-specific confirmation of no backup override above <=92 days plus deletion/restore semantics that do not silently reintroduce erased/held records",
+      "provider-bound rights-hold/erasure and incident-response smoke evidence in TEST_TWIN_NON_EVIDENCE"
+    ]
+  },
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

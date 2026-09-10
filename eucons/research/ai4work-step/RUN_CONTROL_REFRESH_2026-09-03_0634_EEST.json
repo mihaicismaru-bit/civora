@@ -1,0 +1,60 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.4",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T06:34:45+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "secondary_research": {
+    "source_register_high_water_mark": "S42",
+    "new_source_promoted": false,
+    "source_revalidated": "S37",
+    "region": "Centru",
+    "change": "S37 provenance was strengthened with an independent institutional corroboration from Universitatea Lucian Blaga din Sibiu, an official FIT EDIH 2.0 partner. Both the FIT EDIH institutional page and ULBS report the same cross-sectional study basis: questionnaires and interviews with more than 600 organisations across all six counties of Centru, with published finding that digitalisation is recognised as necessary while implementation remains fragmented, especially among small enterprises and local public administrations.",
+    "classification_after_revalidation": "DIRECT_COMPLEMENTARY_INSTITUTIONAL_CORROBORATED_SAMPLING_DETAILS_UNPUBLISHED_ZERO_H1_H5",
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "claim_boundary": "The project launch, service offer and beneficiary targets are not evidence of need. Only the reported completed study finding is retained, and no prevalence is inferred because sampling frame, response rate, instrument items and detailed distribution are unpublished.",
+    "sources": [
+      "https://digitalinnovationhub.fit/romania-lanseaza-fit-edih-2-0/",
+      "https://www.ulbsibiu.ro/news/ulbs-partener-strategic-in-proiectul-fit-edih-2-0-pentru-accelerarea-transformarii-digitale/"
+    ]
+  },
+  "call_requirements_refresh": {
+    "gmail_scope": "newer_than:1d excluding spam/trash/GitHub; terms AI4WORK, STEP, OMIPE, MIPE, EUROCONSULT, Claus Web, cPanel, Cloudflare, GDPR",
+    "matching_new_authority_or_provider_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_query": "AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 PROD_REAL_EVIDENCE source_export_sha256",
+    "eligible_combined_real_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "public_surface_refresh": {
+    "homepage_observed": "https://eucons.ro/",
+    "contact_surface": "commercial contact form only; company email channel described as attached at production activation",
+    "privacy_surface": "commercial privacy notice for lead/marketing flows; not accepted as dedicated AI4WORK Article 13 notice",
+    "dedicated_ai4work_research_surface_observed": false,
+    "real_collection_inferred": false
+  },
+  "forms_and_gdpr_state": {
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "residual_provider_backup_ceiling_days": 92
+  },
+  "blocker": "HUMAN_LIVE_PRECOLLECTION_BOUNDARY",
+  "blocker_detail": "Exact approval and dual SHA-256 lock of NEED_ANALYSIS_PLAN and COLLECTION_FRAME; controller approval of Art. 6(1)(f) LIA and DPIA outcome; operational EUROCONSULT privacy contact and final dedicated Article 13 notice; approved requester-authentication/data-subject-rights procedure; account-specific eucons.ro/cPanel/Cloudflare logging-retention-access-security readback proving <=7-day Raw Access; provider-bound proof of research-store separation from CRM/webroot and residual backups <=92 days; active processor/subprocessor, rights-hold and incident-response bindings; real CH-* entries after dissemination authorization; then fresh explicit collection-only v0.2 approval.",
+  "downstream_state": "NF06 PROD -> synthesis -> deterministic H1-H5 ranking -> adversarial QA -> NEEDS_ANALYSIS/DOCX/source-register/final package remains FAIL-CLOSED until eligible immutable real adult+employer evidence exists.",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

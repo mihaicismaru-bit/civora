@@ -1,0 +1,50 @@
+{
+  "schema_version": "eucons.ai4work_live_hosting_service_mapping.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-29",
+  "status": "FROZEN_FIRST_PARTY_SERVICE_MAPPING_ACCOUNT_CONFIGURATION_OPEN",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "collection_enabled": false,
+  "site": "eucons.ro",
+  "provider": "CLAUS WEB SRL",
+  "service_family": "Shared Hosting / cPanel",
+  "first_party_evidence": [
+    {
+      "reference": "CONTROLLED_GMAIL_CLAUS_WEB_2026_02_08_HOSTING_ACCOUNT_EUCONS_RO",
+      "observed_fact": "Claus Web states that the hosting account is associated with the eucons.ro domain and that the account has 9 GB total disk space after a 1 GB bonus allocation.",
+      "boundary": "This confirms provider/service association, not GDPR controller, current account-holder legal role, respondent-data access or current cPanel configuration."
+    },
+    {
+      "reference": "CONTROLLED_GMAIL_CLAUS_WEB_2026_03_20_EUCONS_RO_RESTORE",
+      "observed_fact": "Claus Web states that the eucons.ro hosting account was to be restored and separately renews the eucons.ro domain.",
+      "boundary": "Restoration history confirms an eucons.ro hosting service existed at Claus Web; billing/customer identity is not treated as controller or processor-role evidence."
+    },
+    {
+      "reference": "CONTROLLED_FIRST_PARTY_CLAUS_WEB_REPLY_2026_08_28_TICKET_219320",
+      "observed_fact": "In a reply specifically addressing eucons.ro, Claus Web supplies the applicable DPA annexes and describes Shared Hosting/cPanel Raw Access logging and retention controls.",
+      "boundary": "Provider-level Shared Hosting/cPanel behavior does not prove the current account-specific Raw Access/archive/retention/access settings or active subprocessor subset."
+    }
+  ],
+  "resolved_facts": {
+    "eucons_ro_hosting_provider": "CLAUS WEB SRL",
+    "eucons_ro_service_family": "Shared Hosting / cPanel",
+    "provider_dpa_annex_package": "FIRST_PARTY_RECEIVED_AND_FROZEN",
+    "provider_level_logging_profile": "FIRST_PARTY_CONFIRMED"
+  },
+  "remaining_open_facts": [
+    "current cPanel Raw Access archive setting",
+    "current cPanel Raw Access retention setting",
+    "current authorised log and respondent-data access roles",
+    "current account-holder/controller-to-provider instruction chain",
+    "active subprocessor/service-component subset for eucons.ro",
+    "any account-specific Annex 5 override",
+    "research-only production store path isolation, encryption and access controls",
+    "provider-bound deletion/backup execution",
+    "provider-bound TEST TWIN browser-to-store-to-export-to-NF06 smoke"
+  ],
+  "prod_gate_rule": "This artifact closes only the live provider/service-family mapping for eucons.ro. It cannot satisfy the processor-chain, account-logging, research-store, retention-execution or provider-bound TEST TWIN gates.",
+  "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

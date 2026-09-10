@@ -1,94 +1,139 @@
 {
-  "schema_version": "eucons.ai4work_controller_determination.v0.1",
+  "schema_version": "eucons.ai4work_controller_determination.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
-  "date": "2026-08-27",
-  "status": "UNRESOLVED_BEFORE_COLLECTION",
-  "purpose": "Fail-closed evidence record for determining the GDPR controller under the actual allocation of decisions over research purposes and essential means. This record must not infer legal roles from branding, applicant status, domain ownership, hosting billing, or technical implementation alone.",
-  "controller": null,
-  "joint_controller_assessment": "PENDING_FACTS",
-  "approved": false,
+  "date": "2026-08-28",
+  "status": "CONTROLLER_DETERMINED_PROD_PREREQUISITES_PENDING",
+  "purpose": "Fail-closed first-party controller determination for the AI4WORK needs-research processing. Controller identity is now fixed, while collection remains disabled until privacy, lawful-basis, provider/live-path, retention, rights and activation gates are separately satisfied.",
+  "controller": {
+    "legal_name": "EUROCONSULT SRL",
+    "cui": "14250864",
+    "role": "GDPR_CONTROLLER",
+    "site": "eucons.ro",
+    "site_ownership_status": "FIRST_PARTY_CONFIRMED",
+    "determination_reference": "AUTHENTICATED_FIRST_PARTY_USER_DECLARATION_2026_08_28"
+  },
+  "controller_source": {
+    "type": "AUTHENTICATED_FIRST_PARTY_DECLARATION",
+    "fact": "EUROCONSULT SRL is the GDPR controller/operator for this research and owns eucons.ro.",
+    "corroboration": [
+      "repository identity baseline already identifies EUROCONSULT SRL with CUI 14250864",
+      "controlled first-party provider correspondence evidences an EUROCONSULT SRL Claus Web customer account"
+    ],
+    "boundary": "This determination fixes controller identity and eucons.ro ownership only. It does not by itself prove which Claus Web customer/account currently carries the eucons.ro hosting service, the active cPanel configuration, respondent-level access, log retention, backup execution or any account-specific Annex 5 override."
+  },
+  "joint_controller_assessment": "NO_JOINT_CONTROLLER_IDENTIFIED_ON_CURRENT_FIRST_PARTY_FACTS_REASSESS_ON_MATERIAL_CHANGE",
+  "approved": true,
   "collection_enabled": false,
   "nf06_reference_eligible": false,
-  "decision_rule": "The controller is the entity that actually determines the purposes and essential means of the AI4WORK needs-research processing. If two or more entities jointly determine those purposes and essential means, a joint-controller assessment and binding allocation of responsibilities is required before collection.",
+  "privacy_contact": null,
+  "decision_rule": "Controller identity is fixed by authenticated first-party determination. PROD remains fail-closed until the determined controller separately binds the privacy contact, lawful basis/LIA, Article 13 notice, rights, retention, DPIA decision, processor/live-hosting chain, research-only storage and provider-bound smoke evidence.",
   "non_determinative_facts": [
-    "website_branding",
-    "project_leader_status",
-    "domain_ownership",
-    "hosting_billing",
-    "technical_implementation"
+    "website_branding_alone",
+    "project_leader_status_alone",
+    "domain_ownership_alone",
+    "hosting_billing_alone",
+    "technical_implementation_alone"
   ],
   "known_evidence_boundaries": {
-    "project_leader": "A project-leader identity has been observed in current read-only MySMIS evidence, but that fact alone does not determine the GDPR controller.",
-    "site_operator": "eucons.ro is the intended first-party collection surface, but site branding/implementation alone does not determine the GDPR controller.",
-    "hosting_account_holder": "A hosting-account relationship is preserved in controlled first-party evidence. Private billing/account identity must not be copied into this public repository artifact; its legal relationship to the controller candidate must be verified before go-live.",
-    "hosting_provider": "CLAUS WEB SRL has a public standard DPA for relevant hosting services, but account-specific applicability, subprocessors, backup/retention and logging facts remain to be bound.",
-    "research_implementation": "Repository implementation responsibility does not by itself establish controller status."
+    "project_leader": "Current controlled read-only MySMIS evidence identifies FUNDAŢIA CENTRUL DE PREGĂTIRE PROFESIONALĂ VÂLCEA as project leader for SMIS 367944. On the current authenticated first-party determination it is not the controller of this research; project-leader status remains distinct from GDPR controller status.",
+    "site_operator": "EUROCONSULT SRL is first-party confirmed as the GDPR controller/operator for this research and owner of eucons.ro.",
+    "hosting_account_history": "Controlled provider correspondence shows mixed historical/current customer and billing references, including EUROCONSULT SRL and FUNDAȚIA ANTREPRENORIAT SOCIAL. Those references must not be collapsed into a current live-hosting account fact without account-specific verification.",
+    "hosting_provider": "CLAUS WEB SRL first-party Shared Hosting evidence received on 2026-08-28 includes DPA v1.0 plus Annex 4 and Annex 5 with controlled SHA-256 identities, and documents the generic Raw Access field profile. Before PROD, account-specific cPanel Raw Access retention/access settings, any Annex 5 override, active processor/subprocessor chain, research-only store isolation/encryption/access, provider-bound deletion/backup execution and controller-to-provider instruction binding still require evidence.",
+    "research_implementation": "Repository implementation responsibility does not alter the first-party controller determination.",
+    "withdrawn_outreach": "Prior AI-generated role-confirmation messages were disavowed and remain REQUEST_WITHDRAWN / CONTROL_ONLY_NOT_EVIDENCE. They are not used to support the controller determination."
   },
-  "required_evidence_before_decision": [
-    "current legal identity and authority of each entity participating in the research decision chain",
-    "documented decision record identifying who approves the research purpose and intended use of results",
-    "documented decision record identifying who approves the questionnaire content and essential data categories",
-    "documented decision record identifying who approves lawful basis, Article 13 notice, retention and deletion",
-    "documented authority to instruct the hosting/provider chain and determine access to respondent-level data",
-    "documented role of the current MySMIS applicant/leader in the needs research",
-    "documented role of the eucons.ro site/operator and research implementation entity",
-    "controlled reference identifying the actual hosting-account holder and its legal relationship to the controller candidate",
-    "processor/subprocessor binding, including account-applicable Claus Web terms and role chain",
-    "joint-controller analysis if more than one entity jointly determines purposes or essential means"
+  "external_contact_state": {
+    "status": "HOLD_WITHDRAWN_REQUESTS_NO_ACTIVE_AUTHORITY_REQUEST",
+    "project_leader_role_request": "WITHDRAWN_BY_AUTHENTICATED_USER_2026_08_28",
+    "hosting_account_holder_role_request": "WITHDRAWN_BY_AUTHENTICATED_USER_2026_08_28",
+    "evidence_rule": "Withdrawn AI-generated outreach is audit history only and is not used as evidence."
+  },
+  "resolved_identity_facts": [
+    "GDPR_CONTROLLER_EUROCONSULT_SRL",
+    "EUCONS_RO_OWNER_EUROCONSULT_SRL",
+    "MYSMIS_PROJECT_LEADER_IDENTITY",
+    "CLAUS_WEB_FIRST_PARTY_DPA_ANNEX4_ANNEX5_AND_GENERIC_LOGGING_PROFILE"
+  ],
+  "remaining_decision_facts": [
+    "which controller privacy contact or DPO contact must appear in the Article 13 notice",
+    "final controller approval of lawful basis/LIA",
+    "final controller approval of Article 13 notice, retention/deletion and data-subject-rights procedure",
+    "controller acceptance of the DPIA screening or completion of a DPIA if the controller decides one is required",
+    "which current Claus Web account/service binding carries eucons.ro and the corresponding controller-to-provider instruction chain",
+    "who has provider-bound respondent-level/log access under the current account configuration",
+    "actual cPanel Raw Access retention/access settings and any Annex 5 account override",
+    "actual research-only production store isolation, encryption and access controls",
+    "provider-bound deletion/backup execution and TEST TWIN smoke"
+  ],
+  "required_evidence_before_prod": [
+    "privacy contact and approved Article 13 notice for EUROCONSULT SRL",
+    "approved lawful basis/LIA",
+    "approved retention/deletion and data-subject-rights procedure",
+    "controller-approved DPIA screening outcome",
+    "account-specific processor/subprocessor and server-logging binding",
+    "research-only production-store binding separated from CRM",
+    "provider-bound deletion/backup and TEST TWIN smoke evidence"
   ],
   "decision_matrix": [
     {
+      "entity_reference": "EUROCONSULT_SRL_CONTROLLER",
+      "observed_legal_identity": "EUROCONSULT SRL",
+      "identity_status": "AUTHENTICATED_FIRST_PARTY_CONTROLLER_AND_SITE_OWNER_DETERMINATION_2026_08_28",
+      "purpose_decision_authority": true,
+      "essential_means_authority": true,
+      "access_to_respondent_level_data": "CONTROLLER_AUTHORITY_ESTABLISHED_LIVE_ACCESS_SCOPE_PENDING",
+      "processor_instruction_authority": "CONTROLLER_AUTHORITY_ESTABLISHED_ACCOUNT_BINDING_PENDING",
+      "legal_binding_reference": "AUTHENTICATED_FIRST_PARTY_USER_DECLARATION_2026_08_28",
+      "proposed_role": "GDPR_CONTROLLER",
+      "status": "CONTROLLER_ROLE_DETERMINED"
+    },
+    {
       "entity_reference": "MYSMIS_PROJECT_LEADER_CONTROLLED_REFERENCE",
-      "purpose_decision_authority": null,
-      "essential_means_authority": null,
-      "access_to_respondent_level_data": null,
-      "processor_instruction_authority": null,
-      "legal_binding_reference": null,
-      "proposed_role": null,
-      "status": "EVIDENCE_REQUIRED"
+      "observed_legal_identity": "FUNDAŢIA CENTRUL DE PREGĂTIRE PROFESIONALĂ VÂLCEA",
+      "identity_status": "VERIFIED_CURRENT_MYSMIS",
+      "purpose_decision_authority": false,
+      "essential_means_authority": false,
+      "access_to_respondent_level_data": "NOT_ESTABLISHED_BY_PROJECT_LEADER_STATUS",
+      "processor_instruction_authority": false,
+      "legal_binding_reference": "AUTHENTICATED_FIRST_PARTY_CONTROLLER_DETERMINATION_2026_08_28",
+      "proposed_role": "PROJECT_LEADER_NOT_CONTROLLER_FOR_THIS_RESEARCH",
+      "status": "CONTROLLER_ROLE_EXCLUDED_ON_CURRENT_FIRST_PARTY_FACTS"
     },
     {
-      "entity_reference": "EUCONS_SITE_OPERATOR_OR_IMPLEMENTATION_ENTITY_CONTROLLED_REFERENCE",
-      "purpose_decision_authority": null,
-      "essential_means_authority": null,
-      "access_to_respondent_level_data": null,
-      "processor_instruction_authority": null,
-      "legal_binding_reference": null,
-      "proposed_role": null,
-      "status": "EVIDENCE_REQUIRED"
-    },
-    {
-      "entity_reference": "HOSTING_ACCOUNT_HOLDER_PRIVATE_CONTROLLED_REFERENCE",
-      "purpose_decision_authority": null,
-      "essential_means_authority": null,
-      "access_to_respondent_level_data": null,
-      "processor_instruction_authority": null,
-      "legal_binding_reference": null,
-      "proposed_role": null,
-      "status": "EVIDENCE_REQUIRED"
+      "entity_reference": "HOSTING_ACCOUNT_HISTORY_CONTROLLED_REFERENCE",
+      "observed_legal_identity": "FUNDAȚIA ANTREPRENORIAT SOCIAL / EUROCONSULT SRL references exist in controlled provider history",
+      "identity_status": "ACCOUNT_HISTORY_VERIFIED_CURRENT_SERVICE_MAPPING_PENDING",
+      "purpose_decision_authority": false,
+      "essential_means_authority": "TECHNICAL_OR_ACCOUNT_ROLE_ONLY_PENDING_CURRENT_BINDING",
+      "access_to_respondent_level_data": "CURRENT_LIVE_ACCESS_SCOPE_TO_BE_VERIFIED",
+      "processor_instruction_authority": "CURRENT_ACCOUNT_BINDING_TO_BE_VERIFIED",
+      "legal_binding_reference": "CONTROLLED_CLAUS_WEB_ACCOUNT_HISTORY_PRIVATE_REFERENCE",
+      "proposed_role": "TECHNICAL_ACCOUNT_ROLE_PENDING_BINDING_NOT_CONTROLLER",
+      "status": "CURRENT_SERVICE_MAPPING_AND_ACCESS_BINDING_REQUIRED"
     },
     {
       "entity_reference": "CLAUS_WEB_SRL",
+      "observed_legal_identity": "CLAUS WEB SRL",
+      "identity_status": "VERIFIED_FIRST_PARTY_SHARED_HOSTING_DPA_ANNEX4_ANNEX5_2026_08_28",
       "purpose_decision_authority": false,
       "essential_means_authority": "TECHNICAL_PROVIDER_MEANS_ONLY_PENDING_ACCOUNT_BINDING",
-      "access_to_respondent_level_data": "POTENTIAL_HOSTING_PROCESSOR_ACCESS_TO_BE_VERIFIED",
+      "access_to_respondent_level_data": "POTENTIAL_HOSTING_PROCESSOR_ACCESS_ACCOUNT_CONFIGURATION_TO_BE_VERIFIED",
       "processor_instruction_authority": false,
-      "legal_binding_reference": "PUBLIC_DPA_V1_0_2026_03_16_ACCOUNT_BINDING_PENDING",
+      "legal_binding_reference": "CONTROLLED_FIRST_PARTY_DPA_ANNEX4_ANNEX5_HASH_REFERENCES_ACCOUNT_SETTINGS_PENDING",
       "proposed_role": "PROCESSOR_OR_SUBPROCESSOR_CANDIDATE",
-      "status": "ACCOUNT_BINDING_REQUIRED"
+      "status": "ACCOUNT_CONFIGURATION_AND_BINDING_REQUIRED"
     }
   ],
   "approval_requirements": [
-    "controller identity is populated from evidence, not inference",
-    "joint-controller assessment is explicitly resolved",
-    "decision matrix has no unresolved authority fields for entities that determine purpose or essential means",
+    "controller identity remains EUROCONSULT SRL unless superseded by a fresh authenticated first-party determination",
     "privacy contact is fixed",
-    "lawful basis/LIA is approved by the determined controller",
-    "Article 13 notice names the determined controller and applicable processors",
+    "lawful basis/LIA is approved by EUROCONSULT SRL",
+    "Article 13 notice names EUROCONSULT SRL and the applicable processing chain",
     "retention/DPIA-screening/provider/logging/store bindings are approved or verified",
-    "NF06 collection frame cites the frozen controller-determination record"
+    "NF06 collection frame cites a frozen controller-determination record before real-response ingest"
   ],
-  "privacy_boundary": "Do not place private billing identifiers, credentials, personal contact data, or non-public account details in this repository artifact. Use controlled evidence references instead.",
+  "privacy_boundary": "Do not place private billing identifiers, credentials, personal contact data, client IDs, passwords or non-public account details in this repository artifact. Use controlled evidence references instead.",
   "merge_authorized": false,
-  "deploy_authorized": false
+  "deploy_authorized": false,
+  "real_collection_authorized": false
 }

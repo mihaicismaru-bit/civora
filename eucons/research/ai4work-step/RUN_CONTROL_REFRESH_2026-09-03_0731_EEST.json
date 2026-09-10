@@ -1,0 +1,87 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.4",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T07:31:31+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "secondary_research": {
+    "source_register_high_water_mark_before": "S42",
+    "source_register_high_water_mark_after": "S45",
+    "drive_registry_readback_verified": true,
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "sources_added": [
+      {
+        "source_id": "S43",
+        "region": "Sud-Vest Oltenia / Valcea",
+        "publisher": "ANOFM / AJOFM Valcea",
+        "title": "Raport de activitate 2025 - capitolul VI Formarea profesionala",
+        "url": "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/01/RAPORT-de-activitate-pe-anul-2025.pdf",
+        "classification": "CURRENT_ADMINISTRATIVE_TRIANGULATION_DEMAND_INFORMED_SUPPLY_ENTANGLED_ZERO_H1_H5",
+        "observed_fact": "The report states that the 2025 training plan was grounded in employers' labour needs, vacancy evolution and requests from jobseekers. The plan contained 22 courses in 21 occupations for 400 planned participants and included one digital-skills course and two data-entry/validation/processing courses.",
+        "claim_boundary": "Training supply is an institutional response, not a direct prevalence measure. Course existence is not promoted as AI4WORK need evidence."
+      },
+      {
+        "source_id": "S44",
+        "region": "Sud-Muntenia / Arges",
+        "publisher": "ANOFM / AJOFM Arges",
+        "title": "Raport de activitate al AJOFM Arges pentru anul 2025",
+        "url": "https://www.anofm.ro/arges/wp-content/uploads/sites/3/2026/02/Raport-de-activitate-AJOFM-Arges-2025.pdf",
+        "classification": "CURRENT_ADMINISTRATIVE_COUNTER_EVIDENCE_PARTIAL_LABOUR_MARKET_ZERO_H1_H5",
+        "observed_fact": "The report records 5,601 newly registered vacancies in 2025, with the strongest demand concentrated in non-digital occupations; the most requested training occupations were security agent, nurse aide, HR referent and assistant cook.",
+        "claim_boundary": "Registered AJOFM vacancies and requested training cover only part of the labour market and do not measure AI/digital skill deficits. The source is retained as an adversarial check against confirmation bias, not as negative proof of no digital need."
+      },
+      {
+        "source_id": "S45",
+        "region": "Centru / Sibiu",
+        "publisher": "ANOFM / AJOFM Sibiu",
+        "title": "Raport anual de activitate 2025 - formarea profesionala",
+        "url": "https://www.anofm.ro/sibiu/wp-content/uploads/sites/36/2026/02/Raport-activitate-2025-AJOFM-SIBIU-.pdf",
+        "classification": "CURRENT_ADMINISTRATIVE_COUNTER_EVIDENCE_SUPPLY_CONSTRAINED_ZERO_H1_H5",
+        "observed_fact": "The county plan targeted 280 free-training beneficiaries and enrolled 162 during 2025. The realised/listed courses were non-digital in this section, and the report states that 61.20% plan execution was due mainly to limited financial resources.",
+        "claim_boundary": "A resource-constrained realised training offer cannot be used as a proxy for demand or as evidence that digital/AI need is absent."
+      }
+    ],
+    "cross_region_interpretation": "S43-S45 add a balanced current administrative layer across all three target regions. The layer is deliberately adversarial: it shows both a local digital-skills signal in Valcea and non-digital/supply-constrained administrative surfaces in Arges and Sibiu. No course, project or institutional activity is treated as direct evidence of AI4WORK need and no H1-H5 score changes."
+  },
+  "call_requirements_refresh": {
+    "gmail_scope": "newer_than:1d excluding spam/trash/GitHub; terms AI4WORK, STEP, OMIPE, MIPE, EUROCONSULT, Claus Web, cPanel, Cloudflare, GDPR",
+    "matching_new_authority_or_provider_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_query": "PROD_REAL_EVIDENCE source_export_sha256 AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1",
+    "eligible_combined_real_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "search_result_class": "CONTROL_SSOT_AND_PRIOR_CONTROL_MATERIAL_ONLY",
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "public_surface_refresh": {
+    "homepage_observed": "https://eucons.ro/",
+    "dedicated_ai4work_research_surface_discoverable": false,
+    "homepage_class": "COMMERCIAL_SERVICE_SURFACE",
+    "real_collection_inferred": false
+  },
+  "forms_and_gdpr_state": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "privacy_contact_operationally_bound": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "residual_provider_backup_ceiling_days": 92
+  },
+  "blocker": "HUMAN_LIVE_PRECOLLECTION_BOUNDARY",
+  "blocker_detail": "Exact approval and dual SHA-256 lock of NEED_ANALYSIS_PLAN and COLLECTION_FRAME; controller approval of Art. 6(1)(f) LIA and DPIA outcome; operational EUROCONSULT privacy contact and final dedicated Article 13 notice; approved requester-authentication/data-subject-rights procedure; account-specific eucons.ro/cPanel/Cloudflare logging-retention-access-security readback proving <=7-day Raw Access; provider-bound proof of research-store separation from CRM/webroot and residual backups <=92 days; active processor/subprocessor, rights-hold and incident-response bindings; real CH-* entries after dissemination authorization; then fresh explicit collection-only v0.2 approval.",
+  "downstream_state": "NF06 PROD -> synthesis -> deterministic H1-H5 ranking -> adversarial QA -> NEEDS_ANALYSIS/DOCX/source-register/final package remains FAIL-CLOSED until an eligible immutable real adult+employer evidence export exists.",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

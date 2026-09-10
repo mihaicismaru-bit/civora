@@ -1,0 +1,81 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.9",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T04:33:27+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "secondary_evidence_refresh": {
+    "source_register_high_water_mark": "S42",
+    "action": "RECONCILE_EXISTING_S08_SOURCE_EXACT",
+    "new_source_id_promoted": null,
+    "source_id": "S08",
+    "publisher": "OECD",
+    "title": "Job Creation and Local Economic Development 2024 — Country Notes: Romania",
+    "publication_year": 2024,
+    "regional_data_year": 2022,
+    "target_region_values": {
+      "Sud-Vest Oltenia": {
+        "genai_exposure_pct": 17.5,
+        "high_automation_risk_pct": 11.1,
+        "ict_job_tightness_relative_to_average_pct": 278.6
+      },
+      "Sud-Muntenia": {
+        "genai_exposure_pct": 17.1,
+        "high_automation_risk_pct": 14.1,
+        "ict_job_tightness_relative_to_average_pct": 426.9
+      },
+      "Centru": {
+        "genai_exposure_pct": 20.9,
+        "high_automation_risk_pct": 15.3,
+        "ict_job_tightness_relative_to_average_pct": 562.0
+      }
+    },
+    "classification": "OFFICIAL_REGIONAL_CONTEXT_ONLY_ZERO_H1_H5",
+    "claim_boundary": "GenAI exposure, automation risk and ICT labour-market tightness are structural labour-technology indicators. They are not prevalence estimates of AI4WORK training need, do not establish causal skill deficits and cannot change the H1-H5 respondent ranking.",
+    "controlled_drive_registry_reconciled": true,
+    "regional_indicators_extended_with_high_automation_risk": true,
+    "project_activity_as_need_evidence": false,
+    "h1_h5_numeric_points_added": 0
+  },
+  "call_requirements_refresh": {
+    "gmail_checked_after": "2026-09-03",
+    "matching_new_authority_or_provider_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_query": "AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1 PROD_REAL_EVIDENCE source_export_sha256",
+    "eligible_combined_real_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "public_surface_refresh": {
+    "current_eucons_surface_class": "COMMERCIAL",
+    "dedicated_ai4work_research_surface_discoverable": false,
+    "commercial_privacy_surface_is_not_ai4work_article13_proof": true,
+    "deploy_or_real_collection_inferred": false
+  },
+  "forms_and_gdpr_state": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "residual_provider_backup_ceiling_days": 92,
+    "privacy_contact_operationally_bound": false
+  },
+  "precollection_method_lock": {
+    "state": "OPEN_NOT_LOCKED",
+    "need_analysis_plan_sha256": null,
+    "collection_frame_sha256": null
+  },
+  "refresh_conclusion": "Existing S08 was repaired from a generic OECD locator to an exact official Romania country-note provenance and exact 2022 values for all three target regions. The controlled regional indicator register now also records high automation-risk values with an explicit context-only boundary. No new authority/provider email and no immutable adult+employer PROD_REAL_EVIDENCE export were found. The live public research/GDPR/provider boundary remains unproven, so NF06 PROD and downstream synthesis remain fail-closed.",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

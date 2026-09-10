@@ -1,0 +1,210 @@
+{
+  "schema_version": "eucons.ai4work_secondary_evidence_refresh.v0.13",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T15:34:11+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "purpose": "Extend and verify official/institutional secondary research for Sud-Vest Oltenia, Sud-Muntenia and Centru without converting project activity, training supply, administrative labour-market context or event-specific recruitment into AI4WORK need-prevalence claims.",
+  "registry_reconciliation": {
+    "source_register_high_water_mark_before_refresh": "S54",
+    "source_register_high_water_mark_after_refresh": "S60",
+    "dashboard_reconciled_to": "S01-S60",
+    "duplicate_source_promoted": false,
+    "new_source_ids": ["S55", "S56", "S57", "S58", "S59", "S60"]
+  },
+  "promotion_policy": {
+    "sources_promoted_this_refresh": ["S55", "S56", "S57", "S58", "S59", "S60"],
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "event_specific_recruitment_as_need_prevalence": false,
+    "decision": "PROMOTE_SIX_SOURCE_EXACT_OFFICIAL_CONTEXT_ROWS_WITH_ZERO_H1_H5"
+  },
+  "promoted_sources": [
+    {
+      "source_id": "S55",
+      "region": "Sud-Vest Oltenia / Gorj",
+      "publisher": "ANOFM / AJOFM Gorj",
+      "title": "Cursuri de (re)calificare organizate de AJOFM Gorj in anul 2025",
+      "publication_date": "2024-11-15",
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/gorj/cursuri-de-recalificare-organizate-de-ajofm-gorj-in-anul-2025/",
+      "classification": "CURRENT_TRAINING_SUPPLY_CONTEXT_ZERO_H1_H5",
+      "observed_facts": {
+        "digital_competence_program_listed": true,
+        "digital_competence_program_duration_hours": 90
+      },
+      "claim_boundary": "The official course offer maps institutional supply only. It does not measure demand, skill-gap prevalence or AI-specific need and contributes zero H1-H5 points."
+    },
+    {
+      "source_id": "S56",
+      "region": "Sud-Muntenia / Dambovita",
+      "publisher": "ANOFM / AJOFM Dambovita",
+      "title": "Programe de formare profesionala planificate de AJOFM Dambovita pentru anul 2025",
+      "publication_date": null,
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/dambovita/wp-content/uploads/sites/18/2025/05/Programe-de-formare-profesionala-planificate-pentru-anul-2025.pdf",
+      "classification": "CURRENT_TRAINING_PLAN_SUPPLY_CONTEXT_ZERO_H1_H5",
+      "observed_facts": {
+        "digital_competence_including_internet_safety_and_cybersecurity_listed": true,
+        "digital_competence_program_duration_hours": 80,
+        "data_entry_validation_processing_operator_program_listed": true
+      },
+      "claim_boundary": "A planned training catalogue is supply context, not a measurement of employer/adult demand, competence deficit or AI4WORK need prevalence. It contributes zero H1-H5 points."
+    },
+    {
+      "source_id": "S57",
+      "region": "Centru / Covasna",
+      "publisher": "ANOFM / AJOFM Covasna",
+      "title": "Raport asupra activitatii AJOFM Covasna, situatiei somajului, programelor de ocupare si formare profesionala, pentru anul 2025",
+      "publication_date": "2026-01-23",
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Raport-anual-2025-AJOFM-Covasna.pdf",
+      "classification": "CURRENT_TRAINING_SUPPLY_CONSTRAINT_TRIANGULATION_ZERO_H1_H5",
+      "observed_facts": {
+        "planned_training_programs": 33,
+        "planned_unemployed_participants": 462,
+        "approved_training_budget_lei": 4000,
+        "report_states_budget_did_not_cover_planned_training_costs": true,
+        "programs_organized_by_year_end": 7,
+        "participants_in_programs_organized_by_year_end": 160,
+        "digital_competence_programs_organized": 1,
+        "digital_competence_participants": 28,
+        "graduates_total": 158,
+        "graduates_employed": 14
+      },
+      "claim_boundary": "These are administrative training and placement outcomes under a constrained budget/supply environment. They do not represent population prevalence of digital/AI skill gaps, do not support causal attribution and contribute zero H1-H5 points."
+    },
+    {
+      "source_id": "S58",
+      "region": "Sud-Vest Oltenia / Gorj",
+      "publisher": "ANOFM / AJOFM Gorj",
+      "title": "Rezultate Bursa Generala a Locurilor de Munca",
+      "publication_date": "2025-05-26",
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/gorj/rezultate-bursa-generala-a-locurilor-de-munca/",
+      "classification": "CURRENT_EVENT_SPECIFIC_DEMAND_SNAPSHOT_ZERO_H1_H5",
+      "observed_facts": {
+        "employers_contacted": 205,
+        "employers_confirmed": 70,
+        "employers_present": 62,
+        "vacancies_offered": 927,
+        "computer_operator_listed": true,
+        "programmer_higher_education_role_listed": true,
+        "jobseekers_attending": 1302,
+        "detained_persons_attending": 7,
+        "selected_for_possible_hire": 273,
+        "hired_on_spot": 13
+      },
+      "claim_boundary": "This is a single recruitment-event snapshot. It is not representative of the county or region and does not measure competence deficit, AI skill need or training-demand prevalence. It contributes zero H1-H5 points."
+    },
+    {
+      "source_id": "S59",
+      "region": "Sud-Muntenia / Dambovita",
+      "publisher": "ANOFM / AJOFM Dambovita",
+      "title": "Bursa Locurilor de Munca pentru Absolventi - comunicat 09.10.2025",
+      "publication_date": "2025-10-09",
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/dambovita/wp-content/uploads/sites/18/2025/10/Comunicat-presa-Bursa-Absolventilor-10.10.2025.pdf",
+      "classification": "CURRENT_EVENT_SPECIFIC_DEMAND_SNAPSHOT_ZERO_H1_H5",
+      "observed_facts": {
+        "employers_announced_over": 30,
+        "vacancies_announced_approximately": 500,
+        "automation_engineer_listed": true,
+        "cnc_operator_listed": true,
+        "it_programmer_listed": true
+      },
+      "claim_boundary": "This recruitment event is not a representative employer survey. The presence of IT, automation and CNC roles does not quantify digital/AI skill gaps or training-demand prevalence and contributes zero H1-H5 points."
+    },
+    {
+      "source_id": "S60",
+      "region": "Centru / Harghita",
+      "publisher": "ANOFM / AJOFM Harghita",
+      "title": "Raport de activitate AJOFM Harghita 2025",
+      "publication_date": "2026-02",
+      "reference_period": "2025",
+      "url": "https://www.anofm.ro/harghita/wp-content/uploads/sites/23/2026/02/Raport-activitate-AJOFM-Harghita-2025.pdf",
+      "classification": "CURRENT_ADMINISTRATIVE_DEMAND_SUPPLY_TRIANGULATION_ZERO_H1_H5",
+      "observed_facts": {
+        "registered_vacancies_2025": 10458,
+        "registered_vacancies_2024": 9142,
+        "training_participants": 285,
+        "training_graduates": 237,
+        "training_graduates_employed": 90,
+        "free_training_programs": 21,
+        "digital_competence_participants": 45,
+        "training_programs_take_employer_requirements_into_account": true
+      },
+      "claim_boundary": "Administrative vacancies and training delivery are partial and supply-entangled. Digital-course participation is not converted into need prevalence and the vacancy mix cannot establish presence or absence of an AI skill gap. It contributes zero H1-H5 points."
+    }
+  ],
+  "cross_region_reverification": {
+    "Sud-Vest Oltenia": {
+      "current_complement": "S55 maps training supply and S58 adds a current event-specific recruitment snapshot that includes some digital roles, both strictly zero-weight context.",
+      "h1_h5_numeric_points_added": 0
+    },
+    "Sud-Muntenia": {
+      "current_complement": "S56 maps training supply and S59 adds a current event-specific recruitment snapshot containing IT/automation/CNC roles, both strictly zero-weight context.",
+      "h1_h5_numeric_points_added": 0
+    },
+    "Centru": {
+      "current_complement": "S57 maps Covasna supply constraints and S60 adds Harghita administrative vacancies/training context, both without treating provision or vacancies as need prevalence.",
+      "h1_h5_numeric_points_added": 0
+    }
+  },
+  "call_requirements_refresh": {
+    "checked_at": "2026-09-03T15:34:11+03:00",
+    "gmail_query_scope": "newer_than:1d excluding spam/trash and GitHub notifications; OMIPE, MIPE, PEO, Claus Web, ClausWeb, Cloudflare, eucons.ro, AI4WORK",
+    "non_github_authority_or_provider_messages_observed": 0,
+    "github_ci_notifications_excluded_from_call_requirements": true,
+    "status": "CLOSED_UNCHANGED",
+    "boundary": "The non-GitHub Gmail screening returned no matching authority/provider messages. No call/provider change was inferred from GitHub CI notifications."
+  },
+  "primary_evidence_refresh": {
+    "checked_at": "2026-09-03T15:34:11+03:00",
+    "drive_queries": ["AI4WORK_ADULTS_V1", "AI4WORK_EMPLOYERS_V1", "source_export_sha256", "PROD_REAL_EVIDENCE"],
+    "search_result_class": "CONTROL_PRE_FINAL_MATERIAL_ONLY",
+    "eligible_combined_real_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "forms_and_gdpr_refresh": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "requester_authentication_internal_mechanics": "IMPLEMENTED_AND_TESTED_FAIL_CLOSED",
+    "requester_authentication_design": "response_id plus respondent-retained private UUIDv4 verification code; server stores only SHA-256 digest; no name/email/CRM/IP/device linkage",
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "privacy_contact": "privacy@eucons.ro",
+    "privacy_contact_inbound_delivery_independently_verified": false,
+    "raw_access_retention_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
+    "residual_provider_backup_ceiling_days": 92,
+    "account_specific_backup_ceiling_proven": false,
+    "public_surface_search_result": "Dedicated AI4WORK Article 13 live rendered surface remains unverified; current public surface is commercial-only and collection remains disabled."
+  },
+  "repo_validation": {
+    "repair_sequence": [
+      "rebound LIVE_PRIVACY_SURFACE_RECONCILIATION_DRAFT.json exact SHA-256 in activation manifest",
+      "aligned stale data-subject-rights regression assertions with the already-implemented requester-authentication contract and PROD privacy-contact boundary"
+    ],
+    "exact_head_after_repair": "61b06fba78aa19b9520c52b8892f32fc9a6374c2",
+    "associated_workflow_runs_read_back": 29,
+    "success_conclusions": 29,
+    "failure_conclusions": 0,
+    "null_conclusions": 0,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
+    "ci_success_not_live_evidence": true
+  },
+  "refresh_conclusion": "The controlled Source_register and Dashboard now reconcile through S60. S58-S60 add one fresh official administrative/event-specific context row for each target region; all remain zero-weight for H1-H5, and neither project activity, training supply nor recruitment-event activity is promoted as need-prevalence evidence. Internal CI regressions caused by a stale hash and stale assertions were repaired without enabling PROD, and all 29 workflow runs associated with the repaired exact head read back success. No eligible immutable real adult+employer response export exists, therefore NF06 PROD and downstream synthesis/ranking remain fail-closed. The substantive remaining boundary is live/account-specific/provider-bound rather than methodological.",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

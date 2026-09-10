@@ -11,14 +11,16 @@ class CollectionFrameTests(unittest.TestCase):
         cls.frame = json.loads((ROOT / "COLLECTION_FRAME_DRAFT.json").read_text(encoding="utf-8"))
         cls.nf06_contract = json.loads((ROOT / "NF06_PREINGEST_CONTRACT.json").read_text(encoding="utf-8"))
 
-    def test_draft_is_fail_closed_and_non_evidence(self):
+    def test_approved_method_frame_is_still_collection_disabled_and_non_evidence(self):
         f = self.frame
         self.assertEqual(f["research_id"], "AI4WORK-STEP-NF-RUN-001")
-        self.assertEqual(f["frame_status"], "DRAFT_NOT_APPROVED_FOR_PROD")
+        self.assertEqual(f["frame_status"], "APPROVED_FOR_PROD")
         self.assertEqual(f["evidence_class"], "METHOD_PLAN_NOT_EVIDENCE")
         self.assertFalse(f["collection_enabled"])
-        self.assertFalse(f["approval"]["approved"])
-        self.assertFalse(f["approval"]["approved_for_prod"])
+        self.assertTrue(f["approval"]["approved"])
+        self.assertTrue(f["approval"]["approved_for_prod"])
+        self.assertEqual(f["approval"]["controller_determination_reference"], "CONTROLLER_DETERMINATION_DRAFT.json v0.3")
+        self.assertTrue(str(f["approval"]["controller_approval_reference"]).startswith("AUTHENTICATED_FIRST_PARTY_USER_APPROVAL_"))
         self.assertFalse(f["nf06_handoff"]["eligible_now"])
 
     def test_privacy_boundary_is_preserved(self):
@@ -77,13 +79,21 @@ class CollectionFrameTests(unittest.TestCase):
         mitigation = " ".join(d["mitigation"]).lower()
         self.assertIn("without using fingerprinting", mitigation)
 
-    def test_approval_placeholders_cover_nf06_prod_provenance(self):
+    def test_operational_nf06_bindings_remain_open_despite_method_approval(self):
         required = set(self.nf06_contract["prod_only_required_fields"])
         approval = self.frame["approval"]
         self.assertTrue(required.issubset(set(approval)))
-        for field in required:
+        self.assertEqual(approval["controller_determination_reference"], "CONTROLLER_DETERMINATION_DRAFT.json v0.3")
+        self.assertIsNotNone(approval["controller_approval_reference"])
+        for field in (
+            "privacy_notice_version",
+            "processor_binding_reference",
+            "server_log_profile_reference",
+            "retention_schedule_reference",
+            "production_store_binding_reference",
+        ):
             self.assertIsNone(approval[field])
-        self.assertIsNone(approval["controller_determination_reference"])
+        self.assertIsNone(approval["collection_channel_register_sha256"])
 
 
 if __name__ == "__main__":

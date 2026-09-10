@@ -1,0 +1,80 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.4",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T08:33:00+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "secondary_research": {
+    "source_register_high_water_mark_before": "S45",
+    "source_register_high_water_mark_after": "S45",
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "candidate_sources": [
+      {
+        "candidate_id": "CANDIDATE-CENTRU-COVASNA-2026-EMPLOYER-FORECAST",
+        "region": "Centru / Covasna",
+        "publisher": "ANOFM / AJOFM Covasna",
+        "title": "Prognoza angajarilor pe 2026 - Judetul Covasna",
+        "official_index_url": "https://www.anofm.ro/covasna/studii/",
+        "document_url": "https://www.anofm.ro/covasna/wp-content/uploads/sites/16/2026/02/Prognoza-angajarilor-pe-2026-Judetul-Covasna.pdf",
+        "verification_state": "OFFICIAL_INDEX_DISCOVERY_CONFIRMED_SOURCE_BODY_NOT_YET_VERIFIED",
+        "evidence_promotion": false,
+        "h1_h5_effect": "ZERO",
+        "reason_not_promoted": "The official AJOFM Covasna studies page currently lists the 2026 forecast, but the source body was not retrievable through the controlled web reader in this run because the PDF exceeded the reader size limit. No sample, statistic, conclusion or methodology from the PDF is inferred from its title or existence."
+      }
+    ],
+    "research_boundary": "Discovery of an official report is not itself evidence of need. No project activity, course, forecast title or inaccessible document is promoted to PROD evidence."
+  },
+  "call_requirements_refresh": {
+    "gmail_scope": "newer_than:1d excluding spam/trash/GitHub; terms AI4WORK, STEP, OMIPE, MIPE, EUROCONSULT, Claus Web, cPanel, Cloudflare, GDPR",
+    "matching_new_authority_or_provider_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_query": "PROD_REAL_EVIDENCE source_export_sha256 AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1",
+    "eligible_combined_real_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "search_result_class": "CONTROL_SSOT_AND_PRIOR_CONTROL_MATERIAL_ONLY",
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "public_surface_refresh": {
+    "homepage_observed": "https://eucons.ro/",
+    "dedicated_ai4work_research_surface_discoverable": false,
+    "homepage_class": "COMMERCIAL_SERVICE_SURFACE",
+    "commercial_privacy_notice_is_dedicated_ai4work_article13": false,
+    "operational_company_email_observed_on_contact_page": false,
+    "real_collection_inferred": false
+  },
+  "method_and_approval_state": {
+    "need_analysis_plan_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "collection_frame_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "precollection_method_lock_state": "OPEN_NOT_LOCKED",
+    "need_analysis_plan_sha256": null,
+    "collection_frame_sha256": null,
+    "lia_controller_signoff": false,
+    "dpia_screening_controller_acceptance": false,
+    "collection_only_v0_2_approval": false
+  },
+  "forms_and_gdpr_state": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "privacy_contact_operationally_bound": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "residual_provider_backup_ceiling_days": 92
+  },
+  "blocker": "HUMAN_LIVE_PRECOLLECTION_BOUNDARY",
+  "blocker_detail": "No explicit approval has yet been recorded for the exact NEED_ANALYSIS_PLAN and COLLECTION_FRAME or their dual SHA-256 lock; the Article 6(1)(f) LIA and current DPIA screening outcome still require controller acceptance; an operational EUROCONSULT privacy contact and dedicated Article 13 notice, approved requester-authentication/data-subject-rights procedure, account-specific eucons.ro/cPanel/Cloudflare logging-retention-access-security proof, provider-bound research-store/CRM-webroot separation and backup proof, processor/subprocessor plus rights-hold and incident-response live bindings, and real CH-* entries remain required. After those checks PASS, fresh explicit collection-only v0.2 approval remains mandatory.",
+  "downstream_state": "NF06 PROD -> synthesis -> deterministic H1-H5 ranking -> adversarial QA -> NEEDS_ANALYSIS/DOCX/source-register/final package remains FAIL-CLOSED until an eligible immutable real adult+employer evidence export exists.",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

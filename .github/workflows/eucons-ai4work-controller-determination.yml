@@ -1,0 +1,46 @@
+name: EUCONS AI4WORK Controller Determination
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/CONTROLLER_DETERMINATION_DRAFT.json'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - 'eucons/research/ai4work-step/controller_determination_control.py'
+      - 'eucons/research/ai4work-step/test_controller_determination.py'
+      - 'eucons/research/ai4work-step/test_controller_determination_control.py'
+      - '.github/workflows/eucons-ai4work-controller-determination.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/CONTROLLER_DETERMINATION_DRAFT.json'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - 'eucons/research/ai4work-step/controller_determination_control.py'
+      - 'eucons/research/ai4work-step/test_controller_determination.py'
+      - 'eucons/research/ai4work-step/test_controller_determination_control.py'
+      - '.github/workflows/eucons-ai4work-controller-determination.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-controller-determination-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  controller-determination:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate controller determination semantics
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_controller_determination.py test_controller_determination_control.py
+      - name: Enforce current controller determination control state
+        working-directory: eucons/research/ai4work-step
+        run: python controller_determination_control.py

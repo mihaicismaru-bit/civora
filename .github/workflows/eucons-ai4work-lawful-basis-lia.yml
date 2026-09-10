@@ -1,0 +1,47 @@
+name: EUCONS AI4WORK Lawful Basis LIA
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/GDPR_LIA_DRAFT.json'
+      - 'eucons/research/ai4work-step/lawful_basis_lia_control.py'
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/test_lawful_basis_lia_control.py'
+      - 'eucons/research/ai4work-step/test_prod_activation_lia_binding.py'
+      - '.github/workflows/eucons-ai4work-lawful-basis-lia.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/GDPR_LIA_DRAFT.json'
+      - 'eucons/research/ai4work-step/lawful_basis_lia_control.py'
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/test_lawful_basis_lia_control.py'
+      - 'eucons/research/ai4work-step/test_prod_activation_lia_binding.py'
+      - '.github/workflows/eucons-ai4work-lawful-basis-lia.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-lawful-basis-lia-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lawful-basis-lia:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate lawful-basis and LIA fail-closed semantics
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_lawful_basis_lia_control.py test_prod_activation_lia_binding.py
+      - name: Enforce current LIA control state
+        working-directory: eucons/research/ai4work-step
+        run: python lawful_basis_lia_control.py
+      - name: Enforce authoritative PROD activation boundary
+        working-directory: eucons/research/ai4work-step
+        run: python prod_activation_gate.py

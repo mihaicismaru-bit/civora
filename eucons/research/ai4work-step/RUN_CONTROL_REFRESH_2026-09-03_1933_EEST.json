@@ -1,0 +1,141 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-03T19:33:30+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "branch_parent_head": "26dc426103e608cff1fa09dd1aa3e57b8b271005",
+  "secondary_evidence_refresh": {
+    "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
+    "high_water_mark_before": "S69",
+    "high_water_mark_after": "S72",
+    "dashboard_reconciled_to": "S01-S72",
+    "new_rows": [
+      {
+        "source_id": "S70",
+        "region": "Sud-Vest Oltenia / Olt",
+        "publisher": "ANOFM / AJOFM Olt",
+        "title": "6,14 - rata somajului inregistrat in evidentele AJOFM Olt in luna iulie 2026",
+        "publication_date": "2026-08-31",
+        "reference_period": "2026-07",
+        "url": "https://www.anofm.ro/olt/614-rata-somajului-inregistrat-in-evidentele-ajofm-olt-in-luna-iulie-2026/",
+        "observed_facts": {
+          "reported_title_rate_value_source_exact": "6,14",
+          "percent_symbol_exposed_in_controlled_wrapper": false,
+          "downloadable_document_text_readback_obtained": false
+        },
+        "classification": "CURRENT_LABOUR_MARKET_ADMINISTRATIVE_CONTEXT_ZERO_H1_H5",
+        "claim_boundary": "The controlled wrapper exposes the official title value 6,14 but not the downloadable document text and not an explicit percent symbol. No unit absent from the readback is added. Registered unemployment remains current territorial labour-market context only and adds zero numeric H1-H5 evidence points."
+      },
+      {
+        "source_id": "S71",
+        "region": "Sud-Muntenia / Teleorman",
+        "publisher": "ANOFM / AJOFM Teleorman",
+        "title": "Rata somajului inregistrat in evidentele A.J.O.F.M Teleorman in luna IULIE 2026",
+        "publication_date": "2026-08-18",
+        "reference_period": "2026-07",
+        "url": "https://www.anofm.ro/teleorman/rata-somajului-inregistrat-in-evidentele-a-j-o-f-m-teleorman-in-luna-iulie-2026/",
+        "observed_facts": {
+          "registered_unemployed_text_total": 9273,
+          "registered_unemployed_women": 3869,
+          "registered_unemployed_rural": 7637,
+          "registered_unemployed_urban": 1636,
+          "age_table_total": 9292,
+          "source_internal_total_discrepancy_preserved": true
+        },
+        "classification": "CURRENT_LABOUR_MARKET_ADMINISTRATIVE_CONTEXT_ZERO_H1_H5",
+        "claim_boundary": "The source contains an internal mismatch between the narrative total (9,273) and the age-table total (9,292). The discrepancy is preserved explicitly; no reconciliation or derived value is invented. Administrative unemployment is not AI4WORK need prevalence."
+      },
+      {
+        "source_id": "S72",
+        "region": "Centru / Mures",
+        "publisher": "ANOFM / AJOFM Mures",
+        "title": "2,86% - rata somajului inregistrat in evidentele AJOFM MURES in luna IULIE 2026",
+        "publication_date": "2026-08-27",
+        "reference_period": "2026-07",
+        "url": "https://www.anofm.ro/mures/286-rata-somajului-inregistrat-in-evidentele-ajofm-mures-in-luna-iulie-2026/",
+        "observed_facts": {
+          "registered_unemployment_rate_percent": 2.86,
+          "registered_unemployed_total": 5919,
+          "registered_unemployed_women": 2785,
+          "registered_unemployed_rural": 4373,
+          "registered_unemployed_urban": 1546
+        },
+        "classification": "CURRENT_LABOUR_MARKET_ADMINISTRATIVE_CONTEXT_ZERO_H1_H5",
+        "claim_boundary": "Registered unemployment and profiling are current territorial labour-market context, not direct measurements of AI/digital skill gaps or training-need prevalence."
+      }
+    ],
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "administrative_labour_market_data_as_need_prevalence": false
+  },
+  "call_requirements_refresh": {
+    "checked_at": "2026-09-03T19:33:30+03:00",
+    "gmail_scope": "newer_than:1d AI4WORK/eucons/Cloudflare/cPanel/OMIPE/MIPE/Claus excluding spam/trash and GitHub notifications",
+    "matching_non_github_authority_or_provider_messages_observed": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "checked_at": "2026-09-03T19:33:30+03:00",
+    "controlled_drive_queries": [
+      "PROD_REAL_EVIDENCE",
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1"
+    ],
+    "eligible_immutable_combined_real_adult_employer_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "repo_control_refresh": {
+    "exact_head_before_this_receipt": "26dc426103e608cff1fa09dd1aa3e57b8b271005",
+    "associated_pr_triggered_workflow_runs_observed": 29,
+    "completed_success": 29,
+    "failed_or_null": 0,
+    "interpretation": "Repository controls are green at the pre-receipt exact head. Earlier failure notifications belonged to superseded commits and are not treated as current-head failures. This does not establish any live account-specific/provider-bound fact."
+  },
+  "gdpr_and_forms_refresh": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "privacy_contact": "privacy@eucons.ro",
+    "privacy_contact_inbound_delivery_independently_verified": false,
+    "raw_access_policy_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
+    "residual_provider_backup_ceiling_days": 92,
+    "account_specific_backup_ceiling_proven": false,
+    "exact_rendered_ai4work_article13_reverified_this_run": false
+  },
+  "nf06_and_downstream": {
+    "nf06_preingest_implementation": "PREPARED_FAIL_CLOSED",
+    "nf06_prod_ingest_allowed": false,
+    "need_synthesis_allowed": false,
+    "deterministic_h1_h5_ranking_allowed": false,
+    "adversarial_qa_prod_allowed": false,
+    "needs_analysis_finalisation_allowed": false,
+    "reason": "No eligible immutable schema-valid real adult+employer PROD_REAL_EVIDENCE batch exists."
+  },
+  "remaining_external_blocker": {
+    "class": "LIVE_ACCOUNT_SPECIFIC_PROVIDER_BOUND",
+    "items": [
+      "exact rendered AI4WORK Article 13 readback and independently working privacy/rights inbound channel",
+      "actual eucons.ro cPanel/Cloudflare Raw Access/archive/access/security/retention readback proving the <=7-day policy on the live account",
+      "current service/account mapping and active processor/subprocessor chain",
+      "provider-bound proof that the research-only store is outside webroot and separate from CRM/commercial storage with authorised access only",
+      "account-specific confirmation of no backup override above <=92 days plus deletion/restore semantics that do not silently reintroduce erased/held records",
+      "provider-bound rights-hold/erasure and incident-response smoke evidence in TEST_TWIN_NON_EVIDENCE"
+    ]
+  },
+  "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

@@ -1,0 +1,64 @@
+name: EUCONS AI4WORK Source Register Provenance Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/source_register_provenance_control.py'
+      - 'eucons/research/ai4work-step/test_source_register_provenance_control.py'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_PROVENANCE_CONTRACT.json'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_SNAPSHOT_CONTRACT.json'
+      - '.github/workflows/eucons-ai4work-source-provenance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/source_register_provenance_control.py'
+      - 'eucons/research/ai4work-step/test_source_register_provenance_control.py'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_PROVENANCE_CONTRACT.json'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_SNAPSHOT_CONTRACT.json'
+      - '.github/workflows/eucons-ai4work-source-provenance.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-source-provenance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-register-provenance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run immutable provenance tests (TEST TWIN is NON-EVIDENCE)
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_source_register_provenance_control.py
+      - name: Assert provenance contract remains fail-closed
+        working-directory: eucons/research/ai4work-step
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          contract = json.loads(Path('SOURCE_REGISTER_PROVENANCE_CONTRACT.json').read_text(encoding='utf-8'))
+          assert contract['schema_version'] == 'eucons.ai4work_source_register_provenance_manifest.v0.1'
+          prod = contract['prod_requirements']
+          twin = contract['test_twin_requirements']
+          assert prod['exact_source_provenance_census'] is True
+          assert prod['exact_source_snapshot_census'] is True
+          assert prod['source_register_sha256_binding'] is True
+          assert prod['recompute_snapshot_sha256_from_actual_bytes'] is True
+          assert prod['synthetic'] is False
+          assert prod['secondary_evidence_h1_h5_numeric_points'] == 0
+          assert prod['project_activity_as_need_evidence'] is False
+          assert prod['source_register_numeric_rank_eligible'] is False
+          assert twin['status'] == 'TEST_TWIN_NON_EVIDENCE'
+          assert twin['synthetic'] is True
+          assert twin['evidence_eligible'] is False
+          assert twin['promotion_to_prod_forbidden'] is True
+          print('PASS: source-register finalization requires byte-level provenance and TEST TWIN remains NON-EVIDENCE')
+          PY

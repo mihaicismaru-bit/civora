@@ -1,0 +1,53 @@
+{
+  "schema_version": "eucons.ai4work_provider_documentary_binding.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "status": "DOCUMENTARY_PROVIDER_BASELINE_FROZEN_ACCOUNT_OVERRIDES_PENDING",
+  "provider": {
+    "legal_name": "CLAUS WEB SRL",
+    "service_family": "Shared Hosting / cPanel",
+    "documentary_basis": "First-party provider package received 2026-08-28 and recorded in the controlled Evidence Registry."
+  },
+  "documents": {
+    "dpa_v1_0": {
+      "filename": "clausweb_dpa_acord_de_prelucrare_a_datelor_anexa_contractuala_pentru_serviciile_claus_web_.pdf",
+      "size_bytes": 253895,
+      "sha256": "40391f30b73a2a20182bc2c1e38b65d515c4d4d65dd2c412b76c0592767d024f"
+    },
+    "annex_4": {
+      "filename": "clausweb_dpa_acord_de_prelucrare_a_datelor_anexa4.pdf",
+      "size_bytes": 124650,
+      "sha256": "69b5491a9fc4842af858b7e58dec88599025229014346eb466ff762912b32108"
+    },
+    "annex_5": {
+      "filename": "clausweb_dpa_acord_de_prelucrare_a_datelor_anexa5.pdf",
+      "size_bytes": 112754,
+      "sha256": "09d8c6a95427d4716ffa6dccc0ae5e054a074b3a8a861085c6ad89984d9c485d"
+    }
+  },
+  "controlled_evidence_reference": "F-367944-113_TO_F-367944-116",
+  "frozen_claims": {
+    "annex_4_document_received_and_hashed": true,
+    "annex_5_document_received_and_hashed": true,
+    "shared_hosting_logging_field_profile_documented": true,
+    "answers_or_identifiers_in_url_query_string": "FORBIDDEN"
+  },
+  "not_closed_by_this_binding": [
+    "actual_active_subprocessor_subset_for_eucons.ro",
+    "current_cpanel_raw_access_archive_retention_and_access",
+    "any_account_specific_annex_5_override",
+    "research_only_store_isolation_encryption_and_access",
+    "provider_bound_deletion_and_backup_execution",
+    "controller_processor_role_chain",
+    "provider_bound_test_twin_smoke"
+  ],
+  "prod_gate_effect": {
+    "provider_annex_4_5": "FROZEN_DOCUMENTARY_BASELINE",
+    "processor_chain": "OPEN",
+    "server_logging_profile": "OPEN_ACCOUNT_CONFIGURATION",
+    "retention_and_deletion": "OPEN_ACCOUNT_EXECUTION",
+    "research_only_store_binding": "OPEN",
+    "provider_bound_test_twin_smoke": "OPEN"
+  },
+  "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+}

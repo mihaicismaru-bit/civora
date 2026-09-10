@@ -1,0 +1,47 @@
+{
+  "schema_version": "eucons.ai4work_controller_governance_approval.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "approved_at": "2026-09-03T07:29:00+02:00",
+  "approval_source": "AUTHENTICATED_FIRST_PARTY_USER_CHAT_DECISION",
+  "approver_role": "EUROCONSULT SRL controller / project owner",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "decisions": {
+    "method_and_collection_frame": {
+      "approved": true,
+      "need_analysis_plan_reference": "NEED_ANALYSIS_PLAN_DRAFT.json",
+      "collection_frame_reference": "COLLECTION_FRAME_DRAFT.json",
+      "dual_sha256_lock_approved": true
+    },
+    "lawful_basis_and_dpia": {
+      "approved": true,
+      "lawful_basis": "GDPR Article 6(1)(f) legitimate interests",
+      "lia_reference": "GDPR_LIA_DRAFT.json",
+      "dpia_screening_reference": "GDPR_DPIA_SCREENING_DRAFT.json",
+      "dpia_screening_outcome_accepted": "DPIA_NOT_REQUIRED_ON_CURRENT_DESIGN",
+      "rescreen_on_material_change_required": true
+    },
+    "gdpr_operational_policy": {
+      "approved": true,
+      "data_minimisation": true,
+      "commercial_tracking_forbidden": true,
+      "crm_linkage_forbidden": true,
+      "research_store_separate_from_crm_required": true,
+      "raw_access_log_retention_max_days": 7,
+      "backup_residual_max_days": 92,
+      "rights_procedure_reference": "GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json",
+      "retention_schedule_reference": "GDPR_RETENTION_SCHEDULE_DRAFT.json"
+    }
+  },
+  "explicit_boundaries": {
+    "collection_authorized": false,
+    "prod_activation_authorized": false,
+    "real_dissemination_authorized": false,
+    "merge_authorized": false,
+    "deploy_authorized": false,
+    "canonicalization_authorized": false,
+    "final_collection_only_v0_2_approval_still_required_after_all_live_checks_pass": true,
+    "live_account_provider_claims_not_inferred": true,
+    "test_twin_policy": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  }
+}
