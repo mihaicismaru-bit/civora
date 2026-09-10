@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-09-10T08:58:46+03:00",
+  "observed_at": "2026-09-10T14:07:55+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 17,
   "sources_ok": 15,
-  "current_signal_count": 34,
-  "today_signal_count": 4,
+  "current_signal_count": 36,
+  "today_signal_count": 16,
   "observations": [
     {
       "seed_id": "press-curierul-de-ramnic",
@@ -28,7 +28,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-09T12:02:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -81,18 +81,60 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "8732258d86a6f4dc76192771",
+          "signal_title": "Continuare about Copiii de la Centrul „Andreea” nu vor face naveta până la Băbeni. Primăria Râmnicului a găsit soluția 👇🏻👇🏻👇🏻",
+          "signal_url": "https://www.curierul.ro/copiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/",
+          "signal_publisher": "Curierul de Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T09:06:09+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            },
+            {
+              "ref_type": "primary_target_id",
+              "id": "romsilva-valcea-torrents"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-curierul-valcea"
+        }
+      ],
       "final_url": "https://www.curierul.ro/",
       "links_examined": 14,
-      "hygiene_dropped_count": 2,
+      "hygiene_dropped_count": 3,
       "hygiene_dropped": [
         {
           "title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-          "url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag"
+          "url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fcopiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag"
         },
         {
           "title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-          "url": "https://x.com/intent/tweet?via=curierulvl&text=S-a%20%C3%AEncheiat%20cu%20ambuteiajele%20la%20Spitalul%20de%20Urgen%C8%9B%C4%83&url=https%3A%2F%2Fwww.curierul.ro%2Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%2F"
+          "url": "https://x.com/intent/tweet?via=curierulvl&text=Copiii%20de%20la%20Centrul%20%E2%80%9EAndreea%E2%80%9D%20nu%20vor%20face%20naveta%20p%C3%A2n%C4%83%20la%20B%C4%83beni.%20Prim%C4%83ria%20R%C3%A2mnicului%20a%20g%C4%83sit%20solu%C8%9Bia%20%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fcopiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F"
+        },
+        {
+          "title": "Imprimare(Se deschide într-o fereastră nouă) Imprimare",
+          "url": "https://www.curierul.ro/copiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/?share=print"
         }
       ]
     },
@@ -114,7 +156,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -151,7 +193,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -185,27 +227,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-09T22:58:01+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-impact-real"
-        },
-        {
-          "signal_id": "9bd6fe767acd16150a70fa8e",
-          "signal_title": "Căruțe cu flori, costume scoase din lăzile de zestre și joc popular: „Brâul de Aur” a adunat județul la Bărbătești",
-          "signal_url": "https://www.impactreal.ro/2026/09/08/carute-cu-flori-costume-scoase-din-lazile-de-zestre-si-joc-popular-braul-de-aur-a-adunat-judetul-la-barbatesti/",
-          "signal_publisher": "Impact Real",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-08T22:15:46+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -287,7 +309,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -307,7 +329,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -354,7 +376,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-09T16:54:04+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -388,7 +410,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -408,7 +430,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -419,47 +441,47 @@
           "signal_seed_id": "press-turnul-sfatului"
         },
         {
-          "signal_id": "242ba9318ec77a26c9b9ca14",
-          "signal_title": "Bănci la cerere pentru locuitorii din Turnu Roșu: proiectul vrea să creeze „insulițe de socializare” în comunitate. Primar: „Trăim în vremuri în care oamenii sunt afectați de singurătate”",
-          "signal_url": "https://www.turnulsfatului.ro/2026/09/10/banci-la-cerere-pentru-locuitorii-din-turnu-rosu-proiectul-vrea-sa-creeze-insulite-de-socializare-in-comunitate-primar-traim-in-vremuri-in-care-oamenii-sunt-afectati-de-s/",
+          "signal_id": "fde1663df87950a15a2635f9",
+          "signal_title": "Poluarea de pe Valea Oltului: apele uzate provin de la organizarea de șantier a constructorului autostrăzii. Amendă de 40.000 de lei aplicată de Apele Române",
+          "signal_url": "https://www.turnulsfatului.ro/2026/09/10/poluarea-de-pe-valea-oltului-apele-uzate-provin-de-la-organizarea-de-santier-a-constructorului-autostrazii-amenda-de-40-000-de-lei-aplicata-de-apele-romane/",
           "signal_publisher": "Turnul Sfatului",
           "signal_tier": "T2",
           "signal_family": "REGIONAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-10T07:40:17+03:00",
+          "published_at": "2026-09-10T07:25:37+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-turnul-sfatului"
-        },
-        {
-          "signal_id": "b9add9084e5526269eb52695",
-          "signal_title": "Cristian, elevul de clasa a X-a care a câștigat 10.000 de euro pentru un proiect social: „Mi-ar plăcea să fim mai deschiși ca societate, să judecăm mai puțin și să ne așezăm la nivelul persoanei din fața noastră”",
-          "signal_url": "https://www.turnulsfatului.ro/2026/09/09/cristian-elevul-de-clasa-a-x-a-care-a-castigat-10-000-de-euro-pentru-un-proiect-social-mi-ar-placea-sa-fim-mai-deschisi-ca-societate-sa-judecam-mai-putin-si-sa-ne-asezam-la-nivelul-persoan/",
-          "signal_publisher": "Turnul Sfatului",
-          "signal_tier": "T2",
-          "signal_family": "REGIONAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-09T22:14:48+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "education",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "environment_weather",
           "verification_targets": [
             {
-              "ref_type": "news_source_id",
-              "id": "ccd-valcea-noutati"
+              "ref_type": "manual_watch_source_id",
+              "id": "inhga-avertizari-hidrologice-valcea"
             },
             {
-              "ref_type": "manual_watch_source_id",
-              "id": "isj-valcea-comunicate"
+              "ref_type": "primary_target_id",
+              "id": "aba-olt-sga-valcea"
             }
           ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-turnul-sfatului"
+        },
+        {
+          "signal_id": "e8303aa3fc434ce3bc7d427e",
+          "signal_title": "Emil Hurezeanu și Robert Hanea, fondatorul Therme Group, în dialog la Sibiu despre cultură, patrimoniu și bani privați",
+          "signal_url": "https://www.turnulsfatului.ro/2026/09/10/emil-hurezeanu-si-robert-hanea-fondatorul-therme-group-in-dialog-la-sibiu-despre-cultura-patrimoniu-si-bani-privati/",
+          "signal_publisher": "Turnul Sfatului",
+          "signal_tier": "T2",
+          "signal_family": "REGIONAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T13:25:35+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -482,6 +504,31 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "5cbe1361d257c83ce7f19341",
+          "signal_title": "Patru femei, amenințate cu violența la Călimănești. O femeie de 39 de ani a fost reținută",
+          "signal_url": "https://vocea-valcii.ro/dezvaluiri/patru-femei-amenintate-cu-violenta-la-calimanesti-o-femeie-de-39-de-ani-a-fost-retinuta/",
+          "signal_publisher": "Vocea Vâlcii",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T13:29:00+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-vocea-valcii"
+        },
+        {
           "signal_id": "cd8b93d57cd9604e4eb59c28",
           "signal_title": "Femeie din Râmnicu Vâlcea, reținută după ce ar fi furat 175.000 de lei din gestiunea unei firme",
           "signal_url": "https://vocea-valcii.ro/dezvaluiri/femeie-din-ramnicu-valcea-retinuta-dupa-ce-ar-fi-furat-175-000-de-lei-din-gestiunea-unei-firme/",
@@ -491,7 +538,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-09T12:13:19+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -521,6 +568,35 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "0ba8bd0a13d729de9ef4ccd3",
+          "signal_title": "CONTROVERSĂ la Școala Waldorf din Râmnicu Vâlcea: cadre didactice, în tricouri cu curcubeu LGBT în prima zi de școală. Simbol educațional sau mesaj ideologic?",
+          "signal_url": "https://ziaruldevalcea.ro/2026/09/controversa-la-scoala-waldorf-din-ramnicu-valcea-cadre-didactice-in-tricouri-cu-curcubeu-lgbt-in-prima-zi-de-scoala-simbol-educational-sau-mesaj-ideologic/",
+          "signal_publisher": "Ziarul de Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": true,
+          "published_at": "2026-09-10T09:05:44+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "education",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "ccd-valcea-noutati"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "isj-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-ziarul-de-valcea"
+        },
+        {
           "signal_id": "3d7a5720b8e9155b442cee50",
           "signal_title": "PAMFLET | „Regele Râmnicului” și misterul ochilor negri: când imobiliarele devin... sport de contact",
           "signal_url": "https://ziaruldevalcea.ro/2026/09/pamflet-regele-ramnicului-si-misterul-ochilor-negri-cand-imobiliarele-devin-sport-de-contact/",
@@ -530,7 +606,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-10T03:36:52+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -550,7 +626,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-09T18:30:27+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -579,7 +655,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-09T18:11:20+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -616,7 +692,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-09T16:40:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -636,7 +712,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-09T16:18:21+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -673,7 +749,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-09T05:14:14+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -693,44 +769,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-09T05:11:46+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "administration_projects",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "prefectura-valcea"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "cj-valcea-anunturi"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "primaria-rm-valcea-comunicate"
-            },
-            {
-              "ref_type": "primary_target_id",
-              "id": "romsilva-valcea-torrents"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-ziarul-de-valcea"
-        },
-        {
-          "signal_id": "dd970214b411aa42dd85f445",
-          "signal_title": "Vâlcea, în fruntea investițiilor PNRR în reciclare: peste 50 de milioane de lei pentru fabrica Plastiflex de la Bujoreni",
-          "signal_url": "https://ziaruldevalcea.ro/2026/09/valcea-in-fruntea-investitiilor-pnrr-in-reciclare-peste-50-de-milioane-de-lei-pentru-fabrica-plastiflex-de-la-bujoreni/",
-          "signal_publisher": "Ziarul de Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": true,
-          "published_at": "2026-09-09T05:09:07+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -772,16 +811,16 @@
       "error": null,
       "signals": [
         {
-          "signal_id": "d3ae5cdc0b0ef0c44870c2c4",
+          "signal_id": "574f0872416f46aa63c2c02b",
           "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-          "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+          "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fcopiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
           "signal_publisher": "Curierul de Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -792,18 +831,55 @@
           "signal_seed_id": "signal-curierul-valcea"
         },
         {
-          "signal_id": "485561d3bd66859354c995c9",
+          "signal_id": "ad66998702120580a930c409",
           "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-          "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=S-a%20%C3%AEncheiat%20cu%20ambuteiajele%20la%20Spitalul%20de%20Urgen%C8%9B%C4%83&url=https%3A%2F%2Fwww.curierul.ro%2Fs-a-incheiat-cu-ambuteiajele-la-spitalul-de-urgenta%2F",
+          "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=Copiii%20de%20la%20Centrul%20%E2%80%9EAndreea%E2%80%9D%20nu%20vor%20face%20naveta%20p%C3%A2n%C4%83%20la%20B%C4%83beni.%20Prim%C4%83ria%20R%C3%A2mnicului%20a%20g%C4%83sit%20solu%C8%9Bia%20%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fcopiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
           "signal_publisher": "Curierul de Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-curierul-valcea"
+        },
+        {
+          "signal_id": "786f87372e45aff673cb1464",
+          "signal_title": "Continuare about Copiii de la Centrul „Andreea” nu vor face naveta până la Băbeni. Primăria Râmnicului a găsit soluția 👇🏻👇🏻👇🏻",
+          "signal_url": "https://www.curierul.ro/copiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/",
+          "signal_publisher": "Curierul de Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T09:06:09+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            },
+            {
+              "ref_type": "primary_target_id",
+              "id": "romsilva-valcea-torrents"
+            }
+          ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -814,8 +890,13 @@
       ],
       "final_url": "https://www.curierul.ro/",
       "links_examined": 14,
-      "hygiene_dropped_count": 0,
-      "hygiene_dropped": []
+      "hygiene_dropped_count": 1,
+      "hygiene_dropped": [
+        {
+          "title": "Imprimare(Se deschide într-o fereastră nouă) Imprimare",
+          "url": "https://www.curierul.ro/copiii-de-la-centrul-andreea-nu-vor-face-naveta-pana-la-babeni-primaria-ramnicului-a-gasit-solutia-%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/?share=print"
+        }
+      ]
     },
     {
       "seed_id": "signal-eveniment-valcean",
@@ -826,90 +907,16 @@
       "error": null,
       "signals": [
         {
-          "signal_id": "45810479142a498201c5e4e2",
-          "signal_title": "Primăria Râmnicului vine în sprijinul copiilor cu dizabilități relocați de la Centrul „Andreea”",
-          "signal_url": "https://evenimentvalcean.ro/primaria-ramnicului-vine-in-sprijinul-copiilor-cu-dizabilitati-relocati-de-la-centrul-andreea/",
+          "signal_id": "c322415f3f607567ef58f87b",
+          "signal_title": "Un milion de lei pentru Complexul Sportiv din Păușești-Otăsău. Investiția de la Bărcănele continuă",
+          "signal_url": "https://evenimentvalcean.ro/un-milion-de-lei-pentru-complexul-sportiv-din-pausesti-otasau-investitia-de-la-barcanele-continua/",
           "signal_publisher": "Eveniment Vâlcean",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-09T14:50:55+03:00",
+          "published_at": "2026-09-10T11:55:32+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "administration_projects",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "prefectura-valcea"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "cj-valcea-anunturi"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "primaria-rm-valcea-comunicate"
-            },
-            {
-              "ref_type": "primary_target_id",
-              "id": "romsilva-valcea-torrents"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-eveniment-valcean"
-        },
-        {
-          "signal_id": "b3f8647c0e5009c87342fc7a",
-          "signal_title": "Vlădești pregătește un parc fotovoltaic de 400 kW. Investiția ar reduce factura administrației",
-          "signal_url": "https://evenimentvalcean.ro/vladesti-pregateste-un-parc-fotovoltaic-de-400-kw-investitia-ar-reduce-factura-administratiei/",
-          "signal_publisher": "Eveniment Vâlcean",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-09T14:19:23+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "administration_projects",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "prefectura-valcea"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "cj-valcea-anunturi"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "primaria-rm-valcea-comunicate"
-            },
-            {
-              "ref_type": "primary_target_id",
-              "id": "romsilva-valcea-torrents"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-eveniment-valcean"
-        },
-        {
-          "signal_id": "ec307b37fcea3f88e50447f4",
-          "signal_title": "FOTO/VIDEO Baza sportivă din Băile Olănești, investiția care a pus stațiunea pe harta sportului",
-          "signal_url": "https://evenimentvalcean.ro/foto-video-baza-sportiva-din-baile-olanesti-investitia-care-a-pus-statiunea-pe-harta-sportului/",
-          "signal_publisher": "Eveniment Vâlcean",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-09T13:09:08+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -923,6 +930,63 @@
             {
               "ref_type": "manual_watch_source_id",
               "id": "ajf-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
+          "signal_id": "5fc2eafa28b0b7181c6f1a02",
+          "signal_title": "Gazele din Șirineasa, tot mai aproape de realitate: două oferte pentru lucrările de peste 55 de milioane de lei",
+          "signal_url": "https://evenimentvalcean.ro/gazele-din-sirineasa-tot-mai-aproape-de-realitate-doua-oferte-pentru-lucrarile-de-peste-55-de-milioane-de-lei/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T11:46:37+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
+          "signal_id": "45810479142a498201c5e4e2",
+          "signal_title": "Primăria Râmnicului vine în sprijinul copiilor cu dizabilități relocați de la Centrul „Andreea”",
+          "signal_url": "https://evenimentvalcean.ro/primaria-ramnicului-vine-in-sprijinul-copiilor-cu-dizabilitati-relocati-de-la-centrul-andreea/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-09T14:50:55+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            },
+            {
+              "ref_type": "primary_target_id",
+              "id": "romsilva-valcea-torrents"
             }
           ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -960,6 +1024,100 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "89992b95fa7580b9dd4e22f9",
+          "signal_title": "FOTO – Poluare pe Valea Oltului: Apele Române au amendat constructorul Autostrăzii Sibiu–Pitești",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/10/foto-poluare-pe-valea-oltului-apele-romane-au-amendat-constructorul-autostrazii-sibiu-pitesti/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T12:58:32+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "environment_weather",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "inhga-avertizari-hidrologice-valcea"
+            },
+            {
+              "ref_type": "primary_target_id",
+              "id": "aba-olt-sga-valcea"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "53a1a725754da65219ed5aa5",
+          "signal_title": "VÂLCEA. O mașină a ars în totalitate…",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/10/valcea-o-masina-a-ars-in-totalitate/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T12:33:11+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "df5d2bb30680948d6d598d91",
+          "signal_title": "Chinul șoferilor se prelungește pe Valea Oltului. Restricțiile de pe DN7 rămân în vigoare până în noiembrie 2026",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/10/chinul-soferilor-se-prelungeste-pe-valea-oltului-restrictiile-de-pe-dn7-raman-in-vigoare-pana-in-noiembrie-2026/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T10:40:33+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "national_road_restrictions",
+          "verification_targets": [
+            {
+              "ref_type": "primary_target_id",
+              "id": "igpr-infotrafic-live"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "75fde993c693fa9a842aa7f2",
+          "signal_title": "Prețul gazelor a depășit 360 lei/MWh, cel mai ridicat nivel din ultimii ani",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/10/pretul-gazelor-a-depasit-360-lei-mwh-cel-mai-ridicat-nivel-din-ultimii-ani/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-10T09:06:38+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
           "signal_id": "1958b4495b8938c8eee3ef2b",
           "signal_title": "FOTO: Patru tineri răniți într-un ACCIDENT, noaptea trecută, la BUDEȘTI. Au intrat cu mașina într-un cap de pod",
           "signal_url": "https://seintamplainvalcea.ro/2026/09/10/foto-patru-tineri-raniti-intr-un-accident-noaptea-trecuta-la-budesti-au-intrat-cu-masina-intr-un-cap-de-pod/",
@@ -969,111 +1127,12 @@
           "signal_sensitive": false,
           "published_at": "2026-09-10T08:55:45+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
               "ref_type": "manual_watch_source_id",
               "id": "ipj-valcea-stiri"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "028c97f1af207aa10e63f0cf",
-          "signal_title": "Primăria Râmnicului vine în sprijinul copiilor cu dizabilități relocați de la Centrul „Andreea”",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/10/primaria-ramnicului-vine-in-sprijinul-copiilor-cu-dizabilitati-relocati-de-la-centrul-andreea/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-10T07:57:13+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "administration_projects",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "prefectura-valcea"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "cj-valcea-anunturi"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "primaria-rm-valcea-comunicate"
-            },
-            {
-              "ref_type": "primary_target_id",
-              "id": "romsilva-valcea-torrents"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "4b21a0ceaeddca47eab38903",
-          "signal_title": "Percheziții în dosarul vacanțelor plătite, dar inexistente. Păgubiți din mai multe județe",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/09/perchezitii-in-dosarul-vacantelor-platite-dar-inexistente-pagubiti-din-mai-multe-judete/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-09T21:36:41+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "police_public_safety",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "ipj-valcea-stiri"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "6bd126456fc1d7a9bde5d658",
-          "signal_title": "Facturi mai mici la energie. Primăria Vlădești pregătește un parc fotovoltaic de 400 kW",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/09/facturi-mai-mici-la-energie-primaria-vladesti-pregateste-un-parc-fotovoltaic-de-400-kw/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-09T17:06:53+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "utilities",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "apavil-comunicate"
-            },
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "apavil-opriri-programate"
-            },
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "cet-govora-termoficare-advisories"
-            },
-            {
-              "ref_type": "primary_target_id",
-              "id": "aba-olt-sga-valcea"
             }
           ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -1093,7 +1152,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-09T16:06:40+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -1118,7 +1177,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-09T14:33:26+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
+          "observed_at": "2026-09-10T14:07:55+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -1129,38 +1188,23 @@
           "signal_seed_id": "signal-se-intampla-in-valcea"
         },
         {
-          "signal_id": "83d813580e34b9213decf0d6",
-          "signal_title": "HOREZU – Tupeu fără limite: s-a urcat la volan fără permis și beat",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/09/horezu-tupeu-fara-limite-s-a-urcat-la-volan-fara-permis-si-beat/",
+          "signal_id": "4b21a0ceaeddca47eab38903",
+          "signal_title": "Percheziții în dosarul vacanțelor plătite, dar inexistente. Păgubiți din mai multe județe",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/09/perchezitii-in-dosarul-vacantelor-platite-dar-inexistente-pagubiti-din-mai-multe-judete/",
           "signal_publisher": "Se întâmplă în Vâlcea",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-09T13:30:54+03:00",
+          "published_at": "2026-09-09T21:36:41+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "50ca0304b6c2df20cb4c536a",
-          "signal_title": "VIDEO | Protest la Câineni: Localnicii cer ca adolescentul acuzat de viol și tentative de viol să fie scos din comunitate",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/09/video-protest-la-caineni-localnicii-cer-ca-adolescentul-acuzat-de-viol-si-tentative-de-viol-sa-fie-scos-din-comunitate/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-09T13:53:05+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-10T08:58:46+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
+          "observed_at": "2026-09-10T14:07:55+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
