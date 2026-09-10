@@ -2,19 +2,129 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-10T21:19:44+03:00",
+  "generated_at": "2026-09-11T00:00:14+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-10T21:18:13+03:00",
-  "task_count": 84,
+  "queue_generated_at": "2026-09-10T23:58:37+03:00",
+  "task_count": 87,
   "primary_match_count": 0,
-  "no_match_count": 46,
-  "unrouted_count": 38,
+  "no_match_count": 48,
+  "unrouted_count": 39,
   "target_count": 19,
   "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "a858d20b2e474b29dbba2e43",
+      "signal_title": "POLUARE pe Valea Oltului, la Câineni! Constructorul Autostrăzii Sibiu–Pitești, amendat cu 40.000 de lei",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/poluare-pe-valea-oltului-la-caineni-constructorul-autostrazii-sibiu-pitesti-amendat-cu-40-000-de-lei/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-10T23:31:00+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "29546d26dd1fa25996af1689",
+      "signal_title": "Zi de sărbătoare la Pojogi: Căminul Cultural a fost inaugurat, iar istoria satului a fost așezată într-o carte",
+      "signal_url": "https://www.impactreal.ro/2026/09/10/zi-de-sarbatoare-la-pojogi-caminul-cultural-a-fost-inaugurat-iar-istoria-satului-a-fost-asezata-intr-o-carte/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-10T23:27:03+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "ed9fadd50d5bd3e5b0929c51",
+      "signal_title": "Remus Sasu, despre investiția de aproape două milioane de euro în parcurile din Ocnele Mari: „Va schimba complet imaginea orașului”",
+      "signal_url": "https://www.impactreal.ro/2026/09/10/remus-sasu-despre-investitia-de-aproape-doua-milioane-de-euro-in-parcurile-din-ocnele-mari-va-schimba-complet-imaginea-orasului/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-10T22:32:52+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "832a5cb78cb5ae11ef57daa9",
       "signal_title": "„Anghel Saligny”, fără bani din 11 septembrie – Ministerul împinge plata lucrărilor spre bugetele locale",
