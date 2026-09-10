@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from social_common import social_story_id, socially_held_story_ids
+from social_common import remove_socially_held_items, social_story_id, socially_held_story_ids
 
 FORBIDDEN_MARKERS = {
     "OPENAI_API_KEY": "OpenAI API secret",
@@ -48,6 +48,33 @@ def load_json(path: Path) -> dict[str, Any]:
     return value
 
 
+def write_json(path: Path, value: dict[str, Any]) -> None:
+    path.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+
+
+def reconcile_held_outboxes(outbox_paths: list[Path]) -> dict[str, list[str]]:
+    """Prune held stories from generated outboxes before ownership validation.
+
+    Publication holds are a safety control, while the outboxes are generated
+    runtime state. A new hold can therefore make a previously committed outbox
+    stale. Reconciliation must happen before any ownership gate or publication
+    preview so a newly held story can never block the repair step that removes
+    it, nor survive into a publishable queue.
+    """
+    removed_by_outbox: dict[str, list[str]] = {}
+    for path in outbox_paths:
+        document = load_json(path)
+        removed = remove_socially_held_items(document)
+        if not removed:
+            continue
+        write_json(path, document)
+        removed_by_outbox[path.name] = removed
+    return removed_by_outbox
+
+
 def cron_declared(workflow_text: str, cron: str) -> bool:
     return any(
         candidate in workflow_text
@@ -76,6 +103,16 @@ def validate(repo_root: Path) -> dict[str, Any]:
 
     held_ids = socially_held_story_ids()
     outbox_paths = sorted(social_root.glob("*_outbox.json"))
+    reconciled_holds = reconcile_held_outboxes(outbox_paths)
+    checks.append({
+        "check": "publication_holds_reconciled_before_social_validation",
+        "passed": True,
+        "held_story_count": len(held_ids),
+        "outboxes_changed": len(reconciled_holds),
+        "items_removed": sum(len(items) for items in reconciled_holds.values()),
+        "removed_by_outbox": reconciled_holds,
+    })
+
     leaked_holds: list[str] = []
     for path in outbox_paths:
         document = load_json(path)
@@ -93,7 +130,7 @@ def validate(repo_root: Path) -> dict[str, Any]:
     })
     if leaked_holds:
         errors.append(
-            "Editorial publication holds leaked into social outboxes: "
+            "Editorial publication holds leaked into social outboxes after reconciliation: "
             + ", ".join(leaked_holds)
         )
 
