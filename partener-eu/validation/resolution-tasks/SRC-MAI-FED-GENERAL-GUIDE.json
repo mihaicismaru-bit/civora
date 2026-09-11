@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-MAI-FED-GENERAL-GUIDE",
-  "source_tier": "T1",
+  "source_name": "managing_authority_general_guide",
   "source_url": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general/",
-  "status": "OPEN",
+  "source_tier": "T1",
+  "previous_semantic_sha256": "f3abfd35967e03d6d8e8a4e7595ca1b5d3ccc37e62267917643f7ebadbfe8561",
+  "candidate_semantic_sha256": "4da962691727990668df932a427d0a8d361896fc68f61af292f933a81405df6f",
+  "current_semantic_sha256": "4da962691727990668df932a427d0a8d361896fc68f61af292f933a81405df6f",
   "first_observed_at": "2026-08-13T05:19:22.391140Z",
   "last_observed_at": "2026-09-11T00:15:38.402408Z",
-  "previous_semantic_sha256": "f3abfd35967e03d6d8e8a4e7595ca1b5d3ccc37e62267917643f7ebadbfe8561",
-  "current_semantic_sha256": "4da962691727990668df932a427d0a8d361896fc68f61af292f933a81405df6f",
+  "registry_class": "managing_authority_general_guide",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-MAI-FED-GENERAL-GUIDE",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
