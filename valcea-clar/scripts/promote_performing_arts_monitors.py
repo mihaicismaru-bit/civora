@@ -16,6 +16,14 @@ GENERAL = ROOT / "editorial" / "monitor_registry.json"
 CULTURE = ROOT / "editorial" / "performing_arts_monitor_registry.json"
 CANDIDATES = ROOT / "editorial" / "performing_arts_update_candidates.json"
 PREFIXES = ("performing-arts-", "performing-arts-signal-")
+STABLE_CLOSE_WHEN = (
+    "Monitor permanent; fiecare eveniment, program, schimbare instituțională sau fir de bani publici "
+    "se închide numai după verificare, publicare cu dovezi ori invalidare explicită."
+)
+SIGNAL_CLOSE_WHEN = (
+    "Semnalul se închide numai după reverificarea sursei primare și o rezoluție explicită: "
+    "transformat în story verificat, absorbit într-un fir deja urmărit sau invalidat cu motiv."
+)
 
 
 def load(path: Path, default: dict) -> dict:
@@ -28,6 +36,7 @@ def normalize_monitor(row: dict) -> dict:
     item = dict(row)
     item.setdefault("status", "ACTIVE_REVERIFY")
     item.setdefault("publication_mode", "STORY_ONLY_AFTER_PRIMARY_EVIDENCE")
+    item.setdefault("close_when", STABLE_CLOSE_WHEN)
     item["public_projection"] = False
     item["normal_story_ready_gate_required"] = True
     return item
@@ -40,9 +49,12 @@ def signal_monitor(candidate: dict) -> dict:
     programme = bool(candidate.get("programme_signal"))
     priority = 94 if money else (91 if programme else 86)
     signals = []
-    if programme: signals.append("program/stagiune")
-    if money: signals.append("bani publici")
-    if not signals: signals.append("modificare sursă")
+    if programme:
+        signals.append("program/stagiune")
+    if money:
+        signals.append("bani publici")
+    if not signals:
+        signals.append("modificare sursă")
     return {
         "id": f"performing-arts-signal-{key}",
         "label": f"{institution} — semnal nou: {', '.join(signals)}",
@@ -71,6 +83,7 @@ def signal_monitor(candidate: dict) -> dict:
             "public_money_signal": money,
             "programme_signal": programme,
         }],
+        "close_when": SIGNAL_CLOSE_WHEN,
         "normal_story_ready_gate_required": True,
     }
 
@@ -110,8 +123,19 @@ def main() -> int:
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()
     output, stable, signals = build()
-    if not any(str(row.get("id") or "").startswith("performing-arts-") for row in output.get("monitors") or []):
+    performing_rows = [
+        row for row in output.get("monitors") or []
+        if str(row.get("id") or "").startswith("performing-arts-")
+    ]
+    if not performing_rows:
         raise SystemExit("performing arts monitors were not promoted")
+    missing_close = [str(row.get("id") or "") for row in performing_rows if not row.get("close_when")]
+    if missing_close:
+        raise SystemExit("performing arts monitors missing explicit close_when: " + ", ".join(missing_close))
+    if any(row.get("public_projection") is not False for row in performing_rows):
+        raise SystemExit("performing arts monitor attempted public projection")
+    if any(row.get("normal_story_ready_gate_required") is not True for row in performing_rows):
+        raise SystemExit("performing arts monitor bypassed normal story-ready gate")
     if args.check:
         print(json.dumps({"status":"PASS","stable_monitors":stable,"signal_monitors":signals}, ensure_ascii=False))
         return 0
