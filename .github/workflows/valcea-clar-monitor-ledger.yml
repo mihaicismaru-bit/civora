@@ -8,6 +8,8 @@ on:
     branches: [main]
     paths:
       - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/performing_arts_monitor_registry.json'
+      - 'valcea-clar/editorial/performing_arts_update_candidates.json'
       - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
       - 'valcea-clar/editorial/market_intelligence_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
@@ -15,6 +17,7 @@ on:
       - 'valcea-clar/editorial/news_discovery_state.json'
       - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/investigations/**'
+      - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/market_intelligence_watch.py'
@@ -24,12 +27,15 @@ on:
   pull_request:
     paths:
       - 'valcea-clar/editorial/monitor_registry.json'
+      - 'valcea-clar/editorial/performing_arts_monitor_registry.json'
+      - 'valcea-clar/editorial/performing_arts_update_candidates.json'
       - 'valcea-clar/editorial/infrastructure_monitor_registry.json'
       - 'valcea-clar/editorial/market_intelligence_registry.json'
       - 'valcea-clar/editorial/news_sources.json'
       - 'valcea-clar/editorial/manual_watch_sources.json'
       - 'valcea-clar/editorial/publication_holds.json'
       - 'valcea-clar/investigations/**'
+      - 'valcea-clar/scripts/promote_performing_arts_monitors.py'
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/market_intelligence_watch.py'
@@ -56,6 +62,11 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
+
+      - name: Reconcile performing arts monitors
+        run: |
+          python valcea-clar/scripts/promote_performing_arts_monitors.py
+          python valcea-clar/scripts/promote_performing_arts_monitors.py --check
 
       - name: Validate durable monitor contract
         run: python valcea-clar/scripts/validate_monitor_registry.py
@@ -108,6 +119,7 @@ jobs:
           git config user.email 'valcea-clar-monitor-ledger@users.noreply.github.com'
 
           git add \
+            valcea-clar/editorial/monitor_registry.json \
             valcea-clar/editorial/monitor_state.json \
             valcea-clar/editorial/council_watch_rm_valcea_state.json \
             valcea-clar/editorial/infrastructure_monitor_state.json \
