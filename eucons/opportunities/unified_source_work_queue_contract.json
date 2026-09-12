@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E10_UNIFIED_SOURCE_WORK_QUEUE",
+  "input": {
+    "freshness_engine_id": "EUCONS_E09_SOURCE_FRESHNESS_RECOVERY_QUEUE",
+    "freshness_state": "READ_ONLY_SOURCE_FRESHNESS_RECOVERY",
+    "official_engine_id": "EUCONS_E10_OFFICIAL_SOURCE_OPERATOR_QUEUE",
+    "official_state": "READ_ONLY_OPERATOR_QUEUE",
+    "required_source_product": "PARTENER.EU",
+    "required_source_role": "DISCOVERY_ONLY",
+    "freshness_queue_always_required": true,
+    "official_queue_required_when_source_ready": true,
+    "official_queue_forbidden_when_source_held": true,
+    "require_same_source_projection_sha256": true
+  },
+  "triage": {
+    "priority_order": ["P0", "P1", "P2"],
+    "domains": ["DISCOVERY_SOURCE", "OFFICIAL_AUTHORITY"],
+    "freshness_reason_codes": ["DISCOVERY_TIMESTAMP_INTEGRITY_HOLD", "DISCOVERY_SOURCE_STALE"],
+    "official_reason_codes": ["OFFICIAL_SOURCE_CONFLICT", "REQUIRED_OFFICIAL_BINDING_MISSING", "OPTIONAL_MATCHING_FACT_BINDINGS_INCOMPLETE"],
+    "deterministic_sort": ["priority_asc", "domain_asc", "work_id_asc"]
+  },
+  "output": {
+    "state": "READ_ONLY_UNIFIED_SOURCE_WORK_QUEUE",
+    "read_only": true,
+    "human_review_required": true,
+    "raw_material_fact_values_forbidden": true,
+    "person_level_fields_forbidden": true,
+    "eligibility_conclusion_forbidden": true,
+    "award_probability_forbidden": true,
+    "official_authority_inference_forbidden": true,
+    "repository_runtime_output_forbidden": true,
+    "external_action_authorized": false
+  },
+  "boundaries": {
+    "network_fetch": false,
+    "crm_write": false,
+    "provider_write": false,
+    "mysmis_write": false,
+    "outreach": false,
+    "message_send": false,
+    "offer_send": false,
+    "publication": false,
+    "deployment": false
+  }
+}

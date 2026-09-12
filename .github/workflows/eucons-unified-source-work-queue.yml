@@ -1,0 +1,57 @@
+name: EUCONS Unified Source Work Queue
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/opportunities/unified_source_work_queue_contract.json'
+      - 'eucons/opportunities/unified_source_work_queue.py'
+      - 'eucons/validation/test_unified_source_work_queue_fail_closed.py'
+      - 'eucons/opportunities/source_freshness_recovery_contract.json'
+      - 'eucons/opportunities/source_freshness_recovery.py'
+      - 'eucons/validation/test_source_freshness_recovery_fail_closed.py'
+      - 'eucons/opportunities/official_source_operator_queue_contract.json'
+      - 'eucons/opportunities/official_source_operator_queue.py'
+      - 'eucons/validation/test_official_source_operator_queue_fail_closed.py'
+      - '.github/workflows/eucons-unified-source-work-queue.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/opportunities/unified_source_work_queue_contract.json'
+      - 'eucons/opportunities/unified_source_work_queue.py'
+      - 'eucons/validation/test_unified_source_work_queue_fail_closed.py'
+      - 'eucons/opportunities/source_freshness_recovery_contract.json'
+      - 'eucons/opportunities/source_freshness_recovery.py'
+      - 'eucons/validation/test_source_freshness_recovery_fail_closed.py'
+      - 'eucons/opportunities/official_source_operator_queue_contract.json'
+      - 'eucons/opportunities/official_source_operator_queue.py'
+      - 'eucons/validation/test_official_source_operator_queue_fail_closed.py'
+      - '.github/workflows/eucons-unified-source-work-queue.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-unified-source-work-queue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Compile source work engines
+        run: |
+          python -m py_compile eucons/opportunities/source_freshness_recovery.py
+          python -m py_compile eucons/opportunities/official_source_operator_queue.py
+          python -m py_compile eucons/opportunities/unified_source_work_queue.py
+      - name: Revalidate source freshness recovery parent
+        run: python eucons/validation/test_source_freshness_recovery_fail_closed.py
+      - name: Revalidate official source operator parent
+        run: python eucons/validation/test_official_source_operator_queue_fail_closed.py
+      - name: Validate unified source work queue fail-closed behavior
+        run: python eucons/validation/test_unified_source_work_queue_fail_closed.py
