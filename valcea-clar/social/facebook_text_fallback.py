@@ -8,6 +8,12 @@ after a live public readback proves that the canonical story URL is HTTP 200 and
 exposes article-specific canonical/OpenGraph metadata matching the newsroom
 headline. The adapter also refuses RSS-like category-prefixed copy. This prevents
 Facebook from caching a stale/wrong card or publishing non-canonical social copy.
+
+A transient ``new_story_ids`` marker is preferred for the first delivery attempt.
+If that marker has already been cleared, the adapter may recover only current
+edition stories that are still newsroom-publishable, have a verified/PASS fact
+kernel, and entered their validity window within the bounded retry horizon. This
+keeps failed social delivery retryable without reopening the legacy backlog.
 """
 from __future__ import annotations
 
@@ -32,6 +38,7 @@ OUTBOX = VC / "social" / "facebook_outbox.json"
 STATE = VC / "social" / "facebook_state.json"
 EVENT = VC / "site" / "story_publication_event.json"
 DECISION = VC / "site" / "newsroom_decision.json"
+CURRENT = VC / "site" / "current_edition.json"
 DEFAULT_GRAPH_VERSION = "v26.0"
 ADAPTER = "facebook-text-fallback-v1.1"
 MISSING_PHOTO_REASON = "story_specific_approved_photo_required"
@@ -40,6 +47,8 @@ ENABLE_ENV = "VALCEA_FB_TEXT_FALLBACK_ENABLED"
 PUBLIC_UA = "facebookexternalhit/1.1 (+https://www.facebook.com/externalhit_uatext.php)"
 PUBLIC_PAGE_MAX_BYTES = 750_000
 OG_TITLE_SUFFIX = " — VÂLCEA CLAR"
+RECOVERY_WINDOW = dt.timedelta(hours=48)
+CLOCK_SKEW = dt.timedelta(minutes=5)
 GITHUB_404_MARKERS = (
     "page not found · github pages",
     "page not found - github pages",
@@ -84,13 +93,78 @@ def write(path: Path, value: dict[str, Any]) -> None:
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def _parse_timestamp(value: object) -> dt.datetime | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def recoverable_recent_story_ids(
+    snapshot: dict[str, Any],
+    decision: dict[str, Any],
+    *,
+    now: dt.datetime | None = None,
+) -> list[str]:
+    """Bound retries to recent, currently publishable verified stories.
+
+    This is deliberately narrower than the full current edition. It exists only
+    to recover a missed/failed Facebook attempt after ``new_story_ids`` has been
+    consumed. Legacy inventory cannot become eligible merely because it remains
+    in the edition.
+    """
+    current = now or dt.datetime.now(dt.timezone.utc)
+    if current.tzinfo is None:
+        raise ValueError("retry recovery clock must be timezone-aware")
+    current = current.astimezone(dt.timezone.utc)
+    publishable = {
+        str(value) for value in decision.get("publishable_story_ids") or [] if str(value)
+    }
+    recovered: list[str] = []
+    for item in snapshot.get("items") or []:
+        if not isinstance(item, dict):
+            continue
+        story_id = str(item.get("id") or "").strip()
+        if not story_id or story_id not in publishable or is_socially_held(story_id):
+            continue
+        if item.get("material_fact_gate") != "PASS":
+            continue
+        if str(item.get("lifecycle_status") or "").strip().lower() != "verified":
+            continue
+        observed = _parse_timestamp(item.get("valid_from"))
+        if observed is None:
+            continue
+        age = current - observed
+        if age < -CLOCK_SKEW or age > RECOVERY_WINDOW:
+            continue
+        recovered.append(story_id)
+    return recovered
+
+
+def _current_edition_snapshot() -> dict[str, Any]:
+    pointer = load(CURRENT, {})
+    source = str(pointer.get("json_source") or "").strip()
+    if not source or not source.startswith("editions/") or ".." in Path(source).parts:
+        return {}
+    return load(VC / source, {})
+
+
 def latest_new_story_ids() -> list[str]:
     event = load(EVENT, {})
     ids = [str(value) for value in event.get("new_story_ids") or [] if str(value)]
     if ids:
         return ids
     decision = load(DECISION, {})
-    return [str(value) for value in decision.get("new_story_ids") or [] if str(value)]
+    ids = [str(value) for value in decision.get("new_story_ids") or [] if str(value)]
+    if ids:
+        return ids
+    return recoverable_recent_story_ids(_current_edition_snapshot(), decision)
 
 
 def canonical_link_ok(value: str) -> bool:
@@ -156,7 +230,7 @@ def public_story_ready(
         return False, f"http_{exc.code}"
     except urllib.error.URLError as exc:
         return False, f"network_{getattr(exc, 'reason', 'error')}"
-    except Exception as exc:  # fail closed for DNS/TLS/transport surprises
+    except Exception as exc:
         return False, f"readback_{type(exc).__name__}"
     if status != 200:
         return False, f"http_{status}"
@@ -304,6 +378,26 @@ def self_test() -> int:
         }},
     }
     try:
+        fixed_now = dt.datetime(2026, 9, 12, 7, 0, tzinfo=dt.timezone.utc)
+        recent_snapshot = {
+            "items": [
+                {
+                    "id": "test-new", "material_fact_gate": "PASS", "lifecycle_status": "verified",
+                    "valid_from": "2026-09-11T00:00:00+03:00",
+                },
+                {
+                    "id": "test-old", "material_fact_gate": "PASS", "lifecycle_status": "verified",
+                    "valid_from": "2026-09-08T00:00:00+03:00",
+                },
+                {
+                    "id": "test-title-only", "material_fact_gate": "HOLD_TITLE_DATE_ONLY",
+                    "lifecycle_status": "verified", "valid_from": "2026-09-11T00:00:00+03:00",
+                },
+            ]
+        }
+        recent_decision = {"publishable_story_ids": ["test-new", "test-old", "test-title-only"]}
+        assert recoverable_recent_story_ids(recent_snapshot, recent_decision, now=fixed_now) == ["test-new"]
+
         assert native_copy_ok(sample["message"])
         assert not native_copy_ok("SPORT | VÂLCEA CLAR\n\nInformare verificată.")
         assert eligible_items({"items": [sample]}, {"published": {}}, ["test-new"])[0]["id"] == sample["id"]
