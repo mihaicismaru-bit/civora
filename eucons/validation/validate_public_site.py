@@ -68,8 +68,9 @@ def main():
         for path in ["/pentru-companii/", "/pentru-autoritati-publice/", "/pentru-ong/"]:
             assert_true(f'href="{path}"' in home, f"Homepage missing priority audience route {path}")
 
-        assert_true("Cere evaluarea proiectului" in home, "Visitor/commercial QA: primary CTA missing")
-        assert_true("Solicită ofertă" in home, "Commercial QA: offer CTA missing")
+        assert_true("Alege traseul potrivit" in home, "Visitor/commercial QA: JTBD-first primary CTA missing")
+        assert_true("Vezi soluțiile" in home, "Commercial QA: secondary service discovery CTA missing")
+        assert_true('href="#trasee-home"' in home, "JTBD QA: homepage primary CTA must target the four-journey chooser")
         assert_true("Ce nu promitem" in home, "Trust QA: explicit boundaries missing")
         assert_true("Nu garantăm obținerea finanțării" in home, "Trust QA: guarantee boundary missing")
         assert_true("O potrivire preliminară nu este eligibilitate confirmată" in home, "Trust QA: eligibility boundary missing")
@@ -95,7 +96,9 @@ def main():
 
         root_preview = (WEB_ROOT / "index.html").read_text(encoding="utf-8")
         assert_true("Development preview" not in root_preview, "Root preview still contains E00 bootstrap placeholder")
-        assert_true("Cere evaluarea proiectului" in root_preview, "Root preview is not commercially actionable")
+        assert_true("Alege traseul potrivit" in root_preview, "Root preview does not start with JTBD selection")
+        assert_true("Vezi soluțiile" in root_preview, "Root preview is missing secondary service discovery")
+        assert_true('href="#trasee-home"' in root_preview, "Root preview primary CTA does not target four-journey chooser")
         assert_true("În ce punct este proiectul tău?" in root_preview, "Root preview is not decision-first")
         for journey_path in (
             "/ce-finantare-mi-se-potriveste/",
