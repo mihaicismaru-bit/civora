@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "engine_id": "EUCONS_E10_MATCH_OPERATOR_EXPLAINABILITY",
+  "inputs": {
+    "required_matching_engine": "EUCONS_E10_OPPORTUNITY_MATCHING",
+    "required_matching_schema_version": 2,
+    "required_score_semantics": "RELEVANCE_NOT_APPROVAL_PROBABILITY",
+    "required_operator_queue_engine": "EUCONS_E10_OFFICIAL_SOURCE_OPERATOR_QUEUE",
+    "required_operator_queue_state": "READ_ONLY_OPERATOR_QUEUE",
+    "required_partener_role": "DISCOVERY_ONLY"
+  },
+  "authority": {
+    "waiting_state": "WAITING_SOURCE",
+    "blocked_state": "BLOCKED_SOURCE_CONFLICT",
+    "verified_state": "OFFICIAL_SOURCE_VERIFIED",
+    "waiting_priority": "P1",
+    "blocked_priority": "P0",
+    "enrichment_priority": "P2",
+    "waiting_action": "VERIFY_REQUIRED_OFFICIAL_FACTS",
+    "blocked_action": "RESOLVE_OFFICIAL_SOURCE_CONFLICT",
+    "enrichment_action": "ENRICH_OFFICIAL_MATERIAL_FACT_BINDINGS"
+  },
+  "matching": {
+    "candidate_state": "MATCH_CANDIDATE",
+    "requires_data_state": "REQUIRES_DATA",
+    "excluded_state": "EXCLUDED_KNOWN_RULE",
+    "held_state": "HOLD_SOURCE_STATE",
+    "confidence_levels": ["LOW", "MEDIUM", "HIGH"],
+    "score_min": 0,
+    "score_max": 100
+  },
+  "dispositions": {
+    "waiting": "WAITING_SOURCE",
+    "blocked": "BLOCKED_SOURCE_CONFLICT",
+    "candidate": "CANDIDATE_FOR_HUMAN_REVIEW",
+    "requires_data": "NEEDS_PROFILE_DETAIL",
+    "excluded": "EXCLUDED_BY_KNOWN_RULE"
+  },
+  "reason_codes": {
+    "waiting": "REQUIRED_OFFICIAL_BINDING_MISSING",
+    "blocked": "OFFICIAL_SOURCE_CONFLICT",
+    "activity_overlap": "ACTIVITY_CODE_OVERLAP",
+    "investment_match": "INVESTMENT_TERM_MATCH",
+    "organization_match": "ORGANIZATION_TERM_MATCH",
+    "region_match": "REGION_TERM_MATCH",
+    "grant_within_cap": "GRANT_WITHIN_OFFICIAL_CAP",
+    "insufficient_signal": "INSUFFICIENT_SPECIFIC_SIGNAL",
+    "activity_exclusion": "ACTIVITY_CODE_MISMATCH",
+    "grant_exclusion": "REQUESTED_GRANT_ABOVE_OFFICIAL_CAP"
+  },
+  "rules": {
+    "queue_alignment_required_for_waiting_or_blocked": true,
+    "verified_enrichment_queue_may_be_present": true,
+    "numeric_score_visible_only_when_authority_verified_and_not_excluded": true,
+    "waiting_or_blocked_score_withheld": true,
+    "excluded_score_withheld": true,
+    "confidence_is_relevance_not_approval_probability": true,
+    "raw_matching_explanations_forbidden": true,
+    "hard_exclusion_detail_forbidden": true,
+    "source_provenance_detail_forbidden": true,
+    "raw_material_fact_values_forbidden": true,
+    "person_level_fields_forbidden": true,
+    "eligibility_conclusion_forbidden": true,
+    "award_probability_forbidden": true,
+    "deterministic_sort": ["disposition_rank", "score_desc_when_visible", "opportunity_id_asc"],
+    "no_external_fetch_or_write": true
+  },
+  "output": {
+    "state": "READ_ONLY_MATCH_EXPLAINABILITY",
+    "human_review_required": true,
+    "external_action_authorized": false,
+    "repository_runtime_output_forbidden": true
+  },
+  "boundaries": {
+    "network_fetch": false,
+    "crm_write": false,
+    "provider_write": false,
+    "mysmis_write": false,
+    "outreach": false,
+    "message_send": false,
+    "offer_send": false,
+    "publication": false,
+    "deployment": false
+  }
+}
