@@ -1,10 +1,10 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-12T21:31:12+03:00",
+  "observed_at": "2026-09-13T00:30:13+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 20,
+  "sources_ok": 19,
   "facts_admitted": 6,
   "source_notice_briefs": 2,
   "facts_before_cross_source_headline_dedupe": 2,
@@ -26,9 +26,8 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": true,
-      "links_examined": 4,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "HTTPError: HTTP Error 500: Internal Server Error",
       "facts": 0
     },
     {
@@ -119,7 +118,7 @@
       "source_id": "scm-rm-valcea",
       "listing_ok": true,
       "links_examined": 7,
-      "article_failures": 0,
+      "article_failures": 2,
       "facts": 0
     },
     {
