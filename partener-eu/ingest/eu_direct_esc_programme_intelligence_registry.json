@@ -1,0 +1,82 @@
+{
+  "schema": "PARTENER_EU_ESC_PROGRAMME_INTELLIGENCE_REGISTRY_V1",
+
+  "source_family": "EU_DIRECT",
+  "programme_family": "European Solidarity Corps",
+  "programme_id": "EUROPEAN_SOLIDARITY_CORPS",
+  "authority_class": "T1_OFFICIAL_EU_PROGRAMME",
+  "programme_context": {
+    "management_mode": "DIRECT_AND_INDIRECT_MANAGEMENT",
+    "current_programming_period": "2021-2027",
+    "programme_fit_is_not_call_eligibility": true
+  },
+  "policy": {
+    "market_intelligence_only": true,
+    "exact_call_or_topic_identifier_required": true,
+    "current_official_exact_endpoint_required": true,
+    "semantic_reconciliation_required": true,
+    "field_scoped_material_admission_required": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "closed_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false
+  },
+  "applicant_fit": {
+    "fit_is_not_eligibility": true,
+    "tags": [
+      "youth_and_solidarity_organisations",
+      "civil_society_organisations",
+      "organisations_in_eu_and_partner_countries",
+      "humanitarian_aid_organisations",
+      "community_solidarity_actors",
+      "transnational_partnerships"
+    ]
+  },
+  "application_route_intelligence": {
+    "route_intelligence_is_not_call_eligibility": true,
+    "tags": [
+      "national_agency_decentralised_actions",
+      "eacea_centralised_actions",
+      "funding_tenders_for_centralised_actions"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "ESC-COMMISSION-PROGRAMME",
+      "url": "https://commission.europa.eu/funding-and-tenders/find-funding/eu-funding-programmes/european-solidarity-corps_en",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_markers": [
+        "European Solidarity Corps",
+        "2021-2027",
+        "Education, Youth, Sport and Culture"
+      ]
+    },
+    {
+      "source_id": "ESC-YOUTH-PORTAL-2026-CALL-INDEX",
+      "url": "https://youth.europa.eu/solidarity/organisations/calls-for-proposals_en",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "required_markers": [
+        "2026 call",
+        "CALL FOR PROPOSALS 2026",
+        "EAC/A15/2025",
+        "European Solidarity Corps Programme Guide for 2026"
+      ]
+    },
+    {
+      "source_id": "ESC-YOUTH-PORTAL-PROGRAMME-GUIDE",
+      "url": "https://youth.europa.eu/solidarity/organisations/documents-resources_en",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_markers": [
+        "European Solidarity Corps Guide 2026",
+        "The European Solidarity Corps Guide",
+        "Translations"
+      ]
+    }
+  ]
+}

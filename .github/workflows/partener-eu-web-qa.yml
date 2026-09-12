@@ -14,6 +14,8 @@ on:
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
+      - 'partener-eu/ops/test_home_freshness_explainability.mjs'
+      - 'partener-eu/ops/test_search_ask_explainability.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
@@ -32,6 +34,8 @@ on:
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
+      - 'partener-eu/ops/test_home_freshness_explainability.mjs'
+      - 'partener-eu/ops/test_search_ask_explainability.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
@@ -71,6 +75,7 @@ jobs:
           python partener-eu/ops/test_public_product_v3.py
           python partener-eu/ops/test_ask_partener_v2.py
           node partener-eu/ops/test_ask_eligibility_projection.js
+          node partener-eu/ops/test_search_ask_explainability.mjs
 
       - name: Consultant lazy-load and runtime contracts
         run: |
@@ -82,18 +87,22 @@ jobs:
         run: |
           python partener-eu/ops/test_public_language.py
           node partener-eu/ops/test_home_freshness_guard.mjs
+          node partener-eu/ops/test_home_freshness_explainability.mjs
+          node partener-eu/ops/test_search_ask_explainability.mjs
           python partener-eu/ops/test_decision_products.py
 
       - name: Syntax-check active web control modules
         run: |
           node --check partener-eu/web/app.js
           node --check partener-eu/web/ask-partener-v2.js
+          node --check partener-eu/web/search-ask-explainability-v1.js
           node --check partener-eu/web/consultant-loader-v1.js
           node --check partener-eu/web/consultant-workspace-v3.js
           node --check partener-eu/web/consultant-onboarding-v3.js
           node --check partener-eu/web/consultant-mysmis-v1.js
           node --check partener-eu/web/decision-intelligence-v2.js
           node --check partener-eu/web/home-freshness-guard-v1.js
+          node --check partener-eu/web/home-freshness-explainability-v1.js
           node --check partener-eu/web/home-novice-v1.js
           node --check partener-eu/web/home-go-to-v2.js
           node --check partener-eu/web/public-product-v3.js

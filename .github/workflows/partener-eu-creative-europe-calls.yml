@@ -333,7 +333,11 @@ jobs:
               if index.get(key) is not False:
                   raise SystemExit(f'FAIL live index became authorizing: {key}')
           raw_hash=str((index.get('receipt') or {}).get('raw_sha256') or '')
-          if not re.fullmatch(r'[0-9a-f]{64}', raw_hash):
+          if index.get('source_health') == 'DEGRADED_TRANSPORT':
+              receipt=index.get('receipt') or {}
+              if raw_hash or not receipt.get('transport_error_type') or index.get('lkg_required') is not True:
+                  raise SystemExit('FAIL degraded index transport receipt is inconsistent')
+          elif not re.fullmatch(r'[0-9a-f]{64}', raw_hash):
               raise SystemExit('FAIL live index immutable raw hash missing')
           if index.get('publication_effect') != 'NONE' or index.get('canonical_corpus_mutation') is not False:
               raise SystemExit('FAIL live index publication boundary drift')

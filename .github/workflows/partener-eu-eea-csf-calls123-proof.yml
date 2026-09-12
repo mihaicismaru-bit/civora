@@ -1,0 +1,87 @@
+name: PARTENER.EU EEA CSF Calls 1-3 Contract CI
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_civil_society_fund_exact_common.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_reconcile_common.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call1_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call1_reconcile.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call2_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call2_reconcile.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call3_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call3_reconcile.py'
+      - 'partener-eu/ops/test_eea_csf_calls123_common.py'
+      - 'partener-eu/ops/run_eea_csf_calls123_proof.py'
+      - 'partener-eu/ops/run_eea_csf_exact_canonical.py'
+      - 'partener-eu/ops/run_eea_csf_exact_canonical_v2.py'
+      - 'partener-eu/ops/run_eea_norway_romania_watch_canonical.py'
+      - '.github/workflows/partener-eu-eea-csf-calls123-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eea-csf-calls123-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile exact-call contracts and canonical owners
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eea_civil_society_fund_exact_common.py \
+            partener-eu/ingest/eea_civil_society_fund_reconcile_common.py \
+            partener-eu/ingest/eea_civil_society_fund_call1_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call1_reconcile.py \
+            partener-eu/ingest/eea_civil_society_fund_call2_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call2_reconcile.py \
+            partener-eu/ingest/eea_civil_society_fund_call3_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call3_reconcile.py \
+            partener-eu/ops/test_eea_csf_calls123_common.py \
+            partener-eu/ops/run_eea_csf_exact_canonical.py \
+            partener-eu/ops/run_eea_csf_exact_canonical_v2.py \
+            partener-eu/ops/run_eea_norway_romania_watch_canonical.py
+
+      - name: Validate fail-closed Calls 1-3 semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: python partener-eu/ops/test_eea_csf_calls123_common.py
+
+      - name: Enforce canonical ownership and retired migration bridge
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import run_eea_csf_exact_canonical_v2 as shared
+          import run_eea_norway_romania_watch_canonical as canonical
+
+          assert canonical.EXACT_CSF_CALL_IDS == ('1','2','3','4','5','6','7')
+          assert canonical.LEGACY_HISTORY_MIGRATION_IDS == ()
+          assert set(shared.CONFIGS) >= {'1','2','3','4','5','6','7'}
+          assert not Path('partener-eu/ops/run_eea_csf_calls123_proof.py').exists()
+          print({
+              'calls': list(canonical.EXACT_CSF_CALL_IDS),
+              'live_owner': 'OFFICIAL_PROGRAMME_CANONICAL',
+              'legacy_history_migration_ids': [],
+              'temporary_live_proof_retired': True,
+              'material_authorization': False,
+          })
+          PY

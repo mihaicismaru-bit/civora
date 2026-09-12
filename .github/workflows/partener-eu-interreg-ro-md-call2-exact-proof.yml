@@ -1,0 +1,189 @@
+name: PARTENER.EU Interreg RO-MD Call 2 Exact Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/interreg_ro_md_call2_exact.py'
+      - 'partener-eu/ops/test_interreg_ro_md_call2_exact.py'
+      - '.github/workflows/partener-eu-interreg-ro-md-call2-exact-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  ro-md-call2-exact-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile and run fail-closed regressions
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python -m py_compile partener-eu/ingest/interreg_ro_md_call2_exact.py partener-eu/ops/test_interreg_ro_md_call2_exact.py
+          python partener-eu/ops/test_interreg_ro_md_call2_exact.py
+
+      - name: Probe official RO-MD TLS route variants
+        shell: bash
+        run: |
+          python - <<'PY'
+          import urllib.request
+          urls = [
+              'https://ro-md.net/en/funding/calls-for-proposals/guidelines-for-applicants-small-scale-projects-open-call-2',
+              'https://www.ro-md.net/en/funding/calls-for-proposals/guidelines-for-applicants-small-scale-projects-open-call-2',
+              'https://ro-md.net/en/funding/calls-for-proposals',
+              'https://www.ro-md.net/en/funding/calls-for-proposals',
+          ]
+          for url in urls:
+              req = urllib.request.Request(url, headers={
+                  'User-Agent': 'PARTENER.EU-tls-probe/1.0 (+https://partener.eu)',
+                  'Accept': 'text/html,application/xhtml+xml',
+              })
+              try:
+                  with urllib.request.urlopen(req, timeout=20) as response:
+                      response.read(1024)
+                      print({
+                          'url': url,
+                          'ok': True,
+                          'status': int(getattr(response, 'status', 200) or 200),
+                          'final_url': str(response.geturl()),
+                          'content_type': str(response.headers.get('Content-Type') or ''),
+                      })
+              except Exception as exc:
+                  print({'url': url, 'ok': False, 'error': f'{type(exc).__name__}: {exc}'})
+          PY
+
+      - name: Restore previous successful same-branch exact receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ro-md-call2-exact
+          SCRATCH="$ROOT/history-scan"
+          mkdir -p "$SCRATCH"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?name=partener-eu-interreg-ro-md-call2-exact-history&per_page=100" > "$SCRATCH/artifacts.json"
+          CANDIDATE="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-ro-md-call2-exact/history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          print(rows[0][1] if rows else '')
+          PY
+          )"
+          if [ -n "$CANDIDATE" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            mkdir -p "$SCRATCH/unpacked"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'ro-md-call2-exact.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous-exact.json"
+              echo "Restored previous bounded RO-MD Call 2 receipt from artifact ${CANDIDATE}"
+            fi
+          else
+            echo "No previous successful same-branch bounded receipt; baseline mode retained."
+          fi
+
+      - name: Acquire fresh exact current RO-MD Call 2 evidence and reconcile
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ro-md-call2-exact
+          mkdir -p "$ROOT"
+          ARGS=()
+          if [ -f "$ROOT/previous-exact.json" ]; then
+            ARGS+=(--previous "$ROOT/previous-exact.json")
+          fi
+          python partener-eu/ingest/interreg_ro_md_call2_exact.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --output "$ROOT/ro-md-call2-exact.json" \
+            --reconciliation-output "$ROOT/ro-md-call2-reconciliation.json" \
+            "${ARGS[@]}"
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-ro-md-call2-exact')
+          current=json.loads((root/'ro-md-call2-exact.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'ro-md-call2-reconciliation.json').read_text(encoding='utf-8'))
+          print({
+              'source_health_state': current['source_health_state'],
+              'official_call_identifier': current['official_call_identifier'],
+              'candidate_state': current['candidate_state'],
+              'candidate_deadline_text': current['candidate_deadline_text'],
+              'degraded_reason': current.get('degraded_reason'),
+              'sources': [
+                  {
+                      'kind': row.get('kind'),
+                      'health_state': row.get('health_state'),
+                      'http_status': row.get('http_status'),
+                      'final_url': row.get('final_url'),
+                      'error': row.get('error'),
+                  }
+                  for row in current.get('sources', [])
+              ],
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'lkg_is_current_truth': rec['lkg_is_current_truth'],
+              'publication_effect': rec['publication_effect'],
+          })
+          if current['source_health_state'] != 'HEALTHY':
+              raise SystemExit(f"RO-MD Call 2 current source is not HEALTHY: {current['source_health_state']}")
+          if current['candidate_state'] != 'CALL_WINDOW_EXPIRED_CANDIDATE':
+              raise SystemExit(f"unexpected candidate state: {current['candidate_state']}")
+          if current['open_call_authorized'] is not False or current['deadline_authorized'] is not False:
+              raise SystemExit('material authorization widened')
+          PY
+
+      - name: Stage compact exact history
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-ro-md-call2-exact
+          mkdir -p "$ROOT/publish"
+          test -f "$ROOT/ro-md-call2-exact.json"
+          test -f "$ROOT/ro-md-call2-reconciliation.json"
+          cp "$ROOT/ro-md-call2-exact.json" "$ROOT/publish/"
+          cp "$ROOT/ro-md-call2-reconciliation.json" "$ROOT/publish/"
+
+      - name: Upload compact exact history
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-interreg-ro-md-call2-exact-history
+          path: /tmp/partener-eu-ro-md-call2-exact/publish
+          if-no-files-found: error
+          retention-days: 7

@@ -3,7 +3,7 @@
 
 This adapter is intentionally non-authorizing. It turns official future-programming
 surveys/consultations into PROGRAMMING_PIPELINE observations and resolves stale
-"now open" copy against explicit date windows. It can never create OPEN_CALL or
+open-copy against explicit date windows. It can never create OPEN_CALL or
 authorize material call facts. A real funding call must be handled by a separate
 call-level adapter using an exact call identifier and current official call page.
 """
@@ -16,7 +16,7 @@ import re
 from typing import Any
 from urllib.parse import urlparse
 
-PARSER_VERSION = "INTERREG_PROGRAMMING_INTELLIGENCE_V1"
+PARSER_VERSION = "INTERREG_PROGRAMMING_INTELLIGENCE_V1_1"
 SOURCE_FAMILY = "INTERREG"
 INTELLIGENCE_FAMILY = "PROGRAMMING_PIPELINE"
 AUTHORITY_CLASS = "OFFICIAL_INTERREG_PROGRAMME_AUTHORITY"
@@ -55,6 +55,21 @@ PROGRAMMING_TERMS = (
     "stakeholder consultation",
     "stakeholder survey",
     "programme preparation",
+)
+
+# Programme authorities publish consultation pages in several languages.  These
+# phrases are freshness signals only: they never authorize OPEN_CALL.  When an
+# explicit consultation window has already ended, lingering open-copy is marked
+# stale so PRODUCT can explain the mismatch instead of repeating it as current.
+OPEN_COPY_TERMS = (
+    "now open",
+    "survey is open",
+    "consultation is open",
+    "chestionarul este deschis",
+    "consultarea este deschisă",
+    "consultarea este deschisa",
+    "a kérdőív nyitva",
+    "a konzultáció nyitva",
 )
 
 MISSING_CALL_PROOF = [
@@ -112,6 +127,11 @@ def _has_programming_context(text: str) -> bool:
     return any(term in lowered for term in PROGRAMMING_TERMS)
 
 
+def _has_open_copy(text: str) -> bool:
+    lowered = text.lower()
+    return any(term in lowered for term in OPEN_COPY_TERMS)
+
+
 def _state(text: str, observed: dt.date, start: dt.date | None, end: dt.date | None) -> str:
     if start and end:
         if observed < start:
@@ -137,7 +157,7 @@ def normalize_programming_observation(
     observed_at = _parse_observed_at(fetched_at)
     start, end = _extract_window(text)
     observation_state = _state(text, observed_at.date(), start, end)
-    stale_open_copy = "now open" in text.lower() and observation_state not in {"CONSULTATION"}
+    stale_open_copy = _has_open_copy(text) and observation_state not in {"CONSULTATION"}
     confidence = "HIGH" if start and end else ("MEDIUM" if _has_programming_context(text) else "LOW")
     semantic = {
         "programme": str(record.get("programme") or "").strip() or None,

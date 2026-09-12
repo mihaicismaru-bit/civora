@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import hashlib
+import html
+import json
+import pathlib
+import re
+import urllib.error
+import urllib.parse
+import urllib.request
+from html.parser import HTMLParser
+from typing import Any, Mapping
+
+SCHEMA = "PARTENER_EU_ESC_PROGRAMME_INTELLIGENCE_V1"
+REGISTRY_SCHEMA = "PARTENER_EU_ESC_PROGRAMME_INTELLIGENCE_REGISTRY_V1"
+PARSER_VERSION = "EU_DIRECT_ESC_PROGRAMME_INTELLIGENCE_V1"
+PROGRAMME_ID = "EUROPEAN_SOLIDARITY_CORPS"
+ALLOWED_HOSTS = {"commission.europa.eu", "youth.europa.eu"}
+ALLOWED_STATES = {"PROGRAMME_INTELLIGENCE", "CALL_INDEX_DISCOVERY"}
+MATERIAL_FLAGS = (
+    "material_fact_use",
+    "open_call_authorized",
+    "closed_call_authorized",
+    "deadline_authorized",
+    "budget_authorized",
+    "eligibility_authorized",
+    "publish_authorized",
+    "distribution_authorized",
+    "call_alert_authorized",
+    "canonical_corpus_mutation",
+)
+
+
+class TextProbe(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.suppressed = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.casefold() in {"script", "style", "noscript"}:
+            self.suppressed += 1
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.casefold() in {"script", "style", "noscript"}:
+            self.suppressed = max(0, self.suppressed - 1)
+
+    def handle_data(self, data: str) -> None:
+        if self.suppressed:
+            return
+        value = " ".join(data.split())
+        if value:
+            self.parts.append(value)
+
+
+def utc_now() -> str:
+    return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat()
+
+
+def sha256_bytes(raw: bytes) -> str:
+    return hashlib.sha256(raw).hexdigest()
+
+
+def sha256_json(value: Any) -> str:
+    raw = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return sha256_bytes(raw)
+
+
+def normal(value: str) -> str:
+    text = html.unescape(value or "").casefold()
+    return re.sub(r"\s+", " ", re.sub(r"[^a-z0-9+./&:-]+", " ", text)).strip()
+
+
+def html_text(raw: bytes) -> str:
+    probe = TextProbe()
+    probe.feed(raw.decode("utf-8", errors="replace"))
+    return " ".join(probe.parts)
+
+
+def validate_registry(registry: Mapping[str, Any]) -> None:
+    if registry.get("schema") != REGISTRY_SCHEMA:
+        raise ValueError("ESC registry schema drift")
+    if registry.get("source_family") != "EU_DIRECT":
+        raise ValueError("ESC source family drift")
+    if registry.get("programme_id") != PROGRAMME_ID or registry.get("programme_family") != "European Solidarity Corps":
+        raise ValueError("ESC programme identity drift")
+    if registry.get("authority_class") != "T1_OFFICIAL_EU_PROGRAMME":
+        raise ValueError("ESC authority class drift")
+
+    context = registry.get("programme_context") or {}
+    if context.get("management_mode") != "DIRECT_AND_INDIRECT_MANAGEMENT":
+        raise ValueError("ESC management-mode drift")
+    if context.get("current_programming_period") != "2021-2027":
+        raise ValueError("ESC programming-period drift")
+    if context.get("programme_fit_is_not_call_eligibility") is not True:
+        raise ValueError("ESC programme fit became call eligibility")
+
+    policy = registry.get("policy") or {}
+    for flag in MATERIAL_FLAGS:
+        if policy.get(flag) is not False:
+            raise ValueError(f"ESC registry became authorizing: {flag}")
+    for key in (
+        "market_intelligence_only",
+        "exact_call_or_topic_identifier_required",
+        "current_official_exact_endpoint_required",
+        "semantic_reconciliation_required",
+        "field_scoped_material_admission_required",
+    ):
+        if policy.get(key) is not True:
+            raise ValueError(f"ESC policy weakened: {key}")
+
+    fit = registry.get("applicant_fit") or {}
+    if fit.get("fit_is_not_eligibility") is not True or not fit.get("tags"):
+        raise ValueError("ESC applicant-fit contract drift")
+    routes = registry.get("application_route_intelligence") or {}
+    if routes.get("route_intelligence_is_not_call_eligibility") is not True or not routes.get("tags"):
+        raise ValueError("ESC application-route contract drift")
+
+    sources = registry.get("sources") or []
+    if len(sources) != 3:
+        raise ValueError("ESC source inventory drift")
+    seen: set[str] = set()
+    for row in sources:
+        source_id = str(row.get("source_id") or "")
+        if not source_id or source_id in seen:
+            raise ValueError("ESC source identity drift")
+        seen.add(source_id)
+        parsed = urllib.parse.urlparse(str(row.get("url") or ""))
+        if parsed.scheme != "https" or (parsed.hostname or "").casefold() not in ALLOWED_HOSTS:
+            raise ValueError("ESC authority URL drift")
+        if row.get("observation_state") not in ALLOWED_STATES:
+            raise ValueError("ESC observation state became call state")
+        if not row.get("required_markers"):
+            raise ValueError("ESC source markers missing")
+
+
+def fetch(url: str, timeout: float = 30.0) -> tuple[bytes, dict[str, Any]]:
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; PARTENER.EU/1.0; +https://partener.eu)",
+            "Accept": "text/html,application/xhtml+xml",
+            "Accept-Language": "en",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=timeout) as response:
+        raw = response.read(3_000_001)
+        if len(raw) > 3_000_000:
+            raise ValueError("ESC source exceeds 3 MB")
+        return raw, {
+            "requested_url": url,
+            "final_url": str(response.geturl()),
+            "http_status": int(getattr(response, "status", 200) or 200),
+            "content_type": str(response.headers.get("Content-Type") or ""),
+        }
+
+
+def failure_class(exc: Exception) -> str:
+    if isinstance(exc, urllib.error.HTTPError):
+        return f"HTTP_{exc.code}"
+    if isinstance(exc, urllib.error.URLError):
+        return "URL_ERROR"
+    if isinstance(exc, TimeoutError):
+        return "TIMEOUT"
+    if isinstance(exc, ValueError):
+        text = str(exc)
+        if text.startswith("MARKER_DRIFT"):
+            return "MARKER_DRIFT"
+        if text in {"HTTP_OR_AUTHORITY_OR_CONTENT_TYPE_DRIFT", "ESC source exceeds 3 MB"}:
+            return text.replace(" ", "_").upper()
+    return type(exc).__name__.upper()
+
+
+def collect(registry: Mapping[str, Any], run_id: str, fetcher=fetch) -> dict[str, Any]:
+    validate_registry(registry)
+    fetched_at = utc_now()
+    evidence: list[dict[str, Any]] = []
+    healthy = 0
+
+    for source in registry["sources"]:
+        row: dict[str, Any] = {
+            "source_id": source["source_id"],
+            "programme_id": PROGRAMME_ID,
+            "source_family": registry["source_family"],
+            "programme_family": registry["programme_family"],
+            "authority_url": source["url"],
+            "authority_class": registry["authority_class"],
+            "observation_state": source["observation_state"],
+            "parser_version": PARSER_VERSION,
+            "run_id": run_id,
+            "fetched_at": fetched_at,
+            "material_fact_use": False,
+            "current_material_truth_available": False,
+        }
+        try:
+            raw, meta = fetcher(source["url"])
+            final = urllib.parse.urlparse(meta["final_url"])
+            ctype = str(meta["content_type"]).casefold()
+            if (
+                meta["http_status"] != 200
+                or final.scheme != "https"
+                or (final.hostname or "").casefold() not in ALLOWED_HOSTS
+                or "html" not in ctype
+            ):
+                raise ValueError("HTTP_OR_AUTHORITY_OR_CONTENT_TYPE_DRIFT")
+            visible = normal(html_text(raw))
+            missing = [marker for marker in source["required_markers"] if normal(marker) not in visible]
+            if missing:
+                raise ValueError(f"MARKER_DRIFT:{missing}")
+            normalized_sha = sha256_bytes(visible.encode("utf-8"))
+            semantic_payload = {
+                "source_id": source["source_id"],
+                "programme_id": PROGRAMME_ID,
+                "observation_state": source["observation_state"],
+                "authority_url": source["url"],
+                "required_markers_present": True,
+                "normalized_visible_text_sha256": normalized_sha,
+            }
+            row.update(
+                {
+                    "requested_url": meta["requested_url"],
+                    "final_url": meta["final_url"],
+                    "http_status": meta["http_status"],
+                    "content_type": meta["content_type"],
+                    "raw_sha256": sha256_bytes(raw),
+                    "normalized_visible_text_sha256": normalized_sha,
+                    "source_semantic_fingerprint": sha256_json(semantic_payload),
+                    "source_health": "HEALTHY",
+                    "failure_class": None,
+                    "lkg_required": False,
+                    "evidence_usable_for_reconciliation": True,
+                    "error": None,
+                }
+            )
+            healthy += 1
+        except Exception as exc:
+            row.update(
+                {
+                    "requested_url": source["url"],
+                    "final_url": None,
+                    "http_status": getattr(exc, "code", None),
+                    "content_type": None,
+                    "raw_sha256": None,
+                    "normalized_visible_text_sha256": None,
+                    "source_semantic_fingerprint": None,
+                    "source_health": "DEGRADED",
+                    "failure_class": failure_class(exc),
+                    "lkg_required": True,
+                    "evidence_usable_for_reconciliation": False,
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+            )
+        evidence.append(row)
+
+    degraded = len(evidence) - healthy
+    snapshot: dict[str, Any] = {
+        "schema": SCHEMA,
+        "parser_version": PARSER_VERSION,
+        "source_family": registry["source_family"],
+        "programme_family": registry["programme_family"],
+        "programme_id": PROGRAMME_ID,
+        "authority_class": registry["authority_class"],
+        "observation_state": "PROGRAMME_INTELLIGENCE",
+        "run_id": run_id,
+        "fetched_at": fetched_at,
+        "registry_sha256": sha256_json(registry),
+        "programme_context": dict(registry["programme_context"]),
+        "source_count": len(evidence),
+        "healthy_source_count": healthy,
+        "degraded_source_count": degraded,
+        "source_health_state": "HEALTHY" if degraded == 0 else "DEGRADED",
+        "lkg_required": degraded > 0,
+        "evidence_usable_for_reconciliation": degraded == 0,
+        "current_material_truth_available": False,
+        "market_intelligence_only": True,
+        "fit_score_is_not_eligibility": True,
+        "route_intelligence_is_not_call_eligibility": True,
+        "applicant_fit_tags": list((registry.get("applicant_fit") or {}).get("tags") or []),
+        "application_route_tags": list((registry.get("application_route_intelligence") or {}).get("tags") or []),
+        "exact_call_or_topic_identifier_required": True,
+        "current_official_exact_endpoint_required": True,
+        "semantic_reconciliation_required": True,
+        "field_scoped_material_admission_required": True,
+        "missing_for_open_confirmation": [
+            "exact_call_or_topic_identifier",
+            "current_official_exact_call_or_topic_endpoint",
+            "explicit_current_official_call_status",
+            "semantic_reconciliation",
+            "field_scoped_material_admission",
+        ],
+        "evidence": evidence,
+        "publication_effect": "NONE",
+    }
+    for flag in MATERIAL_FLAGS:
+        snapshot[flag] = False
+    snapshot["semantic_fingerprint"] = sha256_json(
+        {
+            "programme_id": PROGRAMME_ID,
+            "programme_context": snapshot["programme_context"],
+            "source_inventory": [
+                (row["source_id"], row["observation_state"], row["source_semantic_fingerprint"])
+                for row in evidence
+            ],
+            "fit_tags": snapshot["applicant_fit_tags"],
+            "route_tags": snapshot["application_route_tags"],
+        }
+    )
+    return snapshot
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--registry", required=True)
+    ap.add_argument("--run-id", required=True)
+    ap.add_argument("--output", required=True)
+    args = ap.parse_args()
+
+    registry = json.loads(pathlib.Path(args.registry).read_text(encoding="utf-8"))
+    snapshot = collect(registry, args.run_id)
+    path = pathlib.Path(args.output)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(snapshot, ensure_ascii=False, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+    print(
+        json.dumps(
+            {
+                "programme_family": snapshot["programme_family"],
+                "source_health_state": snapshot["source_health_state"],
+                "healthy_source_count": snapshot["healthy_source_count"],
+                "degraded_source_count": snapshot["degraded_source_count"],
+                "open_call_authorized": False,
+                "publication_effect": "NONE",
+            },
+            sort_keys=True,
+        )
+    )
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
