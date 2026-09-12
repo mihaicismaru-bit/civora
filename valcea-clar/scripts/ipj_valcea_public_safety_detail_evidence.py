@@ -14,6 +14,7 @@ import json
 import re
 import ssl
 import sys
+import unicodedata
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from html.parser import HTMLParser
@@ -30,7 +31,7 @@ from ipj_valcea_public_safety_reference_adapter import (
 )
 
 SCHEMA = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_V1"
-PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_10_P0_ARTICLE_SCOPE_RECONCILED"
+PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_12_P0_CHROME_FRAGMENT_RUN_GUARD"
 SOURCE_FAMILY = "IPJ_VALCEA_PUBLIC_SAFETY"
 AUTHORITY_CLASS = "FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE"
 OBSERVATION_STATE = "POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING"
@@ -100,6 +101,13 @@ CONTENT_HINTS = {
     "news", "news-body", "news-content", "news-detail", "news-article",
     "stire", "stiri", "stire-content", "stire-detalii", "stire-text",
     "post-content", "entry-content", "content-article", "page-content",
+}
+# Known static IPJ navigation/page-chrome labels that have previously crossed an
+# outer content wrapper and polluted a legacy story. They are exact normalized
+# labels, not semantic keyword filters, so genuine article sentences mentioning
+# detention or arrest remain admissible as police-source evidence context.
+PAGE_CHROME_GUARD_KEYS = {
+    "program centrul de retinere si arest preventiv",
 }
 
 
@@ -261,6 +269,41 @@ def _find_explicit_date(text: str) -> str | None:
     return textual.group(0) if textual else None
 
 
+def _guard_key(text: str) -> str:
+    folded = text.casefold().replace("ş", "ș").replace("ţ", "ț")
+    ascii_folded = "".join(
+        char for char in unicodedata.normalize("NFKD", folded)
+        if not unicodedata.combining(char)
+    )
+    return re.sub(r"[^a-z0-9]+", " ", ascii_folded).strip()
+
+
+def _drop_exact_page_chrome_runs(segments: list[str]) -> list[str]:
+    """Drop only adjacent text-node runs that exactly recompose known chrome labels."""
+    kept: list[str] = []
+    index = 0
+    max_parts = 8
+    while index < len(segments):
+        matched_end: int | None = None
+        combined = ""
+        for end in range(index, min(len(segments), index + max_parts)):
+            combined = " ".join(part for part in (combined, segments[end]) if part).strip()
+            key = _guard_key(combined)
+            if key in PAGE_CHROME_GUARD_KEYS:
+                matched_end = end
+                break
+            if key and not any(
+                guard.startswith(key + " ") for guard in PAGE_CHROME_GUARD_KEYS
+            ):
+                break
+        if matched_end is not None:
+            index = matched_end + 1
+            continue
+        kept.append(segments[index])
+        index += 1
+    return kept
+
+
 def _tags_for_fragment(fragment: str) -> tuple[str, ...]:
     lowered = fragment.casefold()
     return tuple(
@@ -271,7 +314,7 @@ def _tags_for_fragment(fragment: str) -> tuple[str, ...]:
 
 def _split_candidate_fragments(segments: list[str]) -> list[str]:
     candidates: list[str] = []
-    for segment in segments:
+    for segment in _drop_exact_page_chrome_runs(segments):
         for piece in re.split(r"(?<=[.!?])\s+|\s+[•|]\s+", segment):
             cleaned = " ".join(piece.split()).strip(" -–—")
             if 30 <= len(cleaned) <= 1200:
@@ -286,6 +329,8 @@ def _evidence_from_segments(
     seen: set[str] = set()
     tag_counts: dict[str, int] = {}
     for fragment in _split_candidate_fragments(segments):
+        if _guard_key(fragment) in PAGE_CHROME_GUARD_KEYS:
+            continue
         tags = _tags_for_fragment(fragment)
         if not tags:
             continue
@@ -441,9 +486,10 @@ def build_live_receipt() -> dict[str, Any]:
             "road_restriction_requires_current_status_verification": True,
             "article_body_scope_is_required": True,
             "whole_page_fallback_for_evidence_is_forbidden": True,
+            "known_page_chrome_exact_guard_is_enforced": True,
             "sample_is_bounded_and_non_exhaustive": True,
         },
-        "interpretation": "ONLY_SCOPED_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;PAGE_CHROME_IS_EXCLUDED",
+        "interpretation": "ONLY_SCOPED_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;KNOWN_PAGE_CHROME_IS_EXCLUDED",
         **NON_AUTHORIZING_FLAGS,
     }
     stable = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -516,6 +562,27 @@ def _self_test() -> None:
     } <= observed_tags
     assert set(tag_counts) <= ALLOWED_TAGS
     assert all(re.fullmatch(r"[0-9a-f]{64}", item.evidence_sha256) for item in field_evidence)
+
+    # Regression for the actual DN64 contaminant. The IPJ site can split this
+    # static navigation label across nested markup inside a broad content wrapper.
+    # Recompose only adjacent nodes for exact chrome matching; never keyword-strip
+    # genuine article sentences about detention or arrest.
+    contaminated_wrapper = (
+        "<html><head><title>IPJ Vâlcea - DN64 test</title></head><body>"
+        "<div class='news page-content'>"
+        "<p><a>Program <span>Centrul de Reţinere și Arest Preventiv</span></a></p>"
+        "<p>2 septembrie 2026</p>"
+        "<p>Polițiștii au controlat peste 70 de autovehicule în cadrul acțiunii rutiere.</p>"
+        "</div></body></html>"
+    ).encode("utf-8")
+    _, dn64_date, dn64_evidence, _ = _extract_html_evidence(contaminated_wrapper)
+    assert dn64_date == "2 septembrie 2026"
+    dn64_observed = " ".join(item.excerpt for item in dn64_evidence)
+    assert "Program Centrul" not in dn64_observed
+    assert "Centrul de Reţinere și Arest Preventiv" not in dn64_observed
+    assert "peste 70 de autovehicule" in dn64_observed
+    assert _guard_key("Program Centrul de Reținere și Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
+    assert _guard_key("Program Centrul de Reţinere şi Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
 
     chrome_only = b"<html><body><nav><p>Politistii au control trafic si sanctiuni.</p></nav></body></html>"
     try:
