@@ -1,6 +1,6 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-13T00:30:13+03:00",
+  "observed_at": "2026-09-13T02:00:40+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
@@ -26,8 +26,9 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 500: Internal Server Error",
+      "listing_ok": true,
+      "links_examined": 4,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -118,7 +119,7 @@
       "source_id": "scm-rm-valcea",
       "listing_ok": true,
       "links_examined": 7,
-      "article_failures": 2,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -158,9 +159,8 @@
     },
     {
       "source_id": "raliul-valcii-official-news",
-      "listing_ok": true,
-      "links_examined": 5,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "TimeoutError: The read operation timed out",
       "facts": 0
     }
   ],
