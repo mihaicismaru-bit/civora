@@ -2,10 +2,16 @@
 """Verified fact-card fallback publisher for VÂLCEA CLAR Instagram.
 
 The primary Instagram lane remains the approved real-photo editorial cover /
-carousel. This adapter is used only for a newly published canonical story that
+carousel. This adapter is used only for a newly published canonical story, or a
+recent current-edition story recovering from a missed delivery attempt, that
 passes the newsroom and social-interest gates but has no approved story-specific
 photograph. It renders an explicit newsroom text card from the verified fact
 kernel; it never depicts the event, person or place synthetically.
+
+A transient ``new_story_ids`` marker is preferred for the first delivery attempt.
+If that marker has already been cleared, recovery is bounded to recent stories
+that remain publishable in the current edition with a verified/PASS fact kernel.
+Legacy inventory cannot become eligible merely because it remains in an edition.
 
 Publishing is two phase. The deterministic JPEG is first persisted to `main`.
 Instagram then fetches that exact artifact from a raw GitHub transport URL on a
@@ -41,6 +47,7 @@ from social_common import is_socially_held  # noqa: E402
 
 CURRENT = VC / "site" / "current_edition.json"
 EVENT = VC / "site" / "story_publication_event.json"
+DECISION = VC / "site" / "newsroom_decision.json"
 STATE = SOCIAL / "instagram_state.json"
 VISUALS = SOCIAL / "story_visuals.json"
 SYSTEM = SOCIAL / "instagram_visual_system.json"
@@ -53,7 +60,9 @@ RAW_BASE = (
 DEFAULT_GRAPH_VERSION = "v26.0"
 DEFAULT_GRAPH_HOST = "graph.facebook.com"
 LIVE_ENABLE_ENV = "VALCEA_IG_TEXT_CARD_LIVE_ENABLED"
-ADAPTER_VERSION = "instagram-editorial-fact-card-v1.0"
+ADAPTER_VERSION = "instagram-editorial-fact-card-v1.1"
+RECOVERY_WINDOW = dt.timedelta(hours=48)
+CLOCK_SKEW = dt.timedelta(minutes=5)
 
 
 class InstagramFactCardError(RuntimeError):
@@ -90,11 +99,68 @@ def state_key(story_id: str) -> str:
     return f"story-{story_id}"
 
 
+def _parse_timestamp(value: object) -> dt.datetime | None:
+    raw = str(value or "").strip()
+    if not raw:
+        return None
+    try:
+        parsed = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if parsed.tzinfo is None:
+        return None
+    return parsed.astimezone(dt.timezone.utc)
+
+
+def recoverable_recent_story_ids(
+    snapshot: dict[str, Any],
+    decision: dict[str, Any],
+    *,
+    now: dt.datetime | None = None,
+) -> list[str]:
+    """Bound retries to recent, currently publishable verified stories.
+
+    Recovery exists only for a missed/failed Instagram attempt after the transient
+    ``new_story_ids`` marker has been consumed. A story must still be publishable
+    in the current newsroom decision, PASS its material-fact gate, remain verified,
+    be free of social hold, and have entered its validity window within 48 hours.
+    """
+    current = now or dt.datetime.now(dt.timezone.utc)
+    if current.tzinfo is None:
+        raise ValueError("retry recovery clock must be timezone-aware")
+    current = current.astimezone(dt.timezone.utc)
+    publishable = {
+        str(value) for value in decision.get("publishable_story_ids") or [] if str(value)
+    }
+    recovered: list[str] = []
+    for item in snapshot.get("items") or []:
+        if not isinstance(item, dict):
+            continue
+        story_id = str(item.get("id") or "").strip()
+        if not story_id or story_id not in publishable or is_socially_held(story_id):
+            continue
+        if item.get("material_fact_gate") != "PASS":
+            continue
+        if str(item.get("lifecycle_status") or "").strip().lower() != "verified":
+            continue
+        observed = _parse_timestamp(item.get("valid_from"))
+        if observed is None:
+            continue
+        age = current - observed
+        if age < -CLOCK_SKEW or age > RECOVERY_WINDOW:
+            continue
+        recovered.append(story_id)
+    return recovered
+
+
 def event_stories() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     pointer = load(CURRENT)
     snapshot = load(VC / str(pointer["json_source"]))
     event = load(EVENT, {"new_story_ids": []})
     wanted = {str(value) for value in event.get("new_story_ids", []) if str(value).strip()}
+    if not wanted:
+        decision = load(DECISION, {})
+        wanted = set(recoverable_recent_story_ids(snapshot, decision))
     stories = [
         row for row in snapshot.get("items", [])
         if isinstance(row, dict)
@@ -469,6 +535,21 @@ def self_test() -> int:
     assert asset["delivery_url"].startswith(RAW_BASE)
     assert (ROOT / asset["rendered_path"]).is_file()
     assert asset_contract.sha256(ROOT / asset["rendered_path"]) == asset["sha256"]
+
+    recovery_now = dt.datetime(2026, 9, 12, 18, 0, tzinfo=dt.timezone.utc)
+    recovery_snapshot = {
+        "items": [
+            {"id": "recent", "material_fact_gate": "PASS", "lifecycle_status": "verified", "valid_from": "2026-09-12T17:00:00Z"},
+            {"id": "stale", "material_fact_gate": "PASS", "lifecycle_status": "verified", "valid_from": "2026-09-09T17:00:00Z"},
+            {"id": "unverified", "material_fact_gate": "PASS", "lifecycle_status": "draft", "valid_from": "2026-09-12T17:00:00Z"},
+            {"id": "failed-gate", "material_fact_gate": "FAIL", "lifecycle_status": "verified", "valid_from": "2026-09-12T17:00:00Z"},
+            {"id": "not-publishable", "material_fact_gate": "PASS", "lifecycle_status": "verified", "valid_from": "2026-09-12T17:00:00Z"},
+        ]
+    }
+    recovery_decision = {
+        "publishable_story_ids": ["recent", "stale", "unverified", "failed-gate"]
+    }
+    assert recoverable_recent_story_ids(recovery_snapshot, recovery_decision, now=recovery_now) == ["recent"]
 
     class Headers:
         def get(self, key, default=None):
