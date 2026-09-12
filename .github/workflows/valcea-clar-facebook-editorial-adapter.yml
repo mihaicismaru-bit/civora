@@ -36,10 +36,12 @@ jobs:
         run: python -m pip install --disable-pip-version-check Pillow==11.3.0
       - name: Fetch approved photographs
         run: python valcea-clar/social/fetch_approved_photos.py
-      - name: Compile adapter and premium renderer
-        run: python -m py_compile valcea-clar/social/feed_identity_v1_1.py valcea-clar/social/facebook_editorial_preview_v1_1.py valcea-clar/social/facebook_editorial_publish.py
+      - name: Compile adapter, text fallback, and premium renderer
+        run: python -m py_compile valcea-clar/social/feed_identity_v1_1.py valcea-clar/social/facebook_editorial_preview_v1_1.py valcea-clar/social/facebook_editorial_publish.py valcea-clar/social/facebook_text_fallback.py
       - name: Offline self-test including mock Meta upload
         run: python valcea-clar/social/facebook_editorial_publish.py --self-test
+      - name: Offline text-fallback retry and public-readback contract self-test
+        run: python valcea-clar/social/facebook_text_fallback.py --self-test
       - name: Dry-run canonical current state
         run: python valcea-clar/social/facebook_editorial_publish.py | tee /tmp/facebook-editorial-dry-run.json
       - name: Assert adoption does not republish existing stories
