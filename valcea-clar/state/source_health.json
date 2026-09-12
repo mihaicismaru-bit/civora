@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "observed_at": "2026-09-12T11:16:14.154187Z",
+  "observed_at": "2026-09-12T15:50:52.962272Z",
   "policy": "monitor-and-open-review-task-never-autopublish-material-facts",
   "sources": [
     {
@@ -18,8 +18,8 @@
       "http_status": 200,
       "final_url": "https://spartan.ro/contact/",
       "content_type": "text/html; charset=UTF-8",
-      "bytes": 233311,
-      "raw_sha256": "fbff8e8a068ab845f91468c6874e592265d795b8bd8e950137ed292988c3197f",
+      "bytes": 233498,
+      "raw_sha256": "d1091ef4ef4ab4cb24ca0c8e9e9090b7570c246398359595369e19c1d7e65c64",
       "semantic_sha256": "4ca7989f8ba14e8b390f475e7a080449daeb9445a2ca96ee36821631548e9e7f",
       "semantic_bytes": 10644,
       "signals": {
@@ -62,7 +62,7 @@
       "final_url": "https://spartan.ro/meniu/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 192354,
-      "raw_sha256": "8c8eca9557965dfb1a8d56c2072470b33a8e5a571e3e28d096b023b7b73d09ba",
+      "raw_sha256": "688dbae247d9d1ee285c0e095319aef0850409ef8864722b02df5ff2c2d33bca",
       "semantic_sha256": "7b6c06cb4287bc1a897dfb48f0a2296e94981b79abe2161d823693aa9593bc7a",
       "semantic_bytes": 1712,
       "signals": {
@@ -119,28 +119,14 @@
         "franchise_context"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.forbes.ro/reteaua-spartan-investeste-un-milion-si-jumatate-de-lei-in-deschiderea-unui-nou-restaurant-500094",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 122956,
-      "raw_sha256": "2382ff5052f4bb34235e1123516a63e235d717a2c05594a7da2ccfdf992d737e",
-      "semantic_sha256": "876eb4a2b0166e6abd32fed03a62cc09193877d98d6fc0bdcab0976f3f47c3eb",
-      "semantic_bytes": 6828,
-      "signals": {
-        "title": "Rețeaua Spartan investește un milion și jumătate de lei în deschiderea unui nou restaurant - Forbes.ro",
-        "canonical_url": "https://www.forbes.ro/reteaua-spartan-investeste-un-milion-si-jumatate-de-lei-in-deschiderea-unui-nou-restaurant-500094",
-        "jsonld_blocks": 1,
-        "social_links": [],
-        "menu_links": [],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "876eb4a2b0166e6abd32fed03a62cc09193877d98d6fc0bdcab0976f3f47c3eb",
       "quarantined": false
     },
     {
@@ -199,7 +185,7 @@
       "final_url": "https://www.castelrestaurant.ro/restauracja/restaurant-castel",
       "content_type": "text/html; charset=utf-8",
       "bytes": 882604,
-      "raw_sha256": "36331ef66a6d478fe1b6ee6e45afcaa332499abb4c918667fd1e2e836f2d3255",
+      "raw_sha256": "43f3d9ee65ce732bf6d174d5b4f792b893f516a89afdee31dd6674fb7e4a19db",
       "semantic_sha256": "9f34ee1adedb0f95746af931d11f7133f619f08feab98ab2446a0573725dcf0c",
       "semantic_bytes": 62220,
       "signals": {
@@ -233,34 +219,14 @@
         "registration_number"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.damici.ro/contact-damici/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 64128,
-      "raw_sha256": "6a1578c35bfa0a80b549bcbf528647e760ec7ae33f9a219b011e36dbd411ed5f",
-      "semantic_sha256": "91813a37f68015532ea91220f3dc21ae4852f3be60a742352e26dbe88b7e292c",
-      "semantic_bytes": 1938,
-      "signals": {
-        "title": "Contact D’amici | Restaurante Ramnicu Valcea",
-        "canonical_url": "https://www.damici.ro/contact-damici/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/bucatarieitaliana/",
-          "https://www.facebook.com/tavernadamici/"
-        ],
-        "menu_links": [
-          "https://www.damici.ro/meniu-ristorante-damici/",
-          "https://www.damici.ro/meniu-taverna-damici/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "91813a37f68015532ea91220f3dc21ae4852f3be60a742352e26dbe88b7e292c",
       "quarantined": false
     },
     {
@@ -275,35 +241,14 @@
         "menu_link"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.damici.ro/taverna-damici/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 67905,
-      "raw_sha256": "5f2f8b85231940b7e7d1083812ca2a4368017e9c6b77b15c9d829370d492278b",
-      "semantic_sha256": "75adb923c8f533c10d156e6bfcb8d97c4fc2ca7c35a74d9b4a20325bbab04052",
-      "semantic_bytes": 2754,
-      "signals": {
-        "title": "Taverna D’amici | Restaurante Ramnicu Valcea",
-        "canonical_url": "https://www.damici.ro/taverna-damici/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/bucatarieitaliana/",
-          "https://www.facebook.com/tavernadamici/"
-        ],
-        "menu_links": [
-          "https://www.damici.ro/meniu-ristorante-damici/",
-          "https://www.damici.ro/meniu-taverna-damici",
-          "https://www.damici.ro/meniu-taverna-damici/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "75adb923c8f533c10d156e6bfcb8d97c4fc2ca7c35a74d9b4a20325bbab04052",
       "quarantined": false
     },
     {
@@ -316,41 +261,14 @@
         "weights"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.damici.ro/meniu-taverna-damici/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 416214,
-      "raw_sha256": "c1cfa5848ae0d0c0f09736175712559a87e5b9a4ef476aac5f54a2a460e5557e",
-      "semantic_sha256": "6da7079ddce144c2f452ca7578a3547a3c98ea95207c8e4ffd1322ed3fea6044",
-      "semantic_bytes": 15193,
-      "signals": {
-        "title": "Meniu Taverna D’amici | Restaurante Ramnicu Valcea",
-        "canonical_url": "https://www.damici.ro/meniu-taverna-damici/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/bucatarieitaliana/",
-          "https://www.facebook.com/tavernadamici/"
-        ],
-        "menu_links": [
-          "https://www.damici.ro/meniu-ristorante-damici/",
-          "https://www.damici.ro/meniu-taverna-damici/",
-          "https://www.damici.ro/meniu-taverna-damici/#close",
-          "https://www.damici.ro/meniu-taverna-damici/#cookie_policy_modal",
-          "https://www.damici.ro/meniu-taverna-damici/#info",
-          "https://www.damici.ro/meniu-taverna-damici/#mm",
-          "https://www.damici.ro/meniu-taverna-damici/#moove_gdpr_cookie_modal",
-          "https://www.damici.ro/meniu-taverna-damici/#privacy_overview",
-          "https://www.damici.ro/meniu-taverna-damici/#strict-necessary-cookies"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "6da7079ddce144c2f452ca7578a3547a3c98ea95207c8e4ffd1322ed3fea6044",
       "quarantined": false
     },
     {
@@ -365,34 +283,14 @@
         "menu_link"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.damici.ro/ristorante-damici/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 67817,
-      "raw_sha256": "8359315f018aa528f1da78538979e6df6a4dc02aa36fde4eb61432b652018293",
-      "semantic_sha256": "86c1402769a7fe9f8323f369e82ad80bc7a3adbc306ac00a081472dc35ad06da",
-      "semantic_bytes": 2808,
-      "signals": {
-        "title": "Ristorante D’amici | Restaurante Ramnicu Valcea",
-        "canonical_url": "https://www.damici.ro/ristorante-damici/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/bucatarieitaliana/",
-          "https://www.facebook.com/tavernadamici/"
-        ],
-        "menu_links": [
-          "https://www.damici.ro/meniu-ristorante-damici/",
-          "https://www.damici.ro/meniu-taverna-damici/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "86c1402769a7fe9f8323f369e82ad80bc7a3adbc306ac00a081472dc35ad06da",
       "quarantined": false
     },
     {
@@ -406,41 +304,14 @@
         "weights"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.damici.ro/meniu-ristorante-damici/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 457375,
-      "raw_sha256": "da02c3de4783441b3dd4ce41d3074b9467b74dcaddde545bc20f17f847dc6970",
-      "semantic_sha256": "825ab32913ab749cb1b056a3d2b13df253fa7d719321571d933c88ad7dda5dd3",
-      "semantic_bytes": 24512,
-      "signals": {
-        "title": "Meniu Ristorante D’amici | Restaurante Ramnicu Valcea",
-        "canonical_url": "https://www.damici.ro/meniu-ristorante-damici/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/bucatarieitaliana/",
-          "https://www.facebook.com/tavernadamici/"
-        ],
-        "menu_links": [
-          "https://www.damici.ro/meniu-ristorante-damici/",
-          "https://www.damici.ro/meniu-ristorante-damici/#close",
-          "https://www.damici.ro/meniu-ristorante-damici/#cookie_policy_modal",
-          "https://www.damici.ro/meniu-ristorante-damici/#info",
-          "https://www.damici.ro/meniu-ristorante-damici/#mm",
-          "https://www.damici.ro/meniu-ristorante-damici/#moove_gdpr_cookie_modal",
-          "https://www.damici.ro/meniu-ristorante-damici/#privacy_overview",
-          "https://www.damici.ro/meniu-ristorante-damici/#strict-necessary-cookies",
-          "https://www.damici.ro/meniu-taverna-damici/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "825ab32913ab749cb1b056a3d2b13df253fa7d719321571d933c88ad7dda5dd3",
       "quarantined": false
     },
     {
@@ -456,33 +327,14 @@
         "delivery_hours"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://gyrospetros.ro/contact/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 111672,
-      "raw_sha256": "54edd5412cde43e185acd68bc180f0cacf4aeeb5c7241fe2ecb21e147b751ecb",
-      "semantic_sha256": "09f2ccebcccc5668cdc048e98883c49390570fb88cc2865e4ff75952f21b9e39",
-      "semantic_bytes": 2000,
-      "signals": {
-        "title": "Contact - GyrosPetros.ro",
-        "canonical_url": "https://gyrospetros.ro/contact/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/petrosgyros"
-        ],
-        "menu_links": [
-          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
-          "https://gyrospetros.ro/meniu/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
-      "semantic_hash_changed": true,
-      "resolution_task_required": true,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "semantic_hash_changed": false,
+      "resolution_task_required": false,
       "publish_material_fact_update": false,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "09f2ccebcccc5668cdc048e98883c49390570fb88cc2865e4ff75952f21b9e39",
       "quarantined": false
     },
     {
@@ -497,33 +349,14 @@
         "brand_owner"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://gyrospetros.ro/termeni-si-conditii/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 119419,
-      "raw_sha256": "afe0ef0012e81a1afc177d1b4e1d0e01a277267171eecd8c547ccbafe451d44d",
-      "semantic_sha256": "3d3b885d21709c15aa471e4bbec92c6cd27096ec23e7b1de983ff260e033283b",
-      "semantic_bytes": 16346,
-      "signals": {
-        "title": "Termeni si conditii - GyrosPetros.ro",
-        "canonical_url": "https://gyrospetros.ro/termeni-si-conditii/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/petrosgyros"
-        ],
-        "menu_links": [
-          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
-          "https://gyrospetros.ro/meniu/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "3d3b885d21709c15aa471e4bbec92c6cd27096ec23e7b1de983ff260e033283b",
       "quarantined": false
     },
     {
@@ -536,34 +369,14 @@
         "products"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://gyrospetros.ro/meniu/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 108803,
-      "raw_sha256": "cc34077c5b8fb6cecb49cd3ee7edd90904bc15561d6e81c6d7afca5582e802f9",
-      "semantic_sha256": "b2bc5d93f23a2e34791f0d1e57c3638b1bfbd28022674a5fd3cdfef9318d6a2b",
-      "semantic_bytes": 1666,
-      "signals": {
-        "title": "Meniu - GyrosPetros.ro",
-        "canonical_url": "https://gyrospetros.ro/meniu/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/petrosgyros"
-        ],
-        "menu_links": [
-          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
-          "https://gyrospetros.ro/meniu/",
-          "https://gyrospetros.ro/meniu/#lafka_mobile_menu_tab"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "b2bc5d93f23a2e34791f0d1e57c3638b1bfbd28022674a5fd3cdfef9318d6a2b",
       "quarantined": false
     },
     {
@@ -576,33 +389,14 @@
         "price"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://gyrospetros.ro/categorie/mix-grill/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 108192,
-      "raw_sha256": "c83afd9a3c4a44d4758fbd837673c82bffc9bf3febf7b9d0d20e38e84099b76d",
-      "semantic_sha256": "bcee8b08631a650a3b8485dd92097a91c3d912e86b1f5d282ac514f2126c5a36",
-      "semantic_bytes": 1765,
-      "signals": {
-        "title": "Mix grill: Comanda online | Takeaway - GyrosPetros.ro",
-        "canonical_url": "https://gyrospetros.ro/categorie/mix-grill/",
-        "jsonld_blocks": 2,
-        "social_links": [
-          "https://www.facebook.com/petrosgyros"
-        ],
-        "menu_links": [
-          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
-          "https://gyrospetros.ro/meniu/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "bcee8b08631a650a3b8485dd92097a91c3d912e86b1f5d282ac514f2126c5a36",
       "quarantined": false
     },
     {
@@ -615,33 +409,14 @@
         "price"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://gyrospetros.ro/categorie/pita/pita-club/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 113305,
-      "raw_sha256": "a7f31ecc3ca275896e42ec521ea7280d87ea56ed56f37a68f572f48d5c246a8e",
-      "semantic_sha256": "dc6300f0e0c86ce850bbb56fa970c646d39ccde139cbcf90e0dee9cefb34264c",
-      "semantic_bytes": 1950,
-      "signals": {
-        "title": "Pita/Shaorma Club - GyrosPetros.ro",
-        "canonical_url": "https://gyrospetros.ro/categorie/pita/pita-club/",
-        "jsonld_blocks": 2,
-        "social_links": [
-          "https://www.facebook.com/petrosgyros"
-        ],
-        "menu_links": [
-          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
-          "https://gyrospetros.ro/meniu/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "dc6300f0e0c86ce850bbb56fa970c646d39ccde139cbcf90e0dee9cefb34264c",
       "quarantined": false
     },
     {
@@ -654,34 +429,14 @@
         "price"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://gyrospetros.ro/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 184244,
-      "raw_sha256": "64b66c3afc34f89124e4236ae843c8abae470c5d4c44c205e178519a7e19a5f0",
-      "semantic_sha256": "6b14feff7873a482930f35db29dc6b8289959d70b88db31a4a376a04f82e5adb",
-      "semantic_bytes": 4693,
-      "signals": {
-        "title": "GyrosPetros.ro - Petros Gyros & Grill",
-        "canonical_url": "https://gyrospetros.ro",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/petrosgyros"
-        ],
-        "menu_links": [
-          "https://gyrospetros.ro/categorie/meniu-de-pui-cryspy-si-aripioare/",
-          "https://gyrospetros.ro/meniu/",
-          "https://gyrospetros.ro/produs/meniu-ozn-burger-cartofi-prajiti/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "6b14feff7873a482930f35db29dc6b8289959d70b88db31a4a376a04f82e5adb",
       "quarantined": false
     },
     {
@@ -701,7 +456,7 @@
       "final_url": "https://www.ramadavalcea.ro/ro/restaurant/",
       "content_type": "text/html; charset=UTF-8",
       "bytes": 395434,
-      "raw_sha256": "8572481b79f2de4d3e50cb963295fdcfb9b2c23ac4a694ee61fb697f9fc69ae8",
+      "raw_sha256": "4219a6e4829da4f685af3b3539b49ad050a04b54a1886783f1568fe644ff8f7d",
       "semantic_sha256": "ed655b05cb47087a6c779c293e87de13664be198c24a9c4fd3cc3848e252b51d",
       "semantic_bytes": 6293,
       "signals": {
@@ -740,10 +495,10 @@
       "http_status": 200,
       "final_url": "https://www.ramadavalcea.ro/contact/",
       "content_type": "text/html; charset=UTF-8",
-      "bytes": 310996,
-      "raw_sha256": "4e82396bef7e91a319284225d3540a6c8eff93bd344d6f23e9741e6479f24c51",
-      "semantic_sha256": "1f46f22c27e0d498d884ce8d7be17047f195e5466701a53469d621929ca0e91e",
-      "semantic_bytes": 5895,
+      "bytes": 310936,
+      "raw_sha256": "2a2c35b5855ed1ea57d827595aa5cd73189f21c46274cb877d2713a52b9a223a",
+      "semantic_sha256": "c77d583fe1561c8a6bfa30e08535b432c454be5732e4d29569bf3397731b17c0",
+      "semantic_bytes": 5894,
       "signals": {
         "title": "Contact - Ramada by Wyndham Ramnicu Valcea",
         "canonical_url": "https://www.ramadavalcea.ro/contact/",
@@ -776,32 +531,14 @@
         "candidate_social_links"
       ],
       "material_fact_use": false,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://valcea.ro/ro/regiuni/ramnicu-valcea/mancare-si-bautura/restaurant-bulevard",
-      "content_type": "text/html; charset=utf-8",
-      "bytes": 35794,
-      "raw_sha256": "66ccb3cf1ddf45fedd47e6ad703ebb15cd1cc2bddd2c69da4b1b4c41ed8ddba6",
-      "semantic_sha256": "20fff5628fbc4a53ae282ff59610869ca2963bff03cd4ecc9d83b178d0662a8f",
-      "semantic_bytes": 472,
-      "signals": {
-        "title": "Valcea - Restaurante, Cazari, Activitati si Afaceri Locale",
-        "canonical_url": null,
-        "jsonld_blocks": 0,
-        "social_links": [
-          "https://www.facebook.com/RevistaValcea.ro",
-          "https://www.instagram.com/valcearo",
-          "https://www.tiktok.com/@valcea.ro"
-        ],
-        "menu_links": [],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "URLError: <urlopen error timed out>",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "20fff5628fbc4a53ae282ff59610869ca2963bff03cd4ecc9d83b178d0662a8f",
       "quarantined": false
     },
     {
@@ -813,32 +550,14 @@
         "discovery_only"
       ],
       "material_fact_use": false,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://vinolavalcea.ro/restaurant/queens-pub-restaurant/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 92889,
-      "raw_sha256": "8000c48f989ecf0e634c01b54d7992c8b787efb4b7cfc0bfc5c54da0b7a18c72",
-      "semantic_sha256": "e42ade9efb43a16e11af03fd572d28505c6852870485fe0606e358dbb4573be5",
-      "semantic_bytes": 2112,
-      "signals": {
-        "title": "Queen’s Pub & Restaurant - Vino la Vâlcea",
-        "canonical_url": "https://vinolavalcea.ro/restaurant/queens-pub-restaurant/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://facebook.com/VinolaValcea.ro/",
-          "https://instagram.com/vinolavalcea/",
-          "https://tiktok.com/@vinolavalcea/"
-        ],
-        "menu_links": [],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "e42ade9efb43a16e11af03fd572d28505c6852870485fe0606e358dbb4573be5",
       "quarantined": false
     },
     {
@@ -861,7 +580,7 @@
       "final_url": "https://www.restaurantqueen.ro/",
       "content_type": "text/html; charset=utf-8",
       "bytes": 38481,
-      "raw_sha256": "92a1f85e9eeb6eba0bd292ffd159a10b710eb4147a46b238f699afe70c147210",
+      "raw_sha256": "e1334a83a0145774c4017f2f62ddfac7b1a968e04504895a0488fdfeddd57e9c",
       "semantic_sha256": "4470f7a9d2d473148b83a6da45c60a90c2fb01fe9f412138f8082977731b4b9a",
       "semantic_bytes": 1953,
       "signals": {
@@ -938,8 +657,8 @@
       "http_status": 200,
       "final_url": "https://www.oldcitygarden.ro/",
       "content_type": "text/html; charset=UTF-8",
-      "bytes": 1143812,
-      "raw_sha256": "4d2119cbd1dfe75bf729f453fe051ea3242d74985d84ae71d87dc8d8d85c2106",
+      "bytes": 1143758,
+      "raw_sha256": "6e88b1753a5f9a2d34faf9c1e46a60489517461792f150c12c4c85d453825bcd",
       "semantic_sha256": "982c523e200981599f69421b595ff8fbce8c1d1a7eeabf9711d3ceb0066d6711",
       "semantic_bytes": 986,
       "signals": {
@@ -979,22 +698,22 @@
       "http_status": 200,
       "final_url": "https://www.autenticrestaurant.ro/",
       "content_type": "text/html; charset=utf-8",
-      "bytes": 98946,
-      "raw_sha256": "81576a18b23d1520d2bfef9afc84999a891719270ed53fcc54e186c2d13443e1",
-      "semantic_sha256": "acad9bbe336a8d2a405d369fddf746ebaea5170df0cbed26fdd27f90b0109f65",
-      "semantic_bytes": 3081,
+      "bytes": 98957,
+      "raw_sha256": "09778ae50f00dd4a4568b89eb79abd3b9855b714b0bb983a38cddf1188bea1ee",
+      "semantic_sha256": "cb3183e909fb9bcb7f2640099f11d358662f09cadc44f87ec6b4ccbce1b0672b",
+      "semantic_bytes": 3110,
       "signals": {
         "title": "Restaurant Autentic - comandați mâncare pentru livrare",
-        "canonical_url": "https://www.autenticrestaurant.ro/.htpasswd",
+        "canonical_url": "https://www.autenticrestaurant.ro/",
         "jsonld_blocks": 0,
         "social_links": [],
         "menu_links": [],
         "robots_noindex": false
       },
       "attempts": 1,
-      "semantic_hash_changed": false,
-      "resolution_task_required": false,
-      "publish_material_fact_update": null,
+      "semantic_hash_changed": true,
+      "resolution_task_required": true,
+      "publish_material_fact_update": false,
       "consecutive_failures": 0,
       "health": "PASS",
       "quarantined": false
@@ -1009,32 +728,14 @@
         "address"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://cinemageosaizescu.ro/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 59670,
-      "raw_sha256": "e94e0e4a800069fbf8f4f2e26b1718a50aa16c7591f580be2c9863bcba0d9f32",
-      "semantic_sha256": "938c5823156bad3cfc45b449fff88b92ffabaffed0cdcd513c946c6ca102e91c",
-      "semantic_bytes": 9757,
-      "signals": {
-        "title": "Cinema Geo Saizescu",
-        "canonical_url": null,
-        "jsonld_blocks": 0,
-        "social_links": [
-          "https://www.facebook.com/cinemageosaizescuvl"
-        ],
-        "menu_links": [
-          "https://cinemageosaizescu.ro/templates/zt_movie/css/menu.css"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "938c5823156bad3cfc45b449fff88b92ffabaffed0cdcd513c946c6ca102e91c",
       "quarantined": false
     },
     {
@@ -1047,34 +748,14 @@
         "address"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://filarmonica-valcea.ro/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 131687,
-      "raw_sha256": "530e182de6727df26dd6b9e8263a23c11d0982a8de7c829f6f4c0f5182048a3c",
-      "semantic_sha256": "67de82f04aad768cabfb5653585e3fb340fd8527ea485b7347b1cced99bd5f10",
-      "semantic_bytes": 5315,
-      "signals": {
-        "title": "Filarmonica Valcea – Filarmonica “Ion Dumitrescu” Râmnicu Vâlcea",
-        "canonical_url": "https://filarmonica-valcea.ro/",
-        "jsonld_blocks": 0,
-        "social_links": [
-          "https://www.facebook.com/filarmonica.valcea",
-          "https://www.facebook.com/filarmonica.valcea/",
-          "https://www.youtube.com/channel/UCdEpQF95YNzkEDzjLjKm88g"
-        ],
-        "menu_links": [
-          "https://filarmonica-valcea.ro/wp-content/plugins/elementor-pro/assets/css/widget-nav-menu.min.css"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "67de82f04aad768cabfb5653585e3fb340fd8527ea485b7347b1cced99bd5f10",
       "quarantined": false
     },
     {
@@ -1089,34 +770,14 @@
         "menu_link"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://gyros-time.ro/about-us/contact/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 82903,
-      "raw_sha256": "2bae6ad65d6b2bac1e33b632e45e1c3974a3e3a03a482d941fc198fe3f0fc1c9",
-      "semantic_sha256": "5f85be4d58439c61a722533e074df06cc097555eadeef7851a5f6ea7d119e1e3",
-      "semantic_bytes": 3619,
-      "signals": {
-        "title": "Contact – Gyros Time",
-        "canonical_url": "https://gyros-time.ro/about-us/contact/",
-        "jsonld_blocks": 0,
-        "social_links": [
-          "https://ro-ro.facebook.com/pages/category/Fast-Food-Restaurant/Gyros-time-130524033714726/",
-          "https://www.instagram.com/gyros.time/"
-        ],
-        "menu_links": [
-          "http://gyros-time.ro/Meniu/GYROSTIME.pdf",
-          "https://gyros-time.ro/about-us/our-menu/"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "5f85be4d58439c61a722533e074df06cc097555eadeef7851a5f6ea7d119e1e3",
       "quarantined": false
     },
     {
@@ -1134,7 +795,7 @@
       "final_url": "https://www.restaurantqueen.ro/",
       "content_type": "text/html; charset=utf-8",
       "bytes": 38481,
-      "raw_sha256": "a0e3893e69bb1b50efe1e439004214506f66a908fb5e6bcacd409af5684ce07e",
+      "raw_sha256": "782f7cfc9d7c2951567f4dd9a1fc79ac4f457aac205870197c9ec80d952f85cb",
       "semantic_sha256": "4470f7a9d2d473148b83a6da45c60a90c2fb01fe9f412138f8082977731b4b9a",
       "semantic_bytes": 1953,
       "signals": {
@@ -1169,34 +830,14 @@
         "address"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://zadis.ro/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 219323,
-      "raw_sha256": "db4be37b14405475184eca1ccef01ef48a5cb780e961a4823e46c660a7bdb514",
-      "semantic_sha256": "c9c94fd60cc0495c5a2595649fa04fcfa9c4765f60451f4aeea6f68df8b412fc",
-      "semantic_bytes": 7672,
-      "signals": {
-        "title": "Zadis Pizza & Pasta Ramnicu Valcea",
-        "canonical_url": "https://zadis.ro/",
-        "jsonld_blocks": 1,
-        "social_links": [
-          "https://www.facebook.com/zaddyspizza",
-          "https://www.instagram.com/zadisrmvalcea/",
-          "https://www.tiktok.com/@zadis.rmvalcea"
-        ],
-        "menu_links": [
-          "https://zadis.ro/wp-content/plugins/menu-ordering-reservations/assets/css/public-style.css?ver=2.4.4"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "c9c94fd60cc0495c5a2595649fa04fcfa9c4765f60451f4aeea6f68df8b412fc",
       "quarantined": false
     },
     {
@@ -1219,7 +860,7 @@
       "final_url": "https://www.streetpub.ro/",
       "content_type": "text/html; charset=utf-8",
       "bytes": 147656,
-      "raw_sha256": "6f21bf706c818f2891eec2be48d633d09d45573779865abbff98c703cd7469ba",
+      "raw_sha256": "1522d69377c22f5bcc4352df132290a11e99d2f8759720b5f26dd41ca7883a7c",
       "semantic_sha256": "3807dbccada2e9be379258e9797297665c1dadac9c1256e433449b8dbf2f3e70",
       "semantic_bytes": 3657,
       "signals": {
@@ -1258,35 +899,14 @@
         "registration_number"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.gallo-nero.ro/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 252462,
-      "raw_sha256": "f2df92d51e353a2a61034a54efa59e6813e6c8ab0067a32d3de89a54475bbb40",
-      "semantic_sha256": "87cdfb3da5fc095e653472b6bfd9d38b3153639fc83fe1ffba1931b742aaf6b0",
-      "semantic_bytes": 3198,
-      "signals": {
-        "title": "Gallo Nero – Restaurant Rm.Valcea",
-        "canonical_url": "https://www.gallo-nero.ro/",
-        "jsonld_blocks": 0,
-        "social_links": [
-          "https://www.facebook.com/GalloNeroValcea/",
-          "https://www.instagram.com/gallonerovalcea/"
-        ],
-        "menu_links": [
-          "https://www.gallo-nero.ro/wp-content/plugins/elementor-pro/assets/css/widget-nav-menu.min.css?ver=4.2.1",
-          "https://www.gallo-nero.ro/wp-content/plugins/elementor-pro/assets/css/widget-woocommerce-menu-cart.min.css?ver=4.2.1",
-          "https://www.gallo-nero.ro/wp-content/plugins/elementor/assets/css/widget-menu-anchor.min.css?ver=4.2.1"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "87cdfb3da5fc095e653472b6bfd9d38b3153639fc83fe1ffba1931b742aaf6b0",
       "quarantined": false
     },
     {
@@ -1299,37 +919,14 @@
         "products"
       ],
       "material_fact_use": true,
-      "ok": true,
-      "http_status": 200,
-      "final_url": "https://www.gallo-nero.ro/restaurant/",
-      "content_type": "text/html; charset=UTF-8",
-      "bytes": 171061,
-      "raw_sha256": "1618e86cb1ab2ced271bc32c2a4b6bf774d9bf776decc33a4418887d05489b57",
-      "semantic_sha256": "2eadea64ad1a55382b5bfede1cfe5d8fc8854524ade8f865a7a1ac5647743b85",
-      "semantic_bytes": 2765,
-      "signals": {
-        "title": "restaurant – Gallo Nero",
-        "canonical_url": "https://www.gallo-nero.ro/restaurant/",
-        "jsonld_blocks": 0,
-        "social_links": [
-          "https://www.facebook.com/GalloNeroValcea/",
-          "https://www.instagram.com/gallonerovalcea/"
-        ],
-        "menu_links": [
-          "https://online.fliphtml5.com/jbizq/Meniu-Bar-Gallo-Nero-2026-updated/",
-          "https://online.fliphtml5.com/jbizq/Meniu-Gallo-Nero-2026/",
-          "https://online.fliphtml5.com/jbizq/Meniu-Sushi-Gallo-Nero/",
-          "https://www.gallo-nero.ro/wp-content/plugins/elementor-pro/assets/css/widget-nav-menu.min.css?ver=4.2.1",
-          "https://www.gallo-nero.ro/wp-content/plugins/elementor-pro/assets/css/widget-woocommerce-menu-cart.min.css?ver=4.2.1"
-        ],
-        "robots_noindex": false
-      },
-      "attempts": 1,
+      "ok": false,
+      "health": "DEGRADED",
+      "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
       "semantic_hash_changed": false,
       "resolution_task_required": false,
-      "publish_material_fact_update": null,
-      "consecutive_failures": 0,
-      "health": "PASS",
+      "publish_material_fact_update": false,
+      "consecutive_failures": 1,
+      "last_known_semantic_sha256": "2eadea64ad1a55382b5bfede1cfe5d8fc8854524ade8f865a7a1ac5647743b85",
       "quarantined": false
     },
     {
@@ -1412,13 +1009,13 @@
   ],
   "summary": {
     "total": 34,
-    "pass": 34,
-    "degraded": 0,
+    "pass": 14,
+    "degraded": 20,
     "fail": 0,
     "changed": 2,
     "quarantined": 0,
     "resolution_tasks_required": 2,
-    "sources_with_social_links": 28,
-    "sources_with_menu_links": 27
+    "sources_with_social_links": 9,
+    "sources_with_menu_links": 10
   }
 }
