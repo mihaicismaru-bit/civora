@@ -31,7 +31,7 @@ from ipj_valcea_public_safety_reference_adapter import (
 )
 
 SCHEMA = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_V1"
-PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_12_P0_CHROME_FRAGMENT_RUN_GUARD"
+PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_13_P0_COMPLETE_FRAGMENT_AND_ABBREVIATION_GUARD"
 SOURCE_FAMILY = "IPJ_VALCEA_PUBLIC_SAFETY"
 AUTHORITY_CLASS = "FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE"
 OBSERVATION_STATE = "POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING"
@@ -43,6 +43,7 @@ MAX_FIELD_EVIDENCE = 8
 MAX_FRAGMENT_CHARS = 420
 ALLOWED_CONTENT_TYPES = {"text/html", "application/xhtml+xml", "text/plain"}
 USER_AGENT = "CIVORA-Valcea-Clar-IPJ-Detail-Evidence/1.1"
+SENTENCE_ABBREVIATIONS = ("nr.", "dr.", "str.", "art.", "alin.", "pct.", "etc.", "cca.", "aprox.")
 
 NON_AUTHORIZING_FLAGS = {
     "material_fact_use": False,
@@ -96,16 +97,15 @@ SKIP_TAGS = {
     "script", "style", "noscript", "svg", "template", "nav", "header",
     "footer", "aside", "form", "button",
 }
+TEXT_BLOCK_TAGS = {
+    "p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "td", "th",
+}
 CONTENT_HINTS = {
     "article", "article-body", "article-content", "article-detail", "article-text",
     "news", "news-body", "news-content", "news-detail", "news-article",
     "stire", "stiri", "stire-content", "stire-detalii", "stire-text",
     "post-content", "entry-content", "content-article", "page-content",
 }
-# Known static IPJ navigation/page-chrome labels that have previously crossed an
-# outer content wrapper and polluted a legacy story. They are exact normalized
-# labels, not semantic keyword filters, so genuine article sentences mentioning
-# detention or arrest remain admissible as police-source evidence context.
 PAGE_CHROME_GUARD_KEYS = {
     "program centrul de retinere si arest preventiv",
 }
@@ -142,7 +142,7 @@ class DetailEvidence:
 
 
 class ArticleBodyParser(HTMLParser):
-    """Collect title globally but evidence text only under explicit content roots."""
+    """Collect title globally and complete text blocks only inside content roots."""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -152,6 +152,7 @@ class ArticleBodyParser(HTMLParser):
         self.scope_seen = False
         self.in_title = False
         self.title_parts: list[str] = []
+        self.current_parts: list[str] = []
         self.segments: list[str] = []
 
     @staticmethod
@@ -169,8 +170,18 @@ class ArticleBodyParser(HTMLParser):
             return True
         return any(hint in values for hint in CONTENT_HINTS)
 
+    def _flush_segment(self) -> None:
+        if not self.current_parts:
+            return
+        text = " ".join("".join(self.current_parts).split())
+        self.current_parts.clear()
+        if text:
+            self.segments.append(text)
+
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         name = tag.lower()
+        if name in TEXT_BLOCK_TAGS and self.scope_depth > 0 and not self.skip_depth:
+            self._flush_segment()
         skip_start = name in SKIP_TAGS
         scope_start = False if self.skip_depth or skip_start else self._starts_scope(name, attrs)
         self.stack.append((name, skip_start, scope_start))
@@ -196,6 +207,9 @@ class ArticleBodyParser(HTMLParser):
                 break
         if match is None:
             return
+        closing_scope = any(scope_start for _name, _skip, scope_start in self.stack[match:])
+        if self.scope_depth > 0 and not self.skip_depth and (name in TEXT_BLOCK_TAGS or closing_scope):
+            self._flush_segment()
         for _name, skip_start, scope_start in reversed(self.stack[match:]):
             if scope_start and self.scope_depth:
                 self.scope_depth -= 1
@@ -204,14 +218,11 @@ class ArticleBodyParser(HTMLParser):
         del self.stack[match:]
 
     def handle_data(self, data: str) -> None:
-        text = " ".join(data.split())
-        if not text:
-            return
         if self.in_title:
-            self.title_parts.append(text)
+            self.title_parts.append(data)
         if self.skip_depth or self.scope_depth <= 0:
             return
-        self.segments.append(text)
+        self.current_parts.append(data)
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -278,8 +289,47 @@ def _guard_key(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", ascii_folded).strip()
 
 
+def _looks_like_title_echo(fragment: str, visible_title: str | None) -> bool:
+    fragment_key = _guard_key(fragment)
+    title_key = _guard_key(visible_title or "")
+    if not fragment_key or not title_key:
+        return False
+    if fragment_key == title_key:
+        return True
+    if len(fragment_key) < 24:
+        return False
+    return (
+        title_key.startswith(fragment_key + " ")
+        or title_key.endswith(" " + fragment_key)
+        or f" {fragment_key} " in f" {title_key} "
+    )
+
+
+def _quotes_balanced(text: str) -> bool:
+    curly_open = text.count("„") + text.count("“")
+    if curly_open != text.count("”"):
+        return False
+    if text.count("«") != text.count("»"):
+        return False
+    return text.count('"') % 2 == 0
+
+
+def _bounded_complete_excerpt(fragment: str) -> str:
+    cleaned = " ".join(fragment.split()).strip()
+    if not cleaned:
+        return ""
+    if len(cleaned) <= MAX_FRAGMENT_CHARS:
+        return cleaned if _quotes_balanced(cleaned) else ""
+    window = cleaned[:MAX_FRAGMENT_CHARS]
+    endings = list(re.finditer(r"[.!?](?:[”\"»])?(?=\s|$)", window))
+    while endings:
+        candidate = window[:endings.pop().end()].strip()
+        if candidate and _quotes_balanced(candidate):
+            return candidate
+    return ""
+
+
 def _drop_exact_page_chrome_runs(segments: list[str]) -> list[str]:
-    """Drop only adjacent text-node runs that exactly recompose known chrome labels."""
     kept: list[str] = []
     index = 0
     max_parts = 8
@@ -292,9 +342,7 @@ def _drop_exact_page_chrome_runs(segments: list[str]) -> list[str]:
             if key in PAGE_CHROME_GUARD_KEYS:
                 matched_end = end
                 break
-            if key and not any(
-                guard.startswith(key + " ") for guard in PAGE_CHROME_GUARD_KEYS
-            ):
+            if key and not any(guard.startswith(key + " ") for guard in PAGE_CHROME_GUARD_KEYS):
                 break
         if matched_end is not None:
             index = matched_end + 1
@@ -312,11 +360,25 @@ def _tags_for_fragment(fragment: str) -> tuple[str, ...]:
     )
 
 
+def _split_sentence_parts(segment: str) -> list[str]:
+    """Split real sentences while preserving common Romanian abbreviations."""
+    raw_parts = re.split(r"(?<=[.!?])\s+|\s+[•|]\s+", segment)
+    parts: list[str] = []
+    for raw in raw_parts:
+        cleaned = " ".join(raw.split()).strip(" -–—")
+        if not cleaned:
+            continue
+        if parts and any(parts[-1].casefold().endswith(abbrev) for abbrev in SENTENCE_ABBREVIATIONS):
+            parts[-1] = f"{parts[-1]} {cleaned}"
+        else:
+            parts.append(cleaned)
+    return parts
+
+
 def _split_candidate_fragments(segments: list[str]) -> list[str]:
     candidates: list[str] = []
     for segment in _drop_exact_page_chrome_runs(segments):
-        for piece in re.split(r"(?<=[.!?])\s+|\s+[•|]\s+", segment):
-            cleaned = " ".join(piece.split()).strip(" -–—")
+        for cleaned in _split_sentence_parts(segment):
             if 30 <= len(cleaned) <= 1200:
                 candidates.append(cleaned)
     return candidates
@@ -324,6 +386,8 @@ def _split_candidate_fragments(segments: list[str]) -> list[str]:
 
 def _evidence_from_segments(
     segments: list[str],
+    *,
+    visible_title: str | None = None,
 ) -> tuple[tuple[FieldEvidence, ...], dict[str, int]]:
     evidence: list[FieldEvidence] = []
     seen: set[str] = set()
@@ -331,10 +395,14 @@ def _evidence_from_segments(
     for fragment in _split_candidate_fragments(segments):
         if _guard_key(fragment) in PAGE_CHROME_GUARD_KEYS:
             continue
-        tags = _tags_for_fragment(fragment)
+        if _looks_like_title_echo(fragment, visible_title):
+            continue
+        excerpt = _bounded_complete_excerpt(fragment)
+        if not excerpt or _looks_like_title_echo(excerpt, visible_title):
+            continue
+        tags = _tags_for_fragment(excerpt)
         if not tags:
             continue
-        excerpt = fragment[:MAX_FRAGMENT_CHARS]
         normalized = " ".join(excerpt.casefold().split())
         if normalized in seen:
             continue
@@ -362,12 +430,13 @@ def _extract_html_evidence(
 ) -> tuple[str | None, str | None, tuple[FieldEvidence, ...], dict[str, int]]:
     parser = ArticleBodyParser()
     parser.feed(body.decode("utf-8", errors="replace"))
+    parser.close()
     if not parser.scope_seen or not parser.segments:
         raise RuntimeError("article_body_scope_not_found")
     article_text = " ".join(parser.segments)
     explicit_date = _find_explicit_date(article_text)
-    evidence, tag_counts = _evidence_from_segments(parser.segments)
-    visible_title = " ".join(parser.title_parts).strip() or None
+    visible_title = " ".join("".join(parser.title_parts).split()) or None
+    evidence, tag_counts = _evidence_from_segments(parser.segments, visible_title=visible_title)
     return visible_title, explicit_date, evidence, tag_counts
 
 
@@ -375,11 +444,7 @@ def _extract_plaintext_evidence(
     body: bytes,
 ) -> tuple[str | None, str | None, tuple[FieldEvidence, ...], dict[str, int]]:
     text = body.decode("utf-8", errors="replace")
-    segments = [
-        " ".join(line.split())
-        for line in text.splitlines()
-        if " ".join(line.split())
-    ]
+    segments = [" ".join(line.split()) for line in text.splitlines() if " ".join(line.split())]
     evidence, tag_counts = _evidence_from_segments(segments)
     return None, _find_explicit_date(" ".join(segments)), evidence, tag_counts
 
@@ -388,10 +453,7 @@ def _fetch_detail(url: str, source_kind: str, timeout: float = 20.0) -> tuple[by
     canonical = _canonical_first_party_target(url, source_kind)
     request = Request(
         canonical,
-        headers={
-            "User-Agent": USER_AGENT,
-            "Accept": "text/html,application/xhtml+xml,text/plain",
-        },
+        headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml,text/plain"},
     )
     context = ssl.create_default_context()
     with urlopen(request, timeout=timeout, context=context) as response:
@@ -411,11 +473,9 @@ def build_live_receipt() -> dict[str, Any]:
     index = build_index_receipt()
     if index.get("status") != "PASS":
         raise RuntimeError(f"index_receipt_not_pass:{index.get('status')}")
-    candidates = [
-        ref
-        for ref in index.get("references", [])
-        if ref.get("topic_class") in HIGH_VALUE_TOPICS
-    ][:MAX_DETAILS]
+    candidates = [ref for ref in index.get("references", []) if ref.get("topic_class") in HIGH_VALUE_TOPICS][
+        :MAX_DETAILS
+    ]
 
     details: list[DetailEvidence] = []
     holds: list[dict[str, str]] = []
@@ -424,11 +484,7 @@ def build_live_receipt() -> dict[str, Any]:
         target_url = str(ref.get("target_url") or "")
         try:
             body, final_url, content_type = _fetch_detail(target_url, source_kind)
-            extractor = (
-                _extract_plaintext_evidence
-                if content_type == "text/plain"
-                else _extract_html_evidence
-            )
+            extractor = _extract_plaintext_evidence if content_type == "text/plain" else _extract_html_evidence
             visible_title, explicit_date, field_evidence, tag_counts = extractor(body)
             if not field_evidence:
                 raise RuntimeError("article_body_has_no_tagged_material_evidence")
@@ -487,9 +543,13 @@ def build_live_receipt() -> dict[str, Any]:
             "article_body_scope_is_required": True,
             "whole_page_fallback_for_evidence_is_forbidden": True,
             "known_page_chrome_exact_guard_is_enforced": True,
+            "inline_markup_text_nodes_are_recomposed_within_block": True,
+            "common_abbreviation_sentence_boundaries_are_preserved": True,
+            "visible_title_echo_is_not_field_evidence": True,
+            "truncated_or_unbalanced_quote_evidence_is_forbidden": True,
             "sample_is_bounded_and_non_exhaustive": True,
         },
-        "interpretation": "ONLY_SCOPED_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;KNOWN_PAGE_CHROME_IS_EXCLUDED",
+        "interpretation": "ONLY_SCOPED_COMPLETE_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;INLINE_MARKUP_AND_COMMON_ABBREVIATIONS_ARE_RECOMPOSED;TITLE_ECHO_PAGE_CHROME_AND_CLIPPED_QUOTES_ARE_EXCLUDED",
         **NON_AUTHORIZING_FLAGS,
     }
     stable = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -514,21 +574,14 @@ def _self_test() -> None:
         raise AssertionError("external police host must not be promoted to IPJ detail authority")
 
     try:
-        _canonical_first_party_target(
-            "https://vl.politiaromana.ro/ro/stiri-si-media/comunicate/test",
-            news,
-        )
+        _canonical_first_party_target("https://vl.politiaromana.ro/ro/stiri-si-media/comunicate/test", news)
     except ValueError:
         pass
     else:
         raise AssertionError("cross-section detail identity must fail closed")
 
     try:
-        _validate_final_url(
-            good,
-            "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/alta-resursa?x=1",
-            news,
-        )
+        _validate_final_url(good, "https://vl.politiaromana.ro/ro/stiri-si-media/stiri/alta-resursa?x=1", news)
     except RuntimeError:
         pass
     else:
@@ -563,10 +616,6 @@ def _self_test() -> None:
     assert set(tag_counts) <= ALLOWED_TAGS
     assert all(re.fullmatch(r"[0-9a-f]{64}", item.evidence_sha256) for item in field_evidence)
 
-    # Regression for the actual DN64 contaminant. The IPJ site can split this
-    # static navigation label across nested markup inside a broad content wrapper.
-    # Recompose only adjacent nodes for exact chrome matching; never keyword-strip
-    # genuine article sentences about detention or arrest.
     contaminated_wrapper = (
         "<html><head><title>IPJ Vâlcea - DN64 test</title></head><body>"
         "<div class='news page-content'>"
@@ -583,6 +632,50 @@ def _self_test() -> None:
     assert "peste 70 de autovehicule" in dn64_observed
     assert _guard_key("Program Centrul de Reținere și Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
     assert _guard_key("Program Centrul de Reţinere şi Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
+
+    inline_markup = (
+        "<html><head><title>IPJ Vâlcea - reținut pentru 24 de ore</title></head><body>"
+        "<main><article>"
+        "<p>Polițiștii Serviciului de In<strong>vestigații Criminale</strong> au reținut pentru 24 de ore un tânăr cercetat pentru tulburarea ordinii publice.</p>"
+        "<p>Polițiștii Secției nr. <strong>3 Poliție Rurală Sutești</strong> au reținut pentru 24 de ore doi bărbați cercetați într-un dosar penal.</p>"
+        "<p>Polițiștii au oprit un autoturism pe strada Dr. Hacman pentru verificări în trafic.</p>"
+        "</article></main></body></html>"
+    ).encode("utf-8")
+    _, _, inline_evidence, _ = _extract_html_evidence(inline_markup)
+    inline_observed = " ".join(item.excerpt for item in inline_evidence)
+    assert "Polițiștii Serviciului de Investigații Criminale" in inline_observed
+    assert "Polițiștii Secției nr. 3 Poliție Rurală Sutești" in inline_observed
+    assert "strada Dr. Hacman" in inline_observed
+    assert not any(item.excerpt.startswith("vestigații Criminale") for item in inline_evidence)
+    assert not any(item.excerpt.startswith("3 Poliție Rurală") for item in inline_evidence)
+    assert not any(item.excerpt == "Polițiștii au oprit un autoturism pe strada Dr." for item in inline_evidence)
+
+    bujoreni_title = "ACTIVITĂȚI DE EDUCAȚIE RUTIERĂ ÎN UNITĂȚILE DE ÎNVĂȚĂMÂNT DIN BUJORENI"
+    long_quote = (
+        "IPJ Vâlcea precizează: „ACORDĂ PRIORITATE PIETONILOR! "
+        + "respectă regulile de siguranță rutieră și adaptează viteza la condițiile de trafic " * 7
+        + "pentru ca deplasarea să se desfășoare în siguranță.”"
+    )
+    bujoreni_html = (
+        "<html><head><title>IPJ Vâlcea - " + bujoreni_title + "</title></head><body>"
+        "<main><article>"
+        "<h1>" + bujoreni_title + "</h1>"
+        "<p>11 septembrie 2026</p>"
+        "<p>Polițiștii au prezentat reguli de siguranță rutieră unui grup de 260 de elevi din Bujoreni.</p>"
+        "<p>Acțiunea de educație rutieră a vizat traversarea în siguranță și conduita în trafic.</p>"
+        "<p>" + long_quote + "</p>"
+        "</article></main></body></html>"
+    ).encode("utf-8")
+    bujoreni_visible_title, bujoreni_date, bujoreni_evidence, _ = _extract_html_evidence(bujoreni_html)
+    assert bujoreni_visible_title == "IPJ Vâlcea - " + bujoreni_title
+    assert bujoreni_date == "11 septembrie 2026"
+    bujoreni_observed = " ".join(item.excerpt for item in bujoreni_evidence)
+    assert bujoreni_title not in bujoreni_observed
+    assert "IPJ Vâlcea precizează" not in bujoreni_observed
+    assert "260 de elevi" in bujoreni_observed
+    assert "traversarea în siguranță" in bujoreni_observed
+    assert all(len(item.excerpt) <= MAX_FRAGMENT_CHARS for item in bujoreni_evidence)
+    assert all(_quotes_balanced(item.excerpt) for item in bujoreni_evidence)
 
     chrome_only = b"<html><body><nav><p>Politistii au control trafic si sanctiuni.</p></nav></body></html>"
     try:
@@ -605,9 +698,7 @@ def _self_test() -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(
-        description="Bounded IPJ Vâlcea first-party article-body evidence"
-    )
+    parser = argparse.ArgumentParser(description="Bounded IPJ Vâlcea first-party article-body evidence")
     parser.add_argument("--self-test", action="store_true")
     parser.add_argument("--live-check", action="store_true")
     parser.add_argument("--output", type=Path)
