@@ -31,7 +31,7 @@ from ipj_valcea_public_safety_reference_adapter import (
 )
 
 SCHEMA = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_V1"
-PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_12_P0_CHROME_FRAGMENT_RUN_GUARD"
+PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_13_P0_TITLE_AND_QUOTE_GUARD"
 SOURCE_FAMILY = "IPJ_VALCEA_PUBLIC_SAFETY"
 AUTHORITY_CLASS = "FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE"
 OBSERVATION_STATE = "POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING"
@@ -278,6 +278,56 @@ def _guard_key(text: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", ascii_folded).strip()
 
 
+def _looks_like_title_echo(fragment: str, visible_title: str | None) -> bool:
+    """Reject source-heading/title text from field evidence.
+
+    The IPJ page may repeat its H1 inside a broad article wrapper while the HTML
+    title adds a site prefix. A heading is discovery metadata, not an independent
+    material claim, even when its words happen to match a material tag.
+    """
+    fragment_key = _guard_key(fragment)
+    title_key = _guard_key(visible_title or "")
+    if not fragment_key or not title_key:
+        return False
+    if fragment_key == title_key:
+        return True
+    if len(fragment_key) < 24:
+        return False
+    return (
+        title_key.startswith(fragment_key + " ")
+        or title_key.endswith(" " + fragment_key)
+        or f" {fragment_key} " in f" {title_key} "
+    )
+
+
+def _quotes_balanced(text: str) -> bool:
+    for opening, closing in (("„", "”"), ("“", "”"), ("«", "»")):
+        if text.count(opening) != text.count(closing):
+            return False
+    return text.count('"') % 2 == 0
+
+
+def _bounded_complete_excerpt(fragment: str) -> str:
+    """Return only a complete, quote-balanced evidence excerpt within the cap.
+
+    Evidence bytes must never be a blind prefix of a longer sentence. If a long
+    fragment has no safe complete sentence before the cap, it is rejected rather
+    than persisted as a clipped quotation or partial claim.
+    """
+    cleaned = " ".join(fragment.split()).strip()
+    if not cleaned:
+        return ""
+    if len(cleaned) <= MAX_FRAGMENT_CHARS:
+        return cleaned if _quotes_balanced(cleaned) else ""
+    window = cleaned[:MAX_FRAGMENT_CHARS]
+    endings = list(re.finditer(r"[.!?](?:[”\"»])?(?=\s|$)", window))
+    while endings:
+        candidate = window[:endings.pop().end()].strip()
+        if candidate and _quotes_balanced(candidate):
+            return candidate
+    return ""
+
+
 def _drop_exact_page_chrome_runs(segments: list[str]) -> list[str]:
     """Drop only adjacent text-node runs that exactly recompose known chrome labels."""
     kept: list[str] = []
@@ -324,6 +374,8 @@ def _split_candidate_fragments(segments: list[str]) -> list[str]:
 
 def _evidence_from_segments(
     segments: list[str],
+    *,
+    visible_title: str | None = None,
 ) -> tuple[tuple[FieldEvidence, ...], dict[str, int]]:
     evidence: list[FieldEvidence] = []
     seen: set[str] = set()
@@ -331,10 +383,14 @@ def _evidence_from_segments(
     for fragment in _split_candidate_fragments(segments):
         if _guard_key(fragment) in PAGE_CHROME_GUARD_KEYS:
             continue
-        tags = _tags_for_fragment(fragment)
+        if _looks_like_title_echo(fragment, visible_title):
+            continue
+        excerpt = _bounded_complete_excerpt(fragment)
+        if not excerpt or _looks_like_title_echo(excerpt, visible_title):
+            continue
+        tags = _tags_for_fragment(excerpt)
         if not tags:
             continue
-        excerpt = fragment[:MAX_FRAGMENT_CHARS]
         normalized = " ".join(excerpt.casefold().split())
         if normalized in seen:
             continue
@@ -366,8 +422,11 @@ def _extract_html_evidence(
         raise RuntimeError("article_body_scope_not_found")
     article_text = " ".join(parser.segments)
     explicit_date = _find_explicit_date(article_text)
-    evidence, tag_counts = _evidence_from_segments(parser.segments)
     visible_title = " ".join(parser.title_parts).strip() or None
+    evidence, tag_counts = _evidence_from_segments(
+        parser.segments,
+        visible_title=visible_title,
+    )
     return visible_title, explicit_date, evidence, tag_counts
 
 
@@ -487,9 +546,11 @@ def build_live_receipt() -> dict[str, Any]:
             "article_body_scope_is_required": True,
             "whole_page_fallback_for_evidence_is_forbidden": True,
             "known_page_chrome_exact_guard_is_enforced": True,
+            "visible_title_echo_is_not_field_evidence": True,
+            "truncated_or_unbalanced_quote_evidence_is_forbidden": True,
             "sample_is_bounded_and_non_exhaustive": True,
         },
-        "interpretation": "ONLY_SCOPED_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;KNOWN_PAGE_CHROME_IS_EXCLUDED",
+        "interpretation": "ONLY_SCOPED_COMPLETE_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;TITLE_ECHO_PAGE_CHROME_AND_CLIPPED_QUOTES_ARE_EXCLUDED",
         **NON_AUTHORIZING_FLAGS,
     }
     stable = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -583,6 +644,36 @@ def _self_test() -> None:
     assert "peste 70 de autovehicule" in dn64_observed
     assert _guard_key("Program Centrul de Reținere și Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
     assert _guard_key("Program Centrul de Reţinere şi Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
+
+    # Regression for the current Bujoreni failure mode: a material-looking H1
+    # repeated inside the article wrapper is metadata, not a claim, and an opening
+    # quote must never be cut at MAX_FRAGMENT_CHARS and promoted as evidence.
+    bujoreni_title = "ACTIVITĂȚI DE EDUCAȚIE RUTIERĂ ÎN UNITĂȚILE DE ÎNVĂȚĂMÂNT DIN BUJORENI"
+    long_quote = (
+        "IPJ Vâlcea precizează: „ACORDĂ PRIORITATE PIETONILOR! "
+        + "respectă regulile de siguranță rutieră și adaptează viteza la condițiile de trafic " * 7
+        + "pentru ca deplasarea să se desfășoare în siguranță.”"
+    )
+    bujoreni_html = (
+        "<html><head><title>IPJ Vâlcea - " + bujoreni_title + "</title></head><body>"
+        "<main><article>"
+        "<h1>" + bujoreni_title + "</h1>"
+        "<p>11 septembrie 2026</p>"
+        "<p>Polițiștii au prezentat reguli de siguranță rutieră unui grup de 260 de elevi din Bujoreni.</p>"
+        "<p>Acțiunea de educație rutieră a vizat traversarea în siguranță și conduita în trafic.</p>"
+        "<p>" + long_quote + "</p>"
+        "</article></main></body></html>"
+    ).encode("utf-8")
+    bujoreni_visible_title, bujoreni_date, bujoreni_evidence, _ = _extract_html_evidence(bujoreni_html)
+    assert bujoreni_visible_title == "IPJ Vâlcea - " + bujoreni_title
+    assert bujoreni_date == "11 septembrie 2026"
+    bujoreni_observed = " ".join(item.excerpt for item in bujoreni_evidence)
+    assert bujoreni_title not in bujoreni_observed
+    assert "IPJ Vâlcea precizează" not in bujoreni_observed
+    assert "260 de elevi" in bujoreni_observed
+    assert "traversarea în siguranță" in bujoreni_observed
+    assert all(len(item.excerpt) <= MAX_FRAGMENT_CHARS for item in bujoreni_evidence)
+    assert all(_quotes_balanced(item.excerpt) for item in bujoreni_evidence)
 
     chrome_only = b"<html><body><nav><p>Politistii au control trafic si sanctiuni.</p></nav></body></html>"
     try:
