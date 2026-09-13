@@ -8,9 +8,9 @@ passes the newsroom and social-interest gates but has no approved story-specific
 photograph. It renders an explicit newsroom text card from the verified fact
 kernel; it never depicts the event, person or place synthetically.
 
-A transient ``new_story_ids`` marker is preferred for the first delivery attempt.
-If that marker has already been cleared, recovery is bounded to recent stories
-that remain publishable in the current edition with a verified/PASS fact kernel.
+Transient ``new_story_ids`` are included immediately, while bounded recovery of
+recent missed deliveries remains eligible concurrently. A new unrelated story
+therefore cannot starve a recent verified story that still needs Instagram delivery.
 Legacy inventory cannot become eligible merely because it remains in an edition.
 
 Publishing is two phase. The deterministic JPEG is first persisted to `main`.
@@ -120,10 +120,10 @@ def recoverable_recent_story_ids(
 ) -> list[str]:
     """Bound retries to recent, currently publishable verified stories.
 
-    Recovery exists only for a missed/failed Instagram attempt after the transient
-    ``new_story_ids`` marker has been consumed. A story must still be publishable
-    in the current newsroom decision, PASS its material-fact gate, remain verified,
-    be free of social hold, and have entered its validity window within 48 hours.
+    Recovery runs alongside transient ``new_story_ids``. A story must still be
+    publishable in the current newsroom decision, PASS its material-fact gate,
+    remain verified, be free of social hold, and have entered its validity window
+    within 48 hours.
     """
     current = now or dt.datetime.now(dt.timezone.utc)
     if current.tzinfo is None:
@@ -153,14 +153,27 @@ def recoverable_recent_story_ids(
     return recovered
 
 
+def wanted_story_ids(
+    snapshot: dict[str, Any],
+    event: dict[str, Any],
+    decision: dict[str, Any],
+    *,
+    now: dt.datetime | None = None,
+) -> set[str]:
+    """Union immediate publication events with bounded recent recovery."""
+    transient_ids = {
+        str(value) for value in event.get("new_story_ids", []) if str(value).strip()
+    }
+    recovery_ids = set(recoverable_recent_story_ids(snapshot, decision, now=now))
+    return transient_ids | recovery_ids
+
+
 def event_stories() -> tuple[list[dict[str, Any]], dict[str, Any]]:
     pointer = load(CURRENT)
     snapshot = load(VC / str(pointer["json_source"]))
     event = load(EVENT, {"new_story_ids": []})
-    wanted = {str(value) for value in event.get("new_story_ids", []) if str(value).strip()}
-    if not wanted:
-        decision = load(DECISION, {})
-        wanted = set(recoverable_recent_story_ids(snapshot, decision))
+    decision = load(DECISION, {})
+    wanted = wanted_story_ids(snapshot, event, decision)
     stories = [
         row for row in snapshot.get("items", [])
         if isinstance(row, dict)
@@ -550,6 +563,16 @@ def self_test() -> int:
         "publishable_story_ids": ["recent", "stale", "unverified", "failed-gate"]
     }
     assert recoverable_recent_story_ids(recovery_snapshot, recovery_decision, now=recovery_now) == ["recent"]
+    event_with_fresh_story = {"new_story_ids": ["fresh"]}
+    decision_with_fresh_story = {
+        "publishable_story_ids": ["fresh", "recent", "stale", "unverified", "failed-gate"]
+    }
+    assert wanted_story_ids(
+        recovery_snapshot,
+        event_with_fresh_story,
+        decision_with_fresh_story,
+        now=recovery_now,
+    ) == {"fresh", "recent"}
 
     class Headers:
         def get(self, key, default=None):
