@@ -44,16 +44,18 @@
   },
   "formats": {
     "straight_news": {
-      "auto_publish_eligible": true,
+      "auto_publish_eligible": false,
       "role_order": ["material_change", "who_what_when_where", "context", "consequence", "next_watch"],
       "minimum_claims": 2,
-      "minimum_distinct_source_urls": 1
+      "minimum_distinct_source_urls": 1,
+      "additional_gate": "FULL_EDITORIAL_BODY_REQUIRED"
     },
     "explainer": {
-      "auto_publish_eligible": true,
+      "auto_publish_eligible": false,
       "role_order": ["material_change", "meaning", "context", "evidence", "consequence", "next_watch"],
       "minimum_claims": 2,
-      "minimum_distinct_source_urls": 1
+      "minimum_distinct_source_urls": 1,
+      "additional_gate": "FULL_EDITORIAL_BODY_REQUIRED"
     },
     "service_news": {
       "auto_publish_eligible": true,
@@ -62,10 +64,11 @@
       "minimum_distinct_source_urls": 1
     },
     "continuous_update": {
-      "auto_publish_eligible": true,
+      "auto_publish_eligible": false,
       "role_order": ["material_change", "who_what_when_where", "context", "consequence", "reader_action", "next_watch"],
       "minimum_claims": 2,
-      "minimum_distinct_source_urls": 1
+      "minimum_distinct_source_urls": 1,
+      "additional_gate": "FULL_EDITORIAL_BODY_REQUIRED"
     },
     "investigation": {
       "auto_publish_eligible": false,
