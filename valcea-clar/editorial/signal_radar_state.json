@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-09-13T01:57:16+03:00",
+  "observed_at": "2026-09-13T03:45:44+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 17,
-  "sources_ok": 15,
-  "current_signal_count": 31,
+  "sources_ok": 13,
+  "current_signal_count": 25,
   "today_signal_count": 0,
   "observations": [
     {
@@ -28,22 +28,11 @@
       "publisher": "Curierul de Vâlcea",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "PASS",
-      "error": null,
+      "status": "DEGRADED",
+      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
       "signals": [],
-      "final_url": "https://www.curierul.ro/",
-      "links_examined": 14,
-      "hygiene_dropped_count": 2,
-      "hygiene_dropped": [
-        {
-          "title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-          "url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fvalceanca-georgiana-sasu-regina-la-beirut-%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag"
-        },
-        {
-          "title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-          "url": "https://x.com/intent/tweet?via=curierulvl&text=V%C3%A2lceanca%20Georgiana%20Sasu%2C%20%E2%80%9Eregin%C4%83%E2%80%9D%20la%20Beirut%20%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fvalceanca-georgiana-sasu-regina-la-beirut-%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F"
-        }
-      ]
+      "hygiene_dropped_count": 0,
+      "hygiene_dropped": []
     },
     {
       "seed_id": "press-eurovalcea",
@@ -63,7 +52,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -100,7 +89,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -134,7 +123,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-11T19:28:04+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "dragasani_administration",
           "verification_targets": [
             {
@@ -159,7 +148,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-11T18:34:34+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -245,27 +234,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-11T19:50:06+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-primplan"
-        },
-        {
-          "signal_id": "d3327a4a2ebfddb55d675876",
-          "signal_title": "Ultima oră o zi in urma Lucrări la rețeaua de gaze pe strada Măndoiu din Păușești-Măglași. Restricția temporară de acces a ajuns la termen",
-          "signal_url": "https://www.primplanpress.ro/lucrari-la-reteaua-de-gaze-pe-strada-mandoiu-din-pausesti-maglasi-restrictia-temporara-de-acces-a-ajuns-la-termen/",
-          "signal_publisher": "Primplan Press",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-11T14:04:35+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -299,7 +268,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -319,7 +288,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -379,7 +348,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -399,7 +368,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -419,7 +388,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T19:36:35+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -439,7 +408,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T14:58:16+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -503,7 +472,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-12T02:51:46+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -523,7 +492,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-12T02:44:26+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -560,7 +529,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-12T02:37:52+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -580,7 +549,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-12T02:36:42+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -600,7 +569,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-12T02:30:37+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -620,7 +589,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-12T00:27:46+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -653,7 +622,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-11T21:49:45+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -673,7 +642,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-11T17:20:13+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -694,52 +663,9 @@
       "publisher": "Curierul de Vâlcea",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "PASS",
-      "error": null,
-      "signals": [
-        {
-          "signal_id": "9d3ce2193f3e425605d194d1",
-          "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-          "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fvalceanca-georgiana-sasu-regina-la-beirut-%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-          "signal_publisher": "Curierul de Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": null,
-          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-curierul-valcea"
-        },
-        {
-          "signal_id": "6373921bacc59f8ba0aa3888",
-          "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-          "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=V%C3%A2lceanca%20Georgiana%20Sasu%2C%20%E2%80%9Eregin%C4%83%E2%80%9D%20la%20Beirut%20%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fvalceanca-georgiana-sasu-regina-la-beirut-%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
-          "signal_publisher": "Curierul de Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": null,
-          "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-13T01:57:16+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-curierul-valcea"
-        }
-      ],
-      "final_url": "https://www.curierul.ro/",
-      "links_examined": 14,
+      "status": "DEGRADED",
+      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+      "signals": [],
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -761,64 +687,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T11:52:30+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
-          "verification_route_id": "administration_projects",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "prefectura-valcea"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "cj-valcea-anunturi"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "primaria-rm-valcea-comunicate"
-            },
-            {
-              "ref_type": "primary_target_id",
-              "id": "romsilva-valcea-torrents"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-eveniment-valcean"
-        },
-        {
-          "signal_id": "df3ec5ea97642bbbcef0af64",
-          "signal_title": "FOTO 102 ani și o viață întreagă de povești! Ecaterina Bulacu, sărbătorită de Râmnicu Vâlcea",
-          "signal_url": "https://evenimentvalcean.ro/foto-102-ani-si-o-viata-intreaga-de-povesti-ecaterina-bulacu-sarbatorita-de-ramnicu-valcea/",
-          "signal_publisher": "Eveniment Vâlcean",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-11T14:56:13+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-eveniment-valcean"
-        },
-        {
-          "signal_id": "44c49dedbe306631a2f720cf",
-          "signal_title": "Primăria Oteșani se întoarce în casă nouă. Sediul administrației locale a fost reabilitat prin PNRR",
-          "signal_url": "https://evenimentvalcean.ro/primaria-otesani-se-intoarce-in-casa-noua-sediul-administratiei-locale-a-fost-reabilitat-prin-pnrr/",
-          "signal_publisher": "Eveniment Vâlcean",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-11T14:27:11+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -882,7 +751,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T20:18:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -915,7 +784,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T20:02:21+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -935,7 +804,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T17:47:23+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -960,7 +829,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T15:26:54+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -985,32 +854,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-12T15:09:24+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
-          "verification_route_id": "police_public_safety",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "ipj-valcea-stiri"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "d66e4e1cc499b59e3cdeec59",
-          "signal_title": "FOTO: ACCIDENT GRAV pe DJ 605A, la Berbești: o victimă este inconștientă după impactul dintre un autoturism și o motocicletă",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/11/foto-accident-grav-pe-dj-605a-la-berbesti-o-victima-este-inconstienta-dupa-impactul-dintre-un-autoturism-si-o-motocicleta/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-11T14:39:49+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-13T01:57:16+03:00",
+          "observed_at": "2026-09-13T03:45:44+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
