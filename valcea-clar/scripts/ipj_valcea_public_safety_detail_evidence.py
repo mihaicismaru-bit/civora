@@ -31,7 +31,7 @@ from ipj_valcea_public_safety_reference_adapter import (
 )
 
 SCHEMA = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_V1"
-PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_13_P0_TITLE_AND_QUOTE_GUARD"
+PARSER_VERSION = "IPJ_VALCEA_PUBLIC_SAFETY_DETAIL_EVIDENCE_2026_09_13_P0_COMPLETE_FRAGMENT_GUARD"
 SOURCE_FAMILY = "IPJ_VALCEA_PUBLIC_SAFETY"
 AUTHORITY_CLASS = "FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE"
 OBSERVATION_STATE = "POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING"
@@ -96,6 +96,9 @@ SKIP_TAGS = {
     "script", "style", "noscript", "svg", "template", "nav", "header",
     "footer", "aside", "form", "button",
 }
+TEXT_BLOCK_TAGS = {
+    "p", "li", "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "td", "th",
+}
 CONTENT_HINTS = {
     "article", "article-body", "article-content", "article-detail", "article-text",
     "news", "news-body", "news-content", "news-detail", "news-article",
@@ -142,7 +145,7 @@ class DetailEvidence:
 
 
 class ArticleBodyParser(HTMLParser):
-    """Collect title globally but evidence text only under explicit content roots."""
+    """Collect title globally and complete text blocks only inside content roots."""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -152,6 +155,7 @@ class ArticleBodyParser(HTMLParser):
         self.scope_seen = False
         self.in_title = False
         self.title_parts: list[str] = []
+        self.current_parts: list[str] = []
         self.segments: list[str] = []
 
     @staticmethod
@@ -169,8 +173,18 @@ class ArticleBodyParser(HTMLParser):
             return True
         return any(hint in values for hint in CONTENT_HINTS)
 
+    def _flush_segment(self) -> None:
+        if not self.current_parts:
+            return
+        text = " ".join("".join(self.current_parts).split())
+        self.current_parts.clear()
+        if text:
+            self.segments.append(text)
+
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         name = tag.lower()
+        if name in TEXT_BLOCK_TAGS and self.scope_depth > 0 and not self.skip_depth:
+            self._flush_segment()
         skip_start = name in SKIP_TAGS
         scope_start = False if self.skip_depth or skip_start else self._starts_scope(name, attrs)
         self.stack.append((name, skip_start, scope_start))
@@ -196,6 +210,9 @@ class ArticleBodyParser(HTMLParser):
                 break
         if match is None:
             return
+        closing_scope = any(scope_start for _name, _skip, scope_start in self.stack[match:])
+        if self.scope_depth > 0 and not self.skip_depth and (name in TEXT_BLOCK_TAGS or closing_scope):
+            self._flush_segment()
         for _name, skip_start, scope_start in reversed(self.stack[match:]):
             if scope_start and self.scope_depth:
                 self.scope_depth -= 1
@@ -204,14 +221,11 @@ class ArticleBodyParser(HTMLParser):
         del self.stack[match:]
 
     def handle_data(self, data: str) -> None:
-        text = " ".join(data.split())
-        if not text:
-            return
         if self.in_title:
-            self.title_parts.append(text)
+            self.title_parts.append(data)
         if self.skip_depth or self.scope_depth <= 0:
             return
-        self.segments.append(text)
+        self.current_parts.append(data)
 
 
 def _sha256_bytes(data: bytes) -> str:
@@ -301,9 +315,11 @@ def _looks_like_title_echo(fragment: str, visible_title: str | None) -> bool:
 
 
 def _quotes_balanced(text: str) -> bool:
-    for opening, closing in (("„", "”"), ("“", "”"), ("«", "»")):
-        if text.count(opening) != text.count(closing):
-            return False
+    curly_open = text.count("„") + text.count("“")
+    if curly_open != text.count("”"):
+        return False
+    if text.count("«") != text.count("»"):
+        return False
     return text.count('"') % 2 == 0
 
 
@@ -329,7 +345,7 @@ def _bounded_complete_excerpt(fragment: str) -> str:
 
 
 def _drop_exact_page_chrome_runs(segments: list[str]) -> list[str]:
-    """Drop only adjacent text-node runs that exactly recompose known chrome labels."""
+    """Drop only adjacent blocks that exactly recompose known chrome labels."""
     kept: list[str] = []
     index = 0
     max_parts = 8
@@ -418,11 +434,12 @@ def _extract_html_evidence(
 ) -> tuple[str | None, str | None, tuple[FieldEvidence, ...], dict[str, int]]:
     parser = ArticleBodyParser()
     parser.feed(body.decode("utf-8", errors="replace"))
+    parser.close()
     if not parser.scope_seen or not parser.segments:
         raise RuntimeError("article_body_scope_not_found")
     article_text = " ".join(parser.segments)
     explicit_date = _find_explicit_date(article_text)
-    visible_title = " ".join(parser.title_parts).strip() or None
+    visible_title = " ".join("".join(parser.title_parts).split()) or None
     evidence, tag_counts = _evidence_from_segments(
         parser.segments,
         visible_title=visible_title,
@@ -546,11 +563,12 @@ def build_live_receipt() -> dict[str, Any]:
             "article_body_scope_is_required": True,
             "whole_page_fallback_for_evidence_is_forbidden": True,
             "known_page_chrome_exact_guard_is_enforced": True,
+            "inline_markup_text_nodes_are_recomposed_within_block": True,
             "visible_title_echo_is_not_field_evidence": True,
             "truncated_or_unbalanced_quote_evidence_is_forbidden": True,
             "sample_is_bounded_and_non_exhaustive": True,
         },
-        "interpretation": "ONLY_SCOPED_COMPLETE_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;TITLE_ECHO_PAGE_CHROME_AND_CLIPPED_QUOTES_ARE_EXCLUDED",
+        "interpretation": "ONLY_SCOPED_COMPLETE_ARTICLE_BODY_TAGGED_POLICE_SOURCE_FRAGMENTS_ARE_EVIDENCE_CONTEXT;INLINE_MARKUP_IS_RECOMPOSED;TITLE_ECHO_PAGE_CHROME_AND_CLIPPED_QUOTES_ARE_EXCLUDED",
         **NON_AUTHORIZING_FLAGS,
     }
     stable = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
@@ -626,8 +644,6 @@ def _self_test() -> None:
 
     # Regression for the actual DN64 contaminant. The IPJ site can split this
     # static navigation label across nested markup inside a broad content wrapper.
-    # Recompose only adjacent nodes for exact chrome matching; never keyword-strip
-    # genuine article sentences about detention or arrest.
     contaminated_wrapper = (
         "<html><head><title>IPJ Vâlcea - DN64 test</title></head><body>"
         "<div class='news page-content'>"
@@ -644,6 +660,22 @@ def _self_test() -> None:
     assert "peste 70 de autovehicule" in dn64_observed
     assert _guard_key("Program Centrul de Reținere și Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
     assert _guard_key("Program Centrul de Reţinere şi Arest Preventiv") in PAGE_CHROME_GUARD_KEYS
+
+    # Regression for inline-markup text-node fragmentation observed in live IPJ
+    # detail receipts. A word split by markup must be reconstructed from the raw
+    # HTML text nodes before evidence tagging, not emitted from the suffix alone.
+    inline_markup = (
+        "<html><head><title>IPJ Vâlcea - reținut pentru 24 de ore</title></head><body>"
+        "<main><article>"
+        "<p>Polițiștii Serviciului de In<strong>vestigații Criminale</strong> au reținut pentru 24 de ore un tânăr cercetat pentru tulburarea ordinii publice.</p>"
+        "<p>Polițiștii Secției nr. <strong>3 Poliție Rurală Sutești</strong> au reținut pentru 24 de ore doi bărbați cercetați într-un dosar penal.</p>"
+        "</article></main></body></html>"
+    ).encode("utf-8")
+    _, _, inline_evidence, _ = _extract_html_evidence(inline_markup)
+    inline_observed = " ".join(item.excerpt for item in inline_evidence)
+    assert "Polițiștii Serviciului de Investigații Criminale" in inline_observed
+    assert "Polițiștii Secției nr. 3 Poliție Rurală Sutești" in inline_observed
+    assert "vestigații Criminale" not in {item.excerpt[:21] for item in inline_evidence}
 
     # Regression for the current Bujoreni failure mode: a material-looking H1
     # repeated inside the article wrapper is metadata, not a claim, and an opening
