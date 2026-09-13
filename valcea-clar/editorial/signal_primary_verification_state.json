@@ -2,19 +2,146 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-13T08:26:55+03:00",
+  "generated_at": "2026-09-13T13:31:53+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-13T08:25:26+03:00",
+  "queue_generated_at": "2026-09-13T13:30:13+03:00",
   "task_count": 62,
   "primary_match_count": 0,
-  "no_match_count": 23,
-  "unrouted_count": 39,
-  "target_count": 18,
-  "targets_ok": 14,
+  "no_match_count": 24,
+  "unrouted_count": 38,
+  "target_count": 19,
+  "targets_ok": 13,
   "results": [
+    {
+      "signal_id": "dc4eca16b4c7a796614270d2",
+      "signal_title": "Echipaj sibian de avion ultraușor, nou record european la Balkaniada din Bulgaria. Radu Ciovica și Alin Brutaru au încheiat competiția și cu medalia de bronz",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/13/echipaj-sibian-de-avion-ultrausor-nou-record-european-la-balkaniada-din-bulgaria-radu-ciovica-si-alin-brutaru-au-incheiat-competitia-si-cu-medalia-de-bronz/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-13T11:47:26+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "186cde4cc2538ce5dcdc3a63",
+      "signal_title": "Polițiștii din Băile Olănești au ajutat un șofer rămas cu mașina în pană",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/13/politistii-din-baile-olanesti-au-ajutat-un-sofer-ramas-cu-masina-in-pana/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-13T10:51:06+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "9072b0221a148d54120cc4dd",
+      "signal_title": "FOTO 172 de câini și pisici, sterilizați gratuit la Băile Olănești",
+      "signal_url": "https://evenimentvalcean.ro/foto-172-de-caini-si-pisici-sterilizati-gratuit-la-baile-olanesti/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-13T10:36:08+03:00",
+      "verification_route_id": "animal_welfare_service",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "smeura-sterilizari-valcea",
+            "name": "Tierhilfe Hoffnung — Smeura Sterilizări Gratuite",
+            "url": "https://smeura.com/events/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "c78d4bfe3f08b98cf5d4007d",
+      "signal_title": "VIDEO. Panică într-un bloc de pe strada Mărășești. Pompierii au identificat scăpări de gaze",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/13/video-panica-intr-un-bloc-de-pe-strada-marasesti-pompierii-au-identificat-scapari-de-gaze/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-13T10:20:21+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 7
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "16fab77db812bdfe2e169210",
+      "signal_title": "Centura Mediașului, blocată de aproape 5 luni la CNSC. Primarul cere explicații și avertizează că proiectul riscă să piardă finanțarea europeană: „Mediașul a așteptat 30 de ani”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/13/centura-mediasului-blocata-de-aproape-5-luni-la-cnsc-primarul-cere-explicatii-si-avertizeaza-ca-proiectul-risca-sa-piarda-finantarea-europeana-mediasul-a-asteptat-30-de-ani/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-13T09:47:08+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "e2d96a34146f5e45b9ab9781",
       "signal_title": "FOTO – INCENDIU la LĂPUȘATA. O mașină a ars în totalitate, afectând un stâlp și vegetația…",
@@ -53,9 +180,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -495,9 +622,9 @@
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -640,18 +767,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "1ec3e1ba7fb07293154778be",
-      "signal_title": "O zi cu însemnătate pentru Parohia Șerbănești: inaugurarea noii capele",
-      "signal_url": "https://www.impactreal.ro/2026/09/11/o-zi-cu-insemnatate-pentru-parohia-serbanesti-inaugurarea-noii-capele/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-09-11T17:35:59+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "e4622595eded7b8d3ce89fff",
@@ -977,78 +1092,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "54bf53d005f377062ebf7c3d",
-      "signal_title": "Mesajul Arhiepiscopului Varsanufie către preoții vâlceni: mai aproape de familii și de comunitățile pe care le păstoresc",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/mesajul-arhiepiscopului-varsanufie-catre-preotii-valceni-mai-aproape-de-familii-si-de-comunitatile-pe-care-le-pastoresc/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-11T01:04:53+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "c680105ae872e7107bde8f9c",
-      "signal_title": "Chimcomplex investește în viitorul industrial al Vâlcii: energie proprie, cogenerare și fotovoltaice pe platforma de la Râmnicu Vâlcea",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/chimcomplex-investeste-in-viitorul-industrial-al-valcii-energie-proprie-cogenerare-si-fotovoltaice-pe-platforma-de-la-ramnicu-valcea/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-11T00:47:16+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "29546d26dd1fa25996af1689",
       "signal_title": "Zi de sărbătoare la Pojogi: Căminul Cultural a fost inaugurat, iar istoria satului a fost așezată într-o carte",
       "signal_url": "https://www.impactreal.ro/2026/09/10/zi-de-sarbatoare-la-pojogi-caminul-cultural-a-fost-inaugurat-iar-istoria-satului-a-fost-asezata-intr-o-carte/",
@@ -1226,45 +1269,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "5cbe1361d257c83ce7f19341",
-      "signal_title": "Patru femei, amenințate cu violența la Călimănești. O femeie de 39 de ani a fost reținută",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/patru-femei-amenintate-cu-violenta-la-calimanesti-o-femeie-de-39-de-ani-a-fost-retinuta/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-10T13:29:00+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "53a1a725754da65219ed5aa5",
-      "signal_title": "VÂLCEA. O mașină a ars în totalitate…",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/10/valcea-o-masina-a-ars-in-totalitate/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-10T12:33:11+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "fbaf068144bf16fc56b085d2",
       "signal_title": "António Costa vine la București: finanțările europene după 2027 intră în negocierea decisivă",
       "signal_url": "https://www.eurovalcea.ro/2026/08/29/antonio-costa-vine-la-bucuresti-finantarile-europene-dupa-2027-intra-in-negocierea-decisiva/",
@@ -1292,9 +1296,9 @@
             "name": "SCM Râmnicu Vâlcea",
             "url": "https://scmramnicuvalcea.ro/category/stiri/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         },
         {
           "target": {
@@ -1342,6 +1346,30 @@
       "signal_title": "Micile afaceri din Sibiu",
       "signal_url": "https://www.turnulsfatului.ro/exclusiv/micile-afaceri-din-sibiu/",
       "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "9d3ce2193f3e425605d194d1",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fvalceanca-georgiana-sasu-regina-la-beirut-%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "6373921bacc59f8ba0aa3888",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=V%C3%A2lceanca%20Georgiana%20Sasu%2C%20%E2%80%9Eregin%C4%83%E2%80%9D%20la%20Beirut%20%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fvalceanca-georgiana-sasu-regina-la-beirut-%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
+      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
@@ -1414,30 +1442,6 @@
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
       "signal_publisher": "Realitatea Vâlceană",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "9d3ce2193f3e425605d194d1",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fvalceanca-georgiana-sasu-regina-la-beirut-%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "6373921bacc59f8ba0aa3888",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=V%C3%A2lceanca%20Georgiana%20Sasu%2C%20%E2%80%9Eregin%C4%83%E2%80%9D%20la%20Beirut%20%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fvalceanca-georgiana-sasu-regina-la-beirut-%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
-      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
