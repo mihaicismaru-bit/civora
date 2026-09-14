@@ -1,9 +1,8 @@
 name: VÂLCEA CLAR Edition Recovery
 
-# Recovery is an explicit operator action. It can be invoked either through
-# workflow_dispatch or by changing the dedicated operator trigger file. There is
-# deliberately no schedule and no broad push trigger: only the recovery control
-# file may start a production recovery run.
+# Recovery stays bounded and deterministic. Operator recovery remains available,
+# while changes to the edition projector rematerialize the current canonical
+# edition automatically so persisted runtime evidence cannot lag code semantics.
 on:
   workflow_dispatch:
     inputs:
@@ -17,6 +16,8 @@ on:
     branches: [main]
     paths:
       - "valcea-clar/ops/edition-recovery-trigger.json"
+      - "valcea-clar/scripts/generate_edition.py"
+      - ".github/workflows/valcea-clar-edition-recovery.yml"
   pull_request:
     paths:
       - "valcea-clar/scripts/generate_edition.py"
@@ -52,7 +53,9 @@ jobs:
           set -euo pipefail
           slot="$REQUESTED_SLOT"
           if [ "${{ github.event_name }}" = "push" ]; then
-            slot=$(python - <<'PY'
+            changed=$(git diff --name-only "${{ github.event.before }}" "${{ github.sha }}" || true)
+            if grep -Fxq "valcea-clar/ops/edition-recovery-trigger.json" <<<"$changed"; then
+              slot=$(python - <<'PY'
           import json
           from pathlib import Path
           path = Path('valcea-clar/ops/edition-recovery-trigger.json')
@@ -62,7 +65,10 @@ jobs:
               value = 'auto'
           print(value if value in {'auto', 'morning', 'evening'} else 'auto')
           PY
-            )
+              )
+            else
+              slot=auto
+            fi
           fi
           if [ "$slot" = "auto" ]; then
             hour=$(TZ=Europe/Bucharest date +%H)
