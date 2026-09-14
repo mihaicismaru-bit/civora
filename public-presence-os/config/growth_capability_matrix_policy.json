@@ -1,0 +1,119 @@
+{
+  "schema_version": "PPOS_GROWTH_CAPABILITY_MATRIX_ENGAGEMENT_API_GATE_POLICY_V1",
+  "checkpoint": "CP83",
+  "module_id": "M52_GROWTH_CAPABILITY_MATRIX_ENGAGEMENT_API_GATE",
+  "parent_activation_checkpoint": "CP82",
+  "parent_control_checkpoint": "CP58",
+  "next_after_cp83": "CP84_ENGAGEMENT_RADAR",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "capability_kinds": [
+    "INBOUND_REPLY",
+    "OUTBOUND_COMMENT",
+    "MENTION_DISCOVERY",
+    "HASHTAG_TOPIC_DISCOVERY",
+    "QUOTE_REPOST",
+    "INSIGHTS",
+    "FOLLOW"
+  ],
+  "allowed_classifications": [
+    "PASS_OFFLINE_CONTRACT",
+    "HOLD_LIVE_PERMISSION",
+    "UNSUPPORTED",
+    "MANUAL_ONLY"
+  ],
+  "unknown_capability_state": "HOLD_CAPABILITY_UNVERIFIED",
+  "unknown_external_metric_value": "UNKNOWN",
+  "global_kill_switch": "ENGAGED",
+  "authority": {
+    "external_authorization_ingested": false,
+    "authorization_granted": false,
+    "runtime_authorization_effective": false,
+    "secret_reference_resolved": false,
+    "environment_read": false,
+    "keychain_read": false,
+    "oauth_attempted": false,
+    "real_account_lookup_attempted": false,
+    "account_connected": false,
+    "network_allowed": false,
+    "network_attempted": false,
+    "live_probe_allowed": false,
+    "live_probe_attempted": false,
+    "publish_allowed": false,
+    "publish_attempted": false,
+    "external_write_allowed": false,
+    "external_write_performed": false,
+    "control_plane_promoted": false,
+    "deploy_allowed": false,
+    "deploy_performed": false,
+    "paid_service_used": false,
+    "authority_activated": false,
+    "runtime_mutated": false
+  },
+  "growth_safety": {
+    "automated_follow_unfollow_forbidden": true,
+    "mass_commenting_forbidden": true,
+    "engagement_pods_forbidden": true,
+    "repetitive_praise_forbidden": true,
+    "copy_paste_replies_forbidden": true,
+    "synthetic_conversation_farming_forbidden": true,
+    "political_microtargeting_forbidden": true,
+    "sensitive_trait_inference_forbidden": true,
+    "sensitive_relationship_profiling_forbidden": true,
+    "broad_outbound_commenting_not_assumed": true,
+    "rate_budgets_are_ceilings_not_targets": true,
+    "manual_packet_required_when_api_write_not_legitimately_supported": true,
+    "receipt_bound_future_writes_required": true,
+    "idempotent_future_writes_required": true,
+    "bounded_retry_future_writes_required": true,
+    "fail_closed_on_uncertainty": true
+  },
+  "excluded_platforms": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_USEFUL_API_IS_PAID",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "official_sources": [
+    {"source_id":"META_FACEBOOK_POSTMAN","owner":"Meta","url":"https://www.postman.com/meta/facebook/documentation/r56bjfd/facebook-api","scope":"Page access-token and Page task baseline","readback_status":"OFFICIAL_META_POSTMAN_READBACK_2026-09-14"},
+    {"source_id":"META_INSTAGRAM_POSTMAN","owner":"Meta","url":"https://www.postman.com/meta/instagram/folder/u4g5a2a/instagram-api-with-facebook-login","scope":"Professional media, own-media comments/replies, mentions, hashtags, metadata/metrics","readback_status":"OFFICIAL_META_POSTMAN_READBACK_2026-09-14"},
+    {"source_id":"META_THREADS_REPLIES_POSTMAN","owner":"Meta","url":"https://www.postman.com/meta/threads/folder/34203612-1cc7918f-d63d-45fd-bdaa-e8855d0338cb","scope":"Read/manage replies on own Threads","readback_status":"OFFICIAL_META_POSTMAN_READBACK_2026-09-14"},
+    {"source_id":"META_THREADS_MENTIONS_POSTMAN","owner":"Meta","url":"https://www.postman.com/meta/threads/request/34203612-fc3f21da-0a53-44ab-80e2-8cd8c376a42a","scope":"Mention discovery","readback_status":"OFFICIAL_META_POSTMAN_READBACK_2026-09-14"},
+    {"source_id":"META_THREADS_INSIGHTS_POSTMAN","owner":"Meta","url":"https://www.postman.com/meta/threads/request/34203612-385abc7d-b3cc-4e5d-9937-ebbe7174e041","scope":"Post insights","readback_status":"OFFICIAL_META_POSTMAN_READBACK_2026-09-14"}
+  ],
+  "capability_matrix": [
+    {"platform":"FACEBOOK_PAGE","capability":"INBOUND_REPLY","classification":"HOLD_LIVE_PERMISSION","scope":"Page-owned comment/reply surfaces only; exact permission and object-level writeability must be read back before enablement.","source_ids":["META_FACEBOOK_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION","HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"FACEBOOK_PAGE","capability":"OUTBOUND_COMMENT","classification":"MANUAL_ONLY","scope":"Arbitrary external-object commenting is not assumed through the Pages API.","source_ids":["META_FACEBOOK_POSTMAN"],"blockers":["HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+    {"platform":"FACEBOOK_PAGE","capability":"MENTION_DISCOVERY","classification":"MANUAL_ONLY","scope":"No exact current official capability was verified in this research pass for the required Page mention-discovery surface.","source_ids":["META_FACEBOOK_POSTMAN"],"blockers":["HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+    {"platform":"FACEBOOK_PAGE","capability":"HASHTAG_TOPIC_DISCOVERY","classification":"MANUAL_ONLY","scope":"No generic Pages API hashtag/topic discovery capability is assumed.","source_ids":["META_FACEBOOK_POSTMAN"],"blockers":["HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+    {"platform":"FACEBOOK_PAGE","capability":"QUOTE_REPOST","classification":"MANUAL_ONLY","scope":"No broad external quote/repost write is assumed for the Page lane.","source_ids":["META_FACEBOOK_POSTMAN"],"blockers":["HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+    {"platform":"FACEBOOK_PAGE","capability":"INSIGHTS","classification":"HOLD_LIVE_PERMISSION","scope":"Page analytics remain permission/account/metric-readback gated; unavailable metric values remain UNKNOWN.","source_ids":["META_FACEBOOK_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"FACEBOOK_PAGE","capability":"FOLLOW","classification":"MANUAL_ONLY","scope":"Automated follow/unfollow is prohibited by product policy regardless of future API capability.","source_ids":["META_FACEBOOK_POSTMAN"],"blockers":["POLICY_AUTOMATED_FOLLOW_UNFOLLOW_FORBIDDEN"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"INBOUND_REPLY","classification":"PASS_OFFLINE_CONTRACT","scope":"Manage and reply to comments on own Professional media; live account/permission readback remains required.","source_ids":["META_INSTAGRAM_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"OUTBOUND_COMMENT","classification":"MANUAL_ONLY","scope":"Arbitrary third-party media comments are not assumed from the verified official surface.","source_ids":["META_INSTAGRAM_POSTMAN"],"blockers":["HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"MENTION_DISCOVERY","classification":"PASS_OFFLINE_CONTRACT","scope":"Identify Professional media where the account has been @mentioned.","source_ids":["META_INSTAGRAM_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"HASHTAG_TOPIC_DISCOVERY","classification":"PASS_OFFLINE_CONTRACT","scope":"Hashtagged-media discovery only; generic topic/keyword discovery is outside this offline contract.","source_ids":["META_INSTAGRAM_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"QUOTE_REPOST","classification":"UNSUPPORTED","scope":"No exact official quote/repost write surface was verified for this scoped Instagram API contract.","source_ids":["META_INSTAGRAM_POSTMAN"],"blockers":["HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_CAPABILITY_UNVERIFIED","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"INSIGHTS","classification":"PASS_OFFLINE_CONTRACT","scope":"Professional metadata/metrics surface exists; exact live metrics remain permission/readback gated and UNKNOWN until observed.","source_ids":["META_INSTAGRAM_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"FOLLOW","classification":"MANUAL_ONLY","scope":"Automated follow/unfollow is prohibited and no automation support is assumed.","source_ids":["META_INSTAGRAM_POSTMAN"],"blockers":["POLICY_AUTOMATED_FOLLOW_UNFOLLOW_FORBIDDEN"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+
+    {"platform":"THREADS","capability":"INBOUND_REPLY","classification":"PASS_OFFLINE_CONTRACT","scope":"Read/manage replies to own Threads; any response write remains live-permission gated.","source_ids":["META_THREADS_REPLIES_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"THREADS","capability":"OUTBOUND_COMMENT","classification":"PASS_OFFLINE_CONTRACT","scope":"Only an exact value-add reply to a specific readable post/reply is modeled; no broad/mass commenting authority.","source_ids":["META_THREADS_REPLIES_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"THREADS","capability":"MENTION_DISCOVERY","classification":"PASS_OFFLINE_CONTRACT","scope":"Discover posts where the authenticated Threads user is mentioned.","source_ids":["META_THREADS_MENTIONS_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"THREADS","capability":"HASHTAG_TOPIC_DISCOVERY","classification":"HOLD_LIVE_PERMISSION","scope":"Discovery is capability-gated; keyword/topic search must be live-permission and exact-query readback verified before use.","source_ids":["META_THREADS_MENTIONS_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION","HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"THREADS","capability":"QUOTE_REPOST","classification":"MANUAL_ONLY","scope":"Read models expose quote/repost context, but no exact current write surface was verified in this pass.","source_ids":["META_THREADS_REPLIES_POSTMAN"],"blockers":["HOLD_CAPABILITY_UNVERIFIED"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"},
+    {"platform":"THREADS","capability":"INSIGHTS","classification":"PASS_OFFLINE_CONTRACT","scope":"Post insights are documented; exact live availability and values remain permission/readback gated and UNKNOWN until observed.","source_ids":["META_THREADS_INSIGHTS_POSTMAN"],"blockers":["HOLD_LIVE_PERMISSION"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"API_CANDIDATE","read_surface":true,"write_surface":false,"broad_outbound_allowed":false,"manual_action_packet":false,"external_metrics":"UNKNOWN"},
+    {"platform":"THREADS","capability":"FOLLOW","classification":"MANUAL_ONLY","scope":"Current roadmap treats follow as manual; automated follow/unfollow is prohibited.","source_ids":["META_THREADS_REPLIES_POSTMAN"],"blockers":["POLICY_AUTOMATED_FOLLOW_UNFOLLOW_FORBIDDEN"],"live_gate":"HOLD_LIVE_PERMISSION","automation_mode":"MANUAL_ACTION_PACKET","read_surface":true,"write_surface":true,"broad_outbound_allowed":false,"manual_action_packet":true,"external_metrics":"UNKNOWN"}
+  ],
+  "required_blockers": [
+    "HOLD_REAL_EXTERNAL_AUTHORIZATION_RECEIPT_NOT_INGESTED",
+    "HOLD_SECRET_REFERENCE_NOT_RESOLVED",
+    "HOLD_REAL_ACCOUNT_NOT_CONNECTED",
+    "HOLD_CONTROL_PLANE_PROMOTION_NOT_EXECUTED",
+    "HOLD_PILOT_PUBLISH_NOT_AUTHORIZED",
+    "HOLD_CP83_OFFLINE_CONTRACT_IS_NOT_RUNTIME_AUTHORITY"
+  ]
+}
