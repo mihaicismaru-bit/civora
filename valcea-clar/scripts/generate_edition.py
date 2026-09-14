@@ -230,6 +230,7 @@ def compact_item(item: dict) -> dict:
         **({"visual": item["visual"]} if item.get("visual") else {}),
         **({"factbox": item["factbox"]} if item.get("factbox") else {}),
         **({"article_sections": item["article_sections"]} if item.get("article_sections") else {}),
+        **({"fact_kernel": item["fact_kernel"]} if item.get("fact_kernel") else {}),
         **({"editorial_product": item["editorial_product"]} if item.get("editorial_product") else {}),
     }
 
@@ -361,6 +362,15 @@ def self_test() -> int:
     assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)
     held_fact = {"facts": [{**sample_fact, "id": "olanesti-bridge-monitor"}]}
     assert eligible_facts(held_fact, now, "morning") == []
+
+    sample_kernel = {
+        "format_hint": "service_news",
+        "headline": {"text": sample_fact["headline"], "source_urls": ["https://example.test"]},
+        "dek": {"text": sample_fact["dek"], "source_urls": ["https://example.test"]},
+        "claims": [{"id": "c1", "role": "reader_service", "kind": "fact", "text": sample_fact["paragraphs"][0], "source_urls": ["https://example.test"]}],
+    }
+    projected = compact_item({**sample_fact, "fact_kernel": sample_kernel})
+    assert projected.get("fact_kernel") == sample_kernel
 
     # Freshness is intentionally stronger than legacy priority across bands.
     ranking_now = datetime(2026, 8, 26, 22, 30, tzinfo=TZ)
