@@ -20,12 +20,6 @@
       "story_id": "ramnicu-fissura-lucis-casa-simian-20260903",
       "image_path": "valcea-clar/social/photos/approved/casa-simian-context-2015.jpg",
       "status": "source_photo_not_materialized_this_run"
-    },
-    {
-      "item_id": "story-valcea-atv-ionesti-pausesti-maglasi-fara-permis-20260902",
-      "story_id": "valcea-atv-ionesti-pausesti-maglasi-fara-permis-20260902",
-      "image_path": "valcea-clar/social/photos/approved/ionesti-olt-context-2010.jpg",
-      "status": "source_photo_not_materialized_this_run"
     }
   ],
   "assets": [
@@ -72,6 +66,17 @@
       "credit": "Tiia Monto / Wikimedia Commons — CC BY-SA 4.0",
       "rights_basis": "creative_commons",
       "source_url": "https://commons.wikimedia.org/wiki/File:Ramnicu_Valcea_-_Bulevardul_Dem_Radulescu.jpg"
+    },
+    {
+      "filename": "ionesti-olt-context-2010.jpg",
+      "kind": "source_photograph",
+      "synthetic": false,
+      "sha256": "b826b417a6eb16759d0c7d94db9aba82abb53285de1c8a4bab55ab9f590a8455",
+      "bytes": 1400768,
+      "public_url": "https://valceaclar.ro/media/social/ionesti-olt-context-2010.jpg",
+      "credit": "Țetcu Mircea Rareș / Wikimedia Commons — CC BY 2.5",
+      "rights_basis": "creative_commons",
+      "source_url": "https://commons.wikimedia.org/wiki/File:RO_VL_Ionesti_Olt_river_lake.JPG"
     },
     {
       "filename": "launch-ramnicu-valcea-panorama.jpg",
@@ -217,11 +222,12 @@
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 1,
+      "delivered": 2,
       "eligible": 8,
-      "value": 0.125,
+      "value": 0.25,
       "delivered_story_ids": [
-        "valcea-intrerupere-curent-2026-09-21-budesti"
+        "valcea-intrerupere-curent-2026-09-21-budesti",
+        "valcea-intrerupere-curent-2026-09-22-horezu"
       ]
     },
     "duplicates": {
@@ -241,12 +247,33 @@
     },
     "manual_intervention": {
       "status": "MEASURED",
-      "value": 0,
-      "workflow_dispatch_runs": [],
+      "value": 4,
+      "workflow_dispatch_runs": [
+        {
+          "run_id": 34886438620,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-14T19:21:57Z"
+        },
+        {
+          "run_id": 34883061060,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-14T18:48:31Z"
+        },
+        {
+          "run_id": 34882947237,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-14T18:47:23Z"
+        },
+        {
+          "run_id": 34882640166,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-14T18:44:26Z"
+        }
+      ],
       "manual_story_route_additions": []
     },
     "soak_48h": {
-      "status": "IN_PROGRESS",
+      "status": "BLOCKED_MANUAL_INTERVENTION",
       "structural_baseline_sha": "b0aeb1b4e8c6836329c7a380d44567b0a1c2e5b7",
       "structural_baseline_at_utc": "2026-09-14T15:03:58Z",
       "eligible_after_utc": "2026-09-16T15:03:58Z",
