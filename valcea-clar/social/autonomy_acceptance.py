@@ -79,6 +79,27 @@ def _bot_identity(name: str, email: str) -> bool:
     return "[bot]" in text or "-bot" in text or "bot@" in text or "github-actions" in text
 
 
+def _workflow_dispatch_is_automated(run: dict[str, Any]) -> bool:
+    """Return True only when both GitHub actor identities are known bots.
+
+    workflow_dispatch is an event type, not proof of human forcing. Workflows in
+    this repository may dispatch bounded downstream health/recovery workflows
+    through GITHUB_TOKEN, in which case GitHub records github-actions[bot] as
+    both actor and triggering_actor. Unknown/missing identity stays fail-closed
+    and therefore is *not* classified as automated here.
+    """
+    logins: list[str] = []
+    for key in ("actor", "triggering_actor"):
+        value = run.get(key)
+        if not isinstance(value, dict):
+            return False
+        login = str(value.get("login") or "").strip()
+        if not login:
+            return False
+        logins.append(login)
+    return all(_bot_identity(login, "") for login in logins)
+
+
 def latest_structural_change() -> dict[str, str] | None:
     try:
         raw = _git([
@@ -288,7 +309,10 @@ def relevant_manual_dispatches(since: datetime) -> dict[str, Any]:
         "per_page": "100",
     })
     url = f"https://api.github.com/repos/{repo}/actions/runs?{query}"
-    request = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "valcea-clar-autonomy-acceptance"})
+    request = urllib.request.Request(
+        url,
+        headers={"Accept": "application/vnd.github+json", "User-Agent": "valcea-clar-autonomy-acceptance"},
+    )
     token = os.environ.get("GITHUB_TOKEN")
     if token:
         request.add_header("Authorization", f"Bearer {token}")
@@ -300,7 +324,9 @@ def relevant_manual_dispatches(since: datetime) -> dict[str, Any]:
 
     if int(payload.get("total_count") or 0) > 100:
         return {"status": "UNKNOWN", "reason": "workflow_dispatch_result_truncated", "runs": []}
+
     relevant: list[dict[str, Any]] = []
+    automated: list[dict[str, Any]] = []
     for run in payload.get("workflow_runs", []):
         if not isinstance(run, dict):
             continue
@@ -308,12 +334,24 @@ def relevant_manual_dispatches(since: datetime) -> dict[str, Any]:
         path = _normal(str(run.get("path") or ""))
         if "valcea clar" not in name and "valcea" not in path:
             continue
-        relevant.append({
+        actor = str((run.get("actor") or {}).get("login") or "") if isinstance(run.get("actor"), dict) else ""
+        triggering_actor = (
+            str((run.get("triggering_actor") or {}).get("login") or "")
+            if isinstance(run.get("triggering_actor"), dict)
+            else ""
+        )
+        row = {
             "run_id": run.get("id"),
             "workflow": run.get("name"),
             "created_at": run.get("created_at"),
-        })
-    return {"status": "MEASURED", "runs": relevant}
+            "actor": actor or None,
+            "triggering_actor": triggering_actor or None,
+        }
+        if _workflow_dispatch_is_automated(run):
+            automated.append(row)
+        else:
+            relevant.append(row)
+    return {"status": "MEASURED", "runs": relevant, "automated_runs_ignored": automated}
 
 
 def _rate(receipts: dict[str, str], story_ids: set[str]) -> dict[str, Any]:
@@ -408,10 +446,16 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
                 "status": "MEASURED",
                 "value": manual_count,
                 "workflow_dispatch_runs": dispatches["runs"],
+                "automated_workflow_dispatch_runs_ignored": dispatches.get("automated_runs_ignored", []),
                 "manual_story_route_additions": manual_routes,
             }
         else:
-            manual = {"status": "UNKNOWN", "value": None, "reason": dispatches.get("reason"), "manual_story_route_additions": manual_routes}
+            manual = {
+                "status": "UNKNOWN",
+                "value": None,
+                "reason": dispatches.get("reason"),
+                "manual_story_route_additions": manual_routes,
+            }
         eligible_after = baseline + timedelta(hours=SOAK_HOURS)
         if manual.get("value") is None:
             soak_status = "UNKNOWN"
@@ -462,6 +506,7 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
             "instagram_requires_media_id_and_finished_container": True,
             "synthetic_asset_counts_as_photo": False,
             "missing_evidence_becomes_zero": False,
+            "bot_workflow_dispatch_counts_as_manual_intervention": False,
         },
     }
 
@@ -469,6 +514,15 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
 def self_test() -> int:
     assert _bot_identity("github-actions[bot]", "41898282+github-actions[bot]@users.noreply.github.com")
     assert not _bot_identity("Example User", "user@example.com")
+    assert _workflow_dispatch_is_automated({
+        "actor": {"login": "github-actions[bot]"},
+        "triggering_actor": {"login": "github-actions[bot]"},
+    })
+    assert not _workflow_dispatch_is_automated({
+        "actor": {"login": "ExampleUser"},
+        "triggering_actor": {"login": "ExampleUser"},
+    })
+    assert not _workflow_dispatch_is_automated({"actor": {"login": "github-actions[bot]"}})
     photo = {
         "stories": {
             "ok": {"image": {"kind": "photograph", "synthetic": False, "subject_match": True, "editor_approved": True, "rights_basis": "cc"}},
