@@ -2,19 +2,106 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-14T22:29:43+03:00",
+  "generated_at": "2026-09-15T01:44:56+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-14T22:28:02+03:00",
-  "task_count": 66,
+  "queue_generated_at": "2026-09-15T01:43:17+03:00",
+  "task_count": 60,
   "primary_match_count": 0,
   "no_match_count": 30,
-  "unrouted_count": 36,
+  "unrouted_count": 30,
   "target_count": 20,
   "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "e9a8614454fb8cf58322c21a",
+      "signal_title": "INFORMARE Consiliul Județean Vâlcea",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/informare-consiliul-judetean-valcea/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-15T00:57:25+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "cd9ecd3c1ff689d0bd2f4695",
+      "signal_title": "Dispar materiale sanitare din Spitalul Județean Vâlcea?! Acuzații grave din interiorul Ortopediei și Neurochirurgiei. Conducerea trebuie să verifice urgent!",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/dispar-materiale-sanitare-din-spitalul-judetean-valcea-acuzatii-grave-din-interiorul-ortopediei-si-neurochirurgiei-conducerea-trebuie-sa-verifice-urgent/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-14T22:40:17+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "7300c4cf2cf878193b0d6de2",
       "signal_title": "SCANDAL la Șușani! 4,55 milioane de lei pentru platforme de gunoi (NISTE COSMELII) amplasate „după ureche”? Localnicii acuză: „Unii au primit, alții au fost săriți!”",
@@ -268,7 +355,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -367,7 +454,7 @@
     },
     {
       "signal_id": "14d115801bf92a2565b948f2",
-      "signal_title": "Drăgășani în Prim-plan 9 ore in urma Tichete sociale de 265 de lei pentru grădiniță la Drăgășani. Sprijin de 265 de lei pe lună pentru participarea la grădiniță Direcția de Asistență Socială Drăgășani îi informează pe părinții...",
+      "signal_title": "Drăgășani în Prim-plan 13 ore in urma Tichete sociale de 265 de lei pentru grădiniță la Drăgășani. Sprijin de 265 de lei pe lună pentru participarea la grădiniță Direcția de Asistență Socială Drăgășani îi informează pe părinții...",
       "signal_url": "https://www.primplanpress.ro/tichete-sociale-de-265-de-lei-pentru-gradinita-la-dragasani/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-09-14T12:58:29+03:00",
@@ -379,7 +466,7 @@
     },
     {
       "signal_id": "e0e638a49774068ee90efbcd",
-      "signal_title": "Ultima oră 10 ore in urma Primăria Malaia asigură transport săptămânal pentru vârstnicii din Ciungetu către dispensar",
+      "signal_title": "Ultima oră 13 ore in urma Primăria Malaia asigură transport săptămânal pentru vârstnicii din Ciungetu către dispensar",
       "signal_url": "https://www.primplanpress.ro/primaria-malaia-asigura-transport-saptamanal-pentru-varstnicii-din-ciungetu-catre-dispensar/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -1001,18 +1088,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "dc4eca16b4c7a796614270d2",
-      "signal_title": "Echipaj sibian de avion ultraușor, nou record european la Balkaniada din Bulgaria. Radu Ciovica și Alin Brutaru au încheiat competiția și cu medalia de bronz",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/13/echipaj-sibian-de-avion-ultrausor-nou-record-european-la-balkaniada-din-bulgaria-radu-ciovica-si-alin-brutaru-au-incheiat-competitia-si-cu-medalia-de-bronz/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-13T11:47:26+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "186cde4cc2538ce5dcdc3a63",
       "signal_title": "Polițiștii din Băile Olănești au ajutat un șofer rămas cu mașina în pană",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/13/politistii-din-baile-olanesti-au-ajutat-un-sofer-ramas-cu-masina-in-pana/",
@@ -1116,18 +1191,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "16fab77db812bdfe2e169210",
-      "signal_title": "Centura Mediașului, blocată de aproape 5 luni la CNSC. Primarul cere explicații și avertizează că proiectul riscă să piardă finanțarea europeană: „Mediașul a așteptat 30 de ani”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/13/centura-mediasului-blocata-de-aproape-5-luni-la-cnsc-primarul-cere-explicatii-si-avertizeaza-ca-proiectul-risca-sa-piarda-finantarea-europeana-mediasul-a-asteptat-30-de-ani/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-13T09:47:08+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "6abebc3a6371a34fabc36cda",
       "signal_title": "Misterele cetății de pe malul Cibinului. De la amvonul ciumei, frigiderul cu gheață de râu până la orga dăruită de Maria Tereza. „Piatra asta n-a crăpat niciodată”",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/13/misterele-cetatii-de-pe-malul-cibinului-de-la-amvonul-ciumei-frigiderul-cu-gheata-de-rau-pana-la-orga-daruita-de-maria-tereza-piatra-asta-n-a-crapat-niciodata/",
@@ -1199,33 +1262,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "5e330e056dac27be34723707",
-      "signal_title": "FOTO/VIDEO. Mascații au descins în localurile din Vâlcea. Ce au găsit, noaptea trecută, polițiștii în timpul raziei",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/12/foto-video-mascatii-au-descins-in-localurile-din-valcea-ce-au-gasit-noaptea-trecuta-politistii-in-timpul-raziei/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-12T17:47:23+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "534b650c3edaab003c899b7a",
@@ -1325,114 +1361,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "86c5e1b9508857b4e103f25a",
-      "signal_title": "Lumina care nu primește factură",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/lumina-care-nu-primeste-factura/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-12T02:51:46+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "c6cea04e1936ef0893b8784b",
-      "signal_title": "DOCUMENT OFICIAL ANRE: AUTORO (Busca - Gutau - masoneria) nu are licență pentru serviciul public de termoficare din Râmnicu Vâlcea. Cine își asumă răspunderea pentru afacerea cu energia termică?",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/document-oficial-anre-autoro-busca-gutau-masoneria-nu-are-licenta-pentru-serviciul-public-de-termoficare-din-ramnicu-valcea-cine-isi-asuma-raspunderea-pentru-afacerea-cu-energia-termica/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-12T02:44:26+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "8f516910f4bfe1550d6c5bf2",
-      "signal_title": "Abonamentul corporate pentru echipe din mai multe orașe: cum alegi un beneficiu care funcționează pentru toți",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/abonamentul-corporate-pentru-echipe-din-mai-multe-orase-cum-alegi-un-beneficiu-care-functioneaza-pentru-toti/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-12T02:37:52+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "36d2c5e1b09fdd4f36265bcb",
-      "signal_title": "Piața auto rulate în 2026: Ce criterii prioritizează românii când își schimbă mașina?",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/piata-auto-rulate-in-2026-ce-criterii-prioritizeaza-romanii-cand-isi-schimba-masina/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-12T02:36:42+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "49370150002bfe558aafb8d3",
-      "signal_title": "Cum construiești o ținută de ocazie fără să renunți la stabilitate și confort",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/cum-construiesti-o-tinuta-de-ocazie-fara-sa-renunti-la-stabilitate-si-confort/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-12T02:30:37+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "cedf55e3f914d0a26b5981e8",
