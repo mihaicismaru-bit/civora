@@ -1,0 +1,150 @@
+{
+  "schema_version": "PPOS_ENGAGEMENT_RADAR_POLICY_V1",
+  "checkpoint": "CP84",
+  "module_id": "M53_ENGAGEMENT_RADAR",
+  "parent_activation_checkpoint": "CP83",
+  "parent_control_checkpoint": "CP58",
+  "next_after_cp84": "CP85_INBOUND_REPLY_ENGINE",
+  "global_kill_switch": "ENGAGED",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "discovery_capabilities": [
+    "MENTION_DISCOVERY",
+    "HASHTAG_TOPIC_DISCOVERY"
+  ],
+  "provenance_kinds": [
+    "PUBLIC_URL_OBSERVATION",
+    "OFFLINE_API_FIXTURE",
+    "SYNTHETIC_FIXTURE"
+  ],
+  "score_dimensions": [
+    "relevance",
+    "expertise_fit",
+    "conversation_momentum",
+    "novelty",
+    "answerability",
+    "reputational_risk",
+    "spam_risk",
+    "expected_relationship_value"
+  ],
+  "benefit_weights": {
+    "relevance": 25,
+    "expertise_fit": 15,
+    "conversation_momentum": 15,
+    "novelty": 10,
+    "answerability": 15,
+    "expected_relationship_value": 20
+  },
+  "risk_penalty_weights": {
+    "reputational_risk": 0.25,
+    "spam_risk": 0.25
+  },
+  "thresholds": {
+    "eligible_score_min": 55,
+    "spam_reject_at": 70,
+    "reputational_reject_at": 80,
+    "relevance_reject_below": 35,
+    "answerability_reject_below": 30,
+    "max_candidate_age_hours": 168
+  },
+  "authority": {
+    "external_authorization_ingested": false,
+    "authorization_granted": false,
+    "runtime_authorization_effective": false,
+    "secret_reference_resolved": false,
+    "environment_read": false,
+    "keychain_read": false,
+    "oauth_attempted": false,
+    "real_account_lookup_attempted": false,
+    "account_connected": false,
+    "network_allowed": false,
+    "network_attempted": false,
+    "live_probe_allowed": false,
+    "live_probe_attempted": false,
+    "publish_allowed": false,
+    "publish_attempted": false,
+    "external_write_allowed": false,
+    "external_write_performed": false,
+    "control_plane_promoted": false,
+    "deploy_allowed": false,
+    "deploy_performed": false,
+    "paid_service_used": false,
+    "authority_activated": false,
+    "runtime_mutated": false
+  },
+  "growth_safety": {
+    "automated_follow_unfollow_forbidden": true,
+    "mass_commenting_forbidden": true,
+    "engagement_pods_forbidden": true,
+    "repetitive_praise_forbidden": true,
+    "copy_paste_replies_forbidden": true,
+    "synthetic_conversation_farming_forbidden": true,
+    "political_microtargeting_forbidden": true,
+    "sensitive_trait_inference_forbidden": true,
+    "sensitive_relationship_profiling_forbidden": true,
+    "posting_authority_forbidden": true,
+    "fail_closed_on_uncertainty": true
+  },
+  "discovery_routes": [
+    {
+      "platform": "FACEBOOK_PAGE",
+      "capability": "MENTION_DISCOVERY",
+      "expected_cp83_classification": "MANUAL_ONLY",
+      "automation_discovery_eligible": false,
+      "allowed_provenance": ["PUBLIC_URL_OBSERVATION", "SYNTHETIC_FIXTURE"],
+      "required_blockers": ["HOLD_CAPABILITY_UNVERIFIED"]
+    },
+    {
+      "platform": "FACEBOOK_PAGE",
+      "capability": "HASHTAG_TOPIC_DISCOVERY",
+      "expected_cp83_classification": "MANUAL_ONLY",
+      "automation_discovery_eligible": false,
+      "allowed_provenance": ["PUBLIC_URL_OBSERVATION", "SYNTHETIC_FIXTURE"],
+      "required_blockers": ["HOLD_CAPABILITY_UNVERIFIED"]
+    },
+    {
+      "platform": "INSTAGRAM_PROFESSIONAL",
+      "capability": "MENTION_DISCOVERY",
+      "expected_cp83_classification": "PASS_OFFLINE_CONTRACT",
+      "automation_discovery_eligible": true,
+      "allowed_provenance": ["PUBLIC_URL_OBSERVATION", "OFFLINE_API_FIXTURE", "SYNTHETIC_FIXTURE"],
+      "required_blockers": ["HOLD_LIVE_PERMISSION"]
+    },
+    {
+      "platform": "INSTAGRAM_PROFESSIONAL",
+      "capability": "HASHTAG_TOPIC_DISCOVERY",
+      "expected_cp83_classification": "PASS_OFFLINE_CONTRACT",
+      "automation_discovery_eligible": true,
+      "allowed_provenance": ["PUBLIC_URL_OBSERVATION", "OFFLINE_API_FIXTURE", "SYNTHETIC_FIXTURE"],
+      "required_blockers": ["HOLD_LIVE_PERMISSION"]
+    },
+    {
+      "platform": "THREADS",
+      "capability": "MENTION_DISCOVERY",
+      "expected_cp83_classification": "PASS_OFFLINE_CONTRACT",
+      "automation_discovery_eligible": true,
+      "allowed_provenance": ["PUBLIC_URL_OBSERVATION", "OFFLINE_API_FIXTURE", "SYNTHETIC_FIXTURE"],
+      "required_blockers": ["HOLD_LIVE_PERMISSION"]
+    },
+    {
+      "platform": "THREADS",
+      "capability": "HASHTAG_TOPIC_DISCOVERY",
+      "expected_cp83_classification": "HOLD_LIVE_PERMISSION",
+      "automation_discovery_eligible": false,
+      "allowed_provenance": ["PUBLIC_URL_OBSERVATION", "SYNTHETIC_FIXTURE"],
+      "required_blockers": ["HOLD_LIVE_PERMISSION", "HOLD_CAPABILITY_UNVERIFIED"]
+    }
+  ],
+  "unknown_external_metric_value": "UNKNOWN",
+  "required_blockers": [
+    "HOLD_REAL_EXTERNAL_AUTHORIZATION_RECEIPT_NOT_INGESTED",
+    "HOLD_SECRET_REFERENCE_NOT_RESOLVED",
+    "HOLD_REAL_ACCOUNT_NOT_CONNECTED",
+    "HOLD_CONTROL_PLANE_PROMOTION_NOT_EXECUTED",
+    "HOLD_PILOT_PUBLISH_NOT_AUTHORIZED",
+    "HOLD_CP84_OFFLINE_RADAR_IS_NOT_RUNTIME_AUTHORITY"
+  ]
+}
