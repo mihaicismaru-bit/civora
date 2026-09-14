@@ -241,8 +241,14 @@ jobs:
           python - <<'PY'
           import json,os
           from pathlib import Path
-          p=json.loads(Path('/tmp/instagram-fact-card-preview.json').read_text(encoding='utf-8')); e=p.get('eligible') or []
-          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f"has_eligible={'true' if len(e) else 'false'}\n")
+          primary=json.loads(Path('/tmp/instagram-preview.json').read_text(encoding='utf-8'))
+          fallback=json.loads(Path('/tmp/instagram-fact-card-preview.json').read_text(encoding='utf-8'))
+          primary_ids={str(row.get('story_id') or '') for row in primary.get('eligible') or [] if isinstance(row,dict)}
+          fallback_ids={str(row.get('story_id') or '') for row in fallback.get('eligible') or [] if isinstance(row,dict)}
+          overlap=sorted((primary_ids & fallback_ids)-{''})
+          if overlap:
+              raise SystemExit(f'Instagram primary/fact-card eligibility overlap: {overlap}')
+          with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f"has_eligible={'true' if len(fallback_ids) else 'false'}\n")
           PY
 
       - name: Preview TikTok queue
@@ -294,7 +300,7 @@ jobs:
 
       - name: Publish eligible Instagram verified fact-card fallback through Meta Graph API
         id: publish_instagram_fact_card
-        if: github.event_name != 'pull_request' && steps.preview_instagram.outputs.has_eligible != 'true' && steps.preview_instagram_fact_card.outputs.has_eligible == 'true'
+        if: github.event_name != 'pull_request' && steps.preview_instagram_fact_card.outputs.has_eligible == 'true'
         continue-on-error: true
         env:
           VALCEA_IG_ACCOUNT_ID: ${{ steps.meta_auth.outputs.ig_account_id || vars.VALCEA_IG_ACCOUNT_ID }}
@@ -306,7 +312,7 @@ jobs:
         run: python valcea-clar/social/instagram_fact_card_publish.py --apply | tee /tmp/instagram-fact-card-apply.json
 
       - name: Record skipped Instagram fact-card apply
-        if: github.event_name == 'pull_request' || steps.preview_instagram.outputs.has_eligible == 'true' || steps.preview_instagram_fact_card.outputs.has_eligible != 'true'
+        if: github.event_name == 'pull_request' || steps.preview_instagram_fact_card.outputs.has_eligible != 'true'
         run: cp /tmp/instagram-fact-card-preview.json /tmp/instagram-fact-card-apply.json
 
       - name: Publish eligible TikTok story through Content Posting API
