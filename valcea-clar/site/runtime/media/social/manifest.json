@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.3",
-  "generation": "deterministic_native_social_assets_v1_3",
+  "schema_version": "1.4",
+  "generation": "deterministic_native_social_assets_v1_4",
   "execution_owner": "civora_site_engine",
   "publication_model": "continuous_story_first",
   "held_channels_are_not_asset_errors": true,
@@ -126,5 +126,137 @@
       "asset_fingerprint_sha256": "d45609607be893d5559dfd76ba75b9f4aa3f8ff60e95863e4e6350221790ed7b",
       "bytes": 523103
     }
-  ]
+  ],
+  "autonomy_acceptance": {
+    "schema_version": "1.0",
+    "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
+    "window_hours": 24,
+    "autonomous_stories_published_24h": 8,
+    "autonomous_story_ids_24h": [
+      "apavil-joburi-septembrie-2026",
+      "fast-ipj-actiuni-pentru-siguranta-rutiera-in-judetul-valcea-4a4010226d",
+      "valcea-intrerupere-curent-2026-09-21-budesti",
+      "valcea-intrerupere-curent-2026-09-22-horezu",
+      "valcea-intrerupere-curent-2026-09-23-ladesti",
+      "valcea-intrerupere-curent-2026-09-24-ionesti",
+      "valcea-intrerupere-curent-2026-09-25-baile-govora",
+      "valcea-intrerupere-curent-2026-09-26-daesti"
+    ],
+    "discovery_to_publish_latency": {
+      "status": "MEASURED",
+      "measured": 8,
+      "published": 8,
+      "stories": [
+        {
+          "story_id": "apavil-joburi-septembrie-2026",
+          "seconds": 782308,
+          "discovered_at_utc": "2026-09-05T12:01:48Z",
+          "published_at_utc": "2026-09-14T13:20:16Z"
+        },
+        {
+          "story_id": "fast-ipj-actiuni-pentru-siguranta-rutiera-in-judetul-valcea-4a4010226d",
+          "seconds": 92,
+          "discovered_at_utc": "2026-09-14T13:18:44Z",
+          "published_at_utc": "2026-09-14T13:20:16Z"
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-21-budesti",
+          "seconds": 77,
+          "discovered_at_utc": "2026-09-14T13:26:54Z",
+          "published_at_utc": "2026-09-14T13:28:11Z"
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-22-horezu",
+          "seconds": 77,
+          "discovered_at_utc": "2026-09-14T13:26:54Z",
+          "published_at_utc": "2026-09-14T13:28:11Z"
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-23-ladesti",
+          "seconds": 77,
+          "discovered_at_utc": "2026-09-14T13:26:54Z",
+          "published_at_utc": "2026-09-14T13:28:11Z"
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-24-ionesti",
+          "seconds": 77,
+          "discovered_at_utc": "2026-09-14T13:26:54Z",
+          "published_at_utc": "2026-09-14T13:28:11Z"
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-25-baile-govora",
+          "seconds": 77,
+          "discovered_at_utc": "2026-09-14T13:26:54Z",
+          "published_at_utc": "2026-09-14T13:28:11Z"
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-26-daesti",
+          "seconds": 77,
+          "discovered_at_utc": "2026-09-14T13:26:54Z",
+          "published_at_utc": "2026-09-14T13:28:11Z"
+        }
+      ],
+      "max_seconds": 782308,
+      "median_seconds": 77
+    },
+    "photo_coverage": {
+      "status": "MEASURED",
+      "real_photo_stories": 0,
+      "published_stories": 8,
+      "value": 0.0,
+      "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
+    },
+    "facebook_delivery_rate_receipt_bound": {
+      "status": "MEASURED",
+      "delivered": 1,
+      "eligible": 8,
+      "value": 0.125,
+      "delivered_story_ids": [
+        "apavil-joburi-septembrie-2026"
+      ]
+    },
+    "instagram_delivery_rate_receipt_bound": {
+      "status": "MEASURED",
+      "delivered": 0,
+      "eligible": 8,
+      "value": 0.0,
+      "delivered_story_ids": []
+    },
+    "duplicates": {
+      "status": "MEASURED",
+      "value": 0,
+      "content_groups": [],
+      "facebook_receipt_groups": [],
+      "instagram_receipt_groups": [],
+      "missing_editorial_evidence": []
+    },
+    "fabricated_claims": {
+      "status": "PASS",
+      "value": 0,
+      "definition": "zero is asserted only when every measured published story passes material-fact and complete claim-source trace gates",
+      "trace_violations": [],
+      "missing_editorial_evidence": []
+    },
+    "manual_intervention": {
+      "status": "MEASURED",
+      "value": 0,
+      "workflow_dispatch_runs": [],
+      "manual_story_route_additions": []
+    },
+    "soak_48h": {
+      "status": "IN_PROGRESS",
+      "structural_baseline_sha": "b0aeb1b4e8c6836329c7a380d44567b0a1c2e5b7",
+      "structural_baseline_at_utc": "2026-09-14T15:03:58Z",
+      "eligible_after_utc": "2026-09-16T15:03:58Z",
+      "required_hours": 48
+    },
+    "acceptance_ready": false,
+    "truth_rules": {
+      "preview_or_outbox_is_delivery": false,
+      "facebook_requires_external_post_id": true,
+      "instagram_requires_media_id_and_finished_container": true,
+      "synthetic_asset_counts_as_photo": false,
+      "missing_evidence_becomes_zero": false
+    }
+  }
 }
