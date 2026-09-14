@@ -21,6 +21,7 @@ from pathlib import Path
 from typing import Any
 
 import tiktok_editorial_v1 as tiktok_editorial
+from autonomy_acceptance import build_acceptance_snapshot, self_test as autonomy_acceptance_self_test
 from social_common import (
     OUTBOX,
     PHOTO_ROOT,
@@ -261,8 +262,8 @@ def build() -> dict[str, Any]:
 
     write_json(OUTBOX, outbox)
     manifest = {
-        "schema_version": "1.3",
-        "generation": "deterministic_native_social_assets_v1_3",
+        "schema_version": "1.4",
+        "generation": "deterministic_native_social_assets_v1_4",
         "execution_owner": "civora_site_engine",
         "publication_model": "continuous_story_first",
         "held_channels_are_not_asset_errors": True,
@@ -272,6 +273,7 @@ def build() -> dict[str, Any]:
         "tiktok_premium_assets": premium_count,
         "unavailable_source_photos": [unavailable[key] for key in sorted(unavailable)],
         "assets": [records[key] for key in sorted(records)],
+        "autonomy_acceptance": build_acceptance_snapshot(),
     }
     write_json(MANIFEST, manifest)
     for destination in DESTINATIONS:
@@ -284,7 +286,8 @@ def self_test() -> int:
     assert len(DESTINATIONS) == 2
     assert PUBLIC_BASE == "https://valceaclar.ro/media/social/"
     assert tiktok_editorial.product_identity("tiktok")["visual"]["brand_mark"] == "VC."
-    print("VÂLCEA CLAR social media asset builder v1.3 self-test: PASS")
+    autonomy_acceptance_self_test()
+    print("VÂLCEA CLAR social media asset builder v1.4 self-test: PASS")
     return 0
 
 
