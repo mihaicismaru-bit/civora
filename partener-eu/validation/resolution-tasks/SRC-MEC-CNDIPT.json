@@ -1,14 +1,19 @@
 {
-  "schema_version": "1.1",
-  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "source_id": "SRC-MEC-CNDIPT",
-  "source_tier": "T1",
+  "source_name": "official_vet_policy_source",
   "source_url": "https://www.edu.ro/profesional_tehnic",
-  "status": "OPEN",
+  "source_tier": "T1",
+  "previous_semantic_sha256": "bf6b4b029b7a2ff064dcc79a9d111d6bdae7d9b8f2f5672bbc60982ead2c874e",
+  "candidate_semantic_sha256": "e3a3ccefae58336118a2f3845c7302e73d5f07f05ceac9da8a129eb003b6a330",
+  "current_semantic_sha256": "e3a3ccefae58336118a2f3845c7302e73d5f07f05ceac9da8a129eb003b6a330",
   "first_observed_at": "2026-08-21T15:59:24.271132Z",
   "last_observed_at": "2026-09-14T00:16:46.122248Z",
-  "previous_semantic_sha256": "bf6b4b029b7a2ff064dcc79a9d111d6bdae7d9b8f2f5672bbc60982ead2c874e",
-  "current_semantic_sha256": "e3a3ccefae58336118a2f3845c7302e73d5f07f05ceac9da8a129eb003b6a330",
+  "registry_class": "official_vet_policy_source",
+  "schema_version": "1.2",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "source_id": "SRC-MEC-CNDIPT",
+  "status": "OPEN",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -18,6 +23,5 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  ]
 }
