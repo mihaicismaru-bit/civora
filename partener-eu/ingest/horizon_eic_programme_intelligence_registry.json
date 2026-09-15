@@ -1,0 +1,159 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "HORIZON_EIC_PROGRAMME_INTELLIGENCE_REGISTRY_V1",
+  "evidence_checked_date": "2026-09-02",
+  "source_family": "EU_DIRECT",
+  "programme_families": [
+    "Horizon Europe",
+    "European Innovation Council"
+  ],
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "closed_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false,
+    "publication_effect": "NONE",
+    "exact_call_or_topic_identifier_required": true,
+    "current_official_exact_endpoint_required": true,
+    "semantic_reconciliation_required": true,
+    "field_scoped_material_admission_required": true
+  },
+  "sources": [
+    {
+      "id": "HORIZON_EUROPE_GATEWAY",
+      "programme_family": "Horizon Europe",
+      "authority_class": "OFFICIAL_PROGRAMME_GATEWAY",
+      "authority_url": "https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe_en",
+      "allowed_hosts": ["research-and-innovation.ec.europa.eu"],
+      "allowed_path_prefixes": ["/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe_en"],
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_marker_groups": [
+        ["horizon europe"],
+        ["funding and tenders portal", "funding and tenders"],
+        ["work programmes"]
+      ],
+      "market_signals": [
+        "RESEARCH_AND_INNOVATION",
+        "COLLABORATIVE_CONSORTIA",
+        "MISSIONS",
+        "EUROPEAN_PARTNERSHIPS",
+        "WIDENING"
+      ],
+      "applicant_fit_tags": [
+        "UNIVERSITY",
+        "RESEARCH_ORGANISATION",
+        "SME",
+        "COMPANY",
+        "PUBLIC_BODY",
+        "NONPROFIT",
+        "CONSORTIUM"
+      ],
+      "pipeline_signals": ["HORIZON_EUROPE_2028_2034_PROPOSAL"],
+      "material_fact_use": false
+    },
+    {
+      "id": "HORIZON_WORK_PROGRAMMES_2026_2027",
+      "programme_family": "Horizon Europe",
+      "authority_class": "OFFICIAL_WORK_PROGRAMME_INDEX",
+      "authority_url": "https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe/horizon-europe-work-programmes_en",
+      "allowed_hosts": ["research-and-innovation.ec.europa.eu"],
+      "allowed_path_prefixes": ["/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe/horizon-europe-work-programmes_en"],
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "required_marker_groups": [
+        ["horizon europe work programmes"],
+        ["2026 - 27", "2026-27"],
+        ["general introduction"]
+      ],
+      "market_signals": [
+        "WORK_PROGRAMME_2026_2027",
+        "CLUSTER_TOPICS",
+        "MISSIONS_TOPICS",
+        "MSCA",
+        "RESEARCH_INFRASTRUCTURES"
+      ],
+      "applicant_fit_tags": [
+        "UNIVERSITY",
+        "RESEARCH_ORGANISATION",
+        "SME",
+        "COMPANY",
+        "PUBLIC_BODY",
+        "NONPROFIT",
+        "CONSORTIUM"
+      ],
+      "pipeline_signals": ["WORK_PROGRAMME_2026_2027"],
+      "material_fact_use": false
+    },
+    {
+      "id": "EIC_WORK_PROGRAMME_2026",
+      "programme_family": "European Innovation Council",
+      "authority_class": "OFFICIAL_WORK_PROGRAMME",
+      "authority_url": "https://eic.ec.europa.eu/eic-funding-opportunities/eic-2026-work-programme_en",
+      "allowed_hosts": ["eic.ec.europa.eu"],
+      "allowed_path_prefixes": ["/eic-funding-opportunities/eic-2026-work-programme_en"],
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "required_marker_groups": [
+        ["eic 2026 work programme"],
+        ["eic pathfinder"],
+        ["eic transition"],
+        ["eic accelerator"]
+      ],
+      "market_signals": [
+        "PATHFINDER",
+        "TRANSITION",
+        "ACCELERATOR",
+        "STEP_SCALE_UP",
+        "PRE_ACCELERATOR",
+        "ADVANCED_INNOVATION_CHALLENGES"
+      ],
+      "applicant_fit_tags": [
+        "STARTUP",
+        "SME",
+        "SCALEUP",
+        "RESEARCH_ORGANISATION",
+        "UNIVERSITY",
+        "DEEP_TECH"
+      ],
+      "pipeline_signals": ["EIC_WORK_PROGRAMME_2026"],
+      "material_fact_use": false
+    },
+    {
+      "id": "EIC_FUNDING_OPPORTUNITIES_INDEX",
+      "programme_family": "European Innovation Council",
+      "authority_class": "OFFICIAL_FUNDING_OPPORTUNITY_INDEX",
+      "authority_url": "https://eic.ec.europa.eu/funding-opportunities_en",
+      "allowed_hosts": ["eic.ec.europa.eu"],
+      "allowed_path_prefixes": ["/funding-opportunities_en"],
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "required_marker_groups": [
+        ["funding opportunities"],
+        ["eic pathfinder"],
+        ["eic accelerator"],
+        ["step scale up"]
+      ],
+      "market_signals": [
+        "CURRENT_INSTRUMENT_DISCOVERY",
+        "PATHFINDER",
+        "TRANSITION",
+        "ACCELERATOR",
+        "STEP_SCALE_UP"
+      ],
+      "applicant_fit_tags": [
+        "STARTUP",
+        "SME",
+        "SCALEUP",
+        "RESEARCH_ORGANISATION",
+        "UNIVERSITY",
+        "DEEP_TECH"
+      ],
+      "pipeline_signals": [],
+      "material_fact_use": false
+    }
+  ]
+}

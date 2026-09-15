@@ -1,0 +1,86 @@
+name: PARTENER.EU EEA CSF Call 4 Contract CI
+
+# Legacy filename retained so the bounded workflow keeps a stable identity;
+# live acquisition/history ownership moved to Official Programme Intelligence.
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eea_civil_society_fund_call4_exact.py'
+      - 'partener-eu/ingest/eea_civil_society_fund_call4_reconcile.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call4_exact.py'
+      - 'partener-eu/ops/test_eea_civil_society_fund_call4_reconcile.py'
+      - 'partener-eu/ops/run_eea_csf_exact_canonical.py'
+      - 'partener-eu/ops/run_eea_norway_romania_watch_canonical.py'
+      - '.github/workflows/partener-eu-eea-csf-call4-exact-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  eea-csf-call4-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile Call 4 contracts and canonical ownership runners
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eea_civil_society_fund_call4_exact.py \
+            partener-eu/ingest/eea_civil_society_fund_call4_reconcile.py \
+            partener-eu/ops/test_eea_civil_society_fund_call4_exact.py \
+            partener-eu/ops/test_eea_civil_society_fund_call4_reconcile.py \
+            partener-eu/ops/run_eea_csf_exact_canonical.py \
+            partener-eu/ops/run_eea_norway_romania_watch_canonical.py
+
+      - name: Validate fail-closed Call 4 semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eea_civil_society_fund_call4_exact.py
+          python partener-eu/ops/test_eea_civil_society_fund_call4_reconcile.py
+
+      - name: Enforce single canonical live owner
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python - <<'PY'
+          import run_eea_csf_exact_canonical as shared
+          import run_eea_norway_romania_watch_canonical as canonical
+
+          config = shared.CONFIGS.get('4')
+          if config is None:
+              raise SystemExit('FAIL Call 4 missing from shared exact runner')
+          if config.exact_module != 'eea_civil_society_fund_call4_exact':
+              raise SystemExit('FAIL Call 4 exact parser ownership drift')
+          if config.reconcile_module != 'eea_civil_society_fund_call4_reconcile':
+              raise SystemExit('FAIL Call 4 reconciler ownership drift')
+          if '4' not in canonical.EXACT_CSF_CALL_IDS:
+              raise SystemExit('FAIL Call 4 missing from canonical Official Programme orchestrator')
+          if '4' in canonical.LEGACY_HISTORY_MIGRATION_IDS:
+              raise SystemExit('FAIL Call 4 legacy history bridge still enabled')
+          print({
+              'status': 'PASS',
+              'call_id': '4',
+              'live_owner': 'PARTENER.EU Official Programme Intelligence',
+              'shared_runner': True,
+              'legacy_history_allowed': False,
+              'live_proof_acquisition': False,
+              'material_authorization': False,
+          })
+          PY

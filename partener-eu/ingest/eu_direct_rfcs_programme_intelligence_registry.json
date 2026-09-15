@@ -1,0 +1,92 @@
+{
+  "schema": "PARTENER_EU_RFCS_PROGRAMME_INTELLIGENCE_REGISTRY_V1",
+  "source_family": "EU_DIRECT",
+  "programme_family": "Research Fund for Coal and Steel (RFCS)",
+  "programme_id": "RFCS",
+  "authority_class": "T1_OFFICIAL_EC_REA_PROGRAMME",
+  "policy": {
+    "market_intelligence_only": true,
+    "exact_call_or_topic_identifier_required": true,
+    "current_official_exact_endpoint_required": true,
+    "semantic_reconciliation_required": true,
+    "field_scoped_material_admission_required": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "closed_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false
+  },
+  "applicant_fit": {
+    "fit_is_not_eligibility": true,
+    "romania_programme_fit": "EU_MEMBER_STATE_APPLICANT_POOL_NON_AUTHORIZING",
+    "tags": [
+      "universities",
+      "research_institutes",
+      "large_industry",
+      "smes",
+      "startups",
+      "environmental_ngos",
+      "public_administrations_coal_steel_regions",
+      "civil_society",
+      "coal_transition",
+      "clean_steel",
+      "industrial_decarbonisation"
+    ]
+  },
+  "partner_intelligence": {
+    "partner_intelligence_is_not_call_eligibility": true,
+    "tags": [
+      "funding_tenders_partner_search",
+      "enterprise_europe_network",
+      "cross_border_consortia",
+      "industry_research_partnerships"
+    ]
+  },
+  "sources": [
+    {
+      "source_id": "RFCS-EC-PROGRAMME-ROOT",
+      "url": "https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/research-fund-coal-and-steel-rfcs_en",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_markers": [
+        "Research Fund for Coal and Steel",
+        "industry-led projects",
+        "Work Programme for 2026"
+      ]
+    },
+    {
+      "source_id": "RFCS-2027-REFORM-PROGRAMMING",
+      "url": "https://research-and-innovation.ec.europa.eu/news/all-research-and-innovation-news/adoption-reform-research-fund-coal-and-steel-2026-06-29_en",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "required_markers": [
+        "reforming the Research Fund for Coal and Steel",
+        "until 2034",
+        "coal-dependent regions"
+      ]
+    },
+    {
+      "source_id": "RFCS-REA-ANNUAL-CALL-INDEX",
+      "url": "https://rea.ec.europa.eu/funding-and-grants/research-fund-coal-and-steel/annual-rfcs-call-proposals-coal-and-steel_en",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "required_markers": [
+        "Annual RFCS call for proposals",
+        "2026 RFCS call for proposals",
+        "Funding & tenders portal"
+      ]
+    },
+    {
+      "source_id": "RFCS-REA-APPLICANT-PARTNER-FIT",
+      "url": "https://rea.ec.europa.eu/funding-and-grants/research-fund-coal-and-steel/research-fund-coal-and-steel-who-should-apply_en",
+      "observation_state": "APPLICANT_FIT_INTELLIGENCE",
+      "required_markers": [
+        "Potential applicants",
+        "Universities and research institutes",
+        "Enterprise Europe Network"
+      ]
+    }
+  ]
+}

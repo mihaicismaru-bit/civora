@@ -2,6 +2,7 @@
 import importlib.util
 import sys
 from pathlib import Path
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[2]
 INGEST = ROOT / "partener-eu" / "ingest"
@@ -41,7 +42,112 @@ def structured_receipt(identifier, status_code, *, call_identifier=None, verifie
     }
 
 
+def verified_readback(url, digest_char):
+    body_sha = digest_char * 64
+    attempt = {
+        "attempt_index": 1,
+        "fetched_at": FETCHED_AT,
+        "outcome": "VERIFIED",
+        "final_url": url,
+        "http_status": 200,
+        "content_type": "text/html",
+        "bytes": 10,
+        "body_sha256": body_sha,
+        "retriable": False,
+    }
+    return {
+        "url": url,
+        "final_url": url,
+        "http_status": 200,
+        "content_type": "text/html",
+        "bytes": 10,
+        "body_sha256": body_sha,
+        "verified": True,
+        "attempt_count": 1,
+        "attempts": [attempt],
+        "recovery_state": "FIRST_ATTEMPT_HEALTHY",
+    }
+
+
+class FakeResponse:
+    def __init__(self, url, *, status=200, content_type="text/html; charset=utf-8", body=b"topic"):
+        self._url = url
+        self.status = status
+        self.headers = {"Content-Type": content_type}
+        self._body = body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def geturl(self):
+        return self._url
+
+    def getcode(self):
+        return self.status
+
+    def read(self, limit=-1):
+        return self._body if limit < 0 else self._body[:limit]
+
+
+class SequenceOpener:
+    def __init__(self, outcomes):
+        self.outcomes = list(outcomes)
+        self.calls = 0
+
+    def open(self, req, timeout=None):
+        self.calls += 1
+        if not self.outcomes:
+            raise AssertionError("unexpected extra topic readback attempt")
+        outcome = self.outcomes.pop(0)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+
+def http_error(url, status):
+    return HTTPError(url, status, f"HTTP {status}", hdrs=None, fp=None)
+
+
+def assert_topic_readback_retry_boundary():
+    url = mod.topic_url(OPEN_ID)
+
+    sleeps = []
+    opener = SequenceOpener([http_error(url, 404), FakeResponse(url)])
+    recovered = mod._topic_readback(url, opener=opener, sleeper=sleeps.append)
+    assert_true(recovered["verified"] is True, "404->200 exact topic readback must recover within bounded retry")
+    assert_true(recovered["attempt_count"] == 2, "recovered readback must preserve both attempts")
+    assert_true(recovered["recovery_state"] == "RECOVERED_AFTER_TRANSIENT_FAILURE", "recovery state drift")
+    assert_true(recovered["attempts"][0]["http_status"] == 404 and recovered["attempts"][0]["retriable"] is True, "initial 404 must remain in provenance")
+    assert_true(recovered["attempts"][1]["outcome"] == "VERIFIED", "final recovery attempt must be explicit")
+    assert_true(sleeps == [mod.TOPIC_READBACK_BACKOFF_SECONDS[0]], "bounded backoff drift")
+
+    sleeps = []
+    opener = SequenceOpener([http_error(url, 404), http_error(url, 404), http_error(url, 404)])
+    exhausted = mod._topic_readback(url, opener=opener, sleeper=sleeps.append)
+    assert_true(exhausted["verified"] is False, "exhausted transient readback must fail closed")
+    assert_true(exhausted["failure_class"] == "TRANSIENT_READBACK_EXHAUSTED", "exhaustion failure class drift")
+    assert_true(exhausted["attempt_count"] == 3, "all exhausted attempts must be preserved")
+    assert_true([row["http_status"] for row in exhausted["attempts"]] == [404, 404, 404], "404 exhaustion provenance drift")
+    assert_true(sleeps == list(mod.TOPIC_READBACK_BACKOFF_SECONDS), "exhaustion backoff drift")
+
+    denied_opener = SequenceOpener([http_error(url, 403), FakeResponse(url)])
+    denied = mod._topic_readback(url, opener=denied_opener, sleeper=lambda _: None)
+    assert_true(denied["verified"] is False and denied["failure_class"] == "NON_RETRYABLE_READBACK_FAILURE", "non-retryable HTTP failure must remain fail closed")
+    assert_true(denied_opener.calls == 1, "non-retryable HTTP failure must not be retried")
+
+    drift_url = "https://example.com/not-authority/topic-details/" + OPEN_ID
+    drift_opener = SequenceOpener([FakeResponse(drift_url), FakeResponse(url)])
+    drift = mod._topic_readback(url, opener=drift_opener, sleeper=lambda _: None)
+    assert_true(drift["verified"] is False and drift["failure_class"] == "AUTHORITY_OR_CONTENT_DRIFT", "authority/content drift must fail closed")
+    assert_true(drift_opener.calls == 1, "authority/content drift must never be retried into success")
+
+
 def main():
+    assert_topic_readback_retry_boundary()
+
     query = mod.default_query()
     terms = query["bool"]["must"]
     assert_true({"terms": {"status": ["31094501", "31094502"]}} in terms, "live search must remain bounded to official status codes of interest")
@@ -114,9 +220,9 @@ def main():
     assert_true(open_url.endswith(OPEN_ID), "topic URL should bind exact identifier")
 
     readbacks = {
-        OPEN_ID: {"url": open_url, "final_url": open_url, "http_status": 200, "verified": True, "body_sha256": "a" * 64},
-        UPCOMING_ID: {"url": upcoming_url, "final_url": upcoming_url, "http_status": 200, "verified": True, "body_sha256": "b" * 64},
-        UNKNOWN_ID: {"url": unknown_url, "final_url": unknown_url, "http_status": 200, "verified": True, "body_sha256": "c" * 64},
+        OPEN_ID: verified_readback(open_url, "a"),
+        UPCOMING_ID: verified_readback(upcoming_url, "b"),
+        UNKNOWN_ID: verified_readback(unknown_url, "c"),
     }
     structured = {
         OPEN_ID: structured_receipt(OPEN_ID, "31094502", call_identifier="HORIZON-TEST-2026"),
@@ -171,7 +277,7 @@ def main():
     planned = normalize_payload([pipeline], fetched_at=FETCHED_AT, run_id=RUN_ID, verified_authority_urls=[open_url])
     assert_true(planned["records"][0]["observation_state"] == "PROGRAMMING_PIPELINE", "proposal/programming record must never become OPEN_CALL")
 
-    print("PASS Funding & Tenders live boundary: Facet status + exact structured topic + exact topic page, zero publication")
+    print("PASS Funding & Tenders live boundary: bounded audited readback retries + Facet status + exact structured topic + exact topic page, zero publication")
 
 
 if __name__ == "__main__":

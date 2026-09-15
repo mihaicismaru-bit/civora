@@ -1,0 +1,56 @@
+{
+  "schema": "PARTENER_EU_EDF_PROGRAMME_INTELLIGENCE_REGISTRY_V1",
+  "source_family": "EU_DIRECT",
+  "programme_family": "European Defence Fund",
+  "programme_id": "EDF",
+  "authority_class": "T1_EUROPEAN_COMMISSION",
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "closed_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false,
+    "exact_call_or_topic_identifier_required": true,
+    "current_official_exact_endpoint_required": true,
+    "semantic_reconciliation_required": true,
+    "field_scoped_material_admission_required": true
+  },
+  "applicant_fit": {
+    "tags": [
+      "public_entities",
+      "private_entities",
+      "research_organisations",
+      "SMEs",
+      "startups",
+      "consortia"
+    ],
+    "fit_is_not_eligibility": true,
+    "romania_fit_basis": "Romania is an EU Member State; programme-level fit is discovery/research only and does not establish call eligibility."
+  },
+  "sources": [
+    {
+      "source_id": "EDF-OFFICIAL-PROGRAMME-ROOT",
+      "url": "https://defence-industry-space.ec.europa.eu/eu-defence-industry/european-defence-fund-edf-official-webpage-european-commission_en",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_markers": ["European Defence Fund", "EDF Work Programme 2026"]
+    },
+    {
+      "source_id": "EDF-2026-WORK-PROGRAMME",
+      "url": "https://defence-industry-space.ec.europa.eu/edf-work-programme-2026_en",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "required_markers": ["EDF Work Programme 2026", "Work Programme 2026", "Call topics description"]
+    },
+    {
+      "source_id": "DG-DEFIS-CALLS-INDEX-DISCOVERY",
+      "url": "https://defence-industry-space.ec.europa.eu/funding-opportunities/calls-proposals_en",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "required_markers": ["Calls for proposals", "Status", "Opening date"]
+    }
+  ]
+}

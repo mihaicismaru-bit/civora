@@ -1,0 +1,804 @@
+name: PARTENER.EU EU Direct Programme Intelligence
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/erasmus_action_router_registry.json'
+      - 'partener-eu/ingest/erasmus_action_router.py'
+      - 'partener-eu/ops/test_erasmus_action_router.py'
+      - 'partener-eu/ingest/eu4health_hadea_call_registry.json'
+      - 'partener-eu/ingest/eu4health_hadea_call.py'
+      - 'partener-eu/ingest/eu4health_hadea_ft_reconcile.py'
+      - 'partener-eu/ingest/funding_tenders_fetch.py'
+      - 'partener-eu/ingest/funding_tenders_api.py'
+      - 'partener-eu/ops/test_eu4health_hadea_call.py'
+      - 'partener-eu/ops/test_eu4health_hadea_ft_reconcile.py'
+      - 'partener-eu/ingest/horizon_eic_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/horizon_eic_programme_intelligence.py'
+      - 'partener-eu/ops/test_horizon_eic_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_eic_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_eic_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_eic_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_eic_ft_reconcile.py'
+      - 'partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eui_innovation_fund_programme_intelligence.py'
+      - 'partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_innovation_fund_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_innovation_fund_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_innovation_fund_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_innovation_fund_ft_reconcile.py'
+      - 'partener-eu/ingest/eu_direct_easi_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eu_direct_easi_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_easi_programme_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_easi_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_easi_programme_reconcile.py'
+      - 'partener-eu/ops/run_easi_programme_canonical.py'
+      - 'partener-eu/ingest/eu_direct_rfcs_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eu_direct_rfcs_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_rfcs_programme_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_rfcs_programme_reconcile.py'
+      - 'partener-eu/ops/run_rfcs_programme_canonical.py'
+      - 'partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eu_direct_edf_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_edf_programme_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_edf_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_edf_programme_reconcile.py'
+      - 'partener-eu/ops/run_edf_programme_canonical.py'
+      - 'partener-eu/ingest/eu_direct_esc_programme_intelligence_registry.json'
+      - 'partener-eu/ingest/eu_direct_esc_programme_intelligence.py'
+      - 'partener-eu/ingest/eu_direct_esc_programme_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_esc_programme_intelligence.py'
+      - 'partener-eu/ops/test_eu_direct_esc_programme_reconcile.py'
+      - 'partener-eu/ops/run_esc_programme_canonical.py'
+      - 'partener-eu/ingest/eu_direct_eui_exact_call.py'
+      - 'partener-eu/ingest/eu_direct_eui_exact_call_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_eui_exact_call.py'
+      - 'partener-eu/ops/test_eu_direct_eui_exact_call_reconcile.py'
+      - 'partener-eu/ops/run_eui_exact_canonical.py'
+      - '.github/workflows/partener-eu-eu-direct-programme-intelligence.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  eu-direct-programme-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile bounded EU Direct programme adapters and regressions
+        run: |
+          python -m json.tool partener-eu/ingest/erasmus_action_router_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eu4health_hadea_call_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/horizon_eic_programme_intelligence_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eu_direct_easi_programme_intelligence_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eu_direct_rfcs_programme_intelligence_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eu_direct_edf_programme_intelligence_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/eu_direct_esc_programme_intelligence_registry.json >/dev/null
+          python -m py_compile \
+            partener-eu/ingest/erasmus_action_router.py \
+            partener-eu/ingest/eu4health_hadea_call.py \
+            partener-eu/ingest/eu4health_hadea_ft_reconcile.py \
+            partener-eu/ingest/horizon_eic_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_eic_ft_exact.py \
+            partener-eu/ingest/eu_direct_eic_ft_reconcile.py \
+            partener-eu/ingest/eui_innovation_fund_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_innovation_fund_ft_exact.py \
+            partener-eu/ingest/eu_direct_innovation_fund_ft_reconcile.py \
+            partener-eu/ingest/eu_direct_easi_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_easi_programme_reconcile.py \
+            partener-eu/ops/run_easi_programme_canonical.py \
+            partener-eu/ingest/eu_direct_rfcs_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_rfcs_programme_reconcile.py \
+            partener-eu/ops/run_rfcs_programme_canonical.py \
+            partener-eu/ingest/eu_direct_edf_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_edf_programme_reconcile.py \
+            partener-eu/ops/run_edf_programme_canonical.py \
+            partener-eu/ingest/eu_direct_esc_programme_intelligence.py \
+            partener-eu/ingest/eu_direct_esc_programme_reconcile.py \
+            partener-eu/ops/run_esc_programme_canonical.py \
+            partener-eu/ops/test_eu_direct_esc_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_esc_programme_reconcile.py \
+            partener-eu/ingest/eu_direct_eui_exact_call.py \
+            partener-eu/ingest/eu_direct_eui_exact_call_reconcile.py \
+            partener-eu/ops/test_eu_direct_eui_exact_call.py \
+            partener-eu/ops/test_eu_direct_eui_exact_call_reconcile.py \
+            partener-eu/ops/run_eui_exact_canonical.py \
+            partener-eu/ops/test_erasmus_action_router.py \
+            partener-eu/ops/test_eu4health_hadea_call.py \
+            partener-eu/ops/test_eu4health_hadea_ft_reconcile.py \
+            partener-eu/ops/test_horizon_eic_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_eic_ft_exact.py \
+            partener-eu/ops/test_eu_direct_eic_ft_reconcile.py \
+            partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_innovation_fund_ft_exact.py \
+            partener-eu/ops/test_eu_direct_innovation_fund_ft_reconcile.py \
+            partener-eu/ops/test_eu_direct_easi_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_easi_programme_reconcile.py \
+            partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_rfcs_programme_reconcile.py \
+            partener-eu/ops/test_eu_direct_edf_programme_intelligence.py \
+            partener-eu/ops/test_eu_direct_edf_programme_reconcile.py
+
+      - name: Validate fail-closed EU Direct programme semantics
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_erasmus_action_router.py
+          python partener-eu/ops/test_eu4health_hadea_call.py
+          python partener-eu/ops/test_eu4health_hadea_ft_reconcile.py
+          python partener-eu/ops/test_horizon_eic_programme_intelligence.py
+          python partener-eu/ops/test_eu_direct_eic_ft_exact.py
+          python partener-eu/ops/test_eu_direct_eic_ft_reconcile.py
+          python partener-eu/ops/test_eui_innovation_fund_programme_intelligence.py
+          python partener-eu/ops/test_eu_direct_innovation_fund_ft_exact.py
+          python partener-eu/ops/test_eu_direct_innovation_fund_ft_reconcile.py
+          python partener-eu/ops/test_eu_direct_easi_programme_intelligence.py -v
+          python partener-eu/ops/test_eu_direct_easi_programme_reconcile.py -v
+          python partener-eu/ops/test_eu_direct_rfcs_programme_intelligence.py -v
+          python partener-eu/ops/test_eu_direct_rfcs_programme_reconcile.py -v
+          python partener-eu/ops/test_eu_direct_edf_programme_intelligence.py
+          python partener-eu/ops/test_eu_direct_edf_programme_reconcile.py -v
+          python partener-eu/ops/test_eu_direct_esc_programme_intelligence.py -v
+          python partener-eu/ops/test_eu_direct_esc_programme_reconcile.py -v
+          python partener-eu/ops/test_eu_direct_eui_exact_call.py
+          python partener-eu/ops/test_eu_direct_eui_exact_call_reconcile.py
+
+      - name: Prepare replay root
+        run: |
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence
+          rm -rf "$ROOT"
+          mkdir -p "$ROOT/erasmus-action-router" "$ROOT/eu4health-hadea" "$ROOT/horizon-eic" "$ROOT/eic-exact/current" "$ROOT/eic-exact/previous" "$ROOT/eui-innovation-fund" "$ROOT/innovation-fund-exact/current" "$ROOT/innovation-fund-exact/previous" "$ROOT/easi-programme/current" "$ROOT/easi-programme/previous" "$ROOT/easi-programme/history" "$ROOT/rfcs-programme/current" "$ROOT/rfcs-programme/previous" "$ROOT/rfcs-programme/history" "$ROOT/edf-programme/current" "$ROOT/edf-programme/previous" "$ROOT/edf-programme/history"
+
+      - name: Acquire fresh official Erasmus application-route intelligence
+        run: |
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence
+          python partener-eu/ingest/erasmus_action_router.py \
+            --management-mode CENTRALISED_EACEA \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --action-reference-hint "ERASMUS-CENTRALISED-DISCOVERY-ONLY" \
+            --live \
+            --output "$ROOT/erasmus-action-router/centralised-eacea.json"
+          python partener-eu/ingest/erasmus_action_router.py \
+            --management-mode DECENTRALISED_NATIONAL_AGENCY \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --live \
+            --output "$ROOT/erasmus-action-router/decentralised-national-agency.json"
+
+      - name: Enforce live non-authorizing Erasmus boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-eu-direct-programme-intelligence/erasmus-action-router')
+          central=json.loads((root/'centralised-eacea.json').read_text(encoding='utf-8'))
+          decentral=json.loads((root/'decentralised-national-agency.json').read_text(encoding='utf-8'))
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          for row, mode, registration, count in (
+              (central,'CENTRALISED_EACEA','PIC',4),
+              (decentral,'DECENTRALISED_NATIONAL_AGENCY','OID',3),
+          ):
+              assert row['schema'] == 'PARTENER_EU_ERASMUS_ACTION_ROUTER_V2'
+              assert row['source_family'] == 'EU_DIRECT'
+              assert row['programme_family'] == 'Erasmus+'
+              assert row['observation_state'] == 'APPLICATION_ROUTE_INTELLIGENCE'
+              assert row['management_mode'] == mode
+              assert row['route']['registration_identifier_kind'] == registration
+              assert row['evidence_source_count'] == count
+              assert row['source_health_state'] in {'HEALTHY','DEGRADED'}
+              assert all(row[k] is False for k in flags)
+              assert row['market_intelligence_only'] is True
+              assert row['publication_effect'] == 'NONE'
+              assert row['exact_action_endpoint_required'] is True
+              assert row['exact_call_or_topic_identifier_required'] is True
+              assert row['semantic_reconciliation_required'] is True
+              assert {
+                  'exact_action_or_call_identifier',
+                  'current_official_exact_action_or_call_endpoint',
+                  'explicit_current_official_action_or_call_status',
+                  'semantic_reconciliation',
+                  'field_scoped_material_admission',
+              }.issubset(set(row['missing_for_open_confirmation']))
+              assert re.fullmatch(r'[0-9a-f]{64}', row['registry_sha256'])
+              assert re.fullmatch(r'[0-9a-f]{64}', row['route_semantic_fingerprint'])
+              for source in row['evidence']:
+                  health=source['source_health']
+                  if health['health_state'] == 'HEALTHY':
+                      assert health['http_status'] == 200
+                      assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
+                  else:
+                      assert str(health['health_state']).startswith('DEGRADED')
+                      assert health['lkg_required'] is True
+          assert central['route']['route_class'] == 'CENTRALISED_EU_DIRECT'
+          assert central['route']['application_gateway_url'].startswith('https://ec.europa.eu/info/funding-tenders/')
+          assert central['action_reference_hint_authority'] == 'DISCOVERY_HINT_ONLY_NOT_CALL_IDENTIFIER'
+          assert decentral['route']['route_class'] == 'DECENTRALISED_NATIONAL_AGENCY'
+          assert decentral['route']['application_gateway_url'] == 'https://webgate.ec.europa.eu/erasmus-esc/index/'
+          print({'programme_family':'Erasmus+','open_call_authorized':False,'publication_effect':'NONE'})
+          PY
+
+      - name: Capture fresh exact HaDEA EU4Health evidence
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea
+          python partener-eu/ingest/eu4health_hadea_call.py \
+            --call-url 'https://hadea.ec.europa.eu/calls-proposals/health-data-biotech-innovation-leveraging-european-health-data-space-0_en' \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eu4health-hadea" \
+            --output "$ROOT/exact-call.json"
+
+      - name: Validate EU4Health exact evidence stays non-authorizing
+        id: live_hadea
+        run: |
+          python - <<'PY'
+          import json, string, sys
+          p='/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/exact-call.json'
+          d=json.load(open(p, encoding='utf-8'))
+          if d.get('adapter_id') != 'EU4HEALTH_HADEA_CALLS_V1': sys.exit('FAIL adapter identity drift')
+          if d.get('observation_state') != 'EXACT_CALL_EVIDENCE_UNRECONCILED': sys.exit('FAIL observation state drift')
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+              if d.get(key) is not False: sys.exit(f'FAIL EU4Health evidence became authorizing: {key}')
+          if d.get('publication_effect') != 'NONE' or d.get('market_intelligence_only') is not True: sys.exit('FAIL EU4Health policy drift')
+          if d.get('funding_tenders_exact_topic_required') is not True or d.get('semantic_reconciliation_required') is not True: sys.exit('FAIL material-admission requirement relaxed')
+          reg_hash=str(d.get('registry_sha256') or '')
+          if len(reg_hash) != 64 or any(ch not in string.hexdigits for ch in reg_hash): sys.exit('FAIL registry hash invalid')
+          health=(d.get('source_health') or {}).get('health_state')
+          if health == 'HEALTHY':
+              raw_hash=str((d.get('source_health') or {}).get('raw_sha256') or '')
+              if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash): sys.exit('FAIL healthy HaDEA evidence missing raw hash')
+              extracted=d.get('extracted') or {}
+              if extracted.get('call_reference') != 'EU4H-2026-SANTE-PJ-08': sys.exit('FAIL exact call reference mismatch')
+              if extracted.get('page_kind') != 'CALL_FOR_PROPOSALS' or extracted.get('programme_candidate') != 'EU4Health': sys.exit('FAIL exact call semantic markers incomplete')
+              if d.get('evidence_usable_for_reconciliation') is not True: sys.exit('FAIL healthy evidence not usable for reconciliation')
+          elif not str(health).startswith('DEGRADED'):
+              sys.exit('FAIL unexpected live source health')
+          elif (d.get('source_health') or {}).get('lkg_required') is not True:
+              sys.exit('FAIL degraded exact source lacks LKG requirement')
+          print(json.dumps({'health_state':health,'call_reference':(d.get('extracted') or {}).get('call_reference'),'open_call_authorized':False}, sort_keys=True))
+          PY
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          d=json.load(open('/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/exact-call.json', encoding='utf-8'))
+          print('evidence_usable=' + ('true' if d.get('evidence_usable_for_reconciliation') is True else 'false'))
+          PY
+
+      - name: Reconcile exact HaDEA reference against fresh structured Funding & Tenders evidence
+        if: steps.live_hadea.outputs.evidence_usable == 'true'
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea
+          python partener-eu/ingest/eu4health_hadea_ft_reconcile.py \
+            --hadea-evidence "$ROOT/exact-call.json" \
+            --live \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eu4health-hadea-ft" \
+            --output-dir "$ROOT"
+
+      - name: Validate reconciled EU4Health evidence stays non-authorizing
+        if: steps.live_hadea.outputs.evidence_usable == 'true'
+        run: |
+          python - <<'PY'
+          import json, re
+          p='/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/hadea-funding-tenders-reconciliation.json'
+          d=json.load(open(p, encoding='utf-8'))
+          expected='EU4H-2026-SANTE-PJ-08'
+          assert d.get('reconciler_version') == 'EU4HEALTH_HADEA_FT_RECONCILE_V1'
+          assert d.get('observation_state') == 'EXACT_CALL_REFERENCE_AND_STATUS_RECONCILED_NON_AUTHORIZING'
+          assert d.get('hadea_reference') == expected and d.get('funding_tenders_reference') == expected
+          assert d.get('identity_match') is True and d.get('topic_url_match') is True and d.get('status_match') is True
+          assert d.get('semantic_reconciliation_passed') is True
+          assert d.get('material_admission_ready_for_downstream_review') is True
+          assert str(d.get('funding_tenders_status') or '').casefold() == 'closed'
+          assert 'current_funding_tenders_status_is_not_open' in set(d.get('missing_for_open_confirmation') or [])
+          assert re.fullmatch(r'[0-9a-f]{64}', str(d.get('semantic_fingerprint') or ''))
+          for key in ('material_fact_use','open_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized'):
+              assert d.get(key) is False
+          assert d.get('publication_effect') == 'NONE' and d.get('canonical_corpus_mutation') is False
+          print(json.dumps({'reference':expected,'status':d.get('funding_tenders_status'),'open_call_authorized':False}, sort_keys=True))
+          PY
+
+      - name: Confirm degraded HaDEA evidence remains unreconciled
+        if: steps.live_hadea.outputs.evidence_usable != 'true'
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          d=json.load(open('/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/exact-call.json', encoding='utf-8'))
+          health=d.get('source_health') or {}
+          assert str(health.get('health_state') or '').startswith('DEGRADED')
+          assert health.get('lkg_required') is True
+          assert d.get('evidence_usable_for_reconciliation') is False
+          assert d.get('open_call_authorized') is False
+          assert d.get('publish_authorized') is False
+          assert not pathlib.Path('/tmp/partener-eu-eu-direct-programme-intelligence/eu4health-hadea/hadea-funding-tenders-reconciliation.json').exists()
+          print(json.dumps({'health_state':health.get('health_state'),'semantic_reconciliation_skipped_fail_closed':True}, sort_keys=True))
+          PY
+
+      - name: Acquire fresh official Horizon EIC programme intelligence
+        run: |
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/horizon-eic
+          python partener-eu/ingest/horizon_eic_programme_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-horizon-eic" \
+            --live \
+            --output "$ROOT/horizon-eic.json"
+
+      - name: Enforce live non-authorizing Horizon EIC boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          p='/tmp/partener-eu-eu-direct-programme-intelligence/horizon-eic/horizon-eic.json'
+          d=json.load(open(p, encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_HORIZON_EIC_PROGRAMME_INTELLIGENCE_V1'
+          assert d['source_family'] == 'EU_DIRECT'
+          assert set(d['programme_families']) == {'Horizon Europe','European Innovation Council'}
+          assert d['source_count'] == 4
+          assert d['source_health_state'] in {'HEALTHY','DEGRADED'}
+          assert d['market_intelligence_only'] is True
+          assert d['publication_effect'] == 'NONE'
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized','canonical_corpus_mutation'):
+              assert d[key] is False, (key,d[key])
+          assert d['exact_call_or_topic_identifier_required'] is True
+          assert d['current_official_exact_endpoint_required'] is True
+          assert d['semantic_reconciliation_required'] is True
+          assert d['field_scoped_material_admission_required'] is True
+          assert re.fullmatch(r'[0-9a-f]{64}', d['registry_sha256'])
+          assert re.fullmatch(r'[0-9a-f]{64}', d['semantic_fingerprint'])
+          assert len(d['sources']) == 4
+          for source in d['sources']:
+              health=source['source_health']
+              if health['health_state'] == 'HEALTHY':
+                  assert health['http_status'] == 200
+                  assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
+                  assert health['lkg_required'] is False
+              else:
+                  assert str(health['health_state']).startswith('DEGRADED')
+                  assert health['lkg_required'] is True
+              assert source['observation_state'] in {'PROGRAMME_INTELLIGENCE','PROGRAMMING_PIPELINE','CALL_INDEX_DISCOVERY'}
+              assert source['material_fact_use'] is False
+          assert {'exact_call_or_topic_identifier','current_official_exact_call_or_topic_endpoint','explicit_current_official_call_status','semantic_reconciliation','field_scoped_material_admission'}.issubset(set(d['missing_for_open_confirmation']))
+          print(json.dumps({'health':d['source_health_state'],'healthy_sources':d['healthy_source_count'],'degraded_sources':d['degraded_source_count'],'programmes':d['programme_families'],'open_call_authorized':False,'publication_effect':'NONE'}, sort_keys=True))
+          PY
+
+      - name: Acquire fresh official EUI and Innovation Fund intelligence
+        run: |
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/eui-innovation-fund
+          python partener-eu/ingest/eui_innovation_fund_programme_intelligence.py \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eui-innovation-fund" \
+            --live \
+            --output "$ROOT/eui-innovation-fund-programme-intelligence.json"
+          cp partener-eu/ingest/eui_innovation_fund_programme_intelligence_registry.json "$ROOT/registry.json"
+
+      - name: Enforce live non-authorizing EUI and Innovation Fund boundary
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          p=Path('/tmp/partener-eu-eu-direct-programme-intelligence/eui-innovation-fund/eui-innovation-fund-programme-intelligence.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          assert d['schema'] == 'PARTENER_EU_EUI_INNOVATION_FUND_PROGRAMME_INTELLIGENCE_V1'
+          assert d['source_family'] == 'EU_DIRECT'
+          assert set(d['programme_families']) == {'European Urban Initiative','Innovation Fund'}
+          assert d['source_count'] == 5 and len(d['sources']) == 5 and len(d['programme_intelligence']) == 2
+          assert d['market_intelligence_only'] is True and d['fit_scores_are_not_eligibility'] is True
+          assert d['publication_effect'] == 'NONE'
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized',
+              'budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized',
+              'call_alert_authorized','canonical_corpus_mutation',
+          )
+          assert all(d[k] is False for k in flags)
+          assert d['exact_call_or_topic_identifier_required'] is True
+          assert d['current_official_exact_endpoint_required'] is True
+          assert d['semantic_reconciliation_required'] is True
+          assert d['field_scoped_material_admission_required'] is True
+          assert re.fullmatch(r'[0-9a-f]{64}', d['registry_sha256'])
+          assert re.fullmatch(r'[0-9a-f]{64}', d['semantic_fingerprint'])
+          states={}
+          for source in d['sources']:
+              assert source['observation_state'] in {'PROGRAMME_INTELLIGENCE','CALL_INDEX_DISCOVERY'}
+              assert source['material_fact_use'] is False
+              assert re.fullmatch(r'[0-9a-f]{64}', source['source_semantic_fingerprint'])
+              health=source['source_health']
+              states[source['source_id']]=health['health_state']
+              if health['health_state'] == 'HEALTHY':
+                  assert health['http_status'] == 200
+                  assert health['lkg_required'] is False
+                  assert re.fullmatch(r'[0-9a-f]{64}', health['raw_sha256'])
+              else:
+                  assert str(health['health_state']).startswith('DEGRADED')
+                  assert health['lkg_required'] is True
+          for row in d['programme_intelligence']:
+              assert row['market_intelligence_only'] is True
+              assert row['fit_score_is_not_eligibility'] is True
+              assert 0 <= row['fit_score'] <= 1
+          print(json.dumps({
+              'source_health':states,
+              'healthy_source_count':d['healthy_source_count'],
+              'degraded_source_count':d['degraded_source_count'],
+              'semantic_fingerprint':d['semantic_fingerprint'],
+              'open_call_authorized':False,
+              'publication_effect':'NONE',
+          }, sort_keys=True))
+          PY
+
+      - name: Restore previous successful same-branch Innovation Fund exact receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact
+          SCRATCH=/tmp/partener-eu-innovation-fund-exact-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH" "$ROOT/previous"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          CANDIDATE="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-innovation-fund-exact-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not (name.startswith('partener-eu-eu-direct-programme-intelligence-') or name.startswith('partener-eu-innovation-fund-exact-proof-')):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          print(rows[0][1] if rows else '')
+          PY
+          )"
+          if [ -n "$CANDIDATE" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            mkdir -p "$SCRATCH/unpacked"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'ft-innovation-fund-exact-evidence.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous/ft-innovation-fund-exact-evidence.json"
+              echo "Restored previous bounded exact Innovation Fund receipt from artifact ${CANDIDATE}"
+            else
+              echo "Candidate artifact ${CANDIDATE} contained no exact Innovation Fund receipt; baseline mode retained."
+            fi
+          else
+            echo "No previous same-branch exact Innovation Fund artifact found; baseline mode retained."
+          fi
+
+      - name: Verify exact official CINEA Innovation Fund discovery endpoint
+        run: |
+          python - <<'PY'
+          import hashlib, json
+          from pathlib import Path
+          from urllib.parse import urlparse
+          from urllib.request import Request, urlopen
+          url='https://cinea.ec.europa.eu/funding-opportunities/calls-proposals/innovation-fund-2025-net-zero-technologies-call_en'
+          parsed=urlparse(url)
+          assert parsed.scheme == 'https' and parsed.hostname == 'cinea.ec.europa.eu'
+          req=Request(url, headers={'User-Agent':'Mozilla/5.0 (compatible; PARTENER-EU/1.0)','Accept':'text/html,application/xhtml+xml'})
+          with urlopen(req, timeout=30) as response:
+              final=response.geturl(); status=getattr(response,'status',response.getcode()); ctype=(response.headers.get('Content-Type') or '').lower(); raw=response.read(2*1024*1024+1)
+          finalp=urlparse(final)
+          assert status == 200 and finalp.scheme == 'https' and finalp.hostname == 'cinea.ec.europa.eu' and 'html' in ctype
+          assert len(raw) <= 2*1024*1024
+          text=raw.decode('utf-8','replace')
+          assert 'Innovation Fund 2025 Net-Zero Technologies Call' in text
+          assert 'The call is closed' in text or '>Closed<' in text or 'Closed' in text
+          receipt={'requested_url':url,'final_url':final,'http_status':status,'content_type':ctype,'bytes':len(raw),'raw_sha256':hashlib.sha256(raw).hexdigest(),'authority_class':'CINEA_OFFICIAL_CALL_DISCOVERY','observation_state':'EXACT_CALL_DISCOVERY_SUPPORT_NON_AUTHORIZING','material_fact_use':False,'publication_effect':'NONE'}
+          Path('/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact/current/cinea-discovery-receipt.json').write_text(json.dumps(receipt,sort_keys=True,indent=2)+'\n',encoding='utf-8')
+          print(json.dumps(receipt,sort_keys=True))
+          PY
+
+      - name: Acquire fresh exact Innovation Fund Funding and Tenders evidence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python partener-eu/ingest/eu_direct_innovation_fund_ft_exact.py \
+            --reference 'INNOVFUND-2025-NZT-GENERAL-LSP' \
+            --expected-call-identifier 'INNOVFUND-2025-NZT' \
+            --discovery-source-url 'https://cinea.ec.europa.eu/funding-opportunities/calls-proposals/innovation-fund-2025-net-zero-technologies-call_en' \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-innovation-fund-exact" \
+            --output-dir /tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact/current
+
+      - name: Reconcile exact Innovation Fund same-identity evidence non-authorizing
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact
+          ARGS=()
+          if [ -f "$ROOT/previous/ft-innovation-fund-exact-evidence.json" ]; then
+            ARGS+=(--previous "$ROOT/previous/ft-innovation-fund-exact-evidence.json")
+          fi
+          python partener-eu/ingest/eu_direct_innovation_fund_ft_reconcile.py \
+            "$ROOT/current/ft-innovation-fund-exact-evidence.json" \
+            "${ARGS[@]}" \
+            --output "$ROOT/current/innovation-fund-exact-reconciliation.json"
+
+      - name: Enforce live exact Innovation Fund boundary and reconciliation
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-eu-direct-programme-intelligence/innovation-fund-exact')
+          evidence=json.loads((root/'current/ft-innovation-fund-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current/innovation-fund-exact-reconciliation.json').read_text(encoding='utf-8'))
+          cinea=json.loads((root/'current/cinea-discovery-receipt.json').read_text(encoding='utf-8'))
+          previous_exists=(root/'previous/ft-innovation-fund-exact-evidence.json').exists()
+          ref='INNOVFUND-2025-NZT-GENERAL-LSP'
+          call='INNOVFUND-2025-NZT'
+          assert cinea['http_status'] == 200 and re.fullmatch(r'[0-9a-f]{64}',cinea['raw_sha256'])
+          assert cinea['material_fact_use'] is False and cinea['publication_effect'] == 'NONE'
+          assert evidence['schema'] == 'PARTENER_EU_INNOVATION_FUND_FT_EXACT_EVIDENCE_V1'
+          assert evidence['reference'] == ref and evidence['call_identifier'] == call
+          assert evidence['programme_family'] == 'INNOVATION_FUND'
+          assert evidence['authority_url_verified'] is True
+          assert 'innovation fund' in str(evidence['programme_label_official']).casefold()
+          assert evidence['candidate_state'] in {'OPEN_CALL','FORTHCOMING_CALL','CLOSED_CALL','UNKNOWN'}
+          assert evidence['status_label']
+          assert re.fullmatch(r'[0-9a-f]{64}', evidence['exact_semantic_fingerprint'])
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              assert evidence[key] is False, (key,evidence[key])
+          assert rec['schema'] == 'PARTENER_EU_INNOVATION_FUND_FT_RECONCILIATION_V1'
+          assert rec['reference'] == ref and rec['call_identifier'] == call
+          if previous_exists:
+              assert rec['reconciliation_state'] in {'NO_CHANGE','INNOVATION_FUND_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING'}
+              assert rec['previous_evidence_sha256'] is not None
+          else:
+              assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+              assert rec['previous_evidence_sha256'] is None
+          assert rec['semantic_reconciliation_passed'] is True
+          assert rec['field_scoped_material_admission_required'] is True
+          assert 'field_scoped_material_admission' in set(rec['missing_for_material_admission'])
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              assert rec[key] is False, (key,rec[key])
+          assert rec['publication_effect'] == 'NONE' and rec['canonical_corpus_mutation'] is False
+          print(json.dumps({
+              'reference': ref,
+              'call_identifier': call,
+              'candidate_state': evidence['candidate_state'],
+              'status_label': evidence['status_label'],
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'previous_same_identity_restored': previous_exists,
+              'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
+              'open_call_authorized': False,
+              'closed_call_authorized': False,
+              'publication_effect': 'NONE',
+          }, sort_keys=True))
+          PY
+
+      - name: Restore previous successful same-branch exact EIC receipt
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/eic-exact
+          SCRATCH=/tmp/partener-eu-eic-exact-history-scan
+          rm -rf "$SCRATCH"
+          mkdir -p "$SCRATCH" "$ROOT/previous"
+          gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts?per_page=100" > "$SCRATCH/artifacts.json"
+          CANDIDATE="$(python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data=json.loads(Path('/tmp/partener-eu-eic-exact-history-scan/artifacts.json').read_text(encoding='utf-8'))
+          head=os.environ['EXPECTED_HEAD_SHA']
+          branch=os.environ['EXPECTED_HEAD_BRANCH']
+          rows=[]
+          for artifact in data.get('artifacts') or []:
+              name=str(artifact.get('name') or '')
+              if not (name.startswith('partener-eu-eu-direct-programme-intelligence-') or name.startswith('partener-eu-eic-exact-proof-')):
+                  continue
+              if artifact.get('expired') is True:
+                  continue
+              run=artifact.get('workflow_run') or {}
+              if str(run.get('head_sha') or '') == head:
+                  continue
+              if branch and str(run.get('head_branch') or '') != branch:
+                  continue
+              rows.append((str(artifact.get('created_at') or ''), int(artifact.get('id') or 0)))
+          rows.sort(reverse=True)
+          print(rows[0][1] if rows else '')
+          PY
+          )"
+          if [ -n "$CANDIDATE" ]; then
+            gh api "repos/${GITHUB_REPOSITORY}/actions/artifacts/${CANDIDATE}/zip" > "$SCRATCH/previous.zip"
+            mkdir -p "$SCRATCH/unpacked"
+            unzip -q "$SCRATCH/previous.zip" -d "$SCRATCH/unpacked"
+            PREVIOUS="$(find "$SCRATCH/unpacked" -type f -name 'ft-eic-exact-evidence.json' | head -n1 || true)"
+            if [ -n "$PREVIOUS" ]; then
+              cp "$PREVIOUS" "$ROOT/previous/ft-eic-exact-evidence.json"
+              echo "Restored previous bounded exact EIC receipt from artifact ${CANDIDATE}"
+            else
+              echo "Candidate artifact ${CANDIDATE} contained no exact EIC receipt; baseline mode retained."
+            fi
+          else
+            echo "No previous same-branch exact EIC artifact found; baseline mode retained."
+          fi
+
+      - name: Acquire fresh exact EIC Funding and Tenders evidence
+        env:
+          PYTHONPATH: partener-eu/ingest
+        run: |
+          python partener-eu/ingest/eu_direct_eic_ft_exact.py \
+            --reference 'HORIZON-EIC-2026-PATHFINDERCHALLENGES-01-01' \
+            --discovery-source-url 'https://eic.ec.europa.eu/eic-funding-opportunities/eic-pathfinder/eic-pathfinder-challenges-2026_en' \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-eic-exact" \
+            --output-dir /tmp/partener-eu-eu-direct-programme-intelligence/eic-exact/current
+
+      - name: Reconcile exact EIC same-identity evidence non-authorizing
+        env:
+          PYTHONPATH: partener-eu/ingest
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT=/tmp/partener-eu-eu-direct-programme-intelligence/eic-exact
+          ARGS=()
+          if [ -f "$ROOT/previous/ft-eic-exact-evidence.json" ]; then
+            ARGS+=(--previous "$ROOT/previous/ft-eic-exact-evidence.json")
+          fi
+          python partener-eu/ingest/eu_direct_eic_ft_reconcile.py \
+            "$ROOT/current/ft-eic-exact-evidence.json" \
+            "${ARGS[@]}" \
+            --output "$ROOT/current/eic-exact-reconciliation.json"
+
+      - name: Enforce live exact EIC boundary and reconciliation
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-eu-direct-programme-intelligence/eic-exact')
+          evidence=json.loads((root/'current/ft-eic-exact-evidence.json').read_text(encoding='utf-8'))
+          rec=json.loads((root/'current/eic-exact-reconciliation.json').read_text(encoding='utf-8'))
+          previous_exists=(root/'previous/ft-eic-exact-evidence.json').exists()
+          ref='HORIZON-EIC-2026-PATHFINDERCHALLENGES-01-01'
+          assert evidence['schema'] == 'PARTENER_EU_EIC_FT_EXACT_EVIDENCE_V1'
+          assert evidence['reference'] == ref
+          assert evidence['programme_family'] == 'HORIZON_EUROPE_EIC'
+          assert 'horizon europe' in str(evidence['programme_label_official']).casefold()
+          assert re.fullmatch(r'[0-9a-f]{64}', evidence['exact_semantic_fingerprint'])
+          usable=evidence.get('evidence_usable_for_reconciliation')
+          assert usable in {True,False}
+          if usable:
+              assert evidence['authority_url_verified'] is True
+              assert evidence['source_health_state'] == 'HEALTHY'
+              assert evidence['lkg_required'] is False
+              assert evidence['candidate_state'] in {'OPEN_CALL','FORTHCOMING_CALL','CLOSED_CALL','UNKNOWN'}
+              assert evidence['status_label']
+          else:
+              assert evidence['authority_url_verified'] is False
+              assert evidence['source_health_state'] == 'DEGRADED_AUTHORITY_READBACK'
+              assert evidence['lkg_required'] is True
+              assert evidence['candidate_state'] == 'UNKNOWN'
+              assert evidence['status_label'] is None
+              assert evidence['deadline_candidate'] is None
+              assert evidence['budget_candidate'] is None
+              assert evidence['degradation_reason']
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              assert evidence[key] is False, (key,evidence[key])
+          assert rec['schema'] == 'PARTENER_EU_EIC_FT_RECONCILIATION_V1'
+          assert rec['reference'] == ref
+          assert rec['field_scoped_material_admission_required'] is True
+          assert 'field_scoped_material_admission' in set(rec['missing_for_material_admission'])
+          assert rec['lkg_reference_is_current_truth'] is False
+          if usable:
+              if previous_exists:
+                  assert rec['reconciliation_state'] in {
+                      'NO_CHANGE',
+                      'EIC_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING',
+                      'SOURCE_HEALTH_RECOVERED_BASELINE_REFRESH_NON_AUTHORIZING',
+                  }
+                  assert rec['previous_evidence_sha256'] is not None
+              else:
+                  assert rec['reconciliation_state'] == 'BASELINE_CAPTURED_NON_AUTHORIZING'
+                  assert rec['previous_evidence_sha256'] is None
+              assert rec['semantic_reconciliation_passed'] is True
+              assert rec['lkg_reference_required'] is False
+          else:
+              assert rec['reconciliation_state'] == 'CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED'
+              assert rec['semantic_reconciliation_passed'] is False
+              assert rec['semantic_change_count'] == 0
+              assert rec['semantic_changes'] == []
+              assert rec['lkg_reference_required'] is True
+              assert rec['lkg_reference_available'] is previous_exists
+              assert rec['material_admission_ready_for_downstream_review'] is False
+              assert 'current_exact_authority_unresolved' in set(rec['missing_for_material_admission'])
+          for key in ('material_fact_use','open_call_authorized','closed_call_authorized','deadline_authorized','budget_authorized','eligibility_authorized','publish_authorized','distribution_authorized','call_alert_authorized'):
+              assert rec[key] is False, (key,rec[key])
+          assert rec['publication_effect'] == 'NONE' and rec['canonical_corpus_mutation'] is False
+          print(json.dumps({
+              'reference': ref,
+              'source_health_state': evidence['source_health_state'],
+              'evidence_usable_for_reconciliation': usable,
+              'candidate_state': evidence['candidate_state'],
+              'status_label': evidence['status_label'],
+              'reconciliation_state': rec['reconciliation_state'],
+              'semantic_change_count': rec['semantic_change_count'],
+              'previous_same_identity_restored': previous_exists,
+              'lkg_reference_required': rec['lkg_reference_required'],
+              'material_admission_ready_for_downstream_review': rec['material_admission_ready_for_downstream_review'],
+              'open_call_authorized': False,
+              'publication_effect': 'NONE',
+          }, sort_keys=True))
+          PY
+
+      - name: Run canonical EaSI programme intelligence with history and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EASI_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-easi
+        run: python partener-eu/ops/run_easi_programme_canonical.py
+
+      - name: Run canonical RFCS programme intelligence with history and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          RFCS_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-rfcs
+        run: python partener-eu/ops/run_rfcs_programme_canonical.py
+
+      - name: Run canonical EDF programme intelligence with history and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EDF_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-edf
+        run: python partener-eu/ops/run_edf_programme_canonical.py
+
+      - name: Run canonical ESC programme intelligence with history and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          ESC_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-esc
+        run: python partener-eu/ops/run_esc_programme_canonical.py
+
+      - name: Run canonical EUI exact call intelligence with history and LKG
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          EUI_EXACT_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-eui-call4
+        run: python partener-eu/ops/run_eui_exact_canonical.py
+
+      - name: Upload replayable EU Direct programme evidence
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: partener-eu-eu-direct-programme-intelligence-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/partener-eu-eu-direct-programme-intelligence
+          if-no-files-found: error
+          retention-days: 7
