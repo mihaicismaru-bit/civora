@@ -329,6 +329,45 @@ jobs:
         if: github.event_name == 'pull_request' || steps.preview_tiktok.outputs.has_eligible != 'true'
         run: cp /tmp/tiktok-preview.json /tmp/tiktok-apply.json
 
+      - name: Refresh truth-bound autonomy acceptance after delivery
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          sys.path.insert(0, str(Path('valcea-clar/social').resolve()))
+          from autonomy_acceptance import build_acceptance_snapshot
+
+          canonical = Path('valcea-clar/social/social_media_manifest.json')
+          if not canonical.is_file():
+              raise SystemExit('missing social_media_manifest.json')
+          manifest = json.loads(canonical.read_text(encoding='utf-8'))
+          if not isinstance(manifest, dict):
+              raise SystemExit('social_media_manifest.json must contain an object')
+          manifest['autonomy_acceptance'] = build_acceptance_snapshot()
+
+          def atomic_write(path: Path) -> None:
+              path.parent.mkdir(parents=True, exist_ok=True)
+              tmp = path.with_name(path.name + '.tmp')
+              tmp.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+              tmp.replace(path)
+
+          atomic_write(canonical)
+          atomic_write(Path('valcea-clar/site/runtime/media/social/manifest.json'))
+          acceptance = manifest['autonomy_acceptance']
+          print(json.dumps({
+              'acceptance_ready': acceptance.get('acceptance_ready'),
+              'public_http_readback': (acceptance.get('public_http_readback') or {}).get('status'),
+              'facebook_receipt_bound': (acceptance.get('facebook_delivery_rate_receipt_bound') or {}).get('status'),
+              'instagram_receipt_bound': (acceptance.get('instagram_delivery_rate_receipt_bound') or {}).get('status'),
+              'manual_intervention': (acceptance.get('manual_intervention') or {}).get('value'),
+          }, ensure_ascii=False, sort_keys=True))
+          PY
+
       - name: Persist canonical social state and public media conflict-safe
         if: always() && github.event_name != 'pull_request'
         shell: bash
