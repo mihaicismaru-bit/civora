@@ -79,6 +79,16 @@ def _bot_identity(name: str, email: str) -> bool:
     return "[bot]" in text or "-bot" in text or "bot@" in text or "github-actions" in text
 
 
+def _workflow_trigger_identity(run: dict[str, Any]) -> dict[str, Any]:
+    triggering = run.get("triggering_actor") if isinstance(run.get("triggering_actor"), dict) else {}
+    actor = run.get("actor") if isinstance(run.get("actor"), dict) else {}
+    source = triggering or actor
+    login = str(source.get("login") or "").strip()
+    actor_type = str(source.get("type") or "").strip()
+    automated = actor_type.casefold() == "bot" or _bot_identity(login, "")
+    return {"login": login or None, "type": actor_type or None, "automated": automated}
+
+
 def latest_structural_change() -> dict[str, str] | None:
     try:
         raw = _git([
@@ -296,11 +306,12 @@ def relevant_manual_dispatches(since: datetime) -> dict[str, Any]:
         with urllib.request.urlopen(request, timeout=10) as response:
             payload = json.loads(response.read().decode("utf-8"))
     except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
-        return {"status": "UNKNOWN", "reason": f"github_actions_read_failed:{type(exc).__name__}", "runs": []}
+        return {"status": "UNKNOWN", "reason": f"github_actions_read_failed:{type(exc).__name__}", "runs": [], "automated_runs": []}
 
     if int(payload.get("total_count") or 0) > 100:
-        return {"status": "UNKNOWN", "reason": "workflow_dispatch_result_truncated", "runs": []}
+        return {"status": "UNKNOWN", "reason": "workflow_dispatch_result_truncated", "runs": [], "automated_runs": []}
     relevant: list[dict[str, Any]] = []
+    automated: list[dict[str, Any]] = []
     for run in payload.get("workflow_runs", []):
         if not isinstance(run, dict):
             continue
@@ -308,12 +319,19 @@ def relevant_manual_dispatches(since: datetime) -> dict[str, Any]:
         path = _normal(str(run.get("path") or ""))
         if "valcea clar" not in name and "valcea" not in path:
             continue
-        relevant.append({
+        identity = _workflow_trigger_identity(run)
+        record = {
             "run_id": run.get("id"),
             "workflow": run.get("name"),
             "created_at": run.get("created_at"),
-        })
-    return {"status": "MEASURED", "runs": relevant}
+            "triggering_actor": identity["login"],
+            "triggering_actor_type": identity["type"],
+        }
+        if identity["automated"]:
+            automated.append(record)
+            continue
+        relevant.append(record)
+    return {"status": "MEASURED", "runs": relevant, "automated_runs": automated}
 
 
 def _rate(receipts: dict[str, str], story_ids: set[str]) -> dict[str, Any]:
@@ -408,10 +426,18 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
                 "status": "MEASURED",
                 "value": manual_count,
                 "workflow_dispatch_runs": dispatches["runs"],
+                "automated_workflow_dispatch_runs": dispatches.get("automated_runs", []),
                 "manual_story_route_additions": manual_routes,
+                "definition": "only non-bot workflow_dispatch triggers and human-authored public story route additions count as manual intervention",
             }
         else:
-            manual = {"status": "UNKNOWN", "value": None, "reason": dispatches.get("reason"), "manual_story_route_additions": manual_routes}
+            manual = {
+                "status": "UNKNOWN",
+                "value": None,
+                "reason": dispatches.get("reason"),
+                "automated_workflow_dispatch_runs": dispatches.get("automated_runs", []),
+                "manual_story_route_additions": manual_routes,
+            }
         eligible_after = baseline + timedelta(hours=SOAK_HOURS)
         if manual.get("value") is None:
             soak_status = "UNKNOWN"
@@ -469,6 +495,12 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
 def self_test() -> int:
     assert _bot_identity("github-actions[bot]", "41898282+github-actions[bot]@users.noreply.github.com")
     assert not _bot_identity("Example User", "user@example.com")
+    bot_trigger = _workflow_trigger_identity({"triggering_actor": {"login": "github-actions[bot]", "type": "Bot"}})
+    assert bot_trigger == {"login": "github-actions[bot]", "type": "Bot", "automated": True}
+    human_trigger = _workflow_trigger_identity({"triggering_actor": {"login": "example-user", "type": "User"}})
+    assert human_trigger == {"login": "example-user", "type": "User", "automated": False}
+    missing_trigger = _workflow_trigger_identity({})
+    assert missing_trigger == {"login": None, "type": None, "automated": False}
     photo = {
         "stories": {
             "ok": {"image": {"kind": "photograph", "synthetic": False, "subject_match": True, "editor_approved": True, "rights_basis": "cc"}},
