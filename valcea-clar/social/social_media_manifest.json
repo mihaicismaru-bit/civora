@@ -170,43 +170,40 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 2,
-      "readback_ok": 0,
-      "value": 0.0,
-      "blocker_story_ids": [
-        "apavil-joburi-septembrie-2026",
-        "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd"
-      ],
+      "readback_ok": 2,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "apavil-joburi-septembrie-2026",
           "url": "https://valceaclar.ro/stiri/apavil-joburi-septembrie-2026/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd",
           "url": "https://valceaclar.ro/stiri/fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         }
       ],
       "projection_evidence": {
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-14T22:06:10.811996Z",
+        "updated_local": "2026-09-15T14:48:49.366184Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 73
+        "public_story_count": 75
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
@@ -221,10 +218,12 @@
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 0,
+      "delivered": 1,
       "eligible": 2,
-      "value": 0.0,
-      "delivered_story_ids": []
+      "value": 0.5,
+      "delivered_story_ids": [
+        "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd"
+      ]
     },
     "duplicates": {
       "status": "MEASURED",
@@ -247,72 +246,51 @@
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
         {
-          "run_id": 34987705959,
+          "run_id": 35011949083,
           "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-15T15:19:50Z",
+          "created_at": "2026-09-15T19:09:46Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
-          "run_id": 34987269738,
+          "run_id": 35011590355,
           "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-15T15:15:59Z",
+          "created_at": "2026-09-15T19:06:11Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
-          "run_id": 34984433005,
+          "run_id": 35008285308,
           "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-15T14:51:07Z",
+          "created_at": "2026-09-15T18:34:06Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
-          "run_id": 34984263324,
+          "run_id": 35008104575,
           "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-15T14:49:37Z",
+          "created_at": "2026-09-15T18:32:21Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
-          "run_id": 34984187291,
-          "workflow": "VÂLCEA CLAR Social Publication Engine",
-          "created_at": "2026-09-15T14:48:57Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "run_id": 34984137220,
+          "run_id": 35007983352,
           "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-09-15T14:48:30Z",
+          "created_at": "2026-09-15T18:31:10Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
-          "run_id": 34975758609,
+          "run_id": 35005972913,
           "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-15T13:33:28Z",
+          "created_at": "2026-09-15T18:12:00Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
-          "run_id": 34966076942,
-          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
-          "created_at": "2026-09-15T11:57:03Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "run_id": 34955852605,
+          "run_id": 35004487848,
           "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-15T10:03:13Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "run_id": 34943275106,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-15T07:44:48Z",
+          "created_at": "2026-09-15T17:57:44Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         }
@@ -322,9 +300,9 @@
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "a97a388c1f7ec0386713119e7ae42d91c49e7c90",
-      "structural_baseline_at_utc": "2026-09-15T06:26:29Z",
-      "eligible_after_utc": "2026-09-17T06:26:29Z",
+      "structural_baseline_sha": "6f06a38bc3787f09752debb3d3a8e5e8a0d68f28",
+      "structural_baseline_at_utc": "2026-09-15T17:57:09Z",
+      "eligible_after_utc": "2026-09-17T17:57:09Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
