@@ -308,16 +308,17 @@
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 6,
+      "delivered": 7,
       "eligible": 8,
-      "value": 0.75,
+      "value": 0.875,
       "delivered_story_ids": [
         "apavil-joburi-septembrie-2026",
         "valcea-intrerupere-curent-2026-09-21-budesti",
         "valcea-intrerupere-curent-2026-09-22-horezu",
         "valcea-intrerupere-curent-2026-09-23-ladesti",
         "valcea-intrerupere-curent-2026-09-24-ionesti",
-        "valcea-intrerupere-curent-2026-09-25-baile-govora"
+        "valcea-intrerupere-curent-2026-09-25-baile-govora",
+        "valcea-intrerupere-curent-2026-09-26-daesti"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
@@ -350,14 +351,15 @@
       "missing_editorial_evidence": []
     },
     "manual_intervention": {
-      "status": "UNKNOWN",
-      "value": null,
-      "reason": "github_actions_read_failed:HTTPError",
+      "status": "MEASURED",
+      "value": 0,
+      "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [],
-      "manual_story_route_additions": []
+      "manual_story_route_additions": [],
+      "definition": "only non-bot workflow_dispatch triggers and human-authored public story route additions count as manual intervention"
     },
     "soak_48h": {
-      "status": "UNKNOWN",
+      "status": "IN_PROGRESS",
       "structural_baseline_sha": "a97a388c1f7ec0386713119e7ae42d91c49e7c90",
       "structural_baseline_at_utc": "2026-09-15T06:26:29Z",
       "eligible_after_utc": "2026-09-17T06:26:29Z",
