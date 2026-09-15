@@ -206,17 +206,118 @@
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
+    "public_http_readback": {
+      "status": "BLOCKED",
+      "eligible": 8,
+      "readback_ok": 7,
+      "value": 0.875,
+      "blocker_story_ids": [
+        "apavil-joburi-septembrie-2026"
+      ],
+      "checks": [
+        {
+          "story_id": "apavil-joburi-septembrie-2026",
+          "url": "https://valceaclar.ro/stiri/apavil-joburi-septembrie-2026/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "fast-ipj-actiuni-pentru-siguranta-rutiera-in-judetul-valcea-4a4010226d",
+          "url": "https://valceaclar.ro/stiri/fast-ipj-actiuni-pentru-siguranta-rutiera-in-judetul-valcea-4a4010226d/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-21-budesti",
+          "url": "https://valceaclar.ro/stiri/valcea-intrerupere-curent-2026-09-21-budesti/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-22-horezu",
+          "url": "https://valceaclar.ro/stiri/valcea-intrerupere-curent-2026-09-22-horezu/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-23-ladesti",
+          "url": "https://valceaclar.ro/stiri/valcea-intrerupere-curent-2026-09-23-ladesti/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-24-ionesti",
+          "url": "https://valceaclar.ro/stiri/valcea-intrerupere-curent-2026-09-24-ionesti/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-25-baile-govora",
+          "url": "https://valceaclar.ro/stiri/valcea-intrerupere-curent-2026-09-25-baile-govora/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-09-26-daesti",
+          "url": "https://valceaclar.ro/stiri/valcea-intrerupere-curent-2026-09-26-daesti/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        }
+      ],
+      "projection_evidence": {
+        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
+        "http_status": 200,
+        "error": null,
+        "updated_local": "2026-09-14T22:06:10.811996Z",
+        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+        "public_story_count": 73
+      },
+      "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
+    },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 5,
+      "delivered": 6,
       "eligible": 8,
-      "value": 0.625,
+      "value": 0.75,
       "delivered_story_ids": [
         "apavil-joburi-septembrie-2026",
         "valcea-intrerupere-curent-2026-09-21-budesti",
         "valcea-intrerupere-curent-2026-09-22-horezu",
         "valcea-intrerupere-curent-2026-09-23-ladesti",
-        "valcea-intrerupere-curent-2026-09-24-ionesti"
+        "valcea-intrerupere-curent-2026-09-24-ionesti",
+        "valcea-intrerupere-curent-2026-09-25-baile-govora"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
@@ -249,18 +350,17 @@
       "missing_editorial_evidence": []
     },
     "manual_intervention": {
-      "status": "MEASURED",
-      "value": 0,
-      "workflow_dispatch_runs": [],
+      "status": "UNKNOWN",
+      "value": null,
+      "reason": "github_actions_read_failed:HTTPError",
       "automated_workflow_dispatch_runs": [],
-      "manual_story_route_additions": [],
-      "definition": "only non-bot workflow_dispatch triggers and human-authored public story route additions count as manual intervention"
+      "manual_story_route_additions": []
     },
     "soak_48h": {
-      "status": "IN_PROGRESS",
-      "structural_baseline_sha": "1aeacb28b9684fb74da0f50135f3fd41349875ff",
-      "structural_baseline_at_utc": "2026-09-15T04:13:36Z",
-      "eligible_after_utc": "2026-09-17T04:13:36Z",
+      "status": "UNKNOWN",
+      "structural_baseline_sha": "a97a388c1f7ec0386713119e7ae42d91c49e7c90",
+      "structural_baseline_at_utc": "2026-09-15T06:26:29Z",
+      "eligible_after_utc": "2026-09-17T06:26:29Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
@@ -269,6 +369,8 @@
       "facebook_requires_external_post_id": true,
       "instagram_requires_media_id_and_finished_container": true,
       "synthetic_asset_counts_as_photo": false,
+      "repository_route_is_publication_proof": false,
+      "public_http_requires_projection_200_canonical_and_headline": true,
       "missing_evidence_becomes_zero": false
     }
   }
