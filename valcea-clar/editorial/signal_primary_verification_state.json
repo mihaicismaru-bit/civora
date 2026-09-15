@@ -2,19 +2,95 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-15T04:00:55+03:00",
+  "generated_at": "2026-09-15T09:05:35+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-15T03:59:23+03:00",
-  "task_count": 60,
+  "queue_generated_at": "2026-09-15T09:04:11+03:00",
+  "task_count": 56,
   "primary_match_count": 0,
-  "no_match_count": 30,
-  "unrouted_count": 30,
+  "no_match_count": 31,
+  "unrouted_count": 25,
   "target_count": 20,
-  "targets_ok": 16,
+  "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "2fecf7c374fcc6bfa4b29d10",
+      "signal_title": "Transport gratuit pentru vârstnicii din Ciungetu – Mălaia care au nevoie de consultații medicale",
+      "signal_url": "https://evenimentvalcean.ro/transport-gratuit-pentru-varstnicii-din-ciungetu-malaia-care-au-nevoie-de-consultatii-medicale/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-15T08:57:58+03:00",
+      "verification_route_id": "health",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "dsp-valcea-anunturi",
+            "name": "Direcția de Sănătate Publică Vâlcea",
+            "url": "https://www.aspjvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "spital-horezu-noutati",
+            "name": "Spitalul Orășenesc Horezu",
+            "url": "https://spitalulhorezu.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "f90b158568d1edd06a3c6e71",
+      "signal_title": "O conductă ascunsă în vegetație deversează apă poluată direct în râul Cibin. Mizeria apoi ajunge în Sibiu",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/15/o-conducta-ascunsa-in-vegetatie-deverseaza-apa-poluata-direct-in-raul-cibin-mizeria-apoi-ajunge-in-sibiu/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-15T06:57:02+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "e9a8614454fb8cf58322c21a",
       "signal_title": "INFORMARE Consiliul Județean Vâlcea",
@@ -303,6 +379,44 @@
       "fact_kernel_ready": false
     },
     {
+      "signal_id": "cd8fb13752c9448095f484b4",
+      "signal_title": "Medic de la Spitalul Militar Sibiu, condamnat din nou la trei ani cu suspendare pentru luare de mită. Interdicția de a profesa a fost redusă de la cinci la doi ani. Curtea de Apel Alba a cerut rejudecarea cazului",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/14/medic-de-la-spitalul-militar-sibiu-condamnat-din-nou-la-trei-ani-cu-suspendare-pentru-luare-de-mita-interdictia-de-a-profesa-a-fost-redusa-de-la-cinci-la-doi-ani-curtea-de-apel-alba-a-cerut-rejudec/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-14T18:52:32+03:00",
+      "verification_route_id": "health",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "dsp-valcea-anunturi",
+            "name": "Direcția de Sănătate Publică Vâlcea",
+            "url": "https://www.aspjvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "spital-horezu-noutati",
+            "name": "Spitalul Orășenesc Horezu",
+            "url": "https://spitalulhorezu.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
       "signal_id": "45f4e6292e1d53564947b0fa",
       "signal_title": "După 11 ani de muncă, Asociația Down Vâlcea a deschis primul centru din județ dedicat copiilor și tinerilor cu sindrom Down",
       "signal_url": "https://www.impactreal.ro/2026/09/14/dupa-11-ani-de-munca-asociatia-down-valcea-a-deschis-primul-centru-din-judet-dedicat-copiilor-si-tinerilor-cu-sindrom-down/",
@@ -391,9 +505,9 @@
             "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
             "url": "https://olt.rowater.ro/sga-valcea/"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 111] Connection refused>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -454,7 +568,7 @@
     },
     {
       "signal_id": "14d115801bf92a2565b948f2",
-      "signal_title": "Drăgășani în Prim-plan 15 ore in urma Tichete sociale de 265 de lei pentru grădiniță la Drăgășani. Sprijin de 265 de lei pe lună pentru participarea la grădiniță Direcția de Asistență Socială Drăgășani îi informează pe părinții...",
+      "signal_title": "Drăgășani în Prim-plan 20 de ore in urma Tichete sociale de 265 de lei pentru grădiniță la Drăgășani. Sprijin de 265 de lei pe lună pentru participarea la grădiniță Direcția de Asistență Socială Drăgășani îi informează pe părinții...",
       "signal_url": "https://www.primplanpress.ro/tichete-sociale-de-265-de-lei-pentru-gradinita-la-dragasani/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-09-14T12:58:29+03:00",
@@ -466,7 +580,7 @@
     },
     {
       "signal_id": "e0e638a49774068ee90efbcd",
-      "signal_title": "Ultima oră 15 ore in urma Primăria Malaia asigură transport săptămânal pentru vârstnicii din Ciungetu către dispensar",
+      "signal_title": "Ultima oră 21 de ore in urma Primăria Malaia asigură transport săptămânal pentru vârstnicii din Ciungetu către dispensar",
       "signal_url": "https://www.primplanpress.ro/primaria-malaia-asigura-transport-saptamanal-pentru-varstnicii-din-ciungetu-catre-dispensar/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -677,9 +791,9 @@
             "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
             "url": "https://olt.rowater.ro/sga-valcea/"
           },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 111] Connection refused>",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1076,18 +1190,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "848ba714fa2590302cf7a169",
-      "signal_title": "Sondaj Turnul Sfatului: aproape jumătate dintre cititori nu cred în semafoarele din sensurile giratorii. Doar 9% le susțin fără rezerve",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/13/sondaj-turnul-sfatului-aproape-jumatate-dintre-cititori-nu-cred-in-semafoarele-din-sensurile-giratorii-doar-9-le-sustin-fara-rezerve/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-13T13:47:58+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "186cde4cc2538ce5dcdc3a63",
       "signal_title": "Polițiștii din Băile Olănești au ajutat un șofer rămas cu mașina în pană",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/13/politistii-din-baile-olanesti-au-ajutat-un-sofer-ramas-cu-masina-in-pana/",
@@ -1191,18 +1293,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "6abebc3a6371a34fabc36cda",
-      "signal_title": "Misterele cetății de pe malul Cibinului. De la amvonul ciumei, frigiderul cu gheață de râu până la orga dăruită de Maria Tereza. „Piatra asta n-a crăpat niciodată”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/13/misterele-cetatii-de-pe-malul-cibinului-de-la-amvonul-ciumei-frigiderul-cu-gheata-de-rau-pana-la-orga-daruita-de-maria-tereza-piatra-asta-n-a-crapat-niciodata/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-13T09:08:09+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "e2d96a34146f5e45b9ab9781",
       "signal_title": "FOTO – INCENDIU la LĂPUȘATA. O mașină a ars în totalitate, afectând un stâlp și vegetația…",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/12/incendiu-la-lapusata-o-masina-a-ars-in-totalitate-afectand-un-stalp-si-vegetatia/",
@@ -1252,45 +1342,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "bf6870b7b3712618e4f05818",
-      "signal_title": "ANPC a controlat peste 1.600 de operatori economici. Amenzi de aproape 4 milioane de lei",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/12/anpc-a-controlat-peste-1-600-de-operatori-economici-amenzi-de-aproape-4-milioane-de-lei/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-12T20:02:21+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "534b650c3edaab003c899b7a",
-      "signal_title": "FOTO | VIDEO. Luna, câinele de urmă care i-a găsit pe cei doi copii din Vâlcea dispăruți",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/12/foto-video-luna-cainele-de-urma-care-i-a-gasit-pe-cei-doi-copii-din-valcea-disparuti/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-12T15:26:54+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "ff5e0ddca050b2b962bd050d",
       "signal_title": "Drăgășani în Prim-plan o zi in urma Drăgășaniul deschide dialogul economic cu Vietnamul: ambasadorul Le Vinh Thang, primit de primarul Costinel Stoica",
       "signal_url": "https://www.primplanpress.ro/dragasaniul-deschide-dialogul-economic-cu-vietnamul-ambasadorul-le-vinh-thang-primit-de-primarul-costinel-stoica/",
@@ -1301,66 +1352,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "dfa82c621ec44184d252b0be",
-      "signal_title": "FOTO/VIDEO 87 de cluburi, 87 de povești. Consiliul Județean continuă sprijinul pentru fotbalul vâlcean",
-      "signal_url": "https://evenimentvalcean.ro/foto-video-87-de-cluburi-87-de-povesti-consiliul-judetean-continua-sprijinul-pentru-fotbalul-valcean/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-12T11:52:30+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "cedf55e3f914d0a26b5981e8",
@@ -1571,30 +1562,6 @@
       "signal_id": "01b31205d09961a354cc35e2",
       "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
       "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=LIGA%202.%20SCM%20R%C3%82MNICU%20V%C3%82LCEA%2C%20SPULBERAT%C4%82%20LA%20SUCEAVA.%200-4%20CU%20CETATEA&url=https%3A%2F%2Fwww.curierul.ro%2Fliga-2-scm-ramnicu-valcea-spulberata-la-suceava-0-4-cu-cetatea%2F",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "9d3ce2193f3e425605d194d1",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fvalceanca-georgiana-sasu-regina-la-beirut-%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "6373921bacc59f8ba0aa3888",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=V%C3%A2lceanca%20Georgiana%20Sasu%2C%20%E2%80%9Eregin%C4%83%E2%80%9D%20la%20Beirut%20%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fvalceanca-georgiana-sasu-regina-la-beirut-%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
       "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
