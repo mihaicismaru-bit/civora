@@ -460,10 +460,11 @@ def _sla_label(contract: InboundReplyContract, published: str, now: str) -> tupl
     now_dt = _parse_utc(now)
     if published_dt > now_dt:
         raise InboundReplyHold("HOLD_CP85_PUBLICATION_TIME_IN_FUTURE")
-    age = round((now_dt - published_dt).total_seconds() / 3600.0, 3)
-    if age <= contract.hot_window_hours:
+    elapsed_seconds = (now_dt - published_dt).total_seconds()
+    age = round(elapsed_seconds / 3600.0, 3)
+    if elapsed_seconds <= contract.hot_window_hours * 3600:
         return "HOT_0_2H", age
-    if age <= contract.priority_window_hours:
+    if elapsed_seconds <= contract.priority_window_hours * 3600:
         return "PRIORITY_2_4H", age
     return "STANDARD_AFTER_4H", age
 
