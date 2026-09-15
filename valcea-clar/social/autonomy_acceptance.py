@@ -2,9 +2,10 @@
 """Build truth-bound VÂLCEA CLAR autonomy acceptance metrics.
 
 The acceptance snapshot is derived only from durable repository history,
-receipt-bearing social state, current canonical editorial evidence, and public
-GitHub Actions metadata. Missing evidence stays UNKNOWN; this module never turns
-preview/outbox state into delivery and never treats an untraced claim as proven.
+receipt-bearing social state, current canonical editorial evidence, public
+HTTP/readback evidence, and public GitHub Actions metadata. Missing evidence
+stays UNKNOWN; this module never turns preview/outbox state into delivery and
+never treats an untraced claim or repository-only route as public proof.
 
 It is intentionally invoked by the existing social asset build so no extra
 workflow, schedule, or publication lane is required.
@@ -29,6 +30,12 @@ ROOT = Path(__file__).resolve().parents[2]
 VC = ROOT / "valcea-clar"
 WINDOW_HOURS = 24
 SOAK_HOURS = 48
+PUBLIC_BASE_URL = "https://valceaclar.ro"
+PUBLIC_ARTICLES_URL = (
+    "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/"
+    "content/articles.json"
+)
+PUBLIC_USER_AGENT = "VALCEA-CLAR-Autonomy-Acceptance/1.0 (+https://valceaclar.ro/)"
 
 STRUCTURAL_PATHS = [
     ":(glob).github/workflows/valcea-clar-*.yml",
@@ -72,6 +79,157 @@ def _git(args: list[str]) -> str:
         capture_output=True,
     )
     return completed.stdout
+
+
+def _fetch(url: str, timeout: int = 12) -> tuple[int | None, str, str | None]:
+    request = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": PUBLIC_USER_AGENT,
+            "Cache-Control": "no-cache",
+            "Accept": "application/json,text/html;q=0.9,*/*;q=0.8",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return int(response.status), response.read(3_000_000).decode("utf-8", errors="replace"), None
+    except urllib.error.HTTPError as exc:
+        try:
+            body = exc.read(200_000).decode("utf-8", errors="replace")
+        except Exception:
+            body = ""
+        return int(exc.code), body, f"HTTP {exc.code}"
+    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+        return None, "", f"{type(exc).__name__}: {exc}"
+
+
+def _canonical_present(html: str, canonical: str) -> bool:
+    return any(
+        value in html
+        for value in (
+            f'href="{canonical}"',
+            f"href='{canonical}'",
+            f'content="{canonical}"',
+            f"content='{canonical}'",
+        )
+    )
+
+
+def _public_projection_articles() -> tuple[dict[str, dict[str, Any]] | None, dict[str, Any]]:
+    status, body, error = _fetch(PUBLIC_ARTICLES_URL)
+    evidence: dict[str, Any] = {
+        "url": PUBLIC_ARTICLES_URL,
+        "http_status": status,
+        "error": error,
+    }
+    if status != 200:
+        return None, evidence
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError as exc:
+        evidence["error"] = f"invalid_json:{exc}"
+        return None, evidence
+    if not isinstance(payload, dict):
+        evidence["error"] = "invalid_json:top_level_object_required"
+        return None, evidence
+    articles = payload.get("articles") if isinstance(payload.get("articles"), list) else []
+    mapped = {
+        str(row.get("id")): row
+        for row in articles
+        if isinstance(row, dict) and str(row.get("id") or "").strip()
+    }
+    evidence.update(
+        {
+            "updated_local": payload.get("updated_local"),
+            "canonical_source": payload.get("canonical_source"),
+            "public_story_count": len(mapped),
+        }
+    )
+    return mapped, evidence
+
+
+def public_http_readback_metric(story_ids: set[str]) -> dict[str, Any]:
+    """Require every recent autonomous route to survive projection and live HTTP readback.
+
+    This is deliberately stricter than repository existence. A story counted as
+    published in the 24h cohort must still be present in the public projection
+    and its canonical URL must return the projected headline. A later removal is
+    reported explicitly rather than silently preserving a historical PASS; once
+    that publication event ages out of the 24h cohort it no longer blocks this
+    metric.
+    """
+    if not story_ids:
+        return {
+            "status": "NO_ELIGIBLE_STORIES",
+            "eligible": 0,
+            "readback_ok": 0,
+            "value": None,
+            "checks": [],
+            "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story",
+        }
+
+    projection, projection_evidence = _public_projection_articles()
+    if projection is None:
+        return {
+            "status": "UNKNOWN",
+            "eligible": len(story_ids),
+            "readback_ok": 0,
+            "value": None,
+            "checks": [],
+            "projection_evidence": projection_evidence,
+            "reason": "public_projection_unavailable",
+            "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story",
+        }
+
+    checks: list[dict[str, Any]] = []
+    for story_id in sorted(story_ids):
+        article = projection.get(story_id)
+        canonical = f"{PUBLIC_BASE_URL}/stiri/{story_id}/"
+        if not isinstance(article, dict):
+            checks.append(
+                {
+                    "story_id": story_id,
+                    "url": canonical,
+                    "projected": False,
+                    "http_status": None,
+                    "canonical_ok": False,
+                    "headline_ok": False,
+                    "ok": False,
+                    "reason": "missing_from_public_projection",
+                }
+            )
+            continue
+
+        headline = str(article.get("headline") or "").strip()
+        status, body, error = _fetch(canonical)
+        canonical_ok = status == 200 and _canonical_present(body, canonical)
+        headline_ok = bool(headline) and headline in body
+        ok = status == 200 and canonical_ok and headline_ok
+        checks.append(
+            {
+                "story_id": story_id,
+                "url": canonical,
+                "projected": True,
+                "http_status": status,
+                "canonical_ok": canonical_ok,
+                "headline_ok": headline_ok,
+                "ok": ok,
+                "error": error,
+            }
+        )
+
+    readback_ok = sum(1 for row in checks if row["ok"])
+    blockers = [row["story_id"] for row in checks if not row["ok"]]
+    return {
+        "status": "PASS" if not blockers else "BLOCKED",
+        "eligible": len(story_ids),
+        "readback_ok": readback_ok,
+        "value": round(readback_ok / len(story_ids), 4),
+        "blocker_story_ids": blockers,
+        "checks": checks,
+        "projection_evidence": projection_evidence,
+        "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story",
+    }
 
 
 def _bot_identity(name: str, email: str) -> bool:
@@ -388,6 +546,7 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
         "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph",
     }
 
+    public_http_readback = public_http_readback_metric(story_ids)
     facebook = _receipt_map(VC / "social" / "facebook_state.json", "facebook_post_id")
     instagram = _receipt_map(VC / "social" / "instagram_state.json", "instagram_media_id", require_finished=True)
     items = current_edition_items()
@@ -465,7 +624,13 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
         and manual.get("status") == "MEASURED"
         and manual.get("value") == 0
     )
-    acceptance_ready = bool(soak.get("status") == "PASS" and objective_zero_gates and latency["status"] == "MEASURED")
+    public_readback_gate = public_http_readback.get("status") in {"PASS", "NO_ELIGIBLE_STORIES"}
+    acceptance_ready = bool(
+        soak.get("status") == "PASS"
+        and objective_zero_gates
+        and latency["status"] == "MEASURED"
+        and public_readback_gate
+    )
 
     return {
         "schema_version": "1.0",
@@ -475,6 +640,7 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
         "autonomous_story_ids_24h": sorted(story_ids),
         "discovery_to_publish_latency": latency,
         "photo_coverage": photo_coverage,
+        "public_http_readback": public_http_readback,
         "facebook_delivery_rate_receipt_bound": _rate(facebook, story_ids),
         "instagram_delivery_rate_receipt_bound": _rate(instagram, story_ids),
         "duplicates": duplicates,
@@ -487,6 +653,8 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
             "facebook_requires_external_post_id": True,
             "instagram_requires_media_id_and_finished_container": True,
             "synthetic_asset_counts_as_photo": False,
+            "repository_route_is_publication_proof": False,
+            "public_http_requires_projection_200_canonical_and_headline": True,
             "missing_evidence_becomes_zero": False,
         },
     }
@@ -512,6 +680,9 @@ def self_test() -> int:
     assert _rate({"a": "receipt"}, {"a", "b"})["value"] == 0.5
     groups = _duplicate_receipts({"a": "x", "b": "x", "c": "y"}, {"a", "b", "c"})
     assert groups == [{"receipt_id": "x", "story_ids": ["a", "b"]}]
+    canonical = "https://valceaclar.ro/stiri/test-story/"
+    assert _canonical_present(f'<link rel="canonical" href="{canonical}">', canonical)
+    assert not _canonical_present('<link rel="canonical" href="https://example.com/">', canonical)
     print("VÂLCEA CLAR truth-bound autonomy acceptance v1 self-test: PASS")
     return 0
 
