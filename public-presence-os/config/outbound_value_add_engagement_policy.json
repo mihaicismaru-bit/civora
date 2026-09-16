@@ -1,0 +1,25 @@
+{
+  "schema_version": "PPOS_OUTBOUND_VALUE_ADD_ENGAGEMENT_ENGINE_POLICY_V1",
+  "checkpoint": "CP86",
+  "module_id": "M55_OUTBOUND_VALUE_ADD_ENGAGEMENT_ENGINE",
+  "parent_activation_checkpoint": "CP85",
+  "parent_radar_checkpoint": "CP84",
+  "parent_capability_checkpoint": "CP83",
+  "parent_control_checkpoint": "CP58",
+  "next_after_cp86": "CP87_RELATIONSHIP_GRAPH",
+  "global_kill_switch": "ENGAGED",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "composer_modes": ["CONTEXT", "DATA_POINT", "CLARIFICATION", "PRACTICAL_EXAMPLE", "GOOD_QUESTION", "RESPECTFUL_COUNTERPOINT"],
+  "provenance_kinds": ["PUBLIC_URL_OBSERVATION", "OFFLINE_API_FIXTURE", "SYNTHETIC_FIXTURE"],
+  "material_value_kinds": ["INFORMATION", "CONTEXT", "CLARIFICATION", "CONCRETE_QUESTION", "USEFUL_PERSPECTIVE"],
+  "candidate_input": {"cp84_decision_required":"ELIGIBLE_HUMAN_REVIEW","fact_bound_evidence_required":true,"exact_target_required":true,"max_comment_chars":600,"max_evidence_items":4,"human_review_required":true},
+  "authority": {"external_authorization_ingested":false,"authorization_granted":false,"runtime_authorization_effective":false,"secret_reference_resolved":false,"environment_read":false,"keychain_read":false,"oauth_attempted":false,"real_account_lookup_attempted":false,"account_connected":false,"network_allowed":false,"network_attempted":false,"live_probe_allowed":false,"live_probe_attempted":false,"publish_allowed":false,"publish_attempted":false,"external_write_allowed":false,"external_write_performed":false,"control_plane_promoted":false,"deploy_allowed":false,"deploy_performed":false,"paid_service_used":false,"authority_activated":false,"runtime_mutated":false},
+  "growth_safety": {"automated_follow_unfollow_forbidden":true,"mass_commenting_forbidden":true,"engagement_pods_forbidden":true,"repetitive_praise_forbidden":true,"copy_paste_replies_forbidden":true,"synthetic_conversation_farming_forbidden":true,"political_microtargeting_forbidden":true,"sensitive_trait_inference_forbidden":true,"sensitive_relationship_profiling_forbidden":true,"generic_compliments_forbidden":true,"engagement_bait_forbidden":true,"broad_outbound_commenting_forbidden":true,"material_value_required":true,"rate_budgets_are_ceilings_not_targets":true,"manual_packet_required_when_api_write_not_legitimately_supported":true,"receipt_bound_future_writes_required":true,"idempotent_future_writes_required":true,"bounded_retry_future_writes_required":true,"fail_closed_on_uncertainty":true},
+  "outbound_routes": [
+    {"platform":"FACEBOOK_PAGE","capability":"OUTBOUND_COMMENT","expected_cp83_classification":"MANUAL_ONLY","automation_mode":"MANUAL_ACTION_PACKET","specific_target_required":true,"allowed_provenance":["PUBLIC_URL_OBSERVATION","SYNTHETIC_FIXTURE"],"required_blockers":["HOLD_CAPABILITY_UNVERIFIED"]},
+    {"platform":"INSTAGRAM_PROFESSIONAL","capability":"OUTBOUND_COMMENT","expected_cp83_classification":"MANUAL_ONLY","automation_mode":"MANUAL_ACTION_PACKET","specific_target_required":true,"allowed_provenance":["PUBLIC_URL_OBSERVATION","SYNTHETIC_FIXTURE"],"required_blockers":["HOLD_CAPABILITY_UNVERIFIED"]},
+    {"platform":"THREADS","capability":"OUTBOUND_COMMENT","expected_cp83_classification":"PASS_OFFLINE_CONTRACT","automation_mode":"DRY_RUN_API_CANDIDATE","specific_target_required":true,"allowed_provenance":["PUBLIC_URL_OBSERVATION","OFFLINE_API_FIXTURE","SYNTHETIC_FIXTURE"],"required_blockers":["HOLD_LIVE_PERMISSION"]}
+  ],
+  "unknown_external_metric_value": "UNKNOWN",
+  "required_blockers": ["HOLD_REAL_EXTERNAL_AUTHORIZATION_RECEIPT_NOT_INGESTED","HOLD_SECRET_REFERENCE_NOT_RESOLVED","HOLD_REAL_ACCOUNT_NOT_CONNECTED","HOLD_CONTROL_PLANE_PROMOTION_NOT_EXECUTED","HOLD_PILOT_PUBLISH_NOT_AUTHORIZED","HOLD_CP86_OFFLINE_ENGAGEMENT_ENGINE_IS_NOT_RUNTIME_AUTHORITY"]
+}
