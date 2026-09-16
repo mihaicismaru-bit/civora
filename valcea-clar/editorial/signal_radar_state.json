@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-09-16T13:02:14+03:00",
+  "observed_at": "2026-09-16T17:55:56+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 17,
-  "sources_ok": 14,
-  "current_signal_count": 34,
-  "today_signal_count": 14,
+  "sources_ok": 15,
+  "current_signal_count": 37,
+  "today_signal_count": 19,
   "observations": [
     {
       "seed_id": "press-curierul-de-ramnic",
@@ -41,7 +41,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T10:29:32+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -93,7 +93,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -113,7 +113,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -147,7 +147,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-15T23:01:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -168,9 +168,11 @@
       "publisher": "Indiscret în Oltenia",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "DEGRADED",
-      "error": "TimeoutError: timed out",
+      "status": "PASS",
+      "error": null,
       "signals": [],
+      "final_url": "https://www.indiscret.ro/",
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -203,7 +205,65 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [],
+      "signals": [
+        {
+          "signal_id": "1afed72d22f24fea019da208",
+          "signal_title": "Ultima oră 3 ore in urma Primăria Drăgoești reamintește obligațiile pentru combaterea ambroziei. Amenzi pentru cei care ignoră avertismentele",
+          "signal_url": "https://www.primplanpress.ro/primaria-dragoesti-reaminteste-obligatiile-pentru-combaterea-ambroziei-amenzi-pentru-cei-care-ignora-avertismentele/",
+          "signal_publisher": "Primplan Press",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-16T14:50:24+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-16T17:55:56+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            },
+            {
+              "ref_type": "primary_target_id",
+              "id": "romsilva-valcea-torrents"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-primplan"
+        },
+        {
+          "signal_id": "0a614a1e6c78fa13623f501f",
+          "signal_title": "Ultima oră 5 ore in urma Vaideeni, zi de comunitate pe 19 septembrie: ecologizare dimineața și teatru pentru copii",
+          "signal_url": "https://www.primplanpress.ro/vaideeni-zi-de-comunitate-pe-19-septembrie-ecologizare-dimineata-si-teatru-pentru-copii/",
+          "signal_publisher": "Primplan Press",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-16T12:30:33+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-16T17:55:56+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-primplan"
+        }
+      ],
       "final_url": "https://www.primplanpress.ro/",
       "links_examined": 14,
       "hygiene_dropped_count": 0,
@@ -227,7 +287,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -247,7 +307,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "sport",
           "verification_targets": [
             {
@@ -294,7 +354,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T09:37:02+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -328,7 +388,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -348,7 +408,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -359,51 +419,43 @@
           "signal_seed_id": "press-turnul-sfatului"
         },
         {
-          "signal_id": "6d5cf7d92511cb2bf912c57f",
-          "signal_title": "„Vreau să aplic acasă ce am învățat afară”. Cătălin Luntrașu, un tânăr sibian întors din Irlanda pentru a face film la Sibiu, invită publicul la proiecția unui scurtmetraj",
-          "signal_url": "https://www.turnulsfatului.ro/2026/09/16/vreau-sa-aplic-acasa-ce-am-invatat-afara-catalin-luntrasu-un-tanar-sibian-intors-din-irlanda-pentru-a-face-film-la-sibiu-invita-publicul-la-proiectia-unui-scurtmetraj/",
+          "signal_id": "22214c74d35a22d0be0c7fd7",
+          "signal_title": "Scandal pe Bălcescu, după ce Primăria Sibiu a venit cu o firmă să ridice un stand de înghețată. Proprietar: „Am bunuri de peste 30.000 de euro”",
+          "signal_url": "https://www.turnulsfatului.ro/2026/09/16/scandal-pe-balcescu-dupa-ce-primaria-sibiu-a-venit-cu-o-firma-sa-ridice-un-stand-de-inghetata-proprietar-am-bunuri-de-peste-30-000-de-euro/",
           "signal_publisher": "Turnul Sfatului",
           "signal_tier": "T2",
           "signal_family": "REGIONAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-16T12:44:47+03:00",
+          "published_at": "2026-09-16T10:04:32+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-turnul-sfatului"
-        },
-        {
-          "signal_id": "f1fef92d1fd5e10ba14f8986",
-          "signal_title": "Ar fi fost comparată cu Lamine Yamal dacă juca fotbal: la 14 ani, Adela Vasilescu conduce naționala U16 de volei, făcând 12 antrenamente pe săptămână",
-          "signal_url": "https://www.turnulsfatului.ro/2026/09/16/ar-fi-fost-comparata-cu-lamine-yamal-daca-juca-fotbal-la-14-ani-adela-vasilescu-conduce-nationala-u16-de-volei-facand-12-antrenamente-pe-saptamana/",
-          "signal_publisher": "Turnul Sfatului",
-          "signal_tier": "T2",
-          "signal_family": "REGIONAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-16T07:24:42+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
-          "verification_route_id": "sport",
+          "observed_at": "2026-09-16T17:55:56+03:00",
+          "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
-              "ref_type": "news_source_id",
-              "id": "scm-rm-valcea"
-            },
-            {
               "ref_type": "manual_watch_source_id",
-              "id": "cs-valcea-1924-social-feed"
-            },
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "ajf-valcea-comunicate"
+              "id": "ipj-valcea-stiri"
             }
           ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-turnul-sfatului"
+        },
+        {
+          "signal_id": "6c5791f1a03892cf6b45badb",
+          "signal_title": "Monument istoric din centrul Sibiului, cu „degradare accentuată a fațadei și a acoperișului”, scos la vânzare. Ministerul Culturii și CJ îl lasă pe piața liberă",
+          "signal_url": "https://www.turnulsfatului.ro/2026/09/16/monument-istoric-din-centrul-sibiului-cu-degradare-accentuata-a-fatadei-si-a-acoperisului-scos-la-vanzare-ministerul-culturii-si-cj-il-lasa-pe-piata-libera/",
+          "signal_publisher": "Turnul Sfatului",
+          "signal_tier": "T2",
+          "signal_family": "REGIONAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-16T14:29:32+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-16T17:55:56+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -435,7 +487,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-15T19:35:24+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -460,7 +512,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-15T10:01:09+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -499,7 +551,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-16T00:37:57+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -519,7 +571,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-15T23:55:15+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -548,7 +600,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-15T23:52:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -568,7 +620,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-15T23:22:49+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -588,7 +640,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-15T23:20:21+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -608,7 +660,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-15T22:55:29+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "apavil_employment",
           "verification_targets": [
             {
@@ -633,7 +685,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-15T22:54:21+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "apavil_employment",
           "verification_targets": [
             {
@@ -658,7 +710,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-15T22:46:26+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -692,7 +744,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -712,7 +764,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -732,7 +784,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T10:29:32+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -767,6 +819,26 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "b5dbf4ad5eb24d904d1f926c",
+          "signal_title": "FOTO Vești bune pentru schiori! Transalpina Ski Resort se pregătește pentru noul sezon",
+          "signal_url": "https://evenimentvalcean.ro/foto-vesti-bune-pentru-schiori-transalpina-ski-resort-se-pregateste-pentru-noul-sezon/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-16T16:46:53+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-16T17:55:56+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
           "signal_id": "a8a709632717bc1ee5910698",
           "signal_title": "Mateești investește în energie verde. Un parc fotovoltaic va fi construit în comună",
           "signal_url": "https://evenimentvalcean.ro/mateesti-investeste-in-energie-verde-un-parc-fotovoltaic-va-fi-construit-in-comuna/",
@@ -776,7 +848,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T10:36:43+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "utilities",
           "verification_targets": [
             {
@@ -813,7 +885,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T10:31:05+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -833,7 +905,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-15T19:58:26+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -897,7 +969,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T11:54:31+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -922,7 +994,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T11:02:09+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -947,7 +1019,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T10:11:34+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -972,7 +1044,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-16T09:43:02+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -992,7 +1064,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-15T22:33:14+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -1012,7 +1084,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-15T15:09:09+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "national_road_restrictions",
           "verification_targets": [
             {
@@ -1037,7 +1109,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-15T10:19:39+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-16T13:02:14+03:00",
+          "observed_at": "2026-09-16T17:55:56+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {

@@ -2,25 +2,125 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-16T13:04:00+03:00",
+  "generated_at": "2026-09-16T17:57:48+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-16T13:02:14+03:00",
-  "task_count": 79,
+  "queue_generated_at": "2026-09-16T17:55:56+03:00",
+  "task_count": 80,
   "primary_match_count": 2,
-  "no_match_count": 37,
-  "unrouted_count": 40,
+  "no_match_count": 36,
+  "unrouted_count": 42,
   "target_count": 19,
   "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "b5dbf4ad5eb24d904d1f926c",
+      "signal_title": "FOTO Vești bune pentru schiori! Transalpina Ski Resort se pregătește pentru noul sezon",
+      "signal_url": "https://evenimentvalcean.ro/foto-vesti-bune-pentru-schiori-transalpina-ski-resort-se-pregateste-pentru-noul-sezon/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-09-16T16:46:53+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "1afed72d22f24fea019da208",
+      "signal_title": "Ultima oră 3 ore in urma Primăria Drăgoești reamintește obligațiile pentru combaterea ambroziei. Amenzi pentru cei care ignoră avertismentele",
+      "signal_url": "https://www.primplanpress.ro/primaria-dragoesti-reaminteste-obligatiile-pentru-combaterea-ambroziei-amenzi-pentru-cei-care-ignora-avertismentele/",
+      "signal_publisher": "Primplan Press",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-16T14:50:24+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "6c5791f1a03892cf6b45badb",
+      "signal_title": "Monument istoric din centrul Sibiului, cu „degradare accentuată a fațadei și a acoperișului”, scos la vânzare. Ministerul Culturii și CJ îl lasă pe piața liberă",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/16/monument-istoric-din-centrul-sibiului-cu-degradare-accentuata-a-fatadei-si-a-acoperisului-scos-la-vanzare-ministerul-culturii-si-cj-il-lasa-pe-piata-libera/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-16T14:29:32+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 56
+    },
     {
       "signal_id": "6d5cf7d92511cb2bf912c57f",
       "signal_title": "„Vreau să aplic acasă ce am învățat afară”. Cătălin Luntrașu, un tânăr sibian întors din Irlanda pentru a face film la Sibiu, invită publicul la proiecția unui scurtmetraj",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/16/vreau-sa-aplic-acasa-ce-am-invatat-afara-catalin-luntrasu-un-tanar-sibian-intors-din-irlanda-pentru-a-face-film-la-sibiu-invita-publicul-la-proiectia-unui-scurtmetraj/",
       "signal_publisher": "Turnul Sfatului",
       "signal_published_at": "2026-09-16T12:44:47+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "0a614a1e6c78fa13623f501f",
+      "signal_title": "Ultima oră 5 ore in urma Vaideeni, zi de comunitate pe 19 septembrie: ecologizare dimineața și teatru pentru copii",
+      "signal_url": "https://www.primplanpress.ro/vaideeni-zi-de-comunitate-pe-19-septembrie-ecologizare-dimineata-si-teatru-pentru-copii/",
+      "signal_publisher": "Primplan Press",
+      "signal_published_at": "2026-09-16T12:30:33+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -221,6 +321,34 @@
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_tier": "T2",
       "signal_published_at": "2026-09-16T10:11:34+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "22214c74d35a22d0be0c7fd7",
+      "signal_title": "Scandal pe Bălcescu, după ce Primăria Sibiu a venit cu o firmă să ridice un stand de înghețată. Proprietar: „Am bunuri de peste 30.000 de euro”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/16/scandal-pe-balcescu-dupa-ce-primaria-sibiu-a-venit-cu-o-firma-sa-ridice-un-stand-de-inghetata-proprietar-am-bunuri-de-peste-30-000-de-euro/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-16T10:04:32+03:00",
       "verification_route_id": "police_public_safety",
       "attempts": [
         {
@@ -1097,7 +1225,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 8
         }
       ],
       "publication_authority": "NONE",
@@ -1403,34 +1531,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "208b930fee8626519fecb99c",
-      "signal_title": "Accidentul cu Ferarri. Șoferul a fost reținut pentru conducere sub influența alcoolului: 2,18 g/l alcool pur în sânge",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/14/accidentul-cu-ferarri-soferul-a-fost-retinut-pentru-conducere-sub-influenta-alcoolului/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-14T20:06:29+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "31249b15469b1acb633420b7",
       "signal_title": "Noile proiecte pregătite pentru Muereasca rămân în așteptare – Ion Ungureanu: „De un an nu avem unde să le depunem”",
       "signal_url": "https://www.impactreal.ro/2026/09/14/noile-proiecte-pregatite-pentru-muereasca-raman-in-asteptare-ion-ungureanu-de-un-an-nu-avem-unde-sa-le-depunem/",
@@ -1442,19 +1542,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "listing_title_identity_rejections": 77
-    },
-    {
-      "signal_id": "c83c423c23ccb7fa9637cbd3",
-      "signal_title": "Restaurantul Old Lisbon din Piața Mică, scos la vânzare. Patron: „În Sibiu, nici semințe nu aș vrea să mai vând”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/14/restaurantul-old-lisbon-din-piata-mica-scos-la-vanzare-patron-in-sibiu-nici-seminte-nu-as-vrea-sa-mai-vand/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-14T19:40:01+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "cd8fb13752c9448095f484b4",
@@ -1485,7 +1572,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 8
         }
       ],
       "publication_authority": "NONE",
@@ -1550,7 +1637,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 8
         }
       ],
       "publication_authority": "NONE",
@@ -1803,73 +1890,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "de71b7a630130e296b2f0a10",
-      "signal_title": "ACCIDENT pe DN 7, între Râmnicu Vâlcea și Sibiu. Două persoane au ajuns la spital",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/13/accident-pe-dn-7-intre-ramnicu-valcea-si-sibiu-doua-persoane-au-ajuns-la-spital/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-13T16:23:06+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "1f0348ca30f06a6111daeaaf",
-      "signal_title": "Divertisment o zi in urma Unde îi duci pe copii în weekend după prima săptămână de școală?",
-      "signal_url": "https://www.primplanpress.ro/unde-ii-duci-pe-copii-in-weekend-dupa-prima-saptamana-de-scoala/",
-      "signal_publisher": "Primplan Press",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-13T15:00:16+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
       "listing_title_identity_rejections": 80
     },
     {
