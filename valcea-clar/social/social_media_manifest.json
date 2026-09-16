@@ -131,98 +131,42 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 2,
-    "autonomous_story_ids_24h": [
-      "apavil-joburi-septembrie-2026",
-      "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd"
-    ],
+    "autonomous_stories_published_24h": 0,
+    "autonomous_story_ids_24h": [],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 2,
-      "published": 2,
-      "stories": [
-        {
-          "story_id": "apavil-joburi-septembrie-2026",
-          "seconds": 874025,
-          "discovered_at_utc": "2026-09-05T12:01:48Z",
-          "published_at_utc": "2026-09-15T14:48:53Z"
-        },
-        {
-          "story_id": "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd",
-          "seconds": 15768,
-          "discovered_at_utc": "2026-09-15T10:26:05Z",
-          "published_at_utc": "2026-09-15T14:48:53Z"
-        }
-      ],
-      "max_seconds": 874025,
-      "median_seconds": 874025
+      "measured": 0,
+      "published": 0,
+      "stories": [],
+      "max_seconds": null,
+      "median_seconds": null
     },
     "photo_coverage": {
-      "status": "MEASURED",
+      "status": "NO_PUBLISHED_STORIES",
       "real_photo_stories": 0,
-      "published_stories": 2,
-      "value": 0.0,
+      "published_stories": 0,
+      "value": null,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
-      "eligible": 2,
-      "readback_ok": 1,
-      "value": 0.5,
-      "blocker_story_ids": [
-        "apavil-joburi-septembrie-2026"
-      ],
-      "checks": [
-        {
-          "story_id": "apavil-joburi-septembrie-2026",
-          "url": "https://valceaclar.ro/stiri/apavil-joburi-septembrie-2026/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
-        },
-        {
-          "story_id": "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd",
-          "url": "https://valceaclar.ro/stiri/fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        }
-      ],
-      "projection_evidence": {
-        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
-        "http_status": 200,
-        "error": null,
-        "updated_local": "2026-09-15T21:40:48.903089Z",
-        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 74
-      },
+      "status": "NO_ELIGIBLE_STORIES",
+      "eligible": 0,
+      "readback_ok": 0,
+      "value": null,
+      "checks": [],
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "MEASURED",
-      "delivered": 2,
-      "eligible": 2,
-      "value": 1.0,
-      "delivered_story_ids": [
-        "apavil-joburi-septembrie-2026",
-        "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd"
-      ]
+      "status": "NO_ELIGIBLE_STORIES",
+      "delivered": 0,
+      "eligible": 0,
+      "value": null
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "MEASURED",
-      "delivered": 2,
-      "eligible": 2,
-      "value": 1.0,
-      "delivered_story_ids": [
-        "apavil-joburi-septembrie-2026",
-        "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd"
-      ]
+      "status": "NO_ELIGIBLE_STORIES",
+      "delivered": 0,
+      "eligible": 0,
+      "value": null
     },
     "duplicates": {
       "status": "MEASURED",
@@ -243,7 +187,22 @@
       "status": "MEASURED",
       "value": 0,
       "workflow_dispatch_runs": [],
-      "automated_workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "run_id": 35111933111,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-16T14:56:22Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "run_id": 35111511864,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-16T14:52:35Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
       "manual_story_route_additions": [],
       "definition": "only non-bot workflow_dispatch triggers and human-authored public story route additions count as manual intervention"
     },
