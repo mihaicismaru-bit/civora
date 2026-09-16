@@ -36,6 +36,8 @@ PUBLIC_ARTICLES_URL = (
     "content/articles.json"
 )
 PUBLIC_USER_AGENT = "VALCEA-CLAR-Autonomy-Acceptance/1.0 (+https://valceaclar.ro/)"
+PUBLIC_PROJECTION_REPO = "mihaicismaru-bit/valcea-clar"
+PUBLIC_PROJECTION_STRUCTURAL_PATH = "scripts/sync_civora.py"
 
 STRUCTURAL_PATHS = [
     ":(glob).github/workflows/valcea-clar-*.yml",
@@ -101,6 +103,24 @@ def _fetch(url: str, timeout: int = 12) -> tuple[int | None, str, str | None]:
         return int(exc.code), body, f"HTTP {exc.code}"
     except (urllib.error.URLError, TimeoutError, OSError) as exc:
         return None, "", f"{type(exc).__name__}: {exc}"
+
+
+def _github_json(url: str, timeout: int = 12) -> tuple[Any | None, str | None]:
+    request = urllib.request.Request(
+        url,
+        headers={
+            "Accept": "application/vnd.github+json",
+            "User-Agent": "valcea-clar-autonomy-acceptance",
+        },
+    )
+    token = os.environ.get("GITHUB_TOKEN")
+    if token:
+        request.add_header("Authorization", f"Bearer {token}")
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
+            return json.loads(response.read().decode("utf-8")), None
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+        return None, f"{type(exc).__name__}: {exc}"
 
 
 def _canonical_present(html: str, canonical: str) -> bool:
@@ -247,7 +267,7 @@ def _workflow_trigger_identity(run: dict[str, Any]) -> dict[str, Any]:
     return {"login": login or None, "type": actor_type or None, "automated": automated}
 
 
-def latest_structural_change() -> dict[str, str] | None:
+def latest_structural_change() -> dict[str, Any] | None:
     try:
         raw = _git([
             "log",
@@ -262,7 +282,75 @@ def latest_structural_change() -> dict[str, str] | None:
     if not raw or "\t" not in raw:
         return None
     sha, when = raw.split("\t", 1)
-    return {"sha": sha, "at_utc": _iso(_utc(when))}
+    return {
+        "sha": sha,
+        "at_utc": _iso(_utc(when)),
+        "repository": os.environ.get("GITHUB_REPOSITORY", "mihaicismaru-bit/civora"),
+        "path": "civora_structural_paths",
+    }
+
+
+def public_projection_structural_change() -> dict[str, Any] | None:
+    query = urllib.parse.urlencode({
+        "sha": "main",
+        "path": PUBLIC_PROJECTION_STRUCTURAL_PATH,
+        "per_page": "1",
+    })
+    source_url = f"https://api.github.com/repos/{PUBLIC_PROJECTION_REPO}/commits?{query}"
+    source_rows, source_error = _github_json(source_url)
+    if source_error or not isinstance(source_rows, list) or not source_rows or not isinstance(source_rows[0], dict):
+        return None
+    source_sha = str(source_rows[0].get("sha") or "").strip()
+    if not source_sha:
+        return None
+
+    history_url = f"https://api.github.com/repos/{PUBLIC_PROJECTION_REPO}/commits?sha=main&per_page=100"
+    history_rows, history_error = _github_json(history_url)
+    if history_error or not isinstance(history_rows, list):
+        return None
+
+    selected: dict[str, Any] | None = None
+    for row in history_rows:
+        if not isinstance(row, dict):
+            continue
+        row_sha = str(row.get("sha") or "").strip()
+        parents = [
+            str(parent.get("sha") or "").strip()
+            for parent in row.get("parents", [])
+            if isinstance(parent, dict)
+        ]
+        if source_sha in parents or row_sha == source_sha:
+            selected = row
+            break
+    if selected is None:
+        return None
+
+    commit = selected.get("commit") if isinstance(selected.get("commit"), dict) else {}
+    committer = commit.get("committer") if isinstance(commit.get("committer"), dict) else {}
+    author = commit.get("author") if isinstance(commit.get("author"), dict) else {}
+    when = str(committer.get("date") or author.get("date") or "").strip()
+    selected_sha = str(selected.get("sha") or "").strip()
+    if not when or not selected_sha:
+        return None
+    return {
+        "sha": selected_sha,
+        "at_utc": _iso(_utc(when)),
+        "repository": PUBLIC_PROJECTION_REPO,
+        "path": PUBLIC_PROJECTION_STRUCTURAL_PATH,
+        "source_sha": source_sha,
+    }
+
+
+def latest_system_structural_change() -> dict[str, Any] | None:
+    civora = latest_structural_change()
+    public_projection = public_projection_structural_change()
+    if civora is None or public_projection is None:
+        return None
+    components = [civora, public_projection]
+    selected = max(components, key=lambda row: _utc(str(row["at_utc"])))
+    result = dict(selected)
+    result["components"] = components
+    return result
 
 
 def added_story_routes(since: datetime) -> list[dict[str, Any]]:
@@ -449,46 +537,61 @@ def _normal(text: str) -> str:
 
 
 def relevant_manual_dispatches(since: datetime) -> dict[str, Any]:
-    repo = os.environ.get("GITHUB_REPOSITORY", "mihaicismaru-bit/civora")
-    query = urllib.parse.urlencode({
-        "event": "workflow_dispatch",
-        "created": f">={_iso(since)}",
-        "per_page": "100",
-    })
-    url = f"https://api.github.com/repos/{repo}/actions/runs?{query}"
-    request = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "valcea-clar-autonomy-acceptance"})
-    token = os.environ.get("GITHUB_TOKEN")
-    if token:
-        request.add_header("Authorization", f"Bearer {token}")
-    try:
-        with urllib.request.urlopen(request, timeout=10) as response:
-            payload = json.loads(response.read().decode("utf-8"))
-    except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
-        return {"status": "UNKNOWN", "reason": f"github_actions_read_failed:{type(exc).__name__}", "runs": [], "automated_runs": []}
-
-    if int(payload.get("total_count") or 0) > 100:
-        return {"status": "UNKNOWN", "reason": "workflow_dispatch_result_truncated", "runs": [], "automated_runs": []}
+    repositories = [
+        os.environ.get("GITHUB_REPOSITORY", "mihaicismaru-bit/civora"),
+        PUBLIC_PROJECTION_REPO,
+    ]
     relevant: list[dict[str, Any]] = []
     automated: list[dict[str, Any]] = []
-    for run in payload.get("workflow_runs", []):
-        if not isinstance(run, dict):
-            continue
-        name = _normal(str(run.get("name") or ""))
-        path = _normal(str(run.get("path") or ""))
-        if "valcea clar" not in name and "valcea" not in path:
-            continue
-        identity = _workflow_trigger_identity(run)
-        record = {
-            "run_id": run.get("id"),
-            "workflow": run.get("name"),
-            "created_at": run.get("created_at"),
-            "triggering_actor": identity["login"],
-            "triggering_actor_type": identity["type"],
-        }
-        if identity["automated"]:
-            automated.append(record)
-            continue
-        relevant.append(record)
+    for repo in dict.fromkeys(repositories):
+        query = urllib.parse.urlencode({
+            "event": "workflow_dispatch",
+            "created": f">={_iso(since)}",
+            "per_page": "100",
+        })
+        url = f"https://api.github.com/repos/{repo}/actions/runs?{query}"
+        request = urllib.request.Request(url, headers={"Accept": "application/vnd.github+json", "User-Agent": "valcea-clar-autonomy-acceptance"})
+        token = os.environ.get("GITHUB_TOKEN")
+        if token:
+            request.add_header("Authorization", f"Bearer {token}")
+        try:
+            with urllib.request.urlopen(request, timeout=10) as response:
+                payload = json.loads(response.read().decode("utf-8"))
+        except (urllib.error.URLError, TimeoutError, json.JSONDecodeError, OSError) as exc:
+            return {
+                "status": "UNKNOWN",
+                "reason": f"github_actions_read_failed:{repo}:{type(exc).__name__}",
+                "runs": [],
+                "automated_runs": [],
+            }
+
+        if int(payload.get("total_count") or 0) > 100:
+            return {
+                "status": "UNKNOWN",
+                "reason": f"workflow_dispatch_result_truncated:{repo}",
+                "runs": [],
+                "automated_runs": [],
+            }
+        for run in payload.get("workflow_runs", []):
+            if not isinstance(run, dict):
+                continue
+            name = _normal(str(run.get("name") or ""))
+            path = _normal(str(run.get("path") or ""))
+            if "valcea clar" not in name and "valcea" not in path and "civora public sync" not in name:
+                continue
+            identity = _workflow_trigger_identity(run)
+            record = {
+                "repository": repo,
+                "run_id": run.get("id"),
+                "workflow": run.get("name"),
+                "created_at": run.get("created_at"),
+                "triggering_actor": identity["login"],
+                "triggering_actor_type": identity["type"],
+            }
+            if identity["automated"]:
+                automated.append(record)
+                continue
+            relevant.append(record)
     return {"status": "MEASURED", "runs": relevant, "automated_runs": automated}
 
 
@@ -572,11 +675,11 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
         "missing_editorial_evidence": trace_missing,
     }
 
-    structural = latest_structural_change()
+    structural = latest_system_structural_change()
     manual: dict[str, Any]
     soak: dict[str, Any]
     if structural:
-        baseline = _utc(structural["at_utc"])
+        baseline = _utc(str(structural["at_utc"]))
         dispatches = relevant_manual_dispatches(baseline)
         manual_routes = [row for row in added_story_routes(baseline) if not row["autonomous"]]
         if dispatches["status"] == "MEASURED":
@@ -587,7 +690,7 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
                 "workflow_dispatch_runs": dispatches["runs"],
                 "automated_workflow_dispatch_runs": dispatches.get("automated_runs", []),
                 "manual_story_route_additions": manual_routes,
-                "definition": "only non-bot workflow_dispatch triggers and human-authored public story route additions count as manual intervention",
+                "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention",
             }
         else:
             manual = {
@@ -610,11 +713,14 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
             "status": soak_status,
             "structural_baseline_sha": structural["sha"],
             "structural_baseline_at_utc": structural["at_utc"],
+            "structural_baseline_repository": structural.get("repository"),
+            "structural_baseline_path": structural.get("path"),
+            "structural_components": structural.get("components", []),
             "eligible_after_utc": _iso(eligible_after),
             "required_hours": SOAK_HOURS,
         }
     else:
-        manual = {"status": "UNKNOWN", "value": None, "reason": "structural_baseline_unavailable"}
+        manual = {"status": "UNKNOWN", "value": None, "reason": "system_structural_baseline_unavailable"}
         soak = {"status": "UNKNOWN", "required_hours": SOAK_HOURS}
 
     objective_zero_gates = (
@@ -655,6 +761,7 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
             "synthetic_asset_counts_as_photo": False,
             "repository_route_is_publication_proof": False,
             "public_http_requires_projection_200_canonical_and_headline": True,
+            "cross_repo_structural_soak_required": True,
             "missing_evidence_becomes_zero": False,
         },
     }
