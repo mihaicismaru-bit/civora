@@ -138,7 +138,7 @@ jobs:
             --output-dir /tmp/regiocentru-actions \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
-      - name: Validate live RegioCentru receipt stays discovery-only
+      - name: Validate live RegioCentru receipt stays discovery-only and fail-closed
         run: |
           python - <<'PY'
           import json, string, sys
@@ -151,31 +151,55 @@ jobs:
           if d.get('observation_state') != 'CALL_INDEX_DISCOVERY':
               print('FAIL RegioCentru action index escaped discovery-only state')
               sys.exit(2)
-          for key in ('material_fact_use','open_call_authorized','publish_authorized','deadline_authorized','budget_authorized','eligibility_authorized'):
+          for key in ('material_fact_use','open_call_authorized','publish_authorized','deadline_authorized','budget_authorized','eligibility_authorized','canonical_corpus_mutation'):
               if d.get(key) is not False:
                   print('FAIL RegioCentru receipt became authorizing:', key, d.get(key))
                   sys.exit(2)
-          if d.get('action_candidate_count', 0) < 1 or len(d.get('action_candidates') or []) != d.get('action_candidate_count'):
-              print('FAIL no bounded RegioCentru action candidates were acquired')
+          if d.get('publication_effect') != 'NONE' or d.get('current_material_truth_available') is not False:
+              print('FAIL RegioCentru receipt crossed current-truth/publication boundary')
               sys.exit(2)
-          raw_hash=str(d.get('raw_sha256') or '')
-          if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
-              print('FAIL invalid RegioCentru raw SHA-256')
+          u=urlparse(str(d.get('requested_url') or ''))
+          if u.scheme != 'https' or (u.hostname or '').lower() not in {'regiocentru.ro','www.regiocentru.ro'} or not (u.path or '/').startswith('/actiuni/'):
+              print('FAIL RegioCentru requested authority/path drift:', d.get('requested_url'))
               sys.exit(2)
-          if not d.get('fetched_at') or not d.get('run_id'):
-              print('FAIL RegioCentru provenance incomplete')
-              sys.exit(2)
-          for key in ('requested_url','final_url'):
-              u=urlparse(str(d.get(key) or ''))
-              if u.scheme != 'https' or (u.hostname or '').lower() not in {'regiocentru.ro','www.regiocentru.ro'} or not (u.path or '/').startswith('/actiuni/'):
-                  print('FAIL RegioCentru authority/path drift:', key, d.get(key))
-                  sys.exit(2)
           missing=set(d.get('missing_for_open_confirmation') or [])
           required={'exact_call_or_mysmis_identifier','current_official_exact_action_endpoint','explicit_current_open_status','semantic_reconciliation'}
           if not required.issubset(missing):
               print('FAIL RegioCentru exact-call proof requirements incomplete:', sorted(missing))
               sys.exit(2)
-          print(json.dumps({'candidate_count': d.get('action_candidate_count'), 'raw_sha256': raw_hash, 'observation_state': d.get('observation_state'), 'publish_authorized': d.get('publish_authorized')}, ensure_ascii=False))
+          state=d.get('source_health_state')
+          if state == 'HEALTHY':
+              if d.get('lkg_required') is not False or d.get('evidence_usable_for_reconciliation') is not True or d.get('failure_class') is not None:
+                  print('FAIL healthy RegioCentru health semantics drift')
+                  sys.exit(2)
+              if d.get('action_candidate_count', 0) < 1 or len(d.get('action_candidates') or []) != d.get('action_candidate_count'):
+                  print('FAIL no bounded RegioCentru action candidates were acquired')
+                  sys.exit(2)
+              raw_hash=str(d.get('raw_sha256') or '')
+              if len(raw_hash) != 64 or any(ch not in string.hexdigits for ch in raw_hash):
+                  print('FAIL invalid RegioCentru raw SHA-256')
+                  sys.exit(2)
+              f=urlparse(str(d.get('final_url') or ''))
+              if f.scheme != 'https' or (f.hostname or '').lower() not in {'regiocentru.ro','www.regiocentru.ro'} or not (f.path or '/').startswith('/actiuni/'):
+                  print('FAIL RegioCentru final authority/path drift:', d.get('final_url'))
+                  sys.exit(2)
+          elif state == 'DEGRADED':
+              if d.get('lkg_required') is not True or d.get('evidence_usable_for_reconciliation') is not False:
+                  print('FAIL degraded RegioCentru receipt did not require LKG/fail closed')
+                  sys.exit(2)
+              if d.get('final_url') is not None or d.get('raw_sha256') is not None or d.get('content_type') is not None:
+                  print('FAIL degraded RegioCentru receipt fabricated acquired content')
+                  sys.exit(2)
+              if d.get('action_candidate_count') != 0 or d.get('action_candidates') != []:
+                  print('FAIL degraded RegioCentru receipt leaked candidates')
+                  sys.exit(2)
+              if not d.get('failure_class'):
+                  print('FAIL degraded RegioCentru receipt missing failure class')
+                  sys.exit(2)
+          else:
+              print('FAIL unexpected RegioCentru source health:', state)
+              sys.exit(2)
+          print(json.dumps({'source_health_state': state, 'failure_class': d.get('failure_class'), 'candidate_count': d.get('action_candidate_count'), 'raw_sha256': d.get('raw_sha256'), 'observation_state': d.get('observation_state'), 'publish_authorized': d.get('publish_authorized'), 'lkg_required': d.get('lkg_required')}, ensure_ascii=False))
           PY
 
       - name: Upload bounded RegioCentru acquisition evidence
@@ -185,4 +209,4 @@ jobs:
           name: partener-regiocentru-actions-live-evidence
           path: /tmp/regiocentru-actions
           retention-days: 7
-          if-no-files-found: warn
+          if-no-files-found: error

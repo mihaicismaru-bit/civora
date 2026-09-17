@@ -8,9 +8,18 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ingest"))
 
 import funding_tenders_fetch as ft
-from eu_direct_life_ft_exact import ExactLifeConflict, collect_exact, select_life_candidate, validate_evidence
+from eu_direct_life_ft_exact import (
+    ExactLifeConflict,
+    PRIORITY_EXACT_WATCH_REFERENCES,
+    collect_exact,
+    select_life_candidate,
+    select_life_execution_target,
+    validate_evidence,
+    validate_reference,
+)
 
 REF = "LIFE-2026-SAP-ENV-ENVIRONMENT"
+PRIORITY_WATCH_REF = "LIFE-2026-CET-BUILDSKILLS"
 PROGRAMME_CODE = "43252405"
 STATUS_CODE = "31094501"
 PROGRAMME_LABEL = "Programme for the Environment and Climate Action (LIFE)"
@@ -25,11 +34,11 @@ def facet_payload():
     }
 
 
-def search_payload(deadline="2026-09-23T17:00:00Z"):
+def search_payload(deadline="2026-09-23T17:00:00Z", reference=REF, call_identifier="LIFE-2026-SAP-ENV"):
     return [{
-        "identifier": REF,
-        "topicAbbreviation": REF,
-        "callIdentifier": "LIFE-2026-SAP-ENV",
+        "identifier": reference,
+        "topicAbbreviation": reference,
+        "callIdentifier": call_identifier,
         "type": "1",
         "frameworkProgramme": PROGRAMME_CODE,
         "programmePeriod": "2021 - 2027",
@@ -74,6 +83,20 @@ def main():
     selected = select_life_candidate(taxonomy)
     assert selected["identifier"] == REF
 
+    # The bounded programme sample deliberately omits the priority BUILDUP topic.
+    # The canonical LIFE lane must still route it into an exact F&T re-check,
+    # while preserving the sample candidate only as a non-authorizing fallback.
+    execution = select_life_execution_target(taxonomy)
+    assert PRIORITY_EXACT_WATCH_REFERENCES == (PRIORITY_WATCH_REF,)
+    assert execution["identifier"] == PRIORITY_WATCH_REF
+    assert execution["handoff_mode"] == "EXPLICIT_PRIORITY_EXACT_RECHECK"
+    assert execution["priority_rank"] == 0
+    assert execution["bounded_sample_contains_target"] is False
+    assert execution["bounded_sample_fallback"]["identifier"] == REF
+    assert execution["material_fact_use"] is False
+    assert execution["exact_recheck_required"] is True
+    assert execution["source_authority_url_candidate"] == ft.topic_url(PRIORITY_WATCH_REF)
+
     evidence = collect_exact(
         REF,
         run_id="synthetic",
@@ -91,6 +114,38 @@ def main():
     assert evidence["open_call_authorized"] is False
     assert evidence["deadline_authorized"] is False
     assert evidence["publish_authorized"] is False
+
+    # Keep priority watch identities on the existing generic exact LIFE adapter.
+    # This is deliberately synthetic/non-authorizing: live admission remains owned
+    # by the canonical F&T acquisition/reconciliation lane.
+    assert validate_reference(PRIORITY_WATCH_REF) == PRIORITY_WATCH_REF
+    watch_evidence = collect_exact(
+        PRIORITY_WATCH_REF,
+        run_id="synthetic-priority-watch",
+        fetched_at="2026-09-08T06:00:00+00:00",
+        post_func=make_post(
+            search=search_payload(
+                deadline="2026-09-16T17:00:00+02:00",
+                reference=PRIORITY_WATCH_REF,
+                call_identifier="LIFE-2026-CET",
+            )
+        ),
+        topic_func=topic,
+    )
+    validate_evidence(watch_evidence)
+    assert watch_evidence["reference"] == PRIORITY_WATCH_REF
+    assert watch_evidence["call_identifier"] == "LIFE-2026-CET"
+    assert watch_evidence["candidate_state"] == "OPEN_CALL"
+    assert watch_evidence["authority_url"] == ft.topic_url(PRIORITY_WATCH_REF)
+    assert watch_evidence["authority_url_verified"] is True
+    assert watch_evidence["semantic_reconciliation_required"] is True
+    assert watch_evidence["field_scoped_material_admission_required"] is True
+    assert watch_evidence["material_fact_use"] is False
+    assert watch_evidence["open_call_authorized"] is False
+    assert watch_evidence["deadline_authorized"] is False
+    assert watch_evidence["publish_authorized"] is False
+    assert watch_evidence["canonical_corpus_mutation"] is False
+    assert watch_evidence["publication_effect"] == "NONE"
 
     bad_facet = facet_payload()
     bad_facet["facets"][0]["values"][0]["value"] = "Horizon Europe"

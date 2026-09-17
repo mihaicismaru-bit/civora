@@ -1,0 +1,192 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+from pathlib import Path
+from typing import Any
+
+MATERIAL_FLAGS = (
+    "material_fact_use",
+    "open_call_authorized",
+    "deadline_authorized",
+    "budget_authorized",
+    "eligibility_authorized",
+    "publish_authorized",
+    "distribution_authorized",
+    "call_alert_authorized",
+)
+
+CURRENT_MODE = "CURRENT_BOUNDED_SAMPLE_CANDIDATE_EXACT_RECHECK"
+OMITTED_RECHECK_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_PREVIOUS_IDENTITY_EXACT_RECHECK"
+OMITTED_SKIP_MODE = "BOUNDED_SAMPLE_FAMILY_OMITTED_NO_SAFE_IDENTITY_NON_AUTHORIZING"
+DEGRADED_RECONCILIATION_STATE = "CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED"
+
+
+def load(path: Path) -> dict[str, Any]:
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def canonical_sha(value: Any) -> str:
+    return hashlib.sha256(
+        json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    ).hexdigest()
+
+
+def check_non_authorizing(obj: dict[str, Any]) -> None:
+    for key in MATERIAL_FLAGS:
+        assert obj[key] is False, (key, obj.get(key))
+    assert obj["canonical_corpus_mutation"] is False
+    assert obj["publication_effect"] == "NONE"
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", required=True, type=Path)
+    parser.add_argument("--previous-digital-available", action="store_true")
+    parser.add_argument("--previous-digital-run-id")
+    args = parser.parse_args()
+    root = args.root
+
+    taxonomy = load(root / "programme-taxonomy.json")
+    handoff = load(root / "digital-exact/ft-digital-handoff-state.json")
+    assert taxonomy["schema"] == "PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1"
+    assert handoff["schema"] == "PARTENER_EU_DIGITAL_FT_HANDOFF_STATE_V1"
+    check_non_authorizing(handoff)
+    assert handoff["bounded_sample_omission_is_material_fact"] is False
+    assert handoff["closure_inference_authorized"] is False
+    assert handoff["previous_evidence_available"] is args.previous_digital_available
+
+    previous_path = root / "history/previous/digital-exact/ft-digital-exact-evidence.json"
+    previous = None
+    if args.previous_digital_available:
+        assert args.previous_digital_run_id
+        assert previous_path.exists()
+        previous = load(previous_path)
+        assert previous["schema"] == "PARTENER_EU_DIGITAL_FT_EXACT_EVIDENCE_V1"
+        assert canonical_sha(previous) == handoff["previous_evidence_sha256"]
+        assert previous["reference"] == handoff["previous_reference"]
+    else:
+        assert args.previous_digital_run_id is None
+        assert not previous_path.exists()
+
+    digital_rows = [
+        row for row in taxonomy.get("records") or []
+        if row.get("programme_family_normalized") == "DIGITAL_EUROPE"
+    ]
+    exact_required = handoff["exact_recheck_required"] is True
+    mode = handoff["observation_state"]
+    if exact_required:
+        assert mode in {CURRENT_MODE, OMITTED_RECHECK_MODE}
+        if mode == CURRENT_MODE:
+            assert digital_rows
+            assert handoff["current_taxonomy_candidate"] is True
+        else:
+            assert not digital_rows
+            assert handoff["current_taxonomy_candidate"] is False
+            assert handoff["previous_evidence_available"] is True
+            assert handoff["previous_same_identity"] is True
+
+        exact = load(root / "digital-exact/ft-digital-exact-evidence.json")
+        rec = load(root / "digital-exact/ft-digital-reconciliation.json")
+        assert exact["schema"] == "PARTENER_EU_DIGITAL_FT_EXACT_EVIDENCE_V1"
+        assert rec["schema"] == "PARTENER_EU_DIGITAL_FT_RECONCILIATION_V1"
+        assert exact["reference"] == handoff["target_reference"]
+        assert exact["programme_family"] == "DIGITAL_EUROPE"
+        assert exact["reference"].startswith("DIGITAL-")
+        assert "digital europe programme" in exact["programme_label_official"].casefold()
+        check_non_authorizing(exact)
+        check_non_authorizing(rec)
+        assert rec["reference"] == exact["reference"]
+        assert rec["current_evidence_sha256"] == canonical_sha(exact)
+        assert rec["lkg_reference_is_current_truth"] is False
+
+        previous_same_identity = handoff["previous_same_identity"] is True
+        usable = exact.get("evidence_usable_for_reconciliation")
+        if usable is None:
+            usable = True  # legacy exact receipt compatibility
+
+        if usable:
+            assert exact["authority_url_verified"] is True
+            assert exact["authority_readback"]["verified"] is True
+            assert exact["candidate_state"] in {"OPEN_CALL", "FORTHCOMING_CALL", "CLOSED_CALL", "UNKNOWN"}
+            assert exact["status_label"]
+            assert rec["semantic_reconciliation_passed"] is True
+            assert rec["lkg_reference_required"] is False
+            if previous_same_identity:
+                assert args.previous_digital_available and previous is not None
+                assert previous["reference"] == exact["reference"]
+                assert rec["previous_evidence_sha256"] == canonical_sha(previous)
+                assert rec["reconciliation_state"] in {
+                    "NO_CHANGE",
+                    "DIGITAL_EXACT_TOPIC_SEMANTIC_CHANGE_RECONCILED_NON_AUTHORIZING",
+                }
+            else:
+                assert rec["reconciliation_state"] == "BASELINE_CAPTURED_NON_AUTHORIZING"
+                assert rec["previous_evidence_sha256"] is None
+            assert rec["material_admission_ready_for_downstream_review"] is (exact["candidate_state"] == "OPEN_CALL")
+        else:
+            assert exact["source_health_state"] == "DEGRADED_AUTHORITY_READBACK"
+            assert exact["lkg_required"] is True
+            assert exact["authority_url_verified"] is False
+            assert exact["authority_readback"].get("verified") is not True
+            assert exact["candidate_state"] == "UNKNOWN"
+            assert exact["status_label"] is None
+            assert exact["deadline_candidate"] is None
+            assert exact["budget_candidate"] is None
+            assert exact["degradation_reason"]
+            assert rec["reconciliation_state"] == DEGRADED_RECONCILIATION_STATE
+            assert rec["semantic_reconciliation_passed"] is False
+            assert rec["semantic_change_count"] == 0
+            assert rec["semantic_changes"] == []
+            assert rec["material_admission_ready_for_downstream_review"] is False
+            assert rec["lkg_reference_required"] is True
+            assert rec["lkg_reference_available"] is previous_same_identity
+            if previous_same_identity:
+                assert args.previous_digital_available and previous is not None
+                assert previous["reference"] == exact["reference"]
+                assert rec["previous_evidence_sha256"] == canonical_sha(previous)
+            else:
+                assert rec["previous_evidence_sha256"] is None
+
+        result = {
+            "handoff_state": mode,
+            "reference": exact["reference"],
+            "candidate_state": exact["candidate_state"],
+            "status_label": exact["status_label"],
+            "authority_url_verified": exact["authority_url_verified"],
+            "source_health_state": exact.get("source_health_state", "HEALTHY_LEGACY"),
+            "evidence_usable_for_reconciliation": usable,
+            "lkg_required": exact.get("lkg_required", False),
+            "previous_evidence_available": args.previous_digital_available,
+            "previous_same_identity": previous_same_identity,
+            "previous_run_id": args.previous_digital_run_id,
+            "reconciliation_state": rec["reconciliation_state"],
+            "semantic_reconciliation_passed": rec["semantic_reconciliation_passed"],
+            "semantic_change_count": rec["semantic_change_count"],
+            "material_admission_ready_for_downstream_review": rec["material_admission_ready_for_downstream_review"],
+            "open_call_authorized": rec["open_call_authorized"],
+        }
+    else:
+        assert not digital_rows
+        assert mode == OMITTED_SKIP_MODE
+        assert handoff["current_taxonomy_candidate"] is False
+        assert handoff["previous_evidence_available"] is False
+        assert handoff["target_reference"] is None
+        assert not (root / "digital-exact/ft-digital-exact-evidence.json").exists()
+        assert not (root / "digital-exact/ft-digital-reconciliation.json").exists()
+        result = {
+            "handoff_state": mode,
+            "reference": None,
+            "exact_recheck_required": False,
+            "previous_evidence_available": False,
+            "open_call_authorized": False,
+        }
+
+    print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

@@ -175,6 +175,63 @@ def collect_live(*, authority_url: str = DEFAULT_URL, run_id: str, fetched_at: s
     return evidence
 
 
+def build_transport_failure_evidence(*, authority_url: str, run_id: str, error: Exception,
+                                     fetched_at: str | None = None) -> dict[str, Any]:
+    """Persist an unusable live readback without weakening TLS or authority checks."""
+    fetched_at = fetched_at or utc_now()
+    requested_url = official_url(authority_url)
+    error_text = " ".join(str(error).split())[:1000]
+    evidence = {
+        "schema": "PARTENER_EU_CREATIVE_EUROPE_CALL_INDEX_LIVE_EVIDENCE_V1",
+        "fetcher_version": FETCHER_VERSION,
+        "adapter_id": indexer.ADAPTER_ID,
+        "parser_version": indexer.PARSER_VERSION,
+        "source_family": indexer.SOURCE_FAMILY,
+        "programme_family": indexer.PROGRAMME_FAMILY,
+        "authority_class": indexer.AUTHORITY_CLASS,
+        "authority_url": requested_url,
+        "fetched_at": fetched_at,
+        "run_id": run_id,
+        "source_health": "DEGRADED_TRANSPORT",
+        "lkg_required": True,
+        "receipt": {
+            "requested_url": requested_url,
+            "final_url": None,
+            "http_status": None,
+            "content_type": None,
+            "bytes": 0,
+            "raw_sha256": None,
+            "transport_error_type": type(error).__name__,
+            "transport_error": error_text,
+        },
+        "batch": None,
+        "stats": {
+            "exact_crea_reference_candidates": 0,
+            "visible_open_candidates": 0,
+            "open_call_authorized": 0,
+            "records_requiring_ft_reconcile": 0,
+        },
+        "market_intelligence_only": True,
+        "material_fact_use": False,
+        "open_call_authorized": False,
+        "deadline_authorized": False,
+        "budget_authorized": False,
+        "eligibility_authorized": False,
+        "publish_authorized": False,
+        "distribution_authorized": False,
+        "publication_effect": "NONE",
+        "canonical_corpus_mutation": False,
+        "missing_for_material_use": [
+            "successful TLS-verified official Culture index readback",
+            "exact current Funding & Tenders topic readback",
+            "semantic reconciliation",
+        ],
+        "rollback": "Discard this degraded transport receipt; no canonical corpus or public projection was mutated.",
+    }
+    validate_live_evidence(evidence)
+    return evidence
+
+
 def validate_live_evidence(evidence: Mapping[str, Any]) -> None:
     if evidence.get("schema") != "PARTENER_EU_CREATIVE_EUROPE_CALL_INDEX_LIVE_EVIDENCE_V1":
         raise ValueError("Creative Europe live evidence schema mismatch")
@@ -195,7 +252,13 @@ def validate_live_evidence(evidence: Mapping[str, Any]) -> None:
     if int(stats.get("records_requiring_ft_reconcile") or 0) != count:
         raise ValueError("Creative Europe index lost Funding & Tenders reconcile gates")
     health = evidence.get("source_health")
-    if count:
+    if health == "DEGRADED_TRANSPORT":
+        receipt = evidence.get("receipt") or {}
+        if count or evidence.get("lkg_required") is not True:
+            raise ValueError("Creative Europe transport failure must be empty and require LKG")
+        if receipt.get("raw_sha256") is not None or not receipt.get("transport_error_type"):
+            raise ValueError("Creative Europe transport failure receipt is inconsistent")
+    elif count:
         if health != "HEALTHY" or evidence.get("lkg_required") is not False:
             raise ValueError("Creative Europe populated index has incorrect source health")
     else:
@@ -212,7 +275,23 @@ def main() -> int:
     args = parser.parse_args()
 
     requested_url = official_url(args.url)
-    response = fetch_url(requested_url)
+    try:
+        response = fetch_url(requested_url)
+    except Exception as exc:
+        evidence = build_transport_failure_evidence(
+            authority_url=requested_url,
+            run_id=args.run_id,
+            error=exc,
+        )
+        args.out.parent.mkdir(parents=True, exist_ok=True)
+        args.out.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({
+            **evidence.get("stats", {}),
+            "source_health": evidence.get("source_health"),
+            "lkg_required": evidence.get("lkg_required"),
+            "transport_error_type": (evidence.get("receipt") or {}).get("transport_error_type"),
+        }, ensure_ascii=False, sort_keys=True))
+        return 0
     raw = bytes(response["raw"])
 
     def replay_fetch(_: str) -> Mapping[str, Any]:

@@ -1,0 +1,149 @@
+name: PARTENER.EU I3 Exact Canonical Runner Proof
+
+on:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/eu_direct_i3_ft_exact.py'
+      - 'partener-eu/ingest/eu_direct_i3_ft_reconcile.py'
+      - 'partener-eu/ops/test_eu_direct_i3_ft_exact.py'
+      - 'partener-eu/ops/test_eu_direct_i3_ft_reconcile.py'
+      - 'partener-eu/ops/run_i3_exact_canonical.py'
+      - '.github/workflows/partener-eu-i3-exact-call-proof.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  i3-exact-canonical-runner-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Verify exact checkout
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Compile I3 exact canonical runner and regressions
+        run: |
+          python -m py_compile \
+            partener-eu/ingest/eu_direct_i3_ft_exact.py \
+            partener-eu/ingest/eu_direct_i3_ft_reconcile.py \
+            partener-eu/ops/run_i3_exact_canonical.py \
+            partener-eu/ops/test_eu_direct_i3_ft_exact.py \
+            partener-eu/ops/test_eu_direct_i3_ft_reconcile.py
+
+      - name: Validate fail-closed I3 exact semantics and reconciliation
+        env:
+          PYTHONPATH: partener-eu/ingest:partener-eu/ops
+        run: |
+          python partener-eu/ops/test_eu_direct_i3_ft_exact.py
+          python partener-eu/ops/test_eu_direct_i3_ft_reconcile.py
+
+      - name: Run canonical I3 exact calls with healthy same-identity history
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          EXPECTED_HEAD_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          I3_EXACT_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-i3-exact-canonical
+        run: python partener-eu/ops/run_i3_exact_canonical.py
+
+      - name: Verify replayable I3 exact output stays fail-closed and non-authorizing
+        run: |
+          python - <<'PY'
+          import json, re
+          from pathlib import Path
+          root=Path('/tmp/partener-eu-eu-direct-programme-intelligence/i3-exact')
+          expected={'inv1':'I3-2026-INV1','inv2a':'I3-2026-INV2A'}
+          selection=json.loads((root/'history-selection.json').read_text(encoding='utf-8'))
+          assert set(selection)=={'I3-2026-INV1','I3-2026-INV2A'}
+          summaries=[]
+          flags=(
+              'material_fact_use','open_call_authorized','closed_call_authorized',
+              'deadline_authorized','budget_authorized','eligibility_authorized',
+              'publish_authorized','distribution_authorized','call_alert_authorized',
+          )
+          for folder, reference in expected.items():
+              current=json.loads((root/folder/'current'/'ft-i3-exact-evidence.json').read_text(encoding='utf-8'))
+              rec=json.loads((root/folder/'current'/'i3-exact-reconciliation.json').read_text(encoding='utf-8'))
+              hist_path=root/folder/'history'/'ft-i3-exact-evidence.json'
+              selected=selection[reference]['selected']
+              assert current['schema']=='PARTENER_EU_I3_FT_EXACT_EVIDENCE_V1'
+              assert current['reference']==reference
+              assert re.fullmatch(r'[0-9a-f]{64}', current['exact_semantic_fingerprint'])
+              assert all(current[k] is False for k in flags)
+              assert current['publication_effect']=='NONE' and current['canonical_corpus_mutation'] is False
+              assert rec['schema']=='PARTENER_EU_I3_FT_RECONCILIATION_V1'
+              assert rec['reference']==reference
+              assert rec['field_scoped_material_admission_required'] is True
+              assert 'field_scoped_material_admission' in set(rec['missing_for_material_admission'])
+              assert rec['lkg_reference_is_current_truth'] is False
+              assert all(rec[k] is False for k in flags)
+              assert rec['publication_effect']=='NONE' and rec['canonical_corpus_mutation'] is False
+              assert selection[reference]['lkg_is_current_truth'] is False
+
+              if current['source_health_state']=='HEALTHY':
+                  assert current['evidence_usable_for_reconciliation'] is True
+                  assert current['funding_tenders_authority_verified'] is True
+                  assert current['eismea_receipt']['health_state']=='HEALTHY'
+                  assert current['cross_authority_status_consistent'] is True
+                  assert rec['semantic_reconciliation_passed'] is True
+                  assert rec['lkg_reference_required'] is False
+                  assert selected=='CURRENT_HEALTHY'
+                  hist=json.loads(hist_path.read_text(encoding='utf-8'))
+                  assert hist['exact_semantic_fingerprint']==current['exact_semantic_fingerprint']
+              else:
+                  assert current['source_health_state']=='DEGRADED_EXACT_AUTHORITY_CHAIN'
+                  assert current['evidence_usable_for_reconciliation'] is False
+                  assert current['lkg_required'] is True
+                  assert current['candidate_state']=='UNKNOWN' and current['status_label'] is None
+                  assert current['deadline_candidate'] is None and current['budget_candidate'] is None
+                  assert rec['reconciliation_state']=='CURRENT_EXACT_AUTHORITY_UNRESOLVED_LKG_REQUIRED'
+                  assert rec['semantic_reconciliation_passed'] is False
+                  assert rec['semantic_change_count']==0
+                  assert rec['lkg_reference_required'] is True
+                  assert rec['material_admission_ready_for_downstream_review'] is False
+                  if selected=='PREVIOUS_HEALTHY_LKG':
+                      hist=json.loads(hist_path.read_text(encoding='utf-8'))
+                      assert hist['reference']==reference and hist['source_health_state']=='HEALTHY'
+                      assert hist['evidence_usable_for_reconciliation'] is True
+                      assert rec['lkg_reference_available'] is True
+                  else:
+                      assert selected=='NO_HEALTHY_LKG_AVAILABLE'
+                      assert rec['lkg_reference_available'] is False
+                      assert not hist_path.exists()
+
+              summaries.append({
+                  'reference':reference,
+                  'source_health_state':current['source_health_state'],
+                  'candidate_state':current['candidate_state'],
+                  'status_label':current['status_label'],
+                  'reconciliation_state':rec['reconciliation_state'],
+                  'semantic_change_count':rec['semantic_change_count'],
+                  'history_selection':selected,
+                  'lkg_reference_required':rec['lkg_reference_required'],
+                  'open_call_authorized':False,
+              })
+          print(json.dumps({'i3_exact_calls':summaries,'publication_effect':'NONE'}, sort_keys=True))
+          PY
+
+      - name: Upload bounded I3 exact canonical-runner proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-eu-i3-exact-call-proof-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-eu-eu-direct-programme-intelligence/i3-exact
+          if-no-files-found: error
+          retention-days: 7

@@ -24,7 +24,9 @@ import pathlib
 import re
 import secrets
 import sys
+import time
 from typing import Any, Iterable, Mapping
+from urllib.error import HTTPError, URLError
 from urllib.parse import quote, urlencode, urlparse
 from urllib.request import Request, build_opener
 
@@ -37,7 +39,7 @@ PORTAL_ORIGIN = "https://ec.europa.eu"
 PORTAL_REFERER = "https://ec.europa.eu/info/funding-tenders/opportunities/portal/"
 TOPIC_BASE = "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/"
 LIVE_SCHEMA = "PARTENER_EU_FUNDING_TENDERS_LIVE_EVIDENCE_V1"
-FETCHER_VERSION = "FUNDING_TENDERS_LIVE_FETCH_V2"
+FETCHER_VERSION = "FUNDING_TENDERS_LIVE_FETCH_V3"
 MAX_API_BYTES = 8 * 1024 * 1024
 MAX_TOPIC_BYTES = 2 * 1024 * 1024
 DEFAULT_PAGE_SIZE = 5
@@ -47,6 +49,9 @@ ALLOWED_TOPIC_HOST = "ec.europa.eu"
 STATUS_CODES_OF_INTEREST = ("31094501", "31094502")
 CALL_TYPES = ("1", "2", "8")
 HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
+TOPIC_READBACK_MAX_ATTEMPTS = 3
+TOPIC_READBACK_BACKOFF_SECONDS = (0.25, 0.75)
+RETRYABLE_TOPIC_HTTP_STATUS = frozenset({404, 408, 425, 429, 500, 502, 503, 504})
 
 
 def utc_now() -> str:
@@ -267,40 +272,143 @@ def topic_url(identifier: str) -> str:
     return TOPIC_BASE + quote(value, safe="-._~:")
 
 
-def _topic_readback(url: str, *, max_bytes: int = MAX_TOPIC_BYTES, opener=None) -> dict[str, Any]:
-    """Bounded HTML reachability proof for the exact official topic page."""
+def _retryable_topic_exception(exc: Exception) -> tuple[bool, int | None]:
+    if isinstance(exc, HTTPError):
+        status = int(exc.code)
+        return status in RETRYABLE_TOPIC_HTTP_STATUS, status
+    if isinstance(exc, (URLError, TimeoutError, ConnectionError)):
+        return True, None
+    return False, None
+
+
+def _topic_readback(
+    url: str,
+    *,
+    max_bytes: int = MAX_TOPIC_BYTES,
+    opener=None,
+    max_attempts: int = TOPIC_READBACK_MAX_ATTEMPTS,
+    sleeper=time.sleep,
+) -> dict[str, Any]:
+    """Bounded HTML reachability proof for the exact official topic page.
+
+    Only transport/reachability failures are retried. Authority/content drift is
+    never retried into success. Every attempt is retained in the returned receipt
+    so a transient recovery cannot erase the initial failure observation.
+    """
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.hostname != ALLOWED_TOPIC_HOST or "/topic-details/" not in parsed.path:
         raise ValueError(f"unsafe Funding & Tenders topic URL: {url}")
+    max_attempts = int(max_attempts)
+    if max_attempts < 1 or max_attempts > 5:
+        raise ValueError("topic readback max_attempts must be between 1 and 5")
     req = Request(url, method="GET", headers=_request_headers(accept="text/html,application/xhtml+xml"))
     op = opener or build_opener()
-    try:
-        with op.open(req, timeout=25) as response:
-            final_url = response.geturl()
-            final = urlparse(final_url)
-            status = getattr(response, "status", response.getcode())
-            ctype = (response.headers.get("Content-Type") or "").lower()
-            raw = response.read(max_bytes + 1)
-    except Exception as exc:
-        return {"url": url, "verified": False, "error": f"{type(exc).__name__}: {exc}"}
-    if len(raw) > max_bytes:
-        return {"url": url, "final_url": final_url, "http_status": status, "verified": False, "error": "response too large"}
-    verified = (
-        status == 200
-        and final.scheme == "https"
-        and final.hostname == ALLOWED_TOPIC_HOST
-        and "/topic-details/" in final.path
-        and "html" in ctype
-    )
-    return {
-        "url": url,
-        "final_url": final_url,
-        "http_status": status,
-        "content_type": ctype,
-        "bytes": len(raw),
-        "body_sha256": sha256_bytes(raw),
-        "verified": bool(verified),
-    }
+    attempts: list[dict[str, Any]] = []
+
+    for attempt_index in range(1, max_attempts + 1):
+        attempt_started_at = utc_now()
+        try:
+            with op.open(req, timeout=25) as response:
+                final_url = response.geturl()
+                final = urlparse(final_url)
+                status = getattr(response, "status", response.getcode())
+                ctype = (response.headers.get("Content-Type") or "").lower()
+                raw = response.read(max_bytes + 1)
+        except Exception as exc:
+            retriable, status = _retryable_topic_exception(exc)
+            attempt = {
+                "attempt_index": attempt_index,
+                "fetched_at": attempt_started_at,
+                "outcome": "TRANSPORT_FAILURE",
+                "http_status": status,
+                "error": f"{type(exc).__name__}: {exc}",
+                "retriable": bool(retriable),
+            }
+            attempts.append(attempt)
+            if retriable and attempt_index < max_attempts:
+                delay = TOPIC_READBACK_BACKOFF_SECONDS[min(attempt_index - 1, len(TOPIC_READBACK_BACKOFF_SECONDS) - 1)]
+                sleeper(delay)
+                continue
+            return {
+                "url": url,
+                "verified": False,
+                "error": attempt["error"],
+                "failure_class": "TRANSIENT_READBACK_EXHAUSTED" if retriable else "NON_RETRYABLE_READBACK_FAILURE",
+                "attempt_count": len(attempts),
+                "attempts": attempts,
+                "recovery_state": "NOT_RECOVERED",
+            }
+
+        if len(raw) > max_bytes:
+            attempts.append({
+                "attempt_index": attempt_index,
+                "fetched_at": attempt_started_at,
+                "outcome": "RESPONSE_TOO_LARGE",
+                "http_status": status,
+                "final_url": final_url,
+                "bytes": len(raw),
+                "retriable": False,
+            })
+            return {
+                "url": url,
+                "final_url": final_url,
+                "http_status": status,
+                "verified": False,
+                "error": "response too large",
+                "failure_class": "RESPONSE_TOO_LARGE",
+                "attempt_count": len(attempts),
+                "attempts": attempts,
+                "recovery_state": "NOT_RECOVERED",
+            }
+
+        verified = (
+            status == 200
+            and final.scheme == "https"
+            and final.hostname == ALLOWED_TOPIC_HOST
+            and "/topic-details/" in final.path
+            and "html" in ctype
+        )
+        attempt = {
+            "attempt_index": attempt_index,
+            "fetched_at": attempt_started_at,
+            "outcome": "VERIFIED" if verified else "AUTHORITY_OR_CONTENT_DRIFT",
+            "final_url": final_url,
+            "http_status": status,
+            "content_type": ctype,
+            "bytes": len(raw),
+            "body_sha256": sha256_bytes(raw),
+            "retriable": False,
+        }
+        attempts.append(attempt)
+        if not verified:
+            return {
+                "url": url,
+                "final_url": final_url,
+                "http_status": status,
+                "content_type": ctype,
+                "bytes": len(raw),
+                "body_sha256": attempt["body_sha256"],
+                "verified": False,
+                "error": "official topic-page authority/content boundary not satisfied",
+                "failure_class": "AUTHORITY_OR_CONTENT_DRIFT",
+                "attempt_count": len(attempts),
+                "attempts": attempts,
+                "recovery_state": "NOT_RECOVERED",
+            }
+        return {
+            "url": url,
+            "final_url": final_url,
+            "http_status": status,
+            "content_type": ctype,
+            "bytes": len(raw),
+            "body_sha256": attempt["body_sha256"],
+            "verified": True,
+            "attempt_count": len(attempts),
+            "attempts": attempts,
+            "recovery_state": "FIRST_ATTEMPT_HEALTHY" if len(attempts) == 1 else "RECOVERED_AFTER_TRANSIENT_FAILURE",
+        }
+
+    raise AssertionError("unreachable topic readback loop")
 
 
 def _record_identifier(record: Mapping[str, Any]) -> str | None:
@@ -592,8 +700,14 @@ def validate_live_evidence(evidence: Mapping[str, Any]) -> None:
             identifier = str(row.get("identifier") or "")
             if not row.get("authority_url_verified"):
                 raise ValueError(f"unverified topic classified as {row.get('observation_state')}: {identifier}")
-            if (html_readbacks.get(identifier) or {}).get("verified") is not True:
+            html_receipt = html_readbacks.get(identifier) or {}
+            if html_receipt.get("verified") is not True:
                 raise ValueError(f"topic-page readback missing for {identifier}")
+            attempts = html_receipt.get("attempts")
+            if not isinstance(attempts, list) or not attempts or html_receipt.get("attempt_count") != len(attempts):
+                raise ValueError(f"topic-page readback attempt provenance missing for {identifier}")
+            if attempts[-1].get("outcome") != "VERIFIED":
+                raise ValueError(f"topic-page readback final attempt is not verified for {identifier}")
             structured = structured_readbacks.get(identifier)
             if not isinstance(structured, Mapping) or structured.get("verified") is not True:
                 raise ValueError(f"structured topic readback missing for {identifier}")

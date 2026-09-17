@@ -1,0 +1,182 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "EUI_INNOVATION_FUND_PROGRAMME_INTELLIGENCE_REGISTRY_V1",
+  "evidence_checked_date": "2026-09-02",
+  "source_family": "EU_DIRECT",
+  "programme_families": [
+    "European Urban Initiative",
+    "Innovation Fund"
+  ],
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "closed_call_authorized": false,
+    "deadline_authorized": false,
+    "budget_authorized": false,
+    "eligibility_authorized": false,
+    "publish_authorized": false,
+    "distribution_authorized": false,
+    "call_alert_authorized": false,
+    "canonical_corpus_mutation": false,
+    "publication_effect": "NONE",
+    "exact_call_or_topic_identifier_required": true,
+    "current_official_exact_endpoint_required": true,
+    "semantic_reconciliation_required": true,
+    "field_scoped_material_admission_required": true
+  },
+  "sources": [
+    {
+      "id": "EUI_PORTICO_PROGRAMME",
+      "programme_family": "European Urban Initiative",
+      "authority_class": "OFFICIAL_PROGRAMME_GATEWAY",
+      "authority_url": "https://portico.urban-initiative.eu/urban-panorama/european-urban-initiative",
+      "allowed_hosts": ["portico.urban-initiative.eu"],
+      "allowed_path_prefixes": ["/urban-panorama/european-urban-initiative"],
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_marker_groups": [
+        ["european urban initiative"],
+        ["open & upcoming calls", "open &amp; upcoming calls", "calls"],
+        ["urban authorities", "urban authority"]
+      ],
+      "market_signals": [
+        "INNOVATIVE_ACTIONS",
+        "URBAN_CAPACITY_BUILDING",
+        "KNOWLEDGE_SHARING",
+        "SUSTAINABLE_URBAN_DEVELOPMENT",
+        "TRANSFERABLE_URBAN_SOLUTIONS"
+      ],
+      "applicant_fit_tags": [
+        "URBAN_AUTHORITY",
+        "CITY",
+        "MUNICIPALITY",
+        "PUBLIC_BODY",
+        "URBAN_CONSORTIUM"
+      ],
+      "pipeline_signals": ["EU_CITIES_PLATFORM_FUTURE_FRAMEWORK"],
+      "material_fact_use": false
+    },
+    {
+      "id": "EUI_PORTICO_CALL_INDEX",
+      "programme_family": "European Urban Initiative",
+      "authority_class": "OFFICIAL_CALL_INDEX_DISCOVERY",
+      "authority_url": "https://portico.urban-initiative.eu/urban-panorama/call-for-proposals",
+      "allowed_hosts": ["portico.urban-initiative.eu"],
+      "allowed_path_prefixes": ["/urban-panorama/call-for-proposals"],
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "required_marker_groups": [
+        ["call for proposals"],
+        ["european urban initiative"],
+        ["deadline date", "open", "closed", "upcoming"]
+      ],
+      "market_signals": [
+        "INNOVATIVE_ACTIONS_CALL_DISCOVERY",
+        "PEER_REVIEW_CALL_DISCOVERY",
+        "URBAN_AUTHORITY_FIT_DISCOVERY"
+      ],
+      "applicant_fit_tags": [
+        "URBAN_AUTHORITY",
+        "CITY",
+        "MUNICIPALITY",
+        "PUBLIC_BODY",
+        "URBAN_CONSORTIUM"
+      ],
+      "pipeline_signals": [],
+      "material_fact_use": false
+    },
+    {
+      "id": "INNOVATION_FUND_CLIMATE_PROGRAMME",
+      "programme_family": "Innovation Fund",
+      "authority_class": "OFFICIAL_PROGRAMME_GATEWAY",
+      "authority_url": "https://climate.ec.europa.eu/eu-action/eu-funding-climate-action/innovation-fund_en",
+      "allowed_hosts": ["climate.ec.europa.eu"],
+      "allowed_path_prefixes": [
+        "/eu-action/eu-funding-climate-action/innovation-fund_en",
+        "/areas-action/eu-funding-climate-action/innovation-fund_en"
+      ],
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_marker_groups": [
+        ["innovation fund"],
+        ["calls for proposals"],
+        ["competitive bidding", "auctions"]
+      ],
+      "market_signals": [
+        "NET_ZERO_TECHNOLOGIES",
+        "INDUSTRIAL_DECARBONISATION",
+        "RENEWABLE_ENERGY",
+        "ENERGY_STORAGE",
+        "HYDROGEN",
+        "CARBON_CAPTURE_USE_STORAGE"
+      ],
+      "applicant_fit_tags": [
+        "COMPANY",
+        "SME",
+        "PROJECT_DEVELOPER",
+        "INDUSTRIAL_PROJECT",
+        "CONSORTIUM"
+      ],
+      "pipeline_signals": ["ANNUAL_CALL_CYCLE"],
+      "material_fact_use": false
+    },
+    {
+      "id": "INNOVATION_FUND_CLIMATE_CALL_INDEX",
+      "programme_family": "Innovation Fund",
+      "authority_class": "OFFICIAL_CALL_INDEX_DISCOVERY",
+      "authority_url": "https://climate.ec.europa.eu/eu-action/eu-funding-climate-action/innovation-fund/calls-proposals_en",
+      "allowed_hosts": ["climate.ec.europa.eu"],
+      "allowed_path_prefixes": [
+        "/eu-action/eu-funding-climate-action/innovation-fund/calls-proposals_en",
+        "/areas-action/eu-funding-climate-action/innovation-fund/calls-proposals_en"
+      ],
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "required_marker_groups": [
+        ["calls for proposals"],
+        ["innovation fund"],
+        ["open calls", "previous calls"]
+      ],
+      "market_signals": [
+        "REGULAR_GRANT_CALL_DISCOVERY",
+        "AUCTION_DISCOVERY",
+        "CALL_CYCLE_DISCOVERY"
+      ],
+      "applicant_fit_tags": [
+        "COMPANY",
+        "SME",
+        "PROJECT_DEVELOPER",
+        "INDUSTRIAL_PROJECT",
+        "CONSORTIUM"
+      ],
+      "pipeline_signals": ["FUTURE_CALL_CYCLE_SIGNAL"],
+      "material_fact_use": false
+    },
+    {
+      "id": "INNOVATION_FUND_CINEA_PROGRAMME",
+      "programme_family": "Innovation Fund",
+      "authority_class": "OFFICIAL_IMPLEMENTING_AGENCY_GATEWAY",
+      "authority_url": "https://cinea.ec.europa.eu/programmes/innovation-fund_en",
+      "allowed_hosts": ["cinea.ec.europa.eu"],
+      "allowed_path_prefixes": ["/programmes/innovation-fund_en"],
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "required_marker_groups": [
+        ["innovation fund"],
+        ["regular grants", "calls"],
+        ["competitive bidding", "auctions"]
+      ],
+      "market_signals": [
+        "IMPLEMENTING_AGENCY_CONTEXT",
+        "REGULAR_GRANTS",
+        "COMPETITIVE_BIDDING",
+        "PROJECT_DEVELOPMENT_ASSISTANCE"
+      ],
+      "applicant_fit_tags": [
+        "COMPANY",
+        "SME",
+        "PROJECT_DEVELOPER",
+        "INDUSTRIAL_PROJECT",
+        "CONSORTIUM"
+      ],
+      "pipeline_signals": [],
+      "material_fact_use": false
+    }
+  ]
+}

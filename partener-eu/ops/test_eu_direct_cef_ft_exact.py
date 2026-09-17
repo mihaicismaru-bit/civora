@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import pathlib
 import sys
+from urllib.error import HTTPError
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "ingest"))
 
@@ -61,7 +62,99 @@ def topic(url):
     return {"url": url, "final_url": url, "http_status": 200, "content_type": "text/html", "bytes": 10, "body_sha256": "b" * 64, "verified": True}
 
 
+class FakeResponse:
+    def __init__(self, url, *, status=200, content_type="text/html; charset=utf-8", body=b"topic"):
+        self._url = url
+        self.status = status
+        self.headers = {"Content-Type": content_type}
+        self._body = body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def geturl(self):
+        return self._url
+
+    def getcode(self):
+        return self.status
+
+    def read(self, limit=-1):
+        return self._body if limit < 0 else self._body[:limit]
+
+
+class SequenceOpener:
+    def __init__(self, outcomes):
+        self.outcomes = list(outcomes)
+        self.calls = 0
+
+    def open(self, req, timeout=None):
+        self.calls += 1
+        if not self.outcomes:
+            raise AssertionError("unexpected extra topic readback attempt")
+        outcome = self.outcomes.pop(0)
+        if isinstance(outcome, Exception):
+            raise outcome
+        return outcome
+
+
+def http_error(url, status):
+    return HTTPError(url, status, f"HTTP {status}", hdrs=None, fp=None)
+
+
+def assert_topic_readback_resilience():
+    url = ft.topic_url(REF)
+
+    sleeps = []
+    opener = SequenceOpener([http_error(url, 404), FakeResponse(url)])
+    recovered = ft._topic_readback(url, opener=opener, sleeper=sleeps.append)
+    assert recovered["verified"] is True
+    assert recovered["attempt_count"] == 2
+    assert recovered["recovery_state"] == "RECOVERED_AFTER_TRANSIENT_FAILURE"
+    assert recovered["attempts"][0]["outcome"] == "TRANSPORT_FAILURE"
+    assert recovered["attempts"][0]["http_status"] == 404
+    assert recovered["attempts"][0]["retriable"] is True
+    assert recovered["attempts"][1]["outcome"] == "VERIFIED"
+    assert sleeps == [ft.TOPIC_READBACK_BACKOFF_SECONDS[0]]
+
+    sleeps = []
+    opener = SequenceOpener([http_error(url, 404), http_error(url, 404), http_error(url, 404)])
+    exhausted = ft._topic_readback(url, opener=opener, sleeper=sleeps.append)
+    assert exhausted["verified"] is False
+    assert exhausted["failure_class"] == "TRANSIENT_READBACK_EXHAUSTED"
+    assert exhausted["attempt_count"] == 3
+    assert [row["http_status"] for row in exhausted["attempts"]] == [404, 404, 404]
+    assert all(row["retriable"] is True for row in exhausted["attempts"])
+    assert sleeps == list(ft.TOPIC_READBACK_BACKOFF_SECONDS)
+
+    opener = SequenceOpener([http_error(url, 403), FakeResponse(url)])
+    denied = ft._topic_readback(url, opener=opener, sleeper=lambda _: None)
+    assert denied["verified"] is False
+    assert denied["failure_class"] == "NON_RETRYABLE_READBACK_FAILURE"
+    assert denied["attempt_count"] == 1
+    assert opener.calls == 1
+
+    drift_url = "https://example.com/not-authority/topic-details/" + REF
+    opener = SequenceOpener([FakeResponse(drift_url), FakeResponse(url)])
+    drift = ft._topic_readback(url, opener=opener, sleeper=lambda _: None)
+    assert drift["verified"] is False
+    assert drift["failure_class"] == "AUTHORITY_OR_CONTENT_DRIFT"
+    assert drift["attempt_count"] == 1
+    assert drift["attempts"][0]["retriable"] is False
+    assert opener.calls == 1
+
+    try:
+        ft._topic_readback(url, opener=SequenceOpener([]), max_attempts=0, sleeper=lambda _: None)
+        raise AssertionError("invalid retry bound was accepted")
+    except ValueError as exc:
+        assert "max_attempts" in str(exc)
+
+
 def main():
+    assert_topic_readback_resilience()
+
     taxonomy = {
         "schema": "PARTENER_EU_FT_PROGRAMME_TAXONOMY_V1",
         "market_intelligence_only": True,
