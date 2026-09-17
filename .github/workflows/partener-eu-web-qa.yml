@@ -9,7 +9,7 @@ on:
       - 'partener-eu/ops/test_web_hygiene.py'
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
-      - 'partener-eu/ops/test_home_novice.py'
+      - 'partener-eu/ops/test_home_concierge_vnext.py'
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
@@ -27,7 +27,7 @@ on:
       - 'partener-eu/ops/test_web_hygiene.py'
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
-      - 'partener-eu/ops/test_home_novice.py'
+      - 'partener-eu/ops/test_home_concierge_vnext.py'
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
@@ -67,7 +67,7 @@ jobs:
 
       - name: Homepage and Ask contracts
         run: |
-          python partener-eu/ops/test_home_novice.py
+          python partener-eu/ops/test_home_concierge_vnext.py
           python partener-eu/ops/test_public_product_v3.py
           python partener-eu/ops/test_ask_partener_v2.py
           node partener-eu/ops/test_ask_eligibility_projection.js
@@ -94,7 +94,6 @@ jobs:
           node --check partener-eu/web/consultant-mysmis-v1.js
           node --check partener-eu/web/decision-intelligence-v2.js
           node --check partener-eu/web/home-freshness-guard-v1.js
-          node --check partener-eu/web/home-novice-v1.js
-          node --check partener-eu/web/home-go-to-v2.js
+          node --check partener-eu/web/home-concierge-vnext.js
           node --check partener-eu/web/public-product-v3.js
           node --check partener-eu/web/people-policy-v1.js
