@@ -1,0 +1,61 @@
+{
+  "schema_version": "PPOS_RELATIONSHIP_GRAPH_POLICY_V1",
+  "checkpoint": "CP87",
+  "module_id": "M56_RELATIONSHIP_GRAPH",
+  "parent_activation_checkpoint": "CP86",
+  "parent_control_checkpoint": "CP58",
+  "next_after_cp87": "CP88_AMPLIFICATION_ENGINE",
+  "global_kill_switch": "ENGAGED",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "node_types": [
+    "public_account",
+    "content",
+    "conversation"
+  ],
+  "input_edge_types": [
+    "replied_to",
+    "mentioned",
+    "quoted"
+  ],
+  "derived_edge_types": [
+    "recurring_interaction",
+    "shared_topic",
+    "prior_useful_exchange"
+  ],
+  "privacy": {
+    "public_identifiers_only": true,
+    "public_interaction_metadata_only": true,
+    "extra_metadata_forbidden": true,
+    "sensitive_trait_inference_forbidden": true,
+    "sensitive_relationship_profiling_forbidden": true,
+    "political_microtargeting_forbidden": true,
+    "demographic_scoring_forbidden": true,
+    "relationship_score_basis": "REPEATED_PUBLIC_INTERACTION_QUALITY_ONLY",
+    "permitted_use": "CONTINUITY_CONTEXT_ONLY_NOT_ACTION_AUTHORITY"
+  },
+  "relationship_score": {
+    "formula": "MEAN_QUALITY_WEIGHTED_PLUS_BOUNDED_REPEAT_BONUS_CAPPED_100",
+    "repeat_interaction_min_count": 2,
+    "useful_exchange_min_quality": 70,
+    "repeat_bonus_points": 4,
+    "repeat_bonus_cap": 5,
+    "mean_quality_weight": 0.8
+  },
+  "authority": {
+    "posting_authority": false,
+    "external_write_allowed": false,
+    "network_allowed": false,
+    "live_probe_allowed": false,
+    "oauth_allowed": false,
+    "account_connection_allowed": false,
+    "control_plane_promotion_allowed": false,
+    "deploy_allowed": false,
+    "automated_targeting_allowed": false
+  },
+  "unknown_external_metric_value": "UNKNOWN",
+  "max_batch": 100
+}
