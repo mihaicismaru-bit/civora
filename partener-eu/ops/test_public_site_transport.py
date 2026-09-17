@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regression tests for the public deployment transport closure gate."""
+"""Regression tests for the public deployment transport and vNext content gate."""
 from __future__ import annotations
 
 import importlib.util
@@ -73,6 +73,27 @@ class TransportGateTests(unittest.TestCase):
             "pages_origin": endpoint("pages_origin", "https", "https", content_verified=False),
         }
         self.assertFalse(CHECK.assess_transport(endpoints)["secure_transport_verified"])
+
+    def test_public_probe_is_bound_to_funding_concierge_vnext(self) -> None:
+        markers = CHECK.REQUIRED_MARKERS
+        self.assertEqual(markers["hero"], "Ce vrei să finanțezi?")
+        self.assertIn("ce știm sigur", markers["product_definition"])
+        self.assertEqual(markers["concierge_ui_ref"], 'src="home-concierge-vnext.js')
+        self.assertEqual(markers["concierge_css_ref"], 'href="home-concierge-vnext.css')
+        self.assertNotIn("novice_ui_ref", markers)
+        self.assertNotIn("goto_ui_ref", markers)
+        self.assertEqual(CHECK.UA, "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.8")
+
+    def test_vnext_asset_extractors_resolve_versioned_refs(self) -> None:
+        html = '''<link rel="stylesheet" href="home-concierge-vnext.css?v=1"><script defer src="home-concierge-vnext.js?v=1"></script>'''
+        self.assertEqual(
+            CHECK.extract_asset(html, "home-concierge-vnext.js", "https://partener.eu/"),
+            "https://partener.eu/home-concierge-vnext.js?v=1",
+        )
+        self.assertEqual(
+            CHECK.extract_stylesheet(html, "home-concierge-vnext.css", "https://partener.eu/"),
+            "https://partener.eu/home-concierge-vnext.css?v=1",
+        )
 
 
 if __name__ == "__main__":
