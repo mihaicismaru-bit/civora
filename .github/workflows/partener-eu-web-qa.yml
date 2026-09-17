@@ -10,6 +10,8 @@ on:
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
       - 'partener-eu/ops/test_home_concierge_vnext.py'
+      - 'partener-eu/ops/check_public_site.py'
+      - 'partener-eu/ops/test_public_site_transport.py'
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
@@ -28,6 +30,8 @@ on:
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
       - 'partener-eu/ops/test_home_concierge_vnext.py'
+      - 'partener-eu/ops/check_public_site.py'
+      - 'partener-eu/ops/test_public_site_transport.py'
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
@@ -64,6 +68,7 @@ jobs:
           python partener-eu/ops/test_web_hygiene.py
           python partener-eu/ops/test_public_boot_performance.py
           python partener-eu/ops/test_frontend_regression.py
+          python partener-eu/ops/test_public_site_transport.py
 
       - name: Homepage and Ask contracts
         run: |
