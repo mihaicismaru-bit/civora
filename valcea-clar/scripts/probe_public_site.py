@@ -207,6 +207,10 @@ def _public_projection_contract(
 
     articles = [row for row in (articles_doc.get("articles") or []) if isinstance(row, dict)]
     public_ids = [str(row.get("id") or "") for row in articles]
+    current_articles = [row for row in articles if row.get("archive_only") is not True]
+    archive_articles = [row for row in articles if row.get("archive_only") is True]
+    current_public_ids = [str(row.get("id") or "") for row in current_articles]
+    archive_public_ids = [str(row.get("id") or "") for row in archive_articles]
     public_paths = [f"/stiri/{story_id}/" for story_id in public_ids if story_id]
     feed_rows = [row for row in ((feed or {}).get("stories") or []) if isinstance(row, dict)]
     feed_ids = [str(row.get("id") or "") for row in feed_rows]
@@ -229,20 +233,30 @@ def _public_projection_contract(
         missing.append("articles_presentation_order")
     if int(state.get("story_count") or 0) != len(articles) or not articles:
         missing.append("state_story_count_matches_articles")
-    if not public_ids or state.get("lead_story_id") != public_ids[0]:
+    if int(state.get("current_story_count") or 0) != len(current_articles):
+        missing.append("state_current_story_count_matches_articles")
+    if int(state.get("archive_story_count") or 0) != len(archive_articles):
+        missing.append("state_archive_story_count_matches_articles")
+    if public_ids != current_public_ids + archive_public_ids:
+        missing.append("archive_stories_follow_current_stories")
+    if not current_public_ids or state.get("lead_story_id") != current_public_ids[0]:
         missing.append("state_lead_matches_public_order")
     if len(public_ids) != len(set(public_ids)) or not all(public_ids):
         missing.append("unique_public_story_ids")
+    if set(current_public_ids) & set(archive_public_ids):
+        missing.append("current_archive_story_sets_disjoint")
     if feed is not None:
         if state.get("source_generated_at") != feed.get("generated_at"):
             missing.append("projection_generated_at_matches_editorial_feed")
         if articles_doc.get("updated_local") != feed.get("generated_at"):
             missing.append("articles_updated_at_matches_editorial_feed")
-        if set(public_ids) != set(feed_ids):
-            missing.append("public_story_ids_match_editorial_feed")
+        if set(current_public_ids) != set(feed_ids):
+            missing.append("current_public_story_ids_match_editorial_feed")
+        if set(archive_public_ids) & set(feed_ids):
+            missing.append("archive_public_story_ids_absent_from_editorial_feed")
 
     required_id = required_revalidation_story_id()
-    if required_id and required_id not in public_ids:
+    if required_id and required_id not in current_public_ids:
         missing.append(f"public_required_story={required_id}")
 
     check.update(
@@ -251,6 +265,8 @@ def _public_projection_contract(
             "missing_markers": missing,
             "source_generated_at": state.get("source_generated_at"),
             "public_story_count": len(articles),
+            "current_public_story_count": len(current_articles),
+            "archive_public_story_count": len(archive_articles),
             "public_lead_story_id": state.get("lead_story_id"),
             "public_lead_story_path": public_paths[0] if public_paths else None,
             "verified_visual_count": state.get("verified_visual_count"),
