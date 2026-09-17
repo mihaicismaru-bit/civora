@@ -187,6 +187,7 @@ jobs:
           python valcea-clar/social/instagram_publish.py --self-test
           python valcea-clar/social/instagram_fact_card_publish.py --self-test
           python valcea-clar/social/tiktok_publish.py --self-test
+          python valcea-clar/scripts/probe_public_site.py --self-test
 
       - name: Probe shared Meta credential health
         id: meta_auth
@@ -263,6 +264,23 @@ jobs:
           p=json.loads(Path('/tmp/tiktok-preview.json').read_text(encoding='utf-8')); e=p.get('eligible') or []
           with open(os.environ['GITHUB_OUTPUT'],'a',encoding='utf-8') as f: f.write(f"has_eligible={'true' if len(e) else 'false'}\n")
           PY
+
+      - name: Require canonical public HTTP readback before external delivery
+        if: github.event_name != 'pull_request' && (steps.preview_facebook.outputs.has_eligible == 'true' || steps.preview_instagram.outputs.has_eligible == 'true' || steps.preview_instagram_fact_card.outputs.has_eligible == 'true' || steps.preview_tiktok.outputs.has_eligible == 'true')
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3 4; do
+            if python valcea-clar/scripts/probe_public_site.py --require-ready --output /tmp/social-public-readback.json; then
+              echo 'Canonical public HTTP readback: PASS'
+              exit 0
+            fi
+            if [ "$attempt" -eq 4 ]; then
+              echo 'Canonical public HTTP readback did not converge; external social delivery remains blocked.' >&2
+              exit 1
+            fi
+            sleep 20
+          done
 
       - name: Publish eligible Facebook editorial story through Meta Graph API
         id: publish_facebook
@@ -469,6 +487,7 @@ jobs:
           path: |
             /tmp/social-engine-ownership.json
             /tmp/meta-auth.json
+            /tmp/social-public-readback.json
             /tmp/facebook-preview.json
             /tmp/instagram-preview.json
             /tmp/instagram-fact-card-preview.json
