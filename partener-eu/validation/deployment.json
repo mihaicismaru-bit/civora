@@ -1,46 +1,46 @@
 {
   "schema_version": "1.8",
-  "observed_at": "2026-09-17T16:08:48Z",
-  "status": "FAIL",
-  "public_content_verified": false,
-  "https_verified": false,
-  "secure_transport_verified": false,
-  "http_redirects_to_https": false,
-  "pages_https_preserved": false,
-  "http_content_verified": false,
-  "https_closure_gate": "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS",
-  "content_origin": null,
+  "observed_at": "2026-09-17T16:19:04Z",
+  "status": "PASS",
+  "public_content_verified": true,
+  "https_verified": true,
+  "secure_transport_verified": true,
+  "http_redirects_to_https": true,
+  "pages_https_preserved": true,
+  "http_content_verified": true,
+  "https_closure_gate": "PASS",
+  "content_origin": "custom_https",
   "old_origin_detected": false,
   "endpoints": [
     {
       "id": "custom_https",
       "url": "https://partener.eu/",
-      "requested_url": "https://partener.eu/?p10_probe=20260917T160848Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "https://partener.eu/?p10_probe=20260917T161904Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260917T160848Z",
+      "final_url": "https://partener.eu/?p10_probe=20260917T161904Z",
       "final_scheme": "https",
       "redirect_chain": [],
       "content_type": "text/html; charset=utf-8",
-      "bytes": 6083,
-      "body_sha256": "f57e1f4c495bfb1b37ebe321e15421a5712d0ba460920f10f453ab1500a98e83",
+      "bytes": 5761,
+      "body_sha256": "f74840abc1833705f04481128bd485dbcdc70099e3449a0a678c3f393a95bdba",
       "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
       "markers": {
         "brand": true,
         "boot_fallback": true,
-        "hero": false,
-        "product_definition": false,
+        "hero": true,
+        "product_definition": true,
         "critical_data_ref": true,
         "critical_app_ref": true,
         "decision_data_ref": true,
         "decision_ui_ref": true,
-        "concierge_ui_ref": false,
-        "concierge_css_ref": false
+        "concierge_ui_ref": true,
+        "concierge_css_ref": true
       },
-      "marker_ok": false,
+      "marker_ok": true,
       "legacy_origin_detected": false,
-      "critical_assets_ok": false,
+      "critical_assets_ok": true,
       "assets": {
         "data.js": {
           "url": "https://partener.eu/data.js?v=20260813-1500",
@@ -68,7 +68,7 @@
           "http_status": 200,
           "final_url": "https://partener.eu/decision-products.js?v=20260901-afir-open-r1",
           "bytes": 600000,
-          "sha256": "2579661ad0198c35fb2e1bc1039f50a28ef4653d581a7e76bdd54d6349fb8f3c",
+          "sha256": "527df6b16637a95dc38f71be8669990e4498749855f6ef4366f891c791111ebd",
           "error": null,
           "expected_marker_found": true
         },
@@ -83,22 +83,24 @@
           "expected_marker_found": true
         },
         "home-concierge-vnext.js": {
-          "url": null,
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "asset reference missing"
+          "url": "https://partener.eu/home-concierge-vnext.js?v=20260917-vnext1",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-concierge-vnext.js?v=20260917-vnext1",
+          "bytes": 11849,
+          "sha256": "371f3415bb2b69aac30979711afedeed477a7b06bb7659402686c7c10a1737ca",
+          "error": null,
+          "expected_marker_found": true
         },
         "home-concierge-vnext.css": {
-          "url": null,
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "asset reference missing"
+          "url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
+          "bytes": 6907,
+          "sha256": "c13fc74a79b62fd4d76f760b173922e67c18486ea88e8513288b2976f18f0368",
+          "error": null,
+          "expected_marker_found": true
         }
       },
       "error": null
@@ -106,38 +108,38 @@
     {
       "id": "custom_http",
       "url": "http://partener.eu/",
-      "requested_url": "http://partener.eu/?p10_probe=20260917T160848Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "http://partener.eu/?p10_probe=20260917T161904Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260917T160848Z",
+      "final_url": "https://partener.eu/?p10_probe=20260917T161904Z",
       "final_scheme": "https",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "http://partener.eu/?p10_probe=20260917T160848Z",
-          "to_url": "https://partener.eu/?p10_probe=20260917T160848Z"
+          "from_url": "http://partener.eu/?p10_probe=20260917T161904Z",
+          "to_url": "https://partener.eu/?p10_probe=20260917T161904Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
-      "bytes": 6083,
-      "body_sha256": "f57e1f4c495bfb1b37ebe321e15421a5712d0ba460920f10f453ab1500a98e83",
+      "bytes": 5761,
+      "body_sha256": "f74840abc1833705f04481128bd485dbcdc70099e3449a0a678c3f393a95bdba",
       "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
       "markers": {
         "brand": true,
         "boot_fallback": true,
-        "hero": false,
-        "product_definition": false,
+        "hero": true,
+        "product_definition": true,
         "critical_data_ref": true,
         "critical_app_ref": true,
         "decision_data_ref": true,
         "decision_ui_ref": true,
-        "concierge_ui_ref": false,
-        "concierge_css_ref": false
+        "concierge_ui_ref": true,
+        "concierge_css_ref": true
       },
-      "marker_ok": false,
+      "marker_ok": true,
       "legacy_origin_detected": false,
-      "critical_assets_ok": false,
+      "critical_assets_ok": true,
       "assets": {
         "data.js": {
           "url": "https://partener.eu/data.js?v=20260813-1500",
@@ -165,7 +167,7 @@
           "http_status": 200,
           "final_url": "https://partener.eu/decision-products.js?v=20260901-afir-open-r1",
           "bytes": 600000,
-          "sha256": "2579661ad0198c35fb2e1bc1039f50a28ef4653d581a7e76bdd54d6349fb8f3c",
+          "sha256": "527df6b16637a95dc38f71be8669990e4498749855f6ef4366f891c791111ebd",
           "error": null,
           "expected_marker_found": true
         },
@@ -180,22 +182,24 @@
           "expected_marker_found": true
         },
         "home-concierge-vnext.js": {
-          "url": null,
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "asset reference missing"
+          "url": "https://partener.eu/home-concierge-vnext.js?v=20260917-vnext1",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-concierge-vnext.js?v=20260917-vnext1",
+          "bytes": 11849,
+          "sha256": "371f3415bb2b69aac30979711afedeed477a7b06bb7659402686c7c10a1737ca",
+          "error": null,
+          "expected_marker_found": true
         },
         "home-concierge-vnext.css": {
-          "url": null,
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "asset reference missing"
+          "url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
+          "bytes": 6907,
+          "sha256": "c13fc74a79b62fd4d76f760b173922e67c18486ea88e8513288b2976f18f0368",
+          "error": null,
+          "expected_marker_found": true
         }
       },
       "error": null
@@ -203,38 +207,38 @@
     {
       "id": "pages_origin",
       "url": "https://mihaicismaru-bit.github.io/civora/",
-      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260917T160848Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260917T161904Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260917T160848Z",
+      "final_url": "https://partener.eu/?p10_probe=20260917T161904Z",
       "final_scheme": "https",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260917T160848Z",
-          "to_url": "https://partener.eu/?p10_probe=20260917T160848Z"
+          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260917T161904Z",
+          "to_url": "https://partener.eu/?p10_probe=20260917T161904Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
-      "bytes": 6083,
-      "body_sha256": "f57e1f4c495bfb1b37ebe321e15421a5712d0ba460920f10f453ab1500a98e83",
+      "bytes": 5761,
+      "body_sha256": "f74840abc1833705f04481128bd485dbcdc70099e3449a0a678c3f393a95bdba",
       "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
       "markers": {
         "brand": true,
         "boot_fallback": true,
-        "hero": false,
-        "product_definition": false,
+        "hero": true,
+        "product_definition": true,
         "critical_data_ref": true,
         "critical_app_ref": true,
         "decision_data_ref": true,
         "decision_ui_ref": true,
-        "concierge_ui_ref": false,
-        "concierge_css_ref": false
+        "concierge_ui_ref": true,
+        "concierge_css_ref": true
       },
-      "marker_ok": false,
+      "marker_ok": true,
       "legacy_origin_detected": false,
-      "critical_assets_ok": false,
+      "critical_assets_ok": true,
       "assets": {
         "data.js": {
           "url": "https://partener.eu/data.js?v=20260813-1500",
@@ -262,7 +266,7 @@
           "http_status": 200,
           "final_url": "https://partener.eu/decision-products.js?v=20260901-afir-open-r1",
           "bytes": 600000,
-          "sha256": "2579661ad0198c35fb2e1bc1039f50a28ef4653d581a7e76bdd54d6349fb8f3c",
+          "sha256": "527df6b16637a95dc38f71be8669990e4498749855f6ef4366f891c791111ebd",
           "error": null,
           "expected_marker_found": true
         },
@@ -277,22 +281,24 @@
           "expected_marker_found": true
         },
         "home-concierge-vnext.js": {
-          "url": null,
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "asset reference missing"
+          "url": "https://partener.eu/home-concierge-vnext.js?v=20260917-vnext1",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-concierge-vnext.js?v=20260917-vnext1",
+          "bytes": 11849,
+          "sha256": "371f3415bb2b69aac30979711afedeed477a7b06bb7659402686c7c10a1737ca",
+          "error": null,
+          "expected_marker_found": true
         },
         "home-concierge-vnext.css": {
-          "url": null,
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "asset reference missing"
+          "url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
+          "bytes": 6907,
+          "sha256": "c13fc74a79b62fd4d76f760b173922e67c18486ea88e8513288b2976f18f0368",
+          "error": null,
+          "expected_marker_found": true
         }
       },
       "error": null
@@ -300,24 +306,24 @@
   ],
   "url": "https://partener.eu/",
   "http_status": 200,
-  "marker_ok": false,
+  "marker_ok": true,
   "markers": {
     "brand": true,
     "boot_fallback": true,
-    "hero": false,
-    "product_definition": false,
+    "hero": true,
+    "product_definition": true,
     "critical_data_ref": true,
     "critical_app_ref": true,
     "decision_data_ref": true,
     "decision_ui_ref": true,
-    "concierge_ui_ref": false,
-    "concierge_css_ref": false
+    "concierge_ui_ref": true,
+    "concierge_css_ref": true
   },
-  "final_url": "https://partener.eu/?p10_probe=20260917T160848Z",
+  "final_url": "https://partener.eu/?p10_probe=20260917T161904Z",
   "content_type": "text/html; charset=utf-8",
-  "bytes": 6083,
-  "body_sha256": "f57e1f4c495bfb1b37ebe321e15421a5712d0ba460920f10f453ab1500a98e83",
+  "bytes": 5761,
+  "body_sha256": "f74840abc1833705f04481128bd485dbcdc70099e3449a0a678c3f393a95bdba",
   "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
-  "critical_assets_ok": false,
-  "error": "public Funding Concierge vNext content verification failed"
+  "critical_assets_ok": true,
+  "error": null
 }
