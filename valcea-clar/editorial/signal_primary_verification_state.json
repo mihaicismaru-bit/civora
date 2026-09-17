@@ -2,19 +2,197 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-18T00:39:43+03:00",
+  "generated_at": "2026-09-18T02:42:35+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-18T00:38:02+03:00",
-  "task_count": 79,
+  "queue_generated_at": "2026-09-18T02:41:14+03:00",
+  "task_count": 85,
   "primary_match_count": 2,
-  "no_match_count": 30,
-  "unrouted_count": 47,
+  "no_match_count": 31,
+  "unrouted_count": 52,
   "target_count": 21,
   "targets_ok": 18,
   "results": [
+    {
+      "signal_id": "256950dc29e62e038a145bab",
+      "signal_title": "Primarul-„șerif” din Șirineasa, Ion-Bebe Streinu, îi avertizează pe oameni să-și încuie casele. Dar ce măsuri a luat Primăria pentru siguranța comunei?",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/primarul-serif-din-sirineasa-ion-bebe-streinu-ii-avertizeaza-pe-oameni-sa-si-incuie-casele-dar-ce-masuri-a-luat-primaria-pentru-siguranta-comunei/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-18T02:39:26+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "65f079e97c2701a30e6deed5",
+      "signal_title": "Călimănești, locomotiva turismului vâlcean: peste jumătate dintre turiștii județului aleg stațiunea",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/calimanesti-locomotiva-turismului-valcean-peste-jumatate-dintre-turistii-judetului-aleg-statiunea/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-18T02:36:28+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "d3ef29087f4360da6f765ba6",
+      "signal_title": "Scandalurile se plătesc! Două săli de jocuri din Râmnicu Vâlcea vor fi închise",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/scandalurile-se-platesc-doua-sali-de-jocuri-din-ramnicu-valcea-vor-fi-inchise/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-18T02:30:19+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "faa0bc879f5e437df5c995fb",
+      "signal_title": "Ștefan-Ovidiu Popa: PSD nu susține un Guvern din care nu face parte. Reacție după desemnarea lui Siegfried Mureșan",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/stefan-ovidiu-popa-psd-nu-sustine-un-guvern-din-care-nu-face-parte-reactie-dupa-desemnarea-lui-siegfried-muresan/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-18T02:27:13+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "8c2f4b0bddc2df9128702730",
+      "signal_title": "Concert de muzică psaltică „Cei ce au iubit Lumina și au mărturisit Viața”, la Catedrala Arhiepiscopală din Râmnicu Vâlcea",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/concert-de-muzica-psaltica-cei-ce-au-iubit-lumina-si-au-marturisit-viata-la-catedrala-arhiepiscopala-din-ramnicu-valcea/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-18T02:20:30+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "f55d57c748554483f4ac0643",
+      "signal_title": "Apel pentru întărirea familiei creștine, la Râmnicu Vâlcea. Preoți, profesori și tineri, reuniți la Simpozionul Național",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/apel-pentru-intarirea-familiei-crestine-la-ramnicu-valcea-preoti-profesori-si-tineri-reuniti-la-simpozionul-national/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-18T02:19:19+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "a8482e4a98e40f64744f7959",
+      "signal_title": "„BOMBA” DE LA RAJDP VÂLCEA: suspiciuni de achiziții la suprapreț, licitații pierdute și teama de insolvență. Cine răspunde pentru situația Regiei?",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/bomba-de-la-rajdp-valcea-suspiciuni-de-achizitii-la-suprapret-licitatii-pierdute-si-teama-de-insolventa-cine-raspunde-pentru-situatia-regiei/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-18T02:16:23+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "174834b88966a079cc910a3b",
+      "signal_title": "Deputatul AUR Antonio Popescu trage semnalul de alarmă: „RAJDP Vâlcea trebuie redresată, nu lăsată să se prăbușească!”",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/deputatul-aur-antonio-popescu-trage-semnalul-de-alarma-rajdp-valcea-trebuie-redresata-nu-lasata-sa-se-prabuseasca/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-18T00:57:05+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "2ec27232e2b1a4e46e303eeb",
       "signal_title": "Călimănești domină turismul vâlcean – Florinel Constantinescu: „Suntem an după an pe primul loc”",
@@ -1049,19 +1227,6 @@
       "listing_title_identity_rejections": 56
     },
     {
-      "signal_id": "6d5cf7d92511cb2bf912c57f",
-      "signal_title": "„Vreau să aplic acasă ce am învățat afară”. Cătălin Luntrașu, un tânăr sibian întors din Irlanda pentru a face film la Sibiu, invită publicul la proiecția unui scurtmetraj",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/16/vreau-sa-aplic-acasa-ce-am-invatat-afara-catalin-luntrasu-un-tanar-sibian-intors-din-irlanda-pentru-a-face-film-la-sibiu-invita-publicul-la-proiectia-unui-scurtmetraj/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-16T12:44:47+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "0a614a1e6c78fa13623f501f",
       "signal_title": "Ultima oră o zi in urma Vaideeni, zi de comunitate pe 19 septembrie: ecologizare dimineața și teatru pentru copii",
       "signal_url": "https://www.primplanpress.ro/vaideeni-zi-de-comunitate-pe-19-septembrie-ecologizare-dimineata-si-teatru-pentru-copii/",
@@ -1340,56 +1505,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "f1fef92d1fd5e10ba14f8986",
-      "signal_title": "Ar fi fost comparată cu Lamine Yamal dacă juca fotbal: la 14 ani, Adela Vasilescu conduce naționala U16 de volei, făcând 12 antrenamente pe săptămână",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/16/ar-fi-fost-comparata-cu-lamine-yamal-daca-juca-fotbal-la-14-ani-adela-vasilescu-conduce-nationala-u16-de-volei-facand-12-antrenamente-pe-saptamana/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-16T07:24:42+03:00",
-      "verification_route_id": "sport",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "scm-rm-valcea",
-            "name": "SCM Râmnicu Vâlcea",
-            "url": "https://scmramnicuvalcea.ro/category/stiri/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cs-valcea-1924-social-feed",
-            "name": "Clubul Sportiv Vâlcea 1924",
-            "url": "https://www.csvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ajf-valcea-comunicate",
-            "name": "Asociația Județeană de Fotbal Vâlcea",
-            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
-          },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
       "listing_title_identity_rejections": 80
     },
     {
