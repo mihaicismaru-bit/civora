@@ -10,10 +10,9 @@ permissions:
   issues: read
 
 # Share the exact Pages deployment lock with the automatic web deploy.
-# This prevents two independent workflows from trying to create a Pages
-# deployment for different commits at the same time.
+# Generation v2 retires the legacy waiting lock without weakening serialization.
 concurrency:
-  group: partener-eu-pages
+  group: partener-eu-pages-v2
   cancel-in-progress: false
 
 jobs:
@@ -168,9 +167,6 @@ jobs:
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add partener-eu/deployment/go-live-result.json
           git commit -m 'Record PARTENER.EU go-live result' || exit 0
-          # Validation ledger commits may land while this job is running.
-          # Rebase the audit-only commit on current main and retry once; never
-          # overwrite or force-push canonical history.
           if ! git push; then
             git fetch origin main
             git rebase origin/main

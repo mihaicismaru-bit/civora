@@ -102,7 +102,7 @@ for workflow_name, workflow in [
 ]:
     if "uses: actions/deploy-pages@v4" not in workflow:
         errors.append(f"{workflow_name} no longer exposes its expected Pages deployment step")
-    if not has_exact_yaml_scalar(workflow, "group", "partener-eu-pages"):
+    if not has_exact_yaml_scalar(workflow, "group", "partener-eu-pages-v2"):
         errors.append(f"{workflow_name} does not share the exact repository-wide Pages deployment lock")
     if not has_exact_yaml_scalar(workflow, "cancel-in-progress", "false"):
         errors.append(f"{workflow_name} can cancel an in-flight Pages deployment")
@@ -233,7 +233,9 @@ else:
 for marker in [
     "https://partener.eu/",
     'id="boot-fallback"',
-    "Ai o investiție în minte?",
+    "Ce vrei să finanțezi?",
+    "home-concierge-vnext.js",
+    "home-concierge-vnext.css",
     "critical_assets_ok",
     "legacy_origin_detected",
 ]:
