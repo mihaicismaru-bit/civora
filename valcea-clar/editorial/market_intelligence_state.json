@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-17T13:26:10Z",
+  "generated_at": "2026-09-17T18:12:49Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -253,7 +253,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "b90b37537fc870962fe1f95a5a1efc8ea2336be12db9c024e2c14142b27851f5",
+          "fingerprint": "4a01fdeeb34e153aa8add2fe548e30ee5b1ec162d133723052f54b5e7ffcf819",
           "match_count": 24,
           "matched_terms": [
             "joburi",
@@ -313,7 +313,8 @@
       ],
       "official_changed_sources": [],
       "degraded_sources": [
-        "ccivl-members"
+        "data-gov-onrc-datasets",
+        "data-gov-finance-datasets"
       ],
       "sources": [
         {
@@ -322,27 +323,15 @@
           "url": "https://data.gov.ro/dataset?organization=onrc",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/dataset?organization=onrc",
-          "fingerprint": "3bd9e8545e30f4d7318bf390a212c73447b862dc22548d085eb252de701bbd35",
-          "match_count": 8,
-          "matched_terms": [
-            "Firme înregistrate la Registrul Comerțului"
-          ],
-          "numeric_signals": [
-            {
-              "kind": "companies",
-              "value_text": "3"
-            },
-            {
-              "kind": "companies",
-              "value_text": "1"
-            }
-          ],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "data-gov-finance-datasets",
@@ -350,19 +339,15 @@
           "url": "https://data.gov.ro/organization/mfp",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/organization/mfp",
-          "fingerprint": "1e228f953c76b1e841fb9ed3e6feed17842350aac83ccd44eec8b3ad24e2c703",
-          "match_count": 6,
-          "matched_terms": [
-            "Situații financiare",
-            "CSV"
-          ],
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "onrc-services",
@@ -521,15 +506,20 @@
           "url": "https://www.ccivl.ro/lista-membri/",
           "source_class": "T1B_INSTITUTIONAL_SIGNAL",
           "publication_authority": true,
-          "reachable": false,
-          "http_status": 403,
-          "fingerprint": null,
-          "match_count": 0,
-          "matched_terms": [],
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://www.ccivl.ro/lista-membri/",
+          "fingerprint": "e23e24ba7e83f40d0f8bd682f69b25e848900314fe1340256e3a194fb54a3d8f",
+          "match_count": 20,
+          "matched_terms": [
+            "membri",
+            "SRL",
+            "SA"
+          ],
           "numeric_signals": [],
-          "health": "UNREACHABLE",
-          "error": "HTTP 403",
-          "change": "PROBE_FAILED"
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
         },
         {
           "id": "seap-business-contracts",
