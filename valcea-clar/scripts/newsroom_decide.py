@@ -16,6 +16,7 @@ import argparse
 import hashlib
 import json
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -31,6 +32,9 @@ from temporal_freshness import CONTRACT as TEMPORAL_CONTRACT, durable_story_temp
 STATE = ROOT / "site" / "newsroom_state.json"
 DECISION = ROOT / "site" / "newsroom_decision.json"
 PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
+PUBLIC_RUNTIME = ROOT / "site" / "runtime"
+PUBLIC_MANIFEST = PUBLIC_RUNTIME / "stiri" / "manifest.json"
+PUBLIC_BASE = "https://valceaclar.ro"
 TZ = ZoneInfo("Europe/Bucharest")
 
 
@@ -143,6 +147,71 @@ def load_state() -> dict:
         return {}
 
 
+def publication_projection_violations(
+    decision: dict,
+    *,
+    manifest_path: Path = PUBLIC_MANIFEST,
+    runtime_root: Path = PUBLIC_RUNTIME,
+) -> list[str]:
+    """Verify that every story about to be marked published has a real canonical route.
+
+    The newsroom state is an assertion of completed publication, not merely of
+    editorial eligibility. This gate therefore runs after story rendering and
+    fails closed if the durable manifest or any expected route is missing.
+    Durable archive rows may coexist in the manifest; every decision-approved ID
+    must nevertheless resolve to a non-empty NewsArticle route with an exact
+    canonical URL before the publication fingerprint can be committed.
+    """
+    expected = [
+        str(value).strip()
+        for value in decision.get("publishable_story_ids") or []
+        if str(value).strip()
+    ]
+    if not expected:
+        return ["decision_has_no_publishable_story_ids"]
+    if not manifest_path.is_file():
+        return ["story_manifest_missing"]
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except Exception:
+        return ["story_manifest_invalid_json"]
+    rows = manifest.get("stories")
+    if not isinstance(rows, list):
+        return ["story_manifest_stories_invalid"]
+
+    violations: list[str] = []
+    by_id: dict[str, dict] = {}
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("id") or "").strip()
+        if not story_id:
+            continue
+        if story_id in by_id:
+            violations.append(f"duplicate_manifest_story:{story_id}")
+        by_id[story_id] = row
+
+    for story_id in expected:
+        row = by_id.get(story_id)
+        if row is None:
+            violations.append(f"manifest_story_missing:{story_id}")
+            continue
+        path = str(row.get("path") or "").strip()
+        canonical = str(row.get("canonical") or "").strip()
+        if not path.startswith("/stiri/") or not path.endswith("/"):
+            violations.append(f"invalid_story_path:{story_id}")
+            continue
+        if canonical != f"{PUBLIC_BASE}{path}":
+            violations.append(f"canonical_mismatch:{story_id}")
+        if str(row.get("structured_data_type") or "") != "NewsArticle":
+            violations.append(f"structured_data_not_newsarticle:{story_id}")
+        route_file = runtime_root / path.strip("/") / "index.html"
+        if not route_file.is_file() or route_file.stat().st_size <= 0:
+            violations.append(f"canonical_route_missing:{story_id}")
+
+    return sorted(set(violations))
+
+
 def load_editorial_writer_stats() -> dict:
     path = ROOT / "editorial" / "editorial_products.json"
     if not path.is_file():
@@ -234,6 +303,7 @@ def decide(now: datetime) -> dict:
             "publish_on_change_not_clock_window": True,
             "durable_temporal_language_contract": TEMPORAL_CONTRACT,
             "relative_time_words_in_durable_story_copy": False,
+            "published_state_requires_canonical_route": True,
         },
     }
 
@@ -312,6 +382,41 @@ def main() -> int:
         review_format["editorial_product"]["auto_publish_eligible_by_format"] = False
         review_format["editorial_product"]["product_fingerprint_sha256"] = editorial_integrity.expected_product_fingerprint(review_format)
         assert story_ready(review_format) == (False, "editorial_integrity:editorial_format_requires_review")
+
+        with tempfile.TemporaryDirectory() as temporary:
+            runtime = Path(temporary)
+            manifest = runtime / "stiri" / "manifest.json"
+            route = runtime / "stiri" / "self-test-full" / "index.html"
+            route.parent.mkdir(parents=True, exist_ok=True)
+            route.write_text("<!doctype html><title>self test</title>", encoding="utf-8")
+            manifest.write_text(
+                json.dumps(
+                    {
+                        "stories": [
+                            {
+                                "id": "self-test-full",
+                                "path": "/stiri/self-test-full/",
+                                "canonical": f"{PUBLIC_BASE}/stiri/self-test-full/",
+                                "structured_data_type": "NewsArticle",
+                            }
+                        ]
+                    }
+                ),
+                encoding="utf-8",
+            )
+            projection_decision = {"publishable_story_ids": ["self-test-full"]}
+            assert publication_projection_violations(
+                projection_decision,
+                manifest_path=manifest,
+                runtime_root=runtime,
+            ) == []
+            route.unlink()
+            assert publication_projection_violations(
+                projection_decision,
+                manifest_path=manifest,
+                runtime_root=runtime,
+            ) == ["canonical_route_missing:self-test-full"]
+
         print("Continuous newsroom decision self-test: PASS")
         return 0
 
@@ -320,6 +425,19 @@ def main() -> int:
     DECISION.write_text(json.dumps(decision, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
     if args.commit_state and decision["publishable_story_count"]:
+        violations = publication_projection_violations(decision)
+        if violations:
+            print(
+                json.dumps(
+                    {
+                        "status": "BLOCKED_PUBLICATION_PROJECTION",
+                        "violations": violations,
+                    },
+                    ensure_ascii=False,
+                ),
+                file=sys.stderr,
+            )
+            return 2
         state = {
             "schema_version": "1.4",
             "last_published_at": decision["evaluated_local"],
@@ -331,6 +449,7 @@ def main() -> int:
             "mode": "continuous_story_first",
             "edition_windows_are_publication_gates": False,
             "durable_temporal_language_contract": TEMPORAL_CONTRACT,
+            "published_state_requires_canonical_route": True,
         }
         STATE.write_text(json.dumps(state, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
