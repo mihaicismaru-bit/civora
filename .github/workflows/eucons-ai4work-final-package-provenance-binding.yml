@@ -1,0 +1,70 @@
+name: EUCONS AI4WORK Final Package Provenance Binding
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/final_package_provenance_binding.py'
+      - 'eucons/research/ai4work-step/test_final_package_provenance_binding.py'
+      - 'eucons/research/ai4work-step/FINAL_PACKAGE_PROVENANCE_BINDING_CONTRACT.json'
+      - 'eucons/research/ai4work-step/final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/source_register_provenance_control.py'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_PROVENANCE_CONTRACT.json'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_SNAPSHOT_CONTRACT.json'
+      - '.github/workflows/eucons-ai4work-final-package-provenance-binding.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/final_package_provenance_binding.py'
+      - 'eucons/research/ai4work-step/test_final_package_provenance_binding.py'
+      - 'eucons/research/ai4work-step/FINAL_PACKAGE_PROVENANCE_BINDING_CONTRACT.json'
+      - 'eucons/research/ai4work-step/final_needs_package_gate.py'
+      - 'eucons/research/ai4work-step/source_register_provenance_control.py'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_PROVENANCE_CONTRACT.json'
+      - 'eucons/research/ai4work-step/SOURCE_REGISTER_SNAPSHOT_CONTRACT.json'
+      - '.github/workflows/eucons-ai4work-final-package-provenance-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-final-package-provenance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  final-package-provenance-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run provenance-bound final package tests (TEST TWIN is NON-EVIDENCE)
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_final_package_provenance_binding.py
+      - name: Assert release boundary requires byte-verified provenance
+        working-directory: eucons/research/ai4work-step
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          contract = json.loads(Path('FINAL_PACKAGE_PROVENANCE_BINDING_CONTRACT.json').read_text(encoding='utf-8'))
+          assert contract['schema_version'] == 'eucons.ai4work_final_package_provenance_binding.v0.1'
+          prod = contract['prod_requirements']
+          twin = contract['test_twin_requirements']
+          assert prod['source_provenance_verification_status'] == 'PASS'
+          assert prod['source_provenance_prod_promotion_allowed'] is True
+          assert prod['source_register_sha256_exact_match'] is True
+          assert prod['source_export_sha256_exact_match'] is True
+          assert prod['captured_source_bytes_required'] is True
+          assert prod['direct_base_package_release_forbidden_without_outer_binding'] is True
+          assert prod['secondary_evidence_h1_h5_numeric_points'] == 0
+          assert prod['project_activity_as_need_evidence'] is False
+          assert twin['evidence_mode'] == 'TEST_TWIN_NON_EVIDENCE'
+          assert twin['prod_promotion_allowed'] is False
+          assert twin['public_release_authorized'] is False
+          assert twin['test_twin_evidence_eligible'] is False
+          print('PASS: final release boundary requires byte-verified source provenance; TEST TWIN remains NON-EVIDENCE')
+          PY

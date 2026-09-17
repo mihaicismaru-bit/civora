@@ -4,17 +4,18 @@ import hashlib
 import json
 import re
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from channel_provenance import ChannelProvenanceError, validate_channel_set, validate_recruitment_channel_id
 from research_storage import ALLOWED_FORMS, RESEARCH_ID, canonical_json_bytes, validate_record_envelope
-from runtime import PII_PATTERNS, _form_by_id, _validate_group, load_forms, reject_forbidden_keys
+from runtime import CONTRACT_PATH, FORMS_PATH, PII_PATTERNS, _form_by_id, _validate_group, load_forms, reject_forbidden_keys
 
 PROD_EVIDENCE_CLASS = "PROD_REAL_EVIDENCE"
 TEST_TWIN_EVIDENCE_CLASS = "TEST_TWIN_NON_EVIDENCE"
 PROD_FRAME_STATUS = "APPROVED_FOR_PROD"
 TEST_TWIN_FRAME_STATUS = "TEST_TWIN_ONLY"
+TARGET_REGIONS = ("Centru", "Sud-Muntenia", "Sud-Vest Oltenia")
 EXPECTED_RECORD_KEYS = {
     "schema_version",
     "research_id",
@@ -28,6 +29,7 @@ EXPECTED_RECORD_KEYS = {
     "synthetic",
 }
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+MAX_CLOCK_SKEW = timedelta(minutes=5)
 PROD_ONLY_FRAME_FIELDS = {
     "privacy_notice_version",
     "controller_determination_reference",
@@ -43,6 +45,8 @@ COMMON_FRAME_FIELDS = {
     "frame_status",
     "evidence_class",
     "instrument_versions",
+    "form_contract_sha256",
+    "forms_definition_sha256",
     "collection_started_at",
     "collection_closed_at",
     "collection_channels",
@@ -83,6 +87,9 @@ def _scan_identifier_like_strings(value: Any, path: str = "$") -> None:
         for idx, child in enumerate(value):
             _scan_identifier_like_strings(child, f"{path}[{idx}]")
     elif isinstance(value, str):
+        leaf = path.rsplit(".", 1)[-1]
+        if leaf.endswith("_sha256") and SHA256_RE.fullmatch(value):
+            return
         hits = [label for label, pattern in PII_PATTERNS.items() if pattern.search(value)]
         if hits:
             raise NF06PreingestError(f"identifier-like content at {path}: {sorted(hits)}")
@@ -93,14 +100,24 @@ def canonical_export_bytes(records: list[dict[str, Any]]) -> bytes:
     return b"".join(canonical_json_bytes(row) for row in ordered)
 
 
+def instrument_definition_hashes() -> dict[str, str]:
+    return {
+        "form_contract_sha256": hashlib.sha256(CONTRACT_PATH.read_bytes()).hexdigest(),
+        "forms_definition_sha256": hashlib.sha256(FORMS_PATH.read_bytes()).hexdigest(),
+    }
+
+
 def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, datetime, frozenset[str]]:
     if not isinstance(frame, dict):
         raise NF06PreingestError("collection frame must be an object")
-    missing = COMMON_FRAME_FIELDS - set(frame)
-    if prod:
-        missing |= PROD_ONLY_FRAME_FIELDS - set(frame)
+    expected_fields = COMMON_FRAME_FIELDS | (PROD_ONLY_FRAME_FIELDS if prod else set())
+    actual_fields = set(frame)
+    missing = expected_fields - actual_fields
+    extra = actual_fields - expected_fields
     if missing:
         raise NF06PreingestError(f"collection frame missing fields: {sorted(missing)}")
+    if extra:
+        raise NF06PreingestError(f"collection frame contains unreviewed fields: {sorted(extra)}")
 
     reject_forbidden_keys(frame)
     _scan_identifier_like_strings(frame)
@@ -124,6 +141,13 @@ def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, date
     if not isinstance(frame.get("collection_channel_register_sha256"), str) or not SHA256_RE.fullmatch(frame["collection_channel_register_sha256"]):
         raise NF06PreingestError("collection_channel_register_sha256 must be lowercase SHA-256 hex")
 
+    current_instrument_hashes = instrument_definition_hashes()
+    for field, expected_hash in current_instrument_hashes.items():
+        if not isinstance(frame.get(field), str) or not SHA256_RE.fullmatch(frame[field]):
+            raise NF06PreingestError(f"{field} must be lowercase SHA-256 hex")
+        if frame[field] != expected_hash:
+            raise NF06PreingestError(f"{field} does not match the frozen repository instrument")
+
     instrument_versions = frame.get("instrument_versions")
     if not isinstance(instrument_versions, dict) or set(instrument_versions) != ALLOWED_FORMS:
         raise NF06PreingestError("instrument_versions must cover both frozen forms")
@@ -139,6 +163,11 @@ def validate_collection_frame(frame: Any, *, prod: bool) -> tuple[datetime, date
     end = _parse_ts(frame.get("collection_closed_at"), field="collection_closed_at")
     if end < start:
         raise NF06PreingestError("collection window is inverted")
+    now = datetime.now(timezone.utc)
+    if start > now + MAX_CLOCK_SKEW:
+        raise NF06PreingestError("collection_started_at cannot be future-dated")
+    if end > now + MAX_CLOCK_SKEW:
+        raise NF06PreingestError("collection_closed_at cannot be future-dated")
 
     if prod:
         if frame.get("frame_status") != PROD_FRAME_STATUS:
@@ -178,6 +207,8 @@ def _validate_normalized_record(
         raise NF06PreingestError("unsupported form_id")
     if record.get("schema_version") != 1 or record.get("form_version") != 1:
         raise NF06PreingestError("unsupported record schema/form version")
+    if not isinstance(record.get("response_id"), str) or not SHA256_RE.fullmatch(record["response_id"]):
+        raise NF06PreingestError("response_id must be a lowercase 64-hex opaque receipt")
     try:
         channel_id = validate_recruitment_channel_id(record.get("recruitment_channel_id"))
     except ChannelProvenanceError as exc:
@@ -204,9 +235,13 @@ def _validate_normalized_record(
     received = _parse_ts(record.get("received_at"), field="received_at")
     if not start <= received <= end:
         raise NF06PreingestError("record received_at outside declared collection window")
-    if not isinstance(record.get("response_id"), str) or not record["response_id"].strip():
-        raise NF06PreingestError("response_id required")
     return received
+
+
+def _dominant_share(counts: Counter[str], denominator: int) -> float:
+    if denominator <= 0 or not counts:
+        return 0.0
+    return max(counts.values()) / denominator
 
 
 def build_preingest_manifest(
@@ -232,7 +267,22 @@ def build_preingest_manifest(
     forms = load_forms()
     response_ids: set[str] = set()
     form_counts = {form_id: 0 for form_id in sorted(ALLOWED_FORMS)}
+    region_counts: Counter[str] = Counter()
+    form_region_counts: dict[str, Counter[str]] = {
+        form_id: Counter({region: 0 for region in TARGET_REGIONS}) for form_id in sorted(ALLOWED_FORMS)
+    }
+    region_channel_ids: dict[str, set[str]] = {region: set() for region in TARGET_REGIONS}
+    form_region_channel_ids: dict[str, dict[str, set[str]]] = {
+        form_id: {region: set() for region in TARGET_REGIONS} for form_id in sorted(ALLOWED_FORMS)
+    }
     channel_counts: Counter[str] = Counter()
+    region_channel_counts: dict[str, Counter[str]] = {
+        region: Counter() for region in TARGET_REGIONS
+    }
+    form_region_channel_counts: dict[str, dict[str, Counter[str]]] = {
+        form_id: {region: Counter() for region in TARGET_REGIONS}
+        for form_id in sorted(ALLOWED_FORMS)
+    }
     received_values: list[datetime] = []
     for record in records:
         received = _validate_normalized_record(
@@ -247,34 +297,95 @@ def build_preingest_manifest(
         if rid in response_ids:
             raise NF06PreingestError("duplicate response_id inside batch")
         response_ids.add(rid)
-        form_counts[record["form_id"]] += 1
-        channel_counts[record["recruitment_channel_id"]] += 1
+        form_id = record["form_id"]
+        region = record["profile"]["region"]
+        if region not in TARGET_REGIONS:
+            raise NF06PreingestError("record region outside AI4WORK target regions")
+        channel_id = record["recruitment_channel_id"]
+        form_counts[form_id] += 1
+        region_counts[region] += 1
+        form_region_counts[form_id][region] += 1
+        region_channel_ids[region].add(channel_id)
+        form_region_channel_ids[form_id][region].add(channel_id)
+        channel_counts[channel_id] += 1
+        region_channel_counts[region][channel_id] += 1
+        form_region_channel_counts[form_id][region][channel_id] += 1
         received_values.append(received)
 
     evidence_class = PROD_EVIDENCE_CLASS if prod else TEST_TWIN_EVIDENCE_CLASS
-    dominant_channel_share = max(channel_counts.values()) / len(records)
+    dominant_channel_share = _dominant_share(channel_counts, len(records))
+    region_dominant_channel_share = {
+        region: _dominant_share(region_channel_counts[region], region_counts.get(region, 0))
+        for region in TARGET_REGIONS
+    }
+    form_region_dominant_channel_share = {
+        form_id: {
+            region: _dominant_share(
+                form_region_channel_counts[form_id][region],
+                form_region_counts[form_id].get(region, 0),
+            )
+            for region in TARGET_REGIONS
+        }
+        for form_id in sorted(ALLOWED_FORMS)
+    }
+    frame_sha = hashlib.sha256(canonical_json_bytes(collection_frame)).hexdigest()
     return {
-        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.2",
+        "schema_version": "eucons.ai4work_nf06_preingest_manifest.v0.6",
         "research_id": RESEARCH_ID,
         "handoff_stage": "NF06_SOURCE_PREFLIGHT",
         "evidence_class": evidence_class,
         "non_evidence": not prod,
         "collection_frame_id": collection_frame["collection_frame_id"],
+        "collection_frame_sha256": frame_sha,
         "source_export_sha256": source_sha,
         "collection_channel_register_sha256": collection_frame["collection_channel_register_sha256"],
+        "form_contract_sha256": collection_frame["form_contract_sha256"],
+        "forms_definition_sha256": collection_frame["forms_definition_sha256"],
         "record_count": len(records),
         "form_counts": form_counts,
+        "region_counts": {region: region_counts.get(region, 0) for region in TARGET_REGIONS},
+        "form_region_counts": {
+            form_id: {region: form_region_counts[form_id].get(region, 0) for region in TARGET_REGIONS}
+            for form_id in sorted(ALLOWED_FORMS)
+        },
+        "region_channel_ids": {
+            region: sorted(region_channel_ids[region]) for region in TARGET_REGIONS
+        },
+        "form_region_channel_ids": {
+            form_id: {
+                region: sorted(form_region_channel_ids[form_id][region]) for region in TARGET_REGIONS
+            }
+            for form_id in sorted(ALLOWED_FORMS)
+        },
         "channel_counts": dict(sorted(channel_counts.items())),
+        "region_channel_counts": {
+            region: dict(sorted(region_channel_counts[region].items()))
+            for region in TARGET_REGIONS
+        },
+        "form_region_channel_counts": {
+            form_id: {
+                region: dict(sorted(form_region_channel_counts[form_id][region].items()))
+                for region in TARGET_REGIONS
+            }
+            for form_id in sorted(ALLOWED_FORMS)
+        },
         "dominant_channel_share": dominant_channel_share,
+        "region_dominant_channel_share": region_dominant_channel_share,
+        "form_region_dominant_channel_share": form_region_dominant_channel_share,
         "received_at_min": min(received_values).isoformat(),
         "received_at_max": max(received_values).isoformat(),
         "records_validated_against_frozen_forms": True,
+        "instrument_content_hashes_validated": True,
+        "collection_frame_exact_field_allowlist_validated": True,
         "channel_membership_validated_against_collection_frame": True,
+        "method_coverage_aggregates_emitted": True,
+        "form_audience_channel_provenance_emitted": True,
+        "channel_concentration_aggregates_emitted": True,
         "direct_identifiers_collected": False,
         "crm_linkage": "FORBIDDEN",
         "commercial_tracking": "FORBIDDEN",
         "prod_promotion_eligible": prod,
-        "scope_boundary": "This manifest validates source-batch integrity, opaque recruitment-channel provenance and eligibility for NF06 handoff only; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
+        "scope_boundary": "This manifest validates source-batch integrity, exact collection-frame identity, frozen instrument content, opaque recruitment-channel provenance and eligibility for NF06 handoff only. Region/form coverage, form-specific channel provenance and channel-concentration aggregates are internal method-QA inputs, not population estimates or need evidence; it does not claim that NF06 ingestion, synthesis, ranking or QA has executed.",
     }
 
 

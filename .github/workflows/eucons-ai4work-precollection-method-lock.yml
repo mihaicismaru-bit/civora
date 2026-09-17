@@ -1,0 +1,45 @@
+name: EUCONS AI4WORK Precollection Method Lock
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-precollection-method-lock.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-precollection-method-lock.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-precollection-method-lock-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  precollection-method-lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Prevent PROD activation before exact needs-analysis method is approved and locked
+        working-directory: eucons/research/ai4work-step
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest -v test_precollection_analysis_plan_gate.py 2>&1 | tee /tmp/precollection-method-lock-test.log
+          python precollection_analysis_plan_gate.py 2>&1 | tee -a /tmp/precollection-method-lock-test.log
+      - name: Preserve precollection method-lock diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: precollection-method-lock-test-log
+          path: /tmp/precollection-method-lock-test.log
+          if-no-files-found: error
+          retention-days: 1

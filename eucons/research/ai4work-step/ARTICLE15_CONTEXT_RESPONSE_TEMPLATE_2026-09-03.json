@@ -1,0 +1,41 @@
+{
+  "schema_version": "eucons.ai4work_article15_context_response.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-09-03",
+  "status": "IMPLEMENTED_CANDIDATE_LIVE_BINDING_REQUIRED",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "controller": "EUROCONSULT SRL",
+  "privacy_contact": "privacy@eucons.ro",
+  "use_rule": "Use only after the two-part opaque rights proof has been validated and the requested response still exists in the isolated research store. Supplement the reviewed respondent-record access copy; do not disclose storage internals, other respondents, raw logs or identity-linkage data.",
+  "article15_context": {
+    "processing_purposes": "fundamentarea și validarea analizei de nevoi AI4WORK STEP privind competențele digitale și utilizarea responsabilă a AI în muncă; fără marketing, CRM profiling, project-enrolment decisions or individual automated decisions",
+    "categories_of_personal_data": "broad preset respondent profile categories and controlled questionnaire answers; opaque technical response receipt; no direct identifiers requested by the research forms",
+    "recipients_or_categories": "authorised EUROCONSULT research personnel and only the technically necessary verified hosting/security/backup processors or subprocessors bound for the live service; no respondent-level disclosure to employers and no CRM transfer",
+    "retention": "live respondent-level research data no longer than 180 days after collection close and, absent a documented legal/audit hold, no later than 2027-03-31; access logs maximum 7 days when live account binding is approved; residual backup maximum 92 days after live deletion; erasure replay marker maximum 24 hours",
+    "rights": "access, rectification where applicable, erasure subject to GDPR exceptions, restriction where Article 18 applies, and objection under Article 21 for the approved legitimate-interest basis",
+    "portability": "not applicable under the approved Article 6(1)(f) legitimate-interest basis; must be re-evaluated if the legal basis changes",
+    "consent_withdrawal": "not applicable because consent is not the legal basis for the current research design",
+    "complaint": "right to lodge a complaint with ANSPDCP and seek judicial remedy under applicable GDPR rules",
+    "source": "data are provided directly through the AI4WORK research form; recruitment-channel provenance is technical distribution metadata and not a direct identity source",
+    "automated_decision_making": "none producing legal or similarly significant effects; no individual profiling for such decisions",
+    "international_transfer": "no respondent-level international transfer is authorised by default; any live transfer depends on the verified active processor/subprocessor chain and applicable safeguards"
+  },
+  "confirmation_logic": {
+    "record_found_after_valid_proof": "confirm that personal data corresponding to the supplied opaque response receipt are processed and provide the reviewed respondent-record copy plus this context",
+    "record_not_found_after_valid_proof": "confirm that no live respondent record can be located for that receipt; do not infer a person's identity and do not search CRM/IP/device data",
+    "invalid_or_missing_proof": "do not disclose whether a particular live record exists; request the two opaque values or apply the Article 11 procedure if the requester cannot supply them"
+  },
+  "forbidden_disclosure": [
+    "raw request bodies or application logs",
+    "raw or hashed idempotency internals beyond the respondent-supplied private verification code used only for verification",
+    "storage hashes and internal integrity metadata not part of the respondent record copy",
+    "rights-hold internals or case narrative",
+    "other respondents' records",
+    "CRM, IP, user-agent, device or commercial-account data as a substitute identity lookup"
+  ],
+  "remaining_live_gate": "freeze the verified live processor/subprocessor subset, live retention/access settings and exact published Article 13 surface before marking this template OPERATIONAL_FOR_PROD.",
+  "collection_enabled": false,
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

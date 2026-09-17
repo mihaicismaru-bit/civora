@@ -1,0 +1,113 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T16:31:44+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "observed_pr_head_before_persist": "8c1500d61509ce8a96f57cb0eb67c93536e5cf78",
+  "secondary_research_refresh": {
+    "regions_checked": [
+      "Sud-Vest Oltenia",
+      "Sud-Muntenia",
+      "Centru"
+    ],
+    "source_register_high_water_mark": "S38",
+    "new_source_promoted": true,
+    "new_source_id": "S38",
+    "new_source": {
+      "region": "Sud-Muntenia / Prahova",
+      "publisher": "ANOFM / AJOFM Prahova",
+      "title": "Prognoza angajarilor pe termen scurt - Judetul Prahova (eSPOR)",
+      "url": "https://www.anofm.ro/prahova/wp-content/uploads/sites/33/2025/02/Prognoza-pe-termen-scurt-privind-evolutia-pietei-muncii-2023-Prahova.pdf",
+      "study_period": "2022-09-12/2022-10-31",
+      "respondents_reported": 1244,
+      "forecast_hires_reported": 13399,
+      "sampling_design": "quota sample with sector coverage as described by the source",
+      "decision": "PROMOTE_AS_HISTORICAL_DIRECT_COMPLEMENTARY_EMPLOYER_EVIDENCE",
+      "limitations": [
+        "county-level Prahova only",
+        "historical 2022 collection for 2023 forecast",
+        "not AI/digital-specific",
+        "quota rather than probability sample",
+        "not a prevalence measure for AI4WORK 2026 target populations"
+      ],
+      "h1_h5_numeric_points_added": 0,
+      "project_activity_as_need_evidence": false
+    },
+    "other_official_institutional_screening": [
+      {
+        "region": "Centru",
+        "publisher": "ANOFM / AJOFM Brasov",
+        "title": "Investeste in competenta si Alege excelenta in cariera - Regiunea Centru",
+        "decision": "REJECT_FROM_NEED_EVIDENCE",
+        "reason": "Training targets and project delivery are supply/activity context, not target-population need prevalence."
+      },
+      {
+        "region": "Sud-Muntenia + Sud-Vest Oltenia",
+        "publisher": "ANOFM / CRFPA Valcea",
+        "title": "CD Future - competente digitale",
+        "decision": "REJECT_FROM_NEED_EVIDENCE",
+        "reason": "Project objective/training activity is not proof of need prevalence."
+      },
+      {
+        "region": "regional NUTS2",
+        "publisher": "Eurostat",
+        "title": "Regional digital society / regional yearbook material",
+        "decision": "NO_NEW_SOURCE_BEYOND_EXISTING_S30",
+        "reason": "Existing S30 already captures newer regional digital-use context for the target regions; older regional internet-use figures add no stronger current inference."
+      }
+    ],
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false
+  },
+  "call_requirements_refresh": {
+    "gmail_query": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK) -in:spam -in:trash -from:notifications@github.com",
+    "matching_new_authority_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "drive_queries": [
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE"
+    ],
+    "eligible_combined_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "public_live_surface_refresh": {
+    "contact_url": "https://eucons.ro/contact/",
+    "privacy_url": "https://eucons.ro/confidentialitate/",
+    "research_route_external_readback": "UNVERIFIED_THIS_REFRESH",
+    "research_route_note": "Fresh public search/readback did not return a usable eucons.ro AI4WORK research surface. No new live-compliance claim is made; the previously verified commercial-surface baseline remains controlling until a successful route-level readback exists.",
+    "live_ai4work_article13_verified": false,
+    "live_dedicated_research_form_verified": false
+  },
+  "repository_implementation_state": {
+    "forms_schema": "eucons.research_forms.v0.5",
+    "direct_identifier_fields_allowed_in_research_forms": false,
+    "analytical_free_text_allowed": false,
+    "commercial_tracking_allowed": false,
+    "crm_linkage_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE",
+    "need_analysis_plan_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+    "precollection_method_lock_status": "OPEN_NOT_LOCKED"
+  },
+  "remaining_precollection_boundary": [
+    "Approve exact NEED_ANALYSIS_PLAN and COLLECTION_FRAME and bind both SHA-256 values",
+    "Controller approval of Art. 6(1)(f) LIA/lawful basis and acceptance of the DPIA screening outcome or completion of a DPIA if required",
+    "Final dedicated AI4WORK Article 13 notice with an operational EUROCONSULT privacy contact",
+    "Approved requester-authentication and data-subject-rights procedure",
+    "Account-specific eucons.ro/cPanel/Cloudflare logging-retention-access-security readback proving Raw Access <= 7 days",
+    "Provider-bound proof that live research storage is separate from CRM/webroot and residual backups meet the <= 92-day ceiling",
+    "Active processor/subprocessor, rights-hold and incident-response bindings",
+    "Real CH-* channel entries created only after dissemination authorization",
+    "Fresh explicit human collection-only v0.2 approval"
+  ],
+  "downstream_state": "FAIL_CLOSED_UNTIL_SUFFICIENT_IMMUTABLE_REAL_ADULT_AND_EMPLOYER_BATCH",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false,
+  "real_collection_authorized": false
+}

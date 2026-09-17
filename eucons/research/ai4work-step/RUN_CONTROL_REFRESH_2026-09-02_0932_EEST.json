@@ -1,0 +1,69 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.2",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T09:32:24+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "secondary_evidence": {
+    "source_register_high_water_mark": "S37",
+    "new_source_id_created": false,
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "qa_correction": {
+      "source_id": "S32",
+      "status": "INTERNAL_RESPONSE_COUNT_DISCREPANCY_FLAGGED",
+      "source_exact_observation": "ADR Centru Tema 2 annex methodology section reports 96 valid responses total, including 40 contracted beneficiaries, while the later respondent subsection reports 92 valid responses for the complementary survey addressed to 339 applicants. The inspected source does not reconcile the four-response difference.",
+      "handling": "Preserve both source-reported counts as an explicit limitation; do not reconstruct a denominator; keep the source-reported SME percentages as selection-frame-limited descriptive signals only; zero H1-H5 numeric effect."
+    },
+    "decision": "NO_S38_PROMOTION_THIS_REFRESH"
+  },
+  "call_requirements": {
+    "checked_at": "2026-09-02T09:32:24+03:00",
+    "connected_mail_query_scope": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding GitHub notifications/spam/trash",
+    "matching_new_authority_messages": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence": {
+    "checked_at": "2026-09-02T09:32:24+03:00",
+    "drive_queries": [
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE"
+    ],
+    "eligible_combined_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "live_surface_readback": {
+    "checked_at": "2026-09-02T09:32:24+03:00",
+    "privacy_url": "https://eucons.ro/confidentialitate/",
+    "contact_url": "https://eucons.ro/contact/",
+    "privacy_surface_observation": "The live privacy page is still explicitly scoped to commercial inquiries and lists direct identifiers and commercial retention classes. It states the form receiver is used for commercial receipt/storage/processing and does not expose a dedicated AI4WORK research Article 13 notice.",
+    "contact_surface_observation": "The live contact page exposes the structured commercial inquiry form and a separate commercial-marketing choice; it does not expose an operational AI4WORK research privacy contact or research questionnaire surface.",
+    "research_article13_live": false,
+    "research_privacy_contact_live": false,
+    "account_specific_cpanel_cloudflare_state_proven": false,
+    "research_store_crm_isolation_proven_live": false,
+    "status": "LIVE_PUBLIC_SURFACE_READBACK_CONFIRMS_PRECOLLECTION_BOUNDARY_OPEN"
+  },
+  "governance": {
+    "controller_method_sha256_approval_closed": false,
+    "lawful_basis_lia_approved": false,
+    "dpia_outcome_accepted": false,
+    "article13_notice_final_live": false,
+    "rights_authentication_procedure_approved": false,
+    "account_specific_logging_retention_access_security_readback_closed": false,
+    "provider_bound_research_store_isolation_closed": false,
+    "processor_subprocessor_chain_active_bound": false,
+    "rights_hold_incident_response_live_bound": false,
+    "real_channel_entries_created": false,
+    "fresh_collection_only_v0_2_approval_received": false
+  },
+  "blocker": "Human/live pre-collection boundary remains open. Real collection remains unauthorized until all governance/live controls pass and a fresh explicit collection-only v0.2 approval is received.",
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_dissemination_authorized": false,
+  "real_collection_authorized": false
+}

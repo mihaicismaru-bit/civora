@@ -1,0 +1,36 @@
+{
+  "schema_version": "eucons.ai4work_final_package_provenance_binding.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "artifact_class": "CONTROL_SCHEMA_NOT_EVIDENCE",
+  "purpose": "Make byte-verified source provenance an inseparable release boundary around the final NEEDS_ANALYSIS package without changing H1-H5 scoring or promoting TEST TWIN data.",
+  "authoritative_release_rule": "A base FINAL_NEEDS_PACKAGE is not release-eligible by itself. PROD release eligibility requires a provenance-bound outer package whose binding manifest verifies the exact base package, source register, source-provenance manifest, source-provenance verification result and source export hashes.",
+  "prod_requirements": {
+    "base_package_evidence_mode": "PROD_REAL_EVIDENCE",
+    "source_provenance_verification_status": "PASS",
+    "source_provenance_prod_promotion_allowed": true,
+    "source_register_sha256_exact_match": true,
+    "source_export_sha256_exact_match": true,
+    "base_package_sha256_binding": true,
+    "source_provenance_manifest_sha256_binding": true,
+    "source_provenance_verification_sha256_binding": true,
+    "captured_source_bytes_required": true,
+    "direct_base_package_release_forbidden_without_outer_binding": true,
+    "secondary_evidence_h1_h5_numeric_points": 0,
+    "project_activity_as_need_evidence": false
+  },
+  "test_twin_requirements": {
+    "evidence_mode": "TEST_TWIN_NON_EVIDENCE",
+    "source_provenance_verification_status": "TEST_TWIN_NON_EVIDENCE",
+    "prod_promotion_allowed": false,
+    "public_release_authorized": false,
+    "test_twin_evidence_eligible": false,
+    "promotion_to_prod_forbidden": true
+  },
+  "outer_package_artifacts": [
+    "BASE_FINAL_NEEDS_PACKAGE.zip",
+    "SOURCE_REGISTER_PROVENANCE.json",
+    "SOURCE_REGISTER_PROVENANCE_VERIFICATION.json",
+    "FINAL_PACKAGE_PROVENANCE_BINDING.json"
+  ],
+  "boundary": "This binding is a release-integrity control, not evidence of need. It cannot replace controller approval, live provider attestations, real respondent evidence, NF06 acceptance, ranking or adversarial QA, and it cannot authorize merge, deploy or canonicalization."
+}

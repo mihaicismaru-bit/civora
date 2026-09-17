@@ -1,0 +1,72 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-02T08:32:06+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "purpose": "Persist the run-level evidence-control, Call Requirements and NF06 freshness checks without promoting implementation activity, funding supply or synthetic data as need evidence.",
+  "secondary_research_refresh": {
+    "target_regions": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+    "promotion_policy": "Only official/institutional empirical evidence with observed target-population data and traceable method may be promoted as direct need evidence. Project activity, funding calls, service offers and technology deployments are not proof of need prevalence.",
+    "result": "NO_NEW_MATERIAL_SOURCE_PROMOTED",
+    "source_register_high_water_mark": "S37",
+    "h1_h5_numeric_points_added": 0,
+    "numeric_ranking_changed": false,
+    "project_activity_used_as_need_evidence": false,
+    "notes": "Fresh official/institutional screening rechecked current ADR/ANOFM/Eurostat/EC regional candidates for all three target regions. No candidate published a materially stronger defensible AI4WORK adult/employer target-population digital/AI skills-need prevalence estimate with sufficient method detail. Existing official contextual evidence remains bounded to its published population and method."
+  },
+  "call_requirements_refresh": {
+    "connected_mail_query": "after:2026/09/02 (OMIPE OR MIPE OR PEO OR 1302 OR Anexa 4 OR AI4WORK), excluding GitHub notifications/spam/trash",
+    "matching_new_authority_messages": 0,
+    "result": "NO_NEW_CALL_REQUIREMENTS_MESSAGE"
+  },
+  "primary_evidence_nf06_refresh": {
+    "drive_queries": [
+      "AI4WORK_ADULTS_V1",
+      "AI4WORK_EMPLOYERS_V1 source_export_sha256 PROD_REAL_EVIDENCE"
+    ],
+    "eligible_combined_real_response_batch_found": false,
+    "observed_result": "Search results are existing governance, SSOT and pre-final analysis artifacts, not a new immutable real-response export eligible for NF06.",
+    "nf06_preingest_state": "FAIL_CLOSED_NO_PROD_REAL_EVIDENCE_BATCH",
+    "test_twin_promotion_allowed": false
+  },
+  "forms_and_privacy_control_refresh": {
+    "forms_definition_state": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifier_fields_in_analytical_forms": false,
+    "free_text_fields_in_analytical_forms": false,
+    "commercial_tracking_allowed": false,
+    "research_storage_separation_required": true,
+    "article13_notice_state": "DRAFT_LIVE_CONTACT_AND_CONTROLLER_APPROVAL_OPEN",
+    "retention_policy_state": "TECHNICAL_POLICY_COMPLETE_CONTROLLER_ACCEPTANCE_AND_PROVIDER_BINDING_REQUIRED_BEFORE_COLLECTION",
+    "live_surface_fresh_revalidation_this_run": false,
+    "live_surface_revalidation_note": "No new live-surface claim is made in this refresh. The latest controlled 06:35 EEST readback remains the evidence baseline; retrieval failure in this run is treated as non-evidence, not as proof of change."
+  },
+  "repository_baseline_before_persist": {
+    "pr": 739,
+    "head_sha": "360a192de699339b9ced84217ebee0e6920ae4fd",
+    "pr_state": "DRAFT_OPEN_UNMERGED",
+    "pr_associated_workflow_runs": 29,
+    "workflow_conclusion": "ALL_SUCCESS",
+    "merge_performed": false,
+    "canonicalization_performed": false,
+    "deploy_performed": false
+  },
+  "remaining_external_precollection_boundary": [
+    "controller-approved exact method/frame and SHA-256 bindings",
+    "controller-approved final lawful basis/LIA",
+    "controller acceptance of DPIA outcome",
+    "final AI4WORK Article 13 notice with an operational research privacy contact",
+    "controller-approved requester-authentication/rights handling procedure",
+    "account-specific eucons.ro/cPanel/Cloudflare logging, retention, access and security readbacks",
+    "provider-bound proof of research-store separation from CRM/webroot and deletion/backup behavior within approved ceilings",
+    "verified active processor/subprocessor chain, rights-hold binding and incident-response binding",
+    "real approved CH-* dissemination-channel entries created only when real dissemination is authorized",
+    "fresh explicit collection-only v0.2 human approval after all preceding controls PASS"
+  ],
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

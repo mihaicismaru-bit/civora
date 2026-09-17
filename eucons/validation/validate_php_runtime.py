@@ -48,9 +48,12 @@ def main() -> None:
     crm = (EUCONS / "runtime" / "php" / "src" / "CrmRuntime.php").read_text(encoding="utf-8")
     retention = (EUCONS / "runtime" / "php" / "src" / "RetentionRuntime.php").read_text(encoding="utf-8")
     mail = (EUCONS / "runtime" / "php" / "src" / "MailRuntime.php").read_text(encoding="utf-8")
+    research = (EUCONS / "runtime" / "php" / "src" / "ResearchRuntime.php").read_text(encoding="utf-8")
     maintenance = (EUCONS / "runtime" / "php" / "maintenance.php").read_text(encoding="utf-8")
     public = (EUCONS / "runtime" / "php" / "public" / "index.php").read_text(encoding="utf-8")
     htaccess = (EUCONS / "runtime" / "php" / "public" / ".htaccess").read_text(encoding="utf-8")
+    research_client = (EUCONS / "research" / "ai4work-step" / "research_form.js").read_text(encoding="utf-8")
+    research_php_twin = (EUCONS / "validation" / "test_php_research_runtime.php").read_text(encoding="utf-8")
 
     for token in ["lead_contract.json", "forms.json", "PII_STORAGE_INSIDE_WEBROOT", "SPAM_REJECTED", "PRIVACY_ACK_REQUIRED", "atomicWriteJson", "flock", "dedupe_key"]:
         if token not in source:
@@ -78,19 +81,70 @@ def main() -> None:
         if token not in htaccess:
             raise SystemExit(f"PHP runtime htaccess guard incomplete: {token}")
 
-    combined = "\n".join([source, crm, retention, mail, maintenance, public])
+    for token in [
+        "AI4WORK-STEP-NF-RUN-001",
+        "RESEARCH_ISOLATION_CONTRACT_NOT_FAIL_CLOSED",
+        "RESEARCH_STORAGE_INSIDE_WEBROOT",
+        "RESEARCH_STORAGE_NOT_SEPARATE_FROM_COMMERCIAL",
+        "AI4WORK_RESEARCH_PROD_ENABLED",
+        "explicit_user_approval_reference",
+        "FORBIDDEN_DIRECT_IDENTIFIER_FIELD",
+        "INVALID_RECRUITMENT_CHANNEL",
+        "IDEMPOTENCY_CONFLICT",
+        "ERASED_RESPONSE_REPLAY_BLOCKED",
+        "expires_at_utc",
+        "MAX_REPLAY_SECONDS = 86400",
+        "exportForm",
+    ]:
+        if token not in research:
+            raise SystemExit(f"PHP research runtime missing {token}")
+    for token in [
+        "const AI4WORK_RESEARCH_PATH = '/research/ai4work/v1/submit'",
+        "EuconsResearchRuntime",
+        "RESEARCH_COLLECTION_DISABLED",
+        "X-AI4WORK-Idempotency-Key",
+        "X-AI4WORK-Recruitment-Channel",
+        "application/json",
+    ]:
+        if token not in public:
+            raise SystemExit(f"PHP research endpoint bridge missing {token}")
+    research_segment = public.split("if ($isResearch) {", 1)[1].split("if ($path !== '/api/leads')", 1)[0]
+    for forbidden in ["EuconsCrmRuntime(", "EuconsMailRuntime(", "EuconsRetentionRuntime(", "process($_POST)", "crm->", "mail->"]:
+        if forbidden in research_segment:
+            raise SystemExit(f"research route crosses commercial runtime boundary: {forbidden}")
+    for token in [
+        'credentials: "omit"',
+        'cache: "no-store"',
+        'referrerPolicy: "no-referrer"',
+        "crypto.randomUUID()",
+        "WeakMap",
+        "X-AI4WORK-Idempotency-Key",
+        "X-AI4WORK-Recruitment-Channel",
+        'checked.value === "true"',
+    ]:
+        if token not in research_client:
+            raise SystemExit(f"research browser client missing {token}")
+    for forbidden in ["localStorage", "sessionStorage", "document.cookie", "gtag(", "fbq("]:
+        if forbidden in research_client:
+            raise SystemExit(f"research browser client contains persistent/commercial tracking token: {forbidden}")
+    for token in ["TEST TWIN ONLY", "NON-EVIDENCE", "IDEMPOTENCY_CONFLICT", "ERASED_RESPONSE_REPLAY_BLOCKED", "RESEARCH_STORAGE_NOT_SEPARATE_FROM_COMMERCIAL", "RESEARCH_STORAGE_INSIDE_WEBROOT"]:
+        if token not in research_php_twin:
+            raise SystemExit(f"PHP research TEST TWIN missing {token}")
+
+    combined = "\n".join([source, crm, retention, mail, research, maintenance, public])
     for forbidden in ["API_KEY=", "PASSWORD=", "CLIENT_SECRET=", "ACCESS_TOKEN=", "synthetic-secret-not-real"]:
         if forbidden in combined:
             raise SystemExit("secret-like assignment committed in PHP runtime")
     if "password' => '" in mail or '"password": "' in mail:
         raise SystemExit("mail runtime contains inline password")
-    sensitive_log_tokens = ["$_POST", "$payload", "$processed", "['email']", "['contact_name']", "['phone']", "['message']", "['password']"]
+    sensitive_log_tokens = ["$_POST", "$payload", "$processed", "['email']", "['contact_name']", "['phone']", "['message']", "['password']", "rawBody"]
     for line in (public + "\n" + maintenance).splitlines():
         if "error_log(" in line and any(token in line for token in sensitive_log_tokens):
             raise SystemExit("PHP runtime logs sensitive field")
 
     builder = load_module("e29_prod_builder", EUCONS / "deployment" / "build_production_ready.py")
     activator = load_module("e29_php_activator", EUCONS / "deployment" / "activate_php_runtime.py")
+    candidate_builder = load_module("ai4work_candidate_builder", EUCONS / "deployment" / "build_ai4work_candidate.py")
     with tempfile.TemporaryDirectory() as td:
         target = Path(td) / "site"
         before = builder.build_site(target)
@@ -121,13 +175,43 @@ def main() -> None:
         if activation_doc.get("api_origin") != "https://api.eucons.ro":
             raise SystemExit("runtime activation manifest drift")
 
+    with tempfile.TemporaryDirectory() as td:
+        target = Path(td) / "candidate"
+        candidate = candidate_builder.build_candidate(target)
+        if candidate.get("status") != "PASS_FAIL_CLOSED_CANDIDATE":
+            raise SystemExit("AI4WORK candidate builder status drift")
+        if candidate.get("merge_authorized") is not False or candidate.get("deploy_authorized") is not False or candidate.get("real_collection_authorized") is not False:
+            raise SystemExit("AI4WORK candidate builder failed open")
+        research_result = candidate.get("research", {})
+        if research_result.get("status") != "PASS_FAIL_CLOSED" or research_result.get("production_enabled") is not False:
+            raise SystemExit("AI4WORK candidate research pages failed open")
+        if "/cercetare/ai4work-step" in (target / "sitemap.xml").read_text(encoding="utf-8"):
+            raise SystemExit("AI4WORK research routes leaked to production sitemap")
+        for page in [
+            target / "cercetare" / "ai4work-step" / "adulti" / "index.html",
+            target / "cercetare" / "ai4work-step" / "angajatori" / "index.html",
+        ]:
+            text = page.read_text(encoding="utf-8")
+            if '<meta name="robots" content="noindex,nofollow">' not in text:
+                raise SystemExit("AI4WORK research page is indexable")
+            if 'data-collection-enabled="false"' not in text:
+                raise SystemExit("AI4WORK research page collection enabled without gate")
+            if 'data-eucons-lead-form' in text:
+                raise SystemExit("AI4WORK research page reuses commercial lead form")
+
     print(json.dumps({
         "status": "PASS",
-        "phase": "E29",
+        "phase": "E29+AI4WORK_RESEARCH_CANDIDATE",
         "runtime": "PHP_8_PLUS_SHARED_HOSTING",
         "lead_route": "https://api.eucons.ro/api/leads",
+        "research_route": "https://api.eucons.ro/research/ai4work/v1/submit",
         "production_pages": expected_pages,
         "activated_forms": activated["forms"],
+        "research_candidate": "FAIL_CLOSED_NON_EVIDENCE_TWIN_ONLY_UNTIL_EXTERNAL_GATES",
+        "research_storage": "OUTSIDE_WEBROOT_SEPARATE_FROM_COMMERCIAL_BY_CONTRACT",
+        "research_crm_integration": "FORBIDDEN",
+        "research_tracking": "NONE",
+        "research_collection_enabled": False,
         "pii_storage": "OUTSIDE_WEBROOT",
         "crm_persistence": "IMPLEMENTED_FAIL_CLOSED",
         "retention": "IMPLEMENTED_WITH_RECEIPTS",
