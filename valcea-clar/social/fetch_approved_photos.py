@@ -21,6 +21,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -269,7 +270,91 @@ def fetch_one(filename: str, urls: list[str]) -> None:
     raise AssetFetchUnavailable(f"unable to fetch {filename}: " + " | ".join(errors))
 
 
+def self_test_lkg_contract() -> None:
+    """Deterministically prove the LKG fallback accepts only exact current evidence."""
+    global ROOT, DEST, REGISTRY, RUNTIME_MEDIA, RUNTIME_MANIFEST
+    original = (ROOT, DEST, REGISTRY, RUNTIME_MEDIA, RUNTIME_MANIFEST)
+    try:
+        with tempfile.TemporaryDirectory() as raw_tmp:
+            tmp = Path(raw_tmp).resolve()
+            ROOT = tmp
+            DEST = (tmp / "valcea-clar" / "social" / "photos" / "approved").resolve()
+            REGISTRY = tmp / "valcea-clar" / "social" / "story_visuals.json"
+            RUNTIME_MEDIA = tmp / "valcea-clar" / "site" / "runtime" / "media" / "social"
+            RUNTIME_MANIFEST = RUNTIME_MEDIA / "manifest.json"
+            DEST.mkdir(parents=True, exist_ok=True)
+            REGISTRY.parent.mkdir(parents=True, exist_ok=True)
+            RUNTIME_MEDIA.mkdir(parents=True, exist_ok=True)
+
+            filename = "truth-bound-lkg.jpg"
+            image_path = f"valcea-clar/social/photos/approved/{filename}"
+            credit = "Example Photographer / Commons — CC BY 4.0"
+            rights = "creative_commons"
+            source_url = "https://commons.wikimedia.org/wiki/File:Example.jpg"
+            registry = {
+                "stories": {
+                    "example-story": {
+                        "image_path": image_path,
+                        "image": {
+                            "kind": "photograph",
+                            "synthetic": False,
+                            "subject_match": True,
+                            "editor_approved": True,
+                            "source_type": "wikimedia_commons",
+                            "source_url": source_url,
+                            "direct_source_url": "https://upload.wikimedia.org/example.jpg",
+                            "credit": credit,
+                            "rights_basis": rights,
+                            "alt_text": "Verified example photograph",
+                        },
+                    }
+                }
+            }
+            REGISTRY.write_text(json.dumps(registry), encoding="utf-8")
+            data = b"\xff\xd8\xff" + (b"L" * 50_000) + b"\xff\xd9"
+            digest = hashlib.sha256(data).hexdigest()
+            (RUNTIME_MEDIA / filename).write_bytes(data)
+            manifest = {
+                "execution_owner": "civora_site_engine",
+                "canonical_base_url": PUBLIC_BASE,
+                "assets": [
+                    {
+                        "filename": filename,
+                        "kind": "source_photograph",
+                        "synthetic": False,
+                        "sha256": digest,
+                        "public_url": PUBLIC_BASE + filename,
+                        "credit": credit,
+                        "rights_basis": rights,
+                        "source_url": source_url,
+                    }
+                ],
+            }
+            RUNTIME_MANIFEST.write_text(json.dumps(manifest), encoding="utf-8")
+            assert last_known_good_bytes(filename) == data
+
+            changed = json.loads(json.dumps(manifest))
+            changed["assets"][0]["credit"] = "Different credit"
+            RUNTIME_MANIFEST.write_text(json.dumps(changed), encoding="utf-8")
+            assert last_known_good_bytes(filename) is None
+
+            RUNTIME_MANIFEST.write_text(json.dumps(manifest), encoding="utf-8")
+            (RUNTIME_MEDIA / filename).write_bytes(data[:-3] + b"BAD")
+            assert last_known_good_bytes(filename) is None
+
+            (RUNTIME_MEDIA / filename).write_bytes(data)
+            REGISTRY.write_text(json.dumps({"stories": {}}), encoding="utf-8")
+            assert last_known_good_bytes(filename) is None
+    finally:
+        ROOT, DEST, REGISTRY, RUNTIME_MEDIA, RUNTIME_MANIFEST = original
+    print("PHOTO_LKG_SELF_TEST PASS")
+
+
 def main() -> int:
+    # This is a safety invariant, not a network smoke test. It runs on every
+    # invocation so the existing Social Publication Engine exercises the exact
+    # LKG accept/reject path without adding another workflow or lane.
+    self_test_lkg_contract()
     DEST.mkdir(parents=True, exist_ok=True)
     assets = all_assets()
     unavailable: list[tuple[str, str]] = []
