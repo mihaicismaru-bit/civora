@@ -1,0 +1,128 @@
+name: VÂLCEA CLAR DSP Vâlcea Public Health References
+
+on:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/dsp_valcea_public_health_reference_adapter.py"
+      - ".github/workflows/valcea-clar-dsp-public-health-references.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/dsp_valcea_public_health_reference_adapter.py"
+      - ".github/workflows/valcea-clar-dsp-public-health-references.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dsp-public-health-references:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+
+      - name: Require exact event head
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Compile adapter
+        run: python -m py_compile valcea-clar/scripts/dsp_valcea_public_health_reference_adapter.py
+
+      - name: Run fail-closed regressions
+        run: python valcea-clar/scripts/dsp_valcea_public_health_reference_adapter.py --self-test
+
+      - name: Read bounded live official references
+        run: |
+          set +e
+          python valcea-clar/scripts/dsp_valcea_public_health_reference_adapter.py > /tmp/dsp-valcea-public-health.json
+          ADAPTER_RC=$?
+          set -e
+          cat /tmp/dsp-valcea-public-health.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          receipt = json.loads(Path('/tmp/dsp-valcea-public-health.json').read_text(encoding='utf-8'))
+          if receipt.get('state') != 'REFERENCE_READY_NON_AUTHORIZING':
+              raise SystemExit(f"DSP public-health source held fail-closed: {receipt.get('state')} / {receipt.get('hold_reason')}")
+          refs = receipt.get('references') or []
+          if not refs:
+              raise SystemExit('DSP public-health source produced no bounded first-party references')
+          if len(refs) > 24:
+              raise SystemExit('reference cap exceeded')
+          for ref in refs:
+              url = str(ref.get('canonical_url') or '')
+              if not url.startswith('https://dspvalcea.ro/'):
+                  raise SystemExit(f'off-surface reference: {url}')
+          forbidden_true = (
+              'title_or_index_presence_is_current_health_alert',
+              'article_body_fetch_allowed',
+              'document_body_fetch_allowed',
+              'disease_incidence_extraction_allowed',
+              'case_count_extraction_allowed',
+              'risk_level_inference_allowed',
+              'medical_advice_inference_allowed',
+              'service_availability_inference_allowed',
+              'campaign_currentness_inference_allowed',
+              'image_ingest_allowed',
+              'inferred_photo_rights_allowed',
+              'breaking_news_promotion_allowed',
+              'persistence_allowed',
+              'fact_kernel_promotion_allowed',
+              'writer_allowed',
+              'public_projection_allowed',
+          )
+          enabled = [name for name in forbidden_true if receipt.get(name) is True]
+          if enabled:
+              raise SystemExit(f'unsafe capability enabled: {enabled}')
+          if receipt.get('publication_authority') != 'NONE':
+              raise SystemExit('publication authority must remain NONE')
+          print(f"DSP Vâlcea public-health references: PASS ({len(refs)} refs)")
+          PY
+          test "$ADAPTER_RC" -eq 0
+
+      - name: Enforce bounded read-only capability boundary
+        run: |
+          python - <<'PY'
+          import ast
+          from pathlib import Path
+
+          path = Path('valcea-clar/scripts/dsp_valcea_public_health_reference_adapter.py')
+          source = path.read_text(encoding='utf-8')
+          tree = ast.parse(source, filename=str(path))
+          forbidden_imports = {'requests', 'subprocess'}
+          imported = set()
+          for node in ast.walk(tree):
+              if isinstance(node, ast.Import):
+                  imported.update(alias.name.split('.', 1)[0] for alias in node.names)
+              elif isinstance(node, ast.ImportFrom) and node.module:
+                  imported.add(node.module.split('.', 1)[0])
+          bad = sorted(imported & forbidden_imports)
+          if bad:
+              raise SystemExit(f'forbidden dependencies: {bad}')
+          required = (
+              'reference_scope: str = "FIRST_PARTY_PUBLIC_HEALTH_REFERENCE_ONLY"',
+              'title_or_index_presence_is_current_health_alert: bool = False',
+              'medical_advice_inference_allowed: bool = False',
+              'campaign_currentness_inference_allowed: bool = False',
+              'fact_kernel_promotion_allowed: bool = False',
+              'writer_allowed: bool = False',
+              'public_projection_allowed: bool = False',
+              'publication_authority: str = "NONE"',
+          )
+          missing = [token for token in required if token not in source]
+          if missing:
+              raise SystemExit(f'fail-closed contract drift: {missing}')
+          print('DSP public-health read-only capability boundary: PASS')
+          PY
