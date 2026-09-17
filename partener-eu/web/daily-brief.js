@@ -90,7 +90,7 @@ function injectCatalog(){
  section.querySelectorAll('[data-catalog-more]').forEach(btn=>btn.addEventListener('click',()=>{const key=btn.dataset.catalogMore;const list=section.querySelector(`[data-catalog-panel="${key}"] .openCallsList`);if(!list)return;list.innerHTML=groups[key].map(d=>catalogRow(d,key)).join('');bindCatalogRows(list);btn.remove()}));
  section.querySelector('[data-catalog-all]')?.addEventListener('click',()=>document.querySelector('[data-decisionnav]')?.click());
 }
-function inject(){injectBrief();setTimeout(injectCatalog,20)}
+function inject(){if(!document.querySelector('[data-dailybrief]'))injectBrief();if(!document.querySelector('[data-open-calls-catalog]'))setTimeout(injectCatalog,20)}
 window.addEventListener('load',()=>setTimeout(inject,120),{once:true});
 document.addEventListener('click',()=>setTimeout(inject,100),true);
 setTimeout(inject,180);
