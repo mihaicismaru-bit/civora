@@ -1,4 +1,4 @@
-name: PARTENER.EU UX Consolidated v1-v4 QA
+name: PARTENER.EU UX vNext QA
 
 on:
   workflow_dispatch:
@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/web/index.html'
+      - 'partener-eu/web/home-concierge-vnext.css'
+      - 'partener-eu/web/home-concierge-vnext.js'
       - 'partener-eu/web/ux-optimization-v1.css'
       - 'partener-eu/web/ux-optimization-v1.js'
       - 'partener-eu/web/ux-orientation-v2.css'
@@ -13,28 +15,25 @@ on:
       - 'partener-eu/web/ux-mobile-density-v3.css'
       - 'partener-eu/web/ux-mobile-density-v3.js'
       - 'partener-eu/web/ux-card-scannability-v4.css'
+      - 'partener-eu/ops/test_home_concierge_*.py'
+      - 'partener-eu/ops/test_frontend_regression.py'
       - 'partener-eu/ops/test_ux_*.py'
       - '.github/workflows/partener-eu-ux-consolidated-v1-v4.yml'
   push:
-    branches:
-      - 'agent/partener-ux-consolidated-v1-v4-20260822'
+    branches: [main]
     paths:
       - 'partener-eu/web/index.html'
-      - 'partener-eu/web/ux-optimization-v1.css'
-      - 'partener-eu/web/ux-optimization-v1.js'
-      - 'partener-eu/web/ux-orientation-v2.css'
-      - 'partener-eu/web/ux-orientation-v2.js'
-      - 'partener-eu/web/ux-mobile-density-v3.css'
-      - 'partener-eu/web/ux-mobile-density-v3.js'
-      - 'partener-eu/web/ux-card-scannability-v4.css'
-      - 'partener-eu/ops/test_ux_*.py'
+      - 'partener-eu/web/home-concierge-vnext.css'
+      - 'partener-eu/web/home-concierge-vnext.js'
+      - 'partener-eu/ops/test_home_concierge_*.py'
+      - 'partener-eu/ops/test_frontend_regression.py'
       - '.github/workflows/partener-eu-ux-consolidated-v1-v4.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: partener-eu-ux-consolidated-${{ github.ref }}
+  group: partener-eu-ux-vnext-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -46,61 +45,58 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
 
       - name: JavaScript syntax
         run: |
           node --check partener-eu/web/ux-optimization-v1.js
           node --check partener-eu/web/ux-orientation-v2.js
           node --check partener-eu/web/ux-mobile-density-v3.js
+          node --check partener-eu/web/home-concierge-vnext.js
 
-      - name: Consolidated static contracts
+      - name: Static UX and frontend contracts
         run: |
           python partener-eu/ops/test_ux_optimization_v1.py
           python partener-eu/ops/test_ux_orientation_v2.py
           python partener-eu/ops/test_ux_mobile_density_v3.py
           python partener-eu/ops/test_ux_card_scannability_v4.py
+          python partener-eu/ops/test_home_concierge_vnext.py
           python partener-eu/ops/test_frontend_regression.py
 
       - name: Install browser harness
         run: python -m pip install --disable-pip-version-check playwright
 
-      - name: Start isolated PARTENER.EU browser servers
+      - name: Start isolated PARTENER.EU browser server
         run: |
-          for port in 4173 4174 4175 4176; do
-            python -m http.server "$port" --bind 127.0.0.1 --directory partener-eu/web >"/tmp/partener-ux-http-${port}.log" 2>&1 &
-            echo $! >"/tmp/partener-ux-http-${port}.pid"
+          python -m http.server 4173 --bind 127.0.0.1 --directory partener-eu/web > /tmp/partener-ux-vnext-http.log 2>&1 &
+          echo $! > /tmp/partener-ux-vnext-http.pid
+          ready=0
+          for i in $(seq 1 20); do
+            if curl -fsS 'http://127.0.0.1:4173/index.html' >/dev/null; then ready=1; break; fi
+            sleep 0.5
           done
-          for port in 4173 4174 4175 4176; do
-            ready=0
-            for i in $(seq 1 20); do
-              if curl -fsS "http://127.0.0.1:${port}/index.html" >/dev/null; then ready=1; break; fi
-              sleep 0.5
-            done
-            if [ "$ready" -ne 1 ]; then
-              cat "/tmp/partener-ux-http-${port}.log"
-              exit 1
-            fi
-          done
+          if [ "$ready" -ne 1 ]; then
+            cat /tmp/partener-ux-vnext-http.log
+            exit 1
+          fi
 
-      - name: V1 browser proof
+      - name: Generic accessibility and responsive proof
         run: python partener-eu/ops/test_ux_browser_v1.py
 
-      - name: V2 browser proof
-        run: python partener-eu/ops/test_ux_orientation_browser_v2.py
+      - name: Funding Concierge vNext browser proof
+        run: python partener-eu/ops/test_home_concierge_browser_vnext.py
 
-      - name: V3 browser proof
-        run: python partener-eu/ops/test_ux_mobile_density_browser_v3.py
-
-      - name: V4 browser proof
-        run: python partener-eu/ops/test_ux_card_scannability_browser_v4.py
-
-      - name: Upload consolidated UX evidence
+      - name: Upload UX vNext evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: partener-ux-consolidated-v1-v4-proof
+          name: partener-ux-vnext-proof
           path: |
-            partener-eu/ops/*ux*proof*.json
-            partener-eu/ops/ux-*-screenshots/*.png
-            /tmp/partener-ux-http-*.log
+            partener-eu/ops/ux-browser-proof.json
+            partener-eu/ops/ux-browser-screenshots/*.png
+            partener-eu/ops/ux-concierge-vnext-proof.json
+            partener-eu/ops/ux-concierge-vnext-screenshots/*.png
+            /tmp/partener-ux-vnext-http.log
           if-no-files-found: warn
