@@ -21,9 +21,10 @@ permissions:
   id-token: write
 
 concurrency:
-  # All workflows that call actions/deploy-pages must share this lock. GitHub
-  # rejects a second deployment while the first is still in progress.
-  group: partener-eu-pages
+  # Generation v2 retires a legacy waiting run that has held the original
+  # repository-wide deployment lock since 2026-09-03. Pages and Go Live still
+  # share one exact lock and never cancel an in-flight deployment.
+  group: partener-eu-pages-v2
   cancel-in-progress: false
 
 jobs:
@@ -191,9 +192,6 @@ jobs:
               print('Pages deployment failed; preserving existing latest.json as LKG.')
           PY
 
-          # The fail-closed preflight deliberately works in-place so the uploaded
-          # artifact can recover an LKG projection. Those generated mutations are
-          # deployment-ephemeral; only deployment evidence is allowed to write back.
           cp partener-eu/deployment/latest.json /tmp/partener-pages-latest.json
           cp partener-eu/deployment/last-attempt.json /tmp/partener-pages-last-attempt.json
           git reset --hard HEAD
