@@ -31,6 +31,19 @@ def audit(browser,name:str,width:int,height:int)->dict:
         errors.append('primary natural-language search missing or hidden')
     if page.locator('.conciergeProfiles button').count()<5:
         errors.append('profile shortcuts incomplete')
+
+    # Regression: the primary search field must remain the same live input while
+    # the user types. Re-rendering/replacing it makes desktop input drop text and
+    # prevents mobile soft keyboards from staying open.
+    qhome=page.locator('.conciergeSearch input')
+    marker='hala productie utilaje valcea'
+    qhome.click()
+    qhome.type(marker,delay=35)
+    page.wait_for_timeout(700)
+    if qhome.input_value()!=marker:
+        errors.append('primary search input lost or rejected typed text')
+    if not page.evaluate("document.activeElement===document.querySelector('.conciergeSearch input')"):
+        errors.append('primary search input lost focus while typing')
     for selector,label in (
         ('.conciergeOpen','open calls section'),
         ('.conciergeUpcoming','upcoming section'),
