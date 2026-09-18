@@ -41,6 +41,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_isj_materiality_shadow_lane.py
           python valcea-clar/tests/test_core_v2_isj_embedded_notice_shadow_lane.py
           python valcea-clar/tests/test_core_v2_isj_embedded_target_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_embedded_content_shadow_lane.py
           python valcea-clar/tests/test_core_v2_visual.py
           python valcea-clar/tests/test_core_v2_visual_registry.py
           python valcea-clar/tests/test_core_v2_shadow_site_package.py
@@ -97,6 +98,13 @@ jobs:
             --embedded /tmp/valcea-core-v2-isj-embedded-notice-shadow.json \
             --live \
             --output /tmp/valcea-core-v2-isj-embedded-target-shadow.json
+
+      - name: Capture verified ISJ embedded document bytes read-only
+        run: |
+          python valcea-clar/core_v2/isj_embedded_content_shadow_lane.py \
+            --targets /tmp/valcea-core-v2-isj-embedded-target-shadow.json \
+            --live \
+            --output /tmp/valcea-core-v2-isj-embedded-content-shadow.json
 
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
@@ -179,6 +187,7 @@ jobs:
             /tmp/valcea-core-v2-isj-materiality-shadow.json
             /tmp/valcea-core-v2-isj-embedded-notice-shadow.json
             /tmp/valcea-core-v2-isj-embedded-target-shadow.json
+            /tmp/valcea-core-v2-isj-embedded-content-shadow.json
             /tmp/valcea-core-v2-photo-truth.json
             /tmp/valcea-core-v2-shadow-site-package.json
             /tmp/valcea-core-v2-shadow-site/**
