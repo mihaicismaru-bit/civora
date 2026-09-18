@@ -41,6 +41,7 @@ class ShadowSitePackageTest(unittest.TestCase):
                         "credit": "Autor / Commons — CC BY-SA 4.0",
                         "editorial_note": "Foto de arhivă; nu surprinde evenimentul curent.",
                         "source_url": "https://commons.wikimedia.org/wiki/File:Example.jpg",
+                        "direct_source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg",
                     },
                 }
             }
@@ -114,6 +115,27 @@ class ShadowSitePackageTest(unittest.TestCase):
             )
             self.assertEqual(report["blocked_count"], 1)
             self.assertEqual(report["rows"][0]["reason"], "photo_external_readback_not_verified")
+
+    def test_pre_materialized_shadow_image_is_reused_without_network(self):
+        with tempfile.TemporaryDirectory() as temp:
+            output_dir = Path(temp) / "out"
+            cached = output_dir / "media/story-1.jpg"
+            cached.parent.mkdir(parents=True)
+            cached.write_bytes(b"verified-shadow-image")
+            report = build_shadow_packages(
+                [self.article_doc()],
+                photo_truth=self.photo_truth(),
+                visual_registry=self.registry(),
+                repo_root=Path(temp) / "repo",
+                output_dir=output_dir,
+                allow_remote_materialization=True,
+            )
+            self.assertEqual(report["package_image_bound_shadow_count"], 1)
+            self.assertEqual(report["blocked_count"], 0)
+            row = report["rows"][0]
+            self.assertEqual(row["materialized_image"]["mode"], "shadow_cache_reuse")
+            self.assertFalse(row["public_article_binding_verified"])
+            self.assertFalse(row["visual_ready"])
 
 
 if __name__ == "__main__":
