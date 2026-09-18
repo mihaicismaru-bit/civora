@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import sys
 import unittest
 from pathlib import Path
@@ -7,8 +8,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
+from isj_article_integrity import verify_isj_article_integrity  # noqa: E402
 from isj_fact_kernel_integrity import verify_fact_kernel_integrity  # noqa: E402
 from isj_fact_kernel_shadow_lane import compose_isj_fact_kernel  # noqa: E402
+from isj_writer_shadow_lane import compose_isj_article  # noqa: E402
 
 
 def field(name, value, evidence_id, state="FIELD_EVIDENCE_VERIFIED_SHADOW"):
@@ -46,6 +49,12 @@ class ISJFactKernelShadowLaneTests(unittest.TestCase):
             }],
         }
         return materiality, fields, calendar
+
+    def _fact_and_integrity(self):
+        materiality, fields, calendar = self._inputs()
+        fact = compose_isj_fact_kernel(materiality, fields, calendar)
+        integrity = verify_fact_kernel_integrity(fact)
+        return fact, integrity
 
     def test_compose_and_integrity_pass_without_writer_authority(self):
         materiality, fields, calendar = self._inputs()
@@ -87,6 +96,47 @@ class ISJFactKernelShadowLaneTests(unittest.TestCase):
         result = compose_isj_fact_kernel(materiality, fields, calendar)
         self.assertEqual(result["state"], "NO_STORY")
         self.assertEqual(result["fact_kernel_count"], 0)
+
+    def test_writer_then_independent_article_integrity_passes(self):
+        fact, fact_integrity = self._fact_and_integrity()
+        article = compose_isj_article(fact, fact_integrity)
+        self.assertEqual(article["state"], "WRITTEN_SHADOW_PENDING_ARTICLE_INTEGRITY")
+        self.assertEqual(article["article_count"], 1)
+        self.assertTrue(article["shadow_writer_executed"])
+        self.assertFalse(article["production_writer_ready"])
+        article_integrity = verify_isj_article_integrity(fact, fact_integrity, article)
+        self.assertEqual(article_integrity["status"], "PASS_SHADOW")
+        self.assertEqual(article_integrity["article_truth_state"], "VERIFIED_WRITTEN_SHADOW")
+        self.assertEqual(article_integrity["verified_article_count"], 1)
+        self.assertEqual(article_integrity["fabricated_claim_count"], 0)
+        self.assertFalse(article_integrity["production_writer_ready"])
+
+    def test_writer_blocks_if_fact_kernel_integrity_did_not_pass(self):
+        fact, fact_integrity = self._fact_and_integrity()
+        fact_integrity["status"] = "BLOCKED"
+        fact_integrity["fact_kernel_integrity_verified"] = False
+        article = compose_isj_article(fact, fact_integrity)
+        self.assertEqual(article["state"], "BLOCKED")
+        self.assertEqual(article["article_count"], 0)
+        self.assertFalse(article["shadow_writer_executed"])
+
+    def test_extra_unverified_registration_fact_fails_full_body_gate(self):
+        fact, fact_integrity = self._fact_and_integrity()
+        article = compose_isj_article(fact, fact_integrity)
+        tampered = copy.deepcopy(article)
+        tampered["articles"][0]["article_package"]["body"] += "\n\nÎnscrierile se încheie la 30 septembrie 2026."
+        article_integrity = verify_isj_article_integrity(fact, fact_integrity, tampered)
+        self.assertEqual(article_integrity["status"], "BLOCKED")
+        self.assertGreaterEqual(article_integrity["fabricated_claim_count"], 1)
+
+    def test_claim_evidence_tamper_fails_closed(self):
+        fact, fact_integrity = self._fact_and_integrity()
+        article = compose_isj_article(fact, fact_integrity)
+        tampered = copy.deepcopy(article)
+        tampered["articles"][0]["article_package"]["claims"][0]["field_evidence_ids"] = ["invented-evidence"]
+        article_integrity = verify_isj_article_integrity(fact, fact_integrity, tampered)
+        self.assertEqual(article_integrity["status"], "BLOCKED")
+        self.assertGreaterEqual(article_integrity["fabricated_claim_count"], 1)
 
 
 if __name__ == "__main__":
