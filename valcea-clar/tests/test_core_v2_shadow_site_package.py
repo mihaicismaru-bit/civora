@@ -2,11 +2,13 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-from shadow_site_package import build_shadow_packages
+import shadow_site_package  # noqa: E402
+from shadow_site_package import MAX_IMAGE_BYTES, _download_remote_image, build_shadow_packages  # noqa: E402
 
 
 class ShadowSitePackageTest(unittest.TestCase):
@@ -136,6 +138,57 @@ class ShadowSitePackageTest(unittest.TestCase):
             self.assertEqual(row["materialized_image"]["mode"], "shadow_cache_reuse")
             self.assertFalse(row["public_article_binding_verified"])
             self.assertFalse(row["visual_ready"])
+
+    def test_remote_materialization_uses_bounded_range_and_accepts_complete_206(self):
+        payload = b"complete-jpeg-bytes"
+
+        class FakeHeaders(dict):
+            def get(self, key, default=None):
+                return super().get(key, default)
+
+        class FakeResponse:
+            status = 206
+            headers = FakeHeaders({
+                "Content-Type": "image/jpeg",
+                "Content-Range": f"bytes 0-{len(payload)-1}/{len(payload)}",
+            })
+            def __enter__(self):
+                return self
+            def __exit__(self, exc_type, exc, tb):
+                return False
+            def read(self, amount):
+                return payload
+
+        captured = {}
+        def fake_urlopen(request, timeout):
+            captured["range"] = request.headers.get("Range")
+            captured["accept"] = request.headers.get("Accept")
+            return FakeResponse()
+
+        with patch.object(shadow_site_package, "urlopen", side_effect=fake_urlopen):
+            data, content_type, attempts = _download_remote_image("https://example.test/image.jpg")
+        self.assertEqual(data, payload)
+        self.assertEqual(content_type, "image/jpeg")
+        self.assertEqual(attempts, 1)
+        self.assertEqual(captured["range"], f"bytes=0-{MAX_IMAGE_BYTES - 1}")
+        self.assertEqual(captured["accept"], "image/*")
+
+    def test_partial_range_that_does_not_cover_complete_image_is_rejected(self):
+        payload = b"partial"
+
+        class FakeResponse:
+            status = 206
+            headers = {"Content-Type": "image/jpeg", "Content-Range": "bytes 0-6/999"}
+            def __enter__(self):
+                return self
+            def __exit__(self, exc_type, exc, tb):
+                return False
+            def read(self, amount):
+                return payload
+
+        with patch.object(shadow_site_package, "urlopen", return_value=FakeResponse()):
+            with self.assertRaisesRegex(ValueError, "complete image"):
+                _download_remote_image("https://example.test/image.jpg")
 
 
 if __name__ == "__main__":
