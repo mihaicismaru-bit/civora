@@ -34,6 +34,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_embedded_target",
                 "isj_embedded_content",
                 "isj_field_evidence",
+                "isj_context_documents",
                 "photo_truth",
                 "shadow_site_package",
             ],
@@ -68,6 +69,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "isj_embedded_notice",
             "isj_embedded_target",
             "isj_embedded_content",
+            "isj_context_documents",
         }
         for stage in plan:
             if stage.name in source_stage_names:
@@ -84,6 +86,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         targets = by_name["isj_embedded_target"]
         content = by_name["isj_embedded_content"]
         fields = by_name["isj_field_evidence"]
+        context_docs = by_name["isj_context_documents"]
         self.assertIsNotNone(isj.output)
         self.assertIsNotNone(detail.output)
         self.assertIn("--input", detail.argv)
@@ -106,6 +109,13 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn("--content", fields.argv)
         self.assertIn(str(content.output), fields.argv)
         self.assertNotIn("--live", fields.argv)
+        self.assertIn("--targets", context_docs.argv)
+        self.assertIn(str(targets.output), context_docs.argv)
+        self.assertIn("--fields", context_docs.argv)
+        self.assertIn(str(fields.output), context_docs.argv)
+        self.assertIn("--year", context_docs.argv)
+        self.assertIn("2026", context_docs.argv)
+        self.assertIn("--live", context_docs.argv)
         names = [stage.name for stage in plan]
         self.assertLess(names.index("isj"), names.index("isj_detail"))
         self.assertLess(names.index("isj_detail"), names.index("isj_materiality"))
@@ -113,7 +123,8 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertLess(names.index("isj_embedded_notice"), names.index("isj_embedded_target"))
         self.assertLess(names.index("isj_embedded_target"), names.index("isj_embedded_content"))
         self.assertLess(names.index("isj_embedded_content"), names.index("isj_field_evidence"))
-        self.assertLess(names.index("isj_field_evidence"), names.index("photo_truth"))
+        self.assertLess(names.index("isj_field_evidence"), names.index("isj_context_documents"))
+        self.assertLess(names.index("isj_context_documents"), names.index("photo_truth"))
 
 
 if __name__ == "__main__":
