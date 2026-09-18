@@ -63,6 +63,41 @@ def collect_archive(now: datetime | None = None) -> list[dict[str, Any]]:
 legacy.collect_archive = collect_archive
 
 
+def sync_archive_only(now: datetime | None = None) -> dict[str, Any]:
+    """Persist durable published-story history without rewriting live runtime.
+
+    The canonical Live Newsroom owns this write. Presentation projectors keep
+    treating story_archive.json as read-only input.
+    """
+    effective_now = now or datetime.now(legacy.TZ)
+    stories = collect_archive(effective_now)
+    if not stories:
+        raise SystemExit("Refusing archive sync: no previously published full stories")
+
+    candidate = legacy.archive_payload(stories, effective_now)
+    previous = legacy.load(legacy.ARCHIVE, {})
+    comparable_previous = {k: v for k, v in previous.items() if k != "generated_at"}
+    comparable_candidate = {k: v for k, v in candidate.items() if k != "generated_at"}
+    changed = comparable_previous != comparable_candidate
+    if changed:
+        legacy.ARCHIVE.write_text(
+            legacy.json.dumps(candidate, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+
+    result = {
+        "status": "PASS",
+        "changed": changed,
+        "story_count": len(stories),
+        "active_story_count": sum(1 for item in stories if item.get("active_now")),
+        "archived_story_count": sum(1 for item in stories if not item.get("active_now")),
+        "archive": "site/story_archive.json",
+        "runtime_unchanged": True,
+    }
+    print(legacy.json.dumps(result, ensure_ascii=False))
+    return result
+
+
 def self_test() -> int:
     safe = {
         "id": "archive-safe",
@@ -78,6 +113,9 @@ def self_test() -> int:
     assert legacy.story_ready(stale)[0] is False
     assert _is_newer("2026-08-17T10:00:00+03:00", "2026-08-16T10:00:00+03:00") is True
     assert _is_newer("2026-08-15T10:00:00+03:00", "2026-08-16T10:00:00+03:00") is False
+    candidate = legacy.archive_payload([safe], datetime(2026, 8, 17, 10, 0, tzinfo=legacy.TZ))
+    assert candidate["story_count"] == 1
+    assert candidate["recap_editions_may_delete_published_stories"] is False
     print("Archive-preserving continuous frontpage wrapper self-test: PASS")
     return 0
 
@@ -85,6 +123,9 @@ def self_test() -> int:
 def main() -> int:
     if "--self-test" in sys.argv:
         return self_test()
+    if "--archive-only" in sys.argv:
+        sync_archive_only()
+        return 0
     return legacy.main()
 
 

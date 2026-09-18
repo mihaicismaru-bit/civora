@@ -51,6 +51,7 @@ jobs:
       - name: Validate continuous newsroom gate
         run: |
           python valcea-clar/scripts/newsroom_decide.py --self-test
+          python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
           python valcea-clar/scripts/discovery_snapshot_material.py --self-test
           python local-news-os/core/discover_primary_source_facts_fast.py --self-test
           python local-news-os/core/discovery_health.py --self-test
@@ -79,6 +80,9 @@ jobs:
           print(f"new_story_count={len(d['new_story_ids'])}")
           PY
 
+      - name: Reconcile durable published-story archive
+        run: python valcea-clar/scripts/repair_continuous_frontpage.py --archive-only
+
       - name: Explain no-publication result
         if: steps.decision.outputs.changed != 'true'
         run: |
@@ -93,6 +97,7 @@ jobs:
           cp valcea-clar/editorial/news_discovery_state.json /tmp/valcea-news-discovery-state.json
           cp valcea-clar/editorial/auto_facts.json /tmp/valcea-auto-facts.json
           cp valcea-clar/site/newsroom_decision.json /tmp/valcea-newsroom-decision.json
+          cp valcea-clar/site/story_archive.json /tmp/valcea-story-archive.json
 
           git config user.name 'vâlcea-clar-live-newsroom[bot]'
           git config user.email 'valcea-clar-live-newsroom@users.noreply.github.com'
@@ -103,6 +108,7 @@ jobs:
             git show origin/main:valcea-clar/editorial/news_discovery_state.json > /tmp/valcea-news-discovery-previous.json 2>/dev/null || printf '{}\n' > /tmp/valcea-news-discovery-previous.json
             git show origin/main:valcea-clar/editorial/auto_facts.json > /tmp/valcea-auto-facts-previous.json 2>/dev/null || printf '{}\n' > /tmp/valcea-auto-facts-previous.json
             git show origin/main:valcea-clar/site/newsroom_decision.json > /tmp/valcea-newsroom-decision-previous.json 2>/dev/null || printf '{}\n' > /tmp/valcea-newsroom-decision-previous.json
+            git show origin/main:valcea-clar/site/story_archive.json > /tmp/valcea-story-archive-previous.json 2>/dev/null || printf '{}\n' > /tmp/valcea-story-archive-previous.json
 
             health_changed=false
             if python local-news-os/core/discovery_health.py \
@@ -136,7 +142,12 @@ jobs:
               fi
             fi
 
-            if [ "$health_changed" != true ] && [ "$snapshot_changed" != true ]; then
+            archive_changed=false
+            if ! cmp -s /tmp/valcea-story-archive.json /tmp/valcea-story-archive-previous.json; then
+              archive_changed=true
+            fi
+
+            if [ "$health_changed" != true ] && [ "$snapshot_changed" != true ] && [ "$archive_changed" != true ]; then
               echo 'No material discovery, candidate, or editorial-decision change.'
               exit 0
             fi
@@ -146,10 +157,12 @@ jobs:
             cp /tmp/valcea-news-discovery-state.json valcea-clar/editorial/news_discovery_state.json
             cp /tmp/valcea-auto-facts.json valcea-clar/editorial/auto_facts.json
             cp /tmp/valcea-newsroom-decision.json valcea-clar/site/newsroom_decision.json
+            cp /tmp/valcea-story-archive.json valcea-clar/site/story_archive.json
             git add \
               valcea-clar/editorial/news_discovery_state.json \
               valcea-clar/editorial/auto_facts.json \
-              valcea-clar/site/newsroom_decision.json
+              valcea-clar/site/newsroom_decision.json \
+              valcea-clar/site/story_archive.json
             if git diff --cached --quiet; then
               echo 'Material discovery snapshot already present on main.'
               exit 0
@@ -306,6 +319,7 @@ jobs:
             valcea-clar/site/newsroom_decision.json
             valcea-clar/site/newsroom_state.json
             valcea-clar/site/story_publication_event.json
+            valcea-clar/site/story_archive.json
             valcea-clar/site/runtime
             valcea-clar/state/source_health.json
             valcea-clar/ops/resolution_tasks
@@ -345,6 +359,7 @@ jobs:
               valcea-clar/site/newsroom_decision.json \
               valcea-clar/site/newsroom_state.json \
               valcea-clar/site/story_publication_event.json \
+              valcea-clar/site/story_archive.json \
               valcea-clar/site/runtime \
               valcea-clar/state/source_health.json \
               valcea-clar/ops/resolution_tasks || true

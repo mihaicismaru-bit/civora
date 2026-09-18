@@ -250,7 +250,16 @@ def load_editorial_integrity_stats() -> dict:
 def decide(now: datetime) -> dict:
     registry, auto_count = edition_engine.merged_registry()
     slot = edition_engine.choose_slot(now, "auto")
-    eligible = edition_engine.eligible_facts(registry, now, slot)
+    # Slot membership is a first-publication gate only. Once a story has
+    # entered a publishable edition, retain it in the canonical current set
+    # while every evidence/status/hold/validity gate still passes.
+    retained_ids = edition_engine.previously_published_ids()
+    eligible = edition_engine.eligible_facts(
+        registry,
+        now,
+        slot,
+        retained_ids=retained_ids,
+    )
 
     publishable: list[dict] = []
     rejected: list[dict] = []
@@ -285,6 +294,7 @@ def decide(now: datetime) -> dict:
         "new_story_ids": new_ids,
         "fingerprint": fingerprint,
         "auto_fact_registry_count": auto_count,
+        "retained_published_story_count": len(retained_ids),
         "editorial_writer": writer_stats,
         "editorial_integrity": integrity_stats,
         "rejected_candidate_count": len(rejected),
@@ -304,6 +314,7 @@ def decide(now: datetime) -> dict:
             "durable_temporal_language_contract": TEMPORAL_CONTRACT,
             "relative_time_words_in_durable_story_copy": False,
             "published_state_requires_canonical_route": True,
+            "published_story_retention_until_ineligible": True,
         },
     }
 
