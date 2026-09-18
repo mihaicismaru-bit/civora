@@ -1,10 +1,12 @@
 import sys
 import unittest
+from datetime import date
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
+from eta_shadow_lane import adjudicate_eta_signal, verify_eta_signals
 from source_signal import normalize_canonical_candidate
 
 
@@ -48,6 +50,84 @@ class SourceSignalBoundaryTest(unittest.TestCase):
         }
         with self.assertRaises(ValueError):
             normalize_canonical_candidate("unknown_source", row)
+
+
+class EtaShadowSignalGateTest(unittest.TestCase):
+    @staticmethod
+    def signal(**overrides):
+        row = {
+            "signal_id": "eta-1",
+            "article_url": "https://eta-bus.ro/comunicate/modificare-traseu",
+            "title": "Modificare temporară traseu",
+            "classification": "SCHEDULE_CHANGE",
+            "effective_start": "2026-09-18",
+            "effective_end": "2026-09-20",
+            "effective_time": "08:00",
+            "cms_published_at": "2026-09-17",
+            "cms_timestamp_semantics": "EXPLICIT_VISIBLE_CMS_DATE",
+            "evidence": {"content_sha256": "a" * 64, "source_url": "https://eta-bus.ro/comunicate/modificare-traseu"},
+            "visual_candidate": {
+                "source_url": "https://eta-bus.ro/images/notice.jpg",
+                "provenance_url": "https://eta-bus.ro/comunicate/modificare-traseu",
+                "rights_status": "UNKNOWN_REUSE_REQUIRES_EDITORIAL_CLEARANCE",
+                "public_reuse_allowed": False,
+            },
+            "boundaries": {"publication_authority": "NONE", "live_status_claim_allowed": False},
+        }
+        row.update(overrides)
+        return row
+
+    def test_explicit_active_window_crosses_only_material_signal_boundary(self):
+        result = adjudicate_eta_signal(self.signal(), as_of=date(2026, 9, 18))
+        self.assertEqual(result["state"], "MATERIAL_SIGNAL_SHADOW")
+        self.assertEqual(result["currentness"], "ACTIVE_EXPLICIT_WINDOW")
+        self.assertEqual(result["photo_truth_status"], "BLOCKED_UNCLEARED_SOURCE_IMAGE")
+        self.assertFalse(result["visual_candidate_promoted"])
+        self.assertFalse(result["fact_kernel_promotion_allowed"])
+        self.assertFalse(result["writer_allowed"])
+        self.assertFalse(result["social_publish_allowed"])
+
+    def test_expired_explicit_window_is_no_story(self):
+        result = adjudicate_eta_signal(
+            self.signal(effective_start="2026-09-10", effective_end="2026-09-12"),
+            as_of=date(2026, 9, 18),
+        )
+        self.assertEqual(result["state"], "NO_STORY")
+        self.assertEqual(result["reason"], "explicit_effective_window_expired")
+
+    def test_old_open_ended_notice_blocks_live_inference(self):
+        result = adjudicate_eta_signal(
+            self.signal(effective_start="2026-08-01", effective_end=None),
+            as_of=date(2026, 9, 18),
+        )
+        self.assertEqual(result["state"], "BLOCKED")
+        self.assertEqual(result["reason"], "open_ended_operational_state_requires_fresh_reverification")
+        self.assertEqual(result["currentness"], "UNPROVEN")
+
+    def test_passenger_impact_without_effective_start_blocks(self):
+        result = adjudicate_eta_signal(self.signal(effective_start=None, effective_end=None), as_of=date(2026, 9, 18))
+        self.assertEqual(result["state"], "BLOCKED")
+        self.assertEqual(result["reason"], "passenger_impact_without_explicit_effective_start")
+
+    def test_hold_notice_terminates_no_story(self):
+        result = adjudicate_eta_signal(self.signal(classification="HOLD"), as_of=date(2026, 9, 18))
+        self.assertEqual(result["state"], "NO_STORY")
+
+    def test_report_never_promotes_fact_kernel_or_writer(self):
+        report = verify_eta_signals(
+            [
+                self.signal(),
+                self.signal(signal_id="eta-2", classification="HOLD"),
+                self.signal(signal_id="eta-3", effective_start="2026-08-01", effective_end=None),
+            ],
+            as_of=date(2026, 9, 18),
+        )
+        self.assertEqual(report["material_signal_shadow_count"], 1)
+        self.assertEqual(report["no_story_count"], 1)
+        self.assertEqual(report["blocked_count"], 1)
+        self.assertFalse(report["fact_kernel_promotion_allowed"])
+        self.assertFalse(report["writer_allowed"])
+        self.assertFalse(report["acceptance_ready"])
 
 
 if __name__ == "__main__":
