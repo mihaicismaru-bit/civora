@@ -116,7 +116,7 @@ def verify_eta_signals(signals: list[dict[str, Any]], *, as_of: date | None = No
     current_date = as_of or date.today()
     rows = [adjudicate_eta_signal(signal, as_of=current_date) for signal in signals if isinstance(signal, dict)]
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "ETA_CURRENT_MATERIAL_SIGNAL_SHADOW",
         "source_kind": "eta",
         "publication_authority": "NONE",
@@ -150,9 +150,40 @@ def _load_eta_adapter():
     return module
 
 
+def _scope_safe_classify_notice(adapter: Any, title: str, text: str) -> tuple[str, list[str]]:
+    """Protect ETA article classification from site-wide footer/archive contamination.
+
+    The legacy parser exposes all visible page text. A detail page can therefore contain
+    links/titles for unrelated sales/procurement notices in its footer. Those tokens may
+    never override passenger-impact evidence from the selected notice. Irrelevant classes
+    are authoritative only when present in the notice title; passenger-impact terms are
+    then evaluated against the detail text.
+    """
+    title_fold = adapter.fold(title)
+    combined = adapter.fold(f"{title} {text}")
+    if any(adapter._has_hint(title_fold, hint) for hint in adapter.IRRELEVANT_HINTS):
+        return "HOLD", ["NON_PASSENGER_OPERATIONAL_NOTICE"]
+
+    if any(adapter._has_hint(combined, hint) for hint in adapter.FARE_ACCESS_HINTS):
+        return "FARE_OR_ACCESS_CHANGE", ["FARE_OR_PASSENGER_ACCESS_TERMS"]
+
+    has_schedule = any(adapter._has_hint(combined, hint) for hint in adapter.SCHEDULE_HINTS)
+    has_change = any(adapter._has_hint(combined, hint) for hint in adapter.CHANGE_HINTS)
+    if has_schedule and has_change:
+        return "SCHEDULE_CHANGE", ["SCHEDULE_TERMS", "CHANGE_TERMS"]
+    if has_change or any(adapter._has_hint(combined, hint) for hint in adapter.SERVICE_HINTS):
+        return "SERVICE_ALERT", ["OPERATIONAL_SERVICE_CHANGE_OR_DEGRADATION"]
+    return "HOLD", ["NO_SUPPORTED_PASSENGER_IMPACT_CLASS"]
+
+
 def _live_signals(limit: int) -> list[dict[str, Any]]:
     adapter = _load_eta_adapter()
-    return list(adapter.discover_and_enrich(limit=limit))
+    legacy_classifier = adapter.classify_notice
+    adapter.classify_notice = lambda title, text: _scope_safe_classify_notice(adapter, title, text)
+    try:
+        return list(adapter.discover_and_enrich(limit=limit))
+    finally:
+        adapter.classify_notice = legacy_classifier
 
 
 def main() -> int:
@@ -174,7 +205,7 @@ def main() -> int:
         result = verify_eta_signals(signals, as_of=current_date)
     except Exception as exc:
         result = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "mode": "ETA_CURRENT_MATERIAL_SIGNAL_SHADOW",
             "source_kind": "eta",
             "publication_authority": "NONE",
