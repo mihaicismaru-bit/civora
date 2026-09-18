@@ -35,6 +35,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_embedded_content",
                 "isj_field_evidence",
                 "isj_context_documents",
+                "isj_calendar_field_evidence",
                 "photo_truth",
                 "shadow_site_package",
             ],
@@ -87,6 +88,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         content = by_name["isj_embedded_content"]
         fields = by_name["isj_field_evidence"]
         context_docs = by_name["isj_context_documents"]
+        calendar_fields = by_name["isj_calendar_field_evidence"]
         self.assertIsNotNone(isj.output)
         self.assertIsNotNone(detail.output)
         self.assertIn("--input", detail.argv)
@@ -116,6 +118,11 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn("--year", context_docs.argv)
         self.assertIn("2026", context_docs.argv)
         self.assertIn("--live", context_docs.argv)
+        self.assertIn("--context", calendar_fields.argv)
+        self.assertIn(str(context_docs.output), calendar_fields.argv)
+        self.assertIn("--year", calendar_fields.argv)
+        self.assertIn("2026", calendar_fields.argv)
+        self.assertNotIn("--live", calendar_fields.argv)
         names = [stage.name for stage in plan]
         self.assertLess(names.index("isj"), names.index("isj_detail"))
         self.assertLess(names.index("isj_detail"), names.index("isj_materiality"))
@@ -124,7 +131,8 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertLess(names.index("isj_embedded_target"), names.index("isj_embedded_content"))
         self.assertLess(names.index("isj_embedded_content"), names.index("isj_field_evidence"))
         self.assertLess(names.index("isj_field_evidence"), names.index("isj_context_documents"))
-        self.assertLess(names.index("isj_context_documents"), names.index("photo_truth"))
+        self.assertLess(names.index("isj_context_documents"), names.index("isj_calendar_field_evidence"))
+        self.assertLess(names.index("isj_calendar_field_evidence"), names.index("photo_truth"))
 
 
 if __name__ == "__main__":
