@@ -33,6 +33,10 @@ def validate(base: Path, repo: Path) -> None:
     isj_detail = load(base / "valcea-core-v2-isj-detail-shadow.json")
     isj_materiality = load(base / "valcea-core-v2-isj-materiality-shadow.json")
     isj_embedded = load(base / "valcea-core-v2-isj-embedded-notice-shadow.json")
+    isj_fact_kernel = load(base / "valcea-core-v2-isj-fact-kernel-shadow.json")
+    isj_fact_integrity = load(base / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json")
+    isj_article = load(base / "valcea-core-v2-isj-article-shadow.json")
+    isj_article_integrity = load(base / "valcea-core-v2-isj-article-integrity-shadow.json")
     photo = load(base / "valcea-core-v2-photo-truth.json")
     shadow_site = load(base / "valcea-core-v2-shadow-site-package.json")
     ledger = load(base / "valcea-core-v2-shadow-candidates.json")
@@ -245,6 +249,72 @@ def validate(base: Path, repo: Path) -> None:
             assert row.get("parent_identity_reverified") is True
             assert row.get("embedded_file_labels")
             assert row.get("explicit_current_material_catalog") is True
+
+    # Late ISJ truth must be validated from the actual artifacts, not only from
+    # the orchestrator summary or a workflow-local assertion block.
+    for label, doc in (
+        ("isj_fact_kernel", isj_fact_kernel),
+        ("isj_fact_kernel_integrity", isj_fact_integrity),
+        ("isj_article", isj_article),
+        ("isj_article_integrity", isj_article_integrity),
+    ):
+        require_none_authority(doc, label)
+        assert doc.get("production_writer_ready") is False
+        assert doc.get("site_publish_allowed") is False
+        assert doc.get("social_publish_allowed") is False
+
+    assert isj_fact_kernel.get("writer_allowed") is False
+    assert isj_fact_kernel.get("state") == "FACT_KERNEL_VERIFIED_SHADOW"
+    assert int(isj_fact_kernel.get("fact_kernel_count") or 0) == 1
+    assert int(isj_fact_kernel.get("fabricated_claim_count") or 0) == 0
+    isj_kernels = isj_fact_kernel.get("kernels") or []
+    assert len(isj_kernels) == 1 and isinstance(isj_kernels[0], dict)
+    isj_kernel_row = isj_kernels[0]
+    isj_kernel = isj_kernel_row.get("fact_kernel") or {}
+    assert isj_kernel_row.get("integrity_status") == "PENDING_SEPARATE_GATE"
+    assert "writer" not in isj_kernel_row and "article" not in isj_kernel_row
+    assert len(isj_kernel.get("claims") or []) == 2
+    assert len(set(isj_kernel.get("evidence_ids") or [])) == 4
+    assert isj_kernel.get("source_url") == "https://www.isjvalcea.ro/management/concurs-directori-2026"
+
+    assert isj_fact_integrity.get("status") == "PASS_SHADOW"
+    assert isj_fact_integrity.get("fact_kernel_integrity_verified") is True
+    assert isj_fact_integrity.get("writer_allowed") is False
+    assert isj_fact_integrity.get("writer_gate_status") == "ELIGIBLE_FOR_SEPARATE_SHADOW_WRITER_IMPLEMENTATION"
+    assert int(isj_fact_integrity.get("verified_claim_count") or 0) == 2
+    assert int(isj_fact_integrity.get("fabricated_claim_count") or 0) == 0
+
+    assert isj_article.get("state") == "WRITTEN_SHADOW_PENDING_ARTICLE_INTEGRITY"
+    assert isj_article.get("shadow_writer_executed") is True
+    assert int(isj_article.get("article_count") or 0) == 1
+    assert int(isj_article.get("fabricated_claim_count") or 0) == 0
+    isj_articles = isj_article.get("articles") or []
+    assert len(isj_articles) == 1 and isinstance(isj_articles[0], dict)
+    isj_article_row = isj_articles[0]
+    assert isj_article_row.get("fact_kernel") == isj_kernel
+    assert isj_article_row.get("state") == "WRITTEN_SHADOW_PENDING_ARTICLE_INTEGRITY"
+    assert isj_article_row.get("publication_authority") == "NONE"
+    assert isj_article_row.get("production_writer_ready") is False
+    assert isj_article_row.get("site_publish_allowed") is False
+    assert isj_article_row.get("social_publish_allowed") is False
+    isj_package = isj_article_row.get("article_package") or {}
+    assert isj_package.get("article_id") == "isj-directori-2026-conducere-scoli"
+    assert isj_package.get("writer_id") == "isj_shadow_editorial_v1"
+    assert len(isj_package.get("claims") or []) == len(isj_kernel.get("claims") or [])
+    excluded_fields = set(isj_package.get("excluded_unverified_or_non_normalized_fields") or [])
+    assert {"registration_deadline", "interview_window_text", "appointment_decision_deadline_text"}.issubset(excluded_fields)
+
+    assert isj_article_integrity.get("status") == "PASS_SHADOW"
+    assert isj_article_integrity.get("article_truth_state") == "VERIFIED_WRITTEN_SHADOW"
+    assert isj_article_integrity.get("article_integrity_verified") is True
+    assert isj_article_integrity.get("photo_gate_status") == "ELIGIBLE_FOR_SEPARATE_PHOTO_TRUTH_GATE"
+    assert int(isj_article_integrity.get("verified_article_count") or 0) == 1
+    assert int(isj_article_integrity.get("verified_claim_count") or 0) == 2
+    assert int(isj_article_integrity.get("fabricated_claim_count") or 0) == 0
+    verified_isj_candidates = isj_article_integrity.get("verified_candidates") or []
+    assert len(verified_isj_candidates) == 1
+    assert verified_isj_candidates[0].get("article_id") == isj_package.get("article_id")
+    assert verified_isj_candidates[0].get("source_url") == isj_kernel.get("source_url")
 
     require_none_authority(photo, "photo_truth")
     assert photo.get("site_publish_allowed") is False
