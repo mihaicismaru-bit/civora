@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.7",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN6-CJ-ROAD-SOURCE-BOUNDARY-VALIDATED",
+  "schema_version": "1.8",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN7-MUNICIPAL-MATERIALITY-AND-FACT-KERNEL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -9,7 +9,7 @@
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "base_merge_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
   "fresh_reread": {
-    "main_observed_sha": "ce07fe85fed7f52596d8c3180e68c2217aade466",
+    "main_observed_sha": "da833a94e4e336785012d1e7737ad5630333b34d",
     "main_core_v2_overlap": false,
     "main_note": "Fresh main continues legacy/runtime bot writes outside Core v2. Core v2 remains isolated; no legacy workflow, main, deploy, public projection or Meta write was triggered by this rebuild.",
     "legacy_public_projection": {
@@ -24,13 +24,13 @@
     }
   },
   "latest_validated_core_feature_head": {
-    "sha": "e23ffba4093f3b8b8d403ebf1fb70a2b1dc82e78",
-    "workflow_run_id": 35340967125,
-    "workflow_run_number": 140,
+    "sha": "dec18b1ce074b89d747a3055f77350f5f6697f19",
+    "workflow_run_id": 35343633405,
+    "workflow_run_number": 156,
     "event": "push",
     "conclusion": "success",
-    "artifact_id": 10545196772,
-    "artifact_sha256": "b926debd135bd72e8e3507f7c2d1d2957c31f02b179de29cd72e655baa877890",
+    "artifact_id": 10546261881,
+    "artifact_sha256": "f3792a08cf5e0fce1d8847aa526eaea44d8fda8d1440949fec65b69363ed2385",
     "permissions": "contents:read",
     "manual_dispatch": false,
     "production_write_authority": false
@@ -45,10 +45,14 @@
     "publication/source visible date and event time remain separate; all three currently promoted IPJ/ISU shadow rows keep event_time UNKNOWN because no explicit event-role date evidence proves otherwise",
     "Râmnicu Vâlcea municipal register discovery is deterministic on the bounded first-party 2026 index: 343 references parse successfully and all 343 remain NO_STORY at metadata-only stage",
     "bounded municipal document-body collector independently revalidates same-host HTTPS surface, 2026 decision identity and SHA-256 evidence boundaries after the reused legacy resolver",
-    "latest official municipal adopted date 2026-09-16 yields three selected HCL documents; all three are DOCUMENT_EVIDENCE_READY with zero fabricated claims, but evidence remains UNADJUDICATED and cannot feed a FactKernel or writer yet",
-    "new CJ Vâlcea road shadow lane is implemented with seven fail-closed contract tests; official road signals can only terminate NO_STORY or BLOCKED at this stage and cannot create a FactKernel/article",
+    "latest official municipal adopted date 2026-09-16 yields three selected HCL documents; all three are DOCUMENT_EVIDENCE_READY with zero fabricated claims",
+    "separate municipal materiality adjudicator is implemented fail-closed: titles alone never prove materiality, every candidate requires first-party evidence IDs, and output cannot feed a writer or publisher",
+    "read-only replay of the three 2026-09-16 HCL document bodies yields three bounded materiality candidates: HCL 343 local public finance, HCL 344 local education access, HCL 345 regulated local authorization; no article or production authority is created",
+    "separate municipal FactKernel shadow composer is implemented with contract validation, exact claim/evidence binding, explicit adoption-date versus implementation-time language, and all writer/site/social gates closed",
+    "shadow CI correctly caught a legal-entity extraction defect that truncated dotted company names; the extractor was corrected and natural push run 156 validated the repair",
+    "new CJ Vâlcea road shadow lane remains fail-closed; official road signals can only terminate NO_STORY or BLOCKED at this stage and cannot create a FactKernel/article",
     "CJ road closures/restrictions explicitly require a fresh current-operational-status recheck; fresh works/update notices require separate material-fact extraction; stale records terminate NO_STORY",
-    "natural Core v2 push run 140 validated compile, all contract tests, live APAVIL/IPJ/ISU/municipal lanes, CJ lane isolation, independent external replay and evidence artifact under contents:read only"
+    "natural Core v2 push run 156 validated compile, all truth-bound contract tests including municipal materiality and municipal FactKernel tests, live APAVIL/IPJ/ISU/municipal evidence lanes, CJ lane isolation, independent external replay and evidence artifact under contents:read only"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -79,8 +83,8 @@
     "acceptance_ready": false
   },
   "public_safety_live_shadow_truth": {
-    "workflow_run_id": 35340967125,
-    "artifact_id": 10545196772,
+    "workflow_run_id": 35343633405,
+    "artifact_id": 10546261881,
     "ipj": {
       "detail_count": 8,
       "verified_written_shadow_count": 1,
@@ -119,12 +123,37 @@
       "row_urls_resolved": 3,
       "document_evidence_ready_count": 3,
       "blocked_count": 0,
+      "fabricated_claim_count": 0
+    },
+    "materiality_adjudication": {
+      "mode": "MUNICIPAL_MATERIALITY_SHADOW",
+      "materiality_candidate_count": 3,
+      "no_story_count": 0,
+      "blocked_count": 0,
       "fabricated_claim_count": 0,
+      "candidates": [
+        {"decision_number": 343, "category": "LOCAL_PUBLIC_FINANCE", "consequence": "2026 internal-credit budget rectification and investment-financing redistribution"},
+        {"decision_number": 344, "category": "LOCAL_EDUCATION_ACCESS", "consequence": "2026-2027 local school-network change adding Școala primară Licurici"},
+        {"decision_number": 345, "category": "REGULATED_LOCAL_AUTHORIZATION", "consequence": "annual slot-machine operating authorization for GEAR SLOT S.R.L. at an identified Râmnicu Vâlcea workpoint with a document-stated local fee"}
+      ],
       "fact_kernel_promotion_allowed": false,
-      "writer_allowed": false
+      "writer_allowed": false,
+      "live_ci_artifact_wiring": false
+    },
+    "fact_kernel_composer": {
+      "mode": "MUNICIPAL_FACT_KERNEL_SHADOW",
+      "implementation_status": "CONTRACT_TESTED",
+      "validated_workflow_run_id": 35343633405,
+      "claims_require_evidence_ids": true,
+      "decision_date_is_not_implementation_time": true,
+      "fabricated_claim_count_in_tests": 0,
+      "writer_allowed": false,
+      "site_publish_allowed": false,
+      "social_publish_allowed": false,
+      "live_ci_artifact_wiring": false
     },
     "publication_authority": "NONE",
-    "safe_rule": "Official HCL document text is evidence, not a story. No municipal FactKernel or article until a separate material-fact adjudicator proves a concrete public consequence and binds every claim to document evidence."
+    "safe_rule": "Official HCL document text is evidence, not a story. Materiality and shadow FactKernel composition are now separate evidence-bound gates; neither authorizes writing or publication."
   },
   "cj_road_live_shadow_truth": {
     "status": "BLOCKED_SOURCE_UNAVAILABLE",
@@ -174,8 +203,8 @@
       "reason": "Read-only Graph requests for replayable Facebook IDs return OAuthException code 10 requiring pages_read_engagement or Page Public Content Access. Internal post IDs are not delivery proof."
     },
     {
-      "gate": "municipal_material_fact_adjudication",
-      "reason": "Three latest official HCL document bodies are identity-verified, but their excerpts are deliberately UNADJUDICATED. Raw operative text cannot become a story until a separate materiality/public-consequence gate exists."
+      "gate": "municipal_writer_gate",
+      "reason": "Three HCLs now have bounded materiality candidates and a contract-tested shadow FactKernel composer, but the materiality/kernel outputs are not yet wired as first-class live CI artifacts and no independent full-article writer/integrity gate has been validated for municipal stories."
     },
     {
       "gate": "cj_road_source_tls",
@@ -199,7 +228,8 @@
     }
   ],
   "next": [
-    "implement a separate fail-closed municipal material-fact adjudicator over DOCUMENT_EVIDENCE_READY rows; distinguish legally operative text from a reader-relevant material consequence and do not grant publication authority",
+    "wire municipal materiality adjudication and municipal FactKernel composition into the read-only shadow workflow immediately after municipal document evidence collection; persist both as first-class evidence artifacts and assert publication_authority=NONE, writer_allowed=false and fabricated_claim_count=0",
+    "build the separate municipal full-article composer and claim-integrity gate only after live FactKernel artifact wiring is validated; article language must preserve decision-versus-implementation uncertainty",
     "bind truthful real-photo candidates to the three currently verified IPJ/ISU shadow stories only when exact/direct/archive-context relevance, rights basis, disclosure and external image readback all pass",
     "continue the bounded pilot with ETA or ISJ while CJ Vâlcea remains TLS-blocked; do not weaken TLS verification or substitute a non-first-party mirror",
     "revisit CJ only through a verifiable first-party transport/trust-chain correction; current-status road claims must remain blocked until rechecked",
@@ -214,6 +244,10 @@
     "public_safety_structured_lane": "valcea-clar/core_v2/public_safety_full_shadow_lane.py",
     "municipal_reference_lane": "valcea-clar/core_v2/municipal_reference_shadow_lane.py",
     "municipal_document_lane": "valcea-clar/core_v2/municipal_document_shadow_lane.py",
+    "municipal_materiality_lane": "valcea-clar/core_v2/municipal_materiality_shadow_lane.py",
+    "municipal_fact_kernel_lane": "valcea-clar/core_v2/municipal_fact_kernel_shadow_lane.py",
+    "municipal_materiality_tests": "valcea-clar/tests/test_core_v2_municipal_materiality_shadow_lane.py",
+    "municipal_fact_kernel_tests": "valcea-clar/tests/test_core_v2_municipal_fact_kernel_shadow_lane.py",
     "cj_road_lane": "valcea-clar/core_v2/cj_road_shadow_lane.py",
     "cj_road_tests": "valcea-clar/tests/test_core_v2_cj_road_shadow_lane.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
