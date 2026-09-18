@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MySMIS — pilot CYBERSTEP</title>
+  <link rel="stylesheet" href="create-inspector.css">
+</head>
+<body>
+  <main>
+    <h1>Pilot CYBERSTEP · 0.2.0</h1>
+    <p>Creare ciornă pentru CPP, pe apelul PEO/1160. Deschide formularul „Adaugă proiect” cu solicitantul și apelul selectate.</p>
+    <button id="prepare" type="button">Pregătește CYBERSTEP</button>
+    <p><output id="writer-status" aria-live="polite">Verific starea ultimei încercări…</output></p>
+    <pre id="writer-preview" hidden></pre>
+    <label><input id="duplicate-check" type="checkbox" disabled> Am verificat în lista completă de proiecte că CYBERSTEP nu există deja pentru CPP și acest apel.</label>
+    <p><button id="create" type="button" disabled>Creează ciorna CYBERSTEP</button></p>
+    <button id="readback" type="button" disabled>Citește rezultatul din lista de proiecte</button>
+    <p><button id="writer-download" type="button" disabled>Descarcă rezultatul testului</button></p>
+    <p class="note">Pregătirea poate completa doar titlul. Crearea apasă „Adaugă” o singură dată. Nu depune și nu semnează cererea de finanțare. După încercare nu reinstala extensia și nu șterge datele ei: blocarea repetării este păstrată local în această instalare.</p>
+    <hr>
+    <h2>Inspectarea formularului</h2>
+    <p>Deschide formularul de creare în fila activă, apoi citește structura câmpurilor.</p>
+    <button id="inspect" type="button">Citește formularul din fila activă</button>
+    <p><output id="status" aria-live="polite">Pregătit pentru citirea structurii.</output></p>
+    <pre id="preview" hidden></pre>
+    <button id="download" type="button" disabled>Descarcă structura pentru verificare</button>
+    <p class="note">Fișierul conține etichetele și identificatorii câmpurilor, fără valorile completate, parole sau lista participanților. Nu transmite nimic automat.</p>
+  </main>
+  <script type="module" src="create-inspector.js"></script>
+  <script type="module" src="cyberstep-popup.mjs"></script>
+</body>
+</html>

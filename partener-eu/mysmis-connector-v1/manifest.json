@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "MySMIS Connector v1",
-  "version": "0.1.0",
-  "description": "Read-only MySMIS artifact inventory and download observation.",
+  "version": "0.2.0",
+  "description": "MySMIS read-only inventory plus local, bounded CYBERSTEP draft-creation pilot.",
   "permissions": [
     "alarms",
     "downloads",
@@ -25,13 +25,20 @@
         "https://mysmis2021.gov.ro/*",
         "https://*.mysmis2021.gov.ro/*"
       ],
-      "js": ["extension/content-script.js"],
+      "js": [
+        "extension/content-script.js"
+      ],
       "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["core/*.mjs", "extension/page-snapshot.mjs"],
+      "resources": [
+        "core/*.mjs",
+        "extension/page-snapshot.mjs",
+        "extension/create-form-snapshot.mjs",
+        "extension/cyberstep-writer.mjs"
+      ],
       "matches": [
         "https://mysmis2021.gov.ro/*",
         "https://*.mysmis2021.gov.ro/*"
@@ -39,6 +46,7 @@
     }
   ],
   "action": {
-    "default_title": "Inventory MySMIS artifacts (read-only)"
+    "default_title": "Pilot CYBERSTEP — creare ciornă",
+    "default_popup": "extension/create-inspector.html"
   }
 }
