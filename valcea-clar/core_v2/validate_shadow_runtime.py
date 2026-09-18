@@ -30,7 +30,11 @@ def validate(base: Path, repo: Path) -> None:
     cj_road = load(base / "valcea-core-v2-cj-road-shadow.json")
     eta = load(base / "valcea-core-v2-eta-shadow.json")
     isj = load(base / "valcea-core-v2-isj-shadow.json")
+    isj_detail = load(base / "valcea-core-v2-isj-detail-shadow.json")
+    isj_materiality = load(base / "valcea-core-v2-isj-materiality-shadow.json")
+    isj_embedded = load(base / "valcea-core-v2-isj-embedded-notice-shadow.json")
     photo = load(base / "valcea-core-v2-photo-truth.json")
+    shadow_site = load(base / "valcea-core-v2-shadow-site-package.json")
     ledger = load(base / "valcea-core-v2-shadow-candidates.json")
     readback = load(base / "valcea-core-v2-site-readback.json")
     visual = load(base / "valcea-core-v2-visual-readback.json")
@@ -197,6 +201,51 @@ def validate(base: Path, repo: Path) -> None:
             assert row.get("document_body_required_for_fact_kernel") is True
             assert row.get("label_date_is_event_time") is False
 
+    require_none_authority(isj_detail, "isj_detail")
+    assert isj_detail.get("fact_kernel_promotion_allowed") is False
+    assert isj_detail.get("writer_allowed") is False
+    for row in isj_detail.get("rows") or []:
+        assert row.get("state") in {"DETAIL_EVIDENCE_SHADOW", "BLOCKED"}
+        assert row.get("publication_authority") == "NONE"
+        assert row.get("fact_kernel_promotion_allowed") is False
+        assert row.get("writer_allowed") is False
+        assert row.get("sensitive_result_projection_allowed") is False
+        assert "fact_kernel" not in row and "article_package" not in row
+
+    require_none_authority(isj_materiality, "isj_materiality")
+    assert isj_materiality.get("fact_kernel_promotion_allowed") is False
+    assert isj_materiality.get("writer_allowed") is False
+    assert isj_materiality.get("production_writer_ready") is False
+    for row in isj_materiality.get("rows") or []:
+        assert row.get("state") in {"MATERIAL_DETAIL_CANDIDATE_SHADOW", "NO_STORY", "BLOCKED"}
+        assert row.get("publication_authority") == "NONE"
+        assert row.get("fact_kernel_promotion_allowed") is False
+        assert row.get("writer_allowed") is False
+        assert row.get("sensitive_result_projection_allowed") is False
+        assert "fact_kernel" not in row and "article_package" not in row
+
+    require_none_authority(isj_embedded, "isj_embedded_notice")
+    assert isj_embedded.get("fact_kernel_promotion_allowed") is False
+    assert isj_embedded.get("writer_allowed") is False
+    assert isj_embedded.get("site_publish_allowed") is False
+    assert isj_embedded.get("social_publish_allowed") is False
+    for row in isj_embedded.get("rows") or []:
+        assert row.get("state") in {"EMBEDDED_NOTICE_EVIDENCE_SHADOW", "BLOCKED"}
+        assert row.get("publication_authority") == "NONE"
+        assert row.get("fact_kernel_promotion_allowed") is False
+        assert row.get("writer_allowed") is False
+        assert row.get("sensitive_result_projection_allowed") is False
+        assert row.get("event_time_verified") is not True
+        assert row.get("deadline_verified") is not True
+        assert row.get("vacancy_count_verified") is not True
+        assert row.get("embedded_targets_fetched") is not True
+        assert row.get("embedded_document_content_verified") is not True
+        assert "fact_kernel" not in row and "article_package" not in row
+        if row.get("state") == "EMBEDDED_NOTICE_EVIDENCE_SHADOW":
+            assert row.get("parent_identity_reverified") is True
+            assert row.get("embedded_file_labels")
+            assert row.get("explicit_current_material_catalog") is True
+
     require_none_authority(photo, "photo_truth")
     assert photo.get("site_publish_allowed") is False
     assert photo.get("social_publish_allowed") is False
@@ -207,6 +256,24 @@ def validate(base: Path, repo: Path) -> None:
         if row.get("status") == "VISUAL_CANDIDATE_VERIFIED_SHADOW":
             assert row.get("visual_ready_for_future_site_binding") is True
             assert row.get("article_binding_verified") is False
+        else:
+            assert row.get("reason")
+
+    require_none_authority(shadow_site, "shadow_site_package")
+    assert shadow_site.get("site_publish_allowed") is False
+    assert shadow_site.get("social_publish_allowed") is False
+    assert shadow_site.get("public_article_binding_verified") is False
+    assert shadow_site.get("visual_ready") is False
+    for row in shadow_site.get("rows") or []:
+        assert row.get("status") in {"PACKAGE_IMAGE_BOUND_SHADOW", "BLOCKED"}
+        assert row.get("publication_authority") == "NONE"
+        assert row.get("site_publish_allowed") is False
+        assert row.get("social_publish_allowed") is False
+        assert row.get("public_article_binding_verified") is False
+        assert row.get("visual_ready") is False
+        if row.get("status") == "PACKAGE_IMAGE_BOUND_SHADOW":
+            assert row.get("staged_package_binding_verified") is True
+            assert (row.get("binding") or {}).get("article_image_bound") is True
         else:
             assert row.get("reason")
 
