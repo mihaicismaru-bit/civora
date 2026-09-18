@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.2",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN4-FIRST-LIVE-SOURCE-LANE",
+  "schema_version": "1.3",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN4-APAVIL-LIVE-VERIFIED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -21,12 +21,12 @@
     "note": "Legacy public projection has naturally converged again. The abandoned legacy 48h soak is not restarted; this evidence is observational only while Core v2 remains shadow-only."
   },
   "latest_validated_core_feature_head": {
-    "sha": "f109d287878f6a0e3ce60110d78d5caf0330bb64",
-    "workflow_run_id": 35328375696,
-    "workflow_run_number": 87,
+    "sha": "62fe6339bfaa6a6f47ed007ce86d1bb7ddf7eee7",
+    "workflow_run_id": 35329039510,
+    "workflow_run_number": 93,
     "conclusion": "success",
-    "artifact_id": 10539419019,
-    "artifact_sha256": "1bf2b67b1cf6adfd8558d3d522b6bdb16db2634664613c34f70075dcfec289ef",
+    "artifact_id": 10539829634,
+    "artifact_sha256": "5b82248a0b9104f273a919445956ec961cadf336f647ca067a42cf96a296c2c3",
     "permissions": "contents:read",
     "manual_dispatch": false
   },
@@ -48,8 +48,10 @@
     "Facebook failures classified as Meta read-permission deficiency rather than guessed stale/deleted posts",
     "public visual truth mismatch proven for valcea-apa-canal-contract-152m-20260902",
     "legacy historical replay proven to lack explicit canonical FactKernel and claim-bound article packages",
-    "first source-specific Core v2 source-to-kernel-to-writer shadow lane prepared for APAVIL scheduled outage notices using only explicit first-party index metadata",
-    "APAVIL shadow lane preserves scheduled-versus-current-status distinction and grants no publication authority"
+    "first source-specific Core v2 source-to-kernel-to-writer shadow lane implemented for APAVIL scheduled outage notices using only explicit first-party index metadata",
+    "APAVIL shadow lane preserves scheduled-versus-current-status distinction and grants no publication authority",
+    "APAVIL live shadow lane naturally validated against the official source: 132 source signals produced 132 truthful NO_STORY terminal results and zero fabricated stories",
+    "APAVIL missing-date notices now terminate NO_STORY rather than BLOCKED, matching the rule that a signal without a material fact must not produce filler"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -69,6 +71,22 @@
     "publication_capable_paths": 82,
     "classification_complete": true,
     "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
+  },
+  "apavil_live_shadow_truth": {
+    "workflow_run_id": 35329039510,
+    "source": "https://apavil.ro/?page_id=962",
+    "signal_count": 132,
+    "verified_written_shadow_count": 0,
+    "no_story_count": 132,
+    "blocked_count": 0,
+    "no_story_reasons": {
+      "stale_scheduled_outage": 119,
+      "missing_effective_date": 13
+    },
+    "fabricated_story_count": 0,
+    "publication_authority": "NONE",
+    "acceptance_ready": false,
+    "interpretation": "The live source contained no currently material explicit-date APAVIL notice eligible for a Core v2 story at this snapshot. Zero output is the correct terminal result, not a failure."
   },
   "shadow_replay_truth": {
     "candidate_count": 2,
@@ -104,10 +122,8 @@
     "migration_rule": "Rendered or legacy prose is not reverse-engineered into facts. New Core v2 FactKernel evidence must originate from explicit bounded source evidence and carry evidence IDs."
   },
   "next": [
-    "naturally validate the APAVIL live shadow lane and persist its source snapshot/kernel/writer evidence artifact",
-    "if the APAVIL source is reachable, quantify VERIFIED_WRITTEN_SHADOW versus NO_STORY/BLOCKED results without publishing anything",
-    "extend the same independent evidence-to-kernel pattern to one public-safety lane, beginning with IPJ or ISU, without inheriting legacy non-authorizing detail evidence as publication authority",
-    "bind Core v2 deterministic writer claims to explicit kernel claim indexes and evidence IDs for new pilot material",
+    "implement an independent public-safety evidence-to-kernel-to-writer shadow lane, beginning with IPJ or ISU first-party detail evidence, without treating legacy non-authorizing detail records as publication authority",
+    "require every new public-safety claim to bind to explicit first-party evidence IDs and preserve allegation/procedural epistemic language",
     "increase truthful real-photo coverage only with exact/direct/archive-context relevance plus rights and external article binding",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient; do not infer delivery from internal IDs",
     "evaluate a ten-story acceptance candidate only after ten stories independently satisfy source, kernel, writer, visual, site and social truth gates"
