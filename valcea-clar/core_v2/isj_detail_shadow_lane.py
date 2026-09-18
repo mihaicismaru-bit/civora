@@ -35,7 +35,13 @@ def _load_legacy_detail_module():
 
 def _is_first_party_https(url: str) -> bool:
     parsed = urlsplit(str(url or "").strip())
-    return parsed.scheme == "https" and (parsed.hostname or "").lower() in ALLOWED_HOSTS and not parsed.username and not parsed.password and parsed.port in (None, 443)
+    return (
+        parsed.scheme == "https"
+        and (parsed.hostname or "").lower() in ALLOWED_HOSTS
+        and not parsed.username
+        and not parsed.password
+        and parsed.port in (None, 443)
+    )
 
 
 def _evidence_id(signal_id: str, detail_sha256: str) -> str:
@@ -46,6 +52,7 @@ def _evidence_id(signal_id: str, detail_sha256: str) -> str:
 def verify_isj_details(
     signal_report: dict[str, Any],
     *,
+    allow_network: bool = True,
     fetcher: Callable[[str], tuple[bytes, str, str]] | None = None,
     html_extractor: Callable[[bytes, str], tuple[str | None, str | None, tuple[str, ...]]] | None = None,
 ) -> dict[str, Any]:
@@ -53,7 +60,8 @@ def verify_isj_details(
 
     This is a second-hop evidence gate, not a FactKernel or writer. A successful fetch
     proves bounded first-party bytes and explicit visible text only. External document
-    hosts remain blocked and are never fetched.
+    hosts remain blocked and are never fetched. Network access is explicit so fixture and
+    non-live orchestration cannot accidentally read a source.
     """
     if str(signal_report.get("publication_authority") or "NONE") != "NONE":
         raise ValueError("upstream_publication_boundary_violation")
@@ -63,13 +71,9 @@ def verify_isj_details(
     rows = [row for row in signal_report.get("rows") or [] if isinstance(row, dict)]
     candidates = [row for row in rows if row.get("state") == "MATERIAL_SIGNAL_SHADOW"][:MAX_DETAILS]
 
-    if fetcher is None or html_extractor is None:
-        legacy = _load_legacy_detail_module()
-        fetcher = fetcher or legacy._fetch_detail
-        html_extractor = html_extractor or legacy._extract_html_evidence
-
     details: list[dict[str, Any]] = []
     blocked: list[dict[str, Any]] = []
+    loaders_ready = False
 
     for row in candidates:
         signal_id = str(row.get("signal_id") or "").strip()
@@ -99,6 +103,22 @@ def verify_isj_details(
                 "detail_fetch_attempted": False,
             })
             continue
+        if not allow_network:
+            blocked.append({
+                **base,
+                "state": "BLOCKED",
+                "reason": "network_read_not_enabled",
+                "detail_fetch_attempted": False,
+            })
+            continue
+
+        if not loaders_ready and (fetcher is None or html_extractor is None):
+            legacy = _load_legacy_detail_module()
+            fetcher = fetcher or legacy._fetch_detail
+            html_extractor = html_extractor or legacy._extract_html_evidence
+            loaders_ready = True
+        assert fetcher is not None
+        assert html_extractor is not None
 
         try:
             body, final_url, content_type = fetcher(target)
@@ -141,6 +161,7 @@ def verify_isj_details(
         "source_kind": "isj_valcea",
         "publication_authority": "NONE",
         "acceptance_ready": False,
+        "network_read_enabled": allow_network,
         "material_fact_use": False,
         "fact_kernel_promotion_allowed": False,
         "writer_allowed": False,
@@ -162,12 +183,13 @@ def verify_isj_details(
 def main() -> int:
     parser = argparse.ArgumentParser(description="Resolve bounded first-party ISJ detail evidence in Core v2 shadow mode")
     parser.add_argument("--input", required=True)
+    parser.add_argument("--live", action="store_true", help="Permit bounded read-only fetches from allow-listed first-party ISJ detail URLs")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
     source = json.loads(Path(args.input).read_text(encoding="utf-8"))
     try:
-        result = verify_isj_details(source)
+        result = verify_isj_details(source, allow_network=args.live)
     except Exception as exc:
         result = {
             "schema_version": "1.0",
@@ -175,6 +197,7 @@ def main() -> int:
             "source_kind": "isj_valcea",
             "publication_authority": "NONE",
             "acceptance_ready": False,
+            "network_read_enabled": args.live,
             "material_fact_use": False,
             "fact_kernel_promotion_allowed": False,
             "writer_allowed": False,
