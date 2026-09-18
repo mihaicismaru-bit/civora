@@ -2,19 +2,195 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-18T04:37:38+03:00",
+  "generated_at": "2026-09-18T09:39:54+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-18T04:36:17+03:00",
-  "task_count": 87,
+  "queue_generated_at": "2026-09-18T09:38:32+03:00",
+  "task_count": 89,
   "primary_match_count": 2,
-  "no_match_count": 32,
+  "no_match_count": 34,
   "unrouted_count": 53,
   "target_count": 21,
   "targets_ok": 18,
   "results": [
+    {
+      "signal_id": "edb9686fe46b8cbe29ad0f39",
+      "signal_title": "Sibian stabilit în SUA, impresionat de medicii Spitalului Județean: „M-au preluat într-un moment dificil și m-au tratat cu o atenție deosebită și tehnologie modernă”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/18/sibian-stabilit-in-sua-impresionat-de-medicii-spitalului-judetean-m-au-preluat-intr-un-moment-dificil-si-m-au-tratat-cu-o-atentie-deosebita-si-tehnologie-moderna/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-18T09:25:33+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "81eac8ac51c626bbe698b0d8",
+      "signal_title": "Primăria Sibiu despre gelateria ridicată cu forța pe Bălcescu: A fost singurul proprietar care a refuzat să se conformeze",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/18/primaria-sibiu-despre-gelateria-ridicata-cu-forta-pe-balcescu-a-fost-singurul-proprietar-care-a-refuzat-sa-se-conformeze/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-18T09:08:33+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "18dab9204a9f5bb31d2c0cd8",
+      "signal_title": "Sâmbătă cu ecologizare și teatru pentru copii, la Vaideeni",
+      "signal_url": "https://evenimentvalcean.ro/sambata-cu-ecologizare-si-teatru-pentru-copii-la-vaideeni/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-09-18T09:01:53+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "d3be10c7f8d5764b9e76311c",
+      "signal_title": "Investiții importante la Lăpușata: bani pentru gaze, drumuri și utilaje",
+      "signal_url": "https://evenimentvalcean.ro/investitii-importante-la-lapusata-bani-pentru-gaze-drumuri-si-utilaje/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-18T08:58:31+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 76
+    },
+    {
+      "signal_id": "4567911b51ceba398176dd08",
+      "signal_title": "VIDEO. A dat mai multe spargeri în Vâlcea. Bărbatul prins de primarul din Șirineasa a fost reținut",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/18/video-a-dat-mai-multe-spargeri-in-valcea-barbatul-prins-de-primarul-din-sirineasa-a-fost-retinut/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-18T08:52:03+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "b989fd0b692c4fcd0d488bce",
       "signal_title": "Cine modernizează parcurile din Ocnele Mari. Contracte de peste 6,4 milioane de lei, împărțite în patru loturi",
@@ -498,7 +674,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -669,7 +845,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -849,7 +1025,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1288,19 +1464,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "6c5791f1a03892cf6b45badb",
-      "signal_title": "Monument istoric din centrul Sibiului, cu „degradare accentuată a fațadei și a acoperișului”, scos la vânzare. Ministerul Culturii și CJ îl lasă pe piața liberă",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/16/monument-istoric-din-centrul-sibiului-cu-degradare-accentuata-a-fatadei-si-a-acoperisului-scos-la-vanzare-ministerul-culturii-si-cj-il-lasa-pe-piata-libera/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-16T14:29:32+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 56
-    },
-    {
       "signal_id": "0a614a1e6c78fa13623f501f",
       "signal_title": "Ultima oră o zi in urma Vaideeni, zi de comunitate pe 19 septembrie: ecologizare dimineața și teatru pentru copii",
       "signal_url": "https://www.primplanpress.ro/vaideeni-zi-de-comunitate-pe-19-septembrie-ecologizare-dimineata-si-teatru-pentru-copii/",
@@ -1506,34 +1669,6 @@
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_tier": "T2",
       "signal_published_at": "2026-09-16T10:11:34+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "22214c74d35a22d0be0c7fd7",
-      "signal_title": "Scandal pe Bălcescu, după ce Primăria Sibiu a venit cu o firmă să ridice un stand de înghețată. Proprietar: „Am bunuri de peste 30.000 de euro”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/16/scandal-pe-balcescu-dupa-ce-primaria-sibiu-a-venit-cu-o-firma-sa-ridice-un-stand-de-inghetata-proprietar-am-bunuri-de-peste-30-000-de-euro/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-16T10:04:32+03:00",
       "verification_route_id": "police_public_safety",
       "attempts": [
         {
@@ -1821,19 +1956,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "52cc72662de0bc53c98f9158",
-      "signal_title": "Campanie de sterilizare la Galicea: zeci de animale au beneficiat de intervenții gratuite și încă mai erau locuri",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/15/campanie-de-sterilizare-la-galicea-zeci-de-animale-au-beneficiat-de-interventii-gratuite-si-inca-mai-erau-locuri/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-15T22:33:14+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 79
     },
     {
       "signal_id": "fee011bd0acaf5b7a82cfdf2",
