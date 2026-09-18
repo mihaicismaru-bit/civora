@@ -2,15 +2,33 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from pathlib import Path
 from typing import Any
 
 ALLOWED_ROLES = {"REGISTRATION_NOTICE", "CONTEST_CALENDAR", "CONTEST_PROCEDURE"}
 ALLOWED_STATES = {"DOCUMENT_TEXT_EXTRACTED_SHADOW", "DOCUMENT_CONTENT_CAPTURED_SHADOW", "BLOCKED"}
+DATE_TOKEN_RE = re.compile(r"\b(?:\d{1,2}[./-]\d{1,2}(?:[./-]\d{2,4})?|\d{1,2}\s+(?:ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+\d{4})\b", re.I)
 
 
 def load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _date_candidate_lines(row: dict[str, Any]) -> list[dict[str, Any]]:
+    if row.get("state") != "DOCUMENT_TEXT_EXTRACTED_SHADOW":
+        return []
+    matches: list[dict[str, Any]] = []
+    for page in row.get("pages") or []:
+        page_number = int(page.get("page_number") or 0)
+        for raw in str(page.get("text") or "").splitlines():
+            line = " ".join(raw.split())
+            if not line or not DATE_TOKEN_RE.search(line):
+                continue
+            matches.append({"page_number": page_number, "line": line[:280]})
+            if len(matches) >= 16:
+                return matches
+    return matches
 
 
 def _row_diagnostic(row: dict[str, Any]) -> dict[str, Any]:
@@ -22,6 +40,7 @@ def _row_diagnostic(row: dict[str, Any]) -> dict[str, Any]:
         "error_type": row.get("error_type"),
         "error": str(row.get("error") or "")[:180] or None,
         "text_extracted": bool(row.get("text_extracted")),
+        "date_candidate_lines": _date_candidate_lines(row),
     }
 
 
