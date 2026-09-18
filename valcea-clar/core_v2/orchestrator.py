@@ -140,6 +140,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     eta = workdir / "valcea-core-v2-eta-shadow.json"
     isj = workdir / "valcea-core-v2-isj-shadow.json"
     isj_detail = workdir / "valcea-core-v2-isj-detail-shadow.json"
+    isj_materiality = workdir / "valcea-core-v2-isj-materiality-shadow.json"
     photo = workdir / "valcea-core-v2-photo-truth.json"
     site_package = workdir / "valcea-core-v2-shadow-site-package.json"
     site_dir = workdir / "valcea-core-v2-shadow-site"
@@ -166,6 +167,16 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
                 "--output", str(isj_detail),
             ),
             isj_detail,
+        ),
+        CycleStage(
+            "isj_materiality",
+            (
+                py,
+                "valcea-clar/core_v2/isj_materiality_shadow_lane.py",
+                "--input", str(isj_detail),
+                "--output", str(isj_materiality),
+            ),
+            isj_materiality,
         ),
         CycleStage(
             "photo_truth",
@@ -211,9 +222,11 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                         "mode",
                         "signal_count",
                         "detail_count",
+                        "detail_row_count",
                         "candidate_count",
                         "selected_material_signal_count",
                         "detail_evidence_shadow_count",
+                        "material_detail_candidate_shadow_count",
                         "verified_written_shadow_count",
                         "visual_candidate_verified_shadow_count",
                         "package_image_bound_shadow_count",
