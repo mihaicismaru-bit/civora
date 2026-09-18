@@ -120,7 +120,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_fact_kernel_integrity", (py,"valcea-clar/core_v2/isj_fact_kernel_integrity.py","--fact-kernel",str(isj_fact_kernel),"--output",str(isj_fact_integrity)), isj_fact_integrity),
         CycleStage("isj_writer", (py,"valcea-clar/core_v2/isj_writer_shadow_lane.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--output",str(isj_article)), isj_article),
         CycleStage("isj_article_integrity", (py,"valcea-clar/core_v2/isj_article_integrity.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--article",str(isj_article),"--output",str(isj_article_integrity)), isj_article_integrity),
-        CycleStage("photo_truth", (py,"valcea-clar/core_v2/photo_truth_gate.py","--input",f"ipj={ipj}","--input",f"isu={isu}","--input",f"municipal={municipal_articles}","--visual-registry","valcea-clar/core_v2/visual_registry.json","--external-probe","--output",str(photo)), photo),
+        CycleStage("photo_truth", (py,"valcea-clar/core_v2/photo_truth_gate.py","--input",f"ipj={ipj}","--input",f"isu={isu}","--input",f"municipal={municipal_articles}","--input",f"isj={isj_article_integrity}","--visual-registry","valcea-clar/core_v2/visual_registry.json","--external-probe","--output",str(photo)), photo),
         CycleStage("shadow_site_package", (py,"valcea-clar/core_v2/shadow_site_package.py","--articles",str(municipal_articles),"--photo-truth",str(photo),"--visual-registry","valcea-clar/core_v2/visual_registry.json","--repo-root",".","--output-dir",str(site_dir),"--output",str(site_package)), site_package),
     )
 

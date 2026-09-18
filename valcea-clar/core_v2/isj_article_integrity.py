@@ -54,6 +54,7 @@ def verify_isj_article_integrity(
     fabricated = 0
     verified_claim_count = 0
     evidence_binding_count = 0
+    verified_candidate: dict[str, Any] | None = None
 
     if fact_kernel_report.get("publication_authority") != "NONE":
         failures.append("fact_kernel_publication_boundary_violation")
@@ -196,13 +197,25 @@ def verify_isj_article_integrity(
             if not {"registration_deadline", "interview_window_text", "appointment_decision_deadline_text"}.issubset(excluded):
                 failures.append("article_does_not_preserve_unverified_field_exclusions")
 
+            verified_candidate = {
+                "article_id": _norm(package.get("article_id")),
+                "headline": _norm(package.get("headline")),
+                "where": kernel.where,
+                "who": kernel.who,
+                "source_url": kernel.source_url,
+            }
+            if not verified_candidate["article_id"]:
+                failures.append("verified_candidate_article_id_missing")
+
     failures = list(dict.fromkeys(failures))
     status = "PASS_SHADOW" if not failures and fabricated == 0 else "BLOCKED"
+    verified_candidates = [verified_candidate] if status == "PASS_SHADOW" and verified_candidate is not None else []
     return {
         **base,
         "status": status,
         "article_truth_state": "VERIFIED_WRITTEN_SHADOW" if status == "PASS_SHADOW" else "BLOCKED",
-        "verified_article_count": 1 if status == "PASS_SHADOW" else 0,
+        "verified_article_count": len(verified_candidates),
+        "verified_candidates": verified_candidates,
         "verified_claim_count": verified_claim_count,
         "evidence_binding_count": evidence_binding_count,
         "fabricated_claim_count": fabricated,
@@ -211,7 +224,7 @@ def verify_isj_article_integrity(
         "photo_gate_status": "ELIGIBLE_FOR_SEPARATE_PHOTO_TRUTH_GATE" if status == "PASS_SHADOW" else "BLOCKED",
         "truth_rule": (
             "This independent gate reconstructs the complete allowed ISJ article from the verified FactKernel and exact claim evidence bindings. "
-            "Any extra or modified factual prose fails closed. PASS_SHADOW does not authorize a visual, site publication, social delivery, acceptance, merge or deployment."
+            "Any extra or modified factual prose fails closed. A verified candidate may enter only the separate photo truth gate; PASS_SHADOW does not authorize a visual, site publication, social delivery, acceptance, merge or deployment."
         ),
     }
 

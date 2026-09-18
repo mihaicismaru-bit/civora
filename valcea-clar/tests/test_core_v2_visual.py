@@ -170,6 +170,34 @@ class PhotoTruthGateTest(unittest.TestCase):
         self.assertFalse(report["social_publish_allowed"])
         self.assertFalse(report["acceptance_ready"])
 
+    def test_integrity_verified_isj_candidate_enters_photo_gate_and_fails_closed_without_visual(self):
+        isj_integrity = {
+            "article_truth_state": "VERIFIED_WRITTEN_SHADOW",
+            "article_integrity_verified": True,
+            "publication_authority": "NONE",
+            "verified_candidates": [
+                {
+                    "article_id": "isj-directori-2026-conducere-scoli",
+                    "headline": "146 de funcții vacante de director și director adjunct",
+                    "where": "județul Vâlcea",
+                    "who": "Inspectoratul Școlar Județean Vâlcea",
+                    "source_url": "https://www.isjvalcea.ro/management/concurs-directori-2026",
+                }
+            ],
+        }
+        report = build_photo_truth_report(
+            [("isj", isj_integrity)],
+            visual_registry={"stories": {}},
+            atlas={"assets": []},
+            external_probe=False,
+        )
+        self.assertEqual(report["candidate_count"], 1)
+        self.assertEqual(report["visual_candidate_verified_shadow_count"], 0)
+        self.assertEqual(report["blocked_count"], 1)
+        self.assertEqual(report["rows"][0]["story_id"], "isj-directori-2026-conducere-scoli")
+        self.assertEqual(report["rows"][0]["reason"], "no_story_specific_approved_visual")
+        self.assertFalse(report["social_publish_allowed"])
+
 
 if __name__ == "__main__":
     unittest.main()

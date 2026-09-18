@@ -46,7 +46,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         embedded = by_name["isj_embedded_notice"]; targets = by_name["isj_embedded_target"]; content = by_name["isj_embedded_content"]
         fields = by_name["isj_field_evidence"]; context_docs = by_name["isj_context_documents"]; calendar_fields = by_name["isj_calendar_field_evidence"]
         field_materiality = by_name["isj_field_materiality"]; fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
-        writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]
+        writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]; photo = by_name["photo_truth"]
 
         self.assertIn(str(isj.output), detail.argv); self.assertIn("--live", detail.argv)
         self.assertIn(str(detail.output), materiality.argv); self.assertNotIn("--live", materiality.argv)
@@ -61,6 +61,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(fact_kernel.output), fact_integrity.argv); self.assertNotIn("--live", fact_integrity.argv)
         self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv); self.assertNotIn("--live", writer.argv)
         self.assertIn(str(fact_kernel.output), article_integrity.argv); self.assertIn(str(fact_integrity.output), article_integrity.argv); self.assertIn(str(writer.output), article_integrity.argv); self.assertNotIn("--live", article_integrity.argv)
+        self.assertIn(f"isj={article_integrity.output}", photo.argv)
 
         names = [stage.name for stage in plan]
         chain = ["isj", "isj_detail", "isj_materiality", "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_field_evidence", "isj_context_documents", "isj_calendar_field_evidence", "isj_field_materiality", "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth"]

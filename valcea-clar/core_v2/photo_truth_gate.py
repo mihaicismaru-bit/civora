@@ -9,7 +9,7 @@ from contracts import ContractViolation, Visual
 from visual_readback import ALLOWED_RIGHTS_BASES, _read_binary_head, _read_text
 
 
-PHOTO_GATE_SCHEMA_VERSION = "1.0"
+PHOTO_GATE_SCHEMA_VERSION = "1.1"
 
 
 def _candidate_id(row: dict[str, Any], *, source_label: str) -> str:
@@ -23,6 +23,25 @@ def _candidate_id(row: dict[str, Any], *, source_label: str) -> str:
 
 
 def iter_written_candidates(document: dict[str, Any], *, source_label: str) -> Iterable[dict[str, Any]]:
+    if (
+        document.get("article_truth_state") == "VERIFIED_WRITTEN_SHADOW"
+        and document.get("article_integrity_verified") is True
+        and document.get("publication_authority") == "NONE"
+    ):
+        for candidate in document.get("verified_candidates") or []:
+            if not isinstance(candidate, dict):
+                continue
+            article_id = str(candidate.get("article_id") or "").strip()
+            if not article_id:
+                continue
+            yield {
+                "candidate_id": article_id,
+                "source_label": source_label,
+                "where": str(candidate.get("where") or "").strip(),
+                "who": str(candidate.get("who") or "").strip(),
+                "headline": str(candidate.get("headline") or "").strip(),
+            }
+
     for row in document.get("rows") or []:
         if row.get("state") != "VERIFIED_WRITTEN_SHADOW":
             continue
