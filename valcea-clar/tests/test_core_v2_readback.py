@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
 from external_readback import inspect_html
-from meta_readback import parse_meta_object
+from meta_readback import parse_meta_error_body, parse_meta_object
 
 
 class ExternalReadbackTest(unittest.TestCase):
@@ -65,6 +65,16 @@ class ExternalReadbackTest(unittest.TestCase):
         )
         self.assertTrue(result["readback_ok"])
         self.assertEqual(result["publication_authority"], "NONE")
+
+    def test_meta_error_body_keeps_diagnostic_without_token(self):
+        detail = parse_meta_error_body(
+            b'{"error":{"message":"Unsupported get request","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"abc"}}'
+        )
+        self.assertEqual(detail["error_code"], 100)
+        self.assertEqual(detail["error_subcode"], 33)
+        self.assertEqual(detail["error_type"], "GraphMethodException")
+        self.assertEqual(detail["error_message"], "Unsupported get request")
+        self.assertNotIn("access_token", detail)
 
 
 if __name__ == "__main__":
