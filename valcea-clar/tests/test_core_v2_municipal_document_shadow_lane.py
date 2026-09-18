@@ -12,6 +12,7 @@ from municipal_document_shadow_lane import (  # noqa: E402
     materialize_document_evidence,
 )
 from test_core_v2_municipal_materiality_shadow_lane import MunicipalMaterialityShadowLaneTests  # noqa: E402,F401
+from test_core_v2_municipal_fact_kernel_shadow_lane import MunicipalFactKernelShadowLaneTests  # noqa: E402,F401
 
 
 class MunicipalDocumentShadowLaneTests(unittest.TestCase):
