@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.4",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN5-PUBLIC-SAFETY-LIVE-VERIFIED",
+  "schema_version": "1.5",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN6-STRUCTURED-WRITER-MUNICIPAL-GATE",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,58 +8,47 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "base_merge_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
-  "main_drift_observed_sha": "126041a595323d4c247f5b42412246fd7da8a9e7",
-  "main_drift_core_overlap": false,
-  "main_drift_note": "Fresh main drift remains outside Core v2 and bounded pilot adapter code: PARTENER.EU generated/validation state, the Olănești investigation state, and legacy VÂLCEA CLAR social/visual state and manifests changed. No rebase, merge, deploy, public write or cutover was performed.",
-  "legacy_public_projection_observation": {
-    "repo": "mihaicismaru-bit/valcea-clar",
-    "latest_observed_sync_commit": "8ab1482011a3344937afc822c9386f907397b1dc",
-    "story_count": 95,
-    "current_story_count": 78,
-    "archive_story_count": 17,
-    "verified_visual_count": 13,
-    "synced_at": "2026-09-18T06:47:10.372561Z",
-    "note": "Legacy public projection is observational only. The abandoned legacy 48h soak is not restarted and is not evidence for Core v2 readiness."
+  "fresh_reread": {
+    "main_observed_sha": "274bbf51d543285d16db2c24e4be92bda7746c7a",
+    "main_core_v2_overlap": false,
+    "main_note": "Fresh main continues to receive legacy/runtime bot writes outside Core v2. The latest observed VÂLCEA CLAR monitor write changed council-watch runtime state but no Core v2 file or bounded Core v2 contract was merged. No rebase, merge, deploy, public write or cutover was performed.",
+    "legacy_public_projection": {
+      "repo": "mihaicismaru-bit/valcea-clar",
+      "story_count": 95,
+      "current_story_count": 78,
+      "archive_story_count": 17,
+      "verified_visual_count": 13,
+      "synced_at": "2026-09-18T06:47:10.372561Z",
+      "lead_story_id": "rm-valcea-hcl-345-20260916",
+      "observation_only": true
+    }
   },
   "latest_validated_core_feature_head": {
-    "sha": "03d381dab8896ea53f7d5eb9aa7fa3239256e63e",
-    "workflow_run_id": 35333732048,
-    "workflow_run_number": 105,
-    "event": "pull_request",
+    "sha": "bf8b9e8af3e37d9e9af18e184b82d4f54bd6a1d1",
+    "workflow_run_id": 35338458159,
+    "workflow_run_number": 122,
+    "event": "push",
     "conclusion": "success",
-    "artifact_id": 10541338910,
-    "artifact_sha256": "7518d889d74f47d517919a483c9089eda756f4d56539a37928808fd90084e441",
+    "artifact_id": 10543603511,
+    "artifact_sha256": "d0064d835e31d30dfdb153ef04a10b15af2dd3fca44023ece49c3d7ceb076484",
     "permissions": "contents:read",
     "manual_dispatch": false,
     "production_write_authority": false
   },
   "done": [
-    "fresh main/workflows/runtime/social/public-projection topology reread",
-    "legacy architecture retained as LEGACY_NOT_PRODUCTION_READY; no production automation disabled yet",
-    "Core v2 StoryState, FactKernel, Visual, PublicationReceipt and AuditResult contracts implemented",
-    "shadow-only sequential orchestrator implemented with publication_authority NONE",
-    "receipt-bound site/Facebook/Instagram contracts implemented",
-    "independent external site HTML/NewsArticle readback implemented",
-    "independent external visual binding/provenance/readback implemented",
-    "independent read-only Meta remote-object readback implemented",
-    "claim-to-FactKernel editorial integrity gate implemented",
-    "strict 10-consecutive-story acceptance ledger implemented",
-    "bounded eight-source pilot fully registered and existing adapters fail-closed self-tested",
-    "deterministic legacy inventory completed with UNKNOWN=0",
-    "82 legacy publication-capable paths identified for migration/retirement control",
-    "exact shadow blocker classifier implemented and naturally validated",
-    "Facebook failures classified as Meta read-permission deficiency rather than guessed stale/deleted posts",
-    "public visual truth mismatch proven for valcea-apa-canal-contract-152m-20260902",
-    "legacy historical replay proven to lack explicit canonical FactKernel and claim-bound article packages",
-    "APAVIL source-to-kernel-to-writer shadow lane implemented using only explicit first-party metadata and naturally validated with zero fabricated output",
-    "public-safety Core v2 promotion lane implemented for IPJ and ISU first-party article-detail evidence without inheriting legacy publication authority",
-    "IPJ allegation, suspicion and procedural-measure semantics remain source-attributed and are never promoted as independent guilt findings",
-    "ISU cause, casualty/affected-person and numeric semantics remain source-attributed and are never promoted as independently established cause or live capacity",
-    "every promoted public-safety claim is bound to index/detail/field evidence IDs and passes the Core v2 claim-to-kernel integrity gate with fabricated_claims=0",
-    "first public-safety live replay exposed a false-geography risk caused by unrelated locality mentions in the evidence body; the candidate was not treated as production evidence",
-    "geography extraction was repaired to prefer explicit title locality, recognize Romanian genitive locality markers, and fail closed on ambiguous multiple geographies",
-    "regression tests now lock Mădulari and Lăpușata title locality against unrelated body-place contamination and require multi-place summary material to BLOCK",
-    "natural PR CI run 105 validated the repaired IPJ/ISU shadow lane end-to-end with contents:read only and no manual dispatch"
+    "legacy architecture remains explicitly LEGACY_NOT_PRODUCTION_READY while live legacy automation is left untouched",
+    "StoryState, FactKernel, Visual, PublicationReceipt, AuditResult and sequential shadow transaction contracts are implemented",
+    "external site, visual and Meta readback plus receipt-bound shadow replay are implemented",
+    "bounded eight-source pilot registry is enforced and legacy inventory remains complete with UNKNOWN=0",
+    "APAVIL source-to-kernel lane terminates non-material or stale signals NO_STORY instead of manufacturing articles",
+    "IPJ/ISU geography extraction is fail-closed and title-locality regressions are locked",
+    "public-safety structured material-fact extraction now binds each promoted field fact to first-party evidence IDs",
+    "public-safety writer upgraded in shadow mode to shadow_structured_editorial_v2 while production_writer_ready remains false",
+    "publication/source visible date and event time are now separate fields; an incident time is accepted only when an explicit event-role date marker exists in field evidence",
+    "all three currently verified IPJ/ISU live rows keep event_time UNKNOWN rather than silently treating the visible publication date as incident time",
+    "editorial integrity gate now requires exact normalized article-claim text equality with the referenced FactKernel claim in addition to evidence-ID binding",
+    "Râmnicu Vâlcea municipal reference lane implemented fail-closed: raw HCL/register metadata can only terminate NO_STORY/BLOCKED and cannot create a FactKernel or article",
+    "natural Core v2 run 122 validated compile, contract tests, live APAVIL/IPJ/ISU/municipal shadow lanes, independent external replay, isolation and evidence artifact with contents:read only"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -85,51 +74,47 @@
     "verified_written_shadow_count": 0,
     "no_story_count": 132,
     "blocked_count": 0,
-    "no_story_reasons": {
-      "stale_scheduled_outage": 119,
-      "missing_effective_date": 13
-    },
     "fabricated_story_count": 0,
     "publication_authority": "NONE",
     "acceptance_ready": false
   },
   "public_safety_live_shadow_truth": {
-    "workflow_run_id": 35333732048,
-    "artifact_id": 10541338910,
+    "workflow_run_id": 35338458159,
+    "artifact_id": 10543603511,
     "ipj": {
       "detail_count": 8,
       "verified_written_shadow_count": 1,
+      "structured_editorial_count": 1,
       "no_story_count": 2,
       "blocked_count": 5,
       "fabricated_claim_count": 0,
-      "verified_localities": [
-        "județul Vâlcea"
-      ],
-      "terminal_reasons": {
-        "explicit_geography_missing": 1,
-        "future_source_date_anomaly": 1,
-        "ambiguous_multiple_geographies": 3,
-        "explicit_source_date_missing": 1,
-        "stale_first_party_detail": 1
-      }
+      "verified_localities": ["județul Vâlcea"],
+      "verified_material_fact_counts": [8],
+      "verified_event_time_statuses": ["UNKNOWN"]
     },
     "isu": {
       "detail_count": 9,
       "verified_written_shadow_count": 2,
+      "structured_editorial_count": 2,
       "no_story_count": 3,
       "blocked_count": 4,
       "fabricated_claim_count": 0,
-      "verified_localities": [
-        "Mădulari",
-        "Lăpușata"
-      ],
-      "terminal_reasons": {
-        "stale_first_party_detail": 3,
-        "ambiguous_multiple_geographies": 1,
-        "explicit_geography_missing": 3
-      }
+      "verified_localities": ["Mădulari", "Lăpușata"],
+      "verified_material_fact_counts": [2, 2],
+      "verified_event_time_statuses": ["UNKNOWN", "UNKNOWN"]
     },
-    "truth_interpretation": "The lane deliberately promotes only a small subset of live first-party detail evidence. Ambiguous, stale, future-anomalous or insufficiently localized records terminate NO_STORY/BLOCKED instead of being completed by inference. Verified rows remain shadow editorial packages, production_writer_ready=false and publication_authority=NONE."
+    "currentness_rule": "A page-visible publication/source date is never incident time by default. Event date/time requires an explicit event-role marker in bound field evidence; multiple dates are ambiguous and future anomalies are blocked from editorial use.",
+    "truth_interpretation": "Only a small subset of fresh first-party records is promotable. Structured facts remain source-attributed, evidence-bound, shadow-only, production_writer_ready=false and publication_authority=NONE."
+  },
+  "municipal_live_shadow_truth": {
+    "status": "BLOCKED_SOURCE_RECEIPT",
+    "reason": "current_year_local_council_decision_references_missing",
+    "reference_count": 0,
+    "verified_written_shadow_count": 0,
+    "production_writer_ready": false,
+    "publication_authority": "NONE",
+    "diagnosis": "The new bounded reference adapter could not obtain deterministic current-year references from its allowed index surface during this live run, while separate legacy monitor state on main reports parsed council-register entries. Core v2 treats this disagreement as a source/parser contract problem, not as permission to inherit legacy state or publish HCL titles.",
+    "safe_rule": "No municipal FactKernel or article until independent first-party reference discovery and document-body evidence capture are both deterministic and evidence-bound."
   },
   "shadow_replay_truth": {
     "candidate_count": 2,
@@ -154,32 +139,22 @@
     "required_surface_named_by_graph": "pages_read_engagement permission or Page Public Content Access feature",
     "safety": "No token changes or Meta writes were attempted. Failed readback remains failed."
   },
-  "fact_evidence_gap": {
-    "fact_kernel_registry_kernel_count": 0,
-    "editorial_products_structured_content_present": false,
-    "legacy_facts_registry_contains_story_prose": true,
-    "migration_rule": "Rendered or legacy prose is not reverse-engineered into facts. New Core v2 FactKernel evidence must originate from explicit bounded source evidence and carry evidence IDs."
-  },
-  "next": [
-    "replace the public-safety shadow attribution summary with a structured material-fact extractor plus full editorial composer while retaining explicit claim/evidence bindings and production_writer_ready=false",
-    "add a deterministic currentness/event-time reconciliation layer so publication-date metadata is never silently used as incident time",
-    "bind truthful real-photo candidates to the newly verified IPJ/ISU shadow stories only when exact/direct/archive-context relevance, rights basis, disclosure and external image readback all pass",
-    "implement the next bounded municipal lane from first-party evidence, preferring Primăria Râmnicu Vâlcea or CJ Vâlcea, without reusing raw HCL titles as articles",
-    "keep Facebook delivery uncertified until read-only Graph permission is sufficient; do not infer delivery from internal IDs",
-    "do not evaluate the ten-story acceptance gate until source, kernel, full writer, visual, site and both social receipt gates are independently satisfiable"
-  ],
   "blocked": [
     {
       "gate": "facebook_receipt_truth",
-      "reason": "Read-only Graph requests for replayable Facebook IDs return OAuthException code 10 requiring pages_read_engagement or Page Public Content Access. Internal post IDs are not delivery proof."
+      "reason": "Read-only Graph requests for replayable Facebook IDs still return OAuthException code 10 requiring pages_read_engagement or Page Public Content Access. Internal post IDs are not delivery proof."
+    },
+    {
+      "gate": "municipal_reference_discovery",
+      "reason": "The bounded municipal current-year index adapter returned current_year_local_council_decision_references_missing while independent legacy runtime parsing reports entries. The mismatch must be resolved using first-party evidence without inheriting legacy publication authority."
     },
     {
       "gate": "legacy_fact_kernel_migration",
-      "reason": "Historical replay candidates lack explicit canonical FactKernel and claim-bound article evidence. Legacy prose is intentionally not reverse-engineered into facts."
+      "reason": "Historical replay candidates lack explicit canonical FactKernel and exact claim-bound article evidence. Legacy prose is intentionally not reverse-engineered into facts."
     },
     {
       "gate": "visual_truth_valcea_apa",
-      "reason": "The internal panorama visual record exists and provenance URLs read back, but the public article does not bind the expected image filename; visual delivery therefore fails."
+      "reason": "The internal panorama visual record exists and provenance URLs read back, but the public article does not bind the expected image filename; visual delivery remains failed."
     },
     {
       "gate": "ten_story_shadow_candidate",
@@ -190,22 +165,29 @@
       "reason": "Explicit owner approval remains mandatory before live Core v2 publication, social delivery, merge or deploy."
     }
   ],
+  "next": [
+    "diagnose and repair the municipal first-party reference discovery mismatch in shadow mode; do not turn raw HCL metadata into stories",
+    "add a non-authorizing municipal document-body evidence collector only after reference discovery is deterministic, then require material facts before FactKernel promotion",
+    "bind truthful real-photo candidates to the three currently verified IPJ/ISU shadow stories only when exact/direct/archive-context relevance, rights basis, disclosure and external image readback all pass",
+    "implement the next bounded first-party lane, preferring CJ Vâlcea after the municipal reference contract is stable",
+    "keep Facebook delivery uncertified until read-only Graph permission is sufficient; do not infer delivery from internal IDs",
+    "do not evaluate the ten-story acceptance gate until source, kernel, full writer, visual, site and both social receipt gates are independently satisfiable"
+  ],
   "evidence": {
     "core_contracts": "valcea-clar/core_v2/contracts.py",
     "core_orchestrator": "valcea-clar/core_v2/orchestrator.py",
-    "source_signal_boundary": "valcea-clar/core_v2/source_signal.py",
+    "editorial_integrity": "valcea-clar/core_v2/editorial_integrity.py",
     "apavil_shadow_lane": "valcea-clar/core_v2/apavil_shadow_lane.py",
-    "public_safety_shadow_lane": "valcea-clar/core_v2/public_safety_shadow_lane.py",
-    "public_safety_regressions": "valcea-clar/tests/test_core_v2_public_safety_shadow_lane.py",
-    "ipj_detail_evidence_reused_read_only": "valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py",
-    "isu_detail_evidence_reused_read_only": "valcea-clar/scripts/isu_valcea_emergency_detail_evidence.py",
+    "public_safety_base_lane": "valcea-clar/core_v2/public_safety_shadow_lane.py",
+    "public_safety_structured_lane": "valcea-clar/core_v2/public_safety_full_shadow_lane.py",
+    "public_safety_structured_tests": "valcea-clar/tests/test_core_v2_public_safety_full_shadow_lane.py",
+    "municipal_reference_lane": "valcea-clar/core_v2/municipal_reference_shadow_lane.py",
+    "municipal_reference_tests": "valcea-clar/tests/test_core_v2_municipal_reference_shadow_lane.py",
+    "legacy_municipal_reference_adapter_reused_read_only": "valcea-clar/scripts/ramnicu_valcea_local_council_decision_reference_adapter.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
     "visual_readback": "valcea-clar/core_v2/visual_readback.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
-    "shadow_receipts": "valcea-clar/core_v2/materialize_shadow_receipts.py",
-    "shadow_transactions": "valcea-clar/core_v2/materialize_shadow_transactions.py",
     "shadow_gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
-    "editorial_integrity": "valcea-clar/core_v2/editorial_integrity.py",
     "ten_story_gate": "valcea-clar/core_v2/acceptance_ledger.py",
     "legacy_inventory": "valcea-clar/core_v2/inventory_legacy.py",
     "pilot_registry": "valcea-clar/core_v2/pilot_sources.json",
