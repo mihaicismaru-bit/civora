@@ -10,6 +10,7 @@ import sys
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit, urlunsplit
 from urllib.request import HTTPSHandler, Request, build_opener
 from zoneinfo import ZoneInfo
 
@@ -23,6 +24,9 @@ from municipal_reference_shadow_lane import (
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPTS = ROOT / "valcea-clar" / "scripts"
 MAX_LATEST_DOCUMENTS = 5
+OFFICIAL_HOST = "dm.primariavl.ro"
+OFFICIAL_PATH_PREFIX = "/dm/2026/hotarari.nsf/"
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$", re.I)
 
 
 def _today_bucharest() -> date:
@@ -38,8 +42,43 @@ def _evidence_id(document_sha: str, kind: str, excerpt: str) -> str:
     return "municipal-document:" + hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
+def _is_sha256(value: Any) -> bool:
+    return bool(SHA256_RE.fullmatch(str(value or "").strip()))
+
+
+def _validate_official_document_url(value: Any) -> str:
+    """Accept only bounded first-party 2026 HCL DocManager document URLs."""
+    raw = str(value or "").strip()
+    parsed = urlsplit(raw)
+    if (
+        parsed.scheme.casefold() != "https"
+        or (parsed.hostname or "").casefold() != OFFICIAL_HOST
+        or parsed.username
+        or parsed.password
+        or parsed.port not in (None, 443)
+        or not parsed.path.startswith(OFFICIAL_PATH_PREFIX)
+        or parsed.fragment
+    ):
+        raise ValueError("official municipal document URL escaped bounded first-party surface")
+    return urlunsplit(("https", OFFICIAL_HOST, parsed.path, parsed.query, ""))
+
+
+def _valid_decision_identity(number: Any, decision_date: Any) -> bool:
+    try:
+        parsed = date.fromisoformat(str(decision_date or ""))
+        numeric = int(number or 0)
+    except (TypeError, ValueError):
+        return False
+    return numeric > 0 and parsed.year == 2026
+
+
 def materialize_document_evidence(document: dict[str, Any]) -> dict[str, Any]:
-    """Convert a resolved official HCL document into non-authorizing evidence rows."""
+    """Convert a resolved official HCL document into non-authorizing evidence rows.
+
+    The legacy resolver is reusable only as a transport/parser component. Core v2
+    independently revalidates document identity boundaries before accepting any
+    excerpt as evidence. No evidence row is a FactKernel claim by itself.
+    """
     if not document.get("resolved"):
         return {
             "decision_number": document.get("decision_number"),
@@ -52,15 +91,42 @@ def materialize_document_evidence(document: dict[str, Any]) -> dict[str, Any]:
             "evidence": [],
         }
 
-    official_url = str(document.get("official_html_url") or "").strip()
-    source_sha = str(document.get("source_sha256") or "").strip()
-    text_sha = str(document.get("document_text_sha256") or "").strip()
-    if not official_url or not source_sha or not text_sha:
+    number = document.get("decision_number")
+    decision_date = document.get("decision_date")
+    if not _valid_decision_identity(number, decision_date):
         return {
-            "decision_number": document.get("decision_number"),
-            "decision_date": document.get("decision_date"),
+            "decision_number": number,
+            "decision_date": decision_date,
             "state": "BLOCKED",
-            "reason": "resolved_document_missing_identity_hashes",
+            "reason": "resolved_document_invalid_decision_identity",
+            "publication_authority": "NONE",
+            "fact_kernel_promotion_allowed": False,
+            "writer_allowed": False,
+            "evidence": [],
+        }
+
+    try:
+        official_url = _validate_official_document_url(document.get("official_html_url"))
+    except (TypeError, ValueError):
+        return {
+            "decision_number": number,
+            "decision_date": decision_date,
+            "state": "BLOCKED",
+            "reason": "resolved_document_off_surface_url",
+            "publication_authority": "NONE",
+            "fact_kernel_promotion_allowed": False,
+            "writer_allowed": False,
+            "evidence": [],
+        }
+
+    source_sha = str(document.get("source_sha256") or "").strip().lower()
+    text_sha = str(document.get("document_text_sha256") or "").strip().lower()
+    if not _is_sha256(source_sha) or not _is_sha256(text_sha):
+        return {
+            "decision_number": number,
+            "decision_date": decision_date,
+            "state": "BLOCKED",
+            "reason": "resolved_document_invalid_identity_hashes",
             "publication_authority": "NONE",
             "fact_kernel_promotion_allowed": False,
             "writer_allowed": False,
@@ -97,8 +163,8 @@ def materialize_document_evidence(document: dict[str, Any]) -> dict[str, Any]:
     operative_count = sum(row["kind"] == "OPERATIVE_ARTICLE" for row in evidence)
     if operative_count == 0:
         return {
-            "decision_number": document.get("decision_number"),
-            "decision_date": document.get("decision_date"),
+            "decision_number": number,
+            "decision_date": decision_date,
             "state": "BLOCKED",
             "reason": "resolved_document_without_operative_article_evidence",
             "publication_authority": "NONE",
@@ -108,8 +174,8 @@ def materialize_document_evidence(document: dict[str, Any]) -> dict[str, Any]:
         }
 
     return {
-        "decision_number": int(document.get("decision_number") or 0),
-        "decision_date": str(document.get("decision_date") or ""),
+        "decision_number": int(number or 0),
+        "decision_date": str(decision_date or ""),
         "registered_title": document.get("registered_title"),
         "state": "DOCUMENT_EVIDENCE_READY",
         "reason": "official_document_identity_and_operative_articles_verified",
@@ -163,7 +229,7 @@ def collect_live(*, as_of: date | None = None, limit: int = MAX_LATEST_DOCUMENTS
     reference_result = verify_reference_state(raw_refs, as_of=as_of)
     if reference_result.get("status") != "PASS_SHADOW" or not reference_result.get("rows"):
         return {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "mode": "MUNICIPAL_DOCUMENT_EVIDENCE_SHADOW",
             "publication_authority": "NONE",
             "acceptance_ready": False,
@@ -213,13 +279,30 @@ def collect_live(*, as_of: date | None = None, limit: int = MAX_LATEST_DOCUMENTS
                 }
             )
             continue
+        try:
+            _validate_official_document_url(candidate)
+        except ValueError:
+            rows.append(
+                {
+                    "decision_number": number,
+                    "decision_date": requested_row["decision_date"],
+                    "registered_title": requested_row["title"],
+                    "state": "BLOCKED",
+                    "reason": "row_document_url_off_surface",
+                    "publication_authority": "NONE",
+                    "fact_kernel_promotion_allowed": False,
+                    "writer_allowed": False,
+                    "evidence": [],
+                }
+            )
+            continue
         document = resolver.extract_document(requested_row, candidate)
         rows.append(materialize_document_evidence(document))
 
     ready = sum(row.get("state") == "DOCUMENT_EVIDENCE_READY" for row in rows)
     blocked = sum(row.get("state") == "BLOCKED" for row in rows)
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "MUNICIPAL_DOCUMENT_EVIDENCE_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -236,6 +319,7 @@ def collect_live(*, as_of: date | None = None, limit: int = MAX_LATEST_DOCUMENTS
         "rows": rows,
         "truth_rule": (
             "The collector may resolve only bounded same-host official HCL document bodies for the latest deterministic adopted-decision date. "
+            "It independently revalidates URL, decision identity and SHA-256 evidence boundaries after the legacy resolver. "
             "It produces evidence rows only; material FactKernel promotion, writer use, persistence and publication remain forbidden."
         ),
     }
@@ -253,7 +337,7 @@ def main() -> int:
         result = collect_live(limit=args.limit)
     except Exception as exc:
         result = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "mode": "MUNICIPAL_DOCUMENT_EVIDENCE_SHADOW",
             "publication_authority": "NONE",
             "acceptance_ready": False,
