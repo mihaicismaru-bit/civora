@@ -49,20 +49,99 @@ def _evidence_id(signal_id: str, detail_sha256: str) -> str:
     return "isj-detail-" + hashlib.sha256(seed.encode("utf-8")).hexdigest()[:24]
 
 
+def _non_authorizing_base(*, signal_id: str, label: str | None, document_url: str | None) -> dict[str, Any]:
+    return {
+        "signal_id": signal_id,
+        "label": label,
+        "document_url": document_url,
+        "source_kind": "isj_valcea",
+        "publication_authority": "NONE",
+        "material_fact_use": False,
+        "fact_kernel_promotion_allowed": False,
+        "writer_allowed": False,
+        "site_publish_allowed": False,
+        "social_publish_allowed": False,
+        "sensitive_result_projection_allowed": False,
+    }
+
+
+def _bridge_reference_receipt(receipt: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Translate the existing bounded first-party detail receipt into Core v2 evidence rows.
+
+    The legacy component is reused only as a read-only source/evidence primitive. Nothing in
+    this bridge grants currentness, material-fact, FactKernel, writer or publication authority.
+    """
+    details: list[dict[str, Any]] = []
+    blocked: list[dict[str, Any]] = []
+    for item in receipt.get("details") or []:
+        if not isinstance(item, dict):
+            continue
+        detail_url = str(item.get("detail_url") or "")
+        detail_sha = str(item.get("detail_sha256") or "")
+        index_sha = str(item.get("index_evidence_sha256") or "")
+        if not _is_first_party_https(detail_url) or len(detail_sha) != 64 or len(index_sha) != 64:
+            blocked.append({
+                **_non_authorizing_base(
+                    signal_id="isj-ref-" + index_sha[:20],
+                    label=str(item.get("index_title") or "") or None,
+                    document_url=detail_url or None,
+                ),
+                "state": "BLOCKED",
+                "reason": "reference_bridge_evidence_identity_invalid",
+                "detail_fetch_attempted": True,
+            })
+            continue
+        details.append({
+            **_non_authorizing_base(
+                signal_id="isj-ref-" + index_sha[:20],
+                label=str(item.get("index_title") or "") or None,
+                document_url=detail_url,
+            ),
+            "state": "DETAIL_EVIDENCE_SHADOW",
+            "reason": "bounded_reference_bridge_first_party_detail_verified_non_authorizing",
+            "evidence_origin": "legacy_first_party_reference_component_reused_read_only",
+            "topic_class": item.get("topic_class"),
+            "detail_url": detail_url,
+            "detail_host": str(item.get("detail_host") or ""),
+            "content_type": item.get("content_type"),
+            "content_length": item.get("content_length"),
+            "detail_sha256": detail_sha,
+            "index_evidence_sha256": index_sha,
+            "evidence_id": _evidence_id("isj-ref-" + index_sha[:20], detail_sha),
+            "visible_title": item.get("visible_title"),
+            "explicit_date_text": item.get("explicit_date_text"),
+            "evidence_fragments": list(item.get("evidence_fragments") or [])[:4],
+            "detail_fetch_attempted": True,
+            "detail_readback_verified": True,
+            "currentness_adjudicated": False,
+        })
+    for hold in receipt.get("holds") or []:
+        if not isinstance(hold, dict):
+            continue
+        index_sha = str(hold.get("index_evidence_sha256") or "")
+        blocked.append({
+            **_non_authorizing_base(
+                signal_id="isj-ref-" + index_sha[:20],
+                label=None,
+                document_url=str(hold.get("target_url") or "") or None,
+            ),
+            "state": "BLOCKED",
+            "reason": "reference_bridge_first_party_detail_fetch_failed",
+            "detail_fetch_attempted": True,
+            "source_hold_reason": hold.get("reason"),
+        })
+    return details, blocked
+
+
 def verify_isj_details(
     signal_report: dict[str, Any],
     *,
     allow_network: bool = True,
     fetcher: Callable[[str], tuple[bytes, str, str]] | None = None,
     html_extractor: Callable[[bytes, str], tuple[str | None, str | None, tuple[str, ...]]] | None = None,
+    reference_bridge_receipt: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    """Resolve only first-party ISJ detail targets selected by the signal gate.
-
-    This is a second-hop evidence gate, not a FactKernel or writer. A successful fetch
-    proves bounded first-party bytes and explicit visible text only. External document
-    hosts remain blocked and are never fetched. Network access is explicit so fixture and
-    non-live orchestration cannot accidentally read a source.
-    """
+    """Resolve bounded first-party ISJ detail evidence without promoting facts or stories."""
     if str(signal_report.get("publication_authority") or "NONE") != "NONE":
         raise ValueError("upstream_publication_boundary_violation")
     if signal_report.get("fact_kernel_promotion_allowed") is True or signal_report.get("writer_allowed") is True:
@@ -79,19 +158,7 @@ def verify_isj_details(
         signal_id = str(row.get("signal_id") or "").strip()
         label = str(row.get("label") or "").strip()
         target = str(row.get("document_url") or "").strip()
-        base = {
-            "signal_id": signal_id,
-            "label": label or None,
-            "document_url": target or None,
-            "source_kind": "isj_valcea",
-            "publication_authority": "NONE",
-            "material_fact_use": False,
-            "fact_kernel_promotion_allowed": False,
-            "writer_allowed": False,
-            "site_publish_allowed": False,
-            "social_publish_allowed": False,
-            "sensitive_result_projection_allowed": False,
-        }
+        base = _non_authorizing_base(signal_id=signal_id, label=label or None, document_url=target or None)
         if not target:
             blocked.append({**base, "state": "BLOCKED", "reason": "official_detail_url_missing"})
             continue
@@ -132,6 +199,7 @@ def verify_isj_details(
                 **base,
                 "state": "DETAIL_EVIDENCE_SHADOW",
                 "reason": "first_party_detail_bytes_verified_non_authorizing",
+                "evidence_origin": "core_v2_material_signal",
                 "detail_url": final_url,
                 "detail_host": (urlsplit(final_url).hostname or "").lower(),
                 "content_type": content_type,
@@ -143,6 +211,7 @@ def verify_isj_details(
                 "evidence_fragments": list(fragments)[:4],
                 "detail_fetch_attempted": True,
                 "detail_readback_verified": True,
+                "currentness_adjudicated": False,
             })
         except Exception as exc:
             blocked.append({
@@ -154,9 +223,23 @@ def verify_isj_details(
                 "error": str(exc)[:400],
             })
 
+    bridge_detail_count = 0
+    bridge_blocked_count = 0
+    if reference_bridge_receipt is not None:
+        bridge_details, bridge_blocked = _bridge_reference_receipt(reference_bridge_receipt)
+        seen = {(row.get("detail_url"), row.get("detail_sha256")) for row in details}
+        for row in bridge_details:
+            key = (row.get("detail_url"), row.get("detail_sha256"))
+            if key not in seen:
+                details.append(row)
+                seen.add(key)
+                bridge_detail_count += 1
+        blocked.extend(bridge_blocked)
+        bridge_blocked_count = len(bridge_blocked)
+
     result_rows = details + blocked
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "ISJ_FIRST_PARTY_DETAIL_EVIDENCE_SHADOW",
         "source_kind": "isj_valcea",
         "publication_authority": "NONE",
@@ -170,11 +253,14 @@ def verify_isj_details(
         "social_publish_allowed": False,
         "selected_material_signal_count": len(candidates),
         "detail_evidence_shadow_count": len(details),
+        "reference_bridge_detail_count": bridge_detail_count,
+        "reference_bridge_blocked_count": bridge_blocked_count,
         "blocked_count": len(blocked),
         "rows": result_rows,
         "truth_rule": (
             "A category/label signal may cross only to bounded first-party detail evidence. "
-            "Verified detail bytes are still non-authorizing: material facts, currentness, FactKernel and writer require a separate field-level adjudication. "
+            "The existing ISJ reference/detail components may be reused strictly as non-authorizing read-only evidence primitives. "
+            "Verified detail bytes still do not prove currentness or material facts; FactKernel and writer require a separate field-level adjudication. "
             "External document hosts are never fetched by this lane, and sensitive/person-level result projection remains forbidden."
         ),
     }
@@ -188,11 +274,22 @@ def main() -> int:
     args = parser.parse_args()
 
     source = json.loads(Path(args.input).read_text(encoding="utf-8"))
+    bridge_receipt: dict[str, Any] | None = None
+    bridge_error: dict[str, str] | None = None
     try:
-        result = verify_isj_details(source, allow_network=args.live)
+        if args.live:
+            legacy = _load_legacy_detail_module()
+            try:
+                bridge_receipt = legacy.build_live_receipt()
+            except Exception as exc:
+                bridge_error = {"error_type": type(exc).__name__, "error": str(exc)[:500]}
+        result = verify_isj_details(source, allow_network=args.live, reference_bridge_receipt=bridge_receipt)
+        result["reference_bridge_status"] = "PASS" if bridge_receipt is not None else ("BLOCKED" if bridge_error else "NOT_RUN")
+        if bridge_error:
+            result["reference_bridge_error"] = bridge_error
     except Exception as exc:
         result = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "mode": "ISJ_FIRST_PARTY_DETAIL_EVIDENCE_SHADOW",
             "source_kind": "isj_valcea",
             "publication_authority": "NONE",
@@ -214,6 +311,7 @@ def main() -> int:
         "status": result.get("status", "PASS_SHADOW"),
         "selected_material_signal_count": result.get("selected_material_signal_count", 0),
         "detail_evidence_shadow_count": result.get("detail_evidence_shadow_count", 0),
+        "reference_bridge_detail_count": result.get("reference_bridge_detail_count", 0),
         "blocked_count": result.get("blocked_count", 0),
         "publication_authority": "NONE",
         "acceptance_ready": False,
