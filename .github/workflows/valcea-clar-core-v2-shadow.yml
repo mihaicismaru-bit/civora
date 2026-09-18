@@ -50,6 +50,8 @@ jobs:
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
       - name: Build non-authoritative shadow replay candidates
         run: python valcea-clar/core_v2/build_shadow_candidate_ledger.py --output /tmp/valcea-core-v2-shadow-candidates.json
+      - name: Replay candidate site truth read-only
+        run: python valcea-clar/core_v2/replay_external_site.py --output /tmp/valcea-core-v2-site-readback.json --limit 10
       - name: Verify shadow isolation
         run: |
           python - <<'PY'
@@ -58,12 +60,14 @@ jobs:
           checkpoint=json.loads(Path('valcea-clar/core_v2/checkpoint.json').read_text(encoding='utf-8'))
           sources=json.loads(Path('valcea-clar/core_v2/pilot_sources.json').read_text(encoding='utf-8'))
           ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
+          readback=json.loads(Path('/tmp/valcea-core-v2-site-readback.json').read_text(encoding='utf-8'))
           assert checkpoint['core_v2_mode']=='SHADOW_ONLY'
           assert checkpoint['publication_authority']=='NONE'
           assert sources['publication_authority']=='NONE'
           assert sources['source_expansion_forbidden_during_pilot'] is True
           assert ledger['publication_authority']=='NONE'
           assert ledger['acceptance_ready'] is False
+          assert readback['publication_authority']=='NONE'
           print('Core v2 shadow isolation: PASS')
           PY
       - name: Upload shadow evidence
@@ -73,5 +77,6 @@ jobs:
           path: |
             /tmp/valcea-core-v2-legacy-inventory.json
             /tmp/valcea-core-v2-shadow-candidates.json
+            /tmp/valcea-core-v2-site-readback.json
           if-no-files-found: error
           retention-days: 3
