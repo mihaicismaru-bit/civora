@@ -30,6 +30,23 @@ def _page_match(row: dict[str, Any], pattern: str, *, flags: int = 0) -> tuple[r
     return matches[0]
 
 
+def _first_page_match(row: dict[str, Any], pattern: str, *, flags: int = 0) -> tuple[re.Match[str], dict[str, Any]]:
+    """Return the first page carrying an exact citation/value.
+
+    Methodology headers and eligibility clauses may be repeated verbatim by
+    pagination/layout. Repetition of the *same exact asserted value* is not
+    ambiguity; the first observed supporting page becomes the canonical
+    provenance anchor. Missing evidence still fails closed.
+    """
+    compiled = re.compile(pattern, flags)
+    for page in row.get("pages") or []:
+        text = str(page.get("text") or "")
+        match = compiled.search(text)
+        if match:
+            return match, page
+    raise RuntimeError(f"expected_page_match:{pattern[:80]}:observed=0")
+
+
 def _field(name: str, value: Any, *, row: dict[str, Any], page: dict[str, Any], excerpt: str, derivation: str = "exact_text_capture") -> dict[str, Any]:
     page_number = int(page.get("page_number") or 0)
     page_sha = str(page.get("text_sha256") or "")
@@ -127,11 +144,11 @@ def _vacancy_fields(row: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def _methodology_fields(row: dict[str, Any]) -> list[dict[str, Any]]:
-    order_match, order_page = _page_match(row, r"nr\.\s*4\.155/2026", flags=re.IGNORECASE)
-    gazette_match, gazette_page = _page_match(row, r"MONITORUL OFICIAL AL ROMÂNIE, PARTEA I, Nr\. 552 bis/6\.VII\.2026", flags=re.IGNORECASE)
-    seniority_match, seniority_page = _page_match(row, r"are\s+o\s+vechime\s+în\s+învățământul\s+preuniversitar\s+de\s+minimum\s+(5)\s+ani", flags=re.IGNORECASE)
-    degree_match, degree_page = _page_match(row, r"este\s+absolvent\s+al\s+învățământului\s+superior\s+cu\s+diplomă\s+de\s+licență\s+sau\s+atestat\s+de\s+echivalare", flags=re.IGNORECASE)
-    tenure_match, tenure_page = _page_match(row, r"este\s+titular\s+în\s+învățământul\s+preuniversitar,\s+având\s+încheiat\s+contract\s+de\s+muncă\s+pe\s+perioadă\s+nedeterminată", flags=re.IGNORECASE)
+    order_match, order_page = _first_page_match(row, r"nr\.\s*4\.155/2026", flags=re.IGNORECASE)
+    gazette_match, gazette_page = _first_page_match(row, r"MONITORUL OFICIAL AL ROMÂNIE(?:I)?, PARTEA I, Nr\. 552 bis/6\.VII\.2026", flags=re.IGNORECASE)
+    seniority_match, seniority_page = _first_page_match(row, r"are\s+o\s+vechime\s+în\s+învățământul\s+preuniversitar\s+de\s+minimum\s+(5)\s+ani", flags=re.IGNORECASE)
+    degree_match, degree_page = _first_page_match(row, r"este\s+absolvent\s+al\s+învățământului\s+superior\s+cu\s+diplomă\s+de\s+licență\s+sau\s+atestat\s+de\s+echivalare", flags=re.IGNORECASE)
+    tenure_match, tenure_page = _first_page_match(row, r"este\s+titular\s+în\s+învățământul\s+preuniversitar,\s+având\s+încheiat\s+contract\s+de\s+muncă\s+pe\s+perioadă\s+nedeterminată", flags=re.IGNORECASE)
     return [
         _field("methodology_order_number", "4.155/2026", row=row, page=order_page, excerpt=order_match.group(0)),
         _field("methodology_official_gazette_date", "2026-07-06", row=row, page=gazette_page, excerpt=gazette_match.group(0)),
@@ -215,7 +232,7 @@ def extract_field_evidence(content_report: dict[str, Any]) -> dict[str, Any]:
         "blocked_count": sum(row.get("state") == "BLOCKED" for row in rows),
         "material_candidate_shadow_count": 1 if material_candidate else 0,
         "rows": rows,
-        "truth_rule": "Field values may be emitted only when exact patterns are bound to verified PDF text plus page-level hashes, or when a table count is derived from a complete contiguous numbered-row sequence with auditable aggregation metadata. These fields remain non-authorizing: they do not create a FactKernel, article, visual readiness, site publication or social delivery.",
+        "truth_rule": "Field values may be emitted only when exact patterns are bound to verified PDF text plus page-level hashes, or when a table count is derived from a complete contiguous numbered-row sequence with auditable aggregation metadata. Repeated verbatim methodology citations use the first supporting page as their canonical provenance anchor. These fields remain non-authorizing: they do not create a FactKernel, article, visual readiness, site publication or social delivery.",
     }
 
 
