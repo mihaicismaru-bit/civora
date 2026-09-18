@@ -53,17 +53,21 @@ def run_shadow(payload: dict[str, Any]) -> StoryTransaction:
         raise ContractViolation("story_id is required")
     tx = StoryTransaction(story_id=story_id, signal_id=payload.get("signal_id"))
     if payload.get("material_signal") is False:
-        tx.no_story(str(payload.get("no_story_reason") or "no material signal")); return tx
-    tx.verify(_kernel(payload.get("fact_kernel") or {})); tx.write(str(payload.get("article") or ""))
+        tx.no_story(str(payload.get("no_story_reason") or "no material signal"))
+        return tx
+    tx.verify(_kernel(payload.get("fact_kernel") or {}))
+    tx.write(str(payload.get("article") or ""))
     if payload.get("visual"):
         tx.attach_visual(_visual(payload["visual"]))
     if payload.get("site_receipt"):
         tx.publish_site(_receipt("site", payload["site_receipt"]))
     for channel in ("facebook", "instagram"):
         row = (payload.get("social_receipts") or {}).get(channel)
-        if not row: continue
+        if not row:
+            continue
         if str(row.get("status") or "").upper() == "FAILED":
-            tx.fail_distribution(channel, str(row.get("reason") or "external delivery failed")); continue
+            tx.fail_distribution(channel, str(row.get("reason") or "external delivery failed"))
+            continue
         tx.deliver_social(_receipt(channel, row))
     audit_doc = payload.get("audit")
     if audit_doc:
@@ -89,6 +93,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     isj_content = workdir / "valcea-core-v2-isj-embedded-content-shadow.json"; isj_fields = workdir / "valcea-core-v2-isj-field-evidence-shadow.json"
     isj_context = workdir / "valcea-core-v2-isj-context-documents-shadow.json"; isj_calendar_fields = workdir / "valcea-core-v2-isj-calendar-field-evidence-shadow.json"
     isj_field_materiality = workdir / "valcea-core-v2-isj-field-materiality-shadow.json"; isj_fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"; isj_fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
+    isj_article = workdir / "valcea-core-v2-isj-article-shadow.json"; isj_article_integrity = workdir / "valcea-core-v2-isj-article-integrity-shadow.json"
     photo = workdir / "valcea-core-v2-photo-truth.json"; site_package = workdir / "valcea-core-v2-shadow-site-package.json"; site_dir = workdir / "valcea-core-v2-shadow-site"
     return (
         CycleStage("apavil", (py,"valcea-clar/core_v2/apavil_shadow_lane.py",*live_flag,"--output",str(apavil)), apavil),
@@ -113,6 +118,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_field_materiality", (py,"valcea-clar/core_v2/isj_field_materiality_shadow_lane.py","--fields",str(isj_fields),"--calendar-fields",str(isj_calendar_fields),"--year","2026","--output",str(isj_field_materiality)), isj_field_materiality),
         CycleStage("isj_fact_kernel", (py,"valcea-clar/core_v2/isj_fact_kernel_shadow_lane.py","--materiality",str(isj_field_materiality),"--fields",str(isj_fields),"--calendar-fields",str(isj_calendar_fields),"--output",str(isj_fact_kernel)), isj_fact_kernel),
         CycleStage("isj_fact_kernel_integrity", (py,"valcea-clar/core_v2/isj_fact_kernel_integrity.py","--fact-kernel",str(isj_fact_kernel),"--output",str(isj_fact_integrity)), isj_fact_integrity),
+        CycleStage("isj_writer", (py,"valcea-clar/core_v2/isj_writer_shadow_lane.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--output",str(isj_article)), isj_article),
+        CycleStage("isj_article_integrity", (py,"valcea-clar/core_v2/isj_article_integrity.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--article",str(isj_article),"--output",str(isj_article_integrity)), isj_article_integrity),
         CycleStage("photo_truth", (py,"valcea-clar/core_v2/photo_truth_gate.py","--input",f"ipj={ipj}","--input",f"isu={isu}","--input",f"municipal={municipal_articles}","--visual-registry","valcea-clar/core_v2/visual_registry.json","--external-probe","--output",str(photo)), photo),
         CycleStage("shadow_site_package", (py,"valcea-clar/core_v2/shadow_site_package.py","--articles",str(municipal_articles),"--photo-truth",str(photo),"--visual-registry","valcea-clar/core_v2/visual_registry.json","--repo-root",".","--output-dir",str(site_dir),"--output",str(site_package)), site_package),
     )
@@ -129,6 +136,7 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                     "detail_evidence_shadow_count","material_detail_candidate_shadow_count","embedded_notice_evidence_shadow_count",
                     "embedded_target_identity_shadow_count","selected_document_count","document_content_captured_shadow_count",
                     "document_text_extracted_shadow_count","verified_document_count","verified_calendar_document_count","field_evidence_count","material_candidate_shadow_count","materiality_candidate_count","fact_kernel_count","verified_claim_count","fact_kernel_integrity_verified","writer_gate_status",
+                    "article_count","shadow_writer_executed","article_truth_state","verified_article_count","article_integrity_verified","photo_gate_status",
                     "contest_context_verified","selected_context_document_count","selected_roles",
                     "verified_written_shadow_count","visual_candidate_verified_shadow_count","package_image_bound_shadow_count","blocked_count",
                     "no_story_count","fabricated_claim_count","publication_authority","acceptance_ready"
@@ -140,22 +148,52 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
 
 
 def run_bounded_shadow_cycle(*, repo_root: Path, workdir: Path, live: bool) -> dict[str, Any]:
-    workdir.mkdir(parents=True, exist_ok=True); plan = bounded_cycle_plan(workdir, live=live); stages=[]; failed_stage=None
+    workdir.mkdir(parents=True, exist_ok=True)
+    plan = bounded_cycle_plan(workdir, live=live)
+    stages: list[dict[str, Any]] = []
+    failed_stage = None
     for stage in plan:
         completed = subprocess.run(list(stage.argv), cwd=repo_root, capture_output=True, text=True, timeout=180, check=False)
-        summary = _stage_summary(stage, completed); stages.append(summary)
+        summary = _stage_summary(stage, completed)
+        stages.append(summary)
         if completed.returncode != 0 or not summary["output_exists"]:
-            failed_stage = stage.name; break
-    return {"schema_version":"1.5","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE","production_write_authority":False,"site_publish_allowed":False,"social_publish_allowed":False,"acceptance_ready":False,"live_read_only":live,"status":"PASS_SHADOW" if failed_stage is None else "BLOCKED","failed_stage":failed_stage,"stage_count_planned":len(plan),"stage_count_completed":len(stages),"stages":stages,"truth_rule":"This orchestrator may read official sources and compose shadow evidence only. It has no publication, deploy, merge, workflow-dispatch or Meta-write authority. A successful shadow cycle is not production readiness."}
+            failed_stage = stage.name
+            break
+    return {
+        "schema_version":"1.6","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE",
+        "production_write_authority":False,"site_publish_allowed":False,"social_publish_allowed":False,"acceptance_ready":False,
+        "live_read_only":live,"status":"PASS_SHADOW" if failed_stage is None else "BLOCKED","failed_stage":failed_stage,
+        "stage_count_planned":len(plan),"stage_count_completed":len(stages),"stages":stages,
+        "truth_rule":"This orchestrator may read official sources and compose shadow evidence only. It has no publication, deploy, merge, workflow-dispatch or Meta-write authority. A successful shadow cycle is not production readiness."
+    }
 
 
 def main() -> int:
-    parser=argparse.ArgumentParser(description="CIVORA Local News Core v2 shadow orchestrator"); parser.add_argument("--input"); parser.add_argument("--output",required=True); parser.add_argument("--run-bounded-cycle",action="store_true"); parser.add_argument("--repo-root",default="."); parser.add_argument("--workdir",default="/tmp"); parser.add_argument("--live",action="store_true"); args=parser.parse_args()
-    output=Path(args.output); output.parent.mkdir(parents=True, exist_ok=True)
+    parser = argparse.ArgumentParser(description="CIVORA Local News Core v2 shadow orchestrator")
+    parser.add_argument("--input")
+    parser.add_argument("--output", required=True)
+    parser.add_argument("--run-bounded-cycle", action="store_true")
+    parser.add_argument("--repo-root", default=".")
+    parser.add_argument("--workdir", default="/tmp")
+    parser.add_argument("--live", action="store_true")
+    args = parser.parse_args()
+    output = Path(args.output)
+    output.parent.mkdir(parents=True, exist_ok=True)
     if args.run_bounded_cycle:
-        report=run_bounded_shadow_cycle(repo_root=Path(args.repo_root),workdir=Path(args.workdir),live=args.live); output.write_text(json.dumps(report,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); print(json.dumps({"status":report["status"],"stage_count_completed":report["stage_count_completed"],"failed_stage":report["failed_stage"],"publication_authority":"NONE","acceptance_ready":False},ensure_ascii=False,sort_keys=True)); return 0 if report["status"]=="PASS_SHADOW" else 1
-    if not args.input: raise SystemExit("--input is required unless --run-bounded-cycle is used")
-    payload=json.loads(Path(args.input).read_text(encoding="utf-8")); tx=run_shadow(payload); out=tx.as_dict(); out["shadow_mode"]=True; out["publication_authority"]="NONE"; output.write_text(json.dumps(out,ensure_ascii=False,indent=2)+"\n",encoding="utf-8"); print(json.dumps({"story_id":tx.story_id,"state":tx.state.value,"shadow_mode":True},ensure_ascii=False)); return 0
+        report = run_bounded_shadow_cycle(repo_root=Path(args.repo_root), workdir=Path(args.workdir), live=args.live)
+        output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        print(json.dumps({"status":report["status"],"stage_count_completed":report["stage_count_completed"],"failed_stage":report["failed_stage"],"publication_authority":"NONE","acceptance_ready":False}, ensure_ascii=False, sort_keys=True))
+        return 0 if report["status"] == "PASS_SHADOW" else 1
+    if not args.input:
+        raise SystemExit("--input is required unless --run-bounded-cycle is used")
+    payload = json.loads(Path(args.input).read_text(encoding="utf-8"))
+    tx = run_shadow(payload)
+    out = tx.as_dict()
+    out["shadow_mode"] = True
+    out["publication_authority"] = "NONE"
+    output.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps({"story_id":tx.story_id,"state":tx.state.value,"shadow_mode":True}, ensure_ascii=False))
+    return 0
 
 
 if __name__ == "__main__":
