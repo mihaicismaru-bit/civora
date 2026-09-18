@@ -5,8 +5,10 @@ import hashlib
 import html
 import json
 import shutil
+import time
 from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from visual_readback import inspect_article_image
@@ -15,6 +17,7 @@ from visual_readback import inspect_article_image
 MODE = "SHADOW_SITE_PACKAGE_BINDING"
 MAX_IMAGE_BYTES = 15 * 1024 * 1024
 USER_AGENT = "CIVORA-Core-v2-shadow-package/1.0"
+REMOTE_RETRY_DELAYS = (0.0, 1.5, 4.0)
 
 
 def _article_index(documents: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -38,6 +41,49 @@ def _article_index(documents: list[dict[str, Any]]) -> dict[str, dict[str, Any]]
 def _paragraphs(text: str) -> str:
     parts = [part.strip() for part in str(text or "").split("\n\n") if part.strip()]
     return "\n".join(f"<p>{html.escape(part)}</p>" for part in parts)
+
+
+def _read_existing_materialized(target: Path, *, filename: str, direct: str) -> dict[str, Any] | None:
+    if not target.is_file() or target.stat().st_size <= 0:
+        return None
+    payload = target.read_bytes()
+    return {
+        "filename": filename,
+        "path": str(target),
+        "mode": "shadow_cache_reuse",
+        "bytes": len(payload),
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "source_url": direct,
+    }
+
+
+def _download_remote_image(direct: str) -> tuple[bytes, str, int]:
+    last_error: Exception | None = None
+    for attempt, delay in enumerate(REMOTE_RETRY_DELAYS, start=1):
+        if delay:
+            time.sleep(delay)
+        request = Request(direct, headers={"User-Agent": USER_AGENT, "Accept": "image/*"})
+        try:
+            with urlopen(request, timeout=20) as response:
+                content_type = str(response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+                if not content_type.startswith("image/"):
+                    raise ValueError("direct source did not return image content")
+                payload = response.read(MAX_IMAGE_BYTES + 1)
+                if len(payload) > MAX_IMAGE_BYTES:
+                    raise ValueError("direct image exceeds shadow materialization size cap")
+                if not payload:
+                    raise ValueError("direct image returned an empty payload")
+                return payload, content_type, attempt
+        except HTTPError as exc:
+            last_error = exc
+            if exc.code != 429 or attempt == len(REMOTE_RETRY_DELAYS):
+                raise
+        except Exception as exc:
+            last_error = exc
+            raise
+    if last_error is not None:
+        raise last_error
+    raise ValueError("remote image materialization exhausted without result")
 
 
 def _materialize_image(
@@ -74,16 +120,12 @@ def _materialize_image(
     direct = str(image.get("direct_source_url") or "").strip()
     if not direct.startswith("https://"):
         raise ValueError("verified direct_source_url required for shadow materialization")
-    request = Request(direct, headers={"User-Agent": USER_AGENT, "Accept": "image/*"})
-    with urlopen(request, timeout=20) as response:
-        content_type = str(response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
-        if not content_type.startswith("image/"):
-            raise ValueError("direct source did not return image content")
-        payload = response.read(MAX_IMAGE_BYTES + 1)
-        if len(payload) > MAX_IMAGE_BYTES:
-            raise ValueError("direct image exceeds shadow materialization size cap")
-        if not payload:
-            raise ValueError("direct image returned an empty payload")
+
+    cached = _read_existing_materialized(target, filename=filename, direct=direct)
+    if cached is not None:
+        return cached
+
+    payload, content_type, attempts = _download_remote_image(direct)
     target.write_bytes(payload)
     return {
         "filename": filename,
@@ -92,6 +134,8 @@ def _materialize_image(
         "bytes": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),
         "source_url": direct,
+        "content_type": content_type,
+        "attempts": attempts,
     }
 
 
@@ -206,7 +250,7 @@ def build_shadow_packages(
     passed = sum(row.get("status") == "PACKAGE_IMAGE_BOUND_SHADOW" for row in rows)
     blocked = sum(row.get("status") == "BLOCKED" for row in rows)
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": MODE,
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -220,7 +264,8 @@ def build_shadow_packages(
         "rows": rows,
         "truth_rule": (
             "A staged HTML package may prove that the intended real photograph is wired into the future article package. "
-            "Verified remote materialization is read-only and temporary. It never proves public delivery, public image binding or VISUAL_READY. "
+            "Verified remote materialization is read-only, bounded and temporary; duplicate assignments reuse the staged byte copy, "
+            "and transient HTTP 429 is retried only within a short bounded window. It never proves public delivery, public image binding or VISUAL_READY. "
             "Those require a later production-authorized public HTTP readback."
         ),
     }
