@@ -12,7 +12,7 @@ from apavil_shadow_lane import verify_document  # noqa: E402
 
 
 class ApavilShadowLaneTests(unittest.TestCase):
-    def _document(self, *, dates=None, geography=None, signal_class="SCHEDULED_WATER_OUTAGE"):
+    def _document(self, *, dates=None, geography=None, signal_class="SCHEDULED_WATER_OUTAGE", date_status="EXPLICIT_VISIBLE_TEXT"):
         return {
             "source_id": "signal-apavil-valcea-scheduled-outages",
             "source_content_sha256": "a" * 64,
@@ -26,7 +26,7 @@ class ApavilShadowLaneTests(unittest.TestCase):
                     "title": "Anunț întrerupere furnizare apă potabilă în municipiul Râmnicu Vâlcea în data de 21.09.2026, în intervalul 09:00 - 15:00",
                     "signal_class": signal_class,
                     "effective_dates": dates if dates is not None else ["2026-09-21"],
-                    "effective_date_status": "EXPLICIT_VISIBLE_TEXT",
+                    "effective_date_status": date_status,
                     "time_range": {"start": "09:00", "end": "15:00", "basis": "EXPLICIT_VISIBLE_TEXT"},
                     "explicit_geography": geography if geography is not None else ["municipiul Râmnicu Vâlcea"],
                     "current_status_claim_allowed": False,
@@ -56,6 +56,13 @@ class ApavilShadowLaneTests(unittest.TestCase):
         self.assertEqual(row["state"], "NO_STORY")
         self.assertEqual(row["reason"], "stale_scheduled_outage")
         self.assertEqual(result["verified_written_shadow_count"], 0)
+
+    def test_missing_effective_date_is_no_story_not_blocked(self):
+        result = verify_document(self._document(dates=[], date_status="MISSING"), as_of=date(2026, 9, 18))
+        row = result["rows"][0]
+        self.assertEqual(row["state"], "NO_STORY")
+        self.assertEqual(row["reason"], "missing_effective_date")
+        self.assertEqual(result["blocked_count"], 0)
 
     def test_missing_explicit_geography_blocks_instead_of_inferring(self):
         result = verify_document(self._document(geography=[]), as_of=date(2026, 9, 18))

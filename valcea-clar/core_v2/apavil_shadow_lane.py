@@ -42,6 +42,15 @@ def _block(signal_id: str, reason: str) -> dict[str, Any]:
     }
 
 
+def _no_story(signal_id: str, reason: str) -> dict[str, Any]:
+    return {
+        "signal_id": signal_id,
+        "state": "NO_STORY",
+        "reason": reason,
+        "publication_authority": "NONE",
+    }
+
+
 def verify_signal(row: dict[str, Any], *, snapshot_sha256: str, as_of: date) -> dict[str, Any]:
     signal_id = str(row.get("signal_id") or "").strip()
     if not signal_id:
@@ -59,13 +68,12 @@ def verify_signal(row: dict[str, Any], *, snapshot_sha256: str, as_of: date) -> 
     if row.get("current_status_claim_allowed") is not False:
         return _block(signal_id, "current_status_claim_not_fail_closed")
     if str(row.get("signal_class") or "") != "SCHEDULED_WATER_OUTAGE":
-        return {
-            "signal_id": signal_id,
-            "state": "NO_STORY",
-            "reason": "not_scheduled_water_outage",
-            "publication_authority": "NONE",
-        }
-    if str(row.get("effective_date_status") or "") != "EXPLICIT_VISIBLE_TEXT":
+        return _no_story(signal_id, "not_scheduled_water_outage")
+
+    date_status = str(row.get("effective_date_status") or "")
+    if date_status == "MISSING":
+        return _no_story(signal_id, "missing_effective_date")
+    if date_status != "EXPLICIT_VISIBLE_TEXT":
         return _block(signal_id, "effective_date_not_explicit")
 
     dates: list[date] = []
@@ -75,14 +83,9 @@ def verify_signal(row: dict[str, Any], *, snapshot_sha256: str, as_of: date) -> 
         except ValueError:
             return _block(signal_id, "invalid_effective_date")
     if not dates:
-        return _block(signal_id, "effective_date_missing")
+        return _no_story(signal_id, "missing_effective_date")
     if max(dates) < as_of:
-        return {
-            "signal_id": signal_id,
-            "state": "NO_STORY",
-            "reason": "stale_scheduled_outage",
-            "publication_authority": "NONE",
-        }
+        return _no_story(signal_id, "stale_scheduled_outage")
 
     geography = [str(value).strip() for value in row.get("explicit_geography") or [] if str(value).strip()]
     if not geography:
@@ -92,7 +95,7 @@ def verify_signal(row: dict[str, Any], *, snapshot_sha256: str, as_of: date) -> 
         return _block(signal_id, "source_title_insufficient")
     when = _when_text(row)
     if not when:
-        return _block(signal_id, "effective_window_missing")
+        return _no_story(signal_id, "missing_effective_window")
 
     evidence_ids = [signal_id]
     if snapshot_sha256:
@@ -191,7 +194,7 @@ def verify_document(document: dict[str, Any], *, as_of: date | None = None) -> d
         "no_story_count": no_story,
         "blocked_count": blocked,
         "rows": rows,
-        "truth_rule": "Only explicit first-party APAVIL index metadata is promoted; scheduled does not mean currently interrupted.",
+        "truth_rule": "Only explicit first-party APAVIL index metadata is promoted; scheduled does not mean currently interrupted; a signal without a material effective date terminates NO_STORY.",
     }
 
 
