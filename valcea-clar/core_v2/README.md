@@ -16,6 +16,23 @@ The unit of truth is a single `StoryTransaction`. A workflow exit code, preview,
 - `PublicationReceipt`: site delivery requires canonical public URL + external readback. Facebook/Instagram delivery requires remote ID + receipt ID + readback.
 - `AuditResult`: acceptance requires external truth evidence and zero duplicates, fabricated claims, manual intervention and unresolved material signals.
 
+## Photo truth gate
+
+`photo_truth_gate.py` is the Core v2 fail-closed pre-publication visual adjudicator. It never treats an atlas entry, candidate registry hit, text card, synthetic asset or rights metadata alone as story approval.
+
+A story visual can become `VISUAL_CANDIDATE_VERIFIED_SHADOW` only when all of the following are true:
+
+- the visual is assigned specifically to that story;
+- it is a real photograph and `synthetic=false`;
+- subject relevance is explicitly proven;
+- editor approval is explicit;
+- the rights basis belongs to the allowed rights set;
+- provenance and direct image URLs are HTTPS;
+- archive/context use has an explicit disclosure;
+- when external probing is enabled, both the provenance page and direct image pass non-destructive readback.
+
+Even after this shadow gate passes, `social_publish_allowed=false` and `article_binding_verified=false`. The public article must later pass independent image binding/readback before the transaction can reach `VISUAL_READY` for production delivery. Legacy `text_card_no_synthetic_depiction` is never a success substitute in Core v2.
+
 ## Safety / isolation
 
 Core v2 currently performs no network writes. `orchestrator.py` is an evidence-replay/shadow evaluator only. It never publishes to site or social. Site publication and social distribution remain separate state transitions; a social failure never rolls back a truthful site publication.
