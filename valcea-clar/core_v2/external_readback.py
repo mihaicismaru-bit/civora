@@ -81,7 +81,7 @@ def inspect_html(html: str, *, requested_url: str, final_url: str, expected_stor
         "canonical_match": canonical_match,
         "newsarticle_count": len(news_articles),
         "newsarticle_story_match": article_match,
-        "readback_ok": bool(route_match and canonical_match and news_articles),
+        "readback_ok": bool(route_match and canonical_match and news_articles and article_match),
     }
 
 
