@@ -40,6 +40,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_visual.py
           python valcea-clar/tests/test_core_v2_visual_registry.py
           python valcea-clar/tests/test_core_v2_shadow_site_package.py
+          python valcea-clar/tests/test_core_v2_orchestrator.py
           python valcea-clar/tests/test_core_v2_transactions.py
           python valcea-clar/tests/test_core_v2_gate_report.py
           python valcea-clar/tests/test_core_v2_apavil_shadow_lane.py
@@ -75,68 +76,14 @@ jobs:
           python valcea-clar/scripts/isu_valcea_emergency_detail_evidence.py --self-test
           python valcea-clar/scripts/council_decision_document_resolver.py --self-test
 
-      - name: Run APAVIL source-to-kernel shadow lane read-only
-        run: python valcea-clar/core_v2/apavil_shadow_lane.py --live --output /tmp/valcea-core-v2-apavil-shadow.json
-
-      - name: Run IPJ structured editorial shadow lane read-only
-        run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source ipj --live --output /tmp/valcea-core-v2-ipj-shadow.json
-
-      - name: Run ISU structured editorial shadow lane read-only
-        run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source isu --live --output /tmp/valcea-core-v2-isu-shadow.json
-
-      - name: Run Râmnicu Vâlcea municipal reference shadow lane read-only
-        run: python valcea-clar/core_v2/municipal_reference_shadow_lane.py --live --output /tmp/valcea-core-v2-municipal-shadow.json
-
-      - name: Collect bounded municipal HCL document evidence read-only
-        run: python valcea-clar/core_v2/municipal_document_shadow_lane.py --live --output /tmp/valcea-core-v2-municipal-documents.json
-
-      - name: Adjudicate municipal materiality read-only
+      - name: Run single bounded Core v2 shadow cycle read-only
         run: |
-          python valcea-clar/core_v2/municipal_materiality_shadow_lane.py \
-            --input /tmp/valcea-core-v2-municipal-documents.json \
-            --output /tmp/valcea-core-v2-municipal-materiality.json
-
-      - name: Compose evidence-bound municipal FactKernels read-only
-        run: |
-          python valcea-clar/core_v2/municipal_fact_kernel_shadow_lane.py \
-            --documents /tmp/valcea-core-v2-municipal-documents.json \
-            --materiality /tmp/valcea-core-v2-municipal-materiality.json \
-            --output /tmp/valcea-core-v2-municipal-fact-kernels.json
-
-      - name: Compose municipal full editorial packages read-only
-        run: |
-          python valcea-clar/core_v2/municipal_writer_shadow_lane.py \
-            --fact-kernels /tmp/valcea-core-v2-municipal-fact-kernels.json \
-            --output /tmp/valcea-core-v2-municipal-articles.json
-
-      - name: Run CJ Vâlcea road signal gate read-only
-        run: python valcea-clar/core_v2/cj_road_shadow_lane.py --live --output /tmp/valcea-core-v2-cj-road-shadow.json
-
-      - name: Run ETA current-material signal gate read-only
-        run: python valcea-clar/core_v2/eta_shadow_lane.py --live --limit 20 --output /tmp/valcea-core-v2-eta-shadow.json
-
-      - name: Run ISJ education current-material signal gate read-only
-        run: python valcea-clar/core_v2/isj_shadow_lane.py --live --output /tmp/valcea-core-v2-isj-shadow.json
-
-      - name: Run Core v2 photo truth gate read-only
-        run: |
-          python valcea-clar/core_v2/photo_truth_gate.py \
-            --input ipj=/tmp/valcea-core-v2-ipj-shadow.json \
-            --input isu=/tmp/valcea-core-v2-isu-shadow.json \
-            --input municipal=/tmp/valcea-core-v2-municipal-articles.json \
-            --visual-registry valcea-clar/core_v2/visual_registry.json \
-            --external-probe \
-            --output /tmp/valcea-core-v2-photo-truth.json
-
-      - name: Build staged article-image packages read-only
-        run: |
-          python valcea-clar/core_v2/shadow_site_package.py \
-            --articles /tmp/valcea-core-v2-municipal-articles.json \
-            --photo-truth /tmp/valcea-core-v2-photo-truth.json \
-            --visual-registry valcea-clar/core_v2/visual_registry.json \
+          python valcea-clar/core_v2/orchestrator.py \
+            --run-bounded-cycle \
+            --live \
             --repo-root . \
-            --output-dir /tmp/valcea-core-v2-shadow-site \
-            --output /tmp/valcea-core-v2-shadow-site-package.json
+            --workdir /tmp \
+            --output /tmp/valcea-core-v2-cycle.json
 
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
@@ -203,6 +150,7 @@ jobs:
         with:
           name: valcea-clar-core-v2-shadow-evidence-${{ github.run_id }}
           path: |
+            /tmp/valcea-core-v2-cycle.json
             /tmp/valcea-core-v2-apavil-shadow.json
             /tmp/valcea-core-v2-ipj-shadow.json
             /tmp/valcea-core-v2-isu-shadow.json
