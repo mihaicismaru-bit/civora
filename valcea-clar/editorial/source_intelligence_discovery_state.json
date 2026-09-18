@@ -14,11 +14,11 @@
       "seed_id": "anchor-aba-olt",
       "publisher": "Administrația Bazinală de Apă Olt",
       "seed_url": "https://olt.rowater.ro/",
-      "checked_at_epoch": 1789608673,
+      "checked_at_epoch": 1789711285,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://olt.rowater.ro/",
-      "content_sha256": "6158bd2823f302a5fae1249795b10e44ea8c16369d857da6b57146c2a38d77d1",
+      "content_sha256": "58a2aa5066bc84f7fca8c19dd840a230418376e3aac2479978b9ffd7c69f6087",
       "candidates": [
         {
           "candidate_id": "67b3a0400317b0003a126cda",
@@ -642,7 +642,7 @@
       "seed_id": "anchor-cj-valcea",
       "publisher": "Consiliul Județean Vâlcea",
       "seed_url": "https://cjvalcea.ro/",
-      "checked_at_epoch": 1789608672,
+      "checked_at_epoch": 1789711284,
       "status": "DEGRADED",
       "http_error": "<urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
       "final_url": null,
@@ -653,11 +653,11 @@
       "seed_id": "anchor-cjp-valcea",
       "publisher": "Casa Județeană de Pensii Vâlcea",
       "seed_url": "https://cjpvl.ro/",
-      "checked_at_epoch": 1789608735,
+      "checked_at_epoch": 1789711345,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://cjpvl.ro/",
-      "content_sha256": "541195c183cdb0ed9a51b517efa44c6893d09159298d421dadbc2bbf5c1901d7",
+      "content_sha256": "0be142ba52dddf8436ea16518ed8c9980e9356c9fe6f5786b5efb1c902f41a3f",
       "candidates": [
         {
           "candidate_id": "807dbbd2a244bd8a88fed425",
@@ -852,7 +852,7 @@
       "seed_id": "anchor-dsvsa-valcea",
       "publisher": "Direcția Sanitară Veterinară și pentru Siguranța Alimentelor Vâlcea",
       "seed_url": "https://valcea.dsvsa.ro/",
-      "checked_at_epoch": 1789608717,
+      "checked_at_epoch": 1789711327,
       "status": "DEGRADED",
       "http_error": "<urlopen error [Errno 101] Network is unreachable>",
       "final_url": null,
@@ -863,12 +863,222 @@
       "seed_id": "anchor-itm-valcea",
       "publisher": "Inspectoratul Teritorial de Muncă Vâlcea",
       "seed_url": "https://www.inspectiamuncii.ro/web/itm-valcea",
-      "checked_at_epoch": 1789608698,
-      "status": "DEGRADED",
-      "http_error": "<urlopen error timed out>",
-      "final_url": null,
-      "content_sha256": null,
-      "candidates": []
+      "checked_at_epoch": 1789711311,
+      "status": "PASS",
+      "http_error": null,
+      "final_url": "https://www.inspectiamuncii.ro/web/itm-valcea",
+      "content_sha256": "d4648b53fc392e1e25ba0f3a4d54d4ccc1a19ab05bad470650865f69503186fb",
+      "candidates": [
+        {
+          "candidate_id": "3137540bd079218640fb6a33",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/robots.txt",
+          "discovered_by": "standard:robots",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "df95456b57fa58589148ff38",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/sitemap.xml",
+          "discovered_by": "standard:sitemap",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "cbb82fb7dafd3a3a2412278f",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/feed/",
+          "discovered_by": "standard:feed",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "ad37d54a43501221cf35bf42",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/rss/",
+          "discovered_by": "standard:rss",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "fc8c9543cb2b833a85df6fb6",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/html/portlet/document_library/css/main.css?browserId=other&themeId=SIAMC_WAR_SIAMCchildtheme&minifierType=css&languageId=ro_RO&b=6210&t=1783112628585",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "808464484c176dc09c9b5c81",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/web/itm-valcea/concurs",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "a36ecf355b7de3be77370fe8",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/web/itm-valcea/solicitare-informatii-de-interes-public",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "b93f968fcf7af50482d2c9a0",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/web/itm-valcea/vizualizare-informatii-solicitate",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "5abd86aa66e00fc8a67b524a",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/mass-media",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "c2b58c71a23915592fb164ee",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/web/securitatea-si-sanatatea-in-munca",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "de8581b7c4ab70c91cb71753",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/924052/40353739/Pliant+IM+Munca+subdeclarata.pdf/ab7a58cc-a353-41f1-9d96-96496182eada",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "b3473904e1a87133b9ffd699",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/66402/77672195/linkuri_lucratorii+straini+non+UE_2024.pdf/1f9c0caa-5df4-437f-bea4-34115e47fbfa",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "ff7979dcf026aa4ec685107c",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/924052/924616/Afise+munca+in+strainatate.pdf/cc32ba6d-d3b7-444a-a92d-dd92677b8346",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "0a19193c67c40bfffca2a077",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/924052/924484/Salariul+minim+brut+pe+economie.pdf/1b1759ae-9475-4127-a445-e482abeb944b",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "5ce5d4978870721fe6210793",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/924052/924484/avertisment_munca_strainatate_2.pdf/111457b7-5848-4fa5-8aeb-ec9c579a3e65",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "7a1b9e2510b8af927e5e88be",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/66402/201782/Alte+informatii+Marea+Britanie/ecacbc9d-49fe-4b1a-a8ad-dfd6d4992596",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "bd88bafe8a1c75f579e5800c",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/66402/201782/Ghid+munca+Olanda/9a1948c5-de94-4466-9f2b-7b32a452426e",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "34ca787c0cf54dbba13a233e",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/66402/200730/INFO+_2020_SITE_IM.pdf/fd17ee85-01c5-44d1-9b3b-4c9ed8e74377",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        },
+        {
+          "candidate_id": "8c84bf9192d08ff636ef949b",
+          "seed_id": "anchor-itm-valcea",
+          "url": "https://www.inspectiamuncii.ro/documents/66402/189490/video+telverde/3de9da6b-fa9d-4087-b862-979c1338525a",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T1",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+        }
+      ]
     },
     {
       "seed_id": "anchor-prefectura-89-uats",
@@ -885,7 +1095,7 @@
       "seed_id": "anchor-salvamont-brezoi",
       "publisher": "Serviciul Public Local SALVAMONT Brezoi",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
-      "checked_at_epoch": 1789608678,
+      "checked_at_epoch": 1789711291,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=56",
@@ -974,7 +1184,7 @@
       "seed_id": "anchor-salvamont-valcea",
       "publisher": "Serviciul Public Județean Salvamont Salvaspeo Vâlcea",
       "seed_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
-      "checked_at_epoch": 1789608676,
+      "checked_at_epoch": 1789711289,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.salvamontromania.ro/serviciu.php?id=17",
@@ -1063,7 +1273,7 @@
       "seed_id": "anchor-sju-valcea",
       "publisher": "Spitalul Județean de Urgență Vâlcea",
       "seed_url": "https://www.sjv.ro/",
-      "checked_at_epoch": 1789608679,
+      "checked_at_epoch": 1789711293,
       "status": "DEGRADED",
       "http_error": "<urlopen error [Errno 101] Network is unreachable>",
       "final_url": null,
@@ -10750,11 +10960,11 @@
       "seed_id": "signal-curierul-valcea",
       "publisher": "Curierul de Vâlcea",
       "seed_url": "https://www.curierul.ro/",
-      "checked_at_epoch": 1789608740,
+      "checked_at_epoch": 1789711350,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://www.curierul.ro/",
-      "content_sha256": "80fa3af72c2392c1725dff8753b148bc7713aaea1eae1e8ef546b845411f1cbf",
+      "content_sha256": "5ccd8d0ffc3abec29564a2ed87c93703c859534a8ae6ab367bad1fc20a573cae",
       "candidates": [
         {
           "candidate_id": "b6080307b0a1b0a345ee341e",
@@ -10966,6 +11176,17 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
+          "candidate_id": "0e473395e707df57a5d0635f",
+          "seed_id": "signal-curierul-valcea",
+          "url": "https://www.curierul.ro/author/comunicat-de-presa/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
           "candidate_id": "17385f82e605ed6d5f519a49",
           "seed_id": "signal-curierul-valcea",
           "url": "https://www.curierul.ro/apavil-anunta-avarie-in-comuna-mihaesti-apa-intrerupta-si-pentru-o-parte-din-locuitorii-din-babeni/?share=facebook",
@@ -11013,17 +11234,6 @@
           "candidate_id": "c6f3e04a2c60d26ddfa29d3b",
           "seed_id": "signal-curierul-valcea",
           "url": "https://www.curierul.ro/apavil-anunta-avarie-in-comuna-mihaesti-apa-intrerupta-si-pentru-o-parte-din-locuitorii-din-babeni/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "0e473395e707df57a5d0635f",
-          "seed_id": "signal-curierul-valcea",
-          "url": "https://www.curierul.ro/author/comunicat-de-presa/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -11365,6 +11575,17 @@
           "candidate_id": "b12752e4d835697549020f70",
           "seed_id": "signal-curierul-valcea",
           "url": "https://www.curierul.ro/category/sport/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "7a18daae530bdd6f46d7e174",
+          "seed_id": "signal-curierul-valcea",
+          "url": "https://www.curierul.ro/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-inginer-in-cadrul-serviciului-avize-proiectare-compartimentul-gis/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -12218,11 +12439,11 @@
       "seed_id": "signal-eveniment-valcean",
       "publisher": "Eveniment Vâlcean",
       "seed_url": "https://evenimentvalcean.ro/",
-      "checked_at_epoch": 1789608737,
+      "checked_at_epoch": 1789711347,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://evenimentvalcean.ro/",
-      "content_sha256": "eebb60d3cd7b573fd8337767f37a8653da29078a7280455f829d2f5c3d48c50a",
+      "content_sha256": "421d9c3f859dd477664d197e70577a2cb511ae78fd39ff9fdd227f7b7df55836",
       "candidates": [
         {
           "candidate_id": "1477086248f3e49ed2c7e27e",
@@ -12335,9 +12556,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "a8a709632717bc1ee5910698",
+          "candidate_id": "d3be10c7f8d5764b9e76311c",
           "seed_id": "signal-eveniment-valcean",
-          "url": "https://evenimentvalcean.ro/mateesti-investeste-in-energie-verde-un-parc-fotovoltaic-va-fi-construit-in-comuna/",
+          "url": "https://evenimentvalcean.ro/investitii-importante-la-lapusata-bani-pentru-gaze-drumuri-si-utilaje/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -12346,9 +12567,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "0d7d8b58ab30296650a2acdc",
+          "candidate_id": "f807de28e3e8359f58aaaece",
           "seed_id": "signal-eveniment-valcean",
-          "url": "https://evenimentvalcean.ro/drumul-ramnicu-valcea-tigveni-de-la-campania-lui-eugen-neata-la-proiectul-de-770-de-milioane-de-lei/",
+          "url": "https://evenimentvalcean.ro/patru-drumuri-locale-din-lacusteni-intra-in-modernizare-investitia-ajunge-la-peste-16-milioane-de-lei/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -12368,20 +12589,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "4deb7e0a3d267a44319e022b",
+          "candidate_id": "6d03e8af22c3b6f38488ba41",
           "seed_id": "signal-eveniment-valcean",
-          "url": "https://evenimentvalcean.ro/pausesti-otasau-trei-meciuri-trei-remize-de-1-1-in-liga-a-3-a-valcenii-raman-neinvinsi/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "f68775c5c43f640807b7b580",
-          "seed_id": "signal-eveniment-valcean",
-          "url": "https://evenimentvalcean.ro/8-septembrie-zi-de-sarbatoare-in-valcea-nasterea-maicii-domnului-aduce-targuri-traditii-si-evenimente-culturale/",
+          "url": "https://evenimentvalcean.ro/foto-video-alerta-in-sirineasa-primarul-ion-bebe-streinu-anunta-un-nou-furt-si-le-cere-localnicilor-sa-si-inchida-casele/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -12393,6 +12603,17 @@
           "candidate_id": "69115b0ea34e4ab431f34f29",
           "seed_id": "signal-eveniment-valcean",
           "url": "https://evenimentvalcean.ro/cnas-a-lansat-portalul-esanatateamea/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "93f3c24da787d1884f43fb14",
+          "seed_id": "signal-eveniment-valcean",
+          "url": "https://evenimentvalcean.ro/foto-ofiterii-anticoruptie-cu-ochii-pe-examenul-auto-de-la-ramnicu-valcea-avertisment-pentru-candidati-inainte-de-plecarea-pe-traseu/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -15352,11 +15573,11 @@
       "seed_id": "signal-jurnalul-olteniei-valcea",
       "publisher": "Jurnalul Olteniei — Vâlcea",
       "seed_url": "https://www.jurnalulolteniei.ro/valcea/",
-      "checked_at_epoch": 1789608742,
+      "checked_at_epoch": 1789711353,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://jurnalulolteniei.ro/valcea-1-000-de-sanctiuni-in-doar-trei-zile/",
-      "content_sha256": "60d441dfe77c0972793f743fe93b7b4c8da06714730cd829606f55d1e65b76e3",
+      "content_sha256": "5ee4e1a50eb95ee819ad6fbe1b64755174b9139f8358227bb8d39cec2950c7e2",
       "candidates": [
         {
           "candidate_id": "6891724d76c22ae57e618b76",
@@ -15502,17 +15723,6 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "454633d0d87cf11e67627b02",
-          "seed_id": "signal-jurnalul-olteniei-valcea",
-          "url": "https://jurnalulolteniei.ro/comunicat-de-presa-privind-inceperea-proiectului-construire-spatii-de-cazare-si-servicii-de-wellness/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
           "candidate_id": "4791b0aecabaf9f1f8cdc80b",
           "seed_id": "signal-jurnalul-olteniei-valcea",
           "url": "https://www.jurnalulolteniei.ro/feed/",
@@ -15535,9 +15745,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "2ab1d587aa2d62da3ef749bd",
+          "candidate_id": "8f9d280e79e45daab0e9bff1",
           "seed_id": "signal-jurnalul-olteniei-valcea",
-          "url": "https://jurnalulolteniei.ro/comunicat-de-presa-privind-lansarea-proiectului-cu-titlul-construire-spatiu-depozitare-p1e-partial-imprejmuire-teren-si-platforma-betonata-cod-proiect-355439/",
+          "url": "https://jurnalulolteniei.ro/finalizarea-proiectului-cu-titlul-infiintare-centru-de-zi-pentru-consiliere-si-sprijin-pentru-parinti-si-copii-in-comuna-seaca-de-camp-judetul-dolj/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -17385,11 +17595,11 @@
       "seed_id": "signal-se-intampla-in-valcea",
       "publisher": "Se întâmplă în Vâlcea",
       "seed_url": "https://seintamplainvalcea.ro/",
-      "checked_at_epoch": 1789608738,
+      "checked_at_epoch": 1789711348,
       "status": "PASS",
       "http_error": null,
       "final_url": "https://seintamplainvalcea.ro/",
-      "content_sha256": "736b5b9e46c24cd76416596f251f5dee8087583b01b3a0e149e7925550c27ac1",
+      "content_sha256": "3ab27214020779907614e92b12c34ce989203ab2550acbfdfe776ce4583811de",
       "candidates": [
         {
           "candidate_id": "3dea03749a10fb619d863a6b",
@@ -17447,9 +17657,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "a981a5822c0009e7e52a7586",
+          "candidate_id": "42ce24ebb58e620b7be56dd6",
           "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/style.css?ver=7.1",
+          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/style.css?ver=7.1.1",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -17458,9 +17668,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "9752ce54fb671034e1e2f74b",
+          "candidate_id": "b597c56a25e99aa4165e42e1",
           "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews-child/style.css?ver=7.1",
+          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews-child/style.css?ver=7.1.1",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -17491,9 +17701,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "afd65493f552afa0a9631dcc",
+          "candidate_id": "5e8ca6889ae704c9354ffdb3",
           "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/icons/style.css?ver=7.1",
+          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/icons/style.css?ver=7.1.1",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -17502,9 +17712,9 @@
           "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
         },
         {
-          "candidate_id": "6253c6af2f914c86efcc967f",
+          "candidate_id": "0b454950c7159d2fa1eb6ef3",
           "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/bootstrap/css/bootstrap.min.css?ver=7.1",
+          "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/bootstrap/css/bootstrap.min.css?ver=7.1.1",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -17538,28 +17748,6 @@
           "candidate_id": "e82f5493dd03c1f2ade95434",
           "seed_id": "signal-se-intampla-in-valcea",
           "url": "https://seintamplainvalcea.ro/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "25acf170fb86200fef0341ee",
-          "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/2026/09/16/agent-de-politie-din-judetul-vecin-cercetat-pentru-trafic-de-persoane-si-proxenetism-ar-fi-obligat-o-femeie-sa-se-prostitueze-in-romania-si-marea-britanie/",
-          "discovered_by": "html:relevant_internal",
-          "tier_ceiling": "T2",
-          "lifecycle": "DISCOVERED_UNRATED",
-          "public_projection": false,
-          "auto_publication": false,
-          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-        },
-        {
-          "candidate_id": "cb23a8b89382c75590c6196c",
-          "seed_id": "signal-se-intampla-in-valcea",
-          "url": "https://seintamplainvalcea.ro/2026/09/16/atentie-urmeaza-razii-de-amploare-pe-soselele-din-valcea-politistii-rutieri-intensifica-verificarile-in-trafic/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -17604,6 +17792,17 @@
           "candidate_id": "f5b95d9bac331d45f5f45357",
           "seed_id": "signal-se-intampla-in-valcea",
           "url": "https://seintamplainvalcea.ro/2026/03/07/25-de-milioane-de-puieti-vor-fi-plantati-in-padurile-statului-in-2026/",
+          "discovered_by": "html:relevant_internal",
+          "tier_ceiling": "T2",
+          "lifecycle": "DISCOVERED_UNRATED",
+          "public_projection": false,
+          "auto_publication": false,
+          "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+        },
+        {
+          "candidate_id": "9315e9a475f307275215c385",
+          "seed_id": "signal-se-intampla-in-valcea",
+          "url": "https://seintamplainvalcea.ro/2026/09/17/foto-o-noua-spargere-la-sirineasa-dupa-un-incident-de-anul-trecut-primarul-avertizeaza-incuiati-va-casele-si-anexele/",
           "discovered_by": "html:relevant_internal",
           "tier_ceiling": "T2",
           "lifecycle": "DISCOVERED_UNRATED",
@@ -20006,7 +20205,7 @@
       ]
     }
   ],
-  "candidate_count": 1725,
+  "candidate_count": 1743,
   "candidates": [
     {
       "candidate_id": "723808db7a7383c967e1a9ce",
@@ -20804,6 +21003,215 @@
       "candidate_id": "777f29837d5148d0cd7772c4",
       "seed_id": "anchor-cjp-valcea",
       "url": "https://cjpvl.ro/wp-content/themes/constructo/css/wordpress.css?ver=5.7.17",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "8c84bf9192d08ff636ef949b",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/66402/189490/video+telverde/3de9da6b-fa9d-4087-b862-979c1338525a",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "34ca787c0cf54dbba13a233e",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/66402/200730/INFO+_2020_SITE_IM.pdf/fd17ee85-01c5-44d1-9b3b-4c9ed8e74377",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "7a1b9e2510b8af927e5e88be",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/66402/201782/Alte+informatii+Marea+Britanie/ecacbc9d-49fe-4b1a-a8ad-dfd6d4992596",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "bd88bafe8a1c75f579e5800c",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/66402/201782/Ghid+munca+Olanda/9a1948c5-de94-4466-9f2b-7b32a452426e",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "b3473904e1a87133b9ffd699",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/66402/77672195/linkuri_lucratorii+straini+non+UE_2024.pdf/1f9c0caa-5df4-437f-bea4-34115e47fbfa",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "de8581b7c4ab70c91cb71753",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/924052/40353739/Pliant+IM+Munca+subdeclarata.pdf/ab7a58cc-a353-41f1-9d96-96496182eada",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "0a19193c67c40bfffca2a077",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/924052/924484/Salariul+minim+brut+pe+economie.pdf/1b1759ae-9475-4127-a445-e482abeb944b",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "5ce5d4978870721fe6210793",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/924052/924484/avertisment_munca_strainatate_2.pdf/111457b7-5848-4fa5-8aeb-ec9c579a3e65",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "ff7979dcf026aa4ec685107c",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/documents/924052/924616/Afise+munca+in+strainatate.pdf/cc32ba6d-d3b7-444a-a92d-dd92677b8346",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "cbb82fb7dafd3a3a2412278f",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/feed/",
+      "discovered_by": "standard:feed",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "fc8c9543cb2b833a85df6fb6",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/html/portlet/document_library/css/main.css?browserId=other&themeId=SIAMC_WAR_SIAMCchildtheme&minifierType=css&languageId=ro_RO&b=6210&t=1783112628585",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "5abd86aa66e00fc8a67b524a",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/mass-media",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "3137540bd079218640fb6a33",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/robots.txt",
+      "discovered_by": "standard:robots",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "ad37d54a43501221cf35bf42",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/rss/",
+      "discovered_by": "standard:rss",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "df95456b57fa58589148ff38",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/sitemap.xml",
+      "discovered_by": "standard:sitemap",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "808464484c176dc09c9b5c81",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/web/itm-valcea/concurs",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "a36ecf355b7de3be77370fe8",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/web/itm-valcea/solicitare-informatii-de-interes-public",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "b93f968fcf7af50482d2c9a0",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/web/itm-valcea/vizualizare-informatii-solicitate",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T1",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
+    },
+    {
+      "candidate_id": "c2b58c71a23915592fb164ee",
+      "seed_id": "anchor-itm-valcea",
+      "url": "https://www.inspectiamuncii.ro/web/securitatea-si-sanatatea-in-munca",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T1",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -30272,6 +30680,17 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "7a18daae530bdd6f46d7e174",
+      "seed_id": "signal-curierul-valcea",
+      "url": "https://www.curierul.ro/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-inginer-in-cadrul-serviciului-avize-proiectare-compartimentul-gis/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "bb22b9aca927efa8d3da79ae",
       "seed_id": "signal-curierul-valcea",
       "url": "https://www.curierul.ro/apavil-sa-anunt-privind-scoaterea-la-concurs-a-unui-post-de-inginer-in-cadrul-serviciului-avize-proiectare/",
@@ -31537,17 +31956,6 @@
       "verification_route": "PRIMARY_SOURCE_SIGNAL_REQUIRES_STORY_GATE"
     },
     {
-      "candidate_id": "f68775c5c43f640807b7b580",
-      "seed_id": "signal-eveniment-valcean",
-      "url": "https://evenimentvalcean.ro/8-septembrie-zi-de-sarbatoare-in-valcea-nasterea-maicii-domnului-aduce-targuri-traditii-si-evenimente-culturale/",
-      "discovered_by": "html:relevant_internal",
-      "tier_ceiling": "T2",
-      "lifecycle": "DISCOVERED_UNRATED",
-      "public_projection": false,
-      "auto_publication": false,
-      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-    },
-    {
       "candidate_id": "5697ea3b6c077d894a08205a",
       "seed_id": "signal-eveniment-valcean",
       "url": "https://evenimentvalcean.ro/category/anunturi/",
@@ -31592,17 +32000,6 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "0d7d8b58ab30296650a2acdc",
-      "seed_id": "signal-eveniment-valcean",
-      "url": "https://evenimentvalcean.ro/drumul-ramnicu-valcea-tigveni-de-la-campania-lui-eugen-neata-la-proiectul-de-770-de-milioane-de-lei/",
-      "discovered_by": "html:relevant_internal",
-      "tier_ceiling": "T2",
-      "lifecycle": "DISCOVERED_UNRATED",
-      "public_projection": false,
-      "auto_publication": false,
-      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-    },
-    {
       "candidate_id": "85a109f4f81d7239fd4f31b5",
       "seed_id": "signal-eveniment-valcean",
       "url": "https://evenimentvalcean.ro/erasmus-la-scoala-gimnaziala-magura-de-la-experienta-la-impact-peste-40-de-participanti-la-conferinta-de-diseminare-a-rezultatelor-proiectului-erasmus-organizata-la-biblioteca-judeteana/",
@@ -31636,9 +32033,31 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
+      "candidate_id": "93f3c24da787d1884f43fb14",
+      "seed_id": "signal-eveniment-valcean",
+      "url": "https://evenimentvalcean.ro/foto-ofiterii-anticoruptie-cu-ochii-pe-examenul-auto-de-la-ramnicu-valcea-avertisment-pentru-candidati-inainte-de-plecarea-pe-traseu/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
       "candidate_id": "b5dbf4ad5eb24d904d1f926c",
       "seed_id": "signal-eveniment-valcean",
       "url": "https://evenimentvalcean.ro/foto-vesti-bune-pentru-schiori-transalpina-ski-resort-se-pregateste-pentru-noul-sezon/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "6d03e8af22c3b6f38488ba41",
+      "seed_id": "signal-eveniment-valcean",
+      "url": "https://evenimentvalcean.ro/foto-video-alerta-in-sirineasa-primarul-ion-bebe-streinu-anunta-un-nou-furt-si-le-cere-localnicilor-sa-si-inchida-casele/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -31658,9 +32077,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "a8a709632717bc1ee5910698",
+      "candidate_id": "d3be10c7f8d5764b9e76311c",
       "seed_id": "signal-eveniment-valcean",
-      "url": "https://evenimentvalcean.ro/mateesti-investeste-in-energie-verde-un-parc-fotovoltaic-va-fi-construit-in-comuna/",
+      "url": "https://evenimentvalcean.ro/investitii-importante-la-lapusata-bani-pentru-gaze-drumuri-si-utilaje/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -31669,9 +32088,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "4deb7e0a3d267a44319e022b",
+      "candidate_id": "f807de28e3e8359f58aaaece",
       "seed_id": "signal-eveniment-valcean",
-      "url": "https://evenimentvalcean.ro/pausesti-otasau-trei-meciuri-trei-remize-de-1-1-in-liga-a-3-a-valcenii-raman-neinvinsi/",
+      "url": "https://evenimentvalcean.ro/patru-drumuri-locale-din-lacusteni-intra-in-modernizare-investitia-ajunge-la-peste-16-milioane-de-lei/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -34639,31 +35058,20 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "454633d0d87cf11e67627b02",
-      "seed_id": "signal-jurnalul-olteniei-valcea",
-      "url": "https://jurnalulolteniei.ro/comunicat-de-presa-privind-inceperea-proiectului-construire-spatii-de-cazare-si-servicii-de-wellness/",
-      "discovered_by": "html:relevant_internal",
-      "tier_ceiling": "T2",
-      "lifecycle": "DISCOVERED_UNRATED",
-      "public_projection": false,
-      "auto_publication": false,
-      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-    },
-    {
-      "candidate_id": "2ab1d587aa2d62da3ef749bd",
-      "seed_id": "signal-jurnalul-olteniei-valcea",
-      "url": "https://jurnalulolteniei.ro/comunicat-de-presa-privind-lansarea-proiectului-cu-titlul-construire-spatiu-depozitare-p1e-partial-imprejmuire-teren-si-platforma-betonata-cod-proiect-355439/",
-      "discovered_by": "html:relevant_internal",
-      "tier_ceiling": "T2",
-      "lifecycle": "DISCOVERED_UNRATED",
-      "public_projection": false,
-      "auto_publication": false,
-      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-    },
-    {
       "candidate_id": "15f2e7da19632dc0d3ef316f",
       "seed_id": "signal-jurnalul-olteniei-valcea",
       "url": "https://jurnalulolteniei.ro/feed/",
+      "discovered_by": "html:relevant_internal",
+      "tier_ceiling": "T2",
+      "lifecycle": "DISCOVERED_UNRATED",
+      "public_projection": false,
+      "auto_publication": false,
+      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
+    },
+    {
+      "candidate_id": "8f9d280e79e45daab0e9bff1",
+      "seed_id": "signal-jurnalul-olteniei-valcea",
+      "url": "https://jurnalulolteniei.ro/finalizarea-proiectului-cu-titlul-infiintare-centru-de-zi-pentru-consiliere-si-sprijin-pentru-parinti-si-copii-in-comuna-seaca-de-camp-judetul-dolj/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -36498,20 +36906,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "25acf170fb86200fef0341ee",
+      "candidate_id": "9315e9a475f307275215c385",
       "seed_id": "signal-se-intampla-in-valcea",
-      "url": "https://seintamplainvalcea.ro/2026/09/16/agent-de-politie-din-judetul-vecin-cercetat-pentru-trafic-de-persoane-si-proxenetism-ar-fi-obligat-o-femeie-sa-se-prostitueze-in-romania-si-marea-britanie/",
-      "discovered_by": "html:relevant_internal",
-      "tier_ceiling": "T2",
-      "lifecycle": "DISCOVERED_UNRATED",
-      "public_projection": false,
-      "auto_publication": false,
-      "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
-    },
-    {
-      "candidate_id": "cb23a8b89382c75590c6196c",
-      "seed_id": "signal-se-intampla-in-valcea",
-      "url": "https://seintamplainvalcea.ro/2026/09/16/atentie-urmeaza-razii-de-amploare-pe-soselele-din-valcea-politistii-rutieri-intensifica-verificarile-in-trafic/",
+      "url": "https://seintamplainvalcea.ro/2026/09/17/foto-o-noua-spargere-la-sirineasa-dupa-un-incident-de-anul-trecut-primarul-avertizeaza-incuiati-va-casele-si-anexele/",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -36575,9 +36972,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "9752ce54fb671034e1e2f74b",
+      "candidate_id": "b597c56a25e99aa4165e42e1",
       "seed_id": "signal-se-intampla-in-valcea",
-      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews-child/style.css?ver=7.1",
+      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews-child/style.css?ver=7.1.1",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -36586,9 +36983,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "6253c6af2f914c86efcc967f",
+      "candidate_id": "0b454950c7159d2fa1eb6ef3",
       "seed_id": "signal-se-intampla-in-valcea",
-      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/bootstrap/css/bootstrap.min.css?ver=7.1",
+      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/bootstrap/css/bootstrap.min.css?ver=7.1.1",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -36619,9 +37016,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "afd65493f552afa0a9631dcc",
+      "candidate_id": "5e8ca6889ae704c9354ffdb3",
       "seed_id": "signal-se-intampla-in-valcea",
-      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/icons/style.css?ver=7.1",
+      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/assets/icons/style.css?ver=7.1.1",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
@@ -36641,9 +37038,9 @@
       "verification_route": "T2_SIGNAL_TO_T1_T1B_CONFIRMATION"
     },
     {
-      "candidate_id": "a981a5822c0009e7e52a7586",
+      "candidate_id": "42ce24ebb58e620b7be56dd6",
       "seed_id": "signal-se-intampla-in-valcea",
-      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/style.css?ver=7.1",
+      "url": "https://seintamplainvalcea.ro/wp-content/themes/covernews/style.css?ver=7.1.1",
       "discovered_by": "html:relevant_internal",
       "tier_ceiling": "T2",
       "lifecycle": "DISCOVERED_UNRATED",
