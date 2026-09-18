@@ -2,6 +2,7 @@
 'use strict';
 const qs=(s,r=document)=>r.querySelector(s);
 const P=window.PARTENER_DECISION_PRODUCTS||{};
+const isTypingTarget=target=>target instanceof Element&&!!target.closest('input,textarea,select,[contenteditable="true"]');
 function openHub(query='',tab='dossiers'){
   const nav=qs('[data-decisionnav]'); if(nav)nav.click();
   setTimeout(()=>{const tabBtn=qs(`[data-di-tab="${tab}"]`);if(tabBtn)tabBtn.click();setTimeout(()=>{if(!query)return;const input=qs('#diQ');if(!input)return;input.value=query;input.dispatchEvent(new Event('input',{bubbles:true}));},80);},80);
@@ -25,8 +26,10 @@ function enhanceHero(){
   const actions=qs('.noviceHeroActions',hero);
   if(actions&&!qs('[data-goto-search]',hero)){
     const search=document.createElement('form');search.className='gotoSearch';search.dataset.gotoSearch='1';
-    search.innerHTML='<label for="gotoQ">Sau caută direct după ideea ta</label><div><input id="gotoQ" autocomplete="off" placeholder="ex. panouri fotovoltaice, digitalizare IMM, centru social"><button type="submit">Caută finanțări</button></div><small>Poți scrie în limbaj normal. Căutăm în dosare, beneficiari, activități și programe.</small>';
-    actions.insertAdjacentElement('afterend',search);search.addEventListener('submit',e=>{e.preventDefault();const q=qs('#gotoQ',search)?.value.trim();if(q)openHub(q,'dossiers')});
+    search.innerHTML='<label for="gotoQ">Sau caută direct după ideea ta</label><div><input id="gotoQ" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ex. panouri fotovoltaice, digitalizare IMM, centru social"><button type="submit">Caută finanțări</button></div><small>Poți scrie în limbaj normal. Căutăm în dosare, beneficiari, activități și programe.</small>';
+    actions.insertAdjacentElement('afterend',search);
+    const input=qs('#gotoQ',search);input?.addEventListener('pointerup',()=>input.focus({preventScroll:true}));
+    search.addEventListener('submit',e=>{e.preventDefault();const q=input?.value.trim();if(q)openHub(q,'dossiers')});
   }
   const proof=qs('.noviceProof',hero);
   if(proof)proof.innerHTML='<span>✓ Surse oficiale urmărite continuu</span><span>✓ Fără jargon administrativ inutil</span><span>✓ Necunoscutele sunt marcate, nu inventate</span><span>✓ Schimbările sunt urmărite</span>';
@@ -39,6 +42,6 @@ function addPromise(){const home=qs('.diHome');if(!home||qs('[data-goto-promise]
 function addPopularSearches(){const entry=qs('.noviceEntry');if(!entry||qs('[data-goto-popular]',entry))return;const block=document.createElement('div');block.className='gotoPopular';block.dataset.gotoPopular='1';const items=['panouri fotovoltaice','digitalizare IMM','utilaje și producție','turism','agricultură','școală și educație'];block.innerHTML='<span>Căutări utile:</span>'+items.map(x=>`<button data-goto-query="${x}">${x}</button>`).join('');entry.appendChild(block);block.querySelectorAll('[data-goto-query]').forEach(btn=>btn.addEventListener('click',()=>openHub(btn.dataset.gotoQuery,'dossiers')));}
 function run(){cleanupLegacyHero();enhanceHero();addOrientation();clarifyEntry();addPopularSearches();addReturnPath();addPromise();}
 window.addEventListener('load',()=>setTimeout(run,240),{once:true});
-document.addEventListener('click',()=>{setTimeout(cleanupLegacyHero,20);setTimeout(run,180)},true);
+document.addEventListener('click',event=>{if(isTypingTarget(event.target))return;setTimeout(cleanupLegacyHero,20);setTimeout(run,180)},true);
 setTimeout(run,420);
 })();
