@@ -33,6 +33,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_contracts.py
           python valcea-clar/tests/test_core_v2_readback.py
           python valcea-clar/tests/test_core_v2_integrity.py
+          python valcea-clar/tests/test_core_v2_source_signal.py
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
       - name: Run reused source-adapter fail-closed self-tests
@@ -47,6 +48,8 @@ jobs:
           python valcea-clar/scripts/filarmonica_valcea_upcoming_event_reference_adapter.py --self-test
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
+      - name: Build non-authoritative shadow replay candidates
+        run: python valcea-clar/core_v2/build_shadow_candidate_ledger.py --output /tmp/valcea-core-v2-shadow-candidates.json
       - name: Verify shadow isolation
         run: |
           python - <<'PY'
@@ -54,16 +57,21 @@ jobs:
           from pathlib import Path
           checkpoint=json.loads(Path('valcea-clar/core_v2/checkpoint.json').read_text(encoding='utf-8'))
           sources=json.loads(Path('valcea-clar/core_v2/pilot_sources.json').read_text(encoding='utf-8'))
+          ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
           assert checkpoint['core_v2_mode']=='SHADOW_ONLY'
           assert checkpoint['publication_authority']=='NONE'
           assert sources['publication_authority']=='NONE'
           assert sources['source_expansion_forbidden_during_pilot'] is True
+          assert ledger['publication_authority']=='NONE'
+          assert ledger['acceptance_ready'] is False
           print('Core v2 shadow isolation: PASS')
           PY
-      - name: Upload forensic inventory
+      - name: Upload shadow evidence
         uses: actions/upload-artifact@v7
         with:
-          name: valcea-clar-core-v2-legacy-inventory-${{ github.run_id }}
-          path: /tmp/valcea-core-v2-legacy-inventory.json
+          name: valcea-clar-core-v2-shadow-evidence-${{ github.run_id }}
+          path: |
+            /tmp/valcea-core-v2-legacy-inventory.json
+            /tmp/valcea-core-v2-shadow-candidates.json
           if-no-files-found: error
           retention-days: 3
