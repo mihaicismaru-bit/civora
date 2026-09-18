@@ -1,47 +1,55 @@
 {
-  "schema_version": "1.1",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN4-TRUTH-REPLAY",
+  "schema_version": "1.2",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN4-FIRST-LIVE-SOURCE-LANE",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
-  "base_main_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
-  "main_drift_observed_sha": "f6458fda1da048c1e9e0887a9aef6d567ad0f078",
-  "main_drift_overlap": false,
-  "branch_vs_main": {
-    "status": "diverged",
-    "ahead_by": 40,
-    "behind_by": 1,
-    "merge_base": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
-    "note": "Core v2 changes remain isolated additions; observed main drift is an unrelated generated validation-ledger commit. No rebase/merge/cutover performed."
-  },
-  "validated_core_head_sha": "d5a54f1e0eadcf0c25c9182730bcbc35544d6867",
-  "diagnostic_head_pending_validation_sha": "c37d7d8f9b849614bea6ff8d957b754d4f911ffe",
   "draft_pr": 1222,
+  "branch": "rebuild/valcea-clar-core-v2-20260918",
+  "base_merge_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
+  "main_drift_observed_sha": "fd49831ca5f4d372b834874650d9ffd42dff58f5",
+  "main_drift_core_overlap": false,
+  "main_drift_note": "Fresh main drift since the Core v2 branch point is limited to PARTENER.EU generated/validation state and the Olănești investigation state; no Core v2 or bounded pilot adapter file overlaps were observed. No rebase, merge or cutover was performed.",
+  "legacy_public_projection_observation": {
+    "repo": "mihaicismaru-bit/valcea-clar",
+    "latest_observed_sync_commit": "8ab1482011a3344937afc822c9386f907397b1dc",
+    "story_count": 95,
+    "current_story_count": 78,
+    "archive_story_count": 17,
+    "verified_visual_count": 13,
+    "synced_at": "2026-09-18T06:47:10.372561Z",
+    "note": "Legacy public projection has naturally converged again. The abandoned legacy 48h soak is not restarted; this evidence is observational only while Core v2 remains shadow-only."
+  },
+  "latest_validated_core_feature_head": {
+    "sha": "f109d287878f6a0e3ce60110d78d5caf0330bb64",
+    "workflow_run_id": 35328375696,
+    "workflow_run_number": 87,
+    "conclusion": "success",
+    "artifact_id": 10539419019,
+    "artifact_sha256": "1bf2b67b1cf6adfd8558d3d522b6bdb16db2634664613c34f70075dcfec289ef",
+    "permissions": "contents:read",
+    "manual_dispatch": false
+  },
   "done": [
-    "fresh main/workflows/runtime/public-projection topology reread",
-    "legacy live newsroom and social split ownership reconfirmed",
+    "fresh main/workflows/runtime/social/public-projection topology reread",
+    "legacy architecture retained as LEGACY_NOT_PRODUCTION_READY; no production automation disabled yet",
     "Core v2 StoryState, FactKernel, Visual, PublicationReceipt and AuditResult contracts implemented",
-    "shadow-only sequential orchestrator implemented",
-    "normalized pilot signal boundary implemented with fail-closed NO_STORY for non-material signals",
-    "receipt-bound acceptance metrics implemented",
-    "independent read-only HTTP/JSON-LD site readback adapter implemented",
-    "site readback requires route + canonical + story-bound NewsArticle JSON-LD",
-    "independent read-only Meta remote-object readback adapter implemented",
+    "shadow-only sequential orchestrator implemented with publication_authority NONE",
+    "receipt-bound site/Facebook/Instagram contracts implemented",
+    "independent external site HTML/NewsArticle readback implemented",
+    "independent external visual binding/provenance/readback implemented",
+    "independent read-only Meta remote-object readback implemented",
     "claim-to-FactKernel editorial integrity gate implemented",
     "strict 10-consecutive-story acceptance ledger implemented",
-    "bounded eight-source pilot fully bound to existing adapters",
-    "all eight reused source adapters passed their fail-closed self-tests",
-    "Core v2 contract/readback/integrity/signal-boundary regression suite passed in natural GitHub Actions",
-    "legacy deterministic inventory classification completed with UNKNOWN=0",
+    "bounded eight-source pilot fully registered and existing adapters fail-closed self-tested",
+    "deterministic legacy inventory completed with UNKNOWN=0",
     "82 legacy publication-capable paths identified for migration/retirement control",
-    "shadow candidate ledger built from current manifest, real-photo evidence and internal social IDs",
-    "two current stories satisfy the minimum internal preconditions for external delivery replay",
-    "independent public site readback passed for both replay candidates",
-    "read-only Instagram remote-object readback passed for both replay candidates",
-    "read-only Facebook remote-object readback failed for both replay candidates and therefore remains failed rather than being inferred delivered",
-    "external site/Meta evidence is now bound into a shadow receipt ledger without publication authority",
-    "shadow isolation passed with contents:read only and publication_authority NONE",
-    "Meta HTTP failure-body diagnostics added without exposing access tokens"
+    "exact shadow blocker classifier implemented and naturally validated",
+    "Facebook failures classified as Meta read-permission deficiency rather than guessed stale/deleted posts",
+    "public visual truth mismatch proven for valcea-apa-canal-contract-152m-20260902",
+    "legacy historical replay proven to lack explicit canonical FactKernel and claim-bound article packages",
+    "first source-specific Core v2 source-to-kernel-to-writer shadow lane prepared for APAVIL scheduled outage notices using only explicit first-party index metadata",
+    "APAVIL shadow lane preserves scheduled-versus-current-status distinction and grants no publication authority"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -60,85 +68,87 @@
     "UNKNOWN": 0,
     "publication_capable_paths": 82,
     "classification_complete": true,
-    "keep_semantics": "reusable component/data only; KEEP grants no publication authority and does not enable a component in the bounded pilot"
+    "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
   },
-  "shadow_candidate_evidence": {
-    "current_manifest_story_count": 75,
-    "eligible_for_external_replay_count": 2,
-    "first_candidate_ids": [
+  "shadow_replay_truth": {
+    "candidate_count": 2,
+    "candidate_ids": [
       "valcea-apa-canal-contract-152m-20260902",
       "cet-govora-cine-a-decis-oprirea-20260821"
     ],
-    "site_external_readback": {
-      "passed": 2,
-      "failed": 0
-    },
-    "facebook_external_readback": {
-      "passed": 0,
-      "failed": 2,
-      "last_observed_error": "HTTP 400; structured Meta error capture added for next natural validation"
-    },
-    "instagram_external_readback": {
-      "passed": 2,
-      "failed": 0
-    },
-    "externally_verified_all_channels": 0,
+    "site_external_readback_passed": 2,
+    "instagram_external_readback_passed": 2,
+    "facebook_external_readback_passed": 0,
+    "visual_external_readback_passed": 1,
+    "visual_external_readback_failed": 1,
+    "fully_bound_story_transactions": 0,
+    "truth_complete_count": 0,
     "acceptance_ready": false,
-    "reason": "only two current stories have real-photo evidence plus both legacy social IDs; site and Instagram independently verify, but Facebook delivery cannot yet be externally verified"
+    "blocker_counts": {
+      "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
+      "FACT_KERNEL_EVIDENCE_MISSING": 2,
+      "VISUAL_ARTICLE_BINDING_FAILED": 1
+    }
   },
-  "latest_validated_shadow_run": {
-    "run_id": 35325562791,
-    "event": "push",
-    "conclusion": "success",
-    "head_sha": "d5a54f1e0eadcf0c25c9182730bcbc35544d6867",
-    "artifact_id": 10538153134,
-    "artifact_sha256": "d05a761f2bef0380d14c08edc960009ae2223e183c7ebd2c2b411854f34e191d",
-    "artifact_files": [
-      "valcea-core-v2-legacy-inventory.json",
-      "valcea-core-v2-shadow-candidates.json",
-      "valcea-core-v2-site-readback.json",
-      "valcea-core-v2-meta-readback.json",
-      "valcea-core-v2-shadow-receipts.json"
-    ]
+  "facebook_readback_evidence": {
+    "error_type": "OAuthException",
+    "error_code": 10,
+    "classification": "META_READ_PERMISSION_CONFIGURATION_REQUIRED",
+    "required_surface_named_by_graph": "pages_read_engagement permission or Page Public Content Access feature",
+    "safety": "No token changes or Meta writes were attempted. Failed readback remains failed."
+  },
+  "fact_evidence_gap": {
+    "fact_kernel_registry_kernel_count": 0,
+    "editorial_products_structured_content_present": false,
+    "legacy_facts_registry_contains_story_prose": true,
+    "migration_rule": "Rendered or legacy prose is not reverse-engineered into facts. New Core v2 FactKernel evidence must originate from explicit bounded source evidence and carry evidence IDs."
   },
   "next": [
-    "capture the exact structured Meta Graph error for the two Facebook readback failures on the next natural shadow validation",
-    "classify Facebook failures as stale/deleted remote object versus token/permission/readback-contract problem without performing any write",
-    "bind fact-kernel and article-claim integrity evidence into full shadow StoryTransaction records for the two replay candidates",
-    "add independent HTTP validation of the public visual asset and provenance metadata before a social receipt can satisfy VISUAL_READY",
-    "increase truthful real-photo coverage inside the fixed eight-source pilot without generic or synthetic substitution",
-    "evaluate a 10-story candidate set only when ten stories have independent external site, visual and social evidence"
+    "naturally validate the APAVIL live shadow lane and persist its source snapshot/kernel/writer evidence artifact",
+    "if the APAVIL source is reachable, quantify VERIFIED_WRITTEN_SHADOW versus NO_STORY/BLOCKED results without publishing anything",
+    "extend the same independent evidence-to-kernel pattern to one public-safety lane, beginning with IPJ or ISU, without inheriting legacy non-authorizing detail evidence as publication authority",
+    "bind Core v2 deterministic writer claims to explicit kernel claim indexes and evidence IDs for new pilot material",
+    "increase truthful real-photo coverage only with exact/direct/archive-context relevance plus rights and external article binding",
+    "keep Facebook delivery uncertified until read-only Graph permission is sufficient; do not infer delivery from internal IDs",
+    "evaluate a ten-story acceptance candidate only after ten stories independently satisfy source, kernel, writer, visual, site and social truth gates"
   ],
   "blocked": [
     {
       "gate": "facebook_receipt_truth",
-      "reason": "both currently replayable legacy Facebook remote IDs return HTTP 400 under the read-only Meta token; delivery cannot be certified until exact Graph error evidence is classified"
+      "reason": "Read-only Graph requests for both replayable Facebook IDs return OAuthException code 10 requiring pages_read_engagement or Page Public Content Access. Internal post IDs are not delivery proof."
+    },
+    {
+      "gate": "legacy_fact_kernel_migration",
+      "reason": "Both historical replay candidates lack explicit canonical FactKernel and claim-bound article evidence. Legacy prose is intentionally not reverse-engineered into facts."
+    },
+    {
+      "gate": "visual_truth_valcea_apa",
+      "reason": "The internal panorama visual record exists and provenance URLs read back, but the public article does not bind the expected image filename; visual delivery therefore fails."
     },
     {
       "gate": "ten_story_shadow_candidate",
-      "reason": "only 2 of 75 current stories presently satisfy real-photo plus both-internal-social-ID preconditions, and 0 currently verify all external channels"
+      "reason": "Only two historical current-story candidates meet the old internal real-photo plus both-social-ID preconditions, and zero satisfy all independent Core v2 truth gates."
     },
     {
       "gate": "production_cutover",
-      "reason": "explicit owner approval required before any live Core v2 publication or social delivery"
+      "reason": "Explicit owner approval remains mandatory before live Core v2 publication, social delivery, merge or deploy."
     }
   ],
   "evidence": {
-    "legacy_newsroom": ".github/workflows/valcea-clar-newsroom-live.yml",
-    "legacy_social": ".github/workflows/valcea-clar-social-publishing.yml",
     "core_contracts": "valcea-clar/core_v2/contracts.py",
     "core_orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "source_signal_boundary": "valcea-clar/core_v2/source_signal.py",
+    "apavil_shadow_lane": "valcea-clar/core_v2/apavil_shadow_lane.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
+    "visual_readback": "valcea-clar/core_v2/visual_readback.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
-    "meta_replay": "valcea-clar/core_v2/replay_external_meta.py",
-    "shadow_receipt_materializer": "valcea-clar/core_v2/materialize_shadow_receipts.py",
+    "shadow_receipts": "valcea-clar/core_v2/materialize_shadow_receipts.py",
+    "shadow_transactions": "valcea-clar/core_v2/materialize_shadow_transactions.py",
+    "shadow_gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
     "editorial_integrity": "valcea-clar/core_v2/editorial_integrity.py",
     "ten_story_gate": "valcea-clar/core_v2/acceptance_ledger.py",
     "legacy_inventory": "valcea-clar/core_v2/inventory_legacy.py",
-    "shadow_candidate_builder": "valcea-clar/core_v2/build_shadow_candidate_ledger.py",
     "pilot_registry": "valcea-clar/core_v2/pilot_sources.json",
-    "pilot_registry_validator": "valcea-clar/core_v2/validate_pilot_sources.py",
     "shadow_workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml"
   }
 }
