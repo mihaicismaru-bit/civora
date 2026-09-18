@@ -2,7 +2,7 @@
 
 ## State
 
-CANDIDATE / OFFLINE ONLY / NOT MERGED / NOT PROMOTED / LIVE HOLD.
+CLOSED / VERIFIED / EFFECTIVE OFFLINE ONLY / LIVE HOLD.
 
 Global control checkpoint remains **CP58**. Global kill switch remains **ENGAGED**. LIVE AUTHORITY remains **NONE**.
 
@@ -85,10 +85,22 @@ CP89 grants no external authority:
 
 The global checkpoint remains CP58 and the kill switch remains ENGAGED.
 
+## Closure evidence
+
+- Original CP89 candidate PR: **#1223**.
+- Candidate exact-head: `74ae362a8fe4439364a3671a0bfbe349d03fa3ef`.
+- PUBLIC PRESENCE OS CI run **#205 / 35325310977** completed with terminal **SUCCESS** on that exact head.
+- PR #1223 merged as commit `f464d3f4eefe1e966597ac39e37c2a9a8ee9d3d4`.
+- Fresh current-main readback before this closure-normalization delta: `cd9b2a7bcf3ddb1772c262280fdc0fbb4334762d`.
+- Current main is 6 commits ahead / 0 behind the CP89 merge commit and those intervening changes are outside `public-presence-os/**`; no conflicting PPOS drift was observed.
+- M58 closure marker is normalized to `PASS_CP89_GROWTH_ANALYTICS_VIRALITY_LEARNING_OFFLINE_TRUTH_BOUND_UNKNOWN_PRESERVING_NON_CAUSAL_NO_STRATEGY_MUTATION_NO_EXTERNAL_WRITE_LIVE_HOLD` while the global registry checkpoint remains CP58.
+
+This closure is **offline-only**. It does not authorize live account connection, OAuth, secrets, social API traffic, probes, publishing, replies/comments, deploys, or paid services.
+
 ## Rollback
 
-Before merge, close the CP89 PR and delete the candidate branch. After merge, revert the CP89 merge commit. CP88 / M57 remains the verified predecessor either way.
+If this closure-normalization candidate is not merged, close its PR and discard branch `ppos/cp89-closure-normalization-20260918`; the already-merged CP89 implementation remains on main with the pre-normalization marker text. After merge of the normalization delta, revert only that closure-marker commit if needed. Reverting the underlying CP89 implementation separately requires reverting merge commit `f464d3f4eefe1e966597ac39e37c2a9a8ee9d3d4`.
 
 ## Next gate
 
-After exact-head CI reaches terminal SUCCESS, re-read current `main`, the `public-presence-os` subtree, PR mergeability, and base drift. Only a later bounded CP89 gate/closure unit may merge or promote this candidate. Do not start CP90 in the same run.
+CP90 / M59 is the next eligible development checkpoint only after this closure-marker normalization has exact-head CI terminal SUCCESS, fresh mergeability/readback, merge, and post-merge verification. Do not start CP90 in this same run.
