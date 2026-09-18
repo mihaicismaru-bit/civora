@@ -87,8 +87,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     municipal_articles = workdir / "valcea-core-v2-municipal-articles.json"; cj = workdir / "valcea-core-v2-cj-road-shadow.json"; eta = workdir / "valcea-core-v2-eta-shadow.json"
     isj = workdir / "valcea-core-v2-isj-shadow.json"; isj_detail = workdir / "valcea-core-v2-isj-detail-shadow.json"; isj_materiality = workdir / "valcea-core-v2-isj-materiality-shadow.json"
     isj_embedded = workdir / "valcea-core-v2-isj-embedded-notice-shadow.json"; isj_targets = workdir / "valcea-core-v2-isj-embedded-target-shadow.json"
-    isj_content = workdir / "valcea-core-v2-isj-embedded-content-shadow.json"; photo = workdir / "valcea-core-v2-photo-truth.json"
-    site_package = workdir / "valcea-core-v2-shadow-site-package.json"; site_dir = workdir / "valcea-core-v2-shadow-site"
+    isj_content = workdir / "valcea-core-v2-isj-embedded-content-shadow.json"; isj_fields = workdir / "valcea-core-v2-isj-field-evidence-shadow.json"
+    photo = workdir / "valcea-core-v2-photo-truth.json"; site_package = workdir / "valcea-core-v2-shadow-site-package.json"; site_dir = workdir / "valcea-core-v2-shadow-site"
     return (
         CycleStage("apavil", (py,"valcea-clar/core_v2/apavil_shadow_lane.py",*live_flag,"--output",str(apavil)), apavil),
         CycleStage("ipj", (py,"valcea-clar/core_v2/public_safety_full_shadow_lane.py","--source","ipj",*live_flag,"--output",str(ipj)), ipj),
@@ -106,6 +106,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_embedded_notice", (py,"valcea-clar/core_v2/isj_embedded_notice_shadow_lane.py","--details",str(isj_detail),"--materiality",str(isj_materiality),*live_flag,"--output",str(isj_embedded)), isj_embedded),
         CycleStage("isj_embedded_target", (py,"valcea-clar/core_v2/isj_embedded_target_shadow_lane.py","--embedded",str(isj_embedded),*live_flag,"--output",str(isj_targets)), isj_targets),
         CycleStage("isj_embedded_content", (py,"valcea-clar/core_v2/isj_embedded_content_shadow_lane.py","--targets",str(isj_targets),*live_flag,"--output",str(isj_content)), isj_content),
+        CycleStage("isj_field_evidence", (py,"valcea-clar/core_v2/isj_field_evidence_shadow_lane.py","--content",str(isj_content),"--output",str(isj_fields)), isj_fields),
         CycleStage("photo_truth", (py,"valcea-clar/core_v2/photo_truth_gate.py","--input",f"ipj={ipj}","--input",f"isu={isu}","--input",f"municipal={municipal_articles}","--visual-registry","valcea-clar/core_v2/visual_registry.json","--external-probe","--output",str(photo)), photo),
         CycleStage("shadow_site_package", (py,"valcea-clar/core_v2/shadow_site_package.py","--articles",str(municipal_articles),"--photo-truth",str(photo),"--visual-registry","valcea-clar/core_v2/visual_registry.json","--repo-root",".","--output-dir",str(site_dir),"--output",str(site_package)), site_package),
     )
@@ -121,8 +122,9 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                     "status","mode","signal_count","detail_count","detail_row_count","candidate_count","selected_material_signal_count",
                     "detail_evidence_shadow_count","material_detail_candidate_shadow_count","embedded_notice_evidence_shadow_count",
                     "embedded_target_identity_shadow_count","selected_document_count","document_content_captured_shadow_count",
-                    "document_text_extracted_shadow_count","verified_written_shadow_count","visual_candidate_verified_shadow_count",
-                    "package_image_bound_shadow_count","blocked_count","no_story_count","fabricated_claim_count","publication_authority","acceptance_ready"
+                    "document_text_extracted_shadow_count","verified_document_count","field_evidence_count","material_candidate_shadow_count",
+                    "verified_written_shadow_count","visual_candidate_verified_shadow_count","package_image_bound_shadow_count","blocked_count",
+                    "no_story_count","fabricated_claim_count","publication_authority","acceptance_ready"
                 )
                 output_doc = {key: parsed.get(key) for key in keys if key in parsed}
         except Exception:
