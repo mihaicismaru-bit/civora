@@ -36,6 +36,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_source_signal.py
           python valcea-clar/tests/test_core_v2_visual.py
           python valcea-clar/tests/test_core_v2_transactions.py
+          python valcea-clar/tests/test_core_v2_gate_report.py
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
       - name: Run reused source-adapter fail-closed self-tests
@@ -89,6 +90,13 @@ jobs:
             --evidence valcea-clar/editorial/facts_registry.json \
             --evidence valcea-clar/editorial/editorial_products.json \
             --output /tmp/valcea-core-v2-shadow-transactions.json
+      - name: Classify exact truth blockers
+        run: |
+          python valcea-clar/core_v2/shadow_gate_report.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --receipts /tmp/valcea-core-v2-shadow-receipts.json \
+            --transactions /tmp/valcea-core-v2-shadow-transactions.json \
+            --output /tmp/valcea-core-v2-gate-report.json
       - name: Verify shadow isolation
         run: |
           python - <<'PY'
@@ -102,6 +110,7 @@ jobs:
           meta=json.loads(Path('/tmp/valcea-core-v2-meta-readback.json').read_text(encoding='utf-8'))
           receipts=json.loads(Path('/tmp/valcea-core-v2-shadow-receipts.json').read_text(encoding='utf-8'))
           transactions=json.loads(Path('/tmp/valcea-core-v2-shadow-transactions.json').read_text(encoding='utf-8'))
+          gates=json.loads(Path('/tmp/valcea-core-v2-gate-report.json').read_text(encoding='utf-8'))
           assert checkpoint['core_v2_mode']=='SHADOW_ONLY'
           assert checkpoint['publication_authority']=='NONE'
           assert sources['publication_authority']=='NONE'
@@ -115,6 +124,8 @@ jobs:
           assert receipts['acceptance_ready'] is False
           assert transactions['publication_authority']=='NONE'
           assert transactions['acceptance_ready'] is False
+          assert gates['publication_authority']=='NONE'
+          assert gates['acceptance_ready'] is False
           print('Core v2 shadow isolation: PASS')
           PY
       - name: Upload shadow evidence
@@ -129,5 +140,6 @@ jobs:
             /tmp/valcea-core-v2-meta-readback.json
             /tmp/valcea-core-v2-shadow-receipts.json
             /tmp/valcea-core-v2-shadow-transactions.json
+            /tmp/valcea-core-v2-gate-report.json
           if-no-files-found: error
           retention-days: 3
