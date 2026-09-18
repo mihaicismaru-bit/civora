@@ -25,17 +25,29 @@ def kernel():
 
 
 class EditorialIntegrityTest(unittest.TestCase):
-    def test_all_article_claims_must_bind_to_kernel_and_evidence(self):
+    def test_all_article_claims_must_bind_exactly_to_kernel_and_evidence(self):
         package = {
             "body": "A" * 200,
             "claims": [
-                {"text": "Parafrază A", "kernel_claim_index": 0, "evidence_ids": ["ev-a"]},
-                {"text": "Parafrază B", "kernel_claim_index": 1, "evidence_ids": ["ev-b"]},
+                {"text": "Faptul A este confirmat.", "kernel_claim_index": 0, "evidence_ids": ["ev-a"]},
+                {"text": "Faptul B este confirmat.", "kernel_claim_index": 1, "evidence_ids": ["ev-b"]},
             ],
         }
         result = validate_editorial_package(kernel(), package)
         self.assertTrue(result.pass_gate)
         self.assertEqual(result.bound_claims, 2)
+
+    def test_untraceable_paraphrase_fails_closed(self):
+        package = {
+            "body": "A" * 200,
+            "claims": [
+                {"text": "Parafrază care nu există în kernel.", "kernel_claim_index": 0, "evidence_ids": ["ev-a"]}
+            ],
+        }
+        result = validate_editorial_package(kernel(), package)
+        self.assertFalse(result.pass_gate)
+        self.assertEqual(result.fabricated_claims, 1)
+        self.assertIn("claim_0_text_mismatch_kernel_claim", result.errors)
 
     def test_unbound_claim_fails_closed(self):
         package = {
