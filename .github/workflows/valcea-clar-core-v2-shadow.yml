@@ -34,6 +34,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_readback.py
           python valcea-clar/tests/test_core_v2_integrity.py
           python valcea-clar/tests/test_core_v2_source_signal.py
+          python valcea-clar/tests/test_core_v2_visual.py
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
       - name: Run reused source-adapter fail-closed self-tests
@@ -63,6 +64,8 @@ jobs:
         run: python valcea-clar/core_v2/build_shadow_candidate_ledger.py --output /tmp/valcea-core-v2-shadow-candidates.json
       - name: Replay candidate site truth read-only
         run: python valcea-clar/core_v2/replay_external_site.py --output /tmp/valcea-core-v2-site-readback.json --limit 10
+      - name: Replay candidate visual truth read-only
+        run: python valcea-clar/core_v2/replay_external_visuals.py --output /tmp/valcea-core-v2-visual-readback.json --limit 10
       - name: Replay candidate Meta truth read-only
         env:
           VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
@@ -73,6 +76,7 @@ jobs:
           python valcea-clar/core_v2/materialize_shadow_receipts.py \
             --candidates /tmp/valcea-core-v2-shadow-candidates.json \
             --site-readback /tmp/valcea-core-v2-site-readback.json \
+            --visual-readback /tmp/valcea-core-v2-visual-readback.json \
             --meta-readback /tmp/valcea-core-v2-meta-readback.json \
             --output /tmp/valcea-core-v2-shadow-receipts.json
       - name: Verify shadow isolation
@@ -84,6 +88,7 @@ jobs:
           sources=json.loads(Path('valcea-clar/core_v2/pilot_sources.json').read_text(encoding='utf-8'))
           ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
           readback=json.loads(Path('/tmp/valcea-core-v2-site-readback.json').read_text(encoding='utf-8'))
+          visual=json.loads(Path('/tmp/valcea-core-v2-visual-readback.json').read_text(encoding='utf-8'))
           meta=json.loads(Path('/tmp/valcea-core-v2-meta-readback.json').read_text(encoding='utf-8'))
           receipts=json.loads(Path('/tmp/valcea-core-v2-shadow-receipts.json').read_text(encoding='utf-8'))
           assert checkpoint['core_v2_mode']=='SHADOW_ONLY'
@@ -93,6 +98,7 @@ jobs:
           assert ledger['publication_authority']=='NONE'
           assert ledger['acceptance_ready'] is False
           assert readback['publication_authority']=='NONE'
+          assert visual['publication_authority']=='NONE'
           assert meta['publication_authority']=='NONE'
           assert receipts['publication_authority']=='NONE'
           assert receipts['acceptance_ready'] is False
@@ -106,6 +112,7 @@ jobs:
             /tmp/valcea-core-v2-legacy-inventory.json
             /tmp/valcea-core-v2-shadow-candidates.json
             /tmp/valcea-core-v2-site-readback.json
+            /tmp/valcea-core-v2-visual-readback.json
             /tmp/valcea-core-v2-meta-readback.json
             /tmp/valcea-core-v2-shadow-receipts.json
           if-no-files-found: error
