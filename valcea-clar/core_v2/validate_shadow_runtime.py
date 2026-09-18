@@ -29,6 +29,7 @@ def validate(base: Path, repo: Path) -> None:
     municipal_articles = load(base / "valcea-core-v2-municipal-articles.json")
     cj_road = load(base / "valcea-core-v2-cj-road-shadow.json")
     eta = load(base / "valcea-core-v2-eta-shadow.json")
+    isj = load(base / "valcea-core-v2-isj-shadow.json")
     photo = load(base / "valcea-core-v2-photo-truth.json")
     ledger = load(base / "valcea-core-v2-shadow-candidates.json")
     readback = load(base / "valcea-core-v2-site-readback.json")
@@ -175,6 +176,26 @@ def validate(base: Path, repo: Path) -> None:
         assert row.get("social_publish_allowed") is False
         assert "fact_kernel" not in row and "article_package" not in row
         assert row.get("visual_candidate_promoted") is not True
+
+    require_none_authority(isj, "isj")
+    assert isj.get("fact_kernel_promotion_allowed") is False
+    assert isj.get("writer_allowed") is False
+    assert isj.get("production_writer_ready") is False
+    assert isj.get("site_publish_allowed") is False
+    assert isj.get("social_publish_allowed") is False
+    for row in isj.get("rows") or []:
+        assert row.get("state") in {"MATERIAL_SIGNAL_SHADOW", "NO_STORY", "BLOCKED"}
+        assert row.get("publication_authority") == "NONE"
+        assert row.get("fact_kernel_promotion_allowed") is False
+        assert row.get("writer_allowed") is False
+        assert row.get("site_publish_allowed") is False
+        assert row.get("social_publish_allowed") is False
+        assert row.get("person_fact_extraction_allowed") is False
+        assert row.get("sensitive_result_projection_allowed") is False
+        assert "fact_kernel" not in row and "article_package" not in row
+        if row.get("state") == "MATERIAL_SIGNAL_SHADOW":
+            assert row.get("document_body_required_for_fact_kernel") is True
+            assert row.get("label_date_is_event_time") is False
 
     require_none_authority(photo, "photo_truth")
     assert photo.get("site_publish_allowed") is False
