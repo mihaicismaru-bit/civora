@@ -6,7 +6,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-from eta_shadow_lane import adjudicate_eta_signal, verify_eta_signals
+from eta_shadow_lane import (
+    _load_eta_adapter,
+    _scope_safe_classify_notice,
+    adjudicate_eta_signal,
+    verify_eta_signals,
+)
 from source_signal import normalize_canonical_candidate
 
 
@@ -112,6 +117,36 @@ class EtaShadowSignalGateTest(unittest.TestCase):
     def test_hold_notice_terminates_no_story(self):
         result = adjudicate_eta_signal(self.signal(classification="HOLD"), as_of=date(2026, 9, 18))
         self.assertEqual(result["state"], "NO_STORY")
+
+    def test_scope_safe_classifier_ignores_unrelated_footer_sales_for_fare_notice(self):
+        adapter = _load_eta_adapter()
+        classification, reasons = _scope_safe_classify_notice(
+            adapter,
+            "Tarife de transport valabile începând cu data de 01/02/2026",
+            "Bilet 1 călătorie 4 lei. Abonament lunar 130 lei. Footer: Anunț vânzare autovehicul. Licitație.",
+        )
+        self.assertEqual(classification, "FARE_OR_ACCESS_CHANGE")
+        self.assertEqual(reasons, ["FARE_OR_PASSENGER_ACCESS_TERMS"])
+
+    def test_scope_safe_classifier_ignores_unrelated_footer_sales_for_service_notice(self):
+        adapter = _load_eta_adapter()
+        classification, _reasons = _scope_safe_classify_notice(
+            adapter,
+            "Comunicat aplicație Skayo AVL",
+            "În perioada 17.07.2026 – 20.07.2026 va fi realizat un upgrade major. "
+            "Pot apărea anomalii temporare în afișarea informațiilor pe panouri. Footer: Anunț vânzare autoturism.",
+        )
+        self.assertEqual(classification, "SERVICE_ALERT")
+
+    def test_irrelevant_notice_title_still_fails_closed(self):
+        adapter = _load_eta_adapter()
+        classification, reasons = _scope_safe_classify_notice(
+            adapter,
+            "Anunț vânzare autovehicul",
+            "În footer există și cuvintele bilet, abonament și traseu.",
+        )
+        self.assertEqual(classification, "HOLD")
+        self.assertEqual(reasons, ["NON_PASSENGER_OPERATIONAL_NOTICE"])
 
     def test_report_never_promotes_fact_kernel_or_writer(self):
         report = verify_eta_signals(
