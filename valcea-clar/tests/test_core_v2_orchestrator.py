@@ -30,6 +30,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj",
                 "isj_detail",
                 "isj_materiality",
+                "isj_embedded_notice",
                 "photo_truth",
                 "shadow_site_package",
             ],
@@ -61,18 +62,20 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "eta",
             "isj",
             "isj_detail",
+            "isj_embedded_notice",
         }
         for stage in plan:
             if stage.name in source_stage_names:
                 self.assertNotIn("--live", stage.argv)
 
-    def test_isj_detail_and_materiality_consume_only_prior_shadow_artifacts(self):
+    def test_isj_detail_materiality_and_embedded_gate_consume_only_prior_shadow_artifacts(self):
         with tempfile.TemporaryDirectory() as temp:
             plan = bounded_cycle_plan(Path(temp), live=True)
         by_name = {stage.name: stage for stage in plan}
         isj = by_name["isj"]
         detail = by_name["isj_detail"]
         materiality = by_name["isj_materiality"]
+        embedded = by_name["isj_embedded_notice"]
         self.assertIsNotNone(isj.output)
         self.assertIsNotNone(detail.output)
         self.assertIn("--input", detail.argv)
@@ -81,10 +84,16 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn("--input", materiality.argv)
         self.assertIn(str(detail.output), materiality.argv)
         self.assertNotIn("--live", materiality.argv)
+        self.assertIn("--details", embedded.argv)
+        self.assertIn(str(detail.output), embedded.argv)
+        self.assertIn("--materiality", embedded.argv)
+        self.assertIn(str(materiality.output), embedded.argv)
+        self.assertIn("--live", embedded.argv)
         names = [stage.name for stage in plan]
         self.assertLess(names.index("isj"), names.index("isj_detail"))
         self.assertLess(names.index("isj_detail"), names.index("isj_materiality"))
-        self.assertLess(names.index("isj_materiality"), names.index("photo_truth"))
+        self.assertLess(names.index("isj_materiality"), names.index("isj_embedded_notice"))
+        self.assertLess(names.index("isj_embedded_notice"), names.index("photo_truth"))
 
 
 if __name__ == "__main__":
