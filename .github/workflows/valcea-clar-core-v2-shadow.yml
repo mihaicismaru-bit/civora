@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   shadow-contracts:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
@@ -83,6 +83,12 @@ jobs:
           python valcea-clar/scripts/isj_valcea_education_detail_evidence.py --self-test
           python valcea-clar/scripts/council_decision_document_resolver.py --self-test
 
+      - name: Install deterministic PDF text extractor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils
+          pdftotext -v
+
       - name: Run single bounded Core v2 shadow cycle read-only
         run: |
           python valcea-clar/core_v2/orchestrator.py \
@@ -91,20 +97,6 @@ jobs:
             --repo-root . \
             --workdir /tmp \
             --output /tmp/valcea-core-v2-cycle.json
-
-      - name: Resolve ISJ embedded target identities read-only
-        run: |
-          python valcea-clar/core_v2/isj_embedded_target_shadow_lane.py \
-            --embedded /tmp/valcea-core-v2-isj-embedded-notice-shadow.json \
-            --live \
-            --output /tmp/valcea-core-v2-isj-embedded-target-shadow.json
-
-      - name: Capture verified ISJ embedded document bytes read-only
-        run: |
-          python valcea-clar/core_v2/isj_embedded_content_shadow_lane.py \
-            --targets /tmp/valcea-core-v2-isj-embedded-target-shadow.json \
-            --live \
-            --output /tmp/valcea-core-v2-isj-embedded-content-shadow.json
 
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
