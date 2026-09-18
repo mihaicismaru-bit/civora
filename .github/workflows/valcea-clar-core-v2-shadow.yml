@@ -39,6 +39,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_gate_report.py
           python valcea-clar/tests/test_core_v2_apavil_shadow_lane.py
           python valcea-clar/tests/test_core_v2_public_safety_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_public_safety_full_shadow_lane.py
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
       - name: Run reused source-adapter fail-closed self-tests
@@ -59,10 +60,10 @@ jobs:
           python valcea-clar/scripts/isu_valcea_emergency_detail_evidence.py --self-test
       - name: Run APAVIL source-to-kernel shadow lane read-only
         run: python valcea-clar/core_v2/apavil_shadow_lane.py --live --output /tmp/valcea-core-v2-apavil-shadow.json
-      - name: Run IPJ first-party evidence promotion shadow lane read-only
-        run: python valcea-clar/core_v2/public_safety_shadow_lane.py --source ipj --live --output /tmp/valcea-core-v2-ipj-shadow.json
-      - name: Run ISU first-party evidence promotion shadow lane read-only
-        run: python valcea-clar/core_v2/public_safety_shadow_lane.py --source isu --live --output /tmp/valcea-core-v2-isu-shadow.json
+      - name: Run IPJ structured editorial shadow lane read-only
+        run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source ipj --live --output /tmp/valcea-core-v2-ipj-shadow.json
+      - name: Run ISU structured editorial shadow lane read-only
+        run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source isu --live --output /tmp/valcea-core-v2-isu-shadow.json
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
       - name: Require complete bounded legacy classification
@@ -137,12 +138,16 @@ jobs:
           for public_safety in (ipj, isu):
               assert public_safety['publication_authority']=='NONE'
               assert public_safety['acceptance_ready'] is False
+              assert public_safety['production_writer_ready'] is False
               assert int(public_safety.get('fabricated_claim_count') or 0) == 0
+              assert int(public_safety.get('structured_editorial_count') or 0) == int(public_safety.get('verified_written_shadow_count') or 0)
               for row in public_safety.get('rows') or []:
                   if row.get('state') == 'VERIFIED_WRITTEN_SHADOW':
                       assert row['integrity']['status'] == 'PASS'
                       assert row['integrity']['fabricated_claims'] == 0
                       assert row['production_writer_ready'] is False
+                      assert row['article_package']['writer_id'] == 'shadow_structured_editorial_v2'
+                      assert row['currentness']['publication_date_is_event_time'] is False
           assert ledger['publication_authority']=='NONE'
           assert ledger['acceptance_ready'] is False
           assert readback['publication_authority']=='NONE'
