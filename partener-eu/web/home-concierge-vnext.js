@@ -5,6 +5,7 @@ if(!Array.isArray(P.dossiers)||!Array.isArray(P.news))return;
 const TZ='Europe/Bucharest';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+const isTypingTarget=target=>target instanceof Element&&!!target.closest('input,textarea,select,[contenteditable="true"],.conciergeSearch');
 const statusOverrides=P.freshnessGuard?.dossierStatusOverrides||{};
 const currentStatus=d=>statusOverrides[d?.id]||d?.status||'REVIEW';
 const fact=(d,label)=>d?.quickFacts?.find(x=>norm(x?.label)===norm(label));
@@ -113,13 +114,19 @@ function render(){
  if(eyebrow)eyebrow.textContent='PARTENER.EU · finanțări explicate simplu';
  if(h1)h1.textContent='Ce vrei să finanțezi?';
  if(p)p.textContent='Descrie investiția în câteva cuvinte. Îți arătăm apelurile care merită verificate, ce știm sigur și ce trebuie să faci mai departe.';
- hero.querySelectorAll('.conciergeSearch,.conciergeProfiles').forEach(x=>x.remove());
- const search=document.createElement('form');search.className='conciergeSearch';
- search.innerHTML='<label for="conciergeQ">Descrie investiția ta</label><div><input id="conciergeQ" autocomplete="off" placeholder="ex. hală de producție și utilaje pentru o firmă din Vâlcea"><button type="submit">Găsește finanțări</button></div>';
- p?.insertAdjacentElement('afterend',search);
- const profiles=document.createElement('div');profiles.className='conciergeProfiles';profiles.innerHTML=PROFILES.map(([l,q])=>`<button type="button" data-concierge-query="${esc(q)}">${esc(l)}</button>`).join('');search.insertAdjacentElement('afterend',profiles);
- search.onsubmit=e=>{e.preventDefault();const q=search.querySelector('input')?.value.trim();if(q)openHub(q,'dossiers')};
- profiles.querySelectorAll('[data-concierge-query]').forEach(b=>b.onclick=()=>openHub(b.dataset.conciergeQuery,'dossiers'));
+ let search=hero.querySelector('.conciergeSearch');
+ if(!search){
+   search=document.createElement('form');search.className='conciergeSearch';
+   search.innerHTML='<label for="conciergeQ">Descrie investiția ta</label><div><input id="conciergeQ" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ex. hală de producție și utilaje pentru o firmă din Vâlcea"><button type="submit">Găsește finanțări</button></div>';
+   p?.insertAdjacentElement('afterend',search);
+   search.onsubmit=e=>{e.preventDefault();const q=search.querySelector('input')?.value.trim();if(q)openHub(q,'dossiers')};
+ }
+ let profiles=hero.querySelector('.conciergeProfiles');
+ if(!profiles){
+   profiles=document.createElement('div');profiles.className='conciergeProfiles';profiles.innerHTML=PROFILES.map(([l,q])=>`<button type="button" data-concierge-query="${esc(q)}">${esc(l)}</button>`).join('');
+   search.insertAdjacentElement('afterend',profiles);
+   profiles.querySelectorAll('[data-concierge-query]').forEach(b=>b.onclick=()=>openHub(b.dataset.conciergeQuery,'dossiers'));
+ }
 
  document.querySelector('[data-concierge-surface]')?.remove();
  const open=P.dossiers.filter(isOpen).sort((a,b)=>score(b)-score(a));
@@ -152,6 +159,6 @@ function render(){
  surface.querySelector('[data-concierge-consultation]')?.addEventListener('click',()=>{openHub('','dossiers');setTimeout(()=>{const s=document.getElementById('diStatus');if(s){s.value='PUBLIC_CONSULTATION';s.dispatchEvent(new Event('change',{bubbles:true}))}},200)});
 }
 window.addEventListener('load',()=>setTimeout(render,560),{once:true});
-document.addEventListener('click',()=>setTimeout(render,360),true);
+document.addEventListener('click',event=>{if(isTypingTarget(event.target))return;setTimeout(render,360)},true);
 setTimeout(render,760);
 })();

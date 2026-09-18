@@ -49,6 +49,9 @@ for token in (
     "['Agricultură','agricultură']",
     "['Educație','educație']",
     'window.PARTENER_DECISION_UI?.openDossier',
+    'isTypingTarget',
+    "if(!search)",
+    'inputmode="search"',
 ):
     assert token in js, token
 
@@ -58,6 +61,7 @@ for forbidden in (
     'fetch(', 'localStorage', 'sessionStorage',
     'window.PARTENER_DATA=', 'window.PARTENER_DECISION_PRODUCTS=',
     'Math.random(',
+    "hero.querySelectorAll('.conciergeSearch,.conciergeProfiles').forEach(x=>x.remove())",
 ):
     assert forbidden not in js, forbidden
 
