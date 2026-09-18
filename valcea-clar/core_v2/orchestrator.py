@@ -86,7 +86,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     municipal_materiality = workdir / "valcea-core-v2-municipal-materiality.json"; municipal_kernels = workdir / "valcea-core-v2-municipal-fact-kernels.json"
     municipal_articles = workdir / "valcea-core-v2-municipal-articles.json"; cj = workdir / "valcea-core-v2-cj-road-shadow.json"; eta = workdir / "valcea-core-v2-eta-shadow.json"
     isj = workdir / "valcea-core-v2-isj-shadow.json"; isj_detail = workdir / "valcea-core-v2-isj-detail-shadow.json"; isj_materiality = workdir / "valcea-core-v2-isj-materiality-shadow.json"
-    isj_embedded = workdir / "valcea-core-v2-isj-embedded-notice-shadow.json"; photo = workdir / "valcea-core-v2-photo-truth.json"
+    isj_embedded = workdir / "valcea-core-v2-isj-embedded-notice-shadow.json"; isj_targets = workdir / "valcea-core-v2-isj-embedded-target-shadow.json"
+    isj_content = workdir / "valcea-core-v2-isj-embedded-content-shadow.json"; photo = workdir / "valcea-core-v2-photo-truth.json"
     site_package = workdir / "valcea-core-v2-shadow-site-package.json"; site_dir = workdir / "valcea-core-v2-shadow-site"
     return (
         CycleStage("apavil", (py,"valcea-clar/core_v2/apavil_shadow_lane.py",*live_flag,"--output",str(apavil)), apavil),
@@ -103,6 +104,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_detail", (py,"valcea-clar/core_v2/isj_detail_shadow_lane.py","--input",str(isj),*live_flag,"--output",str(isj_detail)), isj_detail),
         CycleStage("isj_materiality", (py,"valcea-clar/core_v2/isj_materiality_shadow_lane.py","--input",str(isj_detail),"--output",str(isj_materiality)), isj_materiality),
         CycleStage("isj_embedded_notice", (py,"valcea-clar/core_v2/isj_embedded_notice_shadow_lane.py","--details",str(isj_detail),"--materiality",str(isj_materiality),*live_flag,"--output",str(isj_embedded)), isj_embedded),
+        CycleStage("isj_embedded_target", (py,"valcea-clar/core_v2/isj_embedded_target_shadow_lane.py","--embedded",str(isj_embedded),*live_flag,"--output",str(isj_targets)), isj_targets),
+        CycleStage("isj_embedded_content", (py,"valcea-clar/core_v2/isj_embedded_content_shadow_lane.py","--targets",str(isj_targets),*live_flag,"--output",str(isj_content)), isj_content),
         CycleStage("photo_truth", (py,"valcea-clar/core_v2/photo_truth_gate.py","--input",f"ipj={ipj}","--input",f"isu={isu}","--input",f"municipal={municipal_articles}","--visual-registry","valcea-clar/core_v2/visual_registry.json","--external-probe","--output",str(photo)), photo),
         CycleStage("shadow_site_package", (py,"valcea-clar/core_v2/shadow_site_package.py","--articles",str(municipal_articles),"--photo-truth",str(photo),"--visual-registry","valcea-clar/core_v2/visual_registry.json","--repo-root",".","--output-dir",str(site_dir),"--output",str(site_package)), site_package),
     )
@@ -114,7 +117,13 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
         try:
             parsed = json.loads(stage.output.read_text(encoding="utf-8"))
             if isinstance(parsed, dict):
-                keys = ("status","mode","signal_count","detail_count","detail_row_count","candidate_count","selected_material_signal_count","detail_evidence_shadow_count","material_detail_candidate_shadow_count","embedded_notice_evidence_shadow_count","verified_written_shadow_count","visual_candidate_verified_shadow_count","package_image_bound_shadow_count","blocked_count","no_story_count","fabricated_claim_count","publication_authority","acceptance_ready")
+                keys = (
+                    "status","mode","signal_count","detail_count","detail_row_count","candidate_count","selected_material_signal_count",
+                    "detail_evidence_shadow_count","material_detail_candidate_shadow_count","embedded_notice_evidence_shadow_count",
+                    "embedded_target_identity_shadow_count","selected_document_count","document_content_captured_shadow_count",
+                    "document_text_extracted_shadow_count","verified_written_shadow_count","visual_candidate_verified_shadow_count",
+                    "package_image_bound_shadow_count","blocked_count","no_story_count","fabricated_claim_count","publication_authority","acceptance_ready"
+                )
                 output_doc = {key: parsed.get(key) for key in keys if key in parsed}
         except Exception:
             output_doc = {"parse_error": True}
@@ -128,7 +137,7 @@ def run_bounded_shadow_cycle(*, repo_root: Path, workdir: Path, live: bool) -> d
         summary = _stage_summary(stage, completed); stages.append(summary)
         if completed.returncode != 0 or not summary["output_exists"]:
             failed_stage = stage.name; break
-    return {"schema_version":"1.0","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE","production_write_authority":False,"site_publish_allowed":False,"social_publish_allowed":False,"acceptance_ready":False,"live_read_only":live,"status":"PASS_SHADOW" if failed_stage is None else "BLOCKED","failed_stage":failed_stage,"stage_count_planned":len(plan),"stage_count_completed":len(stages),"stages":stages,"truth_rule":"This orchestrator may read official sources and compose shadow evidence only. It has no publication, deploy, merge, workflow-dispatch or Meta-write authority. A successful shadow cycle is not production readiness."}
+    return {"schema_version":"1.1","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE","production_write_authority":False,"site_publish_allowed":False,"social_publish_allowed":False,"acceptance_ready":False,"live_read_only":live,"status":"PASS_SHADOW" if failed_stage is None else "BLOCKED","failed_stage":failed_stage,"stage_count_planned":len(plan),"stage_count_completed":len(stages),"stages":stages,"truth_rule":"This orchestrator may read official sources and compose shadow evidence only. It has no publication, deploy, merge, workflow-dispatch or Meta-write authority. A successful shadow cycle is not production readiness."}
 
 
 def main() -> int:
