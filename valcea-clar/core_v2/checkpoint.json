@@ -1,6 +1,6 @@
 {
-  "schema_version": "3.1",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN18-ISJ-ARTICLE-EVIDENCE-ARTIFACT-NATURAL-VALIDATED",
+  "schema_version": "3.2",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN19-LATE-ISJ-RUNTIME-CROSS-ARTIFACT-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,28 +8,28 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "99fb1138a69126087d00d443f7a810cc0fe9f7fd",
-    "main_observed_message": "Persist verified source registry health and resolution tasks",
-    "main_observed_at": "2026-09-18T21:03:04Z",
+    "main_observed_sha": "44f69fb57bb215a36c1c95d428fb5a1281ecf64e",
+    "main_observed_message": "Persist VÂLCEA CLAR story-first social state",
+    "main_observed_at": "2026-09-18T21:57:17Z",
     "legacy_live_activity_observed": true,
-    "legacy_live_activity_note": "main advanced independently through story-first publication/social/source-health commits; these legacy writes are observation-only and are not Core v2 readiness evidence",
+    "legacy_live_activity_note": "main advanced independently through story-first/social/public-projection activity; these legacy writes are observation-only and are not Core v2 readiness evidence",
     "legacy_public_projection": {
       "repo": "mihaicismaru-bit/valcea-clar",
-      "main_sha": "b1b20ed298f587cc79bcf457ae4e8ccf12851fca",
+      "main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
       "message": "sync: reconcile CIVORA canonical stories",
       "observation_only": true
     },
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "1c445efd889884bfe7136c1c29e1ac2e4596addd",
-    "message": "core v2: persist ISJ article truth in evidence artifact",
-    "workflow_run_id": 35395066226,
-    "workflow_run_number": 398,
-    "event": "pull_request",
+    "sha": "a120ae8dbb68687d1ad10291e060357928ed2400",
+    "message": "core v2: validate late ISJ artifacts in runtime truth gate",
+    "workflow_run_id": 35400381931,
+    "workflow_run_number": 401,
+    "event": "push",
     "conclusion": "success",
-    "artifact_id": 10567337700,
-    "artifact_sha256": "dde3b7fd055cca05a9a2190ffcb082d723da64f3e2e97673df5c5c722a05ef5e",
+    "artifact_id": 10569274317,
+    "artifact_sha256": "38423eb90416c78eb9eb43bc800451307da92549f0d347d783309ee84f9b339a",
     "manual_dispatch": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 26,
@@ -43,15 +43,14 @@
     "APAVIL/IPJ/ISU/municipal/CJ/ETA/ISJ source lanes remain fail-closed under their validated truth contracts",
     "ISJ field materiality, FactKernel composition and independent FactKernel integrity remain evidence-bound; registration deadline and non-normalized schedule ranges remain excluded",
     "ISJ deterministic shadow writer runs only after FactKernel integrity PASS_SHADOW and independent full-article integrity reconstructs the complete allowed article before promotion to VERIFIED_WRITTEN_SHADOW",
-    "ISJ writer/article-integrity regression tests are now explicitly executed in the Core v2 truth-bound test step",
-    "ISJ writer output and independent article-integrity output are now first-class files in the short-lived downloadable shadow evidence artifact",
-    "run 398 independently asserted the ISJ writer output remains non-authorizing and the article integrity remains PASS_SHADOW with one verified article and zero fabricated claims",
+    "late ISJ FactKernel, FactKernel-integrity, writer and article-integrity outputs are first-class downloadable evidence artifacts",
+    "validate_shadow_runtime.py now directly loads the four late ISJ artifacts and cross-checks publication boundaries, exact kernel/article identity, claim/evidence cardinality, source URL, excluded unverified fields and photo-gate eligibility instead of trusting only cycle summaries or workflow-local assertions",
+    "natural Core v2 run 401 executed all 26 shadow stages and the extended canonical runtime validator against live read-only artifacts; runtime invariants passed with zero publication authority",
     "the integrity-verified ISJ article remains supplied to the separate PHOTO truth gate and is correctly BLOCKED because no story-specific approved rights-cleared real photograph exists",
-    "current PHOTO truth report contains 7 written candidates: 2 VISUAL_CANDIDATE_VERIFIED_SHADOW and 5 BLOCKED; the blocked set is current IPJ, both current ISU, HCL 344 and ISJ",
-    "historical external replay remains truth-incomplete: site 2/2, Instagram 2/2, Facebook 0/2, visual 0/2",
-    "water-contract historical visual replay remains blocked because the public article does not bind the expected image even though internal metadata names one",
-    "CET Govora direct visual provenance remains fail-closed after bounded HTTP 429 retries; rate limiting is not reinterpreted as success",
-    "natural Core v2 run 398 completed all contract/runtime/readback steps successfully and uploaded artifact 10567337700 with SHA-256 dde3b7fd055cca05a9a2190ffcb082d723da64f3e2e97673df5c5c722a05ef5e",
+    "current PHOTO truth remains 2/7: two verified visual candidates and five fail-closed written candidates",
+    "historical external replay remains truth-incomplete: site 2/2, Instagram 2/2, Facebook 0/2, visual 0/2, externally verified receipts 0",
+    "historical replay transactions remain 0 fully bound because both replay candidates lack explicit Core v2 FactKernel evidence binding",
+    "natural run 401 uploaded 38 evidence files as artifact 10569274317 with SHA-256 38423eb90416c78eb9eb43bc800451307da92549f0d347d783309ee84f9b339a",
     "no workflow_dispatch, rerun, merge, deploy, live Core v2 article publication, public projection mutation or Meta write was used"
   ],
   "pilot_sources": [
@@ -92,11 +91,13 @@
     "fact_kernel_count": 1,
     "material_claim_count": 2,
     "fact_kernel_integrity_status": "PASS_SHADOW",
+    "runtime_cross_artifact_fact_kernel_integrity_verified": true,
     "shadow_writer_state": "WRITTEN_SHADOW_PENDING_ARTICLE_INTEGRITY",
     "article_integrity_status": "PASS_SHADOW",
     "article_truth_state": "VERIFIED_WRITTEN_SHADOW",
     "verified_article_count": 1,
     "verified_claim_count": 2,
+    "runtime_cross_artifact_article_identity_verified": true,
     "article_evidence_in_downloadable_artifact": true,
     "photo_gate_status": "BLOCKED",
     "photo_gate_reason": "no_story_specific_approved_visual",
@@ -121,14 +122,11 @@
       "hcl-344-local-education-access",
       "isj-directori-2026-conducere-scoli"
     ],
-    "isj_story_added_to_photo_gate": true,
-    "isj_story_id": "isj-directori-2026-conducere-scoli",
-    "isj_status": "BLOCKED",
-    "isj_reason": "no_story_specific_approved_visual",
     "truth_rule": "A verified article is not VISUAL_READY. Every story requires a story-specific real, semantically relevant, rights-cleared and approved visual plus external readback where enabled; generic or synthetic-as-photo substitutes remain forbidden."
   },
   "external_replay_truth": {
     "candidate_count": 2,
+    "current_manifest_story_count_observed": 75,
     "site_readback": {"passed": 2, "failed": 0},
     "visual_readback": {
       "passed": 0,
@@ -141,6 +139,8 @@
     "instagram": {"passed": 2, "failed": 0},
     "both_channels_verified_count": 0,
     "externally_verified_receipts": 0,
+    "fully_bound_replay_count": 0,
+    "transaction_block_reason": "BLOCKED_FACT_KERNEL_EVIDENCE",
     "truth_complete_count": 0,
     "acceptance_ready": false
   },
@@ -159,11 +159,11 @@
     },
     {
       "gate": "historical_visual_replay",
-      "reason": "Run 398 independently observed 0/2 historical visual replay passes: the water-contract public article does not bind its expected image; CET Govora direct-source readback remained HTTP 429 after three bounded attempts. The 429 is treated as transient, not as proof of invalid provenance."
+      "reason": "Run 401 independently observed 0/2 historical visual replay passes: the water-contract public article does not bind its expected image; CET Govora direct-source readback remained HTTP 429 after bounded attempts. The 429 is treated as transient, not as proof of invalid provenance."
     },
     {
       "gate": "facebook_receipt_truth",
-      "reason": "Read-only Graph requests for both replay candidates return OAuth error 10 requiring pages_read_engagement or Page Public Content Access. Internal post IDs remain insufficient delivery proof."
+      "reason": "Read-only Graph requests for both replay candidates require pages_read_engagement or Page Public Content Access. Internal post IDs remain insufficient delivery proof."
     },
     {
       "gate": "historical_fact_kernel_truth",
@@ -183,7 +183,7 @@
     }
   ],
   "next": [
-    "extend validate_shadow_runtime.py so it directly loads and asserts the late ISJ FactKernel-integrity, writer and article-integrity artifacts instead of relying only on cycle summaries and the workflow-local assertion step",
+    "add a focused negative regression suite for validate_shadow_runtime.py that deliberately mutates late ISJ cross-artifact identities/claims/source bindings and proves the canonical runtime validator fails closed",
     "continue rights/relevance work for HCL 344 and current IPJ/ISU candidates without synthetic-as-photo or generic imagery",
     "preserve ISJ PHOTO=BLOCKED unless a story-specific real rights-cleared visual with semantic relevance and disclosure is independently evidenced",
     "keep the historical water-contract image binding BLOCKED until a future explicitly authorized live/public remediation can be proven by public article readback; internal visual metadata alone is insufficient",
@@ -195,7 +195,7 @@
   ],
   "evidence": {
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
-    "isj_field_materiality": "valcea-clar/core_v2/isj_field_materiality_shadow_lane.py",
+    "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "isj_fact_kernel": "valcea-clar/core_v2/isj_fact_kernel_shadow_lane.py",
     "isj_fact_kernel_integrity": "valcea-clar/core_v2/isj_fact_kernel_integrity.py",
     "isj_writer": "valcea-clar/core_v2/isj_writer_shadow_lane.py",
@@ -203,10 +203,13 @@
     "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
     "visual_readback": "valcea-clar/core_v2/visual_readback.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35395066226",
-    "artifact_id": 10567337700,
-    "artifact_sha256": "dde3b7fd055cca05a9a2190ffcb082d723da64f3e2e97673df5c5c722a05ef5e",
+    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35400381931",
+    "artifact_id": 10569274317,
+    "artifact_sha256": "38423eb90416c78eb9eb43bc800451307da92549f0d347d783309ee84f9b339a",
+    "artifact_file_count": 38,
     "artifact_contains": [
+      "valcea-core-v2-isj-fact-kernel-shadow.json",
+      "valcea-core-v2-isj-fact-kernel-integrity-shadow.json",
       "valcea-core-v2-isj-article-shadow.json",
       "valcea-core-v2-isj-article-integrity-shadow.json"
     ]
