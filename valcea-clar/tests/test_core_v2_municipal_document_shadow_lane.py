@@ -11,6 +11,7 @@ from municipal_document_shadow_lane import (  # noqa: E402
     _validate_official_document_url,
     materialize_document_evidence,
 )
+from test_core_v2_municipal_materiality_shadow_lane import MunicipalMaterialityShadowLaneTests  # noqa: E402,F401
 
 
 class MunicipalDocumentShadowLaneTests(unittest.TestCase):
