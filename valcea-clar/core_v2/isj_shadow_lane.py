@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import importlib.util
 import json
+import sys
 from dataclasses import asdict
 from datetime import date, timedelta
 from pathlib import Path
@@ -265,11 +266,20 @@ def verify_isj_signals(signals: list[dict[str, Any]], *, as_of: date | None = No
 
 def _load_isj_adapter():
     path = Path(__file__).resolve().parents[1] / "scripts" / "isj_valcea_education_signal_adapter.py"
-    spec = importlib.util.spec_from_file_location("core_v2_isj_valcea_education_signal_adapter", path)
+    module_name = "core_v2_isj_valcea_education_signal_adapter"
+    spec = importlib.util.spec_from_file_location(module_name, path)
     if spec is None or spec.loader is None:
         raise RuntimeError("isj_adapter_load_failed")
     module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # dataclasses resolves postponed annotations through sys.modules during class creation.
+    # Register the isolated legacy adapter before exec_module; otherwise Python 3.13 can
+    # fail inside dataclasses with a None module namespace.
+    sys.modules[module_name] = module
+    try:
+        spec.loader.exec_module(module)
+    except Exception:
+        sys.modules.pop(module_name, None)
+        raise
     return module
 
 
