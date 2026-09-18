@@ -13,6 +13,18 @@ def load(path: Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _row_diagnostic(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "document_role": row.get("document_role"),
+        "document_label": row.get("document_label"),
+        "state": row.get("state"),
+        "reason": row.get("reason"),
+        "error_type": row.get("error_type"),
+        "error": str(row.get("error") or "")[:180] or None,
+        "text_extracted": bool(row.get("text_extracted")),
+    }
+
+
 def validate(doc: dict[str, Any], *, expected_year: int) -> dict[str, Any]:
     assert doc.get("publication_authority") == "NONE"
     assert doc.get("acceptance_ready") is False
@@ -29,6 +41,7 @@ def validate(doc: dict[str, Any], *, expected_year: int) -> dict[str, Any]:
     blocked_count = int(doc.get("blocked_count") or 0)
     rows = doc.get("rows") or []
     assert isinstance(rows, list)
+    diagnostics = [_row_diagnostic(row) for row in rows if isinstance(row, dict)]
 
     if not context_verified:
         assert selected_count == 0
@@ -42,6 +55,7 @@ def validate(doc: dict[str, Any], *, expected_year: int) -> dict[str, Any]:
             "document_text_extracted_shadow_count": 0,
             "blocked_count": blocked_count,
             "selected_roles": [],
+            "rows": diagnostics,
         }
 
     assert doc.get("expected_contest_session_year") == expected_year
@@ -110,6 +124,7 @@ def validate(doc: dict[str, Any], *, expected_year: int) -> dict[str, Any]:
         "document_text_extracted_shadow_count": extracted_count,
         "blocked_count": blocked_count,
         "selected_roles": selected_roles,
+        "rows": diagnostics,
     }
 
 
