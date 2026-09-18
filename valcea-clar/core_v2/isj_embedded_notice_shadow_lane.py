@@ -12,7 +12,6 @@ from isj_detail_shadow_lane import _is_first_party_https, _load_legacy_detail_mo
 
 MAX_EMBEDDED_ROWS = 4
 MAX_LABELS = 32
-DOCUMENT_EXTENSIONS = ("pdf", "doc", "docx", "xls", "xlsx")
 
 
 class _VisibleChunkParser(HTMLParser):
@@ -43,13 +42,17 @@ def _fold(value: Any) -> str:
     return " ".join(re.sub(r"[^a-z0-9.]+", " ", text.translate(table)).split())
 
 
-def _extract_embedded_file_labels(body: bytes) -> list[str]:
+def _visible_parts(body: bytes) -> list[str]:
     parser = _VisibleChunkParser()
     parser.feed(body.decode("utf-8", errors="replace"))
+    return parser.parts
+
+
+def _extract_embedded_file_labels(parts: list[str]) -> list[str]:
     labels: list[str] = []
     seen: set[str] = set()
     matcher = re.compile(r"\.(?:pdf|doc|docx|xls|xlsx)\b", re.IGNORECASE)
-    for part in parser.parts:
+    for part in parts:
         if not matcher.search(part):
             continue
         normalized = " ".join(part.split()).strip()
@@ -164,36 +167,49 @@ def resolve_embedded_notice_evidence(
         assert fetcher is not None
         try:
             body, final_url, content_type = fetcher(target)
-            observed_sha = hashlib.sha256(body).hexdigest()
-            expected_sha = str(detail.get("detail_sha256") or "")
-            if expected_sha and observed_sha != expected_sha:
-                rows.append({
-                    **base,
-                    "state": "BLOCKED",
-                    "reason": "detail_changed_since_verified_evidence",
-                    "network_fetch_attempted": True,
-                    "observed_detail_sha256": observed_sha,
-                    "expected_detail_sha256": expected_sha,
-                })
-                continue
             if content_type not in {"text/html", "text/plain"}:
                 rows.append({**base, "state": "BLOCKED", "reason": "embedded_catalog_parent_not_text", "network_fetch_attempted": True, "content_type": content_type})
                 continue
-            labels = _extract_embedded_file_labels(body)
+            observed_sha = hashlib.sha256(body).hexdigest()
+            expected_sha = str(detail.get("detail_sha256") or "")
+            parts = _visible_parts(body)
+            visible_folded = _fold(" ".join(parts))
+            identity_anchor = _fold(row.get("label") or detail.get("visible_title"))
+            if not identity_anchor or identity_anchor not in visible_folded:
+                rows.append({
+                    **base,
+                    "state": "BLOCKED",
+                    "reason": "detail_identity_anchor_missing_after_refetch",
+                    "network_fetch_attempted": True,
+                    "prior_detail_sha256": expected_sha or None,
+                    "observed_detail_sha256": observed_sha,
+                    "parent_bytes_changed_since_detail_gate": bool(expected_sha and observed_sha != expected_sha),
+                    "parent_identity_reverified": False,
+                })
+                continue
+            labels = _extract_embedded_file_labels(parts)
             fields = _classify_labels(labels, current_year=current_year)
+            parent_meta = {
+                "network_fetch_attempted": True,
+                "detail_url": final_url,
+                "prior_detail_sha256": expected_sha or None,
+                "observed_detail_sha256": observed_sha,
+                "parent_bytes_changed_since_detail_gate": bool(expected_sha and observed_sha != expected_sha),
+                "parent_identity_reverified": True,
+                "parent_identity_anchor": row.get("label") or detail.get("visible_title"),
+                "embedded_parent_evidence_id": f"isj-embedded-parent-{observed_sha[:24]}",
+            }
             if not labels:
-                rows.append({**base, **fields, "state": "BLOCKED", "reason": "no_embedded_document_labels_observed", "network_fetch_attempted": True, "detail_url": final_url, "detail_sha256": observed_sha})
+                rows.append({**base, **fields, **parent_meta, "state": "BLOCKED", "reason": "no_embedded_document_labels_observed"})
                 continue
             state = "EMBEDDED_NOTICE_EVIDENCE_SHADOW" if fields["explicit_current_material_catalog"] else "BLOCKED"
             reason = "current_year_embedded_notice_catalog_verified_non_authorizing" if state == "EMBEDDED_NOTICE_EVIDENCE_SHADOW" else "embedded_catalog_present_but_current_materiality_unproven"
             rows.append({
                 **base,
                 **fields,
+                **parent_meta,
                 "state": state,
                 "reason": reason,
-                "network_fetch_attempted": True,
-                "detail_url": final_url,
-                "detail_sha256": observed_sha,
                 "embedded_targets_fetched": False,
                 "embedded_document_content_verified": False,
             })
@@ -201,7 +217,7 @@ def resolve_embedded_notice_evidence(
             rows.append({**base, "state": "BLOCKED", "reason": "embedded_catalog_parent_fetch_failed", "network_fetch_attempted": True, "error_type": type(exc).__name__, "error": str(exc)[:400]})
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "ISJ_EMBEDDED_NOTICE_EVIDENCE_SHADOW",
         "source_kind": "isj_valcea",
         "publication_authority": "NONE",
@@ -217,7 +233,7 @@ def resolve_embedded_notice_evidence(
         "embedded_notice_evidence_shadow_count": sum(row.get("state") == "EMBEDDED_NOTICE_EVIDENCE_SHADOW" for row in rows),
         "blocked_count": sum(row.get("state") == "BLOCKED" for row in rows),
         "rows": rows,
-        "truth_rule": "A verified first-party ISJ page may prove only that explicitly visible embedded document labels are listed on that page. Embedded document targets are not fetched by this gate, and their contents, deadlines, vacancy counts or event times are never inferred from filenames. Even a current-year registration/calendar/post-list catalog remains non-authorizing until document content and field-level facts are independently verified.",
+        "truth_rule": "Dynamic first-party page bytes may change between bounded reads, so raw-byte drift is recorded rather than treated as proof of semantic drift. The current read must independently preserve the page identity anchor and visibly list the embedded document labels. This gate never fetches embedded document targets and never infers their contents, deadlines, vacancy counts or event times from filenames. Even a current-year registration/calendar/post-list catalog remains non-authorizing until document content and field-level facts are independently verified.",
     }
 
 
