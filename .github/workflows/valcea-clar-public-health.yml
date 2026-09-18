@@ -17,7 +17,7 @@ on:
     types: [completed]
     branches: [main]
   schedule:
-    - cron: '17,47 * * * *'
+    - cron: '23,53 * * * *'
   push:
     branches: [main]
     paths:
@@ -74,7 +74,10 @@ jobs:
         run: |
           set -euo pipefail
           EXTRA=''
-          if [ "${{ github.event_name }}" = 'push' ] || [ "${{ github.event_name }}" = 'workflow_run' ]; then
+          # Push/workflow_run probes are immediate telemetry and may race the
+          # cross-repo public projector. Strict certification belongs to the
+          # scheduled observer after the bounded projection convergence window.
+          if [ "${{ github.event_name }}" = 'schedule' ]; then
             EXTRA='--require-ready'
           elif [ "${{ github.event_name }}" = 'workflow_dispatch' ] && [ "${{ inputs.require_ready }}" = 'true' ]; then
             EXTRA='--require-ready'
@@ -127,6 +130,7 @@ jobs:
           STATUS_REPOSITORY: ${{ github.repository }}
           STATUS_SHA: ${{ steps.target.outputs.sha }}
           STATUS_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EVENT_NAME: ${{ github.event_name }}
         run: |
           python - <<'PY'
           import json
@@ -145,9 +149,14 @@ jobs:
                       state = 'success'
                       description = f"READY · {report.get('expected_story_count', '—')} durable stories"
                   else:
-                      state = 'failure'
                       blockers = [str(x) for x in (report.get('blockers') or [])]
-                      description = 'BLOCKED · ' + (', '.join(blockers[:4]) or 'unknown blocker')
+                      immediate_event = os.environ.get('EVENT_NAME') in {'push', 'workflow_run'}
+                      if immediate_event and blockers == ['__public_projection__']:
+                          state = 'pending'
+                          description = 'CONVERGING · public projection'
+                      else:
+                          state = 'failure'
+                          description = 'BLOCKED · ' + (', '.join(blockers[:4]) or 'unknown blocker')
               except Exception as exc:
                   description = f'ERROR · invalid health report ({type(exc).__name__})'
 
