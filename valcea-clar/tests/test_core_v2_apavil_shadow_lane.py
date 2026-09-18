@@ -46,7 +46,8 @@ class ApavilShadowLaneTests(unittest.TestCase):
         self.assertEqual(row["integrity"]["status"], "PASS")
         self.assertEqual(row["integrity"]["fabricated_claims"], 0)
         self.assertGreaterEqual(len(row["article_package"]["body"]), 180)
-        self.assertIn("programată", row["article_package"]["body"])
+        self.assertIn("programare anunțată", row["article_package"]["body"])
+        self.assertIn("nu afirmă că întreruperea este în desfășurare", row["article_package"]["body"])
         self.assertIn("source-snapshot:" + "a" * 64, row["fact_kernel"]["evidence_ids"])
 
     def test_past_schedule_is_truthful_no_story(self):
