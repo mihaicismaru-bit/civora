@@ -20,14 +20,16 @@ permissions:
 jobs:
   shadow-contracts:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
+
       - name: Compile Core v2
         run: python -m py_compile valcea-clar/core_v2/*.py valcea-clar/tests/test_core_v2_*.py
+
       - name: Run truth-bound contract tests
         run: |
           python valcea-clar/tests/test_core_v2_contracts.py
@@ -47,8 +49,10 @@ jobs:
           python valcea-clar/tests/test_core_v2_municipal_article_integrity.py
           python valcea-clar/tests/test_core_v2_municipal_writer_shadow_lane.py
           python valcea-clar/tests/test_core_v2_cj_road_shadow_lane.py
+
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
+
       - name: Run reused source-adapter fail-closed self-tests
         run: |
           python valcea-clar/scripts/ipj_valcea_news_signal_adapter.py --self-test
@@ -59,6 +63,7 @@ jobs:
           python valcea-clar/scripts/eta_valcea_signal_adapter.py --self-test
           python valcea-clar/scripts/isj_valcea_education_signal_adapter.py --self-test
           python valcea-clar/scripts/filarmonica_valcea_upcoming_event_reference_adapter.py --self-test
+
       - name: Run reused first-party detail-evidence self-tests
         run: |
           python valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py --self-test
@@ -66,36 +71,59 @@ jobs:
           python valcea-clar/scripts/isu_valcea_emergency_reference_adapter.py --self-test
           python valcea-clar/scripts/isu_valcea_emergency_detail_evidence.py --self-test
           python valcea-clar/scripts/council_decision_document_resolver.py --self-test
+
       - name: Run APAVIL source-to-kernel shadow lane read-only
         run: python valcea-clar/core_v2/apavil_shadow_lane.py --live --output /tmp/valcea-core-v2-apavil-shadow.json
+
       - name: Run IPJ structured editorial shadow lane read-only
         run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source ipj --live --output /tmp/valcea-core-v2-ipj-shadow.json
+
       - name: Run ISU structured editorial shadow lane read-only
         run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source isu --live --output /tmp/valcea-core-v2-isu-shadow.json
+
       - name: Run Râmnicu Vâlcea municipal reference shadow lane read-only
         run: python valcea-clar/core_v2/municipal_reference_shadow_lane.py --live --output /tmp/valcea-core-v2-municipal-shadow.json
+
       - name: Collect bounded municipal HCL document evidence read-only
         run: python valcea-clar/core_v2/municipal_document_shadow_lane.py --live --output /tmp/valcea-core-v2-municipal-documents.json
+
       - name: Adjudicate municipal materiality read-only
         run: |
           python valcea-clar/core_v2/municipal_materiality_shadow_lane.py \
             --input /tmp/valcea-core-v2-municipal-documents.json \
             --output /tmp/valcea-core-v2-municipal-materiality.json
+
       - name: Compose evidence-bound municipal FactKernels read-only
         run: |
           python valcea-clar/core_v2/municipal_fact_kernel_shadow_lane.py \
             --documents /tmp/valcea-core-v2-municipal-documents.json \
             --materiality /tmp/valcea-core-v2-municipal-materiality.json \
             --output /tmp/valcea-core-v2-municipal-fact-kernels.json
+
       - name: Compose municipal full editorial packages read-only
         run: |
           python valcea-clar/core_v2/municipal_writer_shadow_lane.py \
             --fact-kernels /tmp/valcea-core-v2-municipal-fact-kernels.json \
             --output /tmp/valcea-core-v2-municipal-articles.json
+
       - name: Run CJ Vâlcea road signal gate read-only
         run: python valcea-clar/core_v2/cj_road_shadow_lane.py --live --output /tmp/valcea-core-v2-cj-road-shadow.json
+
+      - name: Run ETA current-material signal gate read-only
+        run: python valcea-clar/core_v2/eta_shadow_lane.py --live --limit 20 --output /tmp/valcea-core-v2-eta-shadow.json
+
+      - name: Run Core v2 photo truth gate read-only
+        run: |
+          python valcea-clar/core_v2/photo_truth_gate.py \
+            --input ipj=/tmp/valcea-core-v2-ipj-shadow.json \
+            --input isu=/tmp/valcea-core-v2-isu-shadow.json \
+            --input municipal=/tmp/valcea-core-v2-municipal-articles.json \
+            --external-probe \
+            --output /tmp/valcea-core-v2-photo-truth.json
+
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
+
       - name: Require complete bounded legacy classification
         run: |
           python - <<'PY'
@@ -107,17 +135,22 @@ jobs:
               raise SystemExit(f'Legacy inventory still has UNKNOWN items: {unknown}')
           print(f"Legacy inventory classification complete: {doc['counts']}")
           PY
+
       - name: Build non-authoritative shadow replay candidates
         run: python valcea-clar/core_v2/build_shadow_candidate_ledger.py --output /tmp/valcea-core-v2-shadow-candidates.json
+
       - name: Replay candidate site truth read-only
         run: python valcea-clar/core_v2/replay_external_site.py --output /tmp/valcea-core-v2-site-readback.json --limit 10
+
       - name: Replay candidate visual truth read-only
         run: python valcea-clar/core_v2/replay_external_visuals.py --output /tmp/valcea-core-v2-visual-readback.json --limit 10
+
       - name: Replay candidate Meta truth read-only
         env:
           VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
           VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
         run: python valcea-clar/core_v2/replay_external_meta.py --output /tmp/valcea-core-v2-meta-readback.json --limit 10
+
       - name: Bind external evidence into shadow receipt ledger
         run: |
           python valcea-clar/core_v2/materialize_shadow_receipts.py \
@@ -126,6 +159,7 @@ jobs:
             --visual-readback /tmp/valcea-core-v2-visual-readback.json \
             --meta-readback /tmp/valcea-core-v2-meta-readback.json \
             --output /tmp/valcea-core-v2-shadow-receipts.json
+
       - name: Bind explicit fact and article evidence into shadow transactions
         run: |
           python valcea-clar/core_v2/materialize_shadow_transactions.py \
@@ -135,6 +169,7 @@ jobs:
             --evidence valcea-clar/editorial/facts_registry.json \
             --evidence valcea-clar/editorial/editorial_products.json \
             --output /tmp/valcea-core-v2-shadow-transactions.json
+
       - name: Classify exact truth blockers
         run: |
           python valcea-clar/core_v2/shadow_gate_report.py \
@@ -142,180 +177,10 @@ jobs:
             --receipts /tmp/valcea-core-v2-shadow-receipts.json \
             --transactions /tmp/valcea-core-v2-shadow-transactions.json \
             --output /tmp/valcea-core-v2-gate-report.json
-      - name: Verify shadow isolation
-        run: |
-          python - <<'PY'
-          import json
-          from pathlib import Path
-          checkpoint=json.loads(Path('valcea-clar/core_v2/checkpoint.json').read_text(encoding='utf-8'))
-          sources=json.loads(Path('valcea-clar/core_v2/pilot_sources.json').read_text(encoding='utf-8'))
-          apavil=json.loads(Path('/tmp/valcea-core-v2-apavil-shadow.json').read_text(encoding='utf-8'))
-          ipj=json.loads(Path('/tmp/valcea-core-v2-ipj-shadow.json').read_text(encoding='utf-8'))
-          isu=json.loads(Path('/tmp/valcea-core-v2-isu-shadow.json').read_text(encoding='utf-8'))
-          municipal=json.loads(Path('/tmp/valcea-core-v2-municipal-shadow.json').read_text(encoding='utf-8'))
-          municipal_docs=json.loads(Path('/tmp/valcea-core-v2-municipal-documents.json').read_text(encoding='utf-8'))
-          municipal_materiality=json.loads(Path('/tmp/valcea-core-v2-municipal-materiality.json').read_text(encoding='utf-8'))
-          municipal_kernels=json.loads(Path('/tmp/valcea-core-v2-municipal-fact-kernels.json').read_text(encoding='utf-8'))
-          municipal_articles=json.loads(Path('/tmp/valcea-core-v2-municipal-articles.json').read_text(encoding='utf-8'))
-          cj_road=json.loads(Path('/tmp/valcea-core-v2-cj-road-shadow.json').read_text(encoding='utf-8'))
-          ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
-          readback=json.loads(Path('/tmp/valcea-core-v2-site-readback.json').read_text(encoding='utf-8'))
-          visual=json.loads(Path('/tmp/valcea-core-v2-visual-readback.json').read_text(encoding='utf-8'))
-          meta=json.loads(Path('/tmp/valcea-core-v2-meta-readback.json').read_text(encoding='utf-8'))
-          receipts=json.loads(Path('/tmp/valcea-core-v2-shadow-receipts.json').read_text(encoding='utf-8'))
-          transactions=json.loads(Path('/tmp/valcea-core-v2-shadow-transactions.json').read_text(encoding='utf-8'))
-          gates=json.loads(Path('/tmp/valcea-core-v2-gate-report.json').read_text(encoding='utf-8'))
-          assert checkpoint['core_v2_mode']=='SHADOW_ONLY'
-          assert checkpoint['publication_authority']=='NONE'
-          assert sources['publication_authority']=='NONE'
-          assert sources['source_expansion_forbidden_during_pilot'] is True
-          assert apavil['publication_authority']=='NONE'
-          assert apavil['acceptance_ready'] is False
-          for public_safety in (ipj, isu):
-              assert public_safety['publication_authority']=='NONE'
-              assert public_safety['acceptance_ready'] is False
-              assert public_safety['production_writer_ready'] is False
-              assert int(public_safety.get('fabricated_claim_count') or 0) == 0
-              assert int(public_safety.get('structured_editorial_count') or 0) == int(public_safety.get('verified_written_shadow_count') or 0)
-              for row in public_safety.get('rows') or []:
-                  if row.get('state') == 'VERIFIED_WRITTEN_SHADOW':
-                      assert row['integrity']['status'] == 'PASS'
-                      assert row['integrity']['fabricated_claims'] == 0
-                      assert row['production_writer_ready'] is False
-                      assert row['article_package']['writer_id'] == 'shadow_structured_editorial_v2'
-                      assert row['currentness']['publication_date_is_event_time'] is False
-          assert municipal['publication_authority']=='NONE'
-          assert municipal['acceptance_ready'] is False
-          assert municipal['production_writer_ready'] is False
-          assert int(municipal.get('verified_written_shadow_count') or 0) == 0
-          for row in municipal.get('rows') or []:
-              assert row.get('state') in {'NO_STORY', 'BLOCKED'}
-              assert 'fact_kernel' not in row
-              assert 'article_package' not in row
-          assert municipal_docs['publication_authority']=='NONE'
-          assert municipal_docs['acceptance_ready'] is False
-          assert municipal_docs['fact_kernel_promotion_allowed'] is False
-          assert municipal_docs['writer_allowed'] is False
-          assert int(municipal_docs.get('fabricated_claim_count') or 0) == 0
-          document_evidence={
-              (int(row.get('decision_number') or 0), str(row.get('decision_date') or '')): {
-                  str(item.get('evidence_id'))
-                  for item in (row.get('evidence') or [])
-                  if item.get('evidence_id')
-              }
-              for row in (municipal_docs.get('rows') or [])
-          }
-          for row in municipal_docs.get('rows') or []:
-              assert row.get('state') in {'DOCUMENT_EVIDENCE_READY', 'BLOCKED'}
-              assert row.get('publication_authority') == 'NONE'
-              assert row.get('fact_kernel_promotion_allowed') is False
-              assert row.get('writer_allowed') is False
-              assert 'fact_kernel' not in row
-              assert 'article_package' not in row
-              for evidence in row.get('evidence') or []:
-                  assert evidence.get('material_fact_status') == 'UNADJUDICATED'
-                  assert evidence.get('epistemic_status') == 'FIRST_PARTY_DOCUMENT_TEXT'
-          assert municipal_materiality['publication_authority']=='NONE'
-          assert municipal_materiality['acceptance_ready'] is False
-          assert municipal_materiality['fact_kernel_promotion_allowed'] is False
-          assert municipal_materiality['writer_allowed'] is False
-          assert municipal_materiality['production_writer_ready'] is False
-          assert int(municipal_materiality.get('fabricated_claim_count') or 0) == 0
-          for row in municipal_materiality.get('rows') or []:
-              assert row.get('state') in {'MATERIALITY_CANDIDATE', 'NO_STORY', 'BLOCKED'}
-              assert row.get('publication_authority') == 'NONE'
-              assert row.get('fact_kernel_promotion_allowed') is False
-              assert row.get('writer_allowed') is False
-              assert 'fact_kernel' not in row
-              assert 'article_package' not in row
-              evidence_ids=document_evidence.get((int(row.get('decision_number') or 0), str(row.get('decision_date') or '')), set())
-              for candidate in row.get('materiality_candidates') or []:
-                  candidate_ids=set(candidate.get('evidence_ids') or [])
-                  assert candidate_ids
-                  assert candidate_ids <= evidence_ids
-                  assert candidate.get('epistemic_status') == 'DOCUMENT_SUPPORTED_MATERIALITY_CANDIDATE'
-                  assert candidate.get('fact_kernel_status') == 'NOT_PROMOTED'
-          assert municipal_kernels['publication_authority']=='NONE'
-          assert municipal_kernels['acceptance_ready'] is False
-          assert municipal_kernels['writer_allowed'] is False
-          assert municipal_kernels['production_writer_ready'] is False
-          assert municipal_kernels['site_publish_allowed'] is False
-          assert municipal_kernels['social_publish_allowed'] is False
-          assert int(municipal_kernels.get('fabricated_claim_count') or 0) == 0
-          for row in municipal_kernels.get('rows') or []:
-              assert row.get('state') in {'FACT_KERNEL_VERIFIED_SHADOW', 'NO_STORY', 'BLOCKED'}
-              assert row.get('publication_authority') == 'NONE'
-              assert row.get('writer_allowed') is False
-              assert row.get('production_writer_ready') is False
-              assert row.get('site_publish_allowed') is False
-              assert row.get('social_publish_allowed') is False
-              if row.get('state') == 'FACT_KERNEL_VERIFIED_SHADOW':
-                  assert row.get('kernels')
-                  for kernel in row.get('kernels') or []:
-                      integrity=kernel.get('integrity') or {}
-                      assert integrity.get('status') == 'PASS_SHADOW'
-                      assert integrity.get('all_claims_evidence_bound') is True
-                      assert int(integrity.get('fabricated_claims') or 0) == 0
-                      fact_kernel=kernel.get('fact_kernel') or {}
-                      assert fact_kernel.get('claims')
-                      assert fact_kernel.get('evidence_ids')
-                      for binding in kernel.get('claim_evidence') or []:
-                          assert binding.get('claim') in fact_kernel.get('claims')
-                          assert binding.get('evidence_ids')
-          assert municipal_articles['publication_authority']=='NONE'
-          assert municipal_articles['acceptance_ready'] is False
-          assert municipal_articles['production_writer_ready'] is False
-          assert municipal_articles['site_publish_allowed'] is False
-          assert municipal_articles['social_publish_allowed'] is False
-          assert int(municipal_articles.get('fabricated_claim_count') or 0) == 0
-          for row in municipal_articles.get('rows') or []:
-              assert row.get('state') in {'VERIFIED_WRITTEN_SHADOW', 'NO_STORY', 'BLOCKED'}
-              assert row.get('publication_authority') == 'NONE'
-              assert row.get('production_writer_ready') is False
-              assert row.get('site_publish_allowed') is False
-              assert row.get('social_publish_allowed') is False
-              if row.get('state') == 'VERIFIED_WRITTEN_SHADOW':
-                  assert row.get('articles')
-                  for article in row.get('articles') or []:
-                      assert article.get('state') == 'VERIFIED_WRITTEN_SHADOW'
-                      assert article.get('publication_authority') == 'NONE'
-                      assert article.get('production_writer_ready') is False
-                      assert article.get('site_publish_allowed') is False
-                      assert article.get('social_publish_allowed') is False
-                      integrity=article.get('integrity') or {}
-                      assert integrity.get('status') == 'PASS'
-                      assert integrity.get('body_fully_controlled') is True
-                      assert int(integrity.get('fabricated_claims') or 0) == 0
-                      package=article.get('article_package') or {}
-                      assert package.get('writer_id') == 'municipal_shadow_editorial_v1'
-                      assert package.get('body_segments')
-          assert cj_road['publication_authority']=='NONE'
-          assert cj_road['acceptance_ready'] is False
-          assert cj_road['fact_kernel_promotion_allowed'] is False
-          assert cj_road['writer_allowed'] is False
-          assert cj_road['production_writer_ready'] is False
-          assert int(cj_road.get('verified_written_shadow_count') or 0) == 0
-          assert int(cj_road.get('fabricated_claim_count') or 0) == 0
-          for row in cj_road.get('rows') or []:
-              assert row.get('state') in {'NO_STORY', 'BLOCKED'}
-              assert row.get('publication_authority') == 'NONE'
-              assert row.get('fact_kernel_promotion_allowed') is False
-              assert row.get('writer_allowed') is False
-              assert 'fact_kernel' not in row
-              assert 'article_package' not in row
-          assert ledger['publication_authority']=='NONE'
-          assert ledger['acceptance_ready'] is False
-          assert readback['publication_authority']=='NONE'
-          assert visual['publication_authority']=='NONE'
-          assert meta['publication_authority']=='NONE'
-          assert receipts['publication_authority']=='NONE'
-          assert receipts['acceptance_ready'] is False
-          assert transactions['publication_authority']=='NONE'
-          assert transactions['acceptance_ready'] is False
-          assert gates['publication_authority']=='NONE'
-          assert gates['acceptance_ready'] is False
-          print('Core v2 shadow isolation: PASS')
-          PY
+
+      - name: Verify all shadow runtime invariants
+        run: python valcea-clar/core_v2/validate_shadow_runtime.py --base /tmp --repo .
+
       - name: Upload shadow evidence
         uses: actions/upload-artifact@v7
         with:
@@ -330,6 +195,8 @@ jobs:
             /tmp/valcea-core-v2-municipal-fact-kernels.json
             /tmp/valcea-core-v2-municipal-articles.json
             /tmp/valcea-core-v2-cj-road-shadow.json
+            /tmp/valcea-core-v2-eta-shadow.json
+            /tmp/valcea-core-v2-photo-truth.json
             /tmp/valcea-core-v2-legacy-inventory.json
             /tmp/valcea-core-v2-shadow-candidates.json
             /tmp/valcea-core-v2-site-readback.json
