@@ -48,10 +48,33 @@ jobs:
           python valcea-clar/scripts/filarmonica_valcea_upcoming_event_reference_adapter.py --self-test
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
+      - name: Require complete bounded legacy classification
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('/tmp/valcea-core-v2-legacy-inventory.json').read_text(encoding='utf-8'))
+          unknown=doc.get('unknown_paths') or []
+          if unknown:
+              raise SystemExit(f'Legacy inventory still has UNKNOWN items: {unknown}')
+          print(f"Legacy inventory classification complete: {doc['counts']}")
+          PY
       - name: Build non-authoritative shadow replay candidates
         run: python valcea-clar/core_v2/build_shadow_candidate_ledger.py --output /tmp/valcea-core-v2-shadow-candidates.json
       - name: Replay candidate site truth read-only
         run: python valcea-clar/core_v2/replay_external_site.py --output /tmp/valcea-core-v2-site-readback.json --limit 10
+      - name: Replay candidate Meta truth read-only
+        env:
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+        run: python valcea-clar/core_v2/replay_external_meta.py --output /tmp/valcea-core-v2-meta-readback.json --limit 10
+      - name: Bind external evidence into shadow receipt ledger
+        run: |
+          python valcea-clar/core_v2/materialize_shadow_receipts.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --site-readback /tmp/valcea-core-v2-site-readback.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --output /tmp/valcea-core-v2-shadow-receipts.json
       - name: Verify shadow isolation
         run: |
           python - <<'PY'
@@ -61,6 +84,8 @@ jobs:
           sources=json.loads(Path('valcea-clar/core_v2/pilot_sources.json').read_text(encoding='utf-8'))
           ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
           readback=json.loads(Path('/tmp/valcea-core-v2-site-readback.json').read_text(encoding='utf-8'))
+          meta=json.loads(Path('/tmp/valcea-core-v2-meta-readback.json').read_text(encoding='utf-8'))
+          receipts=json.loads(Path('/tmp/valcea-core-v2-shadow-receipts.json').read_text(encoding='utf-8'))
           assert checkpoint['core_v2_mode']=='SHADOW_ONLY'
           assert checkpoint['publication_authority']=='NONE'
           assert sources['publication_authority']=='NONE'
@@ -68,6 +93,9 @@ jobs:
           assert ledger['publication_authority']=='NONE'
           assert ledger['acceptance_ready'] is False
           assert readback['publication_authority']=='NONE'
+          assert meta['publication_authority']=='NONE'
+          assert receipts['publication_authority']=='NONE'
+          assert receipts['acceptance_ready'] is False
           print('Core v2 shadow isolation: PASS')
           PY
       - name: Upload shadow evidence
@@ -78,5 +106,7 @@ jobs:
             /tmp/valcea-core-v2-legacy-inventory.json
             /tmp/valcea-core-v2-shadow-candidates.json
             /tmp/valcea-core-v2-site-readback.json
+            /tmp/valcea-core-v2-meta-readback.json
+            /tmp/valcea-core-v2-shadow-receipts.json
           if-no-files-found: error
           retention-days: 3
