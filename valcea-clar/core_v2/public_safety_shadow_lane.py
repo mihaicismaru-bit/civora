@@ -21,6 +21,7 @@ SOURCE_PROFILES = {
     "ipj": {
         "module": "ipj_valcea_public_safety_detail_evidence",
         "institution": "Inspectoratul de Poliție Județean Vâlcea",
+        "short_name": "IPJ Vâlcea",
         "authority_class": "FIRST_PARTY_COUNTY_POLICE_ARTICLE_DETAIL_EVIDENCE",
         "observation_state": "POLICE_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING",
         "source_scope": "POLICE_FIRST_PARTY_STATEMENT_ONLY_NOT_INDEPENDENT_VERIFICATION",
@@ -35,6 +36,7 @@ SOURCE_PROFILES = {
     "isu": {
         "module": "isu_valcea_emergency_detail_evidence",
         "institution": "Inspectoratul pentru Situații de Urgență Vâlcea",
+        "short_name": "ISU Vâlcea",
         "authority_class": "FIRST_PARTY_COUNTY_EMERGENCY_ARTICLE_DETAIL_EVIDENCE",
         "observation_state": "ISU_SOURCE_DETAIL_EVIDENCE_NON_AUTHORIZING",
         "source_scope": "ISU_FIRST_PARTY_STATEMENT_ONLY_NOT_INDEPENDENT_VERIFICATION",
@@ -96,13 +98,18 @@ KNOWN_VALCEA_PLACES = (
     "Orlești",
     "Prundeni",
     "Galicea",
+    "Mădulari",
+    "Lăpușata",
     "județul Vâlcea",
 )
 
-PLACE_RE = re.compile(
-    r"\b(?:municipiul|orașul|orasul|localitatea|comuna|satul)\s+"
-    r"([A-ZĂÂÎȘȚ][A-Za-zĂÂÎȘȚăâîșț\-]+(?:\s+[A-ZĂÂÎȘȚ][A-Za-zĂÂÎȘȚăâîșț\-]+){0,2})"
+PLACE_MARKER_RE = re.compile(
+    r"\b(?:municipiul|municipiului|orașul|orașului|orasul|orasului|localitatea|localității|localitatii|comuna|comunei|satul|satului)\s+"
+    r"([^,.;:()\n]{2,90})"
 )
+PLACE_STOPWORDS = {
+    "din", "de", "pentru", "unde", "care", "iar", "și", "si", "în", "in", "cu", "la", "al", "a", "ale", "ai",
+}
 
 
 def _today_bucharest() -> date:
@@ -141,26 +148,65 @@ def _parse_visible_date(value: Any) -> date | None:
     return None
 
 
-def _evidence_text(detail: dict[str, Any]) -> str:
-    parts = [str(detail.get("index_title") or ""), str(detail.get("visible_title") or "")]
-    for field in detail.get("field_evidence") or []:
-        if isinstance(field, dict):
-            parts.append(str(field.get("excerpt") or ""))
-    return " ".join(part for part in parts if part).strip()
+def _clean_marker_candidate(value: str) -> str | None:
+    words = [word.strip("'\"„”«»[]{}") for word in value.split()]
+    accepted: list[str] = []
+    for word in words[:4]:
+        if not word:
+            continue
+        if _fold(word) in {_fold(v) for v in PLACE_STOPWORDS}:
+            break
+        first = word[0]
+        if not (first.isupper() or first.isdigit()):
+            break
+        if accepted and len(word) > 2 and word.isupper():
+            break
+        accepted.append(word)
+    candidate = " ".join(accepted).strip(" ,.;:()")
+    return candidate or None
 
 
-def _explicit_place(detail: dict[str, Any]) -> str | None:
-    text = _evidence_text(detail)
+def _places_in_text(text: str) -> list[str]:
+    candidates: list[tuple[int, str]] = []
     folded = _fold(text)
     for place in KNOWN_VALCEA_PLACES:
-        if _fold(place) in folded:
-            return place
-    match = PLACE_RE.search(text)
-    if match:
-        candidate = " ".join(match.group(1).split()).strip(" ,.;:()")
+        pos = folded.find(_fold(place))
+        if pos >= 0:
+            candidates.append((pos, place))
+    for match in PLACE_MARKER_RE.finditer(text):
+        candidate = _clean_marker_candidate(match.group(1))
         if candidate:
-            return candidate
-    return None
+            candidates.append((match.start(1), candidate))
+    candidates.sort(key=lambda item: item[0])
+    seen: set[str] = set()
+    ordered: list[str] = []
+    for _pos, place in candidates:
+        key = _fold(place)
+        if key in seen:
+            continue
+        seen.add(key)
+        ordered.append(place)
+    return ordered
+
+
+def _explicit_places(detail: dict[str, Any]) -> list[str]:
+    index_title = str(detail.get("index_title") or "").strip()
+    if index_title:
+        places = _places_in_text(index_title)
+        if places:
+            return places
+    visible_title = str(detail.get("visible_title") or "").strip()
+    if visible_title:
+        places = _places_in_text(visible_title)
+        if places:
+            return places
+    evidence_parts: list[str] = []
+    for field in detail.get("field_evidence") or []:
+        if isinstance(field, dict):
+            excerpt = str(field.get("excerpt") or "").strip()
+            if excerpt:
+                evidence_parts.append(excerpt)
+    return _places_in_text(" ".join(evidence_parts))
 
 
 def _evidence_ids(detail: dict[str, Any]) -> list[str]:
@@ -254,7 +300,7 @@ def promote_detail(source: str, detail: dict[str, Any], *, as_of: date, max_age_
     detail_url = str(detail.get("detail_url") or "").strip()
     if not detail_url.startswith("https://"):
         return _block(detail_id, "first_party_detail_url_missing")
-    title = str(detail.get("visible_title") or detail.get("index_title") or "").strip()
+    title = str(detail.get("index_title") or detail.get("visible_title") or "").strip()
     if len(title) < 12:
         return _block(detail_id, "source_title_insufficient")
 
@@ -266,9 +312,12 @@ def promote_detail(source: str, detail: dict[str, Any], *, as_of: date, max_age_
     if visible_date > as_of + timedelta(days=1):
         return _block(detail_id, "future_source_date_anomaly")
 
-    place = _explicit_place(detail)
-    if not place:
+    places = _explicit_places(detail)
+    if not places:
         return _block(detail_id, "explicit_geography_missing")
+    if len(places) > 1:
+        return _block(detail_id, "ambiguous_multiple_geographies")
+    place = places[0]
 
     allowed_tags = set(profile["allowed_tags"])
     tags = _observed_tags(detail, allowed_tags)
@@ -280,8 +329,9 @@ def promote_detail(source: str, detail: dict[str, Any], *, as_of: date, max_age_
         return _block(detail_id, "evidence_chain_incomplete")
 
     institution = str(profile["institution"])
+    short_name = str(profile["short_name"])
     date_claim = (
-        f"Pagina oficială a {institution} afișează data {detail.get('explicit_date_text')}; "
+        f"Pagina oficială {short_name} afișează data {detail.get('explicit_date_text')}; "
         "Core v2 tratează această dată ca dată vizibilă a materialului, nu ca moment confirmat al incidentului."
     )
     place_claim = f"Localizarea identificată explicit în material este {place}."
