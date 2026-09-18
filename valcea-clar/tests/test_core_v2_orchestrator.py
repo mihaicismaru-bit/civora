@@ -33,6 +33,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_embedded_notice",
                 "isj_embedded_target",
                 "isj_embedded_content",
+                "isj_field_evidence",
                 "photo_truth",
                 "shadow_site_package",
             ],
@@ -82,6 +83,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         embedded = by_name["isj_embedded_notice"]
         targets = by_name["isj_embedded_target"]
         content = by_name["isj_embedded_content"]
+        fields = by_name["isj_field_evidence"]
         self.assertIsNotNone(isj.output)
         self.assertIsNotNone(detail.output)
         self.assertIn("--input", detail.argv)
@@ -101,13 +103,17 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn("--targets", content.argv)
         self.assertIn(str(targets.output), content.argv)
         self.assertIn("--live", content.argv)
+        self.assertIn("--content", fields.argv)
+        self.assertIn(str(content.output), fields.argv)
+        self.assertNotIn("--live", fields.argv)
         names = [stage.name for stage in plan]
         self.assertLess(names.index("isj"), names.index("isj_detail"))
         self.assertLess(names.index("isj_detail"), names.index("isj_materiality"))
         self.assertLess(names.index("isj_materiality"), names.index("isj_embedded_notice"))
         self.assertLess(names.index("isj_embedded_notice"), names.index("isj_embedded_target"))
         self.assertLess(names.index("isj_embedded_target"), names.index("isj_embedded_content"))
-        self.assertLess(names.index("isj_embedded_content"), names.index("photo_truth"))
+        self.assertLess(names.index("isj_embedded_content"), names.index("isj_field_evidence"))
+        self.assertLess(names.index("isj_field_evidence"), names.index("photo_truth"))
 
 
 if __name__ == "__main__":
