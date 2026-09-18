@@ -1,0 +1,112 @@
+{
+  "schema_version": "PPOS_GROWTH_ANALYTICS_VIRALITY_LEARNING_POLICY_V1",
+  "checkpoint": "CP89",
+  "module_id": "M58_GROWTH_ANALYTICS_VIRALITY_LEARNING",
+  "parent_activation_checkpoint": "CP88",
+  "parent_control_checkpoint": "CP58",
+  "next_after_cp89": "CP90_ENGAGEMENT_SCHEDULER_RATE_QUALITY_BUDGET",
+  "global_kill_switch": "ENGAGED",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "unknown_external_metric_value": "UNKNOWN",
+  "primary_funnel": [
+    "PUBLICATION",
+    "REACH_IMPRESSIONS",
+    "ENGAGED_USERS",
+    "COMMENTS_REPLIES",
+    "PROFILE_VISITS_WHERE_AVAILABLE",
+    "FOLLOWS_WHERE_AVAILABLE",
+    "REPEAT_ENGAGEMENT",
+    "CONVERSATION_DEPTH"
+  ],
+  "core_metrics": [
+    "engagement_per_reached_user",
+    "meaningful_comment_rate",
+    "reply_rate",
+    "median_first_reply_latency",
+    "conversation_depth",
+    "repeat_engager_rate",
+    "profile_visit_rate",
+    "follower_conversion_rate",
+    "outbound_comment_response_rate",
+    "relationship_reactivation_rate",
+    "amplification_yield",
+    "topic_to_growth_attribution"
+  ],
+  "metric_definitions": {
+    "engagement_per_reached_user": "engaged_users / reach",
+    "meaningful_comment_rate": "meaningful_comments / comments",
+    "reply_rate": "replies / response_opportunities",
+    "median_first_reply_latency": "median(first_reply_latencies_seconds)",
+    "conversation_depth": "mean(conversation_depth_samples)",
+    "repeat_engager_rate": "repeat_engagers / engaged_users",
+    "profile_visit_rate": "profile_visits / reach",
+    "follower_conversion_rate": "follows / profile_visits",
+    "outbound_comment_response_rate": "outbound_comments_with_response / outbound_comments",
+    "relationship_reactivation_rate": "reactivated_relationships / eligible_dormant_relationships",
+    "amplification_yield": "successful_amplifications / amplification_candidates",
+    "topic_to_growth_attribution": "descriptive_non_causal_topic_grouped_core_metric_profile"
+  },
+  "virality_learning": {
+    "mode": "OBSERVATIONAL_NON_CAUSAL",
+    "components": [
+      "topic_selection",
+      "packaging",
+      "early_engagement",
+      "network_propagation"
+    ],
+    "weights": {
+      "topic_selection": 0.25,
+      "packaging": 0.25,
+      "early_engagement": 0.25,
+      "network_propagation": 0.25
+    },
+    "all_components_required_for_observed_signal_score": true,
+    "automatic_strategy_mutation_allowed": false,
+    "clickbait_optimization_allowed": false,
+    "conflict_fabrication_allowed": false
+  },
+  "truthfulness": {
+    "missing_value_state": "UNKNOWN",
+    "zero_denominator_state": "UNKNOWN",
+    "null_is_not_zero": true,
+    "partial_coverage_must_be_labeled": true,
+    "causal_attribution_claims_forbidden": true,
+    "fabricated_external_metrics_forbidden": true
+  },
+  "privacy": {
+    "aggregate_content_level_only": true,
+    "person_level_identifiers_forbidden": true,
+    "sensitive_trait_inference_forbidden": true,
+    "sensitive_relationship_profiling_forbidden": true,
+    "political_microtargeting_forbidden": true
+  },
+  "safety": {
+    "automated_follow_unfollow_forbidden": true,
+    "mass_commenting_forbidden": true,
+    "engagement_pods_forbidden": true,
+    "repetitive_praise_forbidden": true,
+    "copy_paste_replies_forbidden": true,
+    "synthetic_conversation_farming_forbidden": true,
+    "clickbait_conflict_fabrication_forbidden": true,
+    "unknown_capability_fail_closed": true,
+    "rate_budgets_are_ceilings": true
+  },
+  "authority": {
+    "external_metric_fetch_allowed": false,
+    "external_write_allowed": false,
+    "network_allowed": false,
+    "live_probe_allowed": false,
+    "oauth_allowed": false,
+    "account_connection_allowed": false,
+    "posting_authority": false,
+    "strategy_mutation_authority": false,
+    "control_plane_promotion_allowed": false,
+    "deploy_allowed": false,
+    "paid_service_allowed": false
+  },
+  "max_batch": 100
+}
