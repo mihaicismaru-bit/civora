@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.3",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN12-ISJ-EMBEDDED-VISUAL-MATERIALIZATION-NATURAL-VALIDATED",
+  "schema_version": "2.4",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN13-ISJ-TARGET-AND-CONTENT-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -17,51 +17,50 @@
       "archive_story_count": 17,
       "verified_visual_count": 13,
       "source_generated_at": "2026-09-18T11:57:59.145412Z",
-      "synced_at": "2026-09-18T11:57:59.145412Z",
       "lead_story_id": "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
       "observation_only": true
     },
-    "legacy_social_observation": {
-      "facebook_internal_state_is_not_delivery_proof": true,
-      "instagram_internal_media_id_is_not_core_v2_truth_without_external_readback": true,
-      "legacy_state_never_grants_core_v2_readiness": true
-    }
+    "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "06269f3a447b12d50b8973f31e6be5bba145fc54",
-    "workflow_run_id": 35370726092,
-    "workflow_run_number": 283,
+    "sha": "7df2867e37b1b464f012fe12d40b43c5065972da",
+    "workflow_run_id": 35373538611,
+    "workflow_run_number": 297,
     "event": "push",
     "conclusion": "success",
-    "artifact_id": 10557962098,
-    "artifact_sha256": "bb19b2b9cc0b55a25f3cfb5e3f60c5396b4d984474cf17ef7a8d9e1c82b23d5f",
-    "permissions": "contents:read",
+    "artifact_id": 10559650845,
+    "artifact_sha256": "5fed9820f33f33e4573bd57c21341705e529a383ccafcba0a114d5394872e717",
     "manual_dispatch": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 16,
-    "ordered_shadow_failed_stage": null
+    "ordered_shadow_failed_stage": null,
+    "post_cycle_read_only_gates": [
+      "isj_embedded_target_identity",
+      "isj_embedded_document_content_capture"
+    ]
   },
   "done": [
     "legacy architecture remains explicitly LEGACY_NOT_PRODUCTION_READY while live legacy automation is left untouched",
     "Core v2 contracts keep site delivery, social delivery, receipts and audit truth separate from internal workflow success",
     "bounded eight-source pilot and complete KEEP/RETIRE/REWRITE inventory remain enforced with UNKNOWN=0",
-    "single Core v2 orchestrator now executes 16 ordered read-only shadow stages; GitHub Actions remains only a thin executor",
-    "APAVIL continues to terminate 132 stale/non-material signals as NO_STORY with zero fabricated stories",
-    "IPJ currently produces 1 VERIFIED_WRITTEN_SHADOW, 2 NO_STORY and 5 BLOCKED from 8 first-party details with fabricated_claims=0",
-    "ISU currently produces 2 VERIFIED_WRITTEN_SHADOW, 3 NO_STORY and 4 BLOCKED from 9 first-party details with fabricated_claims=0",
-    "Râmnicu Vâlcea HCL 343/344/345 remain three evidence-bound deterministic full shadow articles with zero fabricated claims",
-    "ETA remains fail-closed at 10 notices: 7 NO_STORY and 3 BLOCKED",
-    "ISJ first-party detail gate resolves 12 verified detail pages; materiality terminates 11 NO_STORY and routes only concours directori 2026 to bounded third-hop evidence",
-    "ISJ third-hop now independently revalidates the first-party page identity after dynamic Google Sites byte drift and verifies 17 visible embedded document labels without treating raw-byte equality as semantic truth",
-    "ISJ concours directori 2026 embedded catalog contains current-year registration/post-list/calendar/methodology evidence but remains non-authorizing: embedded targets are not fetched and deadline/event time/vacancy count are not inferred",
-    "photo truth currently evaluates 6 written candidates: two municipal archive-context visuals pass provenance/relevance preflight and four candidates remain BLOCKED for missing story-specific approved real visuals",
-    "shadow image materialization now uses bounded HTTP Range reads with bounded 429 retry; the verified Commons city-hall image materialized at 2,347,279 bytes with sha256 97831b8aa6ff78cf28f62b93154c61e130c88eaa49873b16ad8e64e33cb211b3 and duplicate assignments reuse the staged byte copy",
-    "both municipal visual candidates bind successfully into internal shadow HTML/image packages; this remains explicitly not VISUAL_READY and not SITE_PUBLISHED",
-    "runtime validator now asserts ISJ detail/materiality/embedded gates and shadow site package cannot escape publication_authority=NONE",
-    "CJ Vâlcea road lane remains fail-closed on TLS certificate-chain verification; TLS verification has not been weakened",
-    "independent historical replay still verifies both Instagram remote objects but Facebook readback fails because Graph permission pages_read_engagement or Page Public Content Access is missing",
-    "historical replay candidates remain truth-incomplete because FactKernel evidence is missing for both and one legacy article has failed visual binding",
-    "natural Core v2 run 283 passed compile, all contract/regression tests, 16-stage live read-only cycle, external replay, expanded runtime invariants and artifact upload"
+    "single Core v2 orchestrator continues to execute 16 ordered read-only shadow stages; GitHub Actions remains a thin executor with no deploy or publication authority",
+    "APAVIL remains fail-closed at 132 NO_STORY and zero fabricated stories",
+    "IPJ remains 1 VERIFIED_WRITTEN_SHADOW, 2 NO_STORY and 5 BLOCKED from 8 first-party details with fabricated_claims=0",
+    "ISU remains 2 VERIFIED_WRITTEN_SHADOW, 3 NO_STORY and 4 BLOCKED from 9 first-party details with fabricated_claims=0",
+    "Râmnicu Vâlcea HCL 343/344/345 remain three evidence-bound deterministic full shadow articles with fabricated_claims=0",
+    "ETA remains 10 signals: 7 NO_STORY and 3 BLOCKED",
+    "ISJ third-hop parent evidence still verifies 17 visible embedded document labels for concurs directori 2026 without using filenames as facts",
+    "new ISJ target-provenance gate independently re-read the first-party parent HTML and bound all 17 visible labels to 17 unique document resource identities with zero ambiguous labels",
+    "two labels explicitly carrying current-year identity were bound to auditable Google Drive resource IDs: LISTA POSTURI CONCURS DIRECTORI 2026 and OMEC-4155 methodology CONCURS DIRECTORI 2026",
+    "new bounded document-content gate read only those two verified current-year targets and captured two PDFs successfully with zero blocked reads",
+    "LISTA POSTURI PDF was verified as 1,401,098 bytes, sha256 c460c8d0279b01b6ac3b6e848cbf0a61c6f02e246ba32e0d1aacdb211c44ef01",
+    "OMEC-4155 methodology PDF was verified as 239,093 bytes, sha256 0467ddb34ef59c27cbf19541d3651135e76185f791dec2a96aa45596ae3d77c8",
+    "document byte capture remains strictly non-authorizing: raw bytes are not persisted by the gate, text is not yet extracted, field extraction is disabled, and no FactKernel/writer promotion occurs",
+    "photo truth remains 6 written candidates with two provenance/relevance preflight visuals and four BLOCKED for missing story-specific approved real visuals",
+    "both municipal visual candidates remain internally bound in shadow packages but are not VISUAL_READY or SITE_PUBLISHED",
+    "CJ Vâlcea road lane remains fail-closed on TLS certificate-chain verification without weakening TLS",
+    "historical external replay remains truth-incomplete; Facebook readback still lacks sufficient Graph permission and internal IDs remain insufficient proof",
+    "natural Core v2 run 297 passed compilation, truth-bound tests, 16-stage live read-only cycle, ISJ target provenance, ISJ document byte capture, external replay, invariant validation and evidence upload"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -118,17 +117,20 @@
     },
     "isj": {
       "signal_count": 16,
-      "signal_blocked_count": 16,
       "detail_evidence_shadow_count": 12,
-      "detail_blocked_count": 0,
       "materiality_no_story_count": 11,
       "materiality_blocked_count": 1,
       "embedded_notice_candidate_count": 1,
       "embedded_notice_evidence_shadow_count": 1,
-      "embedded_notice_blocked_count": 0,
       "embedded_file_count": 17,
-      "embedded_targets_fetched": false,
-      "embedded_document_content_verified": false,
+      "target_identity_bound_count": 17,
+      "target_identity_blocked_label_count": 0,
+      "explicit_current_year_target_identity_count": 2,
+      "selected_document_content_count": 2,
+      "document_content_captured_shadow_count": 2,
+      "document_content_blocked_count": 0,
+      "text_extracted": false,
+      "field_extraction_allowed": false,
       "event_time_verified": false,
       "deadline_verified": false,
       "vacancy_count_verified": false,
@@ -162,7 +164,7 @@
     "instagram_external_readback_passed": 2,
     "facebook_external_readback_passed": 0,
     "truth_complete_count": 0,
-    "blocker_counts": {
+    "blocker_counts_latest_observed": {
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
       "FACT_KERNEL_EVIDENCE_MISSING": 2,
       "VISUAL_ARTICLE_BINDING_FAILED": 1
@@ -170,12 +172,12 @@
   },
   "blocked": [
     {
-      "gate": "photo_truth_gate",
-      "reason": "Current IPJ and both current ISU stories plus municipal HCL 344 still lack story-specific approved real photographs. Generic imagery is forbidden."
+      "gate": "isj_field_truth",
+      "reason": "Two current-year PDF byte identities are now captured and hashed, but no PDF text or field-level evidence has been extracted. Deadlines, vacancy counts, calendar dates and eligibility remain unverified."
     },
     {
-      "gate": "isj_document_content_truth",
-      "reason": "The first-party current-year page proves a visible embedded document catalog, not the contents of those documents. Embedded target resolution/content verification is still required before any FactKernel or writer promotion."
+      "gate": "photo_truth_gate",
+      "reason": "Current IPJ and both current ISU stories plus municipal HCL 344 still lack story-specific approved real photographs. Generic imagery is forbidden."
     },
     {
       "gate": "facebook_receipt_truth",
@@ -199,10 +201,10 @@
     }
   ],
   "next": [
-    "resolve bounded target identity/provenance for the visible ISJ embedded documents without treating Google Sites/gstatic chrome as document authority; fetch document contents only when an auditable target can be bound",
-    "extract field-level ISJ facts only from verified embedded document content; otherwise terminate BLOCKED or NO_STORY without FactKernel promotion",
-    "continue rights/relevance search for HCL 344 and the current IPJ/ISU candidates; do not use generic photos merely to raise coverage",
-    "keep shadow package binding internal and distinct from future public VISUAL_READY/SITE_PUBLISHED readback",
+    "add bounded PDF text extraction with deterministic extractor provenance for the two verified ISJ PDFs; keep extraction fail-closed and non-authorizing until field evidence is independently bound",
+    "resolve calendar/registration document content only when its role can be bound to the verified current contest context without inferring year from filename absence",
+    "extract field-level ISJ facts only from verified document text; otherwise terminate BLOCKED or NO_STORY without FactKernel promotion",
+    "continue rights/relevance search for HCL 344 and current IPJ/ISU candidates; do not use generic photos merely to raise coverage",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
     "do not start the 10-story acceptance series until all external truth gates can be independently satisfied"
@@ -213,11 +215,12 @@
     "isj_detail": "valcea-clar/core_v2/isj_detail_shadow_lane.py",
     "isj_materiality": "valcea-clar/core_v2/isj_materiality_shadow_lane.py",
     "isj_embedded_notice": "valcea-clar/core_v2/isj_embedded_notice_shadow_lane.py",
+    "isj_embedded_target_identity": "valcea-clar/core_v2/isj_embedded_target_shadow_lane.py",
+    "isj_embedded_document_content": "valcea-clar/core_v2/isj_embedded_content_shadow_lane.py",
     "photo_truth": "valcea-clar/core_v2/photo_truth_gate.py",
     "shadow_site_package": "valcea-clar/core_v2/shadow_site_package.py",
-    "runtime_invariants": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35370726092",
-    "artifact_id": 10557962098
+    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35373538611",
+    "artifact_id": 10559650845
   }
 }
