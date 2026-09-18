@@ -1,17 +1,25 @@
 {
-  "schema_version": "1.0",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN4",
+  "schema_version": "1.1",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN4-TRUTH-REPLAY",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
   "base_main_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
   "main_drift_observed_sha": "f6458fda1da048c1e9e0887a9aef6d567ad0f078",
   "main_drift_overlap": false,
-  "validated_core_head_sha": "9c23538495e68524f24bae67eda83e0d0e3c5c8b",
+  "branch_vs_main": {
+    "status": "diverged",
+    "ahead_by": 40,
+    "behind_by": 1,
+    "merge_base": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
+    "note": "Core v2 changes remain isolated additions; observed main drift is an unrelated generated validation-ledger commit. No rebase/merge/cutover performed."
+  },
+  "validated_core_head_sha": "d5a54f1e0eadcf0c25c9182730bcbc35544d6867",
+  "diagnostic_head_pending_validation_sha": "c37d7d8f9b849614bea6ff8d957b754d4f911ffe",
   "draft_pr": 1222,
   "done": [
-    "fresh main/workflows/runtime topology reviewed",
-    "legacy live newsroom and social split ownership confirmed",
+    "fresh main/workflows/runtime/public-projection topology reread",
+    "legacy live newsroom and social split ownership reconfirmed",
     "Core v2 StoryState, FactKernel, Visual, PublicationReceipt and AuditResult contracts implemented",
     "shadow-only sequential orchestrator implemented",
     "normalized pilot signal boundary implemented with fail-closed NO_STORY for non-material signals",
@@ -23,10 +31,17 @@
     "strict 10-consecutive-story acceptance ledger implemented",
     "bounded eight-source pilot fully bound to existing adapters",
     "all eight reused source adapters passed their fail-closed self-tests",
-    "18 Core v2 contract/readback/integrity/signal-boundary regression tests passed in GitHub Actions",
-    "shadow candidate ledger builder implemented from current manifest, real-photo evidence and internal social IDs",
+    "Core v2 contract/readback/integrity/signal-boundary regression suite passed in natural GitHub Actions",
+    "legacy deterministic inventory classification completed with UNKNOWN=0",
+    "82 legacy publication-capable paths identified for migration/retirement control",
+    "shadow candidate ledger built from current manifest, real-photo evidence and internal social IDs",
+    "two current stories satisfy the minimum internal preconditions for external delivery replay",
+    "independent public site readback passed for both replay candidates",
+    "read-only Instagram remote-object readback passed for both replay candidates",
+    "read-only Facebook remote-object readback failed for both replay candidates and therefore remains failed rather than being inferred delivered",
+    "external site/Meta evidence is now bound into a shadow receipt ledger without publication authority",
     "shadow isolation passed with contents:read only and publication_authority NONE",
-    "legacy deterministic inventory and shadow candidate ledger generated as CI evidence"
+    "Meta HTTP failure-body diagnostics added without exposing access tokens"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -39,11 +54,13 @@
     "filarmonica_valcea"
   ],
   "inventory": {
-    "KEEP": 143,
-    "RETIRE": 172,
-    "REWRITE": 29,
-    "UNKNOWN": 125,
-    "publication_capable_paths": 82
+    "KEEP": 232,
+    "RETIRE": 198,
+    "REWRITE": 39,
+    "UNKNOWN": 0,
+    "publication_capable_paths": 82,
+    "classification_complete": true,
+    "keep_semantics": "reusable component/data only; KEEP grants no publication authority and does not enable a component in the bounded pilot"
   },
   "shadow_candidate_evidence": {
     "current_manifest_story_count": 75,
@@ -52,25 +69,54 @@
       "valcea-apa-canal-contract-152m-20260902",
       "cet-govora-cine-a-decis-oprirea-20260821"
     ],
+    "site_external_readback": {
+      "passed": 2,
+      "failed": 0
+    },
+    "facebook_external_readback": {
+      "passed": 0,
+      "failed": 2,
+      "last_observed_error": "HTTP 400; structured Meta error capture added for next natural validation"
+    },
+    "instagram_external_readback": {
+      "passed": 2,
+      "failed": 0
+    },
+    "externally_verified_all_channels": 0,
     "acceptance_ready": false,
-    "reason": "internal state exposes only two current stories with real-photo evidence plus both Facebook and Instagram remote IDs; all external delivery remains unverified until independent readback"
+    "reason": "only two current stories have real-photo evidence plus both legacy social IDs; site and Instagram independently verify, but Facebook delivery cannot yet be externally verified"
   },
-  "latest_shadow_artifact": {
-    "artifact_id": 10538811517,
-    "artifact_sha256": "2b150e4810188cfd708b49c87bfaa630dbd8897dabe893372a635d6643157cf0"
+  "latest_validated_shadow_run": {
+    "run_id": 35325562791,
+    "event": "push",
+    "conclusion": "success",
+    "head_sha": "d5a54f1e0eadcf0c25c9182730bcbc35544d6867",
+    "artifact_id": 10538153134,
+    "artifact_sha256": "d05a761f2bef0380d14c08edc960009ae2223e183c7ebd2c2b411854f34e191d",
+    "artifact_files": [
+      "valcea-core-v2-legacy-inventory.json",
+      "valcea-core-v2-shadow-candidates.json",
+      "valcea-core-v2-site-readback.json",
+      "valcea-core-v2-meta-readback.json",
+      "valcea-core-v2-shadow-receipts.json"
+    ]
   },
   "next": [
-    "review and reduce the 125 UNKNOWN inventory items",
-    "replay the two existing complete internal candidates through independent public site readback without publishing",
-    "bind their existing Facebook and Instagram remote IDs to read-only Meta verification in shadow",
-    "materialize verified external receipts into a real shadow StoryTransaction ledger",
-    "expand shadow candidates only through truthful real-photo coverage on the fixed eight-source pilot",
-    "evaluate the first 10-story candidate set only when ten stories have independent external evidence"
+    "capture the exact structured Meta Graph error for the two Facebook readback failures on the next natural shadow validation",
+    "classify Facebook failures as stale/deleted remote object versus token/permission/readback-contract problem without performing any write",
+    "bind fact-kernel and article-claim integrity evidence into full shadow StoryTransaction records for the two replay candidates",
+    "add independent HTTP validation of the public visual asset and provenance metadata before a social receipt can satisfy VISUAL_READY",
+    "increase truthful real-photo coverage inside the fixed eight-source pilot without generic or synthetic substitution",
+    "evaluate a 10-story candidate set only when ten stories have independent external site, visual and social evidence"
   ],
   "blocked": [
     {
+      "gate": "facebook_receipt_truth",
+      "reason": "both currently replayable legacy Facebook remote IDs return HTTP 400 under the read-only Meta token; delivery cannot be certified until exact Graph error evidence is classified"
+    },
+    {
       "gate": "ten_story_shadow_candidate",
-      "reason": "only 2 of 75 current internal stories presently satisfy the minimum internal preconditions for external replay"
+      "reason": "only 2 of 75 current stories presently satisfy real-photo plus both-internal-social-ID preconditions, and 0 currently verify all external channels"
     },
     {
       "gate": "production_cutover",
@@ -85,11 +131,14 @@
     "source_signal_boundary": "valcea-clar/core_v2/source_signal.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
+    "meta_replay": "valcea-clar/core_v2/replay_external_meta.py",
+    "shadow_receipt_materializer": "valcea-clar/core_v2/materialize_shadow_receipts.py",
     "editorial_integrity": "valcea-clar/core_v2/editorial_integrity.py",
     "ten_story_gate": "valcea-clar/core_v2/acceptance_ledger.py",
+    "legacy_inventory": "valcea-clar/core_v2/inventory_legacy.py",
     "shadow_candidate_builder": "valcea-clar/core_v2/build_shadow_candidate_ledger.py",
     "pilot_registry": "valcea-clar/core_v2/pilot_sources.json",
     "pilot_registry_validator": "valcea-clar/core_v2/validate_pilot_sources.py",
-    "validated_shadow_workflow_run": 35324475794
+    "shadow_workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml"
   }
 }
