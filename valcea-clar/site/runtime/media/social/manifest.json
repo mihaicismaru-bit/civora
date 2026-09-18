@@ -145,7 +145,7 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 10,
+    "autonomous_stories_published_24h": 13,
     "autonomous_story_ids_24h": [
       "babeni-izvorul-dorului-program-20260903",
       "balcesti-incendiu-vegetatie-15ha-20260902",
@@ -156,12 +156,15 @@
       "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
       "ramnicu-fissura-lucis-casa-simian-20260903",
       "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+      "rm-valcea-hcl-343-20260916",
+      "rm-valcea-hcl-344-20260916",
+      "rm-valcea-hcl-345-20260916",
       "supercupa-damila-pietrari-20260822"
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 10,
-      "published": 10,
+      "measured": 13,
+      "published": 13,
       "stories": [
         {
           "story_id": "babeni-izvorul-dorului-program-20260903",
@@ -222,21 +225,39 @@
           "seconds": 2326459,
           "discovered_at_utc": "2026-08-22T06:06:27Z",
           "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "rm-valcea-hcl-343-20260916",
+          "seconds": 115,
+          "discovered_at_utc": "2026-09-18T06:43:42Z",
+          "published_at_utc": "2026-09-18T06:45:37Z"
+        },
+        {
+          "story_id": "rm-valcea-hcl-344-20260916",
+          "seconds": 115,
+          "discovered_at_utc": "2026-09-18T06:43:42Z",
+          "published_at_utc": "2026-09-18T06:45:37Z"
+        },
+        {
+          "story_id": "rm-valcea-hcl-345-20260916",
+          "seconds": 115,
+          "discovered_at_utc": "2026-09-18T06:43:42Z",
+          "published_at_utc": "2026-09-18T06:45:37Z"
         }
       ],
       "max_seconds": 2326459,
-      "median_seconds": 2157468
+      "median_seconds": 1298670
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 5,
-      "published_stories": 10,
-      "value": 0.5,
+      "published_stories": 13,
+      "value": 0.3846,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
       "status": "BLOCKED",
-      "eligible": 10,
+      "eligible": 13,
       "readback_ok": 0,
       "value": 0.0,
       "blocker_story_ids": [
@@ -249,6 +270,9 @@
         "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
         "ramnicu-fissura-lucis-casa-simian-20260903",
         "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+        "rm-valcea-hcl-343-20260916",
+        "rm-valcea-hcl-344-20260916",
+        "rm-valcea-hcl-345-20260916",
         "supercupa-damila-pietrari-20260822"
       ],
       "checks": [
@@ -343,6 +367,36 @@
           "reason": "missing_from_public_projection"
         },
         {
+          "story_id": "rm-valcea-hcl-343-20260916",
+          "url": "https://valceaclar.ro/stiri/rm-valcea-hcl-343-20260916/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "rm-valcea-hcl-344-20260916",
+          "url": "https://valceaclar.ro/stiri/rm-valcea-hcl-344-20260916/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "rm-valcea-hcl-345-20260916",
+          "url": "https://valceaclar.ro/stiri/rm-valcea-hcl-345-20260916/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
           "story_id": "supercupa-damila-pietrari-20260822",
           "url": "https://valceaclar.ro/stiri/supercupa-damila-pietrari-20260822/",
           "projected": false,
@@ -366,8 +420,8 @@
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 3,
-      "eligible": 10,
-      "value": 0.3,
+      "eligible": 13,
+      "value": 0.2308,
       "delivered_story_ids": [
         "babeni-izvorul-dorului-program-20260903",
         "balcesti-incendiu-vegetatie-15ha-20260902",
@@ -377,8 +431,8 @@
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 1,
-      "eligible": 10,
-      "value": 0.1,
+      "eligible": 13,
+      "value": 0.0769,
       "delivered_story_ids": [
         "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827"
       ]
@@ -406,7 +460,20 @@
       "status": "UNKNOWN",
       "value": null,
       "definition": "zero is asserted only when every measured published story passes material-fact and complete claim-source trace gates",
-      "trace_violations": [],
+      "trace_violations": [
+        {
+          "story_id": "rm-valcea-hcl-343-20260916",
+          "reason": "material_fact_gate_not_pass"
+        },
+        {
+          "story_id": "rm-valcea-hcl-344-20260916",
+          "reason": "material_fact_gate_not_pass"
+        },
+        {
+          "story_id": "rm-valcea-hcl-345-20260916",
+          "reason": "material_fact_gate_not_pass"
+        }
+      ],
       "missing_editorial_evidence": [
         "babeni-izvorul-dorului-program-20260903",
         "balcesti-incendiu-vegetatie-15ha-20260902",
@@ -424,7 +491,64 @@
       "status": "MEASURED",
       "value": 0,
       "workflow_dispatch_runs": [],
-      "automated_workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35316458280,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-18T06:47:56Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35316411992,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-18T06:47:17Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35316294098,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-18T06:45:41Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35316145500,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-18T06:43:45Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35314561557,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-18T06:21:57Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35312711090,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-18T05:55:18Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35308918895,
+          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
+          "created_at": "2026-09-18T04:57:12Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
       "manual_story_route_additions": [],
       "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
