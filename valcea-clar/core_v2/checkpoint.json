@@ -5,29 +5,36 @@
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
   "base_main_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
-  "validated_core_head_sha": "0644b7812519b195cb75a25f0a463164225d9c16",
+  "main_drift_observed_sha": "f6458fda1da048c1e9e0887a9aef6d567ad0f078",
+  "main_drift_overlap": false,
+  "validated_core_head_sha": "843976b803defe225c49545e0394a82560eede04",
   "draft_pr": 1222,
   "done": [
-    "fresh main reviewed",
-    "live newsroom trigger/write topology re-read",
-    "social publication fallback topology re-read",
-    "Core v2 StoryState contract implemented",
-    "FactKernel contract implemented",
-    "Visual fail-closed real-photo contract implemented",
-    "site and social PublicationReceipt contracts implemented",
-    "AuditResult zero-defect acceptance contract implemented",
+    "fresh main/workflows/runtime topology reviewed",
+    "legacy live newsroom and social split ownership confirmed",
+    "Core v2 StoryState, FactKernel, Visual, PublicationReceipt and AuditResult contracts implemented",
     "shadow-only sequential orchestrator implemented",
     "receipt-bound acceptance metrics implemented",
-    "legacy deterministic inventory generator implemented",
-    "bounded pilot source registry created",
     "independent read-only HTTP/JSON-LD site readback adapter implemented",
     "site readback requires route + canonical + story-bound NewsArticle JSON-LD",
     "independent read-only Meta remote-object readback adapter implemented",
     "claim-to-FactKernel editorial integrity gate implemented",
     "strict 10-consecutive-story acceptance ledger implemented",
-    "15 contract/readback/integrity regression tests passed in GitHub Actions",
-    "shadow isolation check passed with contents:read only",
-    "forensic legacy inventory generated as CI artifact"
+    "bounded eight-source pilot fully bound to existing adapters",
+    "all eight reused source adapters passed their fail-closed self-tests",
+    "15 Core v2 contract/readback/integrity regression tests passed in GitHub Actions",
+    "shadow isolation passed with contents:read only and publication_authority NONE",
+    "legacy deterministic inventory generated and audited by CI"
+  ],
+  "pilot_sources": [
+    "ipj_valcea",
+    "isu_valcea",
+    "apavil",
+    "primaria_ramnicu_valcea",
+    "cj_valcea",
+    "eta",
+    "isj_valcea",
+    "filarmonica_valcea"
   ],
   "inventory": {
     "KEEP": 143,
@@ -35,16 +42,16 @@
     "REWRITE": 29,
     "UNKNOWN": 125,
     "publication_capable_paths": 82,
-    "latest_artifact_id": 10538735622,
-    "latest_artifact_sha256": "50c3d66187af3ec492c58f485a969d259158e5a16bd90b0fdd99420233ccbd89"
+    "latest_artifact_id": 10538376759,
+    "latest_artifact_sha256": "965cb338516b46ffc3a5c09145e10213699270cad967378da860bf88afe19cb7"
   },
   "next": [
     "review and reduce the 125 UNKNOWN inventory items",
-    "bind Primaria Ramnicu Valcea and one cultural source to explicit Core v2 adapters",
-    "replay selected existing public stories through the independent site readback adapter without publishing",
+    "build a normalized source-adapter output boundary for the eight pilot sources",
+    "replay selected existing public stories through independent site readback without publishing",
     "bind existing Facebook and Instagram receipts to read-only Meta verification in shadow",
-    "build a real shadow transaction ledger from existing canonical evidence",
-    "evaluate the first synthetic-free 10-story shadow candidate set without any live writes"
+    "materialize a real shadow StoryTransaction ledger from canonical existing evidence",
+    "evaluate the first synthetic-free 10-story shadow candidate set without live writes"
   ],
   "blocked": [
     {
@@ -61,9 +68,8 @@
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
     "editorial_integrity": "valcea-clar/core_v2/editorial_integrity.py",
     "ten_story_gate": "valcea-clar/core_v2/acceptance_ledger.py",
-    "core_contract_tests": "valcea-clar/tests/test_core_v2_contracts.py",
-    "core_readback_tests": "valcea-clar/tests/test_core_v2_readback.py",
-    "core_integrity_tests": "valcea-clar/tests/test_core_v2_integrity.py",
-    "validated_shadow_workflow_run": 35323937288
+    "pilot_registry": "valcea-clar/core_v2/pilot_sources.json",
+    "pilot_registry_validator": "valcea-clar/core_v2/validate_pilot_sources.py",
+    "validated_shadow_workflow_run": 35324234920
   }
 }
