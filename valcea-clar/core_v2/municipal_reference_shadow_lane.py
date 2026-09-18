@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib
 import json
 import ssl
@@ -52,12 +53,104 @@ def _validate_expanded_index_url(url: str) -> str:
     return urlunsplit(("https", "dm.primariavl.ro", parsed.path, "OpenView&Count=500", ""))
 
 
+def _parse_expanded_index(
+    html_text: str,
+    payload: bytes,
+    *,
+    as_of: date,
+    canonical_source_url: str,
+    transport_url: str,
+) -> dict[str, Any]:
+    """Parse only first-party adopted-decision register metadata.
+
+    The older reference adapter assumed that every usable reference lived inside a
+    table row with a direct `$FILE` link. The live DocManager register exposes a
+    reliable flat visible-text sequence even when that DOM/link assumption fails.
+    We therefore reuse only the proven read-only parser from the legacy council
+    monitor (`to_text`, `parse_register`, `attachment_index`). No target-date
+    selection, document fetch, legal inference, persistence or publication state
+    is inherited from the legacy monitor.
+    """
+    sys.path.insert(0, str(SCRIPTS))
+    monitor = importlib.import_module("council_watch_rm_valcea")
+
+    visible_text = monitor.to_text(html_text)
+    register_rows = monitor.parse_register(visible_text)
+    attachments = monitor.attachment_index(transport_url, html_text)
+
+    references: list[dict[str, Any]] = []
+    seen: set[tuple[int, str]] = set()
+    for row in register_rows:
+        number = row.get("decision_number")
+        decision_date = str(row.get("decision_date") or "")
+        title = " ".join(str(row.get("title") or "").split()).strip()
+        if not isinstance(number, int) or number <= 0 or not decision_date.startswith(f"{as_of.year}-"):
+            continue
+        key = (number, decision_date)
+        if key in seen:
+            continue
+        seen.add(key)
+        document_url = attachments.get(key)
+        evidence_payload = (
+            "kind=LOCAL_COUNCIL_ADOPTED_DECISION_INDEX_REFERENCE|"
+            f"decision_number={number}|decision_date={decision_date}|title_hint={title}|"
+            f"document_reference_url={document_url or ''}|index={canonical_source_url}|transport={transport_url}"
+        )
+        references.append(
+            {
+                "kind": "LOCAL_COUNCIL_ADOPTED_DECISION_REFERENCE",
+                "decision_number": number,
+                "decision_date": decision_date,
+                "title_hint": title[:500],
+                "document_reference_url": document_url,
+                "document_reference_available": bool(document_url),
+                "document_reference_unfollowed": True,
+                "canonical_index_url": canonical_source_url,
+                "evidence_sha256": hashlib.sha256(evidence_payload.encode("utf-8")).hexdigest(),
+            }
+        )
+
+    references.sort(
+        key=lambda item: (str(item["decision_date"]), int(item["decision_number"])),
+        reverse=True,
+    )
+    digest = hashlib.sha256(payload).hexdigest()
+    return {
+        "source_id": SOURCE_ID,
+        "source_tier": EXPECTED_SOURCE_TIER,
+        "source_url": canonical_source_url,
+        "source_payload_sha256": digest,
+        "reference_scope": EXPECTED_REFERENCE_SCOPE,
+        "publication_authority": "NONE",
+        "state": "REFERENCE_READY" if references else "HOLD",
+        "hold_reason": None if references else "current_year_local_council_decision_references_missing",
+        "decision_document_follow_allowed": False,
+        "decision_document_body_fetch_allowed": False,
+        "legal_effect_inference_allowed": False,
+        "current_validity_inference_allowed": False,
+        "amendment_status_inference_allowed": False,
+        "repeal_status_inference_allowed": False,
+        "implementation_status_inference_allowed": False,
+        "breaking_news_promotion_allowed": False,
+        "persistence_allowed": False,
+        "fact_kernel_promotion_allowed": False,
+        "writer_allowed": False,
+        "public_projection_allowed": False,
+        "references": references,
+        "_transport_url": transport_url,
+        "_transport_parser": "legacy_text_register_parser_reused_without_authority",
+        "_register_entries_parsed": len(register_rows),
+        "_current_year_references": len(references),
+        "_direct_attachment_references": sum(bool(row.get("document_reference_url")) for row in references),
+    }
+
+
 def verify_state(state_value: Any, *, as_of: date | None = None) -> dict[str, Any]:
     as_of = as_of or _today_bucharest()
     state = _to_dict(state_value)
 
     base = {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": "MUNICIPAL_REFERENCE_SHADOW_VERIFICATION",
         "source_id": SOURCE_ID,
         "publication_authority": "NONE",
@@ -65,6 +158,9 @@ def verify_state(state_value: Any, *, as_of: date | None = None) -> dict[str, An
         "production_writer_ready": False,
         "as_of_date": as_of.isoformat(),
         "transport_url": state.get("_transport_url"),
+        "transport_parser": state.get("_transport_parser"),
+        "register_entries_parsed": int(state.get("_register_entries_parsed") or 0),
+        "direct_attachment_references": int(state.get("_direct_attachment_references") or 0),
     }
 
     if str(state.get("source_id") or "") != SOURCE_ID:
@@ -118,10 +214,10 @@ def verify_state(state_value: Any, *, as_of: date | None = None) -> dict[str, An
         decision_date = str(ref.get("decision_date") or "")
         title_hint = str(ref.get("title_hint") or "").strip()
         evidence_sha = str(ref.get("evidence_sha256") or "").strip()
-        document_url = str(ref.get("document_reference_url") or "").strip()
+        document_url = str(ref.get("document_reference_url") or "").strip() or None
         row_id = f"hcl-{number}-{decision_date}" if number and decision_date else evidence_sha[:24] or "UNKNOWN"
 
-        if not number or not decision_date or not evidence_sha or not document_url:
+        if not number or not decision_date or not evidence_sha:
             rows.append({
                 "reference_id": row_id,
                 "state": "BLOCKED",
@@ -129,7 +225,7 @@ def verify_state(state_value: Any, *, as_of: date | None = None) -> dict[str, An
                 "publication_authority": "NONE",
             })
             continue
-        if ref.get("document_reference_unfollowed") is not True:
+        if document_url and ref.get("document_reference_unfollowed") is not True:
             rows.append({
                 "reference_id": row_id,
                 "state": "BLOCKED",
@@ -147,11 +243,12 @@ def verify_state(state_value: Any, *, as_of: date | None = None) -> dict[str, An
             "decision_date": decision_date,
             "title_hint": title_hint,
             "document_reference_url": document_url,
+            "document_reference_available": bool(document_url),
             "evidence_ids": [f"municipal-reference:{evidence_sha}"],
             "truth_note": (
-                "A first-party adopted-decision reference proves only that the municipal index exposes this reference. "
-                "It does not prove legal effect, current validity, implementation, money, people, or a material news fact, "
-                "and therefore cannot create a FactKernel or article by itself."
+                "A first-party adopted-decision index reference proves only that the official register exposes the numbered/date-labeled reference. "
+                "It does not prove legal effect, current validity, implementation, money, people, or a material news fact. "
+                "Missing direct attachment linkage is retained as missing rather than guessed, and no FactKernel or article is created."
             ),
         })
 
@@ -180,7 +277,7 @@ def _live_state(*, as_of: date) -> dict[str, Any]:
     opener = build_opener(adapter.NoRedirects(), HTTPSHandler(context=ssl.create_default_context()))
     request = Request(
         transport_url,
-        headers={"User-Agent": adapter.USER_AGENT, "Accept": "text/html,*/*;q=0.8"},
+        headers={"User-Agent": adapter.USER_AGENT, "Accept": "text/html,*/*;q=0.8", "Cache-Control": "no-cache"},
     )
     with opener.open(request, timeout=adapter.TIMEOUT_SECONDS) as response:
         final_url = _validate_expanded_index_url(response.geturl())
@@ -194,9 +291,13 @@ def _live_state(*, as_of: date) -> dict[str, Any]:
             raise ValueError("expanded municipal index exceeds size cap")
         charset = response.headers.get_content_charset() or "utf-8"
     text = payload.decode(charset, errors="replace")
-    state = asdict(adapter.build_state(text, payload, as_of=as_of, source_url=adapter.SOURCE_URL))
-    state["_transport_url"] = transport_url
-    return state
+    return _parse_expanded_index(
+        text,
+        payload,
+        as_of=as_of,
+        canonical_source_url=adapter.SOURCE_URL,
+        transport_url=transport_url,
+    )
 
 
 def main() -> int:
@@ -217,7 +318,7 @@ def main() -> int:
         result = verify_state(state, as_of=as_of)
     except Exception as exc:
         result = {
-            "schema_version": "1.1",
+            "schema_version": "1.2",
             "mode": "MUNICIPAL_REFERENCE_SHADOW_VERIFICATION",
             "source_id": SOURCE_ID,
             "publication_authority": "NONE",
@@ -233,6 +334,8 @@ def main() -> int:
     print(json.dumps({
         "status": result.get("status"),
         "reference_count": result.get("reference_count", 0),
+        "register_entries_parsed": result.get("register_entries_parsed", 0),
+        "direct_attachment_references": result.get("direct_attachment_references", 0),
         "verified_written_shadow_count": result.get("verified_written_shadow_count", 0),
         "no_story_count": result.get("no_story_count", 0),
         "blocked_count": result.get("blocked_count", 0),
