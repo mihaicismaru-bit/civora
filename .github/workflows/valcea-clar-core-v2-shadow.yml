@@ -37,6 +37,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_integrity.py
           python valcea-clar/tests/test_core_v2_source_signal.py
           python valcea-clar/tests/test_core_v2_isj_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_detail_shadow_lane.py
           python valcea-clar/tests/test_core_v2_visual.py
           python valcea-clar/tests/test_core_v2_visual_registry.py
           python valcea-clar/tests/test_core_v2_shadow_site_package.py
@@ -74,6 +75,8 @@ jobs:
           python valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py --self-test
           python valcea-clar/scripts/isu_valcea_emergency_reference_adapter.py --self-test
           python valcea-clar/scripts/isu_valcea_emergency_detail_evidence.py --self-test
+          python valcea-clar/scripts/isj_valcea_education_reference_adapter.py --self-test
+          python valcea-clar/scripts/isj_valcea_education_detail_evidence.py --self-test
           python valcea-clar/scripts/council_decision_document_resolver.py --self-test
 
       - name: Run single bounded Core v2 shadow cycle read-only
@@ -162,6 +165,7 @@ jobs:
             /tmp/valcea-core-v2-cj-road-shadow.json
             /tmp/valcea-core-v2-eta-shadow.json
             /tmp/valcea-core-v2-isj-shadow.json
+            /tmp/valcea-core-v2-isj-detail-shadow.json
             /tmp/valcea-core-v2-photo-truth.json
             /tmp/valcea-core-v2-shadow-site-package.json
             /tmp/valcea-core-v2-shadow-site/**
