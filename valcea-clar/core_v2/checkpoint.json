@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.6",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN6-MUNICIPAL-DOCUMENT-EVIDENCE-VALIDATED",
+  "schema_version": "1.7",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN6-CJ-ROAD-SOURCE-BOUNDARY-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -9,9 +9,9 @@
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "base_merge_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
   "fresh_reread": {
-    "main_observed_sha": "ca0f9928ae351a8f9f5ecf720490a1a6c9d91ec0",
+    "main_observed_sha": "ce07fe85fed7f52596d8c3180e68c2217aade466",
     "main_core_v2_overlap": false,
-    "main_note": "Fresh main still receives legacy/runtime state writes outside Core v2. Legacy newsroom and social workflows remain write-capable and include manual/scheduled triggers, but this rebuild did not modify, trigger, merge or deploy them.",
+    "main_note": "Fresh main continues legacy/runtime bot writes outside Core v2. Core v2 remains isolated; no legacy workflow, main, deploy, public projection or Meta write was triggered by this rebuild.",
     "legacy_public_projection": {
       "repo": "mihaicismaru-bit/valcea-clar",
       "story_count": 95,
@@ -24,13 +24,13 @@
     }
   },
   "latest_validated_core_feature_head": {
-    "sha": "a6fd52a23656fca2c3c6ac84289f6777594544fc",
-    "workflow_run_id": 35340461502,
-    "workflow_run_number": 136,
+    "sha": "e23ffba4093f3b8b8d403ebf1fb70a2b1dc82e78",
+    "workflow_run_id": 35340967125,
+    "workflow_run_number": 140,
     "event": "push",
     "conclusion": "success",
-    "artifact_id": 10545011373,
-    "artifact_sha256": "5df1a9bd99ead7b375041248d7be887a98fb3a1fe4d20fbd8609628322697dd4",
+    "artifact_id": 10545196772,
+    "artifact_sha256": "b926debd135bd72e8e3507f7c2d1d2957c31f02b179de29cd72e655baa877890",
     "permissions": "contents:read",
     "manual_dispatch": false,
     "production_write_authority": false
@@ -43,10 +43,12 @@
     "APAVIL source-to-kernel lane terminates non-material or stale signals NO_STORY instead of manufacturing articles",
     "IPJ/ISU first-party detail evidence, fail-closed geography, material-fact extraction, structured shadow writer and claim integrity remain validated with zero fabricated claims",
     "publication/source visible date and event time remain separate; all three currently promoted IPJ/ISU shadow rows keep event_time UNKNOWN because no explicit event-role date evidence proves otherwise",
-    "Râmnicu Vâlcea municipal register discovery is now deterministic on the bounded first-party 2026 index: 343 references parse successfully and all 343 remain NO_STORY at metadata-only stage",
-    "bounded municipal document-body collector is implemented and independently revalidates same-host HTTPS surface, 2026 decision identity and SHA-256 evidence boundaries after the reused legacy resolver",
-    "latest official municipal adopted date 2026-09-16 yields three selected HCL documents; all three resolve to DOCUMENT_EVIDENCE_READY, zero blocked, zero fabricated claims, but all evidence remains UNADJUDICATED with FactKernel promotion and writer use forbidden",
-    "natural Core v2 push run 136 validated compile, all contract tests including seven municipal-document trust-boundary tests, live APAVIL/IPJ/ISU/municipal reference/document lanes, independent external replay, shadow isolation and evidence artifact under contents:read only"
+    "Râmnicu Vâlcea municipal register discovery is deterministic on the bounded first-party 2026 index: 343 references parse successfully and all 343 remain NO_STORY at metadata-only stage",
+    "bounded municipal document-body collector independently revalidates same-host HTTPS surface, 2026 decision identity and SHA-256 evidence boundaries after the reused legacy resolver",
+    "latest official municipal adopted date 2026-09-16 yields three selected HCL documents; all three are DOCUMENT_EVIDENCE_READY with zero fabricated claims, but evidence remains UNADJUDICATED and cannot feed a FactKernel or writer yet",
+    "new CJ Vâlcea road shadow lane is implemented with seven fail-closed contract tests; official road signals can only terminate NO_STORY or BLOCKED at this stage and cannot create a FactKernel/article",
+    "CJ road closures/restrictions explicitly require a fresh current-operational-status recheck; fresh works/update notices require separate material-fact extraction; stale records terminate NO_STORY",
+    "natural Core v2 push run 140 validated compile, all contract tests, live APAVIL/IPJ/ISU/municipal lanes, CJ lane isolation, independent external replay and evidence artifact under contents:read only"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -77,8 +79,8 @@
     "acceptance_ready": false
   },
   "public_safety_live_shadow_truth": {
-    "workflow_run_id": 35340461502,
-    "artifact_id": 10545011373,
+    "workflow_run_id": 35340967125,
+    "artifact_id": 10545196772,
     "ipj": {
       "detail_count": 8,
       "verified_written_shadow_count": 1,
@@ -124,6 +126,25 @@
     "publication_authority": "NONE",
     "safe_rule": "Official HCL document text is evidence, not a story. No municipal FactKernel or article until a separate material-fact adjudicator proves a concrete public consequence and binds every claim to document evidence."
   },
+  "cj_road_live_shadow_truth": {
+    "status": "BLOCKED_SOURCE_UNAVAILABLE",
+    "discovered_article_count": 0,
+    "signal_count": 0,
+    "fetch_hold_count": 0,
+    "fresh_material_candidate_count": 0,
+    "no_story_count": 0,
+    "blocked_count": 0,
+    "verified_written_shadow_count": 0,
+    "fabricated_claim_count": 0,
+    "error_type": "URLError",
+    "error_classification": "TLS_CERTIFICATE_CHAIN_VERIFICATION_FAILED",
+    "error_summary": "Python/OpenSSL read-only fetch refused the official cjvalcea.ro source because the presented certificate chain could not be verified to a local issuer. TLS verification was not disabled and no insecure fallback was introduced.",
+    "external_observation": "The official CJ Vâlcea website remained discoverable by an independent web crawler on 2026-09-18, so this is classified as a Core runner trust-chain/access mismatch rather than proof that the public source is offline.",
+    "fact_kernel_promotion_allowed": false,
+    "writer_allowed": false,
+    "publication_authority": "NONE",
+    "acceptance_ready": false
+  },
   "shadow_replay_truth": {
     "candidate_count": 2,
     "site_external_readback_passed": 2,
@@ -154,7 +175,11 @@
     },
     {
       "gate": "municipal_material_fact_adjudication",
-      "reason": "Three latest official HCL document bodies are now identity-verified, but their excerpts are deliberately UNADJUDICATED. Raw operative text cannot become a story until a separate materiality/public-consequence gate exists."
+      "reason": "Three latest official HCL document bodies are identity-verified, but their excerpts are deliberately UNADJUDICATED. Raw operative text cannot become a story until a separate materiality/public-consequence gate exists."
+    },
+    {
+      "gate": "cj_road_source_tls",
+      "reason": "The bounded CJ Vâlcea road adapter cannot currently establish a verified TLS chain from the Core v2 runner. Do not disable certificate verification or publish from an unverified fetch."
     },
     {
       "gate": "legacy_fact_kernel_migration",
@@ -174,9 +199,10 @@
     }
   ],
   "next": [
-    "implement a separate fail-closed municipal material-fact adjudicator over DOCUMENT_EVIDENCE_READY rows; it must distinguish legally operative text from a reader-relevant material consequence and must not grant publication authority",
+    "implement a separate fail-closed municipal material-fact adjudicator over DOCUMENT_EVIDENCE_READY rows; distinguish legally operative text from a reader-relevant material consequence and do not grant publication authority",
     "bind truthful real-photo candidates to the three currently verified IPJ/ISU shadow stories only when exact/direct/archive-context relevance, rights basis, disclosure and external image readback all pass",
-    "implement the next bounded first-party lane, preferring CJ Vâlcea road-infrastructure signals now that the municipal reference/document contract is stable",
+    "continue the bounded pilot with ETA or ISJ while CJ Vâlcea remains TLS-blocked; do not weaken TLS verification or substitute a non-first-party mirror",
+    "revisit CJ only through a verifiable first-party transport/trust-chain correction; current-status road claims must remain blocked until rechecked",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient; do not infer delivery from internal IDs",
     "do not evaluate the ten-story acceptance gate until source, kernel, full writer, visual, site and both social receipt gates are independently satisfiable"
   ],
@@ -187,10 +213,9 @@
     "apavil_shadow_lane": "valcea-clar/core_v2/apavil_shadow_lane.py",
     "public_safety_structured_lane": "valcea-clar/core_v2/public_safety_full_shadow_lane.py",
     "municipal_reference_lane": "valcea-clar/core_v2/municipal_reference_shadow_lane.py",
-    "municipal_reference_tests": "valcea-clar/tests/test_core_v2_municipal_reference_shadow_lane.py",
     "municipal_document_lane": "valcea-clar/core_v2/municipal_document_shadow_lane.py",
-    "municipal_document_tests": "valcea-clar/tests/test_core_v2_municipal_document_shadow_lane.py",
-    "legacy_municipal_document_resolver_reused_non_authoritatively": "valcea-clar/scripts/council_decision_document_resolver.py",
+    "cj_road_lane": "valcea-clar/core_v2/cj_road_shadow_lane.py",
+    "cj_road_tests": "valcea-clar/tests/test_core_v2_cj_road_shadow_lane.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
     "visual_readback": "valcea-clar/core_v2/visual_readback.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
