@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN4",
+  "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
+  "core_v2_mode": "SHADOW_ONLY",
+  "publication_authority": "NONE",
+  "base_main_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
+  "done": [
+    "fresh main reviewed",
+    "live newsroom trigger/write topology re-read",
+    "social publication fallback topology re-read",
+    "Core v2 StoryState contract implemented",
+    "FactKernel contract implemented",
+    "Visual fail-closed real-photo contract implemented",
+    "site and social PublicationReceipt contracts implemented",
+    "AuditResult zero-defect acceptance contract implemented",
+    "shadow-only sequential orchestrator implemented",
+    "receipt-bound acceptance metrics implemented",
+    "legacy deterministic inventory generator implemented",
+    "bounded pilot source registry created",
+    "8 local contract regression tests authored and locally passed"
+  ],
+  "next": [
+    "run generated legacy inventory against checkout and review UNKNOWN bucket",
+    "bind Primaria Ramnicu Valcea and one cultural source to explicit Core v2 adapters",
+    "add independent HTTP/JSON-LD readback adapter for site without publication authority",
+    "add Meta readback adapters that consume receipts but cannot publish",
+    "add claim-to-kernel editorial integrity replay gate",
+    "add 10-story shadow acceptance ledger"
+  ],
+  "blocked": [
+    {
+      "gate": "production_cutover",
+      "reason": "explicit owner approval required before any live Core v2 publication or social delivery"
+    }
+  ],
+  "evidence": {
+    "legacy_newsroom": ".github/workflows/valcea-clar-newsroom-live.yml",
+    "legacy_social": ".github/workflows/valcea-clar-social-publishing.yml",
+    "core_contracts": "valcea-clar/core_v2/contracts.py",
+    "core_orchestrator": "valcea-clar/core_v2/orchestrator.py",
+    "core_tests": "valcea-clar/tests/test_core_v2_contracts.py"
+  }
+}
