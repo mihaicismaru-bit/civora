@@ -1,12 +1,31 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
 from photo_truth_gate import assess_story_visual, build_photo_truth_report
-from visual_readback import _filename, inspect_article_image
+from visual_readback import _filename, _read_binary_head, inspect_article_image
+
+
+class _FakeImageResponse:
+    status = 206
+    headers = {"Content-Type": "image/jpeg"}
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        return False
+
+    def geturl(self):
+        return "https://upload.wikimedia.org/example.jpg"
+
+    def read(self, size=-1):
+        return b"\xff\xd8\xff"[: max(0, size)] if size >= 0 else b"\xff\xd8\xff"
 
 
 class VisualReadbackTest(unittest.TestCase):
@@ -33,6 +52,22 @@ class VisualReadbackTest(unittest.TestCase):
             expected_filename="cet.jpg",
         )
         self.assertFalse(result["article_image_bound"])
+
+    def test_binary_image_readback_retries_429_only_and_preserves_external_truth(self):
+        first = HTTPError(
+            "https://upload.wikimedia.org/example.jpg",
+            429,
+            "Too Many Requests",
+            {"Retry-After": "0"},
+            None,
+        )
+        with patch("visual_readback.urlopen", side_effect=[first, _FakeImageResponse()]), patch("visual_readback.time.sleep") as sleep:
+            result = _read_binary_head("https://upload.wikimedia.org/example.jpg", timeout=1.0)
+        self.assertEqual(result["status"], "PASS")
+        self.assertTrue(result["readback_ok"])
+        self.assertEqual(result["attempts"], 2)
+        self.assertFalse(result["rate_limited"])
+        sleep.assert_called_once()
 
 
 class PhotoTruthGateTest(unittest.TestCase):

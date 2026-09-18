@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 from html.parser import HTMLParser
 from pathlib import PurePosixPath
 from typing import Any
@@ -76,24 +77,62 @@ def _read_text(url: str, timeout: float = 12.0) -> dict[str, Any]:
     }
 
 
-def _read_binary_head(url: str, timeout: float = 12.0) -> dict[str, Any]:
-    request = Request(url, headers={"User-Agent": "CIVORA-Core-v2-Auditor/1.0", "Range": "bytes=0-1023"})
+def _retry_delay(exc: HTTPError, attempt: int) -> float:
+    raw = None
     try:
-        with urlopen(request, timeout=timeout) as response:
-            status = int(getattr(response, "status", 0) or 0)
-            final_url = response.geturl()
-            content_type = str(response.headers.get("Content-Type") or "")
-            response.read(1024)
-    except (HTTPError, URLError, TimeoutError) as exc:
-        return {"status": "FAILED", "error": str(exc), "http_status": getattr(exc, "code", None), "readback_ok": False}
-    image_type = content_type.lower().startswith("image/")
-    return {
-        "status": "PASS" if status in {200, 206} and image_type else "FAILED",
-        "http_status": status,
-        "final_url": final_url,
-        "content_type": content_type,
-        "readback_ok": bool(status in {200, 206} and image_type),
-    }
+        raw = exc.headers.get("Retry-After") if exc.headers else None
+    except Exception:
+        raw = None
+    if raw:
+        try:
+            return max(0.0, min(float(raw), 1.0))
+        except (TypeError, ValueError):
+            pass
+    return min(0.25 * attempt, 1.0)
+
+
+def _read_binary_head(url: str, timeout: float = 12.0, *, max_attempts: int = 3) -> dict[str, Any]:
+    attempts = max(1, int(max_attempts))
+    for attempt in range(1, attempts + 1):
+        request = Request(url, headers={"User-Agent": "CIVORA-Core-v2-Auditor/1.0", "Range": "bytes=0-1023"})
+        try:
+            with urlopen(request, timeout=timeout) as response:
+                status = int(getattr(response, "status", 0) or 0)
+                final_url = response.geturl()
+                content_type = str(response.headers.get("Content-Type") or "")
+                response.read(1024)
+        except HTTPError as exc:
+            if getattr(exc, "code", None) == 429 and attempt < attempts:
+                time.sleep(_retry_delay(exc, attempt))
+                continue
+            return {
+                "status": "FAILED",
+                "error": str(exc),
+                "http_status": getattr(exc, "code", None),
+                "readback_ok": False,
+                "attempts": attempt,
+                "rate_limited": getattr(exc, "code", None) == 429,
+            }
+        except (URLError, TimeoutError) as exc:
+            return {
+                "status": "FAILED",
+                "error": str(exc),
+                "http_status": getattr(exc, "code", None),
+                "readback_ok": False,
+                "attempts": attempt,
+                "rate_limited": False,
+            }
+        image_type = content_type.lower().startswith("image/")
+        return {
+            "status": "PASS" if status in {200, 206} and image_type else "FAILED",
+            "http_status": status,
+            "final_url": final_url,
+            "content_type": content_type,
+            "readback_ok": bool(status in {200, 206} and image_type),
+            "attempts": attempt,
+            "rate_limited": False,
+        }
+    return {"status": "FAILED", "error": "binary_readback_attempts_exhausted", "http_status": None, "readback_ok": False, "attempts": attempts, "rate_limited": False}
 
 
 def read_visual(
@@ -124,7 +163,7 @@ def read_visual(
         public_image = _read_binary_head(str(article_binding["matching_images"][0]["url"]), timeout)
 
     provenance_source = _read_text(source_url, timeout)
-    direct_source = {"status": "NOT_REQUIRED", "readback_ok": True}
+    direct_source = {"status": "NOT_REQUIRED", "readback_ok": True, "attempts": 0, "rate_limited": False}
     if direct_source_url:
         direct_source = _read_binary_head(direct_source_url, timeout)
 
