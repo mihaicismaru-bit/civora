@@ -28,6 +28,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "cj_road",
                 "eta",
                 "isj",
+                "isj_detail",
                 "photo_truth",
                 "shadow_site_package",
             ],
@@ -49,10 +50,33 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
     def test_non_live_plan_does_not_enable_source_network_reads(self):
         with tempfile.TemporaryDirectory() as temp:
             plan = bounded_cycle_plan(Path(temp), live=False)
-        source_stage_names = {"apavil", "ipj", "isu", "municipal_reference", "municipal_document", "cj_road", "eta", "isj"}
+        source_stage_names = {
+            "apavil",
+            "ipj",
+            "isu",
+            "municipal_reference",
+            "municipal_document",
+            "cj_road",
+            "eta",
+            "isj",
+            "isj_detail",
+        }
         for stage in plan:
             if stage.name in source_stage_names:
                 self.assertNotIn("--live", stage.argv)
+
+    def test_isj_detail_consumes_only_prior_isj_shadow_artifact(self):
+        with tempfile.TemporaryDirectory() as temp:
+            plan = bounded_cycle_plan(Path(temp), live=True)
+        by_name = {stage.name: stage for stage in plan}
+        isj = by_name["isj"]
+        detail = by_name["isj_detail"]
+        self.assertIsNotNone(isj.output)
+        self.assertIn("--input", detail.argv)
+        self.assertIn(str(isj.output), detail.argv)
+        self.assertIn("--live", detail.argv)
+        self.assertLess([stage.name for stage in plan].index("isj"), [stage.name for stage in plan].index("isj_detail"))
+        self.assertLess([stage.name for stage in plan].index("isj_detail"), [stage.name for stage in plan].index("photo_truth"))
 
 
 if __name__ == "__main__":
