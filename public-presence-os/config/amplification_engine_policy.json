@@ -1,0 +1,92 @@
+{
+  "schema_version": "PPOS_AMPLIFICATION_ENGINE_POLICY_V1",
+  "checkpoint": "CP88",
+  "module_id": "M57_AMPLIFICATION_ENGINE",
+  "parent_activation_checkpoint": "CP87",
+  "parent_control_checkpoint": "CP58",
+  "next_after_cp88": "CP89_GROWTH_ANALYTICS_VIRALITY_LEARNING",
+  "global_kill_switch": "ENGAGED",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "candidate_kinds": [
+    "OWN_POST",
+    "COMMENT_THREAD",
+    "PUBLIC_CONVERSATION"
+  ],
+  "action_kinds": [
+    "FOLLOW_UP_POST",
+    "SECOND_POST",
+    "EXPLAINER",
+    "CORRECTION",
+    "CONTENT_IDEA",
+    "QUOTE_REPOST"
+  ],
+  "decision_states": [
+    "SELECTED_OFFLINE",
+    "MANUAL_ACTION_PACKET",
+    "NO_ACTION",
+    "HOLD"
+  ],
+  "quality_thresholds": {
+    "minimum_amplification_score": 68,
+    "minimum_novelty_score": 55,
+    "minimum_material_delta_score": 60,
+    "strong_thread_quality_score": 72,
+    "strong_thread_depth": 3,
+    "correction_need_score": 80
+  },
+  "score_weights": {
+    "relevance": 0.2,
+    "substance": 0.25,
+    "novelty": 0.2,
+    "followup_value": 0.2,
+    "explanation_value": 0.15
+  },
+  "quote_repost_capability_baseline": {
+    "FACEBOOK_PAGE": {
+      "classification": "MANUAL_ONLY",
+      "automation_mode": "MANUAL_ACTION_PACKET",
+      "live_gate": "HOLD_LIVE_PERMISSION"
+    },
+    "INSTAGRAM_PROFESSIONAL": {
+      "classification": "UNSUPPORTED",
+      "automation_mode": "MANUAL_ACTION_PACKET",
+      "live_gate": "HOLD_CAPABILITY_UNVERIFIED"
+    },
+    "THREADS": {
+      "classification": "MANUAL_ONLY",
+      "automation_mode": "MANUAL_ACTION_PACKET",
+      "live_gate": "HOLD_LIVE_PERMISSION"
+    }
+  },
+  "safety": {
+    "material_new_information_required": true,
+    "duplicate_posting_forbidden": true,
+    "repetitive_self_amplification_forbidden": true,
+    "quote_repost_rights_context_required": true,
+    "quote_repost_context_integrity_required": true,
+    "capability_unknown_fail_closed": true,
+    "manual_packet_when_api_write_not_supported": true,
+    "political_microtargeting_forbidden": true,
+    "sensitive_trait_inference_forbidden": true,
+    "sensitive_relationship_profiling_forbidden": true,
+    "synthetic_conversation_farming_forbidden": true,
+    "clickbait_conflict_fabrication_forbidden": true
+  },
+  "authority": {
+    "posting_authority": false,
+    "external_write_allowed": false,
+    "network_allowed": false,
+    "live_probe_allowed": false,
+    "oauth_allowed": false,
+    "account_connection_allowed": false,
+    "control_plane_promotion_allowed": false,
+    "deploy_allowed": false,
+    "paid_service_allowed": false
+  },
+  "unknown_external_metric_value": "UNKNOWN",
+  "max_batch": 100
+}
