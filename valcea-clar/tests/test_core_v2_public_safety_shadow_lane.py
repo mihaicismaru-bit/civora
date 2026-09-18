@@ -60,7 +60,7 @@ class PublicSafetyShadowLaneTests(unittest.TestCase):
                     "source_assertion_scope": "ISU_FIRST_PARTY_STATEMENT_ONLY_NOT_INDEPENDENT_VERIFICATION",
                 },
                 {
-                    "excerpt": "Sursa menționează o cauză probabilă și un număr raportat de persoane afectate.",
+                    "excerpt": "Într-un context separat din corpul paginii este menționată localitatea Măciuca; aceasta nu poate înlocui localizarea explicită din titlu. Sursa menționează o cauză probabilă și un număr raportat de persoane afectate.",
                     "epistemic_tags": ["REPORTED_CAUSE_OR_ORIGIN", "REPORTED_AFFECTED_OR_CASUALTY", "REPORTED_NUMERIC_COUNT"],
                     "evidence_sha256": "2" * 64,
                     "source_assertion_scope": "ISU_FIRST_PARTY_STATEMENT_ONLY_NOT_INDEPENDENT_VERIFICATION",
@@ -101,7 +101,7 @@ class PublicSafetyShadowLaneTests(unittest.TestCase):
         self.assertIn("rămâne atribuită IPJ Vâlcea", body)
         self.assertIn("nu prezintă o reținere", body)
         self.assertIn("nu ca moment confirmat al evenimentului", body)
-        self.assertIn("Râmnicu Vâlcea", row["fact_kernel"]["where"])
+        self.assertEqual(row["fact_kernel"]["where"], "Râmnicu Vâlcea")
         self.assertGreaterEqual(len(row["fact_kernel"]["evidence_ids"]), 4)
 
     def test_isu_detail_preserves_reported_cause_and_count_limits(self):
@@ -113,6 +113,41 @@ class PublicSafetyShadowLaneTests(unittest.TestCase):
         self.assertIn("Cauzele, numărul persoanelor afectate", body)
         self.assertIn("fără verificare separată", body)
         self.assertEqual(row["fact_kernel"]["where"], "Băile Olănești")
+
+    def test_title_locality_wins_over_unrelated_body_place(self):
+        detail = self._isu_detail()
+        detail["index_title"] = "Incendiu izbucnit într-o gospodărie din localitatea Mădulari"
+        detail["visible_title"] = "ISU Vâlcea - Incendiu izbucnit într-o gospodărie din localitatea Mădulari"
+        detail["field_evidence"][0]["excerpt"] = "Pompierii au intervenit în localitatea Mădulari pentru stingerea incendiului."
+        detail["field_evidence"][1]["excerpt"] = "Pagina conține și o referință separată la localitatea Măciuca, care nu descrie locul incidentului."
+        row = promote_detail("isu", detail, as_of=date(2026, 9, 18))
+        self.assertEqual(row["state"], "VERIFIED_WRITTEN_SHADOW")
+        self.assertEqual(row["fact_kernel"]["where"], "Mădulari")
+
+    def test_genitive_locality_is_extracted_from_title(self):
+        detail = self._isu_detail()
+        detail["index_title"] = "Incendiu la o anexă gospodărească pe raza localității Lăpușata"
+        detail["visible_title"] = detail["index_title"]
+        detail["field_evidence"][0]["excerpt"] = "Echipajele ISU au intervenit pentru gestionarea incendiului."
+        row = promote_detail("isu", detail, as_of=date(2026, 9, 18))
+        self.assertEqual(row["state"], "VERIFIED_WRITTEN_SHADOW")
+        self.assertEqual(row["fact_kernel"]["where"], "Lăpușata")
+
+    def test_multiple_body_geographies_block_when_title_has_none(self):
+        detail = self._isu_detail()
+        detail["index_title"] = "Bilanț al intervențiilor pompierilor din ultimele ore"
+        detail["visible_title"] = detail["index_title"]
+        detail["field_evidence"] = [
+            {
+                "excerpt": "Echipajele ISU au intervenit în localitatea Drăgășani și în localitatea Măciuca.",
+                "epistemic_tags": ["ISU_REPORTED_OBSERVATION", "RESPONSE_ACTION"],
+                "evidence_sha256": "4" * 64,
+                "source_assertion_scope": "ISU_FIRST_PARTY_STATEMENT_ONLY_NOT_INDEPENDENT_VERIFICATION",
+            }
+        ]
+        row = promote_detail("isu", detail, as_of=date(2026, 9, 18))
+        self.assertEqual(row["state"], "BLOCKED")
+        self.assertEqual(row["reason"], "ambiguous_multiple_geographies")
 
     def test_missing_explicit_source_date_is_no_story(self):
         detail = self._ipj_detail()
