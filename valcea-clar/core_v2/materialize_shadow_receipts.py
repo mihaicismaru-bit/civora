@@ -21,6 +21,14 @@ def _site_index(doc: dict[str, Any]) -> dict[str, dict[str, Any]]:
     }
 
 
+def _visual_index(doc: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    return {
+        str(row.get("story_id") or ""): row
+        for row in doc.get("results") or []
+        if isinstance(row, dict) and row.get("story_id")
+    }
+
+
 def _meta_index(doc: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
     return {
         (str(row.get("story_id") or ""), str(row.get("channel") or "")): row
@@ -45,6 +53,22 @@ def _site_receipt(row: dict[str, Any] | None, canonical_url: str | None) -> dict
     }
 
 
+def _visual_receipt(row: dict[str, Any] | None) -> dict[str, Any]:
+    row = row or {}
+    ok = row.get("readback_ok") is True
+    return {
+        "channel": "visual",
+        "status": "VERIFIED" if ok else str(row.get("status") or "FAILED"),
+        "readback_ok": ok,
+        "internal_truth_gate": row.get("internal_truth_gate") is True,
+        "rights_basis": row.get("rights_basis"),
+        "article_image_bound": ((row.get("article_binding") or {}).get("article_image_bound") is True),
+        "public_image_readback_ok": ((row.get("public_image") or {}).get("readback_ok") is True),
+        "provenance_source_readback_ok": ((row.get("provenance_source") or {}).get("readback_ok") is True),
+        "direct_source_readback_ok": ((row.get("direct_source") or {}).get("readback_ok") is True),
+    }
+
+
 def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | None) -> dict[str, Any]:
     row = row or {}
     ok = row.get("readback_ok") is True and bool(row.get("permalink"))
@@ -59,11 +83,21 @@ def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | N
         "permalink": row.get("permalink"),
         "reason": row.get("reason"),
         "error": row.get("error"),
+        "error_code": row.get("error_code"),
+        "error_subcode": row.get("error_subcode"),
+        "error_type": row.get("error_type"),
+        "error_message": row.get("error_message"),
     }
 
 
-def materialize(candidates: dict[str, Any], site: dict[str, Any], meta: dict[str, Any]) -> dict[str, Any]:
+def materialize(
+    candidates: dict[str, Any],
+    site: dict[str, Any],
+    visual: dict[str, Any],
+    meta: dict[str, Any],
+) -> dict[str, Any]:
     site_by_story = _site_index(site)
+    visual_by_story = _visual_index(visual)
     meta_by_story = _meta_index(meta)
     candidate_ids = set(candidates.get("first_ten_candidate_ids") or [])
     rows = []
@@ -77,6 +111,7 @@ def materialize(candidates: dict[str, Any], site: dict[str, Any], meta: dict[str
             continue
         receipts = {
             "site": _site_receipt(site_by_story.get(story_id), candidate.get("canonical_url")),
+            "visual": _visual_receipt(visual_by_story.get(story_id)),
             "facebook": _social_receipt(
                 "facebook",
                 meta_by_story.get((story_id, "facebook")),
@@ -90,7 +125,14 @@ def materialize(candidates: dict[str, Any], site: dict[str, Any], meta: dict[str
         }
         externally_verified = (
             candidate.get("real_visual_internal_evidence") is True
-            and all(receipt.get("status") == "DELIVERED" and receipt.get("readback_ok") is True for receipt in receipts.values())
+            and receipts["site"].get("status") == "DELIVERED"
+            and receipts["site"].get("readback_ok") is True
+            and receipts["visual"].get("status") == "VERIFIED"
+            and receipts["visual"].get("readback_ok") is True
+            and receipts["facebook"].get("status") == "DELIVERED"
+            and receipts["facebook"].get("readback_ok") is True
+            and receipts["instagram"].get("status") == "DELIVERED"
+            and receipts["instagram"].get("readback_ok") is True
         )
         if externally_verified:
             externally_verified_ids.append(story_id)
@@ -113,10 +155,10 @@ def materialize(candidates: dict[str, Any], site: dict[str, Any], meta: dict[str
         )
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "SHADOW_RECEIPT_LEDGER",
         "publication_authority": "NONE",
-        "truth_rule": "Only independent external readback can upgrade an internal remote ID to delivered evidence.",
+        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence.",
         "candidate_count": len(rows),
         "externally_verified_count": len(externally_verified_ids),
         "externally_verified_story_ids": externally_verified_ids,
@@ -131,10 +173,16 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Materialize read-only Core v2 shadow delivery receipts")
     parser.add_argument("--candidates", required=True)
     parser.add_argument("--site-readback", required=True)
+    parser.add_argument("--visual-readback", required=True)
     parser.add_argument("--meta-readback", required=True)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
-    result = materialize(_load(args.candidates), _load(args.site_readback), _load(args.meta_readback))
+    result = materialize(
+        _load(args.candidates),
+        _load(args.site_readback),
+        _load(args.visual_readback),
+        _load(args.meta_readback),
+    )
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(
         json.dumps(
