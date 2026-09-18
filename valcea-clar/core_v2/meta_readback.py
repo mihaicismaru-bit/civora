@@ -31,6 +31,31 @@ def parse_meta_object(channel: str, remote_id: str, payload: dict[str, Any]) -> 
     }
 
 
+def parse_meta_error_body(raw: bytes | str | None) -> dict[str, Any]:
+    if not raw:
+        return {}
+    if isinstance(raw, bytes):
+        text = raw.decode("utf-8", errors="replace")
+    else:
+        text = raw
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return {"error_body_excerpt": text[:500]}
+    error = payload.get("error") if isinstance(payload, dict) else None
+    if not isinstance(error, dict):
+        return {"error_body_excerpt": text[:500]}
+    return {
+        "error_code": error.get("code"),
+        "error_subcode": error.get("error_subcode"),
+        "error_type": error.get("type"),
+        "error_message": error.get("message"),
+        "error_user_title": error.get("error_user_title"),
+        "error_user_msg": error.get("error_user_msg"),
+        "fbtrace_id": error.get("fbtrace_id"),
+    }
+
+
 def read_meta(channel: str, remote_id: str, token: str, graph_version: str = "v26.0", timeout: float = 12.0) -> dict[str, Any]:
     if channel not in FIELDS:
         raise ValueError(f"unsupported channel: {channel}")
@@ -52,7 +77,23 @@ def read_meta(channel: str, remote_id: str, token: str, graph_version: str = "v2
     try:
         with urlopen(request, timeout=timeout) as response:
             payload = json.loads(response.read().decode("utf-8"))
-    except (HTTPError, URLError, TimeoutError, json.JSONDecodeError) as exc:
+    except HTTPError as exc:
+        try:
+            body = exc.read()
+        except Exception:
+            body = b""
+        detail = parse_meta_error_body(body)
+        return {
+            "channel": channel,
+            "remote_id": remote_id,
+            "status": "FAILED",
+            "http_status": exc.code,
+            "error": str(exc),
+            **detail,
+            "readback_ok": False,
+            "publication_authority": "NONE",
+        }
+    except (URLError, TimeoutError, json.JSONDecodeError) as exc:
         return {
             "channel": channel,
             "remote_id": remote_id,
