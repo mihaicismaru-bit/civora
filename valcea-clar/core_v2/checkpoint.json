@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.7",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN15-ISJ-CALENDAR-FIELD-EVIDENCE-NATURAL-VALIDATED",
+  "schema_version": "2.8",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN16-ISJ-WRITER-ARTICLE-INTEGRITY-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,64 +8,51 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "5e712521b18a8c60f546452b7f5c733c5667e638",
-    "main_observed_message": "Checkpoint verified decision-maker projection",
-    "main_observed_at": "2026-09-18T19:17:05Z",
+    "main_observed_sha": "6707aa3ffb0d81bd58d1f12bcd3106d3a82f502f",
+    "main_observed_message": "Stage PEO calendar candidate state fail-closed",
+    "main_observed_at": "2026-09-18T20:39:35Z",
     "legacy_public_projection": {
       "repo": "mihaicismaru-bit/valcea-clar",
       "main_sha": "b1b20ed298f587cc79bcf457ae4e8ccf12851fca",
-      "story_count": 96,
-      "current_story_count": 79,
-      "archive_story_count": 17,
-      "verified_visual_count": 13,
       "observation_only": true
     },
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "09fad82b1047a63e46118845868f6907ff5d73a2",
-    "workflow_run_id": 35385923193,
-    "workflow_run_number": 358,
+    "sha": "11ff78cbb2704073d338fd68d951f705b922dfaa",
+    "workflow_run_id": 35392485606,
+    "workflow_run_number": 386,
     "event": "pull_request",
     "conclusion": "success",
-    "artifact_id": 10563563773,
-    "artifact_sha256": "8cb9841bac23617c117ddb1bb3618bf19667be0e7bfc6ff1a497f08cba4f7196",
+    "artifact_id": 10566129920,
+    "artifact_sha256": "1e78ca9a72011d2d0a9ef914397138c76aa7d28e9ca3694579005a80bcb97533",
     "manual_dispatch": false,
     "production_write_authority": false,
-    "ordered_shadow_stage_count": 21,
+    "ordered_shadow_stage_count": 26,
     "ordered_shadow_failed_stage": null,
-    "post_cycle_read_only_gates": [
-      "isj_document_target_and_text_truth",
-      "isj_field_evidence_truth",
-      "isj_context_document_truth",
-      "isj_calendar_field_evidence_truth",
-      "historical_external_readback",
-      "shadow_runtime_invariants"
+    "new_truth_gates": [
+      "isj_field_materiality",
+      "isj_fact_kernel",
+      "isj_fact_kernel_integrity",
+      "isj_writer",
+      "isj_article_integrity"
     ]
   },
   "done": [
     "legacy architecture remains explicitly LEGACY_NOT_PRODUCTION_READY while live legacy automation is left untouched",
     "Core v2 contracts keep source truth, FactKernel, article, visual, site delivery, social delivery, receipts and audit truth separate from workflow success",
     "bounded eight-source pilot and complete KEEP/RETIRE/REWRITE inventory remain enforced with UNKNOWN=0",
-    "single Core v2 orchestrator now executes 21 ordered read-only shadow stages; GitHub Actions is a thin executor with no deploy, merge, publication or Meta-write authority",
-    "APAVIL remains fail-closed at 132 NO_STORY and zero fabricated stories",
-    "IPJ remains 1 VERIFIED_WRITTEN_SHADOW, 2 NO_STORY and 5 BLOCKED from 8 first-party details with fabricated_claims=0",
-    "ISU remains 2 VERIFIED_WRITTEN_SHADOW, 3 NO_STORY and 4 BLOCKED from 9 first-party details with fabricated_claims=0",
-    "Râmnicu Vâlcea HCL 343/344/345 remain three evidence-bound deterministic full shadow articles with fabricated_claims=0",
-    "ETA remains 10 signals: 7 NO_STORY and 3 BLOCKED",
-    "ISJ parent evidence verifies 17 embedded document labels for concurs directori 2026 and binds all 17 to document resource identities without using filenames as facts",
-    "two explicitly current-year ISJ PDFs remain byte-verified and deterministically text-extracted with Poppler pdftotext provenance, page-level hashes and no OCR",
-    "vacancy-list field evidence remains 9 exact fields across vacancy list and methodology, including 146 vacant director/director-adjunct functions and the verified contest session 2026",
-    "new context-document gate requires the already verified contest_session_year field evidence before it may read sibling registration/calendar/procedure resources from the same first-party contest page",
-    "context-document live read selected exactly two bounded resources: REGISTRATION_NOTICE and CONTEST_CALENDAR; the registration PDF failed closed because deterministic pdftotext returned empty/too-short text, and no OCR fallback was used",
-    "the OMEC-4622 calendar PDF was deterministically text-extracted and remains non-authorizing with page-level hashes and contest-session provenance",
-    "new calendar field-evidence gate verified exactly four page/hash-bound fields from the calendar PDF: calendar_order_date=2026-08-06, interview_window_text='12-27 noiembrie', appointment_decision_deadline_text='Până la data de 16 decembrie', and appointment_effective_date=2027-01-01",
-    "bare month/day ranges deliberately remain raw text rather than normalized 2026 dates because the supporting schedule lines do not themselves state the year; no year is inferred from the filename",
-    "all ISJ calendar fields remain material_fact_use=false, fact_kernel_promotion_allowed=false, writer_allowed=false and site/social publication false",
-    "photo truth remains 6 written candidates with two provenance/relevance preflight visuals and four BLOCKED for missing story-specific approved real visuals",
-    "CJ Vâlcea road lane remains fail-closed on TLS certificate-chain verification without weakening TLS",
-    "historical external replay is truth-incomplete: site readback 2/2 and Instagram 2/2 passed, Facebook 0/2 remains unverified, visual replay 0/2 passed in the latest run, and no replay transaction is fully truth-bound",
-    "natural Core v2 run 358 passed compilation, all truth-bound tests, all 21 live read-only stages, deterministic PDF extraction, ISJ target/text/field/context/calendar-field truth gates, external replay, runtime invariants and evidence upload"
+    "single Core v2 orchestrator now executes 26 ordered read-only shadow stages; GitHub Actions remains a thin executor with no deploy, merge, publication or Meta-write authority",
+    "APAVIL/IPJ/ISU/municipal/CJ/ETA/ISJ source lanes remain fail-closed under their previously validated truth contracts",
+    "ISJ field materiality now accepts only exact field_evidence_id-bound values and keeps registration_deadline plus non-normalized schedule ranges excluded",
+    "ISJ materiality promotes exactly one evidence-bound LOCAL_EDUCATION_LEADERSHIP shadow candidate when the verified 2026 vacancy list and future appointment-effective date satisfy currentness rules",
+    "ISJ FactKernel composition now binds two material claims to exactly four accepted field evidence IDs and excludes unverified registration/schedule claims",
+    "a separate ISJ FactKernel integrity gate rejects missing evidence bindings and forbidden invented schedule or registration claims before any writer can run",
+    "the ISJ shadow writer now runs only after FactKernel integrity PASS_SHADOW and creates one deterministic article package without granting publication authority",
+    "a second independent full-article integrity gate reconstructs the allowed headline, dek, claims, evidence bindings and complete body; extra or modified factual prose fails closed",
+    "natural Core v2 run 386 passed the 26-stage live read-only orchestrator including ISJ writer and article-integrity stages with no failed stage",
+    "the validated ISJ article truth state is VERIFIED_WRITTEN_SHADOW only; production_writer_ready, site_publish_allowed and social_publish_allowed all remain false",
+    "no workflow_dispatch, rerun, merge, deploy, live article publication, public projection mutation or Meta write was used"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -86,118 +73,42 @@
     "classification_complete": true,
     "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
   },
-  "live_shadow_truth": {
-    "apavil": {
-      "signal_count": 132,
-      "verified_written_shadow_count": 0,
-      "no_story_count": 132,
-      "blocked_count": 0
-    },
-    "ipj": {
-      "detail_count": 8,
-      "verified_written_shadow_count": 1,
-      "no_story_count": 2,
-      "blocked_count": 5,
-      "fabricated_claim_count": 0
-    },
-    "isu": {
-      "detail_count": 9,
-      "verified_written_shadow_count": 2,
-      "no_story_count": 3,
-      "blocked_count": 4,
-      "fabricated_claim_count": 0
-    },
-    "municipal": {
-      "selected_document_count": 3,
-      "verified_article_count": 3,
-      "blocked_count": 0,
-      "fabricated_claim_count": 0
-    },
-    "eta": {
-      "signal_count": 10,
-      "no_story_count": 7,
-      "blocked_count": 3
-    },
-    "isj": {
-      "signal_count": 16,
-      "detail_evidence_shadow_count": 12,
-      "materiality_no_story_count": 11,
-      "materiality_blocked_count": 1,
-      "embedded_notice_candidate_count": 1,
-      "embedded_notice_evidence_shadow_count": 1,
-      "embedded_file_count": 17,
-      "target_identity_bound_count": 17,
-      "explicit_current_year_target_identity_count": 2,
-      "selected_document_content_count": 2,
-      "document_text_extracted_shadow_count": 2,
-      "field_verified_document_count": 2,
-      "field_evidence_count": 9,
-      "vacant_function_count_verified_shadow": 146,
-      "contest_session_year_verified_shadow": 2026,
-      "context_selected_document_count": 2,
-      "context_document_text_extracted_shadow_count": 1,
-      "context_document_blocked_count": 1,
-      "registration_notice_text_status": "BLOCKED_PDF_TEXT_EMPTY_OR_TOO_SHORT_NO_OCR",
-      "calendar_document_text_verified_shadow": true,
-      "calendar_field_verified_document_count": 1,
-      "calendar_field_evidence_count": 4,
-      "calendar_order_date_verified_shadow": "2026-08-06",
-      "interview_window_text_verified_shadow": "12-27 noiembrie",
-      "appointment_decision_deadline_text_verified_shadow": "Până la data de 16 decembrie",
-      "appointment_effective_date_verified_shadow": "2027-01-01",
-      "full_calendar_verified": false,
-      "event_time_verified": false,
-      "registration_deadline_verified": false,
-      "fact_kernel_promotion_allowed": false,
-      "writer_allowed": false
-    },
-    "photo_truth": {
-      "candidate_count": 6,
-      "visual_candidate_verified_shadow_count": 2,
-      "blocked_count": 4,
-      "verified_story_ids": [
-        "hcl-343-local-public-finance",
-        "hcl-345-regulated-local-authorization"
-      ]
-    },
-    "shadow_site_package": {
-      "candidate_count": 2,
-      "package_image_bound_shadow_count": 2,
-      "blocked_count": 0,
-      "public_article_binding_verified": false,
-      "visual_ready": false
-    },
-    "cj_road": {
-      "status": "BLOCKED_SOURCE_UNAVAILABLE",
-      "error_classification": "TLS_CERTIFICATE_CHAIN_VERIFICATION_FAILED"
-    }
+  "isj_editorial_truth": {
+    "contest_session_year_verified_shadow": 2026,
+    "vacant_function_count_verified_shadow": 146,
+    "registration_deadline_verified": false,
+    "raw_schedule_ranges_normalized": false,
+    "field_materiality_state": "MATERIALITY_CANDIDATE_SHADOW",
+    "fact_kernel_state": "FACT_KERNEL_VERIFIED_SHADOW",
+    "fact_kernel_count": 1,
+    "material_claim_count": 2,
+    "fact_kernel_integrity_status": "PASS_SHADOW",
+    "shadow_writer_state": "WRITTEN_SHADOW_PENDING_ARTICLE_INTEGRITY",
+    "article_integrity_status": "PASS_SHADOW",
+    "article_truth_state": "VERIFIED_WRITTEN_SHADOW",
+    "verified_article_count": 1,
+    "fabricated_claim_count": 0,
+    "production_writer_ready": false,
+    "site_publish_allowed": false,
+    "social_publish_allowed": false
   },
-  "historical_external_replay": {
-    "candidate_count": 2,
-    "site_external_readback_passed": 2,
-    "visual_external_readback_passed": 0,
-    "instagram_external_readback_passed": 2,
-    "facebook_external_readback_passed": 0,
-    "truth_complete_count": 0,
-    "blocker_counts_latest_observed": {
-      "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
-      "FACT_KERNEL_EVIDENCE_MISSING": 2,
-      "VISUAL_ARTICLE_BINDING_FAILED": 1,
-      "VISUAL_PROVENANCE_FAILED": 1
-    }
+  "photo_truth": {
+    "latest_explicit_coverage_snapshot": "2/6",
+    "isj_story_added_to_photo_gate": false,
+    "truth_rule": "A verified article is not VISUAL_READY. ISJ must enter the separate photo truth gate only with a real, semantically relevant, rights-cleared and approved visual; otherwise it must remain BLOCKED."
   },
   "blocked": [
     {
       "gate": "isj_registration_notice_text",
-      "reason": "The first-party registration PDF is byte-addressable but deterministic pdftotext returns empty/too-short text. No OCR fallback is used because this Romanian document cannot yet be promoted safely from OCR-derived text."
+      "reason": "The first-party registration PDF is byte-addressable but deterministic pdftotext returns empty/too-short text. No OCR-derived Romanian facts are promoted."
     },
     {
-      "gate": "isj_fact_kernel_promotion",
-      "reason": "Exact field evidence now exists for the vacancy list, methodology and selected calendar facts, but registration deadline and a deliberate field-evidence-to-editorial-materiality gate remain absent. No ISJ FactKernel or article is authorized."
+      "gate": "isj_photo_truth",
+      "reason": "The newly verified ISJ shadow article has not been supplied to the photo truth gate and has no story-specific approved rights-cleared visual."
     },
     {
       "gate": "photo_truth_gate",
-      "reason": "Current IPJ and both current ISU stories plus municipal HCL 344 still lack story-specific approved real photographs. Generic imagery is forbidden."
+      "reason": "Current IPJ and both current ISU stories plus municipal HCL 344 still lack story-specific approved real photographs in the latest explicit coverage snapshot. Generic imagery is forbidden."
     },
     {
       "gate": "facebook_receipt_truth",
@@ -205,7 +116,7 @@
     },
     {
       "gate": "historical_replay_truth",
-      "reason": "Both replay candidates still lack FactKernel evidence binding; latest visual external readback also fails both candidates, leaving one article-binding blocker and one provenance blocker."
+      "reason": "Historical candidates remain truth-incomplete until FactKernel evidence, visual provenance/article binding and Facebook readback are independently demonstrated."
     },
     {
       "gate": "cj_road_source_tls",
@@ -221,10 +132,10 @@
     }
   ],
   "next": [
-    "build a separate ISJ calendar/materiality adjudicator that consumes only verified field_evidence_id values and distinguishes usable current contest facts from raw schedule text whose year is not explicit in the supporting line",
-    "resolve the registration deadline only from first-party text that can be deterministically verified; keep the current registration PDF blocked rather than introducing OCR-derived facts",
-    "only after materiality adjudication, build a shadow ISJ FactKernel with claim-to-field-evidence bindings and add a separate claim-integrity gate before any writer",
-    "continue rights/relevance search for HCL 344 and current IPJ/ISU candidates; do not use generic photos merely to raise coverage",
+    "execute the new ISJ writer unit test explicitly in the Core v2 CI test step and include ISJ article plus article-integrity JSON in the short-lived evidence artifact",
+    "feed the verified ISJ article into the separate PHOTO truth gate only after a story-specific rights-cleared real visual candidate exists; otherwise preserve BLOCKED rather than use a generic image",
+    "continue deterministic first-party resolution of the ISJ registration deadline without converting OCR output into authoritative facts",
+    "continue rights/relevance search for HCL 344 and current IPJ/ISU candidates without synthetic-as-photo or generic imagery",
     "repair historical visual replay only from public readback/provenance evidence; do not treat internal binding as success",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
@@ -232,16 +143,15 @@
   ],
   "evidence": {
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
-    "isj_field_evidence": "valcea-clar/core_v2/isj_field_evidence_shadow_lane.py",
-    "isj_context_documents": "valcea-clar/core_v2/isj_context_documents_shadow_lane.py",
-    "isj_calendar_field_evidence": "valcea-clar/core_v2/isj_calendar_field_evidence_shadow_lane.py",
-    "isj_context_truth_validator": "valcea-clar/core_v2/validate_isj_context_document_truth.py",
-    "isj_calendar_field_truth_validator": "valcea-clar/core_v2/validate_isj_calendar_field_truth.py",
-    "photo_truth": "valcea-clar/core_v2/photo_truth_gate.py",
-    "shadow_site_package": "valcea-clar/core_v2/shadow_site_package.py",
+    "isj_field_materiality": "valcea-clar/core_v2/isj_field_materiality_shadow_lane.py",
+    "isj_fact_kernel": "valcea-clar/core_v2/isj_fact_kernel_shadow_lane.py",
+    "isj_fact_kernel_integrity": "valcea-clar/core_v2/isj_fact_kernel_integrity.py",
+    "isj_writer": "valcea-clar/core_v2/isj_writer_shadow_lane.py",
+    "isj_article_integrity": "valcea-clar/core_v2/isj_article_integrity.py",
+    "isj_writer_tests": "valcea-clar/tests/test_core_v2_isj_writer_shadow_lane.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35385923193",
-    "artifact_id": 10563563773,
-    "artifact_sha256": "8cb9841bac23617c117ddb1bb3618bf19667be0e7bfc6ff1a497f08cba4f7196"
+    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35392485606",
+    "artifact_id": 10566129920,
+    "artifact_sha256": "1e78ca9a72011d2d0a9ef914397138c76aa7d28e9ca3694579005a80bcb97533"
   }
 }
