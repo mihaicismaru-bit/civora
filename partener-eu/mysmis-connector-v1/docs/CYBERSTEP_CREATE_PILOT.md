@@ -1,56 +1,76 @@
-# CYBERSTEP creation pilot — 18 September 2026
+# CYBERSTEP creation pilot — 0.2.0 — 18 September 2026
 
-## What this increment does
+## Observed baseline and scope
 
-The recovered baseline is PR #976 at dd9c30c4ca83cee145f88ef40a6245f9754569db.
-It dispatches HEALTH and DISCOVER_ARTIFACTS only. It has no create-project operation.
-The listed LIST_PROJECTS capability is not a dispatchable project-list command.
-Its existing HEALTH heuristic needs a six-digit project code; it is not evidence of
-an authenticated pre-creation screen. This increment makes no new auth claim.
+The 0.1.1 inspector was installed by the operator and produced a live structural
+capture: one text input named `nume`, two input comboboxes, and an `Adaugă` submit
+button. The operator screenshot confirms the selected applicant CPP and call
+PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66. It shows a blank title, no created project.
+Opera's earlier observation did not match that screenshot. Do not promote it over
+the operator's current screen. The creation-form wrapper hierarchy is not captured;
+0.2.0 discovers it conservatively and rejects ambiguous layouts at runtime.
 
-The new extension popup reads the visible form structure in exactly the active tab
-and main frame. It works without a project code or the loopback runtime. It provides
-an explicit JSON download for field identifiers, labels, required/disabled flags and
-length limits. It does not inspect values, hidden fields, option lists or page bodies.
-It rejects sign-in pages, mismatched responses and navigation during the capture.
+The fixed working title is CYBERSTEP. The fixed applicant is FUNDAȚIA CENTRUL DE
+PREGĂTIRE PROFESIONALĂ VÂLCEA. This is a local, operator-triggered pilot for creating
+one draft. It does not submit the funding application, sign, upload attachments,
+change the applicant/call, or implement a generic remote write API. The read-only
+bridge HEALTH/DISCOVER_ARTIFACTS dispatch and its policy remain unchanged.
 
-This is the missing observation step for implementing a bounded draft writer. It is
-**not** a draft writer and does not claim CYBERSTEP has been created. Existing bridge
-operations and their restrictions remain unchanged. The same extension package is
-extended; no second connector, remote shell or credential access is introduced.
+## Operator steps
 
-## Observed live boundary
+1. Extract the new package. Copy the **contents of its PAYLOAD** into the same
+   PAYLOAD directory used by the installed 0.1.1 extension, replacing matching files.
+   In opera://extensions press Reload on that extension. Do not load a second copy.
+   Verify version 0.2.0. The same path/extension identity retains the attempt lock.
+2. Reload the MySMIS tab once to replace the old content script. Reopen “Adaugă
+   proiect”, select CPP and the exact PEO/1160 call, close the dropdown. The title
+   may be blank or exactly CYBERSTEP. Do not press MySMIS “Adaugă” manually.
+3. Open the extension popup and press **Pregătește CYBERSTEP**. This may write only
+   the title. Review the displayed fixed applicant, call and title. No creation has
+   occurred. If preparation returns an error, stop and report its exact code.
+4. Check the full project list for an existing CYBERSTEP under the same applicant
+   and call. If already checked before opening the form, attest that in the checkbox.
+   The extension's automatic duplicate check covers visible rows only; the operator
+   check is required for other pages and rows hidden by the modal. If you must leave
+   the form to check, return and prepare again; preparation expires after 2 minutes.
+5. Press **Creează ciorna CYBERSTEP** once. The background stores a durable attempt
+   lock before dispatch. The content script revalidates origin, form identities,
+   selected applicant/call, title, enabled button and visible duplicates, then invokes
+   the observed submit button once. A changed or unsupported form is rejected.
+6. Inspect the MySMIS result. In the same tab open the project list and use
+   **Citește rezultatul din lista de proiecte**. Download the JSON result. A six-digit
+   code next to the exact title is only a candidate: verify applicant and call inside
+   the resulting project before recording full acceptance.
 
-Opera exposes read/navigation functions, no click/fill/create. In this session it can
-navigate to MySMIS `/home`, which redirects to the sign-in page. Cloud Browser was
-rejected by MySMIS in the preceding test; no further cloud retry is needed.
-There is no authenticated creation-form snapshot and no installed version receipt
-for the updated extension yet. All automated tests use explicitly synthetic fixtures.
+After any dispatch attempt, do not click MySMIS Adaugă manually, reinstall another
+copy, clear extension storage, or use another device to retry. The lock is local to
+this extension installation; it cannot prevent manual writes or another installation.
+An uncertain response remains locked. There is intentionally no automatic reset.
+Investigate the project list before any separately reviewed recovery.
 
-## Operator steps, in Romanian
+## Binding and privacy
 
-1. În Opera, autentifică-te în fila MySMIS deschisă. Parola și codurile se introduc
-   doar în MySMIS, nu în conversație.
-2. Selectează CPP și deschide formularul de proiect nou pe apelul potrivit. Lasă
-   formularul deschis; această versiune nu îl completează și nu creează proiectul.
-3. Încarcă versiunea actualizată a extensiei din directorul PAYLOAD al pachetului
-   verificat, folosind funcția Load unpacked / Încarcă extensia neîmpachetată din
-   pagina de extensii. Dacă folosești deja această extensie, păstrează copia veche
-   pentru revenire și încarcă noua copie o singură dată. Nu configura loopback-ul
-   pentru această captură; configurarea veche rămâne legată de vechiul build.
-4. Reîncarcă fila MySMIS după instalare, redeschide formularul dacă este necesar,
-   apoi apasă pictograma extensiei și «Citește formularul din fila activă».
-5. Verifică previzualizarea, apasă «Descarcă structura pentru verificare» și adaugă
-   MYSMIS_CREATE_FORM_STRUCTURE.json în conversație.
+No generated React IDs are hardcoded. The title selector and submit metadata come
+from the captured form. Labels and selected context are checked in a bounded parent
+scope with exactly three visible fields and one submit action. Unsupported label or
+wrapper variations stop before submission. No private DOM runtime/framework state,
+network endpoints, credentials, cookies, site storage or tokens are inspected.
+Only the fixed project identity and local attempt status enter the downloadable receipt.
 
-## Next implementation gate
+The popup communicates with its own service worker. The worker serializes requests,
+binds the active tab/URL, and persists a single attempt before sending the commit.
+Only that extension's background context may invoke page mutations. Sender URL is
+optional in the platform API, so service-worker messages without it are admitted
+only with the same extension ID and no sending tab. See the official
+[MessageSender contract](https://developer.chrome.com/docs/extensions/reference/api/runtime#type-MessageSender).
 
-Use the actual capture to bind the title, applicant and call fields and the exact
-create action. Confirm the available call and applicant context from the visible UI.
-The writer must check for a duplicate before execution, perform at most one creation
-attempt and treat a lost response as uncertain until the project list is reread.
-Success requires the resulting SMIS code and matching title/applicant/call readback.
-Do not infer selectors, create endpoints or field limits from synthetic tests.
+## Verification and remaining acceptance
 
-User authorization to create CYBERSTEP is already recorded in the conversation.
-The remaining blocker is access and observed schema, not a missing generic approval.
+Fourteen new synthetic tests cover fixed identity mismatch, title preservation,
+layout change, duplicate detection, disabled submit, expiration, navigation, sender
+restriction, concurrent commits, restart, storage failure and lost responses. They
+exercise an explicit synthetic DOM adapter and Chrome API doubles, not the live site.
+The full local suite passes 233/233; the MV3 static compatibility gate passes.
+No live 0.2.0 installation, actual creation, or code/applicant/call readback has yet
+been observed. Status: **WRITER_IMPLEMENTED_LOCAL_TESTS_PASS_LIVE_ACCEPTANCE_PENDING**.
+The public source contains no uploaded screenshot or real capture JSON.

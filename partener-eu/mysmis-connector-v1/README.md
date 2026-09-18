@@ -1,10 +1,13 @@
 # MySMIS Connector v1
 
-Capability-gated, read-only connector skeleton for authenticated Chrome/Edge sessions.
+Capability-gated read-only bridge, with a separate local-popup CYBERSTEP draft writer.
 
-The 0.1.1 pilot adds an action popup for structural inspection of the active MySMIS
-creation form. It does not create projects. See [CYBERSTEP creation pilot](docs/CYBERSTEP_CREATE_PILOT.md)
-for the observed limitations, local operator steps and the remaining writer work.
+Version 0.2.0 adds a bounded, operator-triggered creation pilot. It checks the fixed
+applicant/call, prepares the CYBERSTEP title, and invokes the observed “Adaugă” button
+at most once per extension installation. This is creation of a draft, not submission
+of the funding application. There is no remote write command in the bridge.
+See [CYBERSTEP creation pilot](docs/CYBERSTEP_CREATE_PILOT.md) for operation and limits.
+Automated fixtures and static compatibility checks do not constitute live acceptance.
 
 This unit implements generic DOM artifact inventory, least-invasive candidate classification,
 download observation metadata, URL redaction, and deterministic offline regression fixtures for
@@ -13,11 +16,11 @@ the two acceptance tracks:
 - WRITING: 367944 / AI4WORK STEP
 - IMPLEMENTATION: 310224
 
-The extension never clicks a control. Save, Submit, Delete, Sign, Upload and Modify controls are
-classified as blocked. POST-based exports remain blocked unless an independent evidence record
+The generic inventory/bridge never clicks a control. Save, Submit, Delete, Sign, Upload and Modify controls are
+classified as blocked in that route. The only separate write path is the local CYBERSTEP popup pilot. POST-based exports remain blocked unless an independent evidence record
 proves the operation read-only; even then, automated invocation requires a separate authorization
-gate. The connector does not read or persist request headers, cookies, browser storage, passwords,
-MFA data or tokens.
+gate. The connector does not read or persist request headers, cookies, site storage, passwords,
+MFA data or tokens. The pilot stores its own attempt receipt in extension-local storage.
 
 ## Run the deterministic unit
 

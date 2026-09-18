@@ -1,3 +1,5 @@
+import { installCyberstepCoordinator } from "./cyberstep-coordinator.mjs";
+installCyberstepCoordinator(chrome);
 import {
   normalizeDownloadObservation,
   normalizeResponseMetadata
