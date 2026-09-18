@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.1",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN10-ISJ-PHOTO-PARTIAL-LIVE-VALIDATED",
+  "schema_version": "2.2",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN11-ISJ-DETAIL-MATERIALITY-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,8 +8,8 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "bd523bb7f302bb9ee3b090685a51573ff0792a32",
-    "main_core_v2_overlap": false,
+    "main_observed_sha": "576031f11f5b7f71a190f7406e33995f39457f3a",
+    "main_observed_message": "Refresh VÂLCEA CLAR canonical public presentation",
     "legacy_public_projection": {
       "repo": "mihaicismaru-bit/valcea-clar",
       "story_count": 96,
@@ -28,38 +28,41 @@
     }
   },
   "latest_validated_core_feature_head": {
-    "sha": "40f6ec2f3caf0a932236841abba2fcc3710d3c08",
-    "workflow_run_id": 35358055693,
-    "workflow_run_number": 215,
-    "event": "push",
+    "sha": "c798ec8caa95015f365aeb96ae16ac2304499e64",
+    "workflow_run_id": 35367876379,
+    "workflow_run_number": 262,
+    "event": "pull_request",
     "conclusion": "success",
-    "artifact_id": 10552896944,
-    "artifact_sha256": "0ea44feed039cd3250565732ce127518fc747737a4ba41ad48d22b2d78d1c3fb",
+    "artifact_id": 10556653499,
+    "artifact_sha256": "58f7656f61967c82685d49441fbbeac0f102acaf3f9c3d8c2cc5de7c570b88ee",
     "permissions": "contents:read",
     "manual_dispatch": false,
-    "production_write_authority": false
+    "production_write_authority": false,
+    "ordered_shadow_stage_count": 15,
+    "ordered_shadow_failed_stage": null
   },
   "done": [
     "legacy architecture remains explicitly LEGACY_NOT_PRODUCTION_READY while live legacy automation is left untouched",
     "StoryState, FactKernel, Visual, PublicationReceipt, AuditResult and sequential shadow transaction contracts are implemented",
     "external site, visual and Meta readback plus receipt-bound shadow replay are implemented",
     "bounded eight-source pilot registry is enforced and legacy inventory remains complete with UNKNOWN=0",
-    "APAVIL source-to-kernel lane terminates non-material or stale signals NO_STORY instead of manufacturing articles",
-    "IPJ/ISU first-party detail evidence, fail-closed geography, material-fact extraction, structured shadow writer and claim integrity remain validated with zero fabricated claims",
-    "Râmnicu Vâlcea municipal document evidence -> materiality -> FactKernel -> deterministic full shadow writer remains validated with zero fabricated claims",
-    "ETA current-material signal lane remains fail-closed: 10 notices, zero current material signals, seven NO_STORY and three BLOCKED",
-    "ISJ bounded education lane is implemented and wired as a first-class read-only shadow artifact; sensitive/person-level result projection is forbidden and label dates never become event time",
-    "ISJ Python 3.13 dynamic dataclass loading defect was reproduced and fixed by registering the isolated adapter module before exec_module",
-    "ISJ Unicode /noutăți transport defect was reproduced and fixed by percent-encoding only the already validated Unicode path immediately before HTTP transport, without weakening host/surface/TLS checks",
-    "live ISJ now reaches both official surfaces without source errors; 16 discovered references are all BLOCKED because none carries a verified official document URL/currentness proof sufficient for FactKernel promotion",
-    "Core v2 now has a branch-only visual registry separate from legacy story_visuals so legacy approvals cannot silently grant Core v2 visual readiness",
-    "two municipal stories have explicit archive-context visual assignments to a real CC BY-SA photograph of Râmnicu Vâlcea City Hall with disclosure that the image does not depict the 2026 meeting, spending, operator premises or regulated activity",
-    "external provenance page and direct JPEG readback passed for both approved municipal archive-context assignments",
-    "live photo truth now evaluates six written shadow candidates: two VISUAL_CANDIDATE_VERIFIED_SHADOW and four BLOCKED; no site/social success is inferred from visual preflight",
-    "IPJ, both ISU stories and municipal HCL 344 remain BLOCKED for no story-specific approved visual rather than receiving a generic image",
+    "APAVIL source-to-kernel lane continues to terminate 132 non-material/stale signals as NO_STORY instead of manufacturing articles",
+    "IPJ/ISU first-party detail, geography, material-fact, writer and claim-integrity components remain fail-closed; the latest natural run recorded a transient IPJ source-unavailable result rather than reusing stale success",
+    "Râmnicu Vâlcea municipal document evidence -> materiality -> FactKernel -> deterministic full shadow writer remains at three evidence-bound articles with zero fabricated claims",
+    "ETA current-material signal lane remains fail-closed at 10 notices, zero material signals, seven NO_STORY and three BLOCKED",
+    "ISJ second-hop first-party detail evidence lane is implemented; external document hosts are never fetched and all detail evidence remains non-authorizing",
+    "ISJ second-hop reuses the existing bounded first-party reference/detail component strictly as a read-only evidence primitive without transferring publication authority",
+    "natural live ISJ second-hop resolved 12 first-party detail pages with verified byte hashes and zero fetch holds; none was promoted directly to FactKernel or writer",
+    "ISJ currentness/materiality gate is implemented and naturally validated: 11 of 12 detail pages terminate NO_STORY as stale/navigation/history and concours directori 2026 remains BLOCKED because a current-year category page does not prove a material event",
+    "sensitive ISJ exam/result surfaces are prohibited from person-level auto-projection and require non-personal field-level review",
+    "Core v2 single ordered orchestrator now contains 15 read-only shadow stages and completed naturally with failed_stage=null",
+    "Core v2 branch-only visual registry remains separate from legacy visual approvals",
+    "latest photo truth evaluated five current written shadow candidates because IPJ was unavailable: two municipal candidates passed provenance/relevance preflight and three candidates remained blocked for missing story-specific approved visual",
+    "shadow site package now binds both verified municipal visual candidates into internal staged HTML/image packages with matching-image verification; this is explicitly not VISUAL_READY or SITE_PUBLISHED",
     "CJ Vâlcea road lane remains fail-closed on verified TLS-chain failure; certificate verification has not been weakened",
+    "historical external replay remains non-authorizing: both site URLs read back, Instagram readback passes both, Facebook readback passes none, and the current independent visual replay passes zero of two legacy candidates",
     "Facebook external receipt truth remains uncertified because read-only Graph access lacks pages_read_engagement or Page Public Content Access",
-    "natural Core v2 run 215 validated compile, regressions, APAVIL/IPJ/ISU, municipal chain, CJ/ETA/ISJ lanes, branch-only visual registry, external photo provenance probes, external replay, runtime invariants and artifact upload"
+    "natural Core v2 run 262 validated compile, regressions, eight-source registry, reused source/detail self-tests, 15-stage orchestrator, legacy inventory, independent external replay, runtime invariants and artifact upload"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -90,14 +93,21 @@
     "acceptance_ready": false
   },
   "public_safety_live_shadow_truth": {
-    "ipj": {
+    "ipj_current_run": {
+      "status": "BLOCKED_SOURCE_UNAVAILABLE",
+      "error": "index_receipt_not_pass:HOLD_SOURCE_FETCH_FAILED",
+      "rows": 0,
+      "stale_success_reused": false
+    },
+    "ipj_last_known_good": {
       "detail_count": 8,
       "verified_written_shadow_count": 1,
       "no_story_count": 2,
       "blocked_count": 5,
-      "fabricated_claim_count": 0
+      "fabricated_claim_count": 0,
+      "historical_reference_only": true
     },
-    "isu": {
+    "isu_current_run": {
       "detail_count": 9,
       "verified_written_shadow_count": 2,
       "no_story_count": 3,
@@ -108,7 +118,6 @@
     "production_writer_ready": false
   },
   "municipal_live_shadow_truth": {
-    "latest_official_adopted_date": "2026-09-16",
     "selected_document_count": 3,
     "document_evidence_ready_count": 3,
     "materiality_candidate_count": 3,
@@ -123,36 +132,75 @@
     "site_publish_allowed": false,
     "social_publish_allowed": false
   },
+  "isj_live_shadow_truth": {
+    "signal_gate": {
+      "signal_count": 16,
+      "material_signal_shadow_count": 0,
+      "no_story_count": 0,
+      "blocked_count": 16,
+      "source_error_count": 0
+    },
+    "detail_gate": {
+      "selected_material_signal_count": 0,
+      "detail_evidence_shadow_count": 12,
+      "reference_bridge_detail_count": 12,
+      "reference_bridge_blocked_count": 0,
+      "blocked_count": 0,
+      "detail_readback_verified": true,
+      "currentness_adjudicated_at_detail_gate": false
+    },
+    "materiality_gate": {
+      "detail_row_count": 12,
+      "material_detail_candidate_shadow_count": 0,
+      "no_story_count": 11,
+      "blocked_count": 1,
+      "blocked_item": "concurs directori 2026",
+      "blocked_reason": "current_year_detail_without_explicit_material_event"
+    },
+    "fact_kernel_promotion_allowed": false,
+    "writer_allowed": false,
+    "publication_authority": "NONE",
+    "site_publish_allowed": false,
+    "social_publish_allowed": false,
+    "acceptance_ready": false,
+    "safe_rule": "Verified first-party category/detail bytes are context only. Stale/navigation/history terminates NO_STORY; a current-year category label without an explicit material event remains BLOCKED and cannot become a FactKernel."
+  },
   "photo_truth_live_shadow": {
     "mode": "PHOTO_TRUTH_GATE_SHADOW",
-    "candidate_count": 6,
+    "candidate_count": 5,
     "visual_candidate_verified_shadow_count": 2,
-    "blocked_count": 4,
+    "blocked_count": 3,
     "verified_story_ids": [
       "hcl-343-local-public-finance",
       "hcl-345-regulated-local-authorization"
     ],
+    "blocked_story_ids": [
+      "67bbb4b1bf787354481bfe46",
+      "b5d2d80de9cbd48116943023",
+      "hcl-344-local-education-access"
+    ],
     "verified_semantic_relevance": "archive_context",
     "verified_rights_basis": "creative_commons",
     "verified_external_provenance_readback": true,
-    "blocked_reason_counts": {
-      "no_story_specific_approved_visual": 4
-    },
-    "blocked_sources": {
-      "ipj": 1,
-      "isu": 2,
-      "municipal": 1
-    },
     "external_probe_enabled": true,
     "article_binding_verified": false,
     "publication_authority": "NONE",
     "site_publish_allowed": false,
     "social_publish_allowed": false,
-    "acceptance_ready": false,
-    "safe_rule": "A pre-publication visual candidate is not a delivered article image. Public article binding/readback remains a separate later gate."
+    "acceptance_ready": false
+  },
+  "shadow_site_package_truth": {
+    "candidate_count": 2,
+    "package_image_bound_shadow_count": 2,
+    "blocked_count": 0,
+    "staged_package_binding_verified": true,
+    "public_article_binding_verified": false,
+    "visual_ready": false,
+    "site_publish_allowed": false,
+    "publication_authority": "NONE",
+    "safe_rule": "Internal staged HTML/image binding proves only package consistency; no public HTTP delivery/readback occurred."
   },
   "eta_live_shadow_truth": {
-    "mode": "ETA_CURRENT_MATERIAL_SIGNAL_SHADOW",
     "signal_count": 10,
     "material_signal_shadow_count": 0,
     "no_story_count": 7,
@@ -160,26 +208,7 @@
     "fact_kernel_promotion_allowed": false,
     "writer_allowed": false,
     "publication_authority": "NONE",
-    "site_publish_allowed": false,
-    "social_publish_allowed": false,
     "acceptance_ready": false
-  },
-  "isj_live_shadow_truth": {
-    "mode": "ISJ_CURRENT_MATERIAL_SIGNAL_SHADOW",
-    "signal_count": 16,
-    "material_signal_shadow_count": 0,
-    "no_story_count": 0,
-    "blocked_count": 16,
-    "source_error_count": 0,
-    "sensitive_auto_projection_allowed": false,
-    "dominant_blocker": "official_document_reference_not_verified",
-    "fact_kernel_promotion_allowed": false,
-    "writer_allowed": false,
-    "publication_authority": "NONE",
-    "site_publish_allowed": false,
-    "social_publish_allowed": false,
-    "acceptance_ready": false,
-    "safe_rule": "ISJ category/navigation labels are not current material news and cannot cross into FactKernel until a bounded first-party document/detail reference plus currentness evidence is resolved."
   },
   "cj_road_live_shadow_truth": {
     "status": "BLOCKED_SOURCE_UNAVAILABLE",
@@ -192,28 +221,48 @@
   "shadow_replay_truth": {
     "candidate_count": 2,
     "site_external_readback_passed": 2,
+    "visual_external_readback_passed": 0,
+    "visual_external_readback_failed": 2,
     "instagram_external_readback_passed": 2,
     "facebook_external_readback_passed": 0,
     "fully_bound_story_transactions": 0,
     "truth_complete_count": 0,
+    "blocker_counts": {
+      "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
+      "FACT_KERNEL_EVIDENCE_MISSING": 2,
+      "VISUAL_ARTICLE_BINDING_FAILED": 1,
+      "VISUAL_PROVENANCE_FAILED": 2
+    },
     "acceptance_ready": false
   },
   "blocked": [
     {
-      "gate": "photo_truth_gate",
-      "reason": "Four of six current Core v2 written shadow candidates still have no story-specific approved real photograph. The two visual candidates that passed remain pre-publication only and have no public article binding yet."
+      "gate": "ipj_source_freshness",
+      "reason": "The latest natural Core v2 run could not obtain a passing IPJ index receipt and correctly returned BLOCKED_SOURCE_UNAVAILABLE. Previous IPJ success is retained only as historical evidence, not current truth."
     },
     {
-      "gate": "isj_material_evidence",
-      "reason": "ISJ live discovery reaches the official surfaces but all 16 current references lack a verified official document/detail target plus currentness evidence sufficient for FactKernel promotion."
+      "gate": "photo_truth_gate",
+      "reason": "Both current ISU stories and municipal HCL 344 still have no story-specific approved real photograph. The two municipal visual candidates that passed remain pre-publication only."
+    },
+    {
+      "gate": "isj_current_material_evidence",
+      "reason": "Twelve first-party ISJ detail pages were verified, but eleven are stale/navigation/history and terminate NO_STORY; concours directori 2026 remains BLOCKED until an explicit current material notice or embedded first-party evidence is resolved."
     },
     {
       "gate": "facebook_receipt_truth",
       "reason": "Read-only Graph requests for replayable Facebook IDs require pages_read_engagement or Page Public Content Access. Internal post IDs remain insufficient delivery proof."
     },
     {
+      "gate": "historical_visual_truth",
+      "reason": "The latest independent legacy replay failed visual truth for both replay candidates; one has no matching article image binding and neither currently satisfies the complete external visual provenance gate."
+    },
+    {
+      "gate": "historical_fact_kernel_truth",
+      "reason": "Both replay candidates still lack explicit FactKernel evidence binding and remain BLOCKED_FACT_KERNEL_EVIDENCE."
+    },
+    {
       "gate": "cj_road_source_tls",
-      "reason": "The bounded official CJ Vâlcea source cannot currently establish a verified TLS chain from the Core runner. Do not disable certificate verification or substitute an unverified/non-first-party mirror."
+      "reason": "The bounded official CJ Vâlcea source cannot currently establish a verified TLS chain from the Core runner. Certificate verification remains enabled."
     },
     {
       "gate": "ten_story_shadow_candidate",
@@ -225,10 +274,11 @@
     }
   ],
   "next": [
-    "resolve a bounded ISJ second-hop official detail/document lane for the discovered category/reference labels; preserve the current rule that labels alone cannot create a story and sensitive/person-level result documents never auto-project",
-    "build an independent staged article-image binding validator for VISUAL_CANDIDATE_VERIFIED_SHADOW packages; it may prove HTML/package binding in shadow but must not mark SITE_PUBLISHED or VISUAL_READY without a production-authorized public HTTP readback",
-    "continue rights/relevance search for HCL 344 and the IPJ/ISU candidates; do not use generic imagery merely to raise coverage",
-    "consolidate source-lane execution behind the Core v2 orchestrator so GitHub Actions can shrink toward a thin scheduler/executor rather than remain the orchestration graph",
+    "resolve the current-year ISJ concours directori 2026 page to a bounded first-party embedded notice/document and perform field-level currentness/materiality extraction; do not infer an event from the category title",
+    "add the same field-level ISJ path only after explicit evidence exists; otherwise terminate NO_STORY or BLOCKED without FactKernel promotion",
+    "re-observe IPJ naturally and diagnose only if BLOCKED_SOURCE_UNAVAILABLE persists across later opportunities; do not force or reuse stale source truth",
+    "continue rights/relevance search for HCL 344 and both current ISU candidates; do not use generic imagery merely to raise photo coverage",
+    "extend internal staged package binding to other Core v2 written candidates only after their photo truth passes; internal package success must remain distinct from public VISUAL_READY/SITE_PUBLISHED",
     "keep ETA at signal/currentness level until a genuinely current material notice appears",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
@@ -237,18 +287,17 @@
   "evidence": {
     "core_contracts": "valcea-clar/core_v2/contracts.py",
     "core_orchestrator": "valcea-clar/core_v2/orchestrator.py",
+    "isj_signal_lane": "valcea-clar/core_v2/isj_shadow_lane.py",
+    "isj_detail_lane": "valcea-clar/core_v2/isj_detail_shadow_lane.py",
+    "isj_materiality_lane": "valcea-clar/core_v2/isj_materiality_shadow_lane.py",
+    "isj_detail_tests": "valcea-clar/tests/test_core_v2_isj_detail_shadow_lane.py",
+    "isj_materiality_tests": "valcea-clar/tests/test_core_v2_isj_materiality_shadow_lane.py",
     "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
     "core_visual_registry": "valcea-clar/core_v2/visual_registry.json",
-    "photo_truth_tests": "valcea-clar/tests/test_core_v2_visual.py",
-    "visual_registry_tests": "valcea-clar/tests/test_core_v2_visual_registry.py",
-    "eta_shadow_lane": "valcea-clar/core_v2/eta_shadow_lane.py",
-    "isj_shadow_lane": "valcea-clar/core_v2/isj_shadow_lane.py",
-    "isj_tests": "valcea-clar/tests/test_core_v2_isj_shadow_lane.py",
-    "shadow_runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
-    "municipal_materiality_lane": "valcea-clar/core_v2/municipal_materiality_shadow_lane.py",
-    "municipal_fact_kernel_lane": "valcea-clar/core_v2/municipal_fact_kernel_shadow_lane.py",
+    "shadow_site_package": "valcea-clar/core_v2/shadow_site_package.py",
     "municipal_writer_lane": "valcea-clar/core_v2/municipal_writer_shadow_lane.py",
     "public_safety_lane": "valcea-clar/core_v2/public_safety_full_shadow_lane.py",
+    "eta_shadow_lane": "valcea-clar/core_v2/eta_shadow_lane.py",
     "cj_road_lane": "valcea-clar/core_v2/cj_road_shadow_lane.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
     "visual_readback": "valcea-clar/core_v2/visual_readback.py",
