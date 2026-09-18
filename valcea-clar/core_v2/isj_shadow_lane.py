@@ -9,6 +9,7 @@ from dataclasses import asdict
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote, urlsplit, urlunsplit
 
 
 MATERIAL_REFERENCE_CLASSES = {
@@ -271,9 +272,6 @@ def _load_isj_adapter():
     if spec is None or spec.loader is None:
         raise RuntimeError("isj_adapter_load_failed")
     module = importlib.util.module_from_spec(spec)
-    # dataclasses resolves postponed annotations through sys.modules during class creation.
-    # Register the isolated legacy adapter before exec_module; otherwise Python 3.13 can
-    # fail inside dataclasses with a None module namespace.
     sys.modules[module_name] = module
     try:
         spec.loader.exec_module(module)
@@ -283,8 +281,36 @@ def _load_isj_adapter():
     return module
 
 
+def _unicode_safe_fetch_html(adapter: Any, url: str, timeout: float | None = None) -> tuple[str, str, bytes]:
+    """Fetch an approved ISJ surface while encoding Unicode path octets for HTTP transport.
+
+    The legacy adapter intentionally canonicalizes the Romanian `/noutăți` path as Unicode.
+    urllib's HTTP request line is ASCII, so Core v2 quotes only the already-validated path
+    immediately before transport. Host/scheme/surface validation remains the adapter's own
+    fail-closed boundary and redirect validation still runs after the response.
+    """
+    canonical, _ = adapter.validate_source_url(url)
+    parsed = urlsplit(canonical)
+    request_url = urlunsplit((parsed.scheme, parsed.netloc, quote(parsed.path, safe="/"), "", ""))
+    context = adapter.ssl.create_default_context()
+    opener = adapter.build_opener(adapter.NoRedirects(), adapter.HTTPSHandler(context=context))
+    request = adapter.Request(
+        request_url,
+        headers={"User-Agent": adapter.USER_AGENT, "Accept": "text/html,*/*;q=0.8"},
+    )
+    effective_timeout = float(timeout or adapter.TIMEOUT_SECONDS)
+    with opener.open(request, timeout=effective_timeout) as response:
+        final_url, _ = adapter.validate_source_url(response.geturl())
+        body = response.read(adapter.MAX_RESPONSE_BYTES + 1)
+        if len(body) > adapter.MAX_RESPONSE_BYTES:
+            raise ValueError("response exceeds size cap")
+        charset = response.headers.get_content_charset() or "utf-8"
+    return final_url, body.decode(charset, errors="replace"), body
+
+
 def _live_signals() -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
     adapter = _load_isj_adapter()
+    adapter.fetch_html = lambda url, timeout=adapter.TIMEOUT_SECONDS: _unicode_safe_fetch_html(adapter, url, timeout)
     signals: list[dict[str, Any]] = []
     errors: list[dict[str, str]] = []
     seen: set[tuple[str, str, str]] = set()
