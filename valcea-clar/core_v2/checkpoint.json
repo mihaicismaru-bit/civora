@@ -7,13 +7,14 @@
   "base_main_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
   "main_drift_observed_sha": "f6458fda1da048c1e9e0887a9aef6d567ad0f078",
   "main_drift_overlap": false,
-  "validated_core_head_sha": "843976b803defe225c49545e0394a82560eede04",
+  "validated_core_head_sha": "9c23538495e68524f24bae67eda83e0d0e3c5c8b",
   "draft_pr": 1222,
   "done": [
     "fresh main/workflows/runtime topology reviewed",
     "legacy live newsroom and social split ownership confirmed",
     "Core v2 StoryState, FactKernel, Visual, PublicationReceipt and AuditResult contracts implemented",
     "shadow-only sequential orchestrator implemented",
+    "normalized pilot signal boundary implemented with fail-closed NO_STORY for non-material signals",
     "receipt-bound acceptance metrics implemented",
     "independent read-only HTTP/JSON-LD site readback adapter implemented",
     "site readback requires route + canonical + story-bound NewsArticle JSON-LD",
@@ -22,9 +23,10 @@
     "strict 10-consecutive-story acceptance ledger implemented",
     "bounded eight-source pilot fully bound to existing adapters",
     "all eight reused source adapters passed their fail-closed self-tests",
-    "15 Core v2 contract/readback/integrity regression tests passed in GitHub Actions",
+    "18 Core v2 contract/readback/integrity/signal-boundary regression tests passed in GitHub Actions",
+    "shadow candidate ledger builder implemented from current manifest, real-photo evidence and internal social IDs",
     "shadow isolation passed with contents:read only and publication_authority NONE",
-    "legacy deterministic inventory generated and audited by CI"
+    "legacy deterministic inventory and shadow candidate ledger generated as CI evidence"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -41,19 +43,35 @@
     "RETIRE": 172,
     "REWRITE": 29,
     "UNKNOWN": 125,
-    "publication_capable_paths": 82,
-    "latest_artifact_id": 10538376759,
-    "latest_artifact_sha256": "965cb338516b46ffc3a5c09145e10213699270cad967378da860bf88afe19cb7"
+    "publication_capable_paths": 82
+  },
+  "shadow_candidate_evidence": {
+    "current_manifest_story_count": 75,
+    "eligible_for_external_replay_count": 2,
+    "first_candidate_ids": [
+      "valcea-apa-canal-contract-152m-20260902",
+      "cet-govora-cine-a-decis-oprirea-20260821"
+    ],
+    "acceptance_ready": false,
+    "reason": "internal state exposes only two current stories with real-photo evidence plus both Facebook and Instagram remote IDs; all external delivery remains unverified until independent readback"
+  },
+  "latest_shadow_artifact": {
+    "artifact_id": 10538811517,
+    "artifact_sha256": "2b150e4810188cfd708b49c87bfaa630dbd8897dabe893372a635d6643157cf0"
   },
   "next": [
     "review and reduce the 125 UNKNOWN inventory items",
-    "build a normalized source-adapter output boundary for the eight pilot sources",
-    "replay selected existing public stories through independent site readback without publishing",
-    "bind existing Facebook and Instagram receipts to read-only Meta verification in shadow",
-    "materialize a real shadow StoryTransaction ledger from canonical existing evidence",
-    "evaluate the first synthetic-free 10-story shadow candidate set without live writes"
+    "replay the two existing complete internal candidates through independent public site readback without publishing",
+    "bind their existing Facebook and Instagram remote IDs to read-only Meta verification in shadow",
+    "materialize verified external receipts into a real shadow StoryTransaction ledger",
+    "expand shadow candidates only through truthful real-photo coverage on the fixed eight-source pilot",
+    "evaluate the first 10-story candidate set only when ten stories have independent external evidence"
   ],
   "blocked": [
+    {
+      "gate": "ten_story_shadow_candidate",
+      "reason": "only 2 of 75 current internal stories presently satisfy the minimum internal preconditions for external replay"
+    },
     {
       "gate": "production_cutover",
       "reason": "explicit owner approval required before any live Core v2 publication or social delivery"
@@ -64,12 +82,14 @@
     "legacy_social": ".github/workflows/valcea-clar-social-publishing.yml",
     "core_contracts": "valcea-clar/core_v2/contracts.py",
     "core_orchestrator": "valcea-clar/core_v2/orchestrator.py",
+    "source_signal_boundary": "valcea-clar/core_v2/source_signal.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
     "editorial_integrity": "valcea-clar/core_v2/editorial_integrity.py",
     "ten_story_gate": "valcea-clar/core_v2/acceptance_ledger.py",
+    "shadow_candidate_builder": "valcea-clar/core_v2/build_shadow_candidate_ledger.py",
     "pilot_registry": "valcea-clar/core_v2/pilot_sources.json",
     "pilot_registry_validator": "valcea-clar/core_v2/validate_pilot_sources.py",
-    "validated_shadow_workflow_run": 35324234920
+    "validated_shadow_workflow_run": 35324475794
   }
 }
