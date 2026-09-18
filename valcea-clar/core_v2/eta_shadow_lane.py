@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import re
 from datetime import date, timedelta
 from pathlib import Path
 from typing import Any
@@ -116,7 +117,7 @@ def verify_eta_signals(signals: list[dict[str, Any]], *, as_of: date | None = No
     current_date = as_of or date.today()
     rows = [adjudicate_eta_signal(signal, as_of=current_date) for signal in signals if isinstance(signal, dict)]
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": "ETA_CURRENT_MATERIAL_SIGNAL_SHADOW",
         "source_kind": "eta",
         "publication_authority": "NONE",
@@ -150,30 +151,63 @@ def _load_eta_adapter():
     return module
 
 
-def _scope_safe_classify_notice(adapter: Any, title: str, text: str) -> tuple[str, list[str]]:
-    """Protect ETA article classification from site-wide footer/archive contamination.
+def _first_hint_position(adapter: Any, folded_text: str, hints: Any) -> int | None:
+    positions: list[int] = []
+    for hint in hints:
+        needle = adapter.fold(hint)
+        if not needle:
+            continue
+        match = re.search(r"(?<!\w)" + re.escape(needle), folded_text)
+        if match:
+            positions.append(match.start())
+    return min(positions) if positions else None
 
-    The legacy parser exposes all visible page text. A detail page can therefore contain
-    links/titles for unrelated sales/procurement notices in its footer. Those tokens may
-    never override passenger-impact evidence from the selected notice. Irrelevant classes
-    are authoritative only when present in the notice title; passenger-impact terms are
-    then evaluated against the detail text.
+
+def _scope_safe_classify_notice(adapter: Any, title: str, text: str) -> tuple[str, list[str]]:
+    """Classify the selected ETA notice without letting later site-wide cards override it.
+
+    The legacy parser exposes all visible text on the detail page, including cards for other
+    notices. Core v2 first treats an explicitly irrelevant selected title as authoritative,
+    then uses title evidence when available, and finally selects the earliest supported
+    passenger-impact evidence in document order. This prevents a later fare/sales card from
+    reclassifying the selected notice while still failing closed when no supported class is
+    evidenced near the selected notice.
     """
     title_fold = adapter.fold(title)
     combined = adapter.fold(f"{title} {text}")
-    if any(adapter._has_hint(title_fold, hint) for hint in adapter.IRRELEVANT_HINTS):
+
+    if _first_hint_position(adapter, title_fold, adapter.IRRELEVANT_HINTS) is not None:
         return "HOLD", ["NON_PASSENGER_OPERATIONAL_NOTICE"]
 
-    if any(adapter._has_hint(combined, hint) for hint in adapter.FARE_ACCESS_HINTS):
+    if _first_hint_position(adapter, title_fold, adapter.FARE_ACCESS_HINTS) is not None:
         return "FARE_OR_ACCESS_CHANGE", ["FARE_OR_PASSENGER_ACCESS_TERMS"]
 
-    has_schedule = any(adapter._has_hint(combined, hint) for hint in adapter.SCHEDULE_HINTS)
-    has_change = any(adapter._has_hint(combined, hint) for hint in adapter.CHANGE_HINTS)
-    if has_schedule and has_change:
+    title_schedule = _first_hint_position(adapter, title_fold, adapter.SCHEDULE_HINTS)
+    title_change = _first_hint_position(adapter, title_fold, adapter.CHANGE_HINTS)
+    if title_schedule is not None and title_change is not None:
         return "SCHEDULE_CHANGE", ["SCHEDULE_TERMS", "CHANGE_TERMS"]
-    if has_change or any(adapter._has_hint(combined, hint) for hint in adapter.SERVICE_HINTS):
+    if title_change is not None or _first_hint_position(adapter, title_fold, adapter.SERVICE_HINTS) is not None:
         return "SERVICE_ALERT", ["OPERATIONAL_SERVICE_CHANGE_OR_DEGRADATION"]
-    return "HOLD", ["NO_SUPPORTED_PASSENGER_IMPACT_CLASS"]
+
+    fare_pos = _first_hint_position(adapter, combined, adapter.FARE_ACCESS_HINTS)
+    schedule_pos = _first_hint_position(adapter, combined, adapter.SCHEDULE_HINTS)
+    change_pos = _first_hint_position(adapter, combined, adapter.CHANGE_HINTS)
+    service_hint_pos = _first_hint_position(adapter, combined, adapter.SERVICE_HINTS)
+
+    candidates: list[tuple[int, str, list[str]]] = []
+    if fare_pos is not None:
+        candidates.append((fare_pos, "FARE_OR_ACCESS_CHANGE", ["FARE_OR_PASSENGER_ACCESS_TERMS"]))
+    if schedule_pos is not None and change_pos is not None:
+        candidates.append((max(schedule_pos, change_pos), "SCHEDULE_CHANGE", ["SCHEDULE_TERMS", "CHANGE_TERMS"]))
+    service_positions = [pos for pos in (change_pos, service_hint_pos) if pos is not None]
+    if service_positions:
+        candidates.append((min(service_positions), "SERVICE_ALERT", ["OPERATIONAL_SERVICE_CHANGE_OR_DEGRADATION"]))
+
+    if not candidates:
+        return "HOLD", ["NO_SUPPORTED_PASSENGER_IMPACT_CLASS"]
+    candidates.sort(key=lambda item: (item[0], {"SCHEDULE_CHANGE": 0, "SERVICE_ALERT": 1, "FARE_OR_ACCESS_CHANGE": 2}[item[1]]))
+    _position, classification, reasons = candidates[0]
+    return classification, reasons
 
 
 def _live_signals(limit: int) -> list[dict[str, Any]]:
@@ -205,7 +239,7 @@ def main() -> int:
         result = verify_eta_signals(signals, as_of=current_date)
     except Exception as exc:
         result = {
-            "schema_version": "1.1",
+            "schema_version": "1.2",
             "mode": "ETA_CURRENT_MATERIAL_SIGNAL_SHADOW",
             "source_kind": "eta",
             "publication_authority": "NONE",
