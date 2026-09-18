@@ -78,16 +78,76 @@ class IsjDetailShadowLaneTest(unittest.TestCase):
         self.assertEqual(result["rows"][0]["reason"], "official_detail_not_first_party_https")
         self.assertFalse(result["rows"][0]["detail_fetch_attempted"])
 
+    def test_network_disabled_blocks_first_party_without_fetch(self):
+        called = False
+
+        def fetcher(url):
+            nonlocal called
+            called = True
+            raise AssertionError("non-live lane must not fetch")
+
+        result = verify_isj_details(
+            self.report("https://www.isjvalcea.ro/files/a.pdf"),
+            allow_network=False,
+            fetcher=fetcher,
+            html_extractor=lambda *_: (None, None, ()),
+        )
+        self.assertFalse(called)
+        self.assertEqual(result["blocked_count"], 1)
+        self.assertEqual(result["rows"][0]["reason"], "network_read_not_enabled")
+
+    def test_bounded_reference_bridge_reuses_detail_only_as_non_authorizing_evidence(self):
+        payload = self.report("https://www.isjvalcea.ro/files/a.pdf")
+        payload["rows"][0]["state"] = "BLOCKED"
+        bridge = {
+            "details": [
+                {
+                    "topic_class": "ADMISSIONS",
+                    "index_title": "Locuri libere admitere 2026",
+                    "detail_url": "https://www.isjvalcea.ro/docs/admitere.html",
+                    "detail_host": "www.isjvalcea.ro",
+                    "content_type": "text/html",
+                    "content_length": 321,
+                    "detail_sha256": "a" * 64,
+                    "index_evidence_sha256": "b" * 64,
+                    "visible_title": "Admitere 2026",
+                    "explicit_date_text": "18.09.2026",
+                    "evidence_fragments": ["Locuri libere admitere 2026"],
+                }
+            ],
+            "holds": [],
+        }
+        result = verify_isj_details(payload, reference_bridge_receipt=bridge)
+        self.assertEqual(result["selected_material_signal_count"], 0)
+        self.assertEqual(result["reference_bridge_detail_count"], 1)
+        self.assertEqual(result["detail_evidence_shadow_count"], 1)
+        row = result["rows"][0]
+        self.assertEqual(row["evidence_origin"], "legacy_first_party_reference_component_reused_read_only")
+        self.assertFalse(row["currentness_adjudicated"])
+        self.assertFalse(row["material_fact_use"])
+        self.assertFalse(row["fact_kernel_promotion_allowed"])
+        self.assertFalse(row["writer_allowed"])
+        self.assertFalse(row["site_publish_allowed"])
+        self.assertFalse(row["social_publish_allowed"])
+
     def test_upstream_promotion_boundary_violation_fails_closed(self):
         payload = self.report("https://www.isjvalcea.ro/files/a.pdf")
         payload["writer_allowed"] = True
         with self.assertRaises(ValueError):
-            verify_isj_details(payload, fetcher=lambda _: (b"x", "https://www.isjvalcea.ro/files/a.pdf", "application/pdf"), html_extractor=lambda *_: (None, None, ()))
+            verify_isj_details(
+                payload,
+                fetcher=lambda _: (b"x", "https://www.isjvalcea.ro/files/a.pdf", "application/pdf"),
+                html_extractor=lambda *_: (None, None, ()),
+            )
 
     def test_non_material_rows_do_not_trigger_detail_fetch(self):
         payload = self.report("https://www.isjvalcea.ro/files/a.pdf")
         payload["rows"][0]["state"] = "NO_STORY"
-        result = verify_isj_details(payload, fetcher=lambda _: (_ for _ in ()).throw(AssertionError("must not fetch")), html_extractor=lambda *_: (None, None, ()))
+        result = verify_isj_details(
+            payload,
+            fetcher=lambda _: (_ for _ in ()).throw(AssertionError("must not fetch")),
+            html_extractor=lambda *_: (None, None, ()),
+        )
         self.assertEqual(result["selected_material_signal_count"], 0)
         self.assertEqual(result["detail_evidence_shadow_count"], 0)
         self.assertEqual(result["blocked_count"], 0)
