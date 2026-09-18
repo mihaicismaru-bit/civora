@@ -20,7 +20,7 @@ permissions:
 jobs:
   shadow-contracts:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -38,6 +38,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_transactions.py
           python valcea-clar/tests/test_core_v2_gate_report.py
           python valcea-clar/tests/test_core_v2_apavil_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_public_safety_shadow_lane.py
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
       - name: Run reused source-adapter fail-closed self-tests
@@ -50,8 +51,18 @@ jobs:
           python valcea-clar/scripts/eta_valcea_signal_adapter.py --self-test
           python valcea-clar/scripts/isj_valcea_education_signal_adapter.py --self-test
           python valcea-clar/scripts/filarmonica_valcea_upcoming_event_reference_adapter.py --self-test
+      - name: Run reused first-party detail-evidence self-tests
+        run: |
+          python valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py --self-test
+          python valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py --self-test
+          python valcea-clar/scripts/isu_valcea_emergency_reference_adapter.py --self-test
+          python valcea-clar/scripts/isu_valcea_emergency_detail_evidence.py --self-test
       - name: Run APAVIL source-to-kernel shadow lane read-only
         run: python valcea-clar/core_v2/apavil_shadow_lane.py --live --output /tmp/valcea-core-v2-apavil-shadow.json
+      - name: Run IPJ first-party evidence promotion shadow lane read-only
+        run: python valcea-clar/core_v2/public_safety_shadow_lane.py --source ipj --live --output /tmp/valcea-core-v2-ipj-shadow.json
+      - name: Run ISU first-party evidence promotion shadow lane read-only
+        run: python valcea-clar/core_v2/public_safety_shadow_lane.py --source isu --live --output /tmp/valcea-core-v2-isu-shadow.json
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
       - name: Require complete bounded legacy classification
@@ -108,6 +119,8 @@ jobs:
           checkpoint=json.loads(Path('valcea-clar/core_v2/checkpoint.json').read_text(encoding='utf-8'))
           sources=json.loads(Path('valcea-clar/core_v2/pilot_sources.json').read_text(encoding='utf-8'))
           apavil=json.loads(Path('/tmp/valcea-core-v2-apavil-shadow.json').read_text(encoding='utf-8'))
+          ipj=json.loads(Path('/tmp/valcea-core-v2-ipj-shadow.json').read_text(encoding='utf-8'))
+          isu=json.loads(Path('/tmp/valcea-core-v2-isu-shadow.json').read_text(encoding='utf-8'))
           ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
           readback=json.loads(Path('/tmp/valcea-core-v2-site-readback.json').read_text(encoding='utf-8'))
           visual=json.loads(Path('/tmp/valcea-core-v2-visual-readback.json').read_text(encoding='utf-8'))
@@ -121,6 +134,15 @@ jobs:
           assert sources['source_expansion_forbidden_during_pilot'] is True
           assert apavil['publication_authority']=='NONE'
           assert apavil['acceptance_ready'] is False
+          for public_safety in (ipj, isu):
+              assert public_safety['publication_authority']=='NONE'
+              assert public_safety['acceptance_ready'] is False
+              assert int(public_safety.get('fabricated_claim_count') or 0) == 0
+              for row in public_safety.get('rows') or []:
+                  if row.get('state') == 'VERIFIED_WRITTEN_SHADOW':
+                      assert row['integrity']['status'] == 'PASS'
+                      assert row['integrity']['fabricated_claims'] == 0
+                      assert row['production_writer_ready'] is False
           assert ledger['publication_authority']=='NONE'
           assert ledger['acceptance_ready'] is False
           assert readback['publication_authority']=='NONE'
@@ -140,6 +162,8 @@ jobs:
           name: valcea-clar-core-v2-shadow-evidence-${{ github.run_id }}
           path: |
             /tmp/valcea-core-v2-apavil-shadow.json
+            /tmp/valcea-core-v2-ipj-shadow.json
+            /tmp/valcea-core-v2-isu-shadow.json
             /tmp/valcea-core-v2-legacy-inventory.json
             /tmp/valcea-core-v2-shadow-candidates.json
             /tmp/valcea-core-v2-site-readback.json
