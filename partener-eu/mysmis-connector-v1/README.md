@@ -2,6 +2,10 @@
 
 Capability-gated, read-only connector skeleton for authenticated Chrome/Edge sessions.
 
+The 0.1.1 pilot adds an action popup for structural inspection of the active MySMIS
+creation form. It does not create projects. See [CYBERSTEP creation pilot](docs/CYBERSTEP_CREATE_PILOT.md)
+for the observed limitations, local operator steps and the remaining writer work.
+
 This unit implements generic DOM artifact inventory, least-invasive candidate classification,
 download observation metadata, URL redaction, and deterministic offline regression fixtures for
 the two acceptance tracks:

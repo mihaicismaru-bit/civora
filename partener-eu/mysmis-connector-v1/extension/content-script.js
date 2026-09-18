@@ -1,4 +1,12 @@
 (async () => {
+  const { respondToCreateFormInspection } = await import(chrome.runtime.getURL("extension/create-form-snapshot.mjs"));
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    const response = respondToCreateFormInspection({ message, sender, runtimeId: chrome.runtime.id,
+      documentLike: document, locationLike: location });
+    if (response === undefined) return false;
+    sendResponse(response);
+    return false;
+  });
   const [{ discoverArtifacts, planAcquisition }, { captureCurrentPageSnapshot }] = await Promise.all([
     import(chrome.runtime.getURL("core/artifact-discovery.mjs")),
     import(chrome.runtime.getURL("extension/page-snapshot.mjs"))

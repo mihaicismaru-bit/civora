@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MySMIS — verificare formular</title>
+  <link rel="stylesheet" href="create-inspector.css">
+</head>
+<body>
+  <main>
+    <h1>Verificare formular MySMIS</h1>
+    <p>Deschide formularul de creare în fila activă, apoi citește structura câmpurilor.</p>
+    <button id="inspect" type="button">Citește formularul din fila activă</button>
+    <p><output id="status" aria-live="polite">Pregătit pentru citire. Proiectul nu este creat de această versiune.</output></p>
+    <pre id="preview" hidden></pre>
+    <button id="download" type="button" disabled>Descarcă structura pentru verificare</button>
+    <p class="note">Fișierul conține etichetele și identificatorii câmpurilor, fără valorile completate, parole sau lista participanților. Nu transmite nimic automat.</p>
+  </main>
+  <script type="module" src="create-inspector.js"></script>
+</body>
+</html>

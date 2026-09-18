@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MySMIS Connector v1",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Read-only MySMIS artifact inventory and download observation.",
   "permissions": [
     "alarms",
@@ -31,7 +31,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["core/*.mjs", "extension/page-snapshot.mjs"],
+      "resources": ["core/*.mjs", "extension/page-snapshot.mjs", "extension/create-form-snapshot.mjs"],
       "matches": [
         "https://mysmis2021.gov.ro/*",
         "https://*.mysmis2021.gov.ro/*"
@@ -39,6 +39,7 @@
     }
   ],
   "action": {
-    "default_title": "Inventory MySMIS artifacts (read-only)"
+    "default_title": "Verificare formular MySMIS (citire)",
+    "default_popup": "extension/create-inspector.html"
   }
 }
