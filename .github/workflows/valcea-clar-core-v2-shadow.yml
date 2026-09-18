@@ -38,6 +38,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_source_signal.py
           python valcea-clar/tests/test_core_v2_isj_shadow_lane.py
           python valcea-clar/tests/test_core_v2_visual.py
+          python valcea-clar/tests/test_core_v2_visual_registry.py
           python valcea-clar/tests/test_core_v2_transactions.py
           python valcea-clar/tests/test_core_v2_gate_report.py
           python valcea-clar/tests/test_core_v2_apavil_shadow_lane.py
@@ -122,6 +123,7 @@ jobs:
             --input ipj=/tmp/valcea-core-v2-ipj-shadow.json \
             --input isu=/tmp/valcea-core-v2-isu-shadow.json \
             --input municipal=/tmp/valcea-core-v2-municipal-articles.json \
+            --visual-registry valcea-clar/core_v2/visual_registry.json \
             --external-probe \
             --output /tmp/valcea-core-v2-photo-truth.json
 
