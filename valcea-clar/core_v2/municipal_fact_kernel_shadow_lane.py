@@ -53,7 +53,7 @@ def _extract_school_name(excerpts: list[str]) -> str | None:
 
 def _extract_operator(excerpts: list[str]) -> str | None:
     for text in excerpts:
-        match = re.search(r"operatorului economic\s+([^,.;]+)", text, flags=re.I)
+        match = re.search(r"operatorului economic\s+([^,]+)", text, flags=re.I)
         if match:
             return _normalize(match.group(1))
     return None
