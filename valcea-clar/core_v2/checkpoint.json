@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.5",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN14-ISJ-FIELD-EVIDENCE-NATURAL-VALIDATED",
+  "schema_version": "2.7",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN15-ISJ-CALENDAR-FIELD-EVIDENCE-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,9 +8,9 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "59ec6bc41fe8da9bad511ae2c4a5ffffe1c5f4c3",
-    "main_observed_message": "Refresh VÂLCEA CLAR canonical public presentation",
-    "main_observed_at": "2026-09-18T18:20:33Z",
+    "main_observed_sha": "5e712521b18a8c60f546452b7f5c733c5667e638",
+    "main_observed_message": "Checkpoint verified decision-maker projection",
+    "main_observed_at": "2026-09-18T19:17:05Z",
     "legacy_public_projection": {
       "repo": "mihaicismaru-bit/valcea-clar",
       "main_sha": "b1b20ed298f587cc79bcf457ae4e8ccf12851fca",
@@ -23,20 +23,22 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "f6d09c9b83f54caec5958d1eda1b441d30cc7a59",
-    "workflow_run_id": 35379544323,
-    "workflow_run_number": 327,
-    "event": "push",
+    "sha": "09fad82b1047a63e46118845868f6907ff5d73a2",
+    "workflow_run_id": 35385923193,
+    "workflow_run_number": 358,
+    "event": "pull_request",
     "conclusion": "success",
-    "artifact_id": 10561747745,
-    "artifact_sha256": "ab7addfa32961f6ffd7fe66e32a339d24ba58b4bfc8c087ae10b4adfa766ca20",
+    "artifact_id": 10563563773,
+    "artifact_sha256": "8cb9841bac23617c117ddb1bb3618bf19667be0e7bfc6ff1a497f08cba4f7196",
     "manual_dispatch": false,
     "production_write_authority": false,
-    "ordered_shadow_stage_count": 19,
+    "ordered_shadow_stage_count": 21,
     "ordered_shadow_failed_stage": null,
     "post_cycle_read_only_gates": [
       "isj_document_target_and_text_truth",
       "isj_field_evidence_truth",
+      "isj_context_document_truth",
+      "isj_calendar_field_evidence_truth",
       "historical_external_readback",
       "shadow_runtime_invariants"
     ]
@@ -45,26 +47,25 @@
     "legacy architecture remains explicitly LEGACY_NOT_PRODUCTION_READY while live legacy automation is left untouched",
     "Core v2 contracts keep source truth, FactKernel, article, visual, site delivery, social delivery, receipts and audit truth separate from workflow success",
     "bounded eight-source pilot and complete KEEP/RETIRE/REWRITE inventory remain enforced with UNKNOWN=0",
-    "single Core v2 orchestrator now executes 19 ordered read-only shadow stages; GitHub Actions is a thin executor with no deploy, merge, publication or Meta-write authority",
+    "single Core v2 orchestrator now executes 21 ordered read-only shadow stages; GitHub Actions is a thin executor with no deploy, merge, publication or Meta-write authority",
     "APAVIL remains fail-closed at 132 NO_STORY and zero fabricated stories",
     "IPJ remains 1 VERIFIED_WRITTEN_SHADOW, 2 NO_STORY and 5 BLOCKED from 8 first-party details with fabricated_claims=0",
     "ISU remains 2 VERIFIED_WRITTEN_SHADOW, 3 NO_STORY and 4 BLOCKED from 9 first-party details with fabricated_claims=0",
     "Râmnicu Vâlcea HCL 343/344/345 remain three evidence-bound deterministic full shadow articles with fabricated_claims=0",
     "ETA remains 10 signals: 7 NO_STORY and 3 BLOCKED",
-    "ISJ parent evidence still verifies 17 embedded document labels for concurs directori 2026 and binds all 17 to document resource identities without using filenames as facts",
-    "two explicitly current-year ISJ PDFs are byte-verified and now deterministically text-extracted with Poppler pdftotext provenance, page-level hashes and no OCR",
-    "LISTA POSTURI PDF remains byte-verified at 1,401,098 bytes sha256 c460c8d0279b01b6ac3b6e848cbf0a61c6f02e246ba32e0d1aacdb211c44ef01; normalized text sha256 6e0386fbb10a930b86d26b7bdecddef4c688a16c7b848428af3bce042446d4ec",
-    "OMEC-4155 methodology PDF remains byte-verified at 239,093 bytes sha256 0467ddb34ef59c27cbf19541d3651135e76185f791dec2a96aa45596ae3d77c8; normalized text sha256 afffe422508aa1b992ecd0c460cee0125be229df6b4e46935a9b3d5e06775fe4",
-    "new ISJ field-evidence gate verified 2 documents, emitted 9 page/hash-bound fields, blocked 0 documents and identified exactly one material candidate in shadow",
-    "vacancy-list evidence verifies document nr. 4596 dated 2026-08-17, contest session 2026 and 146 listed vacant director/director-adjunct functions using a complete contiguous table row sequence 1..146; a duplicated row index 1 attributable to page layout is recorded rather than silently discarded",
-    "methodology evidence verifies order 4.155/2026, Monitorul Oficial date 2026-07-06, minimum 5 years preuniversity seniority, higher-education degree/equivalence requirement, and tenured preuniversity indefinite-contract requirement",
-    "repeated methodology headers/citations are handled deterministically by selecting the first exact supporting page while preserving page-level provenance; missing exact evidence still fails closed",
-    "all ISJ extracted text and field evidence remain strictly non-authorizing: material_fact_use=false, fact_kernel_promotion_allowed=false, writer_allowed=false, site/social publication false",
+    "ISJ parent evidence verifies 17 embedded document labels for concurs directori 2026 and binds all 17 to document resource identities without using filenames as facts",
+    "two explicitly current-year ISJ PDFs remain byte-verified and deterministically text-extracted with Poppler pdftotext provenance, page-level hashes and no OCR",
+    "vacancy-list field evidence remains 9 exact fields across vacancy list and methodology, including 146 vacant director/director-adjunct functions and the verified contest session 2026",
+    "new context-document gate requires the already verified contest_session_year field evidence before it may read sibling registration/calendar/procedure resources from the same first-party contest page",
+    "context-document live read selected exactly two bounded resources: REGISTRATION_NOTICE and CONTEST_CALENDAR; the registration PDF failed closed because deterministic pdftotext returned empty/too-short text, and no OCR fallback was used",
+    "the OMEC-4622 calendar PDF was deterministically text-extracted and remains non-authorizing with page-level hashes and contest-session provenance",
+    "new calendar field-evidence gate verified exactly four page/hash-bound fields from the calendar PDF: calendar_order_date=2026-08-06, interview_window_text='12-27 noiembrie', appointment_decision_deadline_text='Până la data de 16 decembrie', and appointment_effective_date=2027-01-01",
+    "bare month/day ranges deliberately remain raw text rather than normalized 2026 dates because the supporting schedule lines do not themselves state the year; no year is inferred from the filename",
+    "all ISJ calendar fields remain material_fact_use=false, fact_kernel_promotion_allowed=false, writer_allowed=false and site/social publication false",
     "photo truth remains 6 written candidates with two provenance/relevance preflight visuals and four BLOCKED for missing story-specific approved real visuals",
-    "both municipal visual candidates remain internally bound in shadow packages but are not VISUAL_READY or SITE_PUBLISHED",
     "CJ Vâlcea road lane remains fail-closed on TLS certificate-chain verification without weakening TLS",
-    "historical external replay remains truth-incomplete; Facebook readback still lacks sufficient Graph permission and internal IDs remain insufficient proof",
-    "natural Core v2 run 327 passed compilation, truth-bound tests, all 19 live read-only stages, deterministic PDF extraction, ISJ document truth, ISJ field truth, external replay, shadow runtime invariants and evidence upload"
+    "historical external replay is truth-incomplete: site readback 2/2 and Instagram 2/2 passed, Facebook 0/2 remains unverified, visual replay 0/2 passed in the latest run, and no replay transaction is fully truth-bound",
+    "natural Core v2 run 358 passed compilation, all truth-bound tests, all 21 live read-only stages, deterministic PDF extraction, ISJ target/text/field/context/calendar-field truth gates, external replay, runtime invariants and evidence upload"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -126,23 +127,27 @@
       "embedded_notice_evidence_shadow_count": 1,
       "embedded_file_count": 17,
       "target_identity_bound_count": 17,
-      "target_identity_blocked_label_count": 0,
       "explicit_current_year_target_identity_count": 2,
       "selected_document_content_count": 2,
-      "document_content_captured_shadow_count": 2,
       "document_text_extracted_shadow_count": 2,
-      "document_content_blocked_count": 0,
       "field_verified_document_count": 2,
       "field_evidence_count": 9,
-      "field_blocked_count": 0,
-      "material_candidate_shadow_count": 1,
       "vacant_function_count_verified_shadow": 146,
       "contest_session_year_verified_shadow": 2026,
-      "list_document_date_verified_shadow": "2026-08-17",
-      "minimum_seniority_years_verified_shadow": 5,
+      "context_selected_document_count": 2,
+      "context_document_text_extracted_shadow_count": 1,
+      "context_document_blocked_count": 1,
+      "registration_notice_text_status": "BLOCKED_PDF_TEXT_EMPTY_OR_TOO_SHORT_NO_OCR",
+      "calendar_document_text_verified_shadow": true,
+      "calendar_field_verified_document_count": 1,
+      "calendar_field_evidence_count": 4,
+      "calendar_order_date_verified_shadow": "2026-08-06",
+      "interview_window_text_verified_shadow": "12-27 noiembrie",
+      "appointment_decision_deadline_text_verified_shadow": "Până la data de 16 decembrie",
+      "appointment_effective_date_verified_shadow": "2027-01-01",
+      "full_calendar_verified": false,
       "event_time_verified": false,
       "registration_deadline_verified": false,
-      "calendar_verified": false,
       "fact_kernel_promotion_allowed": false,
       "writer_allowed": false
     },
@@ -170,19 +175,25 @@
   "historical_external_replay": {
     "candidate_count": 2,
     "site_external_readback_passed": 2,
+    "visual_external_readback_passed": 0,
     "instagram_external_readback_passed": 2,
     "facebook_external_readback_passed": 0,
     "truth_complete_count": 0,
     "blocker_counts_latest_observed": {
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
       "FACT_KERNEL_EVIDENCE_MISSING": 2,
-      "VISUAL_ARTICLE_BINDING_FAILED": 1
+      "VISUAL_ARTICLE_BINDING_FAILED": 1,
+      "VISUAL_PROVENANCE_FAILED": 1
     }
   },
   "blocked": [
     {
+      "gate": "isj_registration_notice_text",
+      "reason": "The first-party registration PDF is byte-addressable but deterministic pdftotext returns empty/too-short text. No OCR fallback is used because this Romanian document cannot yet be promoted safely from OCR-derived text."
+    },
+    {
       "gate": "isj_fact_kernel_promotion",
-      "reason": "Field-level evidence now verifies a current 2026 contest material candidate, but event timing, registration deadline/calendar context and a deliberate editorial materiality-to-FactKernel gate are not yet verified. No FactKernel or article is authorized."
+      "reason": "Exact field evidence now exists for the vacancy list, methodology and selected calendar facts, but registration deadline and a deliberate field-evidence-to-editorial-materiality gate remain absent. No ISJ FactKernel or article is authorized."
     },
     {
       "gate": "photo_truth_gate",
@@ -193,8 +204,8 @@
       "reason": "Read-only Graph requests require pages_read_engagement or Page Public Content Access. Internal post IDs remain insufficient delivery proof."
     },
     {
-      "gate": "historical_fact_kernel_truth",
-      "reason": "Both replay candidates still lack explicit FactKernel evidence binding."
+      "gate": "historical_replay_truth",
+      "reason": "Both replay candidates still lack FactKernel evidence binding; latest visual external readback also fails both candidates, leaving one article-binding blocker and one provenance blocker."
     },
     {
       "gate": "cj_road_source_tls",
@@ -210,30 +221,27 @@
     }
   ],
   "next": [
-    "bind the 2026 registration/calendar document identities to the already verified contest context and extract exact event/deadline fields only from verified text; year must not be inferred from a filename that omits it",
-    "build a separate ISJ editorial-materiality and FactKernel promotion gate that consumes only field_evidence_id values and remains shadow-only until event timing is independently verified",
-    "add claim-integrity regression tests before any ISJ writer is allowed to consume the promoted FactKernel",
+    "build a separate ISJ calendar/materiality adjudicator that consumes only verified field_evidence_id values and distinguishes usable current contest facts from raw schedule text whose year is not explicit in the supporting line",
+    "resolve the registration deadline only from first-party text that can be deterministically verified; keep the current registration PDF blocked rather than introducing OCR-derived facts",
+    "only after materiality adjudication, build a shadow ISJ FactKernel with claim-to-field-evidence bindings and add a separate claim-integrity gate before any writer",
     "continue rights/relevance search for HCL 344 and current IPJ/ISU candidates; do not use generic photos merely to raise coverage",
+    "repair historical visual replay only from public readback/provenance evidence; do not treat internal binding as success",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
-    "do not start the 10-story acceptance series until all external truth gates can be independently satisfied"
+    "do not start the 10-story acceptance series until all external truth gates can be independently satisfied and the owner explicitly authorizes cutover"
   ],
   "evidence": {
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
-    "isj_signal": "valcea-clar/core_v2/isj_shadow_lane.py",
-    "isj_detail": "valcea-clar/core_v2/isj_detail_shadow_lane.py",
-    "isj_materiality": "valcea-clar/core_v2/isj_materiality_shadow_lane.py",
-    "isj_embedded_notice": "valcea-clar/core_v2/isj_embedded_notice_shadow_lane.py",
-    "isj_embedded_target_identity": "valcea-clar/core_v2/isj_embedded_target_shadow_lane.py",
-    "isj_embedded_document_content": "valcea-clar/core_v2/isj_embedded_content_shadow_lane.py",
     "isj_field_evidence": "valcea-clar/core_v2/isj_field_evidence_shadow_lane.py",
-    "isj_document_truth_validator": "valcea-clar/core_v2/validate_isj_document_truth.py",
-    "isj_field_truth_validator": "valcea-clar/core_v2/validate_isj_field_truth.py",
+    "isj_context_documents": "valcea-clar/core_v2/isj_context_documents_shadow_lane.py",
+    "isj_calendar_field_evidence": "valcea-clar/core_v2/isj_calendar_field_evidence_shadow_lane.py",
+    "isj_context_truth_validator": "valcea-clar/core_v2/validate_isj_context_document_truth.py",
+    "isj_calendar_field_truth_validator": "valcea-clar/core_v2/validate_isj_calendar_field_truth.py",
     "photo_truth": "valcea-clar/core_v2/photo_truth_gate.py",
     "shadow_site_package": "valcea-clar/core_v2/shadow_site_package.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35379544323",
-    "artifact_id": 10561747745,
-    "artifact_sha256": "ab7addfa32961f6ffd7fe66e32a339d24ba58b4bfc8c087ae10b4adfa766ca20"
+    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35385923193",
+    "artifact_id": 10563563773,
+    "artifact_sha256": "8cb9841bac23617c117ddb1bb3618bf19667be0e7bfc6ff1a497f08cba4f7196"
   }
 }
