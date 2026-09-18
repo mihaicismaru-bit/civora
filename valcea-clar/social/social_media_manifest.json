@@ -145,57 +145,280 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 0,
-    "autonomous_story_ids_24h": [],
+    "autonomous_stories_published_24h": 10,
+    "autonomous_story_ids_24h": [
+      "babeni-izvorul-dorului-program-20260903",
+      "balcesti-incendiu-vegetatie-15ha-20260902",
+      "buila-vanturarita-accident-20260822",
+      "cantecele-oltului-2026-parada-concurs-20260822",
+      "dn7-valea-oltului-restrictii-august-20260824",
+      "horezu-autobuze-electrice-energie-verde-20260903",
+      "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
+      "ramnicu-fissura-lucis-casa-simian-20260903",
+      "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+      "supercupa-damila-pietrari-20260822"
+    ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 0,
-      "published": 0,
-      "stories": [],
-      "max_seconds": null,
-      "median_seconds": null
+      "measured": 10,
+      "published": 10,
+      "stories": [
+        {
+          "story_id": "babeni-izvorul-dorului-program-20260903",
+          "seconds": 1294251,
+          "discovered_at_utc": "2026-09-03T04:49:55Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "balcesti-incendiu-vegetatie-15ha-20260902",
+          "seconds": 1298670,
+          "discovered_at_utc": "2026-09-03T03:36:16Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "buila-vanturarita-accident-20260822",
+          "seconds": 2299018,
+          "discovered_at_utc": "2026-08-22T13:43:48Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "cantecele-oltului-2026-parada-concurs-20260822",
+          "seconds": 2326459,
+          "discovered_at_utc": "2026-08-22T06:06:27Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "dn7-valea-oltului-restrictii-august-20260824",
+          "seconds": 2157468,
+          "discovered_at_utc": "2026-08-24T05:02:58Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "horezu-autobuze-electrice-energie-verde-20260903",
+          "seconds": 1286937,
+          "discovered_at_utc": "2026-09-03T06:51:49Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
+          "seconds": 1891547,
+          "discovered_at_utc": "2026-08-27T06:54:59Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "ramnicu-fissura-lucis-casa-simian-20260903",
+          "seconds": 1275944,
+          "discovered_at_utc": "2026-09-03T09:55:02Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+          "seconds": 2157468,
+          "discovered_at_utc": "2026-08-24T05:02:58Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        },
+        {
+          "story_id": "supercupa-damila-pietrari-20260822",
+          "seconds": 2326459,
+          "discovered_at_utc": "2026-08-22T06:06:27Z",
+          "published_at_utc": "2026-09-18T04:20:46Z"
+        }
+      ],
+      "max_seconds": 2326459,
+      "median_seconds": 2157468
     },
     "photo_coverage": {
-      "status": "NO_PUBLISHED_STORIES",
-      "real_photo_stories": 0,
-      "published_stories": 0,
-      "value": null,
+      "status": "MEASURED",
+      "real_photo_stories": 5,
+      "published_stories": 10,
+      "value": 0.5,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "eligible": 0,
+      "status": "BLOCKED",
+      "eligible": 10,
       "readback_ok": 0,
-      "value": null,
-      "checks": [],
+      "value": 0.0,
+      "blocker_story_ids": [
+        "babeni-izvorul-dorului-program-20260903",
+        "balcesti-incendiu-vegetatie-15ha-20260902",
+        "buila-vanturarita-accident-20260822",
+        "cantecele-oltului-2026-parada-concurs-20260822",
+        "dn7-valea-oltului-restrictii-august-20260824",
+        "horezu-autobuze-electrice-energie-verde-20260903",
+        "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
+        "ramnicu-fissura-lucis-casa-simian-20260903",
+        "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+        "supercupa-damila-pietrari-20260822"
+      ],
+      "checks": [
+        {
+          "story_id": "babeni-izvorul-dorului-program-20260903",
+          "url": "https://valceaclar.ro/stiri/babeni-izvorul-dorului-program-20260903/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "balcesti-incendiu-vegetatie-15ha-20260902",
+          "url": "https://valceaclar.ro/stiri/balcesti-incendiu-vegetatie-15ha-20260902/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "buila-vanturarita-accident-20260822",
+          "url": "https://valceaclar.ro/stiri/buila-vanturarita-accident-20260822/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "cantecele-oltului-2026-parada-concurs-20260822",
+          "url": "https://valceaclar.ro/stiri/cantecele-oltului-2026-parada-concurs-20260822/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "dn7-valea-oltului-restrictii-august-20260824",
+          "url": "https://valceaclar.ro/stiri/dn7-valea-oltului-restrictii-august-20260824/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "horezu-autobuze-electrice-energie-verde-20260903",
+          "url": "https://valceaclar.ro/stiri/horezu-autobuze-electrice-energie-verde-20260903/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
+          "url": "https://valceaclar.ro/stiri/maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "ramnicu-fissura-lucis-casa-simian-20260903",
+          "url": "https://valceaclar.ro/stiri/ramnicu-fissura-lucis-casa-simian-20260903/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+          "url": "https://valceaclar.ro/stiri/ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "supercupa-damila-pietrari-20260822",
+          "url": "https://valceaclar.ro/stiri/supercupa-damila-pietrari-20260822/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        }
+      ],
+      "projection_evidence": {
+        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
+        "http_status": 200,
+        "error": null,
+        "updated_local": "2026-09-17T21:43:56.160830Z",
+        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+        "public_story_count": 81
+      },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "status": "MEASURED",
+      "delivered": 3,
+      "eligible": 10,
+      "value": 0.3,
+      "delivered_story_ids": [
+        "babeni-izvorul-dorului-program-20260903",
+        "balcesti-incendiu-vegetatie-15ha-20260902",
+        "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827"
+      ]
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "status": "MEASURED",
+      "delivered": 1,
+      "eligible": 10,
+      "value": 0.1,
+      "delivered_story_ids": [
+        "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827"
+      ]
     },
     "duplicates": {
-      "status": "MEASURED",
+      "status": "PARTIAL",
       "value": 0,
       "content_groups": [],
       "facebook_receipt_groups": [],
       "instagram_receipt_groups": [],
-      "missing_editorial_evidence": []
+      "missing_editorial_evidence": [
+        "babeni-izvorul-dorului-program-20260903",
+        "balcesti-incendiu-vegetatie-15ha-20260902",
+        "buila-vanturarita-accident-20260822",
+        "cantecele-oltului-2026-parada-concurs-20260822",
+        "dn7-valea-oltului-restrictii-august-20260824",
+        "horezu-autobuze-electrice-energie-verde-20260903",
+        "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
+        "ramnicu-fissura-lucis-casa-simian-20260903",
+        "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+        "supercupa-damila-pietrari-20260822"
+      ]
     },
     "fabricated_claims": {
-      "status": "PASS",
-      "value": 0,
+      "status": "UNKNOWN",
+      "value": null,
       "definition": "zero is asserted only when every measured published story passes material-fact and complete claim-source trace gates",
       "trace_violations": [],
-      "missing_editorial_evidence": []
+      "missing_editorial_evidence": [
+        "babeni-izvorul-dorului-program-20260903",
+        "balcesti-incendiu-vegetatie-15ha-20260902",
+        "buila-vanturarita-accident-20260822",
+        "cantecele-oltului-2026-parada-concurs-20260822",
+        "dn7-valea-oltului-restrictii-august-20260824",
+        "horezu-autobuze-electrice-energie-verde-20260903",
+        "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
+        "ramnicu-fissura-lucis-casa-simian-20260903",
+        "ramnicu-valcea-remus-bellu-incendiu-autobuz-20260822",
+        "supercupa-damila-pietrari-20260822"
+      ]
     },
     "manual_intervention": {
       "status": "MEASURED",
@@ -204,81 +427,17 @@
       "automated_workflow_dispatch_runs": [
         {
           "repository": "mihaicismaru-bit/civora",
-          "run_id": 35288516573,
+          "run_id": 35306650046,
           "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-17T23:49:14Z",
+          "created_at": "2026-09-18T04:21:29Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
           "repository": "mihaicismaru-bit/civora",
-          "run_id": 35288247831,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-17T23:45:29Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35288090630,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-17T23:43:21Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35280674908,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-17T22:10:31Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35278301502,
+          "run_id": 35306608857,
           "workflow": "VÂLCEA CLAR Social Publication Engine",
-          "created_at": "2026-09-17T21:44:03Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35278157804,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-17T21:42:25Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35277406843,
-          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
-          "created_at": "2026-09-17T21:34:10Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35260151143,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-17T18:39:26Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35259822236,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-17T18:36:10Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35259438791,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-17T18:32:22Z",
+          "created_at": "2026-09-18T04:20:50Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         }
@@ -288,14 +447,14 @@
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "8c713218a7419591f26ac017855c8d6951e05646",
-      "structural_baseline_at_utc": "2026-09-17T18:31:00Z",
+      "structural_baseline_sha": "e0269831738dcf8a0177fcb3e350e9235301125a",
+      "structural_baseline_at_utc": "2026-09-18T04:19:04Z",
       "structural_baseline_repository": "mihaicismaru-bit/civora",
       "structural_baseline_path": "civora_structural_paths",
       "structural_components": [
         {
-          "sha": "8c713218a7419591f26ac017855c8d6951e05646",
-          "at_utc": "2026-09-17T18:31:00Z",
+          "sha": "e0269831738dcf8a0177fcb3e350e9235301125a",
+          "at_utc": "2026-09-18T04:19:04Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
@@ -307,7 +466,7 @@
           "source_sha": "6a28b61906e4963271b0eab8c6ee708a2e662b1e"
         }
       ],
-      "eligible_after_utc": "2026-09-19T18:31:00Z",
+      "eligible_after_utc": "2026-09-20T04:19:04Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
