@@ -8,6 +8,7 @@ const PROFILE_FILTERS=[
   ['Fermă / agricultură','fermieri'],
   ['Formare profesională','formare profesională']
 ];
+const isTypingTarget=target=>target instanceof Element&&!!target.closest('input,textarea,select,[contenteditable="true"]');
 const NEED_FILTERS=[
   ['Energie','energie'],
   ['Digitalizare','digitalizare'],
@@ -152,6 +153,6 @@ function polishMobileCards(){
 
 function run(){injectBeginnerEntry();explainLabels();polishMobileCards();}
 window.addEventListener('load',()=>setTimeout(run,80),{once:true});
-document.addEventListener('click',()=>setTimeout(run,120),true);
+document.addEventListener('click',event=>{if(isTypingTarget(event.target))return;setTimeout(run,120)},true);
 setTimeout(run,180);
 })();
