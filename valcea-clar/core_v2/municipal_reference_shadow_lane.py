@@ -3,11 +3,14 @@ from __future__ import annotations
 import argparse
 import importlib
 import json
+import ssl
 import sys
 from dataclasses import asdict, is_dataclass
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import parse_qsl, urlsplit, urlunsplit
+from urllib.request import HTTPSHandler, Request, build_opener
 from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -17,6 +20,7 @@ SOURCE_ID = "signal-ramnicu-valcea-local-council-decision-reference"
 EXPECTED_SOURCE_TIER = "T1_OFFICIAL_MUNICIPALITY_FIRST_PARTY"
 EXPECTED_REFERENCE_SCOPE = "FIRST_PARTY_LOCAL_COUNCIL_ADOPTED_DECISION_REFERENCE_ONLY"
 EXPECTED_SOURCE_URL_PREFIX = "https://dm.primariavl.ro/dm/2026/hotarari.nsf/"
+EXPANDED_INDEX_URL = "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500"
 
 
 def _today_bucharest() -> date:
@@ -31,18 +35,36 @@ def _to_dict(value: Any) -> dict[str, Any]:
     raise TypeError("municipal state must be dataclass or dict")
 
 
+def _validate_expanded_index_url(url: str) -> str:
+    parsed = urlsplit(str(url).strip())
+    params = [(k.casefold(), v.casefold()) for k, v in parse_qsl(parsed.query, keep_blank_values=True)]
+    if (
+        parsed.scheme.casefold() != "https"
+        or (parsed.hostname or "").casefold() != "dm.primariavl.ro"
+        or parsed.username
+        or parsed.password
+        or parsed.port not in (None, 443)
+        or parsed.path != "/dm/2026/hotarari.nsf/vwHotarariByAn"
+        or params != [("openview", ""), ("count", "500")]
+        or parsed.fragment
+    ):
+        raise ValueError(f"off-surface expanded municipal index refused: {url}")
+    return urlunsplit(("https", "dm.primariavl.ro", parsed.path, "OpenView&Count=500", ""))
+
+
 def verify_state(state_value: Any, *, as_of: date | None = None) -> dict[str, Any]:
     as_of = as_of or _today_bucharest()
     state = _to_dict(state_value)
 
     base = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "MUNICIPAL_REFERENCE_SHADOW_VERIFICATION",
         "source_id": SOURCE_ID,
         "publication_authority": "NONE",
         "acceptance_ready": False,
         "production_writer_ready": False,
         "as_of_date": as_of.isoformat(),
+        "transport_url": state.get("_transport_url"),
     }
 
     if str(state.get("source_id") or "") != SOURCE_ID:
@@ -151,10 +173,30 @@ def verify_state(state_value: Any, *, as_of: date | None = None) -> dict[str, An
     }
 
 
-def _live_state(*, as_of: date):
+def _live_state(*, as_of: date) -> dict[str, Any]:
     sys.path.insert(0, str(SCRIPTS))
     adapter = importlib.import_module("ramnicu_valcea_local_council_decision_reference_adapter")
-    return adapter.run_live(as_of=as_of)
+    transport_url = _validate_expanded_index_url(EXPANDED_INDEX_URL)
+    opener = build_opener(adapter.NoRedirects(), HTTPSHandler(context=ssl.create_default_context()))
+    request = Request(
+        transport_url,
+        headers={"User-Agent": adapter.USER_AGENT, "Accept": "text/html,*/*;q=0.8"},
+    )
+    with opener.open(request, timeout=adapter.TIMEOUT_SECONDS) as response:
+        final_url = _validate_expanded_index_url(response.geturl())
+        if final_url != transport_url:
+            raise ValueError("expanded municipal index drift after fetch")
+        content_type = str(response.headers.get("Content-Type", "")).casefold()
+        if "text/html" not in content_type:
+            raise ValueError(f"non-HTML municipal index refused: {content_type or 'unknown'}")
+        payload = response.read(adapter.MAX_RESPONSE_BYTES + 1)
+        if len(payload) > adapter.MAX_RESPONSE_BYTES:
+            raise ValueError("expanded municipal index exceeds size cap")
+        charset = response.headers.get_content_charset() or "utf-8"
+    text = payload.decode(charset, errors="replace")
+    state = asdict(adapter.build_state(text, payload, as_of=as_of, source_url=adapter.SOURCE_URL))
+    state["_transport_url"] = transport_url
+    return state
 
 
 def main() -> int:
@@ -175,7 +217,7 @@ def main() -> int:
         result = verify_state(state, as_of=as_of)
     except Exception as exc:
         result = {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "mode": "MUNICIPAL_REFERENCE_SHADOW_VERIFICATION",
             "source_id": SOURCE_ID,
             "publication_authority": "NONE",
