@@ -1,15 +1,20 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
+import shutil
 from pathlib import Path, PurePosixPath
 from typing import Any
+from urllib.request import Request, urlopen
 
 from visual_readback import inspect_article_image
 
 
 MODE = "SHADOW_SITE_PACKAGE_BINDING"
+MAX_IMAGE_BYTES = 15 * 1024 * 1024
+USER_AGENT = "CIVORA-Core-v2-shadow-package/1.0"
 
 
 def _article_index(documents: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
@@ -35,22 +40,64 @@ def _paragraphs(text: str) -> str:
     return "\n".join(f"<p>{html.escape(part)}</p>" for part in parts)
 
 
-def render_shadow_article(
-    article: dict[str, Any],
-    *,
+def _materialize_image(
     visual_assignment: dict[str, Any],
+    *,
     repo_root: Path,
-) -> tuple[str, str]:
-    package = article.get("article_package") or {}
+    output_dir: Path,
+    allow_remote_materialization: bool,
+) -> dict[str, Any]:
     image = visual_assignment.get("image") or {}
     image_path = str(visual_assignment.get("image_path") or "").strip()
     if not image_path:
         raise ValueError("visual image_path missing")
-    file_path = repo_root / image_path
-    if not file_path.is_file() or file_path.stat().st_size <= 0:
+    filename = PurePosixPath(image_path).name
+    target_dir = output_dir / "media"
+    target_dir.mkdir(parents=True, exist_ok=True)
+    target = target_dir / filename
+
+    local = repo_root / image_path
+    if local.is_file() and local.stat().st_size > 0:
+        shutil.copyfile(local, target)
+        payload = target.read_bytes()
+        return {
+            "filename": filename,
+            "path": str(target),
+            "mode": "checkout_copy",
+            "bytes": len(payload),
+            "sha256": hashlib.sha256(payload).hexdigest(),
+        }
+
+    if not allow_remote_materialization:
         raise ValueError("visual image file missing from checkout")
 
-    filename = PurePosixPath(image_path).name
+    direct = str(image.get("direct_source_url") or "").strip()
+    if not direct.startswith("https://"):
+        raise ValueError("verified direct_source_url required for shadow materialization")
+    request = Request(direct, headers={"User-Agent": USER_AGENT, "Accept": "image/*"})
+    with urlopen(request, timeout=20) as response:
+        content_type = str(response.headers.get("Content-Type") or "").split(";", 1)[0].strip().lower()
+        if not content_type.startswith("image/"):
+            raise ValueError("direct source did not return image content")
+        payload = response.read(MAX_IMAGE_BYTES + 1)
+        if len(payload) > MAX_IMAGE_BYTES:
+            raise ValueError("direct image exceeds shadow materialization size cap")
+        if not payload:
+            raise ValueError("direct image returned an empty payload")
+    target.write_bytes(payload)
+    return {
+        "filename": filename,
+        "path": str(target),
+        "mode": "verified_remote_read_only",
+        "bytes": len(payload),
+        "sha256": hashlib.sha256(payload).hexdigest(),
+        "source_url": direct,
+    }
+
+
+def render_shadow_article(article: dict[str, Any], *, visual_assignment: dict[str, Any], filename: str) -> str:
+    package = article.get("article_package") or {}
+    image = visual_assignment.get("image") or {}
     headline = str(package.get("headline") or "").strip()
     dek = str(package.get("dek") or "").strip()
     body = str(package.get("body") or "").strip()
@@ -62,7 +109,7 @@ def render_shadow_article(
     if not headline or not body or not alt or not credit or not disclosure or not source_url:
         raise ValueError("article/visual package incomplete")
 
-    rendered = f"""<!doctype html>
+    return f"""<!doctype html>
 <html lang="ro">
 <head><meta charset="utf-8"><title>{html.escape(headline)}</title></head>
 <body>
@@ -78,7 +125,6 @@ def render_shadow_article(
 </body>
 </html>
 """
-    return rendered, filename
 
 
 def build_shadow_packages(
@@ -88,6 +134,7 @@ def build_shadow_packages(
     visual_registry: dict[str, Any],
     repo_root: Path,
     output_dir: Path,
+    allow_remote_materialization: bool = False,
 ) -> dict[str, Any]:
     articles = _article_index(article_documents)
     assignments = visual_registry.get("stories") or {}
@@ -119,7 +166,13 @@ def build_shadow_packages(
             rows.append({**row, "status": "BLOCKED", "reason": "photo_external_readback_not_verified"})
             continue
         try:
-            rendered, filename = render_shadow_article(article, visual_assignment=assignment, repo_root=repo_root)
+            materialized = _materialize_image(
+                assignment,
+                repo_root=repo_root,
+                output_dir=output_dir,
+                allow_remote_materialization=allow_remote_materialization,
+            )
+            rendered = render_shadow_article(article, visual_assignment=assignment, filename=materialized["filename"])
         except Exception as exc:
             rows.append({**row, "status": "BLOCKED", "reason": str(exc)})
             continue
@@ -131,7 +184,7 @@ def build_shadow_packages(
         binding = inspect_article_image(
             rendered,
             article_url=f"https://shadow.invalid/stiri/{story_id}/",
-            expected_filename=filename,
+            expected_filename=materialized["filename"],
         )
         if not binding.get("article_image_bound"):
             rows.append({**row, "status": "BLOCKED", "reason": "staged_html_image_binding_failed", "binding": binding})
@@ -143,16 +196,17 @@ def build_shadow_packages(
                 "reason": None,
                 "staged_package_binding_verified": True,
                 "package_path": str(article_path),
-                "expected_image_filename": filename,
+                "expected_image_filename": materialized["filename"],
+                "materialized_image": materialized,
                 "binding": binding,
-                "truth_note": "Internal staged HTML binding only; no public HTTP delivery or public article image readback has occurred.",
+                "truth_note": "Internal staged HTML/image binding only; no public HTTP delivery or public article image readback has occurred.",
             }
         )
 
     passed = sum(row.get("status") == "PACKAGE_IMAGE_BOUND_SHADOW" for row in rows)
     blocked = sum(row.get("status") == "BLOCKED" for row in rows)
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": MODE,
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -166,7 +220,8 @@ def build_shadow_packages(
         "rows": rows,
         "truth_rule": (
             "A staged HTML package may prove that the intended real photograph is wired into the future article package. "
-            "It never proves public delivery, public image binding or VISUAL_READY. Those require a later production-authorized public HTTP readback."
+            "Verified remote materialization is read-only and temporary. It never proves public delivery, public image binding or VISUAL_READY. "
+            "Those require a later production-authorized public HTTP readback."
         ),
     }
 
@@ -188,6 +243,7 @@ def main() -> int:
         visual_registry=json.loads(Path(args.visual_registry).read_text(encoding="utf-8")),
         repo_root=Path(args.repo_root),
         output_dir=Path(args.output_dir),
+        allow_remote_materialization=True,
     )
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
