@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "mode": "shadow_only",
+  "publication_authority": "NONE",
+  "sources": [
+    {"source_id": "ipj_valcea", "label": "IPJ Vâlcea", "adapter": "valcea-clar/scripts/ipj_valcea_news_signal_adapter.py", "enabled": true},
+    {"source_id": "isu_valcea", "label": "ISU Vâlcea", "adapter": "valcea-clar/scripts/isu_valcea_local_news_signal_adapter.py", "enabled": true},
+    {"source_id": "apavil", "label": "APAVIL", "adapter": "valcea-clar/scripts/apavil_valcea_signal_adapter.py", "enabled": true},
+    {"source_id": "primaria_ramnicu_valcea", "label": "Primăria Râmnicu Vâlcea", "adapter": null, "enabled": false, "blocker": "bind existing council/municipal evidence path to Core v2 adapter contract"},
+    {"source_id": "cj_valcea", "label": "Consiliul Județean Vâlcea", "adapter": "valcea-clar/scripts/cj_valcea_roadworks_signal_adapter.py", "enabled": true},
+    {"source_id": "eta", "label": "ETA", "adapter": "valcea-clar/scripts/eta_valcea_signal_adapter.py", "enabled": true},
+    {"source_id": "isj_valcea", "label": "ISJ Vâlcea", "adapter": "valcea-clar/scripts/isj_valcea_education_signal_adapter.py", "enabled": true},
+    {"source_id": "cultural", "label": "Cultural pilot", "adapter": null, "enabled": false, "blocker": "select one existing cultural adapter after semantic-quality review"}
+  ],
+  "no_material_signal_terminal": "NO_STORY",
+  "source_expansion_forbidden_during_pilot": true
+}
