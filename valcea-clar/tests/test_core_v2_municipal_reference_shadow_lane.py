@@ -8,7 +8,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "core_v2"))
 
-from municipal_reference_shadow_lane import verify_state  # noqa: E402
+from municipal_reference_shadow_lane import (  # noqa: E402
+    EXPANDED_INDEX_URL,
+    _validate_expanded_index_url,
+    verify_state,
+)
 
 
 class MunicipalReferenceShadowLaneTests(unittest.TestCase):
@@ -44,6 +48,18 @@ class MunicipalReferenceShadowLaneTests(unittest.TestCase):
                 }
             ],
         }
+
+    def test_expanded_index_transport_is_exact_and_bounded(self):
+        self.assertEqual(_validate_expanded_index_url(EXPANDED_INDEX_URL), EXPANDED_INDEX_URL)
+        for bad in (
+            "http://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+            "https://evil.example/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=9999",
+            "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500&Start=1",
+            "https://dm.primariavl.ro/dm/2025/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+        ):
+            with self.assertRaises(ValueError):
+                _validate_expanded_index_url(bad)
 
     def test_reference_metadata_alone_is_no_story(self):
         result = verify_state(self._state(), as_of=date(2026, 9, 18))
