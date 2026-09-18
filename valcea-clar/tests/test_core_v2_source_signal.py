@@ -118,23 +118,25 @@ class EtaShadowSignalGateTest(unittest.TestCase):
         result = adjudicate_eta_signal(self.signal(classification="HOLD"), as_of=date(2026, 9, 18))
         self.assertEqual(result["state"], "NO_STORY")
 
-    def test_scope_safe_classifier_ignores_unrelated_footer_sales_for_fare_notice(self):
+    def test_scope_safe_classifier_ignores_later_service_and_sales_cards_for_fare_notice(self):
         adapter = _load_eta_adapter()
         classification, reasons = _scope_safe_classify_notice(
             adapter,
             "Tarife de transport valabile începând cu data de 01/02/2026",
-            "Bilet 1 călătorie 4 lei. Abonament lunar 130 lei. Footer: Anunț vânzare autovehicul. Licitație.",
+            "Bilet 1 călătorie 4 lei. Abonament lunar 130 lei. "
+            "Footer: Comunicat aplicație upgrade, anomalii pe panouri. Anunț vânzare autovehicul. Licitație.",
         )
         self.assertEqual(classification, "FARE_OR_ACCESS_CHANGE")
         self.assertEqual(reasons, ["FARE_OR_PASSENGER_ACCESS_TERMS"])
 
-    def test_scope_safe_classifier_ignores_unrelated_footer_sales_for_service_notice(self):
+    def test_scope_safe_classifier_uses_earlier_service_evidence_before_later_fare_card(self):
         adapter = _load_eta_adapter()
         classification, _reasons = _scope_safe_classify_notice(
             adapter,
             "Comunicat aplicație Skayo AVL",
             "În perioada 17.07.2026 – 20.07.2026 va fi realizat un upgrade major. "
-            "Pot apărea anomalii temporare în afișarea informațiilor pe panouri. Footer: Anunț vânzare autoturism.",
+            "Pot apărea anomalii temporare în afișarea informațiilor pe panouri. "
+            "Footer: Tarife de transport. Bilet 1 călătorie. Abonament lunar. Anunț vânzare autoturism.",
         )
         self.assertEqual(classification, "SERVICE_ALERT")
 
