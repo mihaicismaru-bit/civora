@@ -40,6 +40,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_apavil_shadow_lane.py
           python valcea-clar/tests/test_core_v2_public_safety_shadow_lane.py
           python valcea-clar/tests/test_core_v2_public_safety_full_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_municipal_reference_shadow_lane.py
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
       - name: Run reused source-adapter fail-closed self-tests
@@ -64,6 +65,8 @@ jobs:
         run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source ipj --live --output /tmp/valcea-core-v2-ipj-shadow.json
       - name: Run ISU structured editorial shadow lane read-only
         run: python valcea-clar/core_v2/public_safety_full_shadow_lane.py --source isu --live --output /tmp/valcea-core-v2-isu-shadow.json
+      - name: Run Râmnicu Vâlcea municipal reference shadow lane read-only
+        run: python valcea-clar/core_v2/municipal_reference_shadow_lane.py --live --output /tmp/valcea-core-v2-municipal-shadow.json
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
       - name: Require complete bounded legacy classification
@@ -122,6 +125,7 @@ jobs:
           apavil=json.loads(Path('/tmp/valcea-core-v2-apavil-shadow.json').read_text(encoding='utf-8'))
           ipj=json.loads(Path('/tmp/valcea-core-v2-ipj-shadow.json').read_text(encoding='utf-8'))
           isu=json.loads(Path('/tmp/valcea-core-v2-isu-shadow.json').read_text(encoding='utf-8'))
+          municipal=json.loads(Path('/tmp/valcea-core-v2-municipal-shadow.json').read_text(encoding='utf-8'))
           ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
           readback=json.loads(Path('/tmp/valcea-core-v2-site-readback.json').read_text(encoding='utf-8'))
           visual=json.loads(Path('/tmp/valcea-core-v2-visual-readback.json').read_text(encoding='utf-8'))
@@ -148,6 +152,14 @@ jobs:
                       assert row['production_writer_ready'] is False
                       assert row['article_package']['writer_id'] == 'shadow_structured_editorial_v2'
                       assert row['currentness']['publication_date_is_event_time'] is False
+          assert municipal['publication_authority']=='NONE'
+          assert municipal['acceptance_ready'] is False
+          assert municipal['production_writer_ready'] is False
+          assert int(municipal.get('verified_written_shadow_count') or 0) == 0
+          for row in municipal.get('rows') or []:
+              assert row.get('state') in {'NO_STORY', 'BLOCKED'}
+              assert 'fact_kernel' not in row
+              assert 'article_package' not in row
           assert ledger['publication_authority']=='NONE'
           assert ledger['acceptance_ready'] is False
           assert readback['publication_authority']=='NONE'
@@ -169,6 +181,7 @@ jobs:
             /tmp/valcea-core-v2-apavil-shadow.json
             /tmp/valcea-core-v2-ipj-shadow.json
             /tmp/valcea-core-v2-isu-shadow.json
+            /tmp/valcea-core-v2-municipal-shadow.json
             /tmp/valcea-core-v2-legacy-inventory.json
             /tmp/valcea-core-v2-shadow-candidates.json
             /tmp/valcea-core-v2-site-readback.json
