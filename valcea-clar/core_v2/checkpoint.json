@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.0",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN9-PHOTO-ETA-LIVE-VALIDATED",
+  "schema_version": "2.1",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN10-ISJ-PHOTO-PARTIAL-LIVE-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -28,13 +28,13 @@
     }
   },
   "latest_validated_core_feature_head": {
-    "sha": "732640ade70340308e9d383c7946f059b2728f65",
-    "workflow_run_id": 35355981705,
-    "workflow_run_number": 195,
-    "event": "pull_request",
+    "sha": "40f6ec2f3caf0a932236841abba2fcc3710d3c08",
+    "workflow_run_id": 35358055693,
+    "workflow_run_number": 215,
+    "event": "push",
     "conclusion": "success",
-    "artifact_id": 10552350494,
-    "artifact_sha256": "1ae097cd6e94a343410b4584be934f8b5c49e9d28a5c1e32df8c352e2176b0f1",
+    "artifact_id": 10552896944,
+    "artifact_sha256": "0ea44feed039cd3250565732ce127518fc747737a4ba41ad48d22b2d78d1c3fb",
     "permissions": "contents:read",
     "manual_dispatch": false,
     "production_write_authority": false
@@ -46,20 +46,20 @@
     "bounded eight-source pilot registry is enforced and legacy inventory remains complete with UNKNOWN=0",
     "APAVIL source-to-kernel lane terminates non-material or stale signals NO_STORY instead of manufacturing articles",
     "IPJ/ISU first-party detail evidence, fail-closed geography, material-fact extraction, structured shadow writer and claim integrity remain validated with zero fabricated claims",
-    "Râmnicu Vâlcea municipal register discovery, bounded document-body evidence, materiality adjudication, evidence-bound FactKernel composition and deterministic full shadow writer remain validated",
-    "independent municipal article integrity rejects unsupported prose and all municipal outputs remain non-authoritative",
-    "Core v2 photo truth gate is implemented and wired as a first-class live shadow artifact after IPJ/ISU/municipal writing",
-    "photo truth requires a story-specific real photograph, explicit subject relevance, editor approval, allowed rights basis, HTTPS provenance/direct image, archive disclosure when applicable and external readback when a candidate reaches that stage",
-    "atlas membership, candidate registry membership, synthetic imagery and text-card output never inherit story approval",
-    "live photo truth evaluated six currently verified written shadow candidates and correctly blocked all six because none has a story-specific approved visual; no social success was inferred",
-    "ETA current-material signal lane is implemented and wired as a first-class live shadow artifact; it never promotes a FactKernel or writer package",
-    "ETA cross-card contamination defect was reproduced: site-wide unrelated notices caused selected detail pages to be misclassified; Core v2 now uses selected-title authority plus earliest passenger-impact evidence ordering instead of global page-token precedence",
-    "ETA contamination regressions prove fare notices are not overridden by later service/sales cards, service notices are not overridden by later fare/sales cards, and explicitly irrelevant selected titles remain HOLD",
-    "live ETA rerun after repair evaluated 10 official notices: zero current material signals, seven NO_STORY and three BLOCKED; the July Skayo service window is correctly expired, while open-ended/undated fare-access notices remain currentness-unproven rather than being published",
-    "shadow runtime invariant checks were moved from a large inline workflow assertion block into validate_shadow_runtime.py so GitHub Actions remains a thinner read-only executor",
-    "natural Core v2 run 195 validated compile, truth-bound tests, APAVIL/IPJ/ISU, municipal chain, CJ fail-closed lane, ETA live currentness, photo truth, external replay, runtime invariants and artifact upload",
+    "Râmnicu Vâlcea municipal document evidence -> materiality -> FactKernel -> deterministic full shadow writer remains validated with zero fabricated claims",
+    "ETA current-material signal lane remains fail-closed: 10 notices, zero current material signals, seven NO_STORY and three BLOCKED",
+    "ISJ bounded education lane is implemented and wired as a first-class read-only shadow artifact; sensitive/person-level result projection is forbidden and label dates never become event time",
+    "ISJ Python 3.13 dynamic dataclass loading defect was reproduced and fixed by registering the isolated adapter module before exec_module",
+    "ISJ Unicode /noutăți transport defect was reproduced and fixed by percent-encoding only the already validated Unicode path immediately before HTTP transport, without weakening host/surface/TLS checks",
+    "live ISJ now reaches both official surfaces without source errors; 16 discovered references are all BLOCKED because none carries a verified official document URL/currentness proof sufficient for FactKernel promotion",
+    "Core v2 now has a branch-only visual registry separate from legacy story_visuals so legacy approvals cannot silently grant Core v2 visual readiness",
+    "two municipal stories have explicit archive-context visual assignments to a real CC BY-SA photograph of Râmnicu Vâlcea City Hall with disclosure that the image does not depict the 2026 meeting, spending, operator premises or regulated activity",
+    "external provenance page and direct JPEG readback passed for both approved municipal archive-context assignments",
+    "live photo truth now evaluates six written shadow candidates: two VISUAL_CANDIDATE_VERIFIED_SHADOW and four BLOCKED; no site/social success is inferred from visual preflight",
+    "IPJ, both ISU stories and municipal HCL 344 remain BLOCKED for no story-specific approved visual rather than receiving a generic image",
     "CJ Vâlcea road lane remains fail-closed on verified TLS-chain failure; certificate verification has not been weakened",
-    "Facebook external receipt truth remains uncertified because read-only Graph access lacks the required permission surface"
+    "Facebook external receipt truth remains uncertified because read-only Graph access lacks pages_read_engagement or Page Public Content Access",
+    "natural Core v2 run 215 validated compile, regressions, APAVIL/IPJ/ISU, municipal chain, CJ/ETA/ISJ lanes, branch-only visual registry, external photo provenance probes, external replay, runtime invariants and artifact upload"
   ],
   "pilot_sources": [
     "ipj_valcea",
@@ -102,64 +102,54 @@
       "verified_written_shadow_count": 2,
       "no_story_count": 3,
       "blocked_count": 4,
-      "fabricated_claim_count": 0,
-      "verified_localities": [
-        "Mădulari",
-        "Lăpușata"
-      ]
+      "fabricated_claim_count": 0
     },
     "publication_authority": "NONE",
     "production_writer_ready": false
   },
   "municipal_live_shadow_truth": {
     "latest_official_adopted_date": "2026-09-16",
-    "reference_count": 343,
     "selected_document_count": 3,
     "document_evidence_ready_count": 3,
     "materiality_candidate_count": 3,
-    "materiality_categories": [
-      "LOCAL_PUBLIC_FINANCE",
-      "LOCAL_EDUCATION_ACCESS",
-      "REGULATED_LOCAL_AUTHORIZATION"
-    ],
     "fact_kernel_verified_row_count": 3,
-    "full_article_writer": {
-      "mode": "MUNICIPAL_FULL_EDITORIAL_SHADOW",
-      "implementation_status": "LIVE_CI_VALIDATED",
-      "writer_id": "municipal_shadow_editorial_v1",
-      "verified_written_shadow_row_count": 3,
-      "article_count": 3,
-      "blocked_count": 0,
-      "no_story_count": 0,
-      "fabricated_claim_count": 0,
-      "body_fully_controlled": true,
-      "independent_integrity_status": "PASS",
-      "decision_date_is_not_implementation_time": true,
-      "publication_authority": "NONE",
-      "production_writer_ready": false,
-      "site_publish_allowed": false,
-      "social_publish_allowed": false
-    }
+    "verified_written_shadow_row_count": 3,
+    "article_count": 3,
+    "blocked_count": 0,
+    "no_story_count": 0,
+    "fabricated_claim_count": 0,
+    "publication_authority": "NONE",
+    "production_writer_ready": false,
+    "site_publish_allowed": false,
+    "social_publish_allowed": false
   },
   "photo_truth_live_shadow": {
     "mode": "PHOTO_TRUTH_GATE_SHADOW",
     "candidate_count": 6,
-    "visual_candidate_verified_shadow_count": 0,
-    "blocked_count": 6,
+    "visual_candidate_verified_shadow_count": 2,
+    "blocked_count": 4,
+    "verified_story_ids": [
+      "hcl-343-local-public-finance",
+      "hcl-345-regulated-local-authorization"
+    ],
+    "verified_semantic_relevance": "archive_context",
+    "verified_rights_basis": "creative_commons",
+    "verified_external_provenance_readback": true,
     "blocked_reason_counts": {
-      "no_story_specific_approved_visual": 6
+      "no_story_specific_approved_visual": 4
     },
-    "candidate_sources": {
+    "blocked_sources": {
       "ipj": 1,
       "isu": 2,
-      "municipal": 3
+      "municipal": 1
     },
     "external_probe_enabled": true,
+    "article_binding_verified": false,
     "publication_authority": "NONE",
     "site_publish_allowed": false,
     "social_publish_allowed": false,
     "acceptance_ready": false,
-    "safe_rule": "A photo atlas or generic/context candidate never grants story approval. Each story requires a real rights-cleared photograph with explicit relevance and approval; public article binding remains a later independent readback gate."
+    "safe_rule": "A pre-publication visual candidate is not a delivered article image. Public article binding/readback remains a separate later gate."
   },
   "eta_live_shadow_truth": {
     "mode": "ETA_CURRENT_MATERIAL_SIGNAL_SHADOW",
@@ -167,35 +157,29 @@
     "material_signal_shadow_count": 0,
     "no_story_count": 7,
     "blocked_count": 3,
-    "notable_terminal_results": [
-      {
-        "title": "Comunicat aplicație Skayo AVL",
-        "classification": "SERVICE_ALERT",
-        "state": "NO_STORY",
-        "reason": "explicit_effective_window_expired",
-        "effective_start": "2026-07-17",
-        "effective_end": "2026-07-20"
-      },
-      {
-        "title": "Tarife de transport valabile începând cu data de 01/02/2026",
-        "classification": "FARE_OR_ACCESS_CHANGE",
-        "state": "BLOCKED",
-        "reason": "open_ended_operational_state_requires_fresh_reverification",
-        "effective_start": "2026-02-01"
-      },
-      {
-        "title": "Tutorial obținere online abonamente gratuite de transport pentru elevii din Râmnicu Vâlcea",
-        "classification": "FARE_OR_ACCESS_CHANGE",
-        "state": "BLOCKED",
-        "reason": "passenger_impact_without_explicit_effective_start"
-      }
-    ],
     "fact_kernel_promotion_allowed": false,
     "writer_allowed": false,
     "publication_authority": "NONE",
     "site_publish_allowed": false,
     "social_publish_allowed": false,
     "acceptance_ready": false
+  },
+  "isj_live_shadow_truth": {
+    "mode": "ISJ_CURRENT_MATERIAL_SIGNAL_SHADOW",
+    "signal_count": 16,
+    "material_signal_shadow_count": 0,
+    "no_story_count": 0,
+    "blocked_count": 16,
+    "source_error_count": 0,
+    "sensitive_auto_projection_allowed": false,
+    "dominant_blocker": "official_document_reference_not_verified",
+    "fact_kernel_promotion_allowed": false,
+    "writer_allowed": false,
+    "publication_authority": "NONE",
+    "site_publish_allowed": false,
+    "social_publish_allowed": false,
+    "acceptance_ready": false,
+    "safe_rule": "ISJ category/navigation labels are not current material news and cannot cross into FactKernel until a bounded first-party document/detail reference plus currentness evidence is resolved."
   },
   "cj_road_live_shadow_truth": {
     "status": "BLOCKED_SOURCE_UNAVAILABLE",
@@ -210,21 +194,18 @@
     "site_external_readback_passed": 2,
     "instagram_external_readback_passed": 2,
     "facebook_external_readback_passed": 0,
-    "visual_external_readback_passed": 1,
-    "visual_external_readback_failed": 1,
     "fully_bound_story_transactions": 0,
     "truth_complete_count": 0,
-    "acceptance_ready": false,
-    "blocker_counts": {
-      "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
-      "FACT_KERNEL_EVIDENCE_MISSING": 2,
-      "VISUAL_ARTICLE_BINDING_FAILED": 1
-    }
+    "acceptance_ready": false
   },
   "blocked": [
     {
       "gate": "photo_truth_gate",
-      "reason": "All six current Core v2 verified written shadow candidates are correctly BLOCKED because none has a story-specific approved real photograph. Atlas/candidate availability is not sufficient."
+      "reason": "Four of six current Core v2 written shadow candidates still have no story-specific approved real photograph. The two visual candidates that passed remain pre-publication only and have no public article binding yet."
+    },
+    {
+      "gate": "isj_material_evidence",
+      "reason": "ISJ live discovery reaches the official surfaces but all 16 current references lack a verified official document/detail target plus currentness evidence sufficient for FactKernel promotion."
     },
     {
       "gate": "facebook_receipt_truth",
@@ -233,14 +214,6 @@
     {
       "gate": "cj_road_source_tls",
       "reason": "The bounded official CJ Vâlcea source cannot currently establish a verified TLS chain from the Core runner. Do not disable certificate verification or substitute an unverified/non-first-party mirror."
-    },
-    {
-      "gate": "eta_current_material_signal",
-      "reason": "The ten currently discovered ETA notices contain no independently current material signal eligible to cross into FactKernel. Seven terminate NO_STORY; three remain BLOCKED on currentness/effective-date proof."
-    },
-    {
-      "gate": "legacy_fact_kernel_migration",
-      "reason": "Historical replay candidates lack explicit canonical FactKernel and exact claim-bound article evidence. Legacy prose is intentionally not reverse-engineered into facts."
     },
     {
       "gate": "ten_story_shadow_candidate",
@@ -252,11 +225,12 @@
     }
   ],
   "next": [
-    "build the bounded ISJ lane next: first-party education signal -> currentness/materiality adjudication only; no writer promotion without evidence-complete FactKernel",
-    "for the six current verified IPJ/ISU/municipal shadow articles, search only for story-specific or explicitly disclosed archive-context real photographs with proven reuse rights; do not auto-assign atlas assets and keep each story BLOCKED until approval and external readback succeed",
-    "after a photo candidate passes the pre-publication truth gate, add independent public article image binding/readback; only that later gate may move a production-authorized transaction toward VISUAL_READY",
-    "keep ETA at signal/currentness level until a genuinely current material notice appears; do not manufacture an article from old open-ended fare/access notices",
-    "keep Facebook delivery uncertified until read-only Graph permission is sufficient; do not infer delivery from legacy/internal IDs",
+    "resolve a bounded ISJ second-hop official detail/document lane for the discovered category/reference labels; preserve the current rule that labels alone cannot create a story and sensitive/person-level result documents never auto-project",
+    "build an independent staged article-image binding validator for VISUAL_CANDIDATE_VERIFIED_SHADOW packages; it may prove HTML/package binding in shadow but must not mark SITE_PUBLISHED or VISUAL_READY without a production-authorized public HTTP readback",
+    "continue rights/relevance search for HCL 344 and the IPJ/ISU candidates; do not use generic imagery merely to raise coverage",
+    "consolidate source-lane execution behind the Core v2 orchestrator so GitHub Actions can shrink toward a thin scheduler/executor rather than remain the orchestration graph",
+    "keep ETA at signal/currentness level until a genuinely current material notice appears",
+    "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
     "do not start the ten-story acceptance series until source, kernel, full writer, visual, site and both social receipt gates are independently satisfiable"
   ],
@@ -264,13 +238,15 @@
     "core_contracts": "valcea-clar/core_v2/contracts.py",
     "core_orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
+    "core_visual_registry": "valcea-clar/core_v2/visual_registry.json",
     "photo_truth_tests": "valcea-clar/tests/test_core_v2_visual.py",
+    "visual_registry_tests": "valcea-clar/tests/test_core_v2_visual_registry.py",
     "eta_shadow_lane": "valcea-clar/core_v2/eta_shadow_lane.py",
-    "eta_tests": "valcea-clar/tests/test_core_v2_source_signal.py",
+    "isj_shadow_lane": "valcea-clar/core_v2/isj_shadow_lane.py",
+    "isj_tests": "valcea-clar/tests/test_core_v2_isj_shadow_lane.py",
     "shadow_runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "municipal_materiality_lane": "valcea-clar/core_v2/municipal_materiality_shadow_lane.py",
     "municipal_fact_kernel_lane": "valcea-clar/core_v2/municipal_fact_kernel_shadow_lane.py",
-    "municipal_article_integrity": "valcea-clar/core_v2/municipal_article_integrity.py",
     "municipal_writer_lane": "valcea-clar/core_v2/municipal_writer_shadow_lane.py",
     "public_safety_lane": "valcea-clar/core_v2/public_safety_full_shadow_lane.py",
     "cj_road_lane": "valcea-clar/core_v2/cj_road_shadow_lane.py",
