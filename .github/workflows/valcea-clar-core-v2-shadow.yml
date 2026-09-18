@@ -221,6 +221,9 @@ jobs:
       - name: Verify all shadow runtime invariants
         run: python valcea-clar/core_v2/validate_shadow_runtime.py --base /tmp --repo .
 
+      - name: Prove late-ISJ runtime truth fails closed under tampering
+        run: python valcea-clar/core_v2/validate_shadow_runtime_negative_regressions.py --base /tmp --repo .
+
       - name: Upload shadow evidence
         uses: actions/upload-artifact@v7
         with:
