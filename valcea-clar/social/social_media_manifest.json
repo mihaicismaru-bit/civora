@@ -263,13 +263,11 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 14,
-      "readback_ok": 13,
-      "value": 0.9286,
-      "blocker_story_ids": [
-        "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878"
-      ],
+      "readback_ok": 14,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "babeni-izvorul-dorului-program-20260903",
@@ -324,12 +322,12 @@
         {
           "story_id": "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
           "url": "https://valceaclar.ro/stiri/fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "horezu-autobuze-electrice-energie-verde-20260903",
@@ -416,30 +414,32 @@
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-18T06:47:10.372561Z",
+        "updated_local": "2026-09-18T11:57:59.145412Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 95
+        "public_story_count": 96
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 4,
+      "delivered": 5,
       "eligible": 14,
-      "value": 0.2857,
+      "value": 0.3571,
       "delivered_story_ids": [
         "babeni-izvorul-dorului-program-20260903",
         "balcesti-incendiu-vegetatie-15ha-20260902",
+        "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
         "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
         "rm-valcea-hcl-343-20260916"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 2,
+      "delivered": 3,
       "eligible": 14,
-      "value": 0.1429,
+      "value": 0.2143,
       "delivered_story_ids": [
+        "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
         "maciuca-ziua-regalitatii-2027-colocviu-bjai-20260827",
         "rm-valcea-hcl-343-20260916"
       ]
