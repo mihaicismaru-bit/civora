@@ -5,6 +5,7 @@
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
   "base_main_sha": "64c0c106c3e0c14bb2a78e1c4206f9cf266dc4a0",
+  "validated_core_head_sha": "0644b7812519b195cb75a25f0a463164225d9c16",
   "draft_pr": 1222,
   "done": [
     "fresh main reviewed",
@@ -20,8 +21,11 @@
     "legacy deterministic inventory generator implemented",
     "bounded pilot source registry created",
     "independent read-only HTTP/JSON-LD site readback adapter implemented",
+    "site readback requires route + canonical + story-bound NewsArticle JSON-LD",
     "independent read-only Meta remote-object readback adapter implemented",
-    "12 contract/readback regression tests passed",
+    "claim-to-FactKernel editorial integrity gate implemented",
+    "strict 10-consecutive-story acceptance ledger implemented",
+    "15 contract/readback/integrity regression tests passed in GitHub Actions",
     "shadow isolation check passed with contents:read only",
     "forensic legacy inventory generated as CI artifact"
   ],
@@ -31,15 +35,16 @@
     "REWRITE": 29,
     "UNKNOWN": 125,
     "publication_capable_paths": 82,
-    "artifact_id": 10538545068,
-    "artifact_sha256": "330c9ad6581fbe5c3e7b4684c45e1e6446b5a7775dd47ecf437e5cebee77dfc4"
+    "latest_artifact_id": 10538735622,
+    "latest_artifact_sha256": "50c3d66187af3ec492c58f485a969d259158e5a16bd90b0fdd99420233ccbd89"
   },
   "next": [
     "review and reduce the 125 UNKNOWN inventory items",
     "bind Primaria Ramnicu Valcea and one cultural source to explicit Core v2 adapters",
-    "add claim-to-kernel editorial integrity replay gate",
-    "add 10-story shadow acceptance ledger",
-    "replay selected existing public stories through the independent readback adapters without publishing"
+    "replay selected existing public stories through the independent site readback adapter without publishing",
+    "bind existing Facebook and Instagram receipts to read-only Meta verification in shadow",
+    "build a real shadow transaction ledger from existing canonical evidence",
+    "evaluate the first synthetic-free 10-story shadow candidate set without any live writes"
   ],
   "blocked": [
     {
@@ -54,8 +59,11 @@
     "core_orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "site_readback": "valcea-clar/core_v2/external_readback.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
+    "editorial_integrity": "valcea-clar/core_v2/editorial_integrity.py",
+    "ten_story_gate": "valcea-clar/core_v2/acceptance_ledger.py",
     "core_contract_tests": "valcea-clar/tests/test_core_v2_contracts.py",
     "core_readback_tests": "valcea-clar/tests/test_core_v2_readback.py",
-    "shadow_workflow_run": 35323687419
+    "core_integrity_tests": "valcea-clar/tests/test_core_v2_integrity.py",
+    "validated_shadow_workflow_run": 35323937288
   }
 }
