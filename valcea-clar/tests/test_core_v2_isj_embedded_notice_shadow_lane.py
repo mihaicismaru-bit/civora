@@ -23,6 +23,7 @@ class ISJEmbeddedNoticeShadowLaneTests(unittest.TestCase):
                 "label": "concurs directori 2026",
                 "detail_url": url,
                 "detail_sha256": sha,
+                "visible_title": "ISJ VÂLCEA - concurs directori 2026",
                 "state": "DETAIL_EVIDENCE_SHADOW",
                 "detail_readback_verified": True,
             }],
@@ -44,13 +45,17 @@ class ISJEmbeddedNoticeShadowLaneTests(unittest.TestCase):
         }
         return detail, materiality
 
-    def test_current_year_embedded_catalog_is_evidence_only(self):
-        body = b"""<html><body><h1>CONCURS DIRECTORI 2026</h1>
+    @staticmethod
+    def _current_catalog() -> bytes:
+        return b"""<html><body><h1>CONCURS DIRECTORI 2026</h1>
         <div>Important inscriere concurs Directori.pdf</div>
         <div>LISTA POSTURI CONCURS DIRECTORI 2026.pdf</div>
         <div>OMEC-4622-CALENDAR-CONCURS-DIRECTORI.pdf</div>
         <div>OMEC-4155-Metodologie CONCURS DIRECTORI 2026.pdf</div>
         </body></html>"""
+
+    def test_current_year_embedded_catalog_is_evidence_only(self):
+        body = self._current_catalog()
         detail, materiality = self._reports(body)
         result = resolve_embedded_notice_evidence(detail, materiality, allow_network=True, current_year=2026, fetcher=lambda url: (body, url, "text/html"))
         self.assertEqual(result["embedded_notice_evidence_shadow_count"], 1)
@@ -60,18 +65,34 @@ class ISJEmbeddedNoticeShadowLaneTests(unittest.TestCase):
         self.assertTrue(row["vacancy_list_present"])
         self.assertTrue(row["calendar_document_present"])
         self.assertGreaterEqual(row["current_year_embedded_label_count"], 1)
+        self.assertTrue(row["parent_identity_reverified"])
         self.assertFalse(row["embedded_targets_fetched"])
         self.assertFalse(row["fact_kernel_promotion_allowed"])
         self.assertFalse(row["writer_allowed"])
         self.assertFalse(row["event_time_verified"])
         self.assertFalse(row["deadline_verified"])
 
-    def test_changed_parent_bytes_fail_closed(self):
-        body = b"<html><body>LISTA POSTURI CONCURS DIRECTORI 2026.pdf</body></html>"
+    def test_dynamic_parent_byte_drift_rebinds_only_after_identity_revalidation(self):
+        body = self._current_catalog()
         detail, materiality = self._reports(body)
-        changed = body + b" changed"
+        changed = body.replace(b"</body>", b"<p>Page updated</p></body>")
         result = resolve_embedded_notice_evidence(detail, materiality, allow_network=True, current_year=2026, fetcher=lambda url: (changed, url, "text/html"))
-        self.assertEqual(result["rows"][0]["reason"], "detail_changed_since_verified_evidence")
+        row = result["rows"][0]
+        self.assertEqual(row["state"], "EMBEDDED_NOTICE_EVIDENCE_SHADOW")
+        self.assertTrue(row["parent_bytes_changed_since_detail_gate"])
+        self.assertTrue(row["parent_identity_reverified"])
+        self.assertNotEqual(row["prior_detail_sha256"], row["observed_detail_sha256"])
+        self.assertTrue(row["embedded_parent_evidence_id"].startswith("isj-embedded-parent-"))
+
+    def test_changed_parent_without_identity_anchor_fails_closed(self):
+        body = self._current_catalog()
+        detail, materiality = self._reports(body)
+        changed = b"<html><body><h1>Alta pagina</h1><div>Calendar general.pdf</div></body></html>"
+        result = resolve_embedded_notice_evidence(detail, materiality, allow_network=True, current_year=2026, fetcher=lambda url: (changed, url, "text/html"))
+        row = result["rows"][0]
+        self.assertEqual(row["state"], "BLOCKED")
+        self.assertEqual(row["reason"], "detail_identity_anchor_missing_after_refetch")
+        self.assertFalse(row["parent_identity_reverified"])
 
     def test_external_parent_is_never_fetched(self):
         body = b"<html><body>LISTA POSTURI CONCURS DIRECTORI 2026.pdf</body></html>"
