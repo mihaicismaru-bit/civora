@@ -1,6 +1,6 @@
 {
-  "schema_version": "2.8",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN16-ISJ-WRITER-ARTICLE-INTEGRITY-NATURAL-VALIDATED",
+  "schema_version": "3.0",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN17-ISJ-PHOTO-FAIL-CLOSED-AND-VISUAL-RETRY-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -10,48 +10,44 @@
   "fresh_reread": {
     "main_observed_sha": "6707aa3ffb0d81bd58d1f12bcd3106d3a82f502f",
     "main_observed_message": "Stage PEO calendar candidate state fail-closed",
-    "main_observed_at": "2026-09-18T20:39:35Z",
+    "main_observed_at": "2026-09-18T20:56:10Z",
     "legacy_public_projection": {
       "repo": "mihaicismaru-bit/valcea-clar",
       "main_sha": "b1b20ed298f587cc79bcf457ae4e8ccf12851fca",
+      "message": "sync: reconcile CIVORA canonical stories",
       "observation_only": true
     },
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "11ff78cbb2704073d338fd68d951f705b922dfaa",
-    "workflow_run_id": 35392485606,
-    "workflow_run_number": 386,
+    "sha": "2a4637534576aee0b3a3ca7ea64dcbb2471e70f8",
+    "message": "core v2: make visual readback 429-resilient fail-closed",
+    "workflow_run_id": 35393969300,
+    "workflow_run_number": 394,
     "event": "pull_request",
     "conclusion": "success",
-    "artifact_id": 10566129920,
-    "artifact_sha256": "1e78ca9a72011d2d0a9ef914397138c76aa7d28e9ca3694579005a80bcb97533",
+    "artifact_id": 10567221382,
+    "artifact_sha256": "8b6066465da4d75f3073e763ef94e2175c32391f7da7833dcac3e3a7ee3742c3",
     "manual_dispatch": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 26,
-    "ordered_shadow_failed_stage": null,
-    "new_truth_gates": [
-      "isj_field_materiality",
-      "isj_fact_kernel",
-      "isj_fact_kernel_integrity",
-      "isj_writer",
-      "isj_article_integrity"
-    ]
+    "ordered_shadow_failed_stage": null
   },
   "done": [
     "legacy architecture remains explicitly LEGACY_NOT_PRODUCTION_READY while live legacy automation is left untouched",
     "Core v2 contracts keep source truth, FactKernel, article, visual, site delivery, social delivery, receipts and audit truth separate from workflow success",
     "bounded eight-source pilot and complete KEEP/RETIRE/REWRITE inventory remain enforced with UNKNOWN=0",
-    "single Core v2 orchestrator now executes 26 ordered read-only shadow stages; GitHub Actions remains a thin executor with no deploy, merge, publication or Meta-write authority",
-    "APAVIL/IPJ/ISU/municipal/CJ/ETA/ISJ source lanes remain fail-closed under their previously validated truth contracts",
-    "ISJ field materiality now accepts only exact field_evidence_id-bound values and keeps registration_deadline plus non-normalized schedule ranges excluded",
-    "ISJ materiality promotes exactly one evidence-bound LOCAL_EDUCATION_LEADERSHIP shadow candidate when the verified 2026 vacancy list and future appointment-effective date satisfy currentness rules",
-    "ISJ FactKernel composition now binds two material claims to exactly four accepted field evidence IDs and excludes unverified registration/schedule claims",
-    "a separate ISJ FactKernel integrity gate rejects missing evidence bindings and forbidden invented schedule or registration claims before any writer can run",
-    "the ISJ shadow writer now runs only after FactKernel integrity PASS_SHADOW and creates one deterministic article package without granting publication authority",
-    "a second independent full-article integrity gate reconstructs the allowed headline, dek, claims, evidence bindings and complete body; extra or modified factual prose fails closed",
-    "natural Core v2 run 386 passed the 26-stage live read-only orchestrator including ISJ writer and article-integrity stages with no failed stage",
-    "the validated ISJ article truth state is VERIFIED_WRITTEN_SHADOW only; production_writer_ready, site_publish_allowed and social_publish_allowed all remain false",
+    "single Core v2 orchestrator executes 26 ordered read-only shadow stages; GitHub Actions remains a thin executor with no deploy, merge, publication or Meta-write authority",
+    "APAVIL/IPJ/ISU/municipal/CJ/ETA/ISJ source lanes remain fail-closed under their validated truth contracts",
+    "ISJ field materiality, FactKernel composition and independent FactKernel integrity remain evidence-bound; registration deadline and non-normalized schedule ranges remain excluded",
+    "ISJ deterministic shadow writer runs only after FactKernel integrity PASS_SHADOW and independent full-article integrity reconstructs the complete allowed article before promotion to VERIFIED_WRITTEN_SHADOW",
+    "ISJ writer and article-integrity regressions are now executed by the existing Core v2 CI truth-bound contract test step",
+    "the integrity-verified ISJ article is now supplied to the separate PHOTO truth gate and is correctly BLOCKED because no story-specific approved rights-cleared real photograph exists",
+    "current PHOTO truth report contains 7 written candidates: 2 VISUAL_CANDIDATE_VERIFIED_SHADOW and 5 BLOCKED; the blocked set is current IPJ, both current ISU, HCL 344 and ISJ",
+    "visual external readback now retries HTTP 429 a bounded maximum of three attempts and records attempts/rate_limited while remaining fail-closed; non-429 failures are not retried",
+    "natural Core v2 run 392 validated the ISJ article-to-PHOTO fail-closed routing with 26/26 stages and no failed stage",
+    "natural Core v2 run 394 validated the bounded 429 retry implementation plus all contract tests and the 26-stage live read-only cycle",
+    "shadow site package remains staging-only at 2 candidate bindings, 0 package-binding blocks and public_article_binding_verified=false",
     "no workflow_dispatch, rerun, merge, deploy, live article publication, public projection mutation or Meta write was used"
   ],
   "pilot_sources": [
@@ -73,6 +69,15 @@
     "classification_complete": true,
     "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
   },
+  "source_truth_snapshot": {
+    "apavil": {"signal_count": 132, "no_story_count": 132, "written_count": 0},
+    "ipj": {"detail_count": 8, "verified_written_shadow_count": 1, "no_story_count": 2, "blocked_count": 5, "fabricated_claim_count": 0},
+    "isu": {"detail_count": 9, "verified_written_shadow_count": 2, "no_story_count": 3, "blocked_count": 4, "fabricated_claim_count": 0},
+    "municipal": {"selected_document_count": 3, "materiality_candidate_count": 3, "fact_kernel_count": 3, "verified_written_shadow_count": 3, "fabricated_claim_count": 0},
+    "cj_road": {"state": "BLOCKED_SOURCE_UNAVAILABLE"},
+    "eta": {"signal_count": 10, "no_story_count": 7, "blocked_count": 3, "material_candidate_count": 0},
+    "isj": {"article_truth_state": "VERIFIED_WRITTEN_SHADOW", "verified_article_count": 1, "fabricated_claim_count": 0}
+  },
   "isj_editorial_truth": {
     "contest_session_year_verified_shadow": 2026,
     "vacant_function_count_verified_shadow": 146,
@@ -87,15 +92,40 @@
     "article_integrity_status": "PASS_SHADOW",
     "article_truth_state": "VERIFIED_WRITTEN_SHADOW",
     "verified_article_count": 1,
+    "photo_gate_status": "BLOCKED",
+    "photo_gate_reason": "no_story_specific_approved_visual",
     "fabricated_claim_count": 0,
     "production_writer_ready": false,
     "site_publish_allowed": false,
     "social_publish_allowed": false
   },
   "photo_truth": {
-    "latest_explicit_coverage_snapshot": "2/6",
-    "isj_story_added_to_photo_gate": false,
-    "truth_rule": "A verified article is not VISUAL_READY. ISJ must enter the separate photo truth gate only with a real, semantically relevant, rights-cleared and approved visual; otherwise it must remain BLOCKED."
+    "candidate_count": 7,
+    "visual_candidate_verified_shadow_count": 2,
+    "blocked_count": 5,
+    "latest_explicit_coverage_snapshot": "2/7",
+    "isj_story_added_to_photo_gate": true,
+    "isj_story_id": "isj-directori-2026-conducere-scoli",
+    "isj_status": "BLOCKED",
+    "isj_reason": "no_story_specific_approved_visual",
+    "truth_rule": "A verified article is not VISUAL_READY. Every story requires a story-specific real, semantically relevant, rights-cleared and approved visual plus external readback where enabled; generic or synthetic-as-photo substitutes remain forbidden."
+  },
+  "external_replay_truth": {
+    "candidate_count": 2,
+    "site_readback": {"passed": 2, "failed": 0},
+    "visual_readback": {
+      "passed": 0,
+      "failed": 2,
+      "water_contract": "FAILED_ARTICLE_IMAGE_BINDING",
+      "cet_govora": "FAILED_DIRECT_SOURCE_RATE_LIMIT_AFTER_3_BOUNDED_ATTEMPTS",
+      "rate_limit_is_transient": true
+    },
+    "facebook": {"passed": 0, "failed": 2, "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"},
+    "instagram": {"passed": 2, "failed": 0},
+    "both_channels_verified_count": 0,
+    "externally_verified_receipts": 0,
+    "truth_complete_count": 0,
+    "acceptance_ready": false
   },
   "blocked": [
     {
@@ -104,19 +134,23 @@
     },
     {
       "gate": "isj_photo_truth",
-      "reason": "The newly verified ISJ shadow article has not been supplied to the photo truth gate and has no story-specific approved rights-cleared visual."
+      "reason": "The integrity-verified ISJ article is now evaluated by PHOTO truth and is fail-closed because no story-specific approved rights-cleared real visual exists."
     },
     {
       "gate": "photo_truth_gate",
-      "reason": "Current IPJ and both current ISU stories plus municipal HCL 344 still lack story-specific approved real photographs in the latest explicit coverage snapshot. Generic imagery is forbidden."
+      "reason": "Five of seven current written shadow candidates lack a verified story-specific visual: current IPJ, both current ISU, HCL 344 and ISJ. Generic imagery is forbidden."
+    },
+    {
+      "gate": "historical_visual_replay",
+      "reason": "Run 394 independently observed 0/2 historical visual replay passes: the water-contract article does not bind its expected image; CET Govora direct-source readback remained HTTP 429 after three bounded attempts. The 429 is treated as transient, not as proof of invalid provenance."
     },
     {
       "gate": "facebook_receipt_truth",
-      "reason": "Read-only Graph requests require pages_read_engagement or Page Public Content Access. Internal post IDs remain insufficient delivery proof."
+      "reason": "Read-only Graph requests for both replay candidates return OAuth error 10 requiring pages_read_engagement or Page Public Content Access. Internal post IDs remain insufficient delivery proof."
     },
     {
-      "gate": "historical_replay_truth",
-      "reason": "Historical candidates remain truth-incomplete until FactKernel evidence, visual provenance/article binding and Facebook readback are independently demonstrated."
+      "gate": "historical_fact_kernel_truth",
+      "reason": "Both historical replay candidates still lack sufficient explicit FactKernel evidence binding for Core v2 truth completion."
     },
     {
       "gate": "cj_road_source_tls",
@@ -132,11 +166,12 @@
     }
   ],
   "next": [
-    "execute the new ISJ writer unit test explicitly in the Core v2 CI test step and include ISJ article plus article-integrity JSON in the short-lived evidence artifact",
-    "feed the verified ISJ article into the separate PHOTO truth gate only after a story-specific rights-cleared real visual candidate exists; otherwise preserve BLOCKED rather than use a generic image",
-    "continue deterministic first-party resolution of the ISJ registration deadline without converting OCR output into authoritative facts",
-    "continue rights/relevance search for HCL 344 and current IPJ/ISU candidates without synthetic-as-photo or generic imagery",
-    "repair historical visual replay only from public readback/provenance evidence; do not treat internal binding as success",
+    "add the ISJ writer and article-integrity JSON files to the short-lived Core v2 evidence artifact so full article truth is independently downloadable rather than represented only by cycle summaries",
+    "find and validate a story-specific real rights-cleared visual for the ISJ director-competition article; otherwise preserve PHOTO=BLOCKED",
+    "continue rights/relevance work for HCL 344 and current IPJ/ISU candidates without synthetic-as-photo or generic imagery",
+    "repair the historical water-contract public image binding from external article truth rather than internal manifest state",
+    "keep CET Govora visual provenance fail-closed when the external host remains rate-limited; do not reinterpret 429 as success",
+    "continue deterministic first-party resolution of the ISJ registration deadline without promoting OCR-derived facts",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
     "do not start the 10-story acceptance series until all external truth gates can be independently satisfied and the owner explicitly authorizes cutover"
@@ -148,10 +183,11 @@
     "isj_fact_kernel_integrity": "valcea-clar/core_v2/isj_fact_kernel_integrity.py",
     "isj_writer": "valcea-clar/core_v2/isj_writer_shadow_lane.py",
     "isj_article_integrity": "valcea-clar/core_v2/isj_article_integrity.py",
-    "isj_writer_tests": "valcea-clar/tests/test_core_v2_isj_writer_shadow_lane.py",
+    "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
+    "visual_readback": "valcea-clar/core_v2/visual_readback.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35392485606",
-    "artifact_id": 10566129920,
-    "artifact_sha256": "1e78ca9a72011d2d0a9ef914397138c76aa7d28e9ca3694579005a80bcb97533"
+    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35393969300",
+    "artifact_id": 10567221382,
+    "artifact_sha256": "8b6066465da4d75f3073e763ef94e2175c32391f7da7833dcac3e3a7ee3742c3"
   }
 }
