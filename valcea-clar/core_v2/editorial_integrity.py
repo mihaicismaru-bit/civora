@@ -18,6 +18,10 @@ class IntegrityResult:
         return self.status == "PASS" and self.fabricated_claims == 0
 
 
+def _normalize_claim_text(value: Any) -> str:
+    return " ".join(str(value or "").split()).strip()
+
+
 def validate_editorial_package(kernel: FactKernel, package: dict[str, Any]) -> IntegrityResult:
     kernel.validate()
     errors: list[str] = []
@@ -33,12 +37,13 @@ def validate_editorial_package(kernel: FactKernel, package: dict[str, Any]) -> I
     bound = 0
     fabricated = 0
     evidence_universe = set(kernel.evidence_ids)
+    normalized_kernel_claims = tuple(_normalize_claim_text(value) for value in kernel.claims)
     for idx, row in enumerate(rows):
         if not isinstance(row, dict):
             errors.append(f"claim_{idx}_not_object")
             fabricated += 1
             continue
-        text = str(row.get("text") or "").strip()
+        text = _normalize_claim_text(row.get("text"))
         source_index = row.get("kernel_claim_index")
         evidence_ids = {str(v) for v in row.get("evidence_ids") or [] if str(v)}
         invalid = False
@@ -47,6 +52,9 @@ def validate_editorial_package(kernel: FactKernel, package: dict[str, Any]) -> I
             invalid = True
         if not isinstance(source_index, int) or not 0 <= source_index < len(kernel.claims):
             errors.append(f"claim_{idx}_unbound_kernel_claim")
+            invalid = True
+        elif text and text != normalized_kernel_claims[source_index]:
+            errors.append(f"claim_{idx}_text_mismatch_kernel_claim")
             invalid = True
         if not evidence_ids:
             errors.append(f"claim_{idx}_missing_evidence")
