@@ -42,6 +42,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_public_safety_full_shadow_lane.py
           python valcea-clar/tests/test_core_v2_municipal_reference_shadow_lane.py
           python valcea-clar/tests/test_core_v2_municipal_document_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_cj_road_shadow_lane.py
       - name: Validate bounded eight-source pilot registry
         run: python valcea-clar/core_v2/validate_pilot_sources.py
       - name: Run reused source-adapter fail-closed self-tests
@@ -71,6 +72,8 @@ jobs:
         run: python valcea-clar/core_v2/municipal_reference_shadow_lane.py --live --output /tmp/valcea-core-v2-municipal-shadow.json
       - name: Collect bounded municipal HCL document evidence read-only
         run: python valcea-clar/core_v2/municipal_document_shadow_lane.py --live --output /tmp/valcea-core-v2-municipal-documents.json
+      - name: Run CJ Vâlcea road signal gate read-only
+        run: python valcea-clar/core_v2/cj_road_shadow_lane.py --live --output /tmp/valcea-core-v2-cj-road-shadow.json
       - name: Generate legacy inventory read-only
         run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
       - name: Require complete bounded legacy classification
@@ -131,6 +134,7 @@ jobs:
           isu=json.loads(Path('/tmp/valcea-core-v2-isu-shadow.json').read_text(encoding='utf-8'))
           municipal=json.loads(Path('/tmp/valcea-core-v2-municipal-shadow.json').read_text(encoding='utf-8'))
           municipal_docs=json.loads(Path('/tmp/valcea-core-v2-municipal-documents.json').read_text(encoding='utf-8'))
+          cj_road=json.loads(Path('/tmp/valcea-core-v2-cj-road-shadow.json').read_text(encoding='utf-8'))
           ledger=json.loads(Path('/tmp/valcea-core-v2-shadow-candidates.json').read_text(encoding='utf-8'))
           readback=json.loads(Path('/tmp/valcea-core-v2-site-readback.json').read_text(encoding='utf-8'))
           visual=json.loads(Path('/tmp/valcea-core-v2-visual-readback.json').read_text(encoding='utf-8'))
@@ -180,6 +184,20 @@ jobs:
               for evidence in row.get('evidence') or []:
                   assert evidence.get('material_fact_status') == 'UNADJUDICATED'
                   assert evidence.get('epistemic_status') == 'FIRST_PARTY_DOCUMENT_TEXT'
+          assert cj_road['publication_authority']=='NONE'
+          assert cj_road['acceptance_ready'] is False
+          assert cj_road['fact_kernel_promotion_allowed'] is False
+          assert cj_road['writer_allowed'] is False
+          assert cj_road['production_writer_ready'] is False
+          assert int(cj_road.get('verified_written_shadow_count') or 0) == 0
+          assert int(cj_road.get('fabricated_claim_count') or 0) == 0
+          for row in cj_road.get('rows') or []:
+              assert row.get('state') in {'NO_STORY', 'BLOCKED'}
+              assert row.get('publication_authority') == 'NONE'
+              assert row.get('fact_kernel_promotion_allowed') is False
+              assert row.get('writer_allowed') is False
+              assert 'fact_kernel' not in row
+              assert 'article_package' not in row
           assert ledger['publication_authority']=='NONE'
           assert ledger['acceptance_ready'] is False
           assert readback['publication_authority']=='NONE'
@@ -203,6 +221,7 @@ jobs:
             /tmp/valcea-core-v2-isu-shadow.json
             /tmp/valcea-core-v2-municipal-shadow.json
             /tmp/valcea-core-v2-municipal-documents.json
+            /tmp/valcea-core-v2-cj-road-shadow.json
             /tmp/valcea-core-v2-legacy-inventory.json
             /tmp/valcea-core-v2-shadow-candidates.json
             /tmp/valcea-core-v2-site-readback.json
