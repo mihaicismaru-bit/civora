@@ -123,8 +123,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     """Return the single ordered Core v2 shadow execution plan.
 
     The plan is read-only by contract. It never contains publish, deploy, workflow-dispatch,
-    branch, merge or Meta-write commands. GitHub Actions should eventually invoke only this
-    plan plus independent external audit/replay stages.
+    branch, merge or Meta-write commands. GitHub Actions should invoke only this plan plus
+    independent external audit/replay stages.
     """
     py = sys.executable
     live_flag = ("--live",) if live else ()
@@ -139,6 +139,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     cj = workdir / "valcea-core-v2-cj-road-shadow.json"
     eta = workdir / "valcea-core-v2-eta-shadow.json"
     isj = workdir / "valcea-core-v2-isj-shadow.json"
+    isj_detail = workdir / "valcea-core-v2-isj-detail-shadow.json"
     photo = workdir / "valcea-core-v2-photo-truth.json"
     site_package = workdir / "valcea-core-v2-shadow-site-package.json"
     site_dir = workdir / "valcea-core-v2-shadow-site"
@@ -155,6 +156,17 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("cj_road", (py, "valcea-clar/core_v2/cj_road_shadow_lane.py", *live_flag, "--output", str(cj)), cj),
         CycleStage("eta", (py, "valcea-clar/core_v2/eta_shadow_lane.py", *live_flag, "--limit", "20", "--output", str(eta)), eta),
         CycleStage("isj", (py, "valcea-clar/core_v2/isj_shadow_lane.py", *live_flag, "--output", str(isj)), isj),
+        CycleStage(
+            "isj_detail",
+            (
+                py,
+                "valcea-clar/core_v2/isj_detail_shadow_lane.py",
+                "--input", str(isj),
+                *live_flag,
+                "--output", str(isj_detail),
+            ),
+            isj_detail,
+        ),
         CycleStage(
             "photo_truth",
             (
@@ -200,6 +212,8 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                         "signal_count",
                         "detail_count",
                         "candidate_count",
+                        "selected_material_signal_count",
+                        "detail_evidence_shadow_count",
                         "verified_written_shadow_count",
                         "visual_candidate_verified_shadow_count",
                         "package_image_bound_shadow_count",
