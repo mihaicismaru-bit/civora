@@ -11,7 +11,9 @@ sys.path.insert(0, str(ROOT))
 from isj_article_integrity import verify_isj_article_integrity  # noqa: E402
 from isj_fact_kernel_integrity import verify_fact_kernel_integrity  # noqa: E402
 from isj_fact_kernel_shadow_lane import compose_isj_fact_kernel  # noqa: E402
+from isj_writer_deadline_projection_shadow_lane import build_writer_deadline_projection  # noqa: E402
 from isj_writer_shadow_lane import compose_isj_article  # noqa: E402
+from validate_isj_writer_deadline_projection import validate as validate_writer_deadline_projection  # noqa: E402
 
 
 def field(name, value, evidence_id, state="FIELD_EVIDENCE_VERIFIED_SHADOW"):
@@ -167,6 +169,17 @@ class ISJFactKernelDeadlineCompositionTests(unittest.TestCase):
         self.assertEqual(integrity["fabricated_claim_count"], 0)
         self.assertFalse(integrity["writer_deadline_projection_allowed"])
 
+        projection = build_writer_deadline_projection(fact, integrity)
+        self.assertEqual(projection["state"], "WRITER_PROJECTION_VERIFIED_SHADOW")
+        self.assertEqual(projection["registration_deadline"], "2026-10-02")
+        self.assertTrue(projection["writer_deadline_projection_allowed"])
+        self.assertFalse(projection["writer_allowed"])
+        self.assertFalse(projection["article_projection_allowed"])
+        projection_validation = validate_writer_deadline_projection(fact, integrity, projection)
+        self.assertEqual(projection_validation["status"], "PASS_SHADOW")
+        self.assertTrue(projection_validation["writer_deadline_projection_allowed"])
+        self.assertFalse(projection_validation["article_projection_allowed"])
+
         article = compose_isj_article(fact, integrity)
         self.assertEqual(article["state"], "WRITTEN_SHADOW_PENDING_ARTICLE_INTEGRITY")
         self.assertNotIn("2 octombrie 2026", article["articles"][0]["article_package"]["body"])
@@ -189,6 +202,27 @@ class ISJFactKernelDeadlineCompositionTests(unittest.TestCase):
         integrity = verify_fact_kernel_integrity(fact)
         self.assertEqual(integrity["status"], "BLOCKED")
         self.assertIn("deadline_promoted_fact_missing_independent_upstream_evidence", integrity["failures"])
+
+    def test_writer_projection_gate_fails_closed_when_claim_binding_changes_after_integrity(self):
+        materiality, fields, calendar, promotion, validation = self._inputs()
+        fact = compose_isj_fact_kernel(materiality, fields, calendar, fact_deadline_promotion=promotion, fact_deadline_promotion_validation=validation)
+        integrity = verify_fact_kernel_integrity(fact, promotion, validation)
+        changed = copy.deepcopy(fact)
+        changed["kernels"][0]["promoted_fact_claims"][0]["claim_evidence_ids"][-1] = "detached-fact-promotion-id"
+        projection = build_writer_deadline_projection(changed, integrity)
+        self.assertEqual(projection["state"], "BLOCKED")
+        self.assertFalse(projection["writer_deadline_projection_allowed"])
+        self.assertIn("claim_evidence_binding_mismatch", projection.get("detail", ""))
+
+    def test_independent_writer_projection_validation_rejects_changed_projection_identity(self):
+        materiality, fields, calendar, promotion, validation = self._inputs()
+        fact = compose_isj_fact_kernel(materiality, fields, calendar, fact_deadline_promotion=promotion, fact_deadline_promotion_validation=validation)
+        integrity = verify_fact_kernel_integrity(fact, promotion, validation)
+        projection = build_writer_deadline_projection(fact, integrity)
+        changed = copy.deepcopy(projection)
+        changed["projection_candidates"][0]["page_text_sha256"] = "0" * 64
+        with self.assertRaises(AssertionError):
+            validate_writer_deadline_projection(fact, integrity, changed)
 
 
 if __name__ == "__main__":
