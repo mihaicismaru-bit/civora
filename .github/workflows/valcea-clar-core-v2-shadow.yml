@@ -1,0 +1,315 @@
+name: VÂLCEA CLAR Core v2 Shadow Validation
+
+on:
+  push:
+    branches:
+      - 'rebuild/valcea-clar-core-v2-*'
+    paths:
+      - 'valcea-clar/core_v2/**'
+      - 'valcea-clar/tests/test_core_v2_*.py'
+      - '.github/workflows/valcea-clar-core-v2-shadow.yml'
+  pull_request:
+    paths:
+      - 'valcea-clar/core_v2/**'
+      - 'valcea-clar/tests/test_core_v2_*.py'
+      - '.github/workflows/valcea-clar-core-v2-shadow.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  shadow-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Compile Core v2
+        run: python -m py_compile valcea-clar/core_v2/*.py valcea-clar/tests/test_core_v2_*.py
+
+      - name: Run truth-bound contract tests
+        run: |
+          python valcea-clar/tests/test_core_v2_contracts.py
+          python valcea-clar/tests/test_core_v2_readback.py
+          python valcea-clar/tests/test_core_v2_instagram_visual_identity.py
+          python valcea-clar/tests/test_core_v2_instagram_transform_diagnostic.py
+          python valcea-clar/tests/test_core_v2_integrity.py
+          python valcea-clar/tests/test_core_v2_source_signal.py
+          python valcea-clar/tests/test_core_v2_isj_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_detail_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_materiality_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_embedded_notice_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_embedded_target_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_embedded_content_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_field_evidence_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_context_documents_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_calendar_field_evidence_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_field_materiality_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_fact_kernel_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_isj_writer_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_visual.py
+          python valcea-clar/tests/test_core_v2_visual_registry.py
+          python valcea-clar/tests/test_core_v2_shadow_site_package.py
+          python valcea-clar/tests/test_core_v2_orchestrator.py
+          python valcea-clar/tests/test_core_v2_transactions.py
+          python valcea-clar/tests/test_core_v2_gate_report.py
+          python valcea-clar/tests/test_core_v2_historical_fact_evidence_preflight.py
+          python valcea-clar/tests/test_core_v2_historical_fact_kernel_evidence.py
+          python valcea-clar/tests/test_core_v2_historical_article_claims_evidence.py
+          python valcea-clar/tests/test_core_v2_apavil_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_public_safety_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_public_safety_full_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_municipal_reference_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_municipal_document_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_municipal_materiality_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_municipal_fact_kernel_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_municipal_article_integrity.py
+          python valcea-clar/tests/test_core_v2_municipal_writer_shadow_lane.py
+          python valcea-clar/tests/test_core_v2_cj_road_shadow_lane.py
+
+      - name: Validate bounded eight-source pilot registry
+        run: python valcea-clar/core_v2/validate_pilot_sources.py
+
+      - name: Run reused source-adapter fail-closed self-tests
+        run: |
+          python valcea-clar/scripts/ipj_valcea_news_signal_adapter.py --self-test
+          python valcea-clar/scripts/isu_valcea_local_news_signal_adapter.py --self-test
+          python valcea-clar/scripts/apavil_valcea_signal_adapter.py --self-test
+          python valcea-clar/scripts/ramnicu_valcea_local_council_decision_reference_adapter.py --self-test
+          python valcea-clar/scripts/cj_valcea_roadworks_signal_adapter.py --self-test
+          python valcea-clar/scripts/eta_valcea_signal_adapter.py --self-test
+          python valcea-clar/scripts/isj_valcea_education_signal_adapter.py --self-test
+          python valcea-clar/scripts/filarmonica_valcea_upcoming_event_reference_adapter.py --self-test
+
+      - name: Run reused first-party detail-evidence self-tests
+        run: |
+          python valcea-clar/scripts/ipj_valcea_public_safety_reference_adapter.py --self-test
+          python valcea-clar/scripts/ipj_valcea_public_safety_detail_evidence.py --self-test
+          python valcea-clar/scripts/isu_valcea_emergency_reference_adapter.py --self-test
+          python valcea-clar/scripts/isu_valcea_emergency_detail_evidence.py --self-test
+          python valcea-clar/scripts/isj_valcea_education_reference_adapter.py --self-test
+          python valcea-clar/scripts/isj_valcea_education_detail_evidence.py --self-test
+          python valcea-clar/scripts/council_decision_document_resolver.py --self-test
+
+      - name: Install deterministic PDF and image tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils imagemagick
+          pdftotext -v
+          convert -version
+
+      - name: Run single bounded Core v2 shadow cycle read-only
+        run: |
+          python valcea-clar/core_v2/orchestrator.py \
+            --run-bounded-cycle \
+            --live \
+            --repo-root . \
+            --workdir /tmp \
+            --output /tmp/valcea-core-v2-cycle.json
+
+      - name: Verify ISJ document target and text truth invariants
+        run: |
+          python valcea-clar/core_v2/validate_isj_document_truth.py \
+            --targets /tmp/valcea-core-v2-isj-embedded-target-shadow.json \
+            --contents /tmp/valcea-core-v2-isj-embedded-content-shadow.json
+
+      - name: Verify ISJ field evidence truth invariants
+        run: |
+          python valcea-clar/core_v2/validate_isj_field_truth.py \
+            --fields /tmp/valcea-core-v2-isj-field-evidence-shadow.json
+
+      - name: Verify ISJ context document truth invariants
+        run: |
+          python valcea-clar/core_v2/validate_isj_context_document_truth.py \
+            --context /tmp/valcea-core-v2-isj-context-documents-shadow.json \
+            --year 2026
+
+      - name: Verify ISJ calendar field evidence truth invariants
+        run: |
+          python valcea-clar/core_v2/validate_isj_calendar_field_truth.py \
+            --fields /tmp/valcea-core-v2-isj-calendar-field-evidence-shadow.json \
+            --year 2026
+
+      - name: Verify ISJ field materiality truth invariants
+        run: |
+          python valcea-clar/core_v2/validate_isj_field_materiality_truth.py \
+            --materiality /tmp/valcea-core-v2-isj-field-materiality-shadow.json
+
+      - name: Verify ISJ writer and article integrity truth invariants
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          article = json.loads(Path('/tmp/valcea-core-v2-isj-article-shadow.json').read_text(encoding='utf-8'))
+          integrity = json.loads(Path('/tmp/valcea-core-v2-isj-article-integrity-shadow.json').read_text(encoding='utf-8'))
+
+          assert article.get('publication_authority') == 'NONE'
+          assert article.get('state') == 'WRITTEN_SHADOW_PENDING_ARTICLE_INTEGRITY'
+          assert int(article.get('article_count') or 0) == 1
+          assert article.get('shadow_writer_executed') is True
+          assert article.get('production_writer_ready') is False
+          assert article.get('site_publish_allowed') is False
+          assert article.get('social_publish_allowed') is False
+
+          assert integrity.get('publication_authority') == 'NONE'
+          assert integrity.get('status') == 'PASS_SHADOW'
+          assert integrity.get('article_truth_state') == 'VERIFIED_WRITTEN_SHADOW'
+          assert integrity.get('article_integrity_verified') is True
+          assert int(integrity.get('verified_article_count') or 0) == 1
+          assert int(integrity.get('fabricated_claim_count') or 0) == 0
+          assert integrity.get('production_writer_ready') is False
+          assert integrity.get('site_publish_allowed') is False
+          assert integrity.get('social_publish_allowed') is False
+          print('ISJ writer/article integrity runtime evidence: PASS_SHADOW')
+          PY
+
+      - name: Generate legacy inventory read-only
+        run: python valcea-clar/core_v2/inventory_legacy.py --output /tmp/valcea-core-v2-legacy-inventory.json
+
+      - name: Require complete bounded legacy classification
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          doc=json.loads(Path('/tmp/valcea-core-v2-legacy-inventory.json').read_text(encoding='utf-8'))
+          unknown=doc.get('unknown_paths') or []
+          if unknown:
+              raise SystemExit(f'Legacy inventory still has UNKNOWN items: {unknown}')
+          print(f"Legacy inventory classification complete: {doc['counts']}")
+          PY
+
+      - name: Build non-authoritative shadow replay candidates
+        run: python valcea-clar/core_v2/build_shadow_candidate_ledger.py --output /tmp/valcea-core-v2-shadow-candidates.json
+
+      - name: Replay candidate site truth read-only
+        run: python valcea-clar/core_v2/replay_external_site.py --output /tmp/valcea-core-v2-site-readback.json --limit 10
+
+      - name: Replay candidate visual truth read-only
+        run: python valcea-clar/core_v2/replay_external_visuals.py --output /tmp/valcea-core-v2-visual-readback.json --limit 10
+
+      - name: Replay candidate Meta truth read-only
+        env:
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
+        run: python valcea-clar/core_v2/replay_external_meta.py --output /tmp/valcea-core-v2-meta-readback.json --limit 10
+
+      - name: Bind approved visual identity to Instagram remote pixels read-only
+        run: |
+          python valcea-clar/core_v2/instagram_visual_identity.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --repo-root . \
+            --output /tmp/valcea-core-v2-instagram-visual-identity.json
+
+      - name: Diagnose bounded Instagram crop/reframing near-match read-only
+        run: |
+          python valcea-clar/core_v2/instagram_transform_diagnostic.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --identity /tmp/valcea-core-v2-instagram-visual-identity.json \
+            --repo-root . \
+            --output /tmp/valcea-core-v2-instagram-transform-diagnostic.json
+
+      - name: Bind external evidence into shadow receipt ledger
+        run: |
+          python valcea-clar/core_v2/materialize_shadow_receipts.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --site-readback /tmp/valcea-core-v2-site-readback.json \
+            --visual-readback /tmp/valcea-core-v2-visual-readback.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --instagram-identity /tmp/valcea-core-v2-instagram-visual-identity.json \
+            --output /tmp/valcea-core-v2-shadow-receipts.json
+
+      - name: Verify Instagram visual identity cross-artifact truth
+        run: |
+          python valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --identity /tmp/valcea-core-v2-instagram-visual-identity.json \
+            --receipts /tmp/valcea-core-v2-shadow-receipts.json
+
+      - name: Bind explicit fact and article evidence into shadow transactions
+        run: |
+          python valcea-clar/core_v2/historical_transaction_binding.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --receipts /tmp/valcea-core-v2-shadow-receipts.json \
+            --evidence valcea-clar/editorial/fact_kernel_registry.json \
+            --evidence valcea-clar/editorial/facts_registry.json \
+            --evidence valcea-clar/editorial/editorial_products.json \
+            --output /tmp/valcea-core-v2-shadow-transactions.json \
+            --kernels-output /tmp/valcea-core-v2-historical-fact-kernels.json \
+            --articles-output /tmp/valcea-core-v2-historical-article-claims.json
+
+      - name: Verify historical FactKernel to article claims runtime binding
+        run: |
+          python valcea-clar/core_v2/validate_historical_article_claims_runtime.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --kernels /tmp/valcea-core-v2-historical-fact-kernels.json \
+            --articles /tmp/valcea-core-v2-historical-article-claims.json \
+            --transactions /tmp/valcea-core-v2-shadow-transactions.json
+
+      - name: Classify exact truth blockers
+        run: |
+          python valcea-clar/core_v2/shadow_gate_report.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --receipts /tmp/valcea-core-v2-shadow-receipts.json \
+            --transactions /tmp/valcea-core-v2-shadow-transactions.json \
+            --output /tmp/valcea-core-v2-gate-report.json
+
+      - name: Verify all shadow runtime invariants
+        run: python valcea-clar/core_v2/validate_shadow_runtime.py --base /tmp --repo .
+
+      - name: Prove late-ISJ runtime truth fails closed under tampering
+        run: python valcea-clar/core_v2/validate_shadow_runtime_negative_regressions.py --base /tmp --repo .
+
+      - name: Upload shadow evidence
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-core-v2-shadow-evidence-${{ github.run_id }}
+          path: |
+            /tmp/valcea-core-v2-cycle.json
+            /tmp/valcea-core-v2-apavil-shadow.json
+            /tmp/valcea-core-v2-ipj-shadow.json
+            /tmp/valcea-core-v2-isu-shadow.json
+            /tmp/valcea-core-v2-municipal-shadow.json
+            /tmp/valcea-core-v2-municipal-documents.json
+            /tmp/valcea-core-v2-municipal-materiality.json
+            /tmp/valcea-core-v2-municipal-fact-kernels.json
+            /tmp/valcea-core-v2-municipal-articles.json
+            /tmp/valcea-core-v2-cj-road-shadow.json
+            /tmp/valcea-core-v2-eta-shadow.json
+            /tmp/valcea-core-v2-isj-shadow.json
+            /tmp/valcea-core-v2-isj-detail-shadow.json
+            /tmp/valcea-core-v2-isj-materiality-shadow.json
+            /tmp/valcea-core-v2-isj-embedded-notice-shadow.json
+            /tmp/valcea-core-v2-isj-embedded-target-shadow.json
+            /tmp/valcea-core-v2-isj-embedded-content-shadow.json
+            /tmp/valcea-core-v2-isj-field-evidence-shadow.json
+            /tmp/valcea-core-v2-isj-context-documents-shadow.json
+            /tmp/valcea-core-v2-isj-calendar-field-evidence-shadow.json
+            /tmp/valcea-core-v2-isj-field-materiality-shadow.json
+            /tmp/valcea-core-v2-isj-fact-kernel-shadow.json
+            /tmp/valcea-core-v2-isj-fact-kernel-integrity-shadow.json
+            /tmp/valcea-core-v2-isj-article-shadow.json
+            /tmp/valcea-core-v2-isj-article-integrity-shadow.json
+            /tmp/valcea-core-v2-photo-truth.json
+            /tmp/valcea-core-v2-shadow-site-package.json
+            /tmp/valcea-core-v2-shadow-site/**
+            /tmp/valcea-core-v2-legacy-inventory.json
+            /tmp/valcea-core-v2-shadow-candidates.json
+            /tmp/valcea-core-v2-site-readback.json
+            /tmp/valcea-core-v2-visual-readback.json
+            /tmp/valcea-core-v2-meta-readback.json
+            /tmp/valcea-core-v2-instagram-visual-identity.json
+            /tmp/valcea-core-v2-instagram-transform-diagnostic.json
+            /tmp/valcea-core-v2-shadow-receipts.json
+            /tmp/valcea-core-v2-historical-fact-kernels.json
+            /tmp/valcea-core-v2-historical-article-claims.json
+            /tmp/valcea-core-v2-shadow-transactions.json
+            /tmp/valcea-core-v2-gate-report.json
+          if-no-files-found: error
+          retention-days: 3

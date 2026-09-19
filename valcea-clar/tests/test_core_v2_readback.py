@@ -1,0 +1,285 @@
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1] / "core_v2"
+sys.path.insert(0, str(ROOT))
+
+from build_shadow_candidate_ledger import _canonical_visual_binding
+from external_readback import inspect_html
+from meta_readback import (
+    _image_response_ok,
+    _instagram_image_candidates,
+    parse_meta_error_body,
+    parse_meta_object,
+)
+from visual_readback import (
+    _classify_visual_truth_failure,
+    _effective_direct_source_status,
+    inspect_provenance_asset,
+)
+
+
+class ExternalReadbackTest(unittest.TestCase):
+    def test_site_readback_requires_route_canonical_and_newsarticle(self):
+        html = """
+        <html><head>
+        <link rel="canonical" href="https://valceaclar.ro/stiri/test-story/">
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"NewsArticle","url":"https://valceaclar.ro/stiri/test-story/","headline":"Test"}
+        </script>
+        </head><body>ok</body></html>
+        """
+        result = inspect_html(
+            html,
+            requested_url="https://valceaclar.ro/stiri/test-story/",
+            final_url="https://valceaclar.ro/stiri/test-story/",
+            expected_story_id="test-story",
+        )
+        self.assertTrue(result["readback_ok"])
+        self.assertEqual(result["newsarticle_count"], 1)
+
+    def test_site_readback_rejects_wrong_canonical(self):
+        html = """
+        <html><head>
+        <link rel="canonical" href="https://valceaclar.ro/stiri/other-story/">
+        <script type="application/ld+json">{"@type":"NewsArticle"}</script>
+        </head></html>
+        """
+        result = inspect_html(
+            html,
+            requested_url="https://valceaclar.ro/stiri/test-story/",
+            final_url="https://valceaclar.ro/stiri/test-story/",
+            expected_story_id="test-story",
+        )
+        self.assertFalse(result["readback_ok"])
+
+    def test_meta_readback_requires_matching_remote_id_and_permalink(self):
+        ok = parse_meta_object(
+            "facebook",
+            "123_456",
+            {"id": "123_456", "permalink_url": "https://facebook.example/posts/456"},
+        )
+        self.assertTrue(ok["readback_ok"])
+        self.assertTrue(ok["object_readback_ok"])
+        bad = parse_meta_object(
+            "facebook",
+            "123_456",
+            {"id": "999", "permalink_url": "https://facebook.example/posts/999"},
+        )
+        self.assertFalse(bad["readback_ok"])
+
+    def test_instagram_readback_accepts_permalink_field(self):
+        result = parse_meta_object(
+            "instagram",
+            "180000",
+            {
+                "id": "180000",
+                "permalink": "https://instagram.example/p/abc",
+                "media_type": "IMAGE",
+                "media_url": "https://scontent.example/image.jpg",
+            },
+        )
+        self.assertTrue(result["readback_ok"])
+        self.assertTrue(result["object_readback_ok"])
+        self.assertEqual(result["media_type"], "IMAGE")
+        self.assertEqual(result["remote_media_url"], "https://scontent.example/image.jpg")
+        self.assertEqual(result["publication_authority"], "NONE")
+
+    def test_instagram_single_image_candidate_is_bounded(self):
+        candidates = _instagram_image_candidates(
+            {
+                "id": "180000",
+                "media_type": "IMAGE",
+                "media_url": "https://scontent.example/image.jpg",
+            }
+        )
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["location"], "parent")
+        self.assertEqual(candidates[0]["remote_id"], "180000")
+
+    def test_instagram_carousel_extracts_only_https_image_children(self):
+        candidates = _instagram_image_candidates(
+            {
+                "id": "180parent",
+                "media_type": "CAROUSEL_ALBUM",
+                "children": {
+                    "data": [
+                        {"id": "1", "media_type": "IMAGE", "media_url": "https://scontent.example/one.jpg"},
+                        {"id": "2", "media_type": "VIDEO", "media_url": "https://scontent.example/two.mp4"},
+                        {"id": "3", "media_type": "IMAGE", "media_url": "http://insecure.example/three.jpg"},
+                        {"id": "4", "media_type": "IMAGE", "media_url": "https://scontent.example/four.jpg"},
+                    ]
+                },
+            }
+        )
+        self.assertEqual([row["remote_id"] for row in candidates], ["1", "4"])
+        self.assertTrue(all(row["location"] == "carousel_child" for row in candidates))
+
+    def test_instagram_non_image_media_does_not_manufacture_visual_truth(self):
+        self.assertEqual(
+            _instagram_image_candidates(
+                {"id": "180video", "media_type": "VIDEO", "media_url": "https://scontent.example/video.mp4"}
+            ),
+            [],
+        )
+        self.assertEqual(
+            _instagram_image_candidates(
+                {"id": "180image", "media_type": "IMAGE", "media_url": ""}
+            ),
+            [],
+        )
+
+    def test_remote_media_truth_accepts_only_http_image_payload(self):
+        self.assertTrue(_image_response_ok(200, "image/jpeg"))
+        self.assertTrue(_image_response_ok(206, "image/webp"))
+        self.assertFalse(_image_response_ok(200, "text/html"))
+        self.assertFalse(_image_response_ok(302, "image/jpeg"))
+        self.assertFalse(_image_response_ok(None, "image/jpeg"))
+
+    def test_meta_error_body_keeps_diagnostic_without_token(self):
+        detail = parse_meta_error_body(
+            b'{"error":{"message":"Unsupported get request","type":"GraphMethodException","code":100,"error_subcode":33,"fbtrace_id":"abc"}}'
+        )
+        self.assertEqual(detail["error_code"], 100)
+        self.assertEqual(detail["error_subcode"], 33)
+        self.assertEqual(detail["error_type"], "GraphMethodException")
+        self.assertEqual(detail["error_message"], "Unsupported get request")
+        self.assertNotIn("access_token", detail)
+
+    def test_commons_provenance_jsonld_binds_exact_direct_asset_and_license(self):
+        html = """
+        <html><head>
+        <script type="application/ld+json">
+        {"@context":"https://schema.org","@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/a/a8/CET_Govora_%28dinspre_nord-vest%29.JPG?utm_source=commons.wikimedia.org","license":"https://creativecommons.org/licenses/by-sa/3.0","name":"CET Govora"}
+        </script>
+        </head></html>
+        """
+        result = inspect_provenance_asset(
+            html,
+            expected_direct_url="https://upload.wikimedia.org/wikipedia/commons/a/a8/CET_Govora_%28dinspre_nord-vest%29.JPG",
+        )
+        self.assertTrue(result["asset_identity_ok"])
+        self.assertTrue(result["license_present"])
+        self.assertEqual(result["matching_imageobject_count"], 1)
+
+    def test_commons_provenance_jsonld_rejects_wrong_asset(self):
+        html = """
+        <script type="application/ld+json">
+        {"@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/x/x1/Other.JPG","license":"https://creativecommons.org/licenses/by/4.0"}
+        </script>
+        """
+        result = inspect_provenance_asset(
+            html,
+            expected_direct_url="https://upload.wikimedia.org/wikipedia/commons/a/a8/CET_Govora_%28dinspre_nord-vest%29.JPG",
+        )
+        self.assertFalse(result["asset_identity_ok"])
+        self.assertFalse(result["license_present"])
+
+    def test_direct_429_fallback_is_narrow_to_verified_wikimedia_asset(self):
+        ok, reason = _effective_direct_source_status(
+            source_url="https://commons.wikimedia.org/wiki/File:CET_Govora_(dinspre_nord-vest).JPG",
+            direct_source_url="https://upload.wikimedia.org/wikipedia/commons/a/a8/CET_Govora_%28dinspre_nord-vest%29.JPG",
+            direct_source={"readback_ok": False, "rate_limited": True, "http_status": 429},
+            provenance_asset={"asset_identity_ok": True, "license_present": True},
+        )
+        self.assertTrue(ok)
+        self.assertEqual(reason, "wikimedia_commons_source_page_identity_fallback_for_direct_429")
+
+        bad, bad_reason = _effective_direct_source_status(
+            source_url="https://example.com/source",
+            direct_source_url="https://example.com/image.jpg",
+            direct_source={"readback_ok": False, "rate_limited": True, "http_status": 429},
+            provenance_asset={"asset_identity_ok": True, "license_present": True},
+        )
+        self.assertFalse(bad)
+        self.assertIsNone(bad_reason)
+
+    def test_visual_failure_classifies_reachable_article_without_approved_image_as_content_absence(self):
+        state, domain = _classify_visual_truth_failure(
+            internal_gate=True,
+            article={"readback_ok": True},
+            article_binding={"article_image_bound": False},
+            public_image={"readback_ok": False},
+            provenance_source={"readback_ok": True},
+            direct_source_effective_ok=True,
+        )
+        self.assertEqual(state, "SITE_APPROVED_VISUAL_ABSENT")
+        self.assertEqual(domain, "SITE_CONTENT")
+
+    def test_visual_failure_keeps_site_transport_distinct_from_content_absence(self):
+        state, domain = _classify_visual_truth_failure(
+            internal_gate=True,
+            article={"readback_ok": False},
+            article_binding={"article_image_bound": False},
+            public_image={"readback_ok": False},
+            provenance_source={"readback_ok": True},
+            direct_source_effective_ok=True,
+        )
+        self.assertEqual(state, "SITE_ARTICLE_TRANSPORT_FAILURE")
+        self.assertEqual(domain, "SITE_TRANSPORT")
+
+    def test_visual_failure_keeps_provenance_transport_distinct_from_site_absence(self):
+        state, domain = _classify_visual_truth_failure(
+            internal_gate=True,
+            article={"readback_ok": True},
+            article_binding={"article_image_bound": True},
+            public_image={"readback_ok": True},
+            provenance_source={"readback_ok": False},
+            direct_source_effective_ok=False,
+        )
+        self.assertEqual(state, "PROVENANCE_SOURCE_TRANSPORT_FAILURE")
+        self.assertEqual(domain, "PROVENANCE_TRANSPORT")
+
+    def test_canonical_visual_binding_requires_same_asset_source_rights_and_verified_provenance(self):
+        source_url = "https://commons.wikimedia.org/wiki/File:Expected.jpg"
+        result = _canonical_visual_binding(
+            expected_image_path="valcea-clar/social/photos/approved/expected.jpg",
+            visual_source_url=source_url,
+            visual_rights_basis="creative_commons",
+            real_visual=True,
+            manifest_image={
+                "public_url": "https://valceaclar.ro/media/social/expected.jpg",
+                "source_url": source_url,
+                "rights_basis": "creative_commons",
+                "provenance_status": "VERIFIED",
+            },
+        )
+        self.assertEqual(result["canonical_site_visual_binding_state"], "CONSISTENT")
+        self.assertTrue(result["canonical_site_image_bound"])
+        self.assertTrue(result["canonical_site_visual_filename_match"])
+        self.assertTrue(result["canonical_site_visual_source_match"])
+        self.assertTrue(result["canonical_site_visual_rights_match"])
+        self.assertTrue(result["canonical_site_visual_provenance_verified"])
+
+    def test_canonical_visual_binding_detects_social_visual_present_but_site_unbound(self):
+        result = _canonical_visual_binding(
+            expected_image_path="valcea-clar/social/photos/approved/expected.jpg",
+            visual_source_url="https://commons.wikimedia.org/wiki/File:Expected.jpg",
+            visual_rights_basis="creative_commons",
+            real_visual=True,
+            manifest_image=None,
+        )
+        self.assertEqual(result["canonical_site_visual_binding_state"], "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND")
+        self.assertFalse(result["canonical_site_image_bound"])
+
+    def test_canonical_visual_binding_detects_different_site_asset(self):
+        source_url = "https://commons.wikimedia.org/wiki/File:Expected.jpg"
+        result = _canonical_visual_binding(
+            expected_image_path="valcea-clar/social/photos/approved/expected.jpg",
+            visual_source_url=source_url,
+            visual_rights_basis="creative_commons",
+            real_visual=True,
+            manifest_image={
+                "public_url": "https://valceaclar.ro/media/social/other.jpg",
+                "source_url": source_url,
+                "rights_basis": "creative_commons",
+                "provenance_status": "VERIFIED",
+            },
+        )
+        self.assertEqual(result["canonical_site_visual_binding_state"], "SITE_BOUND_DIFFERENT_ASSET")
+        self.assertFalse(result["canonical_site_visual_filename_match"])
+
+
+if __name__ == "__main__":
+    unittest.main()
