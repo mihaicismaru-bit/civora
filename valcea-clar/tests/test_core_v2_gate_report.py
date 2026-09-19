@@ -21,11 +21,24 @@ def candidate(story_id: str, state: str = "CONSISTENT") -> dict:
     }
 
 
+def visual_receipt(state: str = "CONSISTENT", *, verified: bool = True, article_bound: bool = True) -> dict:
+    return {
+        "status": "VERIFIED" if verified else "FAILED",
+        "readback_ok": verified,
+        "article_image_bound": article_bound,
+        "public_image_readback_ok": verified,
+        "provenance_source_readback_ok": True,
+        "direct_source_readback_ok": True,
+        "canonical_site_visual_binding_state": state,
+    }
+
+
 class ShadowGateReportTests(unittest.TestCase):
     def test_exact_permission_visual_and_kernel_blockers(self) -> None:
+        state = "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND"
         candidates = {
             "first_ten_candidate_ids": ["story-a"],
-            "rows": [candidate("story-a", "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND")],
+            "rows": [candidate("story-a", state)],
         }
         receipts = {
             "rows": [
@@ -33,14 +46,7 @@ class ShadowGateReportTests(unittest.TestCase):
                     "story_id": "story-a",
                     "receipts": {
                         "site": {"status": "DELIVERED", "readback_ok": True},
-                        "visual": {
-                            "status": "FAILED",
-                            "readback_ok": False,
-                            "article_image_bound": False,
-                            "public_image_readback_ok": False,
-                            "provenance_source_readback_ok": True,
-                            "direct_source_readback_ok": True,
-                        },
+                        "visual": visual_receipt(state, verified=False, article_bound=False),
                         "facebook": {
                             "status": "FAILED",
                             "readback_ok": False,
@@ -64,11 +70,13 @@ class ShadowGateReportTests(unittest.TestCase):
         row = report["rows"][0]
         self.assertEqual(row["truth_state"], "BLOCKED")
         self.assertIn("CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE", row["blockers"])
+        self.assertNotIn("CROSS_SURFACE_VISUAL_BINDING_STATE_MISMATCH", row["blockers"])
         self.assertIn("VISUAL_ARTICLE_BINDING_FAILED", row["blockers"])
         self.assertIn("FACEBOOK_READBACK_PERMISSION_MISSING", row["blockers"])
         self.assertIn("FACT_KERNEL_EVIDENCE_MISSING", row["blockers"])
         self.assertIn("META_READ_PERMISSION_CONFIGURATION_REQUIRED", row["owner_actions"])
-        self.assertEqual(row["canonical_site_visual_binding_state"], "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND")
+        self.assertEqual(row["canonical_site_visual_binding_state"], state)
+        self.assertTrue(row["canonical_site_visual_binding_state_match"])
         self.assertFalse(report["acceptance_ready"])
 
     def test_fully_bound_replay_can_be_truth_complete_without_granting_acceptance(self) -> None:
@@ -82,14 +90,7 @@ class ShadowGateReportTests(unittest.TestCase):
                     "story_id": "story-b",
                     "receipts": {
                         "site": {"status": "DELIVERED", "readback_ok": True},
-                        "visual": {
-                            "status": "VERIFIED",
-                            "readback_ok": True,
-                            "article_image_bound": True,
-                            "public_image_readback_ok": True,
-                            "provenance_source_readback_ok": True,
-                            "direct_source_readback_ok": True,
-                        },
+                        "visual": visual_receipt(),
                         "facebook": {"status": "DELIVERED", "readback_ok": True},
                         "instagram": {"status": "DELIVERED", "readback_ok": True},
                     },
@@ -110,6 +111,7 @@ class ShadowGateReportTests(unittest.TestCase):
         self.assertEqual(report["rows"][0]["blockers"], [])
         self.assertEqual(report["rows"][0]["truth_state"], "REPLAY_TRUTH_COMPLETE")
         self.assertEqual(report["rows"][0]["canonical_site_visual_binding_state"], "CONSISTENT")
+        self.assertTrue(report["rows"][0]["canonical_site_visual_binding_state_match"])
         self.assertFalse(report["acceptance_ready"])
         self.assertEqual(report["publication_authority"], "NONE")
 
@@ -124,7 +126,7 @@ class ShadowGateReportTests(unittest.TestCase):
                     "story_id": "story-missing",
                     "receipts": {
                         "site": {"status": "DELIVERED", "readback_ok": True},
-                        "visual": {"status": "VERIFIED", "readback_ok": True},
+                        "visual": visual_receipt(""),
                         "facebook": {"status": "DELIVERED", "readback_ok": True},
                         "instagram": {"status": "DELIVERED", "readback_ok": True},
                     },
@@ -148,7 +150,7 @@ class ShadowGateReportTests(unittest.TestCase):
                     "story_id": "story-not-ready",
                     "receipts": {
                         "site": {"status": "DELIVERED", "readback_ok": True},
-                        "visual": {"status": "VERIFIED", "readback_ok": True},
+                        "visual": visual_receipt("NOT_READY"),
                         "facebook": {"status": "DELIVERED", "readback_ok": True},
                         "instagram": {"status": "DELIVERED", "readback_ok": True},
                     },
@@ -158,6 +160,31 @@ class ShadowGateReportTests(unittest.TestCase):
         transactions = {"rows": [{"story_id": "story-not-ready", "terminal_reason": None}]}
         report = build_report(candidates, receipts, transactions)
         self.assertIn("CROSS_SURFACE_VISUAL_BINDING_NOT_READY", report["rows"][0]["blockers"])
+
+    def test_binding_state_mismatch_between_candidate_and_receipt_fails_closed(self) -> None:
+        candidates = {
+            "first_ten_candidate_ids": ["story-drift"],
+            "rows": [candidate("story-drift", "CONSISTENT")],
+        }
+        receipts = {
+            "rows": [
+                {
+                    "story_id": "story-drift",
+                    "receipts": {
+                        "site": {"status": "DELIVERED", "readback_ok": True},
+                        "visual": visual_receipt("SOCIAL_VISUAL_PRESENT_SITE_UNBOUND"),
+                        "facebook": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": {"status": "DELIVERED", "readback_ok": True},
+                    },
+                }
+            ]
+        }
+        transactions = {"rows": [{"story_id": "story-drift", "terminal_reason": None}]}
+        report = build_report(candidates, receipts, transactions)
+        row = report["rows"][0]
+        self.assertIn("CROSS_SURFACE_VISUAL_BINDING_STATE_MISMATCH", row["blockers"])
+        self.assertFalse(row["canonical_site_visual_binding_state_match"])
+        self.assertEqual(row["truth_state"], "BLOCKED")
 
     def test_generic_facebook_failure_is_not_misclassified_as_permission(self) -> None:
         candidates = {
@@ -170,7 +197,7 @@ class ShadowGateReportTests(unittest.TestCase):
                     "story_id": "story-c",
                     "receipts": {
                         "site": {"status": "DELIVERED", "readback_ok": True},
-                        "visual": {"status": "VERIFIED", "readback_ok": True},
+                        "visual": visual_receipt(),
                         "facebook": {
                             "status": "FAILED",
                             "readback_ok": False,
@@ -188,6 +215,7 @@ class ShadowGateReportTests(unittest.TestCase):
         self.assertIn("FACEBOOK_READBACK_FAILED", blockers)
         self.assertNotIn("FACEBOOK_READBACK_PERMISSION_MISSING", blockers)
         self.assertNotIn("CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE", blockers)
+        self.assertNotIn("CROSS_SURFACE_VISUAL_BINDING_STATE_MISMATCH", blockers)
 
 
 if __name__ == "__main__":
