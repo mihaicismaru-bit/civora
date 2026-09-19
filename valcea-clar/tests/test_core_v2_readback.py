@@ -7,7 +7,7 @@ sys.path.insert(0, str(ROOT))
 
 from build_shadow_candidate_ledger import _canonical_visual_binding
 from external_readback import inspect_html
-from meta_readback import parse_meta_error_body, parse_meta_object
+from meta_readback import _image_response_ok, parse_meta_error_body, parse_meta_object
 from visual_readback import _effective_direct_source_status, inspect_provenance_asset
 
 
@@ -52,6 +52,7 @@ class ExternalReadbackTest(unittest.TestCase):
             {"id": "123_456", "permalink_url": "https://facebook.example/posts/456"},
         )
         self.assertTrue(ok["readback_ok"])
+        self.assertTrue(ok["object_readback_ok"])
         bad = parse_meta_object(
             "facebook",
             "123_456",
@@ -63,10 +64,25 @@ class ExternalReadbackTest(unittest.TestCase):
         result = parse_meta_object(
             "instagram",
             "180000",
-            {"id": "180000", "permalink": "https://instagram.example/p/abc"},
+            {
+                "id": "180000",
+                "permalink": "https://instagram.example/p/abc",
+                "media_type": "IMAGE",
+                "media_url": "https://scontent.example/image.jpg",
+            },
         )
         self.assertTrue(result["readback_ok"])
+        self.assertTrue(result["object_readback_ok"])
+        self.assertEqual(result["media_type"], "IMAGE")
+        self.assertEqual(result["remote_media_url"], "https://scontent.example/image.jpg")
         self.assertEqual(result["publication_authority"], "NONE")
+
+    def test_remote_media_truth_accepts_only_http_image_payload(self):
+        self.assertTrue(_image_response_ok(200, "image/jpeg"))
+        self.assertTrue(_image_response_ok(206, "image/webp"))
+        self.assertFalse(_image_response_ok(200, "text/html"))
+        self.assertFalse(_image_response_ok(302, "image/jpeg"))
+        self.assertFalse(_image_response_ok(None, "image/jpeg"))
 
     def test_meta_error_body_keeps_diagnostic_without_token(self):
         detail = parse_meta_error_body(
