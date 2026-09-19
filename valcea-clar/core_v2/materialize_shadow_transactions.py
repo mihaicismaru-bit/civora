@@ -7,6 +7,7 @@ from typing import Any, Iterable
 
 from contracts import ContractViolation, FactKernel
 from editorial_integrity import validate_editorial_package
+from historical_fact_evidence_preflight import build as build_historical_fact_preflight
 
 REQUIRED_KERNEL_KEYS = (
     "what",
@@ -125,10 +126,21 @@ def _kernel_from_dict(data: dict[str, Any]) -> FactKernel:
     )
 
 
+def _preflight_index(preflight: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    if not isinstance(preflight, dict):
+        return {}
+    return {
+        str(row.get("story_id") or ""): row
+        for row in preflight.get("rows") or []
+        if isinstance(row, dict) and str(row.get("story_id") or "").strip()
+    }
+
+
 def materialize(
     candidates: dict[str, Any],
     receipts: dict[str, Any],
     evidence_documents: list[tuple[str, Any]],
+    fact_preflight: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     candidate_ids = set(candidates.get("first_ten_candidate_ids") or [])
     candidates_by_id = {
@@ -141,6 +153,7 @@ def materialize(
         for row in receipts.get("rows") or []
         if isinstance(row, dict) and row.get("story_id")
     }
+    preflight_by_id = _preflight_index(fact_preflight)
 
     rows: list[dict[str, Any]] = []
     fully_bound = 0
@@ -148,6 +161,7 @@ def materialize(
         candidate = candidates_by_id.get(story_id) or {}
         receipt_row = receipt_by_id.get(story_id) or {}
         evidence = find_explicit_evidence(story_id, evidence_documents)
+        preflight_row = preflight_by_id.get(story_id) or {}
         result: dict[str, Any] = {
             "story_id": story_id,
             "publication_authority": "NONE",
@@ -155,6 +169,14 @@ def materialize(
             "fact_kernel_source": evidence.get("kernel_source"),
             "article_package_source": evidence.get("article_source"),
             "matched_structured_record_count": evidence.get("matched_record_count", 0),
+            "historical_fact_preflight_state": preflight_row.get("state"),
+            "historical_fact_preflight_promotion_allowed": preflight_row.get("promotion_allowed") is True,
+            "historical_legacy_verified_fact_record_present": preflight_row.get("legacy_verified_fact_record_present") is True,
+            "historical_explicit_core_v2_fact_kernel_present": preflight_row.get("explicit_core_v2_fact_kernel_present") is True,
+            "historical_t1_source_count": int(preflight_row.get("t1_source_count") or 0),
+            "historical_t1_source_readback_passed": int(preflight_row.get("t1_source_readback_passed") or 0),
+            "historical_all_t1_sources_readback_ok": preflight_row.get("all_t1_sources_readback_ok") is True,
+            "historical_source_readback": preflight_row.get("source_readback") or [],
             "external_receipt_truth": receipt_row.get("external_delivery_truth") or "BLOCKED",
             "external_receipts": receipt_row.get("receipts") or {},
             "state": "BLOCKED",
@@ -220,13 +242,26 @@ def materialize(
         fully_bound += 1
         rows.append(result)
 
+    preflight_summary = None
+    if isinstance(fact_preflight, dict):
+        preflight_summary = {
+            "schema_version": fact_preflight.get("schema_version"),
+            "candidate_count": fact_preflight.get("candidate_count"),
+            "source_readback_story_count": fact_preflight.get("source_readback_story_count"),
+            "explicit_core_v2_fact_kernel_story_count": fact_preflight.get("explicit_core_v2_fact_kernel_story_count"),
+            "state_counts": fact_preflight.get("state_counts") or {},
+            "publication_authority": fact_preflight.get("publication_authority"),
+            "promotion_allowed": fact_preflight.get("promotion_allowed") is True,
+        }
+
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "SHADOW_TRANSACTION_REPLAY",
         "publication_authority": "NONE",
-        "truth_rule": "Fact kernels and article claims must already exist as explicit structured evidence; rendered article prose is never reverse-engineered into facts.",
+        "truth_rule": "Fact kernels and article claims must already exist as explicit structured evidence; rendered article prose is never reverse-engineered into facts. Legacy fact/source preflight is read-only and cannot promote legacy records into a Core v2 FactKernel.",
         "candidate_count": len(rows),
         "fully_bound_replay_count": fully_bound,
+        "historical_fact_preflight": preflight_summary,
         "acceptance_ready": False,
         "rows": rows,
     }
@@ -239,14 +274,32 @@ def main() -> int:
     parser.add_argument("--evidence", action="append", default=[])
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
+    candidates = _load(args.candidates)
+    receipts = _load(args.receipts)
     documents = [(path, _load(path)) for path in args.evidence]
-    result = materialize(_load(args.candidates), _load(args.receipts), documents)
+    facts_document = next(
+        (document for source_name, document in documents if Path(source_name).name == "facts_registry.json" and isinstance(document, dict)),
+        None,
+    )
+    fact_preflight = build_historical_fact_preflight(candidates, facts_document) if isinstance(facts_document, dict) else None
+    result = materialize(candidates, receipts, documents, fact_preflight=fact_preflight)
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     reasons: dict[str, int] = {}
     for row in result["rows"]:
         reason = str(row.get("terminal_reason") or "AUDIT_REPLAY_READY")
         reasons[reason] = reasons.get(reason, 0) + 1
-    print(json.dumps({"candidate_count": result["candidate_count"], "fully_bound_replay_count": result["fully_bound_replay_count"], "reasons": reasons, "acceptance_ready": False}, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "candidate_count": result["candidate_count"],
+                "fully_bound_replay_count": result["fully_bound_replay_count"],
+                "historical_fact_preflight": result.get("historical_fact_preflight"),
+                "reasons": reasons,
+                "acceptance_ready": False,
+            },
+            sort_keys=True,
+        )
+    )
     return 0
 
 
