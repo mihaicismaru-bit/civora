@@ -54,6 +54,9 @@ jobs:
           python valcea-clar/tests/test_core_v2_orchestrator.py
           python valcea-clar/tests/test_core_v2_transactions.py
           python valcea-clar/tests/test_core_v2_gate_report.py
+          python valcea-clar/tests/test_core_v2_historical_fact_evidence_preflight.py
+          python valcea-clar/tests/test_core_v2_historical_fact_kernel_evidence.py
+          python valcea-clar/tests/test_core_v2_historical_article_claims_evidence.py
           python valcea-clar/tests/test_core_v2_apavil_shadow_lane.py
           python valcea-clar/tests/test_core_v2_public_safety_shadow_lane.py
           python valcea-clar/tests/test_core_v2_public_safety_full_shadow_lane.py
@@ -202,13 +205,23 @@ jobs:
 
       - name: Bind explicit fact and article evidence into shadow transactions
         run: |
-          python valcea-clar/core_v2/materialize_shadow_transactions.py \
+          python valcea-clar/core_v2/historical_transaction_binding.py \
             --candidates /tmp/valcea-core-v2-shadow-candidates.json \
             --receipts /tmp/valcea-core-v2-shadow-receipts.json \
             --evidence valcea-clar/editorial/fact_kernel_registry.json \
             --evidence valcea-clar/editorial/facts_registry.json \
             --evidence valcea-clar/editorial/editorial_products.json \
-            --output /tmp/valcea-core-v2-shadow-transactions.json
+            --output /tmp/valcea-core-v2-shadow-transactions.json \
+            --kernels-output /tmp/valcea-core-v2-historical-fact-kernels.json \
+            --articles-output /tmp/valcea-core-v2-historical-article-claims.json
+
+      - name: Verify historical FactKernel to article claims runtime binding
+        run: |
+          python valcea-clar/core_v2/validate_historical_article_claims_runtime.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --kernels /tmp/valcea-core-v2-historical-fact-kernels.json \
+            --articles /tmp/valcea-core-v2-historical-article-claims.json \
+            --transactions /tmp/valcea-core-v2-shadow-transactions.json
 
       - name: Classify exact truth blockers
         run: |
@@ -263,6 +276,8 @@ jobs:
             /tmp/valcea-core-v2-visual-readback.json
             /tmp/valcea-core-v2-meta-readback.json
             /tmp/valcea-core-v2-shadow-receipts.json
+            /tmp/valcea-core-v2-historical-fact-kernels.json
+            /tmp/valcea-core-v2-historical-article-claims.json
             /tmp/valcea-core-v2-shadow-transactions.json
             /tmp/valcea-core-v2-gate-report.json
           if-no-files-found: error
