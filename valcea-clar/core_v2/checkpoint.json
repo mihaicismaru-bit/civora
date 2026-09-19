@@ -1,6 +1,6 @@
 {
-  "schema_version": "5.0",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN37-WATER-EXACT-VISUAL-HYDRATION-NATURAL-VALIDATED",
+  "schema_version": "5.1",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN38-WATER-INSTAGRAM-SCORE-DIAGNOSTICS-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,60 +8,48 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "civora_main_observed_sha": "ad3922c1377b0467b37c201b4f1ea7320f566f56",
+    "civora_main_observed_sha": "826cdb9783c2ca6237325df87217d7ea5678c1fe",
     "civora_main_observed_message": "Refresh VÂLCEA CLAR canonical public presentation",
     "public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
     "public_projection_message": "sync: reconcile CIVORA canonical stories",
+    "legacy_newsroom_evaluated_local": "2026-09-19T14:40:00+03:00",
+    "legacy_newsroom_publishable_story_count": 78,
+    "legacy_newsroom_new_story_count": 0,
     "legacy_state_is_observation_only": true,
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "186deb95255f76fcf3ad4f1248f33a467c483cf8",
-    "message": "Core v2: validate exact derivative hydration truth",
-    "functional_parent_sha": "c285054f76391383e62f9ec867f1834e26993702",
-    "functional_increment": "The missing approved water-contract panorama can now be hydrated ephemerally in shadow from a deterministic 1280/960px Wikimedia derivative only after the exact approved upload.wikimedia.org original has exhausted bounded retries with HTTP 429 and an independently read Commons page proves exact JSON-LD ImageObject identity plus license. The cross-artifact runtime validator independently rechecks the 429 prerequisite, Commons/upload hosts, provenance identity/license, deterministic thumb path, derivative download truth and identity binding to the original. No alternate asset or generic image is accepted and hydration grants no publication authority.",
-    "workflow_run_id": 35442511382,
-    "workflow_run_number": 575,
+    "sha": "92cadba8715e0477834df296258785bef2efcab1",
+    "message": "Core v2: test Instagram score diagnostics fail-closed",
+    "functional_parent_sha": "125d9b66a44f89bb8628c8a5ff3480544097f8a3",
+    "functional_increment": "Instagram visual identity now emits acceptance-neutral, read-only per-remote score diagnostics. The diagnostic ranks externally read carousel IMAGE payloads and reports exact correlation/MAE/composite gaps to the existing thresholds, but has publication_authority=NONE, thresholds_changed=false and identity_promotion_allowed=false. Identity acceptance logic and thresholds remain unchanged.",
+    "workflow_run_id": 35445673191,
+    "workflow_run_number": 581,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10584118737,
-    "artifact_sha256": "968184d30b743401be710a78567c8e53abfb26b67020e898d34ba1b33d55f1f0",
-    "artifact_size_bytes": 215975,
+    "artifact_id": 10585403209,
+    "artifact_sha256": "f5a35b8d84d64907b14828605b2536a49c764aab0a0577f320ef4fba3ab04b21",
+    "artifact_size_bytes": 2561216,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 26,
     "ordered_shadow_failed_stage": null
   },
-  "validation_history": {
-    "initial_feature_run": {
-      "workflow_run_number": 573,
-      "head_sha": "c285054f76391383e62f9ec867f1834e26993702",
-      "conclusion": "failure",
-      "failure_class": "VALIDATOR_SCHEMA_DRIFT",
-      "truth_preserving_observation": "The natural run proved exact derivative hydration for the water visual, then failed because the independent runtime validator still accepted only the previous direct-hydration state. No rerun was used; a new commit tightened the validator to recognize the derivative state only under its full fail-closed invariants."
-    },
-    "corrective_natural_run": {
-      "workflow_run_number": 575,
-      "head_sha": "186deb95255f76fcf3ad4f1248f33a467c483cf8",
-      "conclusion": "success",
-      "run_attempt": 1,
-      "manual_rerun": false
-    }
-  },
   "done": [
     "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness",
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
-    "PHOTO remains fail-closed; generic, text-card and synthetic-as-photo substitutions remain forbidden",
-    "current PHOTO snapshot remains 7/7 verified shadow candidates with zero blocked current-photo lanes",
+    "PHOTO remains fail-closed and the current shadow snapshot remains 7/7 verified with zero blocked current-photo lanes",
     "historical FactKernel evidence remains 2/2 and historical article-claims evidence remains 2/2 with fabricated_claims=0",
-    "the exact approved historical water panorama is now hydrated ephemerally from verified provenance in natural execution even when the exact original is rate-limited with HTTP 429",
-    "Wikimedia derivative hydration is exact-asset only: it is permitted only after original HTTP 429, exact Commons ImageObject identity, explicit license, Commons/upload host checks and deterministic thumb path construction from the original shard and filename",
-    "the independent runtime validator re-verifies derivative hydration semantics and fails closed on host/path/429/provenance drift",
-    "natural push run 575 proves one verified provenance hydration and one exact Wikimedia derivative hydration for valcea-apa-canal-contract-152m-20260902",
-    "natural push run 575 passed contract tests, all 26 ordered shadow stages, external site/visual/Meta replay, Instagram visual-identity validation, receipts, transactions, runtime invariants and tamper regressions",
+    "exact approved water panorama provenance/hydration remains verified without alternate-asset substitution",
+    "per-remote Instagram visual-comparison scores are now persisted as read-only evidence without changing identity thresholds or promoting delivery truth",
+    "water carousel has one unique best remote candidate, id 18112621466117073, but it remains below identity acceptance thresholds",
+    "water best remote score is correlation 0.743929, MAE 0.097864, composite 0.671125; unchanged thresholds are correlation >= 0.80, MAE <= 0.12, composite >= 0.70 and uniqueness margin >= 0.20",
+    "water best candidate therefore misses correlation by 0.056071 and composite by 0.028875 despite passing MAE; runner-up composite is 0 and uniqueness margin is 0.671125",
+    "natural push run 581 passed contract tests, all 26 ordered shadow stages, external site/visual/Meta replay, visual identity diagnostics, receipts, transactions, runtime invariants and tamper regressions",
+    "public water article readback still proves the approved panorama is not bound into the article: matching image count remains 0 and public visual remains failed",
     "no merge, deploy, live Core v2 publication, public-projection mutation, Meta write, workflow_dispatch or manual rerun was used"
   ],
   "inventory": {
@@ -79,18 +67,8 @@
     "verified_shadow_count": 7,
     "blocked_count": 0,
     "coverage": "7/7",
-    "verified_story_ids": [
-      "hcl-343-local-public-finance",
-      "hcl-344-local-education-access",
-      "hcl-345-regulated-local-authorization",
-      "isj-directori-2026-conducere-scoli",
-      "d8b16613110809449b51663b",
-      "6546c2c57ea3bec64c372747",
-      "1fc80eac6f7052a36ebc8a56"
-    ],
-    "blocked_current_lanes": [],
     "generic_or_synthetic_substitution_forbidden": true,
-    "scope_note": "7/7 applies to the seven current written shadow candidates in this validated snapshot; it is not production readiness or delivery readiness."
+    "scope_note": "7/7 applies only to the seven current written shadow candidates in this validated snapshot; it is not production or delivery readiness."
   },
   "historical_evidence_binding": {
     "candidate_count": 2,
@@ -105,18 +83,35 @@
     "publication_authority": "NONE",
     "live_promotion_allowed": false
   },
-  "historical_water_exact_visual_hydration": {
+  "historical_water_instagram_diagnostics": {
     "story_id": "valcea-apa-canal-contract-152m-20260902",
-    "approved_asset": "launch-ramnicu-valcea-panorama.jpg",
-    "provenance_page": "https://commons.wikimedia.org/wiki/File:Ramnicu_Valcea_panorama.jpg",
-    "approved_original": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Ramnicu_Valcea_panorama.jpg",
-    "hydration_ok": true,
-    "hydration_transport": "exact_wikimedia_derivative_after_original_429",
-    "exact_derivative_hydration_count": 1,
-    "exact_derivative_identity_bound_to_original": true,
-    "publication_authority": "NONE",
-    "instagram_remote_visual_identity_bound": false,
-    "truth_note": "Hydration now proves access to the exact already-approved visual lineage; it does not prove that any Instagram remote carousel child is that approved image and it does not repair the public-site image binding."
+    "identity_bound": false,
+    "identity_state": "NO_REMOTE_IMAGE_MATCHED_APPROVED_VISUAL",
+    "diagnostic_state": "UNIQUE_BEST_BELOW_IDENTITY_THRESHOLDS",
+    "diagnostic_authority": "NONE",
+    "thresholds_changed": false,
+    "identity_promotion_allowed": false,
+    "best_remote_id": "18112621466117073",
+    "best_mode": "center_crop",
+    "best_correlation": 0.743929,
+    "best_mae_normalized": 0.097864,
+    "best_composite_score": 0.671125,
+    "runner_up_composite_score": 0.0,
+    "best_to_runner_up_margin": 0.671125,
+    "thresholds": {
+      "correlation_min": 0.8,
+      "mae_max": 0.12,
+      "composite_min": 0.7,
+      "match_margin_min": 0.2
+    },
+    "gaps": {
+      "correlation_gap_to_min": 0.056071,
+      "mae_headroom_to_max": 0.022136,
+      "composite_gap_to_min": 0.028875
+    },
+    "other_remote_candidates": 3,
+    "other_remote_candidate_composite_scores": [0.0, 0.0, 0.0],
+    "truth_note": "This is diagnostic evidence only. It distinguishes one uniquely closer carousel child from three clearly unrelated children but does not establish approved-visual identity and cannot upgrade a receipt."
   },
   "external_replay_truth": {
     "candidate_count": 2,
@@ -131,8 +126,7 @@
       "failed": 1,
       "passed_story_ids": ["cet-govora-cine-a-decis-oprirea-20260821"],
       "blocked_story_ids": ["valcea-apa-canal-contract-152m-20260902"],
-      "water_contract_hydration": "VERIFIED_EXACT_ASSET_LINEAGE",
-      "water_contract_identity": "UNBOUND_AFTER_HYDRATION"
+      "water_contract_identity": "UNBOUND_WITH_UNIQUE_NEAR_MATCH_DIAGNOSTIC"
     },
     "externally_verified_complete_receipts": 0,
     "truth_complete_count": 0,
@@ -140,14 +134,13 @@
       "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
       "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 1,
-      "VISUAL_ARTICLE_BINDING_FAILED": 1,
-      "VISUAL_PROVENANCE_FAILED": 1
+      "VISUAL_ARTICLE_BINDING_FAILED": 1
     },
     "acceptance_ready": false
   },
   "blocked": [
-    {"gate": "historical_water_instagram_visual_identity", "reason": "The exact approved water panorama can now be hydrated, but independent comparison still does not bind it to one unique Instagram remote image; no identity claim is promoted."},
-    {"gate": "historical_water_cross_surface_binding", "reason": "The water-contract approved social visual remains unbound to the canonical/public site story, so visual readback remains 1/2."},
+    {"gate": "historical_water_instagram_visual_identity", "reason": "One remote carousel image is uniquely closer to the approved panorama but remains below the unchanged correlation and composite acceptance thresholds; no identity claim is promoted."},
+    {"gate": "historical_water_cross_surface_binding", "reason": "The public water article still has no bound approved panorama; external article matching_image_count is 0 and visual readback remains 1/2."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
     {"gate": "isj_registration_deadline_normalization", "reason": "Raw registration window is verified but its year is not explicit in that row; no normalized 2026 deadline is promoted."},
@@ -155,8 +148,8 @@
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "inspect and expose the water-contract per-remote comparison scores read-only to determine whether the four Instagram carousel images contain a transformed version of the approved panorama or a genuinely different asset; do not relax thresholds merely to obtain a match",
-    "reconcile the water-contract canonical/public site image binding read-only; do not mutate the public projection before owner-authorized cutover",
+    "add a bounded acceptance-neutral transform/crop diagnostic for the single water near-match to test whether Instagram reframing explains the residual correlation/composite gap; do not alter acceptance thresholds and do not upgrade identity from diagnostics alone",
+    "strengthen read-only site visual classification so a public article with zero bound approved images is distinguished explicitly from provenance transport failures",
     "keep Facebook uncertified until read-only Graph permission is sufficient and a remote receipt can be independently read back",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
     "keep ISJ deadline normalization fail-closed unless the year is directly supported by the same evidence context",
@@ -167,18 +160,16 @@
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
     "instagram_visual_identity": "valcea-clar/core_v2/instagram_visual_identity.py",
-    "instagram_visual_identity_validator": "valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py",
     "instagram_visual_identity_tests": "valcea-clar/tests/test_core_v2_instagram_visual_identity.py",
+    "instagram_visual_identity_validator": "valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py",
     "visual_readback": "valcea-clar/core_v2/visual_readback.py",
-    "meta_readback": "valcea-clar/core_v2/meta_readback.py",
     "receipt_ledger": "valcea-clar/core_v2/materialize_shadow_receipts.py",
     "gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "failed_discovery_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35442295823",
-    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35442511382",
-    "validated_feature_artifact_id": 10584118737,
-    "validated_feature_artifact_sha256": "968184d30b743401be710a78567c8e53abfb26b67020e898d34ba1b33d55f1f0",
-    "validated_feature_artifact_size_bytes": 215975
+    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35445673191",
+    "validated_feature_artifact_id": 10585403209,
+    "validated_feature_artifact_sha256": "f5a35b8d84d64907b14828605b2536a49c764aab0a0577f320ef4fba3ab04b21",
+    "validated_feature_artifact_size_bytes": 2561216
   }
 }
