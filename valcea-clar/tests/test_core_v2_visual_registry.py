@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-from photo_truth_gate import _candidate_fingerprint
+from photo_truth_gate import _candidate_fingerprint, _candidate_id
 from visual_readback import ALLOWED_RIGHTS_BASES
 
 
@@ -24,7 +24,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
                 "hcl-344-local-education-access",
                 "hcl-345-regulated-local-authorization",
                 "isj-directori-2026-conducere-scoli",
-                "3d51c1c0967c1e0d99225eba",
+                "d8b16613110809449b51663b",
             },
         )
         for story_id, assignment in stories.items():
@@ -72,7 +72,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
             self.assertEqual(isj_binding.get(field), expected_candidate[field], field)
         self.assertEqual(isj_binding.get("candidate_fingerprint"), _candidate_fingerprint(expected_candidate))
 
-        lapusata = stories["3d51c1c0967c1e0d99225eba"]
+        lapusata = stories["d8b16613110809449b51663b"]
         lapusata_image = lapusata.get("image") or {}
         lapusata_binding = lapusata.get("binding") or {}
         self.assertEqual(lapusata_image.get("source_type"), "creative_commons")
@@ -84,7 +84,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertIn("not evidence of the vehicle fire", str(lapusata.get("approval_basis") or ""))
 
         expected_lapusata_candidate = {
-            "candidate_id": "3d51c1c0967c1e0d99225eba",
+            "candidate_id": "d8b16613110809449b51663b",
             "source_label": "isu",
             "source_url": "https://isuvl.igsu.ro/stiri-locale/incendiu-izbucnit-la-un-autoturism-in-localitatea-lapusata-799",
             "headline": "Incendiu izbucnit la un autoturism, în localitatea Lăpușata",
@@ -98,6 +98,22 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
             lapusata_binding.get("candidate_fingerprint"),
             _candidate_fingerprint(expected_lapusata_candidate),
         )
+
+    def test_public_safety_candidate_identity_ignores_volatile_detail_hash(self):
+        source_url = "https://isuvl.igsu.ro/stiri-locale/incendiu-izbucnit-la-un-autoturism-in-localitatea-lapusata-799"
+        first = _candidate_id({"detail_id": "a" * 24}, source_label="isu", source_url=source_url)
+        second = _candidate_id({"detail_id": "b" * 24}, source_label="isu", source_url=source_url)
+        self.assertEqual(first, "d8b16613110809449b51663b")
+        self.assertEqual(second, first)
+
+    def test_explicit_story_id_still_wins_over_source_stable_identity(self):
+        source_url = "https://vl.politiaromana.ro/example"
+        explicit = _candidate_id(
+            {"story_id": "canonical-story-id", "detail_id": "a" * 24},
+            source_label="ipj",
+            source_url=source_url,
+        )
+        self.assertEqual(explicit, "canonical-story-id")
 
 
 if __name__ == "__main__":
