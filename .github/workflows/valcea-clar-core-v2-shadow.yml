@@ -214,6 +214,14 @@ jobs:
             --instagram-identity /tmp/valcea-core-v2-instagram-visual-identity.json \
             --output /tmp/valcea-core-v2-shadow-receipts.json
 
+      - name: Verify Instagram visual identity cross-artifact truth
+        run: |
+          python valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --identity /tmp/valcea-core-v2-instagram-visual-identity.json \
+            --receipts /tmp/valcea-core-v2-shadow-receipts.json
+
       - name: Bind explicit fact and article evidence into shadow transactions
         run: |
           python valcea-clar/core_v2/historical_transaction_binding.py \
