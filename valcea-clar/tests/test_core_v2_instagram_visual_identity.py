@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
 import instagram_visual_identity as identity_module
-from instagram_visual_identity import compare_vectors, identity_decision
+from instagram_visual_identity import compare_vectors, identity_decision, score_diagnostics
 
 
 class InstagramVisualIdentityTest(unittest.TestCase):
@@ -62,6 +62,49 @@ class InstagramVisualIdentityTest(unittest.TestCase):
         ])
         self.assertFalse(none["identity_bound"])
         self.assertEqual(none["identity_state"], "NO_REMOTE_IMAGE_MATCHED_APPROVED_VISUAL")
+
+    def test_score_diagnostics_exposes_near_miss_without_promoting_identity(self):
+        candidates = [
+            {
+                "remote_id": "water-top",
+                "media_url": "https://example.test/water-top.jpg",
+                "best_mode": "center_crop",
+                "download": {"download_ok": True},
+                "correlation": 0.743929,
+                "mae_normalized": 0.097864,
+                "composite_score": 0.671125,
+                "same_visual": False,
+            },
+            {
+                "remote_id": "other",
+                "media_url": "https://example.test/other.jpg",
+                "best_mode": "stretch",
+                "download": {"download_ok": True},
+                "correlation": -0.26201,
+                "mae_normalized": 0.56397,
+                "composite_score": 0.0,
+                "same_visual": False,
+            },
+        ]
+        decision = identity_decision(candidates)
+        self.assertFalse(decision["identity_bound"])
+        self.assertEqual(decision["identity_state"], "NO_REMOTE_IMAGE_MATCHED_APPROVED_VISUAL")
+
+        diagnostic = score_diagnostics(candidates, decision)
+        self.assertEqual(diagnostic["diagnostic_state"], "UNIQUE_BEST_BELOW_IDENTITY_THRESHOLDS")
+        self.assertEqual(diagnostic["diagnostic_authority"], "NONE")
+        self.assertFalse(diagnostic["thresholds_changed"])
+        self.assertFalse(diagnostic["identity_promotion_allowed"])
+        self.assertEqual(diagnostic["best_remote_id"], "water-top")
+        self.assertEqual(diagnostic["best_to_runner_up_margin"], 0.671125)
+        best = diagnostic["ranked_remote_scores"][0]
+        self.assertEqual(best["rank"], 1)
+        self.assertFalse(best["passes_correlation"])
+        self.assertTrue(best["passes_mae"])
+        self.assertFalse(best["passes_composite"])
+        self.assertEqual(best["correlation_gap_to_min"], 0.056071)
+        self.assertEqual(best["mae_headroom_to_max"], 0.022136)
+        self.assertEqual(best["composite_gap_to_min"], 0.028875)
 
     def test_missing_repo_asset_can_hydrate_only_from_exact_verified_provenance(self):
         candidate = {
