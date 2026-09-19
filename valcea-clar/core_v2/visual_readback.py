@@ -33,6 +33,39 @@ class _ImageParser(HTMLParser):
         self.images.append({"src": data.get("src"), "alt": data.get("alt")})
 
 
+class _JsonLdParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__()
+        self._capturing = False
+        self._chunks: list[str] = []
+        self.documents: list[Any] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag.lower() != "script":
+            return
+        data = {k.lower(): v for k, v in attrs}
+        if str(data.get("type") or "").lower() == "application/ld+json":
+            self._capturing = True
+            self._chunks = []
+
+    def handle_data(self, data: str) -> None:
+        if self._capturing:
+            self._chunks.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() != "script" or not self._capturing:
+            return
+        raw = "".join(self._chunks).strip()
+        self._capturing = False
+        self._chunks = []
+        if not raw:
+            return
+        try:
+            self.documents.append(json.loads(raw))
+        except json.JSONDecodeError:
+            return
+
+
 def _filename(url_or_path: str | None) -> str:
     if not url_or_path:
         return ""
@@ -54,6 +87,48 @@ def inspect_article_image(html: str, *, article_url: str, expected_filename: str
         "matching_image_count": len(matches),
         "matching_images": matches,
         "article_image_bound": bool(matches),
+    }
+
+
+def _walk_json(value: Any):
+    if isinstance(value, dict):
+        yield value
+        for nested in value.values():
+            yield from _walk_json(nested)
+    elif isinstance(value, list):
+        for nested in value:
+            yield from _walk_json(nested)
+
+
+def inspect_provenance_asset(html: str, *, expected_direct_url: str | None) -> dict[str, Any]:
+    expected_filename = _filename(expected_direct_url)
+    parser = _JsonLdParser()
+    parser.feed(html)
+    matches: list[dict[str, Any]] = []
+    if expected_filename:
+        for document in parser.documents:
+            for node in _walk_json(document):
+                raw_type = node.get("@type")
+                types = {str(item) for item in raw_type} if isinstance(raw_type, list) else {str(raw_type or "")}
+                if "ImageObject" not in types:
+                    continue
+                content_url = str(node.get("contentUrl") or "").strip()
+                if _filename(content_url) != expected_filename:
+                    continue
+                license_url = str(node.get("license") or "").strip()
+                matches.append(
+                    {
+                        "content_url": content_url,
+                        "license": license_url or None,
+                        "name": str(node.get("name") or "").strip() or None,
+                    }
+                )
+    return {
+        "expected_filename": expected_filename,
+        "matching_imageobject_count": len(matches),
+        "matching_imageobjects": matches,
+        "asset_identity_ok": bool(matches),
+        "license_present": bool(matches and all(str(item.get("license") or "").startswith("https://") for item in matches)),
     }
 
 
@@ -135,6 +210,31 @@ def _read_binary_head(url: str, timeout: float = 12.0, *, max_attempts: int = 3)
     return {"status": "FAILED", "error": "binary_readback_attempts_exhausted", "http_status": None, "readback_ok": False, "attempts": attempts, "rate_limited": False}
 
 
+def _effective_direct_source_status(
+    *,
+    source_url: str,
+    direct_source_url: str | None,
+    direct_source: dict[str, Any],
+    provenance_asset: dict[str, Any],
+) -> tuple[bool, str | None]:
+    if direct_source.get("readback_ok") is True:
+        return True, None
+    source_host = (urlparse(source_url).hostname or "").lower()
+    direct_host = (urlparse(str(direct_source_url or "")).hostname or "").lower()
+    bounded_wikimedia_rate_limit_fallback = bool(
+        direct_source_url
+        and direct_source.get("rate_limited") is True
+        and direct_source.get("http_status") == 429
+        and source_host == "commons.wikimedia.org"
+        and direct_host == "upload.wikimedia.org"
+        and provenance_asset.get("asset_identity_ok") is True
+        and provenance_asset.get("license_present") is True
+    )
+    if bounded_wikimedia_rate_limit_fallback:
+        return True, "wikimedia_commons_source_page_identity_fallback_for_direct_429"
+    return False, None
+
+
 def read_visual(
     *,
     article_url: str,
@@ -163,9 +263,26 @@ def read_visual(
         public_image = _read_binary_head(str(article_binding["matching_images"][0]["url"]), timeout)
 
     provenance_source = _read_text(source_url, timeout)
+    provenance_asset = (
+        inspect_provenance_asset(provenance_source.get("body") or "", expected_direct_url=direct_source_url)
+        if provenance_source.get("readback_ok")
+        else {
+            "expected_filename": _filename(direct_source_url),
+            "matching_imageobject_count": 0,
+            "matching_imageobjects": [],
+            "asset_identity_ok": False,
+            "license_present": False,
+        }
+    )
     direct_source = {"status": "NOT_REQUIRED", "readback_ok": True, "attempts": 0, "rate_limited": False}
     if direct_source_url:
         direct_source = _read_binary_head(direct_source_url, timeout)
+    direct_source_effective_ok, direct_source_fallback_reason = _effective_direct_source_status(
+        source_url=source_url,
+        direct_source_url=direct_source_url,
+        direct_source=direct_source,
+        provenance_asset=provenance_asset,
+    )
 
     ok = bool(
         internal_gate
@@ -173,9 +290,10 @@ def read_visual(
         and article_binding.get("article_image_bound")
         and public_image.get("readback_ok")
         and provenance_source.get("readback_ok")
-        and direct_source.get("readback_ok")
+        and direct_source_effective_ok
     )
     article.pop("body", None)
+    provenance_source.pop("body", None)
     return {
         "status": "PASS" if ok else "FAILED",
         "readback_ok": ok,
@@ -186,7 +304,10 @@ def read_visual(
         "article_binding": article_binding,
         "public_image": public_image,
         "provenance_source": provenance_source,
+        "provenance_asset": provenance_asset,
         "direct_source": direct_source,
+        "direct_source_effective_ok": direct_source_effective_ok,
+        "direct_source_fallback_reason": direct_source_fallback_reason,
     }
 
 
