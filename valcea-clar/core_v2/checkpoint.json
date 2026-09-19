@@ -1,6 +1,6 @@
 {
-  "schema_version": "5.4",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN41-ISJ-CALENDAR-SCOPE-GATE-NATURAL-VALIDATED",
+  "schema_version": "5.5",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN42-ISJ-CALENDAR-SCOPE-RUNTIME-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,8 +8,8 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "civora_main_observed_sha": "eb5eb7a4296276f9c639141b59c32abee7d13719",
-    "civora_main_observed_message": "Record Portal Legislativ API health state",
+    "civora_main_observed_sha": "2beb5768e306225af300fecd77d0f5382252d771",
+    "civora_main_observed_message": "Update Olănești investigation monitor state",
     "public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
     "public_projection_message": "sync: reconcile CIVORA canonical stories",
@@ -17,21 +17,21 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "d2c00158163d713e5538118e341812104a4d5649",
-    "message": "Test ISJ same-document calendar year binding",
-    "functional_increment": "A separate fail-closed ISJ calendar-scope evidence gate now permits normalization of the raw registration window only when the same verified calendar PDF contains exactly one explicit contest-session heading for 2026, the raw registration line remains bound to the same document/page hash, and temporal bounds are consistent. It can derive 2026-09-14 through 2026-10-02 as evidence, but it grants no materiality, FactKernel, writer, site, social or acceptance authority and is not yet wired into the runtime orchestrator/downstream promotion path.",
-    "workflow_run_id": 35454907281,
-    "workflow_run_number": 611,
+    "sha": "d44ef8193113722322e961e88f7d8bb434d5fb9d",
+    "message": "Wire ISJ calendar scope into Core v2 runtime",
+    "functional_increment": "The same-document ISJ calendar-scope evidence gate is now part of the single ordered Core v2 shadow orchestrator. Its normalized 2026 registration window is independently rebound to context/calendar evidence, validated fail-closed with two tamper regressions, and persisted inside the uploaded cycle runtime artifact. Downstream materiality, FactKernel and writer do not consume this evidence yet, so the deadline remains evidence-only and non-authorizing.",
+    "workflow_run_id": 35457858472,
+    "workflow_run_number": 615,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10588515884,
-    "artifact_sha256": "a66713d56a84b92461ecba65c87d1b63fcd8a7d97eff9f01808911b403800286",
-    "artifact_size_bytes": 220980,
+    "artifact_id": 10589530120,
+    "artifact_sha256": "c1c0b61524522cbadf6d567ceaacb9ae72ded73e94e52a4bebca90ace2df3ae1",
+    "artifact_size_bytes": 222677,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
-    "ordered_shadow_stage_count": 26,
+    "ordered_shadow_stage_count": 28,
     "ordered_shadow_failed_stage": null
   },
   "done": [
@@ -39,12 +39,12 @@
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
     "PHOTO current shadow snapshot remains 7/7 verified with zero blocked current-photo lanes",
     "historical FactKernel evidence remains 2/2 and historical article-claims evidence remains 2/2 with fabricated_claims=0",
-    "the prior SITE_APPROVED_VISUAL_ABSENT taxonomy remains active and acceptance-neutral",
-    "a new isj_calendar_scope_binding_shadow_lane gate requires same-document explicit session-year evidence, exact registration-line provenance, and temporal consistency before normalizing the registration window",
-    "the new gate derives registration_window_start_date=2026-09-14 and registration_deadline=2026-10-02 only under those compound evidence conditions and remains strictly non-authorizing",
-    "contract regressions prove missing explicit session heading and tampered registration page provenance fail closed",
-    "natural push run 611 passed the updated truth-bound contract tests plus all existing 26 ordered shadow stages, external site/visual/Meta replay, receipts, transactions, runtime invariants and tamper regressions",
-    "run 611 did not use workflow_dispatch or manual rerun and did not merge, deploy, publish Core v2, mutate the public projection or write Meta"
+    "SITE_APPROVED_VISUAL_ABSENT taxonomy remains active and acceptance-neutral for the historical water article",
+    "isj_calendar_scope_binding_shadow_lane is now wired after verified calendar field evidence in the single orchestrator",
+    "the orchestrator now executes an independent isj_calendar_scope_validation stage that recomputes same-document scope/year/page-hash/evidence IDs and proves two tamper cases fail closed",
+    "the natural runtime cycle persisted both scope binding and independent validation as full runtime_artifact_snapshots inside valcea-core-v2-cycle.json",
+    "natural push run 615 completed all 28 ordered shadow stages, external site/visual/Meta replay, receipts, transactions, runtime invariants and late-ISJ tamper regressions with conclusion success",
+    "run 615 retained publication_authority=NONE and acceptance_ready=false; no workflow_dispatch or manual rerun was used and no merge, deploy, public-projection mutation or Meta write occurred"
   ],
   "inventory": {
     "KEEP": 232,
@@ -70,7 +70,12 @@
     "exact_registration_line_page_hash_required": true,
     "registration_window_start_date_derivable": "2026-09-14",
     "registration_deadline_derivable": "2026-10-02",
-    "runtime_orchestrator_wired": false,
+    "runtime_orchestrator_wired": true,
+    "runtime_artifact_persisted": true,
+    "runtime_independent_validation": true,
+    "runtime_validation_status": "PASS_SHADOW",
+    "runtime_tamper_regressions_passed": 2,
+    "runtime_stage_count": 28,
     "materiality_promotion_wired": false,
     "fact_kernel_promotion_wired": false,
     "writer_projection_wired": false,
@@ -113,31 +118,31 @@
     "acceptance_ready": false
   },
   "blocked": [
-    {"gate": "historical_water_site_visual", "reason": "The public water article is reachable, but the approved panorama is absent from the article HTML; this is SITE_APPROVED_VISUAL_ABSENT / SITE_CONTENT."},
+    {"gate": "historical_water_site_visual", "reason": "The public water article is reachable, but the approved panorama is absent from the article HTML; this remains SITE_APPROVED_VISUAL_ABSENT / SITE_CONTENT."},
     {"gate": "historical_water_instagram_visual_identity", "reason": "The unique water carousel near-match remains below the unchanged correlation threshold; no identity claim is promoted."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
-    {"gate": "isj_registration_deadline_runtime_binding", "reason": "Same-document calendar-scope derivation is implemented and naturally contract-validated, but it is not yet wired into the orchestrator/runtime artifact, materiality gate, FactKernel or writer. Therefore 2026-10-02 is not yet canonical runtime truth or an article claim."},
+    {"gate": "isj_registration_deadline_promotion", "reason": "2026-10-02 is now independently validated runtime evidence, but the materiality, FactKernel and writer stages intentionally do not consume the calendar-scope artifact yet. It is not a canonical article claim or publication fact."},
     {"gate": "ten_story_acceptance", "reason": "No story yet satisfies the complete independent source + FactKernel + article + photo + site + FB + IG + receipt + audit chain."},
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "wire isj_calendar_scope_binding_shadow_lane into the single orchestrator and persist its artifact in the natural shadow cycle",
-    "add independent runtime validation plus tamper regression for same-document scope/year/page-hash binding",
-    "only after natural external runtime validation, decide whether registration_deadline may enter ISJ materiality, FactKernel and writer claims",
+    "implement a separate fail-closed ISJ promotion gate that can consume only independently validated calendar-scope evidence and explicitly bind registration_deadline=2026-10-02 into materiality without bypassing existing raw-field evidence",
+    "propagate the deadline to FactKernel and writer only after claim-level evidence IDs remain exact through an independent integrity replay; otherwise keep it excluded",
     "keep the water site issue classified as SITE_APPROVED_VISUAL_ABSENT and do not relax Instagram identity thresholds",
     "keep Facebook uncertified until read-only Graph permission is sufficient; keep CJ fail-closed on TLS",
     "do not start the 10-story acceptance series or cutover without all external truth gates and explicit owner authorization"
   ],
   "evidence": {
     "calendar_scope_gate": "valcea-clar/core_v2/isj_calendar_scope_binding_shadow_lane.py",
-    "calendar_scope_tests": "valcea-clar/tests/test_core_v2_isj_calendar_field_evidence_shadow_lane.py",
+    "calendar_scope_runtime_validator": "valcea-clar/core_v2/validate_isj_calendar_scope_truth.py",
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
+    "orchestrator_tests": "valcea-clar/tests/test_core_v2_orchestrator.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35454907281",
-    "validated_feature_artifact_id": 10588515884,
-    "validated_feature_artifact_sha256": "a66713d56a84b92461ecba65c87d1b63fcd8a7d97eff9f01808911b403800286",
-    "validated_feature_artifact_size_bytes": 220980
+    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35457858472",
+    "validated_feature_artifact_id": 10589530120,
+    "validated_feature_artifact_sha256": "c1c0b61524522cbadf6d567ceaacb9ae72ded73e94e52a4bebca90ace2df3ae1",
+    "validated_feature_artifact_size_bytes": 222677
   }
 }
