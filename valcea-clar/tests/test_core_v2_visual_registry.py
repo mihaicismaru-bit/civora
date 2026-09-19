@@ -27,6 +27,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
                 "isj-directori-2026-conducere-scoli",
                 "d8b16613110809449b51663b",
                 "6546c2c57ea3bec64c372747",
+                "1fc80eac6f7052a36ebc8a56",
             },
         )
         for story_id, assignment in stories.items():
@@ -60,7 +61,6 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertIn("Colegiul Național «Alexandru Lahovari»", str(isj_image.get("editorial_note") or ""))
         self.assertIn("nu dovedește că acest colegiu are una dintre cele 146", str(isj_image.get("editorial_note") or ""))
         self.assertIn("not evidence that Alexandru Lahovari National College is among the 146", str(isj.get("approval_basis") or ""))
-
         expected_candidate = {
             "candidate_id": "isj-directori-2026-conducere-scoli",
             "source_label": "isj",
@@ -84,7 +84,6 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertIn("context geografic", str(lapusata_image.get("editorial_note") or ""))
         self.assertIn("nu surprinde incendiul autoturismului", str(lapusata_image.get("editorial_note") or ""))
         self.assertIn("not evidence of the vehicle fire", str(lapusata.get("approval_basis") or ""))
-
         expected_lapusata_candidate = {
             "candidate_id": "d8b16613110809449b51663b",
             "source_label": "isu",
@@ -96,10 +95,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertEqual(lapusata_binding.get("candidate_id"), expected_lapusata_candidate["candidate_id"])
         for field in ("source_label", "source_url", "headline", "where", "who"):
             self.assertEqual(lapusata_binding.get(field), expected_lapusata_candidate[field], field)
-        self.assertEqual(
-            lapusata_binding.get("candidate_fingerprint"),
-            _candidate_fingerprint(expected_lapusata_candidate),
-        )
+        self.assertEqual(lapusata_binding.get("candidate_fingerprint"), _candidate_fingerprint(expected_lapusata_candidate))
 
         madulari = stories["6546c2c57ea3bec64c372747"]
         madulari_image = madulari.get("image") or {}
@@ -111,7 +107,6 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertIn("satul Mamu", str(madulari_image.get("editorial_note") or ""))
         self.assertIn("nu surprinde incendiul forestier", str(madulari_image.get("editorial_note") or ""))
         self.assertIn("not evidence of the forest fire", str(madulari.get("approval_basis") or ""))
-
         expected_madulari_candidate = {
             "candidate_id": "6546c2c57ea3bec64c372747",
             "source_label": "isu",
@@ -123,10 +118,30 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertEqual(madulari_binding.get("candidate_id"), expected_madulari_candidate["candidate_id"])
         for field in ("source_label", "source_url", "headline", "where", "who"):
             self.assertEqual(madulari_binding.get(field), expected_madulari_candidate[field], field)
-        self.assertEqual(
-            madulari_binding.get("candidate_fingerprint"),
-            _candidate_fingerprint(expected_madulari_candidate),
-        )
+        self.assertEqual(madulari_binding.get("candidate_fingerprint"), _candidate_fingerprint(expected_madulari_candidate))
+
+        ipj = stories["1fc80eac6f7052a36ebc8a56"]
+        ipj_image = ipj.get("image") or {}
+        ipj_binding = ipj.get("binding") or {}
+        self.assertEqual(ipj_image.get("source_type"), "creative_commons")
+        self.assertEqual(ipj_image.get("rights_basis"), "creative_commons")
+        self.assertEqual(ipj_image.get("license_url"), "https://creativecommons.org/licenses/by/3.0/")
+        self.assertIn("L.Kenzel", str(ipj_image.get("credit") or ""))
+        self.assertIn("DN7/E81", str(ipj_image.get("editorial_note") or ""))
+        self.assertIn("nu dovedește că acțiunile IPJ", str(ipj_image.get("editorial_note") or ""))
+        self.assertIn("not evidence that the 11–13 September 2026 police actions occurred", str(ipj.get("approval_basis") or ""))
+        expected_ipj_candidate = {
+            "candidate_id": "1fc80eac6f7052a36ebc8a56",
+            "source_label": "ipj",
+            "source_url": "https://vl.politiaromana.ro/ro/stiri-si-media/comunicate/actiuni-pentru-siguranta-rutiera-in-judetul-valcea",
+            "headline": "ACȚIUNI PENTRU SIGURANȚA RUTIERĂ ÎN JUDEȚUL VÂLCEA",
+            "where": "județul Vâlcea",
+            "who": "Inspectoratul de Poliție Județean Vâlcea",
+        }
+        self.assertEqual(ipj_binding.get("candidate_id"), expected_ipj_candidate["candidate_id"])
+        for field in ("source_label", "source_url", "headline", "where", "who"):
+            self.assertEqual(ipj_binding.get(field), expected_ipj_candidate[field], field)
+        self.assertEqual(ipj_binding.get("candidate_fingerprint"), _candidate_fingerprint(expected_ipj_candidate))
 
     def test_public_safety_candidate_identity_ignores_volatile_detail_hash(self):
         source_url = "https://isuvl.igsu.ro/stiri-locale/incendiu-izbucnit-la-un-autoturism-in-localitatea-lapusata-799"
@@ -137,11 +152,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
 
     def test_explicit_story_id_still_wins_over_source_stable_identity(self):
         source_url = "https://vl.politiaromana.ro/example"
-        explicit = _candidate_id(
-            {"story_id": "canonical-story-id", "detail_id": "a" * 24},
-            source_label="ipj",
-            source_url=source_url,
-        )
+        explicit = _candidate_id({"story_id": "canonical-story-id", "detail_id": "a" * 24}, source_label="ipj", source_url=source_url)
         self.assertEqual(explicit, "canonical-story-id")
 
     @patch("photo_truth_gate._read_binary_head")
@@ -149,35 +160,12 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
     def test_photo_probe_accepts_only_exact_commons_identity_on_upload_429(self, read_text, read_binary):
         source_url = "https://commons.wikimedia.org/wiki/File:Approved.jpg"
         direct_url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Approved.jpg"
-        read_text.return_value = {
-            "status": "PASS",
-            "http_status": 200,
-            "final_url": source_url,
-            "content_type": "text/html; charset=UTF-8",
-            "readback_ok": True,
-            "body": (
-                '<script type="application/ld+json">'
-                '{"@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Approved.jpg",'
-                '"license":"https://creativecommons.org/licenses/by-sa/4.0/","name":"Approved"}'
-                '</script>'
-            ),
-        }
-        read_binary.return_value = {
-            "status": "FAILED",
-            "http_status": 429,
-            "readback_ok": False,
-            "rate_limited": True,
-            "attempts": 3,
-        }
-        result = _external_provenance_probe(
-            {"source_url": source_url, "direct_source_url": direct_url}, timeout=1.0
-        )
+        read_text.return_value = {"status":"PASS","http_status":200,"final_url":source_url,"content_type":"text/html; charset=UTF-8","readback_ok":True,"body":('<script type="application/ld+json">' '{"@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Approved.jpg",' '"license":"https://creativecommons.org/licenses/by-sa/4.0/","name":"Approved"}' '</script>')}
+        read_binary.return_value = {"status":"FAILED","http_status":429,"readback_ok":False,"rate_limited":True,"attempts":3}
+        result = _external_provenance_probe({"source_url":source_url,"direct_source_url":direct_url}, timeout=1.0)
         self.assertIs(result["readback_ok"], True)
         self.assertIs(result["direct_source_effective_ok"], True)
-        self.assertEqual(
-            result["direct_source_fallback"],
-            "wikimedia_commons_source_page_identity_fallback_for_direct_429",
-        )
+        self.assertEqual(result["direct_source_fallback"], "wikimedia_commons_source_page_identity_fallback_for_direct_429")
         self.assertIs(result["provenance_asset"]["asset_identity_ok"], True)
         self.assertIs(result["provenance_asset"]["license_present"], True)
 
@@ -186,29 +174,9 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
     def test_photo_probe_rejects_commons_429_when_jsonld_points_to_different_asset(self, read_text, read_binary):
         source_url = "https://commons.wikimedia.org/wiki/File:Approved.jpg"
         direct_url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Approved.jpg"
-        read_text.return_value = {
-            "status": "PASS",
-            "http_status": 200,
-            "final_url": source_url,
-            "content_type": "text/html; charset=UTF-8",
-            "readback_ok": True,
-            "body": (
-                '<script type="application/ld+json">'
-                '{"@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Different.jpg",'
-                '"license":"https://creativecommons.org/licenses/by-sa/4.0/"}'
-                '</script>'
-            ),
-        }
-        read_binary.return_value = {
-            "status": "FAILED",
-            "http_status": 429,
-            "readback_ok": False,
-            "rate_limited": True,
-            "attempts": 3,
-        }
-        result = _external_provenance_probe(
-            {"source_url": source_url, "direct_source_url": direct_url}, timeout=1.0
-        )
+        read_text.return_value = {"status":"PASS","http_status":200,"final_url":source_url,"content_type":"text/html; charset=UTF-8","readback_ok":True,"body":('<script type="application/ld+json">' '{"@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Different.jpg",' '"license":"https://creativecommons.org/licenses/by-sa/4.0/"}' '</script>')}
+        read_binary.return_value = {"status":"FAILED","http_status":429,"readback_ok":False,"rate_limited":True,"attempts":3}
+        result = _external_provenance_probe({"source_url":source_url,"direct_source_url":direct_url}, timeout=1.0)
         self.assertIs(result["readback_ok"], False)
         self.assertIs(result["direct_source_effective_ok"], False)
         self.assertIsNone(result["direct_source_fallback"])
