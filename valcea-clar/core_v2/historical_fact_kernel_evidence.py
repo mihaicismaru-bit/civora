@@ -102,7 +102,7 @@ SPECS: dict[str, dict[str, Any]] = {
             "what": {
                 "value": "Contractul de finanțare nr. 179 pentru Proiectul Regional de Dezvoltare a Infrastructurii de Apă și Apă Uzată în Județul Vâlcea a fost semnat.",
                 "source": "apavil",
-                "fragments": ["contractul de finantare", "numarul 179", "cod smis 364180"],
+                "fragments": ["contractul de finantare", "nr 179", "cod smis 364180"],
             },
             "who": {
                 "value": "APAVIL S.A. și Ministerul Investițiilor și Proiectelor Europene",
@@ -117,7 +117,7 @@ SPECS: dict[str, dict[str, Any]] = {
             "when": {
                 "value": "28 august 2026",
                 "source": "apavil",
-                "fragments": ["28 08 2026", "numarul 179"],
+                "fragments": ["28 08 2026", "nr 179"],
             },
             "why_it_matters": {
                 "value": "Contractul finanțează investiții regionale de apă și apă uzată, cu o valoare totală de 931.728.052,15 lei și finanțare nerambursabilă maximă de 709.812.993,20 lei.",
@@ -131,7 +131,7 @@ SPECS: dict[str, dict[str, Any]] = {
             {
                 "text": "Contractul de finanțare nr. 179 pentru proiectul regional a fost semnat la 28 august 2026.",
                 "source": "apavil",
-                "fragments": ["28 08 2026", "numarul 179", "cod smis 364180"],
+                "fragments": ["28 08 2026", "nr 179", "cod smis 364180"],
             },
             {
                 "text": "Valoarea totală a contractului este 931.728.052,15 lei, iar finanțarea nerambursabilă maximă este 709.812.993,20 lei.",
@@ -181,7 +181,7 @@ SPECS: dict[str, dict[str, Any]] = {
             "why_it_matters": {
                 "value": "Oprirea producției pe cărbune impune surse de înlocuire și o nouă organizare a serviciului public de alimentare cu energie termică pentru continuitatea SACET Râmnicu Vâlcea.",
                 "source": "h225",
-                "fragments": ["delegarea serviciului public de alimentare cu energie termica", "asigurarea continuitatii"],
+                "fragments": ["contractului de delegare a gestiunii serviciului public de alimentare cu energie termica", "asigurarea continuitatii"],
             },
         },
         "source_label": "HCL Râmnicu Vâlcea nr. 225/2026 și HCL nr. 5/2026 — evidence-bound public text with official municipal document links",
@@ -193,9 +193,9 @@ SPECS: dict[str, dict[str, Any]] = {
                 "fragments": ["31 08 2026 isi va inceta definitiv productia", "dispozitiilor legale imperative", "eliminarea productiei de energie pe baza de carbune"],
             },
             {
-                "text": "După oprirea producției, CET Govora urma să rămână operator pentru transportul și distribuția energiei termice în Râmnicu Vâlcea.",
+                "text": "Studiul aprobat indică delegarea prin concesiune ca soluție și cere Municipiului Râmnicu Vâlcea să demareze achiziția publică pentru contractul de delegare a serviciului termic.",
                 "source": "h225",
-                "fragments": ["cet govora va ramane operator", "transport si distributie a energiei termice"],
+                "fragments": ["modalitatea de delegare a serviciului public de alimentare cu energie termica spaet catre un operator spaet prin concesiune", "municipiul ramnicu valcea trebuie sa demareze o procedura de achizitie publica", "contractului de delegare a gestiunii serviciului public de alimentare cu energie termica"],
             },
             {
                 "text": "De la 1 ianuarie 2026, prețul de facturare pentru populația racordată la distribuție este 553,15 lei/Gcal, iar pentru populația racordată la transport 400,28 lei/Gcal, fără TVA.",
