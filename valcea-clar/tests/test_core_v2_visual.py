@@ -7,7 +7,7 @@ from urllib.error import HTTPError
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-from photo_truth_gate import assess_story_visual, build_photo_truth_report
+from photo_truth_gate import _candidate_fingerprint, assess_story_visual, build_photo_truth_report
 from visual_readback import _filename, _read_binary_head, inspect_article_image
 
 
@@ -93,6 +93,17 @@ class PhotoTruthGateTest(unittest.TestCase):
             }
         }
 
+    @staticmethod
+    def public_safety_candidate():
+        return {
+            "candidate_id": "ps-1",
+            "source_label": "isu",
+            "source_url": "https://www.isuvl.igsu.ro/stiri-locale/exemplu-2026",
+            "headline": "Intervenție ISU în Mădulari",
+            "where": "Mădulari",
+            "who": "Inspectoratul pentru Situații de Urgență Vâlcea",
+        }
+
     def test_story_specific_real_rights_cleared_visual_passes_shadow_gate(self):
         result = assess_story_visual(
             "story-1",
@@ -167,13 +178,68 @@ class PhotoTruthGateTest(unittest.TestCase):
         self.assertIn("subject_match_not_proven", result["problems"])
         self.assertIn("editor_approval_missing", result["problems"])
 
+    def test_public_safety_visual_assignment_without_exact_binding_fails_closed(self):
+        candidate = self.public_safety_candidate()
+        result = assess_story_visual(
+            "ps-1",
+            visual_registry=self.valid_registry("ps-1"),
+            atlas={"assets": []},
+            external_probe=False,
+            candidate=candidate,
+        )
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertEqual(result["reason"], "story_binding_missing")
+        self.assertFalse(result["candidate_binding_verified"])
+
+    def test_public_safety_visual_binding_rejects_source_url_drift(self):
+        candidate = self.public_safety_candidate()
+        registry = self.valid_registry("ps-1")
+        registry["stories"]["ps-1"]["binding"] = {
+            "source_label": "isu",
+            "source_url": "https://www.isuvl.igsu.ro/stiri-locale/alta-poveste-2026",
+            "candidate_fingerprint": _candidate_fingerprint(candidate),
+        }
+        result = assess_story_visual(
+            "ps-1",
+            visual_registry=registry,
+            atlas={"assets": []},
+            external_probe=False,
+            candidate=candidate,
+        )
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertIn("story_binding_source_url_mismatch", result["problems"])
+
+    def test_public_safety_visual_exact_source_and_fingerprint_binding_passes_shadow(self):
+        candidate = self.public_safety_candidate()
+        registry = self.valid_registry("ps-1")
+        registry["stories"]["ps-1"]["binding"] = {
+            "source_label": "isu",
+            "source_url": candidate["source_url"],
+            "candidate_fingerprint": _candidate_fingerprint(candidate),
+        }
+        result = assess_story_visual(
+            "ps-1",
+            visual_registry=registry,
+            atlas={"assets": []},
+            external_probe=False,
+            candidate=candidate,
+        )
+        self.assertEqual(result["status"], "VISUAL_CANDIDATE_VERIFIED_SHADOW")
+        self.assertTrue(result["candidate_binding_configured"])
+        self.assertTrue(result["candidate_binding_verified"])
+        self.assertEqual(result["candidate_fingerprint"], _candidate_fingerprint(candidate))
+
     def test_report_extracts_public_safety_and_municipal_written_candidates(self):
         public_safety = {
             "rows": [
                 {
                     "detail_id": "ps-1",
                     "state": "VERIFIED_WRITTEN_SHADOW",
-                    "fact_kernel": {"where": "Mădulari", "who": "ISU Vâlcea"},
+                    "fact_kernel": {
+                        "where": "Mădulari",
+                        "who": "ISU Vâlcea",
+                        "source_url": "https://www.isuvl.igsu.ro/stiri-locale/exemplu-2026",
+                    },
                     "article_package": {"headline": "Incendiu în Mădulari"},
                 }
             ]
@@ -186,7 +252,11 @@ class PhotoTruthGateTest(unittest.TestCase):
                     "articles": [
                         {
                             "article_id": "hcl-343-local-public-finance",
-                            "fact_kernel": {"where": "Râmnicu Vâlcea", "who": "Consiliul Local"},
+                            "fact_kernel": {
+                                "where": "Râmnicu Vâlcea",
+                                "who": "Consiliul Local",
+                                "source_url": "https://www.primariavl.ro/hcl/343-2026",
+                            },
                             "article_package": {"headline": "Buget local"},
                         }
                     ],
@@ -204,6 +274,7 @@ class PhotoTruthGateTest(unittest.TestCase):
         self.assertEqual(report["blocked_count"], 2)
         self.assertFalse(report["social_publish_allowed"])
         self.assertFalse(report["acceptance_ready"])
+        self.assertEqual(report["rows"][0]["article_source_url"], "https://www.isuvl.igsu.ro/stiri-locale/exemplu-2026")
 
     def test_integrity_verified_isj_candidate_enters_photo_gate_and_fails_closed_without_visual(self):
         isj_integrity = {
@@ -231,6 +302,7 @@ class PhotoTruthGateTest(unittest.TestCase):
         self.assertEqual(report["blocked_count"], 1)
         self.assertEqual(report["rows"][0]["story_id"], "isj-directori-2026-conducere-scoli")
         self.assertEqual(report["rows"][0]["reason"], "no_story_specific_approved_visual")
+        self.assertEqual(report["rows"][0]["article_source_url"], "https://www.isjvalcea.ro/management/concurs-directori-2026")
         self.assertFalse(report["social_publish_allowed"])
 
 
