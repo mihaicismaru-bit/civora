@@ -130,6 +130,85 @@ def identity_decision(candidate_results: list[dict[str, Any]]) -> dict[str, Any]
     }
 
 
+def score_diagnostics(
+    candidate_results: list[dict[str, Any]],
+    decision: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Expose acceptance-neutral per-remote score evidence without changing identity truth.
+
+    This diagnostic layer never promotes a remote image to delivered/identity-bound. It
+    reports ranking and exact deltas to the existing acceptance thresholds so a near
+    miss can be distinguished from unrelated carousel images without threshold drift.
+    """
+    rows: list[dict[str, Any]] = []
+    for row in candidate_results:
+        if not isinstance(row, dict):
+            continue
+        if row.get("download", {}).get("download_ok") is not True and "composite_score" not in row:
+            continue
+        try:
+            correlation = float(row.get("correlation"))
+            mae = float(row.get("mae_normalized"))
+            composite = float(row.get("composite_score"))
+        except (TypeError, ValueError):
+            continue
+        rows.append({
+            "remote_id": row.get("remote_id"),
+            "media_url": row.get("media_url"),
+            "best_mode": row.get("best_mode"),
+            "correlation": round(correlation, 6),
+            "mae_normalized": round(mae, 6),
+            "composite_score": round(composite, 6),
+            "passes_correlation": correlation >= CORRELATION_MIN,
+            "passes_mae": mae <= MAE_MAX,
+            "passes_composite": composite >= COMPOSITE_MIN,
+            "correlation_gap_to_min": round(max(0.0, CORRELATION_MIN - correlation), 6),
+            "mae_headroom_to_max": round(MAE_MAX - mae, 6),
+            "composite_gap_to_min": round(max(0.0, COMPOSITE_MIN - composite), 6),
+            "same_visual": row.get("same_visual") is True,
+        })
+
+    ranked = sorted(rows, key=lambda row: float(row.get("composite_score") or 0.0), reverse=True)
+    for index, row in enumerate(ranked, start=1):
+        row["rank"] = index
+
+    best = ranked[0] if ranked else None
+    runner_up = ranked[1] if len(ranked) > 1 else None
+    best_score = float((best or {}).get("composite_score") or 0.0)
+    runner_up_score = float((runner_up or {}).get("composite_score") or 0.0)
+    margin = max(0.0, best_score - runner_up_score) if best else None
+    identity_bound = bool((decision or {}).get("identity_bound") is True)
+
+    if not best:
+        state = "NO_COMPARABLE_REMOTE_IMAGES"
+    elif identity_bound:
+        state = "IDENTITY_ALREADY_BOUND"
+    else:
+        best_pass_count = sum(bool(best.get(key)) for key in ("passes_correlation", "passes_mae", "passes_composite"))
+        if best_pass_count >= 1 and margin is not None and margin >= MATCH_MARGIN_MIN:
+            state = "UNIQUE_BEST_BELOW_IDENTITY_THRESHOLDS"
+        else:
+            state = "NO_ACCEPTANCE_NEAR_MATCH"
+
+    return {
+        "diagnostic_state": state,
+        "diagnostic_authority": "NONE",
+        "thresholds_changed": False,
+        "identity_promotion_allowed": False,
+        "best_remote_id": (best or {}).get("remote_id"),
+        "best_composite_score": round(best_score, 6) if best else None,
+        "runner_up_composite_score": round(runner_up_score, 6) if runner_up else None,
+        "best_to_runner_up_margin": round(margin, 6) if margin is not None else None,
+        "acceptance_thresholds": {
+            "correlation_min": CORRELATION_MIN,
+            "mae_max": MAE_MAX,
+            "composite_min": COMPOSITE_MIN,
+            "match_margin_min": MATCH_MARGIN_MIN,
+        },
+        "ranked_remote_scores": ranked,
+    }
+
+
 def _imagemagick_binary() -> str | None:
     return shutil.which("convert") or shutil.which("magick")
 
@@ -463,6 +542,7 @@ def audit(
                 "identity_bound": False,
                 "identity_state": "BLOCKED_IMAGEMAGICK_UNAVAILABLE",
                 "candidate_results": [],
+                "read_only_score_diagnostics": score_diagnostics([], None),
             })
             continue
         if candidate.get("real_visual_internal_evidence") is not True or not image_path:
@@ -472,6 +552,7 @@ def audit(
                 "identity_bound": False,
                 "identity_state": "BLOCKED_APPROVED_VISUAL_NOT_READY",
                 "candidate_results": [],
+                "read_only_score_diagnostics": score_diagnostics([], None),
             })
             continue
 
@@ -488,6 +569,7 @@ def audit(
                 "identity_bound": False,
                 "identity_state": "BLOCKED_NO_REMOTE_IMAGE_READBACK",
                 "candidate_results": [],
+                "read_only_score_diagnostics": score_diagnostics([], None),
             })
             continue
 
@@ -509,6 +591,7 @@ def audit(
                         "identity_bound": False,
                         "identity_state": "BLOCKED_APPROVED_VISUAL_HYDRATION_FAILED",
                         "candidate_results": [],
+                        "read_only_score_diagnostics": score_diagnostics([], None),
                     })
                     continue
                 approved_asset_origin = "verified_provenance_hydration"
@@ -534,12 +617,14 @@ def audit(
                 compared.append({**row, **comparison})
 
         decision = identity_decision(compared)
+        diagnostics = score_diagnostics(compared, decision)
         results.append({
             **base,
             "approved_asset_origin": approved_asset_origin,
             "approved_visual_hydration": hydration,
             **decision,
             "candidate_results": compared,
+            "read_only_score_diagnostics": diagnostics,
         })
 
     bound = [row for row in results if row.get("identity_bound") is True]
@@ -549,11 +634,16 @@ def audit(
         if isinstance(row.get("approved_visual_hydration"), dict)
         and row["approved_visual_hydration"].get("hydration_transport") == "exact_wikimedia_derivative_after_original_429"
     ]
+    unique_below_threshold = [
+        row for row in results
+        if isinstance(row.get("read_only_score_diagnostics"), dict)
+        and row["read_only_score_diagnostics"].get("diagnostic_state") == "UNIQUE_BEST_BELOW_IDENTITY_THRESHOLDS"
+    ]
     return {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "mode": "READ_ONLY_INSTAGRAM_VISUAL_IDENTITY",
         "publication_authority": "NONE",
-        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE clears transform-tolerant normalized-pixel thresholds and exceeds every other remote image by the required uniqueness margin. A missing repository copy may be hydrated only from the exact already-approved HTTPS original after independent provenance-page ImageObject identity plus license verification. If and only if that exact Wikimedia original is rate-limited with HTTP 429, hydration may use a deterministic 1280/960px derivative whose URL is constructed from that exact original shard and filename; no alternate asset or generic image is accepted. Hydration is ephemeral shadow evidence and grants no publication authority.",
+        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE clears transform-tolerant normalized-pixel thresholds and exceeds every other remote image by the required uniqueness margin. A missing repository copy may be hydrated only from the exact already-approved HTTPS original after independent provenance-page ImageObject identity plus license verification. If and only if that exact Wikimedia original is rate-limited with HTTP 429, hydration may use a deterministic 1280/960px derivative whose URL is constructed from that exact original shard and filename; no alternate asset or generic image is accepted. Read-only score diagnostics expose per-remote ranking and exact gaps to the unchanged acceptance thresholds but can never promote identity. Hydration and diagnostics are ephemeral shadow evidence and grant no publication authority.",
         "candidate_count": len(results),
         "identity_bound_count": len(bound),
         "identity_bound_story_ids": [str(row.get("story_id")) for row in bound],
@@ -561,6 +651,8 @@ def audit(
         "verified_provenance_hydration_story_ids": [str(row.get("story_id")) for row in hydrated],
         "exact_wikimedia_derivative_hydration_count": len(exact_derivative_hydrated),
         "exact_wikimedia_derivative_hydration_story_ids": [str(row.get("story_id")) for row in exact_derivative_hydrated],
+        "read_only_score_diagnostics_count": len(results),
+        "unique_best_below_identity_threshold_story_ids": [str(row.get("story_id")) for row in unique_below_threshold],
         "acceptance_ready": False,
         "results": results,
     }
@@ -583,6 +675,8 @@ def main() -> int:
         "verified_provenance_hydration_story_ids": result["verified_provenance_hydration_story_ids"],
         "exact_wikimedia_derivative_hydration_count": result["exact_wikimedia_derivative_hydration_count"],
         "exact_wikimedia_derivative_hydration_story_ids": result["exact_wikimedia_derivative_hydration_story_ids"],
+        "read_only_score_diagnostics_count": result["read_only_score_diagnostics_count"],
+        "unique_best_below_identity_threshold_story_ids": result["unique_best_below_identity_threshold_story_ids"],
         "acceptance_ready": result["acceptance_ready"],
     }, ensure_ascii=False, sort_keys=True))
     return 0
