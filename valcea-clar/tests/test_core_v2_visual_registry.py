@@ -24,7 +24,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
                 "hcl-344-local-education-access",
                 "hcl-345-regulated-local-authorization",
                 "isj-directori-2026-conducere-scoli",
-                "07b864d62bb882f7f7cb820e",
+                "3d51c1c0967c1e0d99225eba",
             },
         )
         for story_id, assignment in stories.items():
@@ -72,7 +72,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
             self.assertEqual(isj_binding.get(field), expected_candidate[field], field)
         self.assertEqual(isj_binding.get("candidate_fingerprint"), _candidate_fingerprint(expected_candidate))
 
-        lapusata = stories["07b864d62bb882f7f7cb820e"]
+        lapusata = stories["3d51c1c0967c1e0d99225eba"]
         lapusata_image = lapusata.get("image") or {}
         lapusata_binding = lapusata.get("binding") or {}
         self.assertEqual(lapusata_image.get("source_type"), "creative_commons")
@@ -84,7 +84,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertIn("not evidence of the vehicle fire", str(lapusata.get("approval_basis") or ""))
 
         expected_lapusata_candidate = {
-            "candidate_id": "07b864d62bb882f7f7cb820e",
+            "candidate_id": "3d51c1c0967c1e0d99225eba",
             "source_label": "isu",
             "source_url": "https://isuvl.igsu.ro/stiri-locale/incendiu-izbucnit-la-un-autoturism-in-localitatea-lapusata-799",
             "headline": "Incendiu izbucnit la un autoturism, în localitatea Lăpușata",
