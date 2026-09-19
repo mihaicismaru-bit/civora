@@ -1,6 +1,6 @@
 {
-  "schema_version": "4.9",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN36-CURRENT-PHOTO-SEVEN-OF-SEVEN-NATURAL-VALIDATED",
+  "schema_version": "5.0",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN37-WATER-EXACT-VISUAL-HYDRATION-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -17,39 +17,51 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "bf2f3a3b844c722cdb483becf7c908d18d15e19b",
-    "message": "Core v2: pin verified Wikimedia originals for PHOTO fallback",
-    "functional_increment": "All seven current written shadow candidates now have a real, relevant, rights-cleared PHOTO truth assignment under fail-closed semantics. The last two lanes were resolved with disclosed contextual archive photographs strongly bound to their exact current candidates: ISU Mădulari uses the Mamu wooden-church photograph as geographic context only, and IPJ road safety uses DN7/E81 in Călimănești as local road-network context only. Direct Wikimedia originals are pinned so a bounded HTTP 429 fallback can succeed only when the independently read Commons page proves exact ImageObject identity plus license; no generic or synthetic substitute is accepted.",
-    "workflow_run_id": 35441164209,
-    "workflow_run_number": 569,
+    "sha": "186deb95255f76fcf3ad4f1248f33a467c483cf8",
+    "message": "Core v2: validate exact derivative hydration truth",
+    "functional_parent_sha": "c285054f76391383e62f9ec867f1834e26993702",
+    "functional_increment": "The missing approved water-contract panorama can now be hydrated ephemerally in shadow from a deterministic 1280/960px Wikimedia derivative only after the exact approved upload.wikimedia.org original has exhausted bounded retries with HTTP 429 and an independently read Commons page proves exact JSON-LD ImageObject identity plus license. The cross-artifact runtime validator independently rechecks the 429 prerequisite, Commons/upload hosts, provenance identity/license, deterministic thumb path, derivative download truth and identity binding to the original. No alternate asset or generic image is accepted and hydration grants no publication authority.",
+    "workflow_run_id": 35442511382,
+    "workflow_run_number": 575,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10583547658,
-    "artifact_sha256": "32fc99ca9819045c5dc2a69e09006174441151734bf56c03ef2cce0ec6ea9b2a",
-    "artifact_size_bytes": 214602,
+    "artifact_id": 10584118737,
+    "artifact_sha256": "968184d30b743401be710a78567c8e53abfb26b67020e898d34ba1b33d55f1f0",
+    "artifact_size_bytes": 215975,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 26,
     "ordered_shadow_failed_stage": null
   },
+  "validation_history": {
+    "initial_feature_run": {
+      "workflow_run_number": 573,
+      "head_sha": "c285054f76391383e62f9ec867f1834e26993702",
+      "conclusion": "failure",
+      "failure_class": "VALIDATOR_SCHEMA_DRIFT",
+      "truth_preserving_observation": "The natural run proved exact derivative hydration for the water visual, then failed because the independent runtime validator still accepted only the previous direct-hydration state. No rerun was used; a new commit tightened the validator to recognize the derivative state only under its full fail-closed invariants."
+    },
+    "corrective_natural_run": {
+      "workflow_run_number": 575,
+      "head_sha": "186deb95255f76fcf3ad4f1248f33a467c483cf8",
+      "conclusion": "success",
+      "run_attempt": 1,
+      "manual_rerun": false
+    }
+  },
   "done": [
     "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness",
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
     "PHOTO remains fail-closed; generic, text-card and synthetic-as-photo substitutions remain forbidden",
-    "public-safety candidate identity remains source-stable across volatile first-party detail-body hashes while explicit story/article IDs retain priority",
-    "HCL 343, HCL 344 and HCL 345 retain independently validated contextual archive visuals",
-    "ISJ 2026 retains a rights-cleared local-education contextual archive visual with strong candidate binding",
-    "Lăpușata retains a rights-cleared CC BY-SA 4.0 geographic-context photograph strongly bound to the exact ISU candidate and explicitly disclosed as not depicting the car fire or response",
-    "Mădulari now has a rights-cleared CC BY 3.0 photograph of the wooden church in Mamu, a locality in Mădulari commune, strongly bound to the exact ISU candidate and disclosed as geographic archive context only; it does not depict the forest fire, affected area, responders, damage or exact incident location",
-    "IPJ road safety now has a rights-cleared CC BY 3.0 photograph of DN7/E81 through Călimănești, strongly bound to the exact current IPJ candidate and disclosed as local road-network archive context only; it does not depict the September 2026 police actions, officers, checks, sanctions, vehicles or accident outcomes",
-    "the registry pins exact upload.wikimedia.org originals for current Commons visuals so the narrow HTTP 429 fallback remains exact-asset and license-bound rather than accepting Commons redirect aliases or unrelated imagery",
-    "natural push run 569 proves PHOTO schema 1.6 with 7 candidates, 7 VISUAL_CANDIDATE_VERIFIED_SHADOW and 0 blocked; every row has external source readback and an effective direct-image truth path",
-    "in run 569 IPJ and Mădulari each returned direct image HTTP 206 image payloads; Lăpușata exercised the bounded upload.wikimedia.org 429 fallback with exact Commons ImageObject identity and license verification",
+    "current PHOTO snapshot remains 7/7 verified shadow candidates with zero blocked current-photo lanes",
     "historical FactKernel evidence remains 2/2 and historical article-claims evidence remains 2/2 with fabricated_claims=0",
-    "historical site readback remains 2/2; CET Govora visual/Instagram approved-image identity remains verified; the water-contract transaction remains fail-closed",
-    "natural push run 569 passed contract tests, all 26 ordered shadow stages, external site/visual/Meta replay, PHOTO truth, receipts, transactions, runtime invariants and tamper regressions",
+    "the exact approved historical water panorama is now hydrated ephemerally from verified provenance in natural execution even when the exact original is rate-limited with HTTP 429",
+    "Wikimedia derivative hydration is exact-asset only: it is permitted only after original HTTP 429, exact Commons ImageObject identity, explicit license, Commons/upload host checks and deterministic thumb path construction from the original shard and filename",
+    "the independent runtime validator re-verifies derivative hydration semantics and fails closed on host/path/429/provenance drift",
+    "natural push run 575 proves one verified provenance hydration and one exact Wikimedia derivative hydration for valcea-apa-canal-contract-152m-20260902",
+    "natural push run 575 passed contract tests, all 26 ordered shadow stages, external site/visual/Meta replay, Instagram visual-identity validation, receipts, transactions, runtime invariants and tamper regressions",
     "no merge, deploy, live Core v2 publication, public-projection mutation, Meta write, workflow_dispatch or manual rerun was used"
   ],
   "inventory": {
@@ -77,38 +89,6 @@
       "1fc80eac6f7052a36ebc8a56"
     ],
     "blocked_current_lanes": [],
-    "ipj_external_readback": {
-      "candidate_binding_verified": true,
-      "semantic_relevance": "archive_context",
-      "rights_basis": "creative_commons",
-      "provenance_http_status": 200,
-      "direct_image_http_status": 206,
-      "direct_source_effective_ok": true,
-      "external_readback_ok": true,
-      "stable_candidate_id": "1fc80eac6f7052a36ebc8a56"
-    },
-    "madulari_external_readback": {
-      "candidate_binding_verified": true,
-      "semantic_relevance": "archive_context",
-      "rights_basis": "creative_commons",
-      "provenance_http_status": 200,
-      "direct_image_http_status": 206,
-      "direct_source_effective_ok": true,
-      "external_readback_ok": true,
-      "stable_candidate_id": "6546c2c57ea3bec64c372747"
-    },
-    "lapusata_external_readback": {
-      "candidate_binding_verified": true,
-      "semantic_relevance": "archive_context",
-      "rights_basis": "creative_commons",
-      "provenance_http_status": 200,
-      "direct_image_http_status": 429,
-      "direct_source_effective_ok": true,
-      "direct_source_fallback": "wikimedia_commons_source_page_identity_fallback_for_direct_429",
-      "fallback_requires_exact_jsonld_asset_identity_and_license": true,
-      "external_readback_ok": true,
-      "stable_candidate_id": "d8b16613110809449b51663b"
-    },
     "generic_or_synthetic_substitution_forbidden": true,
     "scope_note": "7/7 applies to the seven current written shadow candidates in this validated snapshot; it is not production readiness or delivery readiness."
   },
@@ -117,12 +97,26 @@
     "fact_kernel_evidence_ready_count": 2,
     "article_claims_evidence_ready_count": 2,
     "fabricated_claims": 0,
+    "fully_bound_replay_count": 0,
     "transaction_terminal_reasons": {
       "valcea-apa-canal-contract-152m-20260902": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE",
       "cet-govora-cine-a-decis-oprirea-20260821": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE"
     },
     "publication_authority": "NONE",
     "live_promotion_allowed": false
+  },
+  "historical_water_exact_visual_hydration": {
+    "story_id": "valcea-apa-canal-contract-152m-20260902",
+    "approved_asset": "launch-ramnicu-valcea-panorama.jpg",
+    "provenance_page": "https://commons.wikimedia.org/wiki/File:Ramnicu_Valcea_panorama.jpg",
+    "approved_original": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Ramnicu_Valcea_panorama.jpg",
+    "hydration_ok": true,
+    "hydration_transport": "exact_wikimedia_derivative_after_original_429",
+    "exact_derivative_hydration_count": 1,
+    "exact_derivative_identity_bound_to_original": true,
+    "publication_authority": "NONE",
+    "instagram_remote_visual_identity_bound": false,
+    "truth_note": "Hydration now proves access to the exact already-approved visual lineage; it does not prove that any Instagram remote carousel child is that approved image and it does not repair the public-site image binding."
   },
   "external_replay_truth": {
     "candidate_count": 2,
@@ -137,7 +131,8 @@
       "failed": 1,
       "passed_story_ids": ["cet-govora-cine-a-decis-oprirea-20260821"],
       "blocked_story_ids": ["valcea-apa-canal-contract-152m-20260902"],
-      "water_contract_reason": "BLOCKED_APPROVED_VISUAL_HYDRATION_FAILED"
+      "water_contract_hydration": "VERIFIED_EXACT_ASSET_LINEAGE",
+      "water_contract_identity": "UNBOUND_AFTER_HYDRATION"
     },
     "externally_verified_complete_receipts": 0,
     "truth_complete_count": 0,
@@ -151,8 +146,8 @@
     "acceptance_ready": false
   },
   "blocked": [
-    {"gate": "historical_water_visual_asset", "reason": "The exact approved water-contract visual still lacks a complete hydrated/bound proof path for approved-pixel identity; no substitute image is accepted."},
-    {"gate": "historical_water_cross_surface_binding", "reason": "The water-contract approved social visual remains unbound to the canonical/public site story."},
+    {"gate": "historical_water_instagram_visual_identity", "reason": "The exact approved water panorama can now be hydrated, but independent comparison still does not bind it to one unique Instagram remote image; no identity claim is promoted."},
+    {"gate": "historical_water_cross_surface_binding", "reason": "The water-contract approved social visual remains unbound to the canonical/public site story, so visual readback remains 1/2."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
     {"gate": "isj_registration_deadline_normalization", "reason": "Raw registration window is verified but its year is not explicit in that row; no normalized 2026 deadline is promoted."},
@@ -160,7 +155,8 @@
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "move the primary autonomous front from current PHOTO acquisition to the historical water-contract exact approved visual hydration and canonical site/image binding; do not accept a substitute asset",
+    "inspect and expose the water-contract per-remote comparison scores read-only to determine whether the four Instagram carousel images contain a transformed version of the approved panorama or a genuinely different asset; do not relax thresholds merely to obtain a match",
+    "reconcile the water-contract canonical/public site image binding read-only; do not mutate the public projection before owner-authorized cutover",
     "keep Facebook uncertified until read-only Graph permission is sufficient and a remote receipt can be independently read back",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
     "keep ISJ deadline normalization fail-closed unless the year is directly supported by the same evidence context",
@@ -170,22 +166,19 @@
   "evidence": {
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
-    "photo_truth_tests": "valcea-clar/tests/test_core_v2_visual.py",
-    "visual_registry": "valcea-clar/core_v2/visual_registry.json",
-    "visual_registry_tests": "valcea-clar/tests/test_core_v2_visual_registry.py",
     "instagram_visual_identity": "valcea-clar/core_v2/instagram_visual_identity.py",
+    "instagram_visual_identity_validator": "valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py",
+    "instagram_visual_identity_tests": "valcea-clar/tests/test_core_v2_instagram_visual_identity.py",
+    "visual_readback": "valcea-clar/core_v2/visual_readback.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
     "receipt_ledger": "valcea-clar/core_v2/materialize_shadow_receipts.py",
     "gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35441164209",
-    "feature_artifact_id": 10583547658,
-    "feature_artifact_sha256": "32fc99ca9819045c5dc2a69e09006174441151734bf56c03ef2cce0ec6ea9b2a",
-    "feature_artifact_size_bytes": 214602,
-    "ipj_photo_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35440953707",
-    "ipj_photo_artifact_id": 10583756960,
-    "madulari_photo_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35440783306",
-    "madulari_photo_artifact_id": 10583358742
+    "failed_discovery_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35442295823",
+    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35442511382",
+    "validated_feature_artifact_id": 10584118737,
+    "validated_feature_artifact_sha256": "968184d30b743401be710a78567c8e53abfb26b67020e898d34ba1b33d55f1f0",
+    "validated_feature_artifact_size_bytes": 215975
   }
 }
