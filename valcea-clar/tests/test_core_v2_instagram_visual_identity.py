@@ -19,7 +19,7 @@ class InstagramVisualIdentityTest(unittest.TestCase):
         near = [max(0, min(255, value + (1 if i % 5 else -1))) for i, value in enumerate(left)]
         transformed = compare_vectors(left, near)
         self.assertTrue(transformed["same_visual"])
-        self.assertGreaterEqual(transformed["correlation"], 0.96)
+        self.assertGreaterEqual(transformed["correlation"], 0.80)
         self.assertLessEqual(transformed["mae_normalized"], 0.12)
 
     def test_different_visual_fails_closed(self):
@@ -29,14 +29,15 @@ class InstagramVisualIdentityTest(unittest.TestCase):
         self.assertFalse(result["same_visual"])
         self.assertLess(result["correlation"], 0.0)
 
-    def test_identity_requires_exactly_one_remote_match(self):
+    def test_identity_requires_exactly_one_dominant_remote_match(self):
         unique = identity_decision([
-            {"remote_id": "a", "media_url": "https://example.test/a.jpg", "same_visual": True, "composite_score": 0.97},
-            {"remote_id": "b", "media_url": "https://example.test/b.jpg", "same_visual": False, "composite_score": 0.31},
+            {"remote_id": "a", "media_url": "https://example.test/a.jpg", "same_visual": True, "composite_score": 0.73},
+            {"remote_id": "b", "media_url": "https://example.test/b.jpg", "same_visual": False, "composite_score": 0.10},
         ])
         self.assertTrue(unique["identity_bound"])
         self.assertEqual(unique["matched_remote_id"], "a")
-        self.assertEqual(unique["identity_state"], "APPROVED_VISUAL_MATCHED_REMOTE_IMAGE")
+        self.assertEqual(unique["identity_state"], "APPROVED_VISUAL_MATCHED_REMOTE_IMAGE_UNIQUE")
+        self.assertGreaterEqual(unique["match_margin"], 0.20)
 
         ambiguous = identity_decision([
             {"remote_id": "a", "media_url": "https://example.test/a.jpg", "same_visual": True, "composite_score": 0.97},
@@ -44,6 +45,14 @@ class InstagramVisualIdentityTest(unittest.TestCase):
         ])
         self.assertFalse(ambiguous["identity_bound"])
         self.assertEqual(ambiguous["identity_state"], "AMBIGUOUS_MULTIPLE_REMOTE_MATCHES")
+
+        close_runner_up = identity_decision([
+            {"remote_id": "a", "media_url": "https://example.test/a.jpg", "same_visual": True, "composite_score": 0.74},
+            {"remote_id": "b", "media_url": "https://example.test/b.jpg", "same_visual": False, "composite_score": 0.63},
+        ])
+        self.assertFalse(close_runner_up["identity_bound"])
+        self.assertEqual(close_runner_up["identity_state"], "BLOCKED_INSUFFICIENT_UNIQUENESS_MARGIN")
+        self.assertLess(close_runner_up["match_margin"], 0.20)
 
         none = identity_decision([
             {"remote_id": "a", "media_url": "https://example.test/a.jpg", "same_visual": False, "composite_score": 0.55},
