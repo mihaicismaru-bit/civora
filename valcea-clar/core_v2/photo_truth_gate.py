@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 from typing import Any, Iterable
@@ -9,7 +10,9 @@ from contracts import ContractViolation, Visual
 from visual_readback import ALLOWED_RIGHTS_BASES, _read_binary_head, _read_text
 
 
-PHOTO_GATE_SCHEMA_VERSION = "1.1"
+PHOTO_GATE_SCHEMA_VERSION = "1.2"
+_STRONG_BINDING_SOURCES = {"ipj", "isu", "isj"}
+_BINDING_FIELDS = ("source_label", "source_url", "headline", "where", "who")
 
 
 def _candidate_id(row: dict[str, Any], *, source_label: str) -> str:
@@ -20,6 +23,19 @@ def _candidate_id(row: dict[str, Any], *, source_label: str) -> str:
     if decision_number is not None:
         return f"hcl-{decision_number}"
     return f"{source_label}:unknown"
+
+
+def _candidate_fingerprint(candidate: dict[str, Any]) -> str:
+    payload = {
+        "candidate_id": str(candidate.get("candidate_id") or "").strip(),
+        "source_label": str(candidate.get("source_label") or "").strip(),
+        "source_url": str(candidate.get("source_url") or "").strip(),
+        "headline": str(candidate.get("headline") or "").strip(),
+        "where": str(candidate.get("where") or "").strip(),
+        "who": str(candidate.get("who") or "").strip(),
+    }
+    raw = json.dumps(payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(raw).hexdigest()
 
 
 def iter_written_candidates(document: dict[str, Any], *, source_label: str) -> Iterable[dict[str, Any]]:
@@ -37,6 +53,7 @@ def iter_written_candidates(document: dict[str, Any], *, source_label: str) -> I
             yield {
                 "candidate_id": article_id,
                 "source_label": source_label,
+                "source_url": str(candidate.get("source_url") or "").strip(),
                 "where": str(candidate.get("where") or "").strip(),
                 "who": str(candidate.get("who") or "").strip(),
                 "headline": str(candidate.get("headline") or "").strip(),
@@ -50,19 +67,23 @@ def iter_written_candidates(document: dict[str, Any], *, source_label: str) -> I
             for article in articles:
                 if not isinstance(article, dict):
                     continue
+                kernel = article.get("fact_kernel") or {}
                 yield {
                     "candidate_id": str(article.get("article_id") or _candidate_id(row, source_label=source_label)),
                     "source_label": source_label,
-                    "where": str((article.get("fact_kernel") or {}).get("where") or "").strip(),
-                    "who": str((article.get("fact_kernel") or {}).get("who") or "").strip(),
+                    "source_url": str(kernel.get("source_url") or "").strip(),
+                    "where": str(kernel.get("where") or "").strip(),
+                    "who": str(kernel.get("who") or "").strip(),
                     "headline": str((article.get("article_package") or {}).get("headline") or "").strip(),
                 }
             continue
+        kernel = row.get("fact_kernel") or {}
         yield {
             "candidate_id": _candidate_id(row, source_label=source_label),
             "source_label": source_label,
-            "where": str((row.get("fact_kernel") or {}).get("where") or "").strip(),
-            "who": str((row.get("fact_kernel") or {}).get("who") or "").strip(),
+            "source_url": str(kernel.get("source_url") or "").strip(),
+            "where": str(kernel.get("where") or "").strip(),
+            "who": str(kernel.get("who") or "").strip(),
             "headline": str((row.get("article_package") or {}).get("headline") or "").strip(),
         }
 
@@ -75,6 +96,37 @@ def _atlas_assets_for_story(atlas: dict[str, Any], story_id: str) -> list[dict[s
         if story_id in {str(value) for value in asset.get("source_story_ids") or []}:
             matches.append(asset)
     return matches
+
+
+def _binding_problems(candidate: dict[str, Any], assignment: dict[str, Any]) -> list[str]:
+    source_label = str(candidate.get("source_label") or "").strip()
+    binding = assignment.get("binding")
+    if not isinstance(binding, dict):
+        if source_label in _STRONG_BINDING_SOURCES:
+            return ["story_binding_missing"]
+        return []
+
+    problems: list[str] = []
+    for field in _BINDING_FIELDS:
+        expected = str(binding.get(field) or "").strip()
+        if not expected:
+            continue
+        actual = str(candidate.get(field) or "").strip()
+        if actual != expected:
+            problems.append(f"story_binding_{field}_mismatch")
+
+    expected_fingerprint = str(binding.get("candidate_fingerprint") or "").strip()
+    actual_fingerprint = _candidate_fingerprint(candidate)
+    if expected_fingerprint and expected_fingerprint != actual_fingerprint:
+        problems.append("story_binding_candidate_fingerprint_mismatch")
+
+    if source_label in _STRONG_BINDING_SOURCES:
+        if not str(binding.get("source_url") or "").strip():
+            problems.append("story_binding_source_url_missing")
+        if not expected_fingerprint:
+            problems.append("story_binding_candidate_fingerprint_missing")
+
+    return problems
 
 
 def _external_provenance_probe(image: dict[str, Any], *, timeout: float) -> dict[str, Any]:
@@ -104,6 +156,7 @@ def assess_story_visual(
     atlas: dict[str, Any] | None = None,
     external_probe: bool = False,
     timeout: float = 12.0,
+    candidate: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     stories = visual_registry.get("stories") or {}
     assigned = stories.get(story_id)
@@ -137,6 +190,10 @@ def assess_story_visual(
         }
 
     problems: list[str] = []
+    bound_candidate = dict(candidate or {})
+    bound_candidate.setdefault("candidate_id", story_id)
+    problems.extend(_binding_problems(bound_candidate, assigned))
+
     kind = str(image.get("kind") or "")
     synthetic = bool(image.get("synthetic"))
     subject_match = image.get("subject_match") is True
@@ -188,6 +245,7 @@ def assess_story_visual(
             problems.append("external_provenance_or_image_readback_failed")
 
     passed = not problems
+    binding_configured = isinstance(assigned.get("binding"), dict)
     return {
         "story_id": story_id,
         "status": "VISUAL_CANDIDATE_VERIFIED_SHADOW" if passed else "BLOCKED",
@@ -197,6 +255,9 @@ def assess_story_visual(
         "social_publish_allowed": False,
         "visual_ready_for_future_site_binding": passed,
         "article_binding_verified": False,
+        "candidate_binding_configured": binding_configured,
+        "candidate_binding_verified": binding_configured and not any(problem.startswith("story_binding_") for problem in problems),
+        "candidate_fingerprint": _candidate_fingerprint(bound_candidate),
         "semantic_relevance": semantic_relevance,
         "rights_basis": rights_basis,
         "image_path": str(assigned.get("image_path") or "").strip(),
@@ -226,14 +287,18 @@ def build_photo_truth_report(
         if story_id in seen:
             continue
         seen.add(story_id)
+        candidate = dict(candidate)
+        candidate["candidate_fingerprint"] = _candidate_fingerprint(candidate)
         decision = assess_story_visual(
             story_id,
             visual_registry=visual_registry,
             atlas=atlas,
             external_probe=external_probe,
             timeout=timeout,
+            candidate=candidate,
         )
         decision["source_label"] = candidate["source_label"]
+        decision["article_source_url"] = candidate["source_url"]
         decision["headline"] = candidate["headline"]
         decision["where"] = candidate["where"]
         decision["who"] = candidate["who"]
@@ -256,8 +321,9 @@ def build_photo_truth_report(
         "truth_rule": (
             "Only a story-specific approved real photograph with proven subject relevance, allowed rights metadata, "
             "archive disclosure when applicable, and successful external provenance/image readback when probing is enabled "
-            "may become a Core v2 visual candidate. Atlas membership or text-card output never implies story approval. "
-            "Public article binding remains a later independent readback gate."
+            "may become a Core v2 visual candidate. IPJ/ISU/ISJ visual approvals must also be strongly bound to the "
+            "exact candidate source URL and candidate fingerprint, so a reused or drifted story identifier cannot inherit approval. "
+            "Atlas membership or text-card output never implies story approval. Public article binding remains a later independent readback gate."
         ),
     }
 
