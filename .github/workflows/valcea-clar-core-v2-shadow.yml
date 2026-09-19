@@ -34,6 +34,7 @@ jobs:
         run: |
           python valcea-clar/tests/test_core_v2_contracts.py
           python valcea-clar/tests/test_core_v2_readback.py
+          python valcea-clar/tests/test_core_v2_instagram_visual_identity.py
           python valcea-clar/tests/test_core_v2_integrity.py
           python valcea-clar/tests/test_core_v2_source_signal.py
           python valcea-clar/tests/test_core_v2_isj_shadow_lane.py
@@ -92,11 +93,12 @@ jobs:
           python valcea-clar/scripts/isj_valcea_education_detail_evidence.py --self-test
           python valcea-clar/scripts/council_decision_document_resolver.py --self-test
 
-      - name: Install deterministic PDF text extractor
+      - name: Install deterministic PDF and image tools
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends poppler-utils
+          sudo apt-get install -y --no-install-recommends poppler-utils imagemagick
           pdftotext -v
+          convert -version
 
       - name: Run single bounded Core v2 shadow cycle read-only
         run: |
@@ -194,6 +196,14 @@ jobs:
           VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
         run: python valcea-clar/core_v2/replay_external_meta.py --output /tmp/valcea-core-v2-meta-readback.json --limit 10
 
+      - name: Bind approved visual identity to Instagram remote pixels read-only
+        run: |
+          python valcea-clar/core_v2/instagram_visual_identity.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --repo-root . \
+            --output /tmp/valcea-core-v2-instagram-visual-identity.json
+
       - name: Bind external evidence into shadow receipt ledger
         run: |
           python valcea-clar/core_v2/materialize_shadow_receipts.py \
@@ -201,6 +211,7 @@ jobs:
             --site-readback /tmp/valcea-core-v2-site-readback.json \
             --visual-readback /tmp/valcea-core-v2-visual-readback.json \
             --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --instagram-identity /tmp/valcea-core-v2-instagram-visual-identity.json \
             --output /tmp/valcea-core-v2-shadow-receipts.json
 
       - name: Bind explicit fact and article evidence into shadow transactions
@@ -275,6 +286,7 @@ jobs:
             /tmp/valcea-core-v2-site-readback.json
             /tmp/valcea-core-v2-visual-readback.json
             /tmp/valcea-core-v2-meta-readback.json
+            /tmp/valcea-core-v2-instagram-visual-identity.json
             /tmp/valcea-core-v2-shadow-receipts.json
             /tmp/valcea-core-v2-historical-fact-kernels.json
             /tmp/valcea-core-v2-historical-article-claims.json
