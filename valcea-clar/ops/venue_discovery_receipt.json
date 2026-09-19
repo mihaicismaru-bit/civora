@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-09-19T04:45:49.164872+00:00",
+  "generated_at": "2026-09-19T11:11:57.024570+00:00",
   "status": "OK",
   "policy": {
     "osm_is_discovery_only": true,
@@ -10,16 +10,80 @@
     "operator_ownership_inference": false,
     "publication_effect": "NONE"
   },
-  "frontier_count": 0,
-  "website_candidates": 0,
-  "websites_checked": 0,
+  "frontier_count": 111,
+  "website_candidates": 18,
+  "websites_checked": 5,
   "official_identity_matches": 0,
   "official_address_matches": 0,
   "new_overlay_venues": [],
   "new_auto_eligible": [],
   "new_review_required": [],
-  "verifications": [],
-  "provider_errors": [
-    "https://overpass-api.de/api/interpreter: HTTPError: HTTP Error 504: Gateway Timeout"
-  ]
+  "verifications": [
+    {
+      "discoveryId": "osm-node-13149483551",
+      "name": "Ahamata Yoga",
+      "observedAt": "2026-09-19T11:12:05.080247+00:00",
+      "health": "FAILED",
+      "website": "https://ahamatayoga.com/",
+      "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-4423759090",
+      "name": "D'Amici",
+      "observedAt": "2026-09-19T11:12:05.137555+00:00",
+      "health": "OK",
+      "website": "https://www.damici.ro/ristorante-damici/",
+      "https": true,
+      "nameMatch": false,
+      "localityMatch": false,
+      "streetMatch": false,
+      "pagesChecked": 1,
+      "textLength": 80,
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-13254124078",
+      "name": "Dabo Doner",
+      "observedAt": "2026-09-19T11:12:06.921431+00:00",
+      "health": "OK",
+      "website": "https://dabodoner.ro/",
+      "https": true,
+      "nameMatch": false,
+      "localityMatch": false,
+      "streetMatch": false,
+      "pagesChecked": 1,
+      "textLength": 4,
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-4718544793",
+      "name": "KFC",
+      "observedAt": "2026-09-19T11:12:07.862733+00:00",
+      "health": "FAILED",
+      "website": "https://www.kfc.ro/",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-13202418033",
+      "name": "Maestro Pizza & Devivery",
+      "observedAt": "2026-09-19T11:12:08.098342+00:00",
+      "health": "OK",
+      "website": "https://pizzamaestro.ro/",
+      "https": true,
+      "nameMatch": false,
+      "localityMatch": false,
+      "streetMatch": false,
+      "pagesChecked": 1,
+      "textLength": 80,
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    }
+  ],
+  "provider_errors": []
 }
