@@ -12,8 +12,58 @@ from urllib.request import Request, urlopen
 
 FIELDS = {
     "facebook": "id,permalink_url,created_time",
-    "instagram": "id,permalink,timestamp,media_type",
+    "instagram": "id,permalink,timestamp,media_type,media_url",
 }
+
+
+def _image_response_ok(http_status: int | None, content_type: str | None) -> bool:
+    return bool(
+        http_status in {200, 206}
+        and str(content_type or "").lower().startswith("image/")
+    )
+
+
+def _read_remote_image(url: str, timeout: float = 12.0) -> dict[str, Any]:
+    if not str(url or "").startswith("https://"):
+        return {
+            "status": "BLOCKED",
+            "reason": "missing_or_non_https_remote_media_url",
+            "readback_ok": False,
+        }
+    request = Request(
+        url,
+        headers={
+            "User-Agent": "CIVORA-Core-v2-Auditor/1.0",
+            "Range": "bytes=0-1023",
+        },
+    )
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            http_status = int(getattr(response, "status", 0) or 0)
+            final_url = response.geturl()
+            content_type = str(response.headers.get("Content-Type") or "")
+            response.read(1024)
+    except HTTPError as exc:
+        return {
+            "status": "FAILED",
+            "http_status": exc.code,
+            "error": str(exc),
+            "readback_ok": False,
+        }
+    except (URLError, TimeoutError) as exc:
+        return {
+            "status": "FAILED",
+            "error": str(exc),
+            "readback_ok": False,
+        }
+    ok = _image_response_ok(http_status, content_type)
+    return {
+        "status": "PASS" if ok else "FAILED",
+        "http_status": http_status,
+        "final_url": final_url,
+        "content_type": content_type,
+        "readback_ok": ok,
+    }
 
 
 def parse_meta_object(channel: str, remote_id: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -25,6 +75,9 @@ def parse_meta_object(channel: str, remote_id: str, payload: dict[str, Any]) -> 
         "remote_id": remote_id,
         "observed_remote_id": actual_id or None,
         "permalink": permalink,
+        "media_type": payload.get("media_type") if channel == "instagram" else None,
+        "remote_media_url": payload.get("media_url") if channel == "instagram" else None,
+        "object_readback_ok": ok,
         "readback_ok": ok,
         "status": "PASS" if ok else "FAILED",
         "publication_authority": "NONE",
@@ -102,7 +155,32 @@ def read_meta(channel: str, remote_id: str, token: str, graph_version: str = "v2
             "readback_ok": False,
             "publication_authority": "NONE",
         }
-    return parse_meta_object(channel, remote_id, payload)
+
+    result = parse_meta_object(channel, remote_id, payload)
+    if channel != "instagram":
+        result["remote_visual_readback_ok"] = None
+        return result
+
+    media_type = str(payload.get("media_type") or "").upper()
+    media_url = str(payload.get("media_url") or "").strip()
+    remote_media = (
+        _read_remote_image(media_url, timeout)
+        if media_type == "IMAGE" and media_url
+        else {
+            "status": "BLOCKED",
+            "reason": "instagram_media_is_not_single_image_or_media_url_missing",
+            "readback_ok": False,
+        }
+    )
+    object_ok = result.get("object_readback_ok") is True
+    remote_visual_ok = remote_media.get("readback_ok") is True
+    result["remote_media"] = remote_media
+    result["remote_visual_readback_ok"] = remote_visual_ok
+    result["readback_ok"] = bool(object_ok and remote_visual_ok)
+    result["status"] = "PASS" if result["readback_ok"] else "FAILED"
+    if object_ok and not remote_visual_ok:
+        result["reason"] = "instagram_remote_visual_readback_failed"
+    return result
 
 
 def main() -> int:
