@@ -80,6 +80,9 @@ def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | N
     ok = row.get("readback_ok") is True and bool(row.get("permalink"))
     status = "DELIVERED" if ok else str(row.get("status") or ("NOT_DELIVERED" if not remote_id else "FAILED"))
     remote_media = row.get("remote_media") if isinstance(row.get("remote_media"), dict) else {}
+    remote_media_results = [
+        item for item in (row.get("remote_media_results") or []) if isinstance(item, dict)
+    ]
     return {
         "channel": channel,
         "status": status,
@@ -92,6 +95,11 @@ def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | N
         "media_type": row.get("media_type"),
         "remote_media_url": row.get("remote_media_url"),
         "remote_visual_readback_ok": row.get("remote_visual_readback_ok"),
+        "remote_visual_identity_bound": row.get("remote_visual_identity_bound"),
+        "remote_visual_identity_note": row.get("remote_visual_identity_note"),
+        "remote_image_candidate_count": row.get("remote_image_candidate_count"),
+        "remote_image_readback_passed_count": row.get("remote_image_readback_passed_count"),
+        "remote_media_results": remote_media_results,
         "remote_media_http_status": remote_media.get("http_status"),
         "remote_media_content_type": remote_media.get("content_type"),
         "remote_media_final_url": remote_media.get("final_url"),
@@ -149,6 +157,7 @@ def materialize(
             and receipts["instagram"].get("status") == "DELIVERED"
             and receipts["instagram"].get("readback_ok") is True
             and receipts["instagram"].get("remote_visual_readback_ok") is True
+            and receipts["instagram"].get("remote_visual_identity_bound") is True
         )
         if externally_verified:
             externally_verified_ids.append(story_id)
@@ -172,10 +181,10 @@ def materialize(
         )
 
     return {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "mode": "SHADOW_RECEIPT_LEDGER",
         "publication_authority": "NONE",
-        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence; Instagram delivery additionally requires readback of the remote image payload, and the approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
+        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence. Instagram delivery requires remote image payload readback and explicit identity binding to the approved visual; remote image presence alone is diagnostic, not a complete receipt. The approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
         "candidate_count": len(rows),
         "externally_verified_count": len(externally_verified_ids),
         "externally_verified_story_ids": externally_verified_ids,
