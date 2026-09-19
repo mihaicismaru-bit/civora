@@ -10,7 +10,7 @@ from contracts import ContractViolation, Visual
 from visual_readback import ALLOWED_RIGHTS_BASES, _read_binary_head, _read_text
 
 
-PHOTO_GATE_SCHEMA_VERSION = "1.2"
+PHOTO_GATE_SCHEMA_VERSION = "1.3"
 _STRONG_BINDING_SOURCES = {"ipj", "isu", "isj"}
 _BINDING_FIELDS = ("source_label", "source_url", "headline", "where", "who")
 
@@ -157,6 +157,7 @@ def assess_story_visual(
     external_probe: bool = False,
     timeout: float = 12.0,
     candidate: dict[str, Any] | None = None,
+    external_probe_cache: dict[tuple[str, str], dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     stories = visual_registry.get("stories") or {}
     assigned = stories.get(story_id)
@@ -238,9 +239,16 @@ def assess_story_visual(
         except ContractViolation as exc:
             problems.append(f"visual_contract:{exc}")
 
-    external = {"status": "NOT_PROBED", "readback_ok": False}
+    external = {"status": "NOT_PROBED", "readback_ok": False, "cache_reused": False}
     if not problems and external_probe:
-        external = _external_provenance_probe(image, timeout=timeout)
+        cache_key = (source_url, direct_source_url)
+        if external_probe_cache is not None and cache_key in external_probe_cache:
+            external = {**external_probe_cache[cache_key], "cache_reused": True}
+        else:
+            probed = _external_provenance_probe(image, timeout=timeout)
+            if external_probe_cache is not None:
+                external_probe_cache[cache_key] = dict(probed)
+            external = {**probed, "cache_reused": False}
         if not external.get("readback_ok"):
             problems.append("external_provenance_or_image_readback_failed")
 
@@ -282,6 +290,7 @@ def build_photo_truth_report(
 
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
+    external_probe_cache: dict[tuple[str, str], dict[str, Any]] | None = {} if external_probe else None
     for candidate in candidates:
         story_id = str(candidate["candidate_id"])
         if story_id in seen:
@@ -296,6 +305,7 @@ def build_photo_truth_report(
             external_probe=external_probe,
             timeout=timeout,
             candidate=candidate,
+            external_probe_cache=external_probe_cache,
         )
         decision["source_label"] = candidate["source_label"]
         decision["article_source_url"] = candidate["source_url"]
@@ -306,6 +316,10 @@ def build_photo_truth_report(
 
     ready = sum(row.get("status") == "VISUAL_CANDIDATE_VERIFIED_SHADOW" for row in rows)
     blocked = sum(row.get("status") == "BLOCKED" for row in rows)
+    reused_probe_count = sum(
+        bool((row.get("external_readback") or {}).get("cache_reused"))
+        for row in rows
+    )
     return {
         "schema_version": PHOTO_GATE_SCHEMA_VERSION,
         "mode": "PHOTO_TRUTH_GATE_SHADOW",
@@ -314,6 +328,8 @@ def build_photo_truth_report(
         "site_publish_allowed": False,
         "social_publish_allowed": False,
         "external_probe_enabled": external_probe,
+        "external_probe_unique_asset_count": len(external_probe_cache or {}),
+        "external_probe_reused_candidate_count": reused_probe_count,
         "candidate_count": len(rows),
         "visual_candidate_verified_shadow_count": ready,
         "blocked_count": blocked,
@@ -321,9 +337,12 @@ def build_photo_truth_report(
         "truth_rule": (
             "Only a story-specific approved real photograph with proven subject relevance, allowed rights metadata, "
             "archive disclosure when applicable, and successful external provenance/image readback when probing is enabled "
-            "may become a Core v2 visual candidate. IPJ/ISU/ISJ visual approvals must also be strongly bound to the "
-            "exact candidate source URL and candidate fingerprint, so a reused or drifted story identifier cannot inherit approval. "
-            "Atlas membership or text-card output never implies story approval. Public article binding remains a later independent readback gate."
+            "may become a Core v2 visual candidate. Identical approved source/direct-source URL pairs share one bounded external "
+            "asset probe per report so redundant story assignments cannot create avoidable rate-limit drift; each story still passes "
+            "its own rights, relevance, disclosure and binding contract independently. IPJ/ISU/ISJ visual approvals must also be "
+            "strongly bound to the exact candidate source URL and candidate fingerprint, so a reused or drifted story identifier "
+            "cannot inherit approval. Atlas membership or text-card output never implies story approval. Public article binding remains "
+            "a later independent readback gate."
         ),
     }
 
@@ -359,6 +378,8 @@ def main() -> int:
         "visual_candidate_verified_shadow_count": report["visual_candidate_verified_shadow_count"],
         "blocked_count": report["blocked_count"],
         "external_probe_enabled": report["external_probe_enabled"],
+        "external_probe_unique_asset_count": report["external_probe_unique_asset_count"],
+        "external_probe_reused_candidate_count": report["external_probe_reused_candidate_count"],
         "publication_authority": "NONE",
         "acceptance_ready": False,
     }, ensure_ascii=False, sort_keys=True))
