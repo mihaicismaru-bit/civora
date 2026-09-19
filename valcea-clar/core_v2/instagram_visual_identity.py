@@ -14,9 +14,14 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[2]
 MAX_REMOTE_BYTES = 15 * 1024 * 1024
 VECTOR_SIDE = 64
-CORRELATION_MIN = 0.96
+# Instagram recompresses, resizes and may reframe carousel images. Absolute
+# pixel thresholds therefore have to tolerate bounded transformation, while
+# identity remains fail-closed through a strong uniqueness margin against all
+# other externally read-back images in the same object.
+CORRELATION_MIN = 0.80
 MAE_MAX = 0.12
-COMPOSITE_MIN = 0.84
+COMPOSITE_MIN = 0.70
+MATCH_MARGIN_MIN = 0.20
 
 
 def _load(path: str | Path) -> dict[str, Any]:
@@ -69,32 +74,55 @@ def identity_decision(candidate_results: list[dict[str, Any]]) -> dict[str, Any]
         reverse=True,
     )
     best = ranked[0] if ranked else None
-    if len(passing) == 1:
-        match = passing[0]
-        return {
-            "identity_bound": True,
-            "identity_state": "APPROVED_VISUAL_MATCHED_REMOTE_IMAGE",
-            "matched_remote_id": match.get("remote_id"),
-            "matched_remote_url": match.get("media_url"),
-            "best_composite_score": match.get("composite_score"),
-            "passing_candidate_count": 1,
-        }
+    runner_up = ranked[1] if len(ranked) > 1 else None
+    best_score = float((best or {}).get("composite_score") or 0.0)
+    runner_up_score = float((runner_up or {}).get("composite_score") or 0.0)
+    match_margin = max(0.0, best_score - runner_up_score)
+    common = {
+        "best_composite_score": round(best_score, 6) if best else None,
+        "runner_up_composite_score": round(runner_up_score, 6) if runner_up else None,
+        "match_margin": round(match_margin, 6) if best else None,
+        "match_margin_min": MATCH_MARGIN_MIN,
+        "passing_candidate_count": len(passing),
+    }
+
     if len(passing) > 1:
         return {
             "identity_bound": False,
             "identity_state": "AMBIGUOUS_MULTIPLE_REMOTE_MATCHES",
             "matched_remote_id": None,
             "matched_remote_url": None,
-            "best_composite_score": (best or {}).get("composite_score"),
-            "passing_candidate_count": len(passing),
+            **common,
         }
+
+    if len(passing) == 1:
+        match = passing[0]
+        # The passing candidate must also be the best candidate and clearly
+        # separated from every other remote image. A close runner-up is an
+        # unresolved ambiguity even when it narrowly misses an absolute gate.
+        match_is_best = bool(best is match or (best or {}).get("remote_id") == match.get("remote_id"))
+        if not match_is_best or match_margin < MATCH_MARGIN_MIN:
+            return {
+                "identity_bound": False,
+                "identity_state": "BLOCKED_INSUFFICIENT_UNIQUENESS_MARGIN",
+                "matched_remote_id": None,
+                "matched_remote_url": None,
+                **common,
+            }
+        return {
+            "identity_bound": True,
+            "identity_state": "APPROVED_VISUAL_MATCHED_REMOTE_IMAGE_UNIQUE",
+            "matched_remote_id": match.get("remote_id"),
+            "matched_remote_url": match.get("media_url"),
+            **common,
+        }
+
     return {
         "identity_bound": False,
         "identity_state": "NO_REMOTE_IMAGE_MATCHED_APPROVED_VISUAL",
         "matched_remote_id": None,
         "matched_remote_url": None,
-        "best_composite_score": (best or {}).get("composite_score"),
-        "passing_candidate_count": 0,
+        **common,
     }
 
 
@@ -105,11 +133,7 @@ def _imagemagick_binary() -> str | None:
 def _vector(path: Path, mode: str, binary: str) -> list[int]:
     if mode not in {"stretch", "center_crop"}:
         raise ValueError(f"unsupported mode: {mode}")
-    if Path(binary).name == "magick":
-        command = [binary, str(path)]
-    else:
-        command = [binary, str(path)]
-    command += ["-auto-orient"]
+    command = [binary, str(path), "-auto-orient"]
     if mode == "stretch":
         command += ["-resize", f"{VECTOR_SIDE}x{VECTOR_SIDE}!"]
     else:
@@ -184,7 +208,7 @@ def _compare_files(local_path: Path, remote_path: Path, binary: str) -> dict[str
         )
     best_mode, best = max(views.items(), key=lambda item: float(item[1]["composite_score"]))
     return {
-        "comparison_method": "imagemagick_rgb64_pearson_mae_v1",
+        "comparison_method": "imagemagick_rgb64_unique_match_v2",
         "best_mode": best_mode,
         "views": views,
         **best,
@@ -220,11 +244,12 @@ def audit(
             "approved_visual_path": image_path or None,
             "approved_visual_filename": candidate.get("visual_filename"),
             "publication_authority": "NONE",
-            "comparison_method": "imagemagick_rgb64_pearson_mae_v1",
+            "comparison_method": "imagemagick_rgb64_unique_match_v2",
             "thresholds": {
                 "correlation_min": CORRELATION_MIN,
                 "mae_max": MAE_MAX,
                 "composite_min": COMPOSITE_MIN,
+                "match_margin_min": MATCH_MARGIN_MIN,
             },
         }
         if not binary:
@@ -271,10 +296,10 @@ def audit(
 
     bound = [row for row in results if row.get("identity_bound") is True]
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "READ_ONLY_INSTAGRAM_VISUAL_IDENTITY",
         "publication_authority": "NONE",
-        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE matches the approved local visual under deterministic normalized-pixel thresholds.",
+        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE clears transform-tolerant normalized-pixel thresholds and exceeds every other remote image by the required uniqueness margin.",
         "candidate_count": len(results),
         "identity_bound_count": len(bound),
         "identity_bound_story_ids": [str(row.get("story_id")) for row in bound],
