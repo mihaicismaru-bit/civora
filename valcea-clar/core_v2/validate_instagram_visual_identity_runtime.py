@@ -4,6 +4,11 @@ import argparse
 import json
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
+
+
+DIRECT_HYDRATION_STATE = "VERIFIED_PROVENANCE_HYDRATED_SHADOW"
+DERIVATIVE_HYDRATION_STATE = "VERIFIED_PROVENANCE_HYDRATED_EXACT_WIKIMEDIA_DERIVATIVE_SHADOW"
 
 
 def _load(path: str | Path) -> dict[str, Any]:
@@ -11,6 +16,56 @@ def _load(path: str | Path) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError(f"expected object: {path}")
     return value
+
+
+def _validate_verified_hydration(hydration: dict[str, Any], candidate: dict[str, Any]) -> bool:
+    assert hydration.get("hydration_ok") is True
+    state = str(hydration.get("hydration_state") or "")
+    assert state in {DIRECT_HYDRATION_STATE, DERIVATIVE_HYDRATION_STATE}
+    assert hydration.get("approved_visual_path") == candidate.get("visual_image_path")
+    assert hydration.get("source_url") == candidate.get("visual_source_url")
+    assert hydration.get("direct_source_url") == candidate.get("visual_direct_source_url")
+    assert hydration.get("rights_basis") == candidate.get("visual_rights_basis")
+    provenance = hydration.get("provenance_asset") or {}
+    assert provenance.get("asset_identity_ok") is True
+    assert provenance.get("license_present") is True
+    digest = str(hydration.get("hydrated_sha256") or "")
+    assert len(digest) == 64 and all(ch in "0123456789abcdef" for ch in digest)
+    assert int(hydration.get("hydrated_bytes") or 0) > 0
+
+    direct = hydration.get("direct_source_download") or {}
+    derivative = hydration.get("exact_derivative_download")
+    if state == DIRECT_HYDRATION_STATE:
+        assert hydration.get("hydration_transport") == "exact_approved_original"
+        assert direct.get("download_ok") is True
+        assert int(direct.get("http_status") or 0) in {200, 206}
+        assert derivative is None
+        assert hydration.get("exact_derivative_identity_bound_to_original") is False
+        return False
+
+    assert hydration.get("hydration_transport") == "exact_wikimedia_derivative_after_original_429"
+    assert direct.get("download_ok") is not True
+    assert int(direct.get("http_status") or 0) == 429
+    source_host = (urlparse(str(hydration.get("source_url") or "")).hostname or "").lower()
+    direct_host = (urlparse(str(hydration.get("direct_source_url") or "")).hostname or "").lower()
+    assert source_host == "commons.wikimedia.org"
+    assert direct_host == "upload.wikimedia.org"
+    assert hydration.get("exact_derivative_identity_bound_to_original") is True
+    assert isinstance(derivative, dict)
+    assert derivative.get("download_ok") is True
+    assert derivative.get("derivative_identity_ok") is True
+    derivative_url = str(derivative.get("derivative_url") or "")
+    final_url = str(derivative.get("final_url") or derivative_url)
+    parsed_derivative = urlparse(derivative_url)
+    parsed_final = urlparse(final_url)
+    assert parsed_derivative.scheme == "https"
+    assert (parsed_derivative.hostname or "").lower() == "thumb.wikimedia.org"
+    assert (parsed_final.hostname or "").lower() in {"thumb.wikimedia.org", "upload.wikimedia.org"}
+    assert parsed_final.path == parsed_derivative.path
+    assert "/wikipedia/commons/thumb/" in parsed_derivative.path
+    direct_filename = Path(urlparse(str(hydration.get("direct_source_url") or "")).path).name
+    assert direct_filename and parsed_derivative.path.endswith(direct_filename)
+    return True
 
 
 def validate(
@@ -52,6 +107,7 @@ def validate(
 
     bound_ids: list[str] = []
     hydrated_ids: list[str] = []
+    derivative_hydrated_ids: list[str] = []
     for story_id in wanted:
         candidate = candidate_index[story_id]
         meta_row = meta_index.get(story_id) or {}
@@ -79,18 +135,10 @@ def validate(
         hydration = row.get("approved_visual_hydration")
         if origin == "verified_provenance_hydration":
             assert isinstance(hydration, dict)
-            assert hydration.get("hydration_ok") is True
-            assert hydration.get("hydration_state") == "VERIFIED_PROVENANCE_HYDRATED_SHADOW"
-            assert hydration.get("approved_visual_path") == candidate.get("visual_image_path")
-            assert hydration.get("source_url") == candidate.get("visual_source_url")
-            assert hydration.get("direct_source_url") == candidate.get("visual_direct_source_url")
-            assert hydration.get("rights_basis") == candidate.get("visual_rights_basis")
-            assert ((hydration.get("provenance_asset") or {}).get("asset_identity_ok")) is True
-            assert ((hydration.get("provenance_asset") or {}).get("license_present")) is True
-            digest = str(hydration.get("hydrated_sha256") or "")
-            assert len(digest) == 64 and all(ch in "0123456789abcdef" for ch in digest)
-            assert int(hydration.get("hydrated_bytes") or 0) > 0
+            derivative_used = _validate_verified_hydration(hydration, candidate)
             hydrated_ids.append(story_id)
+            if derivative_used:
+                derivative_hydrated_ids.append(story_id)
         if origin == "provenance_hydration_failed":
             assert isinstance(hydration, dict)
             assert hydration.get("hydration_ok") is not True
@@ -140,6 +188,11 @@ def validate(
     assert set(identity.get("identity_bound_story_ids") or []) == set(bound_ids)
     assert int(identity.get("verified_provenance_hydration_count") or 0) == len(hydrated_ids)
     assert set(identity.get("verified_provenance_hydration_story_ids") or []) == set(hydrated_ids)
+    if "exact_wikimedia_derivative_hydration_count" in identity:
+        assert int(identity.get("exact_wikimedia_derivative_hydration_count") or 0) == len(derivative_hydrated_ids)
+        assert set(identity.get("exact_wikimedia_derivative_hydration_story_ids") or []) == set(derivative_hydrated_ids)
+    else:
+        assert not derivative_hydrated_ids
     assert int(receipts.get("instagram_visual_identity_bound_count") or 0) == len(bound_ids)
 
 
