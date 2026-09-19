@@ -18,7 +18,11 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         stories = doc.get("stories") or {}
         self.assertEqual(
             set(stories),
-            {"hcl-343-local-public-finance", "hcl-345-regulated-local-authorization"},
+            {
+                "hcl-343-local-public-finance",
+                "hcl-344-local-education-access",
+                "hcl-345-regulated-local-authorization",
+            },
         )
         for story_id, assignment in stories.items():
             image = assignment.get("image") or {}
@@ -32,6 +36,12 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
             self.assertTrue(str(image.get("direct_source_url") or "").startswith("https://"), story_id)
             self.assertTrue(str(image.get("editorial_note") or "").strip(), story_id)
             self.assertTrue(str(assignment.get("approval_basis") or "").strip(), story_id)
+
+        hcl344 = stories["hcl-344-local-education-access"]
+        hcl344_note = str((hcl344.get("image") or {}).get("editorial_note") or "")
+        self.assertIn("Foto de arhivă/context", hcl344_note)
+        self.assertIn("nu prezintă Școala primară Licurici", hcl344_note)
+        self.assertIn("Consiliu Local", str(hcl344.get("approval_basis") or ""))
 
 
 if __name__ == "__main__":
