@@ -12,7 +12,6 @@ from urllib.parse import unquote, urlsplit
 MODE = "CORE_V2_SHADOW_VISUAL_RUNTIME_PATH_HYDRATION"
 _ALLOWED_SUFFIXES = {".jpg", ".jpeg", ".png", ".webp"}
 _WIKIMEDIA_THUMB_WIDTH = 960
-_WIKIMEDIA_429_FALLBACK = "wikimedia_commons_source_page_identity_fallback_for_direct_429"
 
 
 def _derived_path(direct_url: str) -> str:
@@ -48,21 +47,16 @@ def _wikimedia_thumbnail_url(direct_url: str) -> str | None:
     )
 
 
-def _verified_wikimedia_429_thumbnail(row: dict[str, Any], image: dict[str, Any]) -> str | None:
+def _verified_wikimedia_thumbnail(row: dict[str, Any], image: dict[str, Any]) -> str | None:
+    """Allow a Commons derivative only after exact external asset identity is proven."""
     external = row.get("external_readback") or {}
-    direct_probe = external.get("direct_source") or {}
     provenance = external.get("provenance_asset") or {}
     source_url = str(image.get("source_url") or "").strip()
     direct_url = str(image.get("direct_source_url") or "").strip()
 
-    source_host = urlsplit(source_url).netloc.lower()
-    if source_host != "commons.wikimedia.org":
+    if urlsplit(source_url).netloc.lower() != "commons.wikimedia.org":
         return None
     if external.get("readback_ok") is not True or external.get("direct_source_effective_ok") is not True:
-        return None
-    if str(external.get("direct_source_fallback") or "") != _WIKIMEDIA_429_FALLBACK:
-        return None
-    if int(direct_probe.get("http_status") or 0) != 429 or direct_probe.get("rate_limited") is not True:
         return None
     if provenance.get("asset_identity_ok") is not True or provenance.get("license_present") is not True:
         return None
@@ -85,7 +79,8 @@ def hydrate_registry(registry: dict[str, Any], photo_truth: dict[str, Any]) -> d
     for row in photo_truth.get("rows") or []:
         if row.get("status") != "VISUAL_CANDIDATE_VERIFIED_SHADOW":
             continue
-        if not bool((row.get("external_readback") or {}).get("readback_ok")):
+        external = row.get("external_readback") or {}
+        if not bool(external.get("readback_ok")):
             raise ValueError("verified visual candidate lacks external readback truth")
         story_id = str(row.get("story_id") or "").strip()
         assignment = stories.get(story_id)
@@ -94,31 +89,35 @@ def hydrate_registry(registry: dict[str, Any], photo_truth: dict[str, Any]) -> d
         image = assignment.get("image") or {}
         if image.get("kind") != "photograph" or image.get("synthetic") is True:
             raise ValueError(f"non-photographic or synthetic visual cannot be hydrated: {story_id}")
+
+        direct = str(image.get("direct_source_url") or "").strip()
         current = str(assignment.get("image_path") or "").strip()
         if current:
             preserved.append(story_id)
-            continue
-        direct = str(image.get("direct_source_url") or "").strip()
-        assignment["image_path"] = _derived_path(direct)
-        assignment["runtime_image_path_basis"] = "derived_filename_from_verified_canonical_direct_source_url"
+        else:
+            assignment["image_path"] = _derived_path(direct)
+            assignment["runtime_image_path_basis"] = "derived_filename_from_verified_canonical_direct_source_url"
+            hydrated.append(story_id)
 
-        thumbnail = _verified_wikimedia_429_thumbnail(row, image)
+        thumbnail = _verified_wikimedia_thumbnail(row, image)
         if thumbnail:
             image["canonical_direct_source_url"] = direct
             image["direct_source_url"] = thumbnail
             assignment["runtime_materialization_url"] = thumbnail
             assignment["runtime_materialization_canonical_direct_source_url"] = direct
-            assignment["runtime_materialization_basis"] = (
-                "wikimedia_960px_derivative_of_exact_provenance_asset_after_verified_original_429"
-            )
+            direct_probe = external.get("direct_source") or {}
+            if int(direct_probe.get("http_status") or 0) == 429 and direct_probe.get("rate_limited") is True:
+                basis = "wikimedia_960px_derivative_of_exact_provenance_asset_after_verified_original_429"
+            else:
+                basis = "wikimedia_960px_derivative_of_exact_provenance_asset_for_bounded_shadow_transport"
+            assignment["runtime_materialization_basis"] = basis
             assignment["runtime_transport_override_only"] = True
             transport_fallback.append(story_id)
         else:
             assignment["runtime_materialization_basis"] = "verified_canonical_direct_source_url"
             assignment["runtime_transport_override_only"] = False
-        hydrated.append(story_id)
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": MODE,
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -132,9 +131,8 @@ def hydrate_registry(registry: dict[str, Any], photo_truth: dict[str, Any]) -> d
         "transport_fallback_story_ids": transport_fallback,
         "stories": stories,
         "truth_rule": (
-            "This runtime adapter only provides deterministic temporary filenames for already verified real-photo assets. "
-            "If the exact Wikimedia original is externally verified by its Commons ImageObject and the original binary probe is specifically rate-limited with HTTP 429, "
-            "a deterministic 960px Wikimedia derivative of that exact asset may be used for shadow transport only. "
+            "This runtime adapter only provides deterministic temporary filenames and bounded transport URLs for already verified real-photo assets. "
+            "For Wikimedia Commons, a deterministic 960px derivative may replace the original binary URL for shadow materialization only after the Commons source page independently proves the exact original ImageObject identity and license. "
             "The canonical original URL is preserved explicitly; provenance, rights, semantic relevance, approval and delivery truth are unchanged, and no publication authority is granted."
         ),
     }
@@ -153,7 +151,7 @@ def main() -> int:
         )
     except Exception as exc:
         report = {
-            "schema_version": "1.1", "mode": MODE, "status": "BLOCKED", "publication_authority": "NONE",
+            "schema_version": "1.2", "mode": MODE, "status": "BLOCKED", "publication_authority": "NONE",
             "acceptance_ready": False, "site_publish_allowed": False, "social_publish_allowed": False, "stories": {}, "reason": str(exc),
         }
         Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
