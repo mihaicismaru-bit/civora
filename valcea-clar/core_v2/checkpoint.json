@@ -1,6 +1,6 @@
 {
-  "schema_version": "3.5",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN22-ISJ-REGISTRATION-WINDOW-FIELD-EVIDENCE-NATURAL-VALIDATED",
+  "schema_version": "3.6",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN23-EXTERNAL-VISUAL-PROVENANCE-IDENTITY-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,9 +8,9 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "147312a2f2925917c4993d6f259b8495d02d3649",
+    "main_observed_sha": "886373f81c3a27f57db0476e29e71e0f028e6178",
     "main_observed_message": "Refresh VÂLCEA CLAR canonical public presentation",
-    "main_observed_at": "2026-09-19T01:14:00Z",
+    "main_observed_at": "2026-09-19T02:12:30Z",
     "legacy_live_activity_observed": true,
     "legacy_live_activity_note": "main continues to advance independently through legacy/public-presentation automation; those writes are observation-only and are not Core v2 readiness evidence",
     "legacy_public_projection": {
@@ -22,15 +22,15 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "639382040fa63e2b8f760e57c7a2723bc6a7074a",
-    "message": "Core v2 verify ISJ registration window text",
-    "workflow_run_id": 35411876900,
-    "workflow_run_number": 417,
+    "sha": "015197c78f06c502cf2ac11884754c4480cfc934",
+    "message": "Core v2 regress bounded Commons provenance fallback",
+    "workflow_run_id": 35414873558,
+    "workflow_run_number": 423,
     "event": "push",
     "conclusion": "success",
-    "artifact_id": 10574528759,
-    "artifact_sha256": "c1e8cb99f5756a64c7ef3e6fa27d98eab3fcfee579c7936a388188b4bb248609",
-    "artifact_size_bytes": 2582958,
+    "artifact_id": 10575123474,
+    "artifact_sha256": "777d8f03367985dd048fc14a98b95c5539ba14eda62a8c5c4bd23698fc82a130",
+    "artifact_size_bytes": 2534955,
     "manual_dispatch": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 26,
@@ -46,13 +46,14 @@
     "canonical runtime validation directly cross-checks the late ISJ FactKernel, FactKernel-integrity, article and article-integrity artifacts instead of trusting only cycle summaries",
     "five late-ISJ negative runtime tamper regressions remain fail-closed under the canonical runtime validator",
     "PHOTO gate schema 1.2 keeps exact first-party article-source and candidate-fingerprint binding mandatory for IPJ/ISU/ISJ visuals",
-    "the verified first-party ISJ contest calendar now yields an exact registration-window field-evidence record for 14 septembrie-2 octombrie, bound to document-text evidence, page number, page hash and the independently verified contest-session context",
-    "registration-window extraction is fail-closed: the exact registration descriptor and exact 14 septembrie-2 octombrie window are required; a changed value or missing descriptor blocks the whole calendar-field gate",
-    "the registration window remains raw non-normalized text because the supporting schedule row itself does not state a year; no year is inferred from filename, page title or surrounding context and registration_deadline_verified remains false",
-    "natural push run 417 executed truth-bound contract tests, all 26 shadow stages, independent external replay, canonical runtime validation and negative tamper regressions successfully; publication authority remained NONE",
-    "run 417 uploaded one evidence bundle, artifact 10574528759, digest sha256:c1e8cb99f5756a64c7ef3e6fa27d98eab3fcfee579c7936a388188b4bb248609",
+    "the verified first-party ISJ contest calendar yields exact registration-window field evidence for 14 septembrie-2 octombrie; the row is intentionally not normalized to a dated 2026 deadline because it does not itself state the year",
+    "external visual readback now parses provenance-page JSON-LD ImageObject records and requires exact direct-asset filename identity plus an HTTPS license before that provenance evidence can support a bounded fallback",
+    "the bounded Commons fallback is deliberately narrow: it can compensate only for an HTTP 429 on upload.wikimedia.org when the requested provenance source is commons.wikimedia.org and the Commons page independently binds the exact asset and license; it never substitutes for public article-image binding or public image-byte readback",
+    "three readback regressions prove exact Commons asset/license binding, rejection of the wrong asset, and rejection of 429 fallback outside the verified Commons/upload.wikimedia host pair",
+    "natural push run 423 executed the expanded readback tests, all 26 shadow stages, independent external replay, canonical runtime validation and negative tamper regressions successfully; publication authority remained NONE",
+    "run 423 uploaded evidence artifact 10575123474 with digest sha256:777d8f03367985dd048fc14a98b95c5539ba14eda62a8c5c4bd23698fc82a130",
+    "run 423 independently verified exact Wikimedia ImageObject identity and license for both historical visual candidates and read both direct Commons originals successfully; visual truth still remained 0/2 because external article/public-image binding is independently required",
     "PHOTO coverage remains 2/7; only HCL 343 and HCL 345 have approved rights-cleared contextual archive visuals",
-    "historical external replay remains truth-incomplete: site 2/2, Instagram 2/2, Facebook 0/2, visual 0/2, externally verified receipts 0 and fully bound replay transactions 0",
     "no workflow_dispatch, rerun, merge, deploy, live Core v2 article publication, public projection mutation or Meta write was used"
   ],
   "pilot_sources": [
@@ -130,8 +131,8 @@
     ],
     "blocked_story_ids": [
       "0795029bb1cd130dd630ba61",
-      "4830dca0d70a8be3f1b3bc26",
-      "7ff665059823b9bda1054ea1",
+      "77b1fce57e75c399c5994eb3",
+      "c217d611bcadd058ef4b198f",
       "hcl-344-local-education-access",
       "isj-directori-2026-conducere-scoli"
     ],
@@ -141,6 +142,8 @@
     "candidate_count": 2,
     "site_readback": {"passed": 2, "failed": 0},
     "visual_readback": {"passed": 0, "failed": 2},
+    "visual_provenance_asset_identity": {"passed": 2, "failed": 0},
+    "visual_direct_original_readback": {"passed": 2, "failed": 0},
     "facebook": {"passed": 0, "failed": 2, "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"},
     "instagram": {"passed": 2, "failed": 0},
     "both_channels_verified_count": 0,
@@ -151,14 +154,18 @@
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
       "FACT_KERNEL_EVIDENCE_MISSING": 2,
       "VISUAL_ARTICLE_BINDING_FAILED": 1,
-      "VISUAL_PROVENANCE_FAILED": 1
+      "VISUAL_PUBLIC_IMAGE_FAILED": 1
+    },
+    "candidate_visual_blockers": {
+      "valcea-apa-canal-contract-152m-20260902": "expected historical image filename is not bound in the public article HTML",
+      "cet-govora-cine-a-decis-oprirea-20260821": "public article binds the expected image and provenance is independently verified, but the bounded public image-byte read timed out in run 423"
     },
     "acceptance_ready": false
   },
   "blocked": [
     {
       "gate": "isj_registration_deadline_normalization",
-      "reason": "The first-party registration notice PDF still yields empty/too-short deterministic pdftotext. The verified first-party calendar now proves the exact raw registration window '14 septembrie-2 octombrie', but its schedule row does not state a year, so Core v2 does not normalize or promote a registration deadline date yet."
+      "reason": "The first-party registration notice PDF still yields empty/too-short deterministic pdftotext. The first-party calendar proves the exact raw registration window '14 septembrie-2 octombrie', but its schedule row does not state a year, so Core v2 does not normalize or promote a dated deadline."
     },
     {
       "gate": "isj_photo_truth",
@@ -174,7 +181,7 @@
     },
     {
       "gate": "historical_visual_replay",
-      "reason": "Run 417 independently kept historical visual replay fail-closed. Internal visual metadata is not accepted as public image binding proof."
+      "reason": "Visual replay remains 0/2. The water-contract article does not bind its expected historical image. The CET article does bind its expected image and Commons provenance is externally verified, but the public image-byte read timed out in the bounded run. Internal metadata is not accepted as a substitute for either external gate."
     },
     {
       "gate": "facebook_receipt_truth",
@@ -198,11 +205,12 @@
     }
   ],
   "next": [
+    "add bounded retry for transient timeout/transport failure on public image-byte readback while still requiring a real external image response; do not replace readback with internal metadata",
     "continue rights/relevance work for HCL 344 and current IPJ/ISU candidates without synthetic-as-photo or generic imagery",
     "when a real IPJ/ISU/ISJ photograph is found, create its shadow registry assignment only with the exact current article source URL and candidate fingerprint produced by PHOTO gate schema 1.2; never key approval only by transient detail/story id",
     "preserve ISJ PHOTO=BLOCKED unless a story-specific real rights-cleared visual with semantic relevance, disclosure and exact candidate binding is independently evidenced",
     "keep historical visual replay fail-closed until public article/image binding and provenance readback both pass independently",
-    "keep the newly verified ISJ registration window as raw text until a dedicated evidence rule can prove the year without inference; do not promote it into the FactKernel merely because the contest session is 2026",
+    "keep the verified ISJ registration window as raw text until a dedicated evidence rule can prove the year without inference; do not promote it into the FactKernel merely because the contest session is 2026",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
     "do not start the 10-story acceptance series until all external truth gates can be independently satisfied and the owner explicitly authorizes cutover"
@@ -213,17 +221,19 @@
     "runtime_negative_regressions": "valcea-clar/core_v2/validate_shadow_runtime_negative_regressions.py",
     "isj_calendar_field_gate": "valcea-clar/core_v2/isj_calendar_field_evidence_shadow_lane.py",
     "isj_calendar_field_validator": "valcea-clar/core_v2/validate_isj_calendar_field_truth.py",
-    "isj_calendar_field_regressions": "valcea-clar/tests/test_core_v2_isj_calendar_field_evidence_shadow_lane.py",
     "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
     "photo_binding_regressions": "valcea-clar/tests/test_core_v2_visual.py",
     "visual_registry": "valcea-clar/core_v2/visual_registry.json",
+    "external_visual_auditor": "valcea-clar/core_v2/visual_readback.py",
+    "external_readback_regressions": "valcea-clar/tests/test_core_v2_readback.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35411876900",
-    "artifact_id": 10574528759,
-    "artifact_sha256": "c1e8cb99f5756a64c7ef3e6fa27d98eab3fcfee579c7936a388188b4bb248609",
-    "artifact_size_bytes": 2582958,
+    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35414873558",
+    "artifact_id": 10575123474,
+    "artifact_sha256": "777d8f03367985dd048fc14a98b95c5539ba14eda62a8c5c4bd23698fc82a130",
+    "artifact_size_bytes": 2534955,
     "negative_runtime_regression_cases": 5,
     "photo_candidate_binding_regression_cases": 3,
+    "external_visual_provenance_regression_cases": 3,
     "registration_window_regression_cases": 2
   }
 }
