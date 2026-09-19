@@ -78,6 +78,11 @@ def _calendar_fields(row: dict[str, Any]) -> list[dict[str, Any]]:
         r"\bBucurești,\s*(6)\s+august\s+(2026)\.?$",
         field_name="calendar_order_date",
     )
+    registration_match, registration_page, registration_line = _exact_one(
+        row,
+        r"\b(14\s+septembrie\s*[-–]\s*2\s+octombrie)\s+Depunerea\s+dosarelor\s+de\s+înscriere\s+la\s+concurs\b",
+        field_name="registration_window_text",
+    )
     interview_match, interview_page, interview_line = _exact_one(
         row,
         r"\b(12-27\s+noiembrie)\s+Desfășurarea\s+probelor\s+de\s+interviu\b",
@@ -98,6 +103,15 @@ def _calendar_fields(row: dict[str, Any]) -> list[dict[str, Any]]:
             excerpt=order_line,
             derivation="explicit_day_month_year_in_calendar_document",
             normalized_date=True,
+        ),
+        _field(
+            "registration_window_text",
+            registration_match.group(1),
+            row=row,
+            page=registration_page,
+            excerpt=registration_line,
+            derivation="exact_registration_window_text_with_registration_descriptor_year_not_inferred",
+            normalized_date=False,
         ),
         _field(
             "interview_window_text",
@@ -136,7 +150,7 @@ def extract_calendar_field_evidence(context_report: dict[str, Any], *, expected_
         raise ValueError("context_report_promotion_boundary_violation")
     if context_report.get("contest_context_verified") is not True or context_report.get("contest_session_year") != expected_year:
         return {
-            "schema_version": "1.0",
+            "schema_version": "1.1",
             "mode": "ISJ_CALENDAR_FIELD_EVIDENCE_SHADOW",
             "source_kind": "isj_valcea",
             "publication_authority": "NONE",
@@ -150,6 +164,8 @@ def extract_calendar_field_evidence(context_report: dict[str, Any], *, expected_
             "expected_contest_session_year": expected_year,
             "verified_calendar_document_count": 0,
             "field_evidence_count": 0,
+            "registration_window_text_verified": False,
+            "registration_deadline_normalized": False,
             "blocked_count": 1,
             "material_candidate_shadow_count": 0,
             "rows": [{
@@ -162,7 +178,7 @@ def extract_calendar_field_evidence(context_report: dict[str, Any], *, expected_
                 "site_publish_allowed": False,
                 "social_publish_allowed": False,
             }],
-            "truth_rule": "Calendar facts may be extracted only from already verified first-party calendar text bound to a separately verified contest-session field. Bare month/day ranges remain raw text unless their year is explicit in the supporting excerpt; this gate never promotes a FactKernel or article.",
+            "truth_rule": "Calendar facts may be extracted only from already verified first-party calendar text bound to a separately verified contest-session field. Exact month/day ranges may be verified as raw text, but are not normalized to dates unless the year is explicit in the supporting excerpt; this gate never promotes a FactKernel or article.",
         }
 
     candidates = [
@@ -226,8 +242,10 @@ def extract_calendar_field_evidence(context_report: dict[str, Any], *, expected_
             })
 
     all_fields = [field for row in rows if row.get("state") == "CALENDAR_FIELD_EVIDENCE_VERIFIED_SHADOW" for field in row.get("fields") or []]
+    by_name = {str(field.get("field") or ""): field for field in all_fields if isinstance(field, dict)}
+    registration_field = by_name.get("registration_window_text") or {}
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "ISJ_CALENDAR_FIELD_EVIDENCE_SHADOW",
         "source_kind": "isj_valcea",
         "publication_authority": "NONE",
@@ -241,10 +259,14 @@ def extract_calendar_field_evidence(context_report: dict[str, Any], *, expected_
         "expected_contest_session_year": expected_year,
         "verified_calendar_document_count": sum(row.get("state") == "CALENDAR_FIELD_EVIDENCE_VERIFIED_SHADOW" for row in rows),
         "field_evidence_count": len(all_fields),
+        "registration_window_text_verified": bool(registration_field),
+        "registration_window_text": registration_field.get("value") if registration_field else None,
+        "registration_window_field_evidence_id": registration_field.get("field_evidence_id") if registration_field else None,
+        "registration_deadline_normalized": False,
         "blocked_count": sum(row.get("state") == "BLOCKED" for row in rows),
         "material_candidate_shadow_count": 1 if all_fields else 0,
         "rows": rows,
-        "truth_rule": "Calendar facts may be extracted only from already verified first-party calendar text bound to a separately verified contest-session field. Bare month/day ranges remain raw text unless their year is explicit in the supporting excerpt; this gate never promotes a FactKernel or article.",
+        "truth_rule": "Calendar facts may be extracted only from already verified first-party calendar text bound to a separately verified contest-session field. The exact registration window may be verified as raw text when its descriptor is present, but its year is not inferred from filename or context; month/day ranges remain non-normalized unless the year is explicit in the supporting excerpt. This gate never promotes a FactKernel or article.",
     }
 
 
@@ -260,6 +282,8 @@ def main() -> int:
     print(json.dumps({
         "verified_calendar_document_count": result["verified_calendar_document_count"],
         "field_evidence_count": result["field_evidence_count"],
+        "registration_window_text_verified": result["registration_window_text_verified"],
+        "registration_deadline_normalized": result["registration_deadline_normalized"],
         "blocked_count": result["blocked_count"],
         "material_candidate_shadow_count": result["material_candidate_shadow_count"],
         "publication_authority": "NONE",

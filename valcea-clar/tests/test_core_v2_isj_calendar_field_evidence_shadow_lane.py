@@ -25,6 +25,8 @@ class ISJCalendarFieldEvidenceShadowLaneTests(unittest.TestCase):
         page1 = _page(1, "ORDIN\nBucurești, 6 august 2026.\n1-4 septembrie\n7-9 septembrie")
         page2 = _page(
             2,
+            "14 septembrie-2 octombrie        Depunerea dosarelor de înscriere la concurs\n"
+            "15 septembrie-7 octombrie        Verificarea dosarelor de înscriere la concurs\n"
             "12-27 noiembrie Desfășurarea probelor de interviu\n"
             "Până la data de 16 decembrie Emiterea și comunicarea deciziilor de numire, cu intrare în vigoare de la 1 ianuarie 2027",
         )
@@ -59,14 +61,28 @@ class ISJCalendarFieldEvidenceShadowLaneTests(unittest.TestCase):
 
     def test_exact_calendar_fields_are_evidence_bound_and_non_authorizing(self):
         result = extract_calendar_field_evidence(self._context(), expected_year=2026)
+        self.assertEqual(result["schema_version"], "1.1")
         self.assertEqual(result["verified_calendar_document_count"], 1)
-        self.assertEqual(result["field_evidence_count"], 4)
+        self.assertEqual(result["field_evidence_count"], 5)
         self.assertEqual(result["blocked_count"], 0)
+        self.assertTrue(result["registration_window_text_verified"])
+        self.assertEqual(result["registration_window_text"], "14 septembrie-2 octombrie")
+        self.assertFalse(result["registration_deadline_normalized"])
         self.assertFalse(result["fact_kernel_promotion_allowed"])
         self.assertFalse(result["writer_allowed"])
         fields = {field["field"]: field for field in result["rows"][0]["fields"]}
         self.assertEqual(fields["calendar_order_date"]["value"], "2026-08-06")
         self.assertTrue(fields["calendar_order_date"]["normalized_date"])
+        self.assertEqual(fields["registration_window_text"]["value"], "14 septembrie-2 octombrie")
+        self.assertFalse(fields["registration_window_text"]["normalized_date"])
+        self.assertEqual(
+            fields["registration_window_text"]["derivation"],
+            "exact_registration_window_text_with_registration_descriptor_year_not_inferred",
+        )
+        self.assertEqual(
+            result["registration_window_field_evidence_id"],
+            fields["registration_window_text"]["field_evidence_id"],
+        )
         self.assertEqual(fields["interview_window_text"]["value"], "12-27 noiembrie")
         self.assertFalse(fields["interview_window_text"]["normalized_date"])
         self.assertEqual(fields["appointment_decision_deadline_text"]["value"], "Până la data de 16 decembrie")
@@ -87,16 +103,32 @@ class ISJCalendarFieldEvidenceShadowLaneTests(unittest.TestCase):
         result = extract_calendar_field_evidence(self._context(), expected_year=2025)
         self.assertEqual(result["verified_calendar_document_count"], 0)
         self.assertEqual(result["field_evidence_count"], 0)
+        self.assertFalse(result["registration_window_text_verified"])
         self.assertEqual(result["blocked_count"], 1)
 
     def test_missing_exact_calendar_line_fails_closed(self):
         context = self._context()
-        context["rows"][1]["pages"][1] = _page(2, "12-27 noiembrie\nPână la data de 16 decembrie")
+        context["rows"][1]["pages"][1] = _page(2, "14 septembrie-2 octombrie\n12-27 noiembrie\nPână la data de 16 decembrie")
         result = extract_calendar_field_evidence(context, expected_year=2026)
         self.assertEqual(result["verified_calendar_document_count"], 0)
         self.assertEqual(result["field_evidence_count"], 0)
         self.assertEqual(result["blocked_count"], 1)
         self.assertIn("expected_one_calendar_line", result["rows"][0]["error"])
+
+    def test_registration_window_descriptor_or_value_drift_fails_closed(self):
+        context = self._context()
+        context["rows"][1]["pages"][1] = _page(
+            2,
+            "14 septembrie-3 octombrie Depunerea dosarelor de înscriere la concurs\n"
+            "12-27 noiembrie Desfășurarea probelor de interviu\n"
+            "Până la data de 16 decembrie Emiterea și comunicarea deciziilor de numire, cu intrare în vigoare de la 1 ianuarie 2027",
+        )
+        result = extract_calendar_field_evidence(context, expected_year=2026)
+        self.assertEqual(result["verified_calendar_document_count"], 0)
+        self.assertEqual(result["field_evidence_count"], 0)
+        self.assertFalse(result["registration_window_text_verified"])
+        self.assertEqual(result["blocked_count"], 1)
+        self.assertIn("registration_window_text", result["rows"][0]["error"])
 
     def test_duplicate_calendar_documents_fail_closed(self):
         context = self._context()
@@ -111,6 +143,7 @@ class ISJCalendarFieldEvidenceShadowLaneTests(unittest.TestCase):
         result = extract_calendar_field_evidence(self._context(), expected_year=2026)
         self.assertEqual(result["verified_calendar_document_count"], 1)
         self.assertEqual(result["rows"][0]["document_role"], "CONTEST_CALENDAR")
+        self.assertTrue(result["registration_window_text_verified"])
 
 
 if __name__ == "__main__":

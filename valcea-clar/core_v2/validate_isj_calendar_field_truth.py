@@ -7,6 +7,7 @@ from typing import Any
 
 EXPECTED_FIELDS = {
     "calendar_order_date": ("2026-08-06", True),
+    "registration_window_text": ("14 septembrie-2 octombrie", False),
     "interview_window_text": ("12-27 noiembrie", False),
     "appointment_decision_deadline_text": ("Până la data de 16 decembrie", False),
     "appointment_effective_date": ("2027-01-01", True),
@@ -27,6 +28,7 @@ def validate(doc: dict[str, Any], *, expected_year: int) -> dict[str, Any]:
     assert doc.get("site_publish_allowed") is False
     assert doc.get("social_publish_allowed") is False
     assert doc.get("expected_contest_session_year") == expected_year
+    assert doc.get("registration_deadline_normalized") is False
 
     rows = doc.get("rows") or []
     verified_rows = [row for row in rows if isinstance(row, dict) and row.get("state") == "CALENDAR_FIELD_EVIDENCE_VERIFIED_SHADOW"]
@@ -36,11 +38,13 @@ def validate(doc: dict[str, Any], *, expected_year: int) -> dict[str, Any]:
 
     if not verified_rows:
         assert int(doc.get("field_evidence_count") or 0) == 0
+        assert doc.get("registration_window_text_verified") is False
         return {
             "verified_calendar_document_count": 0,
             "field_evidence_count": 0,
             "blocked_count": len(blocked_rows),
             "fields": [],
+            "registration_window_text_verified": False,
         }
 
     assert len(verified_rows) == 1
@@ -79,11 +83,19 @@ def validate(doc: dict[str, Any], *, expected_year: int) -> dict[str, Any]:
         assert field.get("fact_kernel_promotion_allowed") is False
         assert field.get("writer_allowed") is False
 
+    registration = by_name["registration_window_text"]
+    assert doc.get("registration_window_text_verified") is True
+    assert doc.get("registration_window_text") == registration.get("value")
+    assert doc.get("registration_window_field_evidence_id") == registration.get("field_evidence_id")
+    assert registration.get("derivation") == "exact_registration_window_text_with_registration_descriptor_year_not_inferred"
+
     return {
         "verified_calendar_document_count": 1,
         "field_evidence_count": len(fields),
         "blocked_count": len(blocked_rows),
         "fields": sorted(by_name),
+        "registration_window_text_verified": True,
+        "registration_deadline_normalized": False,
     }
 
 
