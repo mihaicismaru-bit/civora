@@ -20,8 +20,9 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "apavil", "ipj", "isu", "municipal_reference", "municipal_document", "municipal_materiality",
                 "municipal_fact_kernel", "municipal_writer", "cj_road", "eta", "isj", "isj_detail", "isj_materiality",
                 "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_field_evidence",
-                "isj_context_documents", "isj_calendar_field_evidence", "isj_field_materiality", "isj_fact_kernel",
-                "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth", "shadow_site_package",
+                "isj_context_documents", "isj_calendar_field_evidence", "isj_calendar_scope_binding",
+                "isj_calendar_scope_validation", "isj_field_materiality", "isj_fact_kernel", "isj_fact_kernel_integrity",
+                "isj_writer", "isj_article_integrity", "photo_truth", "shadow_site_package",
             ],
         )
         joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
@@ -29,6 +30,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             self.assertNotIn(forbidden, joined)
         self.assertIn("--external-probe", joined)
         self.assertIn("--live", joined)
+        self.assertIn("--prove-tamper", joined)
 
     def test_non_live_plan_does_not_enable_source_network_reads(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -45,6 +47,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         isj = by_name["isj"]; detail = by_name["isj_detail"]; materiality = by_name["isj_materiality"]
         embedded = by_name["isj_embedded_notice"]; targets = by_name["isj_embedded_target"]; content = by_name["isj_embedded_content"]
         fields = by_name["isj_field_evidence"]; context_docs = by_name["isj_context_documents"]; calendar_fields = by_name["isj_calendar_field_evidence"]
+        calendar_scope = by_name["isj_calendar_scope_binding"]; calendar_scope_validation = by_name["isj_calendar_scope_validation"]
         field_materiality = by_name["isj_field_materiality"]; fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
         writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]; photo = by_name["photo_truth"]
 
@@ -56,7 +59,20 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(content.output), fields.argv); self.assertNotIn("--live", fields.argv)
         self.assertIn(str(targets.output), context_docs.argv); self.assertIn(str(fields.output), context_docs.argv); self.assertIn("2026", context_docs.argv); self.assertIn("--live", context_docs.argv)
         self.assertIn(str(context_docs.output), calendar_fields.argv); self.assertIn("2026", calendar_fields.argv); self.assertNotIn("--live", calendar_fields.argv)
+
+        self.assertIn(str(context_docs.output), calendar_scope.argv)
+        self.assertIn(str(calendar_fields.output), calendar_scope.argv)
+        self.assertIn("2026", calendar_scope.argv)
+        self.assertNotIn("--live", calendar_scope.argv)
+        self.assertIn(str(context_docs.output), calendar_scope_validation.argv)
+        self.assertIn(str(calendar_fields.output), calendar_scope_validation.argv)
+        self.assertIn(str(calendar_scope.output), calendar_scope_validation.argv)
+        self.assertIn("--prove-tamper", calendar_scope_validation.argv)
+        self.assertNotIn("--live", calendar_scope_validation.argv)
+
         self.assertIn(str(fields.output), field_materiality.argv); self.assertIn(str(calendar_fields.output), field_materiality.argv); self.assertIn("2026", field_materiality.argv); self.assertNotIn("--live", field_materiality.argv)
+        self.assertNotIn(str(calendar_scope.output), field_materiality.argv)
+        self.assertNotIn(str(calendar_scope_validation.output), field_materiality.argv)
         self.assertIn(str(field_materiality.output), fact_kernel.argv); self.assertIn(str(fields.output), fact_kernel.argv); self.assertIn(str(calendar_fields.output), fact_kernel.argv); self.assertNotIn("--live", fact_kernel.argv)
         self.assertIn(str(fact_kernel.output), fact_integrity.argv); self.assertNotIn("--live", fact_integrity.argv)
         self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv); self.assertNotIn("--live", writer.argv)
@@ -64,7 +80,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(f"isj={article_integrity.output}", photo.argv)
 
         names = [stage.name for stage in plan]
-        chain = ["isj", "isj_detail", "isj_materiality", "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_field_evidence", "isj_context_documents", "isj_calendar_field_evidence", "isj_field_materiality", "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth"]
+        chain = ["isj", "isj_detail", "isj_materiality", "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_field_evidence", "isj_context_documents", "isj_calendar_field_evidence", "isj_calendar_scope_binding", "isj_calendar_scope_validation", "isj_field_materiality", "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth"]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))
 
