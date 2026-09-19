@@ -7,10 +7,16 @@ from pathlib import Path
 from typing import Any, Iterable
 
 from contracts import ContractViolation, Visual
-from visual_readback import ALLOWED_RIGHTS_BASES, _read_binary_head, _read_text
+from visual_readback import (
+    ALLOWED_RIGHTS_BASES,
+    _effective_direct_source_status,
+    _read_binary_head,
+    _read_text,
+    inspect_provenance_asset,
+)
 
 
-PHOTO_GATE_SCHEMA_VERSION = "1.4"
+PHOTO_GATE_SCHEMA_VERSION = "1.5"
 _STRONG_BINDING_SOURCES = {"ipj", "isu", "isj"}
 _SOURCE_STABLE_ID_SOURCES = {"ipj", "isu"}
 _BINDING_FIELDS = ("source_label", "source_url", "headline", "where", "who")
@@ -157,10 +163,30 @@ def _external_provenance_probe(image: dict[str, Any], *, timeout: float) -> dict
         "readback_ok": False,
         "reason": "missing_direct_source_url",
     }
+    provenance_asset = (
+        inspect_provenance_asset(source.get("body") or "", expected_direct_url=direct_source_url)
+        if source.get("readback_ok") and direct_source_url
+        else {
+            "expected_filename": "",
+            "matching_imageobject_count": 0,
+            "matching_imageobjects": [],
+            "asset_identity_ok": False,
+            "license_present": False,
+        }
+    )
+    direct_effective_ok, direct_fallback = _effective_direct_source_status(
+        source_url=source_url,
+        direct_source_url=direct_source_url,
+        direct_source=direct,
+        provenance_asset=provenance_asset,
+    )
     return {
         "source": {key: value for key, value in source.items() if key != "body"},
         "direct_source": direct,
-        "readback_ok": bool(source.get("readback_ok") and direct.get("readback_ok")),
+        "provenance_asset": provenance_asset,
+        "direct_source_effective_ok": direct_effective_ok,
+        "direct_source_fallback": direct_fallback,
+        "readback_ok": bool(source.get("readback_ok") and direct_effective_ok),
     }
 
 
@@ -354,11 +380,13 @@ def build_photo_truth_report(
             "archive disclosure when applicable, and successful external provenance/image readback when probing is enabled "
             "may become a Core v2 visual candidate. Identical approved source/direct-source URL pairs share one bounded external "
             "asset probe per report so redundant story assignments cannot create avoidable rate-limit drift; each story still passes "
-            "its own rights, relevance, disclosure and binding contract independently. IPJ/ISU candidates use a deterministic "
-            "source-label + canonical source-URL identity instead of volatile detail-body hashes; IPJ/ISU/ISJ visual approvals must "
-            "also be strongly bound to the exact candidate source URL and candidate fingerprint, so content drift cannot silently "
-            "transfer approval to another story. Atlas membership or text-card output never implies story approval. Public article "
-            "binding remains a later independent readback gate."
+            "its own rights, relevance, disclosure and binding contract independently. A Wikimedia upload 429 may be tolerated only "
+            "through the existing bounded Commons fallback when the independently read Commons page JSON-LD identifies the exact "
+            "approved filename and exposes a license; this does not relax story relevance or candidate binding. IPJ/ISU candidates "
+            "use a deterministic source-label + canonical source-URL identity instead of volatile detail-body hashes; IPJ/ISU/ISJ "
+            "visual approvals must also be strongly bound to the exact candidate source URL and candidate fingerprint, so content "
+            "drift cannot silently transfer approval to another story. Atlas membership or text-card output never implies story "
+            "approval. Public article binding remains a later independent readback gate."
         ),
     }
 
