@@ -21,7 +21,14 @@ def candidate(story_id: str, state: str = "CONSISTENT") -> dict:
     }
 
 
-def visual_receipt(state: str = "CONSISTENT", *, verified: bool = True, article_bound: bool = True) -> dict:
+def visual_receipt(
+    state: str = "CONSISTENT",
+    *,
+    verified: bool = True,
+    article_bound: bool = True,
+    failure_classification: str | None = None,
+    failure_domain: str | None = None,
+) -> dict:
     return {
         "status": "VERIFIED" if verified else "FAILED",
         "readback_ok": verified,
@@ -30,6 +37,9 @@ def visual_receipt(state: str = "CONSISTENT", *, verified: bool = True, article_
         "provenance_source_readback_ok": True,
         "direct_source_readback_ok": True,
         "canonical_site_visual_binding_state": state,
+        "visual_truth_state": "SITE_APPROVED_VISUAL_VERIFIED" if verified else failure_classification,
+        "failure_classification": failure_classification,
+        "failure_domain": failure_domain,
     }
 
 
@@ -87,6 +97,49 @@ class ShadowGateReportTests(unittest.TestCase):
         self.assertEqual(row["canonical_site_visual_binding_state"], state)
         self.assertTrue(row["canonical_site_visual_binding_state_match"])
         self.assertFalse(report["acceptance_ready"])
+
+    def test_explicit_site_visual_absence_survives_receipt_to_gate_and_suppresses_generic_external_blocker(self) -> None:
+        state = "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND"
+        candidates = {
+            "first_ten_candidate_ids": ["story-site-visual-absent"],
+            "rows": [candidate("story-site-visual-absent", state)],
+        }
+        receipts = {
+            "rows": [
+                {
+                    "story_id": "story-site-visual-absent",
+                    "receipts": {
+                        "site": {"status": "DELIVERED", "readback_ok": True},
+                        "visual": visual_receipt(
+                            state,
+                            verified=False,
+                            article_bound=False,
+                            failure_classification="SITE_APPROVED_VISUAL_ABSENT",
+                            failure_domain="SITE_CONTENT",
+                        ),
+                        "facebook": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(),
+                    },
+                }
+            ]
+        }
+        transactions = {
+            "rows": [
+                {
+                    "story_id": "story-site-visual-absent",
+                    "terminal_reason": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE",
+                }
+            ]
+        }
+        report = build_report(candidates, receipts, transactions)
+        row = report["rows"][0]
+        self.assertIn("SITE_APPROVED_VISUAL_ABSENT", row["blockers"])
+        self.assertNotIn("VISUAL_ARTICLE_BINDING_FAILED", row["blockers"])
+        self.assertNotIn("VISUAL_PROVENANCE_FAILED", row["blockers"])
+        self.assertNotIn("EXTERNAL_DELIVERY_BLOCKED", row["blockers"])
+        self.assertEqual(row["visual_truth_state"], "SITE_APPROVED_VISUAL_ABSENT")
+        self.assertEqual(row["visual_failure_classification"], "SITE_APPROVED_VISUAL_ABSENT")
+        self.assertEqual(row["visual_failure_domain"], "SITE_CONTENT")
 
     def test_fully_bound_replay_can_be_truth_complete_without_granting_acceptance(self) -> None:
         candidates = {
