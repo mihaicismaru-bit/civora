@@ -15,6 +15,88 @@ permissions:
   contents: read
 
 jobs:
+  runtime-localization-cp90:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: public-presence-os
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install package and test runner
+        run: python -m pip install -e . pytest
+      - name: Localize inherited pathological runtime segment
+        env:
+          PYTHONPATH: src
+        run: |
+          python - <<'PY'
+          from __future__ import annotations
+
+          import os
+          import subprocess
+          import sys
+          import time
+
+          collected = subprocess.run(
+              [sys.executable, "-m", "pytest", "--collect-only", "-q", "tests"],
+              check=True,
+              capture_output=True,
+              text=True,
+              env=os.environ.copy(),
+          )
+          nodes = [
+              line.strip()
+              for line in collected.stdout.splitlines()
+              if "::" in line and line.strip().startswith("tests/")
+          ]
+          start_index = 504  # zero-based: first test after the last fast 504-test block
+          end_index = min(576, len(nodes))
+          segment = nodes[start_index:end_index]
+          print(f"CP90_RUNTIME_LOCALIZATION collected={len(nodes)} segment={start_index + 1}-{end_index}")
+          if not segment:
+              raise SystemExit("CP90_RUNTIME_LOCALIZATION_EMPTY_SEGMENT")
+
+          timeout_seconds = 60
+          slow = None
+          for ordinal, node in enumerate(segment, start=start_index + 1):
+              started = time.monotonic()
+              try:
+                  result = subprocess.run(
+                      [sys.executable, "-m", "pytest", "-q", node],
+                      capture_output=True,
+                      text=True,
+                      env=os.environ.copy(),
+                      timeout=timeout_seconds,
+                  )
+              except subprocess.TimeoutExpired:
+                  elapsed = time.monotonic() - started
+                  slow = (ordinal, node, elapsed)
+                  print(
+                      f"CP90_RUNTIME_LOCALIZATION_TIMEOUT index={ordinal} "
+                      f"timeout_seconds={timeout_seconds} node={node}"
+                  )
+                  break
+
+              elapsed = time.monotonic() - started
+              print(
+                  f"CP90_RUNTIME_LOCALIZATION_RESULT index={ordinal} "
+                  f"seconds={elapsed:.3f} returncode={result.returncode} node={node}"
+              )
+              if result.returncode != 0:
+                  print(result.stdout)
+                  print(result.stderr, file=sys.stderr)
+                  raise SystemExit(result.returncode)
+
+          if slow is None:
+              print(
+                  "CP90_RUNTIME_LOCALIZATION_NO_SINGLE_TEST_OVER_60S "
+                  "segment_requires_aggregate-runtime analysis"
+              )
+          PY
+
   validate:
     runs-on: ubuntu-latest
     defaults:
