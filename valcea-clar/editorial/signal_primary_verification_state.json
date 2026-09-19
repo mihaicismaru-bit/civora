@@ -2,19 +2,79 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-19T20:30:40+03:00",
+  "generated_at": "2026-09-19T22:34:42+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-19T20:29:14+03:00",
-  "task_count": 69,
+  "queue_generated_at": "2026-09-19T22:32:56+03:00",
+  "task_count": 66,
   "primary_match_count": 0,
   "no_match_count": 29,
-  "unrouted_count": 40,
+  "unrouted_count": 37,
   "target_count": 17,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "107fa36fa7483624b3ce2e80",
+      "signal_title": "Primăria Râmnicului iluminată în verde pentru „Light Up for Mito”",
+      "signal_url": "https://evenimentvalcean.ro/primaria-ramnicului-iluminata-in-verde-pentru-light-up-for-mito/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-19T20:29:27+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "1f9fcbd2ae33c319a88a317f",
       "signal_title": "Comuna Mădulari și-a prezentat istoria la Universitatea de Vest din Timișoara: film documentar și două volume dedicate localității",
@@ -702,7 +762,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -830,18 +890,6 @@
       "signal_url": "https://seintamplainvalcea.ro/2026/09/18/casele-de-schimb-valutar-luate-la-verificat-de-anaf-180-de-unitati-vizate-de-controale-in-toata-tara/",
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_published_at": "2026-09-18T09:57:13+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "edb9686fe46b8cbe29ad0f39",
-      "signal_title": "Sibian stabilit în SUA, impresionat de medicii Spitalului Județean: „M-au preluat într-un moment dificil și m-au tratat cu o atenție deosebită și tehnologie modernă”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/18/sibian-stabilit-in-sua-impresionat-de-medicii-spitalului-judetean-m-au-preluat-intr-un-moment-dificil-si-m-au-tratat-cu-o-atentie-deosebita-si-tehnologie-moderna/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-18T09:25:33+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -1396,33 +1444,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "cc4605931261a1ae18445f3f",
-      "signal_title": "VIDEO. Scandal în Râmnicu Vâlcea: momentul în care un bărbat ar fi încercat să-și lovească vecinii cu o greblă",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/17/video-scandal-in-ramnicu-valcea-momentul-in-care-un-barbat-ar-fi-incercat-sa-si-loveasca-vecinii-cu-o-grebla/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-17T20:45:23+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "f4a64c2b442a79e594d78a4c",
       "signal_title": "Tiberiu Costea, despre investițiile în sănătate din Lungești: două dispensare modernizate și servicii medicale mai aproape de oameni",
       "signal_url": "https://www.impactreal.ro/2026/09/17/tiberiu-costea-despre-investitiile-in-sanatate-din-lungesti-doua-dispensare-modernizate-si-servicii-medicale-mai-aproape-de-oameni/",
@@ -1451,7 +1472,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1512,18 +1533,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "d33629ae762e397d87456a1b",
-      "signal_title": "Șomajul a crescut în Vâlcea. Însă, efectele disponibilizărilor de la CET Govora vin din septembrie",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/17/somajul-a-crescut-in-valcea-insa-efectele-disponibilizarilor-de-la-cet-govora-vin-din-septembrie/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-17T16:03:00+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "b917ddcd32d6aaece57e8675",
       "signal_title": "Primăria Mălaia face precizări după închiderea cabinetului medical din Ciungetu",
       "signal_url": "https://evenimentvalcean.ro/primaria-malaia-face-precizari-dupa-inchiderea-cabinetului-medical-din-ciungetu/",
@@ -1552,7 +1561,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1560,18 +1569,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "3c03d82f3c177052bdc6d14e",
-      "signal_title": "Călimănești, magnet pentru turiști. Mai mult de jumătate dintre cei care au ajuns în Vâlcea au ales stațiunea",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/17/calimanesti-magnet-pentru-turisti-mai-mult-de-jumatate-dintre-cei-care-au-ajuns-in-valcea-au-ales-statiunea/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-17T14:57:44+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "ba392c127f715cecd5b729d6",
