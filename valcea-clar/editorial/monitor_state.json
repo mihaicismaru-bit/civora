@@ -4,8 +4,8 @@
   "product": "VÂLCEA CLAR durable monitor state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-19T14:23:41Z",
-  "last_live_probe_at": "2026-09-19T14:23:41Z",
+  "generated_at": "2026-09-19T18:00:01Z",
+  "last_live_probe_at": "2026-09-19T18:00:01Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "discovery_observed_at": "2026-09-19T16:25:04+03:00",
   "monitor_count": 184,
@@ -17,7 +17,6 @@
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [],
       "degraded_sources": [
-        "posturi-gov-valcea",
         "sju-valcea-direct"
       ],
       "reverify_leads": [
@@ -30,13 +29,14 @@
           "url": "https://posturi.gov.ro/judet/valcea/",
           "publisher": "posturi.gov.ro",
           "tier": "T1",
-          "reachable": false,
-          "http_status": null,
-          "fingerprint": null,
-          "match_count": 0,
-          "error": "URLError: <urlopen error timed out>",
-          "health": "UNREACHABLE",
-          "change": "PROBE_FAILED"
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://posturi.gov.ro/judet/valcea/",
+          "fingerprint": "2d99691d412885ad9b74c852657dc166fd6ff01f9587ba15666622c158b6cf33",
+          "match_count": 8,
+          "error": null,
+          "health": "OK",
+          "change": "NEW_BASELINE"
         },
         {
           "id": "sju-valcea-direct",
@@ -48,7 +48,7 @@
           "http_status": null,
           "fingerprint": null,
           "match_count": 0,
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
           "health": "UNREACHABLE",
           "change": "PROBE_FAILED"
         }
@@ -123,8 +123,7 @@
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [],
       "degraded_sources": [
-        "primaria-rm-valcea-comunicate",
-        "rm-valcea-hcl-2026"
+        "primaria-rm-valcea-comunicate"
       ],
       "reverify_leads": [
         "rm-valcea-hcl159-2026-musiclover-public-money"
@@ -147,13 +146,14 @@
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf",
           "publisher": "Primăria Municipiului Râmnicu Vâlcea — hotărâri",
           "tier": "T1",
-          "reachable": false,
-          "http_status": null,
-          "fingerprint": null,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf",
+          "fingerprint": "896dd9f2858ac786346332602a19ad6caed9f0a61b6adb5df318cab8ccad28b7",
           "match_count": 0,
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
-          "health": "UNREACHABLE",
-          "change": "PROBE_FAILED"
+          "error": null,
+          "health": "OK",
+          "change": "NEW_BASELINE"
         },
         {
           "id": "cj-valcea-sedinte",
@@ -268,7 +268,7 @@
           "http_status": null,
           "fingerprint": null,
           "match_count": 0,
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
           "health": "UNREACHABLE",
           "change": "PROBE_FAILED"
         }
@@ -320,7 +320,7 @@
           "http_status": null,
           "fingerprint": null,
           "match_count": 0,
-          "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
           "health": "UNREACHABLE",
           "change": "PROBE_FAILED"
         }
