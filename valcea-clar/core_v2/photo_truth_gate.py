@@ -10,15 +10,25 @@ from contracts import ContractViolation, Visual
 from visual_readback import ALLOWED_RIGHTS_BASES, _read_binary_head, _read_text
 
 
-PHOTO_GATE_SCHEMA_VERSION = "1.3"
+PHOTO_GATE_SCHEMA_VERSION = "1.4"
 _STRONG_BINDING_SOURCES = {"ipj", "isu", "isj"}
+_SOURCE_STABLE_ID_SOURCES = {"ipj", "isu"}
 _BINDING_FIELDS = ("source_label", "source_url", "headline", "where", "who")
 
 
-def _candidate_id(row: dict[str, Any], *, source_label: str) -> str:
-    explicit = str(row.get("story_id") or row.get("article_id") or row.get("detail_id") or "").strip()
+def _candidate_id(row: dict[str, Any], *, source_label: str, source_url: str = "") -> str:
+    explicit = str(row.get("story_id") or row.get("article_id") or "").strip()
     if explicit:
         return explicit
+
+    normalized_source_url = str(source_url or "").strip()
+    if source_label in _SOURCE_STABLE_ID_SOURCES and normalized_source_url:
+        stable_payload = f"{source_label}\n{normalized_source_url}".encode("utf-8")
+        return hashlib.sha256(stable_payload).hexdigest()[:24]
+
+    detail_id = str(row.get("detail_id") or "").strip()
+    if detail_id:
+        return detail_id
     decision_number = row.get("decision_number")
     if decision_number is not None:
         return f"hcl-{decision_number}"
@@ -68,20 +78,25 @@ def iter_written_candidates(document: dict[str, Any], *, source_label: str) -> I
                 if not isinstance(article, dict):
                     continue
                 kernel = article.get("fact_kernel") or {}
+                source_url = str(kernel.get("source_url") or "").strip()
                 yield {
-                    "candidate_id": str(article.get("article_id") or _candidate_id(row, source_label=source_label)),
+                    "candidate_id": str(
+                        article.get("article_id")
+                        or _candidate_id(row, source_label=source_label, source_url=source_url)
+                    ),
                     "source_label": source_label,
-                    "source_url": str(kernel.get("source_url") or "").strip(),
+                    "source_url": source_url,
                     "where": str(kernel.get("where") or "").strip(),
                     "who": str(kernel.get("who") or "").strip(),
                     "headline": str((article.get("article_package") or {}).get("headline") or "").strip(),
                 }
             continue
         kernel = row.get("fact_kernel") or {}
+        source_url = str(kernel.get("source_url") or "").strip()
         yield {
-            "candidate_id": _candidate_id(row, source_label=source_label),
+            "candidate_id": _candidate_id(row, source_label=source_label, source_url=source_url),
             "source_label": source_label,
-            "source_url": str(kernel.get("source_url") or "").strip(),
+            "source_url": source_url,
             "where": str(kernel.get("where") or "").strip(),
             "who": str(kernel.get("who") or "").strip(),
             "headline": str((row.get("article_package") or {}).get("headline") or "").strip(),
@@ -339,10 +354,11 @@ def build_photo_truth_report(
             "archive disclosure when applicable, and successful external provenance/image readback when probing is enabled "
             "may become a Core v2 visual candidate. Identical approved source/direct-source URL pairs share one bounded external "
             "asset probe per report so redundant story assignments cannot create avoidable rate-limit drift; each story still passes "
-            "its own rights, relevance, disclosure and binding contract independently. IPJ/ISU/ISJ visual approvals must also be "
-            "strongly bound to the exact candidate source URL and candidate fingerprint, so a reused or drifted story identifier "
-            "cannot inherit approval. Atlas membership or text-card output never implies story approval. Public article binding remains "
-            "a later independent readback gate."
+            "its own rights, relevance, disclosure and binding contract independently. IPJ/ISU candidates use a deterministic "
+            "source-label + canonical source-URL identity instead of volatile detail-body hashes; IPJ/ISU/ISJ visual approvals must "
+            "also be strongly bound to the exact candidate source URL and candidate fingerprint, so content drift cannot silently "
+            "transfer approval to another story. Atlas membership or text-card output never implies story approval. Public article "
+            "binding remains a later independent readback gate."
         ),
     }
 
