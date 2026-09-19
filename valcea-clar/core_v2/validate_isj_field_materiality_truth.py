@@ -35,22 +35,49 @@ def validate(doc: dict[str, Any]) -> dict[str, Any]:
     assert isinstance(vacancy_count, int) and vacancy_count > 0
     assert str(candidate.get("vacancy_list_date") or "")
     assert str(candidate.get("appointment_effective_date") or "")
+
     ids = candidate.get("field_evidence_ids") or []
     assert len(ids) == 4
     assert len(set(ids)) == 4
     assert all(str(value).startswith(("isj-field-", "isj-calendar-field-")) for value in ids)
+
     excluded = set(candidate.get("excluded_unverified_or_non_normalized_fields") or [])
-    assert "registration_deadline" in excluded
     assert "interview_window_text" in excluded
     assert "appointment_decision_deadline_text" in excluded
+    assert "registration_deadline" in excluded
     assert "isj-calendar-field-" not in " ".join(str(v) for v in ids if "interview" in str(v))
     assert "fact_kernel" not in candidate
     assert "article" not in candidate
+
+    deadline_consumed = doc.get("registration_deadline_materiality_consumed") is True
+    if deadline_consumed:
+        assert doc.get("unresolved_fields") == []
+        deadline = str(doc.get("registration_deadline") or "")
+        assert deadline == str(candidate.get("registration_deadline") or "")
+        assert deadline.startswith("2026-")
+        promoted = (candidate.get("materiality_only_promoted_fields") or {}).get("registration_deadline")
+        assert isinstance(promoted, dict)
+        assert promoted.get("value") == deadline
+        assert promoted.get("epistemic_status") == "INDEPENDENTLY_VALIDATED_MATERIALITY_ONLY_PROMOTION"
+        assert promoted.get("fact_kernel_status") == "NOT_PROMOTED"
+        assert promoted.get("writer_status") == "NOT_PROMOTED"
+        assert str(promoted.get("field_evidence_id") or "").startswith("isj-calendar-scope-")
+        promotion_id = str(promoted.get("promotion_evidence_id") or "")
+        assert promotion_id.startswith("isj-deadline-promotion-")
+        assert doc.get("registration_deadline_promotion_evidence_id") == promotion_id
+        assert promoted.get("field_evidence_id") not in ids
+    else:
+        assert "registration_deadline" in (doc.get("unresolved_fields") or [])
+        assert candidate.get("registration_deadline") is None
+        assert not candidate.get("materiality_only_promoted_fields")
+
     return {
         "state": state,
         "materiality_candidate_count": 1,
         "vacant_function_count": vacancy_count,
         "field_evidence_id_count": len(ids),
+        "registration_deadline_materiality_consumed": deadline_consumed,
+        "registration_deadline": doc.get("registration_deadline"),
     }
 
 

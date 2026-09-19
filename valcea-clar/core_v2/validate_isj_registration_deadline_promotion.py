@@ -79,6 +79,7 @@ def validate(
     scope_evidence_id = str(source_field.get("scope_field_evidence_id") or "")
     raw_evidence_id = str(source_field.get("source_registration_window_field_evidence_id") or "")
     document_text_evidence_id = str(source_field.get("document_text_evidence_id") or "")
+    page_number = int(source_field.get("page_number") or 0)
     page_hash = str(source_field.get("page_text_sha256") or "")
     excerpt = _norm(source_field.get("excerpt"))
     assert all((deadline_evidence_id, scope_evidence_id, raw_evidence_id, document_text_evidence_id, page_hash, excerpt))
@@ -100,6 +101,7 @@ def validate(
     assert candidate.get("source_registration_window_field_evidence_id") == raw_evidence_id
     assert candidate.get("supporting_field_evidence_ids") == [scope_evidence_id, raw_evidence_id]
     assert candidate.get("document_text_evidence_id") == document_text_evidence_id
+    assert int(candidate.get("page_number") or 0) == page_number
     assert candidate.get("page_text_sha256") == page_hash
     assert _norm(candidate.get("excerpt")) == excerpt
     assert candidate.get("contest_session_year") == expected_year
@@ -129,9 +131,20 @@ def validate(
         "registration_deadline": deadline,
         "registration_deadline_field_evidence_id": deadline_evidence_id,
         "promotion_evidence_id": expected_promotion_id,
+        "scope_field_evidence_id": scope_evidence_id,
+        "source_registration_window_field_evidence_id": raw_evidence_id,
+        "supporting_field_evidence_ids": [scope_evidence_id, raw_evidence_id],
+        "document_text_evidence_id": document_text_evidence_id,
+        "page_number": page_number,
+        "page_text_sha256": page_hash,
+        "excerpt": excerpt,
         "materiality_promotion_allowed": True,
+        "material_fact_use": False,
         "fact_kernel_promotion_allowed": False,
         "writer_allowed": False,
+        "production_writer_ready": False,
+        "site_publish_allowed": False,
+        "social_publish_allowed": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
     }
@@ -185,7 +198,7 @@ def main() -> int:
     summary = validate(scope, scope_validation, promotion, expected_year=args.year)
     tamper_passed = prove_tamper_regressions(scope, scope_validation, promotion, expected_year=args.year) if args.prove_tamper else 0
     report = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "ISJ_REGISTRATION_DEADLINE_PROMOTION_VALIDATION",
         **summary,
         "tamper_regressions_requested": bool(args.prove_tamper),
@@ -194,7 +207,7 @@ def main() -> int:
         "production_writer_ready": False,
         "site_publish_allowed": False,
         "social_publish_allowed": False,
-        "truth_rule": "Materiality may consume the deadline promotion only if this independent validator reproduces the exact deadline, field evidence ID, scope evidence ID, raw registration evidence ID, document evidence ID, page hash and promotion evidence ID. This validator grants no FactKernel, writer, publication or delivery authority.",
+        "truth_rule": "Materiality may consume the deadline promotion only if this independent validator reproduces the exact deadline, field evidence ID, scope evidence ID, raw registration evidence ID, document evidence ID, page number/hash, excerpt and promotion evidence ID. This validator grants no FactKernel, writer, publication or delivery authority.",
     }
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({

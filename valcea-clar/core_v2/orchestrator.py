@@ -93,6 +93,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     isj_content = workdir / "valcea-core-v2-isj-embedded-content-shadow.json"; isj_fields = workdir / "valcea-core-v2-isj-field-evidence-shadow.json"
     isj_context = workdir / "valcea-core-v2-isj-context-documents-shadow.json"; isj_calendar_fields = workdir / "valcea-core-v2-isj-calendar-field-evidence-shadow.json"
     isj_calendar_scope = workdir / "valcea-core-v2-isj-calendar-scope-binding-shadow.json"; isj_calendar_scope_validation = workdir / "valcea-core-v2-isj-calendar-scope-validation.json"
+    isj_deadline_promotion = workdir / "valcea-core-v2-isj-registration-deadline-promotion.json"; isj_deadline_promotion_validation = workdir / "valcea-core-v2-isj-registration-deadline-promotion-validation.json"
     isj_field_materiality = workdir / "valcea-core-v2-isj-field-materiality-shadow.json"; isj_fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"; isj_fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
     isj_article = workdir / "valcea-core-v2-isj-article-shadow.json"; isj_article_integrity = workdir / "valcea-core-v2-isj-article-integrity-shadow.json"
     photo = workdir / "valcea-core-v2-photo-truth.json"; site_package = workdir / "valcea-core-v2-shadow-site-package.json"; site_dir = workdir / "valcea-core-v2-shadow-site"
@@ -118,7 +119,9 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_calendar_field_evidence", (py,"valcea-clar/core_v2/isj_calendar_field_evidence_shadow_lane.py","--context",str(isj_context),"--year","2026","--output",str(isj_calendar_fields)), isj_calendar_fields),
         CycleStage("isj_calendar_scope_binding", (py,"valcea-clar/core_v2/isj_calendar_scope_binding_shadow_lane.py","--context",str(isj_context),"--calendar-fields",str(isj_calendar_fields),"--year","2026","--output",str(isj_calendar_scope)), isj_calendar_scope),
         CycleStage("isj_calendar_scope_validation", (py,"valcea-clar/core_v2/validate_isj_calendar_scope_truth.py","--context",str(isj_context),"--calendar-fields",str(isj_calendar_fields),"--scope",str(isj_calendar_scope),"--year","2026","--prove-tamper","--output",str(isj_calendar_scope_validation)), isj_calendar_scope_validation),
-        CycleStage("isj_field_materiality", (py,"valcea-clar/core_v2/isj_field_materiality_shadow_lane.py","--fields",str(isj_fields),"--calendar-fields",str(isj_calendar_fields),"--year","2026","--output",str(isj_field_materiality)), isj_field_materiality),
+        CycleStage("isj_registration_deadline_promotion", (py,"valcea-clar/core_v2/isj_registration_deadline_promotion_shadow_lane.py","--scope",str(isj_calendar_scope),"--scope-validation",str(isj_calendar_scope_validation),"--year","2026","--output",str(isj_deadline_promotion)), isj_deadline_promotion),
+        CycleStage("isj_registration_deadline_promotion_validation", (py,"valcea-clar/core_v2/validate_isj_registration_deadline_promotion.py","--scope",str(isj_calendar_scope),"--scope-validation",str(isj_calendar_scope_validation),"--promotion",str(isj_deadline_promotion),"--year","2026","--prove-tamper","--output",str(isj_deadline_promotion_validation)), isj_deadline_promotion_validation),
+        CycleStage("isj_field_materiality", (py,"valcea-clar/core_v2/isj_field_materiality_shadow_lane.py","--fields",str(isj_fields),"--calendar-fields",str(isj_calendar_fields),"--deadline-promotion",str(isj_deadline_promotion),"--deadline-promotion-validation",str(isj_deadline_promotion_validation),"--year","2026","--output",str(isj_field_materiality)), isj_field_materiality),
         CycleStage("isj_fact_kernel", (py,"valcea-clar/core_v2/isj_fact_kernel_shadow_lane.py","--materiality",str(isj_field_materiality),"--fields",str(isj_fields),"--calendar-fields",str(isj_calendar_fields),"--output",str(isj_fact_kernel)), isj_fact_kernel),
         CycleStage("isj_fact_kernel_integrity", (py,"valcea-clar/core_v2/isj_fact_kernel_integrity.py","--fact-kernel",str(isj_fact_kernel),"--output",str(isj_fact_integrity)), isj_fact_integrity),
         CycleStage("isj_writer", (py,"valcea-clar/core_v2/isj_writer_shadow_lane.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--output",str(isj_article)), isj_article),
@@ -141,7 +144,7 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                     "document_text_extracted_shadow_count","verified_document_count","verified_calendar_document_count","field_evidence_count","material_candidate_shadow_count","materiality_candidate_count","fact_kernel_count","verified_claim_count","fact_kernel_integrity_verified","writer_gate_status",
                     "article_count","shadow_writer_executed","article_truth_state","verified_article_count","article_integrity_verified","photo_gate_status",
                     "contest_context_verified","selected_context_document_count","selected_roles","same_document_year_scope_verified",
-                    "registration_window_normalized","registration_deadline_normalized","registration_deadline","tamper_regressions_passed",
+                    "registration_window_normalized","registration_deadline_normalized","registration_deadline","promotion_evidence_id","materiality_promotion_allowed","registration_deadline_materiality_consumed","tamper_regressions_passed",
                     "verified_written_shadow_count","visual_candidate_verified_shadow_count","package_image_bound_shadow_count","blocked_count",
                     "no_story_count","fabricated_claim_count","publication_authority","acceptance_ready"
                 )
@@ -152,7 +155,12 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
 
 
 def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]:
-    names = {"isj_calendar_scope_binding", "isj_calendar_scope_validation"}
+    names = {
+        "isj_calendar_scope_binding",
+        "isj_calendar_scope_validation",
+        "isj_registration_deadline_promotion",
+        "isj_registration_deadline_promotion_validation",
+    }
     snapshots: dict[str, Any] = {}
     for stage in plan:
         if stage.name not in names or stage.output is None or not stage.output.is_file():
@@ -179,7 +187,7 @@ def run_bounded_shadow_cycle(*, repo_root: Path, workdir: Path, live: bool) -> d
             failed_stage = stage.name
             break
     return {
-        "schema_version":"1.7","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE",
+        "schema_version":"1.8","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE",
         "production_write_authority":False,"site_publish_allowed":False,"social_publish_allowed":False,"acceptance_ready":False,
         "live_read_only":live,"status":"PASS_SHADOW" if failed_stage is None else "BLOCKED","failed_stage":failed_stage,
         "stage_count_planned":len(plan),"stage_count_completed":len(stages),"stages":stages,

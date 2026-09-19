@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import sys
 import unittest
 from datetime import date
@@ -125,7 +126,13 @@ class ISJFieldMaterialityShadowLaneTests(unittest.TestCase):
         }
         return scope, scope_validation
 
-    def test_materiality_uses_only_exact_normalized_current_fields(self):
+    def _promotion_and_validation(self):
+        scope, scope_validation = self._deadline_scope_fixtures()
+        promotion = build_deadline_promotion(scope, scope_validation, expected_year=2026, as_of=date(2026, 9, 19))
+        independent = validate_deadline_promotion(scope, scope_validation, promotion, expected_year=2026)
+        return promotion, independent
+
+    def test_materiality_uses_only_exact_normalized_current_fields_without_optional_promotion(self):
         fields, calendar = self._reports()
         result = adjudicate_field_materiality(fields, calendar, as_of=date(2026, 9, 18))
         self.assertEqual(result["state"], "MATERIALITY_CANDIDATE_SHADOW")
@@ -138,6 +145,8 @@ class ISJFieldMaterialityShadowLaneTests(unittest.TestCase):
         self.assertEqual(candidate["field_evidence_ids"], ["isj-field-session", "isj-field-count", "isj-field-list-date", "isj-calendar-field-effective"])
         self.assertIn("registration_deadline", candidate["excluded_unverified_or_non_normalized_fields"])
         self.assertIn("interview_window_text", candidate["excluded_unverified_or_non_normalized_fields"])
+        self.assertIn("registration_deadline", result["unresolved_fields"])
+        self.assertFalse(result["registration_deadline_materiality_consumed"])
         self.assertNotIn("isj-calendar-field-interview", candidate["field_evidence_ids"])
         self.assertFalse(result["material_fact_use"])
         self.assertFalse(result["fact_kernel_promotion_allowed"])
@@ -145,6 +154,47 @@ class ISJFieldMaterialityShadowLaneTests(unittest.TestCase):
         self.assertFalse(result["site_publish_allowed"])
         self.assertFalse(result["social_publish_allowed"])
         self.assertEqual(result["fabricated_claim_count"], 0)
+
+    def test_materiality_consumes_deadline_only_from_independent_pass_with_exact_identity(self):
+        fields, calendar = self._reports()
+        promotion, independent = self._promotion_and_validation()
+        result = adjudicate_field_materiality(
+            fields,
+            calendar,
+            deadline_promotion=promotion,
+            deadline_promotion_validation=independent,
+            as_of=date(2026, 9, 19),
+        )
+        self.assertEqual(result["state"], "MATERIALITY_CANDIDATE_SHADOW")
+        self.assertTrue(result["registration_deadline_materiality_consumed"])
+        self.assertEqual(result["registration_deadline"], "2026-10-02")
+        self.assertEqual(result["unresolved_fields"], [])
+        candidate = result["materiality_candidates"][0]
+        self.assertEqual(candidate["registration_deadline"], "2026-10-02")
+        promoted = candidate["materiality_only_promoted_fields"]["registration_deadline"]
+        self.assertEqual(promoted["field_evidence_id"], "isj-calendar-scope-deadline-001")
+        self.assertEqual(promoted["promotion_evidence_id"], independent["promotion_evidence_id"])
+        self.assertEqual(promoted["page_text_sha256"], "a" * 64)
+        self.assertEqual(promoted["fact_kernel_status"], "NOT_PROMOTED")
+        self.assertEqual(promoted["writer_status"], "NOT_PROMOTED")
+        self.assertIn("registration_deadline", candidate["excluded_unverified_or_non_normalized_fields"])
+        self.assertNotIn(promoted["field_evidence_id"], candidate["field_evidence_ids"])
+        self.assertFalse(result["fact_kernel_promotion_allowed"])
+        self.assertFalse(result["writer_allowed"])
+
+    def test_materiality_rejects_promotion_validation_identity_drift(self):
+        fields, calendar = self._reports()
+        promotion, independent = self._promotion_and_validation()
+        tampered = copy.deepcopy(independent)
+        tampered["page_text_sha256"] = "0" * 64
+        with self.assertRaises(ValueError):
+            adjudicate_field_materiality(
+                fields,
+                calendar,
+                deadline_promotion=promotion,
+                deadline_promotion_validation=tampered,
+                as_of=date(2026, 9, 19),
+            )
 
     def test_missing_appointment_date_blocks(self):
         fields, calendar = self._reports()
@@ -190,6 +240,8 @@ class ISJFieldMaterialityShadowLaneTests(unittest.TestCase):
         independent = validate_deadline_promotion(scope, validation, result, expected_year=2026)
         self.assertEqual(independent["status"], "PASS_SHADOW")
         self.assertEqual(independent["registration_deadline_field_evidence_id"], "isj-calendar-scope-deadline-001")
+        self.assertEqual(independent["page_text_sha256"], "a" * 64)
+        self.assertEqual(independent["supporting_field_evidence_ids"], ["isj-calendar-scope-scope-001", "isj-calendar-field-registration-001"])
         self.assertEqual(prove_tamper_regressions(scope, validation, result, expected_year=2026), 3)
 
     def test_registration_deadline_promotion_fails_closed_on_evidence_divergence(self):
