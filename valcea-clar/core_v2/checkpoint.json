@@ -1,6 +1,6 @@
 {
-  "schema_version": "4.4",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN31-INSTAGRAM-APPROVED-VISUAL-IDENTITY-NATURAL-VALIDATED",
+  "schema_version": "4.5",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN32-HISTORICAL-WATER-PROVENANCE-HYDRATION-FAILCLOSED-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,8 +8,8 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "civora_main_observed_sha": "dbbfcd898bac16c5e74bef882bd44da30c629450",
-    "civora_main_observed_message": "Persist VÂLCEA CLAR story-first social state",
+    "civora_main_observed_sha": "40beed4077c4c6489f5590beb8102bc9bf1d73cd",
+    "civora_main_observed_message": "Checkpoint verified decision-maker projection",
     "public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
     "public_projection_message": "sync: reconcile CIVORA canonical stories",
@@ -17,17 +17,17 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "2a9b07544b1bfd363c3cd1664822cec5eabaa16c",
-    "message": "Core v2: validate Instagram visual identity cross-artifact binding",
-    "functional_increment": "Independent read-only Instagram approved-visual identity proof now compares each externally downloaded remote IMAGE against the approved Core v2 asset using transform-tolerant normalized-pixel evidence plus a strong uniqueness margin, then validates candidate-to-Meta-to-identity-to-receipt consistency fail-closed.",
-    "workflow_run_id": 35434196792,
-    "workflow_run_number": 521,
+    "sha": "a7b716f56c559b05a3a720c5c713add1ee92d3ee",
+    "message": "Core v2: hydrate approved visual from verified provenance",
+    "functional_increment": "When an already-approved historical visual is absent from the repository, Instagram identity audit can now attempt ephemeral shadow-only hydration from the exact approved HTTPS direct source, but only after independent provenance-page ImageObject identity and license verification. Hydration never grants publication authority and fails closed on any provenance or download failure.",
+    "workflow_run_id": 35436784993,
+    "workflow_run_number": 525,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10581617736,
-    "artifact_sha256": "272b317c5d3e22118f846caaf6fd476f66c455da28fc6e36404fa6194d56361d",
-    "artifact_size_bytes": 2555013,
+    "artifact_id": 10581524788,
+    "artifact_sha256": "282001b6a6146a4fad58e1044290060adea2384eaf5c7fd0f2cb3c9c3cdf206f",
+    "artifact_size_bytes": 2555695,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
@@ -39,14 +39,12 @@
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
     "PHOTO remains fail-closed; generic, text-card and synthetic-as-photo substitutions remain forbidden",
     "historical FactKernel evidence is 2/2 and historical article-claims evidence is 2/2 with fabricated_claims=0",
-    "Instagram external replay remains carousel-aware and independently reads bounded HTTPS IMAGE payloads from Graph/CDN",
-    "new instagram_visual_identity.py performs deterministic ImageMagick normalization at RGB 64x64 using stretch and center-crop views",
-    "identity comparison uses bounded transform-tolerant thresholds correlation>=0.80, normalized_MAE<=0.12 and composite>=0.70",
-    "a visual is identity-bound only when exactly one remote image passes and it exceeds the runner-up by at least 0.20 composite score; multiple or close candidates fail closed",
-    "new cross-artifact runtime validator requires candidate approved visual, externally read Meta IMAGE ids, identity ledger and receipt ledger to agree exactly",
-    "CET Govora is now independently identity-bound to Instagram remote IMAGE id 18091947767438679 with composite 0.734977, correlation 0.811194, normalized MAE 0.093956 and uniqueness margin 0.734977",
-    "water-contract visual remains correctly blocked because story_visuals references launch-ramnicu-valcea-panorama.jpg but that approved local file is absent; no substitute was introduced",
-    "natural push run 521 passed all contract tests, all 26 shadow stages, site/visual/Meta replay, approved-visual identity comparison, cross-artifact validator, receipts, transactions, runtime invariants and tamper regressions",
+    "Instagram object and remote IMAGE payload replay remains externally verified 2/2 with 10/10 bounded remote image payloads readable",
+    "CET Govora remains independently identity-bound to its approved visual",
+    "missing approved repository assets may now be hydrated only ephemerally from their exact already-approved direct source after rights/provenance verification",
+    "water-contract Wikimedia Commons source page returned HTTP 200 and exposed exactly one matching ImageObject for Ramnicu_Valcea_panorama.jpg with a HTTPS CC BY-SA 4.0 license",
+    "water-contract original upload.wikimedia.org asset returned HTTP 429 on all three bounded hydration attempts; Core v2 therefore kept approved-visual identity unbound rather than substituting another image",
+    "natural push run 525 passed contract tests, all 26 shadow stages, external site/visual/Meta replay, provenance hydration logic, receipts, transactions, runtime invariants and tamper regressions",
     "no merge, deploy, live Core v2 publication, public-projection mutation, Meta write, workflow_dispatch or manual rerun was used"
   ],
   "inventory": {
@@ -101,7 +99,12 @@
       "failed": 1,
       "passed_story_ids": ["cet-govora-cine-a-decis-oprirea-20260821"],
       "blocked_story_ids": ["valcea-apa-canal-contract-152m-20260902"],
-      "water_contract_reason": "BLOCKED_APPROVED_VISUAL_NOT_READY"
+      "water_contract_reason": "BLOCKED_APPROVED_VISUAL_HYDRATION_FAILED",
+      "water_contract_provenance_page_verified": true,
+      "water_contract_exact_imageobject_verified": true,
+      "water_contract_license_verified": true,
+      "water_contract_direct_download_http_status": 429,
+      "water_contract_direct_download_attempts": 3
     },
     "externally_verified_receipts": 0,
     "truth_complete_count": 0,
@@ -115,7 +118,7 @@
   },
   "blocked": [
     {"gate": "photo_truth_gate", "reason": "Five of seven current written shadow candidates still lack a verified story-specific real, relevant and rights-cleared visual."},
-    {"gate": "historical_water_visual_asset", "reason": "The approved visual registry references launch-ramnicu-valcea-panorama.jpg but the approved repository file is absent; Core v2 will not infer or substitute an image."},
+    {"gate": "historical_water_visual_asset", "reason": "The exact approved Wikimedia provenance is independently verified, but the original direct asset is rate-limited HTTP 429 and the repository copy is absent; no substitute was introduced."},
     {"gate": "historical_water_cross_surface_binding", "reason": "The water-contract approved social visual remains unbound to the canonical/public site story."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
@@ -124,7 +127,7 @@
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "resolve the historical water approved-visual asset only from demonstrable rights-cleared evidence; do not create or substitute a generic image",
+    "add a bounded Wikimedia-only fallback to an exact thumbnail derivative of the same already-approved file when the original upload asset is HTTP 429; prove same-file provenance before comparison and never accept a different image",
     "reconcile the historical water-contract canonical site/image binding read-only before any delivery receipt can be complete",
     "continue PHOTO rights/relevance research for current IPJ/ISU/HCL344/ISJ without generic or synthetic-as-photo substitution",
     "keep Facebook uncertified until read-only Graph permission is sufficient and a remote receipt can be independently read back",
@@ -142,8 +145,8 @@
     "gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35434196792",
-    "feature_artifact_id": 10581617736,
-    "feature_artifact_sha256": "272b317c5d3e22118f846caaf6fd476f66c455da28fc6e36404fa6194d56361d"
+    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35436784993",
+    "feature_artifact_id": 10581524788,
+    "feature_artifact_sha256": "282001b6a6146a4fad58e1044290060adea2384eaf5c7fd0f2cb3c9c3cdf206f"
   }
 }
