@@ -79,6 +79,7 @@ def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | N
     row = row or {}
     ok = row.get("readback_ok") is True and bool(row.get("permalink"))
     status = "DELIVERED" if ok else str(row.get("status") or ("NOT_DELIVERED" if not remote_id else "FAILED"))
+    remote_media = row.get("remote_media") if isinstance(row.get("remote_media"), dict) else {}
     return {
         "channel": channel,
         "status": status,
@@ -86,7 +87,14 @@ def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | N
         "remote_id": row.get("observed_remote_id") or remote_id,
         "receipt_id": row.get("permalink") if ok else None,
         "readback_ok": ok,
+        "object_readback_ok": row.get("object_readback_ok") is True if "object_readback_ok" in row else ok,
         "permalink": row.get("permalink"),
+        "media_type": row.get("media_type"),
+        "remote_media_url": row.get("remote_media_url"),
+        "remote_visual_readback_ok": row.get("remote_visual_readback_ok"),
+        "remote_media_http_status": remote_media.get("http_status"),
+        "remote_media_content_type": remote_media.get("content_type"),
+        "remote_media_final_url": remote_media.get("final_url"),
         "reason": row.get("reason"),
         "error": row.get("error"),
         "error_code": row.get("error_code"),
@@ -140,6 +148,7 @@ def materialize(
             and receipts["facebook"].get("readback_ok") is True
             and receipts["instagram"].get("status") == "DELIVERED"
             and receipts["instagram"].get("readback_ok") is True
+            and receipts["instagram"].get("remote_visual_readback_ok") is True
         )
         if externally_verified:
             externally_verified_ids.append(story_id)
@@ -166,7 +175,7 @@ def materialize(
         "schema_version": "1.2",
         "mode": "SHADOW_RECEIPT_LEDGER",
         "publication_authority": "NONE",
-        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence, and the approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
+        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence; Instagram delivery additionally requires readback of the remote image payload, and the approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
         "candidate_count": len(rows),
         "externally_verified_count": len(externally_verified_ids),
         "externally_verified_story_ids": externally_verified_ids,
