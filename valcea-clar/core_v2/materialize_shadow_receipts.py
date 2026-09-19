@@ -66,6 +66,12 @@ def _visual_receipt(row: dict[str, Any] | None) -> dict[str, Any]:
         "public_image_readback_ok": ((row.get("public_image") or {}).get("readback_ok") is True),
         "provenance_source_readback_ok": ((row.get("provenance_source") or {}).get("readback_ok") is True),
         "direct_source_readback_ok": ((row.get("direct_source") or {}).get("readback_ok") is True),
+        "canonical_site_visual_binding_state": row.get("canonical_site_visual_binding_state"),
+        "canonical_site_image_bound": row.get("canonical_site_image_bound") is True,
+        "canonical_site_visual_filename_match": row.get("canonical_site_visual_filename_match") is True,
+        "canonical_site_visual_source_match": row.get("canonical_site_visual_source_match") is True,
+        "canonical_site_visual_rights_match": row.get("canonical_site_visual_rights_match") is True,
+        "canonical_site_visual_provenance_verified": row.get("canonical_site_visual_provenance_verified") is True,
     }
 
 
@@ -125,6 +131,7 @@ def materialize(
         }
         externally_verified = (
             candidate.get("real_visual_internal_evidence") is True
+            and receipts["visual"].get("canonical_site_visual_binding_state") == "CONSISTENT"
             and receipts["site"].get("status") == "DELIVERED"
             and receipts["site"].get("readback_ok") is True
             and receipts["visual"].get("status") == "VERIFIED"
@@ -143,6 +150,7 @@ def materialize(
                 "real_visual_internal_evidence": candidate.get("real_visual_internal_evidence") is True,
                 "visual_source_url": candidate.get("visual_source_url"),
                 "visual_rights_basis": candidate.get("visual_rights_basis"),
+                "candidate_canonical_site_visual_binding_state": candidate.get("canonical_site_visual_binding_state"),
                 "receipts": receipts,
                 "external_delivery_truth": "VERIFIED" if externally_verified else "BLOCKED",
                 "acceptance_state": (
@@ -155,10 +163,10 @@ def materialize(
         )
 
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": "SHADOW_RECEIPT_LEDGER",
         "publication_authority": "NONE",
-        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence.",
+        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence, and the approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
         "candidate_count": len(rows),
         "externally_verified_count": len(externally_verified_ids),
         "externally_verified_story_ids": externally_verified_ids,
