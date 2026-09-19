@@ -2,11 +2,12 @@ import json
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-from photo_truth_gate import _candidate_fingerprint, _candidate_id
+from photo_truth_gate import _candidate_fingerprint, _candidate_id, _external_provenance_probe
 from visual_readback import ALLOWED_RIGHTS_BASES
 
 
@@ -114,6 +115,76 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
             source_url=source_url,
         )
         self.assertEqual(explicit, "canonical-story-id")
+
+    @patch("photo_truth_gate._read_binary_head")
+    @patch("photo_truth_gate._read_text")
+    def test_photo_probe_accepts_only_exact_commons_identity_on_upload_429(self, read_text, read_binary):
+        source_url = "https://commons.wikimedia.org/wiki/File:Approved.jpg"
+        direct_url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Approved.jpg"
+        read_text.return_value = {
+            "status": "PASS",
+            "http_status": 200,
+            "final_url": source_url,
+            "content_type": "text/html; charset=UTF-8",
+            "readback_ok": True,
+            "body": (
+                '<script type="application/ld+json">'
+                '{"@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Approved.jpg",'
+                '"license":"https://creativecommons.org/licenses/by-sa/4.0/","name":"Approved"}'
+                '</script>'
+            ),
+        }
+        read_binary.return_value = {
+            "status": "FAILED",
+            "http_status": 429,
+            "readback_ok": False,
+            "rate_limited": True,
+            "attempts": 3,
+        }
+        result = _external_provenance_probe(
+            {"source_url": source_url, "direct_source_url": direct_url}, timeout=1.0
+        )
+        self.assertIs(result["readback_ok"], True)
+        self.assertIs(result["direct_source_effective_ok"], True)
+        self.assertEqual(
+            result["direct_source_fallback"],
+            "wikimedia_commons_source_page_identity_fallback_for_direct_429",
+        )
+        self.assertIs(result["provenance_asset"]["asset_identity_ok"], True)
+        self.assertIs(result["provenance_asset"]["license_present"], True)
+
+    @patch("photo_truth_gate._read_binary_head")
+    @patch("photo_truth_gate._read_text")
+    def test_photo_probe_rejects_commons_429_when_jsonld_points_to_different_asset(self, read_text, read_binary):
+        source_url = "https://commons.wikimedia.org/wiki/File:Approved.jpg"
+        direct_url = "https://upload.wikimedia.org/wikipedia/commons/a/ab/Approved.jpg"
+        read_text.return_value = {
+            "status": "PASS",
+            "http_status": 200,
+            "final_url": source_url,
+            "content_type": "text/html; charset=UTF-8",
+            "readback_ok": True,
+            "body": (
+                '<script type="application/ld+json">'
+                '{"@type":"ImageObject","contentUrl":"https://upload.wikimedia.org/wikipedia/commons/a/ab/Different.jpg",'
+                '"license":"https://creativecommons.org/licenses/by-sa/4.0/"}'
+                '</script>'
+            ),
+        }
+        read_binary.return_value = {
+            "status": "FAILED",
+            "http_status": 429,
+            "readback_ok": False,
+            "rate_limited": True,
+            "attempts": 3,
+        }
+        result = _external_provenance_probe(
+            {"source_url": source_url, "direct_source_url": direct_url}, timeout=1.0
+        )
+        self.assertIs(result["readback_ok"], False)
+        self.assertIs(result["direct_source_effective_ok"], False)
+        self.assertIsNone(result["direct_source_fallback"])
+        self.assertIs(result["provenance_asset"]["asset_identity_ok"], False)
 
 
 if __name__ == "__main__":
