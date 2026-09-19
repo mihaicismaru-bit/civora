@@ -8,6 +8,7 @@ from typing import Any, Iterable
 from contracts import ContractViolation, FactKernel
 from editorial_integrity import validate_editorial_package
 from historical_fact_evidence_preflight import build as build_historical_fact_preflight
+from historical_fact_kernel_evidence import build as build_historical_fact_kernel_evidence
 
 REQUIRED_KERNEL_KEYS = (
     "what",
@@ -136,11 +137,22 @@ def _preflight_index(preflight: dict[str, Any] | None) -> dict[str, dict[str, An
     }
 
 
+def _historical_kernel_index(document: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    if not isinstance(document, dict):
+        return {}
+    return {
+        str(row.get("story_id") or ""): row
+        for row in document.get("rows") or []
+        if isinstance(row, dict) and str(row.get("story_id") or "").strip()
+    }
+
+
 def materialize(
     candidates: dict[str, Any],
     receipts: dict[str, Any],
     evidence_documents: list[tuple[str, Any]],
     fact_preflight: dict[str, Any] | None = None,
+    historical_kernel_evidence: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     candidate_ids = set(candidates.get("first_ten_candidate_ids") or [])
     candidates_by_id = {
@@ -154,6 +166,7 @@ def materialize(
         if isinstance(row, dict) and row.get("story_id")
     }
     preflight_by_id = _preflight_index(fact_preflight)
+    historical_kernel_by_id = _historical_kernel_index(historical_kernel_evidence)
 
     rows: list[dict[str, Any]] = []
     fully_bound = 0
@@ -162,6 +175,7 @@ def materialize(
         receipt_row = receipt_by_id.get(story_id) or {}
         evidence = find_explicit_evidence(story_id, evidence_documents)
         preflight_row = preflight_by_id.get(story_id) or {}
+        historical_kernel_row = historical_kernel_by_id.get(story_id) or {}
         result: dict[str, Any] = {
             "story_id": story_id,
             "publication_authority": "NONE",
@@ -177,6 +191,10 @@ def materialize(
             "historical_t1_source_readback_passed": int(preflight_row.get("t1_source_readback_passed") or 0),
             "historical_all_t1_sources_readback_ok": preflight_row.get("all_t1_sources_readback_ok") is True,
             "historical_source_readback": preflight_row.get("source_readback") or [],
+            "historical_fact_kernel_evidence_state": historical_kernel_row.get("state"),
+            "historical_fact_kernel_evidence_ready": historical_kernel_row.get("fact_kernel_evidence_ready") is True,
+            "historical_fact_kernel_live_promotion_allowed": historical_kernel_row.get("live_promotion_allowed") is True,
+            "historical_fact_kernel_evidence_count": len(historical_kernel_row.get("evidence") or []),
             "external_receipt_truth": receipt_row.get("external_delivery_truth") or "BLOCKED",
             "external_receipts": receipt_row.get("receipts") or {},
             "state": "BLOCKED",
@@ -198,6 +216,18 @@ def materialize(
             rows.append(result)
             continue
 
+        result["fact_kernel"] = {
+            "what": kernel.what,
+            "who": kernel.who,
+            "where": kernel.where,
+            "when": kernel.when,
+            "why_it_matters": kernel.why_it_matters,
+            "source": kernel.source,
+            "source_url": kernel.source_url,
+            "claims": list(kernel.claims),
+            "evidence_ids": list(kernel.evidence_ids),
+        }
+
         package = evidence.get("article_package")
         if not isinstance(package, dict):
             result["terminal_reason"] = "BLOCKED_EXPLICIT_ARTICLE_CLAIMS_EVIDENCE"
@@ -216,17 +246,6 @@ def materialize(
             rows.append(result)
             continue
 
-        result["fact_kernel"] = {
-            "what": kernel.what,
-            "who": kernel.who,
-            "where": kernel.where,
-            "when": kernel.when,
-            "why_it_matters": kernel.why_it_matters,
-            "source": kernel.source,
-            "source_url": kernel.source_url,
-            "claims": list(kernel.claims),
-            "evidence_ids": list(kernel.evidence_ids),
-        }
         result["article_claim_count"] = len(package.get("claims") or [])
         result["article_body_chars"] = len(str(package.get("body") or ""))
         result["visual_internal_truth"] = candidate.get("real_visual_internal_evidence") is True
@@ -254,14 +273,30 @@ def materialize(
             "promotion_allowed": fact_preflight.get("promotion_allowed") is True,
         }
 
+    historical_kernel_summary = None
+    if isinstance(historical_kernel_evidence, dict):
+        historical_kernel_summary = {
+            "schema_version": historical_kernel_evidence.get("schema_version"),
+            "candidate_count": historical_kernel_evidence.get("candidate_count"),
+            "fact_kernel_evidence_ready_count": historical_kernel_evidence.get("fact_kernel_evidence_ready_count"),
+            "publication_authority": historical_kernel_evidence.get("publication_authority"),
+            "live_promotion_allowed": historical_kernel_evidence.get("live_promotion_allowed") is True,
+            "states": {
+                str(row.get("story_id")): row.get("state")
+                for row in historical_kernel_evidence.get("rows") or []
+                if isinstance(row, dict) and row.get("story_id")
+            },
+        }
+
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": "SHADOW_TRANSACTION_REPLAY",
         "publication_authority": "NONE",
-        "truth_rule": "Fact kernels and article claims must already exist as explicit structured evidence; rendered article prose is never reverse-engineered into facts. Legacy fact/source preflight is read-only and cannot promote legacy records into a Core v2 FactKernel.",
+        "truth_rule": "Historical FactKernels may be generated only from bounded field/claim evidence matched directly against external source content; rendered article prose is never reverse-engineered into facts. A shadow historical FactKernel never grants live publication authority.",
         "candidate_count": len(rows),
         "fully_bound_replay_count": fully_bound,
         "historical_fact_preflight": preflight_summary,
+        "historical_fact_kernel_evidence": historical_kernel_summary,
         "acceptance_ready": False,
         "rows": rows,
     }
@@ -282,8 +317,21 @@ def main() -> int:
         None,
     )
     fact_preflight = build_historical_fact_preflight(candidates, facts_document) if isinstance(facts_document, dict) else None
-    result = materialize(candidates, receipts, documents, fact_preflight=fact_preflight)
+
+    historical_kernel_evidence = build_historical_fact_kernel_evidence(candidates)
+    documents.append(("historical_fact_kernel_evidence", historical_kernel_evidence))
+
+    result = materialize(
+        candidates,
+        receipts,
+        documents,
+        fact_preflight=fact_preflight,
+        historical_kernel_evidence=historical_kernel_evidence,
+    )
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    historical_output = Path(args.output).with_name("valcea-core-v2-historical-fact-kernels.json")
+    historical_output.write_text(json.dumps(historical_kernel_evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
     reasons: dict[str, int] = {}
     for row in result["rows"]:
         reason = str(row.get("terminal_reason") or "AUDIT_REPLAY_READY")
@@ -294,6 +342,7 @@ def main() -> int:
                 "candidate_count": result["candidate_count"],
                 "fully_bound_replay_count": result["fully_bound_replay_count"],
                 "historical_fact_preflight": result.get("historical_fact_preflight"),
+                "historical_fact_kernel_evidence": result.get("historical_fact_kernel_evidence"),
                 "reasons": reasons,
                 "acceptance_ready": False,
             },
