@@ -13,7 +13,11 @@ from meta_readback import (
     parse_meta_error_body,
     parse_meta_object,
 )
-from visual_readback import _effective_direct_source_status, inspect_provenance_asset
+from visual_readback import (
+    _classify_visual_truth_failure,
+    _effective_direct_source_status,
+    inspect_provenance_asset,
+)
 
 
 class ExternalReadbackTest(unittest.TestCase):
@@ -190,6 +194,42 @@ class ExternalReadbackTest(unittest.TestCase):
         )
         self.assertFalse(bad)
         self.assertIsNone(bad_reason)
+
+    def test_visual_failure_classifies_reachable_article_without_approved_image_as_content_absence(self):
+        state, domain = _classify_visual_truth_failure(
+            internal_gate=True,
+            article={"readback_ok": True},
+            article_binding={"article_image_bound": False},
+            public_image={"readback_ok": False},
+            provenance_source={"readback_ok": True},
+            direct_source_effective_ok=True,
+        )
+        self.assertEqual(state, "SITE_APPROVED_VISUAL_ABSENT")
+        self.assertEqual(domain, "SITE_CONTENT")
+
+    def test_visual_failure_keeps_site_transport_distinct_from_content_absence(self):
+        state, domain = _classify_visual_truth_failure(
+            internal_gate=True,
+            article={"readback_ok": False},
+            article_binding={"article_image_bound": False},
+            public_image={"readback_ok": False},
+            provenance_source={"readback_ok": True},
+            direct_source_effective_ok=True,
+        )
+        self.assertEqual(state, "SITE_ARTICLE_TRANSPORT_FAILURE")
+        self.assertEqual(domain, "SITE_TRANSPORT")
+
+    def test_visual_failure_keeps_provenance_transport_distinct_from_site_absence(self):
+        state, domain = _classify_visual_truth_failure(
+            internal_gate=True,
+            article={"readback_ok": True},
+            article_binding={"article_image_bound": True},
+            public_image={"readback_ok": True},
+            provenance_source={"readback_ok": False},
+            direct_source_effective_ok=False,
+        )
+        self.assertEqual(state, "PROVENANCE_SOURCE_TRANSPORT_FAILURE")
+        self.assertEqual(domain, "PROVENANCE_TRANSPORT")
 
     def test_canonical_visual_binding_requires_same_asset_source_rights_and_verified_provenance(self):
         source_url = "https://commons.wikimedia.org/wiki/File:Expected.jpg"
