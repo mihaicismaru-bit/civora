@@ -2,19 +2,31 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-19T04:27:19+03:00",
+  "generated_at": "2026-09-19T09:23:53+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-19T04:25:52+03:00",
-  "task_count": 78,
+  "queue_generated_at": "2026-09-19T09:22:23+03:00",
+  "task_count": 76,
   "primary_match_count": 0,
-  "no_match_count": 30,
+  "no_match_count": 28,
   "unrouted_count": 48,
-  "target_count": 19,
-  "targets_ok": 15,
+  "target_count": 16,
+  "targets_ok": 13,
   "results": [
+    {
+      "signal_id": "ce3c0f3567c872ac263687b1",
+      "signal_title": "Colectarea separată la marginea Sibiului: Reportaj din Cristian, alături de angajații ADI Eco. „Se vede o îmbunătățire de la an la an, însă mai sunt detalii de corectat”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/19/colectarea-separata-la-marginea-sibiului-reportaj-din-cristian-alaturi-de-angajatii-adi-eco-se-vede-o-imbunatatire-de-la-an-la-an-insa-mai-sunt-detalii-de-corectat/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-19T07:46:00+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "7735cd552b4c3846edf8c83d",
       "signal_title": "FOTO – Galicea s-a mobilizat pentru curățenie. Mesajul primarului Mărăcine pentru cei care aruncă gunoaie",
@@ -246,9 +258,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
         }
       ],
       "publication_authority": "NONE",
@@ -1019,9 +1031,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
         }
       ],
       "publication_authority": "NONE",
@@ -1120,18 +1132,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "9105f77d42050934accb1064",
-      "signal_title": "Ciobanul Ionică, originar din Jina, liderul protestelor oierilor de la București: „Nu ne vaccinăm oile fără garanții de la stat”. Chemările la noi proteste sunt respinse, deocamdată",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/17/ciobanul-ionica-originar-din-jina-liderul-protestelor-oierilor-de-la-bucuresti-nu-ne-vaccinam-oile-fara-garantii-de-la-stat-chemarile-la-noi-proteste-sunt-respinse-deocamdata/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-17T17:19:39+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "d978dd3ccffd35eba9d768d7",
       "signal_title": "Doar din București: cinci oferte au fost depuse pentru studiul de fezabilitate al trenului periurban Sibiu. Printre subcontractanți, Muzeul Olteniei și firme din Italia și Polonia",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/17/doar-din-bucuresti-cinci-oferte-au-fost-depuse-pentru-studiul-de-fezabilitate-al-trenului-periurban-sibiu-printre-subcontractanti-muzeul-olteniei-si-firme-din-italia-si-polonia/",
@@ -1182,9 +1182,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
         }
       ],
       "publication_authority": "NONE",
@@ -1240,93 +1240,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "422e94c713e57feaf7943339",
-      "signal_title": "Incendiu la o casă din Berislăvești. Un bărbat a ajuns la spital",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/17/incendiu-la-o-casa-din-berislavesti-un-barbat-a-ajuns-la-spital/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-17T13:01:28+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "27c07f4a7b28031a8b10d64e",
-      "signal_title": "Haosul continuă la „Regina Maria”. Părinții elevilor din a V-a au cerut ajutorul ISJ după ce școala a schimbat diriginții peste noapte. Inspectoratul: „Măsura nu a fost solicitată de noi”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/17/haosul-continua-la-regina-maria-parintii-elevilor-din-a-v-a-au-cerut-ajutorul-isj-dupa-ce-scoala-a-schimbat-dirigintii-peste-noapte-inspectoratul-masura-nu-a-fost-solicit/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-17T12:57:47+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "f807de28e3e8359f58aaaece",
