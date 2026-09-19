@@ -54,6 +54,24 @@ def _visual_blockers(receipt: dict[str, Any]) -> list[str]:
     return blockers
 
 
+def _cross_surface_visual_blockers(candidate: dict[str, Any]) -> list[str]:
+    """Keep internal cross-surface divergence explicit and fail-closed.
+
+    This does not replace external visual readback. It prevents a real visual
+    approved in the social registry from becoming audit-complete when the
+    canonical site manifest binds a different asset, no asset, different
+    provenance, or when the binding state is absent entirely.
+    """
+    state = str(candidate.get("canonical_site_visual_binding_state") or "").strip()
+    if state == "CONSISTENT":
+        return []
+    if not state:
+        return ["CROSS_SURFACE_VISUAL_BINDING_UNKNOWN"]
+    if state == "NOT_READY":
+        return ["CROSS_SURFACE_VISUAL_BINDING_NOT_READY"]
+    return ["CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE"]
+
+
 def _transaction_blockers(transaction: dict[str, Any]) -> list[str]:
     reason = str(transaction.get("terminal_reason") or "")
     mapping = {
@@ -76,6 +94,7 @@ def build_report(
     receipts: dict[str, Any],
     transactions: dict[str, Any],
 ) -> dict[str, Any]:
+    candidate_rows = _rows_by_story(candidates)
     receipt_rows = _rows_by_story(receipts)
     transaction_rows = _rows_by_story(transactions)
     story_ids = [str(value) for value in candidates.get("first_ten_candidate_ids") or []]
@@ -84,11 +103,14 @@ def build_report(
     blocker_counts: Counter[str] = Counter()
     truth_complete = 0
     for story_id in story_ids:
+        candidate = candidate_rows.get(story_id) or {}
         receipt_row = receipt_rows.get(story_id) or {}
         transaction = transaction_rows.get(story_id) or {}
         channel_receipts = receipt_row.get("receipts") if isinstance(receipt_row.get("receipts"), dict) else {}
         blockers: list[str] = []
         owner_actions: list[str] = []
+
+        blockers.extend(_cross_surface_visual_blockers(candidate))
 
         site = channel_receipts.get("site") if isinstance(channel_receipts.get("site"), dict) else {}
         if not (site.get("status") == "DELIVERED" and site.get("readback_ok") is True):
@@ -137,6 +159,11 @@ def build_report(
                 "truth_state": "REPLAY_TRUTH_COMPLETE" if not blockers else "BLOCKED",
                 "blockers": blockers,
                 "owner_actions": owner_actions,
+                "canonical_site_visual_binding_state": candidate.get("canonical_site_visual_binding_state"),
+                "canonical_site_visual_filename_match": candidate.get("canonical_site_visual_filename_match"),
+                "canonical_site_visual_source_match": candidate.get("canonical_site_visual_source_match"),
+                "canonical_site_visual_rights_match": candidate.get("canonical_site_visual_rights_match"),
+                "canonical_site_visual_provenance_verified": candidate.get("canonical_site_visual_provenance_verified"),
                 "site_status": site.get("status"),
                 "visual_status": visual.get("status"),
                 "facebook_status": facebook.get("status"),
@@ -146,7 +173,7 @@ def build_report(
         )
 
     return {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "SHADOW_TRUTH_GATE_REPORT",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -155,7 +182,7 @@ def build_report(
         "blocked_count": len(story_ids) - truth_complete,
         "blocker_counts": dict(sorted(blocker_counts.items())),
         "rows": rows,
-        "truth_rule": "A green workflow, internal ID, outbox item or legacy published flag never satisfies an external truth gate by itself.",
+        "truth_rule": "A green workflow, internal ID, outbox item, legacy published flag or internal visual assignment never satisfies external truth; replay candidates also require a CONSISTENT canonical social-visual/site-manifest binding.",
     }
 
 
