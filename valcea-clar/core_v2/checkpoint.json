@@ -1,6 +1,6 @@
 {
-  "schema_version": "4.5",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN32-HISTORICAL-WATER-PROVENANCE-HYDRATION-FAILCLOSED-NATURAL-VALIDATED",
+  "schema_version": "4.6",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN33-PHOTO-PROBE-DEDUP-HCL344-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -17,17 +17,17 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "a7b716f56c559b05a3a720c5c713add1ee92d3ee",
-    "message": "Core v2: hydrate approved visual from verified provenance",
-    "functional_increment": "When an already-approved historical visual is absent from the repository, Instagram identity audit can now attempt ephemeral shadow-only hydration from the exact approved HTTPS direct source, but only after independent provenance-page ImageObject identity and license verification. Hydration never grants publication authority and fails closed on any provenance or download failure.",
-    "workflow_run_id": 35436784993,
-    "workflow_run_number": 525,
+    "sha": "96a37b125fc1cd79feafeffc4a50edc55cb56a87",
+    "message": "Core v2: regress shared photo probe deduplication",
+    "functional_increment": "PHOTO truth schema 1.3 now probes each identical approved provenance/direct-source URL pair only once per report and reuses that bounded external evidence across story assignments. Each story still independently passes its rights, semantic relevance, archive disclosure and candidate-binding contract. This removes avoidable rate-limit drift without weakening fail-closed truth.",
+    "workflow_run_id": 35437435389,
+    "workflow_run_number": 537,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10581524788,
-    "artifact_sha256": "282001b6a6146a4fad58e1044290060adea2384eaf5c7fd0f2cb3c9c3cdf206f",
-    "artifact_size_bytes": 2555695,
+    "artifact_id": 10582681936,
+    "artifact_sha256": "56657826cd1bb2764f9c31524b8a3d2729b2869ccc21f80635f199c9e8961fae",
+    "artifact_size_bytes": 2557379,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
@@ -38,13 +38,13 @@
     "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness",
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
     "PHOTO remains fail-closed; generic, text-card and synthetic-as-photo substitutions remain forbidden",
-    "historical FactKernel evidence is 2/2 and historical article-claims evidence is 2/2 with fabricated_claims=0",
-    "Instagram object and remote IMAGE payload replay remains externally verified 2/2 with 10/10 bounded remote image payloads readable",
-    "CET Govora remains independently identity-bound to its approved visual",
-    "missing approved repository assets may now be hydrated only ephemerally from their exact already-approved direct source after rights/provenance verification",
-    "water-contract Wikimedia Commons source page returned HTTP 200 and exposed exactly one matching ImageObject for Ramnicu_Valcea_panorama.jpg with a HTTPS CC BY-SA 4.0 license",
-    "water-contract original upload.wikimedia.org asset returned HTTP 429 on all three bounded hydration attempts; Core v2 therefore kept approved-visual identity unbound rather than substituting another image",
-    "natural push run 525 passed contract tests, all 26 shadow stages, external site/visual/Meta replay, provenance hydration logic, receipts, transactions, runtime invariants and tamper regressions",
+    "HCL 344 now has a story-specific approved contextual archive photograph of Râmnicu Vâlcea City Hall with CC BY-SA 4.0 provenance and explicit disclosure that it does not depict Școala primară Licurici, pupils, staff, opening activity or the 2026 council meeting",
+    "PHOTO truth schema 1.3 deduplicates external probes for identical approved image provenance/direct-source pairs inside one report",
+    "natural run 537 independently demonstrated one unique external image probe reused by two later municipal candidates; HCL 343, HCL 344 and HCL 345 all passed the PHOTO gate from the same successful bounded asset evidence without redundant HTTP reads",
+    "current PHOTO truth increased from 2/7 to 3/7 without generic or synthetic substitution",
+    "historical FactKernel evidence remains 2/2 and historical article-claims evidence remains 2/2 with fabricated_claims=0",
+    "historical site readback remains 2/2; CET Govora visual/Instagram approved-image identity remains verified; the water-contract transaction remains fail-closed",
+    "natural push run 537 passed contract tests, all 26 ordered shadow stages, external site/visual/Meta replay, deduplicated PHOTO probing, receipts, transactions, runtime invariants and tamper regressions",
     "no merge, deploy, live Core v2 publication, public-projection mutation, Meta write, workflow_dispatch or manual rerun was used"
   ],
   "inventory": {
@@ -57,20 +57,23 @@
     "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
   },
   "photo_truth": {
+    "schema_version": "1.3",
     "candidate_count": 7,
-    "verified_shadow_count": 2,
-    "blocked_count": 5,
-    "coverage": "2/7",
+    "verified_shadow_count": 3,
+    "blocked_count": 4,
+    "coverage": "3/7",
+    "external_probe_unique_asset_count": 1,
+    "external_probe_reused_candidate_count": 2,
     "verified_story_ids": [
       "hcl-343-local-public-finance",
+      "hcl-344-local-education-access",
       "hcl-345-regulated-local-authorization"
     ],
-    "blocked_story_ids": [
-      "0795029bb1cd130dd630ba61",
-      "884cfb20e52e672db53fa14d",
-      "c5cc807a6f72abd31ebc8aff",
-      "hcl-344-local-education-access",
-      "isj-directori-2026-conducere-scoli"
+    "blocked_current_lanes": [
+      "IPJ Vâlcea — ACȚIUNI PENTRU SIGURANȚA RUTIERĂ ÎN JUDEȚUL VÂLCEA",
+      "ISU Vâlcea — Incendiu în fondul forestier al localității Mădulari",
+      "ISU Vâlcea — Incendiu izbucnit la un autoturism, în localitatea Lăpușata",
+      "ISJ Vâlcea — concurs directori 2026"
     ],
     "generic_or_synthetic_substitution_forbidden": true
   },
@@ -99,25 +102,21 @@
       "failed": 1,
       "passed_story_ids": ["cet-govora-cine-a-decis-oprirea-20260821"],
       "blocked_story_ids": ["valcea-apa-canal-contract-152m-20260902"],
-      "water_contract_reason": "BLOCKED_APPROVED_VISUAL_HYDRATION_FAILED",
-      "water_contract_provenance_page_verified": true,
-      "water_contract_exact_imageobject_verified": true,
-      "water_contract_license_verified": true,
-      "water_contract_direct_download_http_status": 429,
-      "water_contract_direct_download_attempts": 3
+      "water_contract_reason": "BLOCKED_APPROVED_VISUAL_HYDRATION_FAILED"
     },
-    "externally_verified_receipts": 0,
+    "externally_verified_complete_receipts": 0,
     "truth_complete_count": 0,
     "blocker_counts": {
       "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
       "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 1,
-      "VISUAL_ARTICLE_BINDING_FAILED": 1
+      "VISUAL_ARTICLE_BINDING_FAILED": 1,
+      "VISUAL_PROVENANCE_FAILED": 1
     },
     "acceptance_ready": false
   },
   "blocked": [
-    {"gate": "photo_truth_gate", "reason": "Five of seven current written shadow candidates still lack a verified story-specific real, relevant and rights-cleared visual."},
+    {"gate": "photo_truth_gate", "reason": "Four of seven current written shadow candidates still lack a verified story-specific real, relevant and rights-cleared visual: IPJ, both current ISU stories and ISJ."},
     {"gate": "historical_water_visual_asset", "reason": "The exact approved Wikimedia provenance is independently verified, but the original direct asset is rate-limited HTTP 429 and the repository copy is absent; no substitute was introduced."},
     {"gate": "historical_water_cross_surface_binding", "reason": "The water-contract approved social visual remains unbound to the canonical/public site story."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
@@ -127,9 +126,9 @@
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "add a bounded Wikimedia-only fallback to an exact thumbnail derivative of the same already-approved file when the original upload asset is HTTP 429; prove same-file provenance before comparison and never accept a different image",
+    "continue PHOTO rights/relevance research for current IPJ, the two ISU stories and ISJ; keep first-party images blocked unless reuse rights or an independently permitted license basis is demonstrable",
+    "add a bounded Wikimedia-only fallback to an exact thumbnail derivative of the same already-approved water-contract file when the original upload asset is HTTP 429; prove same-file provenance before comparison and never accept a different image",
     "reconcile the historical water-contract canonical site/image binding read-only before any delivery receipt can be complete",
-    "continue PHOTO rights/relevance research for current IPJ/ISU/HCL344/ISJ without generic or synthetic-as-photo substitution",
     "keep Facebook uncertified until read-only Graph permission is sufficient and a remote receipt can be independently read back",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
     "keep ISJ deadline normalization fail-closed unless the year is directly supported by the same evidence context",
@@ -137,16 +136,17 @@
   ],
   "evidence": {
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
+    "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
+    "photo_truth_tests": "valcea-clar/tests/test_core_v2_visual.py",
+    "visual_registry": "valcea-clar/core_v2/visual_registry.json",
     "instagram_visual_identity": "valcea-clar/core_v2/instagram_visual_identity.py",
-    "instagram_visual_identity_tests": "valcea-clar/tests/test_core_v2_instagram_visual_identity.py",
-    "instagram_visual_identity_runtime_validator": "valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
     "receipt_ledger": "valcea-clar/core_v2/materialize_shadow_receipts.py",
     "gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35436784993",
-    "feature_artifact_id": 10581524788,
-    "feature_artifact_sha256": "282001b6a6146a4fad58e1044290060adea2384eaf5c7fd0f2cb3c9c3cdf206f"
+    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35437435389",
+    "feature_artifact_id": 10582681936,
+    "feature_artifact_sha256": "56657826cd1bb2764f9c31524b8a3d2729b2869ccc21f80635f199c9e8961fae"
   }
 }
