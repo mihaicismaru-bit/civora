@@ -24,10 +24,11 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
                 "isj_registration_deadline_promotion_validation", "isj_field_materiality",
                 "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
-                "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth", "shadow_site_package",
+                "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity",
+                "site_verified_article_ledger", "photo_truth", "shadow_site_package",
             ],
         )
-        self.assertEqual(len(names), 32)
+        self.assertEqual(len(names), 33)
         joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
         for forbidden in ("workflow_dispatch", "git push", "merge", "deploy", "facebook_publish", "instagram_publish", "manual-publish"):
             self.assertNotIn(forbidden, joined)
@@ -43,7 +44,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             if stage.name in source_stage_names:
                 self.assertNotIn("--live", stage.argv)
 
-    def test_isj_chain_consumes_only_prior_shadow_artifacts(self):
+    def test_isj_chain_and_site_ledger_consume_only_prior_shadow_artifacts(self):
         with tempfile.TemporaryDirectory() as temp:
             plan = bounded_cycle_plan(Path(temp), live=True)
         by_name = {stage.name: stage for stage in plan}
@@ -56,7 +57,9 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         fact_deadline_promotion = by_name["isj_fact_kernel_deadline_promotion"]
         fact_deadline_validation = by_name["isj_fact_kernel_deadline_promotion_validation"]
         fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
-        writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]; photo = by_name["photo_truth"]
+        writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]
+        ledger = by_name["site_verified_article_ledger"]; photo = by_name["photo_truth"]; site = by_name["shadow_site_package"]
+        ipj = by_name["ipj"]; isu = by_name["isu"]; municipal = by_name["municipal_writer"]
 
         self.assertIn(str(isj.output), detail.argv); self.assertIn("--live", detail.argv)
         self.assertIn(str(detail.output), materiality.argv); self.assertNotIn("--live", materiality.argv)
@@ -66,57 +69,30 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(content.output), fields.argv); self.assertNotIn("--live", fields.argv)
         self.assertIn(str(targets.output), context_docs.argv); self.assertIn(str(fields.output), context_docs.argv); self.assertIn("2026", context_docs.argv); self.assertIn("--live", context_docs.argv)
         self.assertIn(str(context_docs.output), calendar_fields.argv); self.assertIn("2026", calendar_fields.argv); self.assertNotIn("--live", calendar_fields.argv)
+        self.assertIn(str(context_docs.output), calendar_scope.argv); self.assertIn(str(calendar_fields.output), calendar_scope.argv); self.assertNotIn("--live", calendar_scope.argv)
+        self.assertIn(str(context_docs.output), calendar_scope_validation.argv); self.assertIn(str(calendar_fields.output), calendar_scope_validation.argv); self.assertIn(str(calendar_scope.output), calendar_scope_validation.argv); self.assertIn("--prove-tamper", calendar_scope_validation.argv)
+        self.assertIn(str(calendar_scope.output), deadline_promotion.argv); self.assertIn(str(calendar_scope_validation.output), deadline_promotion.argv)
+        self.assertIn(str(calendar_scope.output), deadline_validation.argv); self.assertIn(str(calendar_scope_validation.output), deadline_validation.argv); self.assertIn(str(deadline_promotion.output), deadline_validation.argv); self.assertIn("--prove-tamper", deadline_validation.argv)
+        self.assertIn(str(fields.output), field_materiality.argv); self.assertIn(str(calendar_fields.output), field_materiality.argv); self.assertIn(str(deadline_promotion.output), field_materiality.argv); self.assertIn(str(deadline_validation.output), field_materiality.argv)
+        self.assertIn(str(field_materiality.output), fact_deadline_promotion.argv); self.assertIn(str(deadline_promotion.output), fact_deadline_promotion.argv); self.assertIn(str(deadline_validation.output), fact_deadline_promotion.argv)
+        self.assertIn(str(field_materiality.output), fact_deadline_validation.argv); self.assertIn(str(deadline_promotion.output), fact_deadline_validation.argv); self.assertIn(str(deadline_validation.output), fact_deadline_validation.argv); self.assertIn(str(fact_deadline_promotion.output), fact_deadline_validation.argv); self.assertIn("--prove-tamper", fact_deadline_validation.argv)
 
-        self.assertIn(str(context_docs.output), calendar_scope.argv)
-        self.assertIn(str(calendar_fields.output), calendar_scope.argv)
-        self.assertIn("2026", calendar_scope.argv)
-        self.assertNotIn("--live", calendar_scope.argv)
-        self.assertIn(str(context_docs.output), calendar_scope_validation.argv)
-        self.assertIn(str(calendar_fields.output), calendar_scope_validation.argv)
-        self.assertIn(str(calendar_scope.output), calendar_scope_validation.argv)
-        self.assertIn("--prove-tamper", calendar_scope_validation.argv)
-        self.assertNotIn("--live", calendar_scope_validation.argv)
-
-        self.assertIn(str(calendar_scope.output), deadline_promotion.argv)
-        self.assertIn(str(calendar_scope_validation.output), deadline_promotion.argv)
-        self.assertIn("2026", deadline_promotion.argv)
-        self.assertNotIn("--live", deadline_promotion.argv)
-        self.assertIn(str(calendar_scope.output), deadline_validation.argv)
-        self.assertIn(str(calendar_scope_validation.output), deadline_validation.argv)
-        self.assertIn(str(deadline_promotion.output), deadline_validation.argv)
-        self.assertIn("--prove-tamper", deadline_validation.argv)
-        self.assertNotIn("--live", deadline_validation.argv)
-
-        self.assertIn(str(fields.output), field_materiality.argv)
-        self.assertIn(str(calendar_fields.output), field_materiality.argv)
-        self.assertIn(str(deadline_promotion.output), field_materiality.argv)
-        self.assertIn(str(deadline_validation.output), field_materiality.argv)
-        self.assertIn("2026", field_materiality.argv)
-        self.assertNotIn("--live", field_materiality.argv)
-
-        self.assertIn(str(field_materiality.output), fact_deadline_promotion.argv)
-        self.assertIn(str(deadline_promotion.output), fact_deadline_promotion.argv)
-        self.assertIn(str(deadline_validation.output), fact_deadline_promotion.argv)
-        self.assertIn("2026", fact_deadline_promotion.argv)
-        self.assertNotIn("--live", fact_deadline_promotion.argv)
-        self.assertIn(str(field_materiality.output), fact_deadline_validation.argv)
-        self.assertIn(str(deadline_promotion.output), fact_deadline_validation.argv)
-        self.assertIn(str(deadline_validation.output), fact_deadline_validation.argv)
-        self.assertIn(str(fact_deadline_promotion.output), fact_deadline_validation.argv)
-        self.assertIn("--prove-tamper", fact_deadline_validation.argv)
-        self.assertNotIn("--live", fact_deadline_validation.argv)
-
-        self.assertNotIn(str(calendar_scope.output), fact_kernel.argv)
-        self.assertNotIn(str(calendar_scope_validation.output), fact_kernel.argv)
-        self.assertNotIn(str(deadline_promotion.output), fact_kernel.argv)
-        self.assertNotIn(str(deadline_validation.output), fact_kernel.argv)
         self.assertNotIn(str(fact_deadline_promotion.output), fact_kernel.argv)
         self.assertNotIn(str(fact_deadline_validation.output), fact_kernel.argv)
-        self.assertIn(str(field_materiality.output), fact_kernel.argv); self.assertIn(str(fields.output), fact_kernel.argv); self.assertIn(str(calendar_fields.output), fact_kernel.argv); self.assertNotIn("--live", fact_kernel.argv)
-        self.assertIn(str(fact_kernel.output), fact_integrity.argv); self.assertNotIn("--live", fact_integrity.argv)
-        self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv); self.assertNotIn("--live", writer.argv)
-        self.assertIn(str(fact_kernel.output), article_integrity.argv); self.assertIn(str(fact_integrity.output), article_integrity.argv); self.assertIn(str(writer.output), article_integrity.argv); self.assertNotIn("--live", article_integrity.argv)
+        self.assertIn(str(field_materiality.output), fact_kernel.argv); self.assertIn(str(fields.output), fact_kernel.argv); self.assertIn(str(calendar_fields.output), fact_kernel.argv)
+        self.assertIn(str(fact_kernel.output), fact_integrity.argv)
+        self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv)
+        self.assertIn(str(fact_kernel.output), article_integrity.argv); self.assertIn(str(fact_integrity.output), article_integrity.argv); self.assertIn(str(writer.output), article_integrity.argv)
+
+        self.assertIn(str(ipj.output), ledger.argv)
+        self.assertIn(str(isu.output), ledger.argv)
+        self.assertIn(str(municipal.output), ledger.argv)
+        self.assertIn(str(writer.output), ledger.argv)
+        self.assertIn(str(article_integrity.output), ledger.argv)
+        self.assertNotIn("--live", ledger.argv)
         self.assertIn(f"isj={article_integrity.output}", photo.argv)
+        self.assertIn(str(ledger.output), site.argv)
+        self.assertNotIn(str(municipal.output), site.argv)
 
         names = [stage.name for stage in plan]
         chain = [
@@ -125,7 +101,8 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "isj_calendar_scope_binding", "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
             "isj_registration_deadline_promotion_validation", "isj_field_materiality",
             "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
-            "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth",
+            "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity",
+            "site_verified_article_ledger", "photo_truth", "shadow_site_package",
         ]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))

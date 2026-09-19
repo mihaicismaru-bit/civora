@@ -98,6 +98,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     isj_fact_kernel_deadline_promotion = workdir / "valcea-core-v2-isj-fact-kernel-deadline-promotion.json"; isj_fact_kernel_deadline_promotion_validation = workdir / "valcea-core-v2-isj-fact-kernel-deadline-promotion-validation.json"
     isj_fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"; isj_fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
     isj_article = workdir / "valcea-core-v2-isj-article-shadow.json"; isj_article_integrity = workdir / "valcea-core-v2-isj-article-integrity-shadow.json"
+    site_article_ledger = workdir / "valcea-core-v2-site-verified-article-ledger.json"
     photo = workdir / "valcea-core-v2-photo-truth.json"; site_package = workdir / "valcea-core-v2-shadow-site-package.json"; site_dir = workdir / "valcea-core-v2-shadow-site"
     return (
         CycleStage("apavil", (py,"valcea-clar/core_v2/apavil_shadow_lane.py",*live_flag,"--output",str(apavil)), apavil),
@@ -130,8 +131,9 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_fact_kernel_integrity", (py,"valcea-clar/core_v2/isj_fact_kernel_integrity.py","--fact-kernel",str(isj_fact_kernel),"--output",str(isj_fact_integrity)), isj_fact_integrity),
         CycleStage("isj_writer", (py,"valcea-clar/core_v2/isj_writer_shadow_lane.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--output",str(isj_article)), isj_article),
         CycleStage("isj_article_integrity", (py,"valcea-clar/core_v2/isj_article_integrity.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--article",str(isj_article),"--output",str(isj_article_integrity)), isj_article_integrity),
+        CycleStage("site_verified_article_ledger", (py,"valcea-clar/core_v2/site_verified_article_ledger.py","--ipj",str(ipj),"--isu",str(isu),"--municipal",str(municipal_articles),"--isj-article",str(isj_article),"--isj-integrity",str(isj_article_integrity),"--output",str(site_article_ledger)), site_article_ledger),
         CycleStage("photo_truth", (py,"valcea-clar/core_v2/photo_truth_gate.py","--input",f"ipj={ipj}","--input",f"isu={isu}","--input",f"municipal={municipal_articles}","--input",f"isj={isj_article_integrity}","--visual-registry","valcea-clar/core_v2/visual_registry.json","--external-probe","--output",str(photo)), photo),
-        CycleStage("shadow_site_package", (py,"valcea-clar/core_v2/shadow_site_package.py","--articles",str(municipal_articles),"--photo-truth",str(photo),"--visual-registry","valcea-clar/core_v2/visual_registry.json","--repo-root",".","--output-dir",str(site_dir),"--output",str(site_package)), site_package),
+        CycleStage("shadow_site_package", (py,"valcea-clar/core_v2/shadow_site_package.py","--articles",str(site_article_ledger),"--photo-truth",str(photo),"--visual-registry","valcea-clar/core_v2/visual_registry.json","--repo-root",".","--output-dir",str(site_dir),"--output",str(site_package)), site_package),
     )
 
 
@@ -146,7 +148,7 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                     "detail_evidence_shadow_count","material_detail_candidate_shadow_count","embedded_notice_evidence_shadow_count",
                     "embedded_target_identity_shadow_count","selected_document_count","document_content_captured_shadow_count",
                     "document_text_extracted_shadow_count","verified_document_count","verified_calendar_document_count","field_evidence_count","material_candidate_shadow_count","materiality_candidate_count","fact_kernel_count","verified_claim_count","fact_kernel_integrity_verified","writer_gate_status",
-                    "article_count","shadow_writer_executed","article_truth_state","verified_article_count","article_integrity_verified","photo_gate_status",
+                    "article_count","source_article_counts","shadow_writer_executed","article_truth_state","verified_article_count","article_integrity_verified","photo_gate_status",
                     "contest_context_verified","selected_context_document_count","selected_roles","same_document_year_scope_verified",
                     "registration_window_normalized","registration_deadline_normalized","registration_deadline","promotion_evidence_id","materiality_promotion_allowed","registration_deadline_materiality_consumed",
                     "fact_kernel_promotion_evidence_id","fact_kernel_promotion_allowed","material_fact_use","tamper_regressions_passed",
@@ -167,6 +169,7 @@ def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]
         "isj_registration_deadline_promotion_validation",
         "isj_fact_kernel_deadline_promotion",
         "isj_fact_kernel_deadline_promotion_validation",
+        "site_verified_article_ledger",
     }
     snapshots: dict[str, Any] = {}
     for stage in plan:
@@ -194,7 +197,7 @@ def run_bounded_shadow_cycle(*, repo_root: Path, workdir: Path, live: bool) -> d
             failed_stage = stage.name
             break
     return {
-        "schema_version":"1.9","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE",
+        "schema_version":"2.0","mode":"CORE_V2_BOUNDED_SHADOW_CYCLE","shadow_mode":True,"publication_authority":"NONE",
         "production_write_authority":False,"site_publish_allowed":False,"social_publish_allowed":False,"acceptance_ready":False,
         "live_read_only":live,"status":"PASS_SHADOW" if failed_stage is None else "BLOCKED","failed_stage":failed_stage,
         "stage_count_planned":len(plan),"stage_count_completed":len(stages),"stages":stages,
