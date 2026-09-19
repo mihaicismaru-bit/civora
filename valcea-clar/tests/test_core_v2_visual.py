@@ -276,6 +276,56 @@ class PhotoTruthGateTest(unittest.TestCase):
         self.assertFalse(report["acceptance_ready"])
         self.assertEqual(report["rows"][0]["article_source_url"], "https://www.isuvl.igsu.ro/stiri-locale/exemplu-2026")
 
+    def test_identical_visual_urls_are_probed_once_per_report(self):
+        registry = self.valid_registry("story-a")
+        registry["stories"]["story-b"] = registry["stories"]["story-a"]
+        municipal = {
+            "rows": [
+                {
+                    "decision_number": 1,
+                    "state": "VERIFIED_WRITTEN_SHADOW",
+                    "articles": [
+                        {
+                            "article_id": "story-a",
+                            "fact_kernel": {
+                                "where": "Râmnicu Vâlcea",
+                                "who": "Consiliul Local",
+                                "source_url": "https://www.primariavl.ro/hcl/1-2026",
+                            },
+                            "article_package": {"headline": "Poveste A"},
+                        },
+                        {
+                            "article_id": "story-b",
+                            "fact_kernel": {
+                                "where": "Râmnicu Vâlcea",
+                                "who": "Consiliul Local",
+                                "source_url": "https://www.primariavl.ro/hcl/2-2026",
+                            },
+                            "article_package": {"headline": "Poveste B"},
+                        },
+                    ],
+                }
+            ]
+        }
+        probe_result = {
+            "source": {"status": "PASS", "readback_ok": True, "http_status": 200},
+            "direct_source": {"status": "PASS", "readback_ok": True, "http_status": 206},
+            "readback_ok": True,
+        }
+        with patch("photo_truth_gate._external_provenance_probe", return_value=probe_result) as probe:
+            report = build_photo_truth_report(
+                [("municipal", municipal)],
+                visual_registry=registry,
+                atlas={"assets": []},
+                external_probe=True,
+            )
+        self.assertEqual(probe.call_count, 1)
+        self.assertEqual(report["external_probe_unique_asset_count"], 1)
+        self.assertEqual(report["external_probe_reused_candidate_count"], 1)
+        self.assertEqual(report["visual_candidate_verified_shadow_count"], 2)
+        self.assertFalse(report["rows"][0]["external_readback"]["cache_reused"])
+        self.assertTrue(report["rows"][1]["external_readback"]["cache_reused"])
+
     def test_integrity_verified_isj_candidate_enters_photo_gate_and_fails_closed_without_visual(self):
         isj_integrity = {
             "article_truth_state": "VERIFIED_WRITTEN_SHADOW",
