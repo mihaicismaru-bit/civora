@@ -11,6 +11,11 @@ sys.path.insert(0, str(ROOT))
 
 from isj_registration_deadline_promotion_shadow_lane import build_deadline_promotion  # noqa: E402
 from validate_isj_registration_deadline_promotion import prove_tamper_regressions, validate  # noqa: E402
+from isj_fact_kernel_deadline_promotion_shadow_lane import build_fact_kernel_deadline_promotion  # noqa: E402
+from validate_isj_fact_kernel_deadline_promotion import (  # noqa: E402
+    prove_tamper_regressions as prove_fact_kernel_tamper_regressions,
+    validate as validate_fact_kernel_promotion,
+)
 
 
 class ISJRegistrationDeadlinePromotionTests(unittest.TestCase):
@@ -73,6 +78,52 @@ class ISJRegistrationDeadlinePromotionTests(unittest.TestCase):
             "source_registration_window_field_evidence_id": raw_id,
         }
         return scope, scope_validation
+
+    def _materiality_fixture(self, promotion, independent):
+        promoted = copy.deepcopy(promotion["promotion_candidates"][0])
+        existing_ids = [
+            "isj-field-session-001",
+            "isj-field-vacancies-001",
+            "isj-field-list-date-001",
+            "isj-calendar-appointment-001",
+        ]
+        return {
+            "source_kind": "isj_valcea",
+            "publication_authority": "NONE",
+            "acceptance_ready": False,
+            "material_fact_use": False,
+            "fact_kernel_promotion_allowed": False,
+            "writer_allowed": False,
+            "production_writer_ready": False,
+            "site_publish_allowed": False,
+            "social_publish_allowed": False,
+            "mode": "ISJ_FIELD_MATERIALITY_SHADOW",
+            "state": "MATERIALITY_CANDIDATE_SHADOW",
+            "materiality_candidate_count": 1,
+            "registration_deadline_materiality_consumed": True,
+            "registration_deadline": promotion["registration_deadline"],
+            "registration_deadline_promotion_evidence_id": promotion["promotion_evidence_id"],
+            "unresolved_fields": [],
+            "materiality_candidates": [{
+                "category": "LOCAL_EDUCATION_LEADERSHIP",
+                "contest_session_year": 2026,
+                "vacant_function_count": 12,
+                "vacancy_list_date": "2026-09-10",
+                "appointment_effective_date": "2026-12-21",
+                "registration_deadline": promotion["registration_deadline"],
+                "field_evidence_ids": existing_ids,
+                "materiality_only_promoted_fields": {
+                    "registration_deadline": promoted,
+                },
+                "excluded_unverified_or_non_normalized_fields": [
+                    "registration_deadline",
+                    "interview_window_text",
+                    "appointment_decision_deadline_text",
+                ],
+                "fact_kernel_status": "NOT_PROMOTED",
+            }],
+            "fabricated_claim_count": 0,
+        }
 
     def test_gate_promotes_only_to_materiality_and_preserves_exact_identity(self):
         scope, validation = self._fixtures()
@@ -137,6 +188,84 @@ class ISJRegistrationDeadlinePromotionTests(unittest.TestCase):
         tampered["promotion_evidence_id"] = "isj-deadline-promotion-tampered"
         with self.assertRaises(AssertionError):
             validate(scope, validation, tampered, expected_year=2026)
+
+    def test_fact_kernel_gate_preserves_exact_materiality_and_upstream_identity(self):
+        scope, scope_validation = self._fixtures()
+        promotion = build_deadline_promotion(scope, scope_validation, expected_year=2026, as_of=date(2026, 9, 19))
+        independent = validate(scope, scope_validation, promotion, expected_year=2026)
+        materiality = self._materiality_fixture(promotion, independent)
+
+        fact_promotion = build_fact_kernel_deadline_promotion(
+            materiality,
+            promotion,
+            independent,
+            expected_year=2026,
+        )
+        self.assertEqual(fact_promotion["state"], "FACT_KERNEL_PROMOTION_VERIFIED_SHADOW")
+        self.assertTrue(fact_promotion["material_fact_use"])
+        self.assertTrue(fact_promotion["fact_kernel_promotion_allowed"])
+        self.assertFalse(fact_promotion["writer_allowed"])
+        self.assertFalse(fact_promotion["site_publish_allowed"])
+        self.assertFalse(fact_promotion["social_publish_allowed"])
+        self.assertFalse(fact_promotion["acceptance_ready"])
+        self.assertEqual(fact_promotion["registration_deadline"], "2026-10-02")
+        self.assertEqual(
+            fact_promotion["upstream_materiality_promotion_evidence_id"],
+            promotion["promotion_evidence_id"],
+        )
+
+        verified = validate_fact_kernel_promotion(
+            materiality,
+            promotion,
+            independent,
+            fact_promotion,
+            expected_year=2026,
+        )
+        self.assertEqual(verified["status"], "PASS_SHADOW")
+        self.assertTrue(verified["fact_kernel_promotion_allowed"])
+        self.assertFalse(verified["writer_allowed"])
+        self.assertEqual(
+            verified["fact_kernel_promotion_evidence_id"],
+            fact_promotion["fact_kernel_promotion_evidence_id"],
+        )
+
+    def test_fact_kernel_gate_fails_closed_if_materiality_upstream_promotion_id_changes(self):
+        scope, scope_validation = self._fixtures()
+        promotion = build_deadline_promotion(scope, scope_validation, expected_year=2026, as_of=date(2026, 9, 19))
+        independent = validate(scope, scope_validation, promotion, expected_year=2026)
+        materiality = self._materiality_fixture(promotion, independent)
+        materiality["registration_deadline_promotion_evidence_id"] = "isj-deadline-promotion-tampered"
+        result = build_fact_kernel_deadline_promotion(materiality, promotion, independent, expected_year=2026)
+        self.assertEqual(result["state"], "BLOCKED")
+        self.assertFalse(result["fact_kernel_promotion_allowed"])
+
+    def test_fact_kernel_gate_fails_closed_if_deadline_was_already_inserted_into_kernel_ids(self):
+        scope, scope_validation = self._fixtures()
+        promotion = build_deadline_promotion(scope, scope_validation, expected_year=2026, as_of=date(2026, 9, 19))
+        independent = validate(scope, scope_validation, promotion, expected_year=2026)
+        materiality = self._materiality_fixture(promotion, independent)
+        deadline_id = promotion["registration_deadline_field_evidence_id"]
+        materiality["materiality_candidates"][0]["field_evidence_ids"][0] = deadline_id
+        result = build_fact_kernel_deadline_promotion(materiality, promotion, independent, expected_year=2026)
+        self.assertEqual(result["state"], "BLOCKED")
+        self.assertFalse(result["fact_kernel_promotion_allowed"])
+
+    def test_fact_kernel_independent_validator_rejects_tamper_cases(self):
+        scope, scope_validation = self._fixtures()
+        promotion = build_deadline_promotion(scope, scope_validation, expected_year=2026, as_of=date(2026, 9, 19))
+        independent = validate(scope, scope_validation, promotion, expected_year=2026)
+        materiality = self._materiality_fixture(promotion, independent)
+        fact_promotion = build_fact_kernel_deadline_promotion(materiality, promotion, independent, expected_year=2026)
+        self.assertEqual(
+            prove_fact_kernel_tamper_regressions(
+                materiality,
+                promotion,
+                independent,
+                fact_promotion,
+                expected_year=2026,
+            ),
+            3,
+        )
 
 
 if __name__ == "__main__":
