@@ -2,19 +2,92 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-19T22:34:42+03:00",
+  "generated_at": "2026-09-20T00:45:32+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-19T22:32:56+03:00",
-  "task_count": 66,
+  "queue_generated_at": "2026-09-20T00:43:58+03:00",
+  "task_count": 69,
   "primary_match_count": 0,
-  "no_match_count": 29,
-  "unrouted_count": 37,
-  "target_count": 17,
-  "targets_ok": 14,
+  "no_match_count": 30,
+  "unrouted_count": 39,
+  "target_count": 20,
+  "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "f0249b030155990219cb22ff",
+      "signal_title": "Nicolae Mîndrescu (AUR Vâlcea): „Românii trebuie întrebați: vor Guvernul Siegfried Mureșan sau vor alegeri anticipate?”",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/nicolae-mindrescu-aur-valcea-romanii-trebuie-intrebati-vor-guvernul-siegfried-muresan-sau-vor-alegeri-anticipate/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-19T23:39:07+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "65d965d18908392fdc640203",
+      "signal_title": "FOTO | Ursul a intrat într-o gospodărie din Bărbătești! Animale ucise și RO-Alert pentru localnici",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/foto-ursul-a-intrat-intr-o-gospodarie-din-barbatesti-animale-ucise-si-ro-alert-pentru-localnici/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-19T23:19:31+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "69ca694ca2e5260a17653e03",
+      "signal_title": "Cutremur în Vâlcea, la doar 37 km de Râmnicu Vâlcea! Seismul s-a produs la mică adâncime",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/cutremur-in-valcea-la-doar-37-km-de-ramnicu-valcea-seismul-s-a-produs-la-mica-adancime/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-19T23:10:18+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "107fa36fa7483624b3ce2e80",
       "signal_title": "Primăria Râmnicului iluminată în verde pentru „Light Up for Mito”",
