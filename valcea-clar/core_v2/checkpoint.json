@@ -1,6 +1,6 @@
 {
-  "schema_version": "4.3",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN30-INSTAGRAM-CAROUSEL-REMOTE-VISUAL-TRUTH-NATURAL-VALIDATED",
+  "schema_version": "4.4",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN31-INSTAGRAM-APPROVED-VISUAL-IDENTITY-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,31 +8,26 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "27738cfb3c76f1e60f5b6a6ec51b030f7ef349f5",
-    "main_observed_message": "PARTENER.EU validation ledger 2026-09-19T08:07:01Z",
-    "valcea_clar_main_observed_sha": "9c6e756e43fd58294ccf5d67cbe33323182237bf",
-    "valcea_clar_main_observed_message": "Refresh VÂLCEA CLAR canonical public presentation",
-    "legacy_public_projection_repo": "mihaicismaru-bit/valcea-clar",
-    "legacy_public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
-    "legacy_public_projection_message": "sync: reconcile CIVORA canonical stories",
-    "legacy_newsroom_evaluated_local": "2026-09-19T09:44:48+03:00",
-    "legacy_newsroom_publishable_story_count": 78,
-    "legacy_newsroom_new_story_count": 0,
+    "civora_main_observed_sha": "dbbfcd898bac16c5e74bef882bd44da30c629450",
+    "civora_main_observed_message": "Persist VÂLCEA CLAR story-first social state",
+    "public_projection_repo": "mihaicismaru-bit/valcea-clar",
+    "public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
+    "public_projection_message": "sync: reconcile CIVORA canonical stories",
     "legacy_state_is_observation_only": true,
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "571092a45cd859227ce910ba9472be594b97da85",
-    "message": "Core v2: test Instagram visual identity blocker",
-    "functional_increment": "Instagram external replay is now carousel-aware: the auditor reads the published Graph object, enumerates bounded IMAGE children, independently reads the remote CDN image payloads, and keeps visual identity to the approved Core v2 asset fail-closed until independently proven. The gate report now distinguishes remote image presence from approved-visual identity.",
-    "workflow_run_id": 35431691862,
-    "workflow_run_number": 503,
+    "sha": "2a9b07544b1bfd363c3cd1664822cec5eabaa16c",
+    "message": "Core v2: validate Instagram visual identity cross-artifact binding",
+    "functional_increment": "Independent read-only Instagram approved-visual identity proof now compares each externally downloaded remote IMAGE against the approved Core v2 asset using transform-tolerant normalized-pixel evidence plus a strong uniqueness margin, then validates candidate-to-Meta-to-identity-to-receipt consistency fail-closed.",
+    "workflow_run_id": 35434196792,
+    "workflow_run_number": 521,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10580334132,
-    "artifact_sha256": "4fd8252611b04ddf75e715e0b88d7a1327c4c9c271383a893fe831f8a2aa683a",
-    "artifact_size_bytes": 2551895,
+    "artifact_id": 10581617736,
+    "artifact_sha256": "272b317c5d3e22118f846caaf6fd476f66c455da28fc6e36404fa6194d56361d",
+    "artifact_size_bytes": 2555013,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
@@ -40,19 +35,18 @@
     "ordered_shadow_failed_stage": null
   },
   "done": [
-    "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness by itself",
-    "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin read-only executor",
-    "PHOTO remains fail-closed and generic/synthetic substitution remains forbidden",
-    "historical FactKernel evidence remains 2/2 and historical article-claims evidence remains 2/2 with zero fabricated claims",
-    "Instagram Graph readback now requests published media_type, media_url and bounded child media metadata rather than treating the parent permalink alone as delivery truth",
-    "CAROUSEL_ALBUM replay now enumerates IMAGE children only, rejects non-HTTPS or non-image candidates, and performs independent bounded readback of the remote CDN payload",
-    "water-contract Instagram replay exposes four image children and all 4/4 remote image payloads return image content successfully",
-    "CET Govora Instagram replay exposes six image children and all 6/6 remote image payloads return image content successfully",
-    "Instagram object plus remote-image presence is therefore externally demonstrated 2/2, replacing the weaker prior permalink-only interpretation",
-    "remote Instagram image presence is deliberately not promoted to approved-visual identity: remote_visual_identity_bound remains false for both historical candidates",
-    "shadow receipt ledger schema 1.3 persists remote image candidates/readback while requiring explicit visual identity binding before a complete external receipt can become VERIFIED",
-    "shadow gate report schema 1.3 now classifies INSTAGRAM_VISUAL_IDENTITY_UNBOUND separately from generic Instagram readback failure",
-    "natural push run 503 passed compile, regression tests, all 26 shadow stages, site/visual/Meta replay, receipt/transaction binding, historical runtime binding, exact blocker classification, runtime invariants and tamper regressions",
+    "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness",
+    "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
+    "PHOTO remains fail-closed; generic, text-card and synthetic-as-photo substitutions remain forbidden",
+    "historical FactKernel evidence is 2/2 and historical article-claims evidence is 2/2 with fabricated_claims=0",
+    "Instagram external replay remains carousel-aware and independently reads bounded HTTPS IMAGE payloads from Graph/CDN",
+    "new instagram_visual_identity.py performs deterministic ImageMagick normalization at RGB 64x64 using stretch and center-crop views",
+    "identity comparison uses bounded transform-tolerant thresholds correlation>=0.80, normalized_MAE<=0.12 and composite>=0.70",
+    "a visual is identity-bound only when exactly one remote image passes and it exceeds the runner-up by at least 0.20 composite score; multiple or close candidates fail closed",
+    "new cross-artifact runtime validator requires candidate approved visual, externally read Meta IMAGE ids, identity ledger and receipt ledger to agree exactly",
+    "CET Govora is now independently identity-bound to Instagram remote IMAGE id 18091947767438679 with composite 0.734977, correlation 0.811194, normalized MAE 0.093956 and uniqueness margin 0.734977",
+    "water-contract visual remains correctly blocked because story_visuals references launch-ramnicu-valcea-panorama.jpg but that approved local file is absent; no substitute was introduced",
+    "natural push run 521 passed all contract tests, all 26 shadow stages, site/visual/Meta replay, approved-visual identity comparison, cross-artifact validator, receipts, transactions, runtime invariants and tamper regressions",
     "no merge, deploy, live Core v2 publication, public-projection mutation, Meta write, workflow_dispatch or manual rerun was used"
   ],
   "inventory": {
@@ -66,7 +60,7 @@
   },
   "photo_truth": {
     "candidate_count": 7,
-    "visual_candidate_verified_shadow_count": 2,
+    "verified_shadow_count": 2,
     "blocked_count": 5,
     "coverage": "2/7",
     "verified_story_ids": [
@@ -83,29 +77,16 @@
     "generic_or_synthetic_substitution_forbidden": true
   },
   "historical_evidence_binding": {
-    "fact_kernel_schema_version": "1.0",
-    "article_claims_schema_version": "1.0",
-    "transaction_schema_version": "1.2",
     "candidate_count": 2,
     "fact_kernel_evidence_ready_count": 2,
     "article_claims_evidence_ready_count": 2,
-    "publication_authority": "NONE",
-    "live_promotion_allowed": false,
-    "fact_kernel_states": {
-      "valcea-apa-canal-contract-152m-20260902": "FACT_KERNEL_EVIDENCE_READY_SHADOW",
-      "cet-govora-cine-a-decis-oprirea-20260821": "FACT_KERNEL_EVIDENCE_READY_SHADOW"
-    },
-    "article_claims_states": {
-      "valcea-apa-canal-contract-152m-20260902": "ARTICLE_CLAIMS_EVIDENCE_READY_SHADOW",
-      "cet-govora-cine-a-decis-oprirea-20260821": "ARTICLE_CLAIMS_EVIDENCE_READY_SHADOW"
-    },
+    "fabricated_claims": 0,
     "transaction_terminal_reasons": {
       "valcea-apa-canal-contract-152m-20260902": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE",
       "cet-govora-cine-a-decis-oprirea-20260821": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE"
     },
-    "fact_kernel_missing_count": 0,
-    "article_claims_package_missing_count": 0,
-    "fabricated_claims": 0
+    "publication_authority": "NONE",
+    "live_promotion_allowed": false
   },
   "external_replay_truth": {
     "candidate_count": 2,
@@ -115,23 +96,27 @@
     "facebook": {"passed": 0, "failed": 2, "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"},
     "instagram_object_and_remote_image_presence": {"passed": 2, "failed": 0},
     "instagram_remote_image_payloads": {"passed": 10, "failed": 0, "water_contract": "4/4", "cet_govora": "6/6"},
-    "instagram_approved_visual_identity_binding": {"passed": 0, "failed": 2, "reason": "remote CDN images are externally present but not yet independently identity-bound to the approved Core v2 visual"},
+    "instagram_approved_visual_identity_binding": {
+      "passed": 1,
+      "failed": 1,
+      "passed_story_ids": ["cet-govora-cine-a-decis-oprirea-20260821"],
+      "blocked_story_ids": ["valcea-apa-canal-contract-152m-20260902"],
+      "water_contract_reason": "BLOCKED_APPROVED_VISUAL_NOT_READY"
+    },
     "externally_verified_receipts": 0,
-    "fully_bound_replay_count": 0,
     "truth_complete_count": 0,
     "blocker_counts": {
       "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
-      "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 2,
+      "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 1,
       "VISUAL_ARTICLE_BINDING_FAILED": 1
     },
     "acceptance_ready": false
   },
   "blocked": [
     {"gate": "photo_truth_gate", "reason": "Five of seven current written shadow candidates still lack a verified story-specific real, relevant and rights-cleared visual."},
-    {"gate": "historical_external_delivery_truth", "reason": "Both historical replay candidates have evidence-bound FactKernel/article claims and externally readable Instagram carousel images, but neither has a complete independently verified external delivery receipt chain."},
-    {"gate": "instagram_visual_identity_truth", "reason": "Remote Instagram image payloads are externally readable for both replay candidates, but the transformed CDN images are not yet independently identity-bound to the approved Core v2 visual."},
-    {"gate": "historical_visual_replay_water_contract", "reason": "Approved social visual is not bound to the canonical/public site story."},
+    {"gate": "historical_water_visual_asset", "reason": "The approved visual registry references launch-ramnicu-valcea-panorama.jpg but the approved repository file is absent; Core v2 will not infer or substitute an image."},
+    {"gate": "historical_water_cross_surface_binding", "reason": "The water-contract approved social visual remains unbound to the canonical/public site story."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
     {"gate": "isj_registration_deadline_normalization", "reason": "Raw registration window is verified but its year is not explicit in that row; no normalized 2026 deadline is promoted."},
@@ -139,8 +124,8 @@
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "implement a deterministic read-only identity comparison between the approved visual and each externally read Instagram carousel image so remote presence cannot masquerade as correct-photo delivery",
-    "repair or reconcile the historical water-contract visual binding read-only so the canonical public article and approved visual agree without mutating production",
+    "resolve the historical water approved-visual asset only from demonstrable rights-cleared evidence; do not create or substitute a generic image",
+    "reconcile the historical water-contract canonical site/image binding read-only before any delivery receipt can be complete",
     "continue PHOTO rights/relevance research for current IPJ/ISU/HCL344/ISJ without generic or synthetic-as-photo substitution",
     "keep Facebook uncertified until read-only Graph permission is sufficient and a remote receipt can be independently read back",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
@@ -149,21 +134,16 @@
   ],
   "evidence": {
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
+    "instagram_visual_identity": "valcea-clar/core_v2/instagram_visual_identity.py",
+    "instagram_visual_identity_tests": "valcea-clar/tests/test_core_v2_instagram_visual_identity.py",
+    "instagram_visual_identity_runtime_validator": "valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py",
     "meta_readback": "valcea-clar/core_v2/meta_readback.py",
-    "meta_readback_tests": "valcea-clar/tests/test_core_v2_readback.py",
     "receipt_ledger": "valcea-clar/core_v2/materialize_shadow_receipts.py",
     "gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
-    "gate_report_tests": "valcea-clar/tests/test_core_v2_gate_report.py",
-    "historical_fact_kernel_builder": "valcea-clar/core_v2/historical_fact_kernel_evidence.py",
-    "historical_article_claims_builder": "valcea-clar/core_v2/historical_article_claims_evidence.py",
-    "historical_transaction_binding": "valcea-clar/core_v2/historical_transaction_binding.py",
-    "historical_runtime_validator": "valcea-clar/core_v2/validate_historical_article_claims_runtime.py",
-    "transaction_materializer": "valcea-clar/core_v2/materialize_shadow_transactions.py",
-    "candidate_ledger": "valcea-clar/core_v2/build_shadow_candidate_ledger.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35431691862",
-    "feature_artifact_id": 10580334132,
-    "feature_artifact_sha256": "4fd8252611b04ddf75e715e0b88d7a1327c4c9c271383a893fe831f8a2aa683a"
+    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35434196792",
+    "feature_artifact_id": 10581617736,
+    "feature_artifact_sha256": "272b317c5d3e22118f846caaf6fd476f66c455da28fc6e36404fa6194d56361d"
   }
 }
