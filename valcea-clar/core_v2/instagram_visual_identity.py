@@ -1,18 +1,23 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from visual_readback import ALLOWED_RIGHTS_BASES, inspect_provenance_asset
+
 ROOT = Path(__file__).resolve().parents[2]
 MAX_REMOTE_BYTES = 15 * 1024 * 1024
+MAX_PROVENANCE_HTML_BYTES = 1_500_000
 VECTOR_SIDE = 64
 # Instagram recompresses, resizes and may reframe carousel images. Absolute
 # pixel thresholds therefore have to tolerate bounded transformation, while
@@ -199,6 +204,120 @@ def _download_remote(url: str, target: Path, timeout: float = 20.0) -> dict[str,
     }
 
 
+def _fetch_text(url: str, timeout: float = 20.0) -> dict[str, Any]:
+    if not str(url or "").startswith("https://"):
+        return {"readback_ok": False, "reason": "missing_or_non_https_provenance_url"}
+    request = Request(url, headers={"User-Agent": "CIVORA-Core-v2-Auditor/1.0"})
+    try:
+        with urlopen(request, timeout=timeout) as response:
+            status = int(getattr(response, "status", 0) or 0)
+            content_type = str(response.headers.get("Content-Type") or "")
+            body = response.read(MAX_PROVENANCE_HTML_BYTES + 1)
+            final_url = response.geturl()
+    except HTTPError as exc:
+        return {"readback_ok": False, "http_status": exc.code, "reason": "http_error", "error": str(exc)}
+    except (URLError, TimeoutError, ValueError) as exc:
+        return {"readback_ok": False, "reason": "readback_error", "error": str(exc)}
+    if status != 200 or len(body) > MAX_PROVENANCE_HTML_BYTES:
+        return {
+            "readback_ok": False,
+            "http_status": status,
+            "content_type": content_type,
+            "reason": "provenance_page_not_bounded_http_200",
+        }
+    return {
+        "readback_ok": True,
+        "http_status": status,
+        "content_type": content_type,
+        "final_url": final_url,
+        "body": body.decode("utf-8", errors="replace"),
+    }
+
+
+def _download_approved_source(url: str, target: Path, timeout: float = 20.0) -> dict[str, Any]:
+    last: dict[str, Any] = {"download_ok": False, "reason": "not_attempted"}
+    for attempt in range(1, 4):
+        last = _download_remote(url, target, timeout)
+        last["attempts"] = attempt
+        if last.get("download_ok") is True:
+            return last
+        if last.get("http_status") != 429 or attempt >= 3:
+            break
+        time.sleep(min(0.25 * attempt, 0.5))
+    return last
+
+
+def _hydrate_approved_visual(candidate: dict[str, Any], target: Path) -> dict[str, Any]:
+    source_url = str(candidate.get("visual_source_url") or "").strip()
+    direct_source_url = str(candidate.get("visual_direct_source_url") or "").strip()
+    rights_basis = str(candidate.get("visual_rights_basis") or "").strip()
+    approved_path = str(candidate.get("visual_image_path") or "").strip()
+
+    base = {
+        "hydration_attempted": True,
+        "approved_visual_path": approved_path or None,
+        "source_url": source_url or None,
+        "direct_source_url": direct_source_url or None,
+        "rights_basis": rights_basis or None,
+        "publication_authority": "NONE",
+    }
+    if candidate.get("real_visual_internal_evidence") is not True:
+        return {**base, "hydration_ok": False, "hydration_state": "BLOCKED_INTERNAL_VISUAL_APPROVAL_MISSING"}
+    if rights_basis not in ALLOWED_RIGHTS_BASES:
+        return {**base, "hydration_ok": False, "hydration_state": "BLOCKED_RIGHTS_BASIS_NOT_ALLOWED"}
+    if not source_url.startswith("https://") or not direct_source_url.startswith("https://"):
+        return {**base, "hydration_ok": False, "hydration_state": "BLOCKED_PROVENANCE_URL_MISSING"}
+
+    provenance = _fetch_text(source_url)
+    if provenance.get("readback_ok") is not True:
+        provenance.pop("body", None)
+        return {
+            **base,
+            "hydration_ok": False,
+            "hydration_state": "BLOCKED_PROVENANCE_PAGE_READBACK",
+            "provenance_source": provenance,
+        }
+
+    provenance_asset = inspect_provenance_asset(
+        str(provenance.get("body") or ""),
+        expected_direct_url=direct_source_url,
+    )
+    provenance.pop("body", None)
+    if provenance_asset.get("asset_identity_ok") is not True or provenance_asset.get("license_present") is not True:
+        return {
+            **base,
+            "hydration_ok": False,
+            "hydration_state": "BLOCKED_PROVENANCE_ASSET_IDENTITY",
+            "provenance_source": provenance,
+            "provenance_asset": provenance_asset,
+        }
+
+    target.parent.mkdir(parents=True, exist_ok=True)
+    download = _download_approved_source(direct_source_url, target)
+    if download.get("download_ok") is not True or not target.is_file():
+        return {
+            **base,
+            "hydration_ok": False,
+            "hydration_state": "BLOCKED_APPROVED_SOURCE_DOWNLOAD",
+            "provenance_source": provenance,
+            "provenance_asset": provenance_asset,
+            "direct_source_download": download,
+        }
+
+    digest = hashlib.sha256(target.read_bytes()).hexdigest()
+    return {
+        **base,
+        "hydration_ok": True,
+        "hydration_state": "VERIFIED_PROVENANCE_HYDRATED_SHADOW",
+        "provenance_source": provenance,
+        "provenance_asset": provenance_asset,
+        "direct_source_download": download,
+        "hydrated_path": str(target),
+        "hydrated_sha256": digest,
+        "hydrated_bytes": target.stat().st_size,
+    }
+
+
 def _compare_files(local_path: Path, remote_path: Path, binary: str) -> dict[str, Any]:
     views = {}
     for mode in ("stretch", "center_crop"):
@@ -238,7 +357,7 @@ def audit(
         candidate = candidate_rows.get(str(story_id)) or {}
         meta_row = instagram_rows.get(str(story_id)) or {}
         image_path = str(candidate.get("visual_image_path") or "").strip()
-        local_path = (repo_root / image_path).resolve() if image_path else None
+        repo_local_path = (repo_root / image_path).resolve() if image_path else None
         base = {
             "story_id": story_id,
             "approved_visual_path": image_path or None,
@@ -253,11 +372,24 @@ def audit(
             },
         }
         if not binary:
-            results.append({**base, "identity_bound": False, "identity_state": "BLOCKED_IMAGEMAGICK_UNAVAILABLE", "candidate_results": []})
+            results.append({
+                **base,
+                "approved_asset_origin": None,
+                "identity_bound": False,
+                "identity_state": "BLOCKED_IMAGEMAGICK_UNAVAILABLE",
+                "candidate_results": [],
+            })
             continue
-        if candidate.get("real_visual_internal_evidence") is not True or not local_path or not local_path.is_file():
-            results.append({**base, "identity_bound": False, "identity_state": "BLOCKED_APPROVED_VISUAL_NOT_READY", "candidate_results": []})
+        if candidate.get("real_visual_internal_evidence") is not True or not image_path:
+            results.append({
+                **base,
+                "approved_asset_origin": None,
+                "identity_bound": False,
+                "identity_state": "BLOCKED_APPROVED_VISUAL_NOT_READY",
+                "candidate_results": [],
+            })
             continue
+
         remote_rows = [
             row for row in (meta_row.get("remote_media_results") or [])
             if isinstance(row, dict)
@@ -265,12 +397,37 @@ def audit(
             and str(row.get("media_url") or "").startswith("https://")
         ]
         if not remote_rows:
-            results.append({**base, "identity_bound": False, "identity_state": "BLOCKED_NO_REMOTE_IMAGE_READBACK", "candidate_results": []})
+            results.append({
+                **base,
+                "approved_asset_origin": None,
+                "identity_bound": False,
+                "identity_state": "BLOCKED_NO_REMOTE_IMAGE_READBACK",
+                "candidate_results": [],
+            })
             continue
 
         compared: list[dict[str, Any]] = []
+        hydration: dict[str, Any] | None = None
         with tempfile.TemporaryDirectory(prefix="civora-instagram-identity-") as temp_dir:
             temp_root = Path(temp_dir)
+            if repo_local_path and repo_local_path.is_file():
+                approved_path = repo_local_path
+                approved_asset_origin = "repository"
+            else:
+                approved_path = temp_root / "approved-from-provenance.img"
+                hydration = _hydrate_approved_visual(candidate, approved_path)
+                if hydration.get("hydration_ok") is not True:
+                    results.append({
+                        **base,
+                        "approved_asset_origin": "provenance_hydration_failed",
+                        "approved_visual_hydration": hydration,
+                        "identity_bound": False,
+                        "identity_state": "BLOCKED_APPROVED_VISUAL_HYDRATION_FAILED",
+                        "candidate_results": [],
+                    })
+                    continue
+                approved_asset_origin = "verified_provenance_hydration"
+
             for index, remote in enumerate(remote_rows):
                 remote_path = temp_root / f"remote-{index}.img"
                 download = _download_remote(str(remote.get("media_url") or ""), remote_path)
@@ -285,24 +442,33 @@ def audit(
                     compared.append(row)
                     continue
                 try:
-                    comparison = _compare_files(local_path, remote_path, binary)
+                    comparison = _compare_files(approved_path, remote_path, binary)
                 except (OSError, RuntimeError, subprocess.SubprocessError) as exc:
                     compared.append({**row, "comparison_error": str(exc)[:500]})
                     continue
                 compared.append({**row, **comparison})
 
         decision = identity_decision(compared)
-        results.append({**base, **decision, "candidate_results": compared})
+        results.append({
+            **base,
+            "approved_asset_origin": approved_asset_origin,
+            "approved_visual_hydration": hydration,
+            **decision,
+            "candidate_results": compared,
+        })
 
     bound = [row for row in results if row.get("identity_bound") is True]
+    hydrated = [row for row in results if row.get("approved_asset_origin") == "verified_provenance_hydration"]
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": "READ_ONLY_INSTAGRAM_VISUAL_IDENTITY",
         "publication_authority": "NONE",
-        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE clears transform-tolerant normalized-pixel thresholds and exceeds every other remote image by the required uniqueness margin.",
+        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE clears transform-tolerant normalized-pixel thresholds and exceeds every other remote image by the required uniqueness margin. A missing repository copy may be hydrated only from the exact already-approved HTTPS direct source after independent provenance-page ImageObject identity plus license verification; hydration is ephemeral shadow evidence and grants no publication authority.",
         "candidate_count": len(results),
         "identity_bound_count": len(bound),
         "identity_bound_story_ids": [str(row.get("story_id")) for row in bound],
+        "verified_provenance_hydration_count": len(hydrated),
+        "verified_provenance_hydration_story_ids": [str(row.get("story_id")) for row in hydrated],
         "acceptance_ready": False,
         "results": results,
     }
@@ -321,6 +487,8 @@ def main() -> int:
         "candidate_count": result["candidate_count"],
         "identity_bound_count": result["identity_bound_count"],
         "identity_bound_story_ids": result["identity_bound_story_ids"],
+        "verified_provenance_hydration_count": result["verified_provenance_hydration_count"],
+        "verified_provenance_hydration_story_ids": result["verified_provenance_hydration_story_ids"],
         "acceptance_ready": result["acceptance_ready"],
     }, ensure_ascii=False, sort_keys=True))
     return 0

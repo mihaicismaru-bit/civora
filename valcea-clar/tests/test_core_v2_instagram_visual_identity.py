@@ -1,10 +1,13 @@
 import sys
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
+import instagram_visual_identity as identity_module
 from instagram_visual_identity import compare_vectors, identity_decision
 
 
@@ -59,6 +62,88 @@ class InstagramVisualIdentityTest(unittest.TestCase):
         ])
         self.assertFalse(none["identity_bound"])
         self.assertEqual(none["identity_state"], "NO_REMOTE_IMAGE_MATCHED_APPROVED_VISUAL")
+
+    def test_missing_repo_asset_can_hydrate_only_from_exact_verified_provenance(self):
+        candidate = {
+            "real_visual_internal_evidence": True,
+            "visual_image_path": "valcea-clar/social/photos/approved/launch-ramnicu-valcea-panorama.jpg",
+            "visual_source_url": "https://commons.wikimedia.org/wiki/File:Ramnicu_Valcea_panorama.jpg",
+            "visual_direct_source_url": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Ramnicu_Valcea_panorama.jpg",
+            "visual_rights_basis": "creative_commons",
+        }
+        source_html = """
+        <html><script type="application/ld+json">
+        {
+          "@type": "ImageObject",
+          "contentUrl": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Ramnicu_Valcea_panorama.jpg",
+          "license": "https://creativecommons.org/licenses/by-sa/4.0/"
+        }
+        </script></html>
+        """
+
+        def fake_download(_url, target, _timeout=20.0):
+            target.write_bytes(b"verified-approved-image-bytes")
+            return {
+                "download_ok": True,
+                "http_status": 200,
+                "content_type": "image/jpeg",
+                "bytes_downloaded": target.stat().st_size,
+                "final_url": candidate["visual_direct_source_url"],
+                "attempts": 1,
+            }
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "approved.img"
+            with patch.object(identity_module, "_fetch_text", return_value={
+                "readback_ok": True,
+                "http_status": 200,
+                "content_type": "text/html",
+                "final_url": candidate["visual_source_url"],
+                "body": source_html,
+            }), patch.object(identity_module, "_download_approved_source", side_effect=fake_download):
+                result = identity_module._hydrate_approved_visual(candidate, target)
+
+        self.assertTrue(result["hydration_ok"])
+        self.assertEqual(result["hydration_state"], "VERIFIED_PROVENANCE_HYDRATED_SHADOW")
+        self.assertEqual(result["approved_visual_path"], candidate["visual_image_path"])
+        self.assertEqual(result["source_url"], candidate["visual_source_url"])
+        self.assertEqual(result["direct_source_url"], candidate["visual_direct_source_url"])
+        self.assertEqual(len(result["hydrated_sha256"]), 64)
+        self.assertGreater(result["hydrated_bytes"], 0)
+        self.assertTrue(result["provenance_asset"]["asset_identity_ok"])
+        self.assertTrue(result["provenance_asset"]["license_present"])
+
+    def test_hydration_rejects_wrong_provenance_asset_before_download(self):
+        candidate = {
+            "real_visual_internal_evidence": True,
+            "visual_image_path": "valcea-clar/social/photos/approved/launch-ramnicu-valcea-panorama.jpg",
+            "visual_source_url": "https://commons.wikimedia.org/wiki/File:Ramnicu_Valcea_panorama.jpg",
+            "visual_direct_source_url": "https://upload.wikimedia.org/wikipedia/commons/8/8d/Ramnicu_Valcea_panorama.jpg",
+            "visual_rights_basis": "creative_commons",
+        }
+        wrong_html = """
+        <html><script type="application/ld+json">
+        {
+          "@type": "ImageObject",
+          "contentUrl": "https://upload.wikimedia.org/wikipedia/commons/a/aa/Different.jpg",
+          "license": "https://creativecommons.org/licenses/by-sa/4.0/"
+        }
+        </script></html>
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target = Path(temp_dir) / "approved.img"
+            with patch.object(identity_module, "_fetch_text", return_value={
+                "readback_ok": True,
+                "http_status": 200,
+                "content_type": "text/html",
+                "final_url": candidate["visual_source_url"],
+                "body": wrong_html,
+            }), patch.object(identity_module, "_download_approved_source") as download:
+                result = identity_module._hydrate_approved_visual(candidate, target)
+
+        self.assertFalse(result["hydration_ok"])
+        self.assertEqual(result["hydration_state"], "BLOCKED_PROVENANCE_ASSET_IDENTITY")
+        download.assert_not_called()
 
 
 if __name__ == "__main__":

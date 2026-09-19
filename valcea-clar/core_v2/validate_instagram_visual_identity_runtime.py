@@ -51,6 +51,7 @@ def validate(
     assert int(identity.get("candidate_count") or 0) == len(wanted)
 
     bound_ids: list[str] = []
+    hydrated_ids: list[str] = []
     for story_id in wanted:
         candidate = candidate_index[story_id]
         meta_row = meta_index.get(story_id) or {}
@@ -67,6 +68,32 @@ def validate(
         assert float(thresholds.get("mae_max") or 1.0) <= 0.12
         assert float(thresholds.get("composite_min") or 0.0) >= 0.70
         assert float(thresholds.get("match_margin_min") or 0.0) >= 0.20
+
+        origin = row.get("approved_asset_origin")
+        assert origin in {
+            None,
+            "repository",
+            "verified_provenance_hydration",
+            "provenance_hydration_failed",
+        }
+        hydration = row.get("approved_visual_hydration")
+        if origin == "verified_provenance_hydration":
+            assert isinstance(hydration, dict)
+            assert hydration.get("hydration_ok") is True
+            assert hydration.get("hydration_state") == "VERIFIED_PROVENANCE_HYDRATED_SHADOW"
+            assert hydration.get("approved_visual_path") == candidate.get("visual_image_path")
+            assert hydration.get("source_url") == candidate.get("visual_source_url")
+            assert hydration.get("direct_source_url") == candidate.get("visual_direct_source_url")
+            assert hydration.get("rights_basis") == candidate.get("visual_rights_basis")
+            assert ((hydration.get("provenance_asset") or {}).get("asset_identity_ok")) is True
+            assert ((hydration.get("provenance_asset") or {}).get("license_present")) is True
+            digest = str(hydration.get("hydrated_sha256") or "")
+            assert len(digest) == 64 and all(ch in "0123456789abcdef" for ch in digest)
+            assert int(hydration.get("hydrated_bytes") or 0) > 0
+            hydrated_ids.append(story_id)
+        if origin == "provenance_hydration_failed":
+            assert isinstance(hydration, dict)
+            assert hydration.get("hydration_ok") is not True
 
         external_remote_ids = {
             str(item.get("remote_id") or "")
@@ -88,6 +115,7 @@ def validate(
         passing = [item for item in row.get("candidate_results") or [] if isinstance(item, dict) and item.get("same_visual") is True]
         if bound:
             assert candidate.get("real_visual_internal_evidence") is True
+            assert origin in {"repository", "verified_provenance_hydration"}
             assert row.get("identity_state") == "APPROVED_VISUAL_MATCHED_REMOTE_IMAGE_UNIQUE"
             assert len(passing) == 1
             assert int(row.get("passing_candidate_count") or 0) == 1
@@ -101,6 +129,7 @@ def validate(
             assert row.get("identity_state") in {
                 "BLOCKED_IMAGEMAGICK_UNAVAILABLE",
                 "BLOCKED_APPROVED_VISUAL_NOT_READY",
+                "BLOCKED_APPROVED_VISUAL_HYDRATION_FAILED",
                 "BLOCKED_NO_REMOTE_IMAGE_READBACK",
                 "NO_REMOTE_IMAGE_MATCHED_APPROVED_VISUAL",
                 "AMBIGUOUS_MULTIPLE_REMOTE_MATCHES",
@@ -109,6 +138,8 @@ def validate(
 
     assert int(identity.get("identity_bound_count") or 0) == len(bound_ids)
     assert set(identity.get("identity_bound_story_ids") or []) == set(bound_ids)
+    assert int(identity.get("verified_provenance_hydration_count") or 0) == len(hydrated_ids)
+    assert set(identity.get("verified_provenance_hydration_story_ids") or []) == set(hydrated_ids)
     assert int(receipts.get("instagram_visual_identity_bound_count") or 0) == len(bound_ids)
 
 
