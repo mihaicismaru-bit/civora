@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from visual_readback import ALLOWED_RIGHTS_BASES, inspect_provenance_asset
@@ -19,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MAX_REMOTE_BYTES = 15 * 1024 * 1024
 MAX_PROVENANCE_HTML_BYTES = 1_500_000
 VECTOR_SIDE = 64
+WIKIMEDIA_DERIVATIVE_WIDTHS = (1280, 960)
 # Instagram recompresses, resizes and may reframe carousel images. Absolute
 # pixel thresholds therefore have to tolerate bounded transformation, while
 # identity remains fail-closed through a strong uniqueness margin against all
@@ -102,9 +104,6 @@ def identity_decision(candidate_results: list[dict[str, Any]]) -> dict[str, Any]
 
     if len(passing) == 1:
         match = passing[0]
-        # The passing candidate must also be the best candidate and clearly
-        # separated from every other remote image. A close runner-up is an
-        # unresolved ambiguity even when it narrowly misses an absolute gate.
         match_is_best = bool(best is match or (best or {}).get("remote_id") == match.get("remote_id"))
         if not match_is_best or match_margin < MATCH_MARGIN_MIN:
             return {
@@ -247,6 +246,68 @@ def _download_approved_source(url: str, target: Path, timeout: float = 20.0) -> 
     return last
 
 
+def _wikimedia_exact_derivative_urls(direct_source_url: str) -> list[str]:
+    parsed = urlparse(str(direct_source_url or ""))
+    if parsed.scheme != "https" or (parsed.hostname or "").lower() != "upload.wikimedia.org":
+        return []
+    prefix = "/wikipedia/commons/"
+    if not parsed.path.startswith(prefix) or "/thumb/" in parsed.path:
+        return []
+    relative = parsed.path[len(prefix):]
+    parts = relative.split("/")
+    if len(parts) != 3 or not all(parts):
+        return []
+    shard_a, shard_b, filename = parts
+    suffix = Path(filename).suffix.lower()
+    if suffix not in {".jpg", ".jpeg", ".png", ".webp"}:
+        return []
+    return [
+        f"https://thumb.wikimedia.org/wikipedia/commons/thumb/{shard_a}/{shard_b}/{filename}/{width}px-{filename}"
+        for width in WIKIMEDIA_DERIVATIVE_WIDTHS
+    ]
+
+
+def _download_exact_wikimedia_derivative(
+    direct_source_url: str,
+    target: Path,
+    timeout: float = 20.0,
+) -> dict[str, Any]:
+    derivative_urls = _wikimedia_exact_derivative_urls(direct_source_url)
+    attempts: list[dict[str, Any]] = []
+    for derivative_url in derivative_urls:
+        result = _download_remote(derivative_url, target, timeout)
+        attempt = {**result, "derivative_url": derivative_url}
+        attempts.append(attempt)
+        if result.get("download_ok") is True:
+            final_url = str(result.get("final_url") or "")
+            final = urlparse(final_url)
+            expected = urlparse(derivative_url)
+            final_path = final.path
+            exact_path = expected.path
+            identity_ok = bool(
+                (final.hostname or "").lower() in {"thumb.wikimedia.org", "upload.wikimedia.org"}
+                and final_path == exact_path
+            )
+            if identity_ok:
+                return {
+                    **result,
+                    "download_ok": True,
+                    "derivative_url": derivative_url,
+                    "derivative_identity_ok": True,
+                    "attempts": attempts,
+                }
+            try:
+                target.unlink(missing_ok=True)
+            except OSError:
+                pass
+    return {
+        "download_ok": False,
+        "reason": "exact_wikimedia_derivative_unavailable",
+        "derivative_identity_ok": False,
+        "attempts": attempts,
+    }
+
+
 def _hydrate_approved_visual(candidate: dict[str, Any], target: Path) -> dict[str, Any]:
     source_url = str(candidate.get("visual_source_url") or "").strip()
     direct_source_url = str(candidate.get("visual_direct_source_url") or "").strip()
@@ -294,24 +355,48 @@ def _hydrate_approved_visual(candidate: dict[str, Any], target: Path) -> dict[st
 
     target.parent.mkdir(parents=True, exist_ok=True)
     download = _download_approved_source(direct_source_url, target)
+    derivative_download: dict[str, Any] | None = None
+    hydration_transport = "exact_approved_original"
+    hydration_state = "VERIFIED_PROVENANCE_HYDRATED_SHADOW"
     if download.get("download_ok") is not True or not target.is_file():
-        return {
-            **base,
-            "hydration_ok": False,
-            "hydration_state": "BLOCKED_APPROVED_SOURCE_DOWNLOAD",
-            "provenance_source": provenance,
-            "provenance_asset": provenance_asset,
-            "direct_source_download": download,
-        }
+        source_host = (urlparse(source_url).hostname or "").lower()
+        direct_host = (urlparse(direct_source_url).hostname or "").lower()
+        allow_exact_derivative_fallback = bool(
+            download.get("http_status") == 429
+            and source_host == "commons.wikimedia.org"
+            and direct_host == "upload.wikimedia.org"
+            and provenance_asset.get("asset_identity_ok") is True
+            and provenance_asset.get("license_present") is True
+        )
+        if allow_exact_derivative_fallback:
+            derivative_download = _download_exact_wikimedia_derivative(direct_source_url, target)
+        if not derivative_download or derivative_download.get("download_ok") is not True or not target.is_file():
+            return {
+                **base,
+                "hydration_ok": False,
+                "hydration_state": "BLOCKED_APPROVED_SOURCE_DOWNLOAD",
+                "provenance_source": provenance,
+                "provenance_asset": provenance_asset,
+                "direct_source_download": download,
+                "exact_derivative_download": derivative_download,
+                "exact_derivative_fallback_allowed": allow_exact_derivative_fallback,
+            }
+        hydration_transport = "exact_wikimedia_derivative_after_original_429"
+        hydration_state = "VERIFIED_PROVENANCE_HYDRATED_EXACT_WIKIMEDIA_DERIVATIVE_SHADOW"
 
     digest = hashlib.sha256(target.read_bytes()).hexdigest()
     return {
         **base,
         "hydration_ok": True,
-        "hydration_state": "VERIFIED_PROVENANCE_HYDRATED_SHADOW",
+        "hydration_state": hydration_state,
+        "hydration_transport": hydration_transport,
         "provenance_source": provenance,
         "provenance_asset": provenance_asset,
         "direct_source_download": download,
+        "exact_derivative_download": derivative_download,
+        "exact_derivative_identity_bound_to_original": bool(
+            derivative_download and derivative_download.get("derivative_identity_ok") is True
+        ),
         "hydrated_path": str(target),
         "hydrated_sha256": digest,
         "hydrated_bytes": target.stat().st_size,
@@ -459,16 +544,23 @@ def audit(
 
     bound = [row for row in results if row.get("identity_bound") is True]
     hydrated = [row for row in results if row.get("approved_asset_origin") == "verified_provenance_hydration"]
+    exact_derivative_hydrated = [
+        row for row in hydrated
+        if isinstance(row.get("approved_visual_hydration"), dict)
+        and row["approved_visual_hydration"].get("hydration_transport") == "exact_wikimedia_derivative_after_original_429"
+    ]
     return {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "mode": "READ_ONLY_INSTAGRAM_VISUAL_IDENTITY",
         "publication_authority": "NONE",
-        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE clears transform-tolerant normalized-pixel thresholds and exceeds every other remote image by the required uniqueness margin. A missing repository copy may be hydrated only from the exact already-approved HTTPS direct source after independent provenance-page ImageObject identity plus license verification; hydration is ephemeral shadow evidence and grants no publication authority.",
+        "truth_rule": "Instagram object/image presence is not approved-visual identity. Identity is bound only when exactly one externally downloaded remote IMAGE clears transform-tolerant normalized-pixel thresholds and exceeds every other remote image by the required uniqueness margin. A missing repository copy may be hydrated only from the exact already-approved HTTPS original after independent provenance-page ImageObject identity plus license verification. If and only if that exact Wikimedia original is rate-limited with HTTP 429, hydration may use a deterministic 1280/960px derivative whose URL is constructed from that exact original shard and filename; no alternate asset or generic image is accepted. Hydration is ephemeral shadow evidence and grants no publication authority.",
         "candidate_count": len(results),
         "identity_bound_count": len(bound),
         "identity_bound_story_ids": [str(row.get("story_id")) for row in bound],
         "verified_provenance_hydration_count": len(hydrated),
         "verified_provenance_hydration_story_ids": [str(row.get("story_id")) for row in hydrated],
+        "exact_wikimedia_derivative_hydration_count": len(exact_derivative_hydrated),
+        "exact_wikimedia_derivative_hydration_story_ids": [str(row.get("story_id")) for row in exact_derivative_hydrated],
         "acceptance_ready": False,
         "results": results,
     }
@@ -489,6 +581,8 @@ def main() -> int:
         "identity_bound_story_ids": result["identity_bound_story_ids"],
         "verified_provenance_hydration_count": result["verified_provenance_hydration_count"],
         "verified_provenance_hydration_story_ids": result["verified_provenance_hydration_story_ids"],
+        "exact_wikimedia_derivative_hydration_count": result["exact_wikimedia_derivative_hydration_count"],
+        "exact_wikimedia_derivative_hydration_story_ids": result["exact_wikimedia_derivative_hydration_story_ids"],
         "acceptance_ready": result["acceptance_ready"],
     }, ensure_ascii=False, sort_keys=True))
     return 0
