@@ -145,36 +145,15 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 4,
+    "autonomous_stories_published_24h": 1,
     "autonomous_story_ids_24h": [
-      "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
-      "rm-valcea-hcl-343-20260916",
-      "rm-valcea-hcl-344-20260916",
-      "rm-valcea-hcl-345-20260916"
+      "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878"
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 4,
-      "published": 4,
+      "measured": 1,
+      "published": 1,
       "stories": [
-        {
-          "story_id": "rm-valcea-hcl-343-20260916",
-          "seconds": 115,
-          "discovered_at_utc": "2026-09-18T06:43:42Z",
-          "published_at_utc": "2026-09-18T06:45:37Z"
-        },
-        {
-          "story_id": "rm-valcea-hcl-344-20260916",
-          "seconds": 115,
-          "discovered_at_utc": "2026-09-18T06:43:42Z",
-          "published_at_utc": "2026-09-18T06:45:37Z"
-        },
-        {
-          "story_id": "rm-valcea-hcl-345-20260916",
-          "seconds": 115,
-          "discovered_at_utc": "2026-09-18T06:43:42Z",
-          "published_at_utc": "2026-09-18T06:45:37Z"
-        },
         {
           "story_id": "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
           "seconds": 105,
@@ -182,56 +161,26 @@
           "published_at_utc": "2026-09-18T11:56:11Z"
         }
       ],
-      "max_seconds": 115,
-      "median_seconds": 115
+      "max_seconds": 105,
+      "median_seconds": 105
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 4,
+      "published_stories": 1,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
       "status": "PASS",
-      "eligible": 4,
-      "readback_ok": 4,
+      "eligible": 1,
+      "readback_ok": 1,
       "value": 1.0,
       "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
           "url": "https://valceaclar.ro/stiri/fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "rm-valcea-hcl-343-20260916",
-          "url": "https://valceaclar.ro/stiri/rm-valcea-hcl-343-20260916/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "rm-valcea-hcl-344-20260916",
-          "url": "https://valceaclar.ro/stiri/rm-valcea-hcl-344-20260916/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "rm-valcea-hcl-345-20260916",
-          "url": "https://valceaclar.ro/stiri/rm-valcea-hcl-345-20260916/",
           "projected": true,
           "http_status": 200,
           "canonical_ok": true,
@@ -252,22 +201,20 @@
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 2,
-      "eligible": 4,
-      "value": 0.5,
+      "delivered": 1,
+      "eligible": 1,
+      "value": 1.0,
       "delivered_story_ids": [
-        "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
-        "rm-valcea-hcl-343-20260916"
+        "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 2,
-      "eligible": 4,
-      "value": 0.5,
+      "delivered": 1,
+      "eligible": 1,
+      "value": 1.0,
       "delivered_story_ids": [
-        "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
-        "rm-valcea-hcl-343-20260916"
+        "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878"
       ]
     },
     "duplicates": {
@@ -279,23 +226,10 @@
       "missing_editorial_evidence": []
     },
     "fabricated_claims": {
-      "status": "BLOCKED_UNTRACEABLE_CLAIMS",
-      "value": null,
+      "status": "PASS",
+      "value": 0,
       "definition": "zero is asserted only when every measured published story passes material-fact and complete claim-source trace gates",
-      "trace_violations": [
-        {
-          "story_id": "rm-valcea-hcl-343-20260916",
-          "reason": "material_fact_gate_not_pass"
-        },
-        {
-          "story_id": "rm-valcea-hcl-344-20260916",
-          "reason": "material_fact_gate_not_pass"
-        },
-        {
-          "story_id": "rm-valcea-hcl-345-20260916",
-          "reason": "material_fact_gate_not_pass"
-        }
-      ],
+      "trace_violations": [],
       "missing_editorial_evidence": []
     },
     "manual_intervention": {
@@ -303,6 +237,46 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35427545346,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-19T06:47:12Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35427366430,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-19T06:43:09Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35425209257,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-19T05:55:02Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35424728083,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-19T05:43:45Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35422288889,
+          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
+          "created_at": "2026-09-19T04:48:43Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 35413621045,
