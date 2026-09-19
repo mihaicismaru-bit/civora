@@ -1,6 +1,6 @@
 {
-  "schema_version": "4.0",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN27-HISTORICAL-FACT-SOURCE-PREFLIGHT-NATURAL-VALIDATED",
+  "schema_version": "4.1",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN28-HISTORICAL-FACT-KERNEL-EVIDENCE-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,7 +8,7 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "c482c2ec8c1ac7bb524952a924185b970827de14",
+    "main_observed_sha": "00eabd0156186f14d5d1ff434ef7f3fe84ec87c3",
     "main_observed_message": "Checkpoint verified decision-maker projection",
     "legacy_public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "legacy_public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
@@ -17,18 +17,19 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "71427f11446cd2ccfd013f6d54b873248a5dd369",
-    "message": "test core-v2 transaction audit preserves fact preflight boundary",
-    "functional_increment": "historical replay now performs bounded read-only T1 source preflight and carries the result into StoryTransaction audit without promoting legacy facts into the Core v2 FactKernel contract",
-    "workflow_run_id": 35423379484,
-    "workflow_run_number": 463,
+    "sha": "b5bce436b426e92908b3913d8ce254159c19736f",
+    "message": "Core v2: bind historical claims to observed source wording",
+    "functional_increment": "historical replay now builds strict Core v2 FactKernel candidates from bounded external field-level and claim-level source evidence rather than rendered legacy prose; both replay candidates reach FACT_KERNEL_EVIDENCE_READY_SHADOW while remaining non-authorizing",
+    "workflow_run_id": 35426210799,
+    "workflow_run_number": 473,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10578156641,
-    "artifact_sha256": "222b91f55f0cb093ecdef7a6bdaa8d0dc4b33499aa52c69e4b5f5151845f5051",
-    "artifact_size_bytes": 2538430,
+    "artifact_id": 10579765240,
+    "artifact_sha256": "4fc91e314ffd8a85a90416e26be27ccd54b459da331da8c81496fe34234f0285",
+    "artifact_size_bytes": 2539472,
     "manual_dispatch": false,
+    "manual_rerun": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 26,
     "ordered_shadow_failed_stage": null
@@ -37,14 +38,14 @@
     "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness by itself",
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains read-only and thin",
     "PHOTO remains fail-closed and generic/synthetic substitution remains forbidden",
-    "cross-surface visual state remains bound candidate -> visual replay -> receipt ledger -> gate report",
-    "historical_fact_evidence_preflight.py now performs bounded independent read-only T1 source reachability with content SHA-256 evidence",
-    "legacy verified status plus reachable official source is explicitly non-authorizing: promotion_allowed=false and publication_authority=NONE",
-    "transaction materialization schema 1.1 carries historical preflight state but still requires the strict explicit Core v2 FactKernel and article package before replay can advance",
-    "water-contract replay has APAVIL T1 readback 1/1 but no explicit Core v2 FactKernel and remains BLOCKED_FACT_KERNEL_EVIDENCE",
-    "CET Govora replay has T1 readback 2/3: HCL 225 and HCL 5 pass; Portal Legislativ closed the connection; no explicit Core v2 FactKernel exists and the story remains BLOCKED_FACT_KERNEL_EVIDENCE",
-    "natural run 463 passed compile, contract tests, all 26 shadow stages, site/visual/Meta replay, receipt/transaction materialization, exact blocker classification, runtime invariants and tamper regressions",
-    "historical replay truth did not inflate: site 2/2, visual 1/2, Instagram 2/2, Facebook 0/2, externally verified receipts 0, truth-complete transactions 0",
+    "historical_fact_kernel_evidence.py performs bounded external source readback, visible-text normalization, source identity checks and field/claim matching with content SHA-256 evidence",
+    "every emitted historical FactKernel carries explicit evidence IDs for what/who/where/when/why_it_matters and each included claim",
+    "legacy prose is not reverse-engineered into a FactKernel and historical evidence grants no live publication authority",
+    "APAVIL water-contract replay now reaches FACT_KERNEL_EVIDENCE_READY_SHADOW from the first-party APAVIL source",
+    "CET Govora replay now reaches FACT_KERNEL_EVIDENCE_READY_SHADOW from HCL 225/2026 and HCL 5/2026 evidence whose public pages link the official municipal documents",
+    "transaction materialization schema 1.2 consumes the historical FactKernel evidence and advances both replay candidates from missing FactKernel to BLOCKED_EXPLICIT_ARTICLE_CLAIMS_EVIDENCE",
+    "natural push run 473 passed compile, contract tests, all 26 shadow stages, site/visual/Meta replay, receipt/transaction materialization, blocker classification, runtime invariants and tamper regressions",
+    "historical replay truth remains externally conservative: site 2/2, visual 1/2, Instagram 2/2, Facebook 0/2, externally verified complete receipts 0, fully-bound replay transactions 0",
     "no merge, deploy, live Core v2 publication, public-projection mutation, Meta write, workflow_dispatch or manual rerun was used"
   ],
   "inventory": {
@@ -65,53 +66,26 @@
     "blocked_story_ids": ["0795029bb1cd130dd630ba61", "884cfb20e52e672db53fa14d", "c5cc807a6f72abd31ebc8aff", "hcl-344-local-education-access", "isj-directori-2026-conducere-scoli"],
     "generic_or_synthetic_substitution_forbidden": true
   },
-  "historical_fact_preflight": {
+  "historical_fact_kernel_evidence": {
     "schema_version": "1.0",
-    "transaction_schema_version": "1.1",
+    "transaction_schema_version": "1.2",
     "candidate_count": 2,
-    "source_readback_story_count": 2,
-    "explicit_core_v2_fact_kernel_story_count": 0,
-    "promotion_allowed": false,
+    "fact_kernel_evidence_ready_count": 2,
     "publication_authority": "NONE",
-    "state_counts": {"LEGACY_VERIFIED_FACT_SOURCE_READBACK_ONLY": 1, "BLOCKED_T1_SOURCE_READBACK": 1},
-    "stories": {
-      "valcea-apa-canal-contract-152m-20260902": {
-        "legacy_verified_fact_record_present": true,
-        "material_fact_gate": "PASS",
-        "t1_source_count": 1,
-        "t1_source_readback_passed": 1,
-        "all_t1_sources_readback_ok": true,
-        "source": "https://apavil.ro/?p=8650",
-        "http_status": 200,
-        "content_sha256": "81ff546d78875f8e299d4418acb03916ab0292b23e12b6e5c33d1d0a385cd773",
-        "explicit_core_v2_fact_kernel_present": false,
-        "preflight_state": "LEGACY_VERIFIED_FACT_SOURCE_READBACK_ONLY",
-        "transaction_terminal_reason": "BLOCKED_FACT_KERNEL_EVIDENCE"
-      },
-      "cet-govora-cine-a-decis-oprirea-20260821": {
-        "legacy_verified_fact_record_present": true,
-        "material_fact_gate": "PASS",
-        "t1_source_count": 3,
-        "t1_source_readback_passed": 2,
-        "all_t1_sources_readback_ok": false,
-        "passed_sources": [
-          {"url": "https://hcl.usr.ro/ramnicu_valcea/2026/h225", "http_status": 200, "content_sha256": "c303f61b621f7b4666e77f0183cc2bb2f305ed3e6e21932c9d2314130d974635"},
-          {"url": "https://hcl.usr.ro/ramnicu_valcea/2026/h5", "http_status": 200, "content_sha256": "be2ffccc0074ec5b0ce6865c137fb4994d23a6dff6926e8504567dfe44babefd"}
-        ],
-        "failed_sources": [{"url": "https://legislatie.just.ro/Public/DetaliiDocument/308855", "error": "Remote end closed connection without response"}],
-        "explicit_core_v2_fact_kernel_present": false,
-        "preflight_state": "BLOCKED_T1_SOURCE_READBACK",
-        "transaction_terminal_reason": "BLOCKED_FACT_KERNEL_EVIDENCE"
-      }
-    }
+    "live_promotion_allowed": false,
+    "states": {
+      "valcea-apa-canal-contract-152m-20260902": "FACT_KERNEL_EVIDENCE_READY_SHADOW",
+      "cet-govora-cine-a-decis-oprirea-20260821": "FACT_KERNEL_EVIDENCE_READY_SHADOW"
+    },
+    "transaction_terminal_reasons": {
+      "valcea-apa-canal-contract-152m-20260902": "BLOCKED_EXPLICIT_ARTICLE_CLAIMS_EVIDENCE",
+      "cet-govora-cine-a-decis-oprirea-20260821": "BLOCKED_EXPLICIT_ARTICLE_CLAIMS_EVIDENCE"
+    },
+    "fact_kernel_missing_count": 0,
+    "article_claims_package_missing_count": 2
   },
   "external_replay_truth": {
     "candidate_count": 2,
-    "candidate_ledger_schema_version": "1.2",
-    "visual_replay_schema_version": "1.1",
-    "receipt_ledger_schema_version": "1.2",
-    "transaction_schema_version": "1.1",
-    "gate_report_schema_version": "1.2",
     "site_readback": {"passed": 2, "failed": 0},
     "visual_readback": {"passed": 1, "failed": 1},
     "facebook": {"passed": 0, "failed": 2, "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"},
@@ -120,16 +94,16 @@
     "fully_bound_replay_count": 0,
     "truth_complete_count": 0,
     "blocker_counts": {
+      "ARTICLE_CLAIMS_EVIDENCE_MISSING": 2,
       "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
-      "FACT_KERNEL_EVIDENCE_MISSING": 2,
       "VISUAL_ARTICLE_BINDING_FAILED": 1
     },
     "acceptance_ready": false
   },
   "blocked": [
     {"gate": "photo_truth_gate", "reason": "Five of seven current written shadow candidates still lack a verified story-specific real, relevant and rights-cleared visual."},
-    {"gate": "historical_fact_kernel_truth", "reason": "Both historical replay candidates have legacy verified fact records, but neither has the strict explicit Core v2 FactKernel contract. Water has APAVIL T1 readback 1/1; CET has T1 readback 2/3 and remains additionally blocked on Portal Legislativ readback."},
+    {"gate": "historical_article_claims_truth", "reason": "Both historical replay candidates now have evidence-bound Core v2 FactKernels, but neither yet has a separate explicit article claims package bound claim-by-claim to the kernel evidence IDs."},
     {"gate": "historical_visual_replay_water_contract", "reason": "Approved social visual is not bound to the canonical/public site story."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
@@ -138,8 +112,8 @@
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "construct a dedicated historical FactKernel evidence builder that consumes field-level/source evidence rather than rendered prose; start with CET HCL 225/HCL 5 and the APAVIL contract source",
-    "keep that builder non-authorizing until each what/who/where/when/why/source/claim has explicit evidence IDs and independent readback evidence",
+    "build a separate historical article-claims package for APAVIL and CET from the now evidence-bound FactKernels and require claim_index/evidence_id integrity before replay can advance",
+    "add the dedicated historical FactKernel regression suite to the explicit workflow test list and include the generated historical FactKernel evidence artifact in the uploaded evidence bundle",
     "continue PHOTO rights/relevance research for current IPJ/ISU/HCL344/ISJ without generic or synthetic-as-photo substitution",
     "keep Facebook uncertified until read-only Graph permission is sufficient",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
@@ -148,6 +122,8 @@
   "evidence": {
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "historical_fact_preflight": "valcea-clar/core_v2/historical_fact_evidence_preflight.py",
+    "historical_fact_kernel_builder": "valcea-clar/core_v2/historical_fact_kernel_evidence.py",
+    "historical_fact_kernel_tests": "valcea-clar/tests/test_core_v2_historical_fact_kernel_evidence.py",
     "transaction_materializer": "valcea-clar/core_v2/materialize_shadow_transactions.py",
     "transaction_tests": "valcea-clar/tests/test_core_v2_transactions.py",
     "candidate_ledger": "valcea-clar/core_v2/build_shadow_candidate_ledger.py",
@@ -155,8 +131,8 @@
     "gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35423379484",
-    "feature_artifact_id": 10578156641,
-    "feature_artifact_sha256": "222b91f55f0cb093ecdef7a6bdaa8d0dc4b33499aa52c69e4b5f5151845f5051"
+    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35426210799",
+    "feature_artifact_id": 10579765240,
+    "feature_artifact_sha256": "4fc91e314ffd8a85a90416e26be27ccd54b459da331da8c81496fe34234f0285"
   }
 }
