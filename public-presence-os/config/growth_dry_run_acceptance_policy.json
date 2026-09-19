@@ -1,0 +1,66 @@
+{
+  "schema_version": "PPOS_GROWTH_DRY_RUN_ACCEPTANCE_POLICY_V1",
+  "checkpoint": "CP91",
+  "module_id": "M60_GROWTH_DRY_RUN_ACCEPTANCE_SUITE",
+  "parent_activation_checkpoint": "CP90",
+  "parent_control_checkpoint": "CP58",
+  "next_after_cp91": "CP92_PILOT_GROWTH_OPERATIONS_MANUAL_SHADOW_PILOT_PLAN",
+  "mode": "OFFLINE_SYNTHETIC_ONLY",
+  "global_kill_switch": "ENGAGED",
+  "live_authority": "NONE",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "required_acceptance_cases": [
+    "PUBLICATION_MONITOR_TASKS",
+    "INBOUND_RANKING_AND_DRY_RUN_REPLY",
+    "OUTBOUND_SCORING_LOW_VALUE_SPAM_REJECTION",
+    "RELATIONSHIP_GRAPH_IDEMPOTENT",
+    "DUPLICATE_ACTIONS_IMPOSSIBLE",
+    "RATE_CEILINGS_ENFORCED",
+    "KILL_SWITCH_SUPPRESSES_WRITE_PATHS",
+    "UNSUPPORTED_CAPABILITY_MANUAL_OR_HOLD",
+    "MISSING_ANALYTICS_REMAIN_UNKNOWN"
+  ],
+  "monitor_task_defaults": {
+    "window_minutes": 240,
+    "interval_minutes": 30,
+    "minimum_task_count": 5
+  },
+  "truthfulness": {
+    "unknown_external_metric_value": "UNKNOWN",
+    "missing_is_never_zero": true,
+    "no_fabricated_external_state": true
+  },
+  "growth_safety": {
+    "automated_follow_unfollow_forbidden": true,
+    "mass_commenting_forbidden": true,
+    "engagement_pods_forbidden": true,
+    "repetitive_praise_forbidden": true,
+    "copy_paste_replies_forbidden": true,
+    "synthetic_conversation_farming_forbidden": true,
+    "political_microtargeting_forbidden": true,
+    "sensitive_trait_inference_forbidden": true,
+    "sensitive_relationship_profiling_forbidden": true,
+    "clickbait_optimization_forbidden": true,
+    "fabricated_conflict_forbidden": true
+  },
+  "write_boundary": {
+    "external_write": false,
+    "social_api_call": false,
+    "oauth": false,
+    "token_or_secret_resolution": false,
+    "live_probe": false,
+    "account_connection": false,
+    "publish": false,
+    "deploy": false,
+    "paid_service": false,
+    "future_writes_must_be_kill_switch_bound": true,
+    "future_writes_must_be_receipt_bound": true,
+    "future_writes_must_be_idempotent": true,
+    "future_writes_must_have_bounded_retry": true,
+    "retry_exhaustion_must_fail_closed": true
+  }
+}
