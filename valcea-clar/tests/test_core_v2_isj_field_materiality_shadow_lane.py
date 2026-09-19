@@ -9,6 +9,8 @@ ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
 from isj_field_materiality_shadow_lane import adjudicate_field_materiality  # noqa: E402
+from isj_registration_deadline_promotion_shadow_lane import build_deadline_promotion  # noqa: E402
+from validate_isj_registration_deadline_promotion import prove_tamper_regressions, validate as validate_deadline_promotion  # noqa: E402
 
 
 def field(name, value, evidence_id, *, normalized_date=None, calendar=False):
@@ -63,6 +65,66 @@ class ISJFieldMaterialityShadowLaneTests(unittest.TestCase):
         }
         return field_report, calendar_report
 
+    def _deadline_scope_fixtures(self):
+        scope_id = "isj-calendar-scope-scope-001"
+        raw_id = "isj-calendar-field-registration-001"
+        deadline_id = "isj-calendar-scope-deadline-001"
+        document_id = "isj-context-document-001"
+        page_hash = "a" * 64
+        excerpt = "14 septembrie-2 octombrie"
+        scope = {
+            "schema_version": "1.0",
+            "publication_authority": "NONE",
+            "acceptance_ready": False,
+            "material_fact_use": False,
+            "fact_kernel_promotion_allowed": False,
+            "writer_allowed": False,
+            "site_publish_allowed": False,
+            "social_publish_allowed": False,
+            "expected_contest_session_year": 2026,
+            "same_document_year_scope_verified": True,
+            "registration_deadline_normalized": True,
+            "registration_deadline": "2026-10-02",
+            "calendar_scope_session_year_field_evidence_id": scope_id,
+            "registration_source_field_evidence_id": raw_id,
+            "rows": [{
+                "state": "CALENDAR_SCOPE_BINDING_VERIFIED_SHADOW",
+                "contest_session_year": 2026,
+                "fields": [{
+                    "field": "registration_deadline",
+                    "value": "2026-10-02",
+                    "state": "CALENDAR_SCOPE_FIELD_EVIDENCE_VERIFIED_SHADOW",
+                    "normalized_date": True,
+                    "field_evidence_id": deadline_id,
+                    "scope_field_evidence_id": scope_id,
+                    "source_registration_window_field_evidence_id": raw_id,
+                    "supporting_field_evidence_ids": [scope_id, raw_id],
+                    "document_text_evidence_id": document_id,
+                    "page_number": 1,
+                    "page_text_sha256": page_hash,
+                    "excerpt": excerpt,
+                    "material_fact_use": False,
+                    "fact_kernel_promotion_allowed": False,
+                    "writer_allowed": False,
+                }],
+            }],
+        }
+        scope_validation = {
+            "status": "PASS_SHADOW",
+            "publication_authority": "NONE",
+            "acceptance_ready": False,
+            "material_fact_use": False,
+            "fact_kernel_promotion_allowed": False,
+            "writer_allowed": False,
+            "site_publish_allowed": False,
+            "social_publish_allowed": False,
+            "same_document_year_scope_verified": True,
+            "registration_deadline": "2026-10-02",
+            "scope_field_evidence_id": scope_id,
+            "source_registration_window_field_evidence_id": raw_id,
+        }
+        return scope, scope_validation
+
     def test_materiality_uses_only_exact_normalized_current_fields(self):
         fields, calendar = self._reports()
         result = adjudicate_field_materiality(fields, calendar, as_of=date(2026, 9, 18))
@@ -113,6 +175,30 @@ class ISJFieldMaterialityShadowLaneTests(unittest.TestCase):
         fields["fact_kernel_promotion_allowed"] = True
         with self.assertRaises(ValueError):
             adjudicate_field_materiality(fields, calendar, as_of=date(2026, 9, 18))
+
+    def test_registration_deadline_promotion_requires_independent_scope_validation(self):
+        scope, validation = self._deadline_scope_fixtures()
+        result = build_deadline_promotion(scope, validation, expected_year=2026, as_of=date(2026, 9, 19))
+        self.assertEqual(result["state"], "MATERIALITY_PROMOTION_VERIFIED_SHADOW")
+        self.assertTrue(result["materiality_promotion_allowed"])
+        self.assertFalse(result["fact_kernel_promotion_allowed"])
+        self.assertFalse(result["writer_allowed"])
+        self.assertEqual(result["registration_deadline"], "2026-10-02")
+        candidate = result["promotion_candidates"][0]
+        self.assertEqual(candidate["field_evidence_id"], "isj-calendar-scope-deadline-001")
+        self.assertEqual(candidate["supporting_field_evidence_ids"], ["isj-calendar-scope-scope-001", "isj-calendar-field-registration-001"])
+        independent = validate_deadline_promotion(scope, validation, result, expected_year=2026)
+        self.assertEqual(independent["status"], "PASS_SHADOW")
+        self.assertEqual(independent["registration_deadline_field_evidence_id"], "isj-calendar-scope-deadline-001")
+        self.assertEqual(prove_tamper_regressions(scope, validation, result, expected_year=2026), 3)
+
+    def test_registration_deadline_promotion_fails_closed_on_evidence_divergence(self):
+        scope, validation = self._deadline_scope_fixtures()
+        validation["registration_deadline"] = "2026-10-03"
+        result = build_deadline_promotion(scope, validation, expected_year=2026, as_of=date(2026, 9, 19))
+        self.assertEqual(result["state"], "BLOCKED")
+        self.assertFalse(result["materiality_promotion_allowed"])
+        self.assertEqual(result["promotion_candidate_count"], 0)
 
 
 if __name__ == "__main__":
