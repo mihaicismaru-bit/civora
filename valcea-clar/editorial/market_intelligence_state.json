@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-19T20:37:35Z",
+  "generated_at": "2026-09-19T23:00:52Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -117,12 +117,14 @@
       "registry_status": "ACTIVE_REVERIFY",
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [
+        "ajofm-valcea-statistics",
         "posturi-gov-valcea-all",
         "ejobs-valcea",
         "bestjobs-valcea",
         "linkedin-jobs-valcea"
       ],
       "official_changed_sources": [
+        "ajofm-valcea-statistics",
         "posturi-gov-valcea-all"
       ],
       "degraded_sources": [
@@ -158,7 +160,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
-          "fingerprint": "4ad211eae217b7fb31ff1a78efb6c858122e9393a8c51f49bbc43889f9d967be",
+          "fingerprint": "495ff538b7885644fcc6eb525b8ef0ec1a6af8df03131460c1cf4484ba003d1c",
           "match_count": 24,
           "matched_terms": [
             "șomaj",
@@ -168,7 +170,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "UNCHANGED"
+          "change": "CHANGED_REVIEW_REQUIRED"
         },
         {
           "id": "posturi-gov-valcea-all",
@@ -179,7 +181,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "16a070deafe515546de0f60b4be34f18a216bc79aa2bb3c188d364e440c8f9f0",
+          "fingerprint": "e4cd01714adf42e22120a185e669327baceaa53bef345d93a433150a01f6a39b",
           "match_count": 17,
           "matched_terms": [
             "Vâlcea",
@@ -200,7 +202,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "7288437fa515216c0c2a5ed7538e67c16bc83b0e91e7e61a9121fcb73ed5610d",
+          "fingerprint": "fc39c19782e564a329238d40d26cc2dbc0ae3e3f13bfec419a04b7aab8603841",
           "match_count": 20,
           "matched_terms": [
             "Joburi",
@@ -211,7 +213,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1256"
+              "value_text": "1248"
             }
           ],
           "health": "OK",
@@ -249,7 +251,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "e6f4e65562bedad82d60172c0470ead6dfb9302a3e094bd9ab9632469442d29c",
+          "fingerprint": "728b161b1957bde10dbf8c63102c6b8a475ec8f5446882cba4726afd4d8a6d40",
           "match_count": 24,
           "matched_terms": [
             "joburi",
@@ -310,7 +312,8 @@
       "official_changed_sources": [],
       "degraded_sources": [
         "data-gov-onrc-datasets",
-        "data-gov-finance-datasets"
+        "data-gov-finance-datasets",
+        "ccivl-members"
       ],
       "sources": [
         {
@@ -502,20 +505,15 @@
           "url": "https://www.ccivl.ro/lista-membri/",
           "source_class": "T1B_INSTITUTIONAL_SIGNAL",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://www.ccivl.ro/lista-membri/",
-          "fingerprint": "e23e24ba7e83f40d0f8bd682f69b25e848900314fe1340256e3a194fb54a3d8f",
-          "match_count": 20,
-          "matched_terms": [
-            "membri",
-            "SRL",
-            "SA"
-          ],
+          "reachable": false,
+          "http_status": 403,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "UNCHANGED"
+          "health": "UNREACHABLE",
+          "error": "HTTP 403",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "seap-business-contracts",
