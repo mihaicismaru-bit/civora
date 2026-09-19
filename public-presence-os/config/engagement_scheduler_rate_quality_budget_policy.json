@@ -1,0 +1,88 @@
+{
+  "version": "cp90-engagement-scheduler-rate-quality-budget-v1",
+  "mode": "OFFLINE_ONLY",
+  "live_hold": true,
+  "global_checkpoint": "CP58",
+  "kill_switch_required_state": "ENGAGED",
+  "live_authority": "NONE",
+  "active_lanes": [
+    "facebook_page",
+    "instagram_professional",
+    "threads"
+  ],
+  "blocked_lanes": {
+    "linkedin": "HOLD_PRODUCTION_API_ACCESS",
+    "x": "HOLD_PAID_API",
+    "bluesky": "HOLD_ROI"
+  },
+  "capability_policy": {
+    "unknown_or_unverified": "HOLD_CAPABILITY_UNVERIFIED",
+    "manual_only_or_unsupported_write": "MANUAL_ACTION_PACKET",
+    "no_assumed_broad_outbound_commenting": true,
+    "no_assumed_follow_unfollow": true,
+    "readback_required_for_future_write_capability": true
+  },
+  "hot_window": {
+    "default_minutes": 240,
+    "minimum_minutes": 120,
+    "maximum_minutes": 240,
+    "default_poll_interval_minutes": 30,
+    "minimum_poll_interval_minutes": 15,
+    "maximum_poll_interval_minutes": 60
+  },
+  "hard_ceiling_budgets": {
+    "global_daily": 12,
+    "global_weekly": 48,
+    "per_account_daily": 3,
+    "per_thread_window": 2,
+    "outbound_value_add_daily": 3,
+    "amplification_daily": 2
+  },
+  "quality": {
+    "minimum_score": 0.7,
+    "semantic_similarity_threshold": 0.82,
+    "account_cooldown_minutes": 45,
+    "thread_saturation_window_minutes": 1440
+  },
+  "retry": {
+    "maximum_attempts": 3,
+    "exhaustion_decision": "HOLD_RETRY_EXHAUSTED_FAIL_CLOSED"
+  },
+  "human_review_triggers": [
+    "conflict_risk",
+    "reputational_risk",
+    "ambiguous_political_persuasion"
+  ],
+  "forbidden_growth_mechanics": [
+    "automated_follow_unfollow",
+    "mass_commenting",
+    "engagement_pods",
+    "repetitive_praise",
+    "copy_paste_replies",
+    "synthetic_conversation_farming",
+    "political_microtargeting",
+    "sensitive_trait_inference",
+    "sensitive_relationship_profiling",
+    "clickbait",
+    "fabricated_conflict"
+  ],
+  "queue_order": [
+    "priority_class_ascending",
+    "quality_score_descending",
+    "due_at_utc_ascending",
+    "action_id_ascending"
+  ],
+  "write_boundary": {
+    "external_write": false,
+    "social_api_call": false,
+    "oauth": false,
+    "token_or_secret_resolution": false,
+    "deploy": false,
+    "paid_service": false,
+    "future_writes_must_be_kill_switch_bound": true,
+    "future_writes_must_be_receipt_bound": true,
+    "future_writes_must_be_idempotent": true,
+    "future_writes_must_have_bounded_retry": true,
+    "retry_exhaustion_must_fail_closed": true
+  }
+}
