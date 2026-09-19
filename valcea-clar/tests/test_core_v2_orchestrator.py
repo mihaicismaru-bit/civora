@@ -25,10 +25,10 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_registration_deadline_promotion_validation", "isj_field_materiality",
                 "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
                 "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity",
-                "site_verified_article_ledger", "photo_truth", "shadow_site_package",
+                "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
             ],
         )
-        self.assertEqual(len(names), 33)
+        self.assertEqual(len(names), 34)
         joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
         for forbidden in ("workflow_dispatch", "git push", "merge", "deploy", "facebook_publish", "instagram_publish", "manual-publish"):
             self.assertNotIn(forbidden, joined)
@@ -58,7 +58,8 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         fact_deadline_validation = by_name["isj_fact_kernel_deadline_promotion_validation"]
         fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
         writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]
-        ledger = by_name["site_verified_article_ledger"]; photo = by_name["photo_truth"]; site = by_name["shadow_site_package"]
+        ledger = by_name["site_verified_article_ledger"]; photo = by_name["photo_truth"]
+        hydrated_registry = by_name["site_visual_runtime_registry"]; site = by_name["shadow_site_package"]
         ipj = by_name["ipj"]; isu = by_name["isu"]; municipal = by_name["municipal_writer"]
 
         self.assertIn(str(isj.output), detail.argv); self.assertIn("--live", detail.argv)
@@ -76,22 +77,20 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(fields.output), field_materiality.argv); self.assertIn(str(calendar_fields.output), field_materiality.argv); self.assertIn(str(deadline_promotion.output), field_materiality.argv); self.assertIn(str(deadline_validation.output), field_materiality.argv)
         self.assertIn(str(field_materiality.output), fact_deadline_promotion.argv); self.assertIn(str(deadline_promotion.output), fact_deadline_promotion.argv); self.assertIn(str(deadline_validation.output), fact_deadline_promotion.argv)
         self.assertIn(str(field_materiality.output), fact_deadline_validation.argv); self.assertIn(str(deadline_promotion.output), fact_deadline_validation.argv); self.assertIn(str(deadline_validation.output), fact_deadline_validation.argv); self.assertIn(str(fact_deadline_promotion.output), fact_deadline_validation.argv); self.assertIn("--prove-tamper", fact_deadline_validation.argv)
-
-        self.assertNotIn(str(fact_deadline_promotion.output), fact_kernel.argv)
-        self.assertNotIn(str(fact_deadline_validation.output), fact_kernel.argv)
+        self.assertNotIn(str(fact_deadline_promotion.output), fact_kernel.argv); self.assertNotIn(str(fact_deadline_validation.output), fact_kernel.argv)
         self.assertIn(str(field_materiality.output), fact_kernel.argv); self.assertIn(str(fields.output), fact_kernel.argv); self.assertIn(str(calendar_fields.output), fact_kernel.argv)
         self.assertIn(str(fact_kernel.output), fact_integrity.argv)
         self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv)
         self.assertIn(str(fact_kernel.output), article_integrity.argv); self.assertIn(str(fact_integrity.output), article_integrity.argv); self.assertIn(str(writer.output), article_integrity.argv)
 
-        self.assertIn(str(ipj.output), ledger.argv)
-        self.assertIn(str(isu.output), ledger.argv)
-        self.assertIn(str(municipal.output), ledger.argv)
-        self.assertIn(str(writer.output), ledger.argv)
-        self.assertIn(str(article_integrity.output), ledger.argv)
+        self.assertIn(str(ipj.output), ledger.argv); self.assertIn(str(isu.output), ledger.argv); self.assertIn(str(municipal.output), ledger.argv); self.assertIn(str(writer.output), ledger.argv); self.assertIn(str(article_integrity.output), ledger.argv)
         self.assertNotIn("--live", ledger.argv)
         self.assertIn(f"isj={article_integrity.output}", photo.argv)
+        self.assertIn(str(photo.output), hydrated_registry.argv)
+        self.assertIn("valcea-clar/core_v2/visual_registry.json", hydrated_registry.argv)
+        self.assertNotIn("--live", hydrated_registry.argv)
         self.assertIn(str(ledger.output), site.argv)
+        self.assertIn(str(hydrated_registry.output), site.argv)
         self.assertNotIn(str(municipal.output), site.argv)
 
         names = [stage.name for stage in plan]
@@ -102,7 +101,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "isj_registration_deadline_promotion_validation", "isj_field_materiality",
             "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
             "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity",
-            "site_verified_article_ledger", "photo_truth", "shadow_site_package",
+            "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
         ]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))
