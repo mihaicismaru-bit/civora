@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
 from isj_calendar_field_evidence_shadow_lane import extract_calendar_field_evidence  # noqa: E402
+from isj_calendar_scope_binding_shadow_lane import derive_registration_calendar_scope  # noqa: E402
 
 
 def _page(number: int, text: str) -> dict:
@@ -22,7 +23,16 @@ def _page(number: int, text: str) -> dict:
 
 class ISJCalendarFieldEvidenceShadowLaneTests(unittest.TestCase):
     def _context(self) -> dict:
-        page1 = _page(1, "ORDIN\nBucurești, 6 august 2026.\n1-4 septembrie\n7-9 septembrie")
+        page1 = _page(
+            1,
+            "ORDIN\n"
+            "București, 6 august 2026.\n"
+            "CALENDARUL\n"
+            "pentru organizarea și desfășurarea concursului pentru ocuparea funcțiilor vacante de director și director adjunct\n"
+            "din unitățile de învățământ preuniversitar de stat, sesiunea august-decembrie 2026\n"
+            "1-4 septembrie\n"
+            "7-9 septembrie",
+        )
         page2 = _page(
             2,
             "14 septembrie-2 octombrie        Depunerea dosarelor de înscriere la concurs\n"
@@ -98,6 +108,63 @@ class ISJCalendarFieldEvidenceShadowLaneTests(unittest.TestCase):
             self.assertFalse(field["material_fact_use"])
             self.assertFalse(field["fact_kernel_promotion_allowed"])
             self.assertFalse(field["writer_allowed"])
+
+    def test_same_document_scope_normalizes_registration_deadline_without_authority(self):
+        context = self._context()
+        calendar = extract_calendar_field_evidence(context, expected_year=2026)
+        result = derive_registration_calendar_scope(context, calendar, expected_year=2026)
+        self.assertEqual(result["mode"], "ISJ_CALENDAR_SCOPE_BINDING_SHADOW")
+        self.assertTrue(result["same_document_year_scope_verified"])
+        self.assertTrue(result["registration_window_normalized"])
+        self.assertTrue(result["registration_deadline_normalized"])
+        self.assertEqual(result["registration_window_start_date"], "2026-09-14")
+        self.assertEqual(result["registration_deadline"], "2026-10-02")
+        self.assertEqual(result["field_evidence_count"], 3)
+        self.assertEqual(result["blocked_count"], 0)
+        self.assertFalse(result["material_fact_use"])
+        self.assertFalse(result["fact_kernel_promotion_allowed"])
+        self.assertFalse(result["writer_allowed"])
+        self.assertFalse(result["site_publish_allowed"])
+        self.assertFalse(result["social_publish_allowed"])
+        fields = {field["field"]: field for field in result["rows"][0]["fields"]}
+        self.assertEqual(fields["calendar_scope_session_year"]["value"], 2026)
+        self.assertEqual(fields["registration_window_start_date"]["value"], "2026-09-14")
+        self.assertEqual(fields["registration_deadline"]["value"], "2026-10-02")
+        self.assertTrue(fields["registration_window_start_date"]["normalized_date"])
+        self.assertTrue(fields["registration_deadline"]["normalized_date"])
+        self.assertEqual(
+            fields["registration_deadline"]["supporting_field_evidence_ids"],
+            [result["calendar_scope_session_year_field_evidence_id"], result["registration_source_field_evidence_id"]],
+        )
+        for field in fields.values():
+            self.assertFalse(field["material_fact_use"])
+            self.assertFalse(field["fact_kernel_promotion_allowed"])
+            self.assertFalse(field["writer_allowed"])
+
+    def test_same_document_scope_missing_explicit_heading_fails_closed(self):
+        context = self._context()
+        context["rows"][1]["pages"][0] = _page(1, "ORDIN\nBucurești, 6 august 2026.\n1-4 septembrie")
+        calendar = extract_calendar_field_evidence(context, expected_year=2026)
+        result = derive_registration_calendar_scope(context, calendar, expected_year=2026)
+        self.assertFalse(result["same_document_year_scope_verified"])
+        self.assertFalse(result["registration_deadline_normalized"])
+        self.assertEqual(result["blocked_count"], 1)
+        self.assertIn("explicit_calendar_scope_heading", result["rows"][0]["detail"])
+
+    def test_same_document_scope_registration_provenance_tamper_fails_closed(self):
+        context = self._context()
+        calendar = extract_calendar_field_evidence(context, expected_year=2026)
+        registration = next(
+            field
+            for field in calendar["rows"][0]["fields"]
+            if field["field"] == "registration_window_text"
+        )
+        registration["page_text_sha256"] = "0" * 64
+        result = derive_registration_calendar_scope(context, calendar, expected_year=2026)
+        self.assertFalse(result["same_document_year_scope_verified"])
+        self.assertFalse(result["registration_deadline_normalized"])
+        self.assertEqual(result["blocked_count"], 1)
+        self.assertIn("registration_page_provenance_mismatch", result["rows"][0]["detail"])
 
     def test_wrong_context_year_blocks(self):
         result = extract_calendar_field_evidence(self._context(), expected_year=2025)
