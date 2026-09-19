@@ -235,6 +235,36 @@ def _effective_direct_source_status(
     return False, None
 
 
+def _classify_visual_truth_failure(
+    *,
+    internal_gate: bool,
+    article: dict[str, Any],
+    article_binding: dict[str, Any],
+    public_image: dict[str, Any],
+    provenance_source: dict[str, Any],
+    provenance_asset: dict[str, Any],
+    direct_source_effective_ok: bool,
+) -> tuple[str, str]:
+    """Return a truth-bound failure class and domain without changing pass/fail semantics."""
+    if not internal_gate:
+        return "INTERNAL_VISUAL_GATE_FAILED", "INTERNAL_GATE"
+    if article.get("readback_ok") is not True:
+        return "SITE_ARTICLE_TRANSPORT_FAILURE", "SITE_TRANSPORT"
+    if article_binding.get("article_image_bound") is not True:
+        return "SITE_APPROVED_VISUAL_ABSENT", "SITE_CONTENT"
+    if public_image.get("readback_ok") is not True:
+        return "SITE_APPROVED_VISUAL_TRANSPORT_FAILURE", "SITE_TRANSPORT"
+    if provenance_source.get("readback_ok") is not True:
+        return "PROVENANCE_SOURCE_TRANSPORT_FAILURE", "PROVENANCE_TRANSPORT"
+    if provenance_asset.get("asset_identity_ok") is not True:
+        return "PROVENANCE_ASSET_IDENTITY_UNVERIFIED", "PROVENANCE_IDENTITY"
+    if provenance_asset.get("license_present") is not True:
+        return "PROVENANCE_LICENSE_UNVERIFIED", "PROVENANCE_IDENTITY"
+    if not direct_source_effective_ok:
+        return "PROVENANCE_DIRECT_ASSET_TRANSPORT_FAILURE", "PROVENANCE_TRANSPORT"
+    return "VISUAL_TRUTH_UNCLASSIFIED_FAILURE", "UNKNOWN"
+
+
 def read_visual(
     *,
     article_url: str,
@@ -290,14 +320,31 @@ def read_visual(
         and article_binding.get("article_image_bound")
         and public_image.get("readback_ok")
         and provenance_source.get("readback_ok")
+        and provenance_asset.get("asset_identity_ok")
+        and provenance_asset.get("license_present")
         and direct_source_effective_ok
     )
+    failure_classification = None
+    failure_domain = None
+    if not ok:
+        failure_classification, failure_domain = _classify_visual_truth_failure(
+            internal_gate=internal_gate,
+            article=article,
+            article_binding=article_binding,
+            public_image=public_image,
+            provenance_source=provenance_source,
+            provenance_asset=provenance_asset,
+            direct_source_effective_ok=direct_source_effective_ok,
+        )
     article.pop("body", None)
     provenance_source.pop("body", None)
     return {
         "status": "PASS" if ok else "FAILED",
         "readback_ok": ok,
         "publication_authority": "NONE",
+        "visual_truth_state": "SITE_APPROVED_VISUAL_VERIFIED" if ok else failure_classification,
+        "failure_classification": failure_classification,
+        "failure_domain": failure_domain,
         "internal_truth_gate": internal_gate,
         "rights_basis": rights_basis,
         "article": article,
