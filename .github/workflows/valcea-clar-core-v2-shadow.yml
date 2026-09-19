@@ -35,6 +35,7 @@ jobs:
           python valcea-clar/tests/test_core_v2_contracts.py
           python valcea-clar/tests/test_core_v2_readback.py
           python valcea-clar/tests/test_core_v2_instagram_visual_identity.py
+          python valcea-clar/tests/test_core_v2_instagram_transform_diagnostic.py
           python valcea-clar/tests/test_core_v2_integrity.py
           python valcea-clar/tests/test_core_v2_source_signal.py
           python valcea-clar/tests/test_core_v2_isj_shadow_lane.py
@@ -204,6 +205,15 @@ jobs:
             --repo-root . \
             --output /tmp/valcea-core-v2-instagram-visual-identity.json
 
+      - name: Diagnose bounded Instagram crop/reframing near-match read-only
+        run: |
+          python valcea-clar/core_v2/instagram_transform_diagnostic.py \
+            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
+            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
+            --identity /tmp/valcea-core-v2-instagram-visual-identity.json \
+            --repo-root . \
+            --output /tmp/valcea-core-v2-instagram-transform-diagnostic.json
+
       - name: Bind external evidence into shadow receipt ledger
         run: |
           python valcea-clar/core_v2/materialize_shadow_receipts.py \
@@ -295,6 +305,7 @@ jobs:
             /tmp/valcea-core-v2-visual-readback.json
             /tmp/valcea-core-v2-meta-readback.json
             /tmp/valcea-core-v2-instagram-visual-identity.json
+            /tmp/valcea-core-v2-instagram-transform-diagnostic.json
             /tmp/valcea-core-v2-shadow-receipts.json
             /tmp/valcea-core-v2-historical-fact-kernels.json
             /tmp/valcea-core-v2-historical-article-claims.json
