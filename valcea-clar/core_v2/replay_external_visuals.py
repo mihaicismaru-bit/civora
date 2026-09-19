@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections import Counter
 from pathlib import Path
 from typing import Any
 
@@ -44,6 +45,9 @@ def replay(limit: int = 10) -> dict[str, Any]:
                     "reason": "missing_visual_provenance_fields",
                     "readback_ok": False,
                     "publication_authority": "NONE",
+                    "visual_truth_state": "MISSING_VISUAL_PROVENANCE_FIELDS",
+                    "failure_classification": "MISSING_VISUAL_PROVENANCE_FIELDS",
+                    "failure_domain": "INTERNAL_GATE",
                     **binding_context,
                 }
             )
@@ -68,14 +72,40 @@ def replay(limit: int = 10) -> dict[str, Any]:
         if row.get("canonical_site_visual_binding_state")
         not in {None, "CONSISTENT", "NOT_READY"}
     )
+    failure_class_counts = dict(
+        sorted(
+            Counter(
+                str(row.get("failure_classification"))
+                for row in results
+                if row.get("failure_classification")
+            ).items()
+        )
+    )
+    failure_domain_counts = dict(
+        sorted(
+            Counter(
+                str(row.get("failure_domain"))
+                for row in results
+                if row.get("failure_domain")
+            ).items()
+        )
+    )
     return {
-        "schema_version": "1.1",
+        "schema_version": "1.2",
         "mode": "READ_ONLY_VISUAL_REPLAY",
         "publication_authority": "NONE",
-        "truth_rule": "external public HTML/image/provenance readback remains authoritative; canonical cross-surface binding is reported independently and cannot manufacture a pass",
+        "truth_rule": "external public HTML/image/provenance readback remains authoritative; canonical cross-surface binding is reported independently and cannot manufacture a pass; site content absence is classified separately from site/provenance transport failure without changing acceptance semantics",
         "candidate_count": len(rows),
         "canonical_consistent_count": canonical_consistent,
         "cross_surface_divergent_count": cross_surface_divergent,
+        "site_approved_visual_absent_count": int(failure_class_counts.get("SITE_APPROVED_VISUAL_ABSENT", 0)),
+        "transport_failure_count": sum(
+            count
+            for domain, count in failure_domain_counts.items()
+            if domain in {"SITE_TRANSPORT", "PROVENANCE_TRANSPORT"}
+        ),
+        "failure_class_counts": failure_class_counts,
+        "failure_domain_counts": failure_domain_counts,
         "passed": passed,
         "failed": len(results) - passed,
         "results": results,
@@ -95,6 +125,8 @@ def main() -> int:
                 "candidate_count": result["candidate_count"],
                 "canonical_consistent_count": result["canonical_consistent_count"],
                 "cross_surface_divergent_count": result["cross_surface_divergent_count"],
+                "site_approved_visual_absent_count": result["site_approved_visual_absent_count"],
+                "transport_failure_count": result["transport_failure_count"],
                 "passed": result["passed"],
                 "failed": result["failed"],
             },
