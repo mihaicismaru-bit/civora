@@ -36,6 +36,16 @@ def _facebook_blockers(receipt: dict[str, Any]) -> tuple[list[str], str | None]:
     return ["FACEBOOK_READBACK_FAILED"], None
 
 
+def _instagram_blockers(receipt: dict[str, Any]) -> list[str]:
+    if not (receipt.get("status") == "DELIVERED" and receipt.get("readback_ok") is True):
+        return ["INSTAGRAM_READBACK_FAILED"]
+    if receipt.get("remote_visual_readback_ok") is not True:
+        return ["INSTAGRAM_REMOTE_VISUAL_READBACK_FAILED"]
+    if receipt.get("remote_visual_identity_bound") is not True:
+        return ["INSTAGRAM_VISUAL_IDENTITY_UNBOUND"]
+    return []
+
+
 def _visual_blockers(receipt: dict[str, Any]) -> list[str]:
     if receipt.get("status") == "VERIFIED" and receipt.get("readback_ok") is True:
         return []
@@ -127,8 +137,7 @@ def build_report(
             owner_actions.append(fb_owner_action)
 
         instagram = channel_receipts.get("instagram") if isinstance(channel_receipts.get("instagram"), dict) else {}
-        if not (instagram.get("status") == "DELIVERED" and instagram.get("readback_ok") is True):
-            blockers.append("INSTAGRAM_READBACK_FAILED")
+        blockers.extend(_instagram_blockers(instagram))
 
         transaction_blockers = _transaction_blockers(transaction)
         if "EXTERNAL_DELIVERY_BLOCKED" in transaction_blockers and any(
@@ -142,6 +151,8 @@ def build_report(
                 "FACEBOOK_READBACK_PERMISSION_MISSING",
                 "FACEBOOK_READBACK_FAILED",
                 "INSTAGRAM_READBACK_FAILED",
+                "INSTAGRAM_REMOTE_VISUAL_READBACK_FAILED",
+                "INSTAGRAM_VISUAL_IDENTITY_UNBOUND",
             )
         ):
             transaction_blockers = [value for value in transaction_blockers if value != "EXTERNAL_DELIVERY_BLOCKED"]
@@ -173,12 +184,14 @@ def build_report(
                 "visual_status": visual.get("status"),
                 "facebook_status": facebook.get("status"),
                 "instagram_status": instagram.get("status"),
+                "instagram_remote_visual_readback_ok": instagram.get("remote_visual_readback_ok"),
+                "instagram_remote_visual_identity_bound": instagram.get("remote_visual_identity_bound"),
                 "transaction_terminal_reason": transaction.get("terminal_reason"),
             }
         )
 
     return {
-        "schema_version": "1.2",
+        "schema_version": "1.3",
         "mode": "SHADOW_TRUTH_GATE_REPORT",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -187,7 +200,7 @@ def build_report(
         "blocked_count": len(story_ids) - truth_complete,
         "blocker_counts": dict(sorted(blocker_counts.items())),
         "rows": rows,
-        "truth_rule": "A green workflow, internal ID, outbox item, legacy published flag or internal visual assignment never satisfies external truth; replay candidates require a CONSISTENT canonical social-visual/site-manifest binding and the receipt ledger must preserve the same binding state.",
+        "truth_rule": "A green workflow, internal ID, outbox item, legacy published flag or internal visual assignment never satisfies external truth; replay candidates require a CONSISTENT canonical social-visual/site-manifest binding, receipt state must preserve that binding, and Instagram requires both remote image readback and explicit identity binding to the approved visual.",
     }
 
 
