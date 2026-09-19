@@ -206,10 +206,11 @@ def test_global_daily_ceiling_is_never_exceeded() -> None:
 def test_global_weekly_ceiling_is_never_exceeded() -> None:
     receipts = []
     for i in range(48):
-        occurred = BASE - timedelta(days=i % 6, minutes=i)
+        occurred = BASE - timedelta(days=i % 5, minutes=i)
         receipts.append(history_receipt(i, occurred=occurred))
-    c = candidate(action_id="weekly-cap", publication=BASE - timedelta(days=1), earliest=BASE)
-    decision = EngagementScheduler().schedule_batch([c], receipts, now_utc=BASE).decisions[0]
+    decision = EngagementScheduler().schedule_batch(
+        [candidate(action_id="weekly-cap")], receipts, now_utc=BASE
+    ).decisions[0]
     assert decision.code == DecisionCode.HOLD_RATE_BUDGET_WEEKLY
 
 
