@@ -37,6 +37,15 @@ def _meta_index(doc: dict[str, Any]) -> dict[tuple[str, str], dict[str, Any]]:
     }
 
 
+def _identity_index(doc: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
+    doc = doc or {}
+    return {
+        str(row.get("story_id") or ""): row
+        for row in doc.get("results") or []
+        if isinstance(row, dict) and row.get("story_id")
+    }
+
+
 def _site_receipt(row: dict[str, Any] | None, canonical_url: str | None) -> dict[str, Any]:
     row = row or {}
     ok = row.get("readback_ok") is True
@@ -75,14 +84,25 @@ def _visual_receipt(row: dict[str, Any] | None) -> dict[str, Any]:
     }
 
 
-def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | None) -> dict[str, Any]:
+def _social_receipt(
+    channel: str,
+    row: dict[str, Any] | None,
+    remote_id: str | None,
+    identity: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     row = row or {}
+    identity = identity or {}
     ok = row.get("readback_ok") is True and bool(row.get("permalink"))
     status = "DELIVERED" if ok else str(row.get("status") or ("NOT_DELIVERED" if not remote_id else "FAILED"))
     remote_media = row.get("remote_media") if isinstance(row.get("remote_media"), dict) else {}
     remote_media_results = [
         item for item in (row.get("remote_media_results") or []) if isinstance(item, dict)
     ]
+    remote_visual_identity_bound = row.get("remote_visual_identity_bound")
+    remote_visual_identity_note = row.get("remote_visual_identity_note")
+    if channel == "instagram" and identity:
+        remote_visual_identity_bound = identity.get("identity_bound") is True
+        remote_visual_identity_note = identity.get("identity_state")
     return {
         "channel": channel,
         "status": status,
@@ -95,8 +115,13 @@ def _social_receipt(channel: str, row: dict[str, Any] | None, remote_id: str | N
         "media_type": row.get("media_type"),
         "remote_media_url": row.get("remote_media_url"),
         "remote_visual_readback_ok": row.get("remote_visual_readback_ok"),
-        "remote_visual_identity_bound": row.get("remote_visual_identity_bound"),
-        "remote_visual_identity_note": row.get("remote_visual_identity_note"),
+        "remote_visual_identity_bound": remote_visual_identity_bound,
+        "remote_visual_identity_note": remote_visual_identity_note,
+        "remote_visual_identity_method": identity.get("comparison_method") if channel == "instagram" else None,
+        "remote_visual_identity_state": identity.get("identity_state") if channel == "instagram" else None,
+        "remote_visual_identity_matched_remote_id": identity.get("matched_remote_id") if channel == "instagram" else None,
+        "remote_visual_identity_best_score": identity.get("best_composite_score") if channel == "instagram" else None,
+        "remote_visual_identity_passing_candidate_count": identity.get("passing_candidate_count") if channel == "instagram" else None,
         "remote_image_candidate_count": row.get("remote_image_candidate_count"),
         "remote_image_readback_passed_count": row.get("remote_image_readback_passed_count"),
         "remote_media_results": remote_media_results,
@@ -117,10 +142,12 @@ def materialize(
     site: dict[str, Any],
     visual: dict[str, Any],
     meta: dict[str, Any],
+    instagram_identity: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     site_by_story = _site_index(site)
     visual_by_story = _visual_index(visual)
     meta_by_story = _meta_index(meta)
+    identity_by_story = _identity_index(instagram_identity)
     candidate_ids = set(candidates.get("first_ten_candidate_ids") or [])
     rows = []
     externally_verified_ids: list[str] = []
@@ -143,6 +170,7 @@ def materialize(
                 "instagram",
                 meta_by_story.get((story_id, "instagram")),
                 candidate.get("instagram_remote_id_internal"),
+                identity_by_story.get(story_id),
             ),
         }
         externally_verified = (
@@ -181,10 +209,13 @@ def materialize(
         )
 
     return {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "mode": "SHADOW_RECEIPT_LEDGER",
         "publication_authority": "NONE",
-        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence. Instagram delivery requires remote image payload readback and explicit identity binding to the approved visual; remote image presence alone is diagnostic, not a complete receipt. The approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
+        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence. Instagram delivery requires remote image payload readback plus an independent deterministic normalized-pixel identity match to exactly one approved Core v2 visual; remote image presence alone is diagnostic, not a complete receipt. The approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
+        "instagram_visual_identity_bound_count": sum(
+            1 for row in rows if ((row.get("receipts") or {}).get("instagram") or {}).get("remote_visual_identity_bound") is True
+        ),
         "candidate_count": len(rows),
         "externally_verified_count": len(externally_verified_ids),
         "externally_verified_story_ids": externally_verified_ids,
@@ -201,6 +232,7 @@ def main() -> int:
     parser.add_argument("--site-readback", required=True)
     parser.add_argument("--visual-readback", required=True)
     parser.add_argument("--meta-readback", required=True)
+    parser.add_argument("--instagram-identity")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
     result = materialize(
@@ -208,12 +240,14 @@ def main() -> int:
         _load(args.site_readback),
         _load(args.visual_readback),
         _load(args.meta_readback),
+        _load(args.instagram_identity) if args.instagram_identity else None,
     )
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(
         json.dumps(
             {
                 "candidate_count": result["candidate_count"],
+                "instagram_visual_identity_bound_count": result["instagram_visual_identity_bound_count"],
                 "externally_verified_count": result["externally_verified_count"],
                 "ten_story_external_delivery_ready": result["ten_story_external_delivery_ready"],
                 "acceptance_ready": result["acceptance_ready"],
