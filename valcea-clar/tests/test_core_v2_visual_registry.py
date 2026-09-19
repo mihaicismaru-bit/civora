@@ -39,9 +39,11 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
 
         hcl344 = stories["hcl-344-local-education-access"]
         hcl344_note = str((hcl344.get("image") or {}).get("editorial_note") or "")
+        hcl344_basis = str(hcl344.get("approval_basis") or "")
         self.assertIn("Foto de arhivă/context", hcl344_note)
         self.assertIn("nu prezintă Școala primară Licurici", hcl344_note)
-        self.assertIn("Consiliu Local", str(hcl344.get("approval_basis") or ""))
+        self.assertIn("Local Council decision", hcl344_basis)
+        self.assertIn("not evidence of the school building", hcl344_basis)
 
 
 if __name__ == "__main__":
