@@ -10,6 +10,7 @@ import time
 from pathlib import Path, PurePosixPath
 from typing import Any
 from urllib.error import HTTPError
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from visual_readback import inspect_article_image
@@ -68,10 +69,11 @@ def _content_range_total(value: str | None) -> int | None:
 def _download_remote_image(direct: str) -> tuple[bytes, str, int]:
     """Materialize one already-proven image with a bounded Range read.
 
-    The photo truth gate performs a tiny external binary readback first. A second
-    immediate unrestricted GET can be throttled by image CDNs (notably Commons),
-    so this stage requests only the bounded byte range it is willing to accept.
-    HTTP 429 remains fail-closed after a short bounded retry window.
+    This remains available for non-override sources. For externally verified
+    Wikimedia assets the runtime registry can instead provide a transport-only
+    remote reference, avoiding a redundant second binary fetch after provenance
+    and direct-asset readback have already succeeded or been accepted through the
+    bounded Commons identity fallback.
     """
     last_error: Exception | None = None
     for attempt, delay in enumerate(REMOTE_RETRY_DELAYS, start=1):
@@ -101,7 +103,6 @@ def _download_remote_image(direct: str) -> tuple[bytes, str, int]:
                     raise ValueError("direct image exceeds shadow materialization size cap")
                 if not payload:
                     raise ValueError("direct image returned an empty payload")
-                # A partial 206 whose total is larger than the bytes returned is not a complete image.
                 if status == 206 and total is not None and len(payload) != total:
                     raise ValueError("bounded range did not return the complete image")
                 return payload, content_type, attempt
@@ -115,6 +116,32 @@ def _download_remote_image(direct: str) -> tuple[bytes, str, int]:
     if last_error is not None:
         raise last_error
     raise ValueError("remote image materialization exhausted without result")
+
+
+def _verified_remote_reference(visual_assignment: dict[str, Any]) -> dict[str, Any] | None:
+    if visual_assignment.get("runtime_transport_override_only") is not True:
+        return None
+    reference_url = str(visual_assignment.get("runtime_materialization_url") or "").strip()
+    canonical = str(visual_assignment.get("runtime_materialization_canonical_direct_source_url") or "").strip()
+    image = visual_assignment.get("image") or {}
+    image_canonical = str(image.get("canonical_direct_source_url") or "").strip()
+    if not reference_url.startswith("https://") or not canonical.startswith("https://"):
+        raise ValueError("runtime transport override missing HTTPS reference or canonical source")
+    if image_canonical != canonical:
+        raise ValueError("runtime transport override canonical source mismatch")
+    if (urlsplit(reference_url).hostname or "").lower() != "upload.wikimedia.org":
+        raise ValueError("runtime transport override host not allowed")
+    filename = PurePosixPath(urlsplit(reference_url).path).name
+    if not filename:
+        raise ValueError("runtime transport override filename missing")
+    return {
+        "filename": filename,
+        "mode": "verified_remote_reference_read_only",
+        "reference_url": reference_url,
+        "canonical_source_url": canonical,
+        "runtime_materialization_basis": str(visual_assignment.get("runtime_materialization_basis") or "").strip(),
+        "bytes_materialized": False,
+    }
 
 
 def _materialize_image(
@@ -156,6 +183,10 @@ def _materialize_image(
     if cached is not None:
         return cached
 
+    reference = _verified_remote_reference(visual_assignment)
+    if reference is not None:
+        return reference
+
     payload, content_type, attempts = _download_remote_image(direct)
     target.write_bytes(payload)
     return {
@@ -170,7 +201,13 @@ def _materialize_image(
     }
 
 
-def render_shadow_article(article: dict[str, Any], *, visual_assignment: dict[str, Any], filename: str) -> str:
+def render_shadow_article(
+    article: dict[str, Any],
+    *,
+    visual_assignment: dict[str, Any],
+    filename: str,
+    image_src: str | None = None,
+) -> str:
     package = article.get("article_package") or {}
     image = visual_assignment.get("image") or {}
     headline = str(package.get("headline") or "").strip()
@@ -183,6 +220,9 @@ def render_shadow_article(article: dict[str, Any], *, visual_assignment: dict[st
 
     if not headline or not body or not alt or not credit or not disclosure or not source_url:
         raise ValueError("article/visual package incomplete")
+    src = image_src or f"/media/{filename}"
+    if not (src.startswith("/media/") or src.startswith("https://")):
+        raise ValueError("shadow image src must be local media or verified HTTPS reference")
 
     return f"""<!doctype html>
 <html lang="ro">
@@ -192,7 +232,7 @@ def render_shadow_article(article: dict[str, Any], *, visual_assignment: dict[st
 <h1>{html.escape(headline)}</h1>
 <p class="dek">{html.escape(dek)}</p>
 <figure>
-<img src="/media/{html.escape(filename)}" alt="{html.escape(alt)}">
+<img src="{html.escape(src)}" alt="{html.escape(alt)}">
 <figcaption>{html.escape(disclosure)} Credit: <a href="{html.escape(source_url)}">{html.escape(credit)}</a></figcaption>
 </figure>
 {_paragraphs(body)}
@@ -247,7 +287,12 @@ def build_shadow_packages(
                 output_dir=output_dir,
                 allow_remote_materialization=allow_remote_materialization,
             )
-            rendered = render_shadow_article(article, visual_assignment=assignment, filename=materialized["filename"])
+            rendered = render_shadow_article(
+                article,
+                visual_assignment=assignment,
+                filename=materialized["filename"],
+                image_src=str(materialized.get("reference_url") or "").strip() or None,
+            )
         except Exception as exc:
             rows.append({**row, "status": "BLOCKED", "reason": str(exc)})
             continue
@@ -274,14 +319,21 @@ def build_shadow_packages(
                 "expected_image_filename": materialized["filename"],
                 "materialized_image": materialized,
                 "binding": binding,
-                "truth_note": "Internal staged HTML/image binding only; no public HTTP delivery or public article image readback has occurred.",
+                "truth_note": (
+                    "Internal staged HTML/image-reference binding only. A verified remote reference may be used to avoid a redundant CDN fetch after independent photo/provenance readback. "
+                    "No public HTTP delivery, public article image readback or production image materialization has occurred."
+                ),
             }
         )
 
     passed = sum(row.get("status") == "PACKAGE_IMAGE_BOUND_SHADOW" for row in rows)
     blocked = sum(row.get("status") == "BLOCKED" for row in rows)
+    remote_reference_count = sum(
+        (row.get("materialized_image") or {}).get("mode") == "verified_remote_reference_read_only"
+        for row in rows
+    )
     return {
-        "schema_version": "1.3",
+        "schema_version": "1.4",
         "mode": MODE,
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -291,13 +343,13 @@ def build_shadow_packages(
         "public_article_binding_verified": False,
         "candidate_count": len(rows),
         "package_image_bound_shadow_count": passed,
+        "verified_remote_reference_bound_shadow_count": remote_reference_count,
         "blocked_count": blocked,
         "rows": rows,
         "truth_rule": (
-            "A staged HTML package may prove that the intended real photograph is wired into the future article package. "
-            "Verified remote materialization is read-only, byte-bounded and temporary; duplicate assignments reuse the staged byte copy, "
-            "and transient HTTP 429 is retried only within a short bounded window. It never proves public delivery, public image binding or VISUAL_READY. "
-            "Those require a later production-authorized public HTTP readback."
+            "A staged HTML package may prove that an independently verified real photograph is wired into the future article package. "
+            "Local bytes may be copied or fetched with a bounded read; an exact provenance-verified Wikimedia derivative may instead be referenced without a redundant second binary fetch. "
+            "Neither mode proves public delivery, public image binding or VISUAL_READY. Those require a later production-authorized public HTTP readback."
         ),
     }
 
@@ -326,6 +378,7 @@ def main() -> int:
         "status": "PASS_SHADOW",
         "candidate_count": report["candidate_count"],
         "package_image_bound_shadow_count": report["package_image_bound_shadow_count"],
+        "verified_remote_reference_bound_shadow_count": report["verified_remote_reference_bound_shadow_count"],
         "blocked_count": report["blocked_count"],
         "public_article_binding_verified": False,
         "publication_authority": "NONE",
