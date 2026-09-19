@@ -69,12 +69,17 @@ def _visual_receipt(row: dict[str, Any] | None) -> dict[str, Any]:
         "channel": "visual",
         "status": "VERIFIED" if ok else str(row.get("status") or "FAILED"),
         "readback_ok": ok,
+        "visual_truth_state": row.get("visual_truth_state"),
+        "failure_classification": row.get("failure_classification"),
+        "failure_domain": row.get("failure_domain"),
         "internal_truth_gate": row.get("internal_truth_gate") is True,
         "rights_basis": row.get("rights_basis"),
         "article_image_bound": ((row.get("article_binding") or {}).get("article_image_bound") is True),
         "public_image_readback_ok": ((row.get("public_image") or {}).get("readback_ok") is True),
         "provenance_source_readback_ok": ((row.get("provenance_source") or {}).get("readback_ok") is True),
         "direct_source_readback_ok": ((row.get("direct_source") or {}).get("readback_ok") is True),
+        "direct_source_effective_ok": row.get("direct_source_effective_ok") is True,
+        "direct_source_fallback_reason": row.get("direct_source_fallback_reason"),
         "canonical_site_visual_binding_state": row.get("canonical_site_visual_binding_state"),
         "canonical_site_image_bound": row.get("canonical_site_image_bound") is True,
         "canonical_site_visual_filename_match": row.get("canonical_site_visual_filename_match") is True,
@@ -209,10 +214,10 @@ def materialize(
         )
 
     return {
-        "schema_version": "1.4",
+        "schema_version": "1.5",
         "mode": "SHADOW_RECEIPT_LEDGER",
         "publication_authority": "NONE",
-        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence. Instagram delivery requires remote image payload readback plus an independent deterministic normalized-pixel identity match to exactly one approved Core v2 visual; remote image presence alone is diagnostic, not a complete receipt. The approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
+        "truth_rule": "Only independent external site, visual provenance and social readback can upgrade internal state to verified delivery evidence. Visual failures retain the auditor's explicit content-versus-transport classification but cannot become delivery merely by classification. Instagram delivery requires remote image payload readback plus an independent deterministic normalized-pixel identity match to exactly one approved Core v2 visual; remote image presence alone is diagnostic, not a complete receipt. The approved visual must remain CONSISTENT across the canonical social registry and site manifest.",
         "instagram_visual_identity_bound_count": sum(
             1 for row in rows if ((row.get("receipts") or {}).get("instagram") or {}).get("remote_visual_identity_bound") is True
         ),
