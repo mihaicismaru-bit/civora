@@ -26,6 +26,7 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
                 "hcl-345-regulated-local-authorization",
                 "isj-directori-2026-conducere-scoli",
                 "d8b16613110809449b51663b",
+                "6546c2c57ea3bec64c372747",
             },
         )
         for story_id, assignment in stories.items():
@@ -98,6 +99,33 @@ class CoreV2VisualRegistryTest(unittest.TestCase):
         self.assertEqual(
             lapusata_binding.get("candidate_fingerprint"),
             _candidate_fingerprint(expected_lapusata_candidate),
+        )
+
+        madulari = stories["6546c2c57ea3bec64c372747"]
+        madulari_image = madulari.get("image") or {}
+        madulari_binding = madulari.get("binding") or {}
+        self.assertEqual(madulari_image.get("source_type"), "creative_commons")
+        self.assertEqual(madulari_image.get("rights_basis"), "creative_commons")
+        self.assertEqual(madulari_image.get("license_url"), "https://creativecommons.org/licenses/by/3.0/")
+        self.assertIn("Alexandru Baboş", str(madulari_image.get("credit") or ""))
+        self.assertIn("satul Mamu", str(madulari_image.get("editorial_note") or ""))
+        self.assertIn("nu surprinde incendiul forestier", str(madulari_image.get("editorial_note") or ""))
+        self.assertIn("not evidence of the forest fire", str(madulari.get("approval_basis") or ""))
+
+        expected_madulari_candidate = {
+            "candidate_id": "6546c2c57ea3bec64c372747",
+            "source_label": "isu",
+            "source_url": "https://isuvl.igsu.ro/stiri-locale/incendiu-in-fondul-forestier-al-localitatii-madulari-801",
+            "headline": "Incendiu în fondul forestier al localității Mădulari",
+            "where": "Mădulari",
+            "who": "Inspectoratul pentru Situații de Urgență Vâlcea",
+        }
+        self.assertEqual(madulari_binding.get("candidate_id"), expected_madulari_candidate["candidate_id"])
+        for field in ("source_label", "source_url", "headline", "where", "who"):
+            self.assertEqual(madulari_binding.get(field), expected_madulari_candidate[field], field)
+        self.assertEqual(
+            madulari_binding.get("candidate_fingerprint"),
+            _candidate_fingerprint(expected_madulari_candidate),
         )
 
     def test_public_safety_candidate_identity_ignores_volatile_detail_hash(self):
