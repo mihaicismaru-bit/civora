@@ -33,6 +33,15 @@ def visual_receipt(state: str = "CONSISTENT", *, verified: bool = True, article_
     }
 
 
+def instagram_receipt(*, delivered: bool = True, visual_ok: bool = True, identity_bound: bool = True) -> dict:
+    return {
+        "status": "DELIVERED" if delivered else "FAILED",
+        "readback_ok": delivered,
+        "remote_visual_readback_ok": visual_ok,
+        "remote_visual_identity_bound": identity_bound,
+    }
+
+
 class ShadowGateReportTests(unittest.TestCase):
     def test_exact_permission_visual_and_kernel_blockers(self) -> None:
         state = "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND"
@@ -53,7 +62,7 @@ class ShadowGateReportTests(unittest.TestCase):
                             "error_code": 10,
                             "error_message": "(#10) This endpoint requires the 'pages_read_engagement' permission or the 'Page Public Content Access' feature.",
                         },
-                        "instagram": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(),
                     },
                 }
             ]
@@ -92,7 +101,7 @@ class ShadowGateReportTests(unittest.TestCase):
                         "site": {"status": "DELIVERED", "readback_ok": True},
                         "visual": visual_receipt(),
                         "facebook": {"status": "DELIVERED", "readback_ok": True},
-                        "instagram": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(),
                     },
                 }
             ]
@@ -115,6 +124,55 @@ class ShadowGateReportTests(unittest.TestCase):
         self.assertFalse(report["acceptance_ready"])
         self.assertEqual(report["publication_authority"], "NONE")
 
+    def test_remote_instagram_image_presence_without_identity_is_explicit_blocker(self) -> None:
+        candidates = {
+            "first_ten_candidate_ids": ["story-ig-unbound"],
+            "rows": [candidate("story-ig-unbound")],
+        }
+        receipts = {
+            "rows": [
+                {
+                    "story_id": "story-ig-unbound",
+                    "receipts": {
+                        "site": {"status": "DELIVERED", "readback_ok": True},
+                        "visual": visual_receipt(),
+                        "facebook": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(identity_bound=False),
+                    },
+                }
+            ]
+        }
+        transactions = {"rows": [{"story_id": "story-ig-unbound", "terminal_reason": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE"}]}
+        report = build_report(candidates, receipts, transactions)
+        row = report["rows"][0]
+        self.assertIn("INSTAGRAM_VISUAL_IDENTITY_UNBOUND", row["blockers"])
+        self.assertNotIn("EXTERNAL_DELIVERY_BLOCKED", row["blockers"])
+        self.assertTrue(row["instagram_remote_visual_readback_ok"])
+        self.assertFalse(row["instagram_remote_visual_identity_bound"])
+        self.assertEqual(report["truth_complete_count"], 0)
+
+    def test_remote_instagram_visual_readback_failure_is_distinct(self) -> None:
+        candidates = {
+            "first_ten_candidate_ids": ["story-ig-no-image"],
+            "rows": [candidate("story-ig-no-image")],
+        }
+        receipts = {
+            "rows": [
+                {
+                    "story_id": "story-ig-no-image",
+                    "receipts": {
+                        "site": {"status": "DELIVERED", "readback_ok": True},
+                        "visual": visual_receipt(),
+                        "facebook": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(visual_ok=False, identity_bound=False),
+                    },
+                }
+            ]
+        }
+        transactions = {"rows": [{"story_id": "story-ig-no-image", "terminal_reason": None}]}
+        report = build_report(candidates, receipts, transactions)
+        self.assertIn("INSTAGRAM_REMOTE_VISUAL_READBACK_FAILED", report["rows"][0]["blockers"])
+
     def test_missing_cross_surface_binding_fails_closed(self) -> None:
         candidates = {
             "first_ten_candidate_ids": ["story-missing"],
@@ -128,7 +186,7 @@ class ShadowGateReportTests(unittest.TestCase):
                         "site": {"status": "DELIVERED", "readback_ok": True},
                         "visual": visual_receipt(""),
                         "facebook": {"status": "DELIVERED", "readback_ok": True},
-                        "instagram": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(),
                     },
                 }
             ]
@@ -152,7 +210,7 @@ class ShadowGateReportTests(unittest.TestCase):
                         "site": {"status": "DELIVERED", "readback_ok": True},
                         "visual": visual_receipt("NOT_READY"),
                         "facebook": {"status": "DELIVERED", "readback_ok": True},
-                        "instagram": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(),
                     },
                 }
             ]
@@ -174,7 +232,7 @@ class ShadowGateReportTests(unittest.TestCase):
                         "site": {"status": "DELIVERED", "readback_ok": True},
                         "visual": visual_receipt("SOCIAL_VISUAL_PRESENT_SITE_UNBOUND"),
                         "facebook": {"status": "DELIVERED", "readback_ok": True},
-                        "instagram": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(),
                     },
                 }
             ]
@@ -204,7 +262,7 @@ class ShadowGateReportTests(unittest.TestCase):
                             "error_code": 190,
                             "error_message": "Invalid OAuth access token.",
                         },
-                        "instagram": {"status": "DELIVERED", "readback_ok": True},
+                        "instagram": instagram_receipt(),
                     },
                 }
             ]
