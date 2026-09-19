@@ -1,6 +1,6 @@
 {
-  "schema_version": "3.3",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN20-LATE-ISJ-NEGATIVE-RUNTIME-REGRESSIONS-NATURAL-VALIDATED",
+  "schema_version": "3.4",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN21-PHOTO-CANDIDATE-BINDING-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,9 +8,9 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "main_observed_sha": "6be5aeeb638a4e9211be1fc3c5b39c684323e4bd",
+    "main_observed_sha": "650f5b7fec3a9387ea0106159e8cca9de434ad0f",
     "main_observed_message": "Refresh VÂLCEA CLAR canonical public presentation",
-    "main_observed_at": "2026-09-18T23:02:55Z",
+    "main_observed_at": "2026-09-18T23:42:11Z",
     "legacy_live_activity_observed": true,
     "legacy_live_activity_note": "main continues to advance independently through legacy/public-presentation automation; those writes are observation-only and are not Core v2 readiness evidence",
     "legacy_public_projection": {
@@ -22,15 +22,15 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "871d154186dffea4290a40901dd5f2010dc5b9b6",
-    "message": "Run fail-closed late ISJ runtime regressions",
-    "workflow_run_id": 35404564343,
-    "workflow_run_number": 407,
+    "sha": "a542a7c8ef0caccea1dace710ab2dc7f5d948c93",
+    "message": "core v2: regress exact visual candidate binding",
+    "workflow_run_id": 35408459579,
+    "workflow_run_number": 413,
     "event": "push",
     "conclusion": "success",
-    "artifact_id": 10572091783,
-    "artifact_sha256": "7f6fa38b59389def202d90f3f4ce80f5ad12ce638893727f87a24035b23bc8e8",
-    "artifact_size_bytes": 2582074,
+    "artifact_id": 10573193370,
+    "artifact_sha256": "b7f833d344c9738d67d6b2a49c7d4c62660ebd2d26b12f563073c2a73f61d5f4",
+    "artifact_size_bytes": 2582736,
     "manual_dispatch": false,
     "production_write_authority": false,
     "ordered_shadow_stage_count": 26,
@@ -44,11 +44,13 @@
     "APAVIL/IPJ/ISU/municipal/CJ/ETA/ISJ source lanes remain fail-closed under their validated truth contracts",
     "ISJ field materiality, FactKernel composition, independent FactKernel integrity, deterministic shadow writer and independent full-article integrity remain evidence-bound",
     "canonical runtime validation directly cross-checks the late ISJ FactKernel, FactKernel-integrity, article and article-integrity artifacts instead of trusting only cycle summaries",
-    "a focused canonical negative runtime regression harness now mutates one real runtime artifact at a time and requires validate_shadow_runtime.py to fail closed",
-    "five late-ISJ tamper cases are covered: embedded FactKernel source identity, article claim cardinality, article-integrity candidate article id, article-integrity candidate source URL and FactKernel source identity",
-    "natural push run 407 executed all 26 shadow stages, canonical runtime validation and all five negative tamper regressions successfully; publication authority remained NONE",
-    "run 407 uploaded one evidence bundle, artifact 10572091783, digest sha256:7f6fa38b59389def202d90f3f4ce80f5ad12ce638893727f87a24035b23bc8e8",
-    "PHOTO truth remains fail-closed at 2/7; only HCL 343 and HCL 345 have approved rights-cleared contextual archive visuals",
+    "five late-ISJ negative runtime tamper regressions remain fail-closed under the canonical runtime validator",
+    "PHOTO gate schema 1.2 now propagates the exact first-party article source URL into each written visual candidate and computes a deterministic candidate fingerprint over candidate id, source lane, source URL, headline, location and institution",
+    "any future IPJ, ISU or ISJ visual assignment must carry an explicit strong binding with the exact article source URL and candidate fingerprint; a missing binding, changed source URL or changed fingerprint fails closed instead of inheriting approval from a matching story id",
+    "PHOTO binding regressions prove three cases: a public-safety assignment without a binding is blocked, a source-URL drift is blocked, and an exact source-URL plus fingerprint binding can pass the shadow visual contract when all other photo requirements are satisfied",
+    "natural push run 413 executed truth-bound contract tests, all 26 shadow stages, independent external replay, canonical runtime validation and negative tamper regressions successfully; publication authority remained NONE",
+    "run 413 uploaded one evidence bundle, artifact 10573193370, digest sha256:b7f833d344c9738d67d6b2a49c7d4c62660ebd2d26b12f563073c2a73f61d5f4",
+    "PHOTO coverage is not inflated by this hardening: the latest explicit approved-visual snapshot remains 2/7, with only HCL 343 and HCL 345 approved rights-cleared contextual archive visuals",
     "fresh exact-identity research for HCL 344 did not produce a story-specific rights-cleared photograph, so HCL 344 remains BLOCKED rather than accepting a generic school image",
     "historical external replay remains truth-incomplete: site 2/2, Instagram 2/2, Facebook 0/2, visual 0/2, externally verified receipts 0 and fully bound replay transactions 0",
     "no workflow_dispatch, rerun, merge, deploy, live Core v2 article publication, public projection mutation or Meta write was used"
@@ -112,6 +114,10 @@
     "visual_candidate_verified_shadow_count": 2,
     "blocked_count": 5,
     "latest_explicit_coverage_snapshot": "2/7",
+    "photo_gate_schema_version": "1.2",
+    "strong_binding_required_sources": ["ipj", "isu", "isj"],
+    "strong_binding_required_fields": ["source_url", "candidate_fingerprint"],
+    "candidate_fingerprint_fields": ["candidate_id", "source_label", "source_url", "headline", "where", "who"],
     "verified_story_ids": [
       "hcl-345-regulated-local-authorization",
       "hcl-343-local-public-finance"
@@ -123,7 +129,7 @@
       "hcl-344-local-education-access",
       "isj-directori-2026-conducere-scoli"
     ],
-    "truth_rule": "A verified article is not VISUAL_READY. Every story requires a story-specific real, semantically relevant, rights-cleared and approved visual plus external readback where enabled; generic or synthetic-as-photo substitutes remain forbidden."
+    "truth_rule": "A verified article is not VISUAL_READY. Every story requires a story-specific real, semantically relevant, rights-cleared and approved visual plus external readback where enabled; generic or synthetic-as-photo substitutes remain forbidden. IPJ/ISU/ISJ approvals additionally require exact article-source and candidate-fingerprint binding so identity drift cannot inherit visual approval."
   },
   "external_replay_truth": {
     "candidate_count": 2,
@@ -151,7 +157,7 @@
     },
     {
       "gate": "isj_photo_truth",
-      "reason": "The integrity-verified ISJ article has no story-specific approved rights-cleared real visual."
+      "reason": "The integrity-verified ISJ article has no story-specific approved rights-cleared real visual; any future assignment must also bind to its exact first-party source URL and current candidate fingerprint."
     },
     {
       "gate": "photo_truth_gate",
@@ -163,7 +169,7 @@
     },
     {
       "gate": "historical_visual_replay",
-      "reason": "Run 407 independently observed 0/2 historical visual replay passes. Internal visual metadata is not accepted as public image binding proof."
+      "reason": "Run 413 independently kept historical visual replay fail-closed. Internal visual metadata is not accepted as public image binding proof."
     },
     {
       "gate": "facebook_receipt_truth",
@@ -188,7 +194,8 @@
   ],
   "next": [
     "continue rights/relevance work for HCL 344 and current IPJ/ISU candidates without synthetic-as-photo or generic imagery",
-    "preserve ISJ PHOTO=BLOCKED unless a story-specific real rights-cleared visual with semantic relevance and disclosure is independently evidenced",
+    "when a real IPJ/ISU/ISJ photograph is found, create its shadow registry assignment only with the exact current article source URL and candidate fingerprint produced by PHOTO gate schema 1.2; never key approval only by transient detail/story id",
+    "preserve ISJ PHOTO=BLOCKED unless a story-specific real rights-cleared visual with semantic relevance, disclosure and exact candidate binding is independently evidenced",
     "keep historical visual replay fail-closed until public article/image binding and provenance readback both pass independently",
     "continue deterministic first-party resolution of the ISJ registration deadline without promoting OCR-derived facts",
     "keep Facebook delivery uncertified until read-only Graph permission is sufficient",
@@ -200,12 +207,14 @@
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "runtime_negative_regressions": "valcea-clar/core_v2/validate_shadow_runtime_negative_regressions.py",
     "photo_truth_gate": "valcea-clar/core_v2/photo_truth_gate.py",
+    "photo_binding_regressions": "valcea-clar/tests/test_core_v2_visual.py",
     "visual_registry": "valcea-clar/core_v2/visual_registry.json",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35404564343",
-    "artifact_id": 10572091783,
-    "artifact_sha256": "7f6fa38b59389def202d90f3f4ce80f5ad12ce638893727f87a24035b23bc8e8",
-    "artifact_size_bytes": 2582074,
-    "negative_regression_cases": 5
+    "natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35408459579",
+    "artifact_id": 10573193370,
+    "artifact_sha256": "b7f833d344c9738d67d6b2a49c7d4c62660ebd2d26b12f563073c2a73f61d5f4",
+    "artifact_size_bytes": 2582736,
+    "negative_runtime_regression_cases": 5,
+    "photo_candidate_binding_regression_cases": 3
   }
 }
