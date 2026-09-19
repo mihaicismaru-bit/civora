@@ -5,6 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
+from build_shadow_candidate_ledger import _canonical_visual_binding
 from external_readback import inspect_html
 from meta_readback import parse_meta_error_body, parse_meta_object
 from visual_readback import _effective_direct_source_status, inspect_provenance_asset
@@ -124,6 +125,55 @@ class ExternalReadbackTest(unittest.TestCase):
         )
         self.assertFalse(bad)
         self.assertIsNone(bad_reason)
+
+    def test_canonical_visual_binding_requires_same_asset_source_rights_and_verified_provenance(self):
+        source_url = "https://commons.wikimedia.org/wiki/File:Expected.jpg"
+        result = _canonical_visual_binding(
+            expected_image_path="valcea-clar/social/photos/approved/expected.jpg",
+            visual_source_url=source_url,
+            visual_rights_basis="creative_commons",
+            real_visual=True,
+            manifest_image={
+                "public_url": "https://valceaclar.ro/media/social/expected.jpg",
+                "source_url": source_url,
+                "rights_basis": "creative_commons",
+                "provenance_status": "VERIFIED",
+            },
+        )
+        self.assertEqual(result["canonical_site_visual_binding_state"], "CONSISTENT")
+        self.assertTrue(result["canonical_site_image_bound"])
+        self.assertTrue(result["canonical_site_visual_filename_match"])
+        self.assertTrue(result["canonical_site_visual_source_match"])
+        self.assertTrue(result["canonical_site_visual_rights_match"])
+        self.assertTrue(result["canonical_site_visual_provenance_verified"])
+
+    def test_canonical_visual_binding_detects_social_visual_present_but_site_unbound(self):
+        result = _canonical_visual_binding(
+            expected_image_path="valcea-clar/social/photos/approved/expected.jpg",
+            visual_source_url="https://commons.wikimedia.org/wiki/File:Expected.jpg",
+            visual_rights_basis="creative_commons",
+            real_visual=True,
+            manifest_image=None,
+        )
+        self.assertEqual(result["canonical_site_visual_binding_state"], "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND")
+        self.assertFalse(result["canonical_site_image_bound"])
+
+    def test_canonical_visual_binding_detects_different_site_asset(self):
+        source_url = "https://commons.wikimedia.org/wiki/File:Expected.jpg"
+        result = _canonical_visual_binding(
+            expected_image_path="valcea-clar/social/photos/approved/expected.jpg",
+            visual_source_url=source_url,
+            visual_rights_basis="creative_commons",
+            real_visual=True,
+            manifest_image={
+                "public_url": "https://valceaclar.ro/media/social/other.jpg",
+                "source_url": source_url,
+                "rights_basis": "creative_commons",
+                "provenance_status": "VERIFIED",
+            },
+        )
+        self.assertEqual(result["canonical_site_visual_binding_state"], "SITE_BOUND_DIFFERENT_ASSET")
+        self.assertFalse(result["canonical_site_visual_filename_match"])
 
 
 if __name__ == "__main__":
