@@ -22,11 +22,12 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_field_evidence",
                 "isj_context_documents", "isj_calendar_field_evidence", "isj_calendar_scope_binding",
                 "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
-                "isj_registration_deadline_promotion_validation", "isj_field_materiality", "isj_fact_kernel",
-                "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth", "shadow_site_package",
+                "isj_registration_deadline_promotion_validation", "isj_field_materiality",
+                "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
+                "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth", "shadow_site_package",
             ],
         )
-        self.assertEqual(len(names), 30)
+        self.assertEqual(len(names), 32)
         joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
         for forbidden in ("workflow_dispatch", "git push", "merge", "deploy", "facebook_publish", "instagram_publish", "manual-publish"):
             self.assertNotIn(forbidden, joined)
@@ -51,7 +52,10 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         fields = by_name["isj_field_evidence"]; context_docs = by_name["isj_context_documents"]; calendar_fields = by_name["isj_calendar_field_evidence"]
         calendar_scope = by_name["isj_calendar_scope_binding"]; calendar_scope_validation = by_name["isj_calendar_scope_validation"]
         deadline_promotion = by_name["isj_registration_deadline_promotion"]; deadline_validation = by_name["isj_registration_deadline_promotion_validation"]
-        field_materiality = by_name["isj_field_materiality"]; fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
+        field_materiality = by_name["isj_field_materiality"]
+        fact_deadline_promotion = by_name["isj_fact_kernel_deadline_promotion"]
+        fact_deadline_validation = by_name["isj_fact_kernel_deadline_promotion_validation"]
+        fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
         writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]; photo = by_name["photo_truth"]
 
         self.assertIn(str(isj.output), detail.argv); self.assertIn("--live", detail.argv)
@@ -89,10 +93,25 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(deadline_validation.output), field_materiality.argv)
         self.assertIn("2026", field_materiality.argv)
         self.assertNotIn("--live", field_materiality.argv)
+
+        self.assertIn(str(field_materiality.output), fact_deadline_promotion.argv)
+        self.assertIn(str(deadline_promotion.output), fact_deadline_promotion.argv)
+        self.assertIn(str(deadline_validation.output), fact_deadline_promotion.argv)
+        self.assertIn("2026", fact_deadline_promotion.argv)
+        self.assertNotIn("--live", fact_deadline_promotion.argv)
+        self.assertIn(str(field_materiality.output), fact_deadline_validation.argv)
+        self.assertIn(str(deadline_promotion.output), fact_deadline_validation.argv)
+        self.assertIn(str(deadline_validation.output), fact_deadline_validation.argv)
+        self.assertIn(str(fact_deadline_promotion.output), fact_deadline_validation.argv)
+        self.assertIn("--prove-tamper", fact_deadline_validation.argv)
+        self.assertNotIn("--live", fact_deadline_validation.argv)
+
         self.assertNotIn(str(calendar_scope.output), fact_kernel.argv)
         self.assertNotIn(str(calendar_scope_validation.output), fact_kernel.argv)
         self.assertNotIn(str(deadline_promotion.output), fact_kernel.argv)
         self.assertNotIn(str(deadline_validation.output), fact_kernel.argv)
+        self.assertNotIn(str(fact_deadline_promotion.output), fact_kernel.argv)
+        self.assertNotIn(str(fact_deadline_validation.output), fact_kernel.argv)
         self.assertIn(str(field_materiality.output), fact_kernel.argv); self.assertIn(str(fields.output), fact_kernel.argv); self.assertIn(str(calendar_fields.output), fact_kernel.argv); self.assertNotIn("--live", fact_kernel.argv)
         self.assertIn(str(fact_kernel.output), fact_integrity.argv); self.assertNotIn("--live", fact_integrity.argv)
         self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv); self.assertNotIn("--live", writer.argv)
@@ -104,8 +123,9 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "isj", "isj_detail", "isj_materiality", "isj_embedded_notice", "isj_embedded_target",
             "isj_embedded_content", "isj_field_evidence", "isj_context_documents", "isj_calendar_field_evidence",
             "isj_calendar_scope_binding", "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
-            "isj_registration_deadline_promotion_validation", "isj_field_materiality", "isj_fact_kernel",
-            "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth",
+            "isj_registration_deadline_promotion_validation", "isj_field_materiality",
+            "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
+            "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer", "isj_article_integrity", "photo_truth",
         ]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))
