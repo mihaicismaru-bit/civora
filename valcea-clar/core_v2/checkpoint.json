@@ -1,6 +1,6 @@
 {
-  "schema_version": "5.7",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN44-ISJ-DEADLINE-MATERIALITY-RUNTIME-NATURAL-VALIDATED",
+  "schema_version": "5.8",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN45-ISJ-FACT-KERNEL-DEADLINE-PROMOTION-GATE-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,8 +8,8 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "civora_main_observed_sha": "f7b4951685696eb6a7e98e615d6a19420316c47f",
-    "civora_main_observed_message": "Checkpoint verified decision-maker projection",
+    "civora_main_observed_sha": "736faa278671fb2cdcf0f1099627c608b95013d0",
+    "civora_main_observed_message": "PPOS CP90: normalize closure markers",
     "public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
     "public_projection_message": "sync: reconcile CIVORA canonical stories",
@@ -17,17 +17,17 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "aeb5678b71f2f69b8da72703ffb0ad9c4954ccab",
-    "message": "Wire ISJ deadline promotion into Core v2 materiality runtime",
-    "functional_increment": "The ordered Core v2 orchestrator now runs the fail-closed ISJ registration-deadline promotion gate and independent validator immediately after same-document calendar-scope validation, persists both artifacts in the cycle runtime snapshots, and permits materiality to consume registration_deadline=2026-10-02 only when the exact promotion/evidence identities independently agree. The deadline remains explicitly materiality-only: it is excluded from the existing FactKernel/writer evidence path and grants no publication, delivery, or acceptance authority.",
-    "workflow_run_id": 35464395347,
-    "workflow_run_number": 625,
+    "sha": "03250a480e4750e11c477911ebf8ab3cdd759de0",
+    "message": "Add fail-closed ISJ deadline FactKernel promotion gate",
+    "functional_increment": "A separate fail-closed ISJ registration-deadline promotion gate now permits the already independently validated materiality-only deadline 2026-10-02 to become eligible for a future FactKernel composition step only when the exact upstream materiality promotion evidence ID and all supporting evidence identities remain unchanged. A separate independent validator recomputes the deterministic FactKernel-promotion evidence ID and proves three tamper cases fail closed. This increment does not alter the existing FactKernel, writer/article, site, social, receipt or acceptance paths and is not yet wired into the runtime orchestrator.",
+    "workflow_run_id": 35467431798,
+    "workflow_run_number": 629,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10590079350,
-    "artifact_sha256": "038b931905f6e628507f716559df542538a6870bf8cc31a4f70f6ca1d994fee6",
-    "artifact_size_bytes": 223850,
+    "artifact_id": 10591970673,
+    "artifact_sha256": "27219f9ba685d674e27ccc85b961c58a3f2004e8a4079f4adcf6e2f161db10ee",
+    "artifact_size_bytes": 223787,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
@@ -37,18 +37,19 @@
   "done": [
     "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness",
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
-    "PHOTO current shadow snapshot remains 7/7 verified with zero blocked current-photo lanes",
+    "bounded pilot registry remains eight sources: APAVIL, CJ Valcea, ETA, Filarmonica Valcea, IPJ Valcea, ISJ Valcea, ISU Valcea and Primaria Ramnicu Valcea",
+    "PHOTO current shadow snapshot remains 7/7 verified with zero blocked current-photo lanes; this is shadow candidate coverage only",
     "historical FactKernel evidence remains 2/2 and historical article-claims evidence remains 2/2 with fabricated_claims=0",
     "SITE_APPROVED_VISUAL_ABSENT taxonomy remains active and acceptance-neutral for the historical water article",
     "same-document ISJ calendar scope remains independently validated runtime evidence for registration_deadline=2026-10-02",
-    "ISJ deadline promotion gate and independent validator are now ordered runtime stages directly after calendar-scope validation",
-    "cycle runtime_artifact_snapshots now persist calendar scope binding, calendar scope validation, deadline promotion, and deadline promotion validation",
-    "the natural runtime promotion artifact is MATERIALITY_PROMOTION_VERIFIED_SHADOW for registration_deadline=2026-10-02 with deterministic promotion evidence ID isj-deadline-promotion-a60a847cb89cd360a9e52253",
-    "the natural independent promotion validation is PASS_SHADOW and passed three fail-closed tamper regressions",
-    "ISJ field materiality consumed registration_deadline=2026-10-02 only from the independently validated exact-identity promotion artifact and now has unresolved_fields=[]",
-    "registration_deadline remains deliberately excluded from FactKernel evidence_ids and writer/article output; FactKernel and article contain no 2026-10-02 claim in RUN44",
-    "natural push run 625 completed all 30 ordered shadow stages plus external site/visual/Meta replay, receipt/transaction binding, runtime invariants and late-ISJ tamper regressions with conclusion success",
-    "run 625 retained publication_authority=NONE and acceptance_ready=false; no workflow_dispatch or manual rerun was used and no merge, deploy, public-projection mutation, Core v2 live publication or Meta write occurred"
+    "ISJ field materiality continues to consume registration_deadline=2026-10-02 only from the independently validated exact-identity materiality promotion artifact and retains field_evidence_id_count=4 for the existing FactKernel path",
+    "a new separate isj_fact_kernel_deadline_promotion_shadow_lane requires exact equality of materiality deadline, upstream materiality promotion ID, deadline field evidence ID, scope evidence ID, raw registration evidence ID, document evidence ID, page number/hash, excerpt, supporting IDs and the pristine four-ID existing FactKernel evidence set before it can set fact_kernel_promotion_allowed=true",
+    "the new FactKernel promotion gate rejects any attempt to treat the deadline as already inserted into the existing FactKernel evidence IDs and requires registration_deadline to remain explicitly excluded upstream until the separate composition increment",
+    "the new FactKernel promotion gate computes a deterministic isj-fact-kernel-deadline-promotion evidence ID but grants no writer, site, social, receipt, acceptance, merge or deployment authority",
+    "a separate independent validator reconstructs the exact materiality/upstream identities and deterministic FactKernel-promotion evidence ID",
+    "three FactKernel-promotion tamper regressions cover a changed materiality deadline, a detached upstream materiality-promotion evidence ID and a detached page hash",
+    "natural push run 629 completed contract tests including the new gate/validator, the existing 30-stage read-only shadow cycle, external site/visual/Meta replay, receipt/transaction binding, runtime invariants and late-ISJ fail-closed regressions with conclusion success",
+    "run 629 retained publication_authority=NONE and acceptance_ready=false; no workflow_dispatch or manual rerun was used and no merge, deploy, public-projection mutation, Core v2 live publication or Meta write occurred"
   ],
   "inventory": {
     "KEEP": 232,
@@ -74,28 +75,30 @@
     "registration_window_start_date_derivable": "2026-09-14",
     "registration_deadline_derivable": "2026-10-02",
     "runtime_orchestrator_wired": true,
-    "runtime_artifact_persisted": true,
     "runtime_independent_validation": true,
     "runtime_validation_status": "PASS_SHADOW",
-    "runtime_tamper_regressions_passed": 2,
     "runtime_stage_count": 30,
     "deadline_materiality_promotion_gate_implemented": true,
     "deadline_materiality_promotion_gate_naturally_validated": true,
     "deadline_materiality_promotion_independent_validator": true,
     "deadline_materiality_promotion_tamper_regressions_passed": 3,
     "deadline_materiality_promotion_runtime_wired": true,
-    "deadline_materiality_promotion_runtime_artifact_persisted": true,
-    "deadline_materiality_promotion_validation_runtime_artifact_persisted": true,
     "materiality_consumes_deadline_promotion": true,
     "materiality_registration_deadline": "2026-10-02",
     "materiality_promotion_evidence_id": "isj-deadline-promotion-a60a847cb89cd360a9e52253",
     "materiality_unresolved_fields": [],
-    "fact_kernel_promotion_wired": false,
+    "deadline_fact_kernel_promotion_gate_implemented": true,
+    "deadline_fact_kernel_promotion_gate_naturally_validated": true,
+    "deadline_fact_kernel_promotion_independent_validator": true,
+    "deadline_fact_kernel_promotion_tamper_regressions_passed": 3,
+    "deadline_fact_kernel_promotion_runtime_wired": false,
+    "deadline_fact_kernel_promotion_runtime_artifact_persisted": false,
+    "fact_kernel_composition_consumes_deadline_promotion": false,
     "writer_projection_wired": false,
-    "publication_authority": "NONE",
     "canonical_materiality_deadline_promoted": true,
     "canonical_fact_kernel_deadline_promoted": false,
-    "canonical_writer_deadline_promoted": false
+    "canonical_writer_deadline_promoted": false,
+    "publication_authority": "NONE"
   },
   "historical_evidence_binding": {
     "candidate_count": 2,
@@ -136,45 +139,12 @@
   },
   "external_replay_truth": {
     "candidate_count": 2,
-    "site_readback": {
-      "passed": 2,
-      "failed": 0
-    },
-    "visual_readback": {
-      "passed": 1,
-      "failed": 1,
-      "site_approved_visual_absent": 1,
-      "transport_failures": 0
-    },
-    "canonical_visual_binding": {
-      "consistent": 1,
-      "divergent": 1
-    },
-    "facebook": {
-      "passed": 0,
-      "failed": 2,
-      "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"
-    },
-    "instagram_object_and_remote_image_presence": {
-      "passed": 2,
-      "failed": 0
-    },
-    "instagram_remote_image_payloads": {
-      "passed": 10,
-      "failed": 0,
-      "water_contract": "4/4",
-      "cet_govora": "6/6"
-    },
-    "instagram_approved_visual_identity_binding": {
-      "passed": 1,
-      "failed": 1,
-      "passed_story_ids": [
-        "cet-govora-cine-a-decis-oprirea-20260821"
-      ],
-      "blocked_story_ids": [
-        "valcea-apa-canal-contract-152m-20260902"
-      ]
-    },
+    "site_readback": {"passed": 2, "failed": 0},
+    "visual_readback": {"passed": 1, "failed": 1, "site_approved_visual_absent": 1, "transport_failures": 0},
+    "canonical_visual_binding": {"consistent": 1, "divergent": 1},
+    "facebook": {"passed": 0, "failed": 2, "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"},
+    "instagram_object_presence": {"passed": 2, "failed": 0},
+    "instagram_approved_visual_identity_binding": {"passed": 1, "failed": 1},
     "externally_verified_complete_receipts": 0,
     "truth_complete_count": 0,
     "blocker_counts": {
@@ -186,55 +156,36 @@
     "acceptance_ready": false
   },
   "blocked": [
-    {
-      "gate": "historical_water_site_visual",
-      "reason": "The public water article is reachable, but the approved panorama is absent from the article HTML; this remains SITE_APPROVED_VISUAL_ABSENT / SITE_CONTENT."
-    },
-    {
-      "gate": "historical_water_instagram_visual_identity",
-      "reason": "The unique water carousel near-match remains below the unchanged correlation threshold; no identity claim is promoted."
-    },
-    {
-      "gate": "facebook_receipt_truth",
-      "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."
-    },
-    {
-      "gate": "cj_road_source_tls",
-      "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."
-    },
-    {
-      "gate": "isj_registration_deadline_fact_kernel_promotion",
-      "reason": "RUN44 deliberately stops the validated 2026-10-02 deadline at materiality. Existing FactKernel and writer/article remain unchanged and exclude the deadline until a separate downstream exact-evidence promotion gate is implemented and naturally validated."
-    },
-    {
-      "gate": "ten_story_acceptance",
-      "reason": "No story yet satisfies the complete independent source + FactKernel + article + photo + site + FB + IG + receipt + audit chain."
-    },
-    {
-      "gate": "production_cutover",
-      "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."
-    }
+    {"gate": "historical_water_site_visual", "reason": "The public water article is reachable, but the approved panorama is absent from the article HTML; this remains SITE_APPROVED_VISUAL_ABSENT / SITE_CONTENT."},
+    {"gate": "historical_water_instagram_visual_identity", "reason": "The unique water carousel near-match remains below the unchanged identity threshold; no identity claim is promoted."},
+    {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
+    {"gate": "cj_road_source_tls", "reason": "Official CJ Valcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
+    {"gate": "isj_registration_deadline_fact_kernel_runtime", "reason": "The separate FactKernel deadline-promotion gate and independent validator are naturally contract-validated, but RUN45 does not yet wire them into the ordered orchestrator and the existing FactKernel/writer/article still exclude 2026-10-02."},
+    {"gate": "ten_story_acceptance", "reason": "No story yet satisfies the complete independent source + FactKernel + article + photo + site + FB + IG + receipt + audit chain."},
+    {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "build a separate fail-closed ISJ FactKernel promotion gate that consumes the materiality-only deadline only when the exact promotion evidence ID and supporting evidence identities still match; do not let materiality itself authorize writer claims",
-    "after natural FactKernel replay, add a separate writer/article claim-binding increment for the deadline and independently verify the article claim against the promoted FactKernel",
+    "wire the new FactKernel deadline promotion gate and its independent validator into the ordered orchestrator immediately after ISJ field materiality and before the existing FactKernel composition, persist both runtime artifacts, and add runtime tamper validation; do not yet alter FactKernel prose",
+    "after a natural replay proves the runtime FactKernel-promotion artifact, make a separate bounded increment that allows FactKernel composition to consume the exact promoted registration_deadline evidence and independently verifies the new claim/evidence binding",
+    "only after the promoted FactKernel is naturally validated, add a separate writer/article deadline claim-binding increment; materiality alone must never authorize writer prose",
     "keep the water site issue classified as SITE_APPROVED_VISUAL_ABSENT and do not relax Instagram identity thresholds",
     "keep Facebook uncertified until read-only Graph permission is sufficient; keep CJ fail-closed on TLS",
     "do not start the 10-story acceptance series or cutover without all external truth gates and explicit owner authorization"
   ],
   "evidence": {
     "calendar_scope_gate": "valcea-clar/core_v2/isj_calendar_scope_binding_shadow_lane.py",
-    "calendar_scope_runtime_validator": "valcea-clar/core_v2/validate_isj_calendar_scope_truth.py",
-    "deadline_promotion_gate": "valcea-clar/core_v2/isj_registration_deadline_promotion_shadow_lane.py",
-    "deadline_promotion_validator": "valcea-clar/core_v2/validate_isj_registration_deadline_promotion.py",
+    "deadline_materiality_promotion_gate": "valcea-clar/core_v2/isj_registration_deadline_promotion_shadow_lane.py",
+    "deadline_materiality_promotion_validator": "valcea-clar/core_v2/validate_isj_registration_deadline_promotion.py",
     "field_materiality_lane": "valcea-clar/core_v2/isj_field_materiality_shadow_lane.py",
-    "field_materiality_validator": "valcea-clar/core_v2/validate_isj_field_materiality_truth.py",
+    "deadline_fact_kernel_promotion_gate": "valcea-clar/core_v2/isj_fact_kernel_deadline_promotion_shadow_lane.py",
+    "deadline_fact_kernel_promotion_validator": "valcea-clar/core_v2/validate_isj_fact_kernel_deadline_promotion.py",
+    "fact_kernel_lane": "valcea-clar/core_v2/isj_fact_kernel_shadow_lane.py",
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35464395347",
-    "validated_feature_artifact_id": 10590079350,
-    "validated_feature_artifact_sha256": "038b931905f6e628507f716559df542538a6870bf8cc31a4f70f6ca1d994fee6",
-    "validated_feature_artifact_size_bytes": 223850
+    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35467431798",
+    "validated_feature_artifact_id": 10591970673,
+    "validated_feature_artifact_sha256": "27219f9ba685d674e27ccc85b961c58a3f2004e8a4079f4adcf6e2f161db10ee",
+    "validated_feature_artifact_size_bytes": 223787
   }
 }
