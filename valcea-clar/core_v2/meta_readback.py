@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 
 FIELDS = {
     "facebook": "id,permalink_url,created_time",
-    "instagram": "id,permalink,timestamp,media_type,media_url",
+    "instagram": "id,permalink,timestamp,media_type,media_url,children{id,media_type,media_url}",
 }
 
 
@@ -64,6 +64,47 @@ def _read_remote_image(url: str, timeout: float = 12.0) -> dict[str, Any]:
         "content_type": content_type,
         "readback_ok": ok,
     }
+
+
+def _instagram_image_candidates(payload: dict[str, Any]) -> list[dict[str, str]]:
+    media_type = str(payload.get("media_type") or "").upper()
+    if media_type == "IMAGE":
+        media_url = str(payload.get("media_url") or "").strip()
+        if media_url.startswith("https://"):
+            return [
+                {
+                    "remote_id": str(payload.get("id") or ""),
+                    "media_type": "IMAGE",
+                    "media_url": media_url,
+                    "location": "parent",
+                }
+            ]
+        return []
+
+    if media_type != "CAROUSEL_ALBUM":
+        return []
+
+    children = payload.get("children")
+    child_rows = children.get("data") if isinstance(children, dict) else None
+    candidates: list[dict[str, str]] = []
+    for child in child_rows or []:
+        if not isinstance(child, dict):
+            continue
+        child_type = str(child.get("media_type") or "").upper()
+        media_url = str(child.get("media_url") or "").strip()
+        if child_type != "IMAGE" or not media_url.startswith("https://"):
+            continue
+        candidates.append(
+            {
+                "remote_id": str(child.get("id") or ""),
+                "media_type": "IMAGE",
+                "media_url": media_url,
+                "location": "carousel_child",
+            }
+        )
+        if len(candidates) >= 10:
+            break
+    return candidates
 
 
 def parse_meta_object(channel: str, remote_id: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -159,23 +200,26 @@ def read_meta(channel: str, remote_id: str, token: str, graph_version: str = "v2
     result = parse_meta_object(channel, remote_id, payload)
     if channel != "instagram":
         result["remote_visual_readback_ok"] = None
+        result["remote_visual_identity_bound"] = None
         return result
 
-    media_type = str(payload.get("media_type") or "").upper()
-    media_url = str(payload.get("media_url") or "").strip()
-    remote_media = (
-        _read_remote_image(media_url, timeout)
-        if media_type == "IMAGE" and media_url
-        else {
-            "status": "BLOCKED",
-            "reason": "instagram_media_is_not_single_image_or_media_url_missing",
-            "readback_ok": False,
-        }
-    )
+    candidates = _instagram_image_candidates(payload)
+    remote_media_results: list[dict[str, Any]] = []
+    for candidate in candidates:
+        readback = _read_remote_image(candidate["media_url"], timeout)
+        remote_media_results.append({**candidate, **readback})
+
+    passed_count = sum(1 for row in remote_media_results if row.get("readback_ok") is True)
     object_ok = result.get("object_readback_ok") is True
-    remote_visual_ok = remote_media.get("readback_ok") is True
-    result["remote_media"] = remote_media
+    remote_visual_ok = passed_count >= 1
+    result["remote_media_results"] = remote_media_results
+    result["remote_image_candidate_count"] = len(candidates)
+    result["remote_image_readback_passed_count"] = passed_count
     result["remote_visual_readback_ok"] = remote_visual_ok
+    result["remote_visual_identity_bound"] = False
+    result["remote_visual_identity_note"] = (
+        "remote Instagram image presence is externally read back, but transformed CDN bytes are not yet identity-bound to the approved Core v2 visual"
+    )
     result["readback_ok"] = bool(object_ok and remote_visual_ok)
     result["status"] = "PASS" if result["readback_ok"] else "FAILED"
     if object_ok and not remote_visual_ok:
