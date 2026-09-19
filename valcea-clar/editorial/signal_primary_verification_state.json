@@ -2,19 +2,141 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-19T17:42:07+03:00",
+  "generated_at": "2026-09-19T20:30:40+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-19T17:40:44+03:00",
-  "task_count": 65,
+  "queue_generated_at": "2026-09-19T20:29:14+03:00",
+  "task_count": 69,
   "primary_match_count": 0,
-  "no_match_count": 27,
-  "unrouted_count": 38,
+  "no_match_count": 29,
+  "unrouted_count": 40,
   "target_count": 17,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "1f9fcbd2ae33c319a88a317f",
+      "signal_title": "Comuna Mădulari și-a prezentat istoria la Universitatea de Vest din Timișoara: film documentar și două volume dedicate localității",
+      "signal_url": "https://www.impactreal.ro/2026/09/19/comuna-madulari-si-a-prezentat-istoria-la-universitatea-de-vest-din-timisoara-film-documentar-si-doua-volume-dedicate-localitatii/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-19T19:47:23+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "880eb05cd8eb3d4fd70a0c23",
+      "signal_title": "VIDEO – SIEKA GROUP SRL, alături de comunitatea din Vâlcea de Ziua de Curățenie Națională",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/19/video-sieka-group-srl-alaturi-de-comunitatea-din-valcea-de-ziua-de-curatenie-nationala/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-09-19T18:55:11+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "26a411b3e642afb4a8c3b753",
+      "signal_title": "Comuna Golești, la câțiva kilometri de Autostrada Sibiu-Pitești: piața imobiliară a explodat, primarul caută primul investitor",
+      "signal_url": "https://www.impactreal.ro/2026/09/19/comuna-golesti-la-cativa-kilometri-de-autostrada-sibiu-pitesti-piata-imobiliara-a-explodat-primarul-cauta-primul-investitor/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-19T18:39:13+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "57448ef7a6e47dbf7b43a813",
+      "signal_title": "Foto / Video. O șură săsească din 1891 a fost transformată într-un centru educațional la Vurpăr. „Să învețe direct din natură, nu din cărți”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/19/foto-video-o-sura-saseasca-din-1891-a-fost-transformata-intr-un-centru-educational-la-vurpar-sa-invete-direct-din-natura-nu-din-carti/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-19T16:08:15+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "5aae7c5a82bbaeeca9a0c475",
       "signal_title": "”Lupii” au mușcat și la Memorialul Elemer Tordai: ”Obiectivul este play-off-ul”",
