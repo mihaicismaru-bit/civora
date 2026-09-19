@@ -7,7 +7,12 @@ sys.path.insert(0, str(ROOT))
 
 from build_shadow_candidate_ledger import _canonical_visual_binding
 from external_readback import inspect_html
-from meta_readback import _image_response_ok, parse_meta_error_body, parse_meta_object
+from meta_readback import (
+    _image_response_ok,
+    _instagram_image_candidates,
+    parse_meta_error_body,
+    parse_meta_object,
+)
 from visual_readback import _effective_direct_source_status, inspect_provenance_asset
 
 
@@ -76,6 +81,50 @@ class ExternalReadbackTest(unittest.TestCase):
         self.assertEqual(result["media_type"], "IMAGE")
         self.assertEqual(result["remote_media_url"], "https://scontent.example/image.jpg")
         self.assertEqual(result["publication_authority"], "NONE")
+
+    def test_instagram_single_image_candidate_is_bounded(self):
+        candidates = _instagram_image_candidates(
+            {
+                "id": "180000",
+                "media_type": "IMAGE",
+                "media_url": "https://scontent.example/image.jpg",
+            }
+        )
+        self.assertEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]["location"], "parent")
+        self.assertEqual(candidates[0]["remote_id"], "180000")
+
+    def test_instagram_carousel_extracts_only_https_image_children(self):
+        candidates = _instagram_image_candidates(
+            {
+                "id": "180parent",
+                "media_type": "CAROUSEL_ALBUM",
+                "children": {
+                    "data": [
+                        {"id": "1", "media_type": "IMAGE", "media_url": "https://scontent.example/one.jpg"},
+                        {"id": "2", "media_type": "VIDEO", "media_url": "https://scontent.example/two.mp4"},
+                        {"id": "3", "media_type": "IMAGE", "media_url": "http://insecure.example/three.jpg"},
+                        {"id": "4", "media_type": "IMAGE", "media_url": "https://scontent.example/four.jpg"},
+                    ]
+                },
+            }
+        )
+        self.assertEqual([row["remote_id"] for row in candidates], ["1", "4"])
+        self.assertTrue(all(row["location"] == "carousel_child" for row in candidates))
+
+    def test_instagram_non_image_media_does_not_manufacture_visual_truth(self):
+        self.assertEqual(
+            _instagram_image_candidates(
+                {"id": "180video", "media_type": "VIDEO", "media_url": "https://scontent.example/video.mp4"}
+            ),
+            [],
+        )
+        self.assertEqual(
+            _instagram_image_candidates(
+                {"id": "180image", "media_type": "IMAGE", "media_url": ""}
+            ),
+            [],
+        )
 
     def test_remote_media_truth_accepts_only_http_image_payload(self):
         self.assertTrue(_image_response_ok(200, "image/jpeg"))
