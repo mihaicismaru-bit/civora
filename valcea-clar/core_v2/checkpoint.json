@@ -1,6 +1,6 @@
 {
-  "schema_version": "4.7",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN34-ISJ-CONTEXTUAL-PHOTO-TRUTH-NATURAL-VALIDATED",
+  "schema_version": "4.8",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN35-SOURCE-STABLE-LAPUSATA-PHOTO-TRUTH-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,7 +8,7 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "civora_main_observed_sha": "40beed4077c4c6489f5590beb8102bc9bf1d73cd",
+    "civora_main_observed_sha": "ed6e41be87e7373deb365a815ff62592882a7a4b",
     "civora_main_observed_message": "Checkpoint verified decision-maker projection",
     "public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "public_projection_main_sha": "8956dd5a9fdb38232318e25c01cf23c12ecdab91",
@@ -17,17 +17,17 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "c82462a28b756383e85ee1016a0e4aee560b2365",
-    "message": "Core v2: add rights-cleared ISJ contextual visual",
-    "functional_increment": "The current ISJ 2026 school-leadership story now has a story-bound, rights-cleared real photograph used only as explicitly disclosed local-education archive/context. The strong ISJ binding pins the approval to the exact first-party story source, headline, who/where fields and candidate fingerprint; the photo is explicitly not evidence of the 2026 competition, candidates, appointments or that the depicted school is among the 146 verified vacancies.",
-    "workflow_run_id": 35437977946,
-    "workflow_run_number": 541,
+    "sha": "704e867c619d278c0d31f8abc1e1b47776a56f2c",
+    "message": "Core v2: regress bounded Commons fallback in photo truth",
+    "functional_increment": "Public-safety candidate identity is now stable across first-party body/hash drift for IPJ/ISU by deriving the candidate ID from source label plus canonical source URL when no explicit story/article ID exists. The Lăpușata ISU story now carries a strongly bound, rights-cleared contextual archive photograph. PHOTO provenance also reuses the existing narrow Wikimedia Commons 429 fallback only when the independently read Commons JSON-LD identifies the exact approved filename and exposes a license; relevance and candidate binding remain fail-closed.",
+    "workflow_run_id": 35440166588,
+    "workflow_run_number": 561,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10582492928,
-    "artifact_sha256": "6fdb9da3dbc2c07a23a1e8cc2d3fa4bd048c85cffc1cba8a33e1103d8502ba56",
-    "artifact_size_bytes": 2558644,
+    "artifact_id": 10584105424,
+    "artifact_sha256": "76de48c2115ba694e1f31839b13fec728737dba6fefb9833a36845da2a025257",
+    "artifact_size_bytes": 2558608,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
@@ -39,13 +39,19 @@
     "single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin shadow executor",
     "PHOTO remains fail-closed; generic, text-card and synthetic-as-photo substitutions remain forbidden",
     "HCL 343, HCL 344 and HCL 345 retain their independently validated contextual archive visual approvals",
-    "ISJ 2026 now has a real Râmnicu Vâlcea school photograph with CC BY-SA 4.0 provenance, explicit contextual-archive disclosure and strong candidate binding",
-    "the ISJ visual disclosure explicitly states that the image does not depict ISJ Vâlcea, the 2026 competition, candidates, interviews or appointments and does not prove the depicted school is among the 146 verified vacancies",
-    "natural run 541 read back the ISJ Commons provenance page HTTP 200 and the exact direct JPEG HTTP 206, with candidate binding verified and no PHOTO gate problems",
-    "current PHOTO truth increased from 3/7 to 4/7 without generic or synthetic substitution",
+    "ISJ 2026 retains its rights-cleared local-education contextual archive visual with strong candidate binding",
+    "a real identity defect was found through truth artifacts rather than workflow color: consecutive live shadow cycles changed ISU detail-body hashes while the canonical Lăpușata source URL represented the same story",
+    "IPJ/ISU candidate identity now prefers explicit story/article ID, otherwise derives a deterministic 24-character ID from source label plus canonical source URL instead of volatile detail-body hash",
+    "regressions prove different detail hashes for the same ISU canonical source URL resolve to the same stable candidate ID and that explicit story IDs still win",
+    "Lăpușata now has a real rights-cleared CC BY-SA 4.0 geographic archive/context visual strongly bound to the exact current ISU source/headline/who/where fingerprint",
+    "the Lăpușata disclosure explicitly states that the image does not depict the car fire, vehicle, firefighters, intervention, damage or exact incident location",
+    "natural run 561 proves PHOTO schema 1.5 with 7 candidates, 5 verified and 2 blocked; Lăpușata stable story ID d8b16613110809449b51663b passed strong binding and external provenance/image readback",
+    "the same run observed a different raw current ISU detail_id for Lăpușata, demonstrating that source-stable identity survives live detail-body drift instead of chasing transient hashes",
+    "the PHOTO gate now reuses the existing bounded Wikimedia Commons 429 fallback only if the independently read Commons page JSON-LD identifies the exact approved filename and exposes a license; wrong-asset JSON-LD remains rejected",
+    "ISJ returned an upload.wikimedia.org HTTP 429 in run 561 but remained truthfully verified because the Commons source page independently proved the exact approved asset identity and license",
     "historical FactKernel evidence remains 2/2 and historical article-claims evidence remains 2/2 with fabricated_claims=0",
     "historical site readback remains 2/2; CET Govora visual/Instagram approved-image identity remains verified; the water-contract transaction remains fail-closed",
-    "natural push run 541 passed contract tests, all 26 ordered shadow stages, external site/visual/Meta replay, PHOTO truth, receipts, transactions, runtime invariants and tamper regressions",
+    "natural push run 561 passed contract tests, all 26 ordered shadow stages, external site/visual/Meta replay, PHOTO truth, receipts, transactions, runtime invariants and tamper regressions",
     "no merge, deploy, live Core v2 publication, public-projection mutation, Meta write, workflow_dispatch or manual rerun was used"
   ],
   "inventory": {
@@ -58,30 +64,39 @@
     "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
   },
   "photo_truth": {
-    "schema_version": "1.3",
+    "schema_version": "1.5",
     "candidate_count": 7,
-    "verified_shadow_count": 4,
-    "blocked_count": 3,
-    "coverage": "4/7",
+    "verified_shadow_count": 5,
+    "blocked_count": 2,
+    "coverage": "5/7",
     "verified_story_ids": [
       "hcl-343-local-public-finance",
       "hcl-344-local-education-access",
       "hcl-345-regulated-local-authorization",
-      "isj-directori-2026-conducere-scoli"
+      "isj-directori-2026-conducere-scoli",
+      "d8b16613110809449b51663b"
     ],
     "blocked_current_lanes": [
       "IPJ Vâlcea — ACȚIUNI PENTRU SIGURANȚA RUTIERĂ ÎN JUDEȚUL VÂLCEA",
-      "ISU Vâlcea — Incendiu în fondul forestier al localității Mădulari",
-      "ISU Vâlcea — Incendiu izbucnit la un autoturism, în localitatea Lăpușata"
+      "ISU Vâlcea — Incendiu în fondul forestier al localității Mădulari"
     ],
+    "lapusata_external_readback": {
+      "candidate_binding_verified": true,
+      "semantic_relevance": "archive_context",
+      "rights_basis": "creative_commons",
+      "external_readback_ok": true,
+      "stable_candidate_id": "d8b16613110809449b51663b",
+      "raw_detail_id_observed_in_feature_run": "d1301f973640f028f27e81ae"
+    },
     "isj_external_readback": {
       "candidate_binding_verified": true,
       "semantic_relevance": "archive_context",
       "rights_basis": "creative_commons",
       "provenance_http_status": 200,
-      "direct_image_http_status": 206,
-      "direct_image_content_type": "image/jpeg",
-      "rate_limited": false
+      "direct_image_http_status": 429,
+      "direct_source_effective_ok": true,
+      "direct_source_fallback": "wikimedia_commons_source_page_identity_fallback_for_direct_429",
+      "fallback_requires_exact_jsonld_asset_identity_and_license": true
     },
     "generic_or_synthetic_substitution_forbidden": true
   },
@@ -118,14 +133,13 @@
       "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
       "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 1,
-      "VISUAL_ARTICLE_BINDING_FAILED": 1,
-      "VISUAL_PROVENANCE_FAILED": 1
+      "VISUAL_ARTICLE_BINDING_FAILED": 1
     },
     "acceptance_ready": false
   },
   "blocked": [
-    {"gate": "photo_truth_gate", "reason": "Three of seven current written shadow candidates still lack a verified story-specific real, relevant and rights-cleared visual: IPJ and both current ISU stories."},
-    {"gate": "historical_water_visual_asset", "reason": "The exact approved Wikimedia provenance is independently verified, but the original direct asset remains rate-limited in historical hydration and the repository copy is absent; no substitute was introduced."},
+    {"gate": "photo_truth_gate", "reason": "Two of seven current written shadow candidates still lack a verified story-specific real, relevant and rights-cleared visual: current IPJ and ISU Mădulari."},
+    {"gate": "historical_water_visual_asset", "reason": "The exact approved water-contract visual still lacks a complete hydrated/bound proof path for approved-pixel identity; no substitute image is accepted."},
     {"gate": "historical_water_cross_surface_binding", "reason": "The water-contract approved social visual remains unbound to the canonical/public site story."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Vâlcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
@@ -134,8 +148,8 @@
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "continue PHOTO rights/relevance research for current IPJ and the two ISU stories; keep first-party images blocked unless reuse rights or an independently permitted license basis is demonstrable",
-    "add a bounded Wikimedia-only fallback to an exact thumbnail derivative of the same already-approved water-contract file when the original upload asset is HTTP 429; prove same-file provenance before comparison and never accept a different image",
+    "continue PHOTO rights/relevance research for current IPJ and ISU Mădulari; keep first-party images blocked unless reuse rights or an independently permitted license basis is demonstrable",
+    "apply the exact-asset bounded Wikimedia identity fallback to the historical water-contract hydration path only where the approved Commons file identity and license can be proved; never accept a different asset",
     "reconcile the historical water-contract canonical site/image binding read-only before any delivery receipt can be complete",
     "keep Facebook uncertified until read-only Graph permission is sufficient and a remote receipt can be independently read back",
     "keep CJ fail-closed on TLS and do not weaken certificate verification",
@@ -154,8 +168,8 @@
     "gate_report": "valcea-clar/core_v2/shadow_gate_report.py",
     "runtime_validator": "valcea-clar/core_v2/validate_shadow_runtime.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35437977946",
-    "feature_artifact_id": 10582492928,
-    "feature_artifact_sha256": "6fdb9da3dbc2c07a23a1e8cc2d3fa4bd048c85cffc1cba8a33e1103d8502ba56"
+    "feature_natural_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35440166588",
+    "feature_artifact_id": 10584105424,
+    "feature_artifact_sha256": "76de48c2115ba694e1f31839b13fec728737dba6fefb9833a36845da2a025257"
   }
 }
