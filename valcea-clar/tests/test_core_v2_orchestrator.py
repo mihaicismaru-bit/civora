@@ -96,13 +96,16 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(consumption.output), consumption_validation.argv)
         self.assertIn("--prove-tamper", consumption_validation.argv)
 
-        # Writer remains independent of the projection/consumption compatibility proof.
+        # Writer explicitly consumes the validated source-neutral pair. This removes
+        # the legacy filename auto-discovery seam while preserving the writer itself.
         self.assertIn(str(fact_kernel.output), writer.argv)
         self.assertIn(str(fact_integrity.output), writer.argv)
         self.assertNotIn(str(projection.output), writer.argv)
         self.assertNotIn(str(projection_validation.output), writer.argv)
-        self.assertNotIn(str(consumption.output), writer.argv)
-        self.assertNotIn(str(consumption_validation.output), writer.argv)
+        self.assertIn("--writer-consumption", writer.argv)
+        self.assertIn("--writer-consumption-validation", writer.argv)
+        self.assertIn(str(consumption.output), writer.argv)
+        self.assertIn(str(consumption_validation.output), writer.argv)
 
         for stage in (article_gate, article_validation):
             self.assertIn(str(fact_kernel.output), stage.argv)

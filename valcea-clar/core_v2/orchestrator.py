@@ -45,6 +45,14 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         elif name == "isj_writer_deadline_consumption_validation":
             name = "promoted_claim_writer_consumption_validation"
             argv[1] = "valcea-clar/core_v2/validate_promoted_claim_writer_consumption_runtime.py"
+        elif name == "isj_writer":
+            # Eliminate the hidden legacy filename auto-discovery dependency. The
+            # writer consumes the canonical neutral pair explicitly; writer code
+            # itself remains a kept/reused component in this increment.
+            argv.extend([
+                "--writer-consumption", str(workdir / _NEW_CONSUMPTION_ARTIFACT),
+                "--writer-consumption-validation", str(workdir / _NEW_VALIDATION_ARTIFACT),
+            ])
 
         transformed.append(CycleStage(name, tuple(argv), output))
 
@@ -59,6 +67,14 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         joined = "\n".join(stage.argv)
         if _OLD_CONSUMPTION_ARTIFACT in joined or _OLD_VALIDATION_ARTIFACT in joined:
             raise RuntimeError(f"legacy_writer_consumption_artifact_leaked:{stage.name}")
+    writer_stage = next(stage for stage in transformed if stage.name == "isj_writer")
+    writer_argv = list(writer_stage.argv)
+    for flag, expected in (
+        ("--writer-consumption", str(workdir / _NEW_CONSUMPTION_ARTIFACT)),
+        ("--writer-consumption-validation", str(workdir / _NEW_VALIDATION_ARTIFACT)),
+    ):
+        if flag not in writer_argv or writer_argv[writer_argv.index(flag) + 1] != expected:
+            raise RuntimeError(f"writer_not_explicitly_bound_to_neutral_consumption:{flag}")
     return tuple(transformed)
 
 
