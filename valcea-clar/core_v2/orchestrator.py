@@ -122,6 +122,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     isj_article_deadline_claim = workdir / "valcea-core-v2-isj-article-deadline-claim.json"
     isj_article_deadline_claim_validation = workdir / "valcea-core-v2-isj-article-deadline-claim-validation.json"
     isj_article_integrity = workdir / "valcea-core-v2-isj-article-integrity-shadow.json"
+    isj_promoted_claim_contract = workdir / "valcea-core-v2-isj-promoted-claim-contract.json"
+    isj_promoted_claim_contract_validation = workdir / "valcea-core-v2-isj-promoted-claim-contract-validation.json"
 
     site_article_ledger = workdir / "valcea-core-v2-site-verified-article-ledger.json"
     photo = workdir / "valcea-core-v2-photo-truth.json"
@@ -184,6 +186,34 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
             "--output", str(isj_article_deadline_claim_validation),
         ), isj_article_deadline_claim_validation),
         CycleStage("isj_article_integrity", (py, "valcea-clar/core_v2/isj_article_integrity.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--article", str(isj_article), "--output", str(isj_article_integrity)), isj_article_integrity),
+        CycleStage("isj_promoted_claim_contract", (
+            py, "valcea-clar/core_v2/isj_promoted_claim_contract_shadow_lane.py",
+            "--deadline-promotion-validation", str(isj_deadline_promotion_validation),
+            "--fact-promotion-validation", str(isj_fact_kernel_deadline_promotion_validation),
+            "--fact-kernel", str(isj_fact_kernel),
+            "--fact-integrity", str(isj_fact_integrity),
+            "--writer-projection-validation", str(isj_writer_deadline_projection_validation),
+            "--writer-consumption-validation", str(isj_writer_deadline_consumption_validation),
+            "--article-claim-gate", str(isj_article_deadline_claim),
+            "--article-claim-validation", str(isj_article_deadline_claim_validation),
+            "--article-integrity", str(isj_article_integrity),
+            "--output", str(isj_promoted_claim_contract),
+        ), isj_promoted_claim_contract),
+        CycleStage("isj_promoted_claim_contract_validation", (
+            py, "valcea-clar/core_v2/validate_isj_promoted_claim_contract_runtime.py",
+            "--deadline-promotion-validation", str(isj_deadline_promotion_validation),
+            "--fact-promotion-validation", str(isj_fact_kernel_deadline_promotion_validation),
+            "--fact-kernel", str(isj_fact_kernel),
+            "--fact-integrity", str(isj_fact_integrity),
+            "--writer-projection-validation", str(isj_writer_deadline_projection_validation),
+            "--writer-consumption-validation", str(isj_writer_deadline_consumption_validation),
+            "--article-claim-gate", str(isj_article_deadline_claim),
+            "--article-claim-validation", str(isj_article_deadline_claim_validation),
+            "--article-integrity", str(isj_article_integrity),
+            "--contract", str(isj_promoted_claim_contract),
+            "--prove-tamper",
+            "--output", str(isj_promoted_claim_contract_validation),
+        ), isj_promoted_claim_contract_validation),
         CycleStage("site_verified_article_ledger", (py, "valcea-clar/core_v2/site_verified_article_ledger.py", "--ipj", str(ipj), "--isu", str(isu), "--municipal", str(municipal_articles), "--isj-article", str(isj_article), "--isj-integrity", str(isj_article_integrity), "--output", str(site_article_ledger)), site_article_ledger),
         CycleStage("photo_truth", (py, "valcea-clar/core_v2/photo_truth_gate.py", "--input", f"ipj={ipj}", "--input", f"isu={isu}", "--input", f"municipal={municipal_articles}", "--input", f"isj={isj_article_integrity}", "--visual-registry", "valcea-clar/core_v2/visual_registry.json", "--external-probe", "--output", str(photo)), photo),
         CycleStage("site_visual_runtime_registry", (py, "valcea-clar/core_v2/site_visual_runtime_path_hydrator.py", "--registry", "valcea-clar/core_v2/visual_registry.json", "--photo-truth", str(photo), "--output", str(site_visual_registry)), site_visual_registry),
@@ -209,7 +239,7 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                     "writer_consumption_evidence_id", "shadow_writer_consumption_allowed", "verified_consumption_candidate_count",
                     "article_deadline_claim_evidence_id", "shadow_article_claim_integrity_passed", "verified_claim_candidate_count",
                     "canonical_article_mutation_allowed", "article_projection_allowed", "article_contains_registration_deadline", "rendered_promoted_claim_count",
-                    "tamper_regressions_passed",
+                    "promoted_claim_contract_id", "lineage_complete", "tamper_regressions_passed",
                     "verified_written_shadow_count", "visual_candidate_verified_shadow_count", "hydrated_story_count", "preserved_story_count", "package_image_bound_shadow_count", "blocked_count",
                     "no_story_count", "fabricated_claim_count", "publication_authority", "acceptance_ready",
                 )
@@ -241,6 +271,8 @@ def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]
         "isj_writer_deadline_consumption_validation",
         "isj_article_deadline_claim_gate",
         "isj_article_deadline_claim_validation",
+        "isj_promoted_claim_contract",
+        "isj_promoted_claim_contract_validation",
         "site_verified_article_ledger",
         "site_visual_runtime_registry",
     }

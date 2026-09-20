@@ -28,11 +28,11 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_writer_deadline_projection_validation", "isj_writer_deadline_consumption",
                 "isj_writer_deadline_consumption_validation", "isj_writer",
                 "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
-                "isj_article_integrity", "site_verified_article_ledger", "photo_truth",
-                "site_visual_runtime_registry", "shadow_site_package",
+                "isj_article_integrity", "isj_promoted_claim_contract", "isj_promoted_claim_contract_validation",
+                "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
             ],
         )
-        self.assertEqual(len(names), 40)
+        self.assertEqual(len(names), 42)
         joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
         for forbidden in ("workflow_dispatch", "git push", "merge", "deploy", "facebook_publish", "instagram_publish", "manual-publish"):
             self.assertNotIn(forbidden, joined)
@@ -69,6 +69,8 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         article_deadline_gate = by_name["isj_article_deadline_claim_gate"]
         article_deadline_validation = by_name["isj_article_deadline_claim_validation"]
         article_integrity = by_name["isj_article_integrity"]
+        promoted_contract = by_name["isj_promoted_claim_contract"]
+        promoted_contract_validation = by_name["isj_promoted_claim_contract_validation"]
         ledger = by_name["site_verified_article_ledger"]; photo = by_name["photo_truth"]
         hydrated_registry = by_name["site_visual_runtime_registry"]; site = by_name["shadow_site_package"]
         ipj = by_name["ipj"]; isu = by_name["isu"]; municipal = by_name["municipal_writer"]
@@ -121,7 +123,27 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertNotIn(str(article_deadline_gate.output), article_integrity.argv)
         self.assertNotIn(str(article_deadline_validation.output), article_integrity.argv)
 
+        reusable_inputs = (
+            deadline_validation.output,
+            fact_deadline_validation.output,
+            fact_kernel.output,
+            fact_integrity.output,
+            writer_projection_validation.output,
+            writer_consumption_validation.output,
+            article_deadline_gate.output,
+            article_deadline_validation.output,
+            article_integrity.output,
+        )
+        for stage in (promoted_contract, promoted_contract_validation):
+            for prior in reusable_inputs:
+                self.assertIn(str(prior), stage.argv)
+            self.assertNotIn("--live", stage.argv)
+        self.assertIn(str(promoted_contract.output), promoted_contract_validation.argv)
+        self.assertIn("--prove-tamper", promoted_contract_validation.argv)
+
         self.assertIn(str(ipj.output), ledger.argv); self.assertIn(str(isu.output), ledger.argv); self.assertIn(str(municipal.output), ledger.argv); self.assertIn(str(writer.output), ledger.argv); self.assertIn(str(article_integrity.output), ledger.argv)
+        self.assertNotIn(str(promoted_contract.output), ledger.argv)
+        self.assertNotIn(str(promoted_contract_validation.output), ledger.argv)
         self.assertNotIn("--live", ledger.argv)
         self.assertIn(f"isj={article_integrity.output}", photo.argv)
         self.assertIn(str(photo.output), hydrated_registry.argv)
@@ -142,8 +164,8 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "isj_writer_deadline_projection_validation", "isj_writer_deadline_consumption",
             "isj_writer_deadline_consumption_validation", "isj_writer",
             "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
-            "isj_article_integrity", "site_verified_article_ledger", "photo_truth",
-            "site_visual_runtime_registry", "shadow_site_package",
+            "isj_article_integrity", "isj_promoted_claim_contract", "isj_promoted_claim_contract_validation",
+            "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
         ]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))
