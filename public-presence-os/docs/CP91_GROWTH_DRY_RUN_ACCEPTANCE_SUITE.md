@@ -2,9 +2,11 @@
 
 ## Status
 
-`CANDIDATE / OFFLINE SYNTHETIC ONLY / LIVE HOLD`
+`CLOSED / VERIFIED / EFFECTIVE OFFLINE ONLY / LIVE HOLD`
 
 Global checkpoint remains `CP58`. The global kill switch remains `ENGAGED`. LIVE AUTHORITY remains `NONE`. CP92 is not started.
+
+This closure is strictly offline-only. It grants no account connection, OAuth, secret resolution, social API traffic, live probe, external write, publish, deploy, or paid-service authority.
 
 ## Purpose
 
@@ -28,7 +30,7 @@ The suite proves the nine canonical roadmap requirements:
 - `src/public_presence_os/growth_dry_run_acceptance.py`
 - `tests/test_cp91_growth_dry_run_acceptance.py`
 - `docs/CP91_GROWTH_DRY_RUN_ACCEPTANCE_SUITE.md`
-- `config/module_registry.json` candidate marker
+- `config/module_registry.json` PASS marker
 
 The CP91 harness adds no production dispatch path. `build_engagement_monitor_tasks()` creates deterministic offline task descriptors from CP90 poll slots. `evaluate_acceptance()` requires all nine named evidence gates, rejects any observed external I/O, preserves missing external state as `UNKNOWN`, and fails closed if the policy weakens.
 
@@ -45,16 +47,14 @@ The CP91 harness adds no production dispatch path. `build_engagement_monitor_tas
 
 ## Acceptance semantics
 
-The executable harness may produce `PASS_CP91_OFFLINE_SYNTHETIC_ACCEPTANCE` for a fully passing synthetic evidence bundle. That result is an internal test outcome only. It does **not** itself make CP91 authoritative on `main`, does not promote global checkpoint CP58, and does not grant live authority.
+The executable harness may produce `PASS_CP91_OFFLINE_SYNTHETIC_ACCEPTANCE` for a fully passing synthetic evidence bundle. That result is an internal offline acceptance outcome only. It does **not** promote global checkpoint CP58 and does not grant live authority.
 
-Repository registry state remains a CP91 candidate until exact-head CI is terminal `SUCCESS`, the PR is mergeable without conflicting PPOS drift, the bounded change is merged, and post-merge readback is verified and persisted to the canonical Drive checkpoint.
+CP91 closure means only that the deterministic synthetic/offline Growth acceptance contract is verified on `main` after exact-head CI success, bounded merge, and post-merge readback. All live-capability, account-permission, shadow-pilot, and explicit owner-authorization gates remain future work. CP92 remains the next eligible checkpoint and is not started by CP91 closure.
 
 ## Rollback
 
-Before merge: close the CP91 PR and discard the CP91 branch; CP90 remains the last closed/effective Growth checkpoint.
-
-After merge: revert only the CP91 bounded implementation/closure commits. Global CP58 and live-hold controls remain unaffected.
+Revert only the bounded CP91 implementation and closure-normalization commits. Global CP58 and live-hold controls remain unaffected.
 
 ## Next exact action
 
-Run exact-head PUBLIC PRESENCE OS CI for the CP91 candidate. If and only if CI is terminal `SUCCESS`, the candidate head remains stable, the PR is mergeable, and fresh `main` shows no conflicting `public-presence-os/**` drift, perform only the CP91 implementation merge plus post-merge readback. Do not start CP92 in the same unit.
+Begin only CP92 / M61 — PILOT GROWTH OPERATIONS MANUAL + SHADOW PILOT PLAN v1 as the next bounded unit after CP91 closure is merged and read back on `main`. Preserve CP58, kill switch `ENGAGED`, LIVE AUTHORITY `NONE`, and zero live/external writes. Do not combine CP92 implementation with any future live authorization or account connection.
