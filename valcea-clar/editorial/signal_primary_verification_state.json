@@ -2,22 +2,194 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-20T10:04:05+03:00",
+  "generated_at": "2026-09-20T15:19:21+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-20T10:02:57+03:00",
+  "queue_generated_at": "2026-09-20T15:17:51+03:00",
   "task_count": 61,
   "primary_match_count": 0,
-  "no_match_count": 26,
-  "unrouted_count": 35,
+  "no_match_count": 27,
+  "unrouted_count": 34,
   "target_count": 20,
   "targets_ok": 15,
   "results": [
     {
+      "signal_id": "17a3b96c97c0423714406883",
+      "signal_title": "AUR Galicea: problemele locale și județene, pe masa deputaților Nicolae Mîndrescu și Antonio Popescu. Vot unanim împotriva Guvernului Mureșan",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/aur-galicea-problemele-locale-si-judetene-pe-masa-deputatilor-nicolae-mindrescu-si-antonio-popescu-vot-unanim-impotriva-guvernului-muresan/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-20T13:52:39+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "6702969c6eb58ddaa840b57b",
+      "signal_title": "Cod galben de vânt în județul Vâlcea. Rafalele pot ajunge la 90 km/h în zona montană",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/20/cod-galben-de-vant-in-judetul-valcea-rafalele-pot-ajunge-la-90-km-h-in-zona-montana/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-20T13:52:22+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "dee5a8c8a7448f7a8054eeee",
+      "signal_title": "Consilierul AUR - Cosmin Bunea pune presiune pe Primăria Nicolae Bălcescu: facturi cerute și neprimite, drumuri calamitate fără bani și căminul din Corbi, în pericol de demolare",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/consilierul-aur-cosmin-bunea-pune-presiune-pe-primaria-nicolae-balcescu-facturi-cerute-si-neprimite-drumuri-calamitate-fara-bani-si-caminul-din-corbi-in-pericol-de-demolare/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-20T13:36:32+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "b2bad2148153f3966f025871",
+      "signal_title": "Cod galben de vânt în județul Sibiu. Luni vremea se răcește și plouă până joi",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/20/cod-galben-de-vant-in-judetul-sibiu-luni-vremea-se-raceste-si-ploua-pana-joi/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-20T12:48:06+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "815a9f65b6d9d28f308647db",
+      "signal_title": "Emil Hurezeanu: Nu cunosc un exemplu, într-una din marile țări europene, în care un monument de 200 de ani să fie transformat într-o parcare și atât",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/20/emil-hurezeanu-nu-cunosc-un-exemplu-intr-una-din-marile-tari-europene-in-care-un-monument-de-200-de-ani-sa-fie-transformat-intr-o-parcare-si-atat/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-20T11:12:22+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "d702c1936f76affa894911a0",
+      "signal_title": "Copiii – exemplu pentru cei mari! Curățenie în comuna Galicea",
+      "signal_url": "https://evenimentvalcean.ro/copiii-exemplu-pentru-cei-mari-curatenie-in-comuna-galicea/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-09-20T11:09:46+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "30f37ba95414ee4d2dab2fde",
-      "signal_title": "Incendiu de pădure în zona Mănăstirii Boia din Câineni. Intervenție dificilă din cauza terenului",
+      "signal_title": "FOTO/UPDATE. Incendiu de pădure în zona Mănăstirii Boia din Câineni. Intervenție dificilă din cauza terenului",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/20/incendiu-de-padure-in-zona-manastirii-boia-din-caineni-interventie-dificila-din-cauza-terenului/",
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_tier": "T2",
@@ -889,18 +1061,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "a50fa8f43261b8b9f971558d",
-      "signal_title": "Tur pe artera principală a orașului cu un sibian nemulțumit de noul sistem de fluidizare a traficului: „Blocajul este mutat dintr-o intersecție în alta”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/18/tur-pe-artera-principala-a-orasului-cu-un-sibian-nemultumit-de-noul-sistem-de-fluidizare-a-traficului-blocajul-este-mutat-dintr-o-intersectie-in-alta/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-18T17:08:44+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "3547f5e4afe84d8a6158904b",
       "signal_title": "Centru medical multifuncțional, investiție importantă pentru comuna Voicești",
       "signal_url": "https://evenimentvalcean.ro/centru-medical-multifunctional-investitie-importanta-pentru-comuna-voicesti/",
@@ -1375,107 +1535,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "f4a64c2b442a79e594d78a4c",
-      "signal_title": "Tiberiu Costea, despre investițiile în sănătate din Lungești: două dispensare modernizate și servicii medicale mai aproape de oameni",
-      "signal_url": "https://www.impactreal.ro/2026/09/17/tiberiu-costea-despre-investitiile-in-sanatate-din-lungesti-doua-dispensare-modernizate-si-servicii-medicale-mai-aproape-de-oameni/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-17T20:07:05+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "4771f300436a21cf8cc37a74",
-      "signal_title": "Ion Iordache demisionează de la conducerea PNL Gorj: „Aleg libertatea de a spune adevărul”. Parcursul politic și controversele care l-au însoțit",
-      "signal_url": "https://stirileolteniei.ro/ion-iordache-demisioneaza-de-la-conducerea-pnl-gorj-aleg-libertatea-de-a-spune-adevarul-parcursul-politic-si-controversele-care-l-au-insotit/",
-      "signal_publisher": "Știrile Olteniei",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-17T18:14:45+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "5313fe06b1212152fa25bf10",
-      "signal_title": "Sorin Grindeanu, dezamăgit de propunerea de premier a președintelui Nicușor Dan. „Este greu de înțeles“",
-      "signal_url": "https://www.indiscret.ro/2026/09/17/sorin-grindeanu-dezamagit-de-propunerea-de-premier-a-presedintelui-nicusor-dan-este-greu-de-inteles/",
-      "signal_publisher": "Indiscret în Oltenia",
-      "signal_published_at": "2026-09-17T18:12:15+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "de39d18ba8327f098b8db20a",
-      "signal_title": "Siegfried Mureșan, nominalizat de președinte pentru poziția de prim-ministru",
-      "signal_url": "https://www.indiscret.ro/2026/09/17/siegfried-muresan-nominalizat-de-presedinte-pentru-pozitia-de-prim-ministru/",
-      "signal_publisher": "Indiscret în Oltenia",
-      "signal_published_at": "2026-09-17T17:29:42+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "ba392c127f715cecd5b729d6",
-      "signal_title": "Universitatea Româno-Americană, Google România și TotalSoft lansează o competiție națională de AI și Business pentru liceeni",
-      "signal_url": "https://stirileolteniei.ro/universitatea-romano-americana-google-romania-si-totalsoft-lanseaza-o-competitie-nationala-de-ai-si-business-pentru-liceeni/",
-      "signal_publisher": "Știrile Olteniei",
-      "signal_published_at": "2026-09-17T13:19:44+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "ea3ee7fbbca31ec707bbf239",
