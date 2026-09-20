@@ -2,11 +2,11 @@
 
 ## Status
 
-`IMPLEMENTATION CANDIDATE / OFFLINE SHADOW PLAN ONLY / LIVE HOLD`
+`CLOSED / VERIFIED / EFFECTIVE OFFLINE ONLY / LIVE HOLD`
 
-Global checkpoint remains `CP58`. The global kill switch remains `ENGAGED`. LIVE AUTHORITY remains `NONE`. CP92 is not yet closed, verified, promoted, or live-effective.
+Global checkpoint remains `CP58`. The global kill switch remains `ENGAGED`. LIVE AUTHORITY remains `NONE`.
 
-This unit defines the operator manual and future shadow-pilot contract only. It does **not** connect a real account, perform OAuth, resolve tokens/secrets, call a social API, execute a live read-only probe, observe real comments/mentions, perform an external write, publish, deploy, or use a paid service.
+This closure is strictly offline-only and closes the CP92 development contract, not a real shadow pilot. It grants no real account connection, OAuth, token/secret resolution, social API traffic, live read-only probe, observation of real comments/mentions, external write, publish, deploy, or paid-service authority. `shadow_pilot_completed` remains false and explicit owner authorization remains uncaptured.
 
 ## Canonical purpose
 
@@ -28,7 +28,7 @@ Because pilot/live authorization has not been granted, the executable implementa
 - `src/public_presence_os/pilot_growth_operations.py`
 - `tests/test_cp92_pilot_growth_operations.py`
 - `docs/CP92_PILOT_GROWTH_OPERATIONS_MANUAL_SHADOW_PILOT_PLAN.md`
-- `config/module_registry.json` M61 candidate marker
+- `config/module_registry.json` M61 PASS marker
 
 ## Operator setup — future authorized read-only phase
 
@@ -118,25 +118,18 @@ Any future shadow pilot must stop and remain on hold if there is:
 
 The deterministic rollback packet requires stopping the shadow observation plan, preserving audit evidence, invalidating unverified capability assumptions, keeping the kill switch engaged, keeping LIVE AUTHORITY at NONE, and requiring fresh owner authorization before any future live step.
 
+Repository rollback after CP92 closure is bounded: revert only the CP92 implementation and closure-normalization commits. Global CP58 and all live-hold controls remain unchanged.
+
 ## Authorization boundary
 
 No first real reply/comment/publish is permitted by CP92. Explicit owner authorization remains separately required after read-only validation and shadow-pilot evidence. CP92 does not promote global checkpoint CP58.
 
 ## Closure semantics
 
-This implementation candidate is not CP92 closure. Closure requires:
-- exact-head CI success;
-- fresh PR mergeability/base-drift readback;
-- bounded merge;
-- post-merge readback;
-- a separate closure-marker normalization unit if the established project workflow still requires it.
+CP92 closure means only that the offline operator-manual/shadow-plan contract is verified on `main` after exact-head CI success, bounded merge, and post-merge readback. It does **not** mean a real account was connected, permissions were exercised, a live read-only probe occurred, real comments/mentions were observed, a shadow pilot completed, or live authority was granted.
 
-No checkpoint after CP92 is started or implied. Any future canonical unit requires a new explicit roadmap/owner decision.
-
-## Rollback before merge
-
-Close the CP92 implementation PR and discard the branch. `main` remains at CP91 CLOSED / VERIFIED / EFFECTIVE OFFLINE ONLY / LIVE HOLD.
+The development sequence defined by the current roadmap ends at CP92. No CP93 is created, implied, or authorized by this closure. Any future canonical unit requires a new explicit roadmap/owner decision.
 
 ## Next exact action
 
-After this candidate is persisted, run exact-head CI and fresh PR/current-main/PPOS drift checks. Only on terminal CI SUCCESS, stable exact-head, mergeable PR, and no conflicting `public-presence-os/**` drift may the bounded CP92 implementation be merged and read back. Do not create or start CP93.
+Run exact-head PUBLIC PRESENCE OS CI for this CP92 closure-normalization candidate. If and only if CI is terminal `SUCCESS`, the candidate head remains stable, the PR is mergeable, and fresh `main` shows no conflicting `public-presence-os/**` or workflow drift, merge only the CP92 closure normalization and perform post-merge readback. Do not create or start CP93.
