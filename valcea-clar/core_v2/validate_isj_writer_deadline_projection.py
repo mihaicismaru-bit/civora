@@ -8,6 +8,11 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from promoted_claim_projection_validation import (
+    prove_projection_tamper_regressions,
+    validate_source_neutral_projection,
+)
+
 
 def _norm(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
@@ -192,7 +197,7 @@ def prove_tamper_regressions(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Independently validate ISJ FactKernel-to-writer deadline projection")
+    parser = argparse.ArgumentParser(description="Validate writer projection with source-neutral canonical dependency and retained legacy equivalence proof")
     parser.add_argument("--fact-kernel", required=True)
     parser.add_argument("--fact-kernel-integrity", required=True)
     parser.add_argument("--projection", required=True)
@@ -204,35 +209,84 @@ def main() -> int:
     fact_kernel = json.loads(Path(args.fact_kernel).read_text(encoding="utf-8"))
     fact_integrity = json.loads(Path(args.fact_kernel_integrity).read_text(encoding="utf-8"))
     projection = json.loads(Path(args.projection).read_text(encoding="utf-8"))
-    summary = validate(
+
+    legacy_summary = validate(
         fact_kernel,
         fact_integrity,
         projection,
         expected_year=args.year,
     )
-    tamper_passed = prove_tamper_regressions(
+    legacy_tamper_passed = prove_tamper_regressions(
         fact_kernel,
         fact_integrity,
         projection,
         expected_year=args.year,
     ) if args.prove_tamper else 0
+
+    generic_summary = validate_source_neutral_projection(fact_kernel, fact_integrity, projection)
+    assert generic_summary.get("status") == "PASS_SHADOW"
+    assert generic_summary.get("field") == "registration_deadline"
+    assert generic_summary.get("value") == legacy_summary.get("registration_deadline")
+    assert generic_summary.get("writer_projection_evidence_id") == legacy_summary.get("writer_projection_evidence_id")
+    assert generic_summary.get("writer_projection_allowed") is True
+    assert int(generic_summary.get("verified_projection_candidate_count") or 0) == 1
+    assert int(generic_summary.get("fabricated_claim_count") or 0) == 0
+
+    generic_tamper_passed = prove_projection_tamper_regressions(
+        fact_kernel,
+        fact_integrity,
+        projection,
+    ) if args.prove_tamper else 0
+    if args.prove_tamper:
+        assert legacy_tamper_passed >= 3
+        assert generic_tamper_passed >= 4
+
+    for key in (
+        "publication_authority",
+        "acceptance_ready",
+        "production_writer_ready",
+        "site_publish_allowed",
+        "social_publish_allowed",
+        "fabricated_claim_count",
+    ):
+        assert generic_summary.get(key) == legacy_summary.get(key), key
+
     report = {
-        "schema_version": "1.0",
-        "mode": "ISJ_WRITER_DEADLINE_PROJECTION_VALIDATION",
-        **summary,
+        "schema_version": "1.1",
+        **generic_summary,
+        "mode": "CORE_V2_SOURCE_NEUTRAL_PROMOTED_CLAIM_PROJECTION_VALIDATION_RUNTIME",
+        "registration_deadline": generic_summary.get("value"),
+        "writer_deadline_projection_allowed": generic_summary.get("writer_projection_allowed") is True,
+        "article_projection_allowed": False,
+        "writer_allowed": False,
         "tamper_regressions_requested": bool(args.prove_tamper),
-        "tamper_regressions_passed": tamper_passed,
+        "tamper_regressions_passed": generic_tamper_passed,
+        "legacy_projection_validator_status": legacy_summary.get("status"),
+        "legacy_projection_tamper_regressions_passed": legacy_tamper_passed,
+        "legacy_projection_validator_retained": True,
+        "legacy_projection_validator_parallel_comparison": True,
+        "legacy_and_generic_projection_identity_equivalent": True,
+        "legacy_and_generic_authority_flags_equivalent": True,
+        "canonical_projection_validation_path": "SOURCE_NEUTRAL",
+        "source_neutral_projection_validation_used_downstream": True,
+        "replacement_path_enabled": True,
+        "retirement_performed": False,
         "truth_rule": (
-            "The deadline may be eligible for a later deterministic shadow-writer projection only if this independent validator reproduces the exact promoted FactKernel claim, evidence identities and deterministic writer-projection ID. "
-            "Runtime tamper regressions must also fail closed. This validator does not modify article prose or grant article, publication, delivery or acceptance authority."
+            "The runtime projection-validation artifact consumed by downstream writer-consumption is now source-neutral and is derived independently from the promoted FactKernel lineage. "
+            "The legacy ISJ validator still runs in parallel inside this boundary and must reproduce the same projection identity, authority flags and PASS_SHADOW result. "
+            "Both validators must fail closed under their tamper suites. No legacy validator is retired here, and this switch grants no article, publication, delivery or acceptance authority."
         ),
     }
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "status": report["status"],
+        "canonical_projection_validation_path": report["canonical_projection_validation_path"],
         "registration_deadline": report["registration_deadline"],
+        "writer_projection_evidence_id": report["writer_projection_evidence_id"],
         "writer_deadline_projection_allowed": report["writer_deadline_projection_allowed"],
         "tamper_regressions_passed": report["tamper_regressions_passed"],
+        "legacy_projection_validator_retained": True,
+        "retirement_performed": False,
         "article_projection_allowed": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
