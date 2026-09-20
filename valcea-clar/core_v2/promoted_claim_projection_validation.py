@@ -86,6 +86,10 @@ def _canonical_promoted_claim(fact_kernel: dict[str, Any]) -> tuple[dict[str, An
     if identities["field_evidence_id"] in _norm_list(base_kernel.get("evidence_ids")):
         raise ValueError("promoted_fact_evidence_leaked_into_writer_visible_universe")
 
+    excluded = _norm_list(kernel_row.get("writer_projection_excluded_fields"))
+    if excluded and field not in excluded:
+        raise ValueError("promoted_fact_missing_from_writer_projection_exclusions")
+
     canonical = {
         "field": field,
         "value": value,
@@ -126,13 +130,104 @@ def _legacy_digest_suffix(canonical: dict[str, Any]) -> str:
     return digest[:24]
 
 
+def build_source_neutral_projection(
+    fact_kernel: dict[str, Any],
+    fact_integrity: dict[str, Any],
+    *,
+    identity_prefix: str,
+) -> dict[str, Any]:
+    """Build one promoted-claim writer projection without source-specific semantics.
+
+    ``identity_prefix`` is an external compatibility namespace.  It is deliberately
+    not interpreted by this builder; preserving an existing namespace lets a
+    source-specific producer be replaced without changing receipt/evidence identity.
+    """
+    base = {
+        "schema_version": "1.0",
+        "mode": "CORE_V2_SOURCE_NEUTRAL_PROMOTED_CLAIM_WRITER_PROJECTION_SHADOW",
+        "source_neutral_writer_projection_builder": True,
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+        "production_writer_ready": False,
+        "writer_allowed": False,
+        "article_projection_allowed": False,
+        "site_publish_allowed": False,
+        "social_publish_allowed": False,
+        "fabricated_claim_count": 0,
+    }
+    try:
+        _require_shadow_boundary(fact_kernel, "fact_kernel")
+        _require_shadow_boundary(fact_integrity, "fact_integrity")
+        if fact_integrity.get("status") != "PASS_SHADOW":
+            raise ValueError("fact_kernel_integrity_not_pass_shadow")
+        if fact_integrity.get("fact_kernel_integrity_verified") is not True:
+            raise ValueError("fact_kernel_integrity_not_verified")
+        if int(fact_integrity.get("promoted_fact_verified_count") or 0) != 1:
+            raise ValueError("promoted_fact_not_independently_verified")
+        if int(fact_integrity.get("fabricated_claim_count") or 0) != 0:
+            raise ValueError("fact_kernel_integrity_fabricated_claims_nonzero")
+
+        _, canonical = _canonical_promoted_claim(fact_kernel)
+        prefix = _norm(identity_prefix)
+        if not prefix or any(ch.isspace() for ch in prefix):
+            raise ValueError("projection_identity_prefix_invalid")
+        suffix = _legacy_digest_suffix(canonical)
+        projection_id = f"{prefix}-{suffix}"
+
+        field = str(canonical["field"])
+        deadline_compat = field == "registration_deadline"
+        candidate = {
+            **canonical,
+            "state": "WRITER_DEADLINE_PROJECTION_VERIFIED_SHADOW" if deadline_compat else "PROMOTED_CLAIM_WRITER_PROJECTION_VERIFIED_SHADOW",
+            "writer_projection_evidence_id": projection_id,
+            "promoted_claim_projection_allowed": True,
+            "writer_deadline_projection_allowed": deadline_compat,
+            "writer_allowed": False,
+            "production_writer_ready": False,
+            "article_projection_allowed": False,
+            "site_publish_allowed": False,
+            "social_publish_allowed": False,
+        }
+        return {
+            **base,
+            "state": "WRITER_PROJECTION_VERIFIED_SHADOW",
+            "field": field,
+            "value": canonical["value"],
+            "claim": canonical["claim"],
+            "writer_projection_evidence_id": projection_id,
+            "promoted_claim_projection_allowed": True,
+            "writer_deadline_projection_allowed": deadline_compat,
+            "registration_deadline": canonical["value"] if deadline_compat else None,
+            "projection_candidate_count": 1,
+            "projection_candidates": [candidate],
+            "lineage_fingerprint_sha256": _lineage_fingerprint(canonical),
+            "deterministic_projection_digest_suffix": suffix,
+            "identity_namespace_compatibility_only": prefix,
+            "truth_rule": (
+                "This source-neutral builder projects exactly one independently verified promoted FactKernel claim while preserving its evidence lineage and a caller-supplied compatibility identity namespace. "
+                "It grants no article, site, social, delivery, or acceptance authority."
+            ),
+        }
+    except Exception as exc:
+        return {
+            **base,
+            "state": "BLOCKED",
+            "reason": "source_neutral_writer_projection_build_failed",
+            "detail": f"{type(exc).__name__}:{exc}"[:500],
+            "promoted_claim_projection_allowed": False,
+            "writer_deadline_projection_allowed": False,
+            "projection_candidate_count": 0,
+            "projection_candidates": [],
+        }
+
+
 def validate_source_neutral_projection(
     fact_kernel: dict[str, Any],
     fact_integrity: dict[str, Any],
     projection: dict[str, Any],
 ) -> dict[str, Any]:
     base = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "CORE_V2_SOURCE_NEUTRAL_PROMOTED_CLAIM_PROJECTION_VALIDATION_SHADOW",
         "source_neutral_projection_validation": True,
         "publication_authority": "NONE",
@@ -190,10 +285,42 @@ def validate_source_neutral_projection(
         suffix = _legacy_digest_suffix(canonical)
         if not projection_id.endswith(suffix):
             raise ValueError("projection_deterministic_digest_mismatch")
+        prefix = projection_id[: -(len(suffix) + 1)]
+        if not prefix:
+            raise ValueError("projection_identity_namespace_missing")
         if candidate.get("writer_deadline_projection_allowed") is not True:
             raise ValueError("projection_candidate_not_allowed")
         if candidate.get("writer_allowed") is not False or candidate.get("article_projection_allowed") is not False:
             raise ValueError("projection_candidate_authority_boundary_violation")
+
+        generic_projection = build_source_neutral_projection(
+            fact_kernel,
+            fact_integrity,
+            identity_prefix=prefix,
+        )
+        if generic_projection.get("state") != "WRITER_PROJECTION_VERIFIED_SHADOW":
+            raise ValueError(f"source_neutral_builder_blocked:{generic_projection.get('detail')}")
+        if generic_projection.get("writer_projection_evidence_id") != projection_id:
+            raise ValueError("source_neutral_builder_projection_identity_mismatch")
+        generic_candidate = _one(generic_projection.get("projection_candidates"), "source_neutral_projection_candidate")
+        for key in (
+            "field", "value", "claim", "field_evidence_id", "scope_field_evidence_id",
+            "source_registration_window_field_evidence_id", "document_text_evidence_id",
+            "upstream_materiality_promotion_evidence_id", "fact_kernel_promotion_evidence_id",
+            "page_text_sha256", "page_number", "excerpt", "writer_projection_evidence_id",
+        ):
+            if generic_candidate.get(key) != candidate.get(key):
+                raise ValueError(f"source_neutral_builder_equivalence_mismatch:{key}")
+        if _norm_list(generic_candidate.get("claim_evidence_ids")) != _norm_list(candidate.get("claim_evidence_ids")):
+            raise ValueError("source_neutral_builder_claim_evidence_mismatch")
+        if _norm_list(generic_candidate.get("supporting_field_evidence_ids")) != _norm_list(candidate.get("supporting_field_evidence_ids")):
+            raise ValueError("source_neutral_builder_supporting_evidence_mismatch")
+        for flag in (
+            "publication_authority", "acceptance_ready", "production_writer_ready",
+            "writer_allowed", "article_projection_allowed", "site_publish_allowed", "social_publish_allowed",
+        ):
+            if generic_projection.get(flag) != projection.get(flag):
+                raise ValueError(f"source_neutral_builder_authority_mismatch:{flag}")
 
         return {
             **base,
@@ -212,6 +339,13 @@ def validate_source_neutral_projection(
             "page_number": canonical["page_number"],
             "page_text_sha256": canonical["page_text_sha256"],
             "excerpt": canonical["excerpt"],
+            "source_neutral_builder_status": "PASS_SHADOW",
+            "source_neutral_builder_equivalent": True,
+            "source_neutral_builder_projection_id": generic_projection["writer_projection_evidence_id"],
+            "source_neutral_builder_lineage_fingerprint_sha256": generic_projection["lineage_fingerprint_sha256"],
+            "source_neutral_builder_authority_flags_equivalent": True,
+            "source_specific_builder_retirement_eligible": True,
+            "source_specific_builder_retirement_performed": False,
         }
     except Exception as exc:
         return {
@@ -222,6 +356,9 @@ def validate_source_neutral_projection(
             "detail": f"{type(exc).__name__}:{exc}"[:500],
             "writer_projection_allowed": False,
             "verified_projection_candidate_count": 0,
+            "source_neutral_builder_equivalent": False,
+            "source_specific_builder_retirement_eligible": False,
+            "source_specific_builder_retirement_performed": False,
         }
 
 
