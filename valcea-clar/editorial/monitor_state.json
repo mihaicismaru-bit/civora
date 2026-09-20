@@ -4,10 +4,10 @@
   "product": "VÂLCEA CLAR durable monitor state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-20T01:05:49Z",
-  "last_live_probe_at": "2026-09-20T01:05:49Z",
+  "generated_at": "2026-09-20T06:13:01Z",
+  "last_live_probe_at": "2026-09-20T06:13:01Z",
   "mode": "LIVE_SOURCE_HEALTH",
-  "discovery_observed_at": "2026-09-20T03:21:00+03:00",
+  "discovery_observed_at": "2026-09-20T08:12:54+03:00",
   "monitor_count": 184,
   "monitors": [
     {
@@ -34,7 +34,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "1c358c413cbfe721fc2f2ec6edb32d3dde28bcc75d8e715b13b9f427c94c9ce6",
+          "fingerprint": "038827632624005ff7d7a2e708b16e25c84543bd4144f6dc7d345e64fd2b6730",
           "match_count": 8,
           "error": null,
           "health": "OK",
@@ -125,7 +125,8 @@
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [],
       "degraded_sources": [
-        "primaria-rm-valcea-comunicate"
+        "primaria-rm-valcea-comunicate",
+        "rm-valcea-hcl-2026"
       ],
       "reverify_leads": [
         "rm-valcea-hcl159-2026-musiclover-public-money"
@@ -148,14 +149,13 @@
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf",
           "publisher": "Primăria Municipiului Râmnicu Vâlcea — hotărâri",
           "tier": "T1",
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf",
-          "fingerprint": "896dd9f2858ac786346332602a19ad6caed9f0a61b6adb5df318cab8ccad28b7",
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
           "match_count": 0,
-          "error": null,
-          "health": "OK",
-          "change": "UNCHANGED"
+          "error": "URLError: <urlopen error [Errno 111] Connection refused>",
+          "health": "UNREACHABLE",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "cj-valcea-sedinte",
