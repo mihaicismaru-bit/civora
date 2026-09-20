@@ -1,6 +1,6 @@
 {
-  "schema_version": "6.7",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN54-ISJ-ARTICLE-DEADLINE-CLAIM-GATE-NATURAL-VALIDATED",
+  "schema_version": "6.8",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN55-ISJ-ARTICLE-DEADLINE-CLAIM-RUNTIME-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,8 +8,8 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "civora_main_observed_sha": "279fce4ff6ccf51abc64ee71b628eec684d7cf7c",
-    "civora_main_observed_message": "PPOS CP91: close growth dry-run acceptance suite",
+    "civora_main_observed_sha": "4f75c491ada499a0a9b1daaad59ea661937d8679",
+    "civora_main_observed_message": "Refresh VÂLCEA CLAR canonical public presentation",
     "public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "public_projection_main_sha": "ee561e2e8cc150cf1c7cf6b34ebad16dec01f764",
     "public_projection_message": "sync: reconcile CIVORA canonical stories",
@@ -18,35 +18,35 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "8d7fd08dc4d911d56c059e66688506ed2dae5091",
-    "message": "Core v2: add fail-closed ISJ article deadline claim gate",
-    "functional_increment": "A distinct fail-closed ISJ article registration-deadline claim-to-evidence gate and an independent validator now re-bind the writer-rendered pending deadline claim to the exact writer_consumption_evidence_id, writer_projection_evidence_id, promoted FactKernel claim, full claim/supporting evidence identities, page hash, page number and excerpt. The validator independently reproduces the deterministic article_deadline_claim_evidence_id and proves five negative tamper cases fail closed, including premature insertion into canonical article body. The gate is logic-validated but intentionally not yet wired into the orchestrator, so canonical article claims/body remain unchanged and no article/site/social/production/acceptance authority is granted.",
-    "workflow_run_id": 35489078310,
-    "workflow_run_number": 687,
+    "sha": "408048be050a5db5593f184927a9ac814a153768",
+    "message": "Core v2 RUN55: assert article deadline gate runtime order",
+    "functional_increment": "The separately validated ISJ article registration-deadline claim gate and its independent validator are now runtime-wired into the single bounded orchestrator immediately after isj_writer and before canonical article integrity. Both artifacts are persisted in runtime_artifact_snapshots. The validator independently re-binds the claim to the exact writer-consumption and promoted FactKernel evidence chain and proves five tamper regressions fail closed. Canonical article claims/body remain unchanged and exclude 2026-10-02; no article/site/social/production/acceptance authority is granted.",
+    "workflow_run_id": 35491759287,
+    "workflow_run_number": 693,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10598442815,
-    "artifact_sha256": "5094f7a9cde42ba21239dbf34daed4c12c4031b584ba963f651d6be3aa664084",
-    "artifact_size_bytes": 238063,
+    "artifact_id": 10599470993,
+    "artifact_sha256": "8cd38a33b807a0f3f56659ca62524bcbde4b6b2413d5f1a58c9302b04c3222a3",
+    "artifact_size_bytes": 187798,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
-    "ordered_shadow_stage_count": 38,
+    "ordered_shadow_stage_count": 40,
     "ordered_shadow_failed_stage": null
   },
   "done": [
     "legacy remains explicitly LEGACY_NOT_PRODUCTION_READY and cannot supply Core v2 readiness",
-    "the single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin push/PR shadow executor",
-    "bounded pilot registry remains limited to the approved eight-source pilot and source expansion remains forbidden during pilot",
-    "ISJ registration_deadline=2026-10-02 remains independently supported through the verified calendar document, exact page hash/excerpt and chained materiality/FactKernel/writer projection/writer consumption identities",
-    "writer projection and writer consumption remain runtime-wired and independently validated with publication authority NONE",
-    "the deterministic writer renders exactly one pending registration-deadline claim while canonical article claims/body remain unchanged",
-    "a separate article deadline claim-to-evidence gate is now implemented and re-binds the pending claim to the exact writer consumption and FactKernel evidence chain",
-    "an independent validator reproduces article_deadline_claim_evidence_id without importing the gate implementation and proves five tamper regressions fail closed",
-    "natural push run 687 completed successfully on attempt 1; contract tests include the new gate/validator while the existing 38-stage bounded shadow cycle and all read-only external truth stages also passed",
-    "run 687 artifact 10598442815 has sha256 5094f7a9cde42ba21239dbf34daed4c12c4031b584ba963f651d6be3aa664084",
-    "run 687 runtime truth still shows article_contains_registration_deadline=false, article integrity PASS_SHADOW with verified_claim_count=2 and fabricated_claim_count=0",
+    "the single sequential Core v2 orchestrator remains the golden-path executor; the RUN55 increment adds two ordered shadow stages rather than a workflow-to-workflow trigger",
+    "the ISJ article deadline claim gate now runs immediately after isj_writer and before canonical article integrity",
+    "the independent article deadline validator runs immediately after the gate with --prove-tamper and passed five fail-closed tamper cases",
+    "both new runtime artifacts are persisted inside the cycle runtime_artifact_snapshots",
+    "runtime gate identity is isj-article-deadline-claim-cc6330d494a44bd79c5340d5 and remains bound to writer_consumption_evidence_id=isj-writer-deadline-consumption-de8b3ece2713d4395a0c62d1",
+    "natural push run 693 completed successfully on attempt 1 with all 40 ordered stages complete and failed_stage=null",
+    "run 693 artifact 10599470993 has sha256 8cd38a33b807a0f3f56659ca62524bcbde4b6b2413d5f1a58c9302b04c3222a3",
+    "artifact readback confirms article_contains_registration_deadline=false, canonical article claim count=2, article integrity PASS_SHADOW, verified_claim_count=2 and fabricated_claim_count=0",
+    "artifact readback confirms current live-source shadow composition produced 2 site-ledger articles, 2/2 photo-truth shadow candidates and 2/2 staged article-image bindings; these are not public delivery",
+    "read-only external replay remains site 2/2, approved public visual 1/2, Facebook receipt-bound 0/2, Instagram object presence 2/2 with approved-image identity 1/2, complete externally verified receipts 0 and truth-complete transactions 0",
     "no workflow_dispatch/manual rerun, merge, deploy, public-projection mutation, Core v2 live publication or Meta write occurred"
   ],
   "inventory": {
@@ -59,29 +59,27 @@
     "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
   },
   "current_shadow_truth": {
-    "ordered_shadow_stage_count": 38,
+    "ordered_shadow_stage_count": 40,
     "ordered_shadow_failed_stage": null,
-    "runtime_validation_checkpoint": "RUN54",
-    "external_delivery_truth_source_checkpoint": "RUN54 read-only external replay confirms historical delivery truth remains blocked",
-    "writer_projection_gate_logic_validated": true,
+    "runtime_validation_checkpoint": "RUN55",
+    "external_delivery_truth_source_checkpoint": "RUN55 read-only external replay",
     "writer_projection_runtime_wired": true,
     "writer_projection_validation_status": "PASS_SHADOW",
     "writer_projection_evidence_id": "isj-writer-deadline-projection-d9ae7b38596fc02a6ee7524d",
     "writer_projection_tamper_regressions_passed": 3,
-    "writer_consumption_gate_logic_validated": true,
-    "writer_consumption_gate_independently_validated": true,
     "writer_consumption_runtime_wired": true,
     "writer_consumption_validation_status": "PASS_SHADOW",
     "writer_consumption_evidence_id": "isj-writer-deadline-consumption-de8b3ece2713d4395a0c62d1",
     "writer_consumption_tamper_regressions_passed": 4,
-    "writer_consumption_runtime_artifacts_persisted": true,
     "writer_consumes_deadline_projection": true,
     "writer_rendered_promoted_claim_count": 1,
-    "writer_pending_deadline_claim_state": "WRITER_RENDERED_SHADOW_PENDING_ARTICLE_CLAIM_INTEGRITY",
     "article_deadline_claim_gate_implemented": true,
     "article_deadline_claim_gate_independently_validated": true,
-    "article_deadline_claim_gate_runtime_wired": false,
+    "article_deadline_claim_gate_runtime_wired": true,
+    "article_deadline_claim_validation_status": "PASS_SHADOW",
+    "article_deadline_claim_evidence_id": "isj-article-deadline-claim-cc6330d494a44bd79c5340d5",
     "article_deadline_claim_tamper_regressions_passed": 5,
+    "article_deadline_claim_runtime_artifacts_persisted": true,
     "canonical_article_mutation_allowed": false,
     "article_contains_registration_deadline": false,
     "canonical_article_claim_count": 2,
@@ -89,37 +87,26 @@
     "article_integrity_status": "PASS_SHADOW",
     "article_integrity_verified_claim_count": 2,
     "article_integrity_fabricated_claim_count": 0,
-    "photo_truth_candidate_count": 5,
-    "photo_truth_verified_shadow_count": 5,
+    "photo_truth_candidate_count": 2,
+    "photo_truth_verified_shadow_count": 2,
+    "shadow_site_package_image_bound_count": 2,
     "generic_or_synthetic_substitution_forbidden": true,
-    "scope_note": "Run 687 validates the new claim-to-evidence gate logic and its five fail-closed tamper cases without conflating that logic-level PASS with runtime article truth. The new gate is not yet an orchestrator stage, and canonical article claims/body still exclude the deadline."
+    "scope_note": "RUN55 validates the runtime wiring itself, not deadline publication. The independently validated deadline claim remains a shadow candidate and is still absent from canonical article claims/body."
   },
   "isj_calendar_scope_truth": {
     "registration_deadline_derivable": "2026-10-02",
     "deadline_materiality_promotion_runtime_wired": true,
-    "materiality_consumes_deadline_promotion": true,
     "deadline_fact_kernel_promotion_runtime_wired": true,
-    "fact_kernel_promotion_allowed": true,
-    "fact_kernel_composition_consumes_deadline_promotion": true,
     "fact_kernel_promoted_fact_claim_count": 1,
     "fact_kernel_promoted_fact_verified_count": 1,
-    "writer_projection_gate_implemented": true,
-    "writer_projection_gate_independently_validated": true,
     "writer_projection_wired": true,
     "writer_projection_validation_passed": true,
-    "writer_projection_tamper_regressions_passed": 3,
-    "writer_deadline_projection_allowed": true,
-    "writer_consumption_gate_implemented": true,
-    "writer_consumption_gate_independently_validated": true,
-    "writer_consumption_tamper_regressions_passed": 4,
     "writer_consumption_runtime_wired": true,
     "writer_consumption_validation_passed": true,
     "writer_consumes_deadline_projection": true,
-    "writer_rendered_promoted_claim_count": 1,
-    "article_deadline_claim_gate_implemented": true,
-    "article_deadline_claim_gate_independently_validated": true,
-    "article_deadline_claim_gate_runtime_wired": false,
-    "article_deadline_claim_tamper_regressions_passed": 5,
+    "article_deadline_claim_gate_runtime_wired": true,
+    "article_deadline_claim_validation_passed": true,
+    "article_deadline_claim_evidence_id": "isj-article-deadline-claim-cc6330d494a44bd79c5340d5",
     "canonical_materiality_deadline_promoted": true,
     "canonical_fact_kernel_deadline_promoted": true,
     "canonical_writer_deadline_promoted": true,
@@ -136,14 +123,35 @@
     "live_promotion_allowed": false
   },
   "external_replay_truth": {
-    "source_checkpoint": "RUN54 read-only external replay",
+    "source_checkpoint": "RUN55 read-only external replay",
     "candidate_count": 2,
-    "site_readback": {"passed": 2, "failed": 0},
-    "visual_readback": {"passed": 1, "failed": 1, "site_approved_visual_absent": 1, "transport_failures": 0},
-    "canonical_visual_binding": {"consistent": 1, "divergent": 1},
-    "facebook": {"passed": 0, "failed": 2, "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"},
-    "instagram_object_presence": {"passed": 2, "failed": 0},
-    "instagram_approved_visual_identity_binding": {"passed": 1, "failed": 1},
+    "site_readback": {
+      "passed": 2,
+      "failed": 0
+    },
+    "visual_readback": {
+      "passed": 1,
+      "failed": 1,
+      "site_approved_visual_absent": 1,
+      "transport_failures": 0
+    },
+    "canonical_visual_binding": {
+      "consistent": 1,
+      "divergent": 1
+    },
+    "facebook": {
+      "passed": 0,
+      "failed": 2,
+      "reason": "pages_read_engagement_or_Page_Public_Content_Access_required"
+    },
+    "instagram_object_presence": {
+      "passed": 2,
+      "failed": 0
+    },
+    "instagram_approved_visual_identity_binding": {
+      "passed": 1,
+      "failed": 1
+    },
     "externally_verified_complete_receipts": 0,
     "truth_complete_count": 0,
     "blocker_counts": {
@@ -155,40 +163,56 @@
     "acceptance_ready": false
   },
   "blocked": [
-    {"gate": "historical_water_site_visual", "reason": "The public water article is reachable, but the approved panorama is absent from article HTML: SITE_APPROVED_VISUAL_ABSENT / SITE_CONTENT."},
-    {"gate": "historical_water_instagram_visual_identity", "reason": "The unique water carousel near-match remains below unchanged identity threshold; no identity claim is promoted."},
-    {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
-    {"gate": "cj_road_source_tls", "reason": "Official CJ Valcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
-    {"gate": "isj_registration_deadline_article_claim_runtime", "reason": "The article deadline claim gate and independent validator are logic-validated, but are not yet wired into the orchestrator/runtime snapshots; canonical article claims/body still exclude the deadline."},
-    {"gate": "ten_story_acceptance", "reason": "No story yet satisfies the complete independent source + FactKernel + article + photo + site + FB + IG + receipt + audit chain."},
-    {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
+    {
+      "gate": "historical_water_site_visual",
+      "reason": "The public water article is reachable, but the approved panorama is absent from article HTML: SITE_APPROVED_VISUAL_ABSENT / SITE_CONTENT."
+    },
+    {
+      "gate": "historical_water_instagram_visual_identity",
+      "reason": "The water Instagram object is externally present but its remote pixels are not identity-bound to the approved Core v2 visual under the unchanged threshold."
+    },
+    {
+      "gate": "facebook_receipt_truth",
+      "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."
+    },
+    {
+      "gate": "cj_road_source_tls",
+      "reason": "Official CJ Valcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."
+    },
+    {
+      "gate": "isj_registration_deadline_article_projection",
+      "reason": "The deadline claim gate is now runtime-wired and independently PASS_SHADOW, but canonical article claims/body still exclude the deadline by design; promotion is a separate next increment."
+    },
+    {
+      "gate": "ten_story_acceptance",
+      "reason": "No story yet satisfies the complete independent source + FactKernel + article + photo + site + FB + IG + receipt + audit chain."
+    },
+    {
+      "gate": "production_cutover",
+      "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."
+    }
   ],
   "next": [
-    "wire the article registration-deadline claim gate and its independent validator into the single orchestrator immediately after isj_writer and before canonical article-integrity promotion; persist both runtime artifacts and add runtime/tamper invariants",
-    "run a natural push replay and require exact runtime PASS_SHADOW plus five tamper regressions while article_contains_registration_deadline remains false",
-    "only after that runtime PASS_SHADOW, project the deadline into canonical article claims/body as a separate increment and re-run complete independent article integrity",
+    "project the registration_deadline claim into canonical ISJ article claims/body only from article_deadline_claim_evidence_id=isj-article-deadline-claim-cc6330d494a44bd79c5340d5, keeping publication authority NONE",
+    "extend the independent article integrity gate so the new canonical claim must resolve to the exact promoted FactKernel/writer-consumption/article-claim evidence chain and prove tamper fail-closed",
+    "require a natural push replay with canonical article claim count=3, fabricated_claim_count=0 and exact deadline claim evidence binding before considering the writer/article segment complete",
     "keep water classified SITE_APPROVED_VISUAL_ABSENT and do not relax Instagram identity thresholds",
     "keep Facebook uncertified until read-only Graph permission is sufficient; keep CJ fail-closed on TLS",
     "do not start the 10-story acceptance series or cutover without complete external truth gates and explicit owner authorization"
   ],
   "evidence": {
-    "writer": "valcea-clar/core_v2/isj_writer_shadow_lane.py",
-    "writer_projection_gate": "valcea-clar/core_v2/isj_writer_deadline_projection_shadow_lane.py",
-    "writer_projection_validator": "valcea-clar/core_v2/validate_isj_writer_deadline_projection.py",
-    "writer_consumption_gate": "valcea-clar/core_v2/isj_writer_deadline_consumption_shadow_lane.py",
-    "writer_consumption_validator": "valcea-clar/core_v2/validate_isj_writer_deadline_consumption.py",
+    "orchestrator": "valcea-clar/core_v2/orchestrator.py",
+    "orchestrator_ordering_tests": "valcea-clar/tests/test_core_v2_orchestrator.py",
     "article_deadline_claim_gate": "valcea-clar/core_v2/isj_article_deadline_claim_gate.py",
     "article_deadline_claim_validator": "valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py",
     "article_integrity": "valcea-clar/core_v2/isj_article_integrity.py",
-    "writer_tests": "valcea-clar/tests/test_core_v2_isj_writer_shadow_lane.py",
-    "orchestrator_ordering_tests": "valcea-clar/tests/test_core_v2_orchestrator.py",
-    "orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35489078310",
-    "validated_feature_artifact_id": 10598442815,
-    "validated_feature_artifact_sha256": "5094f7a9cde42ba21239dbf34daed4c12c4031b584ba963f651d6be3aa664084",
-    "validated_feature_artifact_size_bytes": 238063,
+    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35491759287",
+    "validated_feature_artifact_id": 10599470993,
+    "validated_feature_artifact_sha256": "8cd38a33b807a0f3f56659ca62524bcbde4b6b2413d5f1a58c9302b04c3222a3",
+    "validated_feature_artifact_size_bytes": 187798,
     "runtime_writer_projection_evidence_id": "isj-writer-deadline-projection-d9ae7b38596fc02a6ee7524d",
-    "runtime_writer_consumption_evidence_id": "isj-writer-deadline-consumption-de8b3ece2713d4395a0c62d1"
+    "runtime_writer_consumption_evidence_id": "isj-writer-deadline-consumption-de8b3ece2713d4395a0c62d1",
+    "runtime_article_deadline_claim_evidence_id": "isj-article-deadline-claim-cc6330d494a44bd79c5340d5"
   }
 }
