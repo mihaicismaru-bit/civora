@@ -9,7 +9,9 @@ ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
 from isj_article_integrity import verify_isj_article_integrity  # noqa: E402
+from isj_writer_deadline_consumption_shadow_lane import build_writer_deadline_consumption  # noqa: E402
 from isj_writer_shadow_lane import compose_isj_article  # noqa: E402
+from validate_isj_writer_deadline_consumption import prove_tamper_regressions, validate as validate_consumption  # noqa: E402
 
 
 class ISJWriterShadowLaneTests(unittest.TestCase):
@@ -93,6 +95,121 @@ class ISJWriterShadowLaneTests(unittest.TestCase):
         integrity = verify_isj_article_integrity(fact_report, fact_integrity, tampered)
         self.assertEqual(integrity["status"], "BLOCKED")
         self.assertGreaterEqual(integrity["fabricated_claim_count"], 1)
+
+
+class ISJWriterDeadlineConsumptionGateTests(unittest.TestCase):
+    def _inputs(self):
+        claim = "Calendarul oficial verificat pentru sesiunea 2026 indică data de 2 octombrie 2026 ca termen-limită al perioadei de înscriere."
+        identities = {
+            "field_evidence_id": "isj-field-registration-deadline",
+            "scope_field_evidence_id": "isj-calendar-scope-session-2026",
+            "source_registration_window_field_evidence_id": "isj-calendar-registration-window",
+            "document_text_evidence_id": "isj-calendar-document-text",
+            "upstream_materiality_promotion_evidence_id": "isj-deadline-promotion-unit",
+            "fact_kernel_promotion_evidence_id": "isj-fact-kernel-deadline-promotion-unit",
+            "page_text_sha256": "a" * 64,
+        }
+        claim_evidence = [
+            identities["field_evidence_id"],
+            identities["scope_field_evidence_id"],
+            identities["source_registration_window_field_evidence_id"],
+            identities["document_text_evidence_id"],
+            identities["fact_kernel_promotion_evidence_id"],
+        ]
+        promoted = {
+            "field": "registration_deadline",
+            "value": "2026-10-02",
+            "claim": claim,
+            **identities,
+            "supporting_field_evidence_ids": [identities["scope_field_evidence_id"], identities["source_registration_window_field_evidence_id"]],
+            "claim_evidence_ids": claim_evidence,
+            "page_number": 1,
+            "excerpt": "14 septembrie – 2 octombrie: depunerea dosarelor de înscriere",
+        }
+        boundary = {
+            "publication_authority": "NONE",
+            "acceptance_ready": False,
+            "production_writer_ready": False,
+            "site_publish_allowed": False,
+            "social_publish_allowed": False,
+        }
+        fact_kernel = {
+            **boundary,
+            "state": "FACT_KERNEL_VERIFIED_SHADOW",
+            "writer_allowed": False,
+            "promoted_fact_claim_count": 1,
+            "kernels": [{"promoted_fact_claims": [promoted]}],
+        }
+        fact_integrity = {
+            **boundary,
+            "status": "PASS_SHADOW",
+            "fact_kernel_integrity_verified": True,
+            "promoted_fact_verified_count": 1,
+            "fabricated_claim_count": 0,
+        }
+        projection_id = "isj-writer-deadline-projection-unit"
+        projection_candidate = {
+            "field": "registration_deadline",
+            "value": "2026-10-02",
+            "claim": claim,
+            "state": "WRITER_DEADLINE_PROJECTION_VERIFIED_SHADOW",
+            **identities,
+            "supporting_field_evidence_ids": promoted["supporting_field_evidence_ids"],
+            "claim_evidence_ids": claim_evidence,
+            "page_number": 1,
+            "excerpt": promoted["excerpt"],
+            "writer_projection_evidence_id": projection_id,
+            "writer_deadline_projection_allowed": True,
+            "writer_allowed": False,
+            "article_projection_allowed": False,
+        }
+        projection = {
+            **boundary,
+            "state": "WRITER_PROJECTION_VERIFIED_SHADOW",
+            "registration_deadline": "2026-10-02",
+            "writer_projection_evidence_id": projection_id,
+            "writer_deadline_projection_allowed": True,
+            "writer_allowed": False,
+            "article_projection_allowed": False,
+            "projection_candidate_count": 1,
+            "projection_candidates": [projection_candidate],
+        }
+        projection_validation = {
+            **boundary,
+            "status": "PASS_SHADOW",
+            "registration_deadline": "2026-10-02",
+            "writer_projection_evidence_id": projection_id,
+            "writer_deadline_projection_allowed": True,
+            "article_projection_allowed": False,
+            "verified_projection_candidate_count": 1,
+            "fabricated_claim_count": 0,
+            "tamper_regressions_passed": 3,
+        }
+        return fact_kernel, fact_integrity, projection, projection_validation
+
+    def test_consumption_gate_and_independent_validator_pass_without_article_authority(self):
+        fact_kernel, fact_integrity, projection, projection_validation = self._inputs()
+        consumption = build_writer_deadline_consumption(fact_kernel, fact_integrity, projection, projection_validation)
+        self.assertEqual(consumption["state"], "WRITER_DEADLINE_CONSUMPTION_VERIFIED_SHADOW")
+        self.assertTrue(consumption["shadow_writer_consumption_allowed"])
+        self.assertFalse(consumption["writer_allowed"])
+        self.assertFalse(consumption["article_projection_allowed"])
+        summary = validate_consumption(fact_kernel, fact_integrity, projection, projection_validation, consumption)
+        self.assertEqual(summary["status"], "PASS_SHADOW")
+        self.assertTrue(summary["shadow_writer_consumption_allowed"])
+        self.assertFalse(summary["article_projection_allowed"])
+        self.assertEqual(
+            prove_tamper_regressions(fact_kernel, fact_integrity, projection, projection_validation, consumption),
+            4,
+        )
+
+    def test_consumption_gate_blocks_detached_projection_validation(self):
+        fact_kernel, fact_integrity, projection, projection_validation = self._inputs()
+        projection_validation["writer_projection_evidence_id"] = "isj-writer-deadline-projection-detached"
+        consumption = build_writer_deadline_consumption(fact_kernel, fact_integrity, projection, projection_validation)
+        self.assertEqual(consumption["state"], "BLOCKED")
+        self.assertFalse(consumption["shadow_writer_consumption_allowed"])
+        self.assertEqual(consumption["publication_authority"], "NONE")
 
 
 if __name__ == "__main__":
