@@ -115,7 +115,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     isj_fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
     isj_fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
     isj_writer_deadline_projection = workdir / "valcea-core-v2-isj-writer-deadline-projection.json"
-    isj_writer_deadline_projection_validation = workdir / "valcea-core-v2-isj-writer-deadline-projection-validation.json"
+    promoted_claim_projection_validation = workdir / "valcea-core-v2-promoted-claim-projection-validation.json"
     isj_writer_deadline_consumption = workdir / "valcea-core-v2-isj-writer-deadline-consumption.json"
     isj_writer_deadline_consumption_validation = workdir / "valcea-core-v2-isj-writer-deadline-consumption-validation.json"
     isj_article = workdir / "valcea-core-v2-isj-article-shadow.json"
@@ -161,9 +161,9 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_fact_kernel", (py, "valcea-clar/core_v2/isj_fact_kernel_shadow_lane.py", "--materiality", str(isj_field_materiality), "--fields", str(isj_fields), "--calendar-fields", str(isj_calendar_fields), "--output", str(isj_fact_kernel)), isj_fact_kernel),
         CycleStage("isj_fact_kernel_integrity", (py, "valcea-clar/core_v2/isj_fact_kernel_integrity.py", "--fact-kernel", str(isj_fact_kernel), "--output", str(isj_fact_integrity)), isj_fact_integrity),
         CycleStage("isj_writer_deadline_projection", (py, "valcea-clar/core_v2/isj_writer_deadline_projection_shadow_lane.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--year", "2026", "--output", str(isj_writer_deadline_projection)), isj_writer_deadline_projection),
-        CycleStage("isj_writer_deadline_projection_validation", (py, "valcea-clar/core_v2/validate_isj_writer_deadline_projection.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--projection", str(isj_writer_deadline_projection), "--year", "2026", "--prove-tamper", "--output", str(isj_writer_deadline_projection_validation)), isj_writer_deadline_projection_validation),
-        CycleStage("isj_writer_deadline_consumption", (py, "valcea-clar/core_v2/isj_writer_deadline_consumption_shadow_lane.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--projection", str(isj_writer_deadline_projection), "--projection-validation", str(isj_writer_deadline_projection_validation), "--year", "2026", "--output", str(isj_writer_deadline_consumption)), isj_writer_deadline_consumption),
-        CycleStage("isj_writer_deadline_consumption_validation", (py, "valcea-clar/core_v2/validate_isj_writer_deadline_consumption.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--projection", str(isj_writer_deadline_projection), "--projection-validation", str(isj_writer_deadline_projection_validation), "--consumption", str(isj_writer_deadline_consumption), "--year", "2026", "--prove-tamper", "--output", str(isj_writer_deadline_consumption_validation)), isj_writer_deadline_consumption_validation),
+        CycleStage("promoted_claim_projection_validation", (py, "valcea-clar/core_v2/validate_promoted_claim_projection_runtime.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--projection", str(isj_writer_deadline_projection), "--year", "2026", "--prove-tamper", "--output", str(promoted_claim_projection_validation)), promoted_claim_projection_validation),
+        CycleStage("isj_writer_deadline_consumption", (py, "valcea-clar/core_v2/isj_writer_deadline_consumption_shadow_lane.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--projection", str(isj_writer_deadline_projection), "--projection-validation", str(promoted_claim_projection_validation), "--year", "2026", "--output", str(isj_writer_deadline_consumption)), isj_writer_deadline_consumption),
+        CycleStage("isj_writer_deadline_consumption_validation", (py, "valcea-clar/core_v2/validate_isj_writer_deadline_consumption.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--projection", str(isj_writer_deadline_projection), "--projection-validation", str(promoted_claim_projection_validation), "--consumption", str(isj_writer_deadline_consumption), "--year", "2026", "--prove-tamper", "--output", str(isj_writer_deadline_consumption_validation)), isj_writer_deadline_consumption_validation),
         CycleStage("isj_writer", (py, "valcea-clar/core_v2/isj_writer_shadow_lane.py", "--fact-kernel", str(isj_fact_kernel), "--fact-kernel-integrity", str(isj_fact_integrity), "--output", str(isj_article)), isj_article),
         CycleStage("isj_article_deadline_claim_gate", (
             py, "valcea-clar/core_v2/isj_article_deadline_claim_gate.py",
@@ -192,7 +192,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
             "--fact-promotion-validation", str(isj_fact_kernel_deadline_promotion_validation),
             "--fact-kernel", str(isj_fact_kernel),
             "--fact-integrity", str(isj_fact_integrity),
-            "--writer-projection-validation", str(isj_writer_deadline_projection_validation),
+            "--writer-projection-validation", str(promoted_claim_projection_validation),
             "--writer-consumption-validation", str(isj_writer_deadline_consumption_validation),
             "--article-claim-gate", str(isj_article_deadline_claim),
             "--article-claim-validation", str(isj_article_deadline_claim_validation),
@@ -205,7 +205,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
             "--fact-promotion-validation", str(isj_fact_kernel_deadline_promotion_validation),
             "--fact-kernel", str(isj_fact_kernel),
             "--fact-integrity", str(isj_fact_integrity),
-            "--writer-projection-validation", str(isj_writer_deadline_projection_validation),
+            "--writer-projection-validation", str(promoted_claim_projection_validation),
             "--writer-consumption-validation", str(isj_writer_deadline_consumption_validation),
             "--article-claim-gate", str(isj_article_deadline_claim),
             "--article-claim-validation", str(isj_article_deadline_claim_validation),
@@ -266,7 +266,7 @@ def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]
         "isj_fact_kernel_deadline_promotion",
         "isj_fact_kernel_deadline_promotion_validation",
         "isj_writer_deadline_projection",
-        "isj_writer_deadline_projection_validation",
+        "promoted_claim_projection_validation",
         "isj_writer_deadline_consumption",
         "isj_writer_deadline_consumption_validation",
         "isj_article_deadline_claim_gate",
