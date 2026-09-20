@@ -1,6 +1,6 @@
 {
-  "schema_version": "6.4",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN51-ISJ-WRITER-DEADLINE-CONSUMPTION-GATE-NATURAL-VALIDATED",
+  "schema_version": "6.5",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN52-ISJ-WRITER-DEADLINE-CONSUMPTION-RUNTIME-NATURAL-VALIDATED",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -8,8 +8,8 @@
   "draft_pr": 1222,
   "branch": "rebuild/valcea-clar-core-v2-20260918",
   "fresh_reread": {
-    "civora_main_observed_sha": "80700022e6443a5f3a73191fd0d44a57de1fcdfe",
-    "civora_main_observed_message": "Checkpoint verified decision-maker projection",
+    "civora_main_observed_sha": "279fce4ff6ccf51abc64ee71b628eec684d7cf7c",
+    "civora_main_observed_message": "PPOS CP91: close growth dry-run acceptance suite",
     "public_projection_repo": "mihaicismaru-bit/valcea-clar",
     "public_projection_main_sha": "ee561e2e8cc150cf1c7cf6b34ebad16dec01f764",
     "public_projection_message": "sync: reconcile CIVORA canonical stories",
@@ -18,21 +18,21 @@
     "legacy_state_is_not_core_v2_truth": true
   },
   "latest_validated_core_feature_head": {
-    "sha": "5a72c192058f0e406db1ea08aa839c521efa82c4",
-    "message": "Add fail-closed ISJ writer deadline consumption gate",
-    "functional_increment": "A separate fail-closed ISJ writer-deadline consumption contract now binds the independently validated writer projection to the exact promoted FactKernel deadline/evidence chain and creates a deterministic writer_consumption_evidence_id. A separately implemented independent validator reproduces that identity and proves four negative tamper cases fail closed. This increment grants only future shadow-writer consumption eligibility; it is not yet wired into the orchestrator, does not alter writer/article prose, and grants no article, site, social, production or acceptance authority.",
-    "workflow_run_id": 35481350179,
-    "workflow_run_number": 673,
+    "sha": "a4eb5dcf7d3b9ffcbe8879a74848c2dd89a4c927",
+    "message": "Assert writer consumption runtime ordering and isolation",
+    "functional_increment": "The independently validated ISJ writer-deadline consumption gate and validator are now wired into the single ordered Core v2 orchestrator immediately after writer-projection validation and before the unchanged writer. Both runtime artifacts are persisted in the bounded-cycle runtime snapshots. The validator runs with four fail-closed tamper regressions. The deterministic writer remains intentionally isolated from projection/consumption artifacts, so the deadline is still not rendered into article prose and no article/site/social/production authority is granted.",
+    "workflow_run_id": 35483721956,
+    "workflow_run_number": 679,
     "event": "push",
     "conclusion": "success",
     "run_attempt": 1,
-    "artifact_id": 10595923067,
-    "artifact_sha256": "112024ca637de93d95a6313d221f50401473e0e765eeeeffb514e5c009477ff7",
-    "artifact_size_bytes": 235916,
+    "artifact_id": 10596956944,
+    "artifact_sha256": "c9784df41fa262a76c26a8177b144a420d327486c515eaa828e8eb0714d73fc2",
+    "artifact_size_bytes": 236594,
     "manual_dispatch": false,
     "manual_rerun": false,
     "production_write_authority": false,
-    "ordered_shadow_stage_count": 36,
+    "ordered_shadow_stage_count": 38,
     "ordered_shadow_failed_stage": null
   },
   "done": [
@@ -40,13 +40,13 @@
     "the single sequential Core v2 orchestrator remains the golden-path executor; GitHub Actions remains a thin push/PR shadow executor",
     "bounded pilot registry remains limited to the approved eight-source pilot and source expansion remains forbidden during pilot",
     "ISJ registration_deadline=2026-10-02 remains independently supported through the same verified calendar document, page hash, exact excerpt and chained materiality/FactKernel promotion identities",
-    "FactKernel composition still records exactly one separately evidence-bound promoted_fact_claim for the deadline while the writer-visible base kernel remains isolated from that promoted claim",
-    "writer projection remains runtime-wired and independently validated, but the deterministic writer and article remain intentionally unchanged",
-    "new writer-deadline consumption gate validates the exact writer_projection_evidence_id, promoted FactKernel claim, evidence IDs, page hash, page/excerpt and materiality/FactKernel promotion identities before minting a deterministic writer_consumption_evidence_id",
-    "new independent writer-consumption validator reproduces the deterministic identity without importing the gate implementation and proves four fail-closed tamper regressions: detached projection identity, detached projection-validation identity, detached claim-evidence identity and detached consumption identity",
-    "natural push run 673 compiled Core v2 and passed the truth-bound contract suite containing the new positive and negative consumption-gate tests; the unchanged 36-stage read-only shadow cycle also completed successfully",
-    "run 673 continued through the read-only source/site/visual/Meta/audit validation workflow and concluded success on attempt 1; this green run is supporting evidence only and is not treated as delivery truth",
-    "run 673 artifact 10595923067 was produced with sha256 112024ca637de93d95a6313d221f50401473e0e765eeeeffb514e5c009477ff7",
+    "FactKernel composition still records exactly one separately evidence-bound promoted_fact_claim for the deadline while the deterministic writer article remains isolated from that promoted claim",
+    "writer projection remains runtime-wired, independently validated and persisted, without granting writer/article authority",
+    "writer-deadline consumption gate and independent validator are now runtime-wired immediately after writer-projection validation and before the unchanged writer",
+    "the ordered bounded Core v2 shadow plan increased from 36 to 38 stages and contract tests assert exact ordering plus writer isolation from projection and consumption artifacts",
+    "both writer-consumption runtime artifacts are persisted in runtime_artifact_snapshots; the validator runs with --prove-tamper and requires four fail-closed regressions",
+    "natural push run 679 executed the complete 38-stage read-only shadow cycle successfully, then passed document/field/context/calendar/materiality/writer/article checks, external site/visual/Meta readback stages, receipt/transaction binding, runtime invariants and late-ISJ negative regressions",
+    "run 679 concluded success on attempt 1 and produced artifact 10596956944 with sha256 c9784df41fa262a76c26a8177b144a420d327486c515eaa828e8eb0714d73fc2",
     "no workflow_dispatch/manual rerun, merge, deploy, public-projection mutation, Core v2 live publication or Meta write occurred"
   ],
   "inventory": {
@@ -59,9 +59,10 @@
     "keep_semantics": "Reusable component/data only; KEEP grants no publication authority."
   },
   "current_shadow_truth": {
-    "ordered_shadow_stage_count": 36,
+    "ordered_shadow_stage_count": 38,
     "ordered_shadow_failed_stage": null,
-    "last_parsed_runtime_truth_checkpoint": "RUN50",
+    "runtime_validation_checkpoint": "RUN52",
+    "external_delivery_truth_source_checkpoint": "RUN50 parsed external replay; run 679 re-executed all read-only external stages successfully without changing delivery authority",
     "writer_projection_gate_logic_validated": true,
     "writer_projection_runtime_wired": true,
     "writer_projection_validation_status": "PASS_SHADOW",
@@ -69,12 +70,14 @@
     "writer_projection_tamper_regressions_passed": 3,
     "writer_consumption_gate_logic_validated": true,
     "writer_consumption_gate_independently_validated": true,
+    "writer_consumption_runtime_wired": true,
+    "writer_consumption_validation_status": "PASS_SHADOW",
     "writer_consumption_tamper_regressions_passed": 4,
-    "writer_consumption_runtime_wired": false,
+    "writer_consumption_runtime_artifacts_persisted": true,
     "writer_consumes_deadline_projection": false,
     "article_contains_registration_deadline": false,
     "generic_or_synthetic_substitution_forbidden": true,
-    "scope_note": "Run 673 naturally validated the new consumption contract and its fail-closed tests while executing the existing read-only 36-stage lane. The new gate is deliberately not orchestrator-wired yet, so writer/article behavior and public delivery truth are unchanged."
+    "scope_note": "Run 679 naturally validated the 38-stage runtime integration and preserved the authority boundary: writer-consumption eligibility is a shadow evidence state only. The deterministic writer still receives only FactKernel + FactKernel integrity, so article prose and public delivery truth remain unchanged."
   },
   "isj_calendar_scope_truth": {
     "registration_deadline_derivable": "2026-10-02",
@@ -94,7 +97,8 @@
     "writer_consumption_gate_implemented": true,
     "writer_consumption_gate_independently_validated": true,
     "writer_consumption_tamper_regressions_passed": 4,
-    "writer_consumption_runtime_wired": false,
+    "writer_consumption_runtime_wired": true,
+    "writer_consumption_validation_passed": true,
     "writer_consumes_deadline_projection": false,
     "canonical_materiality_deadline_promoted": true,
     "canonical_fact_kernel_deadline_promoted": true,
@@ -111,7 +115,7 @@
     "live_promotion_allowed": false
   },
   "external_replay_truth": {
-    "source_checkpoint": "RUN50 parsed external replay; run 673 re-executed the read-only external stages successfully but did not change delivery authority",
+    "source_checkpoint": "RUN50 parsed external replay; run 679 re-executed the read-only external stages successfully but did not change delivery authority",
     "candidate_count": 2,
     "site_readback": {"passed": 2, "failed": 0},
     "visual_readback": {"passed": 1, "failed": 1, "site_approved_visual_absent": 1, "transport_failures": 0},
@@ -134,14 +138,14 @@
     {"gate": "historical_water_instagram_visual_identity", "reason": "The unique water carousel near-match remains below unchanged identity threshold; no identity claim is promoted."},
     {"gate": "facebook_receipt_truth", "reason": "Read-only Graph access still lacks sufficient permission for receipt-bound Facebook delivery verification."},
     {"gate": "cj_road_source_tls", "reason": "Official CJ Valcea source still cannot establish a verified TLS chain from the Core runner; certificate verification stays enabled."},
-    {"gate": "isj_registration_deadline_writer_consumption_runtime", "reason": "The new writer-consumption contract is independently validated, but it is not yet wired into the orchestrator and the deterministic writer still does not consume it."},
+    {"gate": "isj_registration_deadline_writer_application", "reason": "The writer-consumption runtime identity is now naturally validated, but the deterministic writer intentionally does not consume it yet and the article still excludes the deadline."},
     {"gate": "ten_story_acceptance", "reason": "No story yet satisfies the complete independent source + FactKernel + article + photo + site + FB + IG + receipt + audit chain."},
     {"gate": "production_cutover", "reason": "Explicit owner approval remains mandatory before merge, deploy or live Core v2 publication/distribution."}
   ],
   "next": [
-    "wire the new writer-consumption gate and independent validator into the single orchestrator immediately after writer-projection validation and before the unchanged writer, persist both runtime artifacts, and extend runtime/tamper invariants without granting article/publication authority",
-    "run a natural push replay and require PASS_SHADOW for the runtime consumption identity before allowing the deterministic writer to consume the deadline in any later increment",
-    "only after runtime consumption validation, implement writer consumption as a separate change and add a distinct article registration-deadline claim-to-evidence integrity gate before any photo/site readiness promotion",
+    "implement deterministic shadow-writer consumption as a separate fail-closed increment: the writer may consume registration_deadline only when the exact runtime writer_consumption_evidence_id has PASS_SHADOW independent validation; keep writer_allowed=false and all publication authority NONE",
+    "add a distinct article registration-deadline claim-to-evidence integrity gate that re-binds the rendered claim to the consumption identity and full FactKernel evidence chain before any article truth promotion",
+    "run natural push replays for writer consumption and article integrity separately; do not infer delivery from green workflows",
     "keep water classified SITE_APPROVED_VISUAL_ABSENT and do not relax Instagram identity thresholds",
     "keep Facebook uncertified until read-only Graph permission is sufficient; keep CJ fail-closed on TLS",
     "do not start the 10-story acceptance series or cutover without complete external truth gates and explicit owner authorization"
@@ -152,12 +156,13 @@
     "writer_consumption_gate": "valcea-clar/core_v2/isj_writer_deadline_consumption_shadow_lane.py",
     "writer_consumption_validator": "valcea-clar/core_v2/validate_isj_writer_deadline_consumption.py",
     "writer_consumption_tests": "valcea-clar/tests/test_core_v2_isj_writer_shadow_lane.py",
+    "orchestrator_ordering_tests": "valcea-clar/tests/test_core_v2_orchestrator.py",
     "orchestrator": "valcea-clar/core_v2/orchestrator.py",
     "workflow": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35481350179",
-    "validated_feature_artifact_id": 10595923067,
-    "validated_feature_artifact_sha256": "112024ca637de93d95a6313d221f50401473e0e765eeeeffb514e5c009477ff7",
-    "validated_feature_artifact_size_bytes": 235916,
+    "validated_feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35483721956",
+    "validated_feature_artifact_id": 10596956944,
+    "validated_feature_artifact_sha256": "c9784df41fa262a76c26a8177b144a420d327486c515eaa828e8eb0714d73fc2",
+    "validated_feature_artifact_size_bytes": 236594,
     "runtime_writer_projection_evidence_id": "isj-writer-deadline-projection-d9ae7b38596fc02a6ee7524d"
   }
 }
