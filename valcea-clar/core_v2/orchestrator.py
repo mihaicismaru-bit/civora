@@ -1,21 +1,22 @@
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 import orchestrator_run70 as _legacy
 
-# RUN72 controlled compatibility boundary:
-# retain the validated RUN70 orchestrator implementation as a frozen component,
-# but make the canonical 42-stage runtime use the source-neutral writer-consumption
-# builder/validator and neutral artifact names. Historical evidence-ID namespaces
-# stay unchanged deliberately so downstream lineage remains stable.
+# RUN73 controlled compatibility boundary:
+# retain the validated RUN70 orchestrator implementation as a frozen component
+# for the still-unmigrated stages, but make the canonical orchestrator own the
+# source-neutral writer-consumption stage definitions directly. The frozen RUN70
+# writer-consumption placeholders are filtered out without reading or transforming
+# their argv/output definitions. Historical evidence-ID namespaces stay unchanged
+# deliberately so downstream lineage remains stable.
 #
-# RUN72 also makes the retirement boundary executable: the canonical plan fails
-# closed if either source-specific ISJ writer-consumption implementation path leaks
-# back into runtime. The historical modules may remain in the repository only as
-# independent regression evidence; they are not a canonical runtime dependency.
+# Source-specific ISJ writer-consumption modules may remain in the repository only
+# as independent regression evidence; they are not a canonical runtime dependency.
 
 CycleStage = _legacy.CycleStage
 run_shadow = _legacy.run_shadow
@@ -31,12 +32,61 @@ _OLD_CONSUMPTION_MODULE = "valcea-clar/core_v2/isj_writer_deadline_consumption_s
 _NEW_CONSUMPTION_MODULE = "valcea-clar/core_v2/promoted_claim_writer_consumption.py"
 _OLD_VALIDATION_MODULE = "valcea-clar/core_v2/validate_isj_writer_deadline_consumption.py"
 _NEW_VALIDATION_MODULE = "valcea-clar/core_v2/validate_promoted_claim_writer_consumption_runtime.py"
+_SOURCE_SPECIFIC_PLACEHOLDER_STAGES = {
+    "isj_writer_deadline_consumption",
+    "isj_writer_deadline_consumption_validation",
+}
 
 
 def _neutralize_arg(value: str) -> str:
+    """Rewrite downstream references only; canonical neutral stages are owned below."""
     return (
         value.replace(_OLD_VALIDATION_ARTIFACT, _NEW_VALIDATION_ARTIFACT)
         .replace(_OLD_CONSUMPTION_ARTIFACT, _NEW_CONSUMPTION_ARTIFACT)
+    )
+
+
+def _owned_writer_consumption_stages(workdir: Path) -> tuple[CycleStage, CycleStage]:
+    """Return the two canonical source-neutral stages without consulting RUN70 placeholders."""
+    fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
+    fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
+    projection = workdir / "valcea-core-v2-promoted-claim-writer-projection.json"
+    projection_validation = workdir / "valcea-core-v2-promoted-claim-projection-validation.json"
+    consumption = workdir / _NEW_CONSUMPTION_ARTIFACT
+    validation = workdir / _NEW_VALIDATION_ARTIFACT
+    py = sys.executable
+
+    return (
+        CycleStage(
+            "promoted_claim_writer_consumption",
+            (
+                py,
+                _NEW_CONSUMPTION_MODULE,
+                "--fact-kernel", str(fact_kernel),
+                "--fact-kernel-integrity", str(fact_integrity),
+                "--projection", str(projection),
+                "--projection-validation", str(projection_validation),
+                "--year", "2026",
+                "--output", str(consumption),
+            ),
+            consumption,
+        ),
+        CycleStage(
+            "promoted_claim_writer_consumption_validation",
+            (
+                py,
+                _NEW_VALIDATION_MODULE,
+                "--fact-kernel", str(fact_kernel),
+                "--fact-kernel-integrity", str(fact_integrity),
+                "--projection", str(projection),
+                "--projection-validation", str(projection_validation),
+                "--consumption", str(consumption),
+                "--year", "2026",
+                "--prove-tamper",
+                "--output", str(validation),
+            ),
+            validation,
+        ),
     )
 
 
@@ -67,7 +117,7 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
     )
     no_dependency = not legacy_refs and exact_neutral_paths
     return {
-        "schema_version": "core-v2-writer-consumption-runtime-dependency-shadow.v1",
+        "schema_version": "core-v2-writer-consumption-runtime-dependency-shadow.v2",
         "status": "PASS_SHADOW" if no_dependency else "BLOCKED",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -78,6 +128,8 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
         "canonical_writer_consumption_validation_stage": validation.name,
         "canonical_writer_consumption_validation_module": validation.argv[1] if len(validation.argv) > 1 else None,
         "canonical_writer_consumption_validation_artifact": validation.output.name if validation.output is not None else None,
+        "canonical_stage_ownership": "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION",
+        "source_specific_placeholder_stage_dependency": False,
         "source_specific_runtime_references": legacy_refs,
         "source_specific_runtime_dependency": not no_dependency,
         "source_specific_regression_only": True,
@@ -85,27 +137,33 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
         "source_specific_retirement_performed": False,
         "compatibility_identity_namespace_retained": True,
         "truth_rule": (
-            "Canonical writer-consumption runtime is retirement-eligible only when the ordered plan references the source-neutral builder, validator and artifacts exactly, "
-            "contains no source-specific ISJ writer-consumption implementation/artifact reference, and grants no publication or acceptance authority."
+            "Canonical writer-consumption runtime is retirement-eligible only when Core v2 directly owns the ordered source-neutral builder and validator stages, "
+            "references their artifacts exactly, contains no source-specific ISJ writer-consumption implementation/artifact reference, and grants no publication or acceptance authority."
         ),
     }
 
 
 def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
-    plan = _LEGACY_PLAN(workdir, live=live)
+    legacy_plan = _LEGACY_PLAN(workdir, live=live)
     transformed: list[CycleStage] = []
-    for stage in plan:
+    owned_stages = _owned_writer_consumption_stages(workdir)
+    owned_inserted = False
+
+    for stage in legacy_plan:
+        # Do not transform or consume the frozen source-specific placeholder
+        # definitions. They are skipped as legacy evidence only.
+        if stage.name in _SOURCE_SPECIFIC_PLACEHOLDER_STAGES:
+            continue
+
+        if stage.name == "isj_writer" and not owned_inserted:
+            transformed.extend(owned_stages)
+            owned_inserted = True
+
         name = stage.name
         argv = [_neutralize_arg(str(arg)) for arg in stage.argv]
         output = Path(_neutralize_arg(str(stage.output))) if stage.output is not None else None
 
-        if name == "isj_writer_deadline_consumption":
-            name = "promoted_claim_writer_consumption"
-            argv[1] = _NEW_CONSUMPTION_MODULE
-        elif name == "isj_writer_deadline_consumption_validation":
-            name = "promoted_claim_writer_consumption_validation"
-            argv[1] = _NEW_VALIDATION_MODULE
-        elif name == "isj_writer":
+        if name == "isj_writer":
             # Eliminate the hidden legacy filename auto-discovery dependency. The
             # writer consumes the canonical neutral pair explicitly; writer code
             # itself remains a kept/reused component in this increment.
@@ -116,13 +174,29 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
 
         transformed.append(CycleStage(name, tuple(argv), output))
 
+    if not owned_inserted:
+        raise RuntimeError("canonical_writer_stage_missing_for_owned_consumption_insertion")
+
     names = [stage.name for stage in transformed]
     if len(transformed) != 42:
         raise RuntimeError(f"canonical_core_v2_stage_count_changed:{len(transformed)}")
     if "promoted_claim_writer_consumption" not in names or "promoted_claim_writer_consumption_validation" not in names:
         raise RuntimeError("source_neutral_writer_consumption_stages_missing")
-    if "isj_writer_deadline_consumption" in names or "isj_writer_deadline_consumption_validation" in names:
+    if _SOURCE_SPECIFIC_PLACEHOLDER_STAGES.intersection(names):
         raise RuntimeError("legacy_writer_consumption_stage_leaked_into_canonical_runtime")
+
+    # The two owned stages must be adjacent and immediately precede the writer,
+    # preserving the validated golden-path ordering without consulting placeholders.
+    consumption_index = names.index("promoted_claim_writer_consumption")
+    validation_index = names.index("promoted_claim_writer_consumption_validation")
+    writer_index = names.index("isj_writer")
+    if (consumption_index, validation_index, writer_index) != (
+        writer_index - 2,
+        writer_index - 1,
+        writer_index,
+    ):
+        raise RuntimeError("owned_writer_consumption_stage_order_changed")
+
     for stage in transformed:
         joined = "\n".join(stage.argv)
         if _OLD_CONSUMPTION_ARTIFACT in joined or _OLD_VALIDATION_ARTIFACT in joined:
@@ -130,19 +204,12 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         if _OLD_CONSUMPTION_MODULE in joined or _OLD_VALIDATION_MODULE in joined:
             raise RuntimeError(f"legacy_writer_consumption_implementation_leaked:{stage.name}")
 
-    by_name = {stage.name: stage for stage in transformed}
-    expected_runtime_paths = (
-        ("promoted_claim_writer_consumption", _NEW_CONSUMPTION_MODULE, _NEW_CONSUMPTION_ARTIFACT),
-        ("promoted_claim_writer_consumption_validation", _NEW_VALIDATION_MODULE, _NEW_VALIDATION_ARTIFACT),
-    )
-    for stage_name, module_path, artifact_name in expected_runtime_paths:
-        stage = by_name[stage_name]
-        if len(stage.argv) <= 1 or stage.argv[1] != module_path:
-            raise RuntimeError(f"writer_consumption_not_bound_to_neutral_module:{stage_name}")
-        if stage.output is None or stage.output.name != artifact_name:
-            raise RuntimeError(f"writer_consumption_not_bound_to_neutral_artifact:{stage_name}")
+    expected_owned = _owned_writer_consumption_stages(workdir)
+    actual_owned = (transformed[consumption_index], transformed[validation_index])
+    if actual_owned != expected_owned:
+        raise RuntimeError("canonical_owned_writer_consumption_definition_drifted")
 
-    writer_stage = next(stage for stage in transformed if stage.name == "isj_writer")
+    writer_stage = transformed[writer_index]
     writer_argv = list(writer_stage.argv)
     for flag, expected in (
         ("--writer-consumption", str(workdir / _NEW_CONSUMPTION_ARTIFACT)),
@@ -154,6 +221,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     dependency = _writer_consumption_dependency_snapshot(tuple(transformed))
     if dependency["status"] != "PASS_SHADOW" or dependency["source_specific_runtime_dependency"] is not False:
         raise RuntimeError("source_specific_writer_consumption_runtime_dependency_detected")
+    if dependency["source_specific_placeholder_stage_dependency"] is not False:
+        raise RuntimeError("source_specific_writer_consumption_placeholder_dependency_detected")
     return tuple(transformed)
 
 
