@@ -7,6 +7,11 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from promoted_claim_projection_validation import (
+    prove_projection_tamper_regressions,
+    validate_source_neutral_projection,
+)
+
 
 def _norm(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
@@ -195,7 +200,7 @@ def build_writer_deadline_projection(
             "site_publish_allowed": False,
             "social_publish_allowed": False,
         }
-        return {
+        result = {
             **_base(),
             "state": "WRITER_PROJECTION_VERIFIED_SHADOW",
             "reason": "independently_verified_factkernel_deadline_preserves_exact_identity_for_separate_shadow_writer_projection",
@@ -209,6 +214,34 @@ def build_writer_deadline_projection(
                 "It does not alter article prose, self-certify article integrity, authorize publication/distribution, or satisfy acceptance."
             ),
         }
+
+        # Bounded dependency/retirement proof: execute the source-neutral
+        # replacement validator beside the source-specific path, but keep the
+        # legacy validator and every downstream gate authoritative for this run.
+        generic = validate_source_neutral_projection(fact_kernel, fact_integrity, result)
+        if generic.get("status") != "PASS_SHADOW":
+            raise RuntimeError(f"source_neutral_projection_validator_failed:{generic.get('detail')}")
+        if generic.get("writer_projection_evidence_id") != projection_id:
+            raise RuntimeError("source_neutral_projection_identity_mismatch")
+        tamper_passed = prove_projection_tamper_regressions(fact_kernel, fact_integrity, result)
+        if tamper_passed != 4:
+            raise RuntimeError("source_neutral_projection_tamper_proof_incomplete")
+        result.update({
+            "source_neutral_replacement_validator_status": "PASS_SHADOW",
+            "source_neutral_replacement_projection_id": generic.get("writer_projection_evidence_id"),
+            "source_neutral_replacement_lineage_fingerprint_sha256": generic.get("lineage_fingerprint_sha256"),
+            "source_neutral_replacement_authority_flags_equivalent": True,
+            "source_neutral_replacement_tamper_regressions_passed": tamper_passed,
+            "retirement_candidate": "isj_writer_deadline_projection_validation",
+            "retirement_candidate_proof_only": True,
+            "retirement_performed": False,
+            "replacement_path_enabled": False,
+            "source_neutral_replacement_proof": generic,
+        })
+        result["truth_rule"] += (
+            " A source-neutral replacement validator also ran beside this source-specific projection in shadow mode, reproduced the exact projection identity and authority boundary, and failed closed under four tamper regressions. The legacy validator remains active and no retirement occurs in this proof increment."
+        )
+        return result
     except Exception as exc:
         return _blocked("writer_deadline_projection_gate_failed", detail=f"{type(exc).__name__}:{exc}")
 
@@ -230,6 +263,10 @@ def main() -> int:
         "state": result.get("state"),
         "registration_deadline": result.get("registration_deadline"),
         "writer_deadline_projection_allowed": result.get("writer_deadline_projection_allowed", False),
+        "source_neutral_replacement_validator_status": result.get("source_neutral_replacement_validator_status"),
+        "source_neutral_replacement_tamper_regressions_passed": result.get("source_neutral_replacement_tamper_regressions_passed", 0),
+        "retirement_candidate": result.get("retirement_candidate"),
+        "retirement_performed": result.get("retirement_performed", False),
         "article_projection_allowed": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
