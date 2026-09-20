@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from promoted_claim_consumer import consume_promoted_claim_contract, validate_consumer_identity
 from promoted_claim_contract import build_promoted_claim_contract
 from validate_promoted_claim_contract import validate_promoted_claim_contract
 
@@ -162,13 +163,66 @@ def derive_expected_lineage_independently(
     }
 
 
+def _validate_consumer_against_expected(
+    consumer: dict[str, Any],
+    expected: dict[str, Any],
+) -> dict[str, Any]:
+    _require_pass(consumer, "source_neutral_consumer")
+    if consumer.get("state") != "PROMOTED_CLAIM_CONSUMED_SHADOW":
+        raise RuntimeError("source_neutral_consumer_state_mismatch")
+    if consumer.get("source_neutral_consumer") is not True:
+        raise RuntimeError("source_neutral_consumer_marker_missing")
+    if consumer.get("lineage_complete") is not True:
+        raise RuntimeError("source_neutral_consumer_lineage_incomplete")
+    if int(consumer.get("verified_claim_count") or 0) != 1:
+        raise RuntimeError("source_neutral_consumer_verified_claim_count_mismatch")
+
+    identity = validate_consumer_identity(consumer)
+    if identity.get("status") != "PASS_SHADOW":
+        raise RuntimeError(f"source_neutral_consumer_identity_failed:{identity.get('detail')}")
+
+    claim = consumer.get("claim")
+    if not isinstance(claim, dict):
+        raise RuntimeError("source_neutral_consumer_claim_missing")
+    if claim != expected:
+        differing = sorted(key for key in set(expected) | set(claim) if claim.get(key) != expected.get(key))
+        raise RuntimeError(f"source_neutral_consumer_output_mismatch:{','.join(differing)}")
+
+    return {
+        "schema_version": "1.0",
+        "mode": "ISJ_SOURCE_NEUTRAL_PROMOTED_CLAIM_EQUIVALENCE_SHADOW",
+        "status": "PASS_SHADOW",
+        "state": "SOURCE_NEUTRAL_OUTPUT_EQUIVALENT_TO_ISJ_LINEAGE_SHADOW",
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+        "site_publish_allowed": False,
+        "social_publish_allowed": False,
+        "production_write_authority": False,
+        "promoted_claim_contract_id": consumer.get("promoted_claim_contract_id"),
+        "promoted_claim_consumer_id": consumer.get("promoted_claim_consumer_id"),
+        "source_specific_output_equivalent": True,
+        "verified_claim_count": 1,
+        "fabricated_claim_count": 0,
+    }
+
+
 def validate_runtime(contract: dict[str, Any], *, prove_tamper: bool = False, **docs: dict[str, Any]) -> dict[str, Any]:
     try:
         expected = derive_expected_lineage_independently(**docs)
         result = validate_promoted_claim_contract(contract, expected)
         if result.get("status") != "PASS_SHADOW":
             return result
+
+        consumer = consume_promoted_claim_contract(contract, result)
+        if consumer.get("status") != "PASS_SHADOW":
+            raise RuntimeError(f"source_neutral_consumer_blocked:{consumer.get('detail')}")
+        consumer_identity = validate_consumer_identity(consumer)
+        if consumer_identity.get("status") != "PASS_SHADOW":
+            raise RuntimeError(f"source_neutral_consumer_identity_blocked:{consumer_identity.get('detail')}")
+        equivalence = _validate_consumer_against_expected(consumer, expected)
+
         tamper_passed = 0
+        consumer_tamper_passed = 0
         if prove_tamper:
             cases: list[dict[str, Any]] = []
             for key, value in (
@@ -189,16 +243,60 @@ def validate_runtime(contract: dict[str, Any], *, prove_tamper: bool = False, **
                 if validate_promoted_claim_contract(row, expected).get("status") != "BLOCKED":
                     raise RuntimeError("tamper_regression_did_not_fail_closed")
                 tamper_passed += 1
+
+            consumer_cases: list[dict[str, Any]] = []
+            for path, value in (
+                (("claim", "value"), "2026-10-03"),
+                (("claim", "article_claim_evidence_id"), "detached-article-claim"),
+                (("claim", "document_page_sha256"), "f" * 64),
+                (("claim", "source_identity", "official_source_url"), "https://example.invalid/detached"),
+            ):
+                row = deepcopy(consumer)
+                target: dict[str, Any] = row
+                for key in path[:-1]:
+                    nested = target.get(key)
+                    if not isinstance(nested, dict):
+                        raise RuntimeError("consumer_tamper_fixture_invalid")
+                    target = nested
+                target[path[-1]] = value
+                consumer_cases.append(row)
+            for row in consumer_cases:
+                try:
+                    _validate_consumer_against_expected(row, expected)
+                except Exception:
+                    consumer_tamper_passed += 1
+                else:
+                    raise RuntimeError("consumer_tamper_regression_did_not_fail_closed")
+
+            detached_validation = deepcopy(result)
+            detached_validation["promoted_claim_contract_id"] = "promoted-claim-detached"
+            detached_consumer = consume_promoted_claim_contract(contract, detached_validation)
+            if detached_consumer.get("status") != "BLOCKED":
+                raise RuntimeError("consumer_detached_validation_did_not_fail_closed")
+            consumer_tamper_passed += 1
+
         return {
             **result,
             "mode": "ISJ_PROMOTED_CLAIM_CONTRACT_RUNTIME_VALIDATION_SHADOW",
             "source_kind": "isj_valcea",
             "tamper_regressions_requested": bool(prove_tamper),
             "tamper_regressions_passed": tamper_passed,
+            "source_neutral_consumer_status": consumer.get("status"),
+            "promoted_claim_consumer_id": consumer.get("promoted_claim_consumer_id"),
+            "source_neutral_consumer_identity_status": consumer_identity.get("status"),
+            "source_specific_equivalence_status": equivalence.get("status"),
+            "source_specific_output_equivalent": equivalence.get("source_specific_output_equivalent") is True,
+            "consumer_tamper_regressions_requested": bool(prove_tamper),
+            "consumer_tamper_regressions_passed": consumer_tamper_passed,
+            "total_tamper_regressions_passed": tamper_passed + consumer_tamper_passed,
+            "source_neutral_consumer": consumer,
+            "source_neutral_consumer_identity_validation": consumer_identity,
+            "source_specific_equivalence": equivalence,
             "truth_rule": (
                 "This source-specific runtime validator independently reconstructs the reusable promoted-claim expected lineage from already "
-                "PASS_SHADOW ISJ truth artifacts and then applies the source-neutral validator. It grants no article mutation, publication, "
-                "distribution, merge, deployment or acceptance authority."
+                "PASS_SHADOW ISJ truth artifacts, applies the source-neutral contract validator, then consumes that contract through a source-neutral "
+                "boundary and proves the consumer output is exactly equivalent to the existing ISJ source-specific lineage. All source-specific gates "
+                "remain in place in this proof increment. No article mutation, publication, distribution, merge, deployment or acceptance authority is granted."
             ),
         }
     except Exception as exc:
@@ -220,6 +318,10 @@ def validate_runtime(contract: dict[str, Any], *, prove_tamper: bool = False, **
             "production_write_authority": False,
             "tamper_regressions_requested": bool(prove_tamper),
             "tamper_regressions_passed": 0,
+            "consumer_tamper_regressions_requested": bool(prove_tamper),
+            "consumer_tamper_regressions_passed": 0,
+            "total_tamper_regressions_passed": 0,
+            "source_specific_output_equivalent": False,
         }
 
 
@@ -260,8 +362,11 @@ def main() -> int:
     print(json.dumps({
         "status": result.get("status"),
         "promoted_claim_contract_id": result.get("promoted_claim_contract_id"),
+        "promoted_claim_consumer_id": result.get("promoted_claim_consumer_id"),
         "lineage_complete": result.get("lineage_complete"),
+        "source_specific_output_equivalent": result.get("source_specific_output_equivalent"),
         "tamper_regressions_passed": result.get("tamper_regressions_passed"),
+        "consumer_tamper_regressions_passed": result.get("consumer_tamper_regressions_passed"),
         "publication_authority": result.get("publication_authority"),
         "acceptance_ready": result.get("acceptance_ready"),
     }, ensure_ascii=False, sort_keys=True))
