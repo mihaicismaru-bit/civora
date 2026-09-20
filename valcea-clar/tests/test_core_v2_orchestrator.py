@@ -24,7 +24,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
                 "isj_registration_deadline_promotion_validation", "isj_field_materiality",
                 "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
-                "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer_deadline_projection",
+                "isj_fact_kernel", "isj_fact_kernel_integrity", "promoted_claim_writer_projection",
                 "promoted_claim_projection_validation", "isj_writer_deadline_consumption",
                 "isj_writer_deadline_consumption_validation", "isj_writer",
                 "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
@@ -39,6 +39,10 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn("--external-probe", joined)
         self.assertIn("--live", joined)
         self.assertIn("--prove-tamper", joined)
+        self.assertIn("promoted_claim_writer_projection.py", joined)
+        self.assertNotIn("isj_writer_deadline_projection_shadow_lane.py", joined)
+        self.assertIn("valcea-core-v2-promoted-claim-writer-projection.json", joined)
+        self.assertNotIn("valcea-core-v2-isj-writer-deadline-projection.json", joined)
         self.assertIn("validate_promoted_claim_projection_runtime.py", joined)
         self.assertNotIn("validate_isj_writer_deadline_projection.py", joined)
         self.assertIn("valcea-core-v2-promoted-claim-projection-validation.json", joined)
@@ -65,7 +69,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         fact_deadline_promotion = by_name["isj_fact_kernel_deadline_promotion"]
         fact_deadline_validation = by_name["isj_fact_kernel_deadline_promotion_validation"]
         fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
-        writer_projection = by_name["isj_writer_deadline_projection"]
+        writer_projection = by_name["promoted_claim_writer_projection"]
         writer_projection_validation = by_name["promoted_claim_projection_validation"]
         writer_consumption = by_name["isj_writer_deadline_consumption"]
         writer_consumption_validation = by_name["isj_writer_deadline_consumption_validation"]
@@ -164,7 +168,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "isj_calendar_scope_binding", "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
             "isj_registration_deadline_promotion_validation", "isj_field_materiality",
             "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
-            "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer_deadline_projection",
+            "isj_fact_kernel", "isj_fact_kernel_integrity", "promoted_claim_writer_projection",
             "promoted_claim_projection_validation", "isj_writer_deadline_consumption",
             "isj_writer_deadline_consumption_validation", "isj_writer",
             "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
