@@ -8,6 +8,7 @@ import tempfile
 from pathlib import Path
 from typing import Callable
 
+from isj_writer_deadline_projection_comparator import compare_source_specific_projection
 from validate_shadow_runtime import validate
 
 
@@ -89,10 +90,46 @@ def _expect_fail_closed(
         td.cleanup()
 
 
+def _run_independent_isj_projection_comparator(base: Path) -> None:
+    """Keep retired source-specific semantics as CI regression only.
+
+    This function runs after the canonical runtime has already validated. It is not
+    imported by the canonical projection producer or orchestrator and therefore
+    cannot determine whether the 42-stage Core v2 runtime succeeds.
+    """
+    projection = _load(base / "valcea-core-v2-isj-writer-deadline-projection.json")
+    assert projection.get("source_specific_comparator_runtime_dependency") is False
+    assert projection.get("source_specific_comparator_execution") == "INDEPENDENT_CI_REGRESSION_ONLY"
+    assert projection.get("source_specific_comparator_status") == "NOT_RUN_CANONICAL_PATH"
+
+    result = compare_source_specific_projection(
+        _load(base / "valcea-core-v2-isj-fact-kernel-shadow.json"),
+        _load(base / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"),
+        projection,
+        expected_year=2026,
+    )
+    assert result.get("status") == "PASS_SHADOW", result
+    assert result.get("source_specific_identity_equivalent") is True
+    assert result.get("source_specific_lineage_equivalent") is True
+    assert result.get("source_specific_authority_flags_equivalent") is True
+    assert result.get("writer_projection_evidence_id") == projection.get("writer_projection_evidence_id")
+    assert result.get("publication_authority") == "NONE"
+    assert result.get("acceptance_ready") is False
+    print(
+        "Independent retired ISJ writer-projection comparator: PASS_SHADOW "
+        f"({result.get('writer_projection_evidence_id')}); canonical_runtime_dependency=false"
+    )
+
+
 def run(base: Path, repo: Path) -> None:
-    # Establish that these regressions are running against a valid natural runtime
-    # corpus before mutating one artifact at a time.
+    # Establish that canonical runtime succeeds first, without the source-specific
+    # projection comparator being imported or executed by the producer path.
     validate(base, repo)
+
+    # Then run the retiring source-specific semantics independently as a CI-only
+    # regression guard. Failure here may fail CI, but cannot retroactively make the
+    # canonical 42-stage runtime dependent on the comparator.
+    _run_independent_isj_projection_comparator(base)
 
     def mutate_article_kernel_source(doc: dict) -> None:
         doc["articles"][0]["fact_kernel"]["source_url"] = "https://invalid.example/isj-source-tamper"
