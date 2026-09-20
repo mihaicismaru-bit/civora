@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 from datetime import date
@@ -153,26 +154,77 @@ def validate(
     }
 
 
+def prove_tamper_regressions(
+    fact_kernel: dict[str, Any],
+    fact_integrity: dict[str, Any],
+    projection: dict[str, Any],
+    *,
+    expected_year: int = 2026,
+) -> int:
+    cases: list[tuple[str, dict[str, Any]]] = []
+
+    detached_claim_evidence = copy.deepcopy(projection)
+    detached_claim_evidence["projection_candidates"][0]["claim_evidence_ids"] = ["tampered-evidence-id"]
+    cases.append(("claim evidence detached", detached_claim_evidence))
+
+    page_hash_tamper = copy.deepcopy(projection)
+    page_hash_tamper["projection_candidates"][0]["page_text_sha256"] = "0" * 64
+    cases.append(("page hash detached", page_hash_tamper))
+
+    projection_id_tamper = copy.deepcopy(projection)
+    projection_id_tamper["writer_projection_evidence_id"] = "isj-writer-deadline-projection-tampered"
+    cases.append(("projection evidence id detached", projection_id_tamper))
+
+    passed = 0
+    for label, projection_case in cases:
+        try:
+            validate(
+                fact_kernel,
+                fact_integrity,
+                projection_case,
+                expected_year=expected_year,
+            )
+        except AssertionError:
+            passed += 1
+            continue
+        raise AssertionError(f"ISJ writer deadline projection validator accepted tamper: {label}")
+    return passed
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Independently validate ISJ FactKernel-to-writer deadline projection")
     parser.add_argument("--fact-kernel", required=True)
     parser.add_argument("--fact-kernel-integrity", required=True)
     parser.add_argument("--projection", required=True)
     parser.add_argument("--year", type=int, default=2026)
+    parser.add_argument("--prove-tamper", action="store_true")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
+
+    fact_kernel = json.loads(Path(args.fact_kernel).read_text(encoding="utf-8"))
+    fact_integrity = json.loads(Path(args.fact_kernel_integrity).read_text(encoding="utf-8"))
+    projection = json.loads(Path(args.projection).read_text(encoding="utf-8"))
+    summary = validate(
+        fact_kernel,
+        fact_integrity,
+        projection,
+        expected_year=args.year,
+    )
+    tamper_passed = prove_tamper_regressions(
+        fact_kernel,
+        fact_integrity,
+        projection,
+        expected_year=args.year,
+    ) if args.prove_tamper else 0
     report = {
         "schema_version": "1.0",
         "mode": "ISJ_WRITER_DEADLINE_PROJECTION_VALIDATION",
-        **validate(
-            json.loads(Path(args.fact_kernel).read_text(encoding="utf-8")),
-            json.loads(Path(args.fact_kernel_integrity).read_text(encoding="utf-8")),
-            json.loads(Path(args.projection).read_text(encoding="utf-8")),
-            expected_year=args.year,
-        ),
+        **summary,
+        "tamper_regressions_requested": bool(args.prove_tamper),
+        "tamper_regressions_passed": tamper_passed,
         "truth_rule": (
             "The deadline may be eligible for a later deterministic shadow-writer projection only if this independent validator reproduces the exact promoted FactKernel claim, evidence identities and deterministic writer-projection ID. "
-            "This validator does not modify article prose or grant article, publication, delivery or acceptance authority."
+            "Runtime tamper regressions must also fail closed. This validator does not modify article prose or grant article, publication, delivery or acceptance authority."
         ),
     }
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -180,6 +232,7 @@ def main() -> int:
         "status": report["status"],
         "registration_deadline": report["registration_deadline"],
         "writer_deadline_projection_allowed": report["writer_deadline_projection_allowed"],
+        "tamper_regressions_passed": report["tamper_regressions_passed"],
         "article_projection_allowed": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
