@@ -1,0 +1,91 @@
+{
+  "schema_version": "PPOS_PILOT_GROWTH_OPERATIONS_SHADOW_PLAN_V1",
+  "checkpoint": "CP92",
+  "module_id": "M61_PILOT_GROWTH_OPERATIONS_MANUAL_SHADOW_PILOT_PLAN",
+  "parent_activation_checkpoint": "CP91",
+  "parent_control_checkpoint": "CP58",
+  "mode": "OFFLINE_SHADOW_PLAN_ONLY",
+  "global_kill_switch": "ENGAGED",
+  "live_authority": "NONE",
+  "active_platforms": [
+    "FACEBOOK_PAGE",
+    "INSTAGRAM_PROFESSIONAL",
+    "THREADS"
+  ],
+  "lane_states": {
+    "FACEBOOK_PAGE": "HOLD_READ_ONLY_VALIDATION_NOT_AUTHORIZED",
+    "INSTAGRAM_PROFESSIONAL": "HOLD_READ_ONLY_VALIDATION_NOT_AUTHORIZED",
+    "THREADS": "HOLD_READ_ONLY_VALIDATION_NOT_AUTHORIZED",
+    "LINKEDIN": "HOLD_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_PAID_API",
+    "BLUESKY": "HOLD_ROI"
+  },
+  "operator_setup": {
+    "permission_validation_mode": "MANUAL_ACTION_PACKET_UNTIL_EXPLICIT_PILOT_AUTHORIZATION",
+    "required_steps": [
+      "REVALIDATE_OFFICIAL_CAPABILITY_SURFACE",
+      "PREPARE_READ_ONLY_PERMISSION_CHECKLIST",
+      "CONFIRM_KILL_SWITCH_ENGAGED",
+      "CONFIRM_ZERO_WRITE_AUTHORITY",
+      "CAPTURE_READBACK_RECEIPT_AFTER_AUTHORIZED_READ_ONLY_VALIDATION",
+      "RECORD_UNSUPPORTED_ACTIONS_AS_MANUAL_OR_HOLD"
+    ],
+    "forbidden_now": [
+      "ACCOUNT_CONNECTION",
+      "OAUTH",
+      "TOKEN_OR_SECRET_RESOLUTION",
+      "SOCIAL_API_TRAFFIC",
+      "LIVE_PROBE",
+      "EXTERNAL_WRITE",
+      "PUBLISH",
+      "DEPLOY",
+      "PAID_SERVICE"
+    ]
+  },
+  "shadow_pilot": {
+    "execution_state": "HOLD_SHADOW_PILOT_NOT_AUTHORIZED",
+    "future_observation_scope": [
+      "OWN_CONTENT_COMMENTS",
+      "OWN_CONTENT_REPLIES",
+      "MENTIONS_WHERE_SUPPORTED"
+    ],
+    "recommendation_only": true,
+    "human_review_required": true,
+    "external_write_allowed": false,
+    "public_publish_allowed": false,
+    "unsupported_action_state": "HOLD_CAPABILITY_UNVERIFIED",
+    "unsupported_action_fallback": "MANUAL_ACTION_PACKET",
+    "unknown_metric_value": "UNKNOWN"
+  },
+  "success_criteria": [
+    "CAPABILITY_MATRIX_REVALIDATED_CURRENT",
+    "READ_ONLY_PERMISSION_RECEIPTS_COMPLETE",
+    "SHADOW_OBSERVATIONS_PRODUCE_RECOMMENDATIONS_WITH_ZERO_WRITES",
+    "NO_UNSUPPORTED_ACTION_DRIFT",
+    "MISSING_METRICS_REMAIN_UNKNOWN",
+    "GROWTH_SAFETY_FILTERS_HOLD",
+    "RATE_BUDGETS_TREATED_AS_CEILINGS",
+    "AUDIT_RECEIPTS_COMPLETE"
+  ],
+  "rollback_triggers": [
+    "CAPABILITY_DRIFT",
+    "AUTHORIZATION_DRIFT",
+    "KILL_SWITCH_NOT_ENGAGED",
+    "UNSUPPORTED_ACTION_ATTEMPT",
+    "EXTERNAL_WRITE_OBSERVED",
+    "FABRICATED_EXTERNAL_STATE",
+    "SENSITIVE_PROFILING_SIGNAL",
+    "GROWTH_SAFETY_VIOLATION"
+  ],
+  "authorization": {
+    "explicit_owner_authorization_required_before_first_real_reply_comment_publish": true,
+    "authorization_captured": false
+  },
+  "future_write_contract": {
+    "kill_switch_bound": true,
+    "receipt_bound": true,
+    "idempotent": true,
+    "bounded_retry": true,
+    "retry_exhaustion_fail_closed": true
+  }
+}
