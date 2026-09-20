@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 from typing import Any
 
-from isj_writer_deadline_projection_comparator import compare_source_specific_projection
 from promoted_claim_projection_validation import (
     build_source_neutral_projection,
     prove_projection_tamper_regressions,
@@ -34,6 +33,7 @@ def _blocked_from(result: dict[str, Any], reason: str, detail: str) -> dict[str,
         "projection_candidates": [],
         "source_specific_builder_canonical_producer": False,
         "source_specific_builder_retirement_performed": False,
+        "source_specific_comparator_runtime_dependency": False,
     })
     return out
 
@@ -44,13 +44,15 @@ def build_writer_deadline_projection(
     *,
     expected_year: int = 2026,
 ) -> dict[str, Any]:
-    """Compatibility facade whose canonical producer is now source-neutral.
+    """Compatibility CLI facade backed only by the source-neutral producer.
 
-    The historical module path is retained for this bounded switch increment so the
-    orchestrator and downstream artifacts do not move at the same time. The actual
-    projection is produced by ``build_source_neutral_projection``. The ISJ-specific
-    logic survives only as an independent comparison guard and cannot grant authority.
+    The historical module path remains temporarily so downstream file names can stay
+    stable during the bounded no-dependency proof. Canonical runtime success depends
+    only on the source-neutral builder, its independent validator and its tamper
+    regressions. The ISJ-specific comparator is deliberately not imported or called
+    here; it runs separately as a non-canonical regression check in CI.
     """
+    _ = expected_year  # retained CLI compatibility only; source-neutral truth comes from evidence.
     generic = build_source_neutral_projection(
         fact_kernel,
         fact_integrity,
@@ -61,29 +63,17 @@ def build_writer_deadline_projection(
         "canonical_writer_projection_runtime_facade": True,
         "compatibility_cli_path_retained": True,
         "source_specific_builder_canonical_producer": False,
-        "source_specific_builder_comparison_only": True,
+        "source_specific_builder_comparison_only": False,
         "source_specific_builder_retirement_performed": False,
+        "source_specific_comparator_runtime_dependency": False,
+        "source_specific_comparator_execution": "INDEPENDENT_CI_REGRESSION_ONLY",
+        "source_specific_comparator_status": "NOT_RUN_CANONICAL_PATH",
     })
     if generic.get("state") != "WRITER_PROJECTION_VERIFIED_SHADOW":
         return generic
 
     try:
-        comparison = compare_source_specific_projection(
-            fact_kernel,
-            fact_integrity,
-            generic,
-            expected_year=expected_year,
-        )
-        if comparison.get("status") != "PASS_SHADOW":
-            return _blocked_from(
-                generic,
-                "source_specific_comparator_failed",
-                str(comparison.get("detail") or comparison.get("reason") or "comparison blocked"),
-            )
         projection_id = str(generic.get("writer_projection_evidence_id") or "")
-        if comparison.get("writer_projection_evidence_id") != projection_id:
-            return _blocked_from(generic, "source_specific_comparator_identity_mismatch", "projection identity diverged")
-
         independent = validate_source_neutral_projection(fact_kernel, fact_integrity, generic)
         if independent.get("status") != "PASS_SHADOW":
             return _blocked_from(
@@ -99,20 +89,18 @@ def build_writer_deadline_projection(
             return _blocked_from(generic, "source_neutral_projection_tamper_proof_incomplete", f"passed={tamper_passed}")
 
         generic.update({
-            "source_specific_comparator_status": "PASS_SHADOW",
-            "source_specific_comparator_identity_equivalent": True,
-            "source_specific_comparator_lineage_equivalent": bool(comparison.get("source_specific_lineage_equivalent")),
-            "source_specific_comparator_authority_flags_equivalent": bool(comparison.get("source_specific_authority_flags_equivalent")),
-            "source_specific_comparator": comparison,
             "source_neutral_projection_validation_status": "PASS_SHADOW",
             "source_neutral_projection_tamper_regressions_passed": tamper_passed,
+            "source_specific_comparator_runtime_dependency": False,
+            "source_specific_comparator_execution": "INDEPENDENT_CI_REGRESSION_ONLY",
+            "source_specific_comparator_status": "NOT_RUN_CANONICAL_PATH",
             "retirement_candidate": "isj_writer_deadline_projection_source_specific_builder",
             "retirement_candidate_proof_only": True,
             "retirement_performed": False,
             "truth_rule": (
                 str(generic.get("truth_rule") or "")
-                + " The canonical producer for this artifact is now the source-neutral promoted-claim builder. "
-                + "The ISJ-specific implementation is retained only as an independent switch-comparison guard; it is not the canonical producer and has not been retired in this increment."
+                + " Canonical runtime success now depends only on the source-neutral builder, independent source-neutral validation and fail-closed tamper proof. "
+                + "The ISJ-specific comparator is not imported or executed by the canonical producer path and is retained only as an independent CI regression."
             ),
         })
         return generic
@@ -138,7 +126,8 @@ def main() -> int:
         "registration_deadline": result.get("registration_deadline"),
         "writer_projection_evidence_id": result.get("writer_projection_evidence_id"),
         "canonical_writer_projection_builder_path": result.get("canonical_writer_projection_builder_path"),
-        "source_specific_comparator_status": result.get("source_specific_comparator_status"),
+        "source_specific_comparator_runtime_dependency": result.get("source_specific_comparator_runtime_dependency", False),
+        "source_specific_comparator_execution": result.get("source_specific_comparator_execution"),
         "source_neutral_projection_tamper_regressions_passed": result.get("source_neutral_projection_tamper_regressions_passed", 0),
         "source_specific_builder_canonical_producer": result.get("source_specific_builder_canonical_producer", False),
         "source_specific_builder_retirement_performed": result.get("source_specific_builder_retirement_performed", False),
