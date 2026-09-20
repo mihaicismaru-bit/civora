@@ -63,7 +63,7 @@ def _case_base(source_base: Path, copied_file: str) -> tuple[tempfile.TemporaryD
         if name == copied_file:
             shutil.copy2(source, destination)
         else:
-            os.symlink(source, destination)
+            os.symlink(source.resolve(), destination)
     return td, case_base
 
 
@@ -97,10 +97,12 @@ def _run_independent_isj_projection_comparator(base: Path) -> None:
     imported by the canonical projection producer or orchestrator and therefore
     cannot determine whether the 42-stage Core v2 runtime succeeds.
     """
-    projection = _load(base / "valcea-core-v2-isj-writer-deadline-projection.json")
+    projection = _load(base / "valcea-core-v2-promoted-claim-writer-projection.json")
     assert projection.get("source_specific_comparator_runtime_dependency") is False
     assert projection.get("source_specific_comparator_execution") == "INDEPENDENT_CI_REGRESSION_ONLY"
     assert projection.get("source_specific_comparator_status") == "NOT_RUN_CANONICAL_PATH"
+    assert projection.get("canonical_writer_projection_stage") == "promoted_claim_writer_projection"
+    assert projection.get("legacy_module_path_required_for_canonical_runtime") is False
 
     result = compare_source_specific_projection(
         _load(base / "valcea-core-v2-isj-fact-kernel-shadow.json"),
@@ -123,7 +125,8 @@ def _run_independent_isj_projection_comparator(base: Path) -> None:
 
 def run(base: Path, repo: Path) -> None:
     # Establish that canonical runtime succeeds first, without the source-specific
-    # projection comparator being imported or executed by the producer path.
+    # projection comparator or historical ISJ projection module being executed by
+    # the producer path.
     validate(base, repo)
 
     # Then run the retiring source-specific semantics independently as a CI-only
