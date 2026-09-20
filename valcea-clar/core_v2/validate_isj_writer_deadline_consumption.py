@@ -8,6 +8,11 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
+from promoted_claim_projection_validation import (
+    prove_projection_tamper_regressions,
+    validate_source_neutral_projection,
+)
+
 
 def _norm(value: Any) -> str:
     return " ".join(str(value or "").split()).strip()
@@ -24,6 +29,47 @@ def _require_shadow_boundary(doc: dict[str, Any], label: str) -> None:
     assert doc.get("production_writer_ready") is False, f"{label}:production_writer_ready"
     assert doc.get("site_publish_allowed") is False, f"{label}:site_publish_allowed"
     assert doc.get("social_publish_allowed") is False, f"{label}:social_publish_allowed"
+
+
+def _source_neutral_compatibility_view(
+    fact_kernel: dict[str, Any],
+    fact_integrity: dict[str, Any],
+    projection: dict[str, Any],
+) -> dict[str, Any]:
+    """Return a temporary compatibility view for the legacy-shaped downstream consumer.
+
+    The source-neutral validator remains authoritative for this view. The aliases below
+    exist only so the still-ISJ-specific consumption validator can be exercised without
+    changing or removing the legacy projection validator in the same increment.
+    """
+    generic = validate_source_neutral_projection(fact_kernel, fact_integrity, projection)
+    assert generic.get("status") == "PASS_SHADOW"
+    assert generic.get("field") == "registration_deadline"
+    assert generic.get("writer_projection_allowed") is True
+    assert generic.get("publication_authority") == "NONE"
+    assert generic.get("acceptance_ready") is False
+    assert generic.get("site_publish_allowed") is False
+    assert generic.get("social_publish_allowed") is False
+    assert int(generic.get("verified_projection_candidate_count") or 0) == 1
+    assert int(generic.get("fabricated_claim_count") or 0) == 0
+
+    tamper_passed = prove_projection_tamper_regressions(fact_kernel, fact_integrity, projection)
+    assert tamper_passed >= 4
+
+    view = dict(generic)
+    view.update({
+        "mode": "CORE_V2_SOURCE_NEUTRAL_PROJECTION_COMPATIBILITY_VIEW_SHADOW",
+        "source_neutral_projection_validation_used_downstream": True,
+        "registration_deadline": generic.get("value"),
+        "writer_deadline_projection_allowed": generic.get("writer_projection_allowed") is True,
+        "article_projection_allowed": False,
+        "writer_allowed": False,
+        "tamper_regressions_requested": True,
+        "tamper_regressions_passed": tamper_passed,
+        "legacy_projection_validator_retained": True,
+        "retirement_performed": False,
+    })
+    return view
 
 
 def validate(
@@ -237,6 +283,7 @@ def main() -> int:
     projection = json.loads(Path(args.projection).read_text(encoding="utf-8"))
     projection_validation = json.loads(Path(args.projection_validation).read_text(encoding="utf-8"))
     consumption = json.loads(Path(args.consumption).read_text(encoding="utf-8"))
+
     summary = validate(
         fact_kernel,
         fact_integrity,
@@ -253,15 +300,44 @@ def main() -> int:
         consumption,
         expected_year=args.year,
     ) if args.prove_tamper else 0
+
+    generic_view = _source_neutral_compatibility_view(fact_kernel, fact_integrity, projection)
+    generic_summary = validate(
+        fact_kernel,
+        fact_integrity,
+        projection,
+        generic_view,
+        consumption,
+        expected_year=args.year,
+    )
+    assert generic_summary["writer_projection_evidence_id"] == summary["writer_projection_evidence_id"]
+    assert generic_summary["writer_consumption_evidence_id"] == summary["writer_consumption_evidence_id"]
+    assert generic_summary["registration_deadline"] == summary["registration_deadline"]
+    assert generic_summary["fabricated_claim_count"] == 0
+    assert projection_validation.get("writer_projection_evidence_id") == generic_view.get("writer_projection_evidence_id")
+    for key in ("publication_authority", "acceptance_ready", "production_writer_ready", "site_publish_allowed", "social_publish_allowed"):
+        assert projection_validation.get(key) == generic_view.get(key), key
+
     report = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "mode": "ISJ_WRITER_DEADLINE_CONSUMPTION_VALIDATION",
         **summary,
         "tamper_regressions_requested": bool(args.prove_tamper),
         "tamper_regressions_passed": tamper_passed,
+        "source_neutral_projection_compatibility_status": "PASS_SHADOW",
+        "source_neutral_projection_validation_used_downstream": True,
+        "source_neutral_projection_validation_mode": generic_view.get("mode"),
+        "source_neutral_projection_tamper_regressions_passed": int(generic_view.get("tamper_regressions_passed") or 0),
+        "legacy_projection_validator_retained": True,
+        "legacy_and_generic_projection_identity_equivalent": True,
+        "legacy_and_generic_authority_flags_equivalent": True,
+        "legacy_and_generic_consumption_identity_equivalent": True,
+        "replacement_path_enabled": True,
+        "retirement_performed": False,
         "truth_rule": (
-            "The shadow writer may consume the registration deadline only after this independent validator reproduces the exact upstream writer-projection identity, promoted FactKernel claim, evidence chain and deterministic consumption ID. "
-            "This validator changes no article prose and grants no article, publication, delivery or acceptance authority."
+            "The shadow writer-consumption validator now proves that the same deterministic consumption identity is accepted when its projection-validation dependency is supplied by the source-neutral validator through a bounded compatibility view. "
+            "The legacy ISJ projection validator remains active in parallel for comparison, and no validator is retired in this increment. "
+            "This compatibility proof grants no article, publication, delivery or acceptance authority."
         ),
     }
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -270,6 +346,11 @@ def main() -> int:
         "registration_deadline": report["registration_deadline"],
         "shadow_writer_consumption_allowed": report["shadow_writer_consumption_allowed"],
         "tamper_regressions_passed": report["tamper_regressions_passed"],
+        "source_neutral_projection_compatibility_status": report["source_neutral_projection_compatibility_status"],
+        "source_neutral_projection_tamper_regressions_passed": report["source_neutral_projection_tamper_regressions_passed"],
+        "replacement_path_enabled": True,
+        "legacy_projection_validator_retained": True,
+        "retirement_performed": False,
         "article_projection_allowed": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
