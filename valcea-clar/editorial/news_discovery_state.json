@@ -1,6 +1,6 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-20T01:55:26+03:00",
+  "observed_at": "2026-09-20T03:21:00+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
@@ -130,9 +130,8 @@
     },
     {
       "source_id": "ipj-valcea-news",
-      "listing_ok": true,
-      "links_examined": 9,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: certificate has expired (_ssl.c:1032)>",
       "facts": 0
     },
     {
@@ -158,8 +157,9 @@
     },
     {
       "source_id": "raliul-valcii-official-news",
-      "listing_ok": false,
-      "error": "TimeoutError: The read operation timed out",
+      "listing_ok": true,
+      "links_examined": 5,
+      "article_failures": 0,
       "facts": 0
     }
   ],
