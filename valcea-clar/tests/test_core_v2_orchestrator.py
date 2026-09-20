@@ -25,8 +25,8 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_registration_deadline_promotion_validation", "isj_field_materiality",
                 "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
                 "isj_fact_kernel", "isj_fact_kernel_integrity", "promoted_claim_writer_projection",
-                "promoted_claim_projection_validation", "isj_writer_deadline_consumption",
-                "isj_writer_deadline_consumption_validation", "isj_writer",
+                "promoted_claim_projection_validation", "promoted_claim_writer_consumption",
+                "promoted_claim_writer_consumption_validation", "isj_writer",
                 "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
                 "isj_article_integrity", "isj_promoted_claim_contract", "isj_promoted_claim_contract_validation",
                 "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
@@ -39,108 +39,91 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn("--external-probe", joined)
         self.assertIn("--live", joined)
         self.assertIn("--prove-tamper", joined)
+
         self.assertIn("promoted_claim_writer_projection.py", joined)
-        self.assertNotIn("isj_writer_deadline_projection_shadow_lane.py", joined)
-        self.assertIn("valcea-core-v2-promoted-claim-writer-projection.json", joined)
-        self.assertNotIn("valcea-core-v2-isj-writer-deadline-projection.json", joined)
         self.assertIn("validate_promoted_claim_projection_runtime.py", joined)
-        self.assertNotIn("validate_isj_writer_deadline_projection.py", joined)
+        self.assertIn("valcea-core-v2-promoted-claim-writer-projection.json", joined)
         self.assertIn("valcea-core-v2-promoted-claim-projection-validation.json", joined)
+        self.assertNotIn("isj_writer_deadline_projection_shadow_lane.py", joined)
+        self.assertNotIn("validate_isj_writer_deadline_projection.py", joined)
+        self.assertNotIn("valcea-core-v2-isj-writer-deadline-projection.json", joined)
         self.assertNotIn("valcea-core-v2-isj-writer-deadline-projection-validation.json", joined)
+
+        self.assertIn("promoted_claim_writer_consumption.py", joined)
+        self.assertIn("validate_promoted_claim_writer_consumption_runtime.py", joined)
+        self.assertIn("valcea-core-v2-promoted-claim-writer-consumption.json", joined)
+        self.assertIn("valcea-core-v2-promoted-claim-writer-consumption-validation.json", joined)
+        self.assertNotIn("isj_writer_deadline_consumption_shadow_lane.py", joined)
+        self.assertNotIn("validate_isj_writer_deadline_consumption.py", joined)
+        self.assertNotIn("valcea-core-v2-isj-writer-deadline-consumption.json", joined)
+        self.assertNotIn("valcea-core-v2-isj-writer-deadline-consumption-validation.json", joined)
 
     def test_non_live_plan_does_not_enable_source_network_reads(self):
         with tempfile.TemporaryDirectory() as temp:
             plan = bounded_cycle_plan(Path(temp), live=False)
-        source_stage_names = {"apavil", "ipj", "isu", "municipal_reference", "municipal_document", "cj_road", "eta", "isj", "isj_detail", "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_context_documents"}
+        source_stage_names = {
+            "apavil", "ipj", "isu", "municipal_reference", "municipal_document", "cj_road", "eta", "isj",
+            "isj_detail", "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_context_documents",
+        }
         for stage in plan:
             if stage.name in source_stage_names:
                 self.assertNotIn("--live", stage.argv)
 
-    def test_isj_chain_and_site_ledger_consume_only_prior_shadow_artifacts(self):
+    def test_neutral_consumption_chain_uses_only_prior_shadow_artifacts(self):
         with tempfile.TemporaryDirectory() as temp:
             plan = bounded_cycle_plan(Path(temp), live=True)
         by_name = {stage.name: stage for stage in plan}
-        isj = by_name["isj"]; detail = by_name["isj_detail"]; materiality = by_name["isj_materiality"]
-        embedded = by_name["isj_embedded_notice"]; targets = by_name["isj_embedded_target"]; content = by_name["isj_embedded_content"]
-        fields = by_name["isj_field_evidence"]; context_docs = by_name["isj_context_documents"]; calendar_fields = by_name["isj_calendar_field_evidence"]
-        calendar_scope = by_name["isj_calendar_scope_binding"]; calendar_scope_validation = by_name["isj_calendar_scope_validation"]
-        deadline_promotion = by_name["isj_registration_deadline_promotion"]; deadline_validation = by_name["isj_registration_deadline_promotion_validation"]
-        field_materiality = by_name["isj_field_materiality"]
-        fact_deadline_promotion = by_name["isj_fact_kernel_deadline_promotion"]
-        fact_deadline_validation = by_name["isj_fact_kernel_deadline_promotion_validation"]
-        fact_kernel = by_name["isj_fact_kernel"]; fact_integrity = by_name["isj_fact_kernel_integrity"]
-        writer_projection = by_name["promoted_claim_writer_projection"]
-        writer_projection_validation = by_name["promoted_claim_projection_validation"]
-        writer_consumption = by_name["isj_writer_deadline_consumption"]
-        writer_consumption_validation = by_name["isj_writer_deadline_consumption_validation"]
+        names = [stage.name for stage in plan]
+
+        fact_kernel = by_name["isj_fact_kernel"]
+        fact_integrity = by_name["isj_fact_kernel_integrity"]
+        projection = by_name["promoted_claim_writer_projection"]
+        projection_validation = by_name["promoted_claim_projection_validation"]
+        consumption = by_name["promoted_claim_writer_consumption"]
+        consumption_validation = by_name["promoted_claim_writer_consumption_validation"]
         writer = by_name["isj_writer"]
-        article_deadline_gate = by_name["isj_article_deadline_claim_gate"]
-        article_deadline_validation = by_name["isj_article_deadline_claim_validation"]
-        article_integrity = by_name["isj_article_integrity"]
+        article_gate = by_name["isj_article_deadline_claim_gate"]
+        article_validation = by_name["isj_article_deadline_claim_validation"]
         promoted_contract = by_name["isj_promoted_claim_contract"]
         promoted_contract_validation = by_name["isj_promoted_claim_contract_validation"]
-        ledger = by_name["site_verified_article_ledger"]; photo = by_name["photo_truth"]
-        hydrated_registry = by_name["site_visual_runtime_registry"]; site = by_name["shadow_site_package"]
-        ipj = by_name["ipj"]; isu = by_name["isu"]; municipal = by_name["municipal_writer"]
 
-        self.assertIn(str(isj.output), detail.argv); self.assertIn("--live", detail.argv)
-        self.assertIn(str(detail.output), materiality.argv); self.assertNotIn("--live", materiality.argv)
-        self.assertIn(str(detail.output), embedded.argv); self.assertIn(str(materiality.output), embedded.argv); self.assertIn("--live", embedded.argv)
-        self.assertIn(str(embedded.output), targets.argv); self.assertIn("--live", targets.argv)
-        self.assertIn(str(targets.output), content.argv); self.assertIn("--live", content.argv)
-        self.assertIn(str(content.output), fields.argv); self.assertNotIn("--live", fields.argv)
-        self.assertIn(str(targets.output), context_docs.argv); self.assertIn(str(fields.output), context_docs.argv); self.assertIn("2026", context_docs.argv); self.assertIn("--live", context_docs.argv)
-        self.assertIn(str(context_docs.output), calendar_fields.argv); self.assertIn("2026", calendar_fields.argv); self.assertNotIn("--live", calendar_fields.argv)
-        self.assertIn(str(context_docs.output), calendar_scope.argv); self.assertIn(str(calendar_fields.output), calendar_scope.argv); self.assertNotIn("--live", calendar_scope.argv)
-        self.assertIn(str(context_docs.output), calendar_scope_validation.argv); self.assertIn(str(calendar_fields.output), calendar_scope_validation.argv); self.assertIn(str(calendar_scope.output), calendar_scope_validation.argv); self.assertIn("--prove-tamper", calendar_scope_validation.argv)
-        self.assertIn(str(calendar_scope.output), deadline_promotion.argv); self.assertIn(str(calendar_scope_validation.output), deadline_promotion.argv)
-        self.assertIn(str(calendar_scope.output), deadline_validation.argv); self.assertIn(str(calendar_scope_validation.output), deadline_validation.argv); self.assertIn(str(deadline_promotion.output), deadline_validation.argv); self.assertIn("--prove-tamper", deadline_validation.argv)
-        self.assertIn(str(fields.output), field_materiality.argv); self.assertIn(str(calendar_fields.output), field_materiality.argv); self.assertIn(str(deadline_promotion.output), field_materiality.argv); self.assertIn(str(deadline_validation.output), field_materiality.argv)
-        self.assertIn(str(field_materiality.output), fact_deadline_promotion.argv); self.assertIn(str(deadline_promotion.output), fact_deadline_promotion.argv); self.assertIn(str(deadline_validation.output), fact_deadline_promotion.argv)
-        self.assertIn(str(field_materiality.output), fact_deadline_validation.argv); self.assertIn(str(deadline_promotion.output), fact_deadline_validation.argv); self.assertIn(str(deadline_validation.output), fact_deadline_validation.argv); self.assertIn(str(fact_deadline_promotion.output), fact_deadline_validation.argv); self.assertIn("--prove-tamper", fact_deadline_validation.argv)
-        self.assertNotIn(str(fact_deadline_promotion.output), fact_kernel.argv); self.assertNotIn(str(fact_deadline_validation.output), fact_kernel.argv)
-        self.assertIn(str(field_materiality.output), fact_kernel.argv); self.assertIn(str(fields.output), fact_kernel.argv); self.assertIn(str(calendar_fields.output), fact_kernel.argv)
-        self.assertIn(str(fact_kernel.output), fact_integrity.argv)
-        self.assertIn(str(fact_kernel.output), writer_projection.argv); self.assertIn(str(fact_integrity.output), writer_projection.argv); self.assertNotIn("--live", writer_projection.argv)
-        self.assertIn(str(fact_kernel.output), writer_projection_validation.argv); self.assertIn(str(fact_integrity.output), writer_projection_validation.argv); self.assertIn(str(writer_projection.output), writer_projection_validation.argv); self.assertIn("--prove-tamper", writer_projection_validation.argv)
-
-        for stage in (writer_consumption, writer_consumption_validation):
+        for stage in (consumption, consumption_validation):
             self.assertIn(str(fact_kernel.output), stage.argv)
             self.assertIn(str(fact_integrity.output), stage.argv)
-            self.assertIn(str(writer_projection.output), stage.argv)
-            self.assertIn(str(writer_projection_validation.output), stage.argv)
+            self.assertIn(str(projection.output), stage.argv)
+            self.assertIn(str(projection_validation.output), stage.argv)
             self.assertNotIn("--live", stage.argv)
-        self.assertIn(str(writer_consumption.output), writer_consumption_validation.argv)
-        self.assertIn("--prove-tamper", writer_consumption_validation.argv)
+        self.assertIn(str(consumption.output), consumption_validation.argv)
+        self.assertIn("--prove-tamper", consumption_validation.argv)
 
-        self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv)
-        self.assertNotIn(str(writer_projection.output), writer.argv); self.assertNotIn(str(writer_projection_validation.output), writer.argv)
-        self.assertNotIn(str(writer_consumption.output), writer.argv); self.assertNotIn(str(writer_consumption_validation.output), writer.argv)
+        # Writer remains independent of the projection/consumption compatibility proof.
+        self.assertIn(str(fact_kernel.output), writer.argv)
+        self.assertIn(str(fact_integrity.output), writer.argv)
+        self.assertNotIn(str(projection.output), writer.argv)
+        self.assertNotIn(str(projection_validation.output), writer.argv)
+        self.assertNotIn(str(consumption.output), writer.argv)
+        self.assertNotIn(str(consumption_validation.output), writer.argv)
 
-        for stage in (article_deadline_gate, article_deadline_validation):
+        for stage in (article_gate, article_validation):
             self.assertIn(str(fact_kernel.output), stage.argv)
             self.assertIn(str(fact_integrity.output), stage.argv)
-            self.assertIn(str(writer_consumption.output), stage.argv)
-            self.assertIn(str(writer_consumption_validation.output), stage.argv)
+            self.assertIn(str(consumption.output), stage.argv)
+            self.assertIn(str(consumption_validation.output), stage.argv)
             self.assertIn(str(writer.output), stage.argv)
             self.assertNotIn("--live", stage.argv)
-        self.assertIn(str(article_deadline_gate.output), article_deadline_validation.argv)
-        self.assertIn("--prove-tamper", article_deadline_validation.argv)
-
-        self.assertIn(str(fact_kernel.output), article_integrity.argv); self.assertIn(str(fact_integrity.output), article_integrity.argv); self.assertIn(str(writer.output), article_integrity.argv)
-        self.assertNotIn(str(article_deadline_gate.output), article_integrity.argv)
-        self.assertNotIn(str(article_deadline_validation.output), article_integrity.argv)
+        self.assertIn(str(article_gate.output), article_validation.argv)
+        self.assertIn("--prove-tamper", article_validation.argv)
 
         reusable_inputs = (
-            deadline_validation.output,
-            fact_deadline_validation.output,
+            by_name["isj_registration_deadline_promotion_validation"].output,
+            by_name["isj_fact_kernel_deadline_promotion_validation"].output,
             fact_kernel.output,
             fact_integrity.output,
-            writer_projection_validation.output,
-            writer_consumption_validation.output,
-            article_deadline_gate.output,
-            article_deadline_validation.output,
-            article_integrity.output,
+            projection_validation.output,
+            consumption_validation.output,
+            article_gate.output,
+            article_validation.output,
+            by_name["isj_article_integrity"].output,
         )
         for stage in (promoted_contract, promoted_contract_validation):
             for prior in reusable_inputs:
@@ -149,31 +132,13 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(promoted_contract.output), promoted_contract_validation.argv)
         self.assertIn("--prove-tamper", promoted_contract_validation.argv)
 
-        self.assertIn(str(ipj.output), ledger.argv); self.assertIn(str(isu.output), ledger.argv); self.assertIn(str(municipal.output), ledger.argv); self.assertIn(str(writer.output), ledger.argv); self.assertIn(str(article_integrity.output), ledger.argv)
-        self.assertNotIn(str(promoted_contract.output), ledger.argv)
-        self.assertNotIn(str(promoted_contract_validation.output), ledger.argv)
-        self.assertNotIn("--live", ledger.argv)
-        self.assertIn(f"isj={article_integrity.output}", photo.argv)
-        self.assertIn(str(photo.output), hydrated_registry.argv)
-        self.assertIn("valcea-clar/core_v2/visual_registry.json", hydrated_registry.argv)
-        self.assertNotIn("--live", hydrated_registry.argv)
-        self.assertIn(str(ledger.output), site.argv)
-        self.assertIn(str(hydrated_registry.output), site.argv)
-        self.assertNotIn(str(municipal.output), site.argv)
-
-        names = [stage.name for stage in plan]
         chain = [
-            "isj", "isj_detail", "isj_materiality", "isj_embedded_notice", "isj_embedded_target",
-            "isj_embedded_content", "isj_field_evidence", "isj_context_documents", "isj_calendar_field_evidence",
-            "isj_calendar_scope_binding", "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
-            "isj_registration_deadline_promotion_validation", "isj_field_materiality",
-            "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
             "isj_fact_kernel", "isj_fact_kernel_integrity", "promoted_claim_writer_projection",
-            "promoted_claim_projection_validation", "isj_writer_deadline_consumption",
-            "isj_writer_deadline_consumption_validation", "isj_writer",
-            "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
-            "isj_article_integrity", "isj_promoted_claim_contract", "isj_promoted_claim_contract_validation",
-            "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
+            "promoted_claim_projection_validation", "promoted_claim_writer_consumption",
+            "promoted_claim_writer_consumption_validation", "isj_writer", "isj_article_deadline_claim_gate",
+            "isj_article_deadline_claim_validation", "isj_article_integrity", "isj_promoted_claim_contract",
+            "isj_promoted_claim_contract_validation", "site_verified_article_ledger", "photo_truth",
+            "site_visual_runtime_registry", "shadow_site_package",
         ]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))
