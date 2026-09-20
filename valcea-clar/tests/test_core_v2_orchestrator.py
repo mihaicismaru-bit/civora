@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-from orchestrator import bounded_cycle_plan
+from orchestrator import bounded_cycle_plan, _writer_consumption_dependency_snapshot
 
 
 class BoundedOrchestratorPlanTest(unittest.TestCase):
@@ -145,6 +145,23 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         ]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))
+
+    def test_source_specific_writer_consumption_is_not_a_canonical_runtime_dependency(self):
+        with tempfile.TemporaryDirectory() as temp:
+            plan = bounded_cycle_plan(Path(temp), live=False)
+        report = _writer_consumption_dependency_snapshot(plan)
+        self.assertEqual(report["status"], "PASS_SHADOW")
+        self.assertEqual(report["canonical_stage_count"], 42)
+        self.assertFalse(report["source_specific_runtime_dependency"])
+        self.assertEqual(report["source_specific_runtime_references"], [])
+        self.assertTrue(report["source_specific_regression_only"])
+        self.assertTrue(report["source_specific_retirement_eligible"])
+        self.assertFalse(report["source_specific_retirement_performed"])
+        self.assertTrue(report["compatibility_identity_namespace_retained"])
+        self.assertEqual(report["canonical_writer_consumption_module"], "valcea-clar/core_v2/promoted_claim_writer_consumption.py")
+        self.assertEqual(report["canonical_writer_consumption_validation_module"], "valcea-clar/core_v2/validate_promoted_claim_writer_consumption_runtime.py")
+        self.assertEqual(report["publication_authority"], "NONE")
+        self.assertFalse(report["acceptance_ready"])
 
 
 if __name__ == "__main__":
