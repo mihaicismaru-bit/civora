@@ -26,11 +26,13 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
                 "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer_deadline_projection",
                 "isj_writer_deadline_projection_validation", "isj_writer_deadline_consumption",
-                "isj_writer_deadline_consumption_validation", "isj_writer", "isj_article_integrity",
-                "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
+                "isj_writer_deadline_consumption_validation", "isj_writer",
+                "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
+                "isj_article_integrity", "site_verified_article_ledger", "photo_truth",
+                "site_visual_runtime_registry", "shadow_site_package",
             ],
         )
-        self.assertEqual(len(names), 38)
+        self.assertEqual(len(names), 40)
         joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
         for forbidden in ("workflow_dispatch", "git push", "merge", "deploy", "facebook_publish", "instagram_publish", "manual-publish"):
             self.assertNotIn(forbidden, joined)
@@ -63,7 +65,10 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         writer_projection_validation = by_name["isj_writer_deadline_projection_validation"]
         writer_consumption = by_name["isj_writer_deadline_consumption"]
         writer_consumption_validation = by_name["isj_writer_deadline_consumption_validation"]
-        writer = by_name["isj_writer"]; article_integrity = by_name["isj_article_integrity"]
+        writer = by_name["isj_writer"]
+        article_deadline_gate = by_name["isj_article_deadline_claim_gate"]
+        article_deadline_validation = by_name["isj_article_deadline_claim_validation"]
+        article_integrity = by_name["isj_article_integrity"]
         ledger = by_name["site_verified_article_ledger"]; photo = by_name["photo_truth"]
         hydrated_registry = by_name["site_visual_runtime_registry"]; site = by_name["shadow_site_package"]
         ipj = by_name["ipj"]; isu = by_name["isu"]; municipal = by_name["municipal_writer"]
@@ -101,7 +106,20 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(fact_kernel.output), writer.argv); self.assertIn(str(fact_integrity.output), writer.argv)
         self.assertNotIn(str(writer_projection.output), writer.argv); self.assertNotIn(str(writer_projection_validation.output), writer.argv)
         self.assertNotIn(str(writer_consumption.output), writer.argv); self.assertNotIn(str(writer_consumption_validation.output), writer.argv)
+
+        for stage in (article_deadline_gate, article_deadline_validation):
+            self.assertIn(str(fact_kernel.output), stage.argv)
+            self.assertIn(str(fact_integrity.output), stage.argv)
+            self.assertIn(str(writer_consumption.output), stage.argv)
+            self.assertIn(str(writer_consumption_validation.output), stage.argv)
+            self.assertIn(str(writer.output), stage.argv)
+            self.assertNotIn("--live", stage.argv)
+        self.assertIn(str(article_deadline_gate.output), article_deadline_validation.argv)
+        self.assertIn("--prove-tamper", article_deadline_validation.argv)
+
         self.assertIn(str(fact_kernel.output), article_integrity.argv); self.assertIn(str(fact_integrity.output), article_integrity.argv); self.assertIn(str(writer.output), article_integrity.argv)
+        self.assertNotIn(str(article_deadline_gate.output), article_integrity.argv)
+        self.assertNotIn(str(article_deadline_validation.output), article_integrity.argv)
 
         self.assertIn(str(ipj.output), ledger.argv); self.assertIn(str(isu.output), ledger.argv); self.assertIn(str(municipal.output), ledger.argv); self.assertIn(str(writer.output), ledger.argv); self.assertIn(str(article_integrity.output), ledger.argv)
         self.assertNotIn("--live", ledger.argv)
@@ -122,8 +140,10 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
             "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
             "isj_fact_kernel", "isj_fact_kernel_integrity", "isj_writer_deadline_projection",
             "isj_writer_deadline_projection_validation", "isj_writer_deadline_consumption",
-            "isj_writer_deadline_consumption_validation", "isj_writer", "isj_article_integrity",
-            "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
+            "isj_writer_deadline_consumption_validation", "isj_writer",
+            "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
+            "isj_article_integrity", "site_verified_article_ledger", "photo_truth",
+            "site_visual_runtime_registry", "shadow_site_package",
         ]
         for left, right in zip(chain, chain[1:]):
             self.assertLess(names.index(left), names.index(right))
