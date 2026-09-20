@@ -134,6 +134,103 @@ class CoreV2ContractsTest(unittest.TestCase):
         self.assertEqual(m.instagram_delivery_rate_receipt_bound, 0.0)
         self.assertTrue(m.acceptance_ready)
 
+from copy import deepcopy
+
+from promoted_claim_contract import build_promoted_claim_contract
+from validate_promoted_claim_contract import validate_promoted_claim_contract
+
+
+def promoted_lineage(claim_key="registration_deadline", value="2026-10-02"):
+    return {
+        "story_id": "isj-directori-2026",
+        "source_kind": "isj_valcea",
+        "claim_key": claim_key,
+        "value": value,
+        "claim_text": f"Termenul verificat este {value}.",
+        "claim_evidence_ids": ["field-1", "calendar-scope-1", "raw-window-1", "document-1"],
+        "supporting_evidence_ids": ["field-1", "calendar-scope-1"],
+        "materiality_promotion_evidence_id": "materiality-promote-1",
+        "fact_kernel_promotion_evidence_id": "fact-promote-1",
+        "writer_projection_evidence_id": "writer-project-1",
+        "writer_consumption_evidence_id": "writer-consume-1",
+        "article_claim_evidence_id": "article-claim-1",
+        "document_evidence_id": "document-1",
+        "document_page": 2,
+        "document_page_sha256": "a" * 64,
+        "document_excerpt": "14 septembrie-2 octombrie Depunerea dosarelor de înscriere la concurs",
+        "source_identity": {
+            "official_source_url": "https://example.org/isj",
+            "source_record_id": "isj-source-1",
+        },
+    }
+
+
+def build_promoted(lineage):
+    return build_promoted_claim_contract(**lineage)
+
+
+class ReusablePromotedClaimContractTest(unittest.TestCase):
+    def test_reusable_contract_accepts_independently_bound_isj_lineage(self):
+        lineage = promoted_lineage()
+        doc = build_promoted(lineage)
+        result = validate_promoted_claim_contract(doc, lineage)
+        self.assertEqual(result["status"], "PASS_SHADOW")
+        self.assertEqual(result["verified_claim_count"], 1)
+        self.assertEqual(result["publication_authority"], "NONE")
+        self.assertFalse(result["acceptance_ready"])
+
+    def test_reusable_contract_is_not_deadline_specific(self):
+        lineage = promoted_lineage("effective_date", "2026-11-01")
+        lineage["source_kind"] = "fixture_official_source"
+        lineage["story_id"] = "fixture-effective-date"
+        lineage["claim_text"] = "Măsura intră în vigoare la 1 noiembrie 2026."
+        lineage["document_excerpt"] = "Data intrării în vigoare: 1 noiembrie 2026"
+        lineage["document_page_sha256"] = "b" * 64
+        doc = build_promoted(lineage)
+        result = validate_promoted_claim_contract(doc, lineage)
+        self.assertEqual(result["status"], "PASS_SHADOW")
+        self.assertEqual(result["claim_key"], "effective_date")
+
+    def test_reusable_contract_fails_closed_for_detached_lineage(self):
+        lineage = promoted_lineage()
+        original = build_promoted(lineage)
+        cases = [
+            ("claim_evidence_ids", ["field-1", "document-1"]),
+            ("supporting_evidence_ids", ["calendar-scope-1"]),
+            ("materiality_promotion_evidence_id", "materiality-promote-tampered"),
+            ("fact_kernel_promotion_evidence_id", "fact-promote-tampered"),
+            ("writer_projection_evidence_id", "writer-project-tampered"),
+            ("writer_consumption_evidence_id", "writer-consume-tampered"),
+            ("article_claim_evidence_id", "article-claim-tampered"),
+            ("document_evidence_id", "document-tampered"),
+            ("document_page", 3),
+            ("document_page_sha256", "c" * 64),
+            ("document_excerpt", "detached excerpt"),
+        ]
+        for key, value in cases:
+            with self.subTest(key=key):
+                tampered = deepcopy(original)
+                tampered[key] = value
+                result = validate_promoted_claim_contract(tampered, lineage)
+                self.assertEqual(result["status"], "BLOCKED")
+
+        tampered = deepcopy(original)
+        tampered["source_identity"]["source_record_id"] = "detached-source"
+        self.assertEqual(validate_promoted_claim_contract(tampered, lineage)["status"], "BLOCKED")
+
+        escalated = deepcopy(original)
+        escalated["publication_authority"] = "PRODUCTION"
+        self.assertEqual(validate_promoted_claim_contract(escalated, lineage)["status"], "BLOCKED")
+
+    def test_recomputed_tampered_envelope_still_fails_against_upstream_truth(self):
+        lineage = promoted_lineage()
+        detached = deepcopy(lineage)
+        detached["document_page_sha256"] = "d" * 64
+        self_signed_detached = build_promoted(detached)
+        result = validate_promoted_claim_contract(self_signed_detached, lineage)
+        self.assertEqual(result["status"], "BLOCKED")
+        self.assertIn("upstream_lineage_mismatch", result["detail"])
+
 
 if __name__ == "__main__":
     unittest.main()
