@@ -98,6 +98,7 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     isj_fact_kernel_deadline_promotion = workdir / "valcea-core-v2-isj-fact-kernel-deadline-promotion.json"; isj_fact_kernel_deadline_promotion_validation = workdir / "valcea-core-v2-isj-fact-kernel-deadline-promotion-validation.json"
     isj_fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"; isj_fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
     isj_writer_deadline_projection = workdir / "valcea-core-v2-isj-writer-deadline-projection.json"; isj_writer_deadline_projection_validation = workdir / "valcea-core-v2-isj-writer-deadline-projection-validation.json"
+    isj_writer_deadline_consumption = workdir / "valcea-core-v2-isj-writer-deadline-consumption.json"; isj_writer_deadline_consumption_validation = workdir / "valcea-core-v2-isj-writer-deadline-consumption-validation.json"
     isj_article = workdir / "valcea-core-v2-isj-article-shadow.json"; isj_article_integrity = workdir / "valcea-core-v2-isj-article-integrity-shadow.json"
     site_article_ledger = workdir / "valcea-core-v2-site-verified-article-ledger.json"
     photo = workdir / "valcea-core-v2-photo-truth.json"; site_visual_registry = workdir / "valcea-core-v2-site-visual-runtime-registry.json"
@@ -133,6 +134,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         CycleStage("isj_fact_kernel_integrity", (py,"valcea-clar/core_v2/isj_fact_kernel_integrity.py","--fact-kernel",str(isj_fact_kernel),"--output",str(isj_fact_integrity)), isj_fact_integrity),
         CycleStage("isj_writer_deadline_projection", (py,"valcea-clar/core_v2/isj_writer_deadline_projection_shadow_lane.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--year","2026","--output",str(isj_writer_deadline_projection)), isj_writer_deadline_projection),
         CycleStage("isj_writer_deadline_projection_validation", (py,"valcea-clar/core_v2/validate_isj_writer_deadline_projection.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--projection",str(isj_writer_deadline_projection),"--year","2026","--prove-tamper","--output",str(isj_writer_deadline_projection_validation)), isj_writer_deadline_projection_validation),
+        CycleStage("isj_writer_deadline_consumption", (py,"valcea-clar/core_v2/isj_writer_deadline_consumption_shadow_lane.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--projection",str(isj_writer_deadline_projection),"--projection-validation",str(isj_writer_deadline_projection_validation),"--year","2026","--output",str(isj_writer_deadline_consumption)), isj_writer_deadline_consumption),
+        CycleStage("isj_writer_deadline_consumption_validation", (py,"valcea-clar/core_v2/validate_isj_writer_deadline_consumption.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--projection",str(isj_writer_deadline_projection),"--projection-validation",str(isj_writer_deadline_projection_validation),"--consumption",str(isj_writer_deadline_consumption),"--year","2026","--prove-tamper","--output",str(isj_writer_deadline_consumption_validation)), isj_writer_deadline_consumption_validation),
         CycleStage("isj_writer", (py,"valcea-clar/core_v2/isj_writer_shadow_lane.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--output",str(isj_article)), isj_article),
         CycleStage("isj_article_integrity", (py,"valcea-clar/core_v2/isj_article_integrity.py","--fact-kernel",str(isj_fact_kernel),"--fact-kernel-integrity",str(isj_fact_integrity),"--article",str(isj_article),"--output",str(isj_article_integrity)), isj_article_integrity),
         CycleStage("site_verified_article_ledger", (py,"valcea-clar/core_v2/site_verified_article_ledger.py","--ipj",str(ipj),"--isu",str(isu),"--municipal",str(municipal_articles),"--isj-article",str(isj_article),"--isj-integrity",str(isj_article_integrity),"--output",str(site_article_ledger)), site_article_ledger),
@@ -156,7 +159,8 @@ def _stage_summary(stage: CycleStage, completed: subprocess.CompletedProcess[str
                     "article_count","source_article_counts","shadow_writer_executed","article_truth_state","verified_article_count","article_integrity_verified","photo_gate_status",
                     "contest_context_verified","selected_context_document_count","selected_roles","same_document_year_scope_verified",
                     "registration_window_normalized","registration_deadline_normalized","registration_deadline","promotion_evidence_id","materiality_promotion_allowed","registration_deadline_materiality_consumed",
-                    "fact_kernel_promotion_evidence_id","fact_kernel_promotion_allowed","material_fact_use","writer_projection_evidence_id","writer_deadline_projection_allowed","verified_projection_candidate_count","tamper_regressions_passed",
+                    "fact_kernel_promotion_evidence_id","fact_kernel_promotion_allowed","material_fact_use","writer_projection_evidence_id","writer_deadline_projection_allowed","verified_projection_candidate_count",
+                    "writer_consumption_evidence_id","shadow_writer_consumption_allowed","verified_consumption_candidate_count","tamper_regressions_passed",
                     "verified_written_shadow_count","visual_candidate_verified_shadow_count","hydrated_story_count","preserved_story_count","package_image_bound_shadow_count","blocked_count",
                     "no_story_count","fabricated_claim_count","publication_authority","acceptance_ready"
                 )
@@ -176,6 +180,8 @@ def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]
         "isj_fact_kernel_deadline_promotion_validation",
         "isj_writer_deadline_projection",
         "isj_writer_deadline_projection_validation",
+        "isj_writer_deadline_consumption",
+        "isj_writer_deadline_consumption_validation",
         "site_verified_article_ledger",
         "site_visual_runtime_registry",
     }
