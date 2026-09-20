@@ -1,7 +1,7 @@
 {
-  "schema_version": "7.1",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN58-ISJ-REUSABLE-LINEAGE-ADAPTER-IMPLEMENTED-REGRESSION-GREEN",
-  "observed_at_utc": "2026-09-20T07:26:00Z",
+  "schema_version": "7.2",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN59-REUSABLE-LINEAGE-RUNTIME-NATURAL-VALIDATED",
+  "observed_at_utc": "2026-09-20T08:24:00Z",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -21,29 +21,32 @@
     "public_projection_modified_by_core_v2": false
   },
   "previous_validated_checkpoint": {
-    "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN57-REUSABLE-PROMOTED-CLAIM-CONTRACT-NATURAL-VALIDATED",
-    "checkpoint_commit": "3cabc9f71f73e0b86c38ce869a5146076c5d707f",
-    "natural_push_run_id": 35495932114,
-    "natural_push_run_number": 705,
-    "artifact_id": 10599804651
+    "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN58-ISJ-REUSABLE-LINEAGE-ADAPTER-IMPLEMENTED-REGRESSION-GREEN",
+    "checkpoint_commit": "731e085b3e734f7c4514ce5d217bdd2ed0ba72c5",
+    "natural_push_run_id": 35496914339,
+    "natural_push_run_number": 709,
+    "artifact_id": 10601211418
   },
   "done": {
-    "source_specific_isj_reusable_lineage_adapter_implemented": true,
-    "independent_isj_reusable_contract_runtime_validator_implemented": true,
-    "adapter_derives_only_from_independently_validated_isj_truth_artifacts": true,
-    "adapter_preserves_fail_closed_authority_boundary": true,
-    "local_replay_against_run57_artifact_passed": true,
-    "local_replay_contract_id": "promoted-claim-e89e691eadfeb5109eacb9fa",
-    "local_replay_validator_status": "PASS_SHADOW",
-    "local_replay_tamper_regressions_passed": 4,
-    "feature_commit": "b1beec0750ab768595f0569ec7278a8fb9e826ba",
-    "feature_push_run_id": 35496771745,
-    "feature_push_run_number": 707,
+    "source_specific_isj_reusable_lineage_adapter_runtime_wired": true,
+    "independent_isj_reusable_contract_runtime_validator_wired": true,
+    "single_orchestrator_stage_count": 42,
+    "reusable_contract_runtime_snapshots_persisted": true,
+    "runtime_contract_id": "promoted-claim-e89e691eadfeb5109eacb9fa",
+    "runtime_contract_lineage_complete": true,
+    "runtime_validator_status": "PASS_SHADOW",
+    "runtime_verified_claim_count": 1,
+    "runtime_fabricated_claim_count": 0,
+    "runtime_tamper_regressions_passed": 4,
+    "feature_commit": "21ac8643b5d45cf090bace236807ed734bca055a",
+    "feature_push_run_id": 35499328383,
+    "feature_push_run_number": 711,
     "feature_push_run_attempt": 1,
     "feature_push_conclusion": "success",
-    "feature_artifact_id": 10600860984,
-    "feature_artifact_sha256": "7953435d30943241955f3b1fafb66842a7a8b4ab19ae1af1ab6be867fe25dcd3",
-    "existing_40_stage_shadow_cycle_regression_green": true,
+    "feature_artifact_id": 10600868850,
+    "feature_artifact_sha256": "8983f7cd7e1111b0ad256bdc199c1baa5362b6fbdb74c07bcb2c33f715db7fbb",
+    "ordered_shadow_cycle_passed": true,
+    "ordered_shadow_failed_stage": null,
     "workflow_dispatch_used": false,
     "manual_rerun_used": false,
     "merge_performed": false,
@@ -52,28 +55,35 @@
     "public_projection_write_performed": false
   },
   "current_shadow_truth": {
-    "ordered_shadow_stage_count": 40,
+    "ordered_shadow_stage_count": 42,
+    "ordered_shadow_stage_count_completed": 42,
     "reusable_contract_generic_implementation_present": true,
     "reusable_contract_generic_validator_present": true,
     "isj_source_specific_lineage_adapter_present": true,
     "isj_source_specific_runtime_validator_present": true,
-    "isj_source_specific_runtime_wired": false,
-    "reusable_contract_runtime_wired": false,
+    "isj_source_specific_runtime_wired": true,
+    "reusable_contract_runtime_wired": true,
     "registration_deadline": "2026-10-02",
     "materiality_promotion_evidence_id": "isj-deadline-promotion-a60a847cb89cd360a9e52253",
     "fact_kernel_promotion_evidence_id": "isj-fact-kernel-deadline-promotion-6bd536646b6126ce12f8fa76",
     "writer_projection_evidence_id": "isj-writer-deadline-projection-d9ae7b38596fc02a6ee7524d",
     "writer_consumption_evidence_id": "isj-writer-deadline-consumption-de8b3ece2713d4395a0c62d1",
     "article_deadline_claim_evidence_id": "isj-article-deadline-claim-cc6330d494a44bd79c5340d5",
-    "promoted_claim_contract_id_from_replay": "promoted-claim-e89e691eadfeb5109eacb9fa",
+    "promoted_claim_contract_id": "promoted-claim-e89e691eadfeb5109eacb9fa",
+    "promoted_claim_contract_validation_status": "PASS_SHADOW",
+    "promoted_claim_contract_tamper_regressions_passed": 4,
     "article_contains_registration_deadline": true,
     "canonical_article_claim_count": 3,
     "promoted_article_claim_count": 1,
     "article_integrity_status": "PASS_SHADOW",
     "verified_article_claim_count": 3,
-    "fabricated_claim_count": 0
+    "fabricated_claim_count": 0,
+    "photo_truth_candidate_count": 2,
+    "photo_truth_verified_shadow_count": 2,
+    "shadow_site_package_image_bound_count": 2
   },
   "external_truth": {
+    "candidate_count": 2,
     "site_public_readback": "2/2",
     "approved_public_visual": "1/2",
     "site_visual_blocker": "SITE_APPROVED_VISUAL_ABSENT",
@@ -82,33 +92,39 @@
     "facebook_receipt_bound": "0/2",
     "complete_externally_verified_receipts": 0,
     "truth_complete_transactions": 0,
+    "blocker_counts": {
+      "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
+      "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
+      "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 1,
+      "SITE_APPROVED_VISUAL_ABSENT": 1
+    },
     "cj_source_state": "BLOCKED_TLS",
     "acceptance_ready": false
   },
   "blocked": [
     "Core v2 acceptance remains blocked by external truth, not by internal workflow status.",
-    "Facebook receipt-bound verification lacks sufficient read permission.",
+    "Facebook receipt-bound verification lacks sufficient read permission for both historical candidates.",
     "One historical water story lacks approved public visual truth and corresponding Instagram approved-image identity.",
     "CJ Vâlcea source remains fail-closed on TLS.",
-    "Reusable promoted-claim source adapter and validator are implemented but are not yet wired into the single orchestrator/runtime snapshots."
+    "The reusable promoted-claim interface is now runtime-validated for ISJ, but source-specific promotion gates remain in place until bounded equivalence consolidation is proven."
   ],
   "next": [
-    "Wire isj_promoted_claim_contract_shadow_lane.py after ISJ article integrity in the single orchestrator.",
-    "Wire validate_isj_promoted_claim_contract_runtime.py immediately after the contract stage with --prove-tamper.",
-    "Persist both runtime artifacts, extend orchestrator invariants/tests, and require a natural push replay before treating the reusable interface as runtime-validated.",
-    "Only after equivalence is proven, start bounded consolidation of redundant per-field promotion glue; do not remove legacy/source-specific gates yet."
+    "Begin bounded equivalence consolidation of the ISJ registration-deadline promotion path without deleting or bypassing any currently validated source-specific gate.",
+    "Introduce one source-neutral promoted-claim consumer boundary behind the validated reusable contract and prove output equivalence against the existing source-specific chain in shadow mode.",
+    "Keep site ledger, photo truth, publication and distribution independent from the reusable claim contract; no authority is inherited from PASS_SHADOW.",
+    "After equivalence is proven by natural replay, identify the first redundant per-field glue stage that can be retired in a later isolated change; do not retire it in the same proof increment."
   ],
   "evidence": {
-    "feature_commit": "b1beec0750ab768595f0569ec7278a8fb9e826ba",
-    "feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35496771745",
-    "feature_artifact_id": 10600860984,
-    "feature_artifact_sha256": "7953435d30943241955f3b1fafb66842a7a8b4ab19ae1af1ab6be867fe25dcd3",
-    "new_files": [
-      "valcea-clar/core_v2/isj_promoted_claim_contract_shadow_lane.py",
-      "valcea-clar/core_v2/validate_isj_promoted_claim_contract_runtime.py"
-    ],
-    "local_replay_source_artifact_id": 10599804651,
-    "local_replay_contract_id": "promoted-claim-e89e691eadfeb5109eacb9fa"
+    "feature_commit": "21ac8643b5d45cf090bace236807ed734bca055a",
+    "feature_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35499328383",
+    "feature_run_number": 711,
+    "feature_artifact_id": 10600868850,
+    "feature_artifact_sha256": "8983f7cd7e1111b0ad256bdc199c1baa5362b6fbdb74c07bcb2c33f715db7fbb",
+    "runtime_contract_id": "promoted-claim-e89e691eadfeb5109eacb9fa",
+    "runtime_contract_validation": "PASS_SHADOW",
+    "runtime_stage_count": "42/42",
+    "runtime_failed_stage": null,
+    "external_gate_truth_complete_count": 0
   },
-  "truth_rule": "A green workflow proves only the checks it actually executes. RUN58 adds and locally replays the source-specific reusable-lineage adapter and independent validator, while the natural GitHub run proves compilation and non-regression of the existing 40-stage shadow system. The reusable contract is not runtime-authoritative until it is wired into the orchestrator and independently passes a natural replay. No internal state, exit code, outbox entry, or shadow artifact equals external delivery."
+  "truth_rule": "A green workflow proves only the checks and external readbacks it actually executes. RUN59 proves the reusable ISJ promoted-claim contract and independent validator are now part of the single 42-stage shadow orchestrator, persist in runtime snapshots, and fail closed under four tamper regressions. This does not equal production readiness or external delivery: site, visual and Meta readback remain independently authoritative, and no internal state, exit code, outbox entry or shadow artifact can substitute for a public receipt/readback."
 }
