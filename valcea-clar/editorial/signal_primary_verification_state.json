@@ -2,19 +2,225 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-21T16:17:39+03:00",
+  "generated_at": "2026-09-21T21:48:36+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-21T16:16:22+03:00",
-  "task_count": 74,
+  "queue_generated_at": "2026-09-21T21:47:10+03:00",
+  "task_count": 77,
   "primary_match_count": 1,
   "no_match_count": 25,
-  "unrouted_count": 48,
-  "target_count": 19,
-  "targets_ok": 14,
+  "unrouted_count": 51,
+  "target_count": 17,
+  "targets_ok": 12,
   "results": [
+    {
+      "signal_id": "d03c201da1666b7457da75f7",
+      "signal_title": "VIDEO. Uniforma școlară ar putea deveni obligatorie. Senatul a adoptat propunerea legislativă susținută de senatorul PSD Vâlcea Andra Bică",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/21/video-uniforma-scolara-ar-putea-deveni-obligatorie-senatul-a-adoptat-propunerea-legislativa-sustinuta-de-senatorul-psd-valcea-andra-bica/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-09-21T21:28:08+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "f3d8d81ca62b20a0126261ab",
+      "signal_title": "FOTO. Încă un incendiu de vegetație în Vâlcea. 30 de hectare afectate până acum…",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/21/foto-inca-un-incendiu-de-vegetatie-in-valcea-30-de-hectare-afectate-pana-acum/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-21T19:12:26+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "350dcad64bdfe66260f7333c",
+      "signal_title": "Protest în Parlament după reținerea lui Călin Georgescu. Reprezentanții AUR acuză „abuzuri” din partea instituțiilor statului",
+      "signal_url": "https://www.indiscret.ro/2026/09/21/protest-in-parlament-dupa-retinerea-lui-calin-georgescu-reprezentantii-aur-acuza-abuzuri-din-partea-institutiilor-statului/",
+      "signal_publisher": "Indiscret în Oltenia",
+      "signal_published_at": "2026-09-21T18:39:36+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "18a19e1bddc41dd448dac702",
+      "signal_title": "Intervenție a pompierilor într-o comună din Vâlcea. Ard peste 10 hectare…",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/21/interventie-a-pompierilor-intr-o-comuna-din-valcea-ard-peste-10-hectare/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-21T18:29:32+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "94f43ac631e63c21b5e18ae2",
+      "signal_title": "Sibiul se leagă cultural de zona veche a Budapestei. Fodor va propune consilierilor să avizeze un acord cu districtul Budavár",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/21/sibiul-se-leaga-cultural-de-zona-veche-a-budapestei-fodor-va-propune-consilierilor-sa-avizeze-un-acord-cu-districtul-budavar/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-21T17:52:49+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "8f5399aafaed482fe81189cb",
+      "signal_title": "La Mădulari, apă fără restricții chiar și în vara secetoasă. Daniel Dimulescu: „Am muncit foarte mult pentru acest sistem. Urmează canalizarea și extinderea rețelei de apă”",
+      "signal_url": "https://www.impactreal.ro/2026/09/21/la-madulari-apa-fara-restrictii-chiar-si-in-vara-secetoasa-daniel-dimulescu-am-muncit-foarte-mult-pentru-acest-sistem-urmeaza-canalizarea-si-extinderea-retelei-de-apa/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-21T16:40:16+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "e81dd04067efe11fdbf1a9a1",
+      "signal_title": "ATENȚIE! ANCHETE de TRAFIC în VÂLCEA. Șoferii vor fi opriți și chestionați. Unde se fac verificările",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/21/atentie-anchete-de-trafic-in-valcea-soferii-vor-fi-opriti-si-chestionati-unde-se-fac-verificarile/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_published_at": "2026-09-21T16:38:09+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "a201d6209f26befc1bbb6c1b",
       "signal_title": "Orlățan, primarul Cisnădiei, va fi dat afară din USR Sibiu, după ce l-a desemnat pe Huja administrator public. Orlățan: „Accept ceea ce spun forurile naționale”",
@@ -73,6 +279,66 @@
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "30611538b336357abc3a9628",
+      "signal_title": "VIDEO Huja se întoarce șef la Primăria Cisnădiei, ca administrator public. Primarul Orlățan: „Vechea perioadă de confruntări și de lupte a trecut”. Atacuri la propriul partid",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/21/video-huja-se-intoarce-sef-la-primaria-cisnadiei-ca-administrator-public-primarul-orlatan-vechea-perioada-de-confruntari-si-de-lupte-a-trecut-atacuri-la-propriul-partid/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-21T14:52:16+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1221,44 +1487,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "57448ef7a6e47dbf7b43a813",
-      "signal_title": "Foto / Video. O șură săsească din 1891 a fost transformată într-un centru educațional la Vurpăr. „Să învețe direct din natură, nu din cărți”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/19/foto-video-o-sura-saseasca-din-1891-a-fost-transformata-intr-un-centru-educational-la-vurpar-sa-invete-direct-din-natura-nu-din-carti/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-19T16:08:15+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "5aae7c5a82bbaeeca9a0c475",
       "signal_title": "”Lupii” au mușcat și la Memorialul Elemer Tordai: ”Obiectivul este play-off-ul”",
       "signal_url": "https://www.impactreal.ro/2026/09/19/lupii-au-muscat-si-la-memorialul-elemer-tordai-obiectivul-este-play-off-ul/",
@@ -1308,18 +1536,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "6ce2e89d1442381a46677f90",
-      "signal_title": "La Flohmarkt-ul din Cartierul Arhitecților, copiii învață să negocieze. „Cel mare își strânge bani de bicicletă, iar cel mic învață să negocieze”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/19/la-flohmarkt-ul-din-cartierul-arhitectilor-copiii-invata-sa-negocieze-cel-mare-isi-strange-bani-de-bicicleta-iar-cel-mic-invata-sa-negocieze/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-19T12:31:04+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "2074f338a6c8a60f51497d4d",
@@ -1408,120 +1624,6 @@
             "id": "igpr-infotrafic-live",
             "name": "Centrul INFOTRAFIC — Poliția Română",
             "url": "https://politiaromana.ro/ro/info-trafic"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "47e2c873641f1f57011d4075",
-      "signal_title": "Primăria Mihăești pregătește comuna pentru Raliul Vâlcii: două zile de competiție și adrenalină",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/19/primaria-mihaesti-pregateste-comuna-pentru-raliul-valcii-doua-zile-de-competitie-si-adrenalina/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-19T10:20:48+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "989038c87a5bb814e190d080",
-      "signal_title": "FOTO – ACCIDENT GRAV spre DRĂGĂȘANI. Trei victime anunțate…",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/18/foto-accident-grav-spre-dragasani-treu-victime-anuntate/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-18T22:02:23+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "1b355c12ace2be5a56a3c678",
-      "signal_title": "FOTO – Accident rutier cu trei autoturisme implicate pe DN 64, la Râureni",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/18/acum-accident-rutier-cu-trei-autoturisme-implicate-pe-dn-64-la-raureni/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-18T18:16:12+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
           },
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
