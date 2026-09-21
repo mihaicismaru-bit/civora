@@ -4,8 +4,8 @@
   "product": "VÂLCEA CLAR durable monitor state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-21T01:04:06Z",
-  "last_live_probe_at": "2026-09-21T01:04:06Z",
+  "generated_at": "2026-09-21T06:18:15Z",
+  "last_live_probe_at": "2026-09-21T06:18:15Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "discovery_observed_at": "2026-09-21T02:28:39+03:00",
   "monitor_count": 184,
@@ -34,7 +34,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "80fed809735f4b9e186cfb02ba0e6e3d5d52b77585c8be7e5ef3808d1cfeec1a",
+          "fingerprint": "d49b113f8a7550b27c8e266ff78feb5e3902c969d6574faf684f75bef057ffd4",
           "match_count": 8,
           "error": null,
           "health": "OK",
@@ -125,8 +125,7 @@
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [],
       "degraded_sources": [
-        "primaria-rm-valcea-comunicate",
-        "rm-valcea-hcl-2026"
+        "primaria-rm-valcea-comunicate"
       ],
       "reverify_leads": [
         "rm-valcea-hcl159-2026-musiclover-public-money"
@@ -149,13 +148,14 @@
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf",
           "publisher": "Primăria Municipiului Râmnicu Vâlcea — hotărâri",
           "tier": "T1",
-          "reachable": false,
-          "http_status": null,
-          "fingerprint": null,
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf",
+          "fingerprint": "896dd9f2858ac786346332602a19ad6caed9f0a61b6adb5df318cab8ccad28b7",
           "match_count": 0,
-          "error": "URLError: <urlopen error [Errno 111] Connection refused>",
-          "health": "UNREACHABLE",
-          "change": "PROBE_FAILED"
+          "error": null,
+          "health": "OK",
+          "change": "NEW_BASELINE"
         },
         {
           "id": "cj-valcea-sedinte",
