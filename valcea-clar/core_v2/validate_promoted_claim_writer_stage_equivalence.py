@@ -119,8 +119,12 @@ def validate(
         raise RuntimeError("writer_projection_consumption_semantics_changed")
     if int(article.get("rendered_promoted_claim_count") or 0) != 1:
         raise RuntimeError("writer_rendered_promoted_claim_count_changed")
-    if article.get("article_contains_registration_deadline") is not True:
-        raise RuntimeError("writer_promoted_claim_rendering_changed")
+    # The writer itself is pre-claim-gate: it may render exactly one promoted
+    # claim into the pending-integrity slot, but it must not yet claim that the
+    # canonical article contains that deadline. The later article claim gate owns
+    # that projection. This is the fail-closed writer boundary proven here.
+    if article.get("article_contains_registration_deadline") is not False:
+        raise RuntimeError("writer_pre_gate_article_claim_boundary_changed")
     if int(article.get("fabricated_claim_count") or 0) != 0:
         raise RuntimeError("writer_fabricated_claim_count_nonzero")
     if article.get("publication_authority") != "NONE" or article.get("acceptance_ready") is not False:
@@ -138,16 +142,24 @@ def validate(
     pending = package.get("rendered_promoted_claims_pending_integrity") or []
     if len(claims) != 2:
         raise RuntimeError("writer_base_claim_cardinality_changed")
+    if package.get("article_contains_registration_deadline") is not False:
+        raise RuntimeError("writer_package_pre_gate_article_claim_boundary_changed")
     if len(pending) != 1 or not isinstance(pending[0], dict):
         raise RuntimeError("writer_pending_promoted_claim_cardinality_changed")
     pending_claim = pending[0]
+    if pending_claim.get("field") != "registration_deadline":
+        raise RuntimeError("writer_pending_promoted_claim_field_changed")
+    if pending_claim.get("state") != "WRITER_RENDERED_SHADOW_PENDING_ARTICLE_CLAIM_INTEGRITY":
+        raise RuntimeError("writer_pending_promoted_claim_state_changed")
+    if pending_claim.get("publication_authority") != "NONE" or pending_claim.get("article_projection_allowed") is not False:
+        raise RuntimeError("writer_pending_promoted_claim_authority_changed")
     if pending_claim.get("writer_projection_evidence_id") != EXPECTED_PROJECTION_ID:
         raise RuntimeError("writer_pending_projection_evidence_id_changed")
     if pending_claim.get("writer_consumption_evidence_id") != EXPECTED_CONSUMPTION_ID:
         raise RuntimeError("writer_pending_consumption_evidence_id_changed")
 
     result = {
-        "schema_version": "core-v2-promoted-claim-writer-stage-definition-equivalence-ci.v1",
+        "schema_version": "core-v2-promoted-claim-writer-stage-definition-equivalence-ci.v2",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -158,16 +170,18 @@ def validate(
         "writer_stage_position_matches_frozen_run81": True,
         "writer_lineage_equivalent": True,
         "downstream_article_truth_stage_definitions_match_frozen_run81": True,
+        "writer_pre_gate_semantics_preserved": True,
         "writer_output_semantics_preserved": True,
         "projection_evidence_id": EXPECTED_PROJECTION_ID,
         "consumption_evidence_id": EXPECTED_CONSUMPTION_ID,
         "consumption_tamper_regressions_passed": 4,
         "base_article_claim_count": 2,
         "pending_promoted_claim_count": 1,
+        "canonical_article_contains_registration_deadline_pre_gate": False,
         "fabricated_claim_count": 0,
         "retirement_authority": "NONE",
         "truth_rule": (
-            "CI-only PASS_SHADOW requires the directly owned promoted_claim_writer stage to remain exactly equivalent to frozen RUN81 in stage name, argv, output and 42-stage position, preserve explicit FactKernel/writer-consumption lineage, preserve downstream article-truth stage definitions, stable evidence identities and writer output semantics, and remain fail-closed for publication, acceptance and retirement."
+            "CI-only PASS_SHADOW requires the directly owned promoted_claim_writer stage to remain exactly equivalent to frozen RUN81 in stage name, argv, output and 42-stage position, preserve explicit FactKernel/writer-consumption lineage, preserve downstream article-truth stage definitions and stable evidence identities, render exactly one registration-deadline claim only into the pending-integrity slot while the canonical article still excludes it, and remain fail-closed for publication, acceptance and retirement."
         ),
     }
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
