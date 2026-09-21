@@ -7,14 +7,13 @@ from typing import Any
 
 import orchestrator_run70 as _legacy
 
-# RUN78 controlled naming migration:
+# RUN79 controlled ownership extraction:
 # retain the validated RUN70 orchestrator implementation as a frozen component
-# for still-unmigrated stages, while Core v2 owns the complete writer seam.
-# The canonical writer stage is now source-neutral in both module and stage name:
-# promoted_claim_writer. The useful ISJ writer remains a KEEP implementation
-# detail behind the source-neutral facade and is not retired in this increment.
-# Frozen RUN70 writer-layer placeholders are skipped without reading or
-# transforming their argv/output definitions. Historical evidence-ID namespaces
+# for still-unmigrated stages, while Core v2 owns the complete writer seam and
+# now also owns the downstream article claim-gate / validation / integrity stage
+# definitions directly. The source-specific truth modules and artifact identities
+# are intentionally retained unchanged in this increment; only stage-definition
+# ownership moves out of the frozen RUN70 plan. Historical evidence-ID namespaces
 # stay stable deliberately so downstream lineage remains comparable.
 
 CycleStage = _legacy.CycleStage
@@ -34,10 +33,21 @@ _NEW_VALIDATION_MODULE = "valcea-clar/core_v2/validate_promoted_claim_writer_con
 _WRITER_MODULE = "valcea-clar/core_v2/promoted_claim_writer.py"
 _RETAINED_WRITER_IMPLEMENTATION = "valcea-clar/core_v2/isj_writer_shadow_lane.py"
 _WRITER_ARTIFACT = "valcea-core-v2-isj-article-shadow.json"
+_ARTICLE_CLAIM_GATE_MODULE = "valcea-clar/core_v2/isj_article_deadline_claim_gate.py"
+_ARTICLE_CLAIM_VALIDATION_MODULE = "valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py"
+_ARTICLE_INTEGRITY_MODULE = "valcea-clar/core_v2/isj_article_integrity.py"
+_ARTICLE_CLAIM_ARTIFACT = "valcea-core-v2-isj-article-deadline-claim.json"
+_ARTICLE_CLAIM_VALIDATION_ARTIFACT = "valcea-core-v2-isj-article-deadline-claim-validation.json"
+_ARTICLE_INTEGRITY_ARTIFACT = "valcea-core-v2-isj-article-integrity-shadow.json"
 _LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES = {
     "isj_writer_deadline_consumption",
     "isj_writer_deadline_consumption_validation",
     "isj_writer",
+}
+_LEGACY_ARTICLE_TRUTH_PLACEHOLDER_STAGES = {
+    "isj_article_deadline_claim_gate",
+    "isj_article_deadline_claim_validation",
+    "isj_article_integrity",
 }
 _CANONICAL_WRITER_STAGE = "promoted_claim_writer"
 
@@ -113,6 +123,61 @@ def _owned_writer_stage(workdir: Path) -> CycleStage:
             "--output", str(article),
         ),
         article,
+    )
+
+
+def _owned_article_truth_stages(workdir: Path) -> tuple[CycleStage, CycleStage, CycleStage]:
+    """Own the existing source-specific article truth stages without changing their semantics."""
+    fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
+    fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
+    consumption = workdir / _NEW_CONSUMPTION_ARTIFACT
+    consumption_validation = workdir / _NEW_VALIDATION_ARTIFACT
+    article = workdir / _WRITER_ARTIFACT
+    article_claim = workdir / _ARTICLE_CLAIM_ARTIFACT
+    article_claim_validation = workdir / _ARTICLE_CLAIM_VALIDATION_ARTIFACT
+    article_integrity = workdir / _ARTICLE_INTEGRITY_ARTIFACT
+    py = sys.executable
+
+    return (
+        CycleStage(
+            "isj_article_deadline_claim_gate",
+            (
+                py, _ARTICLE_CLAIM_GATE_MODULE,
+                "--fact-kernel", str(fact_kernel),
+                "--fact-kernel-integrity", str(fact_integrity),
+                "--writer-consumption", str(consumption),
+                "--writer-consumption-validation", str(consumption_validation),
+                "--article", str(article),
+                "--output", str(article_claim),
+            ),
+            article_claim,
+        ),
+        CycleStage(
+            "isj_article_deadline_claim_validation",
+            (
+                py, _ARTICLE_CLAIM_VALIDATION_MODULE,
+                "--fact-kernel", str(fact_kernel),
+                "--fact-kernel-integrity", str(fact_integrity),
+                "--writer-consumption", str(consumption),
+                "--writer-consumption-validation", str(consumption_validation),
+                "--article", str(article),
+                "--gate", str(article_claim),
+                "--prove-tamper",
+                "--output", str(article_claim_validation),
+            ),
+            article_claim_validation,
+        ),
+        CycleStage(
+            "isj_article_integrity",
+            (
+                py, _ARTICLE_INTEGRITY_MODULE,
+                "--fact-kernel", str(fact_kernel),
+                "--fact-kernel-integrity", str(fact_integrity),
+                "--article", str(article),
+                "--output", str(article_integrity),
+            ),
+            article_integrity,
+        ),
     )
 
 
@@ -197,25 +262,71 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
     }
 
 
+def _article_truth_stage_ownership_snapshot(plan: tuple[CycleStage, ...]) -> dict[str, Any]:
+    by_name = {stage.name: stage for stage in plan}
+    gate = by_name["isj_article_deadline_claim_gate"]
+    validation = by_name["isj_article_deadline_claim_validation"]
+    integrity = by_name["isj_article_integrity"]
+    exact = (
+        len(gate.argv) > 1 and gate.argv[1] == _ARTICLE_CLAIM_GATE_MODULE
+        and len(validation.argv) > 1 and validation.argv[1] == _ARTICLE_CLAIM_VALIDATION_MODULE
+        and len(integrity.argv) > 1 and integrity.argv[1] == _ARTICLE_INTEGRITY_MODULE
+        and gate.output is not None and gate.output.name == _ARTICLE_CLAIM_ARTIFACT
+        and validation.output is not None and validation.output.name == _ARTICLE_CLAIM_VALIDATION_ARTIFACT
+        and integrity.output is not None and integrity.output.name == _ARTICLE_INTEGRITY_ARTIFACT
+        and "--writer-consumption" in gate.argv
+        and "--writer-consumption-validation" in gate.argv
+        and "--writer-consumption" in validation.argv
+        and "--writer-consumption-validation" in validation.argv
+        and _NEW_CONSUMPTION_ARTIFACT in " ".join(gate.argv)
+        and _NEW_VALIDATION_ARTIFACT in " ".join(gate.argv)
+        and _NEW_CONSUMPTION_ARTIFACT in " ".join(validation.argv)
+        and _NEW_VALIDATION_ARTIFACT in " ".join(validation.argv)
+        and "--prove-tamper" in validation.argv
+    )
+    return {
+        "schema_version": "core-v2-article-truth-stage-ownership-shadow.v1",
+        "status": "PASS_SHADOW" if exact else "BLOCKED",
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+        "canonical_stage_count": len(plan),
+        "canonical_stage_ownership": "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION",
+        "owned_stages": [gate.name, validation.name, integrity.name],
+        "frozen_run70_article_truth_placeholder_definitions_consumed": False,
+        "source_specific_truth_modules_retained": True,
+        "source_specific_truth_stage_names_retained": True,
+        "artifact_identities_retained": True,
+        "retirement_eligible": False,
+        "retirement_performed": False,
+        "truth_rule": (
+            "Core v2 directly owns the article claim-gate, its tamper validation, and article-integrity stage definitions while retaining the existing source-specific truth modules, stage names, and artifact identities. "
+            "This ownership extraction changes no article truth semantics and grants no publication, acceptance, naming-migration, or retirement authority."
+        ),
+    }
+
+
 def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     legacy_plan = _LEGACY_PLAN(workdir, live=live)
     transformed: list[CycleStage] = []
     owned_consumption_stages = _owned_writer_consumption_stages(workdir)
     owned_writer = _owned_writer_stage(workdir)
+    owned_article_truth = _owned_article_truth_stages(workdir)
     owned_chain_inserted = False
 
     for stage in legacy_plan:
-        # Do not transform or consume the frozen writer-layer placeholder
-        # definitions. They are skipped as legacy evidence only.
+        # Do not transform or consume the frozen writer-layer placeholders.
         if stage.name in _LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES:
             continue
 
-        # Insert the complete Core-v2-owned writer seam immediately before the
-        # first downstream article-claim gate. This preserves the validated order
-        # while eliminating dependence on the frozen RUN70 writer definition.
+        # Replace the first frozen article gate with the complete directly-owned
+        # writer + article-truth seam. The following frozen validation/integrity
+        # placeholders are skipped, so no RUN70 argv/output definition is reused.
         if stage.name == "isj_article_deadline_claim_gate" and not owned_chain_inserted:
-            transformed.extend((*owned_consumption_stages, owned_writer))
+            transformed.extend((*owned_consumption_stages, owned_writer, *owned_article_truth))
             owned_chain_inserted = True
+            continue
+        if stage.name in _LEGACY_ARTICLE_TRUTH_PLACEHOLDER_STAGES:
+            continue
 
         name = stage.name
         argv = [_neutralize_arg(str(arg)) for arg in stage.argv]
@@ -240,13 +351,17 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     validation_index = names.index("promoted_claim_writer_consumption_validation")
     writer_index = names.index(_CANONICAL_WRITER_STAGE)
     gate_index = names.index("isj_article_deadline_claim_gate")
-    if (consumption_index, validation_index, writer_index, gate_index) != (
+    article_validation_index = names.index("isj_article_deadline_claim_validation")
+    article_integrity_index = names.index("isj_article_integrity")
+    if (consumption_index, validation_index, writer_index, gate_index, article_validation_index, article_integrity_index) != (
         gate_index - 3,
         gate_index - 2,
         gate_index - 1,
         gate_index,
+        gate_index + 1,
+        gate_index + 2,
     ):
-        raise RuntimeError("owned_writer_layer_stage_order_changed")
+        raise RuntimeError("owned_writer_article_truth_stage_order_changed")
 
     for stage in transformed:
         joined = "\n".join(stage.argv)
@@ -264,6 +379,15 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
 
     if transformed[writer_index] != _owned_writer_stage(workdir):
         raise RuntimeError("canonical_owned_writer_definition_drifted")
+
+    expected_article_truth = _owned_article_truth_stages(workdir)
+    actual_article_truth = (
+        transformed[gate_index],
+        transformed[article_validation_index],
+        transformed[article_integrity_index],
+    )
+    if actual_article_truth != expected_article_truth:
+        raise RuntimeError("canonical_owned_article_truth_definition_drifted")
 
     writer_stage = transformed[writer_index]
     writer_argv = list(writer_stage.argv)
@@ -289,6 +413,14 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         raise RuntimeError("source_specific_writer_stage_runtime_reference_detected")
     if dependency["compatibility_writer_stage_name_retired"] is not True:
         raise RuntimeError("compatibility_writer_stage_name_still_present")
+
+    article_ownership = _article_truth_stage_ownership_snapshot(tuple(transformed))
+    if article_ownership["status"] != "PASS_SHADOW":
+        raise RuntimeError("article_truth_stage_direct_ownership_not_proven")
+    if article_ownership["frozen_run70_article_truth_placeholder_definitions_consumed"] is not False:
+        raise RuntimeError("frozen_run70_article_truth_placeholder_definition_consumed")
+    if article_ownership["retirement_eligible"] is not False:
+        raise RuntimeError("article_truth_component_retirement_must_remain_closed")
     return tuple(transformed)
 
 
@@ -304,6 +436,7 @@ def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]
         except Exception:
             snapshots[stage.name] = {"parse_error": True, "path": str(stage.output)}
     snapshots["writer_consumption_runtime_dependency"] = _writer_consumption_dependency_snapshot(plan)
+    snapshots["article_truth_stage_ownership"] = _article_truth_stage_ownership_snapshot(plan)
     return snapshots
 
 
