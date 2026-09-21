@@ -182,8 +182,10 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
         "source_specific_runtime_references": legacy_refs,
         "source_specific_runtime_dependency": not no_dependency,
         "source_specific_regression_only": True,
-        "source_specific_retirement_eligible": False,
+        "source_specific_retirement_eligible": no_dependency,
         "source_specific_retirement_performed": False,
+        "retained_writer_implementation_retirement_eligible": False,
+        "retained_writer_implementation_retirement_performed": False,
         "compatibility_identity_namespace_retained": True,
         "truth_rule": (
             "Canonical writer-layer runtime passes only when Core v2 directly owns the ordered source-neutral consumption builder/validator and points the writer stage at the source-neutral promoted_claim_writer runtime facade, "
