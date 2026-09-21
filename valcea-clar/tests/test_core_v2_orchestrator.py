@@ -226,6 +226,107 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertEqual(report["publication_authority"], "NONE")
         self.assertFalse(report["acceptance_ready"])
 
+    def test_source_neutral_article_truth_cli_stage_definition_equivalence_before_switch(self):
+        with tempfile.TemporaryDirectory() as temp:
+            workdir = Path(temp)
+            plan = bounded_cycle_plan(workdir, live=False)
+
+        by_name = {stage.name: stage for stage in plan}
+        names = [stage.name for stage in plan]
+        gate = by_name["isj_article_deadline_claim_gate"]
+        validation = by_name["isj_article_deadline_claim_validation"]
+        integrity = by_name["isj_article_integrity"]
+
+        fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
+        fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
+        consumption = workdir / "valcea-core-v2-promoted-claim-writer-consumption.json"
+        consumption_validation = workdir / "valcea-core-v2-promoted-claim-writer-consumption-validation.json"
+        article = workdir / "valcea-core-v2-isj-article-shadow.json"
+        claim = workdir / "valcea-core-v2-isj-article-deadline-claim.json"
+        claim_validation = workdir / "valcea-core-v2-isj-article-deadline-claim-validation.json"
+        source_neutral_cli = "valcea-clar/core_v2/promoted_claim_article_truth.py"
+
+        proposed_gate_argv = (
+            sys.executable,
+            source_neutral_cli,
+            "--mode", "gate",
+            "--fact-kernel", str(fact_kernel),
+            "--fact-kernel-integrity", str(fact_integrity),
+            "--writer-consumption", str(consumption),
+            "--writer-consumption-validation", str(consumption_validation),
+            "--article", str(article),
+            "--output", str(claim),
+        )
+        proposed_validation_argv = (
+            sys.executable,
+            source_neutral_cli,
+            "--mode", "validate",
+            "--fact-kernel", str(fact_kernel),
+            "--fact-kernel-integrity", str(fact_integrity),
+            "--writer-consumption", str(consumption),
+            "--writer-consumption-validation", str(consumption_validation),
+            "--article", str(article),
+            "--gate", str(claim),
+            "--prove-tamper",
+            "--output", str(claim_validation),
+        )
+
+        def option_contract(argv, *, ignore_mode=False):
+            pairs = []
+            index = 2
+            while index < len(argv):
+                token = argv[index]
+                if token == "--prove-tamper":
+                    pairs.append((token, True))
+                    index += 1
+                    continue
+                self.assertTrue(token.startswith("--"), f"unexpected positional token: {token}")
+                self.assertLess(index + 1, len(argv), f"missing value for {token}")
+                value = argv[index + 1]
+                if not (ignore_mode and token == "--mode"):
+                    pairs.append((token, value))
+                index += 2
+            return tuple(pairs)
+
+        self.assertEqual(len(plan), 42)
+        self.assertEqual(gate.name, "isj_article_deadline_claim_gate")
+        self.assertEqual(validation.name, "isj_article_deadline_claim_validation")
+        self.assertEqual(gate.argv[1], "valcea-clar/core_v2/isj_article_deadline_claim_gate.py")
+        self.assertEqual(validation.argv[1], "valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py")
+        self.assertNotEqual(gate.argv[1], source_neutral_cli)
+        self.assertNotEqual(validation.argv[1], source_neutral_cli)
+        self.assertEqual(gate.output, claim)
+        self.assertEqual(validation.output, claim_validation)
+
+        self.assertEqual(option_contract(gate.argv), option_contract(proposed_gate_argv, ignore_mode=True))
+        self.assertEqual(option_contract(validation.argv), option_contract(proposed_validation_argv, ignore_mode=True))
+        self.assertEqual(proposed_gate_argv[2:4], ("--mode", "gate"))
+        self.assertEqual(proposed_validation_argv[2:4], ("--mode", "validate"))
+        self.assertIn("--gate", proposed_validation_argv)
+        self.assertIn(str(claim), proposed_validation_argv)
+        self.assertIn("--prove-tamper", proposed_validation_argv)
+        self.assertNotIn("--live", proposed_gate_argv)
+        self.assertNotIn("--live", proposed_validation_argv)
+
+        writer_index = names.index("promoted_claim_writer")
+        gate_index = names.index("isj_article_deadline_claim_gate")
+        validation_index = names.index("isj_article_deadline_claim_validation")
+        integrity_index = names.index("isj_article_integrity")
+        self.assertEqual(gate_index, writer_index + 1)
+        self.assertEqual(validation_index, gate_index + 1)
+        self.assertEqual(integrity_index, validation_index + 1)
+        self.assertEqual(integrity.output, workdir / "valcea-core-v2-isj-article-integrity-shadow.json")
+
+        canonical_joined = "\n".join(" ".join(stage.argv) for stage in plan)
+        self.assertNotIn(source_neutral_cli, canonical_joined)
+        ownership = _article_truth_stage_ownership_snapshot(plan)
+        self.assertEqual(ownership["status"], "PASS_SHADOW")
+        self.assertEqual(ownership["canonical_stage_count"], 42)
+        self.assertEqual(ownership["publication_authority"], "NONE")
+        self.assertFalse(ownership["acceptance_ready"])
+        self.assertFalse(ownership["retirement_eligible"])
+        self.assertFalse(ownership["retirement_performed"])
+
     def test_owned_promoted_claim_contract_definitions_match_frozen_run70_semantics(self):
         with tempfile.TemporaryDirectory() as temp:
             workdir = Path(temp)
