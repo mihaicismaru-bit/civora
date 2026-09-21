@@ -201,6 +201,29 @@ def validate(base: Path, repo: Path) -> None:
 
     _validate_projected_truth(base)
 
+    # Independent CI-only regression: bind the direct fact-kernel definition
+    # extraction to frozen RUN81/RUN70 semantics and to downstream truth evidence.
+    # This is intentionally not part of the orchestrator's production/runtime plan.
+    if os.environ.get("GITHUB_ACTIONS", "").lower() == "true":
+        import validate_fact_kernel_definition_equivalence_runtime as fact_equivalence
+
+        report = fact_equivalence.validate(base)
+        if report.get("status") != "PASS_SHADOW":
+            raise RuntimeError("fact_kernel_definition_equivalence_not_pass_shadow")
+        print(json.dumps({
+            "ci_only_fact_kernel_definition_equivalence": report.get("status"),
+            "canonical_stage_count": report.get("canonical_stage_count"),
+            "projection_evidence_id": report.get("projection_evidence_id"),
+            "consumption_evidence_id": report.get("consumption_evidence_id"),
+            "article_claim_evidence_id": report.get("article_claim_evidence_id"),
+            "promoted_claim_contract_id": report.get("promoted_claim_contract_id"),
+            "tamper_regressions": report.get("tamper_regressions"),
+            "verified_article_claim_count": report.get("verified_article_claim_count"),
+            "fabricated_claim_count": report.get("fabricated_claim_count"),
+            "publication_authority": "NONE",
+            "acceptance_ready": False,
+        }, ensure_ascii=False, sort_keys=True))
+
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Validate all Core v2 live shadow artifacts remain non-authoritative")
