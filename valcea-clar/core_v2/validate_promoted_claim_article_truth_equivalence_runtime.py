@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from orchestrator import bounded_cycle_plan, _article_truth_stage_ownership_snapshot
+from validate_promoted_claim_article_integrity_equivalence import validate_equivalence as validate_integrity_equivalence
 from validate_promoted_claim_article_truth_equivalence_run91 import validate_equivalence
 
 
@@ -105,23 +106,39 @@ def main() -> int:
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
+    fact_kernel = _load(args.fact_kernel)
+    fact_integrity = _load(args.fact_kernel_integrity)
+    canonical_article = _load(args.canonical_article)
+    canonical_integrity = _load(args.canonical_integrity)
+
     report = validate_equivalence(
-        _load(args.fact_kernel),
-        _load(args.fact_kernel_integrity),
+        fact_kernel,
+        fact_integrity,
         _load(args.writer_consumption),
         _load(args.writer_consumption_validation),
         _load(args.canonical_gate),
         _load(args.canonical_validation),
-        _load(args.canonical_article),
-        _load(args.canonical_integrity),
+        canonical_article,
+        canonical_integrity,
     )
     switch = _validate_canonical_switch()
+    integrity_facade = validate_integrity_equivalence(
+        fact_kernel,
+        fact_integrity,
+        canonical_article,
+        canonical_integrity,
+    )
 
     report.update(switch)
-    report["schema_version"] = "core-v2-promoted-claim-article-truth-canonical-switch-shadow.v1"
+    report["article_integrity_facade_equivalence"] = integrity_facade
+    report["schema_version"] = "core-v2-promoted-claim-article-truth-canonical-switch-shadow.v2"
     report["status"] = "PASS_SHADOW"
     report["canonical_runtime_switched"] = True
     report["canonical_stage_definitions_switched"] = True
+    report["article_integrity_facade_built"] = True
+    report["article_integrity_facade_equivalent"] = integrity_facade.get("json_semantic_equivalent") is True
+    report["article_integrity_facade_canonical_runtime_switched"] = False
+    report["article_integrity_facade_tamper_regressions_passed"] = integrity_facade.get("fail_closed_tamper_regressions_passed")
     report["retained_implementations_retirement_eligible"] = False
     report["retirement_authority"] = "NONE"
     report["publication_authority"] = "NONE"
@@ -129,13 +146,14 @@ def main() -> int:
     report["site_publish_allowed"] = False
     report["social_publish_allowed"] = False
     report["truth_rule"] = (
-        "The canonical article-truth gate and validation stage names now execute the source-neutral "
-        "promoted_claim_article_truth CLI one-for-one, with exact artifact identities and preserved "
-        "writer->gate->validation->integrity order. Semantic parity remains bound to the retained ISJ "
-        "gate/validator implementations on the same inputs, the article-claim evidence identity is unchanged, "
-        "5/5 preprojection and 3/3 projected tamper regressions pass, and downstream integrity remains "
-        "3 verified / 0 fabricated. Retained ISJ implementations remain KEEP regression components only; "
-        "no publication, acceptance, merge, deploy, Meta-write, public-projection or retirement authority is granted."
+        "The canonical article-truth gate and validation stage names execute the source-neutral promoted_claim_article_truth "
+        "CLI one-for-one, with exact artifact identities and preserved writer->gate->validation->integrity order. Semantic "
+        "parity remains bound to the retained ISJ gate/validator implementations, with the same article-claim evidence identity, "
+        "5/5 preprojection and 3/3 projected tamper regressions, and downstream 3 verified / 0 fabricated. In parallel, a new "
+        "source-neutral article-integrity facade is proven JSON-semantically identical to both the retained verifier and the "
+        "canonical integrity artifact and fails closed on independent headline, evidence-identity and extra-claim tampering. "
+        "The canonical integrity stage remains intentionally unswitched and retained components remain KEEP/not-retirement-eligible. "
+        "No publication, acceptance, merge, deploy, Meta-write, public-projection or retirement authority is granted."
     )
 
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -149,6 +167,9 @@ def main() -> int:
         "projected_tamper_regressions_passed": report["projected_tamper_regressions_passed"],
         "downstream_verified_claim_count": report["downstream_verified_claim_count"],
         "downstream_fabricated_claim_count": report["downstream_fabricated_claim_count"],
+        "article_integrity_facade_equivalent": report["article_integrity_facade_equivalent"],
+        "article_integrity_facade_tamper_regressions_passed": report["article_integrity_facade_tamper_regressions_passed"],
+        "article_integrity_facade_canonical_runtime_switched": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
     }, ensure_ascii=False, sort_keys=True))
