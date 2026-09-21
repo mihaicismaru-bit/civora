@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-21T19:25:51Z",
+  "generated_at": "2026-09-21T23:17:08Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -162,7 +162,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
-          "fingerprint": "98ed22f7a6fb112183dfa23337a1f0f1578804d5663fedf3a4bacfe03e1ae9ae",
+          "fingerprint": "045125c77406f921a9b613415d51b1b74179c487df4861f42fa94902b34e51fd",
           "match_count": 24,
           "matched_terms": [
             "șomaj",
@@ -183,7 +183,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "355a7b3aa392777f1dc07c94003863c5b1c17492dc40bd233f27f3a971181899",
+          "fingerprint": "40c8c0eb037f4ab0b35a1ea69e3ca5242a05e72d6b9283795b9f02b2d14b3254",
           "match_count": 17,
           "matched_terms": [
             "Vâlcea",
@@ -204,8 +204,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "4e98844355b181126796129198b77b449a5092fa11b5b75b0164c2cbe3d567e6",
-          "match_count": 21,
+          "fingerprint": "6a016f6e63ee3c6d6bbda33bfe36cb224e5a8a7327ec17f390429528a8d04900",
+          "match_count": 23,
           "matched_terms": [
             "Joburi",
             "locuri de munca",
@@ -215,7 +215,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1395"
+              "value_text": "1398"
             }
           ],
           "health": "OK",
@@ -312,7 +312,10 @@
         "termene-top50-valcea"
       ],
       "official_changed_sources": [],
-      "degraded_sources": [],
+      "degraded_sources": [
+        "data-gov-onrc-datasets",
+        "data-gov-finance-datasets"
+      ],
       "sources": [
         {
           "id": "data-gov-onrc-datasets",
@@ -320,27 +323,15 @@
           "url": "https://data.gov.ro/dataset?organization=onrc",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/dataset?organization=onrc",
-          "fingerprint": "3bd9e8545e30f4d7318bf390a212c73447b862dc22548d085eb252de701bbd35",
-          "match_count": 8,
-          "matched_terms": [
-            "Firme înregistrate la Registrul Comerțului"
-          ],
-          "numeric_signals": [
-            {
-              "kind": "companies",
-              "value_text": "3"
-            },
-            {
-              "kind": "companies",
-              "value_text": "1"
-            }
-          ],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "data-gov-finance-datasets",
@@ -348,19 +339,15 @@
           "url": "https://data.gov.ro/organization/mfp",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/organization/mfp",
-          "fingerprint": "ce4f74e4d2e54f5d9c439ee0fede4f2ff46aabc07eba222e382ee6bba9e0ce23",
-          "match_count": 6,
-          "matched_terms": [
-            "Situații financiare",
-            "CSV"
-          ],
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "onrc-services",
