@@ -7,8 +7,8 @@ from pathlib import Path
 from typing import Any
 
 import orchestrator
-import orchestrator_run70
 import orchestrator_run81
+import orchestrator_run86
 import validate_promoted_claim_article_integrity_stage_equivalence as integrity_stage_equivalence
 import validate_promoted_claim_consumption_definition_equivalence_runtime as consumption_equivalence
 
@@ -41,8 +41,13 @@ def _by_name(plan: tuple[Any, ...]) -> dict[str, Any]:
 
 def validate(base: Path) -> dict[str, Any]:
     canonical = orchestrator.bounded_cycle_plan(base, live=False)
-    frozen81 = orchestrator_run81.bounded_cycle_plan(base, live=False)
-    frozen70 = orchestrator_run70.bounded_cycle_plan(base, live=False)
+    # Immutable historical comparators. Later Core v2 wrappers intentionally
+    # patch public module-level bounded_cycle_plan symbols to delegate runtime
+    # execution, so those public symbols are not valid frozen baselines.
+    # RUN86 captured the naturally validated RUN81 plan before patching it;
+    # RUN81 captured the RUN70 plan before patching that public symbol.
+    frozen81 = orchestrator_run86._BASE_PLAN(base, live=False)
+    frozen70 = orchestrator_run81._LEGACY_PLAN(base, live=False)
     owned = {stage.name: stage for stage in orchestrator._owned_fact_kernel_stages(base)}
     canonical_by_name = _by_name(canonical)
     run81_by_name = _by_name(frozen81)
@@ -176,12 +181,16 @@ def validate(base: Path) -> dict[str, Any]:
         raise RuntimeError("article_integrity_retained_retirement_boundary_changed")
 
     return {
-        "schema_version": "core-v2-fact-kernel-definition-equivalence-ci.v4",
+        "schema_version": "core-v2-fact-kernel-definition-equivalence-ci.v5",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
         "canonical_stage_count": 42,
         "canonical_stage_order_matches_frozen_run81": True,
+        "frozen_run81_comparator_source": "orchestrator_run86._BASE_PLAN",
+        "frozen_run81_comparator_immutable": True,
+        "frozen_run70_comparator_source": "orchestrator_run81._LEGACY_PLAN",
+        "frozen_run70_comparator_immutable": True,
         "fact_kernel_definitions_match_frozen_run81": True,
         "fact_kernel_definitions_match_frozen_run70": True,
         "fact_kernel_lineage_equivalent": True,
@@ -207,13 +216,7 @@ def validate(base: Path) -> dict[str, Any]:
         "article_integrity_retained_retirement_eligible": False,
         "retirement_authority": "NONE",
         "truth_rule": (
-            "This CI-only regression preserves the Core v2 fact-kernel equivalence to frozen RUN81/RUN70, binds that proof "
-            "to deterministic downstream evidence identities and all existing tamper proofs, and independently verifies the "
-            "post-switch article-integrity boundary. The canonical integrity stage now executes the source-neutral facade with "
-            "the same normalized stage name, inputs, output artifact and 42-stage position as frozen RUN81; its positive JSON "
-            "semantics and 3/3 fail-closed tamper behavior remain identical to the retained deterministic verifier. The retained "
-            "verifier is regression-only, not a runtime dependency and not retirement-eligible. No naming, retirement, publication, "
-            "delivery, merge, deployment, acceptance or cutover authority is granted."
+            "This CI-only regression preserves the Core v2 fact-kernel equivalence to immutable frozen RUN81/RUN70 comparators, binds that proof to deterministic downstream evidence identities and all existing tamper proofs, and independently verifies the post-switch article-integrity boundary. The canonical integrity stage now executes the source-neutral facade with the same normalized stage name, inputs, output artifact and 42-stage position as frozen RUN81; its positive JSON semantics and 3/3 fail-closed tamper behavior remain identical to the retained deterministic verifier. The retained verifier is regression-only, not a runtime dependency and not retirement-eligible. No naming, retirement, publication, delivery, merge, deployment, acceptance or cutover authority is granted."
         ),
     }
 
