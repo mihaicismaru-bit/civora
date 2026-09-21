@@ -1,3 +1,4 @@
+import copy
 import sys
 import unittest
 from pathlib import Path
@@ -7,12 +8,15 @@ sys.path.insert(0, str(ROOT))
 
 from build_shadow_candidate_ledger import _canonical_visual_binding
 from external_readback import inspect_html
+from materialize_shadow_receipts import materialize as materialize_receipts
 from meta_readback import (
     _image_response_ok,
     _instagram_image_candidates,
     parse_meta_error_body,
     parse_meta_object,
 )
+from promoted_claim_auditor import audit_documents
+from shadow_gate_report import build_report
 from visual_readback import (
     _classify_visual_truth_failure,
     _effective_direct_source_status,
@@ -279,6 +283,210 @@ class ExternalReadbackTest(unittest.TestCase):
         )
         self.assertEqual(result["canonical_site_visual_binding_state"], "SITE_BOUND_DIFFERENT_ASSET")
         self.assertFalse(result["canonical_site_visual_filename_match"])
+
+    @staticmethod
+    def _auditor_fixture():
+        candidates = {
+            "first_ten_candidate_ids": ["story-a", "story-b"],
+            "rows": [
+                {
+                    "story_id": "story-a",
+                    "canonical_url": "https://valceaclar.ro/stiri/story-a/",
+                    "real_visual_internal_evidence": True,
+                    "visual_rights_basis": "creative_commons",
+                    "canonical_site_visual_binding_state": "CONSISTENT",
+                    "facebook_remote_id_internal": "fb-a",
+                    "instagram_remote_id_internal": "ig-a",
+                },
+                {
+                    "story_id": "story-b",
+                    "canonical_url": "https://valceaclar.ro/stiri/story-b/",
+                    "real_visual_internal_evidence": True,
+                    "visual_rights_basis": "creative_commons",
+                    "canonical_site_visual_binding_state": "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND",
+                    "facebook_remote_id_internal": "fb-b",
+                    "instagram_remote_id_internal": "ig-b",
+                },
+            ],
+        }
+        site = {
+            "results": [
+                {
+                    "expected_story_id": story,
+                    "http_status": 200,
+                    "route_match": True,
+                    "canonical_match": True,
+                    "newsarticle_count": 1,
+                    "newsarticle_story_match": True,
+                    "readback_ok": True,
+                    "canonical_url": f"https://valceaclar.ro/stiri/{story}/",
+                }
+                for story in ("story-a", "story-b")
+            ]
+        }
+        visual_common = {
+            "status": "PASS",
+            "readback_ok": True,
+            "internal_truth_gate": True,
+            "rights_basis": "creative_commons",
+            "canonical_site_image_bound": True,
+            "canonical_site_visual_filename_match": True,
+            "canonical_site_visual_source_match": True,
+            "canonical_site_visual_rights_match": True,
+            "canonical_site_visual_provenance_verified": True,
+            "article": {"readback_ok": True},
+            "article_binding": {"article_image_bound": True},
+            "public_image": {"readback_ok": True},
+            "provenance_source": {"readback_ok": True},
+            "provenance_asset": {"asset_identity_ok": True, "license_present": True},
+            "direct_source": {"readback_ok": True},
+            "direct_source_effective_ok": True,
+        }
+        visual = {
+            "results": [
+                {"story_id": "story-a", "canonical_site_visual_binding_state": "CONSISTENT", **visual_common},
+                {"story_id": "story-b", "canonical_site_visual_binding_state": "SOCIAL_VISUAL_PRESENT_SITE_UNBOUND", **visual_common},
+            ]
+        }
+        meta = {
+            "results": [
+                {
+                    "story_id": "story-a", "channel": "facebook", "remote_id": "fb-a", "observed_remote_id": "fb-a",
+                    "object_readback_ok": False, "readback_ok": False, "status": "FAILED", "error_code": 10,
+                },
+                {
+                    "story_id": "story-b", "channel": "facebook", "remote_id": "fb-b", "observed_remote_id": "fb-b",
+                    "object_readback_ok": False, "readback_ok": False, "status": "FAILED", "error_code": 10,
+                },
+                {
+                    "story_id": "story-a", "channel": "instagram", "remote_id": "ig-a", "observed_remote_id": "ig-a",
+                    "object_readback_ok": True, "readback_ok": True, "status": "PASS",
+                    "permalink": "https://instagram.example/p/a", "remote_visual_readback_ok": True,
+                },
+                {
+                    "story_id": "story-b", "channel": "instagram", "remote_id": "ig-b", "observed_remote_id": "ig-b",
+                    "object_readback_ok": True, "readback_ok": True, "status": "PASS",
+                    "permalink": "https://instagram.example/p/b", "remote_visual_readback_ok": True,
+                },
+            ]
+        }
+        identity = {
+            "results": [
+                {
+                    "story_id": "story-a", "identity_bound": True,
+                    "identity_state": "APPROVED_VISUAL_MATCHED_REMOTE_IMAGE_UNIQUE",
+                    "passing_candidate_count": 1, "matched_remote_id": "ig-image-a",
+                },
+                {
+                    "story_id": "story-b", "identity_bound": False,
+                    "identity_state": "NO_REMOTE_IMAGE_MATCHED_APPROVED_VISUAL",
+                    "passing_candidate_count": 0, "matched_remote_id": None,
+                },
+            ]
+        }
+        transactions = {
+            "rows": [
+                {
+                    "story_id": story,
+                    "terminal_reason": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE",
+                    "integrity": {"fabricated_claims": 0},
+                }
+                for story in ("story-a", "story-b")
+            ]
+        }
+        return candidates, site, visual, meta, identity, transactions
+
+    def test_independent_auditor_matches_canonical_external_semantics_and_stays_fail_closed(self):
+        candidates, site, visual, meta, identity, transactions = self._auditor_fixture()
+        audit = audit_documents(candidates, site, visual, meta, identity, transactions)
+        receipts = materialize_receipts(candidates, site, visual, meta, identity)
+        gate = build_report(candidates, receipts, transactions)
+
+        receipt_rows = receipts["rows"]
+        canonical_projection = {
+            "stories_published": sum(
+                1 for row in receipt_rows
+                if row["receipts"]["site"]["status"] == "DELIVERED"
+                and row["receipts"]["site"]["readback_ok"] is True
+            ),
+            "photo_verified_count": sum(
+                1 for row in receipt_rows
+                if row["receipts"]["visual"]["status"] == "VERIFIED"
+                and row["receipts"]["visual"]["readback_ok"] is True
+                and row["receipts"]["visual"]["canonical_site_visual_binding_state"] == "CONSISTENT"
+            ),
+            "facebook_delivered_receipt_bound": sum(
+                1 for row in receipt_rows
+                if row["receipts"]["facebook"]["status"] == "DELIVERED"
+                and row["receipts"]["facebook"]["readback_ok"] is True
+                and row["receipts"]["facebook"]["remote_id"]
+                and row["receipts"]["facebook"]["receipt_id"]
+            ),
+            "instagram_delivered_receipt_bound": sum(
+                1 for row in receipt_rows
+                if row["receipts"]["instagram"]["status"] == "DELIVERED"
+                and row["receipts"]["instagram"]["readback_ok"] is True
+                and row["receipts"]["instagram"]["remote_id"]
+                and row["receipts"]["instagram"]["receipt_id"]
+                and row["receipts"]["instagram"]["remote_visual_readback_ok"] is True
+                and row["receipts"]["instagram"]["remote_visual_identity_bound"] is True
+                and row["receipts"]["visual"]["canonical_site_visual_binding_state"] == "CONSISTENT"
+            ),
+            "truth_complete_transactions": gate["truth_complete_count"],
+        }
+        auditor_projection = {
+            key: audit["metrics"][key]
+            for key in canonical_projection
+        }
+        self.assertEqual(auditor_projection, canonical_projection)
+        self.assertEqual(auditor_projection["stories_published"], 2)
+        self.assertEqual(auditor_projection["photo_verified_count"], 1)
+        self.assertEqual(auditor_projection["facebook_delivered_receipt_bound"], 0)
+        self.assertEqual(auditor_projection["instagram_delivered_receipt_bound"], 1)
+        self.assertEqual(auditor_projection["truth_complete_transactions"], 0)
+        self.assertEqual(audit["metrics"]["fabricated_claims"], 0)
+        self.assertEqual(audit["metrics"]["unresolved_material_signals"], 0)
+        self.assertEqual(audit["metrics"]["manual_intervention"], 0)
+        self.assertFalse(audit["external_truth_complete"])
+        self.assertFalse(audit["acceptance_ready"])
+        self.assertEqual(audit["publication_authority"], "NONE")
+        self.assertEqual(audit["cutover_authority"], "NONE")
+        self.assertEqual(audit["retirement_authority"], "NONE")
+
+    def test_independent_auditor_rejects_self_consistent_but_tampered_statuses(self):
+        candidates, site, visual, meta, identity, transactions = self._auditor_fixture()
+
+        tampered_site = copy.deepcopy(site)
+        tampered_site["results"][0]["canonical_match"] = False
+        tampered_site["results"][0]["readback_ok"] = True
+        result = audit_documents(candidates, tampered_site, visual, meta, identity, transactions)
+        self.assertEqual(result["metrics"]["stories_published"], 1)
+
+        tampered_visual = copy.deepcopy(visual)
+        tampered_visual["results"][0]["provenance_asset"]["asset_identity_ok"] = False
+        tampered_visual["results"][0]["readback_ok"] = True
+        result = audit_documents(candidates, site, tampered_visual, meta, identity, transactions)
+        self.assertEqual(result["metrics"]["photo_verified_count"], 0)
+
+        delivered_fb = copy.deepcopy(meta)
+        delivered_fb["results"][0].update(
+            {
+                "object_readback_ok": True,
+                "readback_ok": True,
+                "status": "PASS",
+                "permalink": "https://facebook.example/posts/a",
+                "observed_remote_id": "wrong-id",
+            }
+        )
+        result = audit_documents(candidates, site, visual, delivered_fb, identity, transactions)
+        self.assertEqual(result["metrics"]["facebook_delivered_receipt_bound"], 0)
+
+        ambiguous_identity = copy.deepcopy(identity)
+        ambiguous_identity["results"][0].update(
+            {"identity_bound": True, "passing_candidate_count": 2, "matched_remote_id": "ig-image-a"}
+        )
+        result = audit_documents(candidates, site, visual, meta, ambiguous_identity, transactions)
+        self.assertEqual(result["metrics"]["instagram_delivered_receipt_bound"], 0)
 
 
 if __name__ == "__main__":
