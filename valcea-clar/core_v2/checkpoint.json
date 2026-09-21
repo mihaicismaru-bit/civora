@@ -1,7 +1,7 @@
 {
   "schema_version": "10.2",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN89-PROMOTED-CLAIM-ARTICLE-TRUTH-FACADE-EQUIVALENCE-NATURAL-VALIDATED",
-  "observed_at_utc": "2026-09-21T16:31:37Z",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN89-ARTICLE-TRUTH-FACADE-FEATURE-VALIDATED-EXTERNAL-REPLAY-BLOCKED",
+  "observed_at_utc": "2026-09-21T16:36:00Z",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -73,7 +73,8 @@
     "public_projection_write_performed": false
   },
   "external_truth": {
-    "runtime_readback_executed_in_run89": true,
+    "feature_runtime_readback_executed": true,
+    "checkpoint_replay_runtime_readback_executed": true,
     "candidate_count": 2,
     "site_public_readback": "2/2",
     "approved_public_visual": "1/2",
@@ -82,6 +83,14 @@
     "facebook_receipt_bound": "0/2",
     "complete_externally_verified_receipts": 0,
     "truth_complete_transactions": 0,
+    "checkpoint_replay_historical_fact_kernel_evidence_ready": "1/2",
+    "checkpoint_replay_historical_article_claims_evidence_ready": "1/2",
+    "checkpoint_replay_transaction_terminal_reasons": {
+      "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE": 1,
+      "BLOCKED_FACT_KERNEL_EVIDENCE": 1
+    },
+    "checkpoint_replay_failure_stage": "Verify historical FactKernel to article claims runtime binding",
+    "checkpoint_replay_failure_class": "EXTERNAL_HISTORICAL_FACT_KERNEL_EVIDENCE_REGRESSION_FAIL_CLOSED",
     "blocker_counts": {
       "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
       "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
@@ -95,15 +104,17 @@
   },
   "blocked": [
     "Core v2 acceptance remains blocked by external truth, not by internal workflow status.",
+    "The RUN89 feature itself passed the complete natural shadow workflow, including exact source-neutral article-truth facade equivalence, but the subsequent natural checkpoint replay failed closed because one of two historical replay candidates no longer reconstructed FactKernel evidence.",
+    "The replay failure is downstream of and independent from the new article-truth facade: the canonical 42-stage cycle, ISJ article integrity, and facade equivalence step all passed before historical runtime binding failed.",
     "Facebook receipt-bound verification lacks pages_read_engagement or Page Public Content Access for both historical candidates.",
     "One historical water story has a public article but no approved visual bound into that site article and its Instagram approved-image identity remains unbound.",
     "CJ Vâlcea source remains fail-closed on TLS certificate verification.",
     "The current IPJ live read-only source lane remains fail-closed on HOLD_SOURCE_FETCH_FAILED; no content is promoted from that unavailable fetch.",
-    "The retained ISJ article claim gate and validator remain KEEP regression components and are not retirement-eligible.",
-    "The source-neutral article-truth facade is proven equivalent but has not replaced the canonical article-truth stage definitions."
+    "The retained ISJ article claim gate and validator remain KEEP regression components and are not retirement-eligible."
   ],
   "next": [
-    "Add source-neutral CLI parity for the promoted-claim article-truth gate and validation pair while preserving the compatibility evidence namespace and exact artifacts.",
+    "Treat the historical FactKernel replay regression as external truth drift, not as a reason to weaken the validator or fabricate readiness; re-read the affected candidate evidence on the next natural run and keep the transaction BLOCKED_FACT_KERNEL_EVIDENCE while evidence is unavailable.",
+    "Continue the isolated R5 migration by adding source-neutral CLI parity for the promoted-claim article-truth gate and validation pair while preserving the compatibility evidence namespace and exact artifacts.",
     "Prove the source-neutral CLI stage definitions are equivalent to the current canonical ISJ article-truth pair on the same 42-stage runtime inputs, without switching canonical dependencies in the same increment.",
     "Only after that separate proof, consider a controlled canonical stage-module switch that preserves stage names, artifact identities, evidence IDs, 5/5 and 3/3 tamper behavior, downstream 3 verified / 0 fabricated, and no authority.",
     "Keep acceptance fail-closed until independent site, approved-photo and Meta receipt truth satisfies the Core v2 contracts.",
@@ -126,6 +137,14 @@
     "runtime_downstream_article_integrity": "PASS_SHADOW",
     "runtime_verified_article_claim_count": 3,
     "runtime_fabricated_claim_count": 0,
+    "checkpoint_commit_with_feature_evidence": "a233b48fb395f86186aad9dd6fc01b2017e28f4b",
+    "checkpoint_replay_run": "https://github.com/mihaicismaru-bit/civora/actions/runs/35626232560",
+    "checkpoint_replay_run_number": 866,
+    "checkpoint_replay_conclusion": "failure",
+    "checkpoint_replay_equivalence_step": "success",
+    "checkpoint_replay_failure_assertion": "fact_kernel_evidence_ready_count == candidate_count",
+    "checkpoint_replay_observed_fact_kernel_evidence_ready_count": 1,
+    "checkpoint_replay_candidate_count": 2,
     "site_readback_passed": 2,
     "visual_readback_passed": 1,
     "visual_readback_failed": 1,
@@ -135,9 +154,18 @@
     "externally_verified_receipt_count": 0,
     "truth_complete_transaction_count": 0
   },
-  "truth_rule": "A green workflow proves only the checks and external readbacks it actually executes. RUN89 adds a source-neutral promoted-claim article-truth facade around the retained deterministic ISJ gate and validator and independently proves JSON-semantic identity against both the retained implementation and the actual canonical runtime artifact. It preserves the exact article-claim evidence identity, passes 5/5 preprojection and 3/3 projected tamper regressions, and reproduces downstream 3-verified/0-fabricated article integrity. The canonical article-truth runtime is intentionally not switched in this increment and the retained implementation is not retirement-eligible. External site, visual and Meta truth remains independently blocked. This grants no retirement, publication, acceptance, merge, deploy, Meta-write, public-projection mutation or cutover authority.",
+  "truth_rule": "RUN89 proves the new source-neutral promoted-claim article-truth facade on a complete natural feature run: it is JSON-semantically identical to the retained and canonical gate outputs, preserves the exact article-claim evidence identity, passes 5/5 preprojection and 3/3 projected tamper regressions, and reproduces downstream 3-verified/0-fabricated article integrity. The later natural checkpoint replay again passed the canonical 42-stage cycle and the new equivalence proof, but then failed closed in independent historical replay because only 1 of 2 candidates reconstructed FactKernel evidence. That external regression is recorded rather than normalized away. The canonical article-truth runtime remains unswitched, retained implementations remain KEEP/not-retirement-eligible, and no publication, acceptance, merge, deploy, Meta-write, public-projection mutation or cutover authority is granted.",
   "checkpoint_replay": {
-    "status": "PENDING_NATURAL_PUSH_REPLAY",
+    "status": "FAILED_CLOSED_EXTERNAL_HISTORICAL_FACT_KERNEL_EVIDENCE_REGRESSION",
+    "run_id": 35626232560,
+    "run_number": 866,
+    "run_attempt": 1,
+    "canonical_42_stage_cycle": "PASS_SHADOW",
+    "article_truth_facade_equivalence": "PASS_SHADOW",
+    "failure_stage": "Verify historical FactKernel to article claims runtime binding",
+    "failure_assertion": "fact_kernel_evidence_ready_count == candidate_count",
+    "observed_fact_kernel_evidence_ready_count": 1,
+    "candidate_count": 2,
     "workflow_dispatch_used": false,
     "manual_rerun_used": false
   }
