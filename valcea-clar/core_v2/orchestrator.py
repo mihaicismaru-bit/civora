@@ -7,14 +7,12 @@ from typing import Any
 
 import orchestrator_run70 as _legacy
 
-# RUN79 controlled ownership extraction:
+# RUN81 controlled ownership extraction:
 # retain the validated RUN70 orchestrator implementation as a frozen component
-# for still-unmigrated stages, while Core v2 owns the complete writer seam and
-# now also owns the downstream article claim-gate / validation / integrity stage
-# definitions directly. The source-specific truth modules and artifact identities
-# are intentionally retained unchanged in this increment; only stage-definition
-# ownership moves out of the frozen RUN70 plan. Historical evidence-ID namespaces
-# stay stable deliberately so downstream lineage remains comparable.
+# for still-unmigrated stages, while Core v2 directly owns the complete writer
+# seam, article-truth seam, and downstream promoted-claim contract pair.
+# Source-specific modules, stage names, artifact identities and historical
+# evidence-ID namespaces are intentionally retained in this increment.
 
 CycleStage = _legacy.CycleStage
 run_shadow = _legacy.run_shadow
@@ -33,12 +31,19 @@ _NEW_VALIDATION_MODULE = "valcea-clar/core_v2/validate_promoted_claim_writer_con
 _WRITER_MODULE = "valcea-clar/core_v2/promoted_claim_writer.py"
 _RETAINED_WRITER_IMPLEMENTATION = "valcea-clar/core_v2/isj_writer_shadow_lane.py"
 _WRITER_ARTIFACT = "valcea-core-v2-isj-article-shadow.json"
+
 _ARTICLE_CLAIM_GATE_MODULE = "valcea-clar/core_v2/isj_article_deadline_claim_gate.py"
 _ARTICLE_CLAIM_VALIDATION_MODULE = "valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py"
 _ARTICLE_INTEGRITY_MODULE = "valcea-clar/core_v2/isj_article_integrity.py"
 _ARTICLE_CLAIM_ARTIFACT = "valcea-core-v2-isj-article-deadline-claim.json"
 _ARTICLE_CLAIM_VALIDATION_ARTIFACT = "valcea-core-v2-isj-article-deadline-claim-validation.json"
 _ARTICLE_INTEGRITY_ARTIFACT = "valcea-core-v2-isj-article-integrity-shadow.json"
+
+_PROMOTED_CLAIM_CONTRACT_MODULE = "valcea-clar/core_v2/isj_promoted_claim_contract_shadow_lane.py"
+_PROMOTED_CLAIM_CONTRACT_VALIDATION_MODULE = "valcea-clar/core_v2/validate_isj_promoted_claim_contract_runtime.py"
+_PROMOTED_CLAIM_CONTRACT_ARTIFACT = "valcea-core-v2-isj-promoted-claim-contract.json"
+_PROMOTED_CLAIM_CONTRACT_VALIDATION_ARTIFACT = "valcea-core-v2-isj-promoted-claim-contract-validation.json"
+
 _LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES = {
     "isj_writer_deadline_consumption",
     "isj_writer_deadline_consumption_validation",
@@ -49,11 +54,15 @@ _LEGACY_ARTICLE_TRUTH_PLACEHOLDER_STAGES = {
     "isj_article_deadline_claim_validation",
     "isj_article_integrity",
 }
+_LEGACY_PROMOTED_CLAIM_CONTRACT_PLACEHOLDER_STAGES = {
+    "isj_promoted_claim_contract",
+    "isj_promoted_claim_contract_validation",
+}
 _CANONICAL_WRITER_STAGE = "promoted_claim_writer"
 
 
 def _neutralize_arg(value: str) -> str:
-    """Rewrite downstream references only; canonical writer-layer stages are owned below."""
+    """Rewrite downstream writer-consumption references only."""
     return (
         value.replace(_OLD_VALIDATION_ARTIFACT, _NEW_VALIDATION_ARTIFACT)
         .replace(_OLD_CONSUMPTION_ARTIFACT, _NEW_CONSUMPTION_ARTIFACT)
@@ -61,7 +70,7 @@ def _neutralize_arg(value: str) -> str:
 
 
 def _owned_writer_consumption_stages(workdir: Path) -> tuple[CycleStage, CycleStage]:
-    """Return the canonical source-neutral consumption pair without consulting RUN70 placeholders."""
+    """Return the canonical source-neutral consumption pair without RUN70 placeholders."""
     fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
     fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
     projection = workdir / "valcea-core-v2-promoted-claim-writer-projection.json"
@@ -127,7 +136,7 @@ def _owned_writer_stage(workdir: Path) -> CycleStage:
 
 
 def _owned_article_truth_stages(workdir: Path) -> tuple[CycleStage, CycleStage, CycleStage]:
-    """Own the existing source-specific article truth stages without changing their semantics."""
+    """Own the existing source-specific article truth stages without semantic changes."""
     fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
     fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
     consumption = workdir / _NEW_CONSUMPTION_ARTIFACT
@@ -177,6 +186,53 @@ def _owned_article_truth_stages(workdir: Path) -> tuple[CycleStage, CycleStage, 
                 "--output", str(article_integrity),
             ),
             article_integrity,
+        ),
+    )
+
+
+def _owned_promoted_claim_contract_stages(workdir: Path) -> tuple[CycleStage, CycleStage]:
+    """Own the promoted-claim contract pair while retaining established semantics."""
+    deadline_validation = workdir / "valcea-core-v2-isj-registration-deadline-promotion-validation.json"
+    fact_promotion_validation = workdir / "valcea-core-v2-isj-fact-kernel-deadline-promotion-validation.json"
+    fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
+    fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
+    projection_validation = workdir / "valcea-core-v2-promoted-claim-projection-validation.json"
+    consumption_validation = workdir / _NEW_VALIDATION_ARTIFACT
+    article_claim = workdir / _ARTICLE_CLAIM_ARTIFACT
+    article_claim_validation = workdir / _ARTICLE_CLAIM_VALIDATION_ARTIFACT
+    article_integrity = workdir / _ARTICLE_INTEGRITY_ARTIFACT
+    contract = workdir / _PROMOTED_CLAIM_CONTRACT_ARTIFACT
+    contract_validation = workdir / _PROMOTED_CLAIM_CONTRACT_VALIDATION_ARTIFACT
+    py = sys.executable
+
+    common = (
+        "--deadline-promotion-validation", str(deadline_validation),
+        "--fact-promotion-validation", str(fact_promotion_validation),
+        "--fact-kernel", str(fact_kernel),
+        "--fact-integrity", str(fact_integrity),
+        "--writer-projection-validation", str(projection_validation),
+        "--writer-consumption-validation", str(consumption_validation),
+        "--article-claim-gate", str(article_claim),
+        "--article-claim-validation", str(article_claim_validation),
+        "--article-integrity", str(article_integrity),
+    )
+    return (
+        CycleStage(
+            "isj_promoted_claim_contract",
+            (py, _PROMOTED_CLAIM_CONTRACT_MODULE, *common, "--output", str(contract)),
+            contract,
+        ),
+        CycleStage(
+            "isj_promoted_claim_contract_validation",
+            (
+                py,
+                _PROMOTED_CLAIM_CONTRACT_VALIDATION_MODULE,
+                *common,
+                "--contract", str(contract),
+                "--prove-tamper",
+                "--output", str(contract_validation),
+            ),
+            contract_validation,
         ),
     )
 
@@ -255,9 +311,10 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
         "retained_writer_implementation_retirement_performed": False,
         "compatibility_identity_namespace_retained": True,
         "truth_rule": (
-            "Canonical writer-layer runtime passes only when Core v2 directly owns the ordered source-neutral consumption builder/validator and the promoted_claim_writer stage points at the source-neutral promoted_claim_writer runtime facade, "
-            "the facade consumes the neutral artifacts explicitly, no source-specific ISJ module or legacy writer-consumption implementation/artifact/stage reference appears in canonical runtime, and no publication or acceptance authority is granted. "
-            "The retained ISJ writer implementation remains a KEEP implementation detail behind the facade; this proof does not claim that implementation source-neutral or retirement-eligible."
+            "Canonical writer-layer runtime passes only when Core v2 directly owns the ordered source-neutral "
+            "consumption builder/validator and the promoted_claim_writer stage points at the source-neutral "
+            "runtime facade, with no source-specific writer-consumption implementation/artifact/stage reference "
+            "in canonical runtime and no publication or acceptance authority."
         ),
     }
 
@@ -299,8 +356,59 @@ def _article_truth_stage_ownership_snapshot(plan: tuple[CycleStage, ...]) -> dic
         "retirement_eligible": False,
         "retirement_performed": False,
         "truth_rule": (
-            "Core v2 directly owns the article claim-gate, its tamper validation, and article-integrity stage definitions while retaining the existing source-specific truth modules, stage names, and artifact identities. "
-            "This ownership extraction changes no article truth semantics and grants no publication, acceptance, naming-migration, or retirement authority."
+            "Core v2 directly owns the article claim-gate, tamper validation and article-integrity stage definitions "
+            "while retaining existing source-specific truth modules, stage names and artifact identities."
+        ),
+    }
+
+
+def _promoted_claim_contract_stage_ownership_snapshot(plan: tuple[CycleStage, ...]) -> dict[str, Any]:
+    by_name = {stage.name: stage for stage in plan}
+    contract = by_name["isj_promoted_claim_contract"]
+    validation = by_name["isj_promoted_claim_contract_validation"]
+    required_contract_inputs = (
+        "valcea-core-v2-isj-registration-deadline-promotion-validation.json",
+        "valcea-core-v2-isj-fact-kernel-deadline-promotion-validation.json",
+        "valcea-core-v2-isj-fact-kernel-shadow.json",
+        "valcea-core-v2-isj-fact-kernel-integrity-shadow.json",
+        "valcea-core-v2-promoted-claim-projection-validation.json",
+        _NEW_VALIDATION_ARTIFACT,
+        _ARTICLE_CLAIM_ARTIFACT,
+        _ARTICLE_CLAIM_VALIDATION_ARTIFACT,
+        _ARTICLE_INTEGRITY_ARTIFACT,
+    )
+    contract_joined = " ".join(contract.argv)
+    validation_joined = " ".join(validation.argv)
+    exact = (
+        len(contract.argv) > 1 and contract.argv[1] == _PROMOTED_CLAIM_CONTRACT_MODULE
+        and len(validation.argv) > 1 and validation.argv[1] == _PROMOTED_CLAIM_CONTRACT_VALIDATION_MODULE
+        and contract.output is not None and contract.output.name == _PROMOTED_CLAIM_CONTRACT_ARTIFACT
+        and validation.output is not None and validation.output.name == _PROMOTED_CLAIM_CONTRACT_VALIDATION_ARTIFACT
+        and all(name in contract_joined for name in required_contract_inputs)
+        and all(name in validation_joined for name in required_contract_inputs)
+        and "--contract" in validation.argv
+        and str(contract.output) in validation.argv
+        and "--prove-tamper" in validation.argv
+    )
+    return {
+        "schema_version": "core-v2-promoted-claim-contract-stage-ownership-shadow.v1",
+        "status": "PASS_SHADOW" if exact else "BLOCKED",
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+        "canonical_stage_count": len(plan),
+        "canonical_stage_ownership": "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION",
+        "owned_stages": [contract.name, validation.name],
+        "frozen_run70_promoted_claim_contract_placeholder_definitions_consumed": False,
+        "source_specific_contract_modules_retained": True,
+        "source_specific_contract_stage_names_retained": True,
+        "artifact_identities_retained": True,
+        "lineage_inputs_retained": True,
+        "retirement_eligible": False,
+        "retirement_performed": False,
+        "truth_rule": (
+            "Core v2 directly owns the promoted-claim contract and validation stage definitions while retaining "
+            "their existing modules, stage names, output artifact identities and lineage inputs. This extraction "
+            "grants no naming, retirement, publication or acceptance authority."
         ),
     }
 
@@ -311,21 +419,26 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     owned_consumption_stages = _owned_writer_consumption_stages(workdir)
     owned_writer = _owned_writer_stage(workdir)
     owned_article_truth = _owned_article_truth_stages(workdir)
+    owned_contract = _owned_promoted_claim_contract_stages(workdir)
     owned_chain_inserted = False
+    owned_contract_inserted = False
 
     for stage in legacy_plan:
-        # Do not transform or consume the frozen writer-layer placeholders.
         if stage.name in _LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES:
             continue
 
-        # Replace the first frozen article gate with the complete directly-owned
-        # writer + article-truth seam. The following frozen validation/integrity
-        # placeholders are skipped, so no RUN70 argv/output definition is reused.
         if stage.name == "isj_article_deadline_claim_gate" and not owned_chain_inserted:
             transformed.extend((*owned_consumption_stages, owned_writer, *owned_article_truth))
             owned_chain_inserted = True
             continue
         if stage.name in _LEGACY_ARTICLE_TRUTH_PLACEHOLDER_STAGES:
+            continue
+
+        if stage.name == "isj_promoted_claim_contract" and not owned_contract_inserted:
+            transformed.extend(owned_contract)
+            owned_contract_inserted = True
+            continue
+        if stage.name in _LEGACY_PROMOTED_CLAIM_CONTRACT_PLACEHOLDER_STAGES:
             continue
 
         name = stage.name
@@ -335,6 +448,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
 
     if not owned_chain_inserted:
         raise RuntimeError("canonical_article_claim_gate_missing_for_owned_writer_chain_insertion")
+    if not owned_contract_inserted:
+        raise RuntimeError("canonical_promoted_claim_contract_missing_for_direct_ownership_insertion")
 
     names = [stage.name for stage in transformed]
     if len(transformed) != 42:
@@ -353,6 +468,9 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     gate_index = names.index("isj_article_deadline_claim_gate")
     article_validation_index = names.index("isj_article_deadline_claim_validation")
     article_integrity_index = names.index("isj_article_integrity")
+    contract_index = names.index("isj_promoted_claim_contract")
+    contract_validation_index = names.index("isj_promoted_claim_contract_validation")
+
     if (consumption_index, validation_index, writer_index, gate_index, article_validation_index, article_integrity_index) != (
         gate_index - 3,
         gate_index - 2,
@@ -362,6 +480,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         gate_index + 2,
     ):
         raise RuntimeError("owned_writer_article_truth_stage_order_changed")
+    if contract_index != article_integrity_index + 1 or contract_validation_index != contract_index + 1:
+        raise RuntimeError("owned_promoted_claim_contract_stage_order_changed")
 
     for stage in transformed:
         joined = "\n".join(stage.argv)
@@ -388,6 +508,11 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     )
     if actual_article_truth != expected_article_truth:
         raise RuntimeError("canonical_owned_article_truth_definition_drifted")
+
+    expected_contract = _owned_promoted_claim_contract_stages(workdir)
+    actual_contract = (transformed[contract_index], transformed[contract_validation_index])
+    if actual_contract != expected_contract:
+        raise RuntimeError("canonical_owned_promoted_claim_contract_definition_drifted")
 
     writer_stage = transformed[writer_index]
     writer_argv = list(writer_stage.argv)
@@ -421,6 +546,15 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         raise RuntimeError("frozen_run70_article_truth_placeholder_definition_consumed")
     if article_ownership["retirement_eligible"] is not False:
         raise RuntimeError("article_truth_component_retirement_must_remain_closed")
+
+    contract_ownership = _promoted_claim_contract_stage_ownership_snapshot(tuple(transformed))
+    if contract_ownership["status"] != "PASS_SHADOW":
+        raise RuntimeError("promoted_claim_contract_stage_direct_ownership_not_proven")
+    if contract_ownership["frozen_run70_promoted_claim_contract_placeholder_definitions_consumed"] is not False:
+        raise RuntimeError("frozen_run70_promoted_claim_contract_placeholder_definition_consumed")
+    if contract_ownership["retirement_eligible"] is not False:
+        raise RuntimeError("promoted_claim_contract_component_retirement_must_remain_closed")
+
     return tuple(transformed)
 
 
@@ -437,6 +571,7 @@ def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]
             snapshots[stage.name] = {"parse_error": True, "path": str(stage.output)}
     snapshots["writer_consumption_runtime_dependency"] = _writer_consumption_dependency_snapshot(plan)
     snapshots["article_truth_stage_ownership"] = _article_truth_stage_ownership_snapshot(plan)
+    snapshots["promoted_claim_contract_stage_ownership"] = _promoted_claim_contract_stage_ownership_snapshot(plan)
     return snapshots
 
 

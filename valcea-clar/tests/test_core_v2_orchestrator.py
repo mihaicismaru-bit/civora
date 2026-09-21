@@ -10,7 +10,9 @@ from orchestrator import (
     bounded_cycle_plan,
     _writer_consumption_dependency_snapshot,
     _article_truth_stage_ownership_snapshot,
+    _promoted_claim_contract_stage_ownership_snapshot,
     _owned_article_truth_stages,
+    _owned_promoted_claim_contract_stages,
     _LEGACY_PLAN,
 )
 
@@ -219,6 +221,42 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertTrue(report["source_specific_truth_modules_retained"])
         self.assertTrue(report["source_specific_truth_stage_names_retained"])
         self.assertTrue(report["artifact_identities_retained"])
+        self.assertFalse(report["retirement_eligible"])
+        self.assertFalse(report["retirement_performed"])
+        self.assertEqual(report["publication_authority"], "NONE")
+        self.assertFalse(report["acceptance_ready"])
+
+    def test_owned_promoted_claim_contract_definitions_match_frozen_run70_semantics(self):
+        with tempfile.TemporaryDirectory() as temp:
+            workdir = Path(temp)
+            frozen_by_name = {stage.name: stage for stage in _LEGACY_PLAN(workdir, live=False)}
+            owned_by_name = {stage.name: stage for stage in _owned_promoted_claim_contract_stages(workdir)}
+            canonical_plan = bounded_cycle_plan(workdir, live=False)
+
+        old_validation = "valcea-core-v2-isj-writer-deadline-consumption-validation.json"
+        new_validation = "valcea-core-v2-promoted-claim-writer-consumption-validation.json"
+
+        def normalized(stage):
+            argv = tuple(str(token).replace(old_validation, new_validation) for token in stage.argv)
+            output = str(stage.output).replace(old_validation, new_validation) if stage.output is not None else None
+            return stage.name, argv, output
+
+        for name in ("isj_promoted_claim_contract", "isj_promoted_claim_contract_validation"):
+            self.assertIn(name, frozen_by_name)
+            self.assertIn(name, owned_by_name)
+            self.assertEqual(normalized(frozen_by_name[name]), normalized(owned_by_name[name]))
+
+        validation = owned_by_name["isj_promoted_claim_contract_validation"]
+        self.assertIn("--prove-tamper", validation.argv)
+        report = _promoted_claim_contract_stage_ownership_snapshot(canonical_plan)
+        self.assertEqual(report["status"], "PASS_SHADOW")
+        self.assertEqual(report["canonical_stage_count"], 42)
+        self.assertEqual(report["canonical_stage_ownership"], "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION")
+        self.assertFalse(report["frozen_run70_promoted_claim_contract_placeholder_definitions_consumed"])
+        self.assertTrue(report["source_specific_contract_modules_retained"])
+        self.assertTrue(report["source_specific_contract_stage_names_retained"])
+        self.assertTrue(report["artifact_identities_retained"])
+        self.assertTrue(report["lineage_inputs_retained"])
         self.assertFalse(report["retirement_eligible"])
         self.assertFalse(report["retirement_performed"])
         self.assertEqual(report["publication_authority"], "NONE")
