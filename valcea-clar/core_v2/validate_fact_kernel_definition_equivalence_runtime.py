@@ -9,6 +9,7 @@ from typing import Any
 import orchestrator
 import orchestrator_run70
 import orchestrator_run81
+import validate_promoted_claim_article_integrity_stage_equivalence as integrity_stage_equivalence
 import validate_promoted_claim_consumption_definition_equivalence_runtime as consumption_equivalence
 
 EXPECTED_PROJECTION_ID = "isj-writer-deadline-projection-d9ae7b38596fc02a6ee7524d"
@@ -162,8 +163,16 @@ def validate(base: Path) -> dict[str, Any]:
     if consumption_report.get("status") != "PASS_SHADOW":
         raise RuntimeError("promoted_claim_consumption_definition_equivalence_not_pass_shadow")
 
+    integrity_stage_report = integrity_stage_equivalence.validate(base)
+    if integrity_stage_report.get("status") != "PASS_SHADOW":
+        raise RuntimeError("article_integrity_stage_definition_equivalence_not_pass_shadow")
+    if integrity_stage_report.get("canonical_runtime_switched") is not False:
+        raise RuntimeError("article_integrity_stage_proof_must_not_switch_canonical_runtime")
+    if integrity_stage_report.get("source_neutral_facade_present_in_canonical_plan") is not False:
+        raise RuntimeError("article_integrity_stage_proof_detected_unexpected_canonical_switch")
+
     return {
-        "schema_version": "core-v2-fact-kernel-definition-equivalence-ci.v2",
+        "schema_version": "core-v2-fact-kernel-definition-equivalence-ci.v3",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -183,15 +192,22 @@ def validate(base: Path) -> dict[str, Any]:
         "promoted_claim_consumption_matches_frozen_run81": consumption_report.get("consumption_definitions_match_frozen_run81"),
         "promoted_claim_consumption_lineage_equivalent": consumption_report.get("consumption_lineage_equivalent"),
         "promoted_claim_consumption_tamper_regressions_passed": consumption_report.get("consumption_tamper_regressions_passed"),
+        "article_integrity_stage_definition_equivalence": integrity_stage_report.get("status"),
+        "article_integrity_stage_matches_frozen_run81": integrity_stage_report.get("canonical_integrity_stage_definition_matches_frozen_run81"),
+        "article_integrity_source_neutral_normalized_definition_equivalent": integrity_stage_report.get("source_neutral_normalized_stage_definition_equivalent"),
+        "article_integrity_positive_cli_json_semantic_equivalent": integrity_stage_report.get("positive_cli_json_semantic_equivalent"),
+        "article_integrity_fail_closed_tamper_regressions_passed": integrity_stage_report.get("fail_closed_tamper_regressions_passed"),
+        "article_integrity_canonical_runtime_switched": False,
+        "article_integrity_retained_runtime_dependency": True,
         "retirement_authority": "NONE",
         "truth_rule": (
-            "This CI-only regression compares the Core v2 fact-kernel definitions with the frozen RUN81 and RUN70 semantics on the same workdir, binds that definition proof to deterministic downstream evidence identities, all existing tamper proofs and the independent article-integrity result, and independently requires the promoted-claim consumption pair to match frozen RUN81 on the same verified inputs with its 4/4 fail-closed tamper proof. It grants no naming, retirement, publication, delivery, merge, deployment, acceptance or cutover authority."
+            "This CI-only regression compares the Core v2 fact-kernel definitions with the frozen RUN81 and RUN70 semantics on the same workdir, binds that definition proof to deterministic downstream evidence identities, all existing tamper proofs and the independent article-integrity result, independently requires the promoted-claim consumption pair to match frozen RUN81 on the same verified inputs with its 4/4 fail-closed tamper proof, and independently proves that the source-neutral article-integrity facade is a one-for-one normalized stage/CLI substitute for the still-retained canonical integrity implementation with exact positive semantics and 3/3 fail-closed tamper parity. The canonical integrity stage is not switched in this increment. No naming, retirement, publication, delivery, merge, deployment, acceptance or cutover authority is granted."
         ),
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="CI-only fact-kernel and promoted-claim consumption definition equivalence regression")
+    parser = argparse.ArgumentParser(description="CI-only fact-kernel, promoted-claim consumption and article-integrity definition equivalence regression")
     parser.add_argument("--base", default="/tmp")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
