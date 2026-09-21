@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 import orchestrator
+import orchestrator_run86
 from validate_promoted_claim_article_integrity_stage_equivalence_run94 import (
     SOURCE_NEUTRAL_FACADE,
     RETAINED_IMPLEMENTATION,
@@ -29,11 +30,11 @@ from validate_promoted_claim_article_integrity_stage_equivalence_run94 import (
 
 def _prove_stage_definition(base: Path) -> dict[str, Any]:
     canonical = orchestrator.bounded_cycle_plan(base, live=False)
-    # Use the frozen function reference captured before the RUN95 switch.  The
-    # imported orchestrator_run81 module object is intentionally not used here:
-    # later wrappers patch its public seam during execution, while _LEGACY_PLAN
-    # remains the immutable RUN81 comparator retained by the migration chain.
-    frozen81 = orchestrator._LEGACY_PLAN(base, live=False)
+    # Immutable RUN81 comparator. RUN86 captured this function reference before
+    # later migration wrappers patched module-level bounded_cycle_plan seams.
+    # orchestrator._LEGACY_PLAN is the older RUN70 comparator and therefore is
+    # not the correct baseline for the post-RUN81 writer/article stage order.
+    frozen81 = orchestrator_run86._BASE_PLAN(base, live=False)
     canonical_by_name = _by_name(canonical)
     frozen_by_name = _by_name(frozen81)
     canonical_names = [stage.name for stage in canonical]
@@ -97,6 +98,8 @@ def _prove_stage_definition(base: Path) -> dict[str, Any]:
     return {
         "canonical_stage_count": 42,
         "canonical_stage_order_matches_frozen_run81": True,
+        "frozen_run81_comparator_source": "orchestrator_run86._BASE_PLAN",
+        "frozen_run81_comparator_immutable": True,
         "canonical_integrity_stage_name": integrity.name,
         "canonical_integrity_module": integrity.argv[1],
         "retained_integrity_module": frozen_integrity.argv[1],
@@ -200,7 +203,7 @@ def validate(base: Path) -> dict[str, Any]:
             })
 
     report = {
-        "schema_version": "core-v2-promoted-claim-article-integrity-post-switch-stage-equivalence-ci.v2",
+        "schema_version": "core-v2-promoted-claim-article-integrity-post-switch-stage-equivalence-ci.v3",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -226,10 +229,10 @@ def validate(base: Path) -> dict[str, Any]:
         "truth_rule": (
             "Post-switch CI-only PASS_SHADOW proves that the canonical isj_article_integrity stage now executes the source-neutral "
             "facade one-for-one with the same normalized stage name, argv inputs, output artifact and 42-stage position as the "
-            "immutable RUN81 comparator. The facade, retained verifier and canonical runtime artifact have exact positive JSON "
-            "semantics and identical fail-closed CLI behavior under headline, evidence-identity and extra-claim tampering. The "
-            "retained verifier is regression-only, not a canonical runtime dependency and not retirement-eligible. No publication, "
-            "acceptance, merge, deploy, cutover or retirement authority is granted."
+            "immutable RUN81 comparator captured by orchestrator_run86._BASE_PLAN. The facade, retained verifier and canonical runtime artifact "
+            "have exact positive JSON semantics and identical fail-closed CLI behavior under headline, evidence-identity and extra-claim tampering. "
+            "The retained verifier is regression-only, not a canonical runtime dependency and not retirement-eligible. No publication, acceptance, "
+            "merge, deploy, cutover or retirement authority is granted."
         ),
     }
     (base / REPORT_ARTIFACT).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
