@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from isj_article_integrity import verify_isj_article_integrity
-from orchestrator import bounded_cycle_plan
+from orchestrator import bounded_cycle_plan, _article_integrity_stage_ownership_snapshot
 from promoted_claim_article_integrity import verify_promoted_claim_article_integrity
 
 
@@ -47,7 +47,7 @@ def _tamper_cases(article: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     promoted = package["claims"][-1]
     promoted["article_deadline_claim_evidence_id"] = "tampered-article-claim-id"
     for segment in package.get("body_segments") or []:
-        if segment.get("kind") == "promoted_fact_claim":
+        if isinstance(segment, dict) and segment.get("kind") == "promoted_fact_claim":
             segment["article_deadline_claim_evidence_id"] = "tampered-article-claim-id"
     claim_id["article_deadline_claim_evidence_id"] = "tampered-article-claim-id"
     cases.append(("article_claim_evidence_id", claim_id))
@@ -62,7 +62,7 @@ def _tamper_cases(article: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     return cases
 
 
-def _validate_plan_unswitched() -> dict[str, Any]:
+def _validate_plan_switched() -> dict[str, Any]:
     with tempfile.TemporaryDirectory(prefix="core-v2-article-integrity-plan-") as raw_tmp:
         plan = bounded_cycle_plan(Path(raw_tmp), live=False)
     by_name = {stage.name: stage for stage in plan}
@@ -73,18 +73,33 @@ def _validate_plan_unswitched() -> dict[str, Any]:
 
     assert len(plan) == 42
     assert integrity_index == validation_index + 1
-    assert len(integrity.argv) > 1 and integrity.argv[1] == RETAINED_IMPLEMENTATION
+    assert len(integrity.argv) > 1 and integrity.argv[1] == SOURCE_NEUTRAL_FACADE
     assert integrity.output is not None and integrity.output.name == INTEGRITY_ARTIFACT
     joined = "\n".join(" ".join(stage.argv) for stage in plan)
-    assert SOURCE_NEUTRAL_FACADE not in joined
+    assert SOURCE_NEUTRAL_FACADE in joined
+    assert RETAINED_IMPLEMENTATION not in joined
+
+    ownership = _article_integrity_stage_ownership_snapshot(plan)
+    assert ownership.get("status") == "PASS_SHADOW"
+    assert ownership.get("canonical_runtime_switched") is True
+    assert ownership.get("source_neutral_facade_present_in_canonical_plan") is True
+    assert ownership.get("retained_integrity_runtime_dependency") is False
+    assert ownership.get("retained_integrity_regression_component") is True
+    assert ownership.get("retained_integrity_retirement_eligible") is False
+    assert ownership.get("publication_authority") == "NONE"
+    assert ownership.get("acceptance_ready") is False
 
     return {
         "canonical_stage_count": len(plan),
         "canonical_integrity_stage_name": integrity.name,
-        "canonical_integrity_module_still_unswitched": integrity.argv[1],
+        "canonical_integrity_module": integrity.argv[1],
         "canonical_integrity_artifact": integrity.output.name,
         "canonical_order_validation_integrity_preserved": True,
-        "source_neutral_facade_present_in_canonical_plan": False,
+        "source_neutral_facade_present_in_canonical_plan": True,
+        "canonical_runtime_switched": True,
+        "retained_implementation_runtime_dependency": False,
+        "retained_implementation_regression_only": True,
+        "retained_implementation_retirement_eligible": False,
     }
 
 
@@ -100,6 +115,7 @@ def validate_equivalence(
     assert facade == retained
     assert retained == canonical_integrity
     _assert_non_authorizing(facade, "facade")
+    _assert_non_authorizing(retained, "retained")
     _assert_non_authorizing(canonical_integrity, "canonical")
 
     assert facade.get("status") == "PASS_SHADOW"
@@ -128,9 +144,9 @@ def validate_equivalence(
             "failures": list(facade_block.get("failures") or []),
         })
 
-    plan = _validate_plan_unswitched()
+    plan = _validate_plan_switched()
     return {
-        "schema_version": "core-v2-promoted-claim-article-integrity-facade-equivalence-shadow.v1",
+        "schema_version": "core-v2-promoted-claim-article-integrity-post-switch-equivalence-shadow.v2",
         "status": "PASS_SHADOW",
         "source_neutral_facade": SOURCE_NEUTRAL_FACADE,
         "retained_implementation": RETAINED_IMPLEMENTATION,
@@ -146,21 +162,18 @@ def validate_equivalence(
         "fail_closed_tamper_regressions_passed": len(tamper_results),
         "tamper_results": tamper_results,
         **plan,
-        "canonical_runtime_switched": False,
-        "retained_implementation_runtime_dependency": True,
-        "retained_implementation_retirement_eligible": False,
         "retirement_authority": "NONE",
         "publication_authority": "NONE",
         "acceptance_ready": False,
         "site_publish_allowed": False,
         "social_publish_allowed": False,
         "truth_rule": (
-            "The source-neutral article-integrity facade is proven JSON-semantically identical to the retained "
-            "deterministic ISJ verifier and the canonical runtime artifact on the same projected article. It preserves "
-            "the exact article-claim evidence identity, 3 verified claims / 0 fabricated claims, and fails closed under "
-            "headline, evidence-identity and extra-claim tampering. The canonical integrity stage remains intentionally "
-            "bound to the retained implementation in this increment; no publication, acceptance, merge, deploy or "
-            "retirement authority is granted."
+            "After the controlled one-for-one switch, the canonical isj_article_integrity stage executes the source-neutral "
+            "promoted_claim_article_integrity facade. Its canonical runtime artifact is JSON-semantically identical to the "
+            "retained deterministic ISJ verifier, preserves the same article-claim evidence identity and 3 verified / 0 "
+            "fabricated claims, and fails closed under headline, evidence-identity and extra-claim tampering. The retained "
+            "verifier is regression-only and not retirement-eligible. No publication, acceptance, merge, deploy or cutover "
+            "authority is granted."
         ),
     }
 
@@ -201,7 +214,7 @@ def _prove_cli_parity(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Prove source-neutral article-integrity facade parity without switching canonical runtime")
+    parser = argparse.ArgumentParser(description="Prove post-switch source-neutral article-integrity runtime parity")
     parser.add_argument("--fact-kernel", required=True)
     parser.add_argument("--fact-kernel-integrity", required=True)
     parser.add_argument("--article", required=True)
@@ -227,11 +240,11 @@ def main() -> int:
         "status": report["status"],
         "json_semantic_equivalent": True,
         "facade_cli_parity": True,
+        "canonical_runtime_switched": True,
         "article_deadline_claim_evidence_id": report["article_deadline_claim_evidence_id"],
         "verified_claim_count": report["verified_claim_count"],
         "fabricated_claim_count": report["fabricated_claim_count"],
         "fail_closed_tamper_regressions_passed": report["fail_closed_tamper_regressions_passed"],
-        "canonical_runtime_switched": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
     }, ensure_ascii=False, sort_keys=True))

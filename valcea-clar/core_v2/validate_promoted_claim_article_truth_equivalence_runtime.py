@@ -12,8 +12,10 @@ from validate_promoted_claim_article_truth_equivalence_run91 import validate_equ
 
 
 SOURCE_NEUTRAL_CLI = "valcea-clar/core_v2/promoted_claim_article_truth.py"
+SOURCE_NEUTRAL_INTEGRITY = "valcea-clar/core_v2/promoted_claim_article_integrity.py"
 RETAINED_GATE = "valcea-clar/core_v2/isj_article_deadline_claim_gate.py"
 RETAINED_VALIDATOR = "valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py"
+RETAINED_INTEGRITY = "valcea-clar/core_v2/isj_article_integrity.py"
 
 
 def _load(path: str | Path) -> dict[str, Any]:
@@ -44,7 +46,7 @@ def _validate_canonical_switch() -> dict[str, Any]:
     assert validation.argv[2:4] == ("--mode", "validate")
     assert gate.output is not None and gate.output.name == "valcea-core-v2-isj-article-deadline-claim.json"
     assert validation.output is not None and validation.output.name == "valcea-core-v2-isj-article-deadline-claim-validation.json"
-    assert integrity.argv[1] == "valcea-clar/core_v2/isj_article_integrity.py"
+    assert integrity.argv[1] == SOURCE_NEUTRAL_INTEGRITY
     assert integrity.output is not None and integrity.output.name == "valcea-core-v2-isj-article-integrity-shadow.json"
     assert (gate_index, validation_index, integrity_index) == (
         writer_index + 1,
@@ -57,13 +59,14 @@ def _validate_canonical_switch() -> dict[str, Any]:
     joined = "\n".join(" ".join(stage.argv) for stage in plan)
     assert RETAINED_GATE not in joined
     assert RETAINED_VALIDATOR not in joined
+    assert RETAINED_INTEGRITY not in joined
 
     ownership = _article_truth_stage_ownership_snapshot(plan)
     assert ownership.get("status") == "PASS_SHADOW"
-    assert ownership.get("canonical_runtime_switched") is True
+    assert ownership.get("canonical_article_truth_runtime_switched") is True
+    assert ownership.get("canonical_article_integrity_runtime_switched") is True
     assert ownership.get("canonical_stage_definitions_switched") is True
-    assert ownership.get("frozen_run81_article_truth_definitions_consumed") is False
-    assert ownership.get("source_specific_truth_modules_runtime_dependency") is False
+    assert ownership.get("retained_implementations_runtime_dependency") is False
     assert ownership.get("retained_implementations_regression_only") is True
     assert ownership.get("retained_implementations_retirement_eligible") is False
     assert ownership.get("retirement_authority") == "NONE"
@@ -74,15 +77,19 @@ def _validate_canonical_switch() -> dict[str, Any]:
         "canonical_stage_count": len(plan),
         "canonical_gate_stage_name": gate.name,
         "canonical_validation_stage_name": validation.name,
+        "canonical_integrity_stage_name": integrity.name,
         "canonical_gate_module": gate.argv[1],
         "canonical_validation_module": validation.argv[1],
+        "canonical_integrity_module": integrity.argv[1],
         "canonical_gate_mode": gate.argv[3],
         "canonical_validation_mode": validation.argv[3],
         "canonical_gate_artifact": gate.output.name,
         "canonical_validation_artifact": validation.output.name,
+        "canonical_integrity_artifact": integrity.output.name,
         "canonical_order_writer_gate_validation_integrity_preserved": True,
         "retained_gate_runtime_dependency": False,
         "retained_validator_runtime_dependency": False,
+        "retained_integrity_runtime_dependency": False,
         "retained_implementations_regression_only": True,
         "retained_implementations_retirement_eligible": False,
         "retirement_authority": "NONE",
@@ -93,7 +100,7 @@ def _validate_canonical_switch() -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Validate the one-for-one canonical source-neutral article-truth switch and semantic parity"
+        description="Validate the canonical source-neutral article-truth and integrity switches plus semantic parity"
     )
     parser.add_argument("--fact-kernel", required=True)
     parser.add_argument("--fact-kernel-integrity", required=True)
@@ -131,13 +138,13 @@ def main() -> int:
 
     report.update(switch)
     report["article_integrity_facade_equivalence"] = integrity_facade
-    report["schema_version"] = "core-v2-promoted-claim-article-truth-canonical-switch-shadow.v2"
+    report["schema_version"] = "core-v2-promoted-claim-article-truth-integrity-post-switch-shadow.v3"
     report["status"] = "PASS_SHADOW"
     report["canonical_runtime_switched"] = True
     report["canonical_stage_definitions_switched"] = True
     report["article_integrity_facade_built"] = True
     report["article_integrity_facade_equivalent"] = integrity_facade.get("json_semantic_equivalent") is True
-    report["article_integrity_facade_canonical_runtime_switched"] = False
+    report["article_integrity_facade_canonical_runtime_switched"] = True
     report["article_integrity_facade_tamper_regressions_passed"] = integrity_facade.get("fail_closed_tamper_regressions_passed")
     report["retained_implementations_retirement_eligible"] = False
     report["retirement_authority"] = "NONE"
@@ -146,14 +153,13 @@ def main() -> int:
     report["site_publish_allowed"] = False
     report["social_publish_allowed"] = False
     report["truth_rule"] = (
-        "The canonical article-truth gate and validation stage names execute the source-neutral promoted_claim_article_truth "
-        "CLI one-for-one, with exact artifact identities and preserved writer->gate->validation->integrity order. Semantic "
-        "parity remains bound to the retained ISJ gate/validator implementations, with the same article-claim evidence identity, "
-        "5/5 preprojection and 3/3 projected tamper regressions, and downstream 3 verified / 0 fabricated. In parallel, a new "
-        "source-neutral article-integrity facade is proven JSON-semantically identical to both the retained verifier and the "
-        "canonical integrity artifact and fails closed on independent headline, evidence-identity and extra-claim tampering. "
-        "The canonical integrity stage remains intentionally unswitched and retained components remain KEEP/not-retirement-eligible. "
-        "No publication, acceptance, merge, deploy, Meta-write, public-projection or retirement authority is granted."
+        "The canonical article-truth gate and validation stages execute the source-neutral promoted_claim_article_truth CLI "
+        "one-for-one, and the canonical article-integrity stage executes the source-neutral promoted_claim_article_integrity "
+        "facade one-for-one. Exact artifacts and writer->gate->validation->integrity order are preserved. Semantic parity remains "
+        "bound to retained deterministic ISJ implementations, with the same article-claim evidence identity, 5/5 preprojection "
+        "and 3/3 projected tamper regressions, downstream 3 verified / 0 fabricated, plus 3/3 independent integrity tamper "
+        "regressions. Retained components remain KEEP regression-only and not retirement-eligible. No publication, acceptance, "
+        "merge, deploy, Meta-write, public-projection or retirement authority is granted."
     )
 
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -169,7 +175,7 @@ def main() -> int:
         "downstream_fabricated_claim_count": report["downstream_fabricated_claim_count"],
         "article_integrity_facade_equivalent": report["article_integrity_facade_equivalent"],
         "article_integrity_facade_tamper_regressions_passed": report["article_integrity_facade_tamper_regressions_passed"],
-        "article_integrity_facade_canonical_runtime_switched": False,
+        "article_integrity_facade_canonical_runtime_switched": True,
         "publication_authority": "NONE",
         "acceptance_ready": False,
     }, ensure_ascii=False, sort_keys=True))
