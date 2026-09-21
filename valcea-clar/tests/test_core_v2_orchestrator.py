@@ -26,13 +26,14 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
                 "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
                 "isj_fact_kernel", "isj_fact_kernel_integrity", "promoted_claim_writer_projection",
                 "promoted_claim_projection_validation", "promoted_claim_writer_consumption",
-                "promoted_claim_writer_consumption_validation", "isj_writer",
+                "promoted_claim_writer_consumption_validation", "promoted_claim_writer",
                 "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
                 "isj_article_integrity", "isj_promoted_claim_contract", "isj_promoted_claim_contract_validation",
                 "site_verified_article_ledger", "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
             ],
         )
         self.assertEqual(len(names), 42)
+        self.assertNotIn("isj_writer", names)
         joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
         for forbidden in ("workflow_dispatch", "git push", "merge", "deploy", "facebook_publish", "instagram_publish", "manual-publish"):
             self.assertNotIn(forbidden, joined)
@@ -81,7 +82,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         projection_validation = by_name["promoted_claim_projection_validation"]
         consumption = by_name["promoted_claim_writer_consumption"]
         consumption_validation = by_name["promoted_claim_writer_consumption_validation"]
-        writer = by_name["isj_writer"]
+        writer = by_name["promoted_claim_writer"]
         article_gate = by_name["isj_article_deadline_claim_gate"]
         article_validation = by_name["isj_article_deadline_claim_validation"]
         promoted_contract = by_name["isj_promoted_claim_contract"]
@@ -96,8 +97,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertIn(str(consumption.output), consumption_validation.argv)
         self.assertIn("--prove-tamper", consumption_validation.argv)
 
-        # Writer explicitly consumes the validated source-neutral pair. This removes
-        # the legacy filename auto-discovery seam while preserving the writer itself.
+        self.assertEqual(writer.name, "promoted_claim_writer")
         self.assertIn(str(fact_kernel.output), writer.argv)
         self.assertIn(str(fact_integrity.output), writer.argv)
         self.assertNotIn(str(projection.output), writer.argv)
@@ -138,7 +138,7 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         chain = [
             "isj_fact_kernel", "isj_fact_kernel_integrity", "promoted_claim_writer_projection",
             "promoted_claim_projection_validation", "promoted_claim_writer_consumption",
-            "promoted_claim_writer_consumption_validation", "isj_writer", "isj_article_deadline_claim_gate",
+            "promoted_claim_writer_consumption_validation", "promoted_claim_writer", "isj_article_deadline_claim_gate",
             "isj_article_deadline_claim_validation", "isj_article_integrity", "isj_promoted_claim_contract",
             "isj_promoted_claim_contract_validation", "site_verified_article_ledger", "photo_truth",
             "site_visual_runtime_registry", "shadow_site_package",
@@ -158,6 +158,9 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertTrue(report["source_specific_retirement_eligible"])
         self.assertFalse(report["source_specific_retirement_performed"])
         self.assertTrue(report["compatibility_identity_namespace_retained"])
+        self.assertTrue(report["compatibility_writer_stage_name_retired"])
+        self.assertEqual(report["canonical_writer_stage"], "promoted_claim_writer")
+        self.assertEqual(report["canonical_writer_module"], "valcea-clar/core_v2/promoted_claim_writer.py")
         self.assertEqual(report["canonical_writer_consumption_module"], "valcea-clar/core_v2/promoted_claim_writer_consumption.py")
         self.assertEqual(report["canonical_writer_consumption_validation_module"], "valcea-clar/core_v2/validate_promoted_claim_writer_consumption_runtime.py")
         self.assertEqual(report["publication_authority"], "NONE")

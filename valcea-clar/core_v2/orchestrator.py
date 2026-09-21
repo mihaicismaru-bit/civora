@@ -7,16 +7,15 @@ from typing import Any
 
 import orchestrator_run70 as _legacy
 
-# RUN76 controlled compatibility boundary:
+# RUN78 controlled naming migration:
 # retain the validated RUN70 orchestrator implementation as a frozen component
-# for still-unmigrated stages, but make the canonical Core v2 orchestrator own
-# the complete writer-consumption -> writer seam directly. The canonical writer
-# stage now points at a source-neutral runtime facade; the useful ISJ writer
-# remains a KEEP implementation detail behind that facade and is not retired in
-# this increment. Frozen RUN70 writer-consumption and writer placeholders are
-# skipped without reading or transforming their argv/output definitions.
-# Historical evidence-ID namespaces stay stable deliberately so downstream
-# lineage remains comparable across the migration.
+# for still-unmigrated stages, while Core v2 owns the complete writer seam.
+# The canonical writer stage is now source-neutral in both module and stage name:
+# promoted_claim_writer. The useful ISJ writer remains a KEEP implementation
+# detail behind the source-neutral facade and is not retired in this increment.
+# Frozen RUN70 writer-layer placeholders are skipped without reading or
+# transforming their argv/output definitions. Historical evidence-ID namespaces
+# stay stable deliberately so downstream lineage remains comparable.
 
 CycleStage = _legacy.CycleStage
 run_shadow = _legacy.run_shadow
@@ -40,6 +39,7 @@ _LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES = {
     "isj_writer_deadline_consumption_validation",
     "isj_writer",
 }
+_CANONICAL_WRITER_STAGE = "promoted_claim_writer"
 
 
 def _neutralize_arg(value: str) -> str:
@@ -95,14 +95,14 @@ def _owned_writer_consumption_stages(workdir: Path) -> tuple[CycleStage, CycleSt
 
 
 def _owned_writer_stage(workdir: Path) -> CycleStage:
-    """Own the canonical writer stage through the source-neutral runtime facade."""
+    """Own the canonical source-neutral writer stage through the runtime facade."""
     fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
     fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
     consumption = workdir / _NEW_CONSUMPTION_ARTIFACT
     validation = workdir / _NEW_VALIDATION_ARTIFACT
     article = workdir / _WRITER_ARTIFACT
     return CycleStage(
-        "isj_writer",
+        _CANONICAL_WRITER_STAGE,
         (
             sys.executable,
             _WRITER_MODULE,
@@ -120,7 +120,7 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
     by_name = {stage.name: stage for stage in plan}
     consumption = by_name["promoted_claim_writer_consumption"]
     validation = by_name["promoted_claim_writer_consumption_validation"]
-    writer = by_name["isj_writer"]
+    writer = by_name[_CANONICAL_WRITER_STAGE]
     joined = "\n".join(" ".join(stage.argv) for stage in plan)
     legacy_refs = [
         token
@@ -144,7 +144,8 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
         and validation.output.name == _NEW_VALIDATION_ARTIFACT
     )
     exact_writer_definition = (
-        len(writer.argv) > 1
+        writer.name == _CANONICAL_WRITER_STAGE
+        and len(writer.argv) > 1
         and writer.argv[1] == _WRITER_MODULE
         and writer.output is not None
         and writer.output.name == _WRITER_ARTIFACT
@@ -155,7 +156,7 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
     )
     no_dependency = not legacy_refs and exact_neutral_paths and exact_writer_definition
     return {
-        "schema_version": "core-v2-writer-layer-runtime-dependency-shadow.v4",
+        "schema_version": "core-v2-writer-layer-runtime-dependency-shadow.v5",
         "status": "PASS_SHADOW" if no_dependency else "BLOCKED",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -173,6 +174,7 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
         "canonical_writer_stage_ownership": "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION",
         "canonical_writer_runtime_facade": True,
         "canonical_writer_runtime_facade_source_neutral": True,
+        "compatibility_writer_stage_name_retired": "isj_writer" not in by_name,
         "retained_writer_implementation": _RETAINED_WRITER_IMPLEMENTATION,
         "retained_writer_implementation_delegated_behind_facade": True,
         "frozen_run70_writer_placeholder_definition_consumed": False,
@@ -188,8 +190,8 @@ def _writer_consumption_dependency_snapshot(plan: tuple[CycleStage, ...]) -> dic
         "retained_writer_implementation_retirement_performed": False,
         "compatibility_identity_namespace_retained": True,
         "truth_rule": (
-            "Canonical writer-layer runtime passes only when Core v2 directly owns the ordered source-neutral consumption builder/validator and points the writer stage at the source-neutral promoted_claim_writer runtime facade, "
-            "the facade consumes the neutral artifacts explicitly, no source-specific ISJ module or legacy writer-consumption implementation/artifact reference appears in canonical stage argv, and no publication or acceptance authority is granted. "
+            "Canonical writer-layer runtime passes only when Core v2 directly owns the ordered source-neutral consumption builder/validator and the promoted_claim_writer stage points at the source-neutral promoted_claim_writer runtime facade, "
+            "the facade consumes the neutral artifacts explicitly, no source-specific ISJ module or legacy writer-consumption implementation/artifact/stage reference appears in canonical runtime, and no publication or acceptance authority is granted. "
             "The retained ISJ writer implementation remains a KEEP implementation detail behind the facade; this proof does not claim that implementation source-neutral or retirement-eligible."
         ),
     }
@@ -228,14 +230,15 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         raise RuntimeError(f"canonical_core_v2_stage_count_changed:{len(transformed)}")
     if "promoted_claim_writer_consumption" not in names or "promoted_claim_writer_consumption_validation" not in names:
         raise RuntimeError("source_neutral_writer_consumption_stages_missing")
-    if _LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES.intersection(names) != {"isj_writer"}:
-        leaked = sorted(_LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES.intersection(names) - {"isj_writer"})
-        if leaked:
-            raise RuntimeError(f"legacy_writer_layer_stage_leaked_into_canonical_runtime:{','.join(leaked)}")
+    leaked_placeholders = sorted(_LEGACY_WRITER_LAYER_PLACEHOLDER_STAGES.intersection(names))
+    if leaked_placeholders:
+        raise RuntimeError(f"legacy_writer_layer_stage_leaked_into_canonical_runtime:{','.join(leaked_placeholders)}")
+    if _CANONICAL_WRITER_STAGE not in names:
+        raise RuntimeError("source_neutral_writer_stage_missing")
 
     consumption_index = names.index("promoted_claim_writer_consumption")
     validation_index = names.index("promoted_claim_writer_consumption_validation")
-    writer_index = names.index("isj_writer")
+    writer_index = names.index(_CANONICAL_WRITER_STAGE)
     gate_index = names.index("isj_article_deadline_claim_gate")
     if (consumption_index, validation_index, writer_index, gate_index) != (
         gate_index - 3,
@@ -264,6 +267,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
 
     writer_stage = transformed[writer_index]
     writer_argv = list(writer_stage.argv)
+    if writer_stage.name != _CANONICAL_WRITER_STAGE:
+        raise RuntimeError("canonical_writer_stage_name_not_source_neutral")
     if len(writer_argv) < 2 or writer_argv[1] != _WRITER_MODULE:
         raise RuntimeError("canonical_writer_not_bound_to_source_neutral_runtime_facade")
     for flag, expected in (
@@ -282,6 +287,8 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         raise RuntimeError("frozen_run70_writer_placeholder_definition_consumed")
     if dependency["source_specific_writer_stage_runtime_reference"] is not False:
         raise RuntimeError("source_specific_writer_stage_runtime_reference_detected")
+    if dependency["compatibility_writer_stage_name_retired"] is not True:
+        raise RuntimeError("compatibility_writer_stage_name_still_present")
     return tuple(transformed)
 
 
