@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import orchestrator
-import orchestrator_run81
+import orchestrator_run86
 
 EXPECTED_PROJECTION_ID = "isj-writer-deadline-projection-d9ae7b38596fc02a6ee7524d"
 EXPECTED_CONSUMPTION_ID = "isj-writer-deadline-consumption-de8b3ece2713d4395a0c62d1"
@@ -40,7 +40,11 @@ def _by_name(plan: tuple[Any, ...]) -> dict[str, Any]:
 
 def validate(base: Path) -> dict[str, Any]:
     canonical = orchestrator.bounded_cycle_plan(base, live=False)
-    frozen81 = orchestrator_run81.bounded_cycle_plan(base, live=False)
+    # Immutable RUN81 comparator: orchestrator_run86 captured the validated
+    # RUN81 plan function before later wrappers patched module-level plan seams.
+    # Calling orchestrator_run81.bounded_cycle_plan here is unsafe because newer
+    # wrappers intentionally replace that public symbol for runtime delegation.
+    frozen81 = orchestrator_run86._BASE_PLAN(base, live=False)
     owned = {stage.name: stage for stage in orchestrator._owned_consumption_stages(base)}
     canonical_by_name = _by_name(canonical)
     run81_by_name = _by_name(frozen81)
@@ -140,13 +144,15 @@ def validate(base: Path) -> dict[str, Any]:
             raise RuntimeError(f"{label}_acceptance_boundary_changed")
 
     return {
-        "schema_version": "core-v2-promoted-claim-consumption-definition-equivalence-ci.v1",
+        "schema_version": "core-v2-promoted-claim-consumption-definition-equivalence-ci.v2",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
         "canonical_stage_count": 42,
         "canonical_stage_order_matches_frozen_run81": True,
         "consumption_definitions_match_frozen_run81": True,
+        "frozen_run81_comparator_source": "orchestrator_run86._BASE_PLAN",
+        "frozen_run81_comparator_immutable": True,
         "consumption_lineage_equivalent": True,
         "projection_evidence_id": EXPECTED_PROJECTION_ID,
         "consumption_evidence_id": EXPECTED_CONSUMPTION_ID,
@@ -157,7 +163,7 @@ def validate(base: Path) -> dict[str, Any]:
         "fabricated_claim_count": 0,
         "retirement_authority": "NONE",
         "truth_rule": (
-            "This CI-only regression independently compares the Core v2 promoted-claim consumption pair with frozen RUN81 semantics on the same verified workdir and binds that definition proof to exact evidence identities, the established 4/4 fail-closed consumption tamper proof, downstream article integrity, and explicit no-authority flags. It grants no naming, retirement, publication, delivery, merge, deployment, acceptance or cutover authority."
+            "This CI-only regression independently compares the Core v2 promoted-claim consumption pair with the immutable, pre-patch RUN81 plan captured by orchestrator_run86._BASE_PLAN on the same verified workdir. It binds that definition proof to exact evidence identities, the established 4/4 fail-closed consumption tamper proof, downstream article integrity, and explicit no-authority flags. It grants no naming, retirement, publication, delivery, merge, deployment, acceptance or cutover authority."
         ),
     }
 
