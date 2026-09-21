@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -81,12 +82,34 @@ def main() -> int:
         if not path.is_file():
             raise SystemExit(f"explicit {label} input file is required")
 
+    fact_kernel = json.loads(fact_kernel_path.read_text(encoding="utf-8"))
+    fact_integrity = json.loads(fact_integrity_path.read_text(encoding="utf-8"))
+    writer_consumption = json.loads(consumption_path.read_text(encoding="utf-8"))
+    writer_consumption_validation = json.loads(validation_path.read_text(encoding="utf-8"))
+
     result = compose_promoted_claim_article(
-        json.loads(fact_kernel_path.read_text(encoding="utf-8")),
-        json.loads(fact_integrity_path.read_text(encoding="utf-8")),
-        json.loads(consumption_path.read_text(encoding="utf-8")),
-        json.loads(validation_path.read_text(encoding="utf-8")),
+        fact_kernel,
+        fact_integrity,
+        writer_consumption,
+        writer_consumption_validation,
     )
+
+    # CI-only independent regression: compare the directly owned writer stage
+    # against frozen RUN81 and bind that definition proof to the same verified
+    # runtime inputs and writer output semantics. This is not a canonical stage,
+    # is never required outside CI, and grants no retirement/publication authority.
+    if os.environ.get("GITHUB_ACTIONS", "").lower() == "true":
+        from validate_promoted_claim_writer_stage_equivalence import validate as validate_stage_equivalence
+
+        report = validate_stage_equivalence(
+            Path(args.output).parent,
+            result,
+            writer_consumption,
+            writer_consumption_validation,
+        )
+        if report.get("status") != "PASS_SHADOW":
+            raise RuntimeError("promoted_claim_writer_stage_definition_equivalence_not_pass_shadow")
+
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "state": result.get("state"),
