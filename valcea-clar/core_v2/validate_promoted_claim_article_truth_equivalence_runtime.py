@@ -3,6 +3,9 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import subprocess
+import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -14,6 +17,7 @@ from promoted_claim_article_truth import (
     RETAINED_GATE_IMPLEMENTATION,
     RETAINED_VALIDATOR_IMPLEMENTATION,
     RUNTIME_FACADE_MODE,
+    SOURCE_NEUTRAL_CLI_MODE,
     build_promoted_claim_article_truth_gate,
     project_promoted_claim_article_shadow,
     prove_promoted_claim_article_truth_tamper_regressions,
@@ -52,6 +56,139 @@ def _require_no_authority(doc: dict[str, Any], label: str) -> None:
     assert doc.get("site_publish_allowed") is False, f"{label}:site_publish_allowed"
     assert doc.get("social_publish_allowed") is False, f"{label}:social_publish_allowed"
     assert int(doc.get("fabricated_claim_count") or 0) == 0, f"{label}:fabricated_claim_count"
+
+
+def _load(path: str | Path) -> dict[str, Any]:
+    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(doc, dict):
+        raise TypeError(f"expected_json_object:{path}")
+    return doc
+
+
+def _dump(path: Path, doc: dict[str, Any]) -> None:
+    path.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _run_source_neutral_cli_parity(
+    fact_kernel: dict[str, Any],
+    fact_integrity: dict[str, Any],
+    writer_consumption: dict[str, Any],
+    writer_consumption_validation: dict[str, Any],
+    preprojection_article: dict[str, Any],
+    canonical_gate: dict[str, Any],
+    canonical_validation: dict[str, Any],
+    canonical_article: dict[str, Any],
+) -> dict[str, Any]:
+    """Execute the source-neutral CLI end-to-end and prove retained CLI parity.
+
+    This is deliberately a subprocess proof rather than another in-process wrapper
+    call: it verifies argv/file semantics, mutation of the shadow article artifact,
+    and the exact JSON artifacts a thin GitHub Actions executor would consume.
+    """
+    cli_path = Path(__file__).with_name("promoted_claim_article_truth.py")
+    assert cli_path.is_file(), f"source_neutral_cli_missing:{cli_path}"
+
+    with tempfile.TemporaryDirectory(prefix="core-v2-article-truth-cli-") as raw_tmp:
+        tmp = Path(raw_tmp)
+        fact_kernel_path = tmp / "fact-kernel.json"
+        fact_integrity_path = tmp / "fact-kernel-integrity.json"
+        consumption_path = tmp / "writer-consumption.json"
+        consumption_validation_path = tmp / "writer-consumption-validation.json"
+        article_path = tmp / "article.json"
+        gate_path = tmp / "gate.json"
+        validation_path = tmp / "validation.json"
+
+        _dump(fact_kernel_path, fact_kernel)
+        _dump(fact_integrity_path, fact_integrity)
+        _dump(consumption_path, writer_consumption)
+        _dump(consumption_validation_path, writer_consumption_validation)
+        _dump(article_path, preprojection_article)
+
+        gate_proc = subprocess.run(
+            [
+                sys.executable,
+                str(cli_path),
+                "--mode", "gate",
+                "--fact-kernel", str(fact_kernel_path),
+                "--fact-kernel-integrity", str(fact_integrity_path),
+                "--writer-consumption", str(consumption_path),
+                "--writer-consumption-validation", str(consumption_validation_path),
+                "--article", str(article_path),
+                "--output", str(gate_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        cli_gate = _load(gate_path)
+        _require_no_authority(cli_gate, "source_neutral_cli_gate")
+        _assert_semantic_equal("source_neutral_cli_vs_canonical_gate", cli_gate, canonical_gate)
+
+        validate_proc = subprocess.run(
+            [
+                sys.executable,
+                str(cli_path),
+                "--mode", "validate",
+                "--fact-kernel", str(fact_kernel_path),
+                "--fact-kernel-integrity", str(fact_integrity_path),
+                "--writer-consumption", str(consumption_path),
+                "--writer-consumption-validation", str(consumption_validation_path),
+                "--article", str(article_path),
+                "--gate", str(gate_path),
+                "--prove-tamper",
+                "--output", str(validation_path),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        cli_validation = _load(validation_path)
+        cli_projected_article = _load(article_path)
+
+        _require_no_authority(cli_validation, "source_neutral_cli_validation")
+        _require_no_authority(cli_projected_article, "source_neutral_cli_projected_article")
+        _assert_semantic_equal(
+            "source_neutral_cli_vs_canonical_validation",
+            cli_validation,
+            canonical_validation,
+        )
+        _assert_semantic_equal(
+            "source_neutral_cli_vs_canonical_projected_article",
+            cli_projected_article,
+            canonical_article,
+        )
+
+        gate_id = str(cli_gate.get("article_deadline_claim_evidence_id") or "").strip()
+        assert gate_id and gate_id == str(cli_validation.get("article_deadline_claim_evidence_id") or "").strip()
+        assert gate_id == str(cli_projected_article.get("article_deadline_claim_evidence_id") or "").strip()
+        assert int(cli_validation.get("tamper_regressions_passed") or 0) == 5
+        assert int(cli_validation.get("projected_tamper_regressions_passed") or 0) == 3
+        assert int(cli_validation.get("canonical_claim_count") or 0) == 3
+        assert cli_validation.get("article_contains_registration_deadline") is True
+
+        gate_stdout = json.loads(gate_proc.stdout.strip().splitlines()[-1])
+        validate_stdout = json.loads(validate_proc.stdout.strip().splitlines()[-1])
+        assert gate_stdout.get("publication_authority") == "NONE"
+        assert gate_stdout.get("acceptance_ready") is False
+        assert validate_stdout.get("publication_authority") == "NONE"
+        assert validate_stdout.get("acceptance_ready") is False
+        assert validate_stdout.get("article_deadline_claim_evidence_id") == gate_id
+        assert int(validate_stdout.get("tamper_regressions_passed") or 0) == 5
+        assert int(validate_stdout.get("projected_tamper_regressions_passed") or 0) == 3
+
+        return {
+            "source_neutral_cli_mode": SOURCE_NEUTRAL_CLI_MODE,
+            "source_neutral_cli_parity": True,
+            "source_neutral_cli_gate_json_semantic_sha256": _semantic_sha256(cli_gate),
+            "source_neutral_cli_validation_json_semantic_sha256": _semantic_sha256(cli_validation),
+            "source_neutral_cli_projected_article_json_semantic_sha256": _semantic_sha256(cli_projected_article),
+            "source_neutral_cli_article_deadline_claim_evidence_id": gate_id,
+            "source_neutral_cli_tamper_regressions_passed": 5,
+            "source_neutral_cli_projected_tamper_regressions_passed": 3,
+            "source_neutral_cli_canonical_claim_count": 3,
+            "source_neutral_cli_publication_authority": "NONE",
+            "source_neutral_cli_acceptance_ready": False,
+        }
 
 
 def validate_equivalence(
@@ -208,6 +345,18 @@ def validate_equivalence(
     assert int(canonical_validation.get("canonical_claim_count") or 0) == 3
     assert canonical_validation.get("article_contains_registration_deadline") is True
 
+    cli_parity = _run_source_neutral_cli_parity(
+        fact_kernel,
+        fact_integrity,
+        writer_consumption,
+        writer_consumption_validation,
+        preprojection_article,
+        canonical_gate,
+        canonical_validation,
+        canonical_article,
+    )
+    assert cli_parity["source_neutral_cli_article_deadline_claim_evidence_id"] == gate_id
+
     expected_integrity = verify_isj_article_integrity(
         fact_kernel,
         fact_integrity,
@@ -224,7 +373,7 @@ def validate_equivalence(
     assert int(canonical_integrity.get("fabricated_claim_count") or 0) == 0
 
     return {
-        "schema_version": "core-v2-promoted-claim-article-truth-facade-equivalence-shadow.v1",
+        "schema_version": "core-v2-promoted-claim-article-truth-facade-equivalence-shadow.v2",
         "status": "PASS_SHADOW",
         "facade_mode": RUNTIME_FACADE_MODE,
         "retained_gate_implementation": RETAINED_GATE_IMPLEMENTATION,
@@ -240,7 +389,9 @@ def validate_equivalence(
         "projected_tamper_regressions_passed": 3,
         "downstream_verified_claim_count": 3,
         "downstream_fabricated_claim_count": 0,
+        **cli_parity,
         "canonical_runtime_switched": False,
+        "canonical_stage_definitions_switched": False,
         "retained_implementations_retirement_eligible": False,
         "retirement_authority": "NONE",
         "publication_authority": "NONE",
@@ -251,22 +402,20 @@ def validate_equivalence(
             "The source-neutral promoted-claim article-truth facade is JSON-semantically identical to the retained "
             "ISJ gate and validator on the same canonical inputs, preserves the exact article-claim evidence identity, "
             "passes all 5/5 preprojection and 3/3 projected tamper regressions, and reproduces the canonical downstream "
-            "3-verified/0-fabricated article integrity result. This proof is parallel CI evidence only: canonical runtime "
-            "is not switched and no publication, acceptance, deployment, merge or retirement authority is granted."
+            "3-verified/0-fabricated article integrity result. The source-neutral CLI is also executed as a subprocess "
+            "and proven JSON-semantically identical to the canonical gate, validation, and projected-article artifacts, "
+            "including file-mutation and argv behavior. This proof is parallel CI evidence only: canonical runtime and "
+            "stage definitions are not switched and no publication, acceptance, deployment, merge or retirement authority is granted."
         ),
     }
 
 
-def _load(path: str) -> dict[str, Any]:
-    doc = json.loads(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(doc, dict):
-        raise TypeError(f"expected_json_object:{path}")
-    return doc
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Prove source-neutral promoted-claim article-truth facade equivalence without switching canonical runtime"
+        description=(
+            "Prove source-neutral promoted-claim article-truth facade and CLI equivalence "
+            "without switching canonical runtime"
+        )
     )
     parser.add_argument("--fact-kernel", required=True)
     parser.add_argument("--fact-kernel-integrity", required=True)
@@ -297,7 +446,9 @@ def main() -> int:
         "projected_tamper_regressions_passed": report["projected_tamper_regressions_passed"],
         "downstream_verified_claim_count": report["downstream_verified_claim_count"],
         "downstream_fabricated_claim_count": report["downstream_fabricated_claim_count"],
+        "source_neutral_cli_parity": report["source_neutral_cli_parity"],
         "canonical_runtime_switched": False,
+        "canonical_stage_definitions_switched": False,
         "publication_authority": "NONE",
         "acceptance_ready": False,
     }, ensure_ascii=False, sort_keys=True))
