@@ -6,7 +6,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-from orchestrator import bounded_cycle_plan, _writer_consumption_dependency_snapshot
+from orchestrator import (
+    bounded_cycle_plan,
+    _writer_consumption_dependency_snapshot,
+    _article_truth_stage_ownership_snapshot,
+    _owned_article_truth_stages,
+    _LEGACY_PLAN,
+)
 
 
 class BoundedOrchestratorPlanTest(unittest.TestCase):
@@ -163,6 +169,58 @@ class BoundedOrchestratorPlanTest(unittest.TestCase):
         self.assertEqual(report["canonical_writer_module"], "valcea-clar/core_v2/promoted_claim_writer.py")
         self.assertEqual(report["canonical_writer_consumption_module"], "valcea-clar/core_v2/promoted_claim_writer_consumption.py")
         self.assertEqual(report["canonical_writer_consumption_validation_module"], "valcea-clar/core_v2/validate_promoted_claim_writer_consumption_runtime.py")
+        self.assertEqual(report["publication_authority"], "NONE")
+        self.assertFalse(report["acceptance_ready"])
+
+    def test_owned_article_truth_definitions_match_frozen_run70_semantics(self):
+        with tempfile.TemporaryDirectory() as temp:
+            workdir = Path(temp)
+            frozen_by_name = {stage.name: stage for stage in _LEGACY_PLAN(workdir, live=False)}
+            owned_by_name = {stage.name: stage for stage in _owned_article_truth_stages(workdir)}
+            canonical_plan = bounded_cycle_plan(workdir, live=False)
+
+        old_consumption = "valcea-core-v2-isj-writer-deadline-consumption.json"
+        new_consumption = "valcea-core-v2-promoted-claim-writer-consumption.json"
+        old_validation = "valcea-core-v2-isj-writer-deadline-consumption-validation.json"
+        new_validation = "valcea-core-v2-promoted-claim-writer-consumption-validation.json"
+
+        def normalized(stage):
+            argv = tuple(
+                str(token)
+                .replace(old_validation, new_validation)
+                .replace(old_consumption, new_consumption)
+                for token in stage.argv
+            )
+            output = (
+                str(stage.output)
+                .replace(old_validation, new_validation)
+                .replace(old_consumption, new_consumption)
+                if stage.output is not None
+                else None
+            )
+            return stage.name, argv, output
+
+        for name in (
+            "isj_article_deadline_claim_gate",
+            "isj_article_deadline_claim_validation",
+            "isj_article_integrity",
+        ):
+            self.assertIn(name, frozen_by_name)
+            self.assertIn(name, owned_by_name)
+            self.assertEqual(normalized(frozen_by_name[name]), normalized(owned_by_name[name]))
+
+        validation = owned_by_name["isj_article_deadline_claim_validation"]
+        self.assertIn("--prove-tamper", validation.argv)
+        report = _article_truth_stage_ownership_snapshot(canonical_plan)
+        self.assertEqual(report["status"], "PASS_SHADOW")
+        self.assertEqual(report["canonical_stage_count"], 42)
+        self.assertEqual(report["canonical_stage_ownership"], "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION")
+        self.assertFalse(report["frozen_run70_article_truth_placeholder_definitions_consumed"])
+        self.assertTrue(report["source_specific_truth_modules_retained"])
+        self.assertTrue(report["source_specific_truth_stage_names_retained"])
+        self.assertTrue(report["artifact_identities_retained"])
+        self.assertFalse(report["retirement_eligible"])
+        self.assertFalse(report["retirement_performed"])
         self.assertEqual(report["publication_authority"], "NONE")
         self.assertFalse(report["acceptance_ready"])
 
