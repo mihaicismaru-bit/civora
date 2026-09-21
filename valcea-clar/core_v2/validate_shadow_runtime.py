@@ -172,6 +172,67 @@ def _validate_projected_truth(base: Path) -> None:
     assert _norm(verified[0].get("registration_deadline")) == "2026-10-02"
 
 
+def _validate_independent_external_auditor(base: Path) -> dict[str, Any]:
+    from promoted_claim_auditor import audit_documents
+
+    candidates = load(base / "valcea-core-v2-shadow-candidates.json")
+    site = load(base / "valcea-core-v2-site-readback.json")
+    visual = load(base / "valcea-core-v2-visual-readback.json")
+    meta = load(base / "valcea-core-v2-meta-readback.json")
+    identity = load(base / "valcea-core-v2-instagram-visual-identity.json")
+    transactions = load(base / "valcea-core-v2-shadow-transactions.json")
+    receipts = load(base / "valcea-core-v2-shadow-receipts.json")
+    gate = load(base / "valcea-core-v2-gate-report.json")
+
+    report = audit_documents(candidates, site, visual, meta, identity, transactions)
+    metrics = report.get("metrics") or {}
+    receipt_rows = [row for row in receipts.get("rows") or [] if isinstance(row, dict)]
+    canonical_projection = {
+        "stories_published": sum(
+            1 for row in receipt_rows
+            if ((row.get("receipts") or {}).get("site") or {}).get("status") == "DELIVERED"
+            and ((row.get("receipts") or {}).get("site") or {}).get("readback_ok") is True
+        ),
+        "photo_verified_count": sum(
+            1 for row in receipt_rows
+            if ((row.get("receipts") or {}).get("visual") or {}).get("status") == "VERIFIED"
+            and ((row.get("receipts") or {}).get("visual") or {}).get("readback_ok") is True
+            and ((row.get("receipts") or {}).get("visual") or {}).get("canonical_site_visual_binding_state") == "CONSISTENT"
+        ),
+        "facebook_delivered_receipt_bound": sum(
+            1 for row in receipt_rows
+            if ((row.get("receipts") or {}).get("facebook") or {}).get("status") == "DELIVERED"
+            and ((row.get("receipts") or {}).get("facebook") or {}).get("readback_ok") is True
+            and ((row.get("receipts") or {}).get("facebook") or {}).get("remote_id")
+            and ((row.get("receipts") or {}).get("facebook") or {}).get("receipt_id")
+        ),
+        "instagram_delivered_receipt_bound": sum(
+            1 for row in receipt_rows
+            if ((row.get("receipts") or {}).get("instagram") or {}).get("status") == "DELIVERED"
+            and ((row.get("receipts") or {}).get("instagram") or {}).get("readback_ok") is True
+            and ((row.get("receipts") or {}).get("instagram") or {}).get("remote_id")
+            and ((row.get("receipts") or {}).get("instagram") or {}).get("receipt_id")
+            and ((row.get("receipts") or {}).get("instagram") or {}).get("remote_visual_readback_ok") is True
+            and ((row.get("receipts") or {}).get("instagram") or {}).get("remote_visual_identity_bound") is True
+            and ((row.get("receipts") or {}).get("visual") or {}).get("canonical_site_visual_binding_state") == "CONSISTENT"
+        ),
+        "truth_complete_transactions": int(gate.get("truth_complete_count") or 0),
+    }
+    auditor_projection = {key: metrics.get(key) for key in canonical_projection}
+    if auditor_projection != canonical_projection:
+        raise RuntimeError(
+            f"independent_external_auditor_semantic_projection_drifted:{auditor_projection!r}!={canonical_projection!r}"
+        )
+    if report.get("publication_authority") != "NONE" or report.get("cutover_authority") != "NONE":
+        raise RuntimeError("independent_external_auditor_authority_boundary_changed")
+    if report.get("retirement_authority") != "NONE" or report.get("acceptance_ready") is not False:
+        raise RuntimeError("independent_external_auditor_acceptance_or_retirement_boundary_changed")
+
+    output = base / "valcea-core-v2-independent-auditor.json"
+    output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return report
+
+
 def validate(base: Path, repo: Path) -> None:
     article_path = base / "valcea-core-v2-isj-article-shadow.json"
     article = load(article_path)
@@ -201,9 +262,7 @@ def validate(base: Path, repo: Path) -> None:
 
     _validate_projected_truth(base)
 
-    # Independent CI-only regression: bind the direct fact-kernel definition
-    # extraction to frozen RUN81/RUN70 semantics and to downstream truth evidence.
-    # This is intentionally not part of the orchestrator's production/runtime plan.
+    # Independent CI-only regressions are validators, never runtime stages.
     if os.environ.get("GITHUB_ACTIONS", "").lower() == "true":
         import validate_fact_kernel_definition_equivalence_runtime as fact_equivalence
 
@@ -222,6 +281,18 @@ def validate(base: Path, repo: Path) -> None:
             "fabricated_claim_count": report.get("fabricated_claim_count"),
             "publication_authority": "NONE",
             "acceptance_ready": False,
+        }, ensure_ascii=False, sort_keys=True))
+
+        external = _validate_independent_external_auditor(base)
+        print(json.dumps({
+            "ci_only_independent_external_auditor": external.get("status"),
+            "external_truth_complete": external.get("external_truth_complete"),
+            "external_blocked_story_count": external.get("external_blocked_story_count"),
+            "metrics": external.get("metrics"),
+            "publication_authority": external.get("publication_authority"),
+            "acceptance_ready": external.get("acceptance_ready"),
+            "cutover_authority": external.get("cutover_authority"),
+            "retirement_authority": external.get("retirement_authority"),
         }, ensure_ascii=False, sort_keys=True))
 
 
