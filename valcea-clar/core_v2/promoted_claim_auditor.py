@@ -253,12 +253,12 @@ def audit_documents(
                 missing_latency_evidence += 1
             else:
                 latencies.append(latency)
-            if visual_ok:
-                photo_verified += 1
-                if fb_ok:
-                    fb_delivered += 1
-                if ig_ok:
-                    ig_delivered += 1
+        if site_ok and visual_ok:
+            photo_verified += 1
+        if fb_ok:
+            fb_delivered += 1
+        if ig_ok:
+            ig_delivered += 1
         fabricated_claims += fabricated
         manual_intervention += manual
         unresolved_material_signals += unresolved
@@ -268,9 +268,9 @@ def audit_documents(
             {
                 "story_id": story_id,
                 "site_published_external": site_ok,
-                "approved_photo_external": visual_ok,
-                "facebook_delivered_receipt_bound": bool(site_ok and visual_ok and fb_ok),
-                "instagram_delivered_receipt_bound": bool(site_ok and visual_ok and ig_ok),
+                "approved_photo_external": bool(site_ok and visual_ok),
+                "facebook_delivered_receipt_bound": fb_ok,
+                "instagram_delivered_receipt_bound": ig_ok,
                 "fabricated_claims": fabricated,
                 "manual_intervention": manual,
                 "unresolved_material_signals": unresolved,
@@ -279,9 +279,8 @@ def audit_documents(
             }
         )
 
-    site_denominator = published
     photo_denominator = published
-    social_denominator = photo_verified
+    social_denominator = len(requested_ids)
     metrics = {
         "stories_published": published,
         "discovery_to_publish_latency_seconds_median": median(latencies) if latencies else None,
@@ -316,7 +315,8 @@ def audit_documents(
         "truth_rule": (
             "This auditor derives truth from raw public site HTTP/route/canonical/NewsArticle evidence, public approved-photo/provenance evidence, "
             "raw remote Meta object readback and independent Instagram pixel identity evidence. It does not use internal outbox/delivered flags, "
-            "materialized receipt status, workflow success or gate-report status as external truth. Missing or contradictory evidence fails closed."
+            "materialized receipt status, workflow success or gate-report status as external truth. Missing or contradictory evidence fails closed. "
+            "Channel delivery metrics remain independent from photo coverage; only truth-complete transaction status composes site, photo and both social channels."
         ),
     }
 
