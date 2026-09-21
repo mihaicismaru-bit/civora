@@ -388,43 +388,31 @@ def compose_isj_article(
     }
 
 
-def _load_optional_runtime_pair(fact_kernel_path: Path) -> tuple[dict[str, Any] | None, dict[str, Any] | None]:
-    workdir = fact_kernel_path.parent
-    consumption_path = workdir / "valcea-core-v2-isj-writer-deadline-consumption.json"
-    validation_path = workdir / "valcea-core-v2-isj-writer-deadline-consumption-validation.json"
-    if not consumption_path.exists() and not validation_path.exists():
-        return None, None
-    if not consumption_path.exists() or not validation_path.exists():
-        raise FileNotFoundError("writer_consumption_runtime_pair_incomplete")
-    return (
-        json.loads(consumption_path.read_text(encoding="utf-8")),
-        json.loads(validation_path.read_text(encoding="utf-8")),
-    )
-
-
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Compose the ISJ article in non-authorizing shadow mode after FactKernel integrity")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Compose the ISJ article in non-authorizing shadow mode after FactKernel integrity. "
+            "Runtime writer-consumption inputs are explicit-only; no filename discovery or legacy fallback is permitted."
+        )
+    )
     parser.add_argument("--fact-kernel", required=True)
     parser.add_argument("--fact-kernel-integrity", required=True)
-    parser.add_argument("--writer-consumption")
-    parser.add_argument("--writer-consumption-validation")
+    parser.add_argument("--writer-consumption", required=True)
+    parser.add_argument("--writer-consumption-validation", required=True)
     parser.add_argument("--output", required=True)
     args = parser.parse_args()
 
     fact_kernel_path = Path(args.fact_kernel)
-    if bool(args.writer_consumption) != bool(args.writer_consumption_validation):
-        raise SystemExit("writer consumption gate and validation must be supplied together")
-    if args.writer_consumption:
-        writer_consumption = json.loads(Path(args.writer_consumption).read_text(encoding="utf-8"))
-        writer_consumption_validation = json.loads(Path(args.writer_consumption_validation).read_text(encoding="utf-8"))
-    else:
-        writer_consumption, writer_consumption_validation = _load_optional_runtime_pair(fact_kernel_path)
+    writer_consumption_path = Path(args.writer_consumption)
+    writer_consumption_validation_path = Path(args.writer_consumption_validation)
+    if not writer_consumption_path.is_file() or not writer_consumption_validation_path.is_file():
+        raise SystemExit("explicit writer consumption gate and validation files are required")
 
     result = compose_isj_article(
         json.loads(fact_kernel_path.read_text(encoding="utf-8")),
         json.loads(Path(args.fact_kernel_integrity).read_text(encoding="utf-8")),
-        writer_consumption,
-        writer_consumption_validation,
+        json.loads(writer_consumption_path.read_text(encoding="utf-8")),
+        json.loads(writer_consumption_validation_path.read_text(encoding="utf-8")),
     )
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
