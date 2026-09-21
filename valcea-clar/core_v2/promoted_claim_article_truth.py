@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import argparse
+import json
+from pathlib import Path
 from typing import Any
 
 from isj_article_deadline_claim_gate import (
@@ -16,6 +19,7 @@ from validate_isj_article_deadline_claim_gate import (
 RETAINED_GATE_IMPLEMENTATION = "valcea-clar/core_v2/isj_article_deadline_claim_gate.py"
 RETAINED_VALIDATOR_IMPLEMENTATION = "valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py"
 RUNTIME_FACADE_MODE = "CORE_V2_SOURCE_NEUTRAL_PROMOTED_CLAIM_ARTICLE_TRUTH_FACADE"
+SOURCE_NEUTRAL_CLI_MODE = "CORE_V2_SOURCE_NEUTRAL_PROMOTED_CLAIM_ARTICLE_TRUTH_CLI"
 
 
 def _require_non_authorizing(doc: dict[str, Any], label: str) -> None:
@@ -159,3 +163,147 @@ def prove_promoted_claim_projected_tamper_regressions(
         projected_article,
         gate,
     )
+
+
+def _load(path: str) -> dict[str, Any]:
+    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    if not isinstance(doc, dict):
+        raise TypeError(f"expected_json_object:{path}")
+    return doc
+
+
+def _write(path: str, doc: dict[str, Any]) -> None:
+    Path(path).write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+
+
+def _run_gate_cli(args: argparse.Namespace) -> dict[str, Any]:
+    gate = build_promoted_claim_article_truth_gate(
+        _load(args.fact_kernel),
+        _load(args.fact_kernel_integrity),
+        _load(args.writer_consumption),
+        _load(args.writer_consumption_validation),
+        _load(args.article),
+    )
+    _write(args.output, gate)
+    return {
+        "state": gate.get("state"),
+        "registration_deadline": gate.get("registration_deadline"),
+        "shadow_article_claim_integrity_passed": gate.get("shadow_article_claim_integrity_passed", False),
+        "canonical_article_mutation_allowed": False,
+        "article_projection_allowed": False,
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+    }
+
+
+def _run_validate_cli(args: argparse.Namespace) -> dict[str, Any]:
+    if not args.gate:
+        raise ValueError("validate_mode_requires_gate")
+
+    fact_kernel = _load(args.fact_kernel)
+    fact_integrity = _load(args.fact_kernel_integrity)
+    consumption = _load(args.writer_consumption)
+    consumption_validation = _load(args.writer_consumption_validation)
+    article_path = Path(args.article)
+    article = _load(args.article)
+    gate = _load(args.gate)
+
+    summary = validate_promoted_claim_article_truth_gate(
+        fact_kernel,
+        fact_integrity,
+        consumption,
+        consumption_validation,
+        article,
+        gate,
+    )
+    tamper = prove_promoted_claim_article_truth_tamper_regressions(
+        fact_kernel,
+        fact_integrity,
+        consumption,
+        consumption_validation,
+        article,
+        gate,
+    ) if args.prove_tamper else 0
+
+    projected = project_promoted_claim_article_shadow(article, gate, summary)
+    projected_summary = validate_promoted_claim_projected_article(
+        fact_kernel,
+        fact_integrity,
+        consumption,
+        consumption_validation,
+        projected,
+        gate,
+    )
+    projected_tamper = prove_promoted_claim_projected_tamper_regressions(
+        fact_kernel,
+        fact_integrity,
+        consumption,
+        consumption_validation,
+        projected,
+        gate,
+    ) if args.prove_tamper else 0
+
+    article_path.write_text(json.dumps(projected, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    out = {
+        **summary,
+        "status": "PASS_SHADOW",
+        "shadow_article_projection_applied": True,
+        "article_contains_registration_deadline": True,
+        "canonical_claim_count": projected_summary["canonical_claim_count"],
+        "canonical_promoted_claim_count": 1,
+        "tamper_regressions_passed": tamper,
+        "projected_tamper_regressions_passed": projected_tamper,
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+        "canonical_article_mutation_allowed": False,
+        "article_projection_allowed": False,
+        "site_publish_allowed": False,
+        "social_publish_allowed": False,
+        "truth_rule": (
+            "The independent validator rebinds the pending deadline claim to the exact writer-consumption "
+            "and promoted FactKernel evidence chain before applying a shadow-only canonical article projection; "
+            "the projected article is independently revalidated and grants no delivery, merge or deployment authority."
+        ),
+    }
+    _write(args.output, out)
+    return {
+        "status": out["status"],
+        "article_deadline_claim_evidence_id": out["article_deadline_claim_evidence_id"],
+        "canonical_claim_count": out["canonical_claim_count"],
+        "article_contains_registration_deadline": True,
+        "tamper_regressions_passed": tamper,
+        "projected_tamper_regressions_passed": projected_tamper,
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description=(
+            "Source-neutral Core v2 promoted-claim article-truth CLI. "
+            "This migration facade preserves retained gate/validator semantics and grants no publication authority."
+        )
+    )
+    parser.add_argument("--mode", choices=("gate", "validate"), required=True)
+    parser.add_argument("--fact-kernel", required=True)
+    parser.add_argument("--fact-kernel-integrity", required=True)
+    parser.add_argument("--writer-consumption", required=True)
+    parser.add_argument("--writer-consumption-validation", required=True)
+    parser.add_argument("--article", required=True)
+    parser.add_argument("--gate")
+    parser.add_argument("--prove-tamper", action="store_true")
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+
+    if args.mode == "gate":
+        summary = _run_gate_cli(args)
+    else:
+        summary = _run_validate_cli(args)
+
+    print(json.dumps(summary, ensure_ascii=False, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
