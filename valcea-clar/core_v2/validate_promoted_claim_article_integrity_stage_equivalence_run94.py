@@ -1,39 +1,136 @@
 from __future__ import annotations
 
 import argparse
+import copy
+import hashlib
 import json
+import subprocess
+import sys
 import tempfile
 from pathlib import Path
 from typing import Any
 
 import orchestrator
-from validate_promoted_claim_article_integrity_stage_equivalence_run94 import (
-    SOURCE_NEUTRAL_FACADE,
-    RETAINED_IMPLEMENTATION,
-    INTEGRITY_STAGE,
-    INTEGRITY_ARTIFACT,
-    FACT_KERNEL_ARTIFACT,
-    FACT_INTEGRITY_ARTIFACT,
-    ARTICLE_ARTIFACT,
-    REPORT_ARTIFACT,
-    EXPECTED_ARTICLE_CLAIM_ID,
-    _load,
-    _semantic_sha,
-    _stage_semantics,
-    _by_name,
-    _assert_non_authorizing,
-    _run_cli,
-    _tamper_cases,
-)
+import orchestrator_run81
+
+
+SOURCE_NEUTRAL_FACADE = "valcea-clar/core_v2/promoted_claim_article_integrity.py"
+RETAINED_IMPLEMENTATION = "valcea-clar/core_v2/isj_article_integrity.py"
+INTEGRITY_STAGE = "isj_article_integrity"
+INTEGRITY_ARTIFACT = "valcea-core-v2-isj-article-integrity-shadow.json"
+FACT_KERNEL_ARTIFACT = "valcea-core-v2-isj-fact-kernel-shadow.json"
+FACT_INTEGRITY_ARTIFACT = "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
+ARTICLE_ARTIFACT = "valcea-core-v2-isj-article-shadow.json"
+REPORT_ARTIFACT = "valcea-core-v2-promoted-claim-article-integrity-stage-equivalence.json"
+EXPECTED_ARTICLE_CLAIM_ID = "isj-article-deadline-claim-cc6330d494a44bd79c5340d5"
+
+
+def _load(path: Path) -> dict[str, Any]:
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(doc, dict):
+        raise TypeError(f"expected_json_object:{path}")
+    return doc
+
+
+def _semantic_sha(doc: dict[str, Any]) -> str:
+    payload = json.dumps(doc, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _normalize_token(token: str, base: Path) -> str:
+    text = str(token)
+    if text == sys.executable:
+        return "<PYTHON>"
+    if text in {SOURCE_NEUTRAL_FACADE, RETAINED_IMPLEMENTATION}:
+        return "<ARTICLE_INTEGRITY_IMPLEMENTATION>"
+    base_text = str(base)
+    if text == base_text:
+        return "<WORKDIR>"
+    if text.startswith(base_text + "/"):
+        return "<WORKDIR>/" + Path(text).name
+    return text
+
+
+def _stage_semantics(stage: Any, base: Path) -> tuple[str, tuple[str, ...], str | None]:
+    return (
+        str(stage.name),
+        tuple(_normalize_token(str(token), base) for token in stage.argv),
+        stage.output.name if stage.output is not None else None,
+    )
+
+
+def _by_name(plan: tuple[Any, ...]) -> dict[str, Any]:
+    return {stage.name: stage for stage in plan}
+
+
+def _assert_non_authorizing(doc: dict[str, Any], label: str) -> None:
+    if doc.get("publication_authority") != "NONE":
+        raise RuntimeError(f"{label}:publication_authority_changed")
+    if doc.get("acceptance_ready") is not False:
+        raise RuntimeError(f"{label}:acceptance_ready_changed")
+    if doc.get("production_writer_ready") is not False:
+        raise RuntimeError(f"{label}:production_writer_ready_changed")
+    if doc.get("site_publish_allowed") is not False or doc.get("social_publish_allowed") is not False:
+        raise RuntimeError(f"{label}:delivery_authority_changed")
+
+
+def _run_cli(
+    module: str,
+    *,
+    fact_kernel: Path,
+    fact_integrity: Path,
+    article: Path,
+    output: Path,
+) -> tuple[int, dict[str, Any], str, str]:
+    completed = subprocess.run(
+        [
+            sys.executable,
+            module,
+            "--fact-kernel", str(fact_kernel),
+            "--fact-kernel-integrity", str(fact_integrity),
+            "--article", str(article),
+            "--output", str(output),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if not output.is_file():
+        raise RuntimeError(
+            f"article_integrity_cli_missing_output:{module}:rc={completed.returncode}:stderr={completed.stderr.strip()}"
+        )
+    return completed.returncode, _load(output), completed.stdout, completed.stderr
+
+
+def _tamper_cases(article: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
+    cases: list[tuple[str, dict[str, Any]]] = []
+
+    headline = copy.deepcopy(article)
+    headline["articles"][0]["article_package"]["headline"] = "TAMPERED HEADLINE"
+    cases.append(("headline", headline))
+
+    claim_id = copy.deepcopy(article)
+    package = claim_id["articles"][0]["article_package"]
+    promoted = package["claims"][-1]
+    promoted["article_deadline_claim_evidence_id"] = "tampered-article-claim-id"
+    for segment in package.get("body_segments") or []:
+        if isinstance(segment, dict) and segment.get("kind") == "promoted_fact_claim":
+            segment["article_deadline_claim_evidence_id"] = "tampered-article-claim-id"
+    claim_id["article_deadline_claim_evidence_id"] = "tampered-article-claim-id"
+    cases.append(("article_claim_evidence_id", claim_id))
+
+    extra_claim = copy.deepcopy(article)
+    extra_claim["articles"][0]["article_package"]["claims"].append(
+        {"text": "Claim never present in the verified FactKernel.", "field_evidence_ids": []}
+    )
+    cases.append(("extra_claim", extra_claim))
+
+    return cases
 
 
 def _prove_stage_definition(base: Path) -> dict[str, Any]:
     canonical = orchestrator.bounded_cycle_plan(base, live=False)
-    # Use the frozen function reference captured before the RUN95 switch.  The
-    # imported orchestrator_run81 module object is intentionally not used here:
-    # later wrappers patch its public seam during execution, while _LEGACY_PLAN
-    # remains the immutable RUN81 comparator retained by the migration chain.
-    frozen81 = orchestrator._LEGACY_PLAN(base, live=False)
+    frozen81 = orchestrator_run81.bounded_cycle_plan(base, live=False)
     canonical_by_name = _by_name(canonical)
     frozen_by_name = _by_name(frozen81)
     canonical_names = [stage.name for stage in canonical]
@@ -57,7 +154,9 @@ def _prove_stage_definition(base: Path) -> dict[str, Any]:
     if frozen_integrity.output is None or frozen_integrity.output.name != INTEGRITY_ARTIFACT:
         raise RuntimeError("frozen_run81_article_integrity_output_changed")
 
-    if _stage_semantics(integrity, base) != _stage_semantics(frozen_integrity, base):
+    canonical_semantics = _stage_semantics(integrity, base)
+    frozen_semantics = _stage_semantics(frozen_integrity, base)
+    if canonical_semantics != frozen_semantics:
         raise RuntimeError("source_neutral_integrity_stage_normalized_definition_not_equivalent_to_frozen_run81")
 
     required_flags = ("--fact-kernel", "--fact-kernel-integrity", "--article", "--output")
@@ -190,14 +289,16 @@ def validate(base: Path) -> dict[str, Any]:
             if int(facade_tamper.get("fabricated_claim_count") or 0) <= 0:
                 raise RuntimeError(f"article_integrity_tamper_not_counted_as_fabricated:{case_name}")
             _assert_non_authorizing(facade_tamper, f"tamper:{case_name}")
-            tamper_results.append({
-                "case": case_name,
-                "retained_exit_code": retained_tamper_rc,
-                "facade_exit_code": facade_tamper_rc,
-                "status": facade_tamper.get("status"),
-                "fabricated_claim_count": int(facade_tamper.get("fabricated_claim_count") or 0),
-                "semantic_sha256": _semantic_sha(facade_tamper),
-            })
+            tamper_results.append(
+                {
+                    "case": case_name,
+                    "retained_exit_code": retained_tamper_rc,
+                    "facade_exit_code": facade_tamper_rc,
+                    "status": facade_tamper.get("status"),
+                    "fabricated_claim_count": int(facade_tamper.get("fabricated_claim_count") or 0),
+                    "semantic_sha256": _semantic_sha(facade_tamper),
+                }
+            )
 
     report = {
         "schema_version": "core-v2-promoted-claim-article-integrity-post-switch-stage-equivalence-ci.v2",
@@ -224,12 +325,12 @@ def validate(base: Path) -> dict[str, Any]:
         "source_neutral_facade_runtime_dependency": True,
         "canonical_switch_validated_by_this_proof": True,
         "truth_rule": (
-            "Post-switch CI-only PASS_SHADOW proves that the canonical isj_article_integrity stage now executes the source-neutral "
-            "facade one-for-one with the same normalized stage name, argv inputs, output artifact and 42-stage position as the "
-            "immutable RUN81 comparator. The facade, retained verifier and canonical runtime artifact have exact positive JSON "
-            "semantics and identical fail-closed CLI behavior under headline, evidence-identity and extra-claim tampering. The "
-            "retained verifier is regression-only, not a canonical runtime dependency and not retirement-eligible. No publication, "
-            "acceptance, merge, deploy, cutover or retirement authority is granted."
+            "Post-switch CI-only PASS_SHADOW proves that the canonical isj_article_integrity stage now executes the "
+            "source-neutral facade one-for-one with the same normalized stage name, argv inputs, output artifact and 42-stage "
+            "position as frozen RUN81. The facade, retained verifier and canonical runtime artifact have exact positive JSON "
+            "semantics and identical fail-closed CLI behavior under headline, evidence-identity and extra-claim tampering. "
+            "The retained verifier is regression-only, not a canonical runtime dependency and not retirement-eligible. No "
+            "publication, acceptance, merge, deploy, cutover or retirement authority is granted."
         ),
     }
     (base / REPORT_ARTIFACT).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -237,26 +338,36 @@ def validate(base: Path) -> dict[str, Any]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="CI-only post-switch proof of source-neutral article-integrity stage-definition and CLI equivalence")
+    parser = argparse.ArgumentParser(
+        description="CI-only post-switch proof of source-neutral article-integrity stage-definition and CLI equivalence"
+    )
     parser.add_argument("--base", default="/tmp")
     parser.add_argument("--output")
     args = parser.parse_args()
     report = validate(Path(args.base))
     if args.output:
         Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps({
-        "status": report["status"],
-        "canonical_stage_count": report["canonical_stage_count"],
-        "source_neutral_normalized_stage_definition_equivalent": report["source_neutral_normalized_stage_definition_equivalent"],
-        "positive_cli_json_semantic_equivalent": report["positive_cli_json_semantic_equivalent"],
-        "article_deadline_claim_evidence_id": report["article_deadline_claim_evidence_id"],
-        "verified_claim_count": report["verified_claim_count"],
-        "fabricated_claim_count": report["fabricated_claim_count"],
-        "fail_closed_tamper_regressions_passed": report["fail_closed_tamper_regressions_passed"],
-        "canonical_runtime_switched": True,
-        "publication_authority": "NONE",
-        "acceptance_ready": False,
-    }, ensure_ascii=False, sort_keys=True))
+    print(
+        json.dumps(
+            {
+                "status": report["status"],
+                "canonical_stage_count": report["canonical_stage_count"],
+                "source_neutral_normalized_stage_definition_equivalent": report[
+                    "source_neutral_normalized_stage_definition_equivalent"
+                ],
+                "positive_cli_json_semantic_equivalent": report["positive_cli_json_semantic_equivalent"],
+                "article_deadline_claim_evidence_id": report["article_deadline_claim_evidence_id"],
+                "verified_claim_count": report["verified_claim_count"],
+                "fabricated_claim_count": report["fabricated_claim_count"],
+                "fail_closed_tamper_regressions_passed": report["fail_closed_tamper_regressions_passed"],
+                "canonical_runtime_switched": True,
+                "publication_authority": "NONE",
+                "acceptance_ready": False,
+            },
+            ensure_ascii=False,
+            sort_keys=True,
+        )
+    )
     return 0
 
 
