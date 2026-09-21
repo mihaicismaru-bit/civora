@@ -7,12 +7,12 @@ from typing import Any
 
 import orchestrator_run81 as _base
 
-# RUN83 controlled ownership extraction:
+# RUN85 controlled ownership extraction:
 # keep the naturally validated RUN81 plan as a frozen migration baseline while
-# Core v2 directly owns both the fact-kernel pair and the already-owned
-# promoted-claim writer projection pair. Runtime semantics, source-specific
-# modules, stage names, artifacts, evidence namespaces, stage count and
-# publication/acceptance authority remain unchanged.
+# Core v2 directly owns the fact-kernel pair, promoted-claim projection pair,
+# and promoted-claim writer-consumption pair. Runtime semantics, source-neutral
+# / source-specific modules, stage names, artifacts, evidence namespaces,
+# stage count and publication/acceptance authority remain unchanged.
 
 CycleStage = _base.CycleStage
 run_shadow = _base.run_shadow
@@ -20,8 +20,8 @@ run_shadow = _base.run_shadow
 _BASE_PLAN = _base.bounded_cycle_plan
 _BASE_SNAPSHOTS = _base._persisted_runtime_snapshots
 
-# Backwards-compatible test/introspection exports retained while RUN70 remains
-# the frozen semantic reference for already-proven writer/article seams.
+# Backwards-compatible test/introspection exports retained while RUN70/RUN81
+# remain frozen semantic references for already-proven writer/article seams.
 _LEGACY_PLAN = _base._LEGACY_PLAN
 _writer_consumption_dependency_snapshot = _base._writer_consumption_dependency_snapshot
 _article_truth_stage_ownership_snapshot = _base._article_truth_stage_ownership_snapshot
@@ -45,6 +45,15 @@ _PROJECTION_VALIDATION_ARTIFACT = "valcea-core-v2-promoted-claim-projection-vali
 _PROJECTION_STAGES = {
     "promoted_claim_writer_projection",
     "promoted_claim_projection_validation",
+}
+
+_CONSUMPTION_MODULE = "valcea-clar/core_v2/promoted_claim_writer_consumption.py"
+_CONSUMPTION_VALIDATION_MODULE = "valcea-clar/core_v2/validate_promoted_claim_writer_consumption_runtime.py"
+_CONSUMPTION_ARTIFACT = "valcea-core-v2-promoted-claim-writer-consumption.json"
+_CONSUMPTION_VALIDATION_ARTIFACT = "valcea-core-v2-promoted-claim-writer-consumption-validation.json"
+_CONSUMPTION_STAGES = {
+    "promoted_claim_writer_consumption",
+    "promoted_claim_writer_consumption_validation",
 }
 
 
@@ -230,13 +239,119 @@ def _promoted_claim_projection_stage_ownership_snapshot(plan: tuple[CycleStage, 
     }
 
 
+def _owned_consumption_stages(workdir: Path) -> tuple[CycleStage, CycleStage]:
+    """Own the source-neutral writer-consumption pair without changing RUN81 semantics."""
+    fact_kernel = workdir / _FACT_KERNEL_ARTIFACT
+    fact_integrity = workdir / _FACT_KERNEL_INTEGRITY_ARTIFACT
+    projection = workdir / _PROJECTION_ARTIFACT
+    projection_validation = workdir / _PROJECTION_VALIDATION_ARTIFACT
+    consumption = workdir / _CONSUMPTION_ARTIFACT
+    validation = workdir / _CONSUMPTION_VALIDATION_ARTIFACT
+    py = sys.executable
+    return (
+        CycleStage(
+            "promoted_claim_writer_consumption",
+            (
+                py,
+                _CONSUMPTION_MODULE,
+                "--fact-kernel", str(fact_kernel),
+                "--fact-kernel-integrity", str(fact_integrity),
+                "--projection", str(projection),
+                "--projection-validation", str(projection_validation),
+                "--year", "2026",
+                "--output", str(consumption),
+            ),
+            consumption,
+        ),
+        CycleStage(
+            "promoted_claim_writer_consumption_validation",
+            (
+                py,
+                _CONSUMPTION_VALIDATION_MODULE,
+                "--fact-kernel", str(fact_kernel),
+                "--fact-kernel-integrity", str(fact_integrity),
+                "--projection", str(projection),
+                "--projection-validation", str(projection_validation),
+                "--consumption", str(consumption),
+                "--year", "2026",
+                "--prove-tamper",
+                "--output", str(validation),
+            ),
+            validation,
+        ),
+    )
+
+
+def _promoted_claim_consumption_stage_ownership_snapshot(plan: tuple[CycleStage, ...]) -> dict[str, Any]:
+    by_name = {stage.name: stage for stage in plan}
+    consumption = by_name["promoted_claim_writer_consumption"]
+    validation = by_name["promoted_claim_writer_consumption_validation"]
+    consumption_joined = " ".join(consumption.argv)
+    validation_joined = " ".join(validation.argv)
+    required_inputs = (
+        _FACT_KERNEL_ARTIFACT,
+        _FACT_KERNEL_INTEGRITY_ARTIFACT,
+        _PROJECTION_ARTIFACT,
+        _PROJECTION_VALIDATION_ARTIFACT,
+    )
+    exact = (
+        len(consumption.argv) > 1
+        and consumption.argv[1] == _CONSUMPTION_MODULE
+        and len(validation.argv) > 1
+        and validation.argv[1] == _CONSUMPTION_VALIDATION_MODULE
+        and consumption.output is not None
+        and consumption.output.name == _CONSUMPTION_ARTIFACT
+        and validation.output is not None
+        and validation.output.name == _CONSUMPTION_VALIDATION_ARTIFACT
+        and all(name in consumption_joined for name in required_inputs)
+        and all(name in validation_joined for name in required_inputs)
+        and "--consumption" in validation.argv
+        and str(consumption.output) in validation.argv
+        and "--year" in consumption.argv
+        and "2026" in consumption.argv
+        and "--year" in validation.argv
+        and "2026" in validation.argv
+        and "--prove-tamper" in validation.argv
+    )
+    return {
+        "schema_version": "core-v2-promoted-claim-consumption-stage-ownership-shadow.v1",
+        "status": "PASS_SHADOW" if exact else "BLOCKED",
+        "publication_authority": "NONE",
+        "acceptance_ready": False,
+        "canonical_stage_count": len(plan),
+        "canonical_stage_ownership": "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION",
+        "owned_stages": [consumption.name, validation.name],
+        "canonical_consumption_module": consumption.argv[1] if len(consumption.argv) > 1 else None,
+        "canonical_consumption_validation_module": validation.argv[1] if len(validation.argv) > 1 else None,
+        "canonical_consumption_artifact": consumption.output.name if consumption.output is not None else None,
+        "canonical_consumption_validation_artifact": validation.output.name if validation.output is not None else None,
+        "frozen_run81_consumption_definitions_consumed": False,
+        "frozen_consumption_stage_anchor_used_for_position_only": True,
+        "source_neutral_consumption_modules_retained": True,
+        "stage_names_retained": True,
+        "artifact_identities_retained": True,
+        "lineage_inputs_retained": True,
+        "tamper_validation_retained": "--prove-tamper" in validation.argv,
+        "retirement_eligible": False,
+        "retirement_performed": False,
+        "truth_rule": (
+            "Core v2 directly owns the promoted-claim writer-consumption and validation definitions while preserving "
+            "the naturally validated RUN81 semantics, source-neutral modules, stage names, artifacts, evidence "
+            "identity namespace, lineage and fail-closed tamper validation. This extraction grants no retirement, "
+            "publication or acceptance authority."
+        ),
+    }
+
+
 def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     base_plan = _BASE_PLAN(workdir, live=live)
     owned_fact_kernel = _owned_fact_kernel_stages(workdir)
     owned_projection = _owned_projection_stages(workdir)
+    owned_consumption = _owned_consumption_stages(workdir)
     transformed: list[CycleStage] = []
     fact_inserted = False
     projection_inserted = False
+    consumption_inserted = False
 
     for stage in base_plan:
         if stage.name == "isj_fact_kernel" and not fact_inserted:
@@ -251,12 +366,20 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
             continue
         if stage.name in _PROJECTION_STAGES:
             continue
+        if stage.name == "promoted_claim_writer_consumption" and not consumption_inserted:
+            transformed.extend(owned_consumption)
+            consumption_inserted = True
+            continue
+        if stage.name in _CONSUMPTION_STAGES:
+            continue
         transformed.append(stage)
 
     if not fact_inserted:
         raise RuntimeError("canonical_fact_kernel_anchor_missing")
     if not projection_inserted:
         raise RuntimeError("canonical_promoted_claim_projection_anchor_missing")
+    if not consumption_inserted:
+        raise RuntimeError("canonical_promoted_claim_consumption_anchor_missing")
 
     names = [stage.name for stage in transformed]
     if len(transformed) != 42:
@@ -265,26 +388,36 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
         raise RuntimeError("canonical_fact_kernel_pair_not_unique")
     if names.count("promoted_claim_writer_projection") != 1 or names.count("promoted_claim_projection_validation") != 1:
         raise RuntimeError("canonical_promoted_claim_projection_pair_not_unique")
+    if names.count("promoted_claim_writer_consumption") != 1 or names.count("promoted_claim_writer_consumption_validation") != 1:
+        raise RuntimeError("canonical_promoted_claim_consumption_pair_not_unique")
 
     fact_index = names.index("isj_fact_kernel")
     fact_integrity_index = names.index("isj_fact_kernel_integrity")
     projection_index = names.index("promoted_claim_writer_projection")
-    validation_index = names.index("promoted_claim_projection_validation")
+    projection_validation_index = names.index("promoted_claim_projection_validation")
     consumption_index = names.index("promoted_claim_writer_consumption")
+    consumption_validation_index = names.index("promoted_claim_writer_consumption_validation")
+    writer_index = names.index("promoted_claim_writer")
     fact_promotion_validation_index = names.index("isj_fact_kernel_deadline_promotion_validation")
+
     if fact_index != fact_promotion_validation_index + 1:
         raise RuntimeError("canonical_fact_kernel_anchor_order_changed")
     if fact_integrity_index != fact_index + 1 or projection_index != fact_integrity_index + 1:
         raise RuntimeError("canonical_fact_kernel_projection_order_changed")
-    if validation_index != projection_index + 1 or consumption_index != validation_index + 1:
+    if projection_validation_index != projection_index + 1 or consumption_index != projection_validation_index + 1:
         raise RuntimeError("canonical_promoted_claim_projection_order_changed")
+    if consumption_validation_index != consumption_index + 1 or writer_index != consumption_validation_index + 1:
+        raise RuntimeError("canonical_promoted_claim_consumption_order_changed")
 
     actual_fact_kernel = (transformed[fact_index], transformed[fact_integrity_index])
     if actual_fact_kernel != _owned_fact_kernel_stages(workdir):
         raise RuntimeError("canonical_owned_fact_kernel_definition_drifted")
-    actual_projection = (transformed[projection_index], transformed[validation_index])
+    actual_projection = (transformed[projection_index], transformed[projection_validation_index])
     if actual_projection != _owned_projection_stages(workdir):
         raise RuntimeError("canonical_owned_promoted_claim_projection_definition_drifted")
+    actual_consumption = (transformed[consumption_index], transformed[consumption_validation_index])
+    if actual_consumption != _owned_consumption_stages(workdir):
+        raise RuntimeError("canonical_owned_promoted_claim_consumption_definition_drifted")
 
     fact_ownership = _fact_kernel_stage_ownership_snapshot(tuple(transformed))
     if fact_ownership["status"] != "PASS_SHADOW":
@@ -302,13 +435,21 @@ def bounded_cycle_plan(workdir: Path, *, live: bool) -> tuple[CycleStage, ...]:
     if projection_ownership["retirement_eligible"] is not False:
         raise RuntimeError("promoted_claim_projection_retirement_must_remain_closed")
 
+    consumption_ownership = _promoted_claim_consumption_stage_ownership_snapshot(tuple(transformed))
+    if consumption_ownership["status"] != "PASS_SHADOW":
+        raise RuntimeError("promoted_claim_consumption_direct_ownership_not_proven")
+    if consumption_ownership["frozen_run81_consumption_definitions_consumed"] is not False:
+        raise RuntimeError("frozen_run81_consumption_definition_consumed")
+    if consumption_ownership["retirement_eligible"] is not False:
+        raise RuntimeError("promoted_claim_consumption_retirement_must_remain_closed")
+
     return tuple(transformed)
 
 
 def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]:
     snapshots = _BASE_SNAPSHOTS(plan)
     for stage in plan:
-        if stage.name not in (_FACT_KERNEL_STAGES | _PROJECTION_STAGES):
+        if stage.name not in (_FACT_KERNEL_STAGES | _PROJECTION_STAGES | _CONSUMPTION_STAGES):
             continue
         if stage.output is None or not stage.output.is_file():
             continue
@@ -318,6 +459,7 @@ def _persisted_runtime_snapshots(plan: tuple[CycleStage, ...]) -> dict[str, Any]
             snapshots[stage.name] = {"parse_error": True, "path": str(stage.output)}
     snapshots["fact_kernel_stage_ownership"] = _fact_kernel_stage_ownership_snapshot(plan)
     snapshots["promoted_claim_projection_stage_ownership"] = _promoted_claim_projection_stage_ownership_snapshot(plan)
+    snapshots["promoted_claim_consumption_stage_ownership"] = _promoted_claim_consumption_stage_ownership_snapshot(plan)
     return snapshots
 
 
