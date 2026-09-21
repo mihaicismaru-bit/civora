@@ -166,13 +166,17 @@ def validate(base: Path) -> dict[str, Any]:
     integrity_stage_report = integrity_stage_equivalence.validate(base)
     if integrity_stage_report.get("status") != "PASS_SHADOW":
         raise RuntimeError("article_integrity_stage_definition_equivalence_not_pass_shadow")
-    if integrity_stage_report.get("canonical_runtime_switched") is not False:
-        raise RuntimeError("article_integrity_stage_proof_must_not_switch_canonical_runtime")
-    if integrity_stage_report.get("source_neutral_facade_present_in_canonical_plan") is not False:
-        raise RuntimeError("article_integrity_stage_proof_detected_unexpected_canonical_switch")
+    if integrity_stage_report.get("canonical_runtime_switched") is not True:
+        raise RuntimeError("article_integrity_stage_post_switch_proof_missing")
+    if integrity_stage_report.get("source_neutral_facade_present_in_canonical_plan") is not True:
+        raise RuntimeError("article_integrity_source_neutral_facade_missing_from_canonical_plan")
+    if integrity_stage_report.get("retained_implementation_runtime_dependency") is not False:
+        raise RuntimeError("article_integrity_retained_runtime_dependency_not_closed")
+    if integrity_stage_report.get("retained_implementation_retirement_eligible") is not False:
+        raise RuntimeError("article_integrity_retained_retirement_boundary_changed")
 
     return {
-        "schema_version": "core-v2-fact-kernel-definition-equivalence-ci.v3",
+        "schema_version": "core-v2-fact-kernel-definition-equivalence-ci.v4",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -193,21 +197,29 @@ def validate(base: Path) -> dict[str, Any]:
         "promoted_claim_consumption_lineage_equivalent": consumption_report.get("consumption_lineage_equivalent"),
         "promoted_claim_consumption_tamper_regressions_passed": consumption_report.get("consumption_tamper_regressions_passed"),
         "article_integrity_stage_definition_equivalence": integrity_stage_report.get("status"),
-        "article_integrity_stage_matches_frozen_run81": integrity_stage_report.get("canonical_integrity_stage_definition_matches_frozen_run81"),
+        "article_integrity_stage_matches_frozen_run81": integrity_stage_report.get("canonical_integrity_stage_normalized_definition_matches_frozen_run81"),
         "article_integrity_source_neutral_normalized_definition_equivalent": integrity_stage_report.get("source_neutral_normalized_stage_definition_equivalent"),
         "article_integrity_positive_cli_json_semantic_equivalent": integrity_stage_report.get("positive_cli_json_semantic_equivalent"),
         "article_integrity_fail_closed_tamper_regressions_passed": integrity_stage_report.get("fail_closed_tamper_regressions_passed"),
-        "article_integrity_canonical_runtime_switched": False,
-        "article_integrity_retained_runtime_dependency": True,
+        "article_integrity_canonical_runtime_switched": True,
+        "article_integrity_source_neutral_runtime_dependency": True,
+        "article_integrity_retained_runtime_dependency": False,
+        "article_integrity_retained_retirement_eligible": False,
         "retirement_authority": "NONE",
         "truth_rule": (
-            "This CI-only regression compares the Core v2 fact-kernel definitions with the frozen RUN81 and RUN70 semantics on the same workdir, binds that definition proof to deterministic downstream evidence identities, all existing tamper proofs and the independent article-integrity result, independently requires the promoted-claim consumption pair to match frozen RUN81 on the same verified inputs with its 4/4 fail-closed tamper proof, and independently proves that the source-neutral article-integrity facade is a one-for-one normalized stage/CLI substitute for the still-retained canonical integrity implementation with exact positive semantics and 3/3 fail-closed tamper parity. The canonical integrity stage is not switched in this increment. No naming, retirement, publication, delivery, merge, deployment, acceptance or cutover authority is granted."
+            "This CI-only regression preserves the Core v2 fact-kernel equivalence to frozen RUN81/RUN70, binds that proof "
+            "to deterministic downstream evidence identities and all existing tamper proofs, and independently verifies the "
+            "post-switch article-integrity boundary. The canonical integrity stage now executes the source-neutral facade with "
+            "the same normalized stage name, inputs, output artifact and 42-stage position as frozen RUN81; its positive JSON "
+            "semantics and 3/3 fail-closed tamper behavior remain identical to the retained deterministic verifier. The retained "
+            "verifier is regression-only, not a runtime dependency and not retirement-eligible. No naming, retirement, publication, "
+            "delivery, merge, deployment, acceptance or cutover authority is granted."
         ),
     }
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="CI-only fact-kernel, promoted-claim consumption and article-integrity definition equivalence regression")
+    parser = argparse.ArgumentParser(description="CI-only fact-kernel, promoted-claim consumption and post-switch article-integrity definition equivalence regression")
     parser.add_argument("--base", default="/tmp")
     parser.add_argument("--output", required=True)
     args = parser.parse_args()

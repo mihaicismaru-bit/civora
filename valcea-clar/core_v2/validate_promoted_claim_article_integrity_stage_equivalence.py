@@ -145,34 +145,34 @@ def _prove_stage_definition(base: Path) -> dict[str, Any]:
 
     integrity = canonical_by_name[INTEGRITY_STAGE]
     frozen_integrity = frozen_by_name[INTEGRITY_STAGE]
-    if len(integrity.argv) < 2 or integrity.argv[1] != RETAINED_IMPLEMENTATION:
-        raise RuntimeError("canonical_article_integrity_not_bound_to_retained_implementation")
+    if len(integrity.argv) < 2 or integrity.argv[1] != SOURCE_NEUTRAL_FACADE:
+        raise RuntimeError("canonical_article_integrity_not_bound_to_source_neutral_facade")
+    if len(frozen_integrity.argv) < 2 or frozen_integrity.argv[1] != RETAINED_IMPLEMENTATION:
+        raise RuntimeError("frozen_run81_article_integrity_not_retained_implementation")
     if integrity.output is None or integrity.output.name != INTEGRITY_ARTIFACT:
         raise RuntimeError("canonical_article_integrity_output_changed")
-
-    proposed_argv = list(integrity.argv)
-    proposed_argv[1] = SOURCE_NEUTRAL_FACADE
-    proposed = orchestrator.CycleStage(integrity.name, tuple(proposed_argv), integrity.output)
+    if frozen_integrity.output is None or frozen_integrity.output.name != INTEGRITY_ARTIFACT:
+        raise RuntimeError("frozen_run81_article_integrity_output_changed")
 
     canonical_semantics = _stage_semantics(integrity, base)
     frozen_semantics = _stage_semantics(frozen_integrity, base)
-    proposed_semantics = _stage_semantics(proposed, base)
     if canonical_semantics != frozen_semantics:
-        raise RuntimeError("canonical_integrity_stage_definition_diverged_from_frozen_run81")
-    if proposed_semantics != canonical_semantics:
-        raise RuntimeError("source_neutral_integrity_stage_normalized_definition_not_equivalent")
+        raise RuntimeError("source_neutral_integrity_stage_normalized_definition_not_equivalent_to_frozen_run81")
 
     required_flags = ("--fact-kernel", "--fact-kernel-integrity", "--article", "--output")
     for flag in required_flags:
-        if integrity.argv.count(flag) != 1 or proposed.argv.count(flag) != 1:
+        if integrity.argv.count(flag) != 1 or frozen_integrity.argv.count(flag) != 1:
             raise RuntimeError(f"integrity_stage_cli_flag_cardinality_changed:{flag}")
 
     joined = " ".join(str(token) for token in integrity.argv)
-    for artifact in (FACT_KERNEL_ARTIFACT, FACT_INTEGRITY_ARTIFACT, ARTICLE_ARTIFACT, INTEGRITY_ARTIFACT):
-        if artifact not in joined and artifact != INTEGRITY_ARTIFACT:
+    for artifact in (FACT_KERNEL_ARTIFACT, FACT_INTEGRITY_ARTIFACT, ARTICLE_ARTIFACT):
+        if artifact not in joined:
             raise RuntimeError(f"integrity_stage_lineage_artifact_missing:{artifact}")
-    if SOURCE_NEUTRAL_FACADE in "\n".join(" ".join(stage.argv) for stage in canonical):
-        raise RuntimeError("source_neutral_integrity_facade_already_present_in_canonical_plan")
+    canonical_joined = "\n".join(" ".join(stage.argv) for stage in canonical)
+    if SOURCE_NEUTRAL_FACADE not in canonical_joined:
+        raise RuntimeError("source_neutral_integrity_facade_missing_from_canonical_plan")
+    if RETAINED_IMPLEMENTATION in canonical_joined:
+        raise RuntimeError("retained_integrity_implementation_still_runtime_dependency")
 
     writer_index = canonical_names.index("promoted_claim_writer")
     gate_index = canonical_names.index("isj_article_deadline_claim_gate")
@@ -181,18 +181,33 @@ def _prove_stage_definition(base: Path) -> dict[str, Any]:
     if (gate_index, validation_index, integrity_index) != (writer_index + 1, writer_index + 2, writer_index + 3):
         raise RuntimeError("canonical_writer_gate_validation_integrity_order_changed")
 
+    ownership = orchestrator._article_integrity_stage_ownership_snapshot(canonical)
+    if ownership.get("status") != "PASS_SHADOW":
+        raise RuntimeError("article_integrity_ownership_snapshot_not_pass_shadow")
+    if ownership.get("canonical_runtime_switched") is not True:
+        raise RuntimeError("article_integrity_ownership_does_not_record_switch")
+    if ownership.get("retained_integrity_runtime_dependency") is not False:
+        raise RuntimeError("retained_integrity_runtime_dependency_not_closed")
+    if ownership.get("retained_integrity_retirement_eligible") is not False:
+        raise RuntimeError("retained_integrity_retirement_boundary_changed")
+    if ownership.get("publication_authority") != "NONE" or ownership.get("acceptance_ready") is not False:
+        raise RuntimeError("article_integrity_ownership_authority_boundary_changed")
+
     return {
         "canonical_stage_count": 42,
         "canonical_stage_order_matches_frozen_run81": True,
         "canonical_integrity_stage_name": integrity.name,
         "canonical_integrity_module": integrity.argv[1],
-        "proposed_source_neutral_integrity_module": SOURCE_NEUTRAL_FACADE,
+        "retained_integrity_module": frozen_integrity.argv[1],
         "canonical_integrity_artifact": integrity.output.name,
-        "canonical_integrity_stage_definition_matches_frozen_run81": True,
+        "canonical_integrity_stage_normalized_definition_matches_frozen_run81": True,
         "source_neutral_normalized_stage_definition_equivalent": True,
         "canonical_order_writer_gate_validation_integrity_preserved": True,
-        "canonical_runtime_switched": False,
-        "source_neutral_facade_present_in_canonical_plan": False,
+        "canonical_runtime_switched": True,
+        "source_neutral_facade_present_in_canonical_plan": True,
+        "retained_implementation_runtime_dependency": False,
+        "retained_implementation_regression_only": True,
+        "retained_implementation_retirement_eligible": False,
     }
 
 
@@ -286,7 +301,7 @@ def validate(base: Path) -> dict[str, Any]:
             )
 
     report = {
-        "schema_version": "core-v2-promoted-claim-article-integrity-stage-definition-equivalence-ci.v1",
+        "schema_version": "core-v2-promoted-claim-article-integrity-post-switch-stage-equivalence-ci.v2",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
@@ -305,17 +320,17 @@ def validate(base: Path) -> dict[str, Any]:
         "projected_deadline_verified": facade.get("projected_deadline_verified") is True,
         "fail_closed_tamper_regressions_passed": len(tamper_results),
         "tamper_results": tamper_results,
-        "retained_implementation_runtime_dependency": True,
+        "retained_implementation_runtime_dependency": False,
         "retained_implementation_retirement_eligible": False,
-        "source_neutral_facade_runtime_dependency": False,
-        "canonical_switch_authorized_by_this_proof": False,
+        "source_neutral_facade_runtime_dependency": True,
+        "canonical_switch_validated_by_this_proof": True,
         "truth_rule": (
-            "CI-only PASS_SHADOW proves that the source-neutral article-integrity CLI can replace the retained "
-            "isj_article_integrity stage one-for-one at the definition boundary: identical stage name, normalized "
-            "argv inputs, output artifact and 42-stage position, plus exact positive JSON semantics and fail-closed "
-            "CLI behavior under headline, evidence-identity and extra-claim tampering. The canonical stage remains "
-            "intentionally bound to the retained implementation in this increment. No publication, acceptance, merge, "
-            "deploy, cutover or retirement authority is granted."
+            "Post-switch CI-only PASS_SHADOW proves that the canonical isj_article_integrity stage now executes the "
+            "source-neutral facade one-for-one with the same normalized stage name, argv inputs, output artifact and 42-stage "
+            "position as frozen RUN81. The facade, retained verifier and canonical runtime artifact have exact positive JSON "
+            "semantics and identical fail-closed CLI behavior under headline, evidence-identity and extra-claim tampering. "
+            "The retained verifier is regression-only, not a canonical runtime dependency and not retirement-eligible. No "
+            "publication, acceptance, merge, deploy, cutover or retirement authority is granted."
         ),
     }
     (base / REPORT_ARTIFACT).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -324,7 +339,7 @@ def validate(base: Path) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="CI-only proof of one-for-one source-neutral article-integrity stage-definition and CLI equivalence"
+        description="CI-only post-switch proof of source-neutral article-integrity stage-definition and CLI equivalence"
     )
     parser.add_argument("--base", default="/tmp")
     parser.add_argument("--output")
@@ -345,7 +360,7 @@ def main() -> int:
                 "verified_claim_count": report["verified_claim_count"],
                 "fabricated_claim_count": report["fabricated_claim_count"],
                 "fail_closed_tamper_regressions_passed": report["fail_closed_tamper_regressions_passed"],
-                "canonical_runtime_switched": False,
+                "canonical_runtime_switched": True,
                 "publication_authority": "NONE",
                 "acceptance_ready": False,
             },
