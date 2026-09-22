@@ -193,6 +193,31 @@ def existing_records(root: Path) -> list[dict[str, Any]]:
     return [r for r in records if isinstance(r, dict)]
 
 
+def prior_terminal_record(
+    records: list[dict[str, Any]], article_id: str, content_version: str, channel: str, edition_id: str
+) -> dict[str, Any] | None:
+    """Carry story-version delivery truth across recap editions.
+
+    Editions are recap snapshots, not delivery identities. A new recap must not
+    manufacture a fresh pending delivery for the exact same story version and
+    channel. Prefer a prior delivered receipt; otherwise preserve an explicit
+    blocked state. Pending records are intentionally not inherited.
+    """
+    candidates = [
+        r for r in records
+        if r.get("edition_id") != edition_id
+        and r.get("article_id") == article_id
+        and r.get("content_version") == content_version
+        and r.get("channel") == channel
+        and r.get("status") in {"delivered", "blocked"}
+    ]
+    delivered = [r for r in candidates if r.get("status") == "delivered"]
+    if delivered:
+        return delivered[-1]
+    blocked = [r for r in candidates if r.get("status") == "blocked"]
+    return blocked[-1] if blocked else None
+
+
 def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     prior = read_json(root / DELIVERY_DIR / "queue.json", {"records": [], "policy": {}}) or {"records": [], "policy": {}}
     prior_records = prior.get("records", []) if isinstance(prior, dict) else []
@@ -208,6 +233,20 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             )
             record = by_id.get(did)
             if record is None:
+                inherited = prior_terminal_record(
+                    records,
+                    article["article_id"],
+                    article["content_version"],
+                    channel,
+                    manifest["edition_id"],
+                )
+                inherited_status = inherited.get("status") if inherited else None
+                inherited_blocker = inherited.get("blocker") if inherited_status == "blocked" else None
+                inherited_confirmation = (
+                    copy.deepcopy(inherited.get("confirmation"))
+                    if inherited_status == "delivered" and inherited.get("confirmation")
+                    else None
+                )
                 record = {
                     "delivery_id": did,
                     "edition_id": manifest["edition_id"],
@@ -215,11 +254,12 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
                     "content_version": article["content_version"],
                     "channel": channel,
                     "canonical_url": article["canonical_url"],
-                    "status": selection.get("queue_status", "pending"),
-                    "blocker": selection.get("blocker"),
+                    "status": inherited_status or selection.get("queue_status", "pending"),
+                    "blocker": inherited_blocker if inherited_status == "blocked" else selection.get("blocker"),
                     "created_at": utc_now(),
                     "last_reconciled_at": None,
-                    "confirmation": None,
+                    "confirmation": inherited_confirmation,
+                    "inherited_from_delivery_id": inherited.get("delivery_id") if inherited else None,
                 }
                 records.append(record)
                 by_id[did] = record
@@ -483,6 +523,41 @@ def self_test() -> None:
         assert first["complete"] is True
         assert first["fully_delivered"] is False
 
+        morning_records = read_json(root / "delivery/queue.json")["records"]
+        morning_versions = {
+            (r["article_id"], r["channel"]): r["content_version"]
+            for r in morning_records if r["edition_id"] == "2026-09-22-morning"
+        }
+        morning = read_json(root / "editions/2026-09-22-morning.json")
+        evening = copy.deepcopy(morning)
+        evening["edition_id"] = "2026-09-22-evening"
+        write_json(root / "editions/2026-09-22-evening.json", evening)
+        write_json(root / "site/current_edition.json", {
+            "edition_id": "2026-09-22-evening", "json_source": "editions/2026-09-22-evening.json"
+        })
+        evening_report = run(root)
+        evening_records = [
+            r for r in read_json(root / "delivery/queue.json")["records"]
+            if r["edition_id"] == "2026-09-22-evening"
+        ]
+        assert evening_report["complete"] is True
+        assert not any(r["status"] == "pending" for r in evening_records)
+        for r in evening_records:
+            key=(r["article_id"], r["channel"])
+            assert r["content_version"] == morning_versions[key]
+            if key == ("alpha", "facebook"):
+                assert r["status"] == "delivered"
+                assert (r.get("confirmation") or {}).get("remote_id") == "fb-1"
+                assert r.get("inherited_from_delivery_id")
+            if key == ("alpha", "threads"):
+                assert r["status"] == "blocked"
+                assert r["blocker"] == PRE_S1_BLOCKER
+
+        # Return to the morning edition for version-change isolation tests.
+        write_json(root / "site/current_edition.json", {
+            "edition_id": "2026-09-22-morning", "json_source": "editions/2026-09-22-morning.json"
+        })
+
         write_json(root / "social/facebook_state.json", {"published": {}})
         run(root)
         records = read_json(root / "delivery/queue.json")["records"]
@@ -520,7 +595,7 @@ def self_test() -> None:
         "self_test": "PASS",
         "invariants": [
             "dedupe", "monotonic_confirmation", "versioned_delivery",
-            "provider_snapshot_single_version_binding", "legacy_pending_quarantine", "explicit_blockers"
+            "provider_snapshot_single_version_binding", "recap_delivery_truth_carryover", "legacy_pending_quarantine", "explicit_blockers"
         ],
     }))
 
