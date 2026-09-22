@@ -163,7 +163,7 @@ footer{border-top:3px solid var(--ink);max-width:1180px;margin:20px auto 0;paddi
 
 def shell(nav: dict[str, Any], *, title: str, description: str, canonical: str, body: str, robots: str | None = None) -> str:
     robots_meta = f'<meta name="robots" content="{esc(robots)}">' if robots else ""
-    return f'''<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(description)}"><link rel="canonical" href="{esc(canonical)}">{robots_meta}<meta property="og:site_name" content="VÂLCEA CLAR"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{esc(canonical)}"><style>{CSS}</style></head><body data-nav-contract="{esc(nav.get('contract_id'))}"><header class="site-header"><div class="mast"><div class="brand"><a href="/">{esc(nav.get('brand'))}</a></div><div class="tag">{esc(nav.get('tagline'))}</div></div><nav class="nav" aria-label="Navigație principală">{nav_html(nav)}</nav></header>{body}{footer_html(nav)}</body></html>'''
+    return f'''<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(description)}"><link rel="canonical" href="{esc(canonical)}"><link rel="alternate" type="application/rss+xml" title="VÂLCEA CLAR RSS" href="/rss.xml">{robots_meta}<meta property="og:site_name" content="VÂLCEA CLAR"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{esc(canonical)}"><style>{CSS}</style></head><body data-nav-contract="{esc(nav.get('contract_id'))}"><header class="site-header"><div class="mast"><div class="brand"><a href="/">{esc(nav.get('brand'))}</a></div><div class="tag">{esc(nav.get('tagline'))}</div></div><nav class="nav" aria-label="Navigație principală">{nav_html(nav)}</nav></header>{body}{footer_html(nav)}</body></html>'''
 
 
 def source_links(story: dict[str, Any], list_mode: bool = False) -> str:
@@ -301,7 +301,10 @@ def build() -> dict[str, Any]:
         },
     }
     write_json(STATE, state)
+    import s4_publication_experience as s4
+    state = s4.apply(nav=nav, stories=stories, live_ids=live_ids, shell=shell)
     validate(nav, stories)
+    s4.validate()
     return state
 
 

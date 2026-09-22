@@ -389,6 +389,30 @@
         "valcea-clar/site/runtime"
       ],
       "owner": "site_engine"
+    },
+    {
+      "id": "s4_publication_experience",
+      "kind": "reader_experience_rubrics_localities_rss_corrections_and_article_metadata",
+      "workflow": ".github/workflows/valcea-clar-s4-publication-ux.yml",
+      "schedule": [],
+      "event_driven": true,
+      "triggers": [
+        "public_ux_contract_change",
+        "story_integrity_render",
+        "correction_ledger_change"
+      ],
+      "publication_authority": "presentation_only",
+      "content_rewrite_allowed": false,
+      "correction_fact_authority": "none",
+      "locality_inference_allowed": false,
+      "writes": [
+        "valcea-clar/site/runtime/rubrici",
+        "valcea-clar/site/runtime/localitati",
+        "valcea-clar/site/runtime/corectii/registru",
+        "valcea-clar/site/runtime/rss.xml",
+        "valcea-clar/site/public_ux_state.json"
+      ],
+      "owner": "site_engine"
     }
   ],
   "retired_external_monitors": [

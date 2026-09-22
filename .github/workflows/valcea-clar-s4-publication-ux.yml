@@ -1,0 +1,123 @@
+name: VÂLCEA CLAR S4 Publication Experience
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/scripts/s4_publication_experience.py"
+      - "valcea-clar/scripts/public_ux_reset.py"
+      - "valcea-clar/scripts/public_ux_story_integrity.py"
+      - "valcea-clar/editorial/corrections.json"
+      - "valcea-clar/docs/S4_PUBLICATION_EXPERIENCE.md"
+      - ".github/workflows/valcea-clar-s4-publication-ux.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/scripts/s4_publication_experience.py"
+      - "valcea-clar/scripts/public_ux_reset.py"
+      - "valcea-clar/scripts/public_ux_story_integrity.py"
+      - "valcea-clar/editorial/corrections.json"
+      - ".github/workflows/valcea-clar-s4-publication-ux.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-live-newsroom
+  cancel-in-progress: false
+
+jobs:
+  s4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Compile S4 and canonical UX
+        run: |
+          python -m py_compile             valcea-clar/scripts/s4_publication_experience.py             valcea-clar/scripts/public_ux_reset.py             valcea-clar/scripts/public_ux_story_integrity.py
+      - name: Self-test S4 semantics
+        run: |
+          python valcea-clar/scripts/s4_publication_experience.py --self-test
+          python valcea-clar/scripts/public_ux_reset.py --self-test
+          python valcea-clar/scripts/public_ux_story_integrity.py --self-test
+      - name: Rebuild reader UX and S4 experience
+        run: |
+          python valcea-clar/scripts/public_ux_media.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/s4_publication_experience.py --check
+      - name: Validate all public articles and S4 routes
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar/site/runtime')
+          manifest=json.loads((root/'stiri/manifest.json').read_text(encoding='utf-8'))
+          stories=manifest.get('stories') or []
+          if not stories:
+              raise SystemExit('S4: empty story manifest')
+          for row in stories:
+              page=root/str(row['path']).strip('/')/'index.html'
+              raw=page.read_text(encoding='utf-8')
+              if 'data-editorial-responsibility="VÂLCEA CLAR"' not in raw:
+                  raise SystemExit(f"S4 responsibility missing: {row['id']}")
+              if 'property="article:published_time"' not in raw:
+                  raise SystemExit(f"S4 published metadata missing: {row['id']}")
+              if row.get('image') and 'data-media-provenance=' not in raw:
+                  raise SystemExit(f"S4 visual provenance missing: {row['id']}")
+          sitemap=(root/'sitemap.xml').read_text(encoding='utf-8')
+          for route in ('/rubrici/','/localitati/','/corectii/registru/'):
+              if f'<loc>https://valceaclar.ro{route}</loc>' not in sitemap:
+                  raise SystemExit(f'S4 sitemap route missing: {route}')
+          rss=(root/'rss.xml').read_text(encoding='utf-8')
+          if rss.count('<item>') < min(10,len(stories)):
+              raise SystemExit('S4 RSS has too few items')
+          state=json.loads(Path('valcea-clar/site/public_ux_state.json').read_text(encoding='utf-8'))
+          s4=state.get('s4_publication_experience') or {}
+          print(json.dumps({
+              'status':'PASS','stories':len(stories),
+              'rubric_routes':s4.get('rubric_routes'),
+              'locality_routes':s4.get('locality_routes'),
+              'rss_items':rss.count('<item>')
+          }))
+          PY
+      - name: Persist S4 runtime conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "valcea-clar-s4-ux[bot]"
+          git config user.email "valcea-clar-s4-ux@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python valcea-clar/scripts/public_ux_media.py
+            python valcea-clar/scripts/public_ux_story_integrity.py
+            python valcea-clar/scripts/s4_publication_experience.py --check
+            git add valcea-clar/site/runtime valcea-clar/site/public_ux_state.json
+            if git diff --cached --quiet; then
+              echo "S4 runtime already reconciled."
+              exit 0
+            fi
+            git commit -m "Project VÂLCEA CLAR S4 publication experience"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+      - name: Upload S4 audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-s4-publication-ux-${{ github.run_id }}
+          path: |
+            valcea-clar/site/public_ux_state.json
+            valcea-clar/site/runtime/rss.xml
+            valcea-clar/site/runtime/rubrici
+            valcea-clar/site/runtime/localitati
+            valcea-clar/site/runtime/corectii/registru
+          if-no-files-found: warn
+          retention-days: 14
