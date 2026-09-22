@@ -321,22 +321,32 @@
       "missing_editorial_evidence": []
     },
     "manual_intervention": {
-      "status": "UNKNOWN",
-      "value": null,
-      "reason": "workflow_dispatch_result_truncated:mihaicismaru-bit/civora",
-      "automated_workflow_dispatch_runs": [],
-      "manual_story_route_additions": []
+      "status": "MEASURED",
+      "value": 0,
+      "workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35695908317,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-22T06:40:31Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
+      "manual_story_route_additions": [],
+      "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
     "soak_48h": {
-      "status": "UNKNOWN",
-      "structural_baseline_sha": "a9c99c29625c98a5f5c2c10519f5408ead486897",
-      "structural_baseline_at_utc": "2026-09-18T04:25:35Z",
+      "status": "IN_PROGRESS",
+      "structural_baseline_sha": "a87fafaad035ab5069b128c78ba9f9ed15ad7c7b",
+      "structural_baseline_at_utc": "2026-09-22T06:39:44Z",
       "structural_baseline_repository": "mihaicismaru-bit/civora",
       "structural_baseline_path": "civora_structural_paths",
       "structural_components": [
         {
-          "sha": "a9c99c29625c98a5f5c2c10519f5408ead486897",
-          "at_utc": "2026-09-18T04:25:35Z",
+          "sha": "a87fafaad035ab5069b128c78ba9f9ed15ad7c7b",
+          "at_utc": "2026-09-22T06:39:44Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
@@ -348,7 +358,7 @@
           "source_sha": "6a28b61906e4963271b0eab8c6ee708a2e662b1e"
         }
       ],
-      "eligible_after_utc": "2026-09-20T04:25:35Z",
+      "eligible_after_utc": "2026-09-24T06:39:44Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
