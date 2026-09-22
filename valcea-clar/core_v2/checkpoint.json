@@ -1,7 +1,7 @@
 {
-  "schema_version": "11.5",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN102-SINGLE-EXECUTOR-META-PARITY-NATURAL-VALIDATED",
-  "observed_at_utc": "2026-09-22T04:22:21Z",
+  "schema_version": "11.6",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN103-CANONICAL-THIN-EXECUTOR-NATURAL-VALIDATED",
+  "observed_at_utc": "2026-09-22T06:32:04Z",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -14,28 +14,36 @@
   "working_branch": "rebuild/valcea-clar-core-v2-20260918",
   "pull_request": 1222,
   "fresh_reread": {
-    "civora_main_sha": "d095a2159db40bebfabadaa4f456a2be0f405578",
-    "civora_main_message": "Refresh VÂLCEA CLAR source discovery state",
+    "civora_main_sha": "440ef32a8745ae90bdfbe5146a927df34a8f45ab",
+    "civora_main_message": "Refresh VÂLCEA CLAR signal intelligence transaction",
     "public_projection_main_sha": "49368394aef01c4f766e36baaf5a5b11f6b68681",
     "public_projection_main_message": "sync: reconcile CIVORA canonical stories",
     "public_projection_modified_by_core_v2": false,
     "legacy_live_automation_still_active": true,
-    "core_v2_parity_feature_head": "b73148449765e2e0f5f6f985ef6cfde5413bad64"
+    "core_v2_thinning_feature_head": "ed240bf9f5455fa801a70c1168bd6197d18dfb9e"
   },
   "previous_validated_state": {
-    "run_label": "RUN101",
-    "checkpoint_head_commit": "2f0644c5204c1b30a4c21687beaa05b24edfb283",
-    "schema_version": "11.4",
+    "run_label": "RUN102",
+    "checkpoint_head_commit": "29d4661b8f5d9a0885ebcfeb769d30862d2c0964",
+    "schema_version": "11.5",
     "canonical_orchestrator_stage_count": 41,
-    "orchestrator_owned_external_evidence": true,
-    "meta_secret_handoff_to_orchestrator": false,
-    "github_actions_external_evidence_steps_still_present": true
+    "single_orchestrator_received_meta_read_secrets": true,
+    "github_actions_external_evidence_steps_still_present": true,
+    "temporary_executor_parity_workflow_present": true
   },
   "done": {
-    "temporary_thin_executor_parity_workflow_added": true,
+    "canonical_shadow_workflow_thinned": true,
     "single_orchestrator_executor_received_existing_meta_read_secrets": true,
     "meta_secret_handoff_to_orchestrator": true,
     "meta_read_only_boundary_preserved": true,
+    "duplicate_candidate_producer_removed_from_workflow": true,
+    "duplicate_site_readback_producer_removed_from_workflow": true,
+    "duplicate_visual_readback_producer_removed_from_workflow": true,
+    "duplicate_meta_readback_producer_removed_from_workflow": true,
+    "duplicate_instagram_identity_producer_removed_from_workflow": true,
+    "duplicate_receipt_producer_removed_from_workflow": true,
+    "duplicate_transaction_producer_removed_from_workflow": true,
+    "independent_workflow_validators_preserved": true,
     "executor_parity_contract_status": "PASS_SHADOW",
     "executor_parity_checks_passed": 21,
     "executor_parity_checks_failed": 0,
@@ -51,9 +59,6 @@
     "canonical_terminal_stage": "shadow_site_package",
     "external_auditor_inserted": false,
     "external_auditor_executed": false,
-    "github_actions_external_evidence_steps_still_present": true,
-    "canonical_shadow_workflow_thinned": false,
-    "duplicate_external_evidence_steps_removed": false,
     "temporary_parity_workflow_retired": false,
     "workflow_dispatch_used": false,
     "manual_rerun_used": false,
@@ -63,35 +68,29 @@
     "meta_write_performed": false,
     "public_projection_write_performed": false
   },
-  "same_head_natural_parity": {
-    "verification_basis": "The temporary thin executor and the existing full shadow workflow both ran naturally from the same push head. The thin path passed the existing Meta credentials only to the single Core v2 orchestrator invocation; the existing workflow independently repeated its legacy workflow-level evidence sequence. Stable truth summaries were compared artifact-to-artifact on the same head and were identical for candidate identity, public site readback, visual blocker taxonomy, Meta object results, Instagram approved-visual identity, receipt states and transaction terminal states.",
-    "head_sha": "b73148449765e2e0f5f6f985ef6cfde5413bad64",
-    "thin_executor_run_id": 35686509985,
-    "thin_executor_run_number": 3,
-    "thin_executor_attempt": 1,
-    "thin_executor_event": "push",
-    "thin_executor_conclusion": "success",
-    "thin_executor_artifact_id": 10676937501,
-    "thin_executor_artifact_sha256": "ea6dc19f59039bf0e17a9dfa9bffb915b5f42c71920c2298dd81254509a6c0cf",
-    "existing_full_shadow_run_id": 35686510020,
-    "existing_full_shadow_run_number": 962,
-    "existing_full_shadow_attempt": 1,
-    "existing_full_shadow_event": "push",
-    "existing_full_shadow_conclusion": "success",
-    "existing_full_shadow_artifact_id": 10677207095,
-    "existing_full_shadow_artifact_sha256": "7e4327de2cbfbca9b898fee6da76152c93eed6e7bf4cf7cc8303deebd0376184",
-    "candidate_identity_parity": true,
-    "site_truth_summary_parity": true,
-    "visual_truth_summary_parity": true,
-    "meta_truth_summary_parity": true,
-    "instagram_visual_identity_parity": true,
-    "receipt_truth_summary_parity": true,
-    "transaction_terminal_state_parity": true,
-    "parity_material_delta": "The single orchestrator executor now proves the same externally observed truth as the still-duplicated workflow-level path while receiving the existing Meta credentials read-only and retaining zero publication authority."
+  "natural_validation": {
+    "verification_basis": "A push caused by the isolated canonical Shadow workflow thinning commit ran naturally. The canonical workflow passed the existing Meta credentials only to the single Core v2 orchestrator invocation; the previously duplicated workflow-level external-evidence producers were absent, while independent validators consumed the orchestrator-produced artifacts. No workflow_dispatch or manual rerun was used.",
+    "head_sha": "ed240bf9f5455fa801a70c1168bd6197d18dfb9e",
+    "shadow_run_id": 35694914648,
+    "shadow_run_number": 966,
+    "shadow_attempt": 1,
+    "shadow_event": "push",
+    "shadow_conclusion": "success",
+    "shadow_artifact_id": 10680191686,
+    "shadow_artifact_sha256": "14d17e5c62e80367229eeae9d9bf3971decc25e1e80fa15ea3ec6bc8c913c6c6",
+    "orchestrator_stage_count": "41/41",
+    "orchestrator_failed_stage": null,
+    "audit_input_count": 6,
+    "fail_closed_regressions_passed": 5,
+    "meta_token_present": true,
+    "executor_parity_checks": "21/21",
+    "external_auditor_inserted": false,
+    "external_auditor_executed": false,
+    "material_delta": "The canonical Shadow workflow now relies on the single Core v2 orchestrator as the sole producer of the six external-evidence families required for AuditResult; GitHub Actions retains tests, diagnostics and independent validators rather than a second producer chain."
   },
   "single_executor_truth": {
-    "candidate_count": 2,
-    "candidate_story_ids": [
+    "replay_candidate_count": 2,
+    "replay_candidate_story_ids": [
       "valcea-apa-canal-contract-152m-20260902",
       "cet-govora-cine-a-decis-oprirea-20260821"
     ],
@@ -100,6 +99,7 @@
     "site_approved_visual_absent": "2/2",
     "canonical_site_visual_binding_consistent": "1/2",
     "cross_surface_visual_binding_divergence": "1/2",
+    "visual_transport_failures": 0,
     "meta_token_present": true,
     "facebook_remote_readback": "0/2",
     "facebook_failed_permission_code_10": "2/2",
@@ -112,8 +112,8 @@
     "truth_complete_transactions": 0,
     "historical_fact_kernel_evidence_ready": "2/2",
     "transaction_terminal_states": {
-      "valcea-apa-canal-contract-152m-20260902": "BLOCKED",
-      "cet-govora-cine-a-decis-oprirea-20260821": "BLOCKED"
+      "valcea-apa-canal-contract-152m-20260902": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE",
+      "cet-govora-cine-a-decis-oprirea-20260821": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE"
     },
     "external_truth_complete": false,
     "acceptance_ready": false
@@ -125,39 +125,35 @@
     "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1
   },
   "blocked": [
-    "Core v2 acceptance remains blocked by external delivery and visual truth, not by CI status.",
-    "The single executor has proven Meta-token plumbing and truth parity, but the canonical shadow workflow still repeats the old workflow-level external-evidence sequence; duplicate sequencing has not yet been removed.",
-    "Facebook readback fails closed for both candidates with Graph error code 10 requiring pages_read_engagement or Page Public Content Access; no internal remote ID is treated as delivered.",
-    "Neither public article currently exposes the approved Core v2 visual; one Instagram object remains unbound to the approved visual identity and one cross-surface visual binding remains divergent.",
+    "Core v2 acceptance remains blocked by external visual and social delivery truth, not by CI status.",
+    "Both public replay articles currently fail the approved-public-visual requirement even though their public article readback succeeds.",
+    "Facebook external readback fails closed for both replay candidates with Graph error code 10 requiring pages_read_engagement or Page Public Content Access; no internal remote ID is treated as delivered.",
+    "One Instagram object remains unbound to the approved visual identity and one cross-surface visual binding remains divergent.",
     "The independent external auditor remains downstream and has not been inserted or executed as a canonical golden-path stage.",
-    "No acceptance, cutover, merge, deploy, publication or legacy-retirement authority is granted by RUN102."
+    "The temporary executor-parity workflow still exists on the isolated branch and is scheduled for a separate cleanup increment; it does not grant publication or cutover authority.",
+    "No acceptance, cutover, merge, deploy, publication or legacy-retirement authority is granted by RUN103."
   ],
   "next": [
-    "Modify the existing Core v2 shadow workflow so its single orchestrator invocation receives the existing Meta read-only secrets directly, then delete the duplicate workflow-level candidate/site/visual/Meta/Instagram/receipt/transaction generation steps while preserving independent validators against the orchestrator-produced artifacts.",
-    "Naturally validate the thinned canonical workflow on push and compare its immutable evidence summaries to this RUN102 parity baseline; do not use workflow_dispatch or manual rerun.",
-    "After canonical thin-executor validation, retire the temporary executor-parity workflow from the branch in a separate cleanup commit and confirm no external-evidence producer exists outside the orchestrator.",
-    "Only after the workflow seam is closed, evaluate inserting the independent auditor as a non-generative downstream consumer of the six immutable snapshots; do not let the auditor generate or mutate evidence.",
-    "Keep acceptance fail-closed and do not merge, deploy, publish, write Meta state or modify the public projection without explicit owner approval."
+    "Delete only the temporary valcea-clar-core-v2-executor-parity workflow from the isolated branch in a separate cleanup commit; do not alter the canonical Shadow workflow producer ownership in that same cleanup.",
+    "Naturally validate the cleanup push and prove that no workflow-level external-evidence producer remains outside the single orchestrator while the canonical Shadow workflow still passes 41/41, six audit inputs, 5/5 fail-closed regressions and 21/21 executor boundary checks.",
+    "After the workflow seam is fully closed, build an isolated stage-definition/equivalence proof for inserting the independent non-generative auditor as a consumer of the six immutable snapshots; do not let the auditor create or mutate evidence.",
+    "Keep acceptance fail-closed and do not merge, deploy, publish, write Meta state, modify the public projection or start the 10-story cutover acceptance series without explicit owner approval."
   ],
   "evidence": {
-    "temporary_executor_workflow_commit": "0e5573209c4a5b6f7c80b9b5d6024b272a26032c",
-    "executor_parity_contract_commit": "b73148449765e2e0f5f6f985ef6cfde5413bad64",
-    "thin_executor_run_id": 35686509985,
-    "thin_executor_run_number": 3,
-    "thin_executor_artifact_id": 10676937501,
-    "thin_executor_artifact_sha256": "ea6dc19f59039bf0e17a9dfa9bffb915b5f42c71920c2298dd81254509a6c0cf",
-    "full_shadow_run_id": 35686510020,
-    "full_shadow_run_number": 962,
-    "full_shadow_artifact_id": 10677207095,
-    "full_shadow_artifact_sha256": "7e4327de2cbfbca9b898fee6da76152c93eed6e7bf4cf7cc8303deebd0376184",
+    "canonical_thinning_commit": "ed240bf9f5455fa801a70c1168bd6197d18dfb9e",
+    "shadow_run_id": 35694914648,
+    "shadow_run_number": 966,
+    "shadow_artifact_id": 10680191686,
+    "shadow_artifact_sha256": "14d17e5c62e80367229eeae9d9bf3971decc25e1e80fa15ea3ec6bc8c913c6c6",
     "runtime_stage_count": "41/41",
     "runtime_failed_stage": null,
     "sequence_fail_closed_regressions_passed": 5,
     "sequence_meta_token_present": true,
+    "executor_parity_checks_passed": 21,
     "external_auditor_inserted": false,
     "pull_request": 1222,
     "pull_request_state": "open",
     "pull_request_draft": true
   },
-  "truth_rule": "RUN102 proves, on two independent natural workflows from the same commit, that the single Core v2 orchestrator executor can receive the existing Meta credentials for read-only external verification and reproduce the stable external-truth state of the legacy workflow-level evidence path without acquiring publication authority. This is a parity proof, not delivery, acceptance, cutover or production readiness. Duplicate workflow-level evidence producers remain until the next isolated thinning increment."
+  "truth_rule": "RUN103 proves that the canonical Core v2 Shadow workflow can operate as a thin executor around a single orchestrator-owned external-evidence sequence: Meta credentials are consumed only for read-only remote verification, the duplicate workflow-level producer chain is removed, independent validators remain, and all authority stays NONE. This is architecture validation, not delivery, acceptance, cutover or production readiness."
 }
