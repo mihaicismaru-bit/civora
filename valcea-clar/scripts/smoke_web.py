@@ -88,6 +88,7 @@ if structured:
     assert structured.get("verified_image_policy") in {
         "provenance_backed_real_photograph_only",
         "provenance_backed_real_photograph_or_original_editorial_card",
+        "provenance_backed_site_visual_only_no_social_cards",
     }
     assert structured.get("unverified_image_policy") == "omit"
 
@@ -142,21 +143,17 @@ for row in rows:
         assert news.get("image") == [public_url], f"NewsArticle image nealiniată pentru {story_id}"
         assert f'<meta property="og:image" content="{public_url}">' in text
         assert f'src="{urlparse(public_url).path}"' in text
-        if kind == "editorial_card":
-            assert image.get("rights_basis") == "original_editorial_layout"
-            assert image.get("depicts_real_scene") is False
-            assert not source_url
-            assert 'data-media-provenance="original-editorial-card"' in text
-            assert "Grafică:" in text
-        else:
-            assert source_url.startswith("https://")
-            if image.get("contextual_archive") is True:
-                assert image.get("captured_at"), f"Foto de arhivă fără captured_at pentru {story_id}"
-            assert (
-                'data-media-provenance="verified-photo"' in text
-                or 'data-photo-provenance="verified"' in text
-            ), f"Marker foto verificată lipsă pentru {story_id}"
-            assert source_url in text and "Foto:" in text, f"Credit foto nevizibil pentru {story_id}"
+        assert kind != "editorial_card", f"Cartolină editorială admisă pe site pentru {story_id}"
+        assert image.get("rights_basis") != "original_editorial_layout"
+        assert source_url.startswith("https://")
+        if image.get("contextual_archive") is True:
+            assert image.get("captured_at"), f"Foto de arhivă fără captured_at pentru {story_id}"
+        assert (
+            'data-media-provenance="verified-photo"' in text
+            or 'data-media-provenance="verified-site-visual"' in text
+            or 'data-photo-provenance="verified"' in text
+        ), f"Marker media verificată lipsă pentru {story_id}"
+        assert source_url in text and "Foto:" in text, f"Credit foto nevizibil pentru {story_id}"
     else:
         assert "image" not in news, f"Imagine fără provenance introdusă în JSON-LD pentru {story_id}"
         assert '<meta property="og:image"' not in text, f"OG image fără provenance pentru {story_id}"
