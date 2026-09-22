@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import urllib.error
 from pathlib import Path
 
 MODULE_PATH = Path(__file__).parents[1] / "ingest" / "regiocentru_actions_fetch.py"
@@ -31,6 +32,64 @@ def expect_value_error(fn, *args) -> None:
     raise AssertionError("expected ValueError")
 
 
+def test_transport_policy() -> None:
+    candidates = mod.transport_candidates(mod.DEFAULT_URL)
+    assert candidates == [
+        "https://www.regiocentru.ro/actiuni/",
+        "https://regiocentru.ro/actiuni/",
+    ]
+    headers = mod.request_headers()
+    assert headers["Accept-Encoding"] == "identity"
+    assert headers["Accept-Language"].startswith("ro-RO")
+    assert "PARTENER.EU-CIVORA" in headers["User-Agent"]
+
+    original_open = mod._open_once
+    original_sleep = mod.time.sleep
+    try:
+        mod.time.sleep = lambda _seconds: None
+
+        calls: list[str] = []
+
+        def alias_after_forbidden(url: str, timeout: int = 30):
+            calls.append(url)
+            if url.startswith("https://www."):
+                raise urllib.error.HTTPError(url, 403, "Forbidden", {}, None)
+            return FIXTURE, url, 200, "text/html"
+
+        mod._open_once = alias_after_forbidden
+        raw, final_url, status, content_type, attempts, selected = mod.fetch_raw(max_attempts=3)
+        assert raw == FIXTURE
+        assert final_url == "https://regiocentru.ro/actiuni/"
+        assert status == 200
+        assert content_type == "text/html"
+        assert attempts == 2
+        assert selected == "https://regiocentru.ro/actiuni/"
+        assert calls == [
+            "https://www.regiocentru.ro/actiuni/",
+            "https://regiocentru.ro/actiuni/",
+        ], calls
+
+        calls = []
+
+        def transient_then_success(url: str, timeout: int = 30):
+            calls.append(url)
+            if len(calls) == 1:
+                raise urllib.error.HTTPError(url, 503, "Unavailable", {}, None)
+            return FIXTURE, url, 200, "text/html"
+
+        mod._open_once = transient_then_success
+        raw, final_url, status, _content_type, attempts, selected = mod.fetch_raw(max_attempts=3)
+        assert raw == FIXTURE
+        assert status == 200
+        assert attempts == 2
+        assert selected == mod.DEFAULT_URL
+        assert final_url == mod.DEFAULT_URL
+        assert calls == [mod.DEFAULT_URL, mod.DEFAULT_URL], calls
+    finally:
+        mod._open_once = original_open
+        mod.time.sleep = original_sleep
+
+
 def main() -> int:
     mod.validate_authority_url("https://www.regiocentru.ro/actiuni/")
     mod.validate_authority_url("https://regiocentru.ro/actiuni/p-7-actiunea-7-3/")
@@ -51,6 +110,8 @@ def main() -> int:
         content_type="text/html",
         fetched_at="2026-08-29T00:00:00+00:00",
         run_id="test",
+        fetch_attempts=1,
+        selected_transport_url="https://www.regiocentru.ro/actiuni/",
     )
     mod.validate_evidence(evidence)
     assert evidence["adapter_id"] == "REGIOCENTRU_ACTIONS_V1"
@@ -60,6 +121,9 @@ def main() -> int:
     assert evidence["programme_family"] == "PROGRAMUL_REGIUNEA_CENTRU_2021_2027"
     assert evidence["authority_class"] == "T1_MANAGING_AUTHORITY"
     assert evidence["requested_url"] == mod.DEFAULT_URL
+    assert evidence["selected_transport_url"] == mod.DEFAULT_URL
+    assert evidence["transport_alias_used"] is False
+    assert evidence["fetch_attempts"] == 1
     assert evidence["final_url"] == mod.DEFAULT_URL
     assert evidence["action_candidate_count"] == 2
     assert evidence["raw_sha256"] == mod.sha256_bytes(FIXTURE)
@@ -89,7 +153,8 @@ def main() -> int:
     assert source["material_fact_use"] is False
     assert set(source["source_families"]) >= {"ROMANIA", "ADR", "CALL_REGISTRY"}
 
-    print("PASS Regiunea Centru action-index acquisition is official, bounded and discovery-only")
+    test_transport_policy()
+    print("PASS Regiunea Centru action-index acquisition is official, bounded, transport-hardened and discovery-only")
     return 0
 
 
