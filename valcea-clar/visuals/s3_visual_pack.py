@@ -105,6 +105,7 @@ def render_card(story:dict[str,Any],brief:dict[str,Any],size:tuple[int,int],suff
     sources=[str(s.get("url")) for s in story.get("sources",[]) if isinstance(s,dict) and str(s.get("url") or "").startswith("http")]
     return {
       "kind":"editorial_card","synthetic":False,"ai_generated":False,"depicts_real_scene":False,
+      "site_visible":False,"distribution_role":"social_only",
       "story_id":story["id"],"concept":brief.get("concept"),"variant":suffix,
       "filename":filename,"public_url":PUBLIC_BASE+filename,"relative_url":"/media/social/editorial/s3/"+filename,
       "sha256":sha256(path),"bytes":path.stat().st_size,"rights_basis":"original_editorial_layout",
