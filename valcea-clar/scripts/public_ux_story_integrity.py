@@ -239,6 +239,7 @@ def build() -> dict:
         route = ux.story_path(story)
         canonical = BASE + route
         story["first_published_at"] = story.get("first_published_at") or published_at
+        story["_s4_publication_timestamp"] = published_at
         story["path"] = route
         story["canonical_url"] = canonical
         target = RUNTIME / route.strip("/") / "index.html"
