@@ -74,7 +74,11 @@ def rank_related(story: dict, stories: list[dict]) -> list[dict]:
 
 
 def verified_image_for_story(story_id: str, visual_registry: dict, asset_manifest: dict) -> dict | None:
-    """Resolve a verified photo first, then a verified original S3 editorial card."""
+    """Resolve only site-eligible verified story media.
+
+    S3 editorial cards are social-distribution assets and are intentionally not
+    returned as reader-facing article media.
+    """
     photo = resolve_verified_story_image(
         story_id,
         visual_registry,
@@ -87,46 +91,7 @@ def verified_image_for_story(story_id: str, visual_registry: dict, asset_manifes
         photo["media_role"] = "verified_story_photograph"
         photo["depicts_real_scene"] = True
         return photo
-
-    s3 = load(S3_VISUAL_MANIFEST, {"assets": []})
-    for asset in s3.get("assets") or []:
-        if not isinstance(asset, dict):
-            continue
-        if str(asset.get("story_id") or "") != story_id or asset.get("variant") != "og":
-            continue
-        if (
-            asset.get("kind") != "editorial_card"
-            or asset.get("synthetic") is not False
-            or asset.get("depicts_real_scene") is not False
-            or asset.get("rights_basis") != "original_editorial_layout"
-            or asset.get("provenance_status") != "VERIFIED"
-        ):
-            continue
-        public_url = str(asset.get("public_url") or "")
-        if not public_url.startswith(MEDIA_BASE_URL):
-            continue
-        local = RUNTIME / str(asset.get("relative_url") or "").lstrip("/")
-        if not local.is_file():
-            continue
-        return {
-            "kind": "editorial_card",
-            "media_role": "original_editorial_card",
-            "public_url": public_url,
-            "relative_url": str(asset.get("relative_url") or ""),
-            "source_url": None,
-            "credit": str(asset.get("credit") or "VÂLCEA CLAR — card editorial"),
-            "rights_basis": "original_editorial_layout",
-            "license_url": None,
-            "alt_text": str(asset.get("alt_text") or "Card editorial VÂLCEA CLAR"),
-            "contextual_archive": False,
-            "captured_at": None,
-            "editorial_note": str(asset.get("editorial_note") or ""),
-            "synthetic": False,
-            "depicts_real_scene": False,
-            "provenance_status": "VERIFIED",
-        }
     return None
-
 
 def image_head_and_figure(image: dict | None, headline: str) -> tuple[str, str]:
     if not isinstance(image, dict) or image.get("provenance_status") != "VERIFIED" or not image.get("public_url"):
@@ -145,12 +110,8 @@ def image_head_and_figure(image: dict | None, headline: str) -> tuple[str, str]:
     disclosure = ""
     if image.get("editorial_note"):
         disclosure = f' · {ux.esc(image.get("editorial_note"))}'
-    if image.get("kind") == "editorial_card":
-        figure = f'''<figure data-media-provenance="original-editorial-card"><img src="{ux.esc(path)}" alt="{ux.esc(alt_text)}" loading="eager" style="width:100%;display:block;margin:24px 0 7px"><figcaption style="font-size:11px;color:#6c665c">Grafică: {ux.esc(credit)}{disclosure}</figcaption></figure>'''
-    else:
-        figure = f'''<figure data-photo-provenance="verified" data-media-provenance="verified-photo"><img src="{ux.esc(path)}" alt="{ux.esc(alt_text)}" loading="eager" style="width:100%;display:block;margin:24px 0 7px"><figcaption style="font-size:11px;color:#6c665c">Foto: <a href="{ux.esc(source_url)}" rel="nofollow noopener">{ux.esc(credit)}</a>{disclosure}</figcaption></figure>'''
+    figure = f'''<figure data-photo-provenance="verified" data-media-provenance="verified-site-visual"><img src="{ux.esc(path)}" alt="{ux.esc(alt_text)}" loading="eager" style="width:100%;display:block;margin:24px 0 7px"><figcaption style="font-size:11px;color:#6c665c">Foto: <a href="{ux.esc(source_url)}" rel="nofollow noopener">{ux.esc(credit)}</a>{disclosure}</figcaption></figure>'''
     return head, figure
-
 
 def jsonld(story: dict, canonical: str, published_at: str, image: dict | None) -> str:
     row = {
@@ -273,7 +234,7 @@ def build() -> dict:
             "type": "NewsArticle",
             "eligible_scope": "publishable_full_story_only",
             "date_published_policy": "stable_publication_ledger_only",
-            "verified_image_policy": "provenance_backed_real_photograph_or_original_editorial_card",
+            "verified_image_policy": "provenance_backed_site_visual_only_no_social_cards",
             "unverified_image_policy": "omit"
         },
         "social_metadata": {
@@ -281,7 +242,7 @@ def build() -> dict:
             "og_type": "article",
             "og_title_policy": "editorial_headline_only",
             "twitter_cards": True,
-            "verified_image_policy": "same_verified_article_media_photo_or_original_editorial_card"
+            "verified_image_policy": "same_site_eligible_verified_article_media"
         },
         "stories": rows,
     }
