@@ -1,0 +1,145 @@
+name: VÂLCEA CLAR S5 Distinctive Products
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/editorial/distinctive_products.json"
+      - "valcea-clar/editorial/special_sections.json"
+      - "valcea-clar/scripts/s5_distinctive_products.py"
+      - "valcea-clar/scripts/s4_publication_experience.py"
+      - "valcea-clar/site/navigation.json"
+      - "valcea-clar/docs/S5_DISTINCTIVE_PRODUCTS.md"
+      - ".github/workflows/valcea-clar-s5-distinctive-products.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/editorial/distinctive_products.json"
+      - "valcea-clar/editorial/special_sections.json"
+      - "valcea-clar/scripts/s5_distinctive_products.py"
+      - "valcea-clar/scripts/s4_publication_experience.py"
+      - "valcea-clar/site/navigation.json"
+      - ".github/workflows/valcea-clar-s5-distinctive-products.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-live-newsroom
+  cancel-in-progress: false
+
+jobs:
+  s5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile S5
+        run: |
+          python -m py_compile             valcea-clar/scripts/s5_distinctive_products.py             valcea-clar/scripts/s4_publication_experience.py
+          python valcea-clar/scripts/s5_distinctive_products.py --self-test
+
+      - name: Snapshot canonical factual inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum             valcea-clar/site/story_archive.json             valcea-clar/editorial/facts_registry.json             valcea-clar/web/unde-iesim.json             > /tmp/s5-inputs-before.sha256
+
+      - name: Rebuild canonical UX with S5
+        run: |
+          python valcea-clar/scripts/public_ux_media.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+          python valcea-clar/scripts/s5_distinctive_products.py --check
+
+      - name: Prove S5 is presentation-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum             valcea-clar/site/story_archive.json             valcea-clar/editorial/facts_registry.json             valcea-clar/web/unde-iesim.json             > /tmp/s5-inputs-after.sha256
+          diff -u /tmp/s5-inputs-before.sha256 /tmp/s5-inputs-after.sha256
+
+      - name: Validate distinctive product routes
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          runtime=root/'site/runtime'
+          state=json.loads((root/'site/public_ux_state.json').read_text(encoding='utf-8'))
+          s5=state.get('s5_distinctive_products') or {}
+          assert s5.get('status')=='OPERATIONAL'
+          assert s5.get('clarification_products')==2
+          assert s5.get('verified_venue_cards')==8
+          assert s5.get('dossiers')==1
+          assert s5.get('new_material_fact_authority') is False
+          assert s5.get('venue_ranking') is False
+          pages=[
+            runtime/'clarificam/index.html',
+            runtime/'clarificam/restrictii-calimanesti-22-septembrie/index.html',
+            runtime/'clarificam/somaj-valcea-august-2026/index.html',
+            runtime/'unde-iesim/verificat/index.html',
+            runtime/'dosare/index.html',
+            runtime/'dosare/open-air-blues-brezoi-2026/index.html',
+          ]
+          for path in pages:
+              raw=path.read_text(encoding='utf-8')
+              assert 'data-nav-contract="valcea-clar-primary-v2"' in raw, path
+              assert '<a href="/clarificam/">Clarificăm</a>' in raw, path
+              assert '<a href="/dosare/">Dosare</a>' in raw, path
+          ui=(runtime/'unde-iesim/verificat/index.html').read_text(encoding='utf-8')
+          assert ui.count('data-s5-venue=')==8
+          assert 'Nu este un clasament' in ui
+          dos=(runtime/'dosare/open-air-blues-brezoi-2026/index.html').read_text(encoding='utf-8')
+          assert 'materialul complet și sursele originale' in dos
+          home=(runtime/'index.html').read_text(encoding='utf-8')
+          assert 'data-s5-products="true"' in home
+          sitemap=(runtime/'sitemap.xml').read_text(encoding='utf-8')
+          for route in ('/clarificam/','/unde-iesim/verificat/','/dosare/'):
+              assert f'<loc>https://valceaclar.ro{route}</loc>' in sitemap, route
+          print(json.dumps({'status':'PASS', **s5}))
+          PY
+
+      - name: Persist S5 runtime conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "valcea-clar-s5-products[bot]"
+          git config user.email "valcea-clar-s5-products@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python valcea-clar/scripts/public_ux_media.py
+            python valcea-clar/scripts/public_ux_story_integrity.py
+            python valcea-clar/scripts/s5_distinctive_products.py --check
+            git add valcea-clar/site/runtime valcea-clar/site/public_ux_state.json
+            if git diff --cached --quiet; then
+              echo "S5 runtime already reconciled."
+              exit 0
+            fi
+            git commit -m "Project VÂLCEA CLAR S5 distinctive products"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+
+      - name: Upload S5 audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-s5-distinctive-products-${{ github.run_id }}
+          path: |
+            valcea-clar/site/public_ux_state.json
+            valcea-clar/site/runtime/clarificam
+            valcea-clar/site/runtime/unde-iesim/verificat
+            valcea-clar/site/runtime/dosare
+            /tmp/s5-inputs-before.sha256
+            /tmp/s5-inputs-after.sha256
+          if-no-files-found: warn
+          retention-days: 14
