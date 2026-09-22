@@ -92,10 +92,27 @@
       "auto-raliul-valcii-official-news-f6e28bbb1533"
     ]
   },
+  "operational_health": {
+    "fleet_harvest_recovery": {
+      "run_id": 35790555499,
+      "status": "FAILURE_FALSE_POSITIVE_GUARD",
+      "acceptance": "SUCCESS",
+      "reconcile": "FAILURE",
+      "failed_step": "Verify routed recovery remains analytics-only and secret-free",
+      "root_cause": "The verifier searched for the substring credential_value across the serialized JSON and matched audit guard field names such as credential_values_persisted and credential_values_read even though both values were false. The recovery output itself reported no provider network calls, no credential values read or persisted, no provider payload persisted, no hard blocks, and publication_blocked=false.",
+      "editorial_publication_blocked": false,
+      "channels": {
+        "facebook": "NO_RECOVERY_REQUIRED",
+        "instagram": "NO_RECOVERY_REQUIRED"
+      },
+      "effect": "Metrics recovery reconciliation persistence was skipped. This failure is not evidence of a social delivery and does not justify marking any channel as delivered.",
+      "recommended_fix": "Replace substring scanning of serialized JSON with structural inspection of forbidden raw-value fields while keeping the explicit boolean no-secret guards fail-closed."
+    }
+  },
   "followups": [
     "Check for competent-authority confirmation of the detailed Râmnicu Vâlcea street restrictions and exceptions.",
     "Reconcile the canonical live-newsroom result against the existing Raliul story route, body, metadata, RSS and sitemap; never infer publication from a workflow or trigger alone.",
-    "Only after a confirmed site update, issue native Facebook/Instagram channel packs with fresh delivery receipts; otherwise retain HOLD/OUTBOX."
+    "Fix the Fleet Harvest Recovery secret-free verifier false positive without weakening the no-secret guarantees, then rerun metrics recovery reconciliation; only after a confirmed site update issue native Facebook/Instagram channel packs with fresh delivery receipts."
   ],
   "human_decisions_required": []
 }
