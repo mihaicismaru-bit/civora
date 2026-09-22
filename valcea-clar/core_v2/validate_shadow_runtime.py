@@ -2,9 +2,20 @@ from __future__ import annotations
 
 import argparse
 import json
-import subprocess
-import sys
 from pathlib import Path
+
+from validate_shadow_runtime_run96 import validate as _validate_run96
+
+
+def validate(base: Path, repo: Path) -> None:
+    """Compatibility-preserving canonical runtime validator.
+
+    Negative runtime regressions import this symbol and intentionally provide a
+    reduced tamper fixture set. Keep that contract identical to RUN96. The new
+    AuditResult equivalence proof is CI-only and is layered in main() only, where
+    the complete external-readback artifact set exists.
+    """
+    _validate_run96(base, repo)
 
 
 def main() -> int:
@@ -12,17 +23,15 @@ def main() -> int:
     parser.add_argument("--base", default="/tmp")
     parser.add_argument("--repo", default=".")
     args = parser.parse_args()
+    base = Path(args.base)
+    repo = Path(args.repo).resolve()
 
-    frozen = Path(__file__).with_name("validate_shadow_runtime_run96.py")
-    subprocess.run(
-        [sys.executable, str(frozen), "--base", args.base, "--repo", args.repo],
-        check=True,
-    )
+    validate(base, repo)
 
-    from validate_promoted_claim_audit_result_stage_equivalence import validate
+    from validate_promoted_claim_audit_result_stage_equivalence import validate as validate_audit_result
 
-    report = validate(Path(args.base), Path(args.repo).resolve())
-    proof_path = Path(args.base) / "valcea-core-v2-audit-result-stage-equivalence.json"
+    report = validate_audit_result(base, repo)
+    proof_path = base / "valcea-core-v2-audit-result-stage-equivalence.json"
     proof_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({
         "ci_only_audit_result_stage_equivalence": report.get("status"),
