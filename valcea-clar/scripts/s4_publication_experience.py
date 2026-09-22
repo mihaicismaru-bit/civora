@@ -345,6 +345,23 @@ def patch_sitemap(routes: list[str]) -> None:
         write(path,raw)
 
 
+def patch_discovery_links() -> None:
+    bar=(
+        '<nav class="live-strip" data-s4-discovery="true" aria-label="Explorează VÂLCEA CLAR">'
+        '<strong>Explorează</strong><span>'
+        '<a href="/rubrici/">Rubrici</a> · <a href="/localitati/">Localități</a> · '
+        '<a href="/editii/">Ediții</a> · <a href="/corectii/registru/">Corecții</a> · '
+        '<a href="/rss.xml">RSS</a></span></nav>'
+    )
+    for path in (RUNTIME/"index.html", RUNTIME/"stiri"/"index.html"):
+        if not path.is_file():
+            continue
+        raw=path.read_text(encoding="utf-8")
+        if 'data-s4-discovery="true"' not in raw:
+            raw=raw.replace("<main>", "<main>"+bar, 1)
+            path.write_text(raw,encoding="utf-8")
+
+
 def apply(*, nav: dict[str,Any], stories: list[dict[str,Any]], live_ids: set[str], shell) -> dict[str,Any]:
     corr=corrections_by_story()
     for story in stories:
@@ -362,6 +379,7 @@ def apply(*, nav: dict[str,Any], stories: list[dict[str,Any]], live_ids: set[str
     render_rss(stories)
     routes.append(RSS_PATH)
     patch_sitemap([r for r in routes if r.endswith("/")])
+    patch_discovery_links()
 
     state=load(STATE,{}) or {}
     current=list(state.get("routes") or [])
@@ -414,6 +432,9 @@ def validate() -> dict[str,Any]:
     rss=(RUNTIME/"rss.xml").read_text(encoding="utf-8")
     if "<rss version=\"2.0\">" not in rss or "<item>" not in rss:
         raise SystemExit("RSS contract invalid")
+    for path in (RUNTIME/"index.html",RUNTIME/"stiri"/"index.html"):
+        if 'data-s4-discovery="true"' not in path.read_text(encoding="utf-8"):
+            raise SystemExit(f"S4 discovery links missing: {path}")
     manifest=load(RUNTIME/"stiri"/"manifest.json",{"stories":[]}) or {"stories":[]}
     rows=manifest.get("stories") or []
     sample=rows[: min(20,len(rows))]
