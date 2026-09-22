@@ -50,6 +50,7 @@ jobs:
           python valcea-clar/visuals/s3_visual_pack.py
           python valcea-clar/scripts/render_story_pages.py
           python valcea-clar/scripts/public_ux_media.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
       - name: Validate pilot visual projection
         run: |
           python - <<'PY'
@@ -93,6 +94,7 @@ jobs:
             python valcea-clar/visuals/s3_visual_pack.py
             python valcea-clar/scripts/render_story_pages.py
             python valcea-clar/scripts/public_ux_media.py
+            python valcea-clar/scripts/public_ux_story_integrity.py
             git add valcea-clar/visuals/s3_visual_manifest.json valcea-clar/site/runtime valcea-clar/site/public_ux_state.json || true
             if git diff --cached --quiet; then
               echo "S3 visual projection already reconciled."
