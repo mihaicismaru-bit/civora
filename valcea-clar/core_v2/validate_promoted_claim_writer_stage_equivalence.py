@@ -5,13 +5,14 @@ from pathlib import Path
 from typing import Any
 
 import orchestrator
-import orchestrator_run81
+import orchestrator_run86
 
 EXPECTED_PROJECTION_ID = "isj-writer-deadline-projection-d9ae7b38596fc02a6ee7524d"
 EXPECTED_CONSUMPTION_ID = "isj-writer-deadline-consumption-de8b3ece2713d4395a0c62d1"
 WRITER_STAGE = "promoted_claim_writer"
 WRITER_MODULE = "valcea-clar/core_v2/promoted_claim_writer.py"
 WRITER_ARTIFACT = "valcea-core-v2-isj-article-shadow.json"
+EXTRACTED_STAGE = "isj_promoted_claim_contract_validation"
 
 
 def _stage_semantics(stage: Any) -> tuple[str, tuple[str, ...], str | None]:
@@ -33,24 +34,27 @@ def validate(
     writer_consumption_validation: dict[str, Any],
 ) -> dict[str, Any]:
     canonical = orchestrator.bounded_cycle_plan(base, live=False)
-    frozen81 = orchestrator_run81.bounded_cycle_plan(base, live=False)
+    frozen81 = orchestrator_run86._BASE_PLAN(base, live=False)
     canonical_by_name = _by_name(canonical)
-    run81_by_name = _by_name(frozen81)
+    frozen_by_name = _by_name(frozen81)
 
     canonical_names = [stage.name for stage in canonical]
-    run81_names = [stage.name for stage in frozen81]
-    if len(canonical_names) != 42:
+    frozen_names = [stage.name for stage in frozen81]
+    expected_names = [name for name in frozen_names if name != EXTRACTED_STAGE]
+    if len(canonical_names) != 41:
         raise RuntimeError(f"canonical_stage_count_changed:{len(canonical_names)}")
-    if canonical_names != run81_names:
-        raise RuntimeError("canonical_stage_order_diverged_from_frozen_run81")
+    if len(frozen_names) != 42:
+        raise RuntimeError(f"frozen_run81_stage_count_changed:{len(frozen_names)}")
+    if canonical_names != expected_names:
+        raise RuntimeError("canonical_stage_order_not_frozen_run81_minus_ci_only_validation")
 
     writer = canonical_by_name[WRITER_STAGE]
-    baseline = run81_by_name[WRITER_STAGE]
+    baseline = frozen_by_name[WRITER_STAGE]
     direct = orchestrator._owned_writer_stage(base)
     if _stage_semantics(writer) != _stage_semantics(direct):
         raise RuntimeError("canonical_owned_writer_stage_semantics_drifted")
     if _stage_semantics(writer) != _stage_semantics(baseline):
-        raise RuntimeError("promoted_claim_writer_run81_equivalence_failed")
+        raise RuntimeError("promoted_claim_writer_frozen_run81_equivalence_failed")
     if len(writer.argv) < 2 or writer.argv[1] != WRITER_MODULE:
         raise RuntimeError("promoted_claim_writer_module_changed")
     if writer.output is None or writer.output.name != WRITER_ARTIFACT:
@@ -74,13 +78,24 @@ def validate(
     if "--writer-consumption" not in writer.argv or "--writer-consumption-validation" not in writer.argv:
         raise RuntimeError("promoted_claim_writer_explicit_consumption_binding_removed")
 
-    for name in (
-        "isj_article_deadline_claim_gate",
-        "isj_article_deadline_claim_validation",
-        "isj_article_integrity",
-    ):
-        if _stage_semantics(canonical_by_name[name]) != _stage_semantics(run81_by_name[name]):
-            raise RuntimeError(f"writer_downstream_stage_semantics_diverged_from_run81:{name}")
+    # The downstream article stages have intentionally migrated to source-neutral
+    # facades, so compare their preserved names/artifacts/order rather than lying
+    # that their module argv is byte-identical to frozen RUN81.
+    gate = canonical_by_name["isj_article_deadline_claim_gate"]
+    validation = canonical_by_name["isj_article_deadline_claim_validation"]
+    integrity = canonical_by_name["isj_article_integrity"]
+    if gate.argv[1] != "valcea-clar/core_v2/promoted_claim_article_truth.py" or gate.argv[2:4] != ("--mode", "gate"):
+        raise RuntimeError("writer_downstream_gate_source_neutral_definition_changed")
+    if validation.argv[1] != "valcea-clar/core_v2/promoted_claim_article_truth.py" or validation.argv[2:4] != ("--mode", "validate"):
+        raise RuntimeError("writer_downstream_validation_source_neutral_definition_changed")
+    if integrity.argv[1] != "valcea-clar/core_v2/promoted_claim_article_integrity.py":
+        raise RuntimeError("writer_downstream_integrity_source_neutral_definition_changed")
+    if gate.output is None or gate.output.name != "valcea-core-v2-isj-article-deadline-claim.json":
+        raise RuntimeError("writer_downstream_gate_artifact_changed")
+    if validation.output is None or validation.output.name != "valcea-core-v2-isj-article-deadline-claim-validation.json":
+        raise RuntimeError("writer_downstream_validation_artifact_changed")
+    if integrity.output is None or integrity.output.name != "valcea-core-v2-isj-article-integrity-shadow.json":
+        raise RuntimeError("writer_downstream_integrity_artifact_changed")
 
     ownership = orchestrator._writer_stage_ownership_snapshot(canonical)
     if ownership.get("status") != "PASS_SHADOW":
@@ -119,10 +134,6 @@ def validate(
         raise RuntimeError("writer_projection_consumption_semantics_changed")
     if int(article.get("rendered_promoted_claim_count") or 0) != 1:
         raise RuntimeError("writer_rendered_promoted_claim_count_changed")
-    # The writer itself is pre-claim-gate: it may render exactly one promoted
-    # claim into the pending-integrity slot, but it must not yet claim that the
-    # canonical article contains that deadline. The later article claim gate owns
-    # that projection. This is the fail-closed writer boundary proven here.
     if article.get("article_contains_registration_deadline") is not False:
         raise RuntimeError("writer_pre_gate_article_claim_boundary_changed")
     if int(article.get("fabricated_claim_count") or 0) != 0:
@@ -159,17 +170,18 @@ def validate(
         raise RuntimeError("writer_pending_consumption_evidence_id_changed")
 
     result = {
-        "schema_version": "core-v2-promoted-claim-writer-stage-definition-equivalence-ci.v2",
+        "schema_version": "core-v2-promoted-claim-writer-stage-definition-equivalence-ci.v3",
         "status": "PASS_SHADOW",
         "publication_authority": "NONE",
         "acceptance_ready": False,
-        "canonical_stage_count": 42,
-        "canonical_stage_order_matches_frozen_run81": True,
+        "canonical_stage_count": 41,
+        "frozen_reference_stage_count": 42,
+        "canonical_stage_order_matches_frozen_run81_minus_ci_only_validation": True,
         "writer_stage_definition_matches_frozen_run81": True,
         "writer_stage_direct_definition_matches_canonical": True,
-        "writer_stage_position_matches_frozen_run81": True,
+        "writer_stage_position_preserved": True,
         "writer_lineage_equivalent": True,
-        "downstream_article_truth_stage_definitions_match_frozen_run81": True,
+        "downstream_article_truth_source_neutral_boundaries_preserved": True,
         "writer_pre_gate_semantics_preserved": True,
         "writer_output_semantics_preserved": True,
         "projection_evidence_id": EXPECTED_PROJECTION_ID,
@@ -181,7 +193,11 @@ def validate(
         "fabricated_claim_count": 0,
         "retirement_authority": "NONE",
         "truth_rule": (
-            "CI-only PASS_SHADOW requires the directly owned promoted_claim_writer stage to remain exactly equivalent to frozen RUN81 in stage name, argv, output and 42-stage position, preserve explicit FactKernel/writer-consumption lineage, preserve downstream article-truth stage definitions and stable evidence identities, render exactly one registration-deadline claim only into the pending-integrity slot while the canonical article still excludes it, and remain fail-closed for publication, acceptance and retirement."
+            "CI-only PASS_SHADOW compares the canonical writer to the immutable frozen RUN81 writer definition while "
+            "recognizing the controlled 41-stage extraction and the separately validated source-neutral article-truth/integrity "
+            "facades. It preserves exact writer lineage/evidence and the fail-closed pre-claim-gate boundary without pretending "
+            "that intentionally migrated downstream module argv is still byte-identical to RUN81. No publication, acceptance, "
+            "cutover or retirement authority is granted."
         ),
     }
     print(json.dumps(result, ensure_ascii=False, sort_keys=True))
