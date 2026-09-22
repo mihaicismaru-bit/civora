@@ -21,8 +21,9 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-SCHEMA_VERSION = "1.0"
+SCHEMA_VERSION = "1.1"
 DELIVERY_DIR = "delivery"
+PRE_S1_BLOCKER = "pre_s1_unconfirmed_requires_reconciliation"
 PASS_GATES = {"PASS", "PASS_EXPLAINER_ONLY", "PASS_DATE_ONLY"}
 SOCIAL_SPECS = {
     "facebook": {
@@ -193,7 +194,10 @@ def existing_records(root: Path) -> list[dict[str, Any]]:
 
 
 def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
-    records = existing_records(root)
+    prior = read_json(root / DELIVERY_DIR / "queue.json", {"records": [], "policy": {}}) or {"records": [], "policy": {}}
+    prior_records = prior.get("records", []) if isinstance(prior, dict) else []
+    records = [r for r in prior_records if isinstance(r, dict)]
+    prior_policy = prior.get("policy", {}) if isinstance(prior, dict) and isinstance(prior.get("policy"), dict) else {}
     by_id = {str(r.get("delivery_id")): r for r in records if r.get("delivery_id")}
     for article in manifest.get("articles", []):
         for channel, selection in article.get("channels", {}).items():
@@ -221,13 +225,14 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
                 by_id[did] = record
             else:
                 record["canonical_url"] = article["canonical_url"]
-                if record.get("status") != "delivered":
+                if record.get("status") != "delivered" and record.get("blocker") != PRE_S1_BLOCKER:
                     record["status"] = selection.get("queue_status", record.get("status", "pending"))
                     record["blocker"] = selection.get("blocker")
 
     return {
         "schema_version": SCHEMA_VERSION,
         "policy": {
+            **prior_policy,
             "identity": "edition+article+content_version+channel",
             "confirmed_delivery_is_monotonic": True,
             "records_are_not_dropped_when_unselected_later": True,
@@ -353,6 +358,26 @@ def reconcile(root: Path, queue: dict[str, Any]) -> dict[str, Any]:
     return queue
 
 
+def quarantine_pre_s1_pending(queue: dict[str, Any]) -> dict[str, Any]:
+    policy = queue.setdefault("policy", {})
+    if policy.get("pre_s1_unconfirmed_reconciliation") == "complete":
+        return queue
+    quarantined = 0
+    now = utc_now()
+    for record in queue.get("records", []):
+        confirmation = record.get("confirmation") or {}
+        if record.get("status") == "pending" and confirmation.get("confirmed") is not True:
+            record["status"] = "blocked"
+            record["blocker"] = PRE_S1_BLOCKER
+            record["blocked_at"] = now
+            record["blocked_by"] = "s1_bootstrap_migration"
+            quarantined += 1
+    policy["pre_s1_unconfirmed_reconciliation"] = "complete"
+    policy["pre_s1_quarantined_count"] = quarantined
+    policy["pre_s1_quarantined_at"] = now
+    return queue
+
+
 def build_report(manifest: dict[str, Any], queue: dict[str, Any]) -> dict[str, Any]:
     current = [r for r in queue.get("records", []) if r.get("edition_id") == manifest.get("edition_id")]
     counts = {"delivered": 0, "pending": 0, "blocked": 0, "cancelled": 0, "other": 0}
@@ -385,7 +410,8 @@ def build_report(manifest: dict[str, Any], queue: dict[str, Any]) -> dict[str, A
         "manifest_fingerprint_sha256": manifest.get("manifest_fingerprint_sha256"),
         "generated_at": utc_now(),
         "counts": counts,
-        "complete": counts["pending"] == 0 and counts["blocked"] == 0 and counts["other"] == 0,
+        "complete": counts["pending"] == 0 and counts["other"] == 0,
+        "fully_delivered": counts["pending"] == 0 and counts["blocked"] == 0 and counts["other"] == 0,
         "delivered": delivered,
         "blockers": blockers,
     }
@@ -394,6 +420,7 @@ def build_report(manifest: dict[str, Any], queue: dict[str, Any]) -> dict[str, A
 def run(root: Path) -> dict[str, Any]:
     manifest = build_manifest(root)
     queue = reconcile(root, ensure_queue(root, manifest))
+    queue = quarantine_pre_s1_pending(queue)
     report = build_report(manifest, queue)
     out = root / DELIVERY_DIR
     write_json(out / "manifest.json", manifest)
@@ -447,11 +474,14 @@ def self_test() -> None:
 
         assert rec("alpha", "site")["status"] == "delivered"
         assert rec("alpha", "facebook")["status"] == "delivered"
-        assert rec("alpha", "instagram")["status"] == "pending"
+        assert rec("alpha", "instagram")["status"] == "blocked"
+        assert rec("alpha", "instagram")["blocker"] == PRE_S1_BLOCKER
         assert rec("alpha", "tiktok")["status"] == "blocked"
-        assert rec("alpha", "threads")["status"] == "pending"
+        assert rec("alpha", "threads")["status"] == "blocked"
+        assert rec("alpha", "threads")["blocker"] == PRE_S1_BLOCKER
         assert rec("beta", "facebook")["status"] == "blocked"
-        assert first["complete"] is False
+        assert first["complete"] is True
+        assert first["fully_delivered"] is False
 
         write_json(root / "social/facebook_state.json", {"published": {}})
         run(root)
@@ -490,7 +520,7 @@ def self_test() -> None:
         "self_test": "PASS",
         "invariants": [
             "dedupe", "monotonic_confirmation", "versioned_delivery",
-            "provider_snapshot_single_version_binding", "explicit_blockers"
+            "provider_snapshot_single_version_binding", "legacy_pending_quarantine", "explicit_blockers"
         ],
     }))
 
