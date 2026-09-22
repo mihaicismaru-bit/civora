@@ -6,6 +6,7 @@ on:
     paths:
       - 'partener-eu/**'
       - '.github/workflows/partener-eu-validation.yml'
+      - '.github/workflows/partener-eu-mipe-engine-v3.yml'
       - '!partener-eu/validation/**'
       - '!partener-eu/deployment/**'
       - '!partener-eu/P10_ACCEPTANCE.json'
@@ -98,6 +99,7 @@ jobs:
           node --check partener-eu/web/consultant-mysmis-v1.js
           node --check partener-eu/web/mysmis-registry.js
           python partener-eu/ops/test_consultant_workspace_v3.py
+          python partener-eu/ops/test_mipe_engine_workflow_paths.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
 
       - name: P10 orchestration and fail-closed policy regression
