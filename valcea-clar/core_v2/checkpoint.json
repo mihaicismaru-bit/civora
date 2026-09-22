@@ -1,7 +1,7 @@
 {
   "schema_version": "11.7",
-  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN104-EXECUTOR-PARITY-WORKFLOW-RETIRED-NATURAL-VALIDATION-PENDING",
-  "observed_at_utc": "2026-09-22T07:24:00Z",
+  "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN104-EXECUTOR-PARITY-WORKFLOW-RETIRED-NATURAL-VALIDATED",
+  "observed_at_utc": "2026-09-22T07:27:00Z",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -20,7 +20,8 @@
     "public_projection_main_message": "sync: reconcile CIVORA canonical stories",
     "public_projection_modified_by_core_v2": false,
     "legacy_live_automation_still_active": true,
-    "core_v2_cleanup_commit": "21622a7e90a314d30a1f71dacf878aaacaf1bcc9"
+    "cleanup_commit": "21622a7e90a314d30a1f71dacf878aaacaf1bcc9",
+    "natural_validation_head": "18725ad0c39902de995635d21d967fd7680719fd"
   },
   "previous_validated_state": {
     "run_label": "RUN103",
@@ -44,7 +45,7 @@
     "duplicate_receipt_producer_removed_from_workflow": true,
     "duplicate_transaction_producer_removed_from_workflow": true,
     "independent_workflow_validators_preserved": true,
-    "executor_parity_contract_status": "PASS_SHADOW_LAST_VALIDATED_RUN103",
+    "executor_parity_contract_status": "PASS_SHADOW",
     "executor_parity_checks_passed": 21,
     "executor_parity_checks_failed": 0,
     "orchestrator_owned_external_evidence": true,
@@ -54,12 +55,15 @@
     "snapshot_sha256_binding": true,
     "sequence_fail_closed_regressions_passed": 5,
     "canonical_orchestrator_stage_count": 41,
+    "canonical_orchestrator_stage_count_completed": 41,
+    "canonical_orchestrator_failed_stage": null,
     "canonical_terminal_stage": "shadow_site_package",
     "external_auditor_inserted": false,
     "external_auditor_executed": false,
     "temporary_parity_workflow_retired": true,
     "temporary_parity_workflow_path_absent": true,
     "canonical_shadow_workflow_remains_present": true,
+    "canonical_shadow_is_sole_core_v2_external_evidence_executor": true,
     "workflow_dispatch_used": false,
     "manual_rerun_used": false,
     "merge_performed": false,
@@ -68,66 +72,89 @@
     "meta_write_performed": false,
     "public_projection_write_performed": false
   },
-  "cleanup_validation": {
-    "status": "PENDING_NATURAL_PUSH_VALIDATION",
+  "natural_validation": {
+    "status": "PASS_SHADOW",
+    "verification_basis": "The cleanup-only commit deleted the temporary Executor Parity workflow. Because that path is intentionally outside the canonical Shadow push path filter, the cleanup commit itself produced no Shadow run. A subsequent canonical checkpoint update under valcea-clar/core_v2/** triggered the required natural push validation without workflow_dispatch or manual rerun. Exactly one relevant Core v2 run existed on that head: the canonical Shadow workflow.",
     "cleanup_commit": "21622a7e90a314d30a1f71dacf878aaacaf1bcc9",
-    "deleted_path": ".github/workflows/valcea-clar-core-v2-executor-parity.yml",
-    "canonical_shadow_path": ".github/workflows/valcea-clar-core-v2-shadow.yml",
-    "source_readback_confirms_deleted_path_absent": true,
-    "source_readback_confirms_shadow_executor_present": true,
-    "reason_pending": "The cleanup-only commit touched a workflow path that is outside the canonical Shadow workflow push path filter, so it correctly did not create a Shadow validation run. This checkpoint update is under valcea-clar/core_v2/** and is intended to trigger the required natural push validation without workflow_dispatch or manual rerun."
+    "head_sha": "18725ad0c39902de995635d21d967fd7680719fd",
+    "shadow_run_id": 35699441782,
+    "shadow_run_number": 971,
+    "shadow_attempt": 1,
+    "shadow_event": "push",
+    "shadow_conclusion": "success",
+    "shadow_artifact_id": 10681564661,
+    "shadow_artifact_sha256": "e04e3dc66c327e9455e5f5ec97084a319d16b0a5e1dd0a7c1419631136ff4c06",
+    "orchestrator_stage_count": "41/41",
+    "orchestrator_failed_stage": null,
+    "audit_input_count": 6,
+    "fail_closed_regressions_passed": 5,
+    "meta_token_present": true,
+    "executor_parity_checks": "21/21",
+    "external_auditor_inserted": false,
+    "external_auditor_executed": false,
+    "temporary_executor_parity_workflow_run_on_head": false,
+    "material_delta": "The temporary Executor Parity workflow is retired from the isolated branch. The canonical Shadow workflow is now the sole Core v2 external-evidence executor and naturally revalidated the unchanged single-orchestrator truth boundary."
   },
-  "last_validated_external_truth": {
-    "basis": "RUN103 natural replay; retained as prior verified truth until RUN104 natural validation completes",
-    "replay_candidate_count": 2,
-    "replay_candidate_story_ids": [
+  "single_executor_truth": {
+    "candidate_count": 2,
+    "candidate_story_ids": [
       "valcea-apa-canal-contract-152m-20260902",
       "cet-govora-cine-a-decis-oprirea-20260821"
     ],
     "site_public_readback": "2/2",
     "approved_public_visual": "0/2",
     "canonical_site_visual_binding_consistent": "1/2",
+    "cross_surface_visual_binding_divergence": "1/2",
     "facebook_remote_readback": "0/2",
+    "facebook_failed_permission_code_10": "2/2",
     "instagram_remote_object_readback": "2/2",
     "instagram_approved_visual_identity": "1/2",
     "complete_externally_verified_receipts": 0,
     "truth_complete_transactions": 0,
+    "transaction_terminal_states": {
+      "valcea-apa-canal-contract-152m-20260902": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE",
+      "cet-govora-cine-a-decis-oprirea-20260821": "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE"
+    },
     "external_truth_complete": false,
     "acceptance_ready": false
   },
-  "blocker_counts_last_validated": {
+  "blocker_counts": {
     "SITE_APPROVED_VISUAL_ABSENT": 2,
     "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
     "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 1,
     "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1
   },
   "blocked": [
-    "RUN104 cleanup has been implemented, but natural Shadow validation of the post-cleanup branch is still pending at this checkpoint commit.",
     "Core v2 acceptance remains blocked by external visual and social delivery truth, not by CI status.",
-    "Facebook external readback remains fail-closed under the last validated truth because required read permission is unavailable; no internal remote ID is treated as delivered.",
+    "Both public replay articles fail the approved-public-visual requirement even though public article readback succeeds.",
+    "Facebook external readback fails closed for both replay candidates with Graph error code 10; no internal remote ID is treated as delivered.",
+    "One Instagram object remains unbound to the approved visual identity and one cross-surface visual binding remains divergent.",
     "The independent external auditor remains downstream and has not been inserted or executed as a canonical golden-path stage.",
     "No acceptance, cutover, merge, deploy, publication or legacy-retirement authority is granted by RUN104."
   ],
   "next": [
-    "Observe the natural Shadow run triggered by this checkpoint update; require 41/41, six immutable audit inputs, 5/5 fail-closed regressions, 21/21 executor-boundary checks and no temporary Executor Parity workflow run on the new head.",
-    "If the natural run passes, persist a RUN104 validated checkpoint with stable run/artifact evidence and re-read the branch to confirm the deleted workflow remains absent.",
-    "Then build an isolated stage-definition/equivalence proof for inserting the independent non-generative auditor as a consumer of the six immutable snapshots; do not let the auditor create or mutate evidence.",
+    "Build an isolated stage-definition/equivalence proof for inserting the independent non-generative auditor as a consumer of the six immutable orchestrator-owned snapshots; do not let the auditor create or mutate evidence.",
+    "Require the proof to preserve the 41-stage runtime semantics, publication_authority=NONE, six SHA-bound inputs, fail-closed behavior and the separation between external observation and internal pipeline state.",
+    "Do not switch the auditor into the canonical golden path in the same increment as the proof; validate equivalence first.",
     "Keep acceptance fail-closed and do not merge, deploy, publish, write Meta state, modify the public projection or start the 10-story cutover acceptance series without explicit owner approval."
   ],
   "evidence": {
     "cleanup_commit": "21622a7e90a314d30a1f71dacf878aaacaf1bcc9",
-    "prior_checkpoint_commit": "d8302892a5963cbf907c5a2c87021e5c41d4e5bc",
-    "prior_shadow_run_id": 35695340622,
-    "prior_shadow_run_number": 968,
-    "prior_shadow_artifact_id": 10679394879,
-    "prior_executor_parity_run_id": 35695340624,
-    "runtime_stage_count_last_validated": "41/41",
-    "sequence_fail_closed_regressions_last_validated": 5,
-    "executor_parity_checks_last_validated": 21,
+    "natural_validation_head": "18725ad0c39902de995635d21d967fd7680719fd",
+    "shadow_run_id": 35699441782,
+    "shadow_run_number": 971,
+    "shadow_artifact_id": 10681564661,
+    "shadow_artifact_sha256": "e04e3dc66c327e9455e5f5ec97084a319d16b0a5e1dd0a7c1419631136ff4c06",
+    "runtime_stage_count": "41/41",
+    "runtime_failed_stage": null,
+    "sequence_fail_closed_regressions_passed": 5,
+    "sequence_meta_token_present": true,
+    "executor_parity_checks_passed": 21,
+    "temporary_executor_parity_workflow_present": false,
     "external_auditor_inserted": false,
     "pull_request": 1222,
     "pull_request_state": "open",
     "pull_request_draft": true
   },
-  "truth_rule": "RUN104 cleanup removes only the temporary Executor Parity workflow from the isolated branch while preserving the canonical Shadow workflow and the single-orchestrator evidence architecture. The cleanup is not considered naturally validated until the post-cleanup Shadow workflow completes on a head that contains this checkpoint update. Architecture validation never substitutes for external delivery evidence."
+  "truth_rule": "RUN104 proves that the temporary Executor Parity workflow can be removed without changing the canonical Core v2 truth boundary: the Shadow workflow is the sole external-evidence executor, the orchestrator remains 41/41 with six immutable audit inputs and 21/21 boundary checks, and all publication/cutover authority remains NONE. Architecture validation is not external delivery, acceptance or production readiness."
 }
