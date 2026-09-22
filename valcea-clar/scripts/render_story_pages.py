@@ -36,6 +36,7 @@ DECISION = ROOT / "site" / "newsroom_decision.json"
 PUBLICATION_EVENT = ROOT / "site" / "story_publication_event.json"
 STORY_VISUALS = ROOT / "social" / "story_visuals.json"
 SOCIAL_ASSETS = ROOT / "social" / "social_media_manifest.json"
+S3_VISUAL_MANIFEST = ROOT / "visuals" / "s3_visual_manifest.json"
 RUNTIME_MEDIA = RUNTIME / "media" / "social"
 BASE = "https://valceaclar.ro"
 MEDIA_BASE = BASE + "/media/social/"
@@ -96,19 +97,63 @@ def related_links(item: dict, stories: list[dict]) -> str:
     )
 
 
-def photo_figure(media: dict | None) -> str:
+def resolve_s3_editorial_card(story_id: str) -> dict | None:
+    manifest = load_optional(S3_VISUAL_MANIFEST)
+    for asset in manifest.get("assets") or []:
+        if not isinstance(asset, dict):
+            continue
+        if str(asset.get("story_id") or "") != story_id or asset.get("variant") != "og":
+            continue
+        if (
+            asset.get("kind") != "editorial_card"
+            or asset.get("synthetic") is not False
+            or asset.get("depicts_real_scene") is not False
+            or asset.get("rights_basis") != "original_editorial_layout"
+            or asset.get("provenance_status") != "VERIFIED"
+        ):
+            continue
+        relative = str(asset.get("relative_url") or "")
+        local = RUNTIME / relative.lstrip("/")
+        if not local.is_file():
+            continue
+        return {
+            "kind": "editorial_card",
+            "public_url": str(asset["public_url"]),
+            "relative_url": relative,
+            "source_url": None,
+            "credit": str(asset.get("credit") or "VÂLCEA CLAR — card editorial"),
+            "rights_basis": "original_editorial_layout",
+            "license_url": None,
+            "alt_text": str(asset.get("alt_text") or "Card editorial VÂLCEA CLAR"),
+            "contextual_archive": False,
+            "captured_at": None,
+            "editorial_note": str(asset.get("editorial_note") or ""),
+            "synthetic": False,
+            "depicts_real_scene": False,
+            "provenance_status": "VERIFIED",
+            "media_role": "original_editorial_card",
+        }
+    return None
+
+
+def media_figure(media: dict | None) -> str:
     if not media:
         return ""
     note = str(media.get("editorial_note") or "").strip()
     disclosure = f"<span>{esc(note)}</span> " if note else ""
-    credit = (
-        f'Foto: <a href="{esc(media["source_url"])}" rel="nofollow noopener">'
-        f'{esc(media["credit"])}</a>'
-    )
-    if media.get("license_url"):
-        credit += f' · <a href="{esc(media["license_url"])}" rel="nofollow noopener">Licență</a>'
+    if media.get("kind") == "editorial_card":
+        credit = f'Grafică: {esc(media.get("credit") or "VÂLCEA CLAR")}'
+        provenance_attr = "original-editorial-card"
+    else:
+        credit = (
+            f'Foto: <a href="{esc(media["source_url"])}" rel="nofollow noopener">'
+            f'{esc(media["credit"])}</a>'
+        )
+        if media.get("license_url"):
+            credit += f' · <a href="{esc(media["license_url"])}" rel="nofollow noopener">Licență</a>'
+        provenance_attr = "verified-photo"
     return (
-        '<figure class="hero-photo" data-photo-provenance="verified">'
+        f'<figure class="hero-photo" data-media-provenance="{provenance_attr}">'
         f'<img src="{esc(media["relative_url"])}" alt="{esc(media["alt_text"])}" '
         'loading="lazy" decoding="async">'
         f'<figcaption>{disclosure}{credit}</figcaption>'
@@ -149,7 +194,7 @@ def page(
     paragraphs = "".join(f"<p>{esc(p)}</p>" for p in item.get("paragraphs", []) if str(p).strip())
     sources = source_links(item)
     related = related_links(item, stories)
-    figure = photo_figure(media)
+    figure = media_figure(media)
     jsonld = structured_data(item, canonical, published_at, media)
     social_meta = ""
     if media:
@@ -281,6 +326,11 @@ def main() -> int:
             runtime_asset_dir=RUNTIME_MEDIA,
             canonical_media_base_url=MEDIA_BASE,
         )
+        if media is not None:
+            media["kind"] = "photograph"
+            media["media_role"] = "verified_story_photograph"
+        else:
+            media = resolve_s3_editorial_card(story_id)
         target = RUNTIME / route.strip("/") / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(page(item, str(doc.get("updated_local") or ""), stories, published_at, media), encoding="utf-8")
@@ -296,12 +346,17 @@ def main() -> int:
             dated_count += 1
         if media:
             row["image"] = {
+                "kind": media.get("kind"),
+                "media_role": media.get("media_role"),
                 "public_url": media["public_url"],
-                "source_url": media["source_url"],
+                "source_url": media.get("source_url"),
                 "credit": media["credit"],
                 "rights_basis": media["rights_basis"],
                 "contextual_archive": media["contextual_archive"],
                 "captured_at": media["captured_at"],
+                "alt_text": media.get("alt_text"),
+                "editorial_note": media.get("editorial_note"),
+                "depicts_real_scene": media.get("depicts_real_scene", media.get("kind") == "photograph"),
                 "synthetic": False,
                 "provenance_status": media["provenance_status"],
             }
@@ -322,7 +377,7 @@ def main() -> int:
                 "type": "NewsArticle",
                 "eligible_scope": "publishable_full_story_only",
                 "date_published_policy": "stable_publication_ledger_only",
-                "verified_image_policy": "provenance_backed_real_photograph_only",
+                "verified_image_policy": "provenance_backed_real_photograph_or_original_editorial_card",
                 "unverified_image_policy": "omit",
             },
             "cross_linking": {
@@ -343,6 +398,7 @@ def main() -> int:
         "newsarticle_jsonld": len(routes),
         "date_published": dated_count,
         "provenance_backed_images": media_count,
+        "s3_editorial_cards": sum(1 for row in routes if (row.get("image") or {}).get("kind") == "editorial_card"),
         "cross_links": cross_link_count,
         "routes": routes,
         "indexing_routes": indexing["route_count"],
