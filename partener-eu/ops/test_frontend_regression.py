@@ -12,6 +12,7 @@ WEB = ROOT / "web"
 index = (WEB / "index.html").read_text(encoding="utf-8")
 public_copy = (WEB / "public-product-copy-v1.js").read_text(encoding="utf-8")
 concierge = (WEB / "home-concierge-vnext.js").read_text(encoding="utf-8")
+p11_adapter = (WEB / "p11-public-adapter.js").read_text(encoding="utf-8")
 people_policy = (WEB / "people-policy-v1.js").read_text(encoding="utf-8")
 
 errors = []
@@ -56,6 +57,21 @@ for required in (
 ):
     if required not in concierge:
         errors.append(f"funding concierge contract missing: {required}")
+
+# The static critical-boot projection can lag behind current source state.
+# Runtime OPEN must therefore fail closed unless both status/deadline are verified
+# and the deadline is still current. This prevents stale legacy OPEN labels from
+# resurfacing in the base explorer, search, detail or fallback UI.
+for required in (
+    "deadlineTimestamp=value=>",
+    "verified.includes('status')",
+    "verified.includes('deadline')",
+    "deadline>=Date.now()",
+    "OPEN_FAIL_CLOSED_NO_CURRENT_VERIFIED_DEADLINE",
+    "call.status='DISCOVERED'",
+):
+    if required not in p11_adapter:
+        errors.append(f"P11 stale-OPEN fail-closed guard missing: {required}")
 
 # Decision-maker promotion remains a homepage-only, fail-closed decision aid.
 for required in (
