@@ -588,6 +588,7 @@ def self_test() -> None:
         alpha_fb = [
             r for r in read_json(root / "delivery/queue.json")["records"]
             if r["article_id"] == "alpha" and r["channel"] == "facebook"
+            and r["edition_id"] == "2026-09-22-morning"
         ]
         assert sorted(r["status"] for r in alpha_fb) == ["delivered", "delivered"]
         assert {r["confirmation"].get("remote_id") for r in alpha_fb} == {"fb-1", "fb-2"}
