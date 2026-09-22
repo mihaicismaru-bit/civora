@@ -312,11 +312,12 @@
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 1,
+      "delivered": 2,
       "eligible": 7,
-      "value": 0.1429,
+      "value": 0.2857,
       "delivered_story_ids": [
-        "calimanesti-restrictii-trotuare-20260922"
+        "calimanesti-restrictii-trotuare-20260922",
+        "valcea-somaj-august-2026"
       ]
     },
     "duplicates": {
@@ -338,53 +339,20 @@
       "status": "MEASURED",
       "value": 0,
       "workflow_dispatch_runs": [],
-      "automated_workflow_dispatch_runs": [
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35696370542,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-22T06:46:33Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35696195510,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-22T06:44:17Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35696154163,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-22T06:43:42Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35696102553,
-          "workflow": "VÂLCEA CLAR Social Publication Engine",
-          "created_at": "2026-09-22T06:43:04Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        }
-      ],
+      "automated_workflow_dispatch_runs": [],
       "manual_story_route_additions": [],
       "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "1c02da108d5b49dd027c6738d3ea1ee4439963a0",
-      "structural_baseline_at_utc": "2026-09-22T06:42:40Z",
+      "structural_baseline_sha": "324b778aa314eeb34f0587046337047095b142c2",
+      "structural_baseline_at_utc": "2026-09-22T07:35:07Z",
       "structural_baseline_repository": "mihaicismaru-bit/civora",
       "structural_baseline_path": "civora_structural_paths",
       "structural_components": [
         {
-          "sha": "1c02da108d5b49dd027c6738d3ea1ee4439963a0",
-          "at_utc": "2026-09-22T06:42:40Z",
+          "sha": "324b778aa314eeb34f0587046337047095b142c2",
+          "at_utc": "2026-09-22T07:35:07Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
@@ -396,7 +364,7 @@
           "source_sha": "6a28b61906e4963271b0eab8c6ee708a2e662b1e"
         }
       ],
-      "eligible_after_utc": "2026-09-24T06:42:40Z",
+      "eligible_after_utc": "2026-09-24T07:35:07Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
