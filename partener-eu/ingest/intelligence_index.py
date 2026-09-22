@@ -365,7 +365,7 @@ def source_availability(source: Dict[str, Any]) -> str:
         return "STALE_LAST_KNOWN_GOOD"
     if freshness_status == "UNKNOWN":
         return "UNKNOWN"
-    if status == "PASS" or status.startswith("OK_"):
+    if status in {"PASS", "OK"} or status.startswith("OK_"):
         return "AVAILABLE"
     if "LAST_KNOWN_GOOD_PRESERVED" in status:
         return "UNAVAILABLE_LAST_KNOWN_GOOD"
@@ -376,6 +376,10 @@ def source_availability(source: Dict[str, Any]) -> str:
     return "UNKNOWN"
 
 
+def is_material_authority(source: Dict[str, Any]) -> bool:
+    return bool(source.get("materialFactUse")) and not source.get("planningOnly") and source.get("tier") not in {"T2", "T3"}
+
+
 def dependency_gate(source: Dict[str, Any]) -> Dict[str, Any]:
     availability = source_availability(source)
     reasons = []
@@ -383,12 +387,12 @@ def dependency_gate(source: Dict[str, Any]) -> Dict[str, Any]:
         reasons.append(availability)
     if source.get("resolutionTaskRequired"):
         reasons.append("UNRESOLVED_SEMANTIC_CHANGE")
-    if reasons:
-        gate = "BLOCKED_SOURCE_DEPENDENCIES"
-    elif source.get("planningOnly"):
+    if source.get("planningOnly"):
         gate = "PLANNING_ONLY"
-    elif not source.get("materialFactUse") or source.get("tier") in {"T2", "T3"}:
+    elif not is_material_authority(source):
         gate = "DISCOVERY_ONLY"
+    elif reasons:
+        gate = "BLOCKED_SOURCE_DEPENDENCIES"
     else:
         gate = "RECONCILIATION_REQUIRED"
     scopes = source.get("dependencyScopes") or source.get("programmes") or source.get("domains") or []
@@ -525,6 +529,9 @@ def build_data_plane(
         **(row.get("freshness") or {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": None}),
     } for row in inventory]
     current_count = sum(1 for row in freshness_rows if row.get("status") == "CURRENT")
+    material_source_ids = {str(row.get("id")) for row in inventory if is_material_authority(row)}
+    material_freshness_rows = [row for row in freshness_rows if row["sourceId"] in material_source_ids]
+    material_current_count = sum(1 for row in material_freshness_rows if row.get("status") == "CURRENT")
     data_plane = {
         "contractId": contract.get("contractId"),
         "contractVersion": contract.get("schemaVersion"),
@@ -538,6 +545,10 @@ def build_data_plane(
             "current": current_count,
             "total": len(freshness_rows),
             "slaBreaches": [row["sourceId"] for row in freshness_rows if row.get("status") != "CURRENT"],
+            "materialStatus": "PASS" if material_current_count == len(material_freshness_rows) else "DEGRADED",
+            "materialCurrent": material_current_count,
+            "materialTotal": len(material_freshness_rows),
+            "materialSlaBreaches": [row["sourceId"] for row in material_freshness_rows if row.get("status") != "CURRENT"],
             "sources": freshness_rows,
         },
         "coverage": {
@@ -636,18 +647,27 @@ def compile_index(
 
     record_types = Counter(str(row.get("recordType") or "UNKNOWN") for row in records)
     programmes = Counter(str(row.get("programme") or "UNKNOWN") for row in records)
-    resolution_count = sum(1 for row in records if row.get("materialFactAction") == "RESOLUTION_REQUIRED")
-    resolution_count += sources[-1]["resolutionTasksRequired"]
+    record_resolution_count = sum(1 for row in records if row.get("materialFactAction") == "RESOLUTION_REQUIRED")
+    resolution_count = record_resolution_count + sources[-1]["resolutionTasksRequired"]
     stale_sources = data_plane["freshness"]["slaBreaches"]
+    material_stale_sources = data_plane["freshness"]["materialSlaBreaches"]
     gates = {row["sourceId"]: row for row in data_plane["dependencyIsolation"]["gates"]}
-    unavailable_t1 = [
-        row["id"] for row in data_plane["sourceInventory"]
+    inventory = data_plane["sourceInventory"]
+    material_source_ids = {str(row.get("id")) for row in inventory if is_material_authority(row)}
+    operational_unavailable_t1 = [
+        row["id"] for row in inventory
         if row.get("tier") == "T1" and gates[row["id"]]["availability"] != "AVAILABLE"
     ]
+    unavailable_t1 = [source_id for source_id in operational_unavailable_t1 if source_id in material_source_ids]
+    material_registry_resolution_count = sum(
+        1 for row in inventory
+        if row.get("resolutionTaskRequired") and is_material_authority(row)
+    )
+    material_resolution_count = record_resolution_count + material_registry_resolution_count
     readiness = "READY_FOR_DISCOVERY_ONLY"
     if data_plane_errors:
         readiness = "BLOCKED_CONTRACT_FAIL_CLOSED"
-    elif unavailable_t1 or stale_sources or resolution_count:
+    elif unavailable_t1 or material_stale_sources or material_resolution_count:
         readiness = "DEGRADED_FAIL_CLOSED"
 
     index = {
@@ -672,8 +692,11 @@ def compile_index(
             "recordTypes": dict(sorted(record_types.items())),
             "programmes": dict(sorted(programmes.items())),
             "staleOrUnknownSources": stale_sources,
+            "materialStaleOrUnknownSources": material_stale_sources,
             "unavailableT1Sources": unavailable_t1,
+            "operationalUnavailableT1Sources": operational_unavailable_t1,
             "resolutionTasksRequired": resolution_count,
+            "materialResolutionTasksRequired": material_resolution_count,
             "materialFactsAutopromoted": 0,
         },
     }
@@ -748,6 +771,7 @@ def main() -> int:
         **index["summary"],
         "coverage": index["dataPlane"]["coverage"]["status"],
         "freshness": index["dataPlane"]["freshness"]["status"],
+        "materialFreshness": index["dataPlane"]["freshness"]["materialStatus"],
         "replay": index["dataPlane"]["replay"]["status"],
         "contract": index["contract"]["status"],
     }, ensure_ascii=False, indent=2))
