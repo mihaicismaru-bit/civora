@@ -39,17 +39,11 @@ permissions:
 
 jobs:
   validate:
-    # A completed workflow_run also includes failed, cancelled and skipped runs.
-    # Those outcomes carry no new canonical product state and must not create
-    # another timestamp-only validation ledger commit.
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
-          # workflow_run events retain the upstream workflow's head SHA even
-          # while this job waits for the serialized ledger writer. Always
-          # start from the latest canonical main before generating evidence.
           ref: main
           fetch-depth: 0
       - uses: actions/setup-python@v6
@@ -103,7 +97,9 @@ jobs:
       - name: P10 orchestration and fail-closed policy regression
         id: policy
         continue-on-error: true
-        run: python partener-eu/ops/test_p10_policy_regression.py
+        run: |
+          python partener-eu/ops/test_p10_policy_regression.py
+          python partener-eu/ops/test_p10_transport_policy.py
 
       - name: AFIR authentication-boundary regression
         id: afir_policy
