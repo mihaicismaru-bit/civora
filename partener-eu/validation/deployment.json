@@ -1,25 +1,25 @@
 {
   "schema_version": "1.8",
-  "observed_at": "2026-09-22T19:36:27Z",
-  "status": "FAIL",
+  "observed_at": "2026-09-22T19:39:22Z",
+  "status": "PASS",
   "public_content_verified": true,
-  "https_verified": false,
-  "secure_transport_verified": false,
+  "https_verified": true,
+  "secure_transport_verified": true,
   "http_redirects_to_https": true,
   "pages_https_preserved": true,
   "http_content_verified": true,
-  "https_closure_gate": "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS",
-  "content_origin": "custom_http",
+  "https_closure_gate": "PASS",
+  "content_origin": "custom_https",
   "old_origin_detected": false,
   "endpoints": [
     {
       "id": "custom_https",
       "url": "https://partener.eu/",
-      "requested_url": "https://partener.eu/?p10_probe=20260922T193627Z",
-      "ok": false,
-      "content_verified": false,
+      "requested_url": "https://partener.eu/?p10_probe=20260922T193922Z",
+      "ok": true,
+      "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260922T193627Z",
+      "final_url": "https://partener.eu/?p10_probe=20260922T193922Z",
       "final_scheme": "https",
       "redirect_chain": [],
       "content_type": "text/html; charset=utf-8",
@@ -40,7 +40,7 @@
       },
       "marker_ok": true,
       "legacy_origin_detected": false,
-      "critical_assets_ok": false,
+      "critical_assets_ok": true,
       "assets": {
         "data.js": {
           "url": "https://partener.eu/data.js?v=20260813-1500",
@@ -94,12 +94,13 @@
         },
         "home-concierge-vnext.css": {
           "url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
-          "ok": false,
-          "http_status": null,
-          "final_url": null,
-          "bytes": 0,
-          "sha256": null,
-          "error": "HTTPError: HTTP Error 503: Service Unavailable"
+          "ok": true,
+          "http_status": 200,
+          "final_url": "https://partener.eu/home-concierge-vnext.css?v=20260917-vnext1",
+          "bytes": 6907,
+          "sha256": "c13fc74a79b62fd4d76f760b173922e67c18486ea88e8513288b2976f18f0368",
+          "error": null,
+          "expected_marker_found": true
         }
       },
       "error": null
@@ -107,17 +108,17 @@
     {
       "id": "custom_http",
       "url": "http://partener.eu/",
-      "requested_url": "http://partener.eu/?p10_probe=20260922T193627Z",
+      "requested_url": "http://partener.eu/?p10_probe=20260922T193922Z",
       "ok": true,
       "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260922T193627Z",
+      "final_url": "https://partener.eu/?p10_probe=20260922T193922Z",
       "final_scheme": "https",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "http://partener.eu/?p10_probe=20260922T193627Z",
-          "to_url": "https://partener.eu/?p10_probe=20260922T193627Z"
+          "from_url": "http://partener.eu/?p10_probe=20260922T193922Z",
+          "to_url": "https://partener.eu/?p10_probe=20260922T193922Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
@@ -206,17 +207,17 @@
     {
       "id": "pages_origin",
       "url": "https://mihaicismaru-bit.github.io/civora/",
-      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260922T193627Z",
+      "requested_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260922T193922Z",
       "ok": true,
       "content_verified": true,
       "http_status": 200,
-      "final_url": "https://partener.eu/?p10_probe=20260922T193627Z",
+      "final_url": "https://partener.eu/?p10_probe=20260922T193922Z",
       "final_scheme": "https",
       "redirect_chain": [
         {
           "http_status": 301,
-          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260922T193627Z",
-          "to_url": "https://partener.eu/?p10_probe=20260922T193627Z"
+          "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260922T193922Z",
+          "to_url": "https://partener.eu/?p10_probe=20260922T193922Z"
         }
       ],
       "content_type": "text/html; charset=utf-8",
@@ -318,11 +319,11 @@
     "concierge_ui_ref": true,
     "concierge_css_ref": true
   },
-  "final_url": "https://partener.eu/?p10_probe=20260922T193627Z",
+  "final_url": "https://partener.eu/?p10_probe=20260922T193922Z",
   "content_type": "text/html; charset=utf-8",
   "bytes": 5764,
   "body_sha256": "3aa78a004fed2e05e6e76c797ad827e1093f11790f08ab57c8d055d1c9b3557f",
   "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
-  "critical_assets_ok": false,
-  "error": "public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
+  "critical_assets_ok": true,
+  "error": null
 }
