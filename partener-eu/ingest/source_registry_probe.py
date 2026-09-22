@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 import hashlib
 import json
+import os
 import re
 import ssl
+import subprocess
+import tempfile
 import time
 import urllib.request
 from datetime import datetime, timezone
@@ -16,6 +19,7 @@ REVIEWED_BASELINES = ROOT / "partener-eu" / "validation" / "accepted-source-base
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/1.0 (+production-validation)"
 MIN_SEMANTIC_CHARS = 256
 MIN_HTML_BYTES_FOR_LOW_INFO = 4096
+MAX_FETCH_BYTES = 3_000_000
 
 
 def utc_now():
@@ -44,6 +48,25 @@ def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
     return True, None, semantic_chars
 
 
+def build_fetch_result(raw: bytes, content_type: str, http_status: int, final_url: str, transport: str):
+    sem = semantic_bytes(raw, content_type)
+    content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), content_type, sem)
+    return {
+        "ok": 200 <= http_status < 400,
+        "http_status": http_status,
+        "final_url": final_url,
+        "content_type": content_type,
+        "bytes": len(raw),
+        "raw_sha256": hashlib.sha256(raw).hexdigest(),
+        "semantic_sha256": hashlib.sha256(sem).hexdigest(),
+        "semantic_bytes": len(sem),
+        "semantic_chars": semantic_chars,
+        "content_quality_ok": content_quality_ok,
+        "quality_issue": quality_issue,
+        "transport": transport,
+    }
+
+
 def fetch_once(url: str):
     req = urllib.request.Request(url, headers={
         "User-Agent": UA,
@@ -53,23 +76,96 @@ def fetch_once(url: str):
     })
     ctx = ssl.create_default_context()
     with urllib.request.urlopen(req, timeout=18, context=ctx) as r:
-        raw = r.read(3_000_000)
+        raw = r.read(MAX_FETCH_BYTES)
         ctype = r.headers.get("content-type") or ""
-        sem = semantic_bytes(raw, ctype)
-        content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
-        return {
-            "ok": 200 <= r.status < 400,
-            "http_status": r.status,
-            "final_url": r.geturl(),
-            "content_type": ctype,
-            "bytes": len(raw),
-            "raw_sha256": hashlib.sha256(raw).hexdigest(),
-            "semantic_sha256": hashlib.sha256(sem).hexdigest(),
-            "semantic_bytes": len(sem),
-            "semantic_chars": semantic_chars,
-            "content_quality_ok": content_quality_ok,
-            "quality_issue": quality_issue,
-        }
+        return build_fetch_result(raw, ctype, r.status, r.geturl(), "python-urllib-verified")
+
+
+def is_tls_verification_failure(exc: Exception) -> bool:
+    """Return True only for certificate-chain verification failures.
+
+    The secure fallback is deliberately narrow: DNS, timeout, HTTP and content
+    failures do not switch transports. This prevents a secondary client from
+    masking unrelated source failures.
+    """
+    text = f"{type(exc).__name__}: {exc}".lower()
+    markers = (
+        "certificate_verify_failed",
+        "certificate verify failed",
+        "unable to get local issuer certificate",
+        "self-signed certificate in certificate chain",
+    )
+    return any(marker in text for marker in markers)
+
+
+def fetch_with_verified_curl(url: str):
+    """Second secure HTTPS transport using system curl with TLS verification ON.
+
+    This exists for official sites whose certificate chain is accepted by the
+    system curl/OpenSSL stack but rejected by Python's urllib/OpenSSL chain
+    builder. It never uses -k/--insecure, never downgrades redirects to HTTP,
+    and returns the same hashed evidence envelope as the primary transport.
+    """
+    if not url.lower().startswith("https://"):
+        raise ValueError("verified curl fallback only permits https URLs")
+
+    fd, tmp_path = tempfile.mkstemp(prefix="partener-source-", suffix=".bin")
+    os.close(fd)
+    try:
+        cmd = [
+            "curl",
+            "--silent",
+            "--show-error",
+            "--location",
+            "--proto", "=https",
+            "--proto-redir", "=https",
+            "--max-redirs", "5",
+            "--connect-timeout", "10",
+            "--max-time", "20",
+            "--max-filesize", str(MAX_FETCH_BYTES),
+            "--user-agent", UA,
+            "--header", "Accept: text/html,application/xhtml+xml,application/pdf,*/*;q=0.8",
+            "--header", "Accept-Language: ro-RO,ro;q=0.9,en;q=0.5",
+            "--header", "Connection: close",
+            "--output", tmp_path,
+            "--write-out", "%{http_code}\t%{url_effective}\t%{content_type}",
+            url,
+        ]
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=25,
+                check=False,
+            )
+        except FileNotFoundError as exc:
+            raise RuntimeError("verified curl fallback unavailable: curl executable not found") from exc
+        except subprocess.TimeoutExpired as exc:
+            raise RuntimeError("verified curl fallback timed out") from exc
+
+        if proc.returncode != 0:
+            stderr = (proc.stderr or "").strip().replace("\n", " ")[:500]
+            raise RuntimeError(f"verified curl fallback failed rc={proc.returncode}: {stderr}")
+
+        parts = (proc.stdout or "").split("\t", 2)
+        if len(parts) != 3:
+            raise RuntimeError("verified curl fallback returned malformed metadata")
+        status_text, final_url, content_type = parts
+        try:
+            http_status = int(status_text)
+        except ValueError as exc:
+            raise RuntimeError(f"verified curl fallback returned invalid HTTP status: {status_text!r}") from exc
+
+        raw = Path(tmp_path).read_bytes()
+        if len(raw) > MAX_FETCH_BYTES:
+            raise RuntimeError("verified curl fallback exceeded bounded fetch size")
+        return build_fetch_result(raw, content_type, http_status, final_url, "system-curl-verified")
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except FileNotFoundError:
+            pass
 
 
 def fetch(url: str, attempts: int = 2):
@@ -83,6 +179,20 @@ def fetch(url: str, attempts: int = 2):
             last = exc
             if n < attempts:
                 time.sleep(1.25 * n)
+
+    if last is not None and is_tls_verification_failure(last):
+        primary_error = f"{type(last).__name__}: {last}"
+        try:
+            out = fetch_with_verified_curl(url)
+            out["attempts"] = attempts + 1
+            out["verified_tls_fallback"] = True
+            out["primary_transport_error"] = primary_error
+            return out
+        except Exception as fallback_exc:
+            raise RuntimeError(
+                "primary verified TLS transport failed and secure curl fallback also failed: "
+                f"primary={primary_error}; fallback={type(fallback_exc).__name__}: {fallback_exc}"
+            ) from fallback_exc
     raise last
 
 
@@ -369,6 +479,8 @@ def main():
             "health": x.get("health"),
             "selected_url": x.get("selected_url"),
             "used_canonical_alias": x.get("used_canonical_alias"),
+            "transport": x.get("transport"),
+            "verified_tls_fallback": x.get("verified_tls_fallback"),
             "material_fact_use": x.get("material_fact_use"),
             "semantic_hash_changed": x.get("semantic_hash_changed"),
             "resolution_task_required": x.get("resolution_task_required"),
