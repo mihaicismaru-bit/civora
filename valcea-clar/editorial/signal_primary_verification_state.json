@@ -2,15 +2,15 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-22T01:21:12+03:00",
+  "generated_at": "2026-09-22T03:57:33+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-22T01:19:47+03:00",
-  "task_count": 86,
+  "queue_generated_at": "2026-09-22T03:56:06+03:00",
+  "task_count": 84,
   "primary_match_count": 1,
-  "no_match_count": 29,
+  "no_match_count": 27,
   "unrouted_count": 56,
   "target_count": 18,
   "targets_ok": 14,
@@ -1346,44 +1346,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "b2bad2148153f3966f025871",
-      "signal_title": "Cod galben de vânt în județul Sibiu. Luni vremea se răcește și plouă până joi",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/20/cod-galben-de-vant-in-judetul-sibiu-luni-vremea-se-raceste-si-ploua-pana-joi/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-20T12:48:06+03:00",
-      "verification_route_id": "environment_weather",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "815a9f65b6d9d28f308647db",
       "signal_title": "Emil Hurezeanu: Nu cunosc un exemplu, într-una din marile țări europene, în care un monument de 200 de ani să fie transformat într-o parcare și atât",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/20/emil-hurezeanu-nu-cunosc-un-exemplu-intr-una-din-marile-tari-europene-in-care-un-monument-de-200-de-ani-sa-fie-transformat-intr-o-parcare-si-atat/",
@@ -1788,66 +1750,6 @@
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "2074f338a6c8a60f51497d4d",
-      "signal_title": "Primarul Ion Ungureanu, despre investițiile realizate prin GAL și proiectul unui adăpost pentru câinii fără stăpân",
-      "signal_url": "https://www.impactreal.ro/2026/09/19/primarul-ion-ungureanu-despre-investitiile-realizate-prin-gal-si-proiectul-unui-adapost-pentru-cainii-fara-stapan/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-19T12:23:40+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
