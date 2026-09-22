@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "run_id": "operator-run-20260922T205814Z",
+  "started_at": "2026-09-22T20:58:14Z",
+  "finished_at": "2026-09-22T20:58:14Z",
+  "scope": "delta_scan_and_followups",
+  "previous_checkpoint": {
+    "operator_run": "valcea-clar/editorial/operator_runs/2026-09-22T2258+0300.json",
+    "canonical_sources_total": 17,
+    "canonical_sources_ok": 15,
+    "canonical_current_signals": 47
+  },
+  "scan_summary": {
+    "fresh_web_queries": 8,
+    "primary_routes_checked": [
+      "https://raliulvalcii.ro/stiri/restrictii-circulatie-raliul-valcii-2026/",
+      "https://raliulvalcii.ro/stiri/program-raliul-valcii-nurvil-2026/",
+      "https://fras.ro/decizia-biroului-executiv-fras-nr-10-din-11-iunie-2026/",
+      "https://vl.politiaromana.ro/"
+    ],
+    "note": "A new Tier-1 organizer notice about traffic restrictions is materially relevant to the existing Raliul Vâlcii rolling story. No independent current Police/municipal restriction notice was located in this pass."
+  },
+  "signals": [
+    {
+      "story_id": "auto-raliul-valcii-official-news-f6e28bbb1533",
+      "locality": "Râmnicu Vâlcea",
+      "product": "VÂLCEA AZI / rolling service update",
+      "status": "HOLD_PENDING_PRIMARY_CLARIFICATION",
+      "priority": 96,
+      "risk": "LOW_REPUTATIONAL_BUT_HIGH_SERVICE_ACCURACY",
+      "source_url": "https://raliulvalcii.ro/stiri/restrictii-circulatie-raliul-valcii-2026/",
+      "fact_kernel": [
+        {
+          "type": "CONFIRMED_FACT",
+          "text": "The Raliul Vâlcii organizer published a traffic-restriction notice on 22 September 2026 for central Râmnicu Vâlcea, with the page headline specifying 24 and 26 September."
+        },
+        {
+          "type": "SOURCE_CLAIM",
+          "text": "The organizer says the Civic Centre/Romarta taxi station is restricted 18:00–20:00 on 24 September and lists multiple central-road restrictions for 26 September, 07:00–22:00, including parts of Calea lui Traian, Știrbei Vodă, Căpitan Negoescu and Tudor Vladimirescu."
+        },
+        {
+          "type": "CONFIRMED_FACT",
+          "text": "The organizer's separate event programme labels 24 September 2026 as Thursday and places the ceremonial start in the Civic Centre that evening."
+        },
+        {
+          "type": "UNVERIFIED",
+          "text": "The restriction notice itself labels 24 September as Wednesday, although 24 September 2026 is Thursday. This day-name/date inconsistency is unresolved on the source page."
+        },
+        {
+          "type": "UNKNOWN",
+          "text": "A current public Police/municipal traffic-order confirmation, any formal traffic management decision, detailed detours, and emergency/resident exceptions beyond those stated by the organizer were not located in this pass."
+        },
+        {
+          "type": "EDITORIAL_INTERPRETATION",
+          "text": "Because this is service information where an incorrect closure day can directly affect readers, VÂLCEA CLAR will not silently normalize the organizer's conflicting weekday label or publish the restriction schedule as settled fact until the inconsistency is clarified or independently corroborated."
+        }
+      ],
+      "action": "Do not create a duplicate article. Hold the update to the existing rolling story pending clarification/corroboration of the 24 September restriction line; keep Saturday 26 September restrictions ready for immediate service update once the package is internally consistent."
+    }
+  ],
+  "publication_summary": {
+    "site_published": 0,
+    "site_updated": 0,
+    "facebook_delivered": 0,
+    "facebook_outbox": 0,
+    "facebook_hold": 1,
+    "instagram_delivered": 0,
+    "instagram_outbox": 0,
+    "instagram_hold": 1,
+    "decision": "No autonomous publication in this pass: the new service signal is useful but contains an unresolved weekday/date contradiction and lacks independent current road-authority corroboration."
+  },
+  "channel_truth": {
+    "facebook": {
+      "existing_story_prior_receipt": "122093597559198636",
+      "new_delivery_this_run": false,
+      "reason": "No site update was released, so no social update/repost is justified."
+    },
+    "instagram": {
+      "new_delivery_this_run": false,
+      "reason": "Instagram adapter is not wired; delivery remains fail-closed without a real receipt/readback."
+    }
+  },
+  "followups": [
+    "Recheck organizer, IPJ Vâlcea and Râmnicu Vâlcea municipality for a corrected/independently confirmed 24 September restriction notice.",
+    "When confirmed, update the existing Raliul Vâlcii rolling story rather than creating a duplicate, and include the 26 September central-road closures in reader-service form.",
+    "After any site update, propagate a genuinely new native Facebook update only with verified receipt/readback; keep Instagram fail-closed until its adapter returns a real receipt."
+  ],
+  "human_decisions_required": []
+}
