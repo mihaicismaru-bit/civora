@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "partener-eu" / "ingest" / "source_registry.json"
 STATE = ROOT / "partener-eu" / "ingest" / "state" / "source_registry_health.json"
 TASK_DIR = ROOT / "partener-eu" / "validation" / "resolution-tasks"
+REVIEWED_BASELINES = ROOT / "partener-eu" / "validation" / "accepted-source-baselines.json"
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/1.0 (+production-validation)"
 MIN_SEMANTIC_CHARS = 256
 MIN_HTML_BYTES_FOR_LOW_INFO = 4096
@@ -137,7 +138,53 @@ def fetch_source(src: dict):
     raise RuntimeError(f"all declared official source transports failed: {attempted}")
 
 
+def reviewed_baseline_hash(source_id: str):
+    """Return an explicitly reviewed non-material semantic baseline, if valid.
+
+    A reviewed baseline is audit-only. It can suppress repeated alerts for the
+    exact already-reviewed page state, but it can never authorize publication
+    of material facts. Both the acceptance ledger and the source task must agree
+    on the hash and on the fail-closed decision.
+    """
+    if not REVIEWED_BASELINES.exists():
+        return None
+    try:
+        ledger = json.loads(REVIEWED_BASELINES.read_text(encoding="utf-8"))
+        entry = (ledger.get("baselines") or {}).get(source_id) or {}
+    except Exception:
+        return None
+
+    accepted = entry.get("accepted_semantic_sha256")
+    if not isinstance(accepted, str) or not re.fullmatch(r"[0-9a-f]{64}", accepted):
+        return None
+    if entry.get("decision") != "RESOLVED_NON_MATERIAL_CHANGE":
+        return None
+    if entry.get("material_fact_action") != "NONE" or entry.get("publish_authorized") is not False:
+        return None
+
+    task_path = TASK_DIR / f"{source_id}.json"
+    if not task_path.exists():
+        return None
+    try:
+        task = json.loads(task_path.read_text(encoding="utf-8"))
+    except Exception:
+        return None
+    if task.get("status") != "RESOLVED_NON_MATERIAL_CHANGE":
+        return None
+    if task.get("resolved_semantic_sha256") != accepted:
+        return None
+    if task.get("material_fact_autoupdate_allowed") is not False:
+        return None
+    if task.get("material_fact_action") != "NONE" or task.get("publish_authorized") is not False:
+        return None
+    return accepted
+
+
 def task_baseline_hash(source_id: str, old: dict):
+    reviewed_hash = reviewed_baseline_hash(source_id)
+    if reviewed_hash:
+        return reviewed_hash
+
     old_hash = old.get("semantic_sha256") or old.get("last_known_semantic_sha256")
     if not old_hash:
         return None
