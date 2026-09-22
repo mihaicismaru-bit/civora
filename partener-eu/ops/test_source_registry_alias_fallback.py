@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Regression guard for official source transport aliases."""
+"""Regression guard for official source transport aliases and verified TLS fallback."""
 from __future__ import annotations
 
 import importlib.util
+import ssl
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -39,6 +40,68 @@ def healthy(url: str):
         "quality_issue": None,
         "attempts": 1,
     }
+
+
+# The secondary transport is allowed only for an explicit certificate-verification
+# failure and must keep TLS verification on. Ordinary network errors must not be
+# hidden by switching clients.
+original_fetch_once = module.fetch_once
+original_verified_curl = module.fetch_with_verified_curl
+original_sleep = module.time.sleep
+try:
+    curl_calls = []
+
+    def tls_chain_failure(url: str):
+        raise ssl.SSLCertVerificationError(
+            1,
+            "certificate verify failed: unable to get local issuer certificate",
+        )
+
+    def verified_curl_success(url: str):
+        curl_calls.append(url)
+        out = healthy(url)
+        out["transport"] = "system-curl-verified"
+        return out
+
+    module.fetch_once = tls_chain_failure
+    module.fetch_with_verified_curl = verified_curl_success
+    module.time.sleep = lambda _seconds: None
+    out = module.fetch(PRIMARY, attempts=1)
+    assert curl_calls == [PRIMARY]
+    assert out["verified_tls_fallback"] is True
+    assert out["transport"] == "system-curl-verified"
+    assert "certificate verify failed" in out["primary_transport_error"].lower()
+
+    curl_calls = []
+
+    def ordinary_network_failure(url: str):
+        raise OSError("temporary DNS failure")
+
+    module.fetch_once = ordinary_network_failure
+    try:
+        module.fetch(PRIMARY, attempts=1)
+        raise AssertionError("ordinary network errors must not switch to TLS fallback")
+    except OSError as exc:
+        assert "DNS" in str(exc)
+    assert curl_calls == []
+
+    module.fetch_once = tls_chain_failure
+
+    def verified_curl_failure(url: str):
+        raise RuntimeError("verified curl certificate validation failed")
+
+    module.fetch_with_verified_curl = verified_curl_failure
+    try:
+        module.fetch(PRIMARY, attempts=1)
+        raise AssertionError("both verified transports failing must stay fail-closed")
+    except RuntimeError as exc:
+        message = str(exc).lower()
+        assert "primary verified tls transport failed" in message
+        assert "secure curl fallback also failed" in message
+finally:
+    module.fetch_once = original_fetch_once
+    module.fetch_with_verified_curl = original_verified_curl
+    module.time.sleep = original_sleep
 
 
 original_fetch = module.fetch
@@ -135,4 +198,4 @@ try:
 finally:
     module.fetch = original_fetch
 
-print("PASS source registry official alias fallback regression")
+print("PASS source registry official alias + verified TLS fallback regression")
