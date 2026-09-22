@@ -8,6 +8,7 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
+      - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
@@ -16,6 +17,7 @@ on:
       - 'partener-eu/ingest/sync_decision_products_projection.py'
       - 'partener-eu/ingest/apply_step_lll_authoritative_dossier.py'
       - 'partener-eu/ops/fix_afir_decision_extraction.py'
+      - 'partener-eu/ops/test_afir_material_resolution_queue.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_afir_current_dossiers.py'
@@ -25,6 +27,8 @@ on:
       - '.github/workflows/partener-eu-afir-ingest.yml'
   pull_request:
     paths:
+      - 'partener-eu/ingest/afir_ingest.py'
+      - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/polish_decision_products.py'
       - 'partener-eu/ingest/finalize_decision_products.py'
@@ -32,6 +36,7 @@ on:
       - 'partener-eu/ingest/apply_afir_current_authoritative_dossiers.py'
       - 'partener-eu/ingest/sync_decision_products_projection.py'
       - 'partener-eu/ingest/apply_step_lll_authoritative_dossier.py'
+      - 'partener-eu/ops/test_afir_material_resolution_queue.py'
       - 'partener-eu/ops/test_decision_products.py'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_afir_current_dossiers.py'
@@ -54,6 +59,10 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
+      - name: Validate AFIR material-change queue fail-closed
+        run: |
+          python partener-eu/ingest/build_afir_material_resolution_queue.py
+          python partener-eu/ops/test_afir_material_resolution_queue.py
       - name: Rebuild and validate the deterministic public-language boundary
         run: |
           python partener-eu/ops/recover_decision_products_lkg.py
@@ -102,6 +111,11 @@ jobs:
       - name: Discover and fingerprint official AFIR corpus fail-closed
         run: python partener-eu/ingest/afir_ingest.py
 
+      - name: Build AFIR material-change resolution queue fail-closed
+        run: |
+          python partener-eu/ingest/build_afir_material_resolution_queue.py
+          python partener-eu/ops/test_afir_material_resolution_queue.py
+
       - name: Preserve the current public last-known-good projection
         run: |
           python partener-eu/ops/recover_decision_products_lkg.py
@@ -134,13 +148,14 @@ jobs:
             cp /tmp/decision-products-lkg.js partener-eu/web/decision-products.js
           fi
 
-      - name: Persist AFIR corpus, enriched source and decision products conflict-safe
+      - name: Persist AFIR corpus, material queue, enriched source and decision products conflict-safe
         shell: bash
         run: |
           set -euo pipefail
           cp partener-eu/ingest/afir_ingest.py /tmp/afir_ingest.py
           cp partener-eu/ingest/state/afir_state.json /tmp/afir_state.json
           cp partener-eu/ingest/state/afir_corpus.json /tmp/afir_corpus.json
+          cp partener-eu/ingest/state/afir_material_resolution_queue.json /tmp/afir_material_resolution_queue.json
           cp partener-eu/ingest/state/decision_products.json /tmp/decision_products.json
           cp partener-eu/web/decision-products.js /tmp/decision-products.js
           git config user.name 'github-actions[bot]'
@@ -156,6 +171,7 @@ jobs:
             cp /tmp/afir_ingest.py partener-eu/ingest/afir_ingest.py
             cp /tmp/afir_state.json partener-eu/ingest/state/afir_state.json
             cp /tmp/afir_corpus.json partener-eu/ingest/state/afir_corpus.json
+            cp /tmp/afir_material_resolution_queue.json partener-eu/ingest/state/afir_material_resolution_queue.json
             cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
             cp /tmp/decision-products.js partener-eu/web/decision-products.js
             python partener-eu/ingest/intelligence_index.py
@@ -163,11 +179,12 @@ jobs:
               partener-eu/ingest/afir_ingest.py \
               partener-eu/ingest/state/afir_state.json \
               partener-eu/ingest/state/afir_corpus.json \
+              partener-eu/ingest/state/afir_material_resolution_queue.json \
               partener-eu/ingest/state/intelligence_index.json \
               partener-eu/ingest/state/decision_products.json \
               partener-eu/web/decision-products.js
             if git diff --cached --quiet; then
-              echo 'No AFIR corpus/state/product changes.'
+              echo 'No AFIR corpus/state/material-queue/product changes.'
               exit 0
             fi
             git commit -m 'Validate AFIR corpus and regenerate funding dossiers'
