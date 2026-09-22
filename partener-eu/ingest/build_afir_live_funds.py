@@ -30,13 +30,13 @@ BUCHAREST = ZoneInfo("Europe/Bucharest")
 
 
 class TableParser(HTMLParser):
-    """Capture table rows/cells while tolerating nested markup."""
+    """Capture table rows/cells while tolerating nested and void markup."""
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.rows: list[list[str]] = []
         self._in_row = False
-        self._cell_depth = 0
+        self._in_cell = False
         self._row: list[str] = []
         self._cell_parts: list[str] = []
 
@@ -45,26 +45,22 @@ class TableParser(HTMLParser):
             self._in_row = True
             self._row = []
         elif self._in_row and tag in {"td", "th"}:
-            self._cell_depth = 1
+            self._in_cell = True
             self._cell_parts = []
-        elif self._cell_depth:
-            self._cell_depth += 1
 
     def handle_endtag(self, tag: str) -> None:
-        if self._cell_depth:
-            self._cell_depth -= 1
-            if self._cell_depth == 0 and tag in {"td", "th"}:
-                self._row.append(clean_cell(" ".join(self._cell_parts)))
-                self._cell_parts = []
-                return
-        if tag == "tr" and self._in_row:
+        if tag in {"td", "th"} and self._in_cell:
+            self._row.append(clean_cell(" ".join(self._cell_parts)))
+            self._cell_parts = []
+            self._in_cell = False
+        elif tag == "tr" and self._in_row:
             if any(self._row):
                 self.rows.append(self._row)
             self._in_row = False
             self._row = []
 
     def handle_data(self, data: str) -> None:
-        if self._cell_depth:
+        if self._in_cell:
             value = data.strip()
             if value:
                 self._cell_parts.append(value)
@@ -90,8 +86,7 @@ def find_counter_item(corpus: dict[str, Any]) -> dict[str, Any]:
     for item in corpus.get("items") or []:
         if not isinstance(item, dict):
             continue
-        url = normalize_counter_url(str(item.get("url") or ""))
-        if url.endswith(COUNTER_PATH):
+        if normalize_counter_url(str(item.get("url") or "")).endswith(COUNTER_PATH):
             return item
     raise ValueError("AFIR live-funds counter was not found in the corpus")
 
@@ -214,6 +209,7 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
         "DEGRADED_SOURCE_DRIFT" if not fingerprint_matches else "FAIL_PARSE"
     )
     codes = sorted({row["interventionCode"] for row in rows})
+    snapshot_fingerprint = canonical_digest(rows) if rows else None
     payload: dict[str, Any] = {
         "schemaVersion": 1,
         "source": "AFIR",
@@ -222,6 +218,7 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
         "corpusFingerprint": corpus_fingerprint,
         "sourceFingerprint": source_fingerprint,
         "sourceFingerprintMatchesCorpus": fingerprint_matches,
+        "snapshotFingerprint": snapshot_fingerprint,
         "sourceObservedAt": observed_at,
         "generatedAt": generated_at,
         "httpStatus": http_status,
@@ -253,6 +250,7 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
             "evidenceType": "OFFICIAL_LIVE_COUNTER",
             "corpusFingerprint": corpus_fingerprint,
             "sourceFingerprint": source_fingerprint,
+            "snapshotFingerprint": snapshot_fingerprint,
             "sourceObservedAt": observed_at,
             "materialFactBoundary": "snapshot-only-no-cross-field-inference",
         },
