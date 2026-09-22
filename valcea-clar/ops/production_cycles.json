@@ -10,15 +10,120 @@
     "no_accidental_duplicate": true,
     "no_unproven_success": true
   },
-  "cycles": [],
-  "interventions": [],
+  "cycles": [
+    {
+      "cycle_id": "S7-2026-09-22-C01",
+      "evaluated_local": "2026-09-22T15:09:45+03:00",
+      "newsroom_fingerprint": "b0bf40b8e5221ade274144885797ba48d099317ea0d6b8846209fc4fb095661a",
+      "outcome": "NO_NEW_PUBLISHABLE_STORY",
+      "new_story_ids": [],
+      "publishable_story_count": 76,
+      "publication_event_matches": false,
+      "publication_event_at": null,
+      "discovery": {
+        "observed_at": "2026-09-22T15:08:39+03:00",
+        "sources_total": 22,
+        "sources_ok": 18,
+        "facts_admitted": 7,
+        "source_notice_briefs": 3,
+        "host_incident_count": 0
+      },
+      "editorial": {
+        "writer": {
+          "writer_id": "manual_journalism_v1",
+          "status": "ACTIVE",
+          "story_count": 134,
+          "fact_kernel_composed": 106,
+          "legacy_passthrough": 25,
+          "editorial_holds": 3
+        },
+        "integrity": {
+          "gate_id": "editorial_integrity_v1",
+          "status": "ACTIVE",
+          "story_count": 134,
+          "passed": 130,
+          "held": 4,
+          "failed": 0
+        },
+        "active_publication_holds": [
+          "derived-council-gambling-20260723",
+          "fast-ipj-actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64-aaf8eb1c11",
+          "fast-ipj-actiunile-politistilor-rutieri-din-ultimele-72-de-ore1-646c23c36d",
+          "fast-ipj-activitati-de-educatie-rutiera-in-unitatile-de-invatam-325cb216b6",
+          "olanesti-bridge-monitor"
+        ]
+      },
+      "delivery": {
+        "edition_id": "2026-09-22-morning",
+        "counts": {
+          "delivered": 160,
+          "pending": 0,
+          "blocked": 220,
+          "cancelled": 0,
+          "other": 0
+        },
+        "complete": true,
+        "fully_delivered": false
+      },
+      "visuals": {
+        "stories_ready": 8,
+        "assets": 16
+      },
+      "experience": {
+        "s4_status": "OPERATIONAL",
+        "s5_status": "OPERATIONAL",
+        "safe_story_count": 103,
+        "route_count": 137
+      },
+      "corrections": {
+        "entries": 0,
+        "historical_migration_complete": false
+      },
+      "governance": {
+        "status": "READY_WITH_KNOWN_LIMITATIONS",
+        "blocker_codes": [],
+        "warning_codes": [
+          "KNOWN_CHANNEL_MEDIA_BACKLOG",
+          "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION"
+        ]
+      },
+      "operator_trigger": {
+        "requested_at": "2026-09-22T15:57:00+03:00",
+        "requested_by": "S7_PRODUCTION_LOOP"
+      },
+      "note": "Deliberate S7 cycle: canonical discovery found fresh radar signals but no new full story passed publication gates. No publication was forced."
+    }
+  ],
+  "interventions": [
+    {
+      "id": "S7-2026-09-22-I01",
+      "detected_at": "2026-09-22T16:32:16+03:00",
+      "story_id": "auto-raliul-valcii-official-news-f6e28bbb1533",
+      "type": "FAIL_CLOSED_UPDATE_REMEDIATION",
+      "symptom": "Verified Fact Kernel update did not reach the existing public article; the public route retained the older registration-focused copy.",
+      "first_gate": "editorial_writer",
+      "causes": [
+        "noncanonical claim kind verified_primary",
+        "self-referential update-note claim cited a URL outside the story source set"
+      ],
+      "public_effect": "No unverified replacement text was published; the previous durable article remained public.",
+      "remediation": [
+        "normalized claim kinds to the existing editorial_manual contract",
+        "removed self-referential editorial update-note claim from the factual kernel",
+        "retained the same canonical story ID and route"
+      ],
+      "status": "REMEDIATED_PENDING_FINAL_READBACK"
+    }
+  ],
   "observation": {
-    "started": false,
-    "first_cycle_at": null,
-    "material_cycles": 0,
+    "started": true,
+    "first_cycle_at": "2026-09-22T15:09:45+03:00",
+    "material_cycles": 1,
     "publication_cycles": 0,
-    "no_publication_cycles": 0,
-    "distinct_local_dates": [],
+    "no_publication_cycles": 1,
+    "distinct_local_dates": [
+      "2026-09-22"
+    ],
     "formal_validation_complete": false
   }
 }
