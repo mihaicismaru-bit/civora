@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-22T18:52:50Z",
+  "generated_at": "2026-09-22T22:07:07Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -162,7 +162,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
-          "fingerprint": "045125c77406f921a9b613415d51b1b74179c487df4861f42fa94902b34e51fd",
+          "fingerprint": "3da08e235e8ef1f53d5c086fb65cc7cca57a20d4334bfc90a5fe59296e574008",
           "match_count": 24,
           "matched_terms": [
             "șomaj",
@@ -183,7 +183,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "d074ff5ae4bb80c196143f3a33b6f9915e8308e1627e20a25f9ffb381d180b39",
+          "fingerprint": "d07d06c181a936b94232d05b44fa06e87c6c0db6b86eada8eb612d7f145f331f",
           "match_count": 17,
           "matched_terms": [
             "Vâlcea",
@@ -204,8 +204,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "3c82d2fd8c34f15b9fa381a2f10987a06db6558e6d17f4f5e7e1c007d4a8431b",
-          "match_count": 20,
+          "fingerprint": "50d7ebb8aa94df332e1c637a1fc048165b66ad74f544e124de41830e99f1dda1",
+          "match_count": 21,
           "matched_terms": [
             "Joburi",
             "locuri de munca",
@@ -310,7 +310,10 @@
         "termene-top50-valcea"
       ],
       "official_changed_sources": [],
-      "degraded_sources": [],
+      "degraded_sources": [
+        "data-gov-onrc-datasets",
+        "data-gov-finance-datasets"
+      ],
       "sources": [
         {
           "id": "data-gov-onrc-datasets",
@@ -318,27 +321,15 @@
           "url": "https://data.gov.ro/dataset?organization=onrc",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/dataset?organization=onrc",
-          "fingerprint": "3bd9e8545e30f4d7318bf390a212c73447b862dc22548d085eb252de701bbd35",
-          "match_count": 8,
-          "matched_terms": [
-            "Firme înregistrate la Registrul Comerțului"
-          ],
-          "numeric_signals": [
-            {
-              "kind": "companies",
-              "value_text": "3"
-            },
-            {
-              "kind": "companies",
-              "value_text": "1"
-            }
-          ],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "data-gov-finance-datasets",
@@ -346,19 +337,15 @@
           "url": "https://data.gov.ro/organization/mfp",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/organization/mfp",
-          "fingerprint": "ce4f74e4d2e54f5d9c439ee0fede4f2ff46aabc07eba222e382ee6bba9e0ce23",
-          "match_count": 6,
-          "matched_terms": [
-            "Situații financiare",
-            "CSV"
-          ],
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "onrc-services",
