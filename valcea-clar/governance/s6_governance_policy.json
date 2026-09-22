@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR / CIVORA",
+  "stage": "S6_OPERATIONS_GOVERNANCE",
+  "operating_model": "human_governance_with_bounded_automation",
+  "principles": {
+    "repository_state_is_durable_truth": true,
+    "automation_may_execute_preapproved_deterministic_rules": true,
+    "automation_may_not_redefine_evidence_standards": true,
+    "material_corrections_are_visible": true,
+    "publication_holds_fail_closed": true,
+    "automatic_rollback_forbidden": true,
+    "rollback_requires_explicit_human_dispatch": true,
+    "runtime_rollback_is_separate_from_code_rollback": true,
+    "alerts_only_for_material_conditions": true
+  },
+  "authority_matrix": {
+    "automation_allowed": [
+      "discover_and_collect_public_signals",
+      "apply_existing_verification_contracts",
+      "render_and_publish_content_that_passes_existing_gates",
+      "reconcile_delivery_confirmations",
+      "render_visual_and_reader_experience_layers",
+      "run_quality_health_and_governance_checks",
+      "persist_deterministic_runtime_state",
+      "hold_or_fail_closed_when_required_evidence_is_missing"
+    ],
+    "automation_forbidden": [
+      "lower_or_redefine_evidence_thresholds",
+      "release_publication_hold_without_release_conditions",
+      "force_publish_failed_or_blocked_story",
+      "erase_or_rewrite_durable_publication_history",
+      "silently_change_material_published_fact",
+      "change_social_credentials_or_secret_values",
+      "enable_paid_spend_or_paid_api_dependency",
+      "execute_runtime_rollback_without_explicit_workflow_dispatch",
+      "execute_code_or_configuration_rollback_without_reviewed_commit_or_pull_request"
+    ],
+    "human_required": [
+      "change_editorial_evidence_policy",
+      "approve_exception_to_fail_closed_rule",
+      "release_reputational_or_integrity_hold",
+      "execute_runtime_rollback",
+      "approve_code_or_configuration_revert",
+      "change_credentials_permissions_or_paid_spend",
+      "resolve_material_correction_dispute"
+    ],
+    "chatgpt_role": "operator_orchestrator_without_credentials_or_unbounded_mutation_authority"
+  },
+  "alert_policy": {
+    "fail_check_on": [
+      "OPEN_P0_INCIDENT",
+      "OPEN_P1_INCIDENT",
+      "GOVERNANCE_INVARIANT_BROKEN",
+      "NO_VALID_ROLLBACK_BASELINE",
+      "CANONICAL_STAGE_REGRESSION"
+    ],
+    "warn_only_on": [
+      "KNOWN_CHANNEL_MEDIA_BACKLOG",
+      "LEGACY_DELIVERY_QUARANTINE",
+      "OPEN_P2_INCIDENT",
+      "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION"
+    ],
+    "ignore_as_nonincident": [
+      "expected_fail_closed_social_hold",
+      "editorially_valid_unpublished_candidate",
+      "known_missing_tiktok_media"
+    ]
+  },
+  "rollback_policy": {
+    "automatic_rollback": false,
+    "runtime_scope": [
+      "valcea-clar/site/runtime",
+      "valcea-clar/site/public_ux_state.json",
+      "valcea-clar/visuals/s3_visual_manifest.json",
+      "valcea-clar/delivery"
+    ],
+    "runtime_excludes": [
+      "valcea-clar/editorial/facts_registry.json",
+      "valcea-clar/site/story_archive.json",
+      "valcea-clar/editorial/corrections.json",
+      "valcea-clar/editorial/publication_holds.json",
+      "credentials_and_secrets"
+    ],
+    "code_config_rollback": "reviewed_git_revert_or_pull_request_only",
+    "runtime_execution": "manual_workflow_dispatch_with_exact_confirmation_phrase",
+    "abort_if_main_moved_since_dispatch": true
+  },
+  "incident_policy": {
+    "severities": {
+      "P0": "active public integrity or safety failure requiring immediate stop/hold",
+      "P1": "material publication/distribution/governance failure requiring operator action",
+      "P2": "degraded noncritical functionality with safe fallback",
+      "P3": "maintenance or improvement item"
+    },
+    "required_fields": [
+      "id",
+      "severity",
+      "status",
+      "opened_at",
+      "summary",
+      "evidence",
+      "owner_action"
+    ],
+    "closed_incident_requires_resolution": true
+  }
+}
