@@ -63,7 +63,12 @@
       "emits": "valcea-clar/site/story_publication_event.json",
       "post_persist_dispatch": ".github/workflows/valcea-clar-social-publishing.yml",
       "post_persist_dispatch_mode": "explicit_workflow_dispatch",
-      "owner": "site_engine"
+      "owner": "site_engine",
+      "production_loop_stage": "S7",
+      "post_cycle_reconciliation": [
+        "edition_delivery_ledger",
+        "s6_operations_governance"
+      ]
     },
     {
       "id": "live_newsroom_operator_bridge",
@@ -471,24 +476,6 @@
         "story_publication_event",
         "public_ux_state_change"
       ]
-    },
-    {
-      "id": "s7_production_loop",
-      "kind": "composed_real_production_cycle_using_existing_canonical_workers",
-      "workflow": ".github/workflows/valcea-clar-newsroom-live.yml",
-      "schedule": [],
-      "event_driven": true,
-      "publication_authority": "existing_canonical_gates_only",
-      "force_publication_allowed": false,
-      "composition": [
-        "live_newsroom",
-        "public_projection_readback",
-        "social_distribution",
-        "edition_delivery_ledger",
-        "s6_operations_governance"
-      ],
-      "evidence": "valcea-clar/ops/s7_production_loop.json",
-      "owner": "site_engine"
     }
   ],
   "retired_external_monitors": [
@@ -517,5 +504,21 @@
       "status": "retired",
       "replacement_workflow": ".github/workflows/valcea-clar-social-publishing.yml"
     }
-  ]
+  ],
+  "production_loop": {
+    "stage": "S7_PRODUCTION_LOOP",
+    "kind": "composition_protocol_not_separate_writer",
+    "canonical_entry_job": "live_newsroom",
+    "force_publication_allowed": false,
+    "composition": [
+      "live_newsroom",
+      "public_projection_readback",
+      "social_distribution",
+      "edition_delivery_ledger",
+      "s6_operations_governance"
+    ],
+    "public_projection_repository": "mihaicismaru-bit/valcea-clar",
+    "evidence": "valcea-clar/ops/s7_production_loop.json",
+    "ownership_rule": "reuse_existing_single_owner_jobs; no duplicate workflow registration"
+  }
 }
