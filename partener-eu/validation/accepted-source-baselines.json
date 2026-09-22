@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "policy": "Reviewed semantic baselines are audit-only. They suppress repeat alerts only for an exact reviewed non-material page state and never authorize material fact publication.",
+  "baselines": {
+    "SRC-OIRCENTRU-PEO": {
+      "accepted_semantic_sha256": "dea4639dc7841aeff97e228a88291de29faec79c3f67a1c4665d9768183e740c",
+      "previous_semantic_sha256": "91e66a5f4e4602354b05b4a67c0daef48314e3914a3d451ee01d70baca740a55",
+      "reviewed_at": "2026-09-22T17:25:00Z",
+      "decision": "RESOLVED_NON_MATERIAL_CHANGE",
+      "rationale": "Reviewed current official OIR Centru PEO programme/resource page. The persistent page-level semantic change does not establish a call-specific change to deadline, eligibility, budget, scoring, beneficiaries or lifecycle status. No material fact update is authorized.",
+      "evidence_urls": [
+        "https://oircentru.ro/peo-2021-2027/"
+      ],
+      "material_fact_action": "NONE",
+      "publish_authorized": false
+    },
+    "SRC-MEC-CNDIPT": {
+      "accepted_semantic_sha256": "ebb583a01fa07b496810ec15c4908487044081af7864a51fc6c4ad7f1fdd98e5",
+      "previous_semantic_sha256": "ab44fb5bf70baf0a47383f28aeff6e1125cfa35700be359dc22bdedf01574d21",
+      "reviewed_at": "2026-09-22T17:25:00Z",
+      "decision": "RESOLVED_NON_MATERIAL_CHANGE",
+      "rationale": "Reviewed current official Ministry of Education vocational/technical policy page. The persistent page-level semantic change does not establish a funding-call-specific change to deadline, eligibility, budget, scoring, beneficiaries or lifecycle status. No material fact update is authorized.",
+      "evidence_urls": [
+        "https://www.edu.ro/profesional_tehnic"
+      ],
+      "material_fact_action": "NONE",
+      "publish_authorized": false
+    }
+  }
+}
