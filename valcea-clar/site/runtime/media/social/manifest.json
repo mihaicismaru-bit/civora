@@ -303,22 +303,24 @@
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 2,
+      "delivered": 3,
       "eligible": 7,
-      "value": 0.2857,
+      "value": 0.4286,
       "delivered_story_ids": [
         "calimanesti-restrictii-trotuare-20260922",
-        "tetoiu-otesani-incendii-20260921"
+        "tetoiu-otesani-incendii-20260921",
+        "valcea-somaj-august-2026"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 4,
+      "delivered": 5,
       "eligible": 7,
-      "value": 0.5714,
+      "value": 0.7143,
       "delivered_story_ids": [
         "brezoi-ziua-recoltei-pregatiri-20260922",
         "calimanesti-restrictii-trotuare-20260922",
+        "scm-valcea-fc-bihor-20260920",
         "tetoiu-otesani-incendii-20260921",
         "valcea-somaj-august-2026"
       ]
@@ -345,25 +347,33 @@
       "automated_workflow_dispatch_runs": [
         {
           "repository": "mihaicismaru-bit/civora",
-          "run_id": 35758558663,
+          "run_id": 35779038689,
           "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-09-22T17:06:50Z",
+          "created_at": "2026-09-22T20:15:03Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
           "repository": "mihaicismaru-bit/civora",
-          "run_id": 35758447579,
-          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
-          "created_at": "2026-09-22T17:05:49Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 35758113136,
+          "run_id": 35778675023,
           "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-22T17:02:49Z",
+          "created_at": "2026-09-22T20:11:44Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35778390209,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-22T20:09:07Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35772508069,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-22T19:14:33Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         }
@@ -373,26 +383,26 @@
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "f516a860e36032e525fd5a6f96f82fc93b35cf1b",
-      "structural_baseline_at_utc": "2026-09-22T16:25:04Z",
-      "structural_baseline_repository": "mihaicismaru-bit/civora",
-      "structural_baseline_path": "civora_structural_paths",
+      "structural_baseline_sha": "c315f2a64b017085a4b4723f3b9b1d057778788f",
+      "structural_baseline_at_utc": "2026-09-22T19:00:53Z",
+      "structural_baseline_repository": "mihaicismaru-bit/valcea-clar",
+      "structural_baseline_path": "scripts/sync_civora.py",
       "structural_components": [
         {
-          "sha": "f516a860e36032e525fd5a6f96f82fc93b35cf1b",
-          "at_utc": "2026-09-22T16:25:04Z",
+          "sha": "80d9ef35f69097661bcbe98d902a94d08148c4d3",
+          "at_utc": "2026-09-22T18:52:37Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
         {
-          "sha": "acbf7f539fdacedd7649b6164a05fb583d048fd4",
-          "at_utc": "2026-09-22T16:16:19Z",
+          "sha": "c315f2a64b017085a4b4723f3b9b1d057778788f",
+          "at_utc": "2026-09-22T19:00:53Z",
           "repository": "mihaicismaru-bit/valcea-clar",
           "path": "scripts/sync_civora.py",
-          "source_sha": "88c0106d0f5f4ec49dc10ca6856554ee7f27f93e"
+          "source_sha": "59e10f8f20e483786292d62505a232b270afcdf1"
         }
       ],
-      "eligible_after_utc": "2026-09-24T16:25:04Z",
+      "eligible_after_utc": "2026-09-24T19:00:53Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
