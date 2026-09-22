@@ -1,0 +1,125 @@
+name: VÂLCEA CLAR S1 Edition Delivery
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/delivery/edition_delivery.py"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/editions/**"
+      - "valcea-clar/site/runtime/stiri/manifest.json"
+      - "valcea-clar/site/runtime/stiri/**/index.html"
+      - "valcea-clar/social/facebook_outbox.json"
+      - "valcea-clar/social/threads_outbox.json"
+      - "valcea-clar/social/facebook_state.json"
+      - "valcea-clar/social/instagram_state.json"
+      - "valcea-clar/social/threads_state.json"
+      - "valcea-clar/social/tiktok_state.json"
+      - ".github/workflows/valcea-clar-edition-delivery.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/delivery/edition_delivery.py"
+      - "valcea-clar/site/current_edition.json"
+      - "valcea-clar/editions/**"
+      - "valcea-clar/site/runtime/stiri/manifest.json"
+      - "valcea-clar/site/runtime/stiri/**/index.html"
+      - "valcea-clar/social/facebook_outbox.json"
+      - "valcea-clar/social/threads_outbox.json"
+      - "valcea-clar/social/facebook_state.json"
+      - "valcea-clar/social/instagram_state.json"
+      - "valcea-clar/social/threads_state.json"
+      - "valcea-clar/social/tiktok_state.json"
+      - ".github/workflows/valcea-clar-edition-delivery.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-s1-edition-delivery
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Self-test delivery invariants
+        run: python valcea-clar/delivery/edition_delivery.py --self-test
+
+      - name: Reconcile current edition deliveries
+        run: python valcea-clar/delivery/edition_delivery.py | tee /tmp/edition-delivery-report.json
+
+      - name: Validate generated ledger
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar/delivery')
+          manifest=json.loads((root/'manifest.json').read_text(encoding='utf-8'))
+          queue=json.loads((root/'queue.json').read_text(encoding='utf-8'))
+          report=json.loads((root/'report.json').read_text(encoding='utf-8'))
+          assert manifest['edition_id'] == report['edition_id']
+          assert manifest['manifest_fingerprint_sha256'] == report['manifest_fingerprint_sha256']
+          ids=[r['delivery_id'] for r in queue['records']]
+          assert len(ids) == len(set(ids)), 'duplicate delivery ids'
+          current=[r for r in queue['records'] if r.get('edition_id') == manifest['edition_id']]
+          expected=sum(1 for a in manifest['articles'] for c in a['channels'].values() if c.get('selected'))
+          assert len(current) >= expected, (len(current), expected)
+          for row in current:
+              if row.get('status') == 'delivered':
+                  assert (row.get('confirmation') or {}).get('confirmed') is True
+                  assert (row.get('confirmation') or {}).get('bound_content_version') == row.get('content_version')
+          print(json.dumps({'ledger':'PASS','edition_id':manifest['edition_id'],'records':len(current),'counts':report['counts']}))
+          PY
+
+      - name: Persist ledger conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/s1-ledger
+          cp valcea-clar/delivery/manifest.json /tmp/s1-ledger/manifest.json
+          cp valcea-clar/delivery/queue.json /tmp/s1-ledger/queue.json
+          cp valcea-clar/delivery/report.json /tmp/s1-ledger/report.json
+          git config user.name "valcea-clar-delivery[bot]"
+          git config user.email "valcea-clar-delivery@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            mkdir -p valcea-clar/delivery
+            cp /tmp/s1-ledger/*.json valcea-clar/delivery/
+            git add valcea-clar/delivery/manifest.json valcea-clar/delivery/queue.json valcea-clar/delivery/report.json
+            if git diff --cached --quiet; then
+              echo "S1 ledger already reconciled."
+              exit 0
+            fi
+            git commit -m "Reconcile VÂLCEA CLAR S1 edition delivery ledger"
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "Could not persist S1 ledger after five attempts." >&2
+          exit 1
+
+      - name: Upload S1 audit artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-s1-edition-delivery-${{ github.run_id }}
+          path: |
+            /tmp/edition-delivery-report.json
+            valcea-clar/delivery/manifest.json
+            valcea-clar/delivery/queue.json
+            valcea-clar/delivery/report.json
+          if-no-files-found: warn
+          retention-days: 14

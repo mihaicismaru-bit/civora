@@ -1,5 +1,5 @@
 {
-  "schema_version": 10,
+  "schema_version": 11,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -51,7 +51,9 @@
       "id": "live_newsroom",
       "kind": "continuous_story_discovery_validation_and_publication",
       "workflow": ".github/workflows/valcea-clar-newsroom-live.yml",
-      "schedule": ["*/5 * * * *"],
+      "schedule": [
+        "*/5 * * * *"
+      ],
       "schedule_role": "polling_fallback_only",
       "event_triggers": true,
       "publication_gate": "post_writer_integrity_and_per_story_quality_gate",
@@ -91,10 +93,27 @@
       "id": "fact_kernel_builder",
       "kind": "single_writer_verified_fact_materialization",
       "workflow": ".github/workflows/valcea-clar-fact-kernel.yml",
-      "schedule": ["4,19,34,49 * * * *"],
+      "schedule": [
+        "4,19,34,49 * * * *"
+      ],
       "schedule_role": "bounded_polling_fallback",
-      "event_triggers": ["structured_alert_events", "manual_publish_queue", "supplemental_facts", "kernel_code_or_policy_change"],
-      "adapters": ["council", "adopted_hcl_articles", "structured_t1_alerts", "primary_source_service", "primary_source_admin", "manual_intake", "supplemental_dossiers", "gambling_dossier", "scm_program"],
+      "event_triggers": [
+        "structured_alert_events",
+        "manual_publish_queue",
+        "supplemental_facts",
+        "kernel_code_or_policy_change"
+      ],
+      "adapters": [
+        "council",
+        "adopted_hcl_articles",
+        "structured_t1_alerts",
+        "primary_source_service",
+        "primary_source_admin",
+        "manual_intake",
+        "supplemental_dossiers",
+        "gambling_dossier",
+        "scm_program"
+      ],
       "promotion_target": "valcea-clar/editorial/facts_registry.json",
       "promotion_rule": "verified_source_specific_contracts_only",
       "single_writer": true,
@@ -115,7 +134,10 @@
       "id": "autonomous_editions",
       "kind": "morning_evening_recap_generation",
       "workflow": ".github/workflows/valcea-clar-editions.yml",
-      "schedule": ["45,55 4,5,6 * * *", "30,40 15,16,17 * * *"],
+      "schedule": [
+        "45,55 4,5,6 * * *",
+        "30,40 15,16,17 * * *"
+      ],
       "timezone_gate": "Europe/Bucharest targets 07:45 and 18:30 for recap snapshots only; these windows never delay or authorize an individual story publication.",
       "publication_gate": false,
       "owner": "site_engine"
@@ -124,7 +146,11 @@
       "id": "source_radar",
       "kind": "canonical_source_health_signal_verification_and_discovery_control_plane",
       "workflow": ".github/workflows/valcea-clar-source-radar.yml",
-      "schedule": ["*/10 * * * *", "23 * * * *", "47 */6 * * *"],
+      "schedule": [
+        "*/10 * * * *",
+        "23 * * * *",
+        "47 */6 * * *"
+      ],
       "cadences": {
         "signal_radar_and_primary_verification": "*/10 * * * *",
         "bounded_discovery": "23 * * * *",
@@ -138,7 +164,9 @@
       "id": "structured_primary_alerts",
       "kind": "rapid_t1_structured_event_ingest",
       "workflow": ".github/workflows/valcea-clar-structured-alerts.yml",
-      "schedule": ["2-57/5 * * * *"],
+      "schedule": [
+        "2-57/5 * * * *"
+      ],
       "writes": "valcea-clar/editorial/structured_alert_events.json",
       "facts_registry_write_allowed": false,
       "downstream_fact_writer": ".github/workflows/valcea-clar-fact-kernel.yml",
@@ -157,7 +185,10 @@
       "id": "cultural_sources",
       "kind": "festival_and_performing_arts_source_monitoring",
       "workflow": ".github/workflows/valcea-clar-festival-intelligence-monitor.yml",
-      "schedule": ["13 */2 * * *", "29 */6 * * *"],
+      "schedule": [
+        "13 */2 * * *",
+        "29 */6 * * *"
+      ],
       "cadences": {
         "performing_arts": "13 */2 * * *",
         "festival": "29 */6 * * *"
@@ -169,7 +200,9 @@
       "id": "identity_intelligence",
       "kind": "people_and_artist_public_identity_projection",
       "workflow": ".github/workflows/valcea-clar-people-intelligence.yml",
-      "schedule": ["29 */6 * * *"],
+      "schedule": [
+        "29 */6 * * *"
+      ],
       "shared_indexing_transaction": true,
       "public_projection_requires_resolved_identity": true,
       "owner": "site_engine"
@@ -198,7 +231,9 @@
       "id": "monitor_ledger",
       "kind": "infrastructure_market_and_council_watch_state",
       "workflow": ".github/workflows/valcea-clar-monitor-ledger.yml",
-      "schedule": ["11 * * * *"],
+      "schedule": [
+        "11 * * * *"
+      ],
       "publication_authority": "none",
       "owner": "site_engine"
     },
@@ -206,7 +241,9 @@
       "id": "observed_metrics",
       "kind": "social_observed_metrics_harvest",
       "workflow": ".github/workflows/valcea-clar-observed-metrics-harvest.yml",
-      "schedule": ["23 * * * *"],
+      "schedule": [
+        "23 * * * *"
+      ],
       "publication_blocking_allowed": false,
       "owner": "site_engine"
     },
@@ -214,14 +251,18 @@
       "id": "venue_ingest",
       "kind": "venue_monitoring_and_ingest",
       "workflow": ".github/workflows/valcea-clar-venues-ingest.yml",
-      "schedule": ["23 */6 * * *"],
+      "schedule": [
+        "23 */6 * * *"
+      ],
       "owner": "site_engine"
     },
     {
       "id": "olanesti_investigation",
       "kind": "investigation_monitoring",
       "workflow": ".github/workflows/valcea-clar-olanesti-investigation-monitor.yml",
-      "schedule": ["17 4,14 * * *"],
+      "schedule": [
+        "17 4,14 * * *"
+      ],
       "editorial_priority": "normal_case_priority; benchmark_only_for_investigation_engine",
       "owner": "site_engine"
     },
@@ -229,7 +270,9 @@
       "id": "social_distribution",
       "kind": "multi_channel_social_distribution",
       "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
-      "schedule": ["7,22,37,52 * * * *"],
+      "schedule": [
+        "7,22,37,52 * * * *"
+      ],
       "schedule_role": "recovery_only",
       "event_trigger": "valcea-clar/site/story_publication_event.json",
       "event_trigger_mode": "explicit_workflow_dispatch_after_canonical_story_persist",
@@ -264,7 +307,9 @@
       "id": "public_http_health",
       "kind": "read_only_public_http_observer",
       "workflow": ".github/workflows/valcea-clar-public-health.yml",
-      "schedule": ["23,53 * * * *"],
+      "schedule": [
+        "23,53 * * * *"
+      ],
       "repository_state_write_allowed": false,
       "owner": "site_engine"
     },
@@ -279,7 +324,32 @@
       "id": "ownership_guard",
       "kind": "runtime_ownership_monitoring",
       "workflow": ".github/workflows/valcea-clar-engine-guard.yml",
-      "schedule": ["11 2 * * *"],
+      "schedule": [
+        "11 2 * * *"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "edition_delivery_ledger",
+      "kind": "durable_edition_article_version_channel_delivery_reconciliation",
+      "workflow": ".github/workflows/valcea-clar-edition-delivery.yml",
+      "schedule": [],
+      "event_driven": true,
+      "triggers": [
+        "current_edition",
+        "edition_payload",
+        "site_runtime_story_manifest",
+        "social_outboxes",
+        "social_confirmation_states"
+      ],
+      "publication_authority": "none",
+      "content_rewrite_allowed": false,
+      "direct_platform_api_allowed": false,
+      "writes": [
+        "valcea-clar/delivery/manifest.json",
+        "valcea-clar/delivery/queue.json",
+        "valcea-clar/delivery/report.json"
+      ],
       "owner": "site_engine"
     }
   ],
