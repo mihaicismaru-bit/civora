@@ -1,0 +1,237 @@
+name: VÂLCEA CLAR S6 Operations & Governance
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "S6 action"
+        required: true
+        default: audit
+        type: choice
+        options: [audit, prepare_runtime_rollback, execute_runtime_rollback]
+      target_baseline:
+        description: "Registered rollback baseline id, or lkg"
+        required: false
+        default: lkg
+        type: string
+      confirmation:
+        description: "For execute_runtime_rollback type exactly ROLLBACK_RUNTIME"
+        required: false
+        default: ""
+        type: string
+  schedule:
+    - cron: "37 * * * *"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/governance/**"
+      - "valcea-clar/ops/incidents.json"
+      - "valcea-clar/ops/rollback_baselines.json"
+      - "valcea-clar/scripts/s6_governance.py"
+      - "valcea-clar/scripts/s6_runtime_rollback.py"
+      - "valcea-clar/engine/automation_registry.json"
+      - ".github/workflows/valcea-clar-s6-operations-governance.yml"
+  pull_request:
+    paths:
+      - "valcea-clar/governance/**"
+      - "valcea-clar/ops/**"
+      - "valcea-clar/scripts/s6_governance.py"
+      - "valcea-clar/scripts/s6_runtime_rollback.py"
+      - "valcea-clar/engine/automation_registry.json"
+      - ".github/workflows/valcea-clar-s6-operations-governance.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-s6-governance-${{ github.event.pull_request.number || 'main' }}
+  cancel-in-progress: false
+
+jobs:
+  governance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Compile and self-test S6
+        run: |
+          python -m py_compile valcea-clar/scripts/s6_governance.py valcea-clar/scripts/s6_runtime_rollback.py
+          python valcea-clar/scripts/s6_governance.py --self-test
+          python valcea-clar/scripts/s6_runtime_rollback.py --target lkg --json
+
+      - name: Audit material governance state
+        run: |
+          python valcea-clar/scripts/s6_governance.py --audit --persist --output /tmp/valcea-clar-s6-governance.json
+
+      - name: Resolve requested rollback baseline
+        if: github.event_name == 'workflow_dispatch' && inputs.action != 'audit'
+        id: rollback
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha=$(python valcea-clar/scripts/s6_runtime_rollback.py --target "${{ inputs.target_baseline }}")
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Rollback target: $sha"
+
+      - name: Prepare runtime rollback plan
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'prepare_runtime_rollback'
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="${{ steps.rollback.outputs.sha }}"
+          git cat-file -e "$target^{commit}"
+          {
+            echo "## S6 runtime rollback plan"
+            echo
+            echo "Target: $target"
+            echo
+            echo "Scope: site/runtime, public_ux_state, S3 visual manifest, S1 generated delivery state."
+            echo
+            echo "Diff stat:"
+            git diff --stat "$target"..HEAD -- valcea-clar/site/runtime valcea-clar/site/public_ux_state.json valcea-clar/visuals/s3_visual_manifest.json valcea-clar/delivery/manifest.json valcea-clar/delivery/queue.json valcea-clar/delivery/report.json || true
+            echo
+            echo "No files were changed."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Persist governance state only on material change
+        if: github.event_name != 'pull_request' && (github.event_name != 'workflow_dispatch' || inputs.action == 'audit')
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "valcea-clar-s6-governance[bot]"
+          git config user.email "valcea-clar-s6-governance@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python valcea-clar/scripts/s6_governance.py --audit --persist --output /tmp/valcea-clar-s6-governance.json
+            git add valcea-clar/ops/governance_state.json valcea-clar/ops/audit_log.jsonl
+            if git diff --cached --quiet; then
+              echo "S6 material governance state unchanged."
+              break
+            fi
+            git commit -m "Reconcile VÂLCEA CLAR S6 governance state"
+            if git push origin HEAD:main; then
+              break
+            fi
+            sleep $((attempt * 2))
+            if [ "$attempt" -eq 5 ]; then exit 1; fi
+          done
+
+      - name: Execute explicit runtime rollback
+        if: github.event_name == 'workflow_dispatch' && inputs.action == 'execute_runtime_rollback'
+        shell: bash
+        env:
+          TARGET_SHA: ${{ steps.rollback.outputs.sha }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+          START_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$CONFIRMATION" != "ROLLBACK_RUNTIME" ]; then
+            echo "Exact confirmation ROLLBACK_RUNTIME is required." >&2
+            exit 1
+          fi
+          git cat-file -e "$TARGET_SHA^{commit}"
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then
+            echo "main moved after rollback dispatch; aborting without mutation." >&2
+            exit 1
+          fi
+
+          git checkout "$TARGET_SHA" -- valcea-clar/site/runtime valcea-clar/site/public_ux_state.json valcea-clar/visuals/s3_visual_manifest.json valcea-clar/delivery/manifest.json valcea-clar/delivery/queue.json valcea-clar/delivery/report.json
+
+          python valcea-clar/scripts/public_ux_story_integrity.py --check
+          python valcea-clar/scripts/s4_publication_experience.py --check
+          python valcea-clar/scripts/s5_distinctive_products.py --check
+          python valcea-clar/scripts/s6_governance.py --audit --check --output /tmp/s6-post-rollback.json
+
+          python - <<'PY'
+          import datetime,json,os
+          from pathlib import Path
+          path=Path('valcea-clar/ops/audit_log.jsonl')
+          event={
+            "at":datetime.datetime.now(datetime.timezone.utc).replace(microsecond=0).isoformat(),
+            "event":"explicit_runtime_rollback",
+            "from_sha":os.environ["START_SHA"],
+            "target_sha":os.environ["TARGET_SHA"],
+            "confirmation":"ROLLBACK_RUNTIME",
+            "scope":"generated_runtime_only"
+          }
+          with path.open('a',encoding='utf-8') as fh:
+              fh.write(json.dumps(event,ensure_ascii=False,separators=(',',':'))+'\n')
+          PY
+
+          git config user.name "valcea-clar-s6-rollback[bot]"
+          git config user.email "valcea-clar-s6-rollback@users.noreply.github.com"
+          git add valcea-clar/site/runtime valcea-clar/site/public_ux_state.json valcea-clar/visuals/s3_visual_manifest.json valcea-clar/delivery/manifest.json valcea-clar/delivery/queue.json valcea-clar/delivery/report.json valcea-clar/ops/audit_log.jsonl
+
+          if git diff --cached --quiet; then
+            echo "Runtime already matches requested baseline."
+            exit 0
+          fi
+          git commit -m "Rollback VÂLCEA CLAR generated runtime to S6 LKG"
+          git fetch origin main
+          if [ "$(git rev-parse origin/main)" != "$START_SHA" ]; then
+            echo "main moved before rollback push; aborting without push." >&2
+            exit 1
+          fi
+          git push origin HEAD:main
+
+      - name: Enforce material governance blockers
+        if: always() && !(github.event_name == 'workflow_dispatch' && inputs.action == 'execute_runtime_rollback')
+        run: |
+          python valcea-clar/scripts/s6_governance.py --audit --check --output /tmp/valcea-clar-s6-governance-final.json
+
+      - name: Write S6 summary
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          from pathlib import Path
+          p=Path('/tmp/valcea-clar-s6-governance-final.json')
+          if not p.is_file():
+              p=Path('/tmp/valcea-clar-s6-governance.json')
+          if not p.is_file():
+              print("## S6 governance: report unavailable")
+              raise SystemExit(0)
+          d=json.loads(p.read_text(encoding='utf-8'))
+          print(f"## S6 governance: {d.get('status')}")
+          print()
+          print(f"- Material blockers: **{len(d.get('blockers') or [])}**")
+          print(f"- Known warnings: **{len(d.get('warnings') or [])}**")
+          print(f"- LKG: {(d.get('lkg') or {}).get('id')}")
+          if d.get('blockers'):
+              print()
+              print("### Blockers")
+              for row in d['blockers']:
+                  print(f"- **{row.get('code')}** — {row.get('summary')}")
+          if d.get('warnings'):
+              print()
+              print("### Known limitations")
+              for row in d['warnings']:
+                  print(f"- **{row.get('code')}** — {row.get('summary')}")
+          PY
+
+      - name: Upload S6 evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-s6-governance-${{ github.run_id }}
+          path: |
+            /tmp/valcea-clar-s6-governance.json
+            /tmp/valcea-clar-s6-governance-final.json
+            /tmp/s6-post-rollback.json
+            valcea-clar/governance/s6_governance_policy.json
+            valcea-clar/ops/governance_state.json
+            valcea-clar/ops/audit_log.jsonl
+            valcea-clar/ops/incidents.json
+            valcea-clar/ops/rollback_baselines.json
+          if-no-files-found: warn
+          retention-days: 14
