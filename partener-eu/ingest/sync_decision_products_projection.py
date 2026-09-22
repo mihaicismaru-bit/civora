@@ -54,6 +54,23 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     return closes is not None and closes >= clock
 
 
+def refresh_quality_pass(payload: dict[str, Any], dossiers: list[dict[str, Any]]) -> None:
+    """Refresh quality counters after authoritative overlays add/replace dossiers.
+
+    finalize_decision_products computes these counters before the AFIR/STEP
+    authoritative overlays run.  The overlays already carry complete executive
+    summaries and the strict applicant-list policy, so the derived counters must
+    be recomputed from the final projection rather than left stale.
+    """
+    quality = payload.setdefault("qualityPass", {})
+    quality["executiveSummaryCoverage"] = sum(1 for row in dossiers if row.get("executiveSummary"))
+    quality["strictApplicantListCoverage"] = sum(
+        1
+        for row in dossiers
+        if (row.get("quality") or {}).get("applicantListPolicy") == "GUIDE_EXPLICIT_ONLY"
+    )
+
+
 def main() -> int:
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
@@ -85,6 +102,7 @@ def main() -> int:
         "constructionDossierCount": construction,
         "identificationDossierCount": identification,
     })
+    refresh_quality_pass(payload, dossiers)
     payload.setdefault("home", {})["openDossierIds"] = [row["id"] for row in open_rows[:8]]
     priority_prepare = {"afir-dr31-2026-2027": 0}
     prepare_rows.sort(key=lambda row: (priority_prepare.get(str(row.get("id")), 1), -int((row.get("quality") or {}).get("completeness") or 0)))
@@ -94,7 +112,13 @@ def main() -> int:
 
     PRODUCTS.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     OUT_JS.write_text("window.PARTENER_DECISION_PRODUCTS=" + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
-    print(json.dumps({"ok": True, "open": [row["id"] for row in open_rows], "dossiers": len(dossiers)}, ensure_ascii=False))
+    print(json.dumps({
+        "ok": True,
+        "open": [row["id"] for row in open_rows],
+        "dossiers": len(dossiers),
+        "executiveSummaryCoverage": payload["qualityPass"]["executiveSummaryCoverage"],
+        "strictApplicantListCoverage": payload["qualityPass"]["strictApplicantListCoverage"],
+    }, ensure_ascii=False))
     return 0
 
 
