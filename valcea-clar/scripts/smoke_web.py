@@ -85,7 +85,10 @@ if structured:
     assert structured.get("type") == "NewsArticle"
     assert structured.get("eligible_scope") == "publishable_full_story_only"
     assert structured.get("date_published_policy") == "stable_publication_ledger_only"
-    assert structured.get("verified_image_policy") == "provenance_backed_real_photograph_only"
+    assert structured.get("verified_image_policy") in {
+        "provenance_backed_real_photograph_only",
+        "provenance_backed_real_photograph_or_original_editorial_card",
+    }
     assert structured.get("unverified_image_policy") == "omit"
 
 routes_by_id = {str(row.get("id")): str(row.get("path")) for row in rows if row.get("id") and row.get("path")}
@@ -129,24 +132,35 @@ for row in rows:
         verified_images += 1
         public_url = str(image.get("public_url") or "")
         source_url = str(image.get("source_url") or "")
+        kind = str(image.get("kind") or "photograph")
         assert image.get("synthetic") is False, f"Imagine sintetică admisă pentru {story_id}"
         assert image.get("provenance_status") == "VERIFIED", f"Provenance neverificată pentru {story_id}"
         assert public_url.startswith("https://valceaclar.ro/media/social/")
-        assert source_url.startswith("https://")
         assert image.get("credit") and image.get("rights_basis")
-        if image.get("contextual_archive") is True:
-            assert image.get("captured_at"), f"Foto de arhivă fără captured_at pentru {story_id}"
-        filename = Path(urlparse(public_url).path).name
-        assert filename and (RUNTIME / "media" / "social" / filename).is_file(), f"Asset foto lipsă pentru {story_id}"
+        local = RUNTIME / urlparse(public_url).path.lstrip("/")
+        assert local.is_file(), f"Asset media lipsă pentru {story_id}: {local}"
         assert news.get("image") == [public_url], f"NewsArticle image nealiniată pentru {story_id}"
         assert f'<meta property="og:image" content="{public_url}">' in text
-        assert 'data-photo-provenance="verified"' in text
         assert f'src="{urlparse(public_url).path}"' in text
-        assert source_url in text and "Foto:" in text, f"Credit foto nevizibil pentru {story_id}"
+        if kind == "editorial_card":
+            assert image.get("rights_basis") == "original_editorial_layout"
+            assert image.get("depicts_real_scene") is False
+            assert not source_url
+            assert 'data-media-provenance="original-editorial-card"' in text
+            assert "Grafică:" in text
+        else:
+            assert source_url.startswith("https://")
+            if image.get("contextual_archive") is True:
+                assert image.get("captured_at"), f"Foto de arhivă fără captured_at pentru {story_id}"
+            assert (
+                'data-media-provenance="verified-photo"' in text
+                or 'data-photo-provenance="verified"' in text
+            ), f"Marker foto verificată lipsă pentru {story_id}"
+            assert source_url in text and "Foto:" in text, f"Credit foto nevizibil pentru {story_id}"
     else:
         assert "image" not in news, f"Imagine fără provenance introdusă în JSON-LD pentru {story_id}"
         assert '<meta property="og:image"' not in text, f"OG image fără provenance pentru {story_id}"
-        assert 'data-photo-provenance="verified"' not in text
+        assert 'data-media-provenance=' not in text
 
     expected_ids = [str(value) for value in row.get("related_story_ids") or []]
     expected_routes = [routes_by_id[value] for value in expected_ids]

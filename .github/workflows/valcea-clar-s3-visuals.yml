@@ -1,0 +1,118 @@
+name: VÂLCEA CLAR S3 Visuals & Channels
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/visuals/s3_*"
+      - "valcea-clar/scripts/validate_s3_visuals_channels.py"
+      - "valcea-clar/scripts/render_story_pages.py"
+      - "valcea-clar/scripts/public_ux_media.py"
+      - ".github/workflows/valcea-clar-s3-visuals.yml"
+  push:
+    branches: [main]
+    paths:
+      - "valcea-clar/visuals/s3_visual_briefs.json"
+      - "valcea-clar/visuals/s3_visual_pack.py"
+      - "valcea-clar/visuals/S3_VISUALS_CHANNELS.md"
+      - "valcea-clar/scripts/validate_s3_visuals_channels.py"
+      - "valcea-clar/scripts/render_story_pages.py"
+      - "valcea-clar/scripts/public_ux_media.py"
+      - ".github/workflows/valcea-clar-s3-visuals.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-live-newsroom
+  cancel-in-progress: false
+
+jobs:
+  s3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install deterministic renderer
+        run: python -m pip install --disable-pip-version-check Pillow==11.3.0
+      - name: Validate S3 contracts
+        run: |
+          python -m py_compile valcea-clar/visuals/s3_visual_pack.py valcea-clar/scripts/validate_s3_visuals_channels.py valcea-clar/scripts/render_story_pages.py valcea-clar/scripts/public_ux_media.py
+          python valcea-clar/visuals/s3_visual_pack.py --self-test
+          python valcea-clar/scripts/validate_s3_visuals_channels.py
+      - name: Build S3 visual pack and project to reader UI
+        run: |
+          python valcea-clar/visuals/s3_visual_pack.py
+          python valcea-clar/scripts/render_story_pages.py
+          python valcea-clar/scripts/public_ux_media.py
+          python valcea-clar/scripts/public_ux_story_integrity.py
+      - name: Validate pilot visual projection
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('valcea-clar')
+          vm=json.loads((root/'visuals/s3_visual_manifest.json').read_text(encoding='utf-8'))
+          sm=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
+          assert vm['summary']['stories_ready']==7
+          assert vm['summary']['assets']==14
+          ids={p['story_id'] for p in vm['packs'] if p.get('status')=='READY'}
+          rows={r['id']:r for r in sm['stories']}
+          for sid in ids:
+              pack=next(p for p in vm['packs'] if p['story_id']==sid)
+              assert pack['channels']['tiktok']=='HOLD_CURRENT_MEDIA_REQUIRED'
+              assets=[a for a in vm['assets'] if a['story_id']==sid]
+              assert {a['variant'] for a in assets}=={'og','ig'}
+              assert all(a['provenance_status']=='VERIFIED' and a['depicts_real_scene'] is False for a in assets)
+              for a in assets:
+                  path=root/'site/runtime'/a['relative_url'].lstrip('/')
+                  assert path.is_file() and path.stat().st_size>10000, path
+              image=(rows[sid].get('image') or {})
+              assert image.get('kind')=='editorial_card', (sid,image)
+              assert image.get('rights_basis')=='original_editorial_layout'
+              page=root/'site/runtime/stiri'/sid/'index.html'
+              text=page.read_text(encoding='utf-8')
+              assert 'data-media-provenance="original-editorial-card"' in text
+              assert '/media/social/editorial/s3/' in text
+          print(json.dumps({'status':'PASS','pilot_stories':len(ids),'assets':len(vm['assets']),'tiktok_fail_closed':True}))
+          PY
+      - name: Persist S3 runtime conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "valcea-clar-s3-visuals[bot]"
+          git config user.email "valcea-clar-s3-visuals@users.noreply.github.com"
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            python valcea-clar/visuals/s3_visual_pack.py
+            python valcea-clar/scripts/render_story_pages.py
+            python valcea-clar/scripts/public_ux_media.py
+            python valcea-clar/scripts/public_ux_story_integrity.py
+            git add valcea-clar/visuals/s3_visual_manifest.json valcea-clar/site/runtime valcea-clar/site/public_ux_state.json || true
+            if git diff --cached --quiet; then
+              echo "S3 visual projection already reconciled."
+              exit 0
+            fi
+            git commit -m "Project VÂLCEA CLAR S3 editorial visual pack"
+            if git push origin HEAD:main; then exit 0; fi
+            sleep $((attempt * 2))
+          done
+          exit 1
+      - name: Upload S3 audit
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: valcea-clar-s3-visuals-${{ github.run_id }}
+          path: |
+            valcea-clar/visuals/s3_visual_manifest.json
+            valcea-clar/site/runtime/media/social/editorial/s3
+            valcea-clar/site/runtime/stiri/manifest.json
+          if-no-files-found: warn
+          retention-days: 14

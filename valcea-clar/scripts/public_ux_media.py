@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Add provenance-backed photographs to the derived VÂLCEA CLAR reader UI.
+"""Add provenance-backed story media to the derived VÂLCEA CLAR reader UI.
 
 This is a presentation-only adapter. It imports the freshness-first projector,
 then decorates already-published stories with either:
@@ -186,9 +186,9 @@ def validate_media_projection() -> dict[str, int]:
     if expected and f'data-story-image="{first["id"]}"' not in home:
         raise SystemExit(f"Homepage ranked-lead media missing: {first['id']}")
     if 'data-story-image=' not in home:
-        raise SystemExit("Homepage contains no story photographs")
+        raise SystemExit("Homepage contains no story media")
     if 'data-story-image=' not in news:
-        raise SystemExit("News index contains no story photographs")
+        raise SystemExit("News index contains no story media")
     contextual = home.count('data-media-context="contextual"')
     exact = home.count('data-media-context="exact"')
     if contextual == 0 and exact == 0:
@@ -219,7 +219,7 @@ def main() -> int:
         return 0
     state = base.build()
     validate_media_projection()
-    print(json.dumps({"status": "PASS", "stories": state["safe_story_count"], "live": state["live_story_count"], "media": "verified_exact_or_explicit_contextual"}, ensure_ascii=False))
+    print(json.dumps({"status": "PASS", "stories": state["safe_story_count"], "live": state["live_story_count"], "media": "verified_photo_editorial_card_or_explicit_contextual"}, ensure_ascii=False))
     return 0
 
 
