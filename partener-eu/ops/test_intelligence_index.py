@@ -40,10 +40,11 @@ def fixture_state(root):
     write(root / "source_registry_health.json", {
         "schema_version": "1.2",
         "observed_at": "2026-08-12T08:00:00Z",
-        "summary": {"total": 2, "fail": 0, "resolution_tasks_required": 1},
+        "summary": {"total": 3, "fail": 1, "resolution_tasks_required": 1},
         "sources": [
             {"id": "SRC-MYSMIS-CALLS", "tier": "T1", "health": "PASS", "semantic_hash_changed": False, "resolution_task_required": False, "semantic_sha256": "mysmis"},
             {"id": "SRC-OIRVEST-PEO", "tier": "T1B", "health": "PASS", "semantic_hash_changed": True, "resolution_task_required": True, "semantic_sha256": "oir"},
+            {"id": "SRC-DISCOVERY-ONLY", "tier": "T1", "health": "FAIL", "semantic_hash_changed": False, "resolution_task_required": False},
         ],
     })
     write(root / "source_registry.json", {
@@ -51,6 +52,7 @@ def fixture_state(root):
         "sources": [
             {"id": "SRC-MYSMIS-CALLS", "tier": "T1", "class": "authoritative_call_registry", "owner": "MySMIS", "url": "https://resurse.mysmis2021.gov.ro/calls", "programmes": ["2021-2027"], "material_fact_use": True},
             {"id": "SRC-OIRVEST-PEO", "tier": "T1B", "class": "official_intermediate_body", "owner": "OIR Vest", "url": "https://oirvest.ro/peo-2021-2027/", "programmes": ["PEO"], "material_fact_use": True},
+            {"id": "SRC-DISCOVERY-ONLY", "tier": "T1", "class": "official_discovery_index", "owner": "Discovery", "url": "https://example.gov.ro/discovery", "programmes": ["2021-2027"], "material_fact_use": False},
         ],
     })
 
@@ -84,7 +86,38 @@ def main():
         assert gates["MIPE_CORPUS"]["affectedScopes"] == ["MIPE_MANAGED_PROGRAMMES"]
         assert gates["AFIR_CORPUS"]["materialFactGate"] == "RECONCILIATION_REQUIRED"
         assert gates["AFIR_CORPUS"]["blocksUnrelatedSources"] is False
+        assert gates["SRC-DISCOVERY-ONLY"]["availability"] == "UNAVAILABLE_LAST_KNOWN_GOOD"
+        assert gates["SRC-DISCOVERY-ONLY"]["materialFactGate"] == "DISCOVERY_ONLY"
+        assert "SRC-DISCOVERY-ONLY" not in index["summary"]["unavailableT1Sources"]
+        assert "SRC-DISCOVERY-ONLY" in index["summary"]["operationalUnavailableT1Sources"]
         assert index["dataPlane"]["dependencyIsolation"]["globalStop"] is False
+
+        # A discovery-only T1 outage must remain visible operationally without
+        # degrading material readiness when all material-authority sources are healthy.
+        afir = json.loads((root / "afir_corpus.json").read_text(encoding="utf-8"))
+        for row in afir["items"]:
+            row["materialChangeCandidate"] = False
+        write(root / "afir_corpus.json", afir)
+        write(root / "mipe_state.json", {
+            "status": "OK", "items": [],
+            "lastRun": {"observedAt": "2026-08-12T08:00:00Z", "sourceAvailable": True},
+        })
+        registry = json.loads((root / "source_registry_health.json").read_text(encoding="utf-8"))
+        registry["summary"]["resolution_tasks_required"] = 0
+        for row in registry["sources"]:
+            if row["id"] == "SRC-OIRVEST-PEO":
+                row["semantic_hash_changed"] = False
+                row["resolution_task_required"] = False
+        write(root / "source_registry_health.json", registry)
+        healthy_material = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
+        assert healthy_material["readiness"] == "READY_FOR_DISCOVERY_ONLY"
+        assert healthy_material["sources"][-1]["status"] == "DEGRADED"
+        assert healthy_material["summary"]["materialResolutionTasksRequired"] == 0
+        assert healthy_material["summary"]["materialStaleOrUnknownSources"] == []
+        assert healthy_material["summary"]["unavailableT1Sources"] == []
+        assert healthy_material["summary"]["operationalUnavailableT1Sources"] == ["SRC-DISCOVERY-ONLY"]
+        assert healthy_material["dataPlane"]["dependencyIsolation"]["blockedSourceIds"] == []
+
         stale = mod.compile_with_replay(
             root,
             dt.datetime(2026, 8, 14, tzinfo=dt.timezone.utc),
@@ -92,9 +125,12 @@ def main():
         )
         assert set(stale["summary"]["staleOrUnknownSources"]) == {
             "AFIR_CORPUS", "PEO_CALENDAR", "MIPE_CORPUS", "VERIFIED_SOURCE_REGISTRY",
-            "SRC-MYSMIS-CALLS", "SRC-OIRVEST-PEO",
+            "SRC-MYSMIS-CALLS", "SRC-OIRVEST-PEO", "SRC-DISCOVERY-ONLY",
         }
-        afir = json.loads((root / "afir_corpus.json").read_text(encoding="utf-8"))
+        assert set(stale["summary"]["materialStaleOrUnknownSources"]) == {
+            "AFIR_CORPUS", "MIPE_CORPUS", "SRC-MYSMIS-CALLS", "SRC-OIRVEST-PEO",
+        }
+
         del afir["policy"]
         write(root / "afir_corpus.json", afir)
         invalid = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
