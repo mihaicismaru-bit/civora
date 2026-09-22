@@ -114,7 +114,6 @@ jobs:
 
       - name: Canonicalize evidence and construct deep dossiers
         run: |
-          python partener-eu/ops/fix_call_lifecycle_event_aliases.py
           python partener-eu/ingest/build_mipe_canonical_calls.py
           python partener-eu/ingest/refine_mipe_canonical_calls.py
           python partener-eu/ingest/enrich_mipe_canonical_facts.py
