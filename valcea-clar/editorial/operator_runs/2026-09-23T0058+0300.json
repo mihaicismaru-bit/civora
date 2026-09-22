@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "run_id": "operator-run-20260922T215823Z",
+  "started_at": "2026-09-22T21:58:23Z",
+  "finished_at": "2026-09-22T22:08:21Z",
+  "scope": "delta_scan_and_followups",
+  "previous_checkpoint": {
+    "operator_run": "valcea-clar/editorial/operator_runs/2026-09-22T2358+0300.json",
+    "canonical_sources_total": 17,
+    "canonical_sources_ok": 15,
+    "canonical_current_signals": 47
+  },
+  "scan_summary": {
+    "canonical_radar_after_refresh": {
+      "observed_at": "2026-09-23T01:07:03+03:00",
+      "sources_total": 17,
+      "sources_ok": 15,
+      "current_signals": 46,
+      "today_signals": 0,
+      "note": "today_signals reset at the local-date rollover; it is not evidence of an empty newsroom."
+    },
+    "primary_routes_checked": [
+      "https://fras.ro/raliul-valcii-nurvil-finala-sezonului-probe-pe-macadam-si-doua-concerte-la-ramnicu-valcea/",
+      "https://raliulvalcii.ro/stiri/restrictii-circulatie-raliul-valcii-2026/",
+      "https://raliulvalcii.ro/stiri/program-raliul-valcii-nurvil-2026/",
+      "https://vl.politiaromana.ro/",
+      "https://isuvl.igsu.ro/"
+    ],
+    "county_scan_note": "Fresh county-wide web and canonical-radar checks found no other low-risk, sufficiently verified material delta that justified publication. A newly admitted radar signal concerned Craiova and was excluded as out of the Vâlcea editorial geography. Previously seen cultural/service items for 23-25 September did not constitute a material new delta."
+  },
+  "signals": [
+    {
+      "story_id": "auto-raliul-valcii-official-news-f6e28bbb1533",
+      "locality": "Râmnicu Vâlcea / county rally route",
+      "product": "VÂLCEA AZI / rolling service update",
+      "status": "CANONICAL_REEVALUATION_REQUESTED",
+      "priority": 96,
+      "risk": "LOW_REPUTATIONAL_BUT_HIGH_SERVICE_ACCURACY",
+      "fact_kernel": [
+        {
+          "type": "CONFIRMED_FACT",
+          "text": "FRAS published a 22 September 2026 event update stating that Raliul Vâlcii runs 24-26 September and that the programme starts joi, 24 septembrie, with the Golești shakedown and ceremonial start at 19:00 in Centrul Civic Râmnicu Vâlcea."
+        },
+        {
+          "type": "CONFIRMED_FACT",
+          "text": "The organizer's separate programme also labels 24 September as Thursday."
+        },
+        {
+          "type": "CONFIRMED_FACT",
+          "text": "The organizer's traffic-restriction notice contains the inconsistent wording 'Miercuri, 24 septembrie'; 24 September 2026 is Thursday. The weekday label is therefore a source-page error, not an unresolved calendar date."
+        },
+        {
+          "type": "SOURCE_CLAIM",
+          "text": "The organizer states that the Civic Centre/Romarta taxi station is restricted 18:00-20:00 on 24 September and lists central-road restrictions for 26 September, 07:00-22:00, including segments of Calea lui Traian, Știrbei Vodă, Căpitan Negoescu and Tudor Vladimirescu, with stated resident/access exceptions."
+        },
+        {
+          "type": "UNKNOWN",
+          "text": "No current public IPJ/municipal road-closure order or other competent-authority notice independently confirming the street-by-street restriction package was located in this operator pass. Formal detours and any exceptions beyond those stated by the organizer remain unknown."
+        },
+        {
+          "type": "EDITORIAL_INTERPRETATION",
+          "text": "The independent FRAS programme resolves the date/weekday contradiction that caused the previous HOLD, but the detailed closures should remain explicitly attributed to the organizer unless the canonical newsroom obtains competent-authority corroboration. A transparent attributed service update may be publishable if the service-accuracy gate accepts that evidence level."
+        }
+      ],
+      "action": "Do not create a duplicate. The canonical live-newsroom trigger was advanced to re-evaluate and, only if its full evidence gate passes, update the existing rolling story with transparent attribution and source-error note, then verify the public route/body/metadata/RSS/sitemap before social propagation."
+    }
+  ],
+  "publication_summary": {
+    "site_published": 0,
+    "site_updated_confirmed_by_operator": 0,
+    "facebook_delivered": 0,
+    "facebook_hold_or_outbox": 1,
+    "instagram_delivered": 0,
+    "instagram_hold_or_outbox": 1,
+    "decision": "A material verification delta was found and sent into the canonical publication path, but this operator run does not claim site or social delivery without canonical write plus readback evidence."
+  },
+  "channel_truth": {
+    "facebook": {
+      "existing_story_prior_receipt": "122093597559198636",
+      "new_delivery_this_run": false,
+      "reason": "No newly verified site update receipt/readback exists in this operator pass, so the prior receipt is not reused as proof of a new delivery."
+    },
+    "instagram": {
+      "new_delivery_this_run": false,
+      "reason": "No receipt-capable Instagram delivery evidence is present; remain fail-closed."
+    }
+  },
+  "operator_trigger": {
+    "path": "valcea-clar/ops/live-newsroom-trigger.json",
+    "commit": "4c78494682ed47ade2ac1481e2a42efaeb7e89d0",
+    "expected_story_ids": [
+      "auto-raliul-valcii-official-news-f6e28bbb1533"
+    ]
+  },
+  "followups": [
+    "Check for competent-authority confirmation of the detailed Râmnicu Vâlcea street restrictions and exceptions.",
+    "Reconcile the canonical live-newsroom result against the existing Raliul story route, body, metadata, RSS and sitemap; never infer publication from a workflow or trigger alone.",
+    "Only after a confirmed site update, issue native Facebook/Instagram channel packs with fresh delivery receipts; otherwise retain HOLD/OUTBOX."
+  ],
+  "human_decisions_required": []
+}
