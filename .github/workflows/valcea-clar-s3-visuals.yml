@@ -68,7 +68,13 @@ jobs:
               assert pack['channels']['tiktok']=='HOLD_CURRENT_MEDIA_REQUIRED'
               assets=[a for a in vm['assets'] if a['story_id']==sid]
               assert {a['variant'] for a in assets}=={'og','ig'}
-              assert all(a['provenance_status']=='VERIFIED' and a['depicts_real_scene'] is False for a in assets)
+              assert all(
+                  a['provenance_status']=='VERIFIED'
+                  and a['depicts_real_scene'] is False
+                  and a.get('site_visible') is False
+                  and a.get('distribution_role')=='social_only'
+                  for a in assets
+              )
               for a in assets:
                   path=root/'site/runtime'/a['relative_url'].lstrip('/')
                   assert path.is_file() and path.stat().st_size>10000, path
