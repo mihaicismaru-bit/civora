@@ -20,6 +20,7 @@ RETAINED_IMPLEMENTATION = "valcea-clar/core_v2/isj_article_integrity.py"
 INTEGRITY_STAGE = "isj_article_integrity"
 INTEGRITY_ARTIFACT = "valcea-core-v2-isj-article-integrity-shadow.json"
 EXPECTED_ARTICLE_CLAIM_ID = "isj-article-deadline-claim-cc6330d494a44bd79c5340d5"
+EXTRACTED_STAGE = "isj_promoted_claim_contract_validation"
 
 
 def _semantic_sha(doc: dict[str, Any]) -> str:
@@ -37,7 +38,6 @@ def _assert_non_authorizing(doc: dict[str, Any], label: str) -> None:
 
 def _tamper_cases(article: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
     cases: list[tuple[str, dict[str, Any]]] = []
-
     headline = copy.deepcopy(article)
     headline["articles"][0]["article_package"]["headline"] = "TAMPERED HEADLINE"
     cases.append(("headline", headline))
@@ -58,7 +58,6 @@ def _tamper_cases(article: dict[str, Any]) -> list[tuple[str, dict[str, Any]]]:
         "field_evidence_ids": [],
     })
     cases.append(("extra_claim", extra_claim))
-
     return cases
 
 
@@ -71,16 +70,21 @@ def _validate_plan_switched() -> dict[str, Any]:
     validation_index = names.index("isj_article_deadline_claim_validation")
     integrity_index = names.index(INTEGRITY_STAGE)
 
-    assert len(plan) == 42
+    assert len(plan) == 41
+    assert EXTRACTED_STAGE not in by_name
+    assert "core_v2_external_audit" not in by_name
     assert integrity_index == validation_index + 1
     assert len(integrity.argv) > 1 and integrity.argv[1] == SOURCE_NEUTRAL_FACADE
     assert integrity.output is not None and integrity.output.name == INTEGRITY_ARTIFACT
     joined = "\n".join(" ".join(stage.argv) for stage in plan)
     assert SOURCE_NEUTRAL_FACADE in joined
     assert RETAINED_IMPLEMENTATION not in joined
+    assert "validate_isj_promoted_claim_contract_runtime.py" not in joined
+    assert "valcea-core-v2-isj-promoted-claim-contract-validation.json" not in joined
 
     ownership = _article_integrity_stage_ownership_snapshot(plan)
     assert ownership.get("status") == "PASS_SHADOW"
+    assert ownership.get("canonical_stage_count") == 41
     assert ownership.get("canonical_runtime_switched") is True
     assert ownership.get("source_neutral_facade_present_in_canonical_plan") is True
     assert ownership.get("retained_integrity_runtime_dependency") is False
@@ -91,6 +95,8 @@ def _validate_plan_switched() -> dict[str, Any]:
 
     return {
         "canonical_stage_count": len(plan),
+        "ci_only_contract_validation_extracted": True,
+        "external_auditor_inserted": False,
         "canonical_integrity_stage_name": integrity.name,
         "canonical_integrity_module": integrity.argv[1],
         "canonical_integrity_artifact": integrity.output.name,
@@ -146,7 +152,7 @@ def validate_equivalence(
 
     plan = _validate_plan_switched()
     return {
-        "schema_version": "core-v2-promoted-claim-article-integrity-post-switch-equivalence-shadow.v2",
+        "schema_version": "core-v2-promoted-claim-article-integrity-post-extraction-equivalence-shadow.v3",
         "status": "PASS_SHADOW",
         "source_neutral_facade": SOURCE_NEUTRAL_FACADE,
         "retained_implementation": RETAINED_IMPLEMENTATION,
@@ -168,12 +174,11 @@ def validate_equivalence(
         "site_publish_allowed": False,
         "social_publish_allowed": False,
         "truth_rule": (
-            "After the controlled one-for-one switch, the canonical isj_article_integrity stage executes the source-neutral "
-            "promoted_claim_article_integrity facade. Its canonical runtime artifact is JSON-semantically identical to the "
-            "retained deterministic ISJ verifier, preserves the same article-claim evidence identity and 3 verified / 0 "
-            "fabricated claims, and fails closed under headline, evidence-identity and extra-claim tampering. The retained "
-            "verifier is regression-only and not retirement-eligible. No publication, acceptance, merge, deploy or cutover "
-            "authority is granted."
+            "The canonical 41-stage runtime executes the source-neutral promoted_claim_article_integrity facade one-for-one. "
+            "Its artifact remains JSON-semantically identical to the retained deterministic ISJ verifier, preserves the same "
+            "article-claim evidence identity and 3 verified / 0 fabricated claims, and fails closed under headline, evidence-identity "
+            "and extra-claim tampering. The unrelated promoted-claim contract validator remains CI-only and the external auditor "
+            "is not inserted. No publication, acceptance, merge, deploy, cutover or retirement authority is granted."
         ),
     }
 
@@ -185,27 +190,16 @@ def _load(path: str) -> dict[str, Any]:
     return doc
 
 
-def _prove_cli_parity(
-    fact_kernel_path: str,
-    fact_integrity_path: str,
-    article_path: str,
-    expected: dict[str, Any],
-) -> str:
+def _prove_cli_parity(fact_kernel_path: str, fact_integrity_path: str, article_path: str, expected: dict[str, Any]) -> str:
     with tempfile.TemporaryDirectory(prefix="core-v2-article-integrity-cli-") as raw_tmp:
         out = Path(raw_tmp) / "integrity.json"
-        completed = subprocess.run(
-            [
-                sys.executable,
-                SOURCE_NEUTRAL_FACADE,
-                "--fact-kernel", fact_kernel_path,
-                "--fact-kernel-integrity", fact_integrity_path,
-                "--article", article_path,
-                "--output", str(out),
-            ],
-            check=False,
-            capture_output=True,
-            text=True,
-        )
+        completed = subprocess.run([
+            sys.executable, SOURCE_NEUTRAL_FACADE,
+            "--fact-kernel", fact_kernel_path,
+            "--fact-kernel-integrity", fact_integrity_path,
+            "--article", article_path,
+            "--output", str(out),
+        ], check=False, capture_output=True, text=True)
         if completed.returncode != 0:
             raise RuntimeError(f"article_integrity_facade_cli_failed:{completed.stderr.strip()}")
         actual = _load(str(out))
@@ -214,7 +208,7 @@ def _prove_cli_parity(
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Prove post-switch source-neutral article-integrity runtime parity")
+    parser = argparse.ArgumentParser(description="Prove post-extraction source-neutral article-integrity runtime parity")
     parser.add_argument("--fact-kernel", required=True)
     parser.add_argument("--fact-kernel-integrity", required=True)
     parser.add_argument("--article", required=True)
@@ -227,12 +221,7 @@ def main() -> int:
     article = _load(args.article)
     canonical = _load(args.canonical_integrity)
     report = validate_equivalence(fact_kernel, fact_integrity, article, canonical)
-    report["facade_cli_json_semantic_sha256"] = _prove_cli_parity(
-        args.fact_kernel,
-        args.fact_kernel_integrity,
-        args.article,
-        canonical,
-    )
+    report["facade_cli_json_semantic_sha256"] = _prove_cli_parity(args.fact_kernel, args.fact_kernel_integrity, args.article, canonical)
     report["facade_cli_parity"] = True
 
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -241,6 +230,8 @@ def main() -> int:
         "json_semantic_equivalent": True,
         "facade_cli_parity": True,
         "canonical_runtime_switched": True,
+        "canonical_stage_count": report["canonical_stage_count"],
+        "ci_only_contract_validation_extracted": True,
         "article_deadline_claim_evidence_id": report["article_deadline_claim_evidence_id"],
         "verified_claim_count": report["verified_claim_count"],
         "fabricated_claim_count": report["fabricated_claim_count"],
