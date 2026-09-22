@@ -13,26 +13,29 @@ ROOT = Path(__file__).resolve().parents[2]
 BUILDER = ROOT / "partener-eu" / "ingest" / "build_afir_material_resolution_queue.py"
 
 
-def run_builder(corpus: dict) -> tuple[dict, bytes]:
+def run_builder(corpus: dict, live_funds: dict | None = None) -> tuple[dict, bytes]:
     with tempfile.TemporaryDirectory() as tmp_dir:
         tmp = Path(tmp_dir)
         corpus_path = tmp / "afir_corpus.json"
+        live_funds_path = tmp / "afir_live_funds.json"
         output_path = tmp / "queue.json"
         corpus_path.write_text(json.dumps(corpus, ensure_ascii=False), encoding="utf-8")
-        subprocess.run(
-            [sys.executable, str(BUILDER), "--corpus", str(corpus_path), "--output", str(output_path)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        command = [
+            sys.executable,
+            str(BUILDER),
+            "--corpus",
+            str(corpus_path),
+            "--output",
+            str(output_path),
+            "--live-funds",
+            str(live_funds_path),
+        ]
+        if live_funds is not None:
+            live_funds_path.write_text(json.dumps(live_funds, ensure_ascii=False), encoding="utf-8")
+        subprocess.run(command, check=True, capture_output=True, text=True)
         first = output_path.read_bytes()
         payload = json.loads(first)
-        subprocess.run(
-            [sys.executable, str(BUILDER), "--corpus", str(corpus_path), "--output", str(output_path)],
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        subprocess.run(command, check=True, capture_output=True, text=True)
         second = output_path.read_bytes()
         assert first == second, "queue must be byte-deterministic for identical corpus input"
         return payload, second
@@ -73,6 +76,7 @@ def main() -> int:
     assert payload["generatedAt"] == corpus["generatedAt"]
     assert payload["policy"]["failClosed"] is True
     assert payload["policy"]["materialFactsAutopromoted"] is False
+    assert payload["policy"]["dedicatedStructuredSnapshotsMayResolveExactCandidates"] is True
     assert payload["summary"] == {
         "candidateCount": 2,
         "unresolvedCount": 2,
@@ -89,6 +93,67 @@ def main() -> int:
         assert row["lastKnownGoodPolicy"] == "PRESERVE_UNTIL_RECONCILED"
         assert "budget" in row["blockedFactClasses"]
         assert "material_call_status" in row["blockedFactClasses"]
+
+    counter_fingerprint = "c" * 64
+    counter_corpus = {
+        "schemaVersion": 2,
+        "source": "AFIR",
+        "generatedAt": "2026-09-22T16:29:38+00:00",
+        "items": [
+            {
+                "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+                "title": "Contor fonduri disponibile",
+                "sha256": counter_fingerprint,
+                "observedAt": "2026-09-22T16:29:26+00:00",
+                "materialChangeCandidate": True,
+            }
+        ],
+    }
+    live_funds = {
+        "schemaVersion": 1,
+        "source": "AFIR",
+        "status": "PASS",
+        "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+        "corpusFingerprint": counter_fingerprint,
+        "sourceFingerprint": counter_fingerprint,
+        "sourceFingerprintMatchesCorpus": True,
+        "sourceObservedAt": "2026-09-22T16:29:26+00:00",
+        "generatedAt": "2026-09-22T16:29:38+00:00",
+        "snapshotFingerprint": "s" * 64,
+        "policy": {
+            "publishableDedicatedSnapshot": True,
+            "autoPromoteIntoDossierBudget": False,
+        },
+        "summary": {
+            "rowCount": 5,
+            "interventions": ["DR-14", "DR-18"],
+        },
+    }
+    resolved, _ = run_builder(counter_corpus, live_funds)
+    assert resolved["summary"] == {
+        "candidateCount": 1,
+        "unresolvedCount": 0,
+        "publishableMaterialFactCount": 0,
+    }
+    counter = resolved["items"][0]
+    assert counter["status"] == "RESOLVED"
+    assert counter["requiresReconciliation"] is False
+    assert counter["publishMaterialFacts"] is False
+    assert counter["materialFactAction"] == "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED"
+    assert counter["resolutionType"] == "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT"
+    assert counter["dedicatedSnapshotPublishable"] is True
+    assert counter["resolutionEvidence"]["sourceFingerprint"] == counter_fingerprint
+    assert counter["resolutionEvidence"]["rowCount"] == 5
+    assert "budget" in counter["blockedFactClasses"]
+    assert "material_call_status" in counter["blockedFactClasses"]
+
+    drifted = dict(live_funds)
+    drifted["sourceFingerprint"] = "e" * 64
+    drifted["sourceFingerprintMatchesCorpus"] = False
+    unresolved, _ = run_builder(counter_corpus, drifted)
+    assert unresolved["summary"]["unresolvedCount"] == 1
+    assert unresolved["items"][0]["status"] == "OPEN"
+    assert unresolved["items"][0]["requiresReconciliation"] is True
 
     empty_payload, _ = run_builder({
         "schemaVersion": 2,
