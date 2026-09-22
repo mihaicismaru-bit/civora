@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "run_at": "2026-09-22T22:58:18+03:00",
+  "operator": "CHATGPT_EDITORIAL_OPERATOR",
+  "scope": "VALCEA_CLAR_CIVORA_COUNTY_WIDE",
+  "state_read": {
+    "signal_radar_observed_at": "2026-09-22T22:07:53+03:00",
+    "source_count": 17,
+    "sources_ok": 15,
+    "current_signal_count": 47,
+    "today_signal_count": 34,
+    "latest_signal_radar_commit_utc": "2026-09-22T19:09:09Z",
+    "live_homepage_last_update": "2026-09-22T09:42:00+03:00",
+    "automated_state_delta_since_prior_operator_run": false
+  },
+  "late_manual_scan": {
+    "local_regional_press_routes_queried": 13,
+    "urgent_primary_routes_queried": 7,
+    "note": "Late manual verification queried the active local/regional press set and change-sensitive T1/T1B public-safety/utilities routes. Search/index availability varied by source; no low-risk, primary-verified new story cleared publication gates.",
+    "sources_with_material_follow_up": [
+      "https://evenimentvalcean.ro/",
+      "https://seintamplainvalcea.ro/"
+    ],
+    "primary_routes_checked_for_material_follow_up": [
+      "https://vl.politiaromana.ro/ro/stiri-si-media/stiri",
+      "https://politiaromana.ro/ro/info-trafic",
+      "https://isuvl.igsu.ro/comunicate-de-presa",
+      "https://apavil.ro/",
+      "https://www.distributieoltenia.ro/ro/suport/lucrari-pentru-prevenire-si-corectare-avarii/valcea.html",
+      "https://www.termoficarevalcea.ro/blog/",
+      "https://www.hidro.ro/warning/"
+    ]
+  },
+  "new_or_changed_signals_reviewed": [
+    {
+      "locality": "Ionesti / Tomsani / Horezu",
+      "topic": "Follow-up in active homicide investigation after discovery of a deceased young woman in the Olt river area",
+      "editorial_product": "NONE_AUTONOMOUS",
+      "priority": "URGENT_HIGH_RISK",
+      "status": "NEEDS_HUMAN_REVIEW",
+      "fact_kernel": {
+        "CONFIRMED_FACT": [],
+        "SOURCE_CLAIM": [
+          "Eveniment Valcean reports on 22.09.2026 that IPJ Valcea put a 30-year-old man in attention as a suspect in the homicide investigation and asked operational structures to act with caution if he is identified.",
+          "The same report says the investigation remains coordinated by prosecutors from the Prosecutor's Office attached to Valcea Tribunal.",
+          "Se intampla in Valcea published an update identifying the victim and providing intrusive/graphic details; those details are excluded from VÂLCEA CLAR autonomous projection under the editorial safety policy."
+        ],
+        "DERIVED_CALCULATION": [],
+        "EDITORIAL_INTERPRETATION": [
+          "The meaningful delta is the reported shift from an unidentified/active investigation to a reported named-suspect search, which has public-safety relevance but also elevated legal and privacy risk."
+        ],
+        "UNVERIFIED": [
+          "A directly accessible public IPJ Valcea notice naming the suspect was not located through the public web verification route in this run.",
+          "The suspect's current location and any subsequent detention/arrest status were not independently verified."
+        ],
+        "UNKNOWN": [
+          "Whether the police attention notice is publicly distributable in its original form and remains current.",
+          "Whether the reported suspect has been located or his procedural status changed after the secondary reports."
+        ]
+      },
+      "risk": "HIGH_ACTIVE_HOMICIDE_IDENTIFIABLE_VICTIM_CRIMINAL_ALLEGATION",
+      "autopublish": false,
+      "hold_reason": "Fail-closed. Active homicide case, identifiable victim coverage and a criminal allegation against a named person require direct current primary confirmation, restrained public-safety framing, and human/legal review before any autonomous VÂLCEA CLAR publication. Victim identity, imagery and graphic/intrusive details are excluded."
+    }
+  ],
+  "non_material_or_preexisting_signals": [
+    "Jurnalul Olteniei report about former Tribunalul Valcea president Petre Dinescu joining AUR Ramnicu Valcea was published at 09:50 on 22.09.2026, before the prior 22:07 radar state; it is not a new delta for this run.",
+    "Malaia EV charging-station reports remain secondary-source follow-up without newly located primary confirmation.",
+    "AJOFM unemployment data and DSVSA weekly laboratory activity were visible in local press but no post-22:07 primary-verified delta requiring a new autonomous publication was established in this run."
+  ],
+  "publication_result": {
+    "new_site_publications_confirmed": 0,
+    "story_updates_confirmed": 0,
+    "new_social_distributions_confirmed": 0,
+    "reason": "No new low-risk signal cleared the canonical primary-evidence + fact-kernel + integrity gates. The only material late follow-up is a high-risk active homicide investigation and remains fail-closed."
+  },
+  "site_reconciliation": {
+    "homepage_checked": true,
+    "public_last_update_seen": "2026-09-22T09:42:00+03:00",
+    "new_public_route_detected": false
+  },
+  "follow_ups": [
+    "Ionesti/Tomsani/Horezu: re-check the public IPJ Valcea / Romanian Police wanted-or-attention notice and current procedural status; do not project victim identity or graphic details.",
+    "Baile Olanesti: continue contract/addenda/payments/reception trace for PNRR C10-I3-1215; no inference about the financing-source difference.",
+    "Brezoi and Calimanesti: continue primary confirmation of physical works progress and the Daesti concession contract respectively."
+  ],
+  "human_decisions_required": [],
+  "operator_notification": "MATERIAL_HIGH_RISK_FOLLOW_UP_ONLY_NO_PUBLICATION"
+}
