@@ -194,7 +194,10 @@ def existing_records(root: Path) -> list[dict[str, Any]]:
 
 
 def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
-    records = existing_records(root)
+    prior = read_json(root / DELIVERY_DIR / "queue.json", {"records": [], "policy": {}}) or {"records": [], "policy": {}}
+    prior_records = prior.get("records", []) if isinstance(prior, dict) else []
+    records = [r for r in prior_records if isinstance(r, dict)]
+    prior_policy = prior.get("policy", {}) if isinstance(prior, dict) and isinstance(prior.get("policy"), dict) else {}
     by_id = {str(r.get("delivery_id")): r for r in records if r.get("delivery_id")}
     for article in manifest.get("articles", []):
         for channel, selection in article.get("channels", {}).items():
@@ -229,6 +232,7 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     return {
         "schema_version": SCHEMA_VERSION,
         "policy": {
+            **prior_policy,
             "identity": "edition+article+content_version+channel",
             "confirmed_delivery_is_monotonic": True,
             "records_are_not_dropped_when_unselected_later": True,
