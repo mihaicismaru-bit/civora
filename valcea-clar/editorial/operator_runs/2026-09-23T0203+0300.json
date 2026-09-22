@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "run_id": "operator-run-20260922T230300Z",
+  "observed_at_local": "2026-09-23T02:03:00+03:00",
+  "scope": "delta_scan_and_followups",
+  "previous_checkpoint": "valcea-clar/editorial/operator_runs/2026-09-23T0058+0300.json",
+  "canonical_newsroom": {
+    "evaluated_local": "2026-09-23T02:02:40+03:00",
+    "changed": false,
+    "new_story_ids": [],
+    "publishable_story_count": 75,
+    "auto_fact_registry_count": 7,
+    "retained_published_story_count": 165,
+    "editorial_integrity": {
+      "passed": 130,
+      "held": 4,
+      "failed": 0
+    }
+  },
+  "scan_summary": {
+    "observed_at": "2026-09-23T02:01:30+03:00",
+    "sources_total": 22,
+    "sources_ok": 18,
+    "facts_admitted": 7,
+    "source_notice_briefs": 3,
+    "host_incidents": 0,
+    "material_delta": false,
+    "source_blockers_unchanged": [
+      "cj-valcea-anunturi: SSL_CERTIFICATE",
+      "ipj-valcea-news: SSL_CERTIFICATE",
+      "primaria-baile-govora-evenimente: HTTP_404",
+      "primaria-rm-valcea-comunicate: NETWORK_UNREACHABLE"
+    ]
+  },
+  "fact_kernel": [
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "The canonical newsroom evaluation found no publishable story-state change and no new story IDs in this pass."
+    },
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "The bounded-parallel source scan completed with 22 configured sources, 18 reachable/usable, seven admitted facts and no host incidents."
+    },
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "The canonical live-newsroom publication/render/social steps were not entered because story state did not change; no new site or social delivery is claimed."
+    },
+    {
+      "type": "EDITORIAL_INTERPRETATION",
+      "text": "No item met the combined novelty, verification and editorial-value threshold for a new autonomous publication or material update. The clock is not a publication reason."
+    }
+  ],
+  "publication_summary": {
+    "site_published": 0,
+    "site_updated_editorial": 0,
+    "facebook_delivered": 0,
+    "facebook_outbox_or_hold_new": 0,
+    "instagram_delivered": 0,
+    "instagram_outbox_or_hold_new": 0,
+    "technical_note": "Static indexing assets may refresh independently; this is not counted as an editorial publication/update."
+  },
+  "channel_truth": {
+    "facebook": {
+      "new_delivery_this_run": false,
+      "basis": "No new durable story_publication_event; social dispatch step skipped by canonical newsroom."
+    },
+    "instagram": {
+      "new_delivery_this_run": false,
+      "basis": "No new durable story_publication_event; social dispatch step skipped by canonical newsroom."
+    }
+  },
+  "active_holds_preserved": [
+    "derived-council-gambling-20260723",
+    "fast-ipj-actiune-pentru-cresterea-sigurantei-rutiere-pe-dn-64-aaf8eb1c11",
+    "fast-ipj-actiunile-politistilor-rutieri-din-ultimele-72-de-ore1-646c23c36d",
+    "fast-ipj-activitati-de-educatie-rutiera-in-unitatile-de-invatam-325cb216b6",
+    "olanesti-bridge-monitor"
+  ],
+  "followups": [
+    "Continue competent-authority verification of the detailed Raliul Vâlcii street restrictions before promoting organizer-only details beyond attributed SOURCE_CLAIM.",
+    "Restore or replace the four degraded primary-source routes without relaxing TLS or provenance controls.",
+    "Treat the legacy_passthrough corpus as editorial-quality debt for a dedicated cleanup pass; do not republish document summaries merely to create activity."
+  ],
+  "human_decisions_required": []
+}
