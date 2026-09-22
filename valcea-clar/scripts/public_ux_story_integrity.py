@@ -285,7 +285,11 @@ def build() -> dict:
         "stories": rows,
     }
     write(MANIFEST, manifest)
-    print(json.dumps({"status":"PASS","stories":len(rows),"cross_links":sum(len(row["related_story_ids"]) for row in rows),"verified_images":sum(1 for row in rows if row.get("image"))}, ensure_ascii=False))
+    import s4_publication_experience as s4
+    live_ids={str(story.get("id")) for story in stories if story.get("active_now") is True or str(story.get("archive_status") or "")=="active"}
+    s4.apply(nav=nav, stories=stories, live_ids=live_ids, shell=ux.shell)
+    s4.validate()
+    print(json.dumps({"status":"PASS","stories":len(rows),"cross_links":sum(len(row["related_story_ids"]) for row in rows),"verified_images":sum(1 for row in rows if row.get("image")),"s4":"PASS"}, ensure_ascii=False))
     return manifest
 
 
