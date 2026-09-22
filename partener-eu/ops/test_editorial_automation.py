@@ -21,8 +21,12 @@ assert spec and spec.loader
 brief = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(brief)
 
-assert 'daily-brief-data.js' in index and 'daily-brief.js' in index
-assert index.index('daily-brief-data.js') < index.index('daily-brief.js')
+# The daily brief remains a generated editorial data product, but the retired
+# daily-brief renderer must not re-enter the active homepage boot path. Funding
+# Concierge vNext is the single homepage renderer and consumes canonical
+# decision products directly.
+assert 'home-concierge-vnext.js' in index
+assert 'daily-brief-data.js' not in index and 'daily-brief.js' not in index
 assert 'people-policy-data.js' in index and 'people-policy-v1.js' in index
 assert index.index('people-policy-data.js') < index.index('people-policy-v1.js')
 
@@ -37,8 +41,9 @@ for item in daily.get('items') or []:
     assert "{'" not in public_text and 'FUNDING_COMMITMENT' not in public_text
     assert not public_text.lstrip().startswith('{')
 
-# Pure regression fixture: the homepage brief must replay deterministically and
-# must not promote stale news or ambiguous/expired OPEN dossiers.
+# Pure regression fixture: the generated daily editorial product must replay
+# deterministically and must not promote stale news or ambiguous/expired OPEN
+# dossiers, regardless of which current UI surface consumes decision products.
 def qf(label: str, value: str, confidence: str = 'CONFIRMED') -> dict[str, str]:
     return {'label': label, 'value': value, 'confidence': confidence}
 
