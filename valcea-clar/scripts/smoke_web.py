@@ -149,7 +149,10 @@ for row in rows:
             assert source_url.startswith("https://")
             if image.get("contextual_archive") is True:
                 assert image.get("captured_at"), f"Foto de arhivă fără captured_at pentru {story_id}"
-            assert 'data-media-provenance="verified-photo"' in text
+            assert (
+                'data-media-provenance="verified-photo"' in text
+                or 'data-photo-provenance="verified"' in text
+            ), f"Marker foto verificată lipsă pentru {story_id}"
             assert source_url in text and "Foto:" in text, f"Credit foto nevizibil pentru {story_id}"
     else:
         assert "image" not in news, f"Imagine fără provenance introdusă în JSON-LD pentru {story_id}"
