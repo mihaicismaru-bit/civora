@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import argparse, datetime as dt, hashlib, html, json, os, pathlib, re, subprocess, sys, tempfile, time, urllib.request
+import argparse, datetime as dt, hashlib, html, json, os, pathlib, re, subprocess, sys, tempfile, time, urllib.error, urllib.parse, urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 OPS = ROOT / "ops"
@@ -11,6 +11,8 @@ CHECKPOINT = VALIDATION / "source_state.checkpoint.json"
 MIN_SEMANTIC_CHARS = 256
 MIN_HTML_BYTES_FOR_LOW_INFO = 4096
 VALID_HEALTH_SCOPES = {"MATERIAL_SOURCE", "TRANSPORT_ONLY", "DISCOVERY_ONLY"}
+TRANSIENT_HTTP_STATUSES = {408, 425, 429, 500, 502, 503, 504}
+REGIOCENTRU_HOSTS = {"www.regiocentru.ro", "regiocentru.ro"}
 
 
 def nowz(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
@@ -80,26 +82,122 @@ def observation_content_quality(obs):
         return False, 'LOW_INFORMATION_HTML_SHELL'
     return True, None
 
+
+def source_transport_urls(src):
+    """Return bounded transport-equivalent URLs without changing source authority.
+
+    Only RegioCentru gets a host alias because the authority exposes both www and
+    bare host identities for the exact same HTTPS path. No mirror, proxy or
+    non-authoritative fallback is permitted here.
+    """
+    primary=str(src.get('url') or '').strip()
+    urls=[primary]
+    parsed=urllib.parse.urlsplit(primary)
+    host=(parsed.hostname or '').lower()
+    if parsed.scheme.lower()=='https' and host in REGIOCENTRU_HOSTS:
+        alt='regiocentru.ro' if host=='www.regiocentru.ro' else 'www.regiocentru.ro'
+        netloc=alt
+        if parsed.port:
+            netloc=f'{alt}:{parsed.port}'
+        alias=urllib.parse.urlunsplit((parsed.scheme,netloc,parsed.path,parsed.query,parsed.fragment))
+        if alias not in urls:
+            urls.append(alias)
+    return urls
+
+
+def _curl_fetch(candidate, headers, timeout, attempts_so_far):
+    marker=b'\n__PARTENER_HTTP_STATUS__:'
+    args=[
+        'curl','-4','--http1.1','-L','--silent','--show-error',
+        '--max-time',str(timeout),
+        '-A',headers['User-Agent'],
+        '-H',f"Accept: {headers['Accept']}",
+        '-H',f"Accept-Language: {headers['Accept-Language']}",
+        '-H','Accept-Encoding: identity',
+        '-H','Cache-Control: no-cache',
+        '-w','\n__PARTENER_HTTP_STATUS__:%{http_code}',
+        candidate,
+    ]
+    cp=subprocess.run(args,capture_output=True,timeout=timeout+15)
+    payload=cp.stdout
+    status=None
+    body=payload
+    idx=payload.rfind(marker)
+    if idx>=0:
+        body=payload[:idx]
+        raw_status=payload[idx+len(marker):].strip()
+        try: status=int(raw_status.decode('ascii','ignore'))
+        except Exception: status=None
+    if cp.returncode==0 and status is not None and 200<=status<400 and body:
+        return make_observation({},body,status,candidate,{},'curl-fallback',attempts_so_far+1), status, None
+    err=cp.stderr.decode('utf-8','ignore')[:500]
+    return None, status, f'curl exit {cp.returncode} HTTP {status}: {err}'
+
+
 def fetch_source(src, timeout=35, attempts=3):
-    headers={'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/151 Safari/537.36 PARTENER.EU-CIVORA-P10/1.2','Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8','Accept-Language':'ro-RO,ro;q=0.9,en;q=0.7','Cache-Control':'no-cache','Connection':'close'}
+    headers={
+        'User-Agent':'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/151 Safari/537.36 PARTENER.EU-CIVORA-P10/1.3',
+        'Accept':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language':'ro-RO,ro;q=0.9,en;q=0.7',
+        'Accept-Encoding':'identity',
+        'Cache-Control':'no-cache',
+        'Connection':'close'
+    }
     last=None
-    for attempt in range(1,attempts+1):
-        req=urllib.request.Request(src['url'], headers=headers)
+    last_status=None
+    total_attempts=0
+    for candidate in source_transport_urls(src):
+        for attempt in range(1,attempts+1):
+            total_attempts+=1
+            req=urllib.request.Request(candidate, headers=headers)
+            try:
+                with urllib.request.urlopen(req, timeout=timeout) as r:
+                    body=r.read(4_000_000); code=getattr(r,'status',200); final=r.geturl(); response_headers=dict(r.headers.items())
+                return make_observation(src,body,code,final,response_headers,'urllib',total_attempts)
+            except urllib.error.HTTPError as e:
+                last_status=int(e.code)
+                last=f'HTTPError: HTTP {e.code} for {candidate}'
+                if e.code in TRANSIENT_HTTP_STATUSES and attempt<attempts:
+                    time.sleep(attempt)
+                    continue
+                break
+            except (urllib.error.URLError, TimeoutError, OSError) as e:
+                last=f'{type(e).__name__}: {e}'
+                if attempt<attempts:
+                    time.sleep(attempt)
+                    continue
+                break
+            except Exception as e:
+                last=f'{type(e).__name__}: {e}'
+                break
+
+        # One alternate HTTP stack per bounded official URL. This is deliberately
+        # not curl --retry: deterministic 4xx responses must fail fast instead of
+        # burning repeated requests against an authority-side WAF/edge rule.
         try:
-            with urllib.request.urlopen(req, timeout=timeout) as r:
-                body=r.read(4_000_000); code=getattr(r,'status',200); final=r.geturl(); response_headers=dict(r.headers.items())
-            return make_observation(src,body,code,final,response_headers,'urllib',attempt)
+            curl_obs,curl_status,curl_error=_curl_fetch(candidate,headers,timeout,total_attempts)
+            total_attempts+=1
+            if curl_obs is not None:
+                curl_obs=make_observation(src,bytes.fromhex('') if False else b'',200,candidate,{},'curl-fallback',total_attempts) if False else curl_obs
+                # Recompute with the real source marker contract because _curl_fetch
+                # intentionally stays transport-only.
+                args=[
+                    'curl','-4','--http1.1','-L','--silent','--show-error','--max-time',str(timeout),
+                    '-A',headers['User-Agent'],'-H',f"Accept: {headers['Accept']}",
+                    '-H',f"Accept-Language: {headers['Accept-Language']}",'-H','Accept-Encoding: identity',
+                    '-H','Cache-Control: no-cache',candidate,
+                ]
+                cp=subprocess.run(args,capture_output=True,timeout=timeout+15)
+                if cp.returncode==0 and cp.stdout:
+                    return make_observation(src,cp.stdout,int(curl_obs['http_status']),candidate,{},'curl-fallback',total_attempts)
+            if curl_status is not None:
+                last_status=curl_status
+            if curl_error:
+                last=curl_error
         except Exception as e:
-            last=f'{type(e).__name__}: {e}'
-            if attempt<attempts: time.sleep(attempt)
-    try:
-        cp=subprocess.run(['curl','-4','--http1.1','-L','--fail','--silent','--show-error','--max-time',str(timeout),'--retry','2','--retry-delay','1','-A',headers['User-Agent'],'-H','Accept-Language: ro-RO,ro;q=0.9,en;q=0.7',src['url']],capture_output=True,timeout=timeout*3+10)
-        if cp.returncode==0 and cp.stdout:
-            return make_observation(src,cp.stdout,200,src['url'],{},'curl-fallback',attempts+1)
-        last=f'curl exit {cp.returncode}: {cp.stderr.decode("utf-8","ignore")[:500]}'
-    except Exception as e:
-        last=f'curl fallback {type(e).__name__}: {e}'
-    return {'ok':False,'http_status':None,'final_url':None,'bytes':0,'raw_sha256':None,'semantic_sha256':None,'semantic_chars':0,'markers_found':[],'etag':None,'last_modified':None,'fetch_method':'urllib+curl','attempts':attempts+1,'error':last}
+            last=f'curl fallback {type(e).__name__}: {e}'
+
+    return {'ok':False,'http_status':last_status,'final_url':None,'bytes':0,'raw_sha256':None,'semantic_sha256':None,'semantic_chars':0,'markers_found':[],'etag':None,'last_modified':None,'fetch_method':'urllib+curl','attempts':total_attempts,'error':last}
 
 def evaluate_change(prev, observed_semantic):
     baseline=prev.get('semantic_sha256')
