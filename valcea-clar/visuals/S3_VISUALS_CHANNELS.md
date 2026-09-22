@@ -12,7 +12,7 @@ S3 resolves the gap between a verified story and its visual/channel presentation
 6. Threads remains text-first.
 7. TikTok stays on hold until current subject/event media is eligible; an editorial card does not masquerade as current-event footage.
 
-The initial S3 pilot covers the seven stories published autonomously in the 24-hour acceptance window on 22 September 2026.
+The initial S3 pilot covers the eight pilot stories, including the three S2 acceptance forms (straight news, explainer and service news).
 
 ## Acceptance
 

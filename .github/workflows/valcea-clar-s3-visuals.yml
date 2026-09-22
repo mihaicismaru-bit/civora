@@ -59,8 +59,8 @@ jobs:
           root=Path('valcea-clar')
           vm=json.loads((root/'visuals/s3_visual_manifest.json').read_text(encoding='utf-8'))
           sm=json.loads((root/'site/runtime/stiri/manifest.json').read_text(encoding='utf-8'))
-          assert vm['summary']['stories_ready']==7
-          assert vm['summary']['assets']==14
+          assert vm['summary']['stories_ready']==8
+          assert vm['summary']['assets']==16
           ids={p['story_id'] for p in vm['packs'] if p.get('status')=='READY'}
           rows={r['id']:r for r in sm['stories']}
           for sid in ids:

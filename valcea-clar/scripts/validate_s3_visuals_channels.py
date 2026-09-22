@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 def load(p): return json.loads(p.read_text(encoding="utf-8"))
 def main():
     cfg=load(ROOT/"visuals"/"s3_visual_briefs.json")
-    assert len(cfg.get("stories") or [])==7
+    assert len(cfg.get("stories") or [])==8
     ids=[x["story_id"] for x in cfg["stories"]]; assert len(ids)==len(set(ids))
     for row in cfg["stories"]:
         ch=row["channels"]
