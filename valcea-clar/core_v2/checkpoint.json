@@ -1,7 +1,7 @@
 {
   "schema_version": "11.1",
   "checkpoint_id": "VALCEA-CLAR-CORE-V2-RUN98-EXTERNAL-AUDIT-SLOT-FEASIBILITY-NATURAL-VALIDATED",
-  "observed_at_utc": "2026-09-22T00:54:09Z",
+  "observed_at_utc": "2026-09-22T00:58:03Z",
   "architecture_status": "LEGACY_NOT_PRODUCTION_READY",
   "core_v2_mode": "SHADOW_ONLY",
   "publication_authority": "NONE",
@@ -67,45 +67,48 @@
     "public_projection_write_performed": false
   },
   "external_truth": {
-    "verification_basis": "RUN98 commit-triggered Core v2 validation run 35673688578 performed fresh read-only public site, visual/provenance and Meta readbacks and rebuilt transaction truth before the slot-feasibility proof ran. Workflow success itself was not treated as delivery truth.",
-    "bounded_replay_candidate_count": 1,
+    "verification_basis": "Latest natural checkpoint replay 35673912537 rebuilt the bounded candidate set and performed fresh read-only public site, visual/provenance and Meta readbacks plus transaction truth before rerunning the slot-feasibility proof. Workflow success itself is not delivery truth.",
+    "bounded_replay_candidate_count": 2,
     "bounded_replay_story_ids": [
-      "valcea-apa-canal-contract-152m-20260902"
+      "valcea-apa-canal-contract-152m-20260902",
+      "cet-govora-cine-a-decis-oprirea-20260821"
     ],
-    "stories_published": 1,
-    "site_public_readback": "1/1",
+    "stories_published": 2,
+    "site_public_readback": "2/2",
     "photo_verified_count": 0,
     "photo_coverage": 0.0,
-    "approved_public_visual": "0/1",
-    "site_approved_visual_absent": "1/1",
-    "instagram_remote_object_presence": "1/1",
-    "instagram_approved_image_identity": "0/1",
-    "instagram_delivered_receipt_bound": 0,
+    "approved_public_visual": "0/2",
+    "site_approved_visual_absent": "2/2",
+    "instagram_remote_object_presence": "2/2",
+    "instagram_approved_image_identity": "1/2",
+    "instagram_delivered_receipt_bound": 1,
     "facebook_delivered_receipt_bound": 0,
     "complete_externally_verified_receipts": 0,
     "truth_complete_transactions": 0,
-    "historical_fact_kernel_evidence_ready": "1/1",
-    "historical_article_claims_evidence_ready": "1/1",
+    "historical_fact_kernel_evidence_ready": "2/2",
+    "historical_article_claims_evidence_ready": "2/2",
     "transaction_terminal_reasons": {
-      "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE": 1
+      "BLOCKED_EXTERNAL_DELIVERY_EVIDENCE": 2
     },
     "blocker_counts": {
       "CROSS_SURFACE_VISUAL_BINDING_DIVERGENCE": 1,
-      "FACEBOOK_READBACK_PERMISSION_MISSING": 1,
+      "FACEBOOK_READBACK_PERMISSION_MISSING": 2,
       "INSTAGRAM_VISUAL_IDENTITY_UNBOUND": 1,
-      "SITE_APPROVED_VISUAL_ABSENT": 1
+      "SITE_APPROVED_VISUAL_ABSENT": 2
     },
-    "external_blocked_story_count": 1,
+    "external_blocked_story_count": 2,
     "external_truth_complete": false,
     "acceptance_ready": false,
-    "replay_candidate_set_changed_since_run97": true,
-    "replay_candidate_truth_rule": "Do not carry forward the second historical replay candidate from prior runs when it is absent from the current bounded replay eligibility set."
+    "fresh_candidate_set_drift_observed_within_run": true,
+    "feature_validation_candidate_count": 1,
+    "checkpoint_replay_candidate_count": 2,
+    "candidate_set_truth_rule": "Use the freshest independently rebuilt/read-back candidate set; do not carry a stale count forward merely to make metrics stable. The change from 1 to 2 is recorded as observed external-state drift, not normalized away."
   },
   "blocked": [
     "Core v2 acceptance remains blocked by external delivery and visual truth, not by CI status.",
     "The current 42-stage canonical orchestrator ends before the six independent external-evidence artifacts required by AuditResult exist, so no current stage can be replaced one-for-one by core_v2_external_audit truthfully.",
     "Adding a 43rd stage or merging independent evidence producers into the auditor is prohibited by the controlled rebuild contract.",
-    "The current bounded replay set contains one eligible historical story; its public page reads back, but the approved site visual is absent, Instagram visual identity is unbound, and Facebook independent object readback lacks the required permission.",
+    "Latest fresh truth has two bounded replay stories: both public pages read back, neither has its approved visual bound on the public site, one Instagram object is approved-image identity-bound, and Facebook independent readback remains unavailable for both.",
     "External audit integration therefore requires structural reconciliation before runtime switching."
   ],
   "next": [
@@ -116,13 +119,21 @@
   ],
   "evidence": {
     "slot_feasibility_feature_commit": "c60bc68caa9d532b0ac1b5c8b78c383f40b1bbc7",
-    "natural_validation_run_id": 35673688578,
-    "natural_validation_run_number": 934,
-    "natural_validation_attempt": 1,
-    "natural_validation_event": "pull_request",
-    "natural_validation_conclusion": "success",
+    "feature_validation_run_id": 35673688578,
+    "feature_validation_run_number": 934,
+    "feature_validation_attempt": 1,
+    "feature_validation_event": "pull_request",
+    "feature_validation_conclusion": "success",
     "feature_artifact_id": 10672535408,
     "feature_artifact_sha256": "2ceb5b0669db48d0ca7fb55d609d400a3afe1fa924d8a01dcc4aca8860e56aba",
+    "checkpoint_commit": "600cfe9aa44ccb2aeeba37dd9ea77e139f4d8929",
+    "checkpoint_replay_run_id": 35673912537,
+    "checkpoint_replay_run_number": 935,
+    "checkpoint_replay_attempt": 1,
+    "checkpoint_replay_event": "push",
+    "checkpoint_replay_conclusion": "success",
+    "checkpoint_replay_artifact_id": 10672830515,
+    "checkpoint_replay_artifact_sha256": "610e8a84edf85a67cb547522b8caa51b7e62d7ef87d1c18bb35d1c38cfe85c0b",
     "runtime_stage_count": "42/42",
     "runtime_failed_stage": null,
     "ci_only_audit_result_slot_feasibility": "PASS_SHADOW",
@@ -132,5 +143,5 @@
     "article_integrity_verified_claim_count": 3,
     "article_integrity_fabricated_claim_count": 0
   },
-  "truth_rule": "RUN98 proves a negative architectural fact instead of forcing a green integration: there is no exact one-for-one slot in the current 42-stage canonical runtime for the external AuditResult because all six required independent public/readback/transaction evidence artifacts are produced after that cycle. The proof remains fail-closed, rejects a 43rd-stage shortcut, keeps evidence producers independent, identifies isj_promoted_claim_contract_validation only as a safe reconciliation candidate with zero in-plan downstream consumers, and performs no runtime switch. Fresh external truth also contracted to one bounded replay candidate and remains acceptance-blocking. No publication, acceptance, merge, deploy, Meta-write, public-projection mutation, cutover or retirement authority is granted."
+  "truth_rule": "RUN98 proves a negative architectural fact instead of forcing a green integration: there is no exact one-for-one slot in the current 42-stage canonical runtime for the external AuditResult because all six required independent public/readback/transaction evidence artifacts are produced after that cycle. The proof remains fail-closed, rejects a 43rd-stage shortcut, keeps evidence producers independent, identifies isj_promoted_claim_contract_validation only as a safe reconciliation candidate with zero in-plan downstream consumers, and performs no runtime switch. Fresh external truth is recorded from the latest readback even when the bounded candidate set changes between two natural validations. No publication, acceptance, merge, deploy, Meta-write, public-projection mutation, cutover or retirement authority is granted."
 }
