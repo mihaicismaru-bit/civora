@@ -15,6 +15,8 @@ import os
 import re
 import ssl
 import tempfile
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import zipfile
@@ -34,7 +36,18 @@ SEEDS = [
     "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
     "https://www.afir.ro/finantare/",
 ]
-UA = "PARTENER.EU-CIVORA-AFIR-Ingest/1.1 (+https://partener.eu)"
+UA = "Mozilla/5.0 (compatible; PARTENER.EU-CIVORA-AFIR-Ingest/1.2; +https://partener.eu)"
+REQUEST_HEADERS = {
+    "User-Agent": UA,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/pdf;q=0.8,*/*;q=0.7",
+    "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.6",
+    "Accept-Encoding": "identity",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "Connection": "close",
+}
+RETRYABLE_STATUS = {408, 425, 429, 500, 502, 503, 504}
+MAX_FETCH_ATTEMPTS = 3
 DOC_EXT = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ods", ".zip")
 MATERIAL_TERMS = (
     "termen", "deadline", "eligibil", "buget", "alocare", "punctaj",
@@ -69,15 +82,62 @@ def norm(url, base=None):
     return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", p.query, ""))
 
 
-def fetch(url, timeout=25):
-    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Language": "ro,en;q=0.7"})
-    try:
-        with urllib.request.urlopen(req, timeout=timeout, context=ssl.create_default_context()) as r:
-            data = r.read(12_000_000)
-            return {"ok": True, "url": r.geturl(), "status": getattr(r, "status", 200),
-                    "content_type": r.headers.get("Content-Type", ""), "data": data}
-    except Exception as e:
-        return {"ok": False, "url": url, "error": f"{type(e).__name__}: {e}"}
+def _retry_delay(attempt, retry_after=None):
+    """Bound retry latency so a flaky source cannot stall the ingestion job."""
+    if retry_after:
+        try:
+            return max(0.0, min(float(retry_after), 8.0))
+        except (TypeError, ValueError):
+            pass
+    return min(float(2 ** (attempt - 1)), 4.0)
+
+
+def fetch(url, timeout=25, sleep=time.sleep):
+    """Fetch one official AFIR resource with bounded transient retries.
+
+    The transport deliberately remains fail-closed: retries can recover a
+    transient HTTP/network failure, but they never convert an error response
+    into evidence and never bypass authentication or TLS verification.
+    """
+    context = ssl.create_default_context()
+    last_error = None
+    last_status = None
+    for attempt in range(1, MAX_FETCH_ATTEMPTS + 1):
+        req = urllib.request.Request(url, headers=REQUEST_HEADERS)
+        try:
+            with urllib.request.urlopen(req, timeout=timeout, context=context) as r:
+                data = r.read(12_000_000)
+                return {
+                    "ok": True,
+                    "url": r.geturl(),
+                    "status": getattr(r, "status", 200),
+                    "content_type": r.headers.get("Content-Type", ""),
+                    "data": data,
+                    "attemptCount": attempt,
+                }
+        except urllib.error.HTTPError as e:
+            last_status = e.code
+            last_error = f"HTTPError: {e.code} {e.reason}"
+            if e.code not in RETRYABLE_STATUS or attempt >= MAX_FETCH_ATTEMPTS:
+                break
+            sleep(_retry_delay(attempt, e.headers.get("Retry-After") if e.headers else None))
+        except (urllib.error.URLError, TimeoutError, ConnectionError, OSError) as e:
+            last_error = f"{type(e).__name__}: {e}"
+            if attempt >= MAX_FETCH_ATTEMPTS:
+                break
+            sleep(_retry_delay(attempt))
+        except Exception as e:
+            last_error = f"{type(e).__name__}: {e}"
+            break
+    result = {
+        "ok": False,
+        "url": url,
+        "error": last_error or "Unknown transport failure",
+        "attemptCount": attempt,
+    }
+    if last_status is not None:
+        result["status"] = last_status
+    return result
 
 
 class Parser(HTMLParser):
@@ -283,6 +343,7 @@ def linked_evidence(links, base):
                 relevant_pages.append(entry)
     return documents[:80], relevant_pages[:80]
 
+
 def main():
     prior = previous()
     old = {x.get("url"): x for x in prior.get("items", [])}
@@ -302,7 +363,12 @@ def main():
         seen.add(url)
         r = fetch(url)
         if not r["ok"]:
-            errors.append({"url": url, "error": r.get("error")})
+            errors.append({
+                "url": url,
+                "error": r.get("error"),
+                "status": r.get("status"),
+                "attemptCount": r.get("attemptCount", 1),
+            })
             continue
         ct = (r.get("content_type") or "").lower()
         data = r["data"]
