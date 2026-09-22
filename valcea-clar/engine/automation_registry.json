@@ -1,5 +1,5 @@
 {
-  "schema_version": 14,
+  "schema_version": 15,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -437,6 +437,31 @@
         "valcea-clar/site/runtime/unde-iesim/verificat",
         "valcea-clar/site/runtime/dosare",
         "valcea-clar/site/public_ux_state.json"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "s6_operations_governance",
+      "kind": "material_state_governance_audit_incident_alert_and_explicit_runtime_rollback",
+      "workflow": ".github/workflows/valcea-clar-s6-operations-governance.yml",
+      "schedule": [
+        "37 * * * *"
+      ],
+      "event_driven": true,
+      "publication_authority": "none",
+      "editorial_fact_authority": "none",
+      "credentials_access_allowed": false,
+      "alert_policy": "fail_only_on_material_governance_blockers",
+      "persistent_log_policy": "material_state_changes_only",
+      "rollback": {
+        "automatic": false,
+        "runtime_manual_dispatch_only": true,
+        "code_config_rollback": "reviewed_revert_or_pull_request_only"
+      },
+      "writes": [
+        "valcea-clar/ops/governance_state.json",
+        "valcea-clar/ops/audit_log.jsonl",
+        "explicit_manual_runtime_rollback_scope_only"
       ],
       "owner": "site_engine"
     }
