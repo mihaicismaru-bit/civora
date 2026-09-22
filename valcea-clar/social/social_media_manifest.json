@@ -145,42 +145,165 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 0,
-    "autonomous_story_ids_24h": [],
+    "autonomous_stories_published_24h": 6,
+    "autonomous_story_ids_24h": [
+      "brezoi-ziua-recoltei-pregatiri-20260922",
+      "calimanesti-concurs-contabil-sef-20260921",
+      "calimanesti-restrictii-trotuare-20260922",
+      "ramnicu-valcea-floarea-darurilor-20260926",
+      "scm-valcea-fc-bihor-20260920",
+      "valcea-somaj-august-2026"
+    ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 0,
-      "published": 0,
-      "stories": [],
-      "max_seconds": null,
-      "median_seconds": null
+      "measured": 6,
+      "published": 6,
+      "stories": [
+        {
+          "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
+          "seconds": 179,
+          "discovered_at_utc": "2026-09-22T06:33:50Z",
+          "published_at_utc": "2026-09-22T06:36:49Z"
+        },
+        {
+          "story_id": "calimanesti-concurs-contabil-sef-20260921",
+          "seconds": 179,
+          "discovered_at_utc": "2026-09-22T06:33:50Z",
+          "published_at_utc": "2026-09-22T06:36:49Z"
+        },
+        {
+          "story_id": "calimanesti-restrictii-trotuare-20260922",
+          "seconds": 179,
+          "discovered_at_utc": "2026-09-22T06:33:50Z",
+          "published_at_utc": "2026-09-22T06:36:49Z"
+        },
+        {
+          "story_id": "ramnicu-valcea-floarea-darurilor-20260926",
+          "seconds": 179,
+          "discovered_at_utc": "2026-09-22T06:33:50Z",
+          "published_at_utc": "2026-09-22T06:36:49Z"
+        },
+        {
+          "story_id": "scm-valcea-fc-bihor-20260920",
+          "seconds": 179,
+          "discovered_at_utc": "2026-09-22T06:33:50Z",
+          "published_at_utc": "2026-09-22T06:36:49Z"
+        },
+        {
+          "story_id": "valcea-somaj-august-2026",
+          "seconds": 179,
+          "discovered_at_utc": "2026-09-22T06:33:50Z",
+          "published_at_utc": "2026-09-22T06:36:49Z"
+        }
+      ],
+      "max_seconds": 179,
+      "median_seconds": 179
     },
     "photo_coverage": {
-      "status": "NO_PUBLISHED_STORIES",
+      "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 0,
-      "value": null,
+      "published_stories": 6,
+      "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "eligible": 0,
+      "status": "BLOCKED",
+      "eligible": 6,
       "readback_ok": 0,
-      "value": null,
-      "checks": [],
+      "value": 0.0,
+      "blocker_story_ids": [
+        "brezoi-ziua-recoltei-pregatiri-20260922",
+        "calimanesti-concurs-contabil-sef-20260921",
+        "calimanesti-restrictii-trotuare-20260922",
+        "ramnicu-valcea-floarea-darurilor-20260926",
+        "scm-valcea-fc-bihor-20260920",
+        "valcea-somaj-august-2026"
+      ],
+      "checks": [
+        {
+          "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
+          "url": "https://valceaclar.ro/stiri/brezoi-ziua-recoltei-pregatiri-20260922/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "calimanesti-concurs-contabil-sef-20260921",
+          "url": "https://valceaclar.ro/stiri/calimanesti-concurs-contabil-sef-20260921/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "calimanesti-restrictii-trotuare-20260922",
+          "url": "https://valceaclar.ro/stiri/calimanesti-restrictii-trotuare-20260922/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "ramnicu-valcea-floarea-darurilor-20260926",
+          "url": "https://valceaclar.ro/stiri/ramnicu-valcea-floarea-darurilor-20260926/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "scm-valcea-fc-bihor-20260920",
+          "url": "https://valceaclar.ro/stiri/scm-valcea-fc-bihor-20260920/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "valcea-somaj-august-2026",
+          "url": "https://valceaclar.ro/stiri/valcea-somaj-august-2026/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        }
+      ],
+      "projection_evidence": {
+        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
+        "http_status": 200,
+        "error": null,
+        "updated_local": "2026-09-21T22:14:00.029802Z",
+        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+        "public_story_count": 96
+      },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
+      "status": "MEASURED",
       "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "eligible": 6,
+      "value": 0.0,
+      "delivered_story_ids": []
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
+      "status": "MEASURED",
       "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "eligible": 6,
+      "value": 0.0,
+      "delivered_story_ids": []
     },
     "duplicates": {
       "status": "MEASURED",
