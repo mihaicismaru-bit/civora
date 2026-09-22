@@ -15,6 +15,15 @@ VALIDATION = ROOT / "validation"
 LATEST = VALIDATION / "latest.json"
 TASKS = VALIDATION / "resolution-tasks"
 INGEST_STATE = ROOT / "ingest" / "state"
+RESOLVED_NON_MATERIAL = "RESOLVED_NON_MATERIAL_CHANGE"
+RESOLUTION_METADATA_FIELDS = (
+    "resolved_semantic_sha256",
+    "resolved_at",
+    "resolution_reason",
+    "material_fact_action",
+    "publish_authorized",
+    "evidence_urls",
+)
 
 
 def atomic_json(path: pathlib.Path, obj: Any) -> None:
@@ -49,26 +58,57 @@ def candidate_fingerprint(rows: list[dict[str, Any]]) -> str:
     return hashlib.sha256(json.dumps(normalized, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
+def task_candidate_hash(task: dict[str, Any]) -> str | None:
+    for key in ("current_semantic_sha256", "candidate_semantic_sha256", "candidate_sha256"):
+        value = task.get(key)
+        if value:
+            return str(value)
+    return None
+
+
 def write_task(source_id: str, task: dict[str, Any]) -> pathlib.Path:
     path = TASKS / f"{source_id}.json"
     existing = load_json(path, {}) or {}
-    task.setdefault("schema_version", "1.2")
-    task.setdefault("task_type", "OFFICIAL_SOURCE_HASH_RESOLUTION")
-    task.setdefault("source_id", source_id)
-    task.setdefault("status", existing.get("status") or "OPEN_MANUAL_EVIDENCE_RESOLUTION")
-    task.setdefault("first_observed_at", existing.get("first_observed_at") or task.get("last_observed_at") or nowz())
-    task.setdefault("last_observed_at", nowz())
-    task.setdefault(
+
+    # Preserve audited resolution metadata when P10 re-materializes the same
+    # already-reviewed candidate. A future different candidate must reopen the
+    # task and discard the prior resolution decision. This prevents validation
+    # ledger refreshes from erasing reviewed-baseline evidence while keeping
+    # every genuinely new semantic change fail-closed.
+    merged = dict(existing)
+    merged.update(task)
+    existing_status = existing.get("status")
+    resolved_hash = existing.get("resolved_semantic_sha256")
+    candidate_hash = task_candidate_hash(merged)
+
+    if existing_status == RESOLVED_NON_MATERIAL and resolved_hash:
+        if candidate_hash and candidate_hash != resolved_hash:
+            merged["status"] = "OPEN_MANUAL_EVIDENCE_RESOLUTION"
+            for key in RESOLUTION_METADATA_FIELDS:
+                merged.pop(key, None)
+        else:
+            merged["status"] = RESOLVED_NON_MATERIAL
+            merged["material_fact_action"] = "NONE"
+            merged["publish_authorized"] = False
+    else:
+        merged.setdefault("status", existing_status or "OPEN_MANUAL_EVIDENCE_RESOLUTION")
+
+    merged.setdefault("schema_version", existing.get("schema_version") or "1.2")
+    merged.setdefault("task_type", "OFFICIAL_SOURCE_HASH_RESOLUTION")
+    merged.setdefault("source_id", source_id)
+    merged.setdefault("first_observed_at", existing.get("first_observed_at") or merged.get("last_observed_at") or nowz())
+    merged.setdefault("last_observed_at", nowz())
+    merged.setdefault(
         "policy",
         "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
     )
-    task["automatic_material_fact_update_allowed"] = False
-    task["material_fact_autoupdate_allowed"] = False
-    task.setdefault(
+    merged["automatic_material_fact_update_allowed"] = False
+    merged["material_fact_autoupdate_allowed"] = False
+    merged.setdefault(
         "blocked_fact_classes",
         ["deadline", "eligibility", "budget", "scoring", "beneficiaries", "material_call_status", "other_material_facts"],
     )
-    atomic_json(path, task)
+    atomic_json(path, merged)
     return path
 
 
