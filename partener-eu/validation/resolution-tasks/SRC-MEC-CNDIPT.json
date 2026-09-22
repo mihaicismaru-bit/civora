@@ -8,10 +8,10 @@
   "first_observed_at": "2026-08-21T15:59:24.271132Z",
   "last_observed_at": "2026-09-22T10:42:59.953021Z",
   "registry_class": "official_vet_policy_source",
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "source_id": "SRC-MEC-CNDIPT",
-  "status": "OPEN",
+  "status": "RESOLVED_AUTHORITATIVE_SCOPE_REVIEWED_NO_AUTO_PROMOTION",
   "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
   "automatic_material_fact_update_allowed": false,
   "material_fact_autoupdate_allowed": false,
@@ -23,5 +23,18 @@
     "beneficiaries",
     "material_call_status",
     "other_material_facts"
-  ]
+  ],
+  "resolved_at": "2026-09-22T11:22:57Z",
+  "resolution_reason": "The authoritative Ministry of Education page was reviewed after the semantic hash change. The page is the CNDIPT institutional overview (published 2016-02-01) and does not itself establish a funding-call deadline, budget, applicant class, scoring rule or current call status. The semantic change is accepted only as reviewed source-page drift. Any narrower VET policy or funding fact still requires the exact linked official document and its own provenance before publication.",
+  "resolution_evidence": {
+    "reviewed_url": "https://www.edu.ro/profesional_tehnic",
+    "reviewed_on": "2026-09-22",
+    "authoritative_page_title": "Centrul Național de Dezvoltare a Învățământului Profesional și Tehnic",
+    "authoritative_page_published": "2016-02-01",
+    "current_semantic_sha256": "ab44fb5bf70baf0a47383f28aeff6e1125cfa35700be359dc22bdedf01574d21",
+    "material_fact_action": "NONE",
+    "publish_authorized": false
+  },
+  "material_fact_action": "NONE",
+  "publish_authorized": false
 }
