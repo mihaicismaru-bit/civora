@@ -119,14 +119,27 @@ def resolve_first_published_at(
 
 
 def verified_visual(value: object) -> dict | None:
-    """Return a safe public visual or fail closed."""
+    """Return a site-eligible public visual or fail closed."""
     if not isinstance(value, dict):
         return None
     if value.get("provenance_status") != "VERIFIED":
         return None
-    if value.get("synthetic") is True:
-        return None
     if not str(value.get("public_url") or "").strip():
+        return None
+    fields = [
+        value.get("kind"), value.get("media_role"), value.get("rights_basis"),
+        value.get("public_url"), value.get("relative_url"), value.get("credit"),
+        value.get("editorial_note"), value.get("alt_text"),
+    ]
+    haystack = " ".join(str(field or "").lower() for field in fields)
+    blocked = (
+        "editorial_card", "editorial card", "card editorial",
+        "social_card", "social card", "original_editorial_layout",
+        "/social/editorial/", "social/editorial",
+    )
+    if any(token in haystack for token in blocked):
+        return None
+    if value.get("synthetic") is True and value.get("depicts_real_scene") is not False:
         return None
     if value.get("contextual_archive") is True and not str(value.get("editorial_note") or "").strip():
         return None
@@ -224,7 +237,7 @@ def refresh_media_only() -> int:
     policy = feed.setdefault("policy", {})
     policy["story_visual_source"] = "verified_story_manifest"
     policy["contextual_visual_disclosure_required"] = True
-    policy["synthetic_story_media_allowed"] = False
+    policy["synthetic_story_media_allowed"] = "illustration_only_when_depicts_real_scene_false"
     before_generated_at = feed.get("generated_at")
     write(OUT, feed)
     if feed.get("generated_at") != before_generated_at:
@@ -282,6 +295,10 @@ def self_test() -> int:
     assert resolve_story_visual({"visual": contextual}, {})["public_url"].endswith("context.jpg")
     assert verified_visual({**contextual, "editorial_note": ""}) is None
     assert verified_visual({**exact, "synthetic": True}) is None
+    safe_ai = {**exact, "synthetic": True, "depicts_real_scene": False, "rights_basis": "ai_generated_editorial"}
+    assert verified_visual(safe_ai) is not None
+    social_card = {**exact, "rights_basis": "original_editorial_layout", "kind": "editorial_card"}
+    assert verified_visual(social_card) is None
     assert verified_visual({"public_url": "https://example.test/no-proof.jpg"}) is None
     print("VÂLCEA CLAR live-feed publication + persisted-timestamp + verified-media handoff self-test: PASS")
     return 0
@@ -338,7 +355,7 @@ def main() -> int:
             "first_publication_timestamp_source": "archive_then_last_persisted_feed_then_reconciled_story_manifest",
             "story_visual_source": "verified_story_manifest_then_existing_snapshot_visual",
             "contextual_visual_disclosure_required": True,
-            "synthetic_story_media_allowed": False,
+            "synthetic_story_media_allowed": "illustration_only_when_depicts_real_scene_false",
         },
     }
     write(OUT, payload)
