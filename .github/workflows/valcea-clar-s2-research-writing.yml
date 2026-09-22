@@ -1,0 +1,27 @@
+name: VÂLCEA CLAR S2 Research & Writing
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "valcea-clar/research/s2_*"
+      - "valcea-clar/editorial/s2_format_examples.json"
+      - "valcea-clar/scripts/validate_s2_research_writing.py"
+      - ".github/workflows/valcea-clar-s2-research-writing.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-s2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Compile validator
+        run: python -m py_compile valcea-clar/scripts/validate_s2_research_writing.py
+      - name: Validate S2 acceptance contract
+        run: python valcea-clar/scripts/validate_s2_research_writing.py
