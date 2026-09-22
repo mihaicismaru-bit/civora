@@ -312,11 +312,12 @@
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 2,
+      "delivered": 3,
       "eligible": 7,
-      "value": 0.2857,
+      "value": 0.4286,
       "delivered_story_ids": [
         "calimanesti-restrictii-trotuare-20260922",
+        "tetoiu-otesani-incendii-20260921",
         "valcea-somaj-august-2026"
       ]
     },
@@ -339,20 +340,69 @@
       "status": "MEASURED",
       "value": 0,
       "workflow_dispatch_runs": [],
-      "automated_workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35725628963,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-22T12:10:35Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35725218120,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-22T12:06:20Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35724006536,
+          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
+          "created_at": "2026-09-22T11:53:40Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35714772169,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-22T10:13:15Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35713297903,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-22T09:57:29Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35705957695,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-22T08:39:01Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
       "manual_story_route_additions": [],
       "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "324b778aa314eeb34f0587046337047095b142c2",
-      "structural_baseline_at_utc": "2026-09-22T07:35:07Z",
+      "structural_baseline_sha": "0a86b462395dc229e14f64bbc32e4d46feb1a9aa",
+      "structural_baseline_at_utc": "2026-09-22T08:37:46Z",
       "structural_baseline_repository": "mihaicismaru-bit/civora",
       "structural_baseline_path": "civora_structural_paths",
       "structural_components": [
         {
-          "sha": "324b778aa314eeb34f0587046337047095b142c2",
-          "at_utc": "2026-09-22T07:35:07Z",
+          "sha": "0a86b462395dc229e14f64bbc32e4d46feb1a9aa",
+          "at_utc": "2026-09-22T08:37:46Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
@@ -364,7 +414,7 @@
           "source_sha": "6a28b61906e4963271b0eab8c6ee708a2e662b1e"
         }
       ],
-      "eligible_after_utc": "2026-09-24T07:35:07Z",
+      "eligible_after_utc": "2026-09-24T08:37:46Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
