@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "source": "AFIR",
+  "generatedAt": "2026-09-22T16:29:38.071004+00:00",
+  "policy": {
+    "purpose": "record-level-material-change-resolution",
+    "failClosed": true,
+    "materialFactsAutopromoted": false,
+    "lastKnownGoodPreservedUntilReconciled": true
+  },
+  "summary": {
+    "candidateCount": 1,
+    "unresolvedCount": 1,
+    "publishableMaterialFactCount": 0
+  },
+  "items": [
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+      "fingerprint": "b55e6e30d6cd2caa5ce80d23984c512796dd1f70702fe0d519d233b2fe9c871a",
+      "observedAt": "2026-09-22T16:29:26.948703+00:00",
+      "status": "OPEN",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": true,
+      "publishMaterialFacts": false,
+      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
+    }
+  ]
+}
