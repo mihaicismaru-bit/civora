@@ -74,7 +74,32 @@ def stable_hash(value: Any) -> str:
 
 
 def article_version(item: dict[str, Any]) -> str:
-    return stable_hash(item)[:16]
+    """Version the editorial product, not volatile recap/source metadata."""
+    product = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
+    product_fp = str(product.get("product_fingerprint_sha256") or "").strip().lower()
+    if len(product_fp) == 64 and all(ch in "0123456789abcdef" for ch in product_fp):
+        return product_fp[:16]
+
+    stable_sources = []
+    for src in item.get("sources") or []:
+        if not isinstance(src, dict):
+            continue
+        stable_sources.append({
+            "name": src.get("name"),
+            "url": src.get("url"),
+            "tier": src.get("tier"),
+        })
+    stable_payload = {
+        "headline": item.get("headline"),
+        "dek": item.get("dek"),
+        "paragraphs": item.get("paragraphs") or [],
+        "section": item.get("section"),
+        "material_fact_gate": item.get("material_fact_gate"),
+        "factbox": item.get("factbox") or [],
+        "article_sections": item.get("article_sections") or [],
+        "sources": stable_sources,
+    }
+    return stable_hash(stable_payload)[:16]
 
 
 def delivery_id(edition_id: str, article_id: str, version: str, channel: str) -> str:
@@ -597,7 +622,7 @@ def self_test() -> None:
         "self_test": "PASS",
         "invariants": [
             "dedupe", "monotonic_confirmation", "versioned_delivery",
-            "provider_snapshot_single_version_binding", "recap_delivery_truth_carryover", "legacy_pending_quarantine", "explicit_blockers"
+            "provider_snapshot_single_version_binding", "editorial_product_version_identity", "recap_delivery_truth_carryover", "legacy_pending_quarantine", "explicit_blockers"
         ],
     }))
 
