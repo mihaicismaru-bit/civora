@@ -136,6 +136,22 @@ def selected_channel_state(root: Path, channel: str, article_id: str) -> dict[st
         blocker = item.get("reason") or item.get("hold_reason")
         if status in {"hold", "blocked"}:
             return {"selected": True, "queue_status": "blocked", "blocker": blocker or status}
+
+        # Match the direct Threads adapter exactly: a current newsroom event
+        # with an explicit empty/new-story edge must never replay backlog.
+        event = read_json(root / "site/story_publication_event.json", {}) or {}
+        canonical_ids = event.get("new_story_ids")
+        if not isinstance(canonical_ids, list):
+            canonical_ids = event.get("story_ids")
+        if isinstance(canonical_ids, list):
+            wanted = {str(value) for value in canonical_ids if str(value).strip()}
+            if article_id not in wanted:
+                return {
+                    "selected": True,
+                    "queue_status": "blocked",
+                    "blocker": "threads_not_new_in_current_publication_event",
+                }
+
         return {"selected": True, "queue_status": "pending", "blocker": None}
 
     item = find_multi_outbox_item(outbox, article_id)
@@ -545,6 +561,23 @@ def self_test() -> None:
         assert rec("alpha", "threads")["status"] == "blocked"
         assert rec("alpha", "threads")["blocker"] == PRE_S1_BLOCKER
         assert rec("beta", "facebook")["status"] == "blocked"
+
+        # Threads direct publisher is event-edge based: an explicit empty
+        # new_story_ids list means no backlog replay, so S1 must record an
+        # explicit block rather than inventing a pending delivery.
+        write_json(root / "site/story_publication_event.json", {
+            "fingerprint": "event-empty-new-edge",
+            "story_ids": ["alpha"],
+            "new_story_ids": [],
+        })
+        threads_selection = selected_channel_state(root, "threads", "alpha")
+        assert threads_selection == {
+            "selected": True,
+            "queue_status": "blocked",
+            "blocker": "threads_not_new_in_current_publication_event",
+        }
+        (root / "site/story_publication_event.json").unlink()
+
         assert first["complete"] is True
         assert first["fully_delivered"] is False
 
@@ -622,7 +655,7 @@ def self_test() -> None:
         "self_test": "PASS",
         "invariants": [
             "dedupe", "monotonic_confirmation", "versioned_delivery",
-            "provider_snapshot_single_version_binding", "editorial_product_version_identity", "recap_delivery_truth_carryover", "legacy_pending_quarantine", "explicit_blockers"
+            "provider_snapshot_single_version_binding", "editorial_product_version_identity", "recap_delivery_truth_carryover", "threads_event_no_replay_alignment", "legacy_pending_quarantine", "explicit_blockers"
         ],
     }))
 
