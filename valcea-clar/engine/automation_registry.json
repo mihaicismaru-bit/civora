@@ -1,5 +1,5 @@
 {
-  "schema_version": 13,
+  "schema_version": 14,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -410,6 +410,32 @@
         "valcea-clar/site/runtime/localitati",
         "valcea-clar/site/runtime/corectii/registru",
         "valcea-clar/site/runtime/rss.xml",
+        "valcea-clar/site/public_ux_state.json"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "s5_distinctive_products",
+      "kind": "reader_facing_clarification_verified_venue_and_dossier_products",
+      "workflow": ".github/workflows/valcea-clar-s5-distinctive-products.yml",
+      "schedule": [],
+      "event_driven": true,
+      "triggers": [
+        "distinctive_product_contract_change",
+        "canonical_public_ux_rebuild"
+      ],
+      "publication_authority": "presentation_only",
+      "content_rewrite_allowed": false,
+      "new_material_fact_authority": false,
+      "canonical_inputs": [
+        "valcea-clar/site/story_archive.json",
+        "valcea-clar/editorial/s2_format_examples.json",
+        "valcea-clar/web/unde-iesim.json"
+      ],
+      "writes": [
+        "valcea-clar/site/runtime/clarificam",
+        "valcea-clar/site/runtime/unde-iesim/verificat",
+        "valcea-clar/site/runtime/dosare",
         "valcea-clar/site/public_ux_state.json"
       ],
       "owner": "site_engine"

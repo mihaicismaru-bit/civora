@@ -398,6 +398,8 @@ def apply(*, nav: dict[str,Any], stories: list[dict[str,Any]], live_ids: set[str
         "explicit_update_timestamps_only":True,
     }
     write_json(STATE,state)
+    import s5_distinctive_products as s5
+    state=s5.apply(nav=nav,stories=stories,live_ids=live_ids,shell=shell)
     return state
 
 
