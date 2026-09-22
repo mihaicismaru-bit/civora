@@ -1,5 +1,5 @@
 {
-  "schema_version": 11,
+  "schema_version": 12,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -349,6 +349,25 @@
         "valcea-clar/delivery/manifest.json",
         "valcea-clar/delivery/queue.json",
         "valcea-clar/delivery/report.json"
+      ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "s2_research_writing_acceptance",
+      "kind": "manual_and_pr_only_research_writing_contract_validation",
+      "workflow": ".github/workflows/valcea-clar-s2-research-writing.yml",
+      "schedule": [],
+      "event_driven": false,
+      "triggers": [
+        "workflow_dispatch",
+        "pull_request"
+      ],
+      "publication_authority": "none",
+      "repository_state_write_allowed": false,
+      "validates": [
+        "valcea-clar/research/s2_priority_sources.json",
+        "valcea-clar/research/s2_editorial_agenda_2026-09-22.json",
+        "valcea-clar/editorial/s2_format_examples.json"
       ],
       "owner": "site_engine"
     }
