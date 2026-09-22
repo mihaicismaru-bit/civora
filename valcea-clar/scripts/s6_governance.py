@@ -198,13 +198,15 @@ def audit()->dict[str,Any]:
 def persist(doc:dict[str,Any])->bool:
     old=load(STATE,{}) or {}
     changed=old.get("material_fingerprint_sha256")!=doc.get("material_fingerprint_sha256")
-    if not changed:
+    log_missing_or_empty=not AUDIT_LOG.is_file() or not AUDIT_LOG.read_text(encoding="utf-8").strip()
+    if not changed and not log_missing_or_empty:
         return False
     OPS.mkdir(parents=True,exist_ok=True)
-    STATE.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    if changed:
+        STATE.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     event={
       "at":doc["observed_at"],
-      "event":"material_governance_state_change",
+      "event":"material_governance_state_change" if changed else "material_governance_state_bootstrap",
       "status":doc["status"],
       "fingerprint":doc["material_fingerprint_sha256"],
       "blocker_codes":[x["code"] for x in doc.get("blockers") or []],

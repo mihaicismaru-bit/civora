@@ -110,6 +110,7 @@ jobs:
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
+            git clean -fd
             python valcea-clar/scripts/s6_governance.py --audit --persist --output /tmp/valcea-clar-s6-governance.json
             git add valcea-clar/ops/governance_state.json valcea-clar/ops/audit_log.jsonl
             if git diff --cached --quiet; then
