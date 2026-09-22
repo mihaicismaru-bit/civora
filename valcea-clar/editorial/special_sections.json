@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR special editorial sections",
   "execution_owner": "CIVORA_SITE_ENGINE",
@@ -20,7 +20,13 @@
       "public_label": "Investigații",
       "route": "/investigatii/",
       "status": "CANONICAL_BACKEND_READY_PUBLIC_WHEN_CONTENT_EXISTS",
-      "content_types": ["investigation", "ancheta", "document_explainer", "follow_the_money", "ownership_and_influence_map"],
+      "content_types": [
+        "investigation",
+        "ancheta",
+        "document_explainer",
+        "follow_the_money",
+        "ownership_and_influence_map"
+      ],
       "homepage_mode": "feature_only_when_publishable",
       "navigation_mode": "show_only_after_first_publishable_item",
       "requirements": {
@@ -31,14 +37,22 @@
         "monitor_progress_report_forbidden": true,
         "incomplete_dossier_publication_forbidden": true
       },
-      "existing_backend_paths": ["valcea-clar/investigations/"]
+      "existing_backend_paths": [
+        "valcea-clar/investigations/"
+      ]
     },
     {
       "id": "satira",
       "public_label": "Satiră",
       "route": "/satira/",
       "status": "CANONICAL_BACKEND_READY_PUBLIC_WHEN_CONTENT_EXISTS",
-      "content_types": ["meme", "gluma_editoriala", "pamflet", "satirical_card", "short_satirical_video"],
+      "content_types": [
+        "meme",
+        "gluma_editoriala",
+        "pamflet",
+        "satirical_card",
+        "short_satirical_video"
+      ],
       "homepage_mode": "occasional_native_module",
       "navigation_mode": "show_only_after_first_publishable_item",
       "requirements": {
@@ -51,8 +65,56 @@
         "platform_native_social_variants": true
       },
       "editorial_tone": {
-        "allowed": ["dry_humor", "absurdity_of_verified_local_bureaucracy", "visual_wordplay", "self_deprecating_local_humor", "document_based_satire"],
-        "forbidden": ["defamation_by_insinuation", "fabricated_scandal", "humiliation_of_private_people", "rage_bait", "fake_breaking_news"]
+        "allowed": [
+          "dry_humor",
+          "absurdity_of_verified_local_bureaucracy",
+          "visual_wordplay",
+          "self_deprecating_local_humor",
+          "document_based_satire"
+        ],
+        "forbidden": [
+          "defamation_by_insinuation",
+          "fabricated_scandal",
+          "humiliation_of_private_people",
+          "rage_bait",
+          "fake_breaking_news"
+        ]
+      }
+    },
+    {
+      "id": "clarificam",
+      "public_label": "Clarificăm",
+      "route": "/clarificam/",
+      "status": "PUBLIC_OPERATIONAL",
+      "content_types": [
+        "clarification",
+        "source_limit_explainer",
+        "verified_data_explainer"
+      ],
+      "homepage_mode": "distinctive_product_module",
+      "navigation_mode": "always_when_product_has_published_items",
+      "requirements": {
+        "canonical_published_story": true,
+        "source_limits_visible": true,
+        "true_false_scoring_required": false,
+        "new_material_fact_creation_forbidden": true
+      }
+    },
+    {
+      "id": "dosare",
+      "public_label": "Dosare",
+      "route": "/dosare/",
+      "status": "PUBLIC_OPERATIONAL",
+      "content_types": [
+        "dossier_index",
+        "documented_longform"
+      ],
+      "homepage_mode": "distinctive_product_module",
+      "navigation_mode": "always_when_product_has_published_items",
+      "requirements": {
+        "canonical_published_story": true,
+        "complete_source_list_remains_on_canonical_story": true,
+        "incomplete_monitor_publication_forbidden": true
       }
     }
   ]
