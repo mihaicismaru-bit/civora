@@ -196,6 +196,7 @@ def story_feed(snapshot: dict) -> list[dict]:
             "path": route.get("path"),
             "canonical_url": route.get("canonical"),
             "sources": item.get("sources", []),
+            "editorial_product": item.get("editorial_product") or None,
             "visual": resolve_story_visual(item, route),
             "first_published_at": first_published_at,
         })
