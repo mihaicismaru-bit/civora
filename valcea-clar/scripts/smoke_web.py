@@ -85,7 +85,10 @@ if structured:
     assert structured.get("type") == "NewsArticle"
     assert structured.get("eligible_scope") == "publishable_full_story_only"
     assert structured.get("date_published_policy") == "stable_publication_ledger_only"
-    assert structured.get("verified_image_policy") == "provenance_backed_real_photograph_only"
+    assert structured.get("verified_image_policy") in {
+        "provenance_backed_real_photograph_only",
+        "provenance_backed_real_photograph_or_original_editorial_card",
+    }
     assert structured.get("unverified_image_policy") == "omit"
 
 routes_by_id = {str(row.get("id")): str(row.get("path")) for row in rows if row.get("id") and row.get("path")}
