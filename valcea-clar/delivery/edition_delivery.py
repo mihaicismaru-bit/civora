@@ -313,6 +313,9 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
                     if inherited_status == "delivered" and inherited.get("confirmation")
                     else None
                 )
+                if inherited_confirmation:
+                    inherited_confirmation["bound_content_version"] = article["content_version"]
+                    inherited_confirmation["migrated_from_delivery_id"] = inherited.get("delivery_id")
                 record = {
                     "delivery_id": did,
                     "edition_id": manifest["edition_id"],
