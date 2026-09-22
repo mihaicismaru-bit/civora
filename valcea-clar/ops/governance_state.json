@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR",
+  "stage": "S6_OPERATIONS_GOVERNANCE",
+  "observed_at": "2026-09-22T13:17:15+00:00",
+  "material_fingerprint_sha256": "ad10fa6f0920525697e31998f1fe79fdc965e07c9abb764e566e404162777f8e",
+  "policy_version": "1.0",
+  "status": "READY_WITH_KNOWN_LIMITATIONS",
+  "blockers": [],
+  "warnings": [
+    {
+      "code": "KNOWN_CHANNEL_MEDIA_BACKLOG",
+      "summary": "S1 has explicit blocked channel deliveries",
+      "evidence": {
+        "delivered": 160,
+        "pending": 0,
+        "blocked": 220,
+        "cancelled": 0,
+        "other": 0
+      }
+    },
+    {
+      "code": "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION",
+      "summary": "Historical correction migration is intentionally not claimed complete"
+    }
+  ],
+  "checks": {
+    "governance_policy": {
+      "automatic_rollback_forbidden": true,
+      "holds_fail_closed": true,
+      "material_corrections_visible": true
+    },
+    "automation_registry": {
+      "required_jobs": 9,
+      "missing": []
+    },
+    "chatgpt_boundary": {
+      "ok": true
+    },
+    "publication_holds": {
+      "count": 5,
+      "unsafe": []
+    },
+    "s1_delivery": {
+      "edition_id": "2026-09-22-morning",
+      "complete": true,
+      "fully_delivered": false,
+      "counts": {
+        "delivered": 160,
+        "pending": 0,
+        "blocked": 220,
+        "cancelled": 0,
+        "other": 0
+      }
+    },
+    "s3_visuals": {
+      "stories_ready": 8,
+      "assets": 16
+    },
+    "s4_publication_experience": {
+      "status": "OPERATIONAL",
+      "rss": "/rss.xml",
+      "correction_register": "/corectii/registru/"
+    },
+    "s5_distinctive_products": {
+      "status": "OPERATIONAL",
+      "clarification_products": 2,
+      "verified_venue_cards": 8,
+      "dossiers": 1
+    },
+    "corrections": {
+      "material_public": true,
+      "silent_rewrite_forbidden": true,
+      "historical_migration_complete": false
+    },
+    "incidents": {
+      "open": 0,
+      "ids": []
+    },
+    "rollback_baseline": {
+      "id": "S6-LKG-2026-09-22-S5",
+      "commit": "73a2d6235be8a6fee418d31bfb068027c3c38b23",
+      "valid": true
+    },
+    "public_runtime": {
+      "edition_id": "2026-09-22-morning",
+      "story_routes": 103,
+      "ux_routes": 137,
+      "safe_story_count": 103
+    }
+  },
+  "lkg": {
+    "id": "S6-LKG-2026-09-22-S5",
+    "commit": "73a2d6235be8a6fee418d31bfb068027c3c38b23",
+    "valid": true
+  }
+}
