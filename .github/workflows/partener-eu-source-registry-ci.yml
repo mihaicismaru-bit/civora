@@ -133,12 +133,15 @@ jobs:
         run: python partener-eu/ops/test_regiocentru_actions_fetch.py
 
       - name: Capture live RegioCentru action-index evidence without changing facts
+        id: regiocentru_live
+        continue-on-error: true
         run: |
           python partener-eu/ingest/regiocentru_actions_fetch.py \
             --output-dir /tmp/regiocentru-actions \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
       - name: Validate live RegioCentru receipt stays discovery-only
+        if: steps.regiocentru_live.outcome == 'success'
         run: |
           python - <<'PY'
           import json, string, sys
@@ -176,6 +179,29 @@ jobs:
               print('FAIL RegioCentru exact-call proof requirements incomplete:', sorted(missing))
               sys.exit(2)
           print(json.dumps({'candidate_count': d.get('action_candidate_count'), 'raw_sha256': raw_hash, 'observation_state': d.get('observation_state'), 'publish_authorized': d.get('publish_authorized')}, ensure_ascii=False))
+          PY
+
+      - name: Confirm RegioCentru transport failure stays fail-closed
+        if: steps.regiocentru_live.outcome == 'failure'
+        run: |
+          python - <<'PY'
+          import json, sys
+          p='partener-eu/ingest/regiocentru_actions_source.json'
+          d=json.load(open(p, encoding='utf-8'))
+          s=d.get('source') or {}
+          if s.get('id') != 'SRC-ADR-CENTRU-PR-ACTIONS':
+              print('FAIL RegioCentru source identity drift')
+              sys.exit(2)
+          if s.get('material_fact_use') is not False or s.get('authority_scope') != 'CALL_INDEX_DISCOVERY' or s.get('observation_state') != 'CALL_INDEX_DISCOVERY':
+              print('FAIL RegioCentru transport failure is not bounded to discovery-only:', s)
+              sys.exit(2)
+          print(json.dumps({
+              'status': 'DEGRADED_FAIL_CLOSED',
+              'source_id': s.get('id'),
+              'material_fact_use': s.get('material_fact_use'),
+              'authority_scope': s.get('authority_scope'),
+              'publication_effect': 'NONE'
+          }, ensure_ascii=False))
           PY
 
       - name: Upload bounded RegioCentru acquisition evidence
