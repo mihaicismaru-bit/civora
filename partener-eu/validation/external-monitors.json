@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-09-22T10:24:25Z",
-  "validation_run_started": "2026-09-22T10:24:03Z",
+  "observed_at": "2026-09-22T10:28:19Z",
+  "validation_run_started": "2026-09-22T10:27:58Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "44deb03b36cfb543462f7f3c9e05cc2012324e7532193497164bb176566ad68c",
-    "history_sha256": "44deb03b36cfb543462f7f3c9e05cc2012324e7532193497164bb176566ad68c",
-    "history_path": "validation/history/20260922T102403Z.json",
+    "latest_sha256": "d10a8ae498683217ba8322867abd8fd721afb84ff0dc05252e84dd372de0032d",
+    "history_sha256": "d10a8ae498683217ba8322867abd8fd721afb84ff0dc05252e84dd372de0032d",
+    "history_path": "validation/history/20260922T102758Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "19cf0823f95cc341464f631d70056efc6ad88e8a4bd22f4830b04f1290bf109e",
-    "checkpoint_sha256": "19cf0823f95cc341464f631d70056efc6ad88e8a4bd22f4830b04f1290bf109e",
+    "source_state_sha256": "f99e2f4172a022eb8f5322165e09a9dabe9b861a9b8fc8032a6f86e737ccc179",
+    "checkpoint_sha256": "f99e2f4172a022eb8f5322165e09a9dabe9b861a9b8fc8032a6f86e737ccc179",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-09-22T05:10:15.220420Z",
-    "age_seconds": 18849,
+    "age_seconds": 19083,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -61,218 +61,14 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-09-11T04:59:32.353310+00:00",
-    "status": "PASS",
+    "observed_at": "2026-09-22T10:27:04.275423+00:00",
+    "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "item_count": 32,
-    "error_count": 41,
+    "error_count": 5,
     "hash_change_candidates": 0,
     "material_signal_candidates": 0,
-    "auth_dependency_count": 29,
-    "auth_dependencies": [
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn",
-        "sourcePage": "https://www.afir.ro/info-la-zi/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fsesiuni%2Fsesiuni-primire-proiecte%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fsesiuni%2Fdetalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/instrumente/sesiuni/detalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicare%2Futile%2Fdezbatere-publica%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Fexploatatii-agricole%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/exploatatii-agricole/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Fprocesare-agricola%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/procesare-agricola/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Fpomicultura%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/pomicultura/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Fgrupuri-de-producatori%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/grupuri-de-producatori/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Finvestalim%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/investalim/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-agricultura%2Ffondul-pentru-modernizare%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-agricultura/fondul-pentru-modernizare/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-mediul-rural%2Futilitate-publica%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-mediul-rural/utilitate-publica/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-mediul-rural%2Flicee-agricole%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-mediul-rural/licee-agricole/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-mediul-rural%2Fexploatatii-forestiere%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-mediul-rural/exploatatii-forestiere/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ffinantare-in-mediul-rural%2Fmediu-si-clima%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/finantare-in-mediul-rural/mediu-si-clima/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fleader%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/leader/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fmasuri-de-sprijin-sm171%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/masuri-de-sprijin-sm171/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Ftransfer-de-cunostinte-dr37%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/transfer-de-cunostinte-dr37/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fetape-accesare-fonduri-europene%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/etape-accesare-fonduri-europene/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fnomenclator%2Ffirme-de-consultanta%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/instrumente/nomenclator/firme-de-consultanta/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fcontor-fonduri-disponibile%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Ffinantare%2Fmasuri-atipice-sm-192%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/finantare/masuri-atipice-sm-192/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Fsesiuni%2Farhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/instrumente/sesiuni/arhiva-anunturilor-de-primire-a-proiectelor-aferente-perioadei-2023-2027/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Finstrumente-de-lucru%2Fproceduri-alte-programe-de-finantare%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/instrumente/instrumente-de-lucru/proceduri-alte-programe-de-finantare/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finstrumente%2Finstrumente-de-lucru%2Ftipizate-si-formulare-alte-programe-de-finantare%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fraport-evaluare-schema-de-energie-sesiunea-2026-solar-peste-1-mw%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/raport-evaluare-schema-de-energie-sesiunea-2026-solar-peste-1-mw/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fversiunea-consultativa-a-ghidului-solicitantului-dr-31%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/versiunea-consultativa-a-ghidului-solicitantului-dr-31/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Factualizare-cerere-de-finantare-dr-14%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/actualizare-cerere-de-finantare-dr-14/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fdomenii-de-interventie%2Fdetalii-si-anexe-dr-14%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-14/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      }
-    ],
+    "auth_dependency_count": 0,
+    "auth_dependencies": [],
     "resolution_task_required": false,
     "resolution_task_present_fail_closed": true,
     "material_facts_auto_promoted": false
