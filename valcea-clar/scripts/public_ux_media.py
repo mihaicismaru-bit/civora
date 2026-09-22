@@ -33,6 +33,31 @@ def load_json(path: Path, default: Any) -> Any:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def site_media_eligible(media: object) -> bool:
+    if not isinstance(media, dict):
+        return False
+    if media.get("provenance_status") != "VERIFIED" or not media.get("public_url"):
+        return False
+    fields = [
+        media.get("kind"), media.get("media_role"), media.get("rights_basis"),
+        media.get("public_url"), media.get("relative_url"), media.get("credit"),
+        media.get("editorial_note"), media.get("alt_text"),
+    ]
+    haystack = " ".join(str(value or "").lower() for value in fields)
+    blocked = (
+        "editorial_card", "editorial card", "card editorial",
+        "social_card", "social card", "original_editorial_layout",
+        "/social/editorial/", "social/editorial",
+    )
+    if any(token in haystack for token in blocked):
+        return False
+    if media.get("synthetic") is True and media.get("depicts_real_scene") is not False:
+        return False
+    if media.get("contextual_archive") is True and not str(media.get("editorial_note") or "").strip():
+        return False
+    return True
+
+
 def exact_media_index() -> dict[str, dict[str, Any]]:
     doc = load_json(STORY_MANIFEST, {"stories": []})
     out: dict[str, dict[str, Any]] = {}
@@ -40,7 +65,7 @@ def exact_media_index() -> dict[str, dict[str, Any]]:
         if not isinstance(row, dict) or not row.get("id"):
             continue
         image = row.get("image") if isinstance(row.get("image"), dict) else None
-        if image and image.get("provenance_status") == "VERIFIED" and image.get("public_url"):
+        if site_media_eligible(image):
             item = copy.deepcopy(image)
             item["media_role"] = "exact_story_media"
             out[str(row["id"])] = item
@@ -64,7 +89,7 @@ def contextual_index(exact: dict[str, dict[str, Any]]) -> dict[str, dict[str, An
             if note:
                 item["editorial_note"] = note
             item["contextual_archive"] = True
-        if item.get("provenance_status") != "VERIFIED" or not item.get("public_url"):
+        if not site_media_eligible(item):
             continue
         item["media_role"] = "explicit_contextual_media"
         item["contextual_archive"] = True
@@ -219,7 +244,7 @@ def main() -> int:
         return 0
     state = base.build()
     validate_media_projection()
-    print(json.dumps({"status": "PASS", "stories": state["safe_story_count"], "live": state["live_story_count"], "media": "verified_photo_editorial_card_or_explicit_contextual"}, ensure_ascii=False))
+    print(json.dumps({"status": "PASS", "stories": state["safe_story_count"], "live": state["live_story_count"], "media": "site_eligible_verified_visual_or_explicit_contextual_no_social_cards"}, ensure_ascii=False))
     return 0
 
 

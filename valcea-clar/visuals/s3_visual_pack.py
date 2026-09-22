@@ -3,9 +3,10 @@
 
 Creates original newsroom graphics from already verified story text. These are
 editorial layouts, not photographs and not synthetic depictions of real scenes.
-They may be used as site/OpenGraph images and as a source for channel-native
-cards. TikTok remains fail-closed unless current subject media is independently
-available.
+They are social-distribution products only (Facebook/Instagram/OpenGraph where
+the channel pack calls for a card) and MUST NOT be projected as visible site
+article/homepage media. TikTok remains fail-closed unless current subject media
+is independently available.
 """
 from __future__ import annotations
 import argparse, hashlib, json, textwrap
@@ -104,6 +105,7 @@ def render_card(story:dict[str,Any],brief:dict[str,Any],size:tuple[int,int],suff
     sources=[str(s.get("url")) for s in story.get("sources",[]) if isinstance(s,dict) and str(s.get("url") or "").startswith("http")]
     return {
       "kind":"editorial_card","synthetic":False,"ai_generated":False,"depicts_real_scene":False,
+      "site_visible":False,"distribution_role":"social_only",
       "story_id":story["id"],"concept":brief.get("concept"),"variant":suffix,
       "filename":filename,"public_url":PUBLIC_BASE+filename,"relative_url":"/media/social/editorial/s3/"+filename,
       "sha256":sha256(path),"bytes":path.stat().st_size,"rights_basis":"original_editorial_layout",
@@ -136,6 +138,7 @@ def build()->dict[str,Any]:
       "publication_authority":"none","generated_from":"current verified edition",
       "policy":{
         "cards_are_photographs":False,"cards_depict_real_scene":False,
+        "cards_visible_on_site":False,"cards_social_only":True,
         "fake_documentary_imagery_forbidden":True,"provenance_required":True,
         "tiktok_current_subject_media_required":True
       },

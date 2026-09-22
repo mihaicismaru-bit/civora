@@ -329,8 +329,8 @@ def main() -> int:
         if media is not None:
             media["kind"] = "photograph"
             media["media_role"] = "verified_story_photograph"
-        else:
-            media = resolve_s3_editorial_card(story_id)
+        # S3 editorial cards are social products only. Missing eligible site media
+        # renders text-only until a verified site visual is assigned.
         target = RUNTIME / route.strip("/") / "index.html"
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(page(item, str(doc.get("updated_local") or ""), stories, published_at, media), encoding="utf-8")
@@ -377,7 +377,7 @@ def main() -> int:
                 "type": "NewsArticle",
                 "eligible_scope": "publishable_full_story_only",
                 "date_published_policy": "stable_publication_ledger_only",
-                "verified_image_policy": "provenance_backed_real_photograph_or_original_editorial_card",
+                "verified_image_policy": "provenance_backed_site_visual_only_no_social_cards",
                 "unverified_image_policy": "omit",
             },
             "cross_linking": {
@@ -398,7 +398,7 @@ def main() -> int:
         "newsarticle_jsonld": len(routes),
         "date_published": dated_count,
         "provenance_backed_images": media_count,
-        "s3_editorial_cards": sum(1 for row in routes if (row.get("image") or {}).get("kind") == "editorial_card"),
+        "s3_editorial_cards_on_site": 0,
         "cross_links": cross_link_count,
         "routes": routes,
         "indexing_routes": indexing["route_count"],

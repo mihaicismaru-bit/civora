@@ -1,0 +1,148 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-22T16:15:00+03:00",
+  "purpose": "Backfill site-visible media without editorial/social cards.",
+  "policy": {
+    "social_cards_visible_on_site": false,
+    "text_only_allowed_until_eligible_visual": true,
+    "generic_substitution_forbidden": true,
+    "preferred_order": [
+      "exact_real_photo",
+      "official_or_press_asset_with_rights",
+      "document_or_screenshot",
+      "map_or_data_visual",
+      "ai_editorial_illustration"
+    ],
+    "ai_rule": "synthetic=true; depicts_real_scene=false; no fake documentary imagery"
+  },
+  "items": [
+    {
+      "priority": 1,
+      "story_id": "calimanesti-restrictii-trotuare-20260922",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "MAP_OR_ROAD_SCHEMATIC",
+      "note": "Use exact DN7 sector 190+650–191+050 or a rights-cleared specific works image; no generic Călimănești photo."
+    },
+    {
+      "priority": 2,
+      "story_id": "valcea-somaj-august-2026",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "DATA_VISUAL",
+      "note": "Visualize 4,214 registered unemployed; rural 2,768 vs urban 1,446; label as data visualization."
+    },
+    {
+      "priority": 3,
+      "story_id": "tetoiu-otesani-incendii-20260921",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "MAP_OR_DATA_VISUAL",
+      "note": "Show reported affected areas (Tetoiu ~35–40 ha; Oteșani ~10 ha); do not synthesize a fake fire photograph."
+    },
+    {
+      "priority": 4,
+      "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "EXACT_RIGHTS_CLEARED_OR_AI_ILLUSTRATION",
+      "note": "Avoid identifiable minors unless rights/privacy are clear. AI must be clearly illustrative and not a real-scene depiction."
+    },
+    {
+      "priority": 5,
+      "story_id": "scm-valcea-fc-bihor-20260920",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_CONTEXTUAL_PHOTO",
+      "note": "Stadionul Municipal, 2016, CC BY-SA 4.0; disclosed as archive/context, not match photo."
+    },
+    {
+      "priority": 6,
+      "story_id": "ramnicu-valcea-floarea-darurilor-20260926",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "VENUE_OR_OFFICIAL_ASSET_WITH_RIGHTS_OR_AI_ILLUSTRATION",
+      "note": "Prefer exact Sala Lahovari venue/official asset with reusable rights; otherwise editorial AI illustration."
+    },
+    {
+      "priority": 7,
+      "story_id": "calimanesti-concurs-contabil-sef-20260921",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "DOCUMENT_LED",
+      "note": "Prefer official announcement/document screenshot or tightly cropped institutional document, not generic town photo."
+    },
+    {
+      "priority": 8,
+      "story_id": "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "OFFICIAL_OR_DOCUMENT_LED"
+    },
+    {
+      "priority": 9,
+      "story_id": "rm-valcea-hcl-345-20260916",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_INSTITUTION_CONTEXT"
+    },
+    {
+      "priority": 10,
+      "story_id": "rm-valcea-hcl-344-20260916",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_INSTITUTION_CONTEXT"
+    },
+    {
+      "priority": 11,
+      "story_id": "rm-valcea-hcl-343-20260916",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_INSTITUTION_CONTEXT"
+    },
+    {
+      "priority": 12,
+      "story_id": "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "OFFICIAL_OR_DOCUMENT_LED"
+    },
+    {
+      "priority": 13,
+      "story_id": "auto-raliul-valcii-official-news-f6e28bbb1533",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "OFFICIAL_EVENT_ASSET_WITH_RIGHTS_OR_MAP"
+    },
+    {
+      "priority": 14,
+      "story_id": "fast-ipj-retinuta-pentru-24-de-ore1788941100-c8f452db47",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "OFFICIAL_OR_DOCUMENT_LED"
+    },
+    {
+      "priority": 15,
+      "story_id": "fast-ipj-actiuni-pentru-siguranta-rutiera-in-judetul-valcea-4a4010226d",
+      "status": "NEEDS_SITE_VISUAL",
+      "strategy": "OFFICIAL_OR_DOCUMENT_LED"
+    },
+    {
+      "priority": 16,
+      "story_id": "ocnele-mari-salina-program-septembrie-20260907",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_CONTEXTUAL_PHOTO",
+      "note": "Ocnele Mari salt mine, 2023, CC BY-SA 4.0; disclosed as context."
+    },
+    {
+      "priority": 17,
+      "story_id": "rm-valcea-hcl-342-20260831",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_INSTITUTION_CONTEXT"
+    },
+    {
+      "priority": 18,
+      "story_id": "rm-valcea-hcl-341-20260831",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_INSTITUTION_CONTEXT"
+    },
+    {
+      "priority": 19,
+      "story_id": "rm-valcea-hcl-340-20260831",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_INSTITUTION_CONTEXT"
+    },
+    {
+      "priority": 20,
+      "story_id": "rm-valcea-hcl-339-20260831",
+      "status": "BACKFILLED_CONTEXTUAL_PHOTO",
+      "strategy": "VERIFIED_INSTITUTION_CONTEXT"
+    }
+  ]
+}
