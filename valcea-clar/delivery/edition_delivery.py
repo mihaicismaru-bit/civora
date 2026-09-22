@@ -234,24 +234,48 @@ def existing_records(root: Path) -> list[dict[str, Any]]:
     return [r for r in records if isinstance(r, dict)]
 
 
+def edition_article_version(root: Path, edition_id: str, article_id: str) -> str | None:
+    """Recompute the stable editorial version from a historical recap.
+
+    This is also the migration bridge for S1 records written before the stable
+    editorial-product version identity existed.
+    """
+    edition = read_json(root / "editions" / f"{edition_id}.json", {}) or {}
+    for item in edition.get("items", []):
+        if isinstance(item, dict) and str(item.get("id", "")) == article_id:
+            return article_version(item)
+    return None
+
+
 def prior_terminal_record(
-    records: list[dict[str, Any]], article_id: str, content_version: str, channel: str, edition_id: str
+    root: Path,
+    records: list[dict[str, Any]],
+    article_id: str,
+    content_version: str,
+    channel: str,
+    edition_id: str,
 ) -> dict[str, Any] | None:
     """Carry story-version delivery truth across recap editions.
 
-    Editions are recap snapshots, not delivery identities. A new recap must not
-    manufacture a fresh pending delivery for the exact same story version and
-    channel. Prefer a prior delivered receipt; otherwise preserve an explicit
-    blocked state. Pending records are intentionally not inherited.
+    For legacy records, compare against a recomputed stable version of the
+    historical edition item instead of trusting the obsolete stored hash.
     """
-    candidates = [
-        r for r in records
-        if r.get("edition_id") != edition_id
-        and r.get("article_id") == article_id
-        and r.get("content_version") == content_version
-        and r.get("channel") == channel
-        and r.get("status") in {"delivered", "blocked"}
-    ]
+    candidates: list[dict[str, Any]] = []
+    for record in records:
+        prior_edition = str(record.get("edition_id") or "")
+        if (
+            not prior_edition
+            or prior_edition == edition_id
+            or record.get("article_id") != article_id
+            or record.get("channel") != channel
+            or record.get("status") not in {"delivered", "blocked"}
+        ):
+            continue
+        stored_match = record.get("content_version") == content_version
+        historical_match = edition_article_version(root, prior_edition, article_id) == content_version
+        if stored_match or historical_match:
+            candidates.append(record)
+
     delivered = [r for r in candidates if r.get("status") == "delivered"]
     if delivered:
         return delivered[-1]
@@ -275,6 +299,7 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             record = by_id.get(did)
             if record is None:
                 inherited = prior_terminal_record(
+                    root,
                     records,
                     article["article_id"],
                     article["content_version"],
@@ -655,7 +680,7 @@ def self_test() -> None:
         "self_test": "PASS",
         "invariants": [
             "dedupe", "monotonic_confirmation", "versioned_delivery",
-            "provider_snapshot_single_version_binding", "editorial_product_version_identity", "recap_delivery_truth_carryover", "threads_event_no_replay_alignment", "legacy_pending_quarantine", "explicit_blockers"
+            "provider_snapshot_single_version_binding", "editorial_product_version_identity", "legacy_version_recompute_bridge", "recap_delivery_truth_carryover", "threads_event_no_replay_alignment", "legacy_pending_quarantine", "explicit_blockers"
         ],
     }))
 
