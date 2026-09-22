@@ -189,6 +189,43 @@ def write_resolution_task(src, old_hash, new_hash, observed_at):
     p.write_text(json.dumps(task, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def close_reverted_resolution_task(src, baseline_hash, observed_hash, observed_at):
+    """Close only a stale OPEN task whose candidate reverted exactly to baseline.
+
+    This changes no material fact. It preserves the candidate hash as audit
+    evidence and records that publication remained fail-closed.
+    """
+    if not baseline_hash or observed_hash != baseline_hash:
+        return False
+    p = TASK_DIR / f"{src['id']}.json"
+    if not p.exists():
+        return False
+    try:
+        task = json.loads(p.read_text(encoding="utf-8"))
+    except Exception:
+        return False
+    if task.get("status") != "OPEN":
+        return False
+
+    previous = task.get("previous_semantic_sha256") or task.get("baseline_semantic_sha256")
+    candidate = task.get("current_semantic_sha256") or task.get("candidate_semantic_sha256")
+    if previous != baseline_hash or not candidate or candidate == baseline_hash:
+        return False
+
+    task["status"] = "RESOLVED_REVERTED_TO_BASELINE"
+    task["resolved_at"] = observed_at
+    task["resolution_reason"] = (
+        "Observed semantic hash returned exactly to the recorded canonical baseline; "
+        "no material fact update was authorized."
+    )
+    task["material_fact_autoupdate_allowed"] = False
+    task["automatic_material_fact_update_allowed"] = False
+    task["material_fact_action"] = "NONE"
+    task["publish_authorized"] = False
+    p.write_text(json.dumps(task, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return True
+
+
 def main():
     registry = json.loads(REGISTRY.read_text(encoding="utf-8"))
     previous = {}
@@ -244,6 +281,8 @@ def main():
                 row["quarantined"] = False
                 if row["resolution_task_required"]:
                     write_resolution_task(src, baseline_hash, new_hash, observed_at)
+                else:
+                    close_reverted_resolution_task(src, baseline_hash, new_hash, observed_at)
         except Exception as exc:
             failures = int(old.get("consecutive_failures") or 0) + 1
             row.update({
