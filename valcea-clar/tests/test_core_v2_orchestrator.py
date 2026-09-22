@@ -6,183 +6,137 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1] / "core_v2"
 sys.path.insert(0, str(ROOT))
 
-import test_core_v2_orchestrator_run94 as frozen
 from orchestrator import (
     bounded_cycle_plan,
     _article_truth_stage_ownership_snapshot,
     _article_integrity_stage_ownership_snapshot,
-    _owned_article_truth_stages,
-    _LEGACY_PLAN,
+    _promoted_claim_contract_stage_ownership_snapshot,
+    _owned_promoted_claim_contract_stages,
+    _fact_kernel_stage_ownership_snapshot,
+    _promoted_claim_projection_stage_ownership_snapshot,
+    _promoted_claim_consumption_stage_ownership_snapshot,
+    _writer_stage_ownership_snapshot,
 )
 
 
-class BoundedOrchestratorPlanTest(frozen.BoundedOrchestratorPlanTest):
-    def test_neutral_writer_article_truth_chain_uses_only_prior_shadow_artifacts(self):
+EXPECTED_STAGE_NAMES = [
+    "apavil", "ipj", "isu", "municipal_reference", "municipal_document", "municipal_materiality",
+    "municipal_fact_kernel", "municipal_writer", "cj_road", "eta", "isj", "isj_detail", "isj_materiality",
+    "isj_embedded_notice", "isj_embedded_target", "isj_embedded_content", "isj_field_evidence",
+    "isj_context_documents", "isj_calendar_field_evidence", "isj_calendar_scope_binding",
+    "isj_calendar_scope_validation", "isj_registration_deadline_promotion",
+    "isj_registration_deadline_promotion_validation", "isj_field_materiality",
+    "isj_fact_kernel_deadline_promotion", "isj_fact_kernel_deadline_promotion_validation",
+    "isj_fact_kernel", "isj_fact_kernel_integrity", "promoted_claim_writer_projection",
+    "promoted_claim_projection_validation", "promoted_claim_writer_consumption",
+    "promoted_claim_writer_consumption_validation", "promoted_claim_writer",
+    "isj_article_deadline_claim_gate", "isj_article_deadline_claim_validation",
+    "isj_article_integrity", "isj_promoted_claim_contract", "site_verified_article_ledger",
+    "photo_truth", "site_visual_runtime_registry", "shadow_site_package",
+]
+
+
+class BoundedOrchestratorPlanTest(unittest.TestCase):
+    def test_plan_is_single_ordered_read_only_41_stage_golden_path(self):
+        with tempfile.TemporaryDirectory() as temp:
+            plan = bounded_cycle_plan(Path(temp), live=True)
+        names = [stage.name for stage in plan]
+        self.assertEqual(names, EXPECTED_STAGE_NAMES)
+        self.assertEqual(len(names), 41)
+        self.assertNotIn("isj_promoted_claim_contract_validation", names)
+        self.assertNotIn("core_v2_external_audit", names)
+        self.assertEqual(names[-1], "shadow_site_package")
+
+        joined = "\n".join(" ".join(stage.argv) for stage in plan).lower()
+        for forbidden in (
+            "workflow_dispatch", "git push", "merge", "deploy",
+            "facebook_publish", "instagram_publish", "manual-publish",
+            "validate_isj_promoted_claim_contract_runtime.py",
+            "valcea-core-v2-isj-promoted-claim-contract-validation.json",
+        ):
+            self.assertNotIn(forbidden, joined)
+        self.assertIn("--external-probe", joined)
+        self.assertIn("--live", joined)
+        self.assertIn("--prove-tamper", joined)
+
+    def test_writer_article_truth_contract_order_is_preserved(self):
         with tempfile.TemporaryDirectory() as temp:
             workdir = Path(temp)
-            plan = bounded_cycle_plan(workdir, live=True)
-
+            plan = bounded_cycle_plan(workdir, live=False)
         by_name = {stage.name: stage for stage in plan}
         names = [stage.name for stage in plan]
-        fact_kernel = by_name["isj_fact_kernel"]
-        fact_integrity = by_name["isj_fact_kernel_integrity"]
-        consumption = by_name["promoted_claim_writer_consumption"]
-        consumption_validation = by_name["promoted_claim_writer_consumption_validation"]
+
         writer = by_name["promoted_claim_writer"]
         gate = by_name["isj_article_deadline_claim_gate"]
         validation = by_name["isj_article_deadline_claim_validation"]
         integrity = by_name["isj_article_integrity"]
+        contract = by_name["isj_promoted_claim_contract"]
+        site_ledger = by_name["site_verified_article_ledger"]
 
-        self.assertEqual(len(plan), 42)
         self.assertEqual(writer.argv[1], "valcea-clar/core_v2/promoted_claim_writer.py")
-        for stage in (gate, validation):
-            self.assertEqual(stage.argv[1], "valcea-clar/core_v2/promoted_claim_article_truth.py")
-            self.assertIn(str(fact_kernel.output), stage.argv)
-            self.assertIn(str(fact_integrity.output), stage.argv)
-            self.assertIn(str(consumption.output), stage.argv)
-            self.assertIn(str(consumption_validation.output), stage.argv)
-            self.assertIn(str(writer.output), stage.argv)
-            self.assertNotIn("--live", stage.argv)
-
+        self.assertEqual(gate.argv[1], "valcea-clar/core_v2/promoted_claim_article_truth.py")
+        self.assertEqual(gate.argv[2:4], ("--mode", "gate"))
+        self.assertEqual(validation.argv[1], "valcea-clar/core_v2/promoted_claim_article_truth.py")
+        self.assertEqual(validation.argv[2:4], ("--mode", "validate"))
         self.assertEqual(integrity.argv[1], "valcea-clar/core_v2/promoted_claim_article_integrity.py")
-        self.assertIn(str(fact_kernel.output), integrity.argv)
-        self.assertIn(str(fact_integrity.output), integrity.argv)
-        self.assertIn(str(writer.output), integrity.argv)
-        self.assertNotIn("--live", integrity.argv)
-        self.assertEqual(integrity.output, workdir / "valcea-core-v2-isj-article-integrity-shadow.json")
+        self.assertEqual(contract.argv[1], "valcea-clar/core_v2/isj_promoted_claim_contract_shadow_lane.py")
 
-        writer_index = names.index("promoted_claim_writer")
-        gate_index = names.index("isj_article_deadline_claim_gate")
-        validation_index = names.index("isj_article_deadline_claim_validation")
-        integrity_index = names.index("isj_article_integrity")
-        self.assertEqual((gate_index, validation_index, integrity_index), (writer_index + 1, writer_index + 2, writer_index + 3))
+        writer_i = names.index(writer.name)
+        gate_i = names.index(gate.name)
+        validation_i = names.index(validation.name)
+        integrity_i = names.index(integrity.name)
+        contract_i = names.index(contract.name)
+        site_i = names.index(site_ledger.name)
+        self.assertEqual((gate_i, validation_i, integrity_i), (writer_i + 1, writer_i + 2, writer_i + 3))
+        self.assertEqual(contract_i, integrity_i + 1)
+        self.assertEqual(site_i, contract_i + 1)
 
-    def test_retained_article_truth_implementations_remain_regression_components(self):
-        with tempfile.TemporaryDirectory() as temp:
-            workdir = Path(temp)
-            frozen_by_name = {stage.name: stage for stage in _LEGACY_PLAN(workdir, live=False)}
-            retained_by_name = {stage.name: stage for stage in _owned_article_truth_stages(workdir)}
-            canonical_plan = bounded_cycle_plan(workdir, live=False)
-
-        old_consumption = "valcea-core-v2-isj-writer-deadline-consumption.json"
-        new_consumption = "valcea-core-v2-promoted-claim-writer-consumption.json"
-        old_validation = "valcea-core-v2-isj-writer-deadline-consumption-validation.json"
-        new_validation = "valcea-core-v2-promoted-claim-writer-consumption-validation.json"
-
-        def normalized(stage):
-            argv = tuple(
-                str(token).replace(old_validation, new_validation).replace(old_consumption, new_consumption)
-                for token in stage.argv
-            )
-            output = (
-                str(stage.output).replace(old_validation, new_validation).replace(old_consumption, new_consumption)
-                if stage.output is not None else None
-            )
-            return stage.name, argv, output
-
-        for name in (
-            "isj_article_deadline_claim_gate",
-            "isj_article_deadline_claim_validation",
-            "isj_article_integrity",
-        ):
-            self.assertEqual(normalized(frozen_by_name[name]), normalized(retained_by_name[name]))
-
-        report = _article_truth_stage_ownership_snapshot(canonical_plan)
-        self.assertEqual(report["status"], "PASS_SHADOW")
-        self.assertEqual(report["canonical_stage_count"], 42)
-        self.assertEqual(report["canonical_stage_ownership"], "CORE_V2_ORCHESTRATOR_DIRECT_DEFINITION")
-        self.assertTrue(report["canonical_article_truth_runtime_switched"])
-        self.assertTrue(report["canonical_article_integrity_runtime_switched"])
-        self.assertTrue(report["canonical_stage_definitions_switched"])
-        self.assertTrue(report["retained_implementations_regression_only"])
-        self.assertFalse(report["retained_implementations_runtime_dependency"])
-        self.assertFalse(report["retained_implementations_retirement_eligible"])
-        self.assertFalse(report["retirement_eligible"])
-        self.assertFalse(report["retirement_performed"])
-        self.assertEqual(report["retirement_authority"], "NONE")
-        self.assertEqual(report["publication_authority"], "NONE")
-        self.assertFalse(report["acceptance_ready"])
-
-        integrity = _article_integrity_stage_ownership_snapshot(canonical_plan)
-        self.assertEqual(integrity["status"], "PASS_SHADOW")
-        self.assertTrue(integrity["canonical_runtime_switched"])
-        self.assertTrue(integrity["source_neutral_facade_present_in_canonical_plan"])
-        self.assertFalse(integrity["retained_integrity_runtime_dependency"])
-        self.assertTrue(integrity["retained_integrity_regression_component"])
-        self.assertFalse(integrity["retained_integrity_retirement_eligible"])
-        self.assertEqual(integrity["publication_authority"], "NONE")
-        self.assertFalse(integrity["acceptance_ready"])
-
-    def test_source_neutral_article_truth_cli_is_canonical_one_for_one_switch(self):
+    def test_contract_validator_is_retained_ci_only_and_absent_from_runtime(self):
         with tempfile.TemporaryDirectory() as temp:
             workdir = Path(temp)
             plan = bounded_cycle_plan(workdir, live=False)
+            retained = {stage.name: stage for stage in _owned_promoted_claim_contract_stages(workdir)}
 
-        by_name = {stage.name: stage for stage in plan}
         names = [stage.name for stage in plan]
-        gate = by_name["isj_article_deadline_claim_gate"]
-        validation = by_name["isj_article_deadline_claim_validation"]
-        integrity = by_name["isj_article_integrity"]
+        joined = "\n".join(" ".join(stage.argv) for stage in plan)
+        self.assertNotIn("isj_promoted_claim_contract_validation", names)
+        self.assertNotIn("validate_isj_promoted_claim_contract_runtime.py", joined)
+        self.assertNotIn("valcea-core-v2-isj-promoted-claim-contract-validation.json", joined)
 
-        fact_kernel = workdir / "valcea-core-v2-isj-fact-kernel-shadow.json"
-        fact_integrity = workdir / "valcea-core-v2-isj-fact-kernel-integrity-shadow.json"
-        consumption = workdir / "valcea-core-v2-promoted-claim-writer-consumption.json"
-        consumption_validation = workdir / "valcea-core-v2-promoted-claim-writer-consumption-validation.json"
-        article = workdir / "valcea-core-v2-isj-article-shadow.json"
-        claim = workdir / "valcea-core-v2-isj-article-deadline-claim.json"
-        claim_validation = workdir / "valcea-core-v2-isj-article-deadline-claim-validation.json"
-        integrity_output = workdir / "valcea-core-v2-isj-article-integrity-shadow.json"
-        truth_cli = "valcea-clar/core_v2/promoted_claim_article_truth.py"
-        integrity_cli = "valcea-clar/core_v2/promoted_claim_article_integrity.py"
+        ci_stage = retained["isj_promoted_claim_contract_validation"]
+        self.assertEqual(ci_stage.argv[1], "valcea-clar/core_v2/validate_isj_promoted_claim_contract_runtime.py")
+        self.assertIn("--contract", ci_stage.argv)
+        self.assertIn("--prove-tamper", ci_stage.argv)
+        self.assertEqual(ci_stage.output.name, "valcea-core-v2-isj-promoted-claim-contract-validation.json")
 
-        expected_gate_argv = (
-            sys.executable, truth_cli, "--mode", "gate",
-            "--fact-kernel", str(fact_kernel),
-            "--fact-kernel-integrity", str(fact_integrity),
-            "--writer-consumption", str(consumption),
-            "--writer-consumption-validation", str(consumption_validation),
-            "--article", str(article),
-            "--output", str(claim),
+        report = _promoted_claim_contract_stage_ownership_snapshot(plan)
+        self.assertEqual(report["status"], "PASS_SHADOW")
+        self.assertEqual(report["canonical_stage_count"], 41)
+        self.assertTrue(report["runtime_extraction_performed"])
+        self.assertTrue(report["ci_only_regression_retained"])
+        self.assertFalse(report["runtime_validation_stage_present"])
+        self.assertFalse(report["runtime_validation_module_present"])
+        self.assertFalse(report["runtime_validation_artifact_referenced"])
+        self.assertFalse(report["external_auditor_inserted"])
+        self.assertEqual(report["publication_authority"], "NONE")
+        self.assertFalse(report["acceptance_ready"])
+
+    def test_migration_ownership_snapshots_remain_pass_shadow(self):
+        with tempfile.TemporaryDirectory() as temp:
+            plan = bounded_cycle_plan(Path(temp), live=False)
+        reports = (
+            _fact_kernel_stage_ownership_snapshot(plan),
+            _promoted_claim_projection_stage_ownership_snapshot(plan),
+            _promoted_claim_consumption_stage_ownership_snapshot(plan),
+            _writer_stage_ownership_snapshot(plan),
+            _article_truth_stage_ownership_snapshot(plan),
+            _article_integrity_stage_ownership_snapshot(plan),
         )
-        expected_validation_argv = (
-            sys.executable, truth_cli, "--mode", "validate",
-            "--fact-kernel", str(fact_kernel),
-            "--fact-kernel-integrity", str(fact_integrity),
-            "--writer-consumption", str(consumption),
-            "--writer-consumption-validation", str(consumption_validation),
-            "--article", str(article),
-            "--gate", str(claim),
-            "--prove-tamper",
-            "--output", str(claim_validation),
-        )
-        expected_integrity_argv = (
-            sys.executable, integrity_cli,
-            "--fact-kernel", str(fact_kernel),
-            "--fact-kernel-integrity", str(fact_integrity),
-            "--article", str(article),
-            "--output", str(integrity_output),
-        )
-
-        self.assertEqual(len(plan), 42)
-        self.assertEqual(gate.argv, expected_gate_argv)
-        self.assertEqual(validation.argv, expected_validation_argv)
-        self.assertEqual(integrity.argv, expected_integrity_argv)
-        self.assertEqual(gate.output, claim)
-        self.assertEqual(validation.output, claim_validation)
-        self.assertEqual(integrity.output, integrity_output)
-
-        writer_index = names.index("promoted_claim_writer")
-        gate_index = names.index("isj_article_deadline_claim_gate")
-        validation_index = names.index("isj_article_deadline_claim_validation")
-        integrity_index = names.index("isj_article_integrity")
-        self.assertEqual((gate_index, validation_index, integrity_index), (writer_index + 1, writer_index + 2, writer_index + 3))
-
-        canonical_joined = "\n".join(" ".join(stage.argv) for stage in plan)
-        self.assertIn(truth_cli, canonical_joined)
-        self.assertIn(integrity_cli, canonical_joined)
-        self.assertNotIn("valcea-clar/core_v2/isj_article_deadline_claim_gate.py", canonical_joined)
-        self.assertNotIn("valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py", canonical_joined)
-        self.assertNotIn("valcea-clar/core_v2/isj_article_integrity.py", canonical_joined)
+        for report in reports:
+            self.assertEqual(report["status"], "PASS_SHADOW")
+            self.assertEqual(report["canonical_stage_count"], 41)
+            self.assertEqual(report["publication_authority"], "NONE")
+            self.assertFalse(report["acceptance_ready"])
 
 
 if __name__ == "__main__":

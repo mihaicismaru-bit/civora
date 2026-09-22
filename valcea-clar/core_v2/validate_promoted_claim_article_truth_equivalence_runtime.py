@@ -16,6 +16,7 @@ SOURCE_NEUTRAL_INTEGRITY = "valcea-clar/core_v2/promoted_claim_article_integrity
 RETAINED_GATE = "valcea-clar/core_v2/isj_article_deadline_claim_gate.py"
 RETAINED_VALIDATOR = "valcea-clar/core_v2/validate_isj_article_deadline_claim_gate.py"
 RETAINED_INTEGRITY = "valcea-clar/core_v2/isj_article_integrity.py"
+EXTRACTED_STAGE = "isj_promoted_claim_contract_validation"
 
 
 def _load(path: str | Path) -> dict[str, Any]:
@@ -31,6 +32,11 @@ def _validate_canonical_switch() -> dict[str, Any]:
     by_name = {stage.name: stage for stage in plan}
     names = [stage.name for stage in plan]
 
+    if len(plan) != 41:
+        raise RuntimeError(f"canonical_stage_count_changed:{len(plan)}")
+    if EXTRACTED_STAGE in by_name:
+        raise RuntimeError("ci_only_contract_validation_leaked_into_runtime")
+
     gate = by_name["isj_article_deadline_claim_gate"]
     validation = by_name["isj_article_deadline_claim_validation"]
     integrity = by_name["isj_article_integrity"]
@@ -39,7 +45,6 @@ def _validate_canonical_switch() -> dict[str, Any]:
     validation_index = names.index(validation.name)
     integrity_index = names.index(integrity.name)
 
-    assert len(plan) == 42
     assert gate.argv[1] == SOURCE_NEUTRAL_CLI
     assert gate.argv[2:4] == ("--mode", "gate")
     assert validation.argv[1] == SOURCE_NEUTRAL_CLI
@@ -75,6 +80,7 @@ def _validate_canonical_switch() -> dict[str, Any]:
 
     return {
         "canonical_stage_count": len(plan),
+        "ci_only_contract_validation_extracted": True,
         "canonical_gate_stage_name": gate.name,
         "canonical_validation_stage_name": validation.name,
         "canonical_integrity_stage_name": integrity.name,
@@ -138,7 +144,7 @@ def main() -> int:
 
     report.update(switch)
     report["article_integrity_facade_equivalence"] = integrity_facade
-    report["schema_version"] = "core-v2-promoted-claim-article-truth-integrity-post-switch-shadow.v3"
+    report["schema_version"] = "core-v2-promoted-claim-article-truth-integrity-post-extraction-shadow.v4"
     report["status"] = "PASS_SHADOW"
     report["canonical_runtime_switched"] = True
     report["canonical_stage_definitions_switched"] = True
@@ -153,13 +159,10 @@ def main() -> int:
     report["site_publish_allowed"] = False
     report["social_publish_allowed"] = False
     report["truth_rule"] = (
-        "The canonical article-truth gate and validation stages execute the source-neutral promoted_claim_article_truth CLI "
-        "one-for-one, and the canonical article-integrity stage executes the source-neutral promoted_claim_article_integrity "
-        "facade one-for-one. Exact artifacts and writer->gate->validation->integrity order are preserved. Semantic parity remains "
-        "bound to retained deterministic ISJ implementations, with the same article-claim evidence identity, 5/5 preprojection "
-        "and 3/3 projected tamper regressions, downstream 3 verified / 0 fabricated, plus 3/3 independent integrity tamper "
-        "regressions. Retained components remain KEEP regression-only and not retirement-eligible. No publication, acceptance, "
-        "merge, deploy, Meta-write, public-projection or retirement authority is granted."
+        "The canonical article-truth gate, validation and integrity stages retain their source-neutral one-for-one semantics "
+        "inside the 41-stage runtime after the unrelated promoted-claim contract validator is extracted to CI-only coverage. "
+        "Exact article artifacts, evidence identity, writer->gate->validation->integrity order and fail-closed tamper behavior "
+        "remain unchanged. No publication, acceptance, merge, deploy, Meta-write, public-projection or retirement authority is granted."
     )
 
     Path(args.output).write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -168,6 +171,7 @@ def main() -> int:
         "canonical_runtime_switched": True,
         "canonical_stage_definitions_switched": True,
         "canonical_stage_count": switch["canonical_stage_count"],
+        "ci_only_contract_validation_extracted": True,
         "article_deadline_claim_evidence_id": report["article_deadline_claim_evidence_id"],
         "tamper_regressions_passed": report["tamper_regressions_passed"],
         "projected_tamper_regressions_passed": report["projected_tamper_regressions_passed"],
@@ -175,7 +179,6 @@ def main() -> int:
         "downstream_fabricated_claim_count": report["downstream_fabricated_claim_count"],
         "article_integrity_facade_equivalent": report["article_integrity_facade_equivalent"],
         "article_integrity_facade_tamper_regressions_passed": report["article_integrity_facade_tamper_regressions_passed"],
-        "article_integrity_facade_canonical_runtime_switched": True,
         "publication_authority": "NONE",
         "acceptance_ready": False,
     }, ensure_ascii=False, sort_keys=True))
