@@ -3,14 +3,13 @@ from __future__ import annotations
 import json
 from typing import Any
 
-import orchestrator_run100 as _base
+import orchestrator_run100 as _impl
 
-# RUN100 correction: the lower migration modules patch RUN70's snapshot symbol
-# during import, so capturing a supposedly frozen snapshot callable after those
-# imports still resolves to the RUN81 42-stage contract-pair snapshotter. Build
-# the 41-stage snapshots directly from the canonical plan instead.
+# RUN100 correction: lower migration modules patch RUN70's snapshot symbol during
+# import. Build 41-stage snapshots directly instead of invoking any inherited
+# snapshotter that assumes the old contract-validation stage is still present.
 
-globals().update({name: value for name, value in vars(_base).items() if not name.startswith("__")})
+globals().update({name: value for name, value in vars(_impl).items() if not name.startswith("__")})
 
 
 def _read_output(stage: Any) -> dict[str, Any] | None:
@@ -27,33 +26,31 @@ def _read_output(stage: Any) -> dict[str, Any] | None:
 
 def _persisted_runtime_snapshots(plan):
     snapshots: dict[str, Any] = {}
-    # Persist every JSON stage artifact that exists. This is more observable than
-    # the old bounded allow-list and does not infer truth from missing files.
     for stage in plan:
         value = _read_output(stage)
         if value is not None:
             snapshots[stage.name] = value
 
-    snapshots["fact_kernel_stage_ownership"] = _base._fact_kernel_stage_ownership_snapshot(plan)
-    snapshots["promoted_claim_projection_stage_ownership"] = _base._promoted_claim_projection_stage_ownership_snapshot(plan)
-    snapshots["promoted_claim_consumption_stage_ownership"] = _base._promoted_claim_consumption_stage_ownership_snapshot(plan)
-    snapshots["writer_consumption_runtime_dependency"] = _base._writer_consumption_dependency_snapshot(plan)
-    snapshots["writer_stage_ownership"] = _base._writer_stage_ownership_snapshot(plan)
-    snapshots["article_truth_stage_ownership"] = _base._article_truth_stage_ownership_snapshot(plan)
-    snapshots["article_integrity_stage_ownership"] = _base._article_integrity_stage_ownership_snapshot(plan)
-    snapshots["promoted_claim_contract_runtime_ownership"] = _base._promoted_claim_contract_stage_ownership_snapshot(plan)
+    snapshots["fact_kernel_stage_ownership"] = _impl._fact_kernel_stage_ownership_snapshot(plan)
+    snapshots["promoted_claim_projection_stage_ownership"] = _impl._promoted_claim_projection_stage_ownership_snapshot(plan)
+    snapshots["promoted_claim_consumption_stage_ownership"] = _impl._promoted_claim_consumption_stage_ownership_snapshot(plan)
+    snapshots["writer_consumption_runtime_dependency"] = _impl._writer_consumption_dependency_snapshot(plan)
+    snapshots["writer_stage_ownership"] = _impl._writer_stage_ownership_snapshot(plan)
+    snapshots["article_truth_stage_ownership"] = _impl._article_truth_stage_ownership_snapshot(plan)
+    snapshots["article_integrity_stage_ownership"] = _impl._article_integrity_stage_ownership_snapshot(plan)
+    snapshots["promoted_claim_contract_runtime_ownership"] = _impl._promoted_claim_contract_stage_ownership_snapshot(plan)
     return snapshots
 
 
-# Replace every live snapshot lookup seam after all lower wrappers have imported.
-_base._persisted_runtime_snapshots = _persisted_runtime_snapshots
-_base._base._persisted_runtime_snapshots = _persisted_runtime_snapshots
-_base._base._base._persisted_runtime_snapshots = _persisted_runtime_snapshots
-_base._base._base._base._persisted_runtime_snapshots = _persisted_runtime_snapshots
-_base._RUN70._persisted_runtime_snapshots = _persisted_runtime_snapshots
+# Replace every live snapshot lookup seam after lower wrappers have imported.
+_impl._persisted_runtime_snapshots = _persisted_runtime_snapshots
+_impl._base._persisted_runtime_snapshots = _persisted_runtime_snapshots
+_impl._base._base._persisted_runtime_snapshots = _persisted_runtime_snapshots
+_impl._base._base._base._persisted_runtime_snapshots = _persisted_runtime_snapshots
+_impl._RUN70._persisted_runtime_snapshots = _persisted_runtime_snapshots
 
-run_bounded_shadow_cycle = _base._RUN70_ENGINE
-main = _base._RUN70_MAIN
+run_bounded_shadow_cycle = _impl._RUN70_ENGINE
+main = _impl._RUN70_MAIN
 
 
 if __name__ == "__main__":
