@@ -3,7 +3,10 @@ import datetime as dt
 import hashlib
 import json
 import re
+import time
+import urllib.error
 import urllib.request
+import zipfile
 from collections import Counter
 from io import BytesIO
 from pathlib import Path
@@ -19,6 +22,8 @@ UA='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safa
 IDENTITY_SCHEMA_VERSION=3
 COMPARE_FIELDS=['plannedLaunch','plannedClose','budget','priority','callType','applicants']
 SIGNATURE_FIELDS=['programmeRaw','priority','title','objective','region','budget','fund','plannedLaunch','plannedClose','callType','applicants','notes','sourceSheet']
+RETRYABLE_HTTP={408,425,429,500,502,503,504}
+XLSX_ACCEPT='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/octet-stream;q=0.9,*/*;q=0.8'
 
 def now(): return dt.datetime.now(dt.timezone.utc)
 def clean(v):
@@ -28,9 +33,49 @@ def clean(v):
 def norm(s):
     s=clean(s).lower().translate(str.maketrans('ăâîșşțţ','aaisstt'))
     return re.sub(r'[^a-z0-9]+',' ',s).strip()
-def fetch(url):
-    req=urllib.request.Request(url,headers={'User-Agent':UA,'Accept':'*/*'})
-    with urllib.request.urlopen(req,timeout=25) as r:return r.read(),getattr(r,'status',200),r.headers.get('Content-Type','')
+
+def _is_xlsx_payload(blob):
+    if len(blob)<1000:return False
+    if not blob.startswith((b'PK\x03\x04',b'PK\x05\x06',b'PK\x07\x08')):return False
+    try:return zipfile.is_zipfile(BytesIO(blob))
+    except Exception:return False
+
+def fetch(url,attempts=4,sleep_fn=time.sleep):
+    headers={
+        'User-Agent':UA,
+        'Accept':XLSX_ACCEPT,
+        'Accept-Language':'ro-RO,ro;q=0.9,en;q=0.8',
+        'Accept-Encoding':'identity',
+        'Cache-Control':'no-cache',
+        'Pragma':'no-cache',
+    }
+    last_error=None
+    for attempt in range(1,attempts+1):
+        try:
+            req=urllib.request.Request(url,headers=headers)
+            with urllib.request.urlopen(req,timeout=25) as r:
+                blob=r.read();code=getattr(r,'status',200);ctype=r.headers.get('Content-Type','')
+            if code in RETRYABLE_HTTP:
+                raise RuntimeError(f'transient HTTP {code}')
+            if code>=400:
+                raise RuntimeError(f'HTTP {code}')
+            if not _is_xlsx_payload(blob):
+                prefix=blob[:12].hex()
+                raise RuntimeError(f'invalid XLSX payload: http={code} content_type={ctype!r} bytes={len(blob)} prefix_hex={prefix}')
+            return blob,code,ctype
+        except urllib.error.HTTPError as e:
+            last_error=e
+            if e.code not in RETRYABLE_HTTP or attempt>=attempts:raise
+        except (urllib.error.URLError,TimeoutError,ConnectionError) as e:
+            last_error=e
+            if attempt>=attempts:raise
+        except RuntimeError as e:
+            last_error=e
+            retryable=str(e).startswith('transient HTTP') or str(e).startswith('invalid XLSX payload')
+            if not retryable or attempt>=attempts:raise
+        sleep_fn(min(2**(attempt-1),4))
+    raise RuntimeError(f'PEO calendar fetch exhausted: {last_error}')
+
 def header_score(row):
     t=' | '.join(norm(x) for x in row)
     return sum(1 for k in ['program','apel','buget','solicitant','deschidere','inchidere'] if k in t)
@@ -72,7 +117,7 @@ def base_identity_tuple(item):
 
 def identity_tuple(item):
     """Variant-aware identity: same call concept may have distinct applicant tracks."""
-    return base_identity_tuple(item)+(norm(item.get('applicants')),)
+    return base_identity_tuple(item)+(norm(item.get('applicants')),) 
 
 def stable_id(program,title,priority,objective,region,sheet,applicants=''):
     identity='|'.join([norm(program),norm(title),norm(priority),norm(objective),norm(region),norm(sheet),norm(applicants)])
@@ -151,7 +196,6 @@ def main():
     observed=now().isoformat();prev=load_state()
     try:
         blob,code,ctype=fetch(OIR_XLSX)
-        if len(blob)<1000:raise RuntimeError('downloaded workbook too small')
         sha=hashlib.sha256(blob).hexdigest();items,diag=parse(blob)
         if not items:raise RuntimeError('no PEO rows found in consolidated workbook')
 
@@ -180,7 +224,7 @@ def main():
         STATE.parent.mkdir(parents=True,exist_ok=True);STATE.write_text(json.dumps(state,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         payload={'status':state['status'],'asOf':observed,'programme':'PEO','title':'Calendar estimativ consolidat al lansărilor de apeluri de proiecte — PEO','canonicalContainer':MIPE_CONTAINER,'retrievalSource':OIR_XLSX,'retrievalSourceClass':state['retrievalSourceClass'],'directMipeVerified':False,'versionSha256':sha,'itemCount':len(items),'changeCount':len(changes),'items':items,'changes':changes[:100]}
         OUT.write_text('window.PARTENER_DATA=window.PARTENER_DATA||{};\nwindow.PARTENER_DATA.peoCalendar='+json.dumps(payload,ensure_ascii=False,separators=(',',':'))+';\n',encoding='utf-8')
-        print(json.dumps({'status':state['status'],'sha256':sha,'itemCount':len(items),'changeCount':len(changes),'sameSourceBytesAsPrevious':same_source_bytes,'identitySchemaVersion':IDENTITY_SCHEMA_VERSION,'diagnostics':diag},ensure_ascii=False,indent=2))
+        print(json.dumps({'status':state['status'],'sha256':sha,'itemCount':len(items),'changeCount':len(changes),'sameSourceBytesAsPrevious':same_source_bytes,'identitySchemaVersion':IDENTITY_SCHEMA_VERSION,'httpStatus':code,'contentType':ctype,'diagnostics':diag},ensure_ascii=False,indent=2))
         return 0
     except Exception as e:
         fail={'observedAt':observed,'error':f'{type(e).__name__}: {e}','source':OIR_XLSX};prev['lastFailure']=fail;prev['status']='SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED';STATE.write_text(json.dumps(prev,ensure_ascii=False,indent=2)+'\n',encoding='utf-8');print(json.dumps({'status':prev['status'],'failure':fail},ensure_ascii=False,indent=2))
