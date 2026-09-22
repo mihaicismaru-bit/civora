@@ -9,6 +9,7 @@ on:
     paths:
       - 'partener-eu/ingest/peo_calendar_ingest.py'
       - 'partener-eu/ops/test_peo_calendar_identity.py'
+      - 'partener-eu/ops/test_peo_calendar_transport.py'
       - '.github/workflows/partener-eu-peo-calendar.yml'
 
 permissions:
@@ -32,6 +33,9 @@ jobs:
 
       - name: Regression — PEO calendar identities are collision-safe
         run: python partener-eu/ops/test_peo_calendar_identity.py
+
+      - name: Regression — PEO calendar transport is bounded and fail-closed
+        run: python partener-eu/ops/test_peo_calendar_transport.py
 
       - name: Ingest and version official PEO calendar candidate
         id: ingest
