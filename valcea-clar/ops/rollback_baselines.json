@@ -1,0 +1,48 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR",
+  "current_lkg": "S6-LKG-2026-09-22-S5",
+  "baselines": [
+    {
+      "id": "S6-LKG-2026-09-22-S5",
+      "commit": "73a2d6235be8a6fee418d31bfb068027c3c38b23",
+      "status": "REGISTERED_LKG",
+      "rollback_eligible": true,
+      "scope": "runtime_only",
+      "description": "Main runtime after S1–S5 integration and subsequent S5/S4 deterministic runtime projection.",
+      "evidence": [
+        "S5 Distinctive Products production run succeeded",
+        "S4 Publication Experience production persistence succeeded",
+        "Quality, ownership and canonical runtime gates passed during S5 integration"
+      ]
+    }
+  ],
+  "milestones": [
+    {
+      "stage": "S1",
+      "commit": "324b778aa314eeb34f0587046337047095b142c2",
+      "rollback_eligible": false
+    },
+    {
+      "stage": "S2",
+      "commit": "a7da3349663fddbfd22d07b8e14e70d20fcd7b85",
+      "rollback_eligible": false
+    },
+    {
+      "stage": "S3",
+      "commit": "ea7bcd3a53ba005b4b4a23a04bae28ac5330dea7",
+      "rollback_eligible": false
+    },
+    {
+      "stage": "S4",
+      "commit": "0a86b462395dc229e14f64bbc32e4d46feb1a9aa",
+      "rollback_eligible": false
+    },
+    {
+      "stage": "S5",
+      "commit": "e888a5d5fbb63cf8af696e0ce3549a9f5315519c",
+      "rollback_eligible": false
+    }
+  ],
+  "rule": "Only baselines with rollback_eligible=true may be used by the executable runtime rollback workflow."
+}
