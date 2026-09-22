@@ -101,7 +101,10 @@ jobs:
           pdftotext -v
           convert -version
 
-      - name: Run single bounded Core v2 shadow cycle read-only
+      - name: Run single bounded Core v2 shadow cycle and external evidence read-only
+        env:
+          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
+          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
         run: |
           python valcea-clar/core_v2/orchestrator.py \
             --run-bounded-cycle \
@@ -109,6 +112,14 @@ jobs:
             --repo-root . \
             --workdir /tmp \
             --output /tmp/valcea-core-v2-cycle.json
+
+      - name: Verify thin executor truth boundary and Meta read-only plumbing
+        run: |
+          python valcea-clar/core_v2/executor_parity_contract.py \
+            --cycle /tmp/valcea-core-v2-cycle.json \
+            --sequence /tmp/valcea-core-v2-external-evidence-sequence.json \
+            --meta /tmp/valcea-core-v2-meta-readback.json \
+            --output /tmp/valcea-core-v2-executor-parity-contract.json
 
       - name: Verify ISJ document target and text truth invariants
         run: |
@@ -195,29 +206,6 @@ jobs:
           print(f"Legacy inventory classification complete: {doc['counts']}")
           PY
 
-      - name: Build non-authoritative shadow replay candidates
-        run: python valcea-clar/core_v2/build_shadow_candidate_ledger.py --output /tmp/valcea-core-v2-shadow-candidates.json
-
-      - name: Replay candidate site truth read-only
-        run: python valcea-clar/core_v2/replay_external_site.py --output /tmp/valcea-core-v2-site-readback.json --limit 10
-
-      - name: Replay candidate visual truth read-only
-        run: python valcea-clar/core_v2/replay_external_visuals.py --output /tmp/valcea-core-v2-visual-readback.json --limit 10
-
-      - name: Replay candidate Meta truth read-only
-        env:
-          VALCEA_META_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_META_PAGE_ACCESS_TOKEN }}
-          VALCEA_FB_PAGE_ACCESS_TOKEN: ${{ secrets.VALCEA_FB_PAGE_ACCESS_TOKEN }}
-        run: python valcea-clar/core_v2/replay_external_meta.py --output /tmp/valcea-core-v2-meta-readback.json --limit 10
-
-      - name: Bind approved visual identity to Instagram remote pixels read-only
-        run: |
-          python valcea-clar/core_v2/instagram_visual_identity.py \
-            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
-            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
-            --repo-root . \
-            --output /tmp/valcea-core-v2-instagram-visual-identity.json
-
       - name: Diagnose bounded Instagram crop/reframing near-match read-only
         run: |
           python valcea-clar/core_v2/instagram_transform_diagnostic.py \
@@ -227,16 +215,6 @@ jobs:
             --repo-root . \
             --output /tmp/valcea-core-v2-instagram-transform-diagnostic.json
 
-      - name: Bind external evidence into shadow receipt ledger
-        run: |
-          python valcea-clar/core_v2/materialize_shadow_receipts.py \
-            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
-            --site-readback /tmp/valcea-core-v2-site-readback.json \
-            --visual-readback /tmp/valcea-core-v2-visual-readback.json \
-            --meta-readback /tmp/valcea-core-v2-meta-readback.json \
-            --instagram-identity /tmp/valcea-core-v2-instagram-visual-identity.json \
-            --output /tmp/valcea-core-v2-shadow-receipts.json
-
       - name: Verify Instagram visual identity cross-artifact truth
         run: |
           python valcea-clar/core_v2/validate_instagram_visual_identity_runtime.py \
@@ -244,18 +222,6 @@ jobs:
             --meta-readback /tmp/valcea-core-v2-meta-readback.json \
             --identity /tmp/valcea-core-v2-instagram-visual-identity.json \
             --receipts /tmp/valcea-core-v2-shadow-receipts.json
-
-      - name: Bind explicit fact and article evidence into shadow transactions
-        run: |
-          python valcea-clar/core_v2/historical_transaction_binding.py \
-            --candidates /tmp/valcea-core-v2-shadow-candidates.json \
-            --receipts /tmp/valcea-core-v2-shadow-receipts.json \
-            --evidence valcea-clar/editorial/fact_kernel_registry.json \
-            --evidence valcea-clar/editorial/facts_registry.json \
-            --evidence valcea-clar/editorial/editorial_products.json \
-            --output /tmp/valcea-core-v2-shadow-transactions.json \
-            --kernels-output /tmp/valcea-core-v2-historical-fact-kernels.json \
-            --articles-output /tmp/valcea-core-v2-historical-article-claims.json
 
       - name: Verify historical FactKernel to article claims runtime binding
         run: |
@@ -285,6 +251,8 @@ jobs:
           name: valcea-clar-core-v2-shadow-evidence-${{ github.run_id }}
           path: |
             /tmp/valcea-core-v2-cycle.json
+            /tmp/valcea-core-v2-external-evidence-sequence.json
+            /tmp/valcea-core-v2-executor-parity-contract.json
             /tmp/valcea-core-v2-apavil-shadow.json
             /tmp/valcea-core-v2-ipj-shadow.json
             /tmp/valcea-core-v2-isu-shadow.json
