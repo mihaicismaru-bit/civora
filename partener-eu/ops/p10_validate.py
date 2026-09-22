@@ -13,6 +13,7 @@ MIN_HTML_BYTES_FOR_LOW_INFO = 4096
 VALID_HEALTH_SCOPES = {"MATERIAL_SOURCE", "TRANSPORT_ONLY", "DISCOVERY_ONLY"}
 TRANSIENT_HTTP_STATUSES = {408, 425, 429, 500, 502, 503, 504}
 REGIOCENTRU_HOSTS = {"www.regiocentru.ro", "regiocentru.ro"}
+CURL_STATUS_MARKER = b"\n__PARTENER_HTTP_STATUS__:"
 
 
 def nowz(): return dt.datetime.now(dt.timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
@@ -84,11 +85,11 @@ def observation_content_quality(obs):
 
 
 def source_transport_urls(src):
-    """Return bounded transport-equivalent URLs without changing source authority.
+    """Return bounded transport-equivalent URLs without changing authority.
 
-    Only RegioCentru gets a host alias because the authority exposes both www and
-    bare host identities for the exact same HTTPS path. No mirror, proxy or
-    non-authoritative fallback is permitted here.
+    RegioCentru publishes the same official HTTPS paths on www and bare host.
+    We may try that exact host alias, but never a mirror, proxy, cached copy or
+    non-authoritative endpoint.
     """
     primary=str(src.get('url') or '').strip()
     urls=[primary]
@@ -96,17 +97,15 @@ def source_transport_urls(src):
     host=(parsed.hostname or '').lower()
     if parsed.scheme.lower()=='https' and host in REGIOCENTRU_HOSTS:
         alt='regiocentru.ro' if host=='www.regiocentru.ro' else 'www.regiocentru.ro'
-        netloc=alt
-        if parsed.port:
-            netloc=f'{alt}:{parsed.port}'
+        netloc=f'{alt}:{parsed.port}' if parsed.port else alt
         alias=urllib.parse.urlunsplit((parsed.scheme,netloc,parsed.path,parsed.query,parsed.fragment))
         if alias not in urls:
             urls.append(alias)
     return urls
 
 
-def _curl_fetch(candidate, headers, timeout, attempts_so_far):
-    marker=b'\n__PARTENER_HTTP_STATUS__:'
+def curl_fetch(candidate, headers, timeout):
+    """Try one bounded alternate HTTP stack and return body/status/error."""
     args=[
         'curl','-4','--http1.1','-L','--silent','--show-error',
         '--max-time',str(timeout),
@@ -120,18 +119,18 @@ def _curl_fetch(candidate, headers, timeout, attempts_so_far):
     ]
     cp=subprocess.run(args,capture_output=True,timeout=timeout+15)
     payload=cp.stdout
+    idx=payload.rfind(CURL_STATUS_MARKER)
     status=None
     body=payload
-    idx=payload.rfind(marker)
     if idx>=0:
         body=payload[:idx]
-        raw_status=payload[idx+len(marker):].strip()
+        raw_status=payload[idx+len(CURL_STATUS_MARKER):].strip()
         try: status=int(raw_status.decode('ascii','ignore'))
         except Exception: status=None
     if cp.returncode==0 and status is not None and 200<=status<400 and body:
-        return make_observation({},body,status,candidate,{},'curl-fallback',attempts_so_far+1), status, None
+        return body,status,None
     err=cp.stderr.decode('utf-8','ignore')[:500]
-    return None, status, f'curl exit {cp.returncode} HTTP {status}: {err}'
+    return None,status,f'curl exit {cp.returncode} HTTP {status}: {err}'
 
 
 def fetch_source(src, timeout=35, attempts=3):
@@ -171,27 +170,16 @@ def fetch_source(src, timeout=35, attempts=3):
                 last=f'{type(e).__name__}: {e}'
                 break
 
-        # One alternate HTTP stack per bounded official URL. This is deliberately
-        # not curl --retry: deterministic 4xx responses must fail fast instead of
-        # burning repeated requests against an authority-side WAF/edge rule.
+        # A second HTTP stack is useful when an official edge treats urllib and
+        # curl differently. It is intentionally one shot: deterministic 4xx
+        # responses are not retried repeatedly against the same official host.
         try:
-            curl_obs,curl_status,curl_error=_curl_fetch(candidate,headers,timeout,total_attempts)
             total_attempts+=1
-            if curl_obs is not None:
-                curl_obs=make_observation(src,bytes.fromhex('') if False else b'',200,candidate,{},'curl-fallback',total_attempts) if False else curl_obs
-                # Recompute with the real source marker contract because _curl_fetch
-                # intentionally stays transport-only.
-                args=[
-                    'curl','-4','--http1.1','-L','--silent','--show-error','--max-time',str(timeout),
-                    '-A',headers['User-Agent'],'-H',f"Accept: {headers['Accept']}",
-                    '-H',f"Accept-Language: {headers['Accept-Language']}",'-H','Accept-Encoding: identity',
-                    '-H','Cache-Control: no-cache',candidate,
-                ]
-                cp=subprocess.run(args,capture_output=True,timeout=timeout+15)
-                if cp.returncode==0 and cp.stdout:
-                    return make_observation(src,cp.stdout,int(curl_obs['http_status']),candidate,{},'curl-fallback',total_attempts)
+            body,curl_status,curl_error=curl_fetch(candidate,headers,timeout)
             if curl_status is not None:
                 last_status=curl_status
+            if body is not None and curl_status is not None:
+                return make_observation(src,body,curl_status,candidate,{},'curl-fallback',total_attempts)
             if curl_error:
                 last=curl_error
         except Exception as e:
