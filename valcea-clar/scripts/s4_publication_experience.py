@@ -80,7 +80,7 @@ def story_path(story: dict[str, Any]) -> str:
 
 
 def publication_timestamp(story: dict[str, Any]) -> str | None:
-    for key in ("first_published_at", "published_at"):
+    for key in ("_s4_publication_timestamp", "first_published_at", "published_at"):
         value = str(story.get(key) or "").strip()
         if value:
             return value
