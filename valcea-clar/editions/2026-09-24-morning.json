@@ -4,12 +4,12 @@
   "slot": "morning",
   "title": "VÂLCEA CLAR — Ediția de dimineață",
   "edition_date": "2026-09-24",
-  "updated_local": "2026-09-24T00:24:59+03:00",
+  "updated_local": "2026-09-24T01:11:30+03:00",
   "generator": "deterministic_zero_llm_v2+manual_journalism_v1",
   "status": "auto_approved",
   "publication_intent": "publish",
-  "editorial_fact_count": 15,
-  "editorial_writer_composed_count": 15,
+  "editorial_fact_count": 16,
+  "editorial_writer_composed_count": 16,
   "auto_fact_registry_count": 4,
   "auto_facts_included": 8,
   "items": [
@@ -349,6 +349,188 @@
         "auto_publish_eligible_by_format": true,
         "additional_gate": null,
         "product_fingerprint_sha256": "c58b0cb60722591028029e73f5788033c61efb2837894c76c60f35094a6d1999"
+      }
+    },
+    {
+      "id": "dragasani-ct-radiologie-program-clarificare-20260924",
+      "section": "SĂNĂTATE",
+      "priority": 94,
+      "headline": "Drăgășani: CT și radiologia sunt disponibile în ambulatoriu. Programele publicate nu coincid",
+      "dek": "Site-ul oficial al Spitalului Municipal „Costache Nicolescu” listează CT între 11:00–17:00 și radiologie între 09:30–12:30. O informare publicată pe 23 septembrie, atribuită spitalului, indică alte intervale; pacienții ar trebui să confirme telefonic programarea înainte de deplasare.",
+      "paragraphs": [
+        "Pagina oficială a Spitalului Municipal „Costache Nicolescu” Drăgășani listează în ambulatoriu servicii de radiologie și computer tomograf, cu numere de contact distincte pentru programare.",
+        "Înainte de deplasare, pacienții ar trebui să confirme programul direct la radiologie sau computer tomograf folosind numerele publicate de spital.",
+        "Se întâmplă în Vâlcea relatează la 23 septembrie, atribuind informațiile reprezentanților spitalului, că un aparat RX și un computer tomograf au fost puse în funcțiune și indică radiologie 08:00–11:00 și CT 11:00–14:00.",
+        "Sursele publice consultate confirmă disponibilitatea imagisticii, dar afișează intervale orare diferite; cauza diferenței nu poate fi stabilită din informațiile publice disponibile.",
+        "O modificare oficială a programului de radiologie sau CT este o actualizare materială și trebuie propagată pe aceeași poveste, fără duplicare.",
+        "Pe pagina oficială, radiologia este listată luni-vineri între 09:30–12:30 la 0371 470 483, iar computerul tomograf luni-vineri între 11:00–17:00 la 0372 893 168."
+      ],
+      "confidence": 97,
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Spitalul Municipal Costache Nicolescu Drăgășani — program ambulatoriu",
+          "url": "https://www.smcnd.ro/",
+          "tier": "T1"
+        },
+        {
+          "name": "Se întâmplă în Vâlcea — 23.09.2026, informații atribuite reprezentanților spitalului",
+          "url": "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/",
+          "tier": "T2"
+        }
+      ],
+      "valid_from": "2026-09-24T01:02:00+03:00",
+      "valid_until": "2026-10-01T23:59:59+03:00",
+      "lifecycle_status": "verified",
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Drăgășani: CT și radiologia sunt disponibile în ambulatoriu. Programele publicate nu coincid",
+          "source_urls": [
+            "https://www.smcnd.ro/",
+            "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+          ]
+        },
+        "dek": {
+          "text": "Site-ul oficial al Spitalului Municipal „Costache Nicolescu” listează CT între 11:00–17:00 și radiologie între 09:30–12:30. O informare publicată pe 23 septembrie, atribuită spitalului, indică alte intervale; pacienții ar trebui să confirme telefonic programarea înainte de deplasare.",
+          "source_urls": [
+            "https://www.smcnd.ro/",
+            "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+          ]
+        },
+        "claims": [
+          {
+            "id": "dragasani-imaging-official-services",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Pagina oficială a Spitalului Municipal „Costache Nicolescu” Drăgășani listează în ambulatoriu servicii de radiologie și computer tomograf, cu numere de contact distincte pentru programare.",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          },
+          {
+            "id": "dragasani-imaging-official-hours",
+            "role": "reader_service",
+            "kind": "fact",
+            "text": "Pe pagina oficială, radiologia este listată luni-vineri între 09:30–12:30 la 0371 470 483, iar computerul tomograf luni-vineri între 11:00–17:00 la 0372 893 168.",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          },
+          {
+            "id": "dragasani-imaging-secondary-new-equipment",
+            "role": "context",
+            "kind": "attributed_statement",
+            "text": "Se întâmplă în Vâlcea relatează la 23 septembrie, atribuind informațiile reprezentanților spitalului, că un aparat RX și un computer tomograf au fost puse în funcțiune și indică radiologie 08:00–11:00 și CT 11:00–14:00.",
+            "attribution": "Se întâmplă în Vâlcea, informații atribuite reprezentanților Spitalului Municipal „Costache Nicolescu”",
+            "source_urls": [
+              "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+            ]
+          },
+          {
+            "id": "dragasani-imaging-discrepancy",
+            "role": "context",
+            "kind": "documented_context",
+            "text": "Sursele publice consultate confirmă disponibilitatea imagisticii, dar afișează intervale orare diferite; cauza diferenței nu poate fi stabilită din informațiile publice disponibile.",
+            "source_urls": [
+              "https://www.smcnd.ro/",
+              "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+            ]
+          },
+          {
+            "id": "dragasani-imaging-reader-action",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "Înainte de deplasare, pacienții ar trebui să confirme programul direct la radiologie sau computer tomograf folosind numerele publicate de spital.",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          },
+          {
+            "id": "dragasani-imaging-next-watch",
+            "role": "next_watch",
+            "kind": "reader_service",
+            "text": "O modificare oficială a programului de radiologie sau CT este o actualizare materială și trebuie propagată pe aceeași poveste, fără duplicare.",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          }
+        ]
+      },
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.smcnd.ro/",
+          "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+        ],
+        "dek_source_urls": [
+          "https://www.smcnd.ro/",
+          "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "dragasani-imaging-official-services",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "167f075c572d0168258a3783c551d499906598b215fab69c04a648a6bdeda9c5",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          },
+          {
+            "claim_id": "dragasani-imaging-reader-action",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text_sha256": "5d0ed280416f36ab176f594ebf1a4cedaab8af054cbb9d382b35dce3399793db",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          },
+          {
+            "claim_id": "dragasani-imaging-secondary-new-equipment",
+            "role": "context",
+            "kind": "attributed_statement",
+            "text_sha256": "219501987266faf4144e51040d9e2410bf55481634d762ac9e506402fa6abe1a",
+            "source_urls": [
+              "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+            ]
+          },
+          {
+            "claim_id": "dragasani-imaging-discrepancy",
+            "role": "context",
+            "kind": "documented_context",
+            "text_sha256": "9d9927426559755c2f64c0511bc6ad9ebb6b9867d816ca8ed9adbe46c69529b6",
+            "source_urls": [
+              "https://www.smcnd.ro/",
+              "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+            ]
+          },
+          {
+            "claim_id": "dragasani-imaging-next-watch",
+            "role": "next_watch",
+            "kind": "reader_service",
+            "text_sha256": "1b8fa1f258c4c2ace4ee2b539837f86b54c1fb17ed250ea82cff92f453c4fb61",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          },
+          {
+            "claim_id": "dragasani-imaging-official-hours",
+            "role": "reader_service",
+            "kind": "fact",
+            "text_sha256": "06692973668b3228998222940bc591fec6001f139111aecc1e899c7625657e4f",
+            "source_urls": [
+              "https://www.smcnd.ro/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "3ac6579e08331c4639a763b0650c330bbc125733e7f1358895da555c94d3c101"
       }
     },
     {
