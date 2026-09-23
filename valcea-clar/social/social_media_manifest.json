@@ -228,24 +228,21 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 9,
-      "readback_ok": 7,
-      "value": 0.7778,
-      "blocker_story_ids": [
-        "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-        "isu-valcea-interventii-zilnice"
-      ],
+      "readback_ok": 9,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
           "url": "https://valceaclar.ro/stiri/brezoi-acces-ingrijire-domiciliu-selectie-20260923/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
@@ -280,12 +277,12 @@
         {
           "story_id": "isu-valcea-interventii-zilnice",
           "url": "https://valceaclar.ro/stiri/isu-valcea-interventii-zilnice/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "ramnicu-valcea-floarea-darurilor-20260926",
@@ -332,18 +329,19 @@
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-22T14:50:47.010513Z",
+        "updated_local": "2026-09-23T05:19:40.367571Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 103
+        "public_story_count": 105
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 6,
+      "delivered": 7,
       "eligible": 9,
-      "value": 0.6667,
+      "value": 0.7778,
       "delivered_story_ids": [
+        "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
         "brezoi-ziua-recoltei-pregatiri-20260922",
         "calimanesti-restrictii-trotuare-20260922",
         "isu-valcea-interventii-zilnice",
@@ -354,10 +352,11 @@
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 7,
+      "delivered": 8,
       "eligible": 9,
-      "value": 0.7778,
+      "value": 0.8889,
       "delivered_story_ids": [
+        "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
         "brezoi-ziua-recoltei-pregatiri-20260922",
         "calimanesti-concurs-contabil-sef-20260921",
         "calimanesti-restrictii-trotuare-20260922",
