@@ -20,39 +20,16 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.ref || github.ref }}
-          fetch-depth: 0
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Materialize verified resolution overlays on same-repo PR
-        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
-        shell: bash
-        run: |
-          python partener-eu/p11/apply_resolutions.py
-          python partener-eu/p11/build_public_projection.py
-          python partener-eu/p11/build_staging_ledger.py
-          python partener-eu/ingest/build_decision_products.py
-          git config user.name "civora-partener-bot"
-          git config user.email "civora-partener-bot@users.noreply.github.com"
-          git add \
-            partener-eu/p11/opportunity_bundle.json \
-            partener-eu/p11/staging_ledger.json \
-            partener-eu/web/p11-public-data.js \
-            partener-eu/ingest/state/decision_products.json \
-            partener-eu/web/decision-products.js
-          if ! git diff --cached --quiet; then
-            git commit -m "PARTENER: materialize verified FAMI call artifacts"
-            git push origin HEAD:${{ github.event.pull_request.head.ref }}
-          fi
       - name: Apply verified resolution overlays
         run: python partener-eu/p11/apply_resolutions.py --check
       - name: Build public fail-closed projection
