@@ -4,12 +4,18 @@
   "source_id": "SRC-MAI-FED-GENERAL-GUIDE",
   "source_tier": "T1",
   "source_url": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general/",
-  "status": "OPEN",
+  "status": "RESOLVED_NON_MATERIAL_CHANGE",
   "first_observed_at": "2026-08-13T05:19:22.391140Z",
   "last_observed_at": "2026-09-23T00:43:47.721023Z",
+  "resolved_at": "2026-09-23T02:28:00Z",
   "previous_semantic_sha256": "9c128352384642790c957b8b5f7aa3f32b096f2fd94e04488721472b96531274",
   "current_semantic_sha256": "f3f7e6952c9cec931d708cbfa8cda2dbbf7b96070711d9282fdb0389e6965483",
+  "candidate_semantic_sha256": "f3f7e6952c9cec931d708cbfa8cda2dbbf7b96070711d9282fdb0389e6965483",
+  "resolved_semantic_sha256": "f3f7e6952c9cec931d708cbfa8cda2dbbf7b96070711d9282fdb0389e6965483",
   "material_fact_autoupdate_allowed": false,
+  "automatic_material_fact_update_allowed": false,
+  "material_fact_action": "NONE",
+  "publish_authorized": false,
   "blocked_fact_classes": [
     "deadline",
     "eligibility",
@@ -20,10 +26,23 @@
     "other_material_facts"
   ],
   "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
+  "resolution_reason": "Reviewed the current official MAI/FED general-guide page and the linked authoritative guide. The page still declares GHIDUL General PNAI v4.0 as the current version, published 17.03.2026 and approved through Instruction AM 19. The linked document also identifies version 4.0 dated 17.03.2026. The observed page-level semantic hash change therefore does not establish a new guide version or a call-specific material funding change. No material funding fact update is authorized.",
+  "evidence": [
+    {
+      "url": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general/",
+      "authority": "MAI / Autoritatea de Management Afaceri Interne",
+      "observed_content": "Official page continues to identify GHIDUL General PNAI v4.0 as current, published 17.03.2026 and approved by Instruction AM 19.",
+      "material_funding_fact_change_found": false
+    },
+    {
+      "url": "https://fed.mai.gov.ro/wp-content/uploads/2026/03/GHIDUL-General-PNAI-v4.0final-INTEGRAL-4semnat.pdf",
+      "authority": "MAI / Autoritatea de Management Afaceri Interne",
+      "observed_content": "Linked authoritative guide identifies version 4.0 with approval date 17.03.2026 and Instruction AM 19.",
+      "material_funding_fact_change_found": false
+    }
+  ],
   "source_name": "managing_authority_general_guide",
-  "candidate_semantic_sha256": "f3f7e6952c9cec931d708cbfa8cda2dbbf7b96070711d9282fdb0389e6965483",
   "registry_class": "managing_authority_general_guide",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication."
 }

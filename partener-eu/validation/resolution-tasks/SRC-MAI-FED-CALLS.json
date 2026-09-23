@@ -7,9 +7,15 @@
   "status": "OPEN",
   "first_observed_at": "2026-08-13T05:19:22.391140Z",
   "last_observed_at": "2026-09-23T00:43:47.721023Z",
+  "reviewed_at": "2026-09-23T02:28:00Z",
   "previous_semantic_sha256": "66c914c44a768cb5d1acaaf32d641920ea3e8c0eeb91eb670a079ad449bbf5d5",
   "current_semantic_sha256": "b9898d2e8da7a86efdc028a1945058a3f3f3dd8d71bde590c27c6b47c3de6cb3",
+  "candidate_semantic_sha256": "b9898d2e8da7a86efdc028a1945058a3f3f3dd8d71bde590c27c6b47c3de6cb3",
   "material_fact_autoupdate_allowed": false,
+  "automatic_material_fact_update_allowed": false,
+  "material_change_confirmed": true,
+  "material_change_class": "NEW_ACTIVE_CALLS",
+  "publish_authorized": false,
   "blocked_fact_classes": [
     "deadline",
     "eligibility",
@@ -19,11 +25,75 @@
     "material_call_status",
     "other_material_facts"
   ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
+  "required_resolution": "Ingest the newly launched calls as call-specific authoritative records, reconcile each guide and resolve the budget-currency conflict before publishing budget facts. Preserve this task OPEN until downstream dossiers/lifecycle entries and provenance are verified.",
+  "resolution_progress": "Authoritative review confirms seven new FAMI calls launched on 16.09.2026. Their official pages identify Status Apel: Activ and a submission deadline of 16.10.2026 16:00. However, the same official pages contain an internal material inconsistency: narrative text labels the available FEN amount in lei while the page summary labels the identical numeric amount in EUR. Budget currency therefore remains fail-closed pending reconciliation with each signed specific guide.",
+  "discovered_calls": [
+    {
+      "code": "AM41D",
+      "url": "https://fed.mai.gov.ro/11327/lansare-apel-am41d-consolidarea-solidaritatii-si-cooperarii-cu-tarile-terte-afectate-de-fluxurile-migratorii-inclusiv-prin-relocare-in-uniune-si-prin-alte-cai-legale-de-obtinere-a-protectie/",
+      "published": "2026-09-16",
+      "deadline": "2026-10-16T16:00:00+03:00",
+      "official_status_label": "Activ",
+      "budget_numeric": 5000000,
+      "budget_currency_conflict": ["RON", "EUR"]
+    },
+    {
+      "code": "AM22M",
+      "url": "https://fed.mai.gov.ro/11324/lansare-apel-am22m-integrarea-sociala-si-economica-a-resortisantilor-tarilor-terte-cu-sedere-legala-in-ro-in-regiunea-5/",
+      "published": "2026-09-16",
+      "deadline": "2026-10-16T16:00:00+03:00",
+      "official_status_label": "Activ",
+      "budget_numeric": 4430000,
+      "budget_currency_conflict": ["RON", "EUR"]
+    },
+    {
+      "code": "AM22L",
+      "url": "https://fed.mai.gov.ro/11320/lansare-apel-am22l-integrarea-sociala-si-economica-a-resortisantilor-tarilor-terte-cu-sedere-legala-in-ro-in-regiunea-3/",
+      "published": "2026-09-16",
+      "deadline": "2026-10-16T16:00:00+03:00",
+      "official_status_label": "Activ",
+      "budget_numeric": 4430000,
+      "budget_currency_conflict": ["RON", "EUR"]
+    },
+    {
+      "code": "AM22N",
+      "url": "https://fed.mai.gov.ro/11317/lansare-apel-am22n-dezvoltarea-de-resurse-educationale-si-programe-de-formare-pentru-specializarea-cadrelor-didactice-in-vederea-predarii-limbii-romane-ca-limba-straina/",
+      "published": "2026-09-16",
+      "deadline": "2026-10-16T16:00:00+03:00",
+      "official_status_label": "Activ",
+      "budget_numeric": 2000000,
+      "budget_currency_conflict": ["RON", "EUR"]
+    },
+    {
+      "code": "AM11I",
+      "url": "https://fed.mai.gov.ro/11314/lansare-apel-am11i-asistenta-medicala-si-psihologica-pentru-solicitantii-de-azil/",
+      "published": "2026-09-16",
+      "deadline": "2026-10-16T16:00:00+03:00",
+      "official_status_label": "Activ",
+      "budget_numeric": 5250000,
+      "budget_currency_conflict": ["RON", "EUR"]
+    },
+    {
+      "code": "AM11H",
+      "url": "https://fed.mai.gov.ro/11311/lansare-apel-am11h-asistenta-sociala-materiala-pentru-solicitantii-de-azil/",
+      "published": "2026-09-16",
+      "deadline": "2026-10-16T16:00:00+03:00",
+      "official_status_label": "Activ",
+      "budget_numeric": 5250000,
+      "budget_currency_conflict": ["RON", "EUR"]
+    },
+    {
+      "code": "AM2A1G",
+      "url": "https://fed.mai.gov.ro/11306/lansare-apel-am2a1g-actiune-specifica-pact-migratie-integrarea-sociala-si-economica-a-resortisantilor-tarilor-terte-cu-sedere-legala-in-ro-in-regiunea-6/",
+      "published": "2026-09-16",
+      "deadline": "2026-10-16T16:00:00+03:00",
+      "official_status_label": "Activ",
+      "budget_numeric": 3922800,
+      "budget_currency_conflict": ["RON", "EUR"]
+    }
+  ],
   "source_name": "managing_authority_call_registry",
-  "candidate_semantic_sha256": "b9898d2e8da7a86efdc028a1945058a3f3f3dd8d71bde590c27c6b47c3de6cb3",
   "registry_class": "managing_authority_call_registry",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication."
 }

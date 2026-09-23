@@ -4,12 +4,18 @@
   "source_id": "SRC-MAI-FED-CALENDAR-INDEX",
   "source_tier": "T1",
   "source_url": "https://fed.mai.gov.ro/despre/lansare-apeluri/",
-  "status": "OPEN",
+  "status": "RESOLVED_NON_MATERIAL_CHANGE",
   "first_observed_at": "2026-08-13T05:19:22.391140Z",
   "last_observed_at": "2026-09-23T00:43:47.721023Z",
+  "resolved_at": "2026-09-23T02:28:00Z",
   "previous_semantic_sha256": "7b526cc47b855f2ba95029c8b696bbd02e55c89a20c94e1fdbd681e2db3c50fe",
   "current_semantic_sha256": "b67c3937bdaf98be3855814bd6912588b4e02c12feeaa784952daa93ea2cd9ff",
+  "candidate_semantic_sha256": "b67c3937bdaf98be3855814bd6912588b4e02c12feeaa784952daa93ea2cd9ff",
+  "resolved_semantic_sha256": "b67c3937bdaf98be3855814bd6912588b4e02c12feeaa784952daa93ea2cd9ff",
   "material_fact_autoupdate_allowed": false,
+  "automatic_material_fact_update_allowed": false,
+  "material_fact_action": "NONE",
+  "publish_authorized": false,
   "blocked_fact_classes": [
     "deadline",
     "eligibility",
@@ -20,10 +26,23 @@
     "other_material_facts"
   ],
   "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
+  "resolution_reason": "Reviewed the current official MAI/FED calendar index and its currently listed IMFV calendar article. The index still identifies IMFV calendar version 11.0, and the linked official article states that version 11 was approved on 23.07.2025 and last edited on 14.01.2026. The observed page-level semantic hash change does not establish a newer calendar version or any call-specific change to deadline, eligibility, budget, scoring, beneficiaries or lifecycle status. No material funding fact update is authorized.",
+  "evidence": [
+    {
+      "url": "https://fed.mai.gov.ro/despre/lansare-apeluri/",
+      "authority": "MAI / Autoritatea de Management Afaceri Interne",
+      "observed_content": "Official calendar index currently lists Programul National 2021-2027 Managementul frontierelor si vize v11.0, dated 14.01.2026.",
+      "material_funding_fact_change_found": false
+    },
+    {
+      "url": "https://fed.mai.gov.ro/8676/calendarul-lansarii-apelurilor-de-proiecte-programul-national-2021-2027-managementul-frontierelor-si-vize-v11-0-actualizat/",
+      "authority": "MAI / Autoritatea de Management Afaceri Interne",
+      "observed_content": "Official article identifies calendar version 11.0, approved 23.07.2025, published 28.07.2025 and edited 14.01.2026.",
+      "material_funding_fact_change_found": false
+    }
+  ],
   "source_name": "managing_authority_calendar_index",
-  "candidate_semantic_sha256": "b67c3937bdaf98be3855814bd6912588b4e02c12feeaa784952daa93ea2cd9ff",
   "registry_class": "managing_authority_calendar_index",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication."
 }
