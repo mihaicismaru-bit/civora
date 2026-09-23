@@ -14,12 +14,7 @@
       "kind": "incomplete_investigation",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Dosarul Olănești–Omniasig rămâne în lucru și nu este un produs editorial complet. Nu se publică, nu se republică și nu se redistribuie până când apare informație nouă, verificată și suficient de materială pentru un articol complet.",
-      "release_when": [
-        "verified_new_material_fact_or_document",
-        "material_public_interest_value_beyond_routine_monitor_update",
-        "investigation_has_sufficient_context_for_reader",
-        "normal_story_ready_gate_passes"
-      ],
+      "release_when": ["verified_new_material_fact_or_document", "material_public_interest_value_beyond_routine_monitor_update", "investigation_has_sufficient_context_for_reader", "normal_story_ready_gate_passes"],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -29,10 +24,7 @@
       "kind": "superseded_fact_kernel_route",
       "status": "HOLD_SUPERSEDED_BY_STRICT_DOCUMENT_CHAIN",
       "reason": "Ruta derivată numai din registrul HCL este supersedată de Council Fact Kernel v1, care cere verificarea documentelor oficiale individuale pentru întregul cluster înainte de promovare. Acest ID nu poate fi proiectat public sau distribuit social.",
-      "release_when": [
-        "never_release_this_superseded_story_id",
-        "use_canonical_council_fact_kernel_v1_story_id_instead"
-      ],
+      "release_when": ["never_release_this_superseded_story_id", "use_canonical_council_fact_kernel_v1_story_id_instead"],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -42,13 +34,7 @@
       "kind": "editorial_integrity_recovery",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Materialul rapid IPJ a inclus fragmente de navigație/interfață capturate eronat drept conținut factual. Ruta este retrasă din proiecția publică și din distribuția socială până când fact-kernel-ul este reconstruit exclusiv din afirmații materiale ale comunicatului oficial și trece din nou writer/integrity/readback.",
-      "release_when": [
-        "primary_source_article_body_scoped",
-        "navigation_and_page_chrome_fragments_rejected",
-        "minimum_two_material_verified_claims",
-        "editorial_writer_and_integrity_pass",
-        "public_readback_matches_repaired_canonical_story"
-      ],
+      "release_when": ["primary_source_article_body_scoped", "navigation_and_page_chrome_fragments_rejected", "minimum_two_material_verified_claims", "editorial_writer_and_integrity_pass", "public_readback_matches_repaired_canonical_story"],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -58,13 +44,7 @@
       "kind": "editorial_integrity_recovery",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Readback-ul public al rutei DN64 încă expune fragmentul de interfață «Program Centrul de Reţinere și Arest Preventiv» ca afirmație editorială. Acesta este ID-ul rutei publice contaminate observabile și trebuie blocat explicit, separat de aliasul/ID-ul istoric deja ținut în HOLD, până la reconstrucția exclusiv din article-body evidence curat și reverificarea completă.",
-      "release_when": [
-        "primary_source_article_body_scoped",
-        "navigation_and_page_chrome_fragments_rejected",
-        "minimum_two_material_verified_claims",
-        "editorial_writer_and_integrity_pass",
-        "public_readback_matches_repaired_canonical_story"
-      ],
+      "release_when": ["primary_source_article_body_scoped", "navigation_and_page_chrome_fragments_rejected", "minimum_two_material_verified_claims", "editorial_writer_and_integrity_pass", "public_readback_matches_repaired_canonical_story"],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -74,15 +54,7 @@
       "kind": "editorial_integrity_recovery",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Materialul IPJ Bujoreni curent conține un titlu/H1 al sursei reutilizat ca afirmație factuală și un fragment citat trunchiat la limita fixă de excerpt. Ruta trebuie retrasă din proiecția publică și din distribuția socială până când evidence-ul este reconstruit exclusiv din afirmații complete din article body, fără title echo și fără citate/afirmații tăiate.",
-      "release_when": [
-        "primary_source_article_body_scoped",
-        "source_title_and_h1_echo_rejected_as_field_evidence",
-        "truncated_or_unbalanced_quote_evidence_rejected",
-        "minimum_two_material_verified_claims",
-        "editorial_writer_and_integrity_pass",
-        "contextual_safe_visual_provenance_if_media_used",
-        "public_readback_matches_repaired_canonical_story_and_og_metadata"
-      ],
+      "release_when": ["primary_source_article_body_scoped", "source_title_and_h1_echo_rejected_as_field_evidence", "truncated_or_unbalanced_quote_evidence_rejected", "minimum_two_material_verified_claims", "editorial_writer_and_integrity_pass", "contextual_safe_visual_provenance_if_media_used", "public_readback_matches_repaired_canonical_story_and_og_metadata"],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -92,10 +64,37 @@
       "kind": "time_bounded_service_expiry",
       "status": "HOLD_EXPIRED_SERVICE_STATE",
       "reason": "Materialul descrie starea verificată în 23 septembrie 2026 a sectorului Rânca–Obârșia Lotrului și precizează programul 09:00–20:00. După ora 20:00 nu mai poate fi proiectat ca lead/current-status story fără o nouă verificare primară; rămâne doar în arhivă.",
-      "release_when": [
-        "never_release_this_date_specific_story_id_as_current_status",
-        "publish_new_verified_service_story_id_for_a_new_date_or_material_road_status"
-      ],
+      "release_when": ["never_release_this_date_specific_story_id_as_current_status", "publish_new_verified_service_story_id_for_a_new_date_or_material_road_status"],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-343-20260916",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Ruta publică folosește titlul administrativ al HCL 343 și un rezumat generic al documentului. Canonul VÂLCEA CLAR interzice publicarea documentului/registrului ca produs editorial. Materialul trebuie rescris cu miza bugetară, suma, destinația, actorii, consecințele, comparația/contextul și necunoscutele, pe baza documentului integral și a anexelor relevante.",
+      "release_when": ["full_document_and_relevant_annexes_resolved", "reader_consequence_and_budget_destination_explained", "headline_and_dek_are_journalistic_not_register_copy", "fact_kernel_claim_trace_complete", "editorial_writer_and_integrity_pass", "public_readback_matches_rewritten_story"],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-344-20260916",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Ruta publică folosește titlul administrativ al HCL 344 și un rezumat generic al documentului. Canonul VÂLCEA CLAR cere explicarea schimbării reale din rețeaua școlară, a unităților/persoanelor afectate și a momentului de aplicare, nu republicarea titlului hotărârii.",
+      "release_when": ["full_document_and_annexes_resolved", "affected_school_network_change_explained", "headline_and_dek_are_journalistic_not_register_copy", "fact_kernel_claim_trace_complete", "editorial_writer_and_integrity_pass", "public_readback_matches_rewritten_story"],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-345-20260916",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Ruta publică folosește titlul administrativ al HCL 345 și un rezumat generic al documentului despre autorizarea anuală a jocurilor de noroc. Până la rezolvarea documentului integral, a operatorului, amplasamentului, condițiilor și contextului local, aceasta nu este un produs jurnalistic publicabil.",
+      "release_when": ["full_document_resolved", "operator_location_conditions_and_public_interest_context_verified", "headline_and_dek_are_journalistic_not_register_copy", "fact_kernel_claim_trace_complete", "editorial_writer_and_integrity_pass", "public_readback_matches_rewritten_story"],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
