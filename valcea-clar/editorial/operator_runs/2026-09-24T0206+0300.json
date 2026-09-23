@@ -1,0 +1,89 @@
+{
+  "schema_version": "1.0",
+  "run_at": "2026-09-24T02:06:00+03:00",
+  "mode": "autonomous_editorial_cycle",
+  "county_scope": "Vâlcea",
+  "source_scan": {
+    "mode": "delta_only_plus_local_life_hot_watch",
+    "scanned_localities": [
+      "Drăgășani",
+      "Bălcești",
+      "Călimănești",
+      "Brezoi",
+      "Horezu",
+      "Voineasa",
+      "Ionești",
+      "Tomșani",
+      "Râmnicu Vâlcea"
+    ],
+    "new_low_risk_news_stories": 0,
+    "policy": "No filler; stable/no-delta sources remain in rotation."
+  },
+  "material_deltas": [
+    {
+      "event_id": "vanner-liber-volatilium-rmvalcea-20260924",
+      "product": "UNDE_IEȘIM",
+      "locality": "Râmnicu Vâlcea",
+      "fact_kernel": {
+        "SOURCE_CLAIM": [
+          "Liber Volatilium is scheduled for 24 September 2026 at 19:00 in Sala Studio, Teatrul Anton Pann.",
+          "Current corroborated local listing states free admission; the same monthly cultural agenda lists the performance at the same venue/date/time."
+        ],
+        "UNKNOWN": [
+          "No directly indexed organiser/venue page was available in this cycle; therefore the event remains sourced as T2 corroborated rather than primary T1."
+        ]
+      },
+      "status": "SYNCED_CANONICAL_EVENT_REGISTRY"
+    },
+    {
+      "event_id": "vanner-liber-volatilium-rmvalcea-20260925",
+      "product": "UNDE_IEȘIM",
+      "locality": "Râmnicu Vâlcea",
+      "fact_kernel": {
+        "SOURCE_CLAIM": [
+          "Liber Volatilium is scheduled for 25 September 2026 at 19:00 in Sala Studio, Teatrul Anton Pann.",
+          "Current corroborated local listing states free admission."
+        ]
+      },
+      "status": "SYNCED_CANONICAL_EVENT_REGISTRY"
+    },
+    {
+      "event_id": "raliul-valcii-start-festiv-mira-20260924",
+      "product": "UNDE_IEȘIM / SPORT",
+      "locality": "Râmnicu Vâlcea",
+      "fact_kernel": {
+        "CONFIRMED_FACT": [
+          "The official Raliul Vâlcii programme lists the start-festiv in Centrul Civic on 24 September 2026, 19:00–21:00, with MIRA scheduled at 20:30."
+        ],
+        "UNKNOWN": [
+          "The organiser page does not state a ticket price/access condition in the verified extract; price remains unknown."
+        ]
+      },
+      "status": "SYNCED_CANONICAL_EVENT_REGISTRY"
+    }
+  ],
+  "local_life": {
+    "canonical_event_count": 11,
+    "new_event_records": 3,
+    "dedupe_status": "PASS",
+    "synced_commit": "0bd0d6b5a1f00b51adfcc3fc384b6ef4c813cf1a",
+    "public_readback": "UNCONFIRMED_CACHE_MISS"
+  },
+  "publication": {
+    "site": "NO_NEW_NEWS_STORY; LOCAL_LIFE_CANONICAL_UPDATED_PUBLIC_READBACK_UNCONFIRMED",
+    "facebook": "HOLD_NO_NEW_CONFIRMED_PUBLIC_STORY",
+    "instagram": "HOLD_NO_NEW_CONFIRMED_PUBLIC_STORY"
+  },
+  "technical_followup": {
+    "status": "OPEN",
+    "finding": "CHATGPT_SITES_INTEGRATION.md documents build_sites_export.py as the presentation payload builder, but the referenced script is absent from main. This is a concrete presentation-bridge drift and likely contributes to canonical-runtime/public-host divergence; do not claim it is the sole cause until the bridge consumer is identified."
+  },
+  "open_followups": [
+    "Resolve presentation-bridge deployment/currentness divergence and restore the documented deterministic Sites export contract.",
+    "Seek a directly indexed Vanner/Teatrul Anton Pann primary source for Liber Volatilium; update the same stable event IDs if access/reservation details change.",
+    "Continue hot-watch for Raliul Vâlcii restrictions and service changes without creating duplicate stories."
+  ],
+  "human_decisions_required": [
+    "Ionești/Tomșani homicide remains NEEDS_HUMAN_REVIEW before any publication."
+  ]
+}
