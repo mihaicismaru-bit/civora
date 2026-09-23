@@ -44,3 +44,12 @@
 .rpmPromoCopy{min-width:0}
 @media(max-width:860px){.rpmBrochureCard{grid-template-columns:110px 1fr}.rpmPromo{grid-template-columns:96px 1fr}.rpmPromo>a{grid-column:1/-1}.rpmPromoImg{width:96px;height:78px}}
 @media(max-width:560px){.rpmBrochureCard{grid-template-columns:1fr}.rpmBrochurePreview{justify-content:flex-start}.rpmPromo{grid-template-columns:82px 1fr}.rpmPromoImg{width:82px;height:70px}}
+
+.rpmCurriculum{padding-top:58px}
+.rpmCurriculumGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:32px}
+.rpmCurriculumGrid article{border:1px solid var(--rpm-line);border-radius:14px;padding:20px;background:#fff}
+.rpmCurriculumGrid h3{margin:0 0 8px;font-size:1.05rem}
+.rpmCurriculumGrid p{margin:0;color:var(--rpm-muted)}
+.rpmCurriculumNote{max-width:900px;margin:22px 0 0;color:var(--rpm-muted);font-size:1.02rem}
+@media(max-width:860px){.rpmCurriculumGrid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.rpmCurriculumGrid{grid-template-columns:1fr}}
