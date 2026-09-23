@@ -43,7 +43,8 @@ def validate(config_path: Path, instance_root: str | None = None) -> list[str]:
     unknown = sorted(set(cfg) - allowed_top)
     require(not unknown, f"unknown top-level fields: {', '.join(unknown)}", errors)
 
-    require(cfg.get("schema_version") == "1.0", "schema_version must be 1.0", errors)
+    schema_version = str(cfg.get("schema_version", ""))
+    require(schema_version in {"1.0", "1.1"}, "schema_version must be 1.0 or 1.1", errors)
     id_pattern = re.compile(r"^[a-z0-9][a-z0-9-]{1,63}$")
     channel_id = str(cfg.get("channel_id", ""))
     instance_id = str(cfg.get("instance_id", ""))
@@ -51,7 +52,8 @@ def validate(config_path: Path, instance_root: str | None = None) -> list[str]:
     require(bool(id_pattern.fullmatch(instance_id)), "invalid instance_id", errors)
 
     platforms = set(schema["properties"]["platform"]["enum"])
-    require(cfg.get("platform") in platforms, f"unsupported platform: {cfg.get('platform')}", errors)
+    platform = cfg.get("platform")
+    require(platform in platforms, f"unsupported platform: {platform}", errors)
     statuses = set(schema["properties"]["status"]["enum"])
     require(cfg.get("status") in statuses, f"unsupported status: {cfg.get('status')}", errors)
     require(len(str(cfg.get("audience_promise", "")).strip()) >= 12, "audience_promise is too short", errors)
@@ -99,8 +101,29 @@ def validate(config_path: Path, instance_root: str | None = None) -> list[str]:
     media = cfg.get("media_policy")
     require(isinstance(media, dict), "media_policy must be an object", errors)
     if isinstance(media, dict):
-        for key in ("real_media_only", "provenance_required", "reuse_rights_required", "synthetic_real_person_forbidden"):
-            require(media.get(key) is True, f"media_policy.{key} must be true", errors)
+        require(isinstance(media.get("real_media_only"), bool), "media_policy.real_media_only must be boolean", errors)
+        require(media.get("provenance_required") is True, "media_policy.provenance_required must be true", errors)
+        require(media.get("synthetic_real_person_forbidden") is True, "media_policy.synthetic_real_person_forbidden must be true", errors)
+        if schema_version == "1.0":
+            require(media.get("real_media_only") is True, "media_policy.real_media_only must be true for schema 1.0", errors)
+            require(media.get("reuse_rights_required") is True, "media_policy.reuse_rights_required must be true for schema 1.0", errors)
+        else:
+            rights_guard = (
+                media.get("reuse_rights_required") is True
+                or media.get("reuse_rights_required_for_third_party_media") is True
+            )
+            require(rights_guard, "media_policy must require reuse rights for third-party media", errors)
+            if media.get("real_media_only") is False:
+                families = media.get("allowed_families")
+                require(isinstance(families, list) and bool(families), "media_policy.allowed_families must be non-empty when real_media_only is false", errors)
+                require(media.get("invented_documentary_photo_forbidden") is True, "media_policy.invented_documentary_photo_forbidden must be true when synthetic/editorial visuals are allowed", errors)
+            if platform == "facebook" and isinstance(native_formats, list) and "editorial_card" in native_formats:
+                require(media.get("editorial_card_allowed") is True, "Facebook editorial_card requires media_policy.editorial_card_allowed=true", errors)
+                require(media.get("editorial_card_site_reuse_forbidden") is True, "Facebook editorial_card must be forbidden from site reuse", errors)
+            if platform == "instagram" and isinstance(native_formats, list):
+                generated_formats = {"editorial_fact_card", "data_card", "document_led", "editorial_layout"}
+                if generated_formats.intersection(native_formats):
+                    require(media.get("invented_documentary_photo_forbidden") is True, "Instagram editorial formats require invented_documentary_photo_forbidden=true", errors)
 
     links = cfg.get("link_policy")
     require(isinstance(links, dict), "link_policy must be an object", errors)
@@ -132,6 +155,13 @@ def validate(config_path: Path, instance_root: str | None = None) -> list[str]:
             prefix = instance_root.rstrip("/") + "/"
             require(outbox.startswith(prefix), f"outbox_path escapes instance root {prefix}", errors)
             require(state_path.startswith(prefix), f"state_path escapes instance root {prefix}", errors)
+
+    delivery_truth = cfg.get("delivery_truth")
+    if delivery_truth is not None:
+        require(isinstance(delivery_truth, dict), "delivery_truth must be an object", errors)
+        if isinstance(delivery_truth, dict):
+            require(delivery_truth.get("delivered_requires_external_receipt_or_readback") is True, "delivery_truth.delivered_requires_external_receipt_or_readback must be true", errors)
+            require(delivery_truth.get("workflow_success_is_not_delivery") is True, "delivery_truth.workflow_success_is_not_delivery must be true", errors)
 
     metrics = cfg.get("metrics")
     require(isinstance(metrics, dict), "metrics must be an object", errors)
