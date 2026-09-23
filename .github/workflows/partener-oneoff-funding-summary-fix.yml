@@ -1,0 +1,96 @@
+name: PARTENER one-off funding summary repair
+
+on:
+  push:
+    branches:
+      - partener/funding-summary-budget-fallback-20260923
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: partener/funding-summary-budget-fallback-20260923
+          fetch-depth: 0
+
+      - name: Apply funding summary repair and regressions
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path: Path, old: str, new: str) -> None:
+              text = path.read_text(encoding='utf-8')
+              if old not in text:
+                  raise SystemExit(f'expected patch anchor missing in {path}: {old[:100]!r}')
+              if text.count(old) != 1:
+                  raise SystemExit(f'patch anchor not unique in {path}: {old[:100]!r}')
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+
+          builder = Path('partener-eu/ops/build_public_static_pages.py')
+          replace_once(
+              builder,
+              '''    if isinstance(value, dict):\n        preferred = (\n''',
+              '''    if isinstance(value, dict):\n        amount = value.get("amount")\n        if amount is not None:\n            currency = str(value.get("currency") or "").strip().upper()\n            rendered = display_value(amount)\n            return rendered + (f" {currency}" if currency else "")\n        preferred = (\n''',
+          )
+          replace_once(
+              builder,
+              '''    grant = (\n        fact(dossier, "Grant")\n        or fact(dossier, "Finanțare")\n        or fact(dossier, "Valoare proiect")\n    )\n''',
+              '''    finance_candidates = [\n        fact(dossier, "Grant"),\n        fact(dossier, "Finanțare"),\n        fact(dossier, "Valoare proiect"),\n        fact(dossier, "Buget"),\n    ]\n    grant = next(\n        (\n            row\n            for row in finance_candidates\n            if row and str(row.get("confidence") or "").upper() == "CONFIRMED"\n        ),\n        None,\n    )\n    if grant is None:\n        grant = next(\n            (\n                row\n                for row in finance_candidates\n                if row and display_value(row.get("value")) != "Neconfirmat"\n            ),\n            None,\n        )\n    finance_label = (\n        "Buget apel" if grant and fold(grant.get("label")) == "buget" else "Finanțare"\n    )\n''',
+          )
+          replace_once(
+              builder,
+              '''            f"<span><b>Finanțare:</b> {esc(display_value(grant.get('value')))}</span>"\n''',
+              '''            f"<span><b>{esc(finance_label)}:</b> {esc(display_value(grant.get('value')))}</span>"\n''',
+          )
+          replace_once(
+              builder,
+              '''    "valoare proiect",\n}\n''',
+              '''    "valoare proiect",\n    "buget",\n}\n''',
+          )
+
+          js = Path('partener-eu/web/home-concierge-vnext.js')
+          replace_once(
+              js,
+              "const fundingFact=d=>['Grant','Finanțare','Valoare proiect'].map(x=>confirmed(d,x)).find(Boolean)||null;",
+              "const fundingFact=d=>['Grant','Finanțare','Valoare proiect','Buget'].map(x=>confirmed(d,x)).find(Boolean)||null;",
+          )
+          replace_once(
+              js,
+              '''   const max=v.maximum_total_project_value_eur??v.maximum_eur??v.max_eur;\n''',
+              '''   const amount=v.amount;\n   if(amount!=null&&Number.isFinite(Number(amount))){\n     const currency=String(v.currency||'').trim().toUpperCase();\n     return `${new Intl.NumberFormat('ro-RO').format(Number(amount))}${currency?` ${currency}`:''}`;\n   }\n   const max=v.maximum_total_project_value_eur??v.maximum_eur??v.max_eur;\n''',
+          )
+
+          static_test = Path('partener-eu/ops/test_public_static_pages.py')
+          replace_once(
+              static_test,
+              '''payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))\n''',
+              '''payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))\n\n# A confirmed call budget is a valid financing summary when grant size is still\n# unknown. This protects FAMI-like dossiers from rendering "Neconfirmat" even\n# though the canonical signed guide already confirms the call allocation.\nbudget_probe = {\n    "id": "budget-probe",\n    "title": "Budget probe",\n    "programme": "TEST",\n    "publicationState": "PUBLISHABLE",\n    "status": "OPEN",\n    "quickFacts": [\n        {"label": "Grant", "value": "Neconfirmat", "confidence": "UNKNOWN"},\n        {\n            "label": "Buget",\n            "value": {\n                "amount": 5_250_000,\n                "currency": "RON",\n                "basis": "FEN_AVAILABLE_CALL_ALLOCATION",\n            },\n            "confidence": "CONFIRMED",\n        },\n    ],\n}\nassert module.display_value(budget_probe["quickFacts"][1]["value"]) == "5.250.000 RON"\nprobe_card = module.card(budget_probe, {"budget-probe": "budget-probe"})\nassert "Buget apel:</b> 5.250.000 RON" in probe_card\nassert "Finanțare:</b> Neconfirmat" not in probe_card\nprobe_home = module.compact_home_dossier(\n    budget_probe, {"budget-probe": "budget-probe"}\n)\nassert any(row.get("label") == "Buget" for row in probe_home.get("quickFacts") or [])\n''',
+          )
+
+          home_test = Path('partener-eu/ops/test_home_concierge_vnext.py')
+          replace_once(
+              home_test,
+              '''    'const P=window.PARTENER_HOME_DATA||{};',\n''',
+              '''    'const P=window.PARTENER_HOME_DATA||{};',\n    "['Grant','Finanțare','Valoare proiect','Buget']",\n    'const amount=v.amount;',\n''',
+          )
+          PY
+
+          python -m py_compile partener-eu/ops/build_public_static_pages.py partener-eu/ops/test_public_static_pages.py partener-eu/ops/test_home_concierge_vnext.py
+          node --check partener-eu/web/home-concierge-vnext.js
+          python partener-eu/ops/test_public_static_pages.py
+          python partener-eu/ops/test_home_concierge_vnext.py
+
+      - name: Commit bounded repair and remove one-off workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/partener-oneoff-funding-summary-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add partener-eu/ops/build_public_static_pages.py partener-eu/ops/test_public_static_pages.py partener-eu/ops/test_home_concierge_vnext.py partener-eu/web/home-concierge-vnext.js .github/workflows/partener-oneoff-funding-summary-fix.yml
+          git commit -m "PARTENER: render confirmed call budgets in funding summaries"
+          git push origin HEAD:partener/funding-summary-budget-fallback-20260923
