@@ -1,40 +1,45 @@
 # PARTENER.EU — roadmap de producție
 
-Actualizat: 14 august 2026
+Actualizat: 23 septembrie 2026
 
 ## Stare curentă
 
-- site public funcțional și monitorizat;
-- P10.1 Data Plane implementat: contract, acoperire, prospețime, replay și izolare pe sursă;
-- P11 integrat: 26 oportunități canonice, 55 dovezi, 26 taskuri de rezoluție;
-- STEP-LLL, AFIR Energie 2026, Clustere inovative 1.2.2, PIDS – Servicii de asistență și suport în luarea deciziei, apelul rezidențial Nord-Est și Regenerare urbană 8.1 sunt publicabile pe baza faptelor materiale demonstrate; restul câmpurilor rămân blocate când nu sunt demonstrate;
-- frontend conectat la P11: 4 apeluri OPEN și 2 apeluri EXPECTED cu fapte materiale verificate, 26 oportunități monitorizate;
-- quality gate local: 18/18 PASS, inclusiv replay semantic fără scriere pentru rezoluții și proiecția publică;
-- transportul securizat strict rămâne PENDING până când HTTP și originul Pages păstrează HTTPS;
-- P10 rămâne deschis până la 30 de zile distincte de validare eligibilă.
+- site public funcțional și monitorizat, cu Funding Concierge ca intrare principală;
+- fluxul canonic rămâne DISCOVER → FETCH → HASH → PARSE → NORMALIZE → DEDUP → RECONCILE → QUALITY GATE → PUBLISH → CHECKPOINT → ALERT;
+- AFIR este operat pe corpus autoritativ curent, iar PEO calendar este curent; faptele materiale rămân fail-closed în lipsa reconcilierii;
+- MySMIS direct este separat de canalul MIPE legacy: un incident al corpusului legacy nu poate bloca ori autoriza automat fapte MySMIS independente;
+- sursele discovery-only sunt separate de autoritatea pentru fapte materiale, astfel încât un transport WAF/403 pe o suprafață de discovery nu degradează artificial readiness-ul editorial;
+- frontend-ul nu mai poate prezenta un apel ca OPEN numai dintr-un snapshot static vechi: OPEN cere status verificat și termen verificat neexpirat;
+- dosarele sunt construite universal pentru apelurile identificate și sunt prioritizate OPEN → PUBLIC_CONSULTATION → EXPECTED/UPCOMING → rest;
+- schimbările de hash rămân candidate până la reconciliere; niciun score de completeness/depth nu este interpretat drept probabilitate de aprobare.
+
+## Situație MAI / FED — 23.09.2026
+
+- driftul semantic al indexului oficial de calendare a fost revizuit: pagina continuă să indice calendarul IMFV v11.0, fără dovadă de versiune nouă; schimbarea este tratată ca non-materială și nu autorizează actualizări de termen/buget/status;
+- driftul semantic al paginii Ghidului general a fost revizuit: versiunea curentă rămâne PNAI v4.0, 17.03.2026, Instrucțiunea AM 19; schimbarea este tratată ca non-materială;
+- registrul oficial de apeluri are însă o schimbare materială reală: șapte apeluri FAMI au fost lansate la 16.09.2026 — AM41D, AM22M, AM22L, AM22N, AM11I, AM11H și AM2A1G — iar paginile oficiale le marchează Activ, cu termen 16.10.2026 ora 16:00;
+- publicarea bugetelor pentru aceste șapte apeluri rămâne blocată până la reconciliere: pe aceleași pagini oficiale textul narativ exprimă suma în lei, în timp ce sumarul paginii etichetează aceeași valoare numerică în EUR;
+- taskul `SRC-MAI-FED-CALLS` rămâne deschis până când apelurile sunt reprezentate în dosare/lifecycle cu provenance verificat și conflictul de monedă este rezolvat din ghidurile specifice semnate.
 
 ## Ordine de execuție
 
-1. Integrarea ramurii de producție și confirmarea CI/Pages.
-2. Activarea HTTPS enforcement din setarea administrativă GitHub Pages.
-3. Rezolvarea metodică a celor 20 taskuri P11 rămase, fără autopromovarea faptelor materiale.
-4. Extinderea ingestiei MySMIS/MIPE/AFIR/ADR și regenerarea automată a indexului.
-5. P12: matching solicitant–apel și checklist explicabil.
-6. P13: watchlist și alerte fără duplicate.
-7. P14: știri, fișe de apel și rezumate de ghid generate din fapte verificate.
-8. P15: email, WordPress și rețele sociale numai după autorizare.
-9. P16: operare completă, 30 de zile validate și CIVORA v1.0.
-
-## Ultimul increment validat
-
-- P11-R08 — acoperire deterministă a surselor autoritative din proiecția publică;
-- fiecare evidență verificată expune hostul derivat strict din URL-ul HTTPS, iar fiecare oportunitate are un sumar verificabil pe hosturi și niveluri T1/T1B;
-- sumarul public arată 17 legături din șapte hosturi: 15 T1 și două T1B; patru oportunități depind de un singur host și două au hosturi multiple;
-- gate-ul respinge deriva hostului, acoperirii pe oportunitate ori sumarului agregat, iar această telemetrie nu poate autoriza publicarea;
-- corpusul și faptele materiale nu sunt modificate: 26 oportunități, șase publicabile și 20 taskuri deschise sau în review.
+1. Finalizarea reconcilierii celor șapte apeluri MAI/FED: ghid specific semnat → monedă/buget → beneficiari → activități → criterii → dosar → lifecycle → public projection.
+2. Reducerea blocajelor materiale de freshness/transport rămase, fără relaxarea fail-closed.
+3. Continuarea enrichment-ului dosarelor OPEN, apoi PUBLIC_CONSULTATION și EXPECTED/UPCOMING.
+4. Extinderea coverage cu surse oficiale lipsă și generarea de dosar pentru fiecare apel identificat.
+5. Audit UX continuu: căutare → rezultate → filtre → dosar → sursa oficială, desktop + mobil + keyboard/focus.
+6. Curățarea incrementală a driftului/telemetriei legacy, numai cu teste și rollback clar.
+7. Matching solicitant–apel și checklist explicabil, fără scoruri prezentate ca probabilitate de aprobare.
+8. Watchlist și alerte fără duplicate.
+9. Știri, modificări de ghid și analize numai din kernel factual verificat.
 
 ## Reguli de închidere
 
 Nicio consultare, dată de calendar sau valoare dintr-un draft nu devine automat
 apel deschis, termen, buget, grant, eligibilitate ori punctaj. Oportunitățile fără
 dovezi suficiente rămân vizibile numai ca monitorizate/în verificare.
+
+Un incident este închis numai după test + dovadă + checkpoint + replay/rollback +
+ieșire verificată. Pentru frontend este obligatoriu lanțul reproducere → fix →
+regression test → CI/deploy → readback public. Pentru ingestie sunt obligatorii
+dovada de fetch/hash/parse/reconcile/QG și starea finală.
