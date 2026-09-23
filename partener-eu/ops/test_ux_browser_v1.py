@@ -135,6 +135,11 @@ def audit_viewport(browser, name: str, width: int, height: int) -> dict:
                 errors.append('discovery search lost focus after filter render')
         status=page.locator('#fs')
         if status.count()==1:
+            if not status.is_visible():
+                summary=page.locator('.filterDrawer>summary')
+                if summary.count()==1:
+                    summary.click()
+                    page.wait_for_timeout(120)
             status.select_option('OPEN')
             page.wait_for_timeout(260)
             if page.locator('.activeFilters [data-clear-filter="status"]').count()!=1:
