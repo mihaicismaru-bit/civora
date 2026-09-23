@@ -39,7 +39,9 @@ def audit_viewport(browser, name: str, width: int, height: int) -> dict:
 
     buttons = page.locator('.navlink')
     labels = [buttons.nth(i).inner_text().strip() for i in range(buttons.count())]
-    for expected in ('Oportunități', 'Calendar', 'Întreabă PARTENER.EU'):
+    # Human-first IA uses "Finanțări" as the primary discovery label; users
+    # should not need to translate a product term such as "Oportunități".
+    for expected in ('Finanțări', 'Calendar', 'Întreabă PARTENER.EU'):
         if expected not in labels:
             errors.append(f'missing nav action: {expected}')
 
