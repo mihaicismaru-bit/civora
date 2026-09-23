@@ -1,24 +1,37 @@
 {
-  "requested_at": "2026-09-23T21:58:13+03:00",
+  "requested_at": "2026-09-24T00:27:00+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "COUNTY-WIDE DELTA + EDITORIAL CORRECTION. The public homepage readback confirms the Transalpina date-specific service story is no longer the lead/current story, so that currentness repair is effective. A new quality audit found three reader-facing HCL register-derived routes (rm-valcea-hcl-343-20260916, -344-, -345-) still exposed with raw administrative titles and generic document summaries. This violates the canonical rule that public documents are evidence/raw material, not the editorial product. Publication holds have now been added for all three pending full journalistic rewrites; rebuild public surfaces so those routes disappear from current/news/category projection and are not social-distributed. Preserve archive/audit evidence and do not silently rewrite unsupported details. MATERIAL SERVICE FOLLOW-UP: official Raliul Vâlcii channels published traffic restrictions on 22 September for 24 and 26 September, corroborated by the event's official program and FRAS coverage. Treat this as a low-risk CE URMEAZĂ / PE SCURT service update candidate, not PR copy: explain what changes for drivers, exact streets/times, what remains open/unknown, the 24 September start-festive timing, and the 26 September superspecial. Source claims must stay attributed to organizer/FRAS unless police/municipality primary corroboration is resolved. Do not invent closures beyond the published list. Continue whole-county rotation; no filler.",
+  "reason": "COUNTY-WIDE DELTA + LOCAL LIFE UPDATE. Preserve the current HCL publication holds and the Raliul Valcii service follow-up. A new low-risk service story for Horezu has passed the canonical Fact Kernel and Live Newsroom gates: the municipality announces closure of the road toward Varful lui Roman on 26 September 2026, 10:00-18:00; public-domain deployment readback remains pending, so do not claim external delivery until HTTP readback resolves. LOCAL LIFE MATERIAL DELTA: the official Filarmonica Ion Dumitrescu calendar confirms PARALELE CORALE on 25 September 2026, 19:00-20:30, Sala Lahovari, and FLOAREA DARULUI on 26 September 2026, 19:00-20:00, Sala Lahovari; the official FLOAREA DARULUI detail page states free admission. Materialize these as structured events, with unknown price/access for PARALELE CORALE unless a primary detail page resolves it. Continue whole-county rotation; no filler.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-    "auto-raliul-valcii-official-news-f6e28bbb1533"
+    "auto-raliul-valcii-official-news-f6e28bbb1533",
+    "horezu-drum-vf-roman-inchis-20260926"
   ],
   "editorial_signals": [
+    {
+      "signal_id": "horezu-vf-roman-road-closure-20260926",
+      "locality": "Horezu",
+      "status": "CONFIRMED_FACT",
+      "product_candidate": "PE_SCURT_SERVICE",
+      "risk": "LOW_SERVICE_TRAFFIC",
+      "claim": "Primaria Horezu announces closure of the road toward Varful lui Roman on 26 September 2026 between 10:00 and 18:00. The indexed primary announcement does not specify motive, detours or access exceptions.",
+      "source_url": "https://www.orasul-horezu.ro/anunturi",
+      "source_tier": "T1",
+      "checked_at": "2026-09-24T00:10:00+03:00",
+      "next_action": "Keep the same story under watch for cancellation, time-window changes, detours or access exceptions; do not infer unknowns."
+    },
     {
       "signal_id": "raliul-valcii-traffic-restrictions-20260922",
       "locality": "Râmnicu Vâlcea / județul Vâlcea",
       "status": "CONFIRMED_SOURCE_CLAIM_PRIMARY_ORGANISER_PLUS_FRAS_CONTEXT",
       "product_candidate": "CE_URMEAZA_OR_PE_SCURT_SERVICE_UPDATE",
       "risk": "LOW_SERVICE_TRAFFIC",
-      "claim": "Raliul Vâlcii official site lists traffic restrictions in central Râmnicu Vâlcea for 24 September 18:00–20:00 (taxi station Centrul Civic–Romarta) and 26 September 07:00–22:00 for the Superspeciala Nurvil Show, including named segments of Calea lui Traian, Știrbei Vodă, Căpitan Negoescu and Tudor Vladimirescu plus resident-access rules. FRAS confirms the rally runs 24–26 September, starts ceremonially at 19:00 on 24 September and ends sportively with the city superspecial on 26 September.",
+      "claim": "Raliul Vâlcii official site lists traffic restrictions in central Râmnicu Vâlcea for 24 September 18:00–20:00 and 26 September 07:00–22:00 for the Superspeciala Nurvil Show; FRAS confirms the rally runs 24–26 September.",
       "source_url": "https://raliulvalcii.ro/stiri/restrictii-circulatie-raliul-valcii-2026/",
       "corroboration_url": "https://fras.ro/raliul-valcii-nurvil-finala-sezonului-probe-pe-macadam-si-doua-concerte-la-ramnicu-valcea/",
       "source_tier": "T1_ORGANISER_PLUS_T1_SPORT_FEDERATION_CONTEXT",
       "checked_at": "2026-09-23T21:58:13+03:00",
-      "next_action": "Build/update a reader-service fact kernel with exact restriction intervals and streets; seek municipality/police corroboration if available, but do not delay the rest of the newsroom."
+      "next_action": "Build/update a reader-service fact kernel with exact restriction intervals and streets; seek municipality/police corroboration if available."
     },
     {
       "signal_id": "ionesti-homicide-arrest-warrant-20260923-2049",
@@ -38,7 +51,7 @@
       "status": "EXPIRED_OR_UNVERIFIED_SERVICE_SIGNAL",
       "product_candidate": "NONE_UNTIL_PRIMARY_CURRENT_READBACK",
       "risk": "MEDIUM_TRAFFIC_CURRENTNESS",
-      "claim": "A secondary report published 23 September says a defective machine obstructed DN7 at km 200+400 in Călimănești and traffic was being directed by pilots and police. Current status at 21:01 is not independently confirmed.",
+      "claim": "A secondary report published 23 September says a defective machine obstructed DN7 at km 200+400 in Călimănești and traffic was being directed by pilots and police. Current status is not independently confirmed.",
       "source_url": "https://sibiu100.ro/eveniment/acum-un-utilaj-blocheaza-valea-oltului-se-circula-cu-dificultate/",
       "source_tier": "T2",
       "checked_at": "2026-09-23T21:01:15+03:00",
@@ -49,15 +62,47 @@
     {
       "story_ids": ["rm-valcea-hcl-343-20260916", "rm-valcea-hcl-344-20260916", "rm-valcea-hcl-345-20260916"],
       "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
-      "reason": "Public readback shows raw administrative HCL titles/generic document summaries. Documents are evidence, not product. Remove from public projections until rewritten with consequences, actors, money/beneficiaries, context, unknowns and complete claim-level provenance."
+      "reason": "Public readback still shows raw administrative HCL titles/generic document summaries while the canonical runtime excludes them. Keep them barred from public and social projections until rewritten journalistically; deployment/currentness divergence remains unresolved."
     }
   ],
   "coverage_cycle": {
-    "deep_scan_zone": "county_delta_plus_currentness_and_reader_quality",
+    "deep_scan_zone": "county_delta_plus_local_life_hot_watch",
     "scanned_localities": ["Drăgășani", "Bălcești", "Călimănești", "Brezoi", "Horezu", "Voineasa", "Ionești", "Tomșani", "Râmnicu Vâlcea"],
-    "material_delta_localities": ["Râmnicu Vâlcea", "Ionești/Tomșani"],
-    "no_material_delta_noted": ["Drăgășani", "Bălcești", "Horezu", "Voineasa"],
+    "material_delta_localities": ["Horezu", "Râmnicu Vâlcea"],
+    "no_material_delta_noted": ["Drăgășani", "Bălcești", "Brezoi", "Voineasa"],
     "policy": "No filler; stale time-bounded service items and document-as-product stories fail closed from reader surfaces."
   },
-  "event_deltas": []
+  "event_deltas": [
+    {
+      "event_id": "filarmonica-paralele-corale-20260925",
+      "title": "Paralele Corale",
+      "event_start": "2026-09-25",
+      "start_time": "19:00",
+      "venue": "Sala Lahovari",
+      "locality": "Râmnicu Vâlcea",
+      "category": "concert coral",
+      "price": "unknown",
+      "organiser": "Filarmonica Ion Dumitrescu Râmnicu Vâlcea",
+      "source_url": "https://filarmonica-valcea.ro/evenimente/",
+      "source_tier": "T1",
+      "checked_at": "2026-09-24T00:27:00+03:00",
+      "status": "scheduled"
+    },
+    {
+      "event_id": "filarmonica-floarea-darului-20260926",
+      "title": "Floarea Darului",
+      "event_start": "2026-09-26",
+      "start_time": "19:00",
+      "venue": "Sala Lahovari",
+      "locality": "Râmnicu Vâlcea",
+      "category": "concert coral / muzică veche",
+      "price": "gratuit",
+      "free": true,
+      "organiser": "Centrul Cultural Municipal Râmnicu Vâlcea / Filarmonica Ion Dumitrescu / Arhiepiscopia Râmnicului",
+      "source_url": "https://filarmonica-valcea.ro/eveniment/floarea-darului/",
+      "source_tier": "T1",
+      "checked_at": "2026-09-24T00:27:00+03:00",
+      "status": "scheduled"
+    }
+  ]
 }
