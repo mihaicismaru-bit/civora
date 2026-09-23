@@ -10,10 +10,15 @@ const statusOverrides=P.freshnessGuard?.dossierStatusOverrides||{};
 const currentStatus=d=>statusOverrides[d?.id]||d?.status||'REVIEW';
 const fact=(d,label)=>d?.quickFacts?.find(x=>norm(x?.label)===norm(label));
 const confirmed=(d,label)=>{const x=fact(d,label);return x&&String(x.confidence||'').toUpperCase()==='CONFIRMED'?x:null};
-const fundingFact=d=>['Grant','Finanțare','Valoare proiect'].map(x=>confirmed(d,x)).find(Boolean)||null;
+const fundingFact=d=>['Grant','Finanțare','Valoare proiect','Buget'].map(x=>confirmed(d,x)).find(Boolean)||null;
 function displayValue(v){
  if(v==null)return '';
  if(typeof v==='object'){
+   const amount=v.amount;
+   if(amount!=null&&Number.isFinite(Number(amount))){
+     const currency=String(v.currency||'').trim().toUpperCase();
+     return `${new Intl.NumberFormat('ro-RO').format(Number(amount))}${currency?` ${currency}`:''}`;
+   }
    const max=v.maximum_total_project_value_eur??v.maximum_eur??v.max_eur;
    if(max!=null&&Number.isFinite(Number(max)))return `max. ${new Intl.NumberFormat('ro-RO').format(Number(max))} EUR`;
    const min=v.minimum_eur??v.min_eur;
