@@ -1,21 +1,36 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-23T16:19:48+03:00",
+  "observed_at": "2026-09-23T17:07:20+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 18,
+  "sources_ok": 14,
   "facts_admitted": 6,
   "source_notice_briefs": 2,
   "facts_before_cross_source_headline_dedupe": 2,
   "preserved_full_story_count_before_refresh": 4,
-  "host_incident_count": 0,
-  "host_incidents": [],
+  "host_incident_count": 1,
+  "host_incidents": [
+    {
+      "host": "anofm.ro",
+      "status": "DEGRADED_HOST",
+      "failed_source_count": 2,
+      "failed_source_ids": [
+        "ajofm-valcea-comunicate",
+        "ajofm-valcea-press-releases"
+      ],
+      "error_categories": [
+        "TIMEOUT"
+      ],
+      "correlated_failure": true,
+      "editorial_semantics_changed": false
+    }
+  ],
   "sources": [
     {
       "source_id": "primaria-rm-valcea-comunicate",
       "listing_ok": false,
-      "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
       "facts": 0
     },
     {
@@ -26,9 +41,8 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": true,
-      "links_examined": 4,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
       "facts": 0
     },
     {
@@ -60,9 +74,8 @@
     },
     {
       "source_id": "ajofm-valcea-comunicate",
-      "listing_ok": true,
-      "links_examined": 12,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "URLError: <urlopen error timed out>",
       "facts": 0
     },
     {
@@ -136,16 +149,14 @@
     },
     {
       "source_id": "isu-valcea-specific-releases",
-      "listing_ok": true,
-      "links_examined": 2,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
       "facts": 0
     },
     {
       "source_id": "ajofm-valcea-press-releases",
-      "listing_ok": true,
-      "links_examined": 12,
-      "article_failures": 0,
+      "listing_ok": false,
+      "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
       "facts": 0
     },
     {
