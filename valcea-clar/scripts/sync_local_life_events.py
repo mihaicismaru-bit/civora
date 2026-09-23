@@ -25,11 +25,23 @@ def fingerprint(row: dict) -> str:
     parts=[norm(row.get(k)) for k in ("title","event_start","start_time","venue","locality","organiser")]
     return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()[:20]
 
+def identity_key(row: dict) -> str:
+    """Stable manifestation identity independent of source/organiser wording.
+
+    The same public event is often discovered from the organiser, a venue and a
+    ticketing page with slightly different organiser/category strings. Those are
+    corroborating sources, not separate events. Time + place + normalized title
+    define the reader-facing manifestation identity; material changes to any of
+    those fields remain distinct and must be reconciled explicitly.
+    """
+    parts=[norm(row.get(k)) for k in ("title","event_start","start_time","venue","locality")]
+    return hashlib.sha256("|".join(parts).encode("utf-8")).hexdigest()[:20]
+
 def stable_id(row: dict) -> str:
     raw=str(row.get("event_id") or "").strip()
     if raw:
         return raw
-    return "evt-"+fingerprint(row)
+    return "evt-"+identity_key(row)
 
 def validate(row: dict) -> dict:
     required=("title","event_start","venue","locality")
@@ -49,6 +61,7 @@ def validate(row: dict) -> dict:
     out={
         "event_id": stable_id(row),
         "fingerprint": fingerprint(row),
+        "identity_key": identity_key(row),
         "title": str(row["title"]).strip(),
         "event_start": str(row["event_start"]).strip(),
         "event_end": str(row.get("event_end") or "").strip() or None,
@@ -69,35 +82,78 @@ def validate(row: dict) -> dict:
     }
     return out
 
+def checked_rank(row: dict) -> tuple:
+    tier=str(row.get("source_tier") or "").upper()
+    tier_rank=0 if tier.startswith("T1") else 1 if tier.startswith("T2") else 2
+    checked=str(row.get("checked_at") or "")
+    return (tier_rank, "" if checked is None else checked)
+
+def preferred(a: dict, b: dict) -> dict:
+    """Prefer stronger provenance; within same tier prefer fresher verification."""
+    ar=checked_rank(a)
+    br=checked_rank(b)
+    if ar[0] != br[0]:
+        return a if ar[0] < br[0] else b
+    return a if ar[1] >= br[1] else b
+
+def normalize_existing(row: dict) -> dict:
+    out=dict(row)
+    out.setdefault("fingerprint", fingerprint(out))
+    out["identity_key"]=identity_key(out)
+    if not out.get("event_id"):
+        out["event_id"]="evt-"+out["identity_key"]
+    return out
+
 def merge(registry: dict, deltas: list[dict]) -> tuple[dict,int]:
-    existing=[r for r in registry.get("events",[]) if isinstance(r,dict)]
-    by_id={str(r.get("event_id")):r for r in existing if r.get("event_id")}
-    by_fp={str(r.get("fingerprint")):r for r in existing if r.get("fingerprint")}
+    existing=[normalize_existing(r) for r in registry.get("events",[]) if isinstance(r,dict)]
     changed=0
+
+    # Collapse historical duplicates before applying new deltas. The same event
+    # may previously have been stored once from an organiser and once from a
+    # venue/ticketing source because organiser wording affected fingerprinting.
+    collapsed={}
+    for row in existing:
+        key=row["identity_key"]
+        if key in collapsed:
+            chosen=preferred(collapsed[key], row)
+            if chosen != collapsed[key]:
+                collapsed[key]=chosen
+            changed += 1
+        else:
+            collapsed[key]=row
+    existing=list(collapsed.values())
+
     for raw in deltas:
         row=validate(raw)
-        old=by_id.get(row["event_id"]) or by_fp.get(row["fingerprint"])
-        if old != row:
+        matches=[r for r in existing if r.get("event_id")==row["event_id"] or r.get("fingerprint")==row["fingerprint"] or r.get("identity_key")==row["identity_key"]]
+        old=None
+        for candidate in matches:
+            old=candidate if old is None else preferred(old,candidate)
+        if old is None or old != row:
             changed += 1
-        if old:
-            existing=[r for r in existing if r is not old]
-        existing.append(row)
-        by_id[row["event_id"]]=row
-        by_fp[row["fingerprint"]]=row
-    # dedupe deterministically
+        existing=[r for r in existing if r not in matches]
+        existing.append(preferred(old,row) if old else row)
+
     uniq={}
     for row in existing:
-        key=str(row.get("event_id") or row.get("fingerprint"))
-        if key:
+        key=row.get("identity_key") or identity_key(row)
+        row["identity_key"]=key
+        if key in uniq:
+            uniq[key]=preferred(uniq[key],row)
+            changed += 1
+        else:
             uniq[key]=row
     events=sorted(uniq.values(), key=lambda r:(str(r.get("event_start") or ""),str(r.get("start_time") or ""),str(r.get("title") or "")))
     return {
-        "schema_version":"1.0",
+        "schema_version":"1.1",
         "updated_at":datetime.now(TZ).isoformat(timespec="seconds"),
         "events":events,
         "policy":{
             "operator_delta_is_structured":True,
-            "dedupe_by_event_id_and_fingerprint":True,
+            "dedupe_by_event_id_fingerprint_and_manifestation_identity":True,
+            "manifestation_identity_fields":["title","event_start","start_time","venue","locality"],
+            "source_wording_does_not_create_duplicate_event":True,
+            "prefer_primary_then_fresher_verification":True,
             "unknown_price_never_invented":True,
             "status_requires_provenance":True,
         }
@@ -136,11 +192,15 @@ def main() -> int:
     args=ap.parse_args()
     if args.self_test:
         base={"events":[]}
-        row={"title":"Test","event_start":"2026-09-24","start_time":"19:00","venue":"Casa","locality":"Drăgășani","category":"teatru","price":"unknown","organiser":"Org","source_url":"https://example.test/e","source_tier":"T1","checked_at":"2026-09-23T17:00:00+03:00","status":"scheduled"}
+        row={"title":"Test","event_start":"2026-09-24","start_time":"19:00","venue":"Casa","locality":"Drăgășani","category":"teatru","price":"unknown","organiser":"Org A","source_url":"https://example.test/e","source_tier":"T2","checked_at":"2026-09-23T17:00:00+03:00","status":"scheduled"}
         out,c=merge(base,[row])
         assert c==1 and len(out["events"])==1
         out2,c2=merge(out,[row])
         assert c2==0 and len(out2["events"])==1
+        corroborating={**row,"event_id":"different-id","organiser":"Org B","source_url":"https://official.test/e","source_tier":"T1","checked_at":"2026-09-23T18:00:00+03:00"}
+        out3,c3=merge(out2,[corroborating])
+        assert c3>=1 and len(out3["events"])==1
+        assert out3["events"][0]["source_url"]=="https://official.test/e"
         bad=dict(row); bad.pop("source_url")
         try:
             validate(bad)
