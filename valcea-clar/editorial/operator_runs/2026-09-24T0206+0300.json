@@ -76,10 +76,10 @@
   },
   "technical_followup": {
     "status": "OPEN",
-    "finding": "CHATGPT_SITES_INTEGRATION.md documents build_sites_export.py as the presentation payload builder, but the referenced script is absent from main. This is a concrete presentation-bridge drift and likely contributes to canonical-runtime/public-host divergence; do not claim it is the sole cause until the bridge consumer is identified."
+    "finding": "The initial missing-build_sites_export diagnosis was superseded after repository-history verification. Commit 5e29a1020d528a906defeafefbf6e50264f93d8f intentionally retired build_sites_export.py and dist/chatgpt-sites on 27 August 2026 and established site/runtime plus overlay_runtime_export.py as the canonical reader presentation. The stale CHATGPT_SITES_INTEGRATION.md contract was corrected in commit 8364d3a05766445d79f02dfaade0bcf76f4b2c6a. The remaining problem is bridge/hosting currentness from canonical site/runtime to valceaclar.ro, not a missing legacy export."
   },
   "open_followups": [
-    "Resolve presentation-bridge deployment/currentness divergence and restore the documented deterministic Sites export contract.",
+    "Resolve bridge/hosting currentness so valceaclar.ro atomically reflects canonical site/runtime; do not restore retired dist/chatgpt-sites.",
     "Seek a directly indexed Vanner/Teatrul Anton Pann primary source for Liber Volatilium; update the same stable event IDs if access/reservation details change.",
     "Continue hot-watch for Raliul Vâlcii restrictions and service changes without creating duplicate stories."
   ],
