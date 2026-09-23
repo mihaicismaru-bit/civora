@@ -10,13 +10,19 @@ ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / 'partener-eu' / 'web'
 STATE = ROOT / 'partener-eu' / 'ingest' / 'state'
 index = (WEB / 'index.html').read_text(encoding='utf-8')
+loader = (WEB / 'public-heavy-loader-v1.js').read_text(encoding='utf-8')
 js = (WEB / 'ask-partener-v2.js').read_text(encoding='utf-8')
 css = (WEB / 'ask-partener-v2.css').read_text(encoding='utf-8')
 
-assert 'ask-partener-v2.css' in index
-assert 'ask-partener-v2.js' in index
-assert index.index('decision-products.js') < index.index('ask-partener-v2.js')
-assert index.index('mipe-canonical-calls.js') < index.index('ask-partener-v2.js')
+assert 'ask-partener-v2.css' not in index
+assert 'ask-partener-v2.js' not in index
+assert 'decision-products.js' not in index
+assert 'mipe-canonical-calls.js' not in index
+for asset in ('ask-partener-v2.css','ask-partener-v2.js','decision-products.js','mipe-canonical-calls.js'):
+    assert asset in loader, asset
+assert loader.index("loadDecisionData()") < loader.index("await loadScript('ask-partener-v2.js")
+assert loader.index("loadCanonicalCalls()") < loader.index("await loadScript('ask-partener-v2.js")
+assert 'window.PARTENER_LOAD_ASK=loadAskSuite' in loader
 assert 'window.PARTENER_DECISION_PRODUCTS' in js
 assert 'window.PARTENER_MIPE_CANONICAL_CALLS' in js
 assert 'const canonicalById=new Map' in js
