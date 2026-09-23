@@ -11,3 +11,20 @@
 .rpmPromo{margin:24px 0 8px;border:1px solid #cfe3de;border-radius:16px;background:#f3faf8;padding:22px 24px;display:flex;gap:26px;align-items:center;justify-content:space-between}.rpmPromo small{display:block;text-transform:uppercase;letter-spacing:.07em;font-weight:800;color:#176a5b;margin-bottom:5px}.rpmPromo strong{font-size:1.15rem;display:block}.rpmPromo p{margin:5px 0 0;color:#526173}.rpmPromo a{white-space:nowrap;text-decoration:none;font-weight:800;color:#fff;background:#176a5b;padding:11px 15px;border-radius:9px}
 @media(max-width:860px){.rpmHero{padding-top:52px}.rpmHeroGrid,.rpmLegal,.rpmCtaInner{grid-template-columns:1fr;gap:32px}.rpmBenefits,.rpmSteps{grid-template-columns:1fr 1fr}.rpmPromo{align-items:flex-start;flex-direction:column}.rpmPromo a{white-space:normal}.rpmFooter .rpmWrap{flex-direction:column}}
 @media(max-width:560px){.rpmWrap{width:min(100% - 28px,1120px)}.rpmHero h1{font-size:2.45rem}.rpmBenefits,.rpmSteps{grid-template-columns:1fr}.rpmSection{padding:56px 0}.rpmNav{min-height:58px}.rpmBack{font-size:.82rem}}
+
+.rpmHeroGrid{grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);align-items:start}
+.rpmHeroVisual{overflow:hidden;border-radius:18px;background:#fff;border:1px solid var(--rpm-line);box-shadow:0 18px 50px rgba(20,42,54,.07)}
+.rpmHeroVisual img{display:block;width:100%;height:290px;object-fit:cover}
+.rpmHeroVisual small{display:block;padding:8px 12px;color:var(--rpm-muted);font-size:.72rem}
+.rpmHero .rpmFactCard{grid-column:2}
+.rpmExperience{padding-top:58px}
+.rpmExperienceGrid{display:grid;grid-template-columns:1.3fr .7fr;gap:36px;align-items:start}
+.rpmExperienceGrid>div:first-child>p:last-child{font-size:1.06rem;color:var(--rpm-muted);max-width:760px}
+.rpmBrochureCard{border:1px solid var(--rpm-line);border-radius:16px;padding:24px;background:var(--rpm-soft)}
+.rpmBrochureCard strong{font-size:1.25rem;color:var(--rpm-ink)}
+.rpmBrochureCard p{color:var(--rpm-muted)}
+.rpmContactBox{display:flex;flex-direction:column;gap:6px;background:#fff;color:var(--rpm-ink);border-radius:14px;padding:20px;min-width:280px}
+.rpmContactBox strong{font-size:1.15rem}
+.rpmContactBox span,.rpmContactBox a{color:var(--rpm-muted);text-decoration:none}
+.rpmContactBox a[href^="tel:"]{font-size:1.15rem;font-weight:800;color:var(--rpm-accent2)}
+@media(max-width:860px){.rpmHeroGrid,.rpmExperienceGrid{grid-template-columns:1fr}.rpmHero .rpmFactCard{grid-column:auto}.rpmHeroVisual img{height:240px}.rpmContactBox{min-width:0}}
