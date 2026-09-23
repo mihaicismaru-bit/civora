@@ -11,9 +11,19 @@ spec = importlib.util.spec_from_file_location("apply_resolutions", ROOT / "apply
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
+FAMI_BUDGETS_RON = {
+    "AM41D": 5_000_000,
+    "AM22M": 4_430_000,
+    "AM22L": 4_430_000,
+    "AM22N": 2_000_000,
+    "AM11I": 5_250_000,
+    "AM11H": 5_250_000,
+    "AM2A1G": 3_922_800,
+}
+
 
 class ResolutionOverlayTests(unittest.TestCase):
-    def test_verified_overlays_preserve_25_identities(self):
+    def test_verified_overlays_preserve_existing_identities_and_add_verified_fami_calls(self):
         base = mod.load(ROOT / "opportunity_bundle.json")
         # Remove already persisted application metadata to make replay explicit.
         base.pop("resolution_application", None)
@@ -23,7 +33,9 @@ class ResolutionOverlayTests(unittest.TestCase):
             [row["opportunity_id"] for row in base["opportunities"]],
             [row["opportunity_id"] for row in merged["opportunities"]][: len(base["opportunities"])],
         )
-        self.assertEqual(len(merged["opportunities"]), 26)
+        # This is a corpus-growth regression: the seven reviewed calls must be
+        # additive and deterministic without weakening any pre-existing identity.
+        self.assertEqual(len(merged["opportunities"]), 33)
         step = next(row for row in merged["opportunities"] if row["opportunity_id"] == "PEO-STEP-LLL-ADULTI-2026")
         self.assertEqual(step["status"], "OPEN")
         self.assertEqual(step["deadline_at"], "2026-09-30T16:00:00+03:00")
@@ -40,6 +52,21 @@ class ResolutionOverlayTests(unittest.TestCase):
         regional_task = next(row for row in merged["resolution_tasks"] if row["resolution_task_id"] == "RT-PR-CENTRU-DIGITAL-2-MATERIAL")
         self.assertEqual(regional_task["status"], "IN_REVIEW")
         self.assertEqual(set(regional_task["blocked_fact_classes"]), {"status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"})
+        fami = [row for row in merged["opportunities"] if row["opportunity_id"].startswith("mai-fami-")]
+        self.assertEqual(len(fami), 7)
+        for item in fami:
+            self.assertEqual(item["status"], "OPEN")
+            self.assertEqual(item["publication_state"], "PUBLISHABLE")
+            self.assertEqual(item["material_facts"]["deadline"]["closes"], "2026-10-16T16:00:00+03:00")
+            self.assertEqual(
+                item["material_facts"]["budget"],
+                {"amount": FAMI_BUDGETS_RON[item["code"]], "currency": "RON", "basis": "FEN_AVAILABLE_CALL_ALLOCATION"},
+            )
+            self.assertFalse(item.get("candidate_material_facts"))
+
+        fami_change = next(row for row in merged["changesets"] if row["changeset_id"] == "CS-MAI-FED-FAMI-OPEN-CALLS-20260923")
+        self.assertEqual(fami_change["resolution_state"], "VERIFIED")
+        self.assertEqual({row["fact_class"] for row in fami_change["changes"]}, {"status", "deadline", "budget"})
 
     def test_replay_is_deterministic(self):
         base = mod.load(ROOT / "opportunity_bundle.json")
