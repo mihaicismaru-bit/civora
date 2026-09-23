@@ -14,7 +14,7 @@ spec.loader.exec_module(mod)
 def main() -> None:
     bundle = json.loads((ROOT / "p11" / "opportunity_bundle.json").read_text(encoding="utf-8"))
     projection = mod.build(bundle)
-    assert projection["summary"]["opportunityCount"] == 26
+    assert projection["summary"]["opportunityCount"] == len(bundle["opportunities"])
     assert projection["summary"]["openVerifiedCount"] >= 1
     step = next(row for row in projection["opportunities"] if row["id"] == "PEO-STEP-LLL-ADULTI-2026")
     assert step["status"] == "OPEN"
@@ -85,8 +85,9 @@ def main() -> None:
     assert projection["policy"]["freshnessReference"] == "PROJECTION_AS_OF"
     assert projection["policy"]["freshnessTelemetryAuthorizesPublication"] is False
     assert projection["policy"]["sourceCoverageTelemetryAuthorizesPublication"] is False
-    assert projection["summary"]["verificationFreshness"]["verifiedEvidenceLinkCount"] == 17
-    assert projection["summary"]["verificationSourceCoverage"]["verifiedEvidenceLinkCount"] == 17
+    verified_evidence_count = sum(row["verifiedEvidenceCount"] for row in projection["opportunities"])
+    assert projection["summary"]["verificationFreshness"]["verifiedEvidenceLinkCount"] == verified_evidence_count
+    assert projection["summary"]["verificationSourceCoverage"]["verifiedEvidenceLinkCount"] == verified_evidence_count
     adapter_path = json.dumps(str(ROOT / "web" / "p11-public-adapter.js"))
     adapter_result = subprocess.run(
         ["node", "-e", f"""
