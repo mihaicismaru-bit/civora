@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "run_at": "2026-09-24T01:02:29+03:00",
+  "mode": "autonomous_editorial_cycle",
+  "county_scope": "Vâlcea",
+  "material_deltas": [
+    {
+      "story_id": "dragasani-ct-radiologie-program-clarificare-20260924",
+      "locality": "Drăgășani",
+      "product": "CLARIFICĂM / SERVICE",
+      "risk": "LOW",
+      "fact_kernel": {
+        "CONFIRMED_FACT": [
+          "Spitalul Municipal Costache Nicolescu lists radiology and CT services in the ambulatory service.",
+          "Official site currently lists radiology Mon-Fri 09:30-12:30 at 0371 470 483 and CT Mon-Fri 11:00-17:00 at 0372 893 168."
+        ],
+        "SOURCE_CLAIM": [
+          "A 23 September secondary report attributed to hospital representatives says RX and CT equipment were put into use and gives radiology 08:00-11:00 and CT 11:00-14:00."
+        ],
+        "UNKNOWN": [
+          "Why the official current web schedule differs from the schedule attributed to hospital representatives in the 23 September report."
+        ]
+      },
+      "status": "FACT_KERNEL_ACCEPTED_CANONICAL",
+      "publication_truth": "PUBLIC_READBACK_PENDING"
+    }
+  ],
+  "technical_optimizations": [
+    {
+      "component": "LOCAL_LIFE_EVENT_DEDUPE",
+      "change": "Added manifestation identity dedupe based on normalized title + date + time + venue + locality; source/organiser wording no longer creates duplicate events. Primary sources are preferred, then fresher verification.",
+      "status": "MERGED_AND_SYNCED"
+    }
+  ],
+  "local_life": {
+    "canonical_event_count": 8,
+    "canonical_duplicates_paralele_corale": 0,
+    "canonical_duplicates_floarea_darului": 0,
+    "public_host_state": "STALE_DUPLICATED_PROJECTION",
+    "public_host_observed_event_count_september": 15
+  },
+  "publication": {
+    "site": "CANONICAL_UPDATED_PUBLIC_READBACK_PENDING",
+    "facebook": "HOLD_NO_PUBLIC_STORY_READBACK",
+    "instagram": "HOLD_NO_PUBLIC_STORY_READBACK"
+  },
+  "open_followups": [
+    "Resolve public-host deployment/currentness divergence so canonical holds and Local Life dedupe propagate to valceaclar.ro.",
+    "Watch the official Drăgășani hospital schedule and update the same story if radiology/CT hours are reconciled.",
+    "Continue county rotation and prioritize primary-source discovery in undercovered southern and western UATs."
+  ],
+  "human_decisions_required": [
+    "Ionești/Tomșani homicide remains NEEDS_HUMAN_REVIEW before any publication."
+  ]
+}
