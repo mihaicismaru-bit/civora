@@ -145,59 +145,17 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 9,
+    "autonomous_stories_published_24h": 3,
     "autonomous_story_ids_24h": [
       "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-      "brezoi-ziua-recoltei-pregatiri-20260922",
-      "calimanesti-concurs-contabil-sef-20260921",
-      "calimanesti-restrictii-trotuare-20260922",
       "isu-valcea-interventii-zilnice",
-      "ramnicu-valcea-floarea-darurilor-20260926",
-      "scm-valcea-fc-bihor-20260920",
-      "tetoiu-otesani-incendii-20260921",
-      "valcea-somaj-august-2026"
+      "tetoiu-otesani-incendii-20260921"
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 9,
-      "published": 9,
+      "measured": 3,
+      "published": 3,
       "stories": [
-        {
-          "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
-          "seconds": 179,
-          "discovered_at_utc": "2026-09-22T06:33:50Z",
-          "published_at_utc": "2026-09-22T06:36:49Z"
-        },
-        {
-          "story_id": "calimanesti-concurs-contabil-sef-20260921",
-          "seconds": 179,
-          "discovered_at_utc": "2026-09-22T06:33:50Z",
-          "published_at_utc": "2026-09-22T06:36:49Z"
-        },
-        {
-          "story_id": "calimanesti-restrictii-trotuare-20260922",
-          "seconds": 179,
-          "discovered_at_utc": "2026-09-22T06:33:50Z",
-          "published_at_utc": "2026-09-22T06:36:49Z"
-        },
-        {
-          "story_id": "ramnicu-valcea-floarea-darurilor-20260926",
-          "seconds": 179,
-          "discovered_at_utc": "2026-09-22T06:33:50Z",
-          "published_at_utc": "2026-09-22T06:36:49Z"
-        },
-        {
-          "story_id": "scm-valcea-fc-bihor-20260920",
-          "seconds": 179,
-          "discovered_at_utc": "2026-09-22T06:33:50Z",
-          "published_at_utc": "2026-09-22T06:36:49Z"
-        },
-        {
-          "story_id": "valcea-somaj-august-2026",
-          "seconds": 179,
-          "discovered_at_utc": "2026-09-22T06:33:50Z",
-          "published_at_utc": "2026-09-22T06:36:49Z"
-        },
         {
           "story_id": "tetoiu-otesani-incendii-20260921",
           "seconds": 550,
@@ -218,55 +176,25 @@
         }
       ],
       "max_seconds": 1610012,
-      "median_seconds": 179
+      "median_seconds": 550
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 9,
+      "published_stories": 3,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
       "status": "PASS",
-      "eligible": 9,
-      "readback_ok": 9,
+      "eligible": 3,
+      "readback_ok": 3,
       "value": 1.0,
       "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
           "url": "https://valceaclar.ro/stiri/brezoi-acces-ingrijire-domiciliu-selectie-20260923/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
-          "url": "https://valceaclar.ro/stiri/brezoi-ziua-recoltei-pregatiri-20260922/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "calimanesti-concurs-contabil-sef-20260921",
-          "url": "https://valceaclar.ro/stiri/calimanesti-concurs-contabil-sef-20260921/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "calimanesti-restrictii-trotuare-20260922",
-          "url": "https://valceaclar.ro/stiri/calimanesti-restrictii-trotuare-20260922/",
           "projected": true,
           "http_status": 200,
           "canonical_ok": true,
@@ -285,38 +213,8 @@
           "error": null
         },
         {
-          "story_id": "ramnicu-valcea-floarea-darurilor-20260926",
-          "url": "https://valceaclar.ro/stiri/ramnicu-valcea-floarea-darurilor-20260926/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "scm-valcea-fc-bihor-20260920",
-          "url": "https://valceaclar.ro/stiri/scm-valcea-fc-bihor-20260920/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
           "story_id": "tetoiu-otesani-incendii-20260921",
           "url": "https://valceaclar.ro/stiri/tetoiu-otesani-incendii-20260921/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "valcea-somaj-august-2026",
-          "url": "https://valceaclar.ro/stiri/valcea-somaj-august-2026/",
           "projected": true,
           "http_status": 200,
           "canonical_ok": true,
@@ -337,33 +235,24 @@
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 7,
-      "eligible": 9,
-      "value": 0.7778,
+      "delivered": 3,
+      "eligible": 3,
+      "value": 1.0,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-        "brezoi-ziua-recoltei-pregatiri-20260922",
-        "calimanesti-restrictii-trotuare-20260922",
         "isu-valcea-interventii-zilnice",
-        "scm-valcea-fc-bihor-20260920",
-        "tetoiu-otesani-incendii-20260921",
-        "valcea-somaj-august-2026"
+        "tetoiu-otesani-incendii-20260921"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 8,
-      "eligible": 9,
-      "value": 0.8889,
+      "delivered": 3,
+      "eligible": 3,
+      "value": 1.0,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-        "brezoi-ziua-recoltei-pregatiri-20260922",
-        "calimanesti-concurs-contabil-sef-20260921",
-        "calimanesti-restrictii-trotuare-20260922",
-        "ramnicu-valcea-floarea-darurilor-20260926",
-        "scm-valcea-fc-bihor-20260920",
-        "tetoiu-otesani-incendii-20260921",
-        "valcea-somaj-august-2026"
+        "isu-valcea-interventii-zilnice",
+        "tetoiu-otesani-incendii-20260921"
       ]
     },
     "duplicates": {
@@ -385,7 +274,24 @@
       "status": "MEASURED",
       "value": 0,
       "workflow_dispatch_runs": [],
-      "automated_workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35827530628,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-23T06:36:18Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35824652426,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T05:58:38Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
       "manual_story_route_additions": [],
       "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
