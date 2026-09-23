@@ -145,23 +145,16 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 3,
+    "autonomous_stories_published_24h": 2,
     "autonomous_story_ids_24h": [
       "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-      "isu-valcea-interventii-zilnice",
-      "tetoiu-otesani-incendii-20260921"
+      "isu-valcea-interventii-zilnice"
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 3,
-      "published": 3,
+      "measured": 2,
+      "published": 2,
       "stories": [
-        {
-          "story_id": "tetoiu-otesani-incendii-20260921",
-          "seconds": 550,
-          "discovered_at_utc": "2026-09-22T06:33:50Z",
-          "published_at_utc": "2026-09-22T06:43:00Z"
-        },
         {
           "story_id": "isu-valcea-interventii-zilnice",
           "seconds": 1610012,
@@ -176,19 +169,19 @@
         }
       ],
       "max_seconds": 1610012,
-      "median_seconds": 550
+      "median_seconds": 1610012
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 3,
+      "published_stories": 2,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
       "status": "PASS",
-      "eligible": 3,
-      "readback_ok": 3,
+      "eligible": 2,
+      "readback_ok": 2,
       "value": 1.0,
       "blocker_story_ids": [],
       "checks": [
@@ -211,16 +204,6 @@
           "headline_ok": true,
           "ok": true,
           "error": null
-        },
-        {
-          "story_id": "tetoiu-otesani-incendii-20260921",
-          "url": "https://valceaclar.ro/stiri/tetoiu-otesani-incendii-20260921/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
         }
       ],
       "projection_evidence": {
@@ -235,24 +218,22 @@
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 3,
-      "eligible": 3,
+      "delivered": 2,
+      "eligible": 2,
       "value": 1.0,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-        "isu-valcea-interventii-zilnice",
-        "tetoiu-otesani-incendii-20260921"
+        "isu-valcea-interventii-zilnice"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 3,
-      "eligible": 3,
+      "delivered": 2,
+      "eligible": 2,
       "value": 1.0,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-        "isu-valcea-interventii-zilnice",
-        "tetoiu-otesani-incendii-20260921"
+        "isu-valcea-interventii-zilnice"
       ]
     },
     "duplicates": {
@@ -275,6 +256,46 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35841533931,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-23T09:12:12Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35841313170,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-23T09:09:57Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35833368725,
+          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
+          "created_at": "2026-09-23T07:45:11Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35828332778,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T06:46:22Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35827908500,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T06:41:07Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 35827530628,
