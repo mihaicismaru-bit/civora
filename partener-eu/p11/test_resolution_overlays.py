@@ -11,6 +11,16 @@ spec = importlib.util.spec_from_file_location("apply_resolutions", ROOT / "apply
 mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(mod)
 
+FAMI_BUDGETS_RON = {
+    "AM41D": 5_000_000,
+    "AM22M": 4_430_000,
+    "AM22L": 4_430_000,
+    "AM22N": 2_000_000,
+    "AM11I": 5_250_000,
+    "AM11H": 5_250_000,
+    "AM2A1G": 3_922_800,
+}
+
 
 class ResolutionOverlayTests(unittest.TestCase):
     def test_verified_overlays_preserve_existing_identities_and_add_verified_fami_calls(self):
@@ -46,8 +56,15 @@ class ResolutionOverlayTests(unittest.TestCase):
             self.assertEqual(item["status"], "OPEN")
             self.assertEqual(item["publication_state"], "PUBLISHABLE")
             self.assertEqual(item["material_facts"]["deadline"]["closes"], "2026-10-16T16:00:00+03:00")
-            self.assertNotIn("budget", item["material_facts"])
+            self.assertEqual(
+                item["material_facts"]["budget"],
+                {"amount": FAMI_BUDGETS_RON[item["code"]], "currency": "RON", "basis": "FEN_AVAILABLE_CALL_ALLOCATION"},
+            )
             self.assertFalse(item.get("candidate_material_facts"))
+
+        fami_change = next(row for row in merged["changesets"] if row["changeset_id"] == "CS-MAI-FED-FAMI-OPEN-CALLS-20260923")
+        self.assertEqual(fami_change["resolution_state"], "VERIFIED")
+        self.assertEqual({row["fact_class"] for row in fami_change["changes"]}, {"status", "deadline", "budget"})
 
     def test_replay_is_deterministic(self):
         base = mod.load(ROOT / "opportunity_bundle.json")
