@@ -46,4 +46,25 @@ assert.equal(out.dossiers.length,9,'Historical dossiers remain queryable; the gu
 const replay=run(payload,sourceData);
 assert.deepEqual(JSON.parse(JSON.stringify(replay)),JSON.parse(JSON.stringify(out)),'Same artifact timestamp must replay deterministically.');
 
-console.log('PASS home-freshness-guard-v1.1: expired/provisional/undated OPEN suppressed, stale PREPARE suppressed, history preserved, replay deterministic.');
+// Defense-in-depth regression for the critical static boot dataset. The raw
+// snapshot must never expose a historical OPEN badge after its own deadline
+// has passed. Runtime adapters remain a second guard, not the only guard.
+const dataPath=path.resolve(here,'../web/data.js');
+const dataSource=fs.readFileSync(dataPath,'utf8');
+const staticWindow={};
+vm.runInNewContext(dataSource,{window:staticWindow});
+const calls=staticWindow.PARTENER_DATA?.calls||[];
+const byId=new Map(calls.map(call=>[call.id,call]));
+const afir=byId.get('afir-energy-2026');
+const pids=byId.get('pids-supported-decision');
+const clusters=byId.get('pr-centru-clusters-122');
+assert.ok(afir,'AFIR static record must remain queryable for history.');
+assert.ok(pids,'PIDS static record must remain queryable for history.');
+assert.ok(clusters,'Current cluster record must remain available.');
+assert.notEqual(afir.status,'OPEN','Expired AFIR static snapshot must fail closed before runtime adaptation.');
+assert.equal(afir.close,'14 august 2026','Historical AFIR deadline must be preserved.');
+assert.notEqual(pids.status,'OPEN','Expired PIDS static snapshot must fail closed before runtime adaptation.');
+assert.equal(pids.close,'28 august 2026, 16:00','Historical PIDS deadline must be preserved.');
+assert.equal(clusters.status,'OPEN','Fail-closed sanitation must not blanket-demote unrelated current OPEN records.');
+
+console.log('PASS home-freshness-guard-v1.2: expired/provisional/undated OPEN suppressed; raw static boot OPEN leak blocked; history preserved; replay deterministic.');
