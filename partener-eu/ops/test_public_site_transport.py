@@ -78,14 +78,32 @@ class TransportGateTests(unittest.TestCase):
         markers = CHECK.REQUIRED_MARKERS
         self.assertEqual(markers["hero"], "Ce vrei să finanțezi?")
         self.assertIn("ce știm sigur", markers["product_definition"])
+        self.assertEqual(markers["heavy_loader_ref"], 'src="public-heavy-loader-v1.js')
+        self.assertEqual(markers["home_data_ref"], 'src="home-public-data.js')
         self.assertEqual(markers["concierge_ui_ref"], 'src="home-concierge-vnext.js')
         self.assertEqual(markers["concierge_css_ref"], 'href="home-concierge-vnext.css')
+        self.assertNotIn("decision_data_ref", markers)
+        self.assertNotIn("decision_ui_ref", markers)
         self.assertNotIn("novice_ui_ref", markers)
         self.assertNotIn("goto_ui_ref", markers)
-        self.assertEqual(CHECK.UA, "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.8")
+        self.assertEqual(CHECK.UA, "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.9")
+
+    def test_optimized_boot_rejects_eager_heavy_refs(self) -> None:
+        optimized = '''<script src="data.js"></script><script src="app.js"></script><script defer src="public-heavy-loader-v1.js"></script><script defer src="home-public-data.js"></script><script defer src="home-concierge-vnext.js"></script>'''
+        self.assertEqual(CHECK.eager_heavy_refs(optimized), [])
+        stale = optimized + '<script defer src="decision-products.js"></script>'
+        self.assertIn('src="decision-products.js', CHECK.eager_heavy_refs(stale))
 
     def test_vnext_asset_extractors_resolve_versioned_refs(self) -> None:
-        html = '''<link rel="stylesheet" href="home-concierge-vnext.css?v=1"><script defer src="home-concierge-vnext.js?v=1"></script>'''
+        html = '''<link rel="stylesheet" href="home-concierge-vnext.css?v=1"><script defer src="public-heavy-loader-v1.js?v=1"></script><script defer src="home-public-data.js?v=1"></script><script defer src="home-concierge-vnext.js?v=1"></script>'''
+        self.assertEqual(
+            CHECK.extract_asset(html, "public-heavy-loader-v1.js", "https://partener.eu/"),
+            "https://partener.eu/public-heavy-loader-v1.js?v=1",
+        )
+        self.assertEqual(
+            CHECK.extract_asset(html, "home-public-data.js", "https://partener.eu/"),
+            "https://partener.eu/home-public-data.js?v=1",
+        )
         self.assertEqual(
             CHECK.extract_asset(html, "home-concierge-vnext.js", "https://partener.eu/"),
             "https://partener.eu/home-concierge-vnext.js?v=1",
