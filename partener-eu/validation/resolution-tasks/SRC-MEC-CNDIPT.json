@@ -4,12 +4,18 @@
   "source_id": "SRC-MEC-CNDIPT",
   "source_tier": "T1",
   "source_url": "https://www.edu.ro/profesional_tehnic",
-  "status": "OPEN",
+  "status": "RESOLVED_NON_MATERIAL_CHANGE",
   "first_observed_at": "2026-08-21T15:59:24.271132Z",
   "last_observed_at": "2026-09-22T21:29:28.947391Z",
+  "resolved_at": "2026-09-23T00:19:10Z",
   "previous_semantic_sha256": "ebb583a01fa07b496810ec15c4908487044081af7864a51fc6c4ad7f1fdd98e5",
   "current_semantic_sha256": "2945a00012d63a896f2a753f4de0ddfa839634242005277e2413585832b343e2",
+  "candidate_semantic_sha256": "2945a00012d63a896f2a753f4de0ddfa839634242005277e2413585832b343e2",
+  "resolved_semantic_sha256": "2945a00012d63a896f2a753f4de0ddfa839634242005277e2413585832b343e2",
   "material_fact_autoupdate_allowed": false,
+  "automatic_material_fact_update_allowed": false,
+  "material_fact_action": "NONE",
+  "publish_authorized": false,
   "blocked_fact_classes": [
     "deadline",
     "eligibility",
@@ -20,10 +26,17 @@
     "other_material_facts"
   ],
   "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
+  "resolution_reason": "Reviewed the current official Ministry of Education and Research CNDIPT page. It remains an institutional vocational/technical-education description page (published 1 February 2016), not a funding-call lifecycle authority, and the semantic delta does not establish any call-specific deadline, eligibility, budget, scoring, beneficiary or status change. No material funding fact update is authorized.",
+  "evidence": [
+    {
+      "url": "https://www.edu.ro/profesional_tehnic",
+      "authority": "Ministerul Educatiei si Cercetarii",
+      "observed_content": "CNDIPT institutional description page; publication date 1 February 2016.",
+      "material_funding_fact_change_found": false
+    }
+  ],
   "source_name": "official_vet_policy_source",
-  "candidate_semantic_sha256": "2945a00012d63a896f2a753f4de0ddfa839634242005277e2413585832b343e2",
   "registry_class": "official_vet_policy_source",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication."
 }
