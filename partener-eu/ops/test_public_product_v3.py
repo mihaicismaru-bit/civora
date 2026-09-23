@@ -9,6 +9,7 @@ people=(WEB/'people-policy-v1.js').read_text(encoding='utf-8')
 decision=(WEB/'decision-intelligence-v2.js').read_text(encoding='utf-8')
 app=(WEB/'app.js').read_text(encoding='utf-8')
 index=(WEB/'index.html').read_text(encoding='utf-8')
+loader=(WEB/'public-heavy-loader-v1.js').read_text(encoding='utf-8')
 
 
 def function_chunk(source: str, name: str) -> str:
@@ -145,10 +146,11 @@ assert 'removePromo();return' in inject_people_chunk
 assert 'Ce fapt oficial lipsește:' in people_card_chunk
 assert 'informații proaspete și suficient de concrete' in people
 
-# "Ce spun decidenții" belongs to the explicit decision-home projection only.
+# "Ce spun decidenții" remains homepage-only even when the heavy decision
+# intelligence module is not loaded on first paint.
 assert 'isHome()' in people
-assert 'data-decision-home="1"' in people
-assert "document.querySelector('.main .hero')" not in people
+assert "document.body.classList.contains('conciergeHome')" in people
+assert "document.querySelector('.main .hero')" in people
 assert "section.dataset.decisionHome='1'" in function_chunk(decision,'enhanceHome')
 assert 'class="hero"' in function_chunk(app,'home')
 for route in ('explorer','calendar','ask','workspace','detail'):
@@ -161,7 +163,9 @@ for view in ('renderHub','renderNews','renderDossier'):
 
 assert 'document.addEventListener(\'click\'' not in people
 assert 'data-peopleall' not in people
-assert 'ask-partener-v2.js' in index
+assert 'ask-partener-v2.js' not in index
+assert 'ask-partener-v2.js' in loader
+assert 'window.PARTENER_LOAD_ASK=loadAskSuite' in loader
 assert 'public-product-v3.js' in index
 assert 'public-product-v3.css' in index
 print('PARTENER.EU public product v3: PASS')
