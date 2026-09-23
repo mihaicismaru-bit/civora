@@ -34,13 +34,20 @@ REQUIRED_MARKERS = {
     "product_definition": "ce știm sigur și ce trebuie să faci mai departe",
     "critical_data_ref": 'src="data.js',
     "critical_app_ref": 'src="app.js',
-    "decision_data_ref": 'src="decision-products.js',
-    "decision_ui_ref": 'src="decision-intelligence-v2.js',
+    "heavy_loader_ref": 'src="public-heavy-loader-v1.js',
+    "home_data_ref": 'src="home-public-data.js',
     "concierge_ui_ref": 'src="home-concierge-vnext.js',
     "concierge_css_ref": 'href="home-concierge-vnext.css',
 }
 LEGACY_MARKERS = ("wp-content/", "wp-includes/", "wordpress.org", "wp-json")
-UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.8"
+FORBIDDEN_EAGER_MARKERS = (
+    'src="decision-products.js',
+    'src="decision-intelligence-v2.js',
+    'src="mipe-canonical-calls.js',
+    'src="mipe-news.js',
+    'src="call-lifecycle.js',
+)
+UA = "PARTENER.EU-CIVORA-P10-Deployment-Probe/1.9"
 
 
 class RedirectAudit(urllib.request.HTTPRedirectHandler):
@@ -100,6 +107,10 @@ def extract_stylesheet(text: str,name: str,base: str) -> str|None:
     return urllib.parse.urljoin(base,m.group(1)) if m else None
 
 
+def eager_heavy_refs(text: str) -> list[str]:
+    return [marker for marker in FORBIDDEN_EAGER_MARKERS if marker in text]
+
+
 def probe_asset(url: str|None, expected: tuple[str,...]) -> dict[str,Any]:
     result={"url":url,"ok":False,"http_status":None,"final_url":None,"bytes":0,"sha256":None,"error":None}
     if not url: result["error"]="asset reference missing"; return result
@@ -112,25 +123,28 @@ def probe_asset(url: str|None, expected: tuple[str,...]) -> dict[str,Any]:
 
 
 def probe(endpoint_id: str,url: str,stamp: str) -> dict[str,Any]:
-    result={"id":endpoint_id,"url":url,"requested_url":cache_bust(url,stamp),"ok":False,"content_verified":False,"http_status":None,"final_url":None,"final_scheme":None,"redirect_chain":[],"content_type":None,"bytes":0,"body_sha256":None,"title":None,"markers":{key:False for key in REQUIRED_MARKERS},"marker_ok":False,"legacy_origin_detected":False,"critical_assets_ok":False,"assets":{},"error":None}
+    result={"id":endpoint_id,"url":url,"requested_url":cache_bust(url,stamp),"ok":False,"content_verified":False,"http_status":None,"final_url":None,"final_scheme":None,"redirect_chain":[],"content_type":None,"bytes":0,"body_sha256":None,"title":None,"markers":{key:False for key in REQUIRED_MARKERS},"marker_ok":False,"eager_heavy_refs":[],"eager_heavy_absent":False,"legacy_origin_detected":False,"critical_assets_ok":False,"assets":{},"error":None}
     try:
         body,code,final,headers,redirect_chain=request(result["requested_url"]); text=body.decode("utf-8","ignore")
         result.update({"http_status":code,"final_url":final,"final_scheme":urllib.parse.urlsplit(final).scheme.lower(),"redirect_chain":redirect_chain,"content_type":headers.get("Content-Type") or headers.get("content-type"),"bytes":len(body),"body_sha256":hashlib.sha256(body).hexdigest()})
         title=re.search(r"(?is)<title[^>]*>(.*?)</title>",text)
         if title: result["title"]=re.sub(r"\s+"," ",title.group(1)).strip()[:300]
-        result["markers"]={key:marker in text for key,marker in REQUIRED_MARKERS.items()}; result["marker_ok"]=all(result["markers"].values())
+        result["markers"]={key:marker in text for key,marker in REQUIRED_MARKERS.items()}
+        result["eager_heavy_refs"]=eager_heavy_refs(text)
+        result["eager_heavy_absent"]=not result["eager_heavy_refs"]
+        result["marker_ok"]=all(result["markers"].values()) and result["eager_heavy_absent"]
         low=text.lower(); result["legacy_origin_detected"]=any(marker in low for marker in LEGACY_MARKERS)
         data_url=extract_asset(text,"data.js",final)
         app_url=extract_asset(text,"app.js",final)
-        decision_data_url=extract_asset(text,"decision-products.js",final)
-        decision_ui_url=extract_asset(text,"decision-intelligence-v2.js",final)
+        heavy_loader_url=extract_asset(text,"public-heavy-loader-v1.js",final)
+        home_data_url=extract_asset(text,"home-public-data.js",final)
         concierge_url=extract_asset(text,"home-concierge-vnext.js",final)
         concierge_css_url=extract_stylesheet(text,"home-concierge-vnext.css",final)
         result["assets"]={
             "data.js":probe_asset(data_url,("PARTENER_DATA","window.PARTENER_DATA")),
             "app.js":probe_asset(app_url,("function render","render();","document.getElementById('app')",'document.getElementById("app")')),
-            "decision-products.js":probe_asset(decision_data_url,("PARTENER_DECISION_PRODUCTS",)),
-            "decision-intelligence-v2.js":probe_asset(decision_ui_url,("renderHub","dossierCard")),
+            "public-heavy-loader-v1.js":probe_asset(heavy_loader_url,("PARTENER_LOAD_DECISION_HUB","PARTENER_LOAD_ASK","decision-products.js")),
+            "home-public-data.js":probe_asset(home_data_url,("PARTENER_HOME_DATA","fullDossiersLazyLoaded")),
             "home-concierge-vnext.js":probe_asset(concierge_url,("Ce vrei să finanțezi?","Deschise acum","confirmed(d,'Termen')")),
             "home-concierge-vnext.css":probe_asset(concierge_css_url,(".conciergeHero",".conciergeSearch",".conciergeTrust")),
         }
@@ -160,7 +174,7 @@ def main() -> int:
     observed_at=nowz(); stamp=observed_at.replace(":","").replace("-",""); endpoints=[probe(i,u,stamp) for i,u in ENDPOINTS]; by_id={x["id"]:x for x in endpoints}; https=by_id["custom_https"]; http=by_id["custom_http"]; pages=by_id["pages_origin"]; transport=assess_transport(by_id)
     public_content_verified=any(x.get("content_verified") for x in endpoints); https_verified=transport["custom_https_verified"]; secure_transport_verified=transport["secure_transport_verified"]; http_content_verified=bool(http.get("content_verified") or pages.get("content_verified"))
     status="PASS" if public_content_verified and secure_transport_verified else "FAIL"
-    result={"schema_version":"1.8","observed_at":observed_at,"status":status,"public_content_verified":public_content_verified,"https_verified":https_verified,"secure_transport_verified":secure_transport_verified,"http_redirects_to_https":transport["http_redirects_to_https"],"pages_https_preserved":transport["pages_https_preserved"],"http_content_verified":http_content_verified,"https_closure_gate":"PASS" if secure_transport_verified else "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS","content_origin":"custom_https" if https.get("content_verified") else ("custom_http" if http.get("content_verified") else ("pages_origin" if pages.get("content_verified") else None)),"old_origin_detected":any(x.get("legacy_origin_detected") for x in endpoints),"endpoints":endpoints,"url":https.get("url"),"http_status":https.get("http_status"),"marker_ok":https.get("marker_ok"),"markers":https.get("markers"),"final_url":https.get("final_url"),"content_type":https.get("content_type"),"bytes":https.get("bytes"),"body_sha256":https.get("body_sha256"),"title":https.get("title"),"critical_assets_ok":https.get("critical_assets_ok"),"error":None}
+    result={"schema_version":"1.9","observed_at":observed_at,"status":status,"public_content_verified":public_content_verified,"https_verified":https_verified,"secure_transport_verified":secure_transport_verified,"http_redirects_to_https":transport["http_redirects_to_https"],"pages_https_preserved":transport["pages_https_preserved"],"http_content_verified":http_content_verified,"https_closure_gate":"PASS" if secure_transport_verified else "PENDING_HTTPS_ENFORCEMENT_AND_SECURE_REDIRECTS","content_origin":"custom_https" if https.get("content_verified") else ("custom_http" if http.get("content_verified") else ("pages_origin" if pages.get("content_verified") else None)),"old_origin_detected":any(x.get("legacy_origin_detected") for x in endpoints),"endpoints":endpoints,"url":https.get("url"),"http_status":https.get("http_status"),"marker_ok":https.get("marker_ok"),"markers":https.get("markers"),"final_url":https.get("final_url"),"content_type":https.get("content_type"),"bytes":https.get("bytes"),"body_sha256":https.get("body_sha256"),"title":https.get("title"),"critical_assets_ok":https.get("critical_assets_ok"),"error":None}
     if not public_content_verified: result["error"]="public Funding Concierge vNext content verification failed"
     elif not secure_transport_verified: result["error"]="public content is current, but HTTP/Pages transport is not fully HTTPS-closed"
     atomic(OUT,result); print(json.dumps(result,ensure_ascii=False,indent=2)); return 0 if status=="PASS" else 2
