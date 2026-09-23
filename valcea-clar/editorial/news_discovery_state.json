@@ -1,36 +1,21 @@
 {
   "schema_version": "1.4",
-  "observed_at": "2026-09-23T17:07:20+03:00",
+  "observed_at": "2026-09-23T17:13:10+03:00",
   "execution_mode": "bounded_parallel",
   "max_parallel_sources": 6,
   "sources_total": 22,
-  "sources_ok": 14,
-  "facts_admitted": 6,
-  "source_notice_briefs": 2,
-  "facts_before_cross_source_headline_dedupe": 2,
+  "sources_ok": 19,
+  "facts_admitted": 4,
+  "source_notice_briefs": 0,
+  "facts_before_cross_source_headline_dedupe": 0,
   "preserved_full_story_count_before_refresh": 4,
-  "host_incident_count": 1,
-  "host_incidents": [
-    {
-      "host": "anofm.ro",
-      "status": "DEGRADED_HOST",
-      "failed_source_count": 2,
-      "failed_source_ids": [
-        "ajofm-valcea-comunicate",
-        "ajofm-valcea-press-releases"
-      ],
-      "error_categories": [
-        "TIMEOUT"
-      ],
-      "correlated_failure": true,
-      "editorial_semantics_changed": false
-    }
-  ],
+  "host_incident_count": 0,
+  "host_incidents": [],
   "sources": [
     {
       "source_id": "primaria-rm-valcea-comunicate",
       "listing_ok": false,
-      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+      "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
       "facts": 0
     },
     {
@@ -41,41 +26,44 @@
     },
     {
       "source_id": "prefectura-valcea",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+      "listing_ok": true,
+      "links_examined": 4,
+      "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "primaria-calimanesti-comunicate",
       "listing_ok": true,
-      "links_examined": 9,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "primaria-horezu-anunturi",
       "listing_ok": true,
-      "links_examined": 5,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "primaria-brezoi-comunicate",
       "listing_ok": true,
-      "links_examined": 7,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "primaria-baile-govora-evenimente",
-      "listing_ok": false,
-      "error": "HTTPError: HTTP Error 404: Not Found",
+      "listing_ok": true,
+      "links_examined": 0,
+      "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "ajofm-valcea-comunicate",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error timed out>",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
       "facts": 0
     },
     {
@@ -88,14 +76,14 @@
     {
       "source_id": "bjai-valcea-evenimente",
       "listing_ok": true,
-      "links_examined": 10,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "filarmonica-valcea-blog",
       "listing_ok": true,
-      "links_examined": 12,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
@@ -116,14 +104,14 @@
     {
       "source_id": "adi-apa-valcea-noutati",
       "listing_ok": true,
-      "links_examined": 4,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "eta-bus-comunicate",
       "listing_ok": true,
-      "links_examined": 8,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
@@ -149,29 +137,31 @@
     },
     {
       "source_id": "isu-valcea-specific-releases",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error [Errno -3] Temporary failure in name resolution>",
+      "listing_ok": true,
+      "links_examined": 2,
+      "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "ajofm-valcea-press-releases",
-      "listing_ok": false,
-      "error": "URLError: <urlopen error _ssl.c:1015: The handshake operation timed out>",
+      "listing_ok": true,
+      "links_examined": 12,
+      "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "cci-valcea-news",
       "listing_ok": true,
-      "links_examined": 7,
+      "links_examined": 0,
       "article_failures": 0,
       "facts": 0
     },
     {
       "source_id": "raliul-valcii-official-news",
       "listing_ok": true,
-      "links_examined": 5,
+      "links_examined": 0,
       "article_failures": 0,
-      "facts": 2
+      "facts": 0
     }
   ],
   "preservation_postcondition_recovered_ids": [],
