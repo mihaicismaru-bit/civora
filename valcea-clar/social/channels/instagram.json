@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "channel_id": "valcea-instagram",
   "instance_id": "valcea",
   "platform": "instagram",
@@ -27,7 +27,10 @@
     "single_photo",
     "carousel",
     "story",
-    "reel"
+    "reel",
+    "editorial_fact_card",
+    "data_card",
+    "document_led"
   ],
   "cadence": {
     "timezone": "Europe/Bucharest",
@@ -44,10 +47,21 @@
     "max_related_posts_24h": 3
   },
   "media_policy": {
-    "real_media_only": true,
+    "real_media_only": false,
+    "allowed_families": [
+      "real_or_official_photo",
+      "editorial_fact_card",
+      "data_card",
+      "document_led",
+      "editorial_layout"
+    ],
+    "native_feed_ratio": "4:5",
+    "story_or_reel_cover_ratio": "9:16",
     "provenance_required": true,
-    "reuse_rights_required": true,
-    "synthetic_real_person_forbidden": true
+    "reuse_rights_required_for_third_party_media": true,
+    "synthetic_real_person_forbidden": true,
+    "invented_documentary_photo_forbidden": true,
+    "generic_photo_only_to_fill_space_forbidden": true
   },
   "link_policy": {
     "mode": "optional",
@@ -81,6 +95,10 @@
     "state_path": "valcea-clar/social/instagram_state.json",
     "dedupe_by_id": true,
     "last_known_good": true
+  },
+  "delivery_truth": {
+    "delivered_requires_external_receipt_or_readback": true,
+    "workflow_success_is_not_delivery": true
   },
   "metrics": {
     "observed_only": true,
