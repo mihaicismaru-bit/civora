@@ -52,6 +52,8 @@ for token in (
     "['Agricultură','agricultură']",
     "['Educație','educație']",
     'const P=window.PARTENER_HOME_DATA||{};',
+    "['Grant','Finanțare','Valoare proiect','Buget']",
+    'const amount=v.amount;',
     'd?.canonicalPath',
     "location.assign('/?q='+encodeURIComponent(query))",
     "open:'/finantari/deschise/'",

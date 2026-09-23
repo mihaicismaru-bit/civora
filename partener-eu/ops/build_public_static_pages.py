@@ -81,6 +81,11 @@ def display_value(value: Any) -> str:
     if isinstance(value, (int, float)):
         return f"{value:,}".replace(",", ".")
     if isinstance(value, dict):
+        amount = value.get("amount")
+        if amount is not None:
+            currency = str(value.get("currency") or "").strip().upper()
+            rendered = display_value(amount)
+            return rendered + (f" {currency}" if currency else "")
         preferred = (
             ("maximum_total_project_value_eur", "max. ", " EUR"),
             ("maximum_eur", "max. ", " EUR"),
@@ -314,16 +319,37 @@ def status_label(dossier: dict[str, Any]) -> str:
 
 def card(dossier: dict[str, Any], slug_by_id: dict[str, str]) -> str:
     deadline = fact(dossier, "Termen")
-    grant = (
-        fact(dossier, "Grant")
-        or fact(dossier, "Finanțare")
-        or fact(dossier, "Valoare proiect")
+    finance_candidates = [
+        fact(dossier, "Grant"),
+        fact(dossier, "Finanțare"),
+        fact(dossier, "Valoare proiect"),
+        fact(dossier, "Buget"),
+    ]
+    grant = next(
+        (
+            row
+            for row in finance_candidates
+            if row and str(row.get("confidence") or "").upper() == "CONFIRMED"
+        ),
+        None,
+    )
+    if grant is None:
+        grant = next(
+            (
+                row
+                for row in finance_candidates
+                if row and display_value(row.get("value")) != "Neconfirmat"
+            ),
+            None,
+        )
+    finance_label = (
+        "Buget apel" if grant and fold(grant.get("label")) == "buget" else "Finanțare"
     )
     audience = [str(item) for item in (dossier.get("audience") or []) if item][:2]
     facts_html: list[str] = []
     if grant:
         facts_html.append(
-            f"<span><b>Finanțare:</b> {esc(display_value(grant.get('value')))}</span>"
+            f"<span><b>{esc(finance_label)}:</b> {esc(display_value(grant.get('value')))}</span>"
         )
     if deadline:
         facts_html.append(
@@ -382,6 +408,7 @@ HOME_FACT_LABELS = {
     "grant",
     "finantare",
     "valoare proiect",
+    "buget",
 }
 
 
