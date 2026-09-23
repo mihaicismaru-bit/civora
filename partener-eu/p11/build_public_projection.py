@@ -8,8 +8,10 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import tempfile
 import urllib.parse
+from zoneinfo import ZoneInfo
 
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -19,6 +21,22 @@ ACTIVE_RESOLUTION_STATES = {"OPEN", "IN_REVIEW"}
 ALLOW_DECISION = "ALLOW_VERIFIED_FACTS"
 BLOCK_DECISION = "BLOCK_MATERIAL_FACTS"
 PROJECTION_SCHEMA_VERSION = 5
+EXPIRED_OPEN_REASON = "OPEN_DEADLINE_EXPIRED_REQUIRES_REFRESH"
+BUCHAREST = ZoneInfo("Europe/Bucharest")
+ROMANIAN_MONTHS = {
+    "ianuarie": 1,
+    "februarie": 2,
+    "martie": 3,
+    "aprilie": 4,
+    "mai": 5,
+    "iunie": 6,
+    "iulie": 7,
+    "august": 8,
+    "septembrie": 9,
+    "octombrie": 10,
+    "noiembrie": 11,
+    "decembrie": 12,
+}
 
 
 def atomic_text(path: pathlib.Path, value: str) -> None:
@@ -48,6 +66,68 @@ def utc_timestamp(value: object, field: str) -> datetime.datetime:
     if parsed.tzinfo is None:
         raise ValueError(f"{field} must include a timezone")
     return parsed.astimezone(datetime.timezone.utc)
+
+
+def deadline_close_at_utc(deadline: object) -> datetime.datetime | None:
+    """Parse a canonical close deadline without inferring lifecycle state.
+
+    Date-only deadlines are treated as end-of-day in Europe/Bucharest. The
+    helper intentionally returns None for unknown/unparseable values so the
+    normal verification gates remain authoritative.
+    """
+    if not isinstance(deadline, dict):
+        return None
+    raw = deadline.get("closes_at") or deadline.get("closes")
+    if not isinstance(raw, str) or not raw.strip():
+        return None
+    raw = raw.strip()
+
+    # Canonical ISO timestamps/dates.
+    try:
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw):
+            day = datetime.date.fromisoformat(raw)
+            parsed = datetime.datetime.combine(day, datetime.time(23, 59, 59), tzinfo=BUCHAREST)
+            return parsed.astimezone(datetime.timezone.utc)
+        parsed = datetime.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=BUCHAREST)
+        return parsed.astimezone(datetime.timezone.utc)
+    except ValueError:
+        pass
+
+    # Romanian human-readable dates used by the historical P11 corpus.
+    match = re.search(
+        r"\b(\d{1,2})\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(\d{4})\b(?:.*?\b(?:ora\s*)?(\d{1,2})[:.](\d{2})\b)?",
+        raw.lower(),
+    )
+    if not match:
+        return None
+    day = int(match.group(1))
+    month = ROMANIAN_MONTHS[match.group(2)]
+    year = int(match.group(3))
+    if match.group(4) is not None:
+        hour = int(match.group(4))
+        minute = int(match.group(5))
+        second = 0
+    else:
+        hour, minute, second = 23, 59, 59
+    try:
+        parsed = datetime.datetime(year, month, day, hour, minute, second, tzinfo=BUCHAREST)
+    except ValueError:
+        return None
+    return parsed.astimezone(datetime.timezone.utc)
+
+
+def expired_verified_open(opportunity: dict, verified_fact_classes: list[str], as_of: object) -> bool:
+    """Return True only when a verified OPEN has a verified deadline already elapsed."""
+    if opportunity.get("status") != "OPEN":
+        return False
+    if not {"status", "deadline"} <= set(verified_fact_classes):
+        return False
+    close_at = deadline_close_at_utc((opportunity.get("material_facts") or {}).get("deadline"))
+    if close_at is None:
+        return False
+    return close_at < utc_timestamp(as_of, "asOf")
 
 
 def evidence_age_seconds(as_of: object, observed_at: object) -> int:
@@ -129,9 +209,10 @@ def projection_integrity_errors(projection: dict) -> list[str]:
     errors = []
     as_of = projection.get("asOf")
     try:
-        utc_timestamp(as_of, "asOf")
+        projection_as_of = utc_timestamp(as_of, "asOf")
     except ValueError as exc:
         errors.append(str(exc))
+        projection_as_of = None
     if projection.get("schemaVersion") != PROJECTION_SCHEMA_VERSION:
         errors.append(f"schemaVersion must be {PROJECTION_SCHEMA_VERSION}")
     if not isinstance(policy, dict):
@@ -151,6 +232,8 @@ def projection_integrity_errors(projection: dict) -> list[str]:
             errors.append("freshness telemetry must not authorize publication")
         if policy.get("sourceCoverageTelemetryAuthorizesPublication") is not False:
             errors.append("source coverage telemetry must not authorize publication")
+        if policy.get("expiredOpenRequiresAuthorityRefresh") is not True:
+            errors.append("policy must fail closed expired verified OPEN calls")
     identifiers = [row.get("id") for row in opportunities if isinstance(row, dict)]
     if len(identifiers) != len(opportunities) or any(not value for value in identifiers):
         errors.append("every opportunity must have an id")
@@ -265,6 +348,15 @@ def projection_integrity_errors(projection: dict) -> list[str]:
             errors.append(f"{row.get('id')}: allowed decision exposes unverified material facts")
         if decision == ALLOW_DECISION and active_task_count:
             errors.append(f"{row.get('id')}: active resolution task cannot be allowed")
+        if (
+            decision == ALLOW_DECISION
+            and row.get("status") == "OPEN"
+            and {"status", "deadline"} <= verified_fact_classes
+            and projection_as_of is not None
+        ):
+            close_at = deadline_close_at_utc((row.get("materialFacts") or {}).get("deadline"))
+            if close_at is not None and close_at < projection_as_of:
+                errors.append(f"{row.get('id')}: expired verified OPEN cannot be allowed")
 
     decision_counts = {
         ALLOW_DECISION: len(allowed),
@@ -432,12 +524,26 @@ def build(bundle: dict) -> dict:
             verified_fact_classes,
             tasks_by_opportunity.get(opportunity["opportunity_id"], []),
         )
+        public_status = opportunity["status"]
+        if (
+            decision["decision"] == ALLOW_DECISION
+            and expired_verified_open(opportunity, verified_fact_classes, bundle.get("as_of"))
+        ):
+            decision = {
+                "decision": BLOCK_DECISION,
+                "reasonCodes": [EXPIRED_OPEN_REASON],
+                "blockedFactClasses": sorted((opportunity.get("material_facts") or {}).keys()),
+                "activeResolutionTaskCount": 0,
+            }
+            # Do not infer CLOSED. The public projection only says current OPEN
+            # evidence is no longer sufficient and requires authority refresh.
+            public_status = "DISCOVERED"
         projected.append({
             "id": opportunity["opportunity_id"],
             "title": opportunity["title"],
             "programme": opportunity.get("programme"),
             "code": opportunity.get("code"),
-            "status": opportunity["status"],
+            "status": public_status,
             "publicationState": opportunity["publication_state"],
             "materialFacts": (
                 opportunity.get("material_facts") or {}
@@ -500,6 +606,7 @@ def build(bundle: dict) -> dict:
             "freshnessReference": "PROJECTION_AS_OF",
             "freshnessTelemetryAuthorizesPublication": False,
             "sourceCoverageTelemetryAuthorizesPublication": False,
+            "expiredOpenRequiresAuthorityRefresh": True,
         },
         "summary": {
             "opportunityCount": len(projected),
