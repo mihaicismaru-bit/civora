@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0",
+  "run_id": "operator-run-20260923T000253Z",
+  "observed_at_local": "2026-09-23T03:02:53+03:00",
+  "scope": "delta_scan_and_followups",
+  "previous_checkpoint": "valcea-clar/editorial/operator_runs/2026-09-23T0203+0300.json",
+  "state_reconciliation": {
+    "previous_canonical_story_change": false,
+    "previous_publishable_story_count": 75,
+    "previous_auto_fact_registry_count": 7,
+    "previous_retained_published_story_count": 165,
+    "repository_delta_since_previous_checkpoint": "No VÂLCEA CLAR editorial fact/story state file changes observed after the previous checkpoint; intervening repository commits were unrelated PARTENER.EU or static presentation/indexing refreshes.",
+    "auto_facts_changed_since_previous_checkpoint": false
+  },
+  "fresh_scan_summary": {
+    "material_delta": false,
+    "county_scope": "Vâlcea countywide",
+    "surfaces_checked": [
+      "Eveniment Vâlcean",
+      "Se întâmplă în Vâlcea",
+      "Ziarul de Vâlcea",
+      "Tribuna Vâlceană",
+      "Primăria Brezoi / official",
+      "Raliul Vâlcii organizer",
+      "FRAS",
+      "searches for CJ Vâlcea, Râmnicu Vâlcea municipality and IPJ Vâlcea follow-ups"
+    ],
+    "new_publishable_story_ids": [],
+    "note": "No low-risk item published or materially updated after the 02:03 pass met the combined novelty, verification and editorial-value threshold. Date rollover and duplicate coverage of the Ionești homicide were not treated as new stories."
+  },
+  "fact_kernel": [
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "The canonical auto_facts registry has no repository commit after the previous 02:03 checkpoint."
+    },
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "Repository comparison after the previous checkpoint found no VÂLCEA CLAR editorial fact/story-state delta; later VÂLCEA commits were static indexing/presentation refreshes rather than new editorial publication."
+    },
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "Fresh countywide surface checks produced no new low-risk, sufficiently verified story that justified autonomous publication in this pass."
+    },
+    {
+      "type": "SOURCE_CLAIM",
+      "text": "The Raliul Vâlcii organizer continues to list detailed 24 and 26 September traffic restrictions; those closure details remain attributed organizer claims pending a competent-authority notice."
+    },
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "The organizer restriction notice still labels 24 September 2026 as Wednesday, while the organizer program and FRAS program confirm the rally schedule begins Thursday, 24 September 2026."
+    },
+    {
+      "type": "UNKNOWN",
+      "text": "A fresh competent-authority notice from the municipality or road/police authority confirming the detailed Raliul Vâlcii street closures was not found in this pass."
+    },
+    {
+      "type": "EDITORIAL_INTERPRETATION",
+      "text": "No item crossed the combined novelty, verification, public-value and proportional-risk threshold. The clock and duplicate publication by another outlet are not publication reasons."
+    }
+  ],
+  "sensitive_followups": [
+    {
+      "topic": "Ionești homicide / body found in suitcase",
+      "status": "HOLD",
+      "reason": "Active homicide investigation involving an identifiable victim/suspect and material legal/reputational risk; no genuinely new underlying fact was established in this pass."
+    }
+  ],
+  "publication_summary": {
+    "site_published": 0,
+    "site_updated_editorial": 0,
+    "facebook_delivered": 0,
+    "facebook_outbox_or_hold_new": 0,
+    "instagram_delivered": 0,
+    "instagram_outbox_or_hold_new": 0,
+    "delivery_truth": "No new durable story publication event; no new channel delivery is claimed."
+  },
+  "channel_truth": {
+    "facebook": {
+      "new_delivery_this_run": false,
+      "receipt": null
+    },
+    "instagram": {
+      "new_delivery_this_run": false,
+      "receipt": null
+    }
+  },
+  "followups": [
+    "Continue competent-authority verification of the detailed Raliul Vâlcii street restrictions before promoting organizer-only details beyond attributed SOURCE_CLAIM.",
+    "Restore or replace degraded CJ Vâlcea, IPJ Vâlcea, Băile Govora and Râmnicu Vâlcea primary-source routes without relaxing TLS or provenance controls.",
+    "Continue countywide delta scanning and avoid republishing legacy_passthrough/document-summary material merely to create activity."
+  ],
+  "human_decisions_required": []
+}
