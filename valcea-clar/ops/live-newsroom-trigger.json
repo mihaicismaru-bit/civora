@@ -1,11 +1,12 @@
 {
-  "requested_at": "2026-09-24T00:31:00+03:00",
+  "requested_at": "2026-09-24T01:58:43+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "COUNTY-WIDE DELTA + LOCAL LIFE CORRECTION. Preserve HCL publication holds, the Raliul Valcii service follow-up, and the verified Horezu road-closure story. PRIMARY DETAIL RESOLUTION: the official Filarmonica Ion Dumitrescu detail page for PARALELE CORALE confirms 25 September 2026, 19:00-20:30, Sala Lahovari and explicitly states Acces liber. Update the same stable event record from price/access UNKNOWN to free; do not create a duplicate. FLOAREA DARULUI remains confirmed for 26 September 2026, 19:00-20:00, Sala Lahovari, free admission. Continue whole-county rotation; no filler.",
+  "reason": "COUNTY-WIDE DELTA + LOCAL LIFE HOT WATCH. No new low-risk county news story surpassed the publication threshold since the 01:02 cycle. Preserve existing publication holds and follow-ups. LOCAL LIFE delta: add two 24/25 September performances of Liber Volatilium at Teatrul Anton Pann from corroborated current public listings, and add the official Raliul Valcii opening/start-festiv event with MIRA on 24 September from the organiser's current programme. Do not infer ticket price or access where the primary source is silent. Continue whole-county rotation; no filler.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533",
-    "horezu-drum-vf-roman-inchis-20260926"
+    "horezu-drum-vf-roman-inchis-20260926",
+    "dragasani-ct-radiologie-program-clarificare-20260924"
   ],
   "editorial_signals": [
     {
@@ -30,8 +31,8 @@
       "source_url": "https://raliulvalcii.ro/stiri/restrictii-circulatie-raliul-valcii-2026/",
       "corroboration_url": "https://fras.ro/raliul-valcii-nurvil-finala-sezonului-probe-pe-macadam-si-doua-concerte-la-ramnicu-valcea/",
       "source_tier": "T1_ORGANISER_PLUS_T1_SPORT_FEDERATION_CONTEXT",
-      "checked_at": "2026-09-23T21:58:13+03:00",
-      "next_action": "Build/update a reader-service fact kernel with exact restriction intervals and streets; seek municipality/police corroboration if available."
+      "checked_at": "2026-09-24T01:58:43+03:00",
+      "next_action": "Update the existing reader-service story only if exact restriction details materially change; do not create a duplicate article."
     },
     {
       "signal_id": "ionesti-homicide-arrest-warrant-20260923-2049",
@@ -60,49 +61,90 @@
   ],
   "editorial_corrections": [
     {
-      "story_ids": ["rm-valcea-hcl-343-20260916", "rm-valcea-hcl-344-20260916", "rm-valcea-hcl-345-20260916"],
+      "story_ids": [
+        "rm-valcea-hcl-343-20260916",
+        "rm-valcea-hcl-344-20260916",
+        "rm-valcea-hcl-345-20260916"
+      ],
       "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
       "reason": "Public readback still shows raw administrative HCL titles/generic document summaries while the canonical runtime excludes them. Keep them barred from public and social projections until rewritten journalistically; deployment/currentness divergence remains unresolved."
     }
   ],
   "coverage_cycle": {
     "deep_scan_zone": "county_delta_plus_local_life_hot_watch",
-    "scanned_localities": ["Drăgășani", "Bălcești", "Călimănești", "Brezoi", "Horezu", "Voineasa", "Ionești", "Tomșani", "Râmnicu Vâlcea"],
-    "material_delta_localities": ["Horezu", "Râmnicu Vâlcea"],
-    "no_material_delta_noted": ["Drăgășani", "Bălcești", "Brezoi", "Voineasa"],
-    "policy": "No filler; stale time-bounded service items and document-as-product stories fail closed from reader surfaces."
+    "scanned_localities": [
+      "Drăgășani",
+      "Bălcești",
+      "Călimănești",
+      "Brezoi",
+      "Horezu",
+      "Voineasa",
+      "Ionești",
+      "Tomșani",
+      "Râmnicu Vâlcea"
+    ],
+    "material_delta_localities": [
+      "Râmnicu Vâlcea"
+    ],
+    "no_material_delta_noted": [
+      "Drăgășani",
+      "Bălcești",
+      "Călimănești",
+      "Brezoi",
+      "Horezu",
+      "Voineasa",
+      "Ionești",
+      "Tomșani"
+    ],
+    "policy": "No filler; stable sources without delta remain in rotation. Current service claims fail closed when primary freshness is absent."
   },
   "event_deltas": [
     {
-      "event_id": "filarmonica-paralele-corale-20260925",
-      "title": "Paralele Corale",
-      "event_start": "2026-09-25",
+      "event_id": "vanner-liber-volatilium-rmvalcea-20260924",
+      "title": "Liber Volatilium",
+      "event_start": "2026-09-24",
       "start_time": "19:00",
-      "venue": "Sala Lahovari",
+      "venue": "Sala Studio, Teatrul Anton Pann",
       "locality": "Râmnicu Vâlcea",
-      "category": "concert coral",
+      "category": "teatru",
       "price": "gratuit",
       "free": true,
-      "organiser": "Centrul Cultural Municipal Râmnicu Vâlcea / Filarmonica Ion Dumitrescu",
-      "source_url": "https://filarmonica-valcea.ro/eveniment/paralele-corale/",
-      "source_tier": "T1",
-      "checked_at": "2026-09-24T00:31:00+03:00",
+      "organiser": "Vanner Collective / Teatrul Anton Pann (gazdă)",
+      "source_url": "https://curierulderamnic.ro/2026/09/21/cand-toata-lumea-zboara-in-aceeasi-directie-cine-mai-alege-drumul-spectacolul-liber-volatilium-ajunge-la-ramnicu-valcea/",
+      "source_tier": "T2_CORROBORATED_BY_MONTHLY_CULTURAL_AGENDA",
+      "checked_at": "2026-09-24T01:58:43+03:00",
       "status": "scheduled"
     },
     {
-      "event_id": "filarmonica-floarea-darului-20260926",
-      "title": "Floarea Darului",
-      "event_start": "2026-09-26",
+      "event_id": "vanner-liber-volatilium-rmvalcea-20260925",
+      "title": "Liber Volatilium",
+      "event_start": "2026-09-25",
       "start_time": "19:00",
-      "venue": "Sala Lahovari",
+      "venue": "Sala Studio, Teatrul Anton Pann",
       "locality": "Râmnicu Vâlcea",
-      "category": "concert coral / muzică veche",
+      "category": "teatru",
       "price": "gratuit",
       "free": true,
-      "organiser": "Centrul Cultural Municipal Râmnicu Vâlcea / Filarmonica Ion Dumitrescu / Arhiepiscopia Râmnicului",
-      "source_url": "https://filarmonica-valcea.ro/eveniment/floarea-darului/",
-      "source_tier": "T1",
-      "checked_at": "2026-09-24T00:31:00+03:00",
+      "organiser": "Vanner Collective / Teatrul Anton Pann (gazdă)",
+      "source_url": "https://curierulderamnic.ro/2026/09/21/cand-toata-lumea-zboara-in-aceeasi-directie-cine-mai-alege-drumul-spectacolul-liber-volatilium-ajunge-la-ramnicu-valcea/",
+      "source_tier": "T2_CORROBORATED_BY_MONTHLY_CULTURAL_AGENDA",
+      "checked_at": "2026-09-24T01:58:43+03:00",
+      "status": "scheduled"
+    },
+    {
+      "event_id": "raliul-valcii-start-festiv-mira-20260924",
+      "title": "Raliul Vâlcii 2026 — start festiv și concert MIRA",
+      "event_start": "2026-09-24",
+      "start_time": "19:00",
+      "venue": "Centrul Civic",
+      "locality": "Râmnicu Vâlcea",
+      "category": "sport / concert",
+      "price": "unknown",
+      "free": null,
+      "organiser": "Raliul Vâlcii Nurvil",
+      "source_url": "https://raliulvalcii.ro/stiri/program-raliul-valcii-nurvil-2026/",
+      "source_tier": "T1_ORGANISER",
+      "checked_at": "2026-09-24T01:58:43+03:00",
       "status": "scheduled"
     }
   ]
