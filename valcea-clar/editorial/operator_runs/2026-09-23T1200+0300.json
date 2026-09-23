@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0",
+  "observed_at": "2026-09-23T12:00:33+03:00",
+  "operator": "CHATGPT_EDITORIAL_OPERATOR",
+  "mode": "county_wide_incremental",
+  "canonical_scan_snapshot": {
+    "observed_at": "2026-09-23T09:39:15+03:00",
+    "sources_total": 22,
+    "sources_ok": 18,
+    "facts_admitted": 7,
+    "degraded_sources": [
+      "primaria-rm-valcea-comunicate: network unreachable",
+      "cj-valcea-anunturi: TLS certificate verify failed",
+      "primaria-baile-govora-evenimente: HTTP 404",
+      "ipj-valcea-news: TLS certificate verify failed"
+    ]
+  },
+  "material_deltas": [
+    {
+      "id": "production-readback-regression-20260923-noon",
+      "type": "DELIVERY_TRUTH_INCIDENT",
+      "fact_kernel": {
+        "CONFIRMED_FACT": [
+          "Direct public readback of https://valceaclar.ro/ at noon still exposes 'Ultima actualizare: 22 septembrie 2026, 09:42'.",
+          "The public homepage still exposes the unresolved HCL 343, 344 and 345 administrative-text-derived cards."
+        ],
+        "EDITORIAL_INTERPRETATION": [
+          "The prior internal claim that the 23 September Brezoi edition was externally confirmed cannot currently be reproduced from the public root URL and must be treated as unconfirmed until production reconciliation succeeds."
+        ],
+        "UNKNOWN": [
+          "Whether the mismatch is caused by Pages origin selection, deployment artifact selection, caching, or another publication-path divergence."
+        ]
+      },
+      "action": "Canonical live-newsroom trigger updated to require origin/artifact reconciliation and external readback before marking SITE UPDATED."
+    },
+    {
+      "id": "race-the-vibe-nicolae-balcescu-20260926-27",
+      "type": "EDITORIAL_SIGNAL",
+      "locality": "Nicolae Bălcescu / Șerbăneasa",
+      "recommended_product": "UNDE IEȘIM / SERVICE",
+      "fact_kernel": {
+        "CONFIRMED_FACT": [
+          "Multiple concordant sources place Race The Vibe at Nicolae Bălcescu/Șerbăneasa on 26–27 September 2026.",
+          "The published September agenda lists Moto Amateur, Moto Pro and Auto Time Attack categories and states online registration closes on 24 September 2026."
+        ],
+        "SOURCE_CLAIM": [
+          "A 23 September local report describes traffic restrictions on DJ 678A and attributes them to the local administration/event context."
+        ],
+        "UNVERIFIED": [
+          "Exact closure interval, km limits, >7.5t restrictions and detours have no competent primary road/police/municipal document located in this cycle.",
+          "The same traffic report contains a material year contradiction, writing 26–27 September 2025 in a 2026 report."
+        ],
+        "UNKNOWN": [
+          "Primary competent-authority traffic order/notice."
+        ],
+        "EDITORIAL_INTERPRETATION": [
+          "The event itself may support a low-risk service story; traffic restrictions must remain held until primary confirmation."
+        ]
+      }
+    }
+  ],
+  "site": {
+    "published_new_confirmed": 0,
+    "updated_confirmed": 0,
+    "status": "HOLD_PENDING_PUBLIC_READBACK_RECONCILIATION"
+  },
+  "facebook": {
+    "delivered_new": 0,
+    "status": "NO_NEW_RECEIPT"
+  },
+  "instagram": {
+    "delivered_new": 0,
+    "status": "NO_NEW_RECEIPT"
+  },
+  "sensitive_holds": [
+    "Ionești/Tomșani/Horezu homicide/valise case: HIGH_RISK / NEEDS_HUMAN_REVIEW"
+  ],
+  "followups": [
+    "Reconcile canonical production artifact/origin with valceaclar.ro and require external URL/body/RSS/sitemap/metadata readback.",
+    "Obtain competent primary authority confirmation for Race The Vibe DJ 678A traffic restrictions.",
+    "Complete HCL 343–345 editorial repair without duplicates."
+  ],
+  "human_decisions_required": []
+}
