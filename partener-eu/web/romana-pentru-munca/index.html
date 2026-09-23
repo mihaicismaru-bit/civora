@@ -107,7 +107,7 @@
           </ul>
           <p><b>Ca să primești oferta</b>, sunt suficiente câteva informații: câți oameni ai, cum lucrează și ce format preferi.</p>
           </div>
-        <form class="rpmLeadForm" id="rpmLeadForm">
+        <form class="rpmLeadForm" id="rpmLeadForm" data-api="">
           <div class="rpmLeadFormHead">
             <strong>Cere oferta</strong>
             <span>Completezi în mai puțin de un minut.</span>
@@ -136,7 +136,8 @@
             </select>
           </label>
           <button class="rpmPrimary" type="submit">Trimite cererea de ofertă</button>
-          <p class="rpmFormNote">La trimitere se deschide aplicația ta de email cu cererea completată către office@partener.eu. Nu stocăm datele în această pagină.</p>
+          <p class="rpmFormNote" id="rpmFormNote">Cererea este trimisă securizat pentru ofertare. Dacă serviciul de formular nu este disponibil, folosim fallback prin email.</p>
+          <p class="rpmFormStatus" id="rpmFormStatus" aria-live="polite"></p>
         </form>
         </div>
       </div>
@@ -244,24 +245,49 @@
 <script>
 (function(){
   const form=document.getElementById('rpmLeadForm');
+  const status=document.getElementById('rpmFormStatus');
   if(!form) return;
-  form.addEventListener('submit',function(e){
-    e.preventDefault();
-    const d=new FormData(form);
+  const params=new URLSearchParams(location.search);
+  const fallbackMail=(d)=>{
     const body=[
-      'Bună ziua,',
-      '',
-      'Doresc o ofertă pentru programul Română pentru Muncă.',
-      '',
-      'Firmă: '+(d.get('company')||''),
-      'Persoană de contact: '+(d.get('name')||''),
-      'Telefon/email: '+(d.get('contact')||''),
-      'Număr aproximativ de angajați: '+(d.get('employees')||''),
-      'Format preferat: '+(d.get('format')||''),
-      '',
-      'Vă rog să mă contactați pentru detalii.'
+      'Bună ziua,','','Doresc o ofertă pentru programul Română pentru Muncă.','',
+      'Firmă: '+(d.company||''),
+      'Persoană de contact: '+(d.name||''),
+      'Telefon/email: '+(d.contact||''),
+      'Număr aproximativ de angajați: '+(d.employees||''),
+      'Format preferat: '+(d.format||''),'','Vă rog să mă contactați pentru detalii.'
     ].join('\n');
     location.href='mailto:office@partener.eu?subject='+encodeURIComponent('Cerere ofertă — Română pentru Muncă')+'&body='+encodeURIComponent(body);
+  };
+  form.addEventListener('submit',async function(e){
+    e.preventDefault();
+    const fd=new FormData(form);
+    const d=Object.fromEntries(fd.entries());
+    const payload={
+      ...d,
+      source_url:location.href,
+      referrer:document.referrer,
+      utm_source:params.get('utm_source')||'',
+      utm_medium:params.get('utm_medium')||'',
+      utm_campaign:params.get('utm_campaign')||'',
+      utm_content:params.get('utm_content')||''
+    };
+    const api=(form.dataset.api||'').trim();
+    const button=form.querySelector('button[type="submit"]');
+    if(!api){ fallbackMail(payload); return; }
+    button.disabled=true;
+    status.textContent='Trimitem cererea…';
+    try{
+      const r=await fetch(api,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+      if(!r.ok) throw new Error('submit');
+      status.textContent='Mulțumim. Cererea a fost înregistrată și te vom contacta pentru ofertă.';
+      form.reset();
+    }catch(err){
+      status.textContent='Serviciul online nu răspunde. Deschidem varianta prin email.';
+      fallbackMail(payload);
+    }finally{
+      button.disabled=false;
+    }
   });
 })();
 </script>
