@@ -2,7 +2,7 @@
 """Read-only exact-call inventory scout for the official MySMIS reporting table.
 
 This diagnostic exists to close the gap between a page-level semantic hash and
-call-level identity.  It never authorizes publication or material facts.  The
+call-level identity. It never authorizes publication or material facts. The
 listing's volatile project/contract counters are retained as diagnostics but
 excluded from the material semantic fingerprint.
 """
@@ -32,7 +32,7 @@ OUT = Path(
 CANONICAL_URL = "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027"
 EXPECTED_HOST = "reporting.mysmis2021.gov.ro"
 EXPECTED_PATH = "/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027"
-PARSER_VERSION = "MYSMIS_EXACT_CALL_INVENTORY_V1"
+PARSER_VERSION = "MYSMIS_EXACT_CALL_INVENTORY_V2"
 UA = "PARTENER.EU-CIVORA-MySMIS-ExactCallInventory/1.0 (+https://partener.eu)"
 MAX_BYTES = 5_000_000
 
@@ -156,8 +156,9 @@ def parse_inventory(raw: str) -> dict[str, Any]:
 
     rows: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
-    seen_codes: set[str] = set()
-    duplicates: list[str] = []
+    seen_by_code: dict[str, dict[str, Any]] = {}
+    conflicting_duplicates: list[str] = []
+    mirrored_duplicates: list[str] = []
     for position, cells in enumerate(data_rows, 1):
         programme = clean(cells[header["programme"]]["text"])
         call_title = clean(cells[header["callTitle"]]["text"])
@@ -170,9 +171,6 @@ def parse_inventory(raw: str) -> dict[str, Any]:
         if not code:
             failures.append({"row": position, "programme": programme, "callTitle": call_title, "reason": "EXACT_CALL_CODE_MISSING_OR_AMBIGUOUS"})
             continue
-        if code in seen_codes:
-            duplicates.append(code)
-        seen_codes.add(code)
 
         def value(name: str) -> str:
             index = header.get(name)
@@ -187,22 +185,33 @@ def parse_inventory(raw: str) -> dict[str, Any]:
             "callBudgetRon": value("callBudgetRon"),
             "operationalCounters": {field: value(field) for field in OPERATIONAL_FIELDS},
         }
+        previous = seen_by_code.get(code)
+        if previous is not None:
+            if previous == item:
+                mirrored_duplicates.append(code)
+            else:
+                conflicting_duplicates.append(code)
+            continue
+        seen_by_code[code] = item
         rows.append(item)
 
     if not data_rows:
         raise RuntimeError("MySMIS registry parsed with zero visible data rows")
 
     total = total_from_html(raw)
-    exact_ok = not failures and not duplicates and len(rows) == len(data_rows)
+    resolved_row_count = len(rows) + len(mirrored_duplicates)
+    exact_ok = not failures and not conflicting_duplicates and resolved_row_count == len(data_rows)
     return {
         "validatedCallCount": total,
         "visibleRowCount": len(data_rows),
         "exactIdentityRowCount": len(rows),
         "identityFailures": failures,
-        "duplicateCallCodes": sorted(set(duplicates)),
+        "duplicateCallCodes": sorted(set(conflicting_duplicates)),
+        "mirroredDuplicateCallCodes": sorted(set(mirrored_duplicates)),
+        "mirroredDuplicateRowCount": len(mirrored_duplicates),
         "exactIdentityCompleteForVisiblePage": exact_ok,
-        "pageComplete": total is not None and exact_ok and len(rows) == total,
-        "paginationRequired": total is None or len(rows) < total,
+        "pageComplete": total is not None and exact_ok and len(data_rows) == total,
+        "paginationRequired": total is None or len(data_rows) < total,
         "materialSemanticSha256": semantic_sha(rows) if rows else None,
         "rows": rows,
     }
@@ -254,6 +263,7 @@ def build_payload(raw: str, raw_bytes: bytes, content_type: str) -> dict[str, An
             "identity": "exact p201_cod_apel from each official Info link",
             "includedInMaterialSemanticHash": list(MATERIAL_FIELDS),
             "excludedAsOperationallyVolatile": list(OPERATIONAL_FIELDS),
+            "identicalDuplicateRows": "collapse only when the full normalized call row, including operational counters, is identical; conflicting repeats remain fail-closed",
             "publicationEffect": "NONE",
             "nextRequiredStep": "paginate the official report and reconcile each exact call identity before any material publication",
         },
