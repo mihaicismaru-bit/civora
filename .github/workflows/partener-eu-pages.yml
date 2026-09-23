@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/web/**'
+      - 'partener-eu/ops/build_public_static_pages.py'
+      - 'partener-eu/ops/test_public_static_pages.py'
       - '.github/workflows/partener-eu-pages.yml'
   workflow_run:
     workflows:
@@ -47,6 +49,14 @@ jobs:
           node --check partener-eu/web/step-lll-dossier-bridge-v2.js
           python partener-eu/ops/test_public_language.py
           grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/index.html
+
+      - name: Generate and validate crawlable public IA, sitemap and dossiers
+        run: |
+          python partener-eu/ops/build_public_static_pages.py
+          python partener-eu/ops/test_public_static_pages.py
+          python -m json.tool partener-eu/web/static-public-manifest.json >/dev/null
+          grep -F 'Sitemap: https://partener.eu/sitemap.xml' partener-eu/web/robots.txt
+          grep -F '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' partener-eu/web/sitemap.xml
 
       - id: configure
         continue-on-error: true
