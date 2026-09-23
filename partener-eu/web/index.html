@@ -13,11 +13,13 @@
   <meta property="og:title" content="PARTENER.EU — Găsește finanțarea potrivită pentru ce vrei să faci" />
   <meta property="og:description" content="Finanțări europene explicate pentru decizie: cine poate aplica, câți bani sunt disponibili, termene, documente, surse și următorul pas." />
   <meta property="og:url" content="https://partener.eu/" />
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"PARTENER.EU","url":"https://partener.eu/","description":"Finanțări europene explicate pentru decizie, cu surse oficiale și dosare verificabile."}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Organization","name":"PARTENER.EU","url":"https://partener.eu/"}</script>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>PARTENER.EU — Găsește finanțări europene pentru investiția ta</title>
-  <link rel="stylesheet" href="styles.css?v=20260812-1115" />
+  <link rel="stylesheet" href="styles.css?v=20260923-ux-sitemap-r1" />
   <link rel="stylesheet" href="radar-sv-oltenia.css?v=20260812-1115" />
   <link rel="stylesheet" href="regional-radars.css?v=20260812-1115" />
   <link rel="stylesheet" href="people-policy-v1.css?v=20260818-1114" />
@@ -35,13 +37,35 @@
 <body>
   <div id="app">
     <div class="shell" id="boot-fallback">
-      <div class="topbar"><div class="nav"><div class="brand">PARTENER<span>.EU</span></div></div></div>
-      <main class="main">
+      <a class="skipLink" href="#continut">Sari la conținut</a>
+      <div class="topbar">
+        <div class="nav">
+          <a class="brand" href="/">PARTENER<span>.EU</span></a>
+          <nav class="fallbackNav" aria-label="Navigație principală">
+            <a href="/finantari/">Finanțări</a>
+            <a href="/finantari/deschise/">Deschise acum</a>
+            <a href="/finantari/in-pregatire/">În pregătire</a>
+            <a href="/consultari/">Consultări</a>
+            <a href="/dosare/">Dosare</a>
+            <a href="/schimbari/">Ce s-a schimbat</a>
+          </nav>
+        </div>
+      </div>
+      <main class="main" id="continut">
         <section class="hero">
           <div>
             <div class="eyebrow">PARTENER.EU · finanțări explicate simplu</div>
             <h1>Ce vrei să finanțezi?</h1>
             <p>Descrie investiția în câteva cuvinte. Îți arătăm apelurile care merită verificate, ce știm sigur și ce trebuie să faci mai departe.</p>
+            <form class="fallbackSearch" action="/" method="get" role="search">
+              <label for="fallback-q">Descrie investiția ta</label>
+              <div><input id="fallback-q" name="q" type="search" placeholder="ex. utilaje pentru o firmă din Vâlcea"><button type="submit">Găsește finanțări</button></div>
+            </form>
+            <div class="fallbackPaths" aria-label="Scurtături">
+              <a href="/finantari/deschise/"><b>Deschise acum</b><span>Apeluri cu stare și termen confirmate</span></a>
+              <a href="/finantari/in-pregatire/"><b>În pregătire</b><span>Ce merită pregătit înainte de lansare</span></a>
+              <a href="/dosare/"><b>Dosare</b><span>Eligibilitate, bani, termene și surse</span></a>
+            </div>
           </div>
         </section>
       </main>
