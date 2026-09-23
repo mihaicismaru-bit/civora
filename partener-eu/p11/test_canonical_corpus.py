@@ -11,6 +11,16 @@ sys.path.insert(0, str(ROOT))
 from opportunity_contract import ContractViolation, validate_bundle  # noqa: E402
 from validate_corpus import public_opportunity_ids  # noqa: E402
 
+FAMI_BUDGETS_RON = {
+    "AM41D": 5_000_000,
+    "AM22M": 4_430_000,
+    "AM22L": 4_430_000,
+    "AM22N": 2_000_000,
+    "AM11I": 5_250_000,
+    "AM11H": 5_250_000,
+    "AM2A1G": 3_922_800,
+}
+
 
 class CanonicalCorpusTests(unittest.TestCase):
     @classmethod
@@ -57,7 +67,10 @@ class CanonicalCorpusTests(unittest.TestCase):
         for item in fami:
             self.assertEqual(item["status"], "OPEN")
             self.assertEqual(item["material_facts"]["deadline"]["closes"], "2026-10-16T16:00:00+03:00")
-            self.assertNotIn("budget", item["material_facts"])
+            self.assertEqual(
+                item["material_facts"]["budget"],
+                {"amount": FAMI_BUDGETS_RON[item["code"]], "currency": "RON", "basis": "FEN_AVAILABLE_CALL_ALLOCATION"},
+            )
             self.assertFalse(item.get("candidate_material_facts"))
 
     def test_candidate_fact_without_resolution_block_is_rejected(self):
