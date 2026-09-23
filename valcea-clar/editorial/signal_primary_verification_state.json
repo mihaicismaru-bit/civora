@@ -2,19 +2,46 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-23T21:43:10+03:00",
+  "generated_at": "2026-09-24T00:51:32+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-23T21:41:34+03:00",
-  "task_count": 88,
+  "queue_generated_at": "2026-09-24T00:50:07+03:00",
+  "task_count": 91,
   "primary_match_count": 0,
-  "no_match_count": 35,
+  "no_match_count": 38,
   "unrouted_count": 53,
-  "target_count": 18,
+  "target_count": 19,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "d20795f31a5f23c725622b63",
+      "signal_title": "FOTO – Investiții în imagistică medicală la Spitalul Municipal din Drăgășani. RX și CT, disponibile pentru pacienții din zonă",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-23T21:56:58+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "f1a7915ecdec04369dd898b4",
       "signal_title": "Iubitul fetei găsită moartă într-o valiză, dat în urmărire după ce ar fi fugit în Ungaria. Bărbatul a fost arestat preventiv în lipsă",
@@ -46,6 +73,93 @@
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "901cdffa5d93c003d0ebddbd",
+      "signal_title": "„Mai bine cu sapa, dar tot prost”. Asociația Pro Infrastructură, despre lotul Boița – Cornetu al Autostrăzii Sibiu – Pitești: „Probabil se vor impune restricții severe pe DN 7”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/23/mai-bine-cu-sapa-dar-tot-prost-asociatia-pro-infrastructura-despre-lotul-boita-cornetu-al-autostrazii-sibiu-pitesti-probabil-se-vor-impune-restrictii-severe-pe-dn-7/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-23T19:21:21+03:00",
+      "verification_route_id": "national_road_restrictions",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "igpr-infotrafic-live",
+            "name": "Centrul INFOTRAFIC — Poliția Română",
+            "url": "https://politiaromana.ro/ro/info-trafic"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "7b0699638e80ef7edb67ef16",
+      "signal_title": "Primăria Sibiu anunță două servicii sociale noi în 2027, promise și în 2026: ambele pentru persoane cu dizabilități. Planul anual, trimis spre aprobare Consiliului local",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/23/primaria-sibiu-anunta-doua-servicii-sociale-noi-in-2027-promise-si-in-2026-ambele-pentru-persoane-cu-dizabilitati-planul-anual-trimis-spre-aprobare-consiliului-local/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-23T18:29:10+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -191,7 +305,7 @@
     },
     {
       "signal_id": "b75e9f9ecce72a8d1dec5f57",
-      "signal_title": "Ultima oră 7 ore in urma Raliul Vâlcii Nurvil revine la Vaideeni pe 26 septembrie",
+      "signal_title": "Ultima oră 11 ore in urma Raliul Vâlcii Nurvil revine la Vaideeni pe 26 septembrie",
       "signal_url": "https://www.primplanpress.ro/raliul-valcii-nurvil-revine-la-vaideeni-pe-26-septembrie/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-09-23T14:13:39+03:00",
@@ -1885,6 +1999,30 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
+      "signal_id": "acd6dd07c7b8fb1beb8f487c",
+      "signal_title": "Schimbarea la față a Sibiului",
+      "signal_url": "https://www.turnulsfatului.ro/exclusiv/schimbarea-la-fata-a-sibiului/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "a60beaad93c15f0dc610a86e",
+      "signal_title": "Micile afaceri din Sibiu",
+      "signal_url": "https://www.turnulsfatului.ro/exclusiv/micile-afaceri-din-sibiu/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "6f8b28cecf97b87ba7b1648d",
       "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
       "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Ffemeie-de-28-de-ani-omorata-si-aruncata-intr-un-geamantan-in-raul-olt%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
@@ -1925,30 +2063,6 @@
       "signal_title": "UE schimbă regulile pentru comenzile online din afara Uniunii. Noua taxă va fi introdusă până la 1 noiembrie 2026",
       "signal_url": "https://www.eurovalcea.ro/2026/09/22/ue-schimba-regulile-pentru-comenzile-online-din-afara-uniunii-noua-taxa-va-fi-introdusa-pana-la-1-noiembrie-2026/",
       "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "acd6dd07c7b8fb1beb8f487c",
-      "signal_title": "Schimbarea la față a Sibiului",
-      "signal_url": "https://www.turnulsfatului.ro/exclusiv/schimbarea-la-fata-a-sibiului/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "a60beaad93c15f0dc610a86e",
-      "signal_title": "Micile afaceri din Sibiu",
-      "signal_url": "https://www.turnulsfatului.ro/exclusiv/micile-afaceri-din-sibiu/",
-      "signal_publisher": "Turnul Sfatului",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
