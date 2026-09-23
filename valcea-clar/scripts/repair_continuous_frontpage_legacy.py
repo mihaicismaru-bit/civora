@@ -45,6 +45,7 @@ HIDDEN_SECTIONS = {
 }
 TZ = ZoneInfo("Europe/Bucharest")
 BASE = "https://valceaclar.ro"
+CURRENT_EVERGREEN_FEED_HOURS = 36
 
 
 def load(path: Path, default: Any = None) -> Any:
@@ -140,13 +141,22 @@ def current_fact_index() -> dict[str, dict[str, Any]]:
     }
 
 
+def fact_active_now(fact: dict[str, Any], now: datetime) -> bool:
+    valid_from = parse_stamp(fact.get("valid_from"))
+    valid_until = parse_stamp(fact.get("valid_until"))
+    if not (valid_from and valid_until and valid_from <= now <= valid_until):
+        return False
+    if str(fact.get("publication_lifecycle") or "").strip().lower() == "evergreen":
+        age_hours = max(0.0, (now - valid_from).total_seconds() / 3600.0)
+        return age_hours <= CURRENT_EVERGREEN_FEED_HOURS
+    return True
+
+
 def mark_activity(stories: list[dict[str, Any]], now: datetime) -> list[dict[str, Any]]:
     facts = current_fact_index()
     for story in stories:
         fact = facts.get(str(story.get("id"))) or {}
-        valid_from = parse_stamp(fact.get("valid_from"))
-        valid_until = parse_stamp(fact.get("valid_until"))
-        active = bool(valid_from and valid_until and valid_from <= now <= valid_until)
+        active = fact_active_now(fact, now)
         story["archive_status"] = "active" if active else "published_archive"
         story["active_now"] = active
         story["path"] = story_renderer.route_for(story)

@@ -170,8 +170,17 @@ def eligible_facts(registry: dict, now: datetime, slot: str, retained_ids: set[s
         sources = fact.get("sources") or []
         if not sources or any(not source.get("url") for source in sources):
             continue
-        if not (parse_dt(fact["valid_from"]) <= now <= parse_dt(fact["valid_until"])):
+        valid_from = parse_dt(fact["valid_from"])
+        valid_until = parse_dt(fact["valid_until"])
+        if not (valid_from <= now <= valid_until):
             continue
+        # Evergreen preserves the canonical article in the archive; it must not
+        # keep a story in the live current-news set indefinitely. Bound evergreen
+        # currentness to the first newsroom freshness band.
+        if str(fact.get("publication_lifecycle") or "").strip().lower() == "evergreen":
+            age_hours = max(0.0, (now - valid_from).total_seconds() / 3600.0)
+            if age_hours > FRESHNESS_BUCKET_HOURS[0]:
+                continue
         # Durable newsroom copy must remain true when read later. Relative time
         # words such as "azi", "mâine" or "ieri" are therefore fail-closed even
         # when the underlying fact itself is inside its validity window.
@@ -396,6 +405,14 @@ def self_test() -> int:
     assert [row["id"] for row in ranked] == ["recent", "older"]
     assert freshness_bucket(recent, ranking_now) == 0
     assert freshness_bucket(older, ranking_now) == 2
+
+    evergreen_old = {
+        **older,
+        "id": "evergreen-old",
+        "publication_lifecycle": "evergreen",
+        "valid_until": "2099-12-31T23:59:59+03:00",
+    }
+    assert eligible_facts({"facts": [evergreen_old]}, ranking_now, "evening") == []
 
     assert pointer_is_publishable({"edition_id": "x", "status": "auto_approved", "publication_intent": "publish"})
     assert not pointer_is_publishable({"edition_id": "x", "status": "auto_hold", "publication_intent": "hold"})
