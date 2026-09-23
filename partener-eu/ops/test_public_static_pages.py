@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import tempfile
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -34,6 +35,47 @@ assert "Buget apel:</b> 5.250.000 RON" in probe_card
 assert "Finanțare:</b> Neconfirmat" not in probe_card
 probe_home = module.compact_home_dossier(budget_probe, {"budget-probe": "budget-probe"})
 assert any(row.get("label") == "Buget" for row in probe_home.get("quickFacts") or [])
+
+# Exact regression for the cross-surface truth defect: an OPEN dossier whose
+# confirmed deadline is already behind the render clock must never be shown as
+# DESCHIS. It is not inferred CLOSED; it is rendered REVIEW until refreshed.
+expired_open_probe = {
+    "id": "expired-open-probe",
+    "title": "Expired OPEN probe",
+    "programme": "TEST",
+    "publicationState": "PUBLISHABLE",
+    "status": "OPEN",
+    "statusLabel": "DESCHIS",
+    "standfirst": "Sunt confirmate: open; termen 14 august 2026.",
+    "decisionLabel": "ACȚIONEAZĂ",
+    "decisionAction": "Începe screeningul și planul de depunere.",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "14 august 2026", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Rezumat executiv", "items": ["Stare apel: OPEN.", "Închidere: 14 august 2026."]},
+        {"title": "Ce trebuie făcut acum", "items": ["Începe screeningul și planul de depunere."]},
+    ],
+}
+probe_clock = module.parse_date("2026-09-23T15:20:00Z")
+assert probe_clock is not None
+assert module.requires_open_refresh(expired_open_probe, probe_clock) is True
+expired_render = module.fail_closed_render_dossier(expired_open_probe, probe_clock)
+assert expired_render["status"] == "REVIEW"
+assert expired_render["statusLabel"] == "ÎN VERIFICARE"
+assert expired_render["decisionLabel"] == "VERIFICĂ STAREA"
+assert expired_render["standfirst"] == module.FAIL_CLOSED_OPEN_STANDFIRST
+status_fact = module.fact(expired_render, "Status")
+assert status_fact and status_fact["value"] == "În verificare"
+assert status_fact["confidence"] == "FAIL_CLOSED"
+expired_card = module.card(expired_render, {"expired-open-probe": "expired-open-probe"})
+assert "status-review" in expired_card
+assert "ÎN VERIFICARE" in expired_card
+assert "DESCHIS" not in expired_card
+assert "Sunt confirmate: open" not in expired_card
+assert module.FAIL_CLOSED_OPEN_STANDFIRST in expired_card
+
 publishable = [
     row
     for row in (payload.get("dossiers") or [])
@@ -108,6 +150,7 @@ with tempfile.TemporaryDirectory() as td:
     assert manifest["policy"]["provisionalFailClosedIndexed"] is False
     assert manifest["policy"]["queryPagesInSitemap"] is False
     assert manifest["policy"]["openRequiresConfirmedCurrentDeadline"] is True
+    assert manifest["policy"]["expiredOrUnverifiedOpenRenderedAsReview"] is True
     assert manifest["homeSnapshotBytes"] < 120_000, manifest["homeSnapshotBytes"]
     assert manifest["homeSnapshotDossiers"] <= 14
     assert manifest["homeSnapshotNews"] <= 8
@@ -118,6 +161,7 @@ with tempfile.TemporaryDirectory() as td:
     home = json.loads(home_raw[len(prefix):].strip().removesuffix(";"))
     assert home["policy"]["readOnlyProjection"] is True
     assert home["policy"]["materialFactsInvented"] is False
+    assert home["policy"]["expiredOrUnverifiedOpenRenderedAsReview"] is True
     assert home["policy"]["fullDossiersLazyLoaded"] is True
     assert len(home.get("dossiers") or []) == manifest["homeSnapshotDossiers"]
     assert len(home.get("news") or []) == manifest["homeSnapshotNews"]
@@ -189,6 +233,40 @@ with tempfile.TemporaryDirectory() as td:
         "actual": sorted(actual_open),
         "expected": sorted(expected_open),
     }
+
+    # The dossier index and detail pages must use the same fail-closed lifecycle
+    # gate. This regression caught the 2026-09-23 drift where the OPEN hub was
+    # correct but AFIR/PIDS expired dossiers still rendered DESCHIS and ACȚIONEAZĂ.
+    expired_open = [
+        row
+        for row in publishable
+        if module.requires_open_refresh(row, clock)
+    ]
+    assert manifest["failClosedOpenRefresh"] == len(expired_open)
+    for row in expired_open:
+        dossier_id = str(row.get("id") or "")
+        pattern = re.compile(
+            rf'<article class="staticCard" data-dossier-id="{re.escape(dossier_id)}">(.*?)</article>',
+            re.S,
+        )
+        match = pattern.search(dossier_index)
+        assert match, f"expired OPEN dossier missing from dossier index: {dossier_id}"
+        article = match.group(1)
+        assert "status-review" in article, dossier_id
+        assert "ÎN VERIFICARE" in article, dossier_id
+        assert ">DESCHIS<" not in article, dossier_id
+        assert "Sunt confirmate: open" not in article, dossier_id
+        href_match = re.search(r'<h2><a href="([^"]+)">', article)
+        assert href_match, dossier_id
+        detail_path = out / href_match.group(1).strip("/") / "index.html"
+        detail = detail_path.read_text(encoding="utf-8")
+        assert '<span class="status status-review">ÎN VERIFICARE</span>' in detail, dossier_id
+        assert '<small>Status</small><b>În verificare</b><span>FAIL_CLOSED</span>' in detail, dossier_id
+        assert module.FAIL_CLOSED_OPEN_STANDFIRST in detail, dossier_id
+        assert module.FAIL_CLOSED_OPEN_ACTION in detail, dossier_id
+        assert ">DESCHIS<" not in detail, dossier_id
+        assert "Stare apel: OPEN." not in detail, dossier_id
+        assert "ACȚIONEAZĂ" not in detail, dossier_id
 
     for row in publishable:
         status = str(row.get("status") or "")

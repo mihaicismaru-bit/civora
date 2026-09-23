@@ -6,6 +6,7 @@ Canonical source: partener-eu/ingest/state/decision_products.json.
 This renderer never invents material facts:
 - only PUBLISHABLE dossiers become indexable detail pages;
 - OPEN pages require a confirmed current deadline;
+- stale/expired OPEN evidence is rendered fail-closed as REVIEW until refreshed;
 - provisional fail-closed objects never enter the sitemap;
 - search/filter query states are intentionally excluded from the sitemap.
 
@@ -13,6 +14,7 @@ Generated pages are deployment artifacts, not a second source of truth.
 """
 from __future__ import annotations
 
+import copy
 import argparse
 import datetime as dt
 import html
@@ -44,6 +46,13 @@ STATUS_LABELS = {
     "DISCOVERED": "IDENTIFICAT",
 }
 PREPARE_STATUSES = {"EXPECTED", "ANNOUNCED", "UPCOMING", "PREPARE_NOW"}
+FAIL_CLOSED_OPEN_STANDFIRST = (
+    "Starea apelului necesită reverificare la sursa oficială. "
+    "Termenul publicat în dosar nu mai autorizează prezentarea apelului ca deschis."
+)
+FAIL_CLOSED_OPEN_ACTION = (
+    "Reverifică starea curentă și orice termen nou în sursa oficială înainte de a pregăti sau depune o cerere."
+)
 
 
 def esc(value: Any) -> str:
@@ -162,6 +171,77 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
         return False
     closes = parse_date(deadline.get("value"))
     return closes is not None and closes >= clock
+
+
+def requires_open_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
+    """Return True when an OPEN dossier cannot be rendered publicly as OPEN now."""
+    return (
+        dossier.get("publicationState") == "PUBLISHABLE"
+        and dossier.get("status") == "OPEN"
+        and not current_open(dossier, clock)
+    )
+
+
+def fail_closed_render_dossier(
+    dossier: dict[str, Any], clock: dt.datetime
+) -> dict[str, Any]:
+    """Return a render-only copy that suppresses stale OPEN claims.
+
+    The canonical dossier remains untouched. We do not infer CLOSED from an expired
+    deadline: the public static layer moves the lifecycle state to REVIEW and asks
+    for a fresh authoritative observation.
+    """
+    if not requires_open_refresh(dossier, clock):
+        return dossier
+
+    rendered = copy.deepcopy(dossier)
+    rendered["status"] = "REVIEW"
+    rendered["statusLabel"] = STATUS_LABELS["REVIEW"]
+    rendered["standfirst"] = FAIL_CLOSED_OPEN_STANDFIRST
+    rendered["decisionLabel"] = "VERIFICĂ STAREA"
+    rendered["decision"] = "VERIFY"
+    rendered["decisionAction"] = FAIL_CLOSED_OPEN_ACTION
+    rendered["renderFailClosedReason"] = "OPEN_DEADLINE_EXPIRED_OR_UNVERIFIED_REQUIRES_REFRESH"
+
+    quick_facts = []
+    saw_status = False
+    for row in rendered.get("quickFacts") or []:
+        item = copy.deepcopy(row)
+        if fold(item.get("label")) == "status":
+            saw_status = True
+            item["value"] = "În verificare"
+            item["confidence"] = "FAIL_CLOSED"
+        quick_facts.append(item)
+    if not saw_status:
+        quick_facts.insert(
+            0,
+            {"label": "Status", "value": "În verificare", "confidence": "FAIL_CLOSED"},
+        )
+    rendered["quickFacts"] = quick_facts
+
+    guarded_sections: list[dict[str, Any]] = []
+    for section in rendered.get("sections") or []:
+        item = copy.deepcopy(section)
+        heading = fold(item.get("title"))
+        rows = [str(value).strip() for value in (item.get("items") or []) if str(value).strip()]
+        if heading in {"decizia rapida", "ce trebuie facut acum"}:
+            rows = [FAIL_CLOSED_OPEN_ACTION]
+        elif heading == "rezumat executiv":
+            replaced = False
+            safe_rows: list[str] = []
+            for value in rows:
+                if fold(value).startswith("stare apel open"):
+                    safe_rows.append("Stare apel: necesită reverificare la sursa oficială.")
+                    replaced = True
+                else:
+                    safe_rows.append(value)
+            if not replaced:
+                safe_rows.insert(0, "Stare apel: necesită reverificare la sursa oficială.")
+            rows = safe_rows
+        item["items"] = rows
+        guarded_sections.append(item)
+    rendered["sections"] = guarded_sections
+    return rendered
 
 
 def safe_url(value: Any) -> str | None:
@@ -467,8 +547,14 @@ def build(
     for dirname in GENERATED_DIRS:
         shutil.rmtree(web_root / dirname, ignore_errors=True)
 
-    publishable = [
+    source_publishable = [
         row for row in dossiers if row.get("publicationState") == "PUBLISHABLE"
+    ]
+    fail_closed_open_refresh_count = sum(
+        1 for row in source_publishable if requires_open_refresh(row, generated)
+    )
+    publishable = [
+        fail_closed_render_dossier(row, generated) for row in source_publishable
     ]
     used: set[str] = set()
     slug_by_id: dict[str, str] = {}
@@ -573,6 +659,7 @@ def build(
             "readOnlyProjection": True,
             "materialFactsInvented": False,
             "openRequiresConfirmedCurrentDeadline": True,
+            "expiredOrUnverifiedOpenRenderedAsReview": True,
             "fullDossiersLazyLoaded": True,
         },
     }
@@ -704,7 +791,7 @@ def build(
   {search_form()}
 </section>
 <section class="staticSection">
-  <div class="resultSummary"><b>{len(publishable)}</b> dosare PUBLISHABLE. Închise: {len(closed_rows)}.</div>
+  <div class="resultSummary"><b>{len(publishable)}</b> dosare PUBLISHABLE. Închise: {len(closed_rows)}. În reverificare după expirarea/lipsa dovezii OPEN: {fail_closed_open_refresh_count}.</div>
   <div class="staticGrid">{''.join(card(row, slug_by_id) for row in publishable) or '<div class="empty">Nu există dosare publicabile.</div>'}</div>
 </section>
 """
@@ -899,7 +986,7 @@ def build(
         ("/finantari/in-pregatire/", latest_lastmod(prepare_rows, "updatedAt")),
         ("/consultari/", latest_lastmod(consultation_rows, "updatedAt")),
         ("/dosare/", latest_lastmod(publishable, "updatedAt")),
-        ("/schimbari/", latest_lastmod(visible_news, "date")),
+        ("/schimbari/", latest_lastmod(visible_home_news, "date")),
     ]
     for dossier in publishable:
         urls.append(
@@ -938,6 +1025,7 @@ def build(
         "currentOpen": len(open_rows),
         "prepare": len(prepare_rows),
         "consultations": len(consultation_rows),
+        "failClosedOpenRefresh": fail_closed_open_refresh_count,
         "sitemapUrls": len(urls),
         "homeSnapshotBytes": home_snapshot_bytes,
         "homeSnapshotDossiers": len(snapshot_rows),
@@ -947,6 +1035,7 @@ def build(
             "provisionalFailClosedIndexed": False,
             "queryPagesInSitemap": False,
             "openRequiresConfirmedCurrentDeadline": True,
+            "expiredOrUnverifiedOpenRenderedAsReview": True,
         },
     }
     write_page(
