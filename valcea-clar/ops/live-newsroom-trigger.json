@@ -1,12 +1,75 @@
 {
-  "requested_at": "2026-09-23T18:37:59+03:00",
+  "requested_at": "2026-09-23T20:03:00+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "POST-PROJECTION REPAIR REBUILD. Canonical public UX now derives current-story identity from explicit feed state and, when compatibility feed fields are absent, from the canonical story manifest; archive can no longer become an unlabelled live hero. If there are genuinely zero current stories, render an explicit no-current state with archive clearly labelled. The same canonical UX now reads editorial/local_life_events.json and renders freshness-gated structured events before the venue catalogue, so /unde-iesim/ must no longer overwrite event inventory with venue-only content. Re-run the canonical Live Newsroom and public presentation. Acceptance: homepage current count must agree with manifest active_now state; hero must be current when any current story exists; /unde-iesim/ must include the eligible structured event inventory including Drăgășani; stale events fail closed; RSS/sitemap/story routes remain coherent; do not report social delivery unless public HTTP readback and external delivery receipt both exist.",
+  "reason": "COUNTY-WIDE DELTA CYCLE. Preserve the repaired continuous-story and Local Life projection. Process only the new/modified signals below. Do not publish filler. The homicide investigation remains NEEDS_HUMAN_REVIEW and must not auto-publish; do not identify the victim or add graphic details. The Călimănești rabies-vaccination notice is a useful public-service signal but remains SOURCE_CLAIM_CORROBORATED until a primary Prefecture/DSVSA/municipality URL is resolved; do not invent veterinary instructions beyond the sourced notice. The 25 Sep CJ Vâlcea agenda is primary-source confirmed; use it as a follow-up queue for document-level CLARIFICĂM/CE URMEAZĂ work, not as a communiqué rewrite. Race The Vibe remains HOLD because two current secondary pages reproduce an internally contradictory 2025 date for an event labelled 2026; require primary road/municipal/police evidence before publishing restrictions. Maintain geographic rotation: this cycle explicitly scanned south (Drăgășani/Bălcești), north/west and resort corridor; absence of a material Bălcești story is not a reason to publish weak copy.",
   "expected_story_ids": [
     "transalpina-ranca-obarsia-lotrului-weather-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533",
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923"
   ],
+  "editorial_signals": [
+    {
+      "signal_id": "calimanesti-rabies-vaccination-20260923",
+      "locality": "Călimănești / județul Vâlcea",
+      "status": "SOURCE_CLAIM_CORROBORATED",
+      "product_candidate": "PE_SCURT_OR_CLARIFICAM",
+      "risk": "LOW_TO_MEDIUM_PUBLIC_HEALTH_SERVICE",
+      "claim": "O informare atribuită Primăriei Călimănești spune că în județul Vâlcea se desfășoară în 25-30 septembrie 2026 campania de vaccinare orală antirabică a vulpilor, cu trimitere la adresa Prefecturii Vâlcea nr. 9846/18.09.2026 bazată pe adresa DSVSA Vâlcea nr. 23337/14.09.2026.",
+      "source_url": "https://criterii.ro/valcea/primaria-calimanesti-campanie-de-vaccinare-a-vulpilor-impotriva-rabiei-turbarii-perioada-25-30-septembrie-2026/",
+      "source_tier": "T2_REPRODUCES_OFFICIAL_NOTICE",
+      "checked_at": "2026-09-23T20:03:00+03:00",
+      "next_action": "Resolve primary Prefecture/DSVSA/Primăria Călimănești document or URL before autonomous publication."
+    },
+    {
+      "signal_id": "ionesti-homicide-investigation-20260923",
+      "locality": "Ionești / Tomșani / județul Vâlcea",
+      "status": "NEEDS_HUMAN_REVIEW",
+      "product_candidate": "VERIFICAT_OR_ROLLING_STORY_AFTER_REVIEW",
+      "risk": "HIGH_SENSITIVE_VICTIM_REPUTATIONAL_CRIMINAL",
+      "claim": "Parchetul de pe lângă Tribunalul Vâlcea a comunicat că există dosar de omor, cercetare in personam față de un bărbat de 30 de ani din Vâlcea și o percheziție domiciliară; relatările actuale indică faptul că suspectul ar fi părăsit România. Nu publica autonom identitatea victimei, detalii grafice sau acuzații din surse neoficiale.",
+      "source_urls": [
+        "https://www.digi24.ro/stiri/actualitate/noi-informatii-in-cazul-tinerei-gasite-moarta-intr-o-valiza-pe-raul-olt-iubitul-ei-este-cautat-de-politisti-3960113",
+        "https://www.news.ro/eveniment/valcea-dosar-penal-omor-cazul-tinerei-gasite-intr-valiza-plutea-raul-olt-principalul-suspect-barbat-ar-parasit-romania-inaintea-descoperirii-faptei-moartea-tinerei-violenta-1922405623002026091322779287",
+        "https://agerpres.ro/justitie/2026/09/23/valcea-tanara-gasita-decedata-intr-o-valiza-ce-plutea-pe-olt-a-fost-identificata-un-suspect-e-cautat--1596213"
+      ],
+      "source_tier": "T2_WITH_OFFICIAL_PARQUET_ATTRIBUTION",
+      "checked_at": "2026-09-23T20:03:00+03:00",
+      "next_action": "Hold publication pending explicit human review and primary prosecutorial readback; preserve presumption of innocence."
+    },
+    {
+      "signal_id": "cj-valcea-25sep-agenda-followup-20260923",
+      "locality": "județul Vâlcea",
+      "status": "CONFIRMED_FACT",
+      "product_candidate": "CLARIFICAM_OR_CE_URMEAZA",
+      "risk": "LOW_DOCUMENTARY",
+      "claim": "Ordinea de zi oficială a ședinței CJ Vâlcea din 25 septembrie 2026 include utilizarea a 600,0 mii lei din fondul de rezervă, transmiterea temporară către Slătioara a administrării unei suprafețe aferente DJ 676 și încetarea/modificarea prin acte adiționale a unor contracte de concesiune CJ Vâlcea-CET Govora.",
+      "source_url": "https://cjvalcea.ro/avn_sedinte_cj/25-09-2026/",
+      "source_tier": "T1",
+      "checked_at": "2026-09-23T20:03:00+03:00",
+      "next_action": "Open and resolve the underlying project files/annexes to explain beneficiaries, exact use of the 600,000 lei, the DJ 676 purpose, and which CET Govora contracts/assets are affected before publication."
+    },
+    {
+      "signal_id": "race-the-vibe-road-restrictions-20260923",
+      "locality": "Nicolae Bălcescu / Șerbăneasa",
+      "status": "UNVERIFIED_HOLD",
+      "product_candidate": "SERVICE_AFTER_PRIMARY_CONFIRMATION",
+      "risk": "MEDIUM_TRAFFIC_SERVICE",
+      "claim": "Two local secondary pages published on 23 September describe Race The Vibe 2026 and DJ 678A restrictions but state the competition dates as 26-27 September 2025, creating a material date contradiction.",
+      "source_urls": [
+        "https://seintamplainvalcea.ro/2026/09/23/restrictii-de-circulatie-la-nicolae-balcescu-pentru-race-the-vibe/",
+        "https://hitfm.ro/restrictii-de-circulatie-pentru-race-the-vibe-2026/23/09/2026/32684/"
+      ],
+      "checked_at": "2026-09-23T20:03:00+03:00",
+      "next_action": "Require primary municipality/CJ/road administrator/police confirmation of year, dates and restrictions before public service publication."
+    }
+  ],
+  "coverage_cycle": {
+    "deep_scan_zone": "south_and_resort_corridor",
+    "scanned_localities": ["Drăgășani", "Bălcești", "Călimănești", "Brezoi", "Horezu", "Voineasa", "Nicolae Bălcescu"],
+    "material_delta_localities": ["Călimănești", "Nicolae Bălcescu", "Ionești/Tomșani"],
+    "no_material_delta_noted": ["Bălcești"],
+    "policy": "No filler for geographic balance; improve sourcing and rotate onward."
+  },
   "event_deltas": [
     {
       "event_id": "uap-fragmente-de-sine-20260924",
