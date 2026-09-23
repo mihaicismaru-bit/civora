@@ -99,6 +99,7 @@ jobs:
           python -m py_compile partener-eu/ops/build_public_static_pages.py
           python -m py_compile partener-eu/ops/test_public_static_pages.py
           node --check partener-eu/web/app.js
+          node --check partener-eu/web/public-heavy-loader-v1.js
           node --check partener-eu/web/ask-partener-v2.js
           node --check partener-eu/web/consultant-loader-v1.js
           node --check partener-eu/web/consultant-workspace-v3.js
