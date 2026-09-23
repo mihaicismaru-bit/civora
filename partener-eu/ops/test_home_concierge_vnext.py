@@ -52,6 +52,8 @@ for token in (
     "['Agricultură','agricultură']",
     "['Educație','educație']",
     'const P=window.PARTENER_HOME_DATA||{};',
+    "['Grant','Finanțare','Valoare proiect','Buget']",
+    'const amount=v.amount;',
     'd?.canonicalPath',
     "location.assign('/?q='+encodeURIComponent(query))",
     "open:'/finantari/deschise/'",
@@ -76,6 +78,8 @@ for forbidden in (
 
 for token in (
     '.conciergeHero', '.conciergeSearch', '.conciergeSection',
+    '.conciergeCard{display:flex;min-width:0;max-width:100%',
+    '.conciergeFacts strong{min-width:0;max-width:100%;overflow-wrap:anywhere',
     '.conciergeGrid', '.conciergeNews', '.conciergeTrust',
     '@media(max-width:650px)',
 ):
