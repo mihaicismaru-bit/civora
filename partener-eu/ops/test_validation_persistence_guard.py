@@ -51,13 +51,17 @@ def test_workflow_ordering_and_guard() -> None:
     reconcile = text.index("name: Reconcile canonical intelligence index after monitor evidence")
     acceptance = text.index("name: Synchronize P10 acceptance ledger")
     persistence = text.index("name: Persist validation ledger and safe source corrections")
-    guard = text.index("python partener-eu/ops/validation_persistence_guard.py")
-    rebase = text.index("git rebase origin/main")
+    retry = text.index("for attempt in 1 2 3 4 5; do", persistence)
+    guard = text.index("python partener-eu/ops/validation_persistence_guard.py", retry)
+    rebase = text.index("git rebase origin/main", guard)
+    guarded_push = text.index("if git push origin HEAD:main; then", rebase)
 
     require(capture < regenerate, "validation base must be captured before derived products are generated")
     require(monitor < reconcile < acceptance, "intelligence index must be rebuilt after monitor/resolution evidence and before acceptance sync")
-    require(persistence < guard < rebase, "rebase must be protected by canonical PARTENER.EU drift classification")
+    require(persistence < retry < guard < rebase < guarded_push, "every persistence retry must re-fetch, classify drift, rebase safely, then attempt the push")
     require("git pull --rebase origin main" not in text, "unconditional stale-evidence rebase must not return")
+    require("main advanced during validation persistence; retrying" in text, "non-fast-forward persistence races must have bounded retry")
+    require("Unable to persist validation outputs after five attempts." in text, "retry exhaustion must fail explicitly")
     require("test_validation_persistence_guard.py" in text, "production validation must execute this regression")
 
 
