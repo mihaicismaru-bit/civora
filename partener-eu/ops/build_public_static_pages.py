@@ -376,6 +376,68 @@ def latest_lastmod(rows: list[dict[str, Any]], key: str) -> str | None:
     return max(values) if values else None
 
 
+HOME_FACT_LABELS = {
+    "status",
+    "termen",
+    "grant",
+    "finantare",
+    "valoare proiect",
+}
+
+
+def compact_home_dossier(
+    dossier: dict[str, Any],
+    slug_by_id: dict[str, str],
+) -> dict[str, Any]:
+    quick = [
+        row
+        for row in (dossier.get("quickFacts") or [])
+        if fold(row.get("label")) in HOME_FACT_LABELS
+    ]
+    return {
+        "id": dossier.get("id"),
+        "title": dossier.get("title"),
+        "programme": dossier.get("programme"),
+        "region": dossier.get("region"),
+        "status": dossier.get("status"),
+        "statusLabel": dossier.get("statusLabel"),
+        "publicationState": dossier.get("publicationState"),
+        "standfirst": dossier.get("standfirst"),
+        "decisionAction": dossier.get("decisionAction"),
+        "audience": list(dossier.get("audience") or [])[:2],
+        "quickFacts": quick,
+        "quality": {
+            "completeness": int(
+                (dossier.get("quality") or {}).get("completeness") or 0
+            )
+        },
+        "canonicalPath": dossier_href(dossier, slug_by_id),
+    }
+
+
+def compact_home_news(
+    item: dict[str, Any],
+    publishable_by_id: dict[str, dict[str, Any]],
+    slug_by_id: dict[str, str],
+) -> dict[str, Any]:
+    dossier_id = str(item.get("dossierId") or "")
+    dossier = publishable_by_id.get(dossier_id)
+    return {
+        "id": item.get("id"),
+        "date": item.get("date"),
+        "kind": item.get("kind"),
+        "programme": item.get("programme"),
+        "headline": item.get("headline"),
+        "standfirst": item.get("standfirst"),
+        "meaning": item.get("meaning"),
+        "utilityScore": item.get("utilityScore"),
+        "dossierId": item.get("dossierId"),
+        "canonicalPath": (
+            dossier_href(dossier, slug_by_id) if dossier else "/schimbari/"
+        ),
+    }
+
+
 def build(
     products_path: Path = DEFAULT_PRODUCTS,
     web_root: Path = DEFAULT_WEB,
@@ -448,6 +510,62 @@ def build(
             str(row.get("title") or ""),
         )
     )
+
+    publishable_by_id = {
+        str(row.get("id") or ""): row for row in publishable
+    }
+    snapshot_rows: list[dict[str, Any]] = []
+    snapshot_seen: set[str] = set()
+    for row in [*open_rows[:6], *prepare_rows[:4], *consultation_rows[:4]]:
+        key = str(row.get("id") or "")
+        if not key or key in snapshot_seen:
+            continue
+        snapshot_seen.add(key)
+        snapshot_rows.append(compact_home_dossier(row, slug_by_id))
+
+    visible_home_news: list[dict[str, Any]] = []
+    for item in news:
+        event_date = parse_date(item.get("date"))
+        if event_date and event_date > generated + dt.timedelta(minutes=5):
+            continue
+        if int(item.get("utilityScore") or 0) < 60:
+            continue
+        visible_home_news.append(item)
+    visible_home_news.sort(
+        key=lambda row: (
+            -int(row.get("utilityScore") or 0),
+            str(row.get("date") or ""),
+        )
+    )
+    home_payload = {
+        "schemaVersion": 1,
+        "generatedAt": payload.get("generatedAt"),
+        "summary": {
+            "dossierCount": len(publishable),
+            "openCount": len(open_rows),
+            "prepareCount": len(prepare_rows),
+            "consultationCount": len(consultation_rows),
+            "newsCount": len(news),
+        },
+        "dossiers": snapshot_rows,
+        "news": [
+            compact_home_news(item, publishable_by_id, slug_by_id)
+            for item in visible_home_news[:8]
+        ],
+        "policy": {
+            "readOnlyProjection": True,
+            "materialFactsInvented": False,
+            "openRequiresConfirmedCurrentDeadline": True,
+            "fullDossiersLazyLoaded": True,
+        },
+    }
+    home_js = (
+        "window.PARTENER_HOME_DATA="
+        + json.dumps(home_payload, ensure_ascii=False, separators=(",", ":"))
+        + ";\n"
+    )
+    home_path = write_page(web_root, "home-public-data.js", home_js)
+    home_snapshot_bytes = home_path.stat().st_size
 
     catalogue_body = f"""
 <section class="staticHero">
@@ -686,9 +804,6 @@ def build(
             ),
         )
 
-    publishable_by_id = {
-        str(row.get("id") or ""): row for row in publishable
-    }
     news_rows: list[str] = []
     visible_news: list[dict[str, Any]] = []
     for item in news:
@@ -807,6 +922,9 @@ def build(
         "prepare": len(prepare_rows),
         "consultations": len(consultation_rows),
         "sitemapUrls": len(urls),
+        "homeSnapshotBytes": home_snapshot_bytes,
+        "homeSnapshotDossiers": len(snapshot_rows),
+        "homeSnapshotNews": len(home_payload["news"]),
         "policy": {
             "materialFactsInvented": False,
             "provisionalFailClosedIndexed": False,
