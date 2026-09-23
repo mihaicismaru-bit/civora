@@ -1,79 +1,109 @@
 {
   "schema_version": "1.0",
   "instance_id": "valcea",
-  "requested_at": "2026-09-24T00:10:00+03:00",
+  "requested_at": "2026-09-24T01:02:00+03:00",
   "requested_by": "VÂLCEA CLAR autonomous editorial operator",
   "publication_intent": "publish",
   "facts": [
     {
-      "id": "horezu-drum-vf-roman-inchis-20260926",
+      "id": "dragasani-ct-radiologie-program-clarificare-20260924",
       "status": "verified",
-      "section": "UTILITATE",
+      "section": "SĂNĂTATE",
       "editorial_type": "service",
       "editorial_form": "service_news",
-      "priority": 92,
-      "confidence": 98,
+      "priority": 94,
+      "confidence": 97,
       "publication_lifecycle": "new_story",
-      "valid_from": "2026-09-24T00:10:00+03:00",
-      "valid_until": "2026-09-26T18:30:00+03:00",
+      "valid_from": "2026-09-24T01:02:00+03:00",
+      "valid_until": "2026-10-01T23:59:59+03:00",
       "slots": ["morning", "evening"],
-      "headline": "Horezu: drumul spre Vârful lui Roman va fi închis pe 26 septembrie, între 10:00 și 18:00",
-      "dek": "Primăria Horezu anunță închiderea drumului spre Vârful lui Roman sâmbătă, 26 septembrie. Anunțul public nu precizează în pagina-index motivul, rutele alternative sau eventuale excepții de acces.",
+      "headline": "Drăgășani: CT și radiologia sunt disponibile în ambulatoriu. Programele publicate nu coincid",
+      "dek": "Site-ul oficial al Spitalului Municipal „Costache Nicolescu” listează CT între 11:00–17:00 și radiologie între 09:30–12:30. O informare publicată pe 23 septembrie, atribuită spitalului, indică alte intervale; pacienții ar trebui să confirme telefonic programarea înainte de deplasare.",
       "paragraphs": [
-        "Primăria Horezu anunță închiderea drumului spre Vârful lui Roman în 26 septembrie 2026, între orele 10:00 și 18:00. Pentru cei care intenționează să urce cu mașina spre zona montană în acea zi, intervalul trebuie tratat ca indisponibil pentru acces pe drumul indicat de administrația locală.",
-        "Anunțul este publicat în secțiunea oficială de anunțuri a Primăriei Horezu. În informația accesibilă public în indexul instituției nu sunt precizate motivul închiderii, o rută alternativă, eventuale excepții sau condiții speciale de acces. VÂLCEA CLAR nu completează aceste elemente din presupuneri.",
-        "Practic, deplasările spre Vârful lui Roman ar trebui planificate în afara intervalului 10:00–18:00 sau după o reverificare a comunicărilor Primăriei Horezu înainte de plecare. Dacă administrația locală modifică ori anulează restricția, actualizarea trebuie făcută pe aceeași poveste, fără un articol duplicat."
+        "Spitalul Municipal „Costache Nicolescu” din Drăgășani listează în prezent în ambulatoriu atât servicii de radiologie, cât și computer tomograf. Pe pagina oficială a spitalului, radiologia apare cu program de luni până vineri între 09:30 și 12:30, la telefon 0371 470 483, iar computerul tomograf între 11:00 și 17:00, la telefon 0372 893 168.",
+        "O relatare publicată la 23 septembrie de Se întâmplă în Vâlcea, care atribuie informațiile reprezentanților spitalului, spune că un aparat RX și un computer tomograf au fost puse în funcțiune și indică radiologia între 08:00 și 11:00, respectiv investigațiile CT între 11:00 și 14:00. Aceeași relatare spune că tomograful poate efectua examinări native și cu substanță de contrast, prin injector automat.",
+        "Cele două surse confirmă disponibilitatea serviciilor de imagistică, dar nu publică același orar. VÂLCEA CLAR nu a putut stabili din documentele publice consultate dacă diferența vine dintr-o actualizare foarte recentă a programului, dintr-un program separat de investigații sau dintr-o informație care nu a fost încă sincronizată pe site-ul spitalului.",
+        "Pentru pacienții din Drăgășani și localitățile din sudul județului, informația utilă este că serviciile sunt disponibile local, însă programul trebuie confirmat înainte de deplasare: radiologie — 0371 470 483; computer tomograf — 0372 893 168. O actualizare oficială a orarului va fi propagată pe aceeași poveste, fără articol duplicat."
       ],
       "material_fact_gate": "PASS",
       "sources": [
         {
-          "name": "Primăria Orașului Horezu — anunțuri, 27 august 2026",
-          "url": "https://www.orasul-horezu.ro/anunturi",
+          "name": "Spitalul Municipal Costache Nicolescu Drăgășani — program ambulatoriu",
+          "url": "https://www.smcnd.ro/",
           "tier": "T1"
+        },
+        {
+          "name": "Se întâmplă în Vâlcea — 23.09.2026, informații atribuite reprezentanților spitalului",
+          "url": "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/",
+          "tier": "T2"
         }
       ],
       "fact_kernel": {
         "format_hint": "service_news",
         "headline": {
-          "text": "Horezu: drumul spre Vârful lui Roman va fi închis pe 26 septembrie, între 10:00 și 18:00",
-          "source_urls": ["https://www.orasul-horezu.ro/anunturi"]
+          "text": "Drăgășani: CT și radiologia sunt disponibile în ambulatoriu. Programele publicate nu coincid",
+          "source_urls": [
+            "https://www.smcnd.ro/",
+            "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+          ]
         },
         "dek": {
-          "text": "Primăria Horezu anunță închiderea drumului spre Vârful lui Roman sâmbătă, 26 septembrie. Anunțul public nu precizează în pagina-index motivul, rutele alternative sau eventuale excepții de acces.",
-          "source_urls": ["https://www.orasul-horezu.ro/anunturi"]
+          "text": "Site-ul oficial al Spitalului Municipal „Costache Nicolescu” listează CT între 11:00–17:00 și radiologie între 09:30–12:30. O informare publicată pe 23 septembrie, atribuită spitalului, indică alte intervale; pacienții ar trebui să confirme telefonic programarea înainte de deplasare.",
+          "source_urls": [
+            "https://www.smcnd.ro/",
+            "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+          ]
         },
         "claims": [
           {
-            "id": "horezu-vf-roman-closure-window",
+            "id": "dragasani-imaging-official-services",
             "role": "material_change",
             "kind": "fact",
-            "text": "Primăria Horezu publică un anunț de închidere a drumului spre Vârful lui Roman în 26 septembrie 2026, pentru intervalul 10:00–18:00.",
-            "source_urls": ["https://www.orasul-horezu.ro/anunturi"]
+            "text": "Pagina oficială a Spitalului Municipal „Costache Nicolescu” Drăgășani listează în ambulatoriu servicii de radiologie și computer tomograf, cu numere de contact distincte pentru programare.",
+            "source_urls": ["https://www.smcnd.ro/"]
           },
           {
-            "id": "horezu-vf-roman-reader-action",
-            "role": "reader_action",
-            "kind": "reader_service",
-            "text": "Pentru o deplasare spre Vârful lui Roman în 26 septembrie, intervalul 10:00–18:00 trebuie evitat ori reverificat în comunicările oficiale înainte de plecare.",
-            "source_urls": ["https://www.orasul-horezu.ro/anunturi"]
+            "id": "dragasani-imaging-official-hours",
+            "role": "reader_service",
+            "kind": "fact",
+            "text": "Pe pagina oficială, radiologia este listată luni-vineri între 09:30–12:30 la 0371 470 483, iar computerul tomograf luni-vineri între 11:00–17:00 la 0372 893 168.",
+            "source_urls": ["https://www.smcnd.ro/"]
           },
           {
-            "id": "horezu-vf-roman-unknowns",
+            "id": "dragasani-imaging-secondary-new-equipment",
+            "role": "context",
+            "kind": "attributed_statement",
+            "text": "Se întâmplă în Vâlcea relatează la 23 septembrie, atribuind informațiile reprezentanților spitalului, că un aparat RX și un computer tomograf au fost puse în funcțiune și indică radiologie 08:00–11:00 și CT 11:00–14:00.",
+            "attribution": "Se întâmplă în Vâlcea, informații atribuite reprezentanților Spitalului Municipal „Costache Nicolescu”",
+            "source_urls": ["https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"]
+          },
+          {
+            "id": "dragasani-imaging-discrepancy",
             "role": "context",
             "kind": "documented_context",
-            "text": "Pagina-index a anunțurilor Primăriei Horezu nu oferă, în informația accesibilă acolo, detalii despre motivul închiderii, rute alternative sau eventuale excepții de acces.",
-            "source_urls": ["https://www.orasul-horezu.ro/anunturi"]
+            "text": "Sursele publice consultate confirmă disponibilitatea imagisticii, dar afișează intervale orare diferite; cauza diferenței nu poate fi stabilită din informațiile publice disponibile.",
+            "source_urls": [
+              "https://www.smcnd.ro/",
+              "https://seintamplainvalcea.ro/2026/09/23/foto-investitii-in-imagistica-medicala-la-spitalul-municipal-din-dragasani-rx-si-ct-disponibile-pentru-pacientii-din-zona/"
+            ]
           },
           {
-            "id": "horezu-vf-roman-next-watch",
+            "id": "dragasani-imaging-reader-action",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "Înainte de deplasare, pacienții ar trebui să confirme programul direct la radiologie sau computer tomograf folosind numerele publicate de spital.",
+            "source_urls": ["https://www.smcnd.ro/"]
+          },
+          {
+            "id": "dragasani-imaging-next-watch",
             "role": "next_watch",
             "kind": "reader_service",
-            "text": "O modificare ori anulare publicată de Primăria Horezu ar constitui o actualizare materială și trebuie propagată pe aceeași poveste, fără duplicare.",
-            "source_urls": ["https://www.orasul-horezu.ro/anunturi"]
+            "text": "O modificare oficială a programului de radiologie sau CT este o actualizare materială și trebuie propagată pe aceeași poveste, fără duplicare.",
+            "source_urls": ["https://www.smcnd.ro/"]
           }
         ]
       },
-      "editorial_note": "Low-risk public-service story from a primary municipal source. The source index confirms only the road, date and closure window; motive, detours and access exceptions remain UNKNOWN and are deliberately not inferred. SITE should publish text-only unless a rights-cleared documentary visual is available."
+      "editorial_note": "Low-risk health service clarification. CONFIRMED_FACT: CT and radiology are listed by the official hospital site, including official contact numbers and displayed hours. SOURCE_CLAIM: the equipment was newly put into service and the narrower hours reported on 23 September. UNKNOWN: why the two published schedules differ. Do not infer procurement value, funding source, commissioning date or reimbursement status. SITE should publish text-only unless a rights-cleared documentary visual is available."
     }
   ]
 }
