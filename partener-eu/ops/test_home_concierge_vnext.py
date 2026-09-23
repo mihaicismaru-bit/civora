@@ -78,6 +78,8 @@ for forbidden in (
 
 for token in (
     '.conciergeHero', '.conciergeSearch', '.conciergeSection',
+    '.conciergeCard{display:flex;min-width:0;max-width:100%',
+    '.conciergeFacts strong{min-width:0;max-width:100%;overflow-wrap:anywhere',
     '.conciergeGrid', '.conciergeNews', '.conciergeTrust',
     '@media(max-width:650px)',
 ):
