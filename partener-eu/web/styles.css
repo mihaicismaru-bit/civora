@@ -25,3 +25,19 @@
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(11,107,71,.22);outline-offset:3px}
 @media(max-width:760px){.fallbackNav{display:none}.fallbackPaths{grid-template-columns:1fr}.fallbackSearch>div{grid-template-columns:1fr}.fallbackSearch button{padding:13px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* Performance/discovery sprint: progressive filters keep search light on mobile. */
+.discoverySearch{max-width:720px;margin:18px 0 10px}
+.filterDrawer{margin:0 0 12px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.filterDrawer>summary{list-style:none;cursor:pointer;padding:12px 14px;font-weight:800;color:#35483e;display:flex;align-items:center;gap:8px}
+.filterDrawer>summary::-webkit-details-marker{display:none}
+.filterDrawer>summary:after{content:'▾';margin-left:auto;color:#738079}
+.filterDrawer[open]>summary:after{transform:rotate(180deg)}
+.filterDrawer>summary span{display:inline-flex;min-width:22px;height:22px;align-items:center;justify-content:center;border-radius:999px;background:var(--green2);color:var(--green);font-size:11px}
+.filterPanel{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:0 12px 12px}
+.filterPanel label{display:flex;flex-direction:column;gap:6px;font-size:11px;font-weight:800;color:#627168}
+.activeFilters{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 14px}
+.activeFilters button{border:1px solid #cfd9d4;border-radius:999px;background:#fff;color:#355043;padding:7px 10px;font:inherit;font-size:11px;font-weight:750;cursor:pointer}
+.activeFilters button:hover{border-color:#89a396;background:#f7faf8}
+@media(min-width:761px){.filterDrawer:not([open]) .filterPanel{display:grid}.filterDrawer>summary{display:none}.filterDrawer{border:0;background:transparent}.filterPanel{padding:0}}
+@media(max-width:760px){.filterPanel{grid-template-columns:1fr}.discoverySearch{margin-top:14px}.filterDrawer:not([open]) .filterPanel{display:none}.filterDrawer>summary{min-height:44px}}
