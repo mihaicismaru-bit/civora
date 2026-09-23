@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const P=window.PARTENER_DECISION_PRODUCTS||{};
+const P=window.PARTENER_HOME_DATA||{};
 if(!Array.isArray(P.dossiers)||!Array.isArray(P.news))return;
 const TZ='Europe/Bucharest';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -37,20 +37,14 @@ function dateText(v){
  return new Intl.DateTimeFormat('ro-RO',{day:'numeric',month:'long',year:'numeric',timeZone:TZ}).format(d);
 }
 function openDossier(id){
- if(window.PARTENER_DECISION_UI?.openDossier?.(id)===true)return;
- document.querySelector('[data-decisionnav]')?.click();
- let tries=0;const timer=setInterval(()=>{tries++;if(window.PARTENER_DECISION_UI?.openDossier?.(id)===true||tries>12)clearInterval(timer)},80);
+ const d=(P.dossiers||[]).find(x=>String(x?.id)===String(id));
+ if(d?.canonicalPath){location.assign(d.canonicalPath);return}
+ window.PARTENER_LOAD_DECISION_HUB?.().then(()=>window.PARTENER_DECISION_UI?.openDossier?.(id)).catch(()=>{});
 }
 function openHub(query='',tab='dossiers'){
- document.querySelector('[data-decisionnav]')?.click();
- setTimeout(()=>{
-   document.querySelector(`[data-di-tab="${tab}"]`)?.click();
-   setTimeout(()=>{
-     if(!query)return;
-     const input=document.getElementById('diQ');if(!input)return;
-     input.value=query;input.dispatchEvent(new Event('input',{bubbles:true}));
-   },80);
- },80);
+ if(query){location.assign('/?q='+encodeURIComponent(query));return}
+ const routes={open:'/finantari/deschise/',prepare:'/finantari/in-pregatire/',news:'/schimbari/',dossiers:'/dosare/'};
+ location.assign(routes[tab]||'/finantari/');
 }
 function isOpen(d){
  if(currentStatus(d)!=='OPEN'||String(d.publicationState||'').toUpperCase()!=='PUBLISHABLE')return false;
@@ -100,8 +94,8 @@ function newsRow(n){
  </article>`;
 }
 function openNews(id){
- document.querySelector('[data-decisionnav]')?.click();
- setTimeout(()=>{document.querySelector('[data-di-tab="news"]')?.click();setTimeout(()=>document.querySelector(`[data-di-news="${CSS.escape(id)}"]`)?.click(),80)},80);
+ const n=(P.news||[]).find(x=>String(x?.id)===String(id));
+ location.assign(n?.canonicalPath||'/schimbari/');
 }
 const PROFILES=[['Firmă / IMM','firmă IMM'],['ONG','ONG'],['Primărie','primărie'],['Agricultură','agricultură'],['Educație','educație']];
 function render(){
@@ -156,7 +150,7 @@ function render(){
  surface.querySelectorAll('[data-concierge-dossier]').forEach(el=>{const go=()=>openDossier(el.dataset.conciergeDossier);el.onclick=go;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
  surface.querySelectorAll('[data-concierge-news]').forEach(el=>{const go=()=>openNews(el.dataset.conciergeNews);el.onclick=go;el.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();go()}}});
  surface.querySelectorAll('[data-concierge-hub]').forEach(b=>b.onclick=()=>openHub('',b.dataset.conciergeHub));
- surface.querySelector('[data-concierge-consultation]')?.addEventListener('click',()=>{openHub('','dossiers');setTimeout(()=>{const s=document.getElementById('diStatus');if(s){s.value='PUBLIC_CONSULTATION';s.dispatchEvent(new Event('change',{bubbles:true}))}},200)});
+ surface.querySelector('[data-concierge-consultation]')?.addEventListener('click',()=>location.assign('/consultari/'));
 }
 window.addEventListener('load',()=>setTimeout(render,560),{once:true});
 document.addEventListener('click',event=>{if(isTypingTarget(event.target))return;setTimeout(render,360)},true);
