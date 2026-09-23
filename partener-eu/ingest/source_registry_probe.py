@@ -32,6 +32,11 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
     text = re.sub(r"<[^>]+>", " ", text)
     # Remove common volatile presentation fragments while retaining substantive text.
     text = re.sub(r"\b(?:[0-2]?\d:[0-5]\d(?::[0-5]\d)?|\d+\s+(?:seconds?|minutes?)\s+ago)\b", " ", text, flags=re.I)
+    # Drupal-style public view counters are presentation telemetry, not source facts.
+    # Normalise them before hashing so routine counter increments cannot reopen a
+    # material-fact resolution task. The expression is deliberately narrow: it
+    # removes only a numeric value immediately followed by Romanian "de afișări".
+    text = re.sub(r"\b\d[\d.\s]*\s+de\s+afi(?:ș|ş|s)(?:ă|a)ri\b", " ", text, flags=re.I)
     text = re.sub(r"\s+", " ", text).strip()
     return text.encode("utf-8")
 
