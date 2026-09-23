@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import hashlib
+import importlib.util
 import json
 import subprocess
 import sys
@@ -29,6 +30,15 @@ FIXTURE = """<!doctype html><html><body>
 <td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>7.500.000,00 EUR</td>
 <td>190.863</td><td>2</td><td>7.309.137,00 EUR</td></tr>
 </table></body></html>"""
+
+
+def load_builder_module():
+    sys.path.insert(0, str(BUILDER.parent))
+    spec = importlib.util.spec_from_file_location("partener_afir_live_funds_builder", BUILDER)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def main() -> int:
@@ -76,6 +86,36 @@ def main() -> int:
         assert drift_payload["status"] == "DEGRADED_SOURCE_DRIFT"
         assert drift_payload["policy"]["publishableDedicatedSnapshot"] is False
 
+        # Re-establish a validated PASS snapshot, then reproduce the production
+        # TLS/transport outage. The LKG must remain byte-identical and the
+        # builder must return the workflow's accepted fail-closed exit code 2.
+        corpus_path.write_text(json.dumps(corpus, ensure_ascii=False), encoding="utf-8")
+        subprocess.run(command, check=True, capture_output=True, text=True)
+        lkg_bytes = output_path.read_bytes()
+        builder = load_builder_module()
+        original_fetch = builder.fetch
+        try:
+            builder.fetch = lambda _url: {
+                "ok": False,
+                "status": None,
+                "error": "URLError: <urlopen error _ssl.c:983: The handshake operation timed out>",
+            }
+            transport_status = builder.run(corpus_path, output_path, None)
+            assert transport_status == 2
+            assert output_path.read_bytes() == lkg_bytes, "transport outage must preserve LKG byte-for-byte"
+            preserved = json.loads(output_path.read_text(encoding="utf-8"))
+            assert preserved["status"] == "PASS"
+            assert preserved["policy"]["publishableDedicatedSnapshot"] is True
+
+            # With no LKG there is still no invented snapshot: the resolver
+            # remains fail-closed and does not create a replacement artifact.
+            output_path.unlink()
+            no_lkg_status = builder.run(corpus_path, output_path, None)
+            assert no_lkg_status == 2
+            assert not output_path.exists()
+        finally:
+            builder.fetch = original_fetch
+
     assert payload["status"] == "PASS"
     assert payload["sourceFingerprintMatchesCorpus"] is True
     assert payload["policy"]["publishableDedicatedSnapshot"] is True
@@ -94,7 +134,7 @@ def main() -> int:
     assert dr14[0]["opensAtIso"].endswith("+03:00")
     assert dr14[0]["availableFundsEur"] in {"44856455.00", "44907500.00"}
 
-    print("AFIR live-funds structured snapshot regression PASS")
+    print("AFIR live-funds structured snapshot + transport fail-closed regression PASS")
     return 0
 
 

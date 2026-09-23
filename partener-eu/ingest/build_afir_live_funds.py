@@ -5,6 +5,10 @@ The source is AFIR's public "Contor fonduri disponibile" table. The builder
 cross-checks the fetched byte fingerprint against the AFIR corpus candidate
 before resolving anything. A mismatch is fail-closed source drift, never a
 reason to auto-promote a material fact.
+
+Transient transport failures are also fail-closed. When a previously validated
+PASS snapshot exists, it is preserved byte-for-byte and the process returns the
+workflow's accepted degraded exit code instead of replacing the LKG or crashing.
 """
 
 from __future__ import annotations
@@ -27,6 +31,10 @@ DEFAULT_CORPUS = ROOT / "state" / "afir_corpus.json"
 DEFAULT_OUTPUT = ROOT / "state" / "afir_live_funds.json"
 COUNTER_PATH = "/finantare/contor-fonduri-disponibile"
 BUCHAREST = ZoneInfo("Europe/Bucharest")
+
+
+class SourceTransportError(RuntimeError):
+    """Official AFIR counter could not be fetched because transport failed."""
 
 
 class TableParser(HTMLParser):
@@ -179,10 +187,42 @@ def load_source_bytes(url: str, fixture: Path | None) -> tuple[bytes, str | None
         return fixture.read_bytes(), None, 200
     response = fetch(url)
     if not response.get("ok"):
-        raise RuntimeError(
+        raise SourceTransportError(
             f"AFIR counter fetch failed: status={response.get('status')} error={response.get('error')}"
         )
     return response["data"], response.get("content_type"), response.get("status")
+
+
+def valid_last_known_good(path: Path, canonical_url: str) -> dict[str, Any] | None:
+    """Return a previously validated PASS snapshot suitable for transport fallback.
+
+    The LKG is deliberately not required to match the *new* corpus fingerprint:
+    during a transport outage that would defeat the purpose of preserving the
+    last independently validated observation. It must, however, be a dedicated
+    AFIR PASS snapshot for the same canonical counter with non-empty rows and
+    plausible evidence fingerprints.
+    """
+
+    if not path.exists():
+        return None
+    try:
+        payload = load_json(path)
+    except (OSError, ValueError, json.JSONDecodeError):
+        return None
+    policy = payload.get("policy") if isinstance(payload.get("policy"), dict) else {}
+    rows = payload.get("rows")
+    if payload.get("source") != "AFIR" or payload.get("status") != "PASS":
+        return None
+    if normalize_counter_url(str(payload.get("canonicalUrl") or "")) != normalize_counter_url(canonical_url):
+        return None
+    if policy.get("publishableDedicatedSnapshot") is not True:
+        return None
+    if not isinstance(rows, list) or not rows:
+        return None
+    for key in ("sourceFingerprint", "snapshotFingerprint"):
+        if not re.fullmatch(r"[0-9a-f]{64}", clean_cell(payload.get(key))):
+            return None
+    return payload
 
 
 def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[str, Any]:
@@ -268,6 +308,39 @@ def write_json(path: Path, payload: dict[str, Any]) -> None:
     tmp.replace(path)
 
 
+def run(corpus_path: Path, output_path: Path, fixture: Path | None = None) -> int:
+    corpus = load_json(corpus_path)
+    item = find_counter_item(corpus)
+    canonical_url = str(item.get("url") or "").strip()
+    try:
+        snapshot = build_snapshot(corpus, fixture)
+    except SourceTransportError as exc:
+        lkg = valid_last_known_good(output_path, canonical_url)
+        report = {
+            "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED" if lkg else "PROVISIONAL_FAIL_CLOSED",
+            "failClosed": True,
+            "lastKnownGoodPreserved": bool(lkg),
+            "outputUnchanged": True,
+            "canonicalUrl": canonical_url,
+            "errorType": type(exc).__name__,
+            "error": str(exc),
+        }
+        if lkg:
+            report.update(
+                {
+                    "lastKnownGoodSourceObservedAt": lkg.get("sourceObservedAt"),
+                    "lastKnownGoodSnapshotFingerprint": lkg.get("snapshotFingerprint"),
+                    "rowCount": (lkg.get("summary") or {}).get("rowCount"),
+                }
+            )
+        print(json.dumps(report, ensure_ascii=False, sort_keys=True))
+        return 2
+
+    write_json(output_path, snapshot)
+    print(json.dumps({"status": snapshot["status"], **snapshot["summary"]}, ensure_ascii=False, sort_keys=True))
+    return 0 if snapshot["status"] == "PASS" else 2
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
@@ -278,10 +351,7 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> int:
     args = parse_args()
-    snapshot = build_snapshot(load_json(args.corpus), args.html_fixture)
-    write_json(args.output, snapshot)
-    print(json.dumps({"status": snapshot["status"], **snapshot["summary"]}, ensure_ascii=False, sort_keys=True))
-    return 0 if snapshot["status"] == "PASS" else 2
+    return run(args.corpus, args.output, args.html_fixture)
 
 
 if __name__ == "__main__":
