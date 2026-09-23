@@ -33,6 +33,8 @@ class ResolutionOverlayTests(unittest.TestCase):
             [row["opportunity_id"] for row in base["opportunities"]],
             [row["opportunity_id"] for row in merged["opportunities"]][: len(base["opportunities"])],
         )
+        # This is a corpus-growth regression: the seven reviewed calls must be
+        # additive and deterministic without weakening any pre-existing identity.
         self.assertEqual(len(merged["opportunities"]), 33)
         step = next(row for row in merged["opportunities"] if row["opportunity_id"] == "PEO-STEP-LLL-ADULTI-2026")
         self.assertEqual(step["status"], "OPEN")
