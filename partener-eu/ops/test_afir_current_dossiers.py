@@ -55,15 +55,18 @@ def main() -> int:
     assert payload["policy"]["afirConsultationsNeverPresentedAsOpen"] is True
     assert payload["policy"]["derivedProjectionSynchronized"] is True
 
-    assert {"afir-dr14-2026", "afir-dr18-2026"} <= set(payload["home"]["openDossierIds"])
+    home_open = payload["home"]["openDossierIds"]
+    assert {"afir-dr14-2026", "afir-dr18-2026"} <= set(home_open)
     assert "afir-dr31-2026-2027" in payload["home"]["prepareDossierIds"]
-    assert payload["summary"]["openCount"] == len(payload["home"]["openDossierIds"])
+    # The homepage is intentionally a bounded editorial shortlist (max 8),
+    # while summary.openCount is the total verified OPEN catalog count.
+    assert len(home_open) == min(payload["summary"]["openCount"], 8)
     step = dossiers["PEO-STEP-LLL-ADULTI-2026"]
     assert fact(step, "Completitudine critică")["value"] == f"{step['quality']['completeness']}%"
 
     news_ids = {row["id"] for row in payload.get("news") or []}
     assert {"news-afir-dr14-dr18-open-2026-09-01", "news-afir-dr31-consultation-2026-08-28"} <= news_ids
-    print(json.dumps({"ok": True, "open": payload["home"]["openDossierIds"]}, ensure_ascii=False))
+    print(json.dumps({"ok": True, "open": home_open, "catalogOpenCount": payload["summary"]["openCount"]}, ensure_ascii=False))
     return 0
 
 
