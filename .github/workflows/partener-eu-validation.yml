@@ -115,6 +115,11 @@ jobs:
           python partener-eu/ops/test_p10_policy_regression.py
           python partener-eu/ops/test_validation_persistence_guard.py
 
+      - name: MySMIS exact-call candidate inventory
+        id: mysmis_exact_inventory
+        continue-on-error: true
+        run: python partener-eu/ingest/mysmis_call_inventory_scout.py
+
       - name: AFIR authentication-boundary regression
         id: afir_policy
         continue-on-error: true
@@ -247,6 +252,7 @@ jobs:
           EDITORIAL_OUTCOME: ${{ steps.editorial.outcome }}
           INTELLIGENCE_UI_OUTCOME: ${{ steps.intelligence_ui.outcome }}
           POLICY_OUTCOME: ${{ steps.policy.outcome }}
+          MYSMIS_EXACT_INVENTORY_OUTCOME: ${{ steps.mysmis_exact_inventory.outcome }}
           AFIR_POLICY_OUTCOME: ${{ steps.afir_policy.outcome }}
           PUBLIC_TRANSPORT_OUTCOME: ${{ steps.public_transport.outcome }}
           QUALITY_OUTCOME: ${{ steps.quality.outcome }}
@@ -257,7 +263,7 @@ jobs:
           ACCEPTANCE_CODE: ${{ steps.acceptance.outputs.exit_code }}
         run: |
           FAIL=0
-          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$EDITORIAL_OUTCOME" "$INTELLIGENCE_UI_OUTCOME" "$POLICY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
+          for OUTCOME in "$RECOVERY_OUTCOME" "$FRONTEND_OUTCOME" "$EDITORIAL_OUTCOME" "$INTELLIGENCE_UI_OUTCOME" "$POLICY_OUTCOME" "$MYSMIS_EXACT_INVENTORY_OUTCOME" "$AFIR_POLICY_OUTCOME" "$PUBLIC_TRANSPORT_OUTCOME" "$QUALITY_OUTCOME"; do
             if [ "$OUTCOME" != "success" ]; then FAIL=2; fi
           done
           for CODE in "$VALIDATE_CODE" "$RESOLUTION_CODE" "$INTEGRITY_CODE" "$DEPLOYMENT_CODE" "$ACCEPTANCE_CODE"; do
