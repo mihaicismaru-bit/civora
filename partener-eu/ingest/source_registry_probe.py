@@ -35,8 +35,9 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
     # Drupal-style public view counters are presentation telemetry, not source facts.
     # Normalise them before hashing so routine counter increments cannot reopen a
     # material-fact resolution task. The expression is deliberately narrow: it
-    # removes only a numeric value immediately followed by Romanian "de afișări".
-    text = re.sub(r"\b\d[\d.\s]*\s+de\s+afi(?:ș|ş|s)(?:ă|a)ri\b", " ", text, flags=re.I)
+    # removes only a numeric value immediately followed by Romanian "de afișări"
+    # or the equivalent English "view/views" counter rendered by the same page.
+    text = re.sub(r"\b\d[\d.\s]*\s+(?:de\s+afi(?:ș|ş|s)(?:ă|a)ri|views?)\b", " ", text, flags=re.I)
     text = re.sub(r"\s+", " ", text).strip()
     return text.encode("utf-8")
 
