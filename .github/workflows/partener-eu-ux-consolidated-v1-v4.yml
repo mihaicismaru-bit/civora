@@ -6,6 +6,12 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/web/index.html'
+      - 'partener-eu/web/app.js'
+      - 'partener-eu/web/styles.css'
+      - 'partener-eu/web/public-heavy-loader-v1.js'
+      - 'partener-eu/ops/build_public_static_pages.py'
+      - 'partener-eu/ops/test_public_static_pages.py'
+      - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/web/home-concierge-vnext.css'
       - 'partener-eu/web/home-concierge-vnext.js'
       - 'partener-eu/web/ux-optimization-v1.css'
@@ -23,6 +29,12 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/web/index.html'
+      - 'partener-eu/web/app.js'
+      - 'partener-eu/web/styles.css'
+      - 'partener-eu/web/public-heavy-loader-v1.js'
+      - 'partener-eu/ops/build_public_static_pages.py'
+      - 'partener-eu/ops/test_public_static_pages.py'
+      - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/web/home-concierge-vnext.css'
       - 'partener-eu/web/home-concierge-vnext.js'
       - 'partener-eu/ops/test_home_concierge_*.py'
@@ -55,6 +67,7 @@ jobs:
           node --check partener-eu/web/ux-orientation-v2.js
           node --check partener-eu/web/ux-mobile-density-v3.js
           node --check partener-eu/web/home-concierge-vnext.js
+          node --check partener-eu/web/public-heavy-loader-v1.js
 
       - name: Static UX and frontend contracts
         run: |
@@ -64,6 +77,14 @@ jobs:
           python partener-eu/ops/test_ux_card_scannability_v4.py
           python partener-eu/ops/test_home_concierge_vnext.py
           python partener-eu/ops/test_frontend_regression.py
+          python partener-eu/ops/test_public_boot_performance.py
+          python partener-eu/ops/test_public_static_pages.py
+
+      - name: Build compact homepage projection for browser proof
+        run: |
+          python partener-eu/ops/build_public_static_pages.py
+          python partener-eu/ops/test_public_static_pages.py
+          test -s partener-eu/web/home-public-data.js
 
       - name: Install browser harness
         run: python -m pip install --disable-pip-version-check playwright
