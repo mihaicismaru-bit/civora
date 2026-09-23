@@ -11,7 +11,7 @@ const rawUrl=/^https?:\/\/\S+\/?$/i;
 const materialTerms=/(apel|ghid|termen|calendar|buget|alocar|realoc|finanț|finant|depun|eligibil|consultare|prelung|contract|rezultat|selec|lansar|deschider|închider|inchider|corrigend|ordin)/i;
 const noisyChrome=/(Despre instituție.*Transparență|Media Articole Descoper|Transparență instituțională.*Informații de interes public)/i;
 const genericImpact=/(semnalul este relevant pentru monitorizare|impactul operațional se stabilește numai|impactul se stabilește numai după|se va urmări evoluția|poate afecta beneficiarii și proiectele)/i;
-function isHome(){return !!document.querySelector('.main [data-decision-home="1"]')}
+function isHome(){return document.body.classList.contains('conciergeHome')||!!document.querySelector('.main .hero')}
 function sourceTier(s){return String(s?.tier||s?.sourceTier||'').trim()}
 function officialSource(s){return /^T1(?:B)?(?:\b|_)/i.test(sourceTier(s))}
 function requiresOfficialEvidence(){return P.policy?.officialEffectRequiresT1Evidence!==false}
