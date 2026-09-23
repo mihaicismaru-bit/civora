@@ -13,7 +13,7 @@ spec.loader.exec_module(mod)
 
 
 class ResolutionOverlayTests(unittest.TestCase):
-    def test_verified_overlays_preserve_25_identities(self):
+    def test_verified_overlays_preserve_existing_identities_and_add_verified_fami_calls(self):
         base = mod.load(ROOT / "opportunity_bundle.json")
         # Remove already persisted application metadata to make replay explicit.
         base.pop("resolution_application", None)
@@ -23,7 +23,7 @@ class ResolutionOverlayTests(unittest.TestCase):
             [row["opportunity_id"] for row in base["opportunities"]],
             [row["opportunity_id"] for row in merged["opportunities"]][: len(base["opportunities"])],
         )
-        self.assertEqual(len(merged["opportunities"]), 26)
+        self.assertEqual(len(merged["opportunities"]), 33)
         step = next(row for row in merged["opportunities"] if row["opportunity_id"] == "PEO-STEP-LLL-ADULTI-2026")
         self.assertEqual(step["status"], "OPEN")
         self.assertEqual(step["deadline_at"], "2026-09-30T16:00:00+03:00")
@@ -40,6 +40,14 @@ class ResolutionOverlayTests(unittest.TestCase):
         regional_task = next(row for row in merged["resolution_tasks"] if row["resolution_task_id"] == "RT-PR-CENTRU-DIGITAL-2-MATERIAL")
         self.assertEqual(regional_task["status"], "IN_REVIEW")
         self.assertEqual(set(regional_task["blocked_fact_classes"]), {"status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"})
+        fami = [row for row in merged["opportunities"] if row["opportunity_id"].startswith("mai-fami-")]
+        self.assertEqual(len(fami), 7)
+        for item in fami:
+            self.assertEqual(item["status"], "OPEN")
+            self.assertEqual(item["publication_state"], "PUBLISHABLE")
+            self.assertEqual(item["material_facts"]["deadline"]["closes"], "2026-10-16T16:00:00+03:00")
+            self.assertNotIn("budget", item["material_facts"])
+            self.assertFalse(item.get("candidate_material_facts"))
 
     def test_replay_is_deterministic(self):
         base = mod.load(ROOT / "opportunity_bundle.json")
