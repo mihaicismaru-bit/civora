@@ -1,0 +1,114 @@
+name: VÂLCEA CLAR Publication Hold Projection
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'valcea-clar/editorial/publication_holds.json'
+      - 'valcea-clar/scripts/repair_continuous_frontpage.py'
+      - 'valcea-clar/scripts/repair_continuous_frontpage_legacy.py'
+      - '.github/workflows/valcea-clar-hold-projection.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-publication-hold-projection
+  cancel-in-progress: false
+
+jobs:
+  rebuild-reader-projection:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+
+      - name: Rebuild fail-closed reader surfaces from latest main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vâlcea-clar-hold-projection[bot]'
+          git config user.email 'valcea-clar-hold-projection@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            git clean -fd
+
+            python valcea-clar/scripts/newsroom_decide.py --self-test
+            python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+            python valcea-clar/scripts/repair_continuous_frontpage.py
+            python valcea-clar/scripts/overlay_runtime_export.py
+
+            python - <<'PY'
+          import json, shutil
+          from pathlib import Path
+
+          root = Path('valcea-clar')
+          holds_doc = json.loads((root/'editorial/publication_holds.json').read_text(encoding='utf-8'))
+          manifest_path = root/'site/runtime/stiri/manifest.json'
+          manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
+
+          held = {
+              str(row.get('story_id') or '').strip()
+              for row in holds_doc.get('holds', [])
+              if isinstance(row, dict)
+              and row.get('public_projection') is False
+              and str(row.get('status') or '').strip().upper() not in {'RELEASED','CLOSED','RESOLVED'}
+              and str(row.get('story_id') or '').strip()
+          }
+          rows = [row for row in manifest.get('stories', []) if isinstance(row, dict)]
+          published_ids = {str(row.get('id') or '').strip() for row in rows}
+          leaked = sorted(held & published_ids)
+          if leaked:
+              raise SystemExit('Held stories leaked into manifest: ' + ','.join(leaked))
+
+          expected_dirs = {
+              Path(str(row.get('path') or '').strip('/')).name
+              for row in rows
+              if str(row.get('path') or '').startswith('/stiri/')
+          }
+          story_root = root/'site/runtime/stiri'
+          removed = []
+          if story_root.is_dir():
+              for child in story_root.iterdir():
+                  if child.is_dir() and child.name not in expected_dirs:
+                      shutil.rmtree(child)
+                      removed.append(child.name)
+
+          homepage = (root/'site/runtime/index.html').read_text(encoding='utf-8')
+          for story_id in held:
+              if f'/stiri/{story_id}/' in homepage:
+                  raise SystemExit('Held story leaked into homepage: ' + story_id)
+
+          print(json.dumps({
+              'status':'PASS',
+              'held_story_count':len(held),
+              'manifest_story_count':len(rows),
+              'pruned_stale_routes':sorted(removed),
+          }, ensure_ascii=False))
+          PY
+
+            git add valcea-clar/site/story_archive.json valcea-clar/site/runtime valcea-clar/site/public_ux_state.json 2>/dev/null || true
+            if git diff --cached --quiet; then
+              echo 'Reader projection already matches publication holds.'
+              exit 0
+            fi
+
+            git commit -m 'Apply VÂLCEA CLAR publication holds to reader surfaces'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during hold projection; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Could not persist publication-hold projection after five attempts.' >&2
+          exit 1
