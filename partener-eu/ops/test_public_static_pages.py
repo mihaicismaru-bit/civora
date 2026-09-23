@@ -37,6 +37,7 @@ with tempfile.TemporaryDirectory() as td:
         "robots.txt",
         "sitemap.xml",
         "static-public-manifest.json",
+        "home-public-data.js",
         "finantari/index.html",
         "finantari/deschise/index.html",
         "finantari/in-pregatire/index.html",
@@ -91,6 +92,27 @@ with tempfile.TemporaryDirectory() as td:
     assert manifest["policy"]["provisionalFailClosedIndexed"] is False
     assert manifest["policy"]["queryPagesInSitemap"] is False
     assert manifest["policy"]["openRequiresConfirmedCurrentDeadline"] is True
+    assert manifest["homeSnapshotBytes"] < 120_000, manifest["homeSnapshotBytes"]
+    assert manifest["homeSnapshotDossiers"] <= 14
+    assert manifest["homeSnapshotNews"] <= 8
+
+    home_raw = (out / "home-public-data.js").read_text(encoding="utf-8")
+    prefix = "window.PARTENER_HOME_DATA="
+    assert home_raw.startswith(prefix) and home_raw.rstrip().endswith(";")
+    home = json.loads(home_raw[len(prefix):].strip().removesuffix(";"))
+    assert home["policy"]["readOnlyProjection"] is True
+    assert home["policy"]["materialFactsInvented"] is False
+    assert home["policy"]["fullDossiersLazyLoaded"] is True
+    assert len(home.get("dossiers") or []) == manifest["homeSnapshotDossiers"]
+    assert len(home.get("news") or []) == manifest["homeSnapshotNews"]
+    for row in home.get("dossiers") or []:
+        assert row.get("publicationState") == "PUBLISHABLE"
+        assert str(row.get("canonicalPath") or "").startswith("/dosare/")
+        for forbidden in ("sections", "sources", "timeline", "sourceLinks", "documents"):
+            assert forbidden not in row, (row.get("id"), forbidden)
+    assert '"sections":' not in home_raw
+    assert '"sources":' not in home_raw
+    assert '"timeline":' not in home_raw
 
     dossier_index = (out / "dosare/index.html").read_text(encoding="utf-8")
     funding_index = (out / "finantari/index.html").read_text(encoding="utf-8")
