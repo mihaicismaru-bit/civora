@@ -145,19 +145,18 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 6,
+    "autonomous_stories_published_24h": 5,
     "autonomous_story_ids_24h": [
       "ansambluri-rezidentiale-ramnicu-valcea",
       "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
-      "dragasani-ct-radiologie-program-clarificare-20260924",
       "horezu-drum-vf-roman-inchis-20260926",
       "isu-valcea-interventii-zilnice",
       "transalpina-ranca-obarsia-lotrului-weather-20260923"
     ],
     "discovery_to_publish_latency": {
       "status": "PARTIAL",
-      "measured": 5,
-      "published": 6,
+      "measured": 4,
+      "published": 5,
       "stories": [
         {
           "story_id": "isu-valcea-interventii-zilnice",
@@ -182,32 +181,26 @@
           "seconds": 197,
           "discovered_at_utc": "2026-09-23T21:20:09Z",
           "published_at_utc": "2026-09-23T21:23:26Z"
-        },
-        {
-          "story_id": "dragasani-ct-radiologie-program-clarificare-20260924",
-          "seconds": 251,
-          "discovered_at_utc": "2026-09-23T22:07:24Z",
-          "published_at_utc": "2026-09-23T22:11:35Z"
         }
       ],
       "max_seconds": 1610012,
-      "median_seconds": 251
+      "median_seconds": 517
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 6,
+      "published_stories": 5,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
       "status": "BLOCKED",
-      "eligible": 6,
-      "readback_ok": 3,
-      "value": 0.5,
+      "eligible": 5,
+      "readback_ok": 2,
+      "value": 0.4,
       "blocker_story_ids": [
         "ansambluri-rezidentiale-ramnicu-valcea",
-        "dragasani-ct-radiologie-program-clarificare-20260924",
+        "horezu-drum-vf-roman-inchis-20260926",
         "transalpina-ranca-obarsia-lotrului-weather-20260923"
       ],
       "checks": [
@@ -232,24 +225,14 @@
           "error": null
         },
         {
-          "story_id": "dragasani-ct-radiologie-program-clarificare-20260924",
-          "url": "https://valceaclar.ro/stiri/dragasani-ct-radiologie-program-clarificare-20260924/",
+          "story_id": "horezu-drum-vf-roman-inchis-20260926",
+          "url": "https://valceaclar.ro/stiri/horezu-drum-vf-roman-inchis-20260926/",
           "projected": false,
           "http_status": null,
           "canonical_ok": false,
           "headline_ok": false,
           "ok": false,
           "reason": "missing_from_public_projection"
-        },
-        {
-          "story_id": "horezu-drum-vf-roman-inchis-20260926",
-          "url": "https://valceaclar.ro/stiri/horezu-drum-vf-roman-inchis-20260926/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
         },
         {
           "story_id": "isu-valcea-interventii-zilnice",
@@ -276,17 +259,17 @@
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-23T21:25:00.297320Z",
+        "updated_local": "2026-09-23T18:07:30.593835Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 75
+        "public_story_count": 105
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 2,
-      "eligible": 6,
-      "value": 0.3333,
+      "eligible": 5,
+      "value": 0.4,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
         "isu-valcea-interventii-zilnice"
@@ -295,8 +278,8 @@
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 2,
-      "eligible": 6,
-      "value": 0.3333,
+      "eligible": 5,
+      "value": 0.4,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
         "isu-valcea-interventii-zilnice"
@@ -330,17 +313,73 @@
       "automated_workflow_dispatch_runs": [
         {
           "repository": "mihaicismaru-bit/civora",
-          "run_id": 35926939429,
-          "workflow": "VÂLCEA CLAR Social Publication Engine",
-          "created_at": "2026-09-23T22:11:39Z",
+          "run_id": 35922384954,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T21:25:52Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         },
         {
           "repository": "mihaicismaru-bit/civora",
-          "run_id": 35926781902,
+          "run_id": 35922333735,
           "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-09-23T22:10:01Z",
+          "created_at": "2026-09-23T21:25:23Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35922315080,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-23T21:25:12Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35922135642,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-23T21:23:30Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35921950504,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-23T21:21:45Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35916666676,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T20:32:44Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35916204389,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-23T20:28:40Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35915453467,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T20:22:02Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35912834838,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T19:58:21Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         }
@@ -350,14 +389,14 @@
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "9bbe53edf7e1169c441c710ae250d5a0190f1f84",
-      "structural_baseline_at_utc": "2026-09-23T22:06:42Z",
+      "structural_baseline_sha": "7c0b596dc0d7c080ca21b523e267578f659ae443",
+      "structural_baseline_at_utc": "2026-09-23T19:15:39Z",
       "structural_baseline_repository": "mihaicismaru-bit/civora",
       "structural_baseline_path": "civora_structural_paths",
       "structural_components": [
         {
-          "sha": "9bbe53edf7e1169c441c710ae250d5a0190f1f84",
-          "at_utc": "2026-09-23T22:06:42Z",
+          "sha": "7c0b596dc0d7c080ca21b523e267578f659ae443",
+          "at_utc": "2026-09-23T19:15:39Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
@@ -369,7 +408,7 @@
           "source_sha": "59e10f8f20e483786292d62505a232b270afcdf1"
         }
       ],
-      "eligible_after_utc": "2026-09-25T22:06:42Z",
+      "eligible_after_utc": "2026-09-25T19:15:39Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
