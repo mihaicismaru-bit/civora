@@ -108,6 +108,44 @@ def audit_viewport(browser, name: str, width: int, height: int) -> dict:
     if nested_interactive:
         errors.append(f'nested interactive controls inside role=button: {nested_interactive}')
 
+    # Discovery simulation: enter the lightweight explorer, use progressive
+    # filters, and prove search focus survives the debounced re-render.
+    funding_link=page.locator('.navlinks .navlink',has_text='Finanțări').first
+    if funding_link.count()!=1:
+        errors.append('Finanțări discovery entry missing')
+    else:
+        funding_link.click()
+        page.wait_for_timeout(320)
+        if page.locator('.filterDrawer').count()!=1:
+            errors.append('progressive filter drawer missing')
+        if page.locator('#fp').count()!=1 or page.locator('#fr').count()!=1 or page.locator('#fs').count()!=1:
+            errors.append('programme/region/status filters incomplete')
+        q=page.locator('#fq')
+        if q.count()!=1:
+            errors.append('discovery search input missing')
+        else:
+            q.click()
+            marker='digitalizare'
+            q.fill(marker)
+            page.wait_for_timeout(420)
+            q2=page.locator('#fq')
+            if q2.input_value()!=marker:
+                errors.append('discovery search lost typed text')
+            if not page.evaluate("document.activeElement===document.querySelector('#fq')"):
+                errors.append('discovery search lost focus after filter render')
+        status=page.locator('#fs')
+        if status.count()==1:
+            status.select_option('OPEN')
+            page.wait_for_timeout(260)
+            if page.locator('.activeFilters [data-clear-filter="status"]').count()!=1:
+                errors.append('active status filter chip missing')
+        heavy=page.evaluate('''() => ({
+          decisionProductsLoaded: !!window.PARTENER_DECISION_PRODUCTS,
+          canonicalCallsLoaded: !!window.PARTENER_MIPE_CANONICAL_CALLS
+        })''')
+        if heavy['decisionProductsLoaded'] or heavy['canonicalCallsLoaded']:
+            errors.append(f'lightweight explorer loaded heavy datasets: {heavy}')
+
     shot = SHOT_DIR / f'{name}.png'
     page.screenshot(path=str(shot), full_page=True)
 
