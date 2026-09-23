@@ -28,16 +28,37 @@ class CanonicalCorpusTests(unittest.TestCase):
 
     def test_bundle_passes_contract(self):
         counts = validate_bundle(self.bundle)
-        self.assertEqual(counts["opportunities"], 26)
+        self.assertEqual(counts["opportunities"], 33)
         self.assertEqual(counts["changesets"], 6)
 
-    def test_normalization_has_no_publication_effect(self):
+    def test_publishable_set_is_explicit_and_fail_closed(self):
         publishable = [x["opportunity_id"] for x in self.bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
         self.assertEqual(
             publishable,
-            ["afir-energy-2026", "pr-ne-energy-residential-towns-2026", "pr-centru-clusters-122", "pids-supported-decision", "pr-centru-urban-81", "PEO-STEP-LLL-ADULTI-2026"],
+            [
+                "afir-energy-2026",
+                "pr-ne-energy-residential-towns-2026",
+                "pr-centru-clusters-122",
+                "pids-supported-decision",
+                "pr-centru-urban-81",
+                "PEO-STEP-LLL-ADULTI-2026",
+                "mai-fami-am41d-2026",
+                "mai-fami-am22m-2026",
+                "mai-fami-am22l-2026",
+                "mai-fami-am22n-2026",
+                "mai-fami-am11i-2026",
+                "mai-fami-am11h-2026",
+                "mai-fami-am2a1g-2026",
+            ],
         )
         self.assertTrue(all(x.get("automatic_material_fact_update_allowed") is False for x in self.bundle["opportunities"]))
+        fami = [x for x in self.bundle["opportunities"] if x["opportunity_id"].startswith("mai-fami-")]
+        self.assertEqual(len(fami), 7)
+        for item in fami:
+            self.assertEqual(item["status"], "OPEN")
+            self.assertEqual(item["material_facts"]["deadline"]["closes"], "2026-10-16T16:00:00+03:00")
+            self.assertNotIn("budget", item["material_facts"])
+            self.assertFalse(item.get("candidate_material_facts"))
 
     def test_candidate_fact_without_resolution_block_is_rejected(self):
         bundle = json.loads(json.dumps(self.bundle))
@@ -81,7 +102,7 @@ class CanonicalCorpusTests(unittest.TestCase):
 
     def test_canonical_target_is_met_without_dropping_resolved_calls(self):
         self.assertGreaterEqual(len(self.bundle["opportunities"]), 25)
-        self.assertEqual(len({x["opportunity_id"] for x in self.bundle["opportunities"]}), 26)
+        self.assertEqual(len({x["opportunity_id"] for x in self.bundle["opportunities"]}), 33)
 
 
 if __name__ == "__main__":
