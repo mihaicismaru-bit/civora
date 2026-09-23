@@ -18,6 +18,7 @@ jobs:
   materialize:
     if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v6
         with:
@@ -26,19 +27,56 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
       - name: Materialize deterministic P11 artifacts
         run: |
           python partener-eu/p11/apply_resolutions.py
           python partener-eu/p11/build_public_projection.py
-      - name: Persist P11 generated artifacts
+      - name: Construct downstream dossiers and lifecycle for every P11 opportunity
+        run: |
+          python partener-eu/ingest/build_mipe_canonical_calls.py
+          python partener-eu/ingest/refine_mipe_canonical_calls.py
+          python partener-eu/ingest/enrich_mipe_canonical_facts.py
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
+          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
+          python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/sync_decision_products_projection.py
+          python partener-eu/ingest/build_mipe_enrichment_seeds.py
+          python partener-eu/ingest/build_call_lifecycle.py
+      - name: Validate materialized branch before persistence
+        run: |
+          python -m unittest discover -s partener-eu/p11 -p 'test_*.py'
+          python partener-eu/p11/validate_corpus.py
+          python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_public_language.py
+          python partener-eu/ops/test_call_lifecycle.py
+      - name: Persist P11 and dossier artifacts to PR branch only
         shell: bash
         run: |
           git config user.name "civora-partener-bot"
           git config user.email "civora-partener-bot@users.noreply.github.com"
-          git add partener-eu/p11/opportunity_bundle.json partener-eu/web/p11-public-data.js
+          git add \
+            partener-eu/p11/opportunity_bundle.json \
+            partener-eu/web/p11-public-data.js \
+            partener-eu/ingest/state/mipe_canonical_calls.json \
+            partener-eu/ingest/state/decision_products.json \
+            partener-eu/ingest/state/dossier_enrichment_queue.json \
+            partener-eu/ingest/state/mipe_enrichment_seeds.json \
+            partener-eu/ingest/state/call_lifecycle.json \
+            partener-eu/web/mipe-canonical-calls.js \
+            partener-eu/web/decision-products.js \
+            partener-eu/web/call-lifecycle.js
           if git diff --cached --quiet; then
-            echo "P11 artifacts already current."
+            echo "P11 and dossier artifacts already current."
             exit 0
           fi
-          git commit -m "PARTENER: materialize hardened FAMI P11 artifacts"
+          git commit -m "PARTENER: materialize FAMI calls and downstream dossiers"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
