@@ -61,12 +61,16 @@ def main() -> None:
         row for row in projection["opportunities"]
         if row["id"] == "pids-supported-decision"
     )
-    assert pids["status"] == "OPEN"
+    assert pids["status"] == "DISCOVERED"
     assert pids["publicationState"] == "PUBLISHABLE"
-    assert pids["materialFacts"]["budget"]["total_eur"] == 11804343
-    assert pids["materialFacts"]["grant"]["form"] == "grant nerambursabil"
-    assert pids["materialFacts"]["scoring"]["minimum_total_points"] == 70
+    assert pids["materialFacts"] == {}
     assert set(pids["verifiedFactClasses"]) == {
+        "status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"
+    }
+    assert pids["publicationDecision"]["decision"] == "BLOCK_MATERIAL_FACTS"
+    assert pids["publicationDecision"]["reasonCodes"] == ["OPEN_DEADLINE_EXPIRED_REQUIRES_REFRESH"]
+    assert pids["publicationDecision"]["activeResolutionTaskCount"] == 0
+    assert set(pids["publicationDecision"]["blockedFactClasses"]) == {
         "status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"
     }
     step_edu = next(
@@ -85,6 +89,7 @@ def main() -> None:
     assert projection["policy"]["freshnessReference"] == "PROJECTION_AS_OF"
     assert projection["policy"]["freshnessTelemetryAuthorizesPublication"] is False
     assert projection["policy"]["sourceCoverageTelemetryAuthorizesPublication"] is False
+    assert projection["policy"]["expiredOpenRequiresAuthorityRefresh"] is True
     verified_evidence_count = sum(row["verifiedEvidenceCount"] for row in projection["opportunities"])
     assert projection["summary"]["verificationFreshness"]["verifiedEvidenceLinkCount"] == verified_evidence_count
     assert projection["summary"]["verificationSourceCoverage"]["verifiedEvidenceLinkCount"] == verified_evidence_count
