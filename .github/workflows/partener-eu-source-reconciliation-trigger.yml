@@ -1,0 +1,29 @@
+name: PARTENER.EU Source Reconciliation Trigger
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/validation/accepted-source-baselines.json'
+      - 'partener-eu/validation/resolution-tasks/**'
+      - '.github/workflows/partener-eu-source-reconciliation-trigger.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: partener-eu-source-reconciliation-trigger
+  cancel-in-progress: false
+
+jobs:
+  dispatch-canonical-reprobe:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch canonical verified-source registry reprobe
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run partener-eu-source-registry.yml --repo "$GH_REPO" --ref main
