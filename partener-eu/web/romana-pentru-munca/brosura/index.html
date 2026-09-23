@@ -1,15 +1,189 @@
 <!doctype html>
-<html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Broșură — Română pentru Muncă</title>
 <meta name="robots" content="noindex,follow">
 <style>
-@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;color:#12335b;background:#fff}.p{width:210mm;min-height:297mm;margin:auto;padding:14mm}.hero{display:grid;grid-template-columns:1.05fr .95fr;background:#12335b;color:#fff;border-radius:12px;overflow:hidden}.hero .t{padding:16mm 10mm}.hero img{width:100%;height:100%;object-fit:cover}.hero h1{font-size:30px;margin:0 0 10px}.hero p{font-size:14px;line-height:1.45}.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:#8fd3c5;font-weight:700}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12mm 0}.card{background:#f4f8fa;border-radius:10px;padding:10px}.card h3{margin:0 0 6px;font-size:14px}.card p{margin:0;font-size:11px;line-height:1.4;color:#5a6978}.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}.box{padding:12px;border-radius:10px;background:#eef6f4}.box.alt{background:#fff7e9}.box h2{font-size:18px;margin:0 0 8px}.box p{font-size:11px;line-height:1.45;color:#5a6978}.steps{margin:10mm 0}.steps h2{font-size:20px}.steps ol{padding-left:22px}.steps li{margin:7px 0;font-size:12px}.cta{margin-top:12mm;padding:12px 16px;background:#12335b;color:#fff;border-radius:10px}.cta h2{margin:0 0 8px;font-size:20px}.cta p{margin:3px 0;font-size:12px}.small{font-size:9px!important;color:#d7e2eb}.print{position:fixed;right:14px;top:14px;background:#176a5b;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}@media print{.print{display:none}.p{margin:0}}
-</style></head><body>
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+:root{--ink:#132238;--blue:#12335b;--green:#176a5b;--muted:#5f6e7d;--line:#dfe6eb;--soft:#f5f8fa;--warm:#fff7e9;--white:#fff}
+body{margin:0;background:#e9eef2;color:var(--ink);font-family:Inter,Arial,sans-serif;line-height:1.45}
+.print{position:fixed;z-index:10;right:18px;top:18px;border:0;border-radius:9px;background:var(--green);color:#fff;padding:11px 16px;font-weight:800;cursor:pointer;box-shadow:0 7px 22px rgba(0,0,0,.15)}
+.sheet{width:210mm;min-height:297mm;margin:10mm auto;background:#fff;padding:15mm;position:relative;overflow:hidden}
+.kicker{font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:800;color:#5ea994}
+h1,h2,h3,p{margin-top:0}h1{font-size:38px;line-height:1.02;letter-spacing:-.04em}h2{font-size:25px;line-height:1.08;letter-spacing:-.025em}h3{font-size:14px;margin-bottom:5px}
+.lead{font-size:16px;line-height:1.5;color:#e8f2f7}.small{font-size:9px}.muted{color:var(--muted)}
+.cover{padding:0;display:grid;grid-template-rows:63% 37%}
+.coverHero{position:relative;background:#12335b;overflow:hidden}.coverHero img{width:100%;height:100%;object-fit:cover;opacity:.48}.coverOverlay{position:absolute;inset:0;background:linear-gradient(90deg,rgba(18,51,91,.97) 0%,rgba(18,51,91,.86) 48%,rgba(18,51,91,.18) 100%);padding:22mm 17mm;color:#fff;display:flex;flex-direction:column;justify-content:center}.coverOverlay h1{max-width:110mm;margin:8px 0 12px}.coverBottom{padding:13mm 17mm;background:#fff}.coverBottom h2{max-width:150mm;margin-bottom:8px}.pillrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.pill{padding:6px 9px;border:1px solid #cbd9df;border-radius:999px;font-size:10px;font-weight:700;color:#294258}
+.problemGrid,.benefits,.curriculum,.formats,.twoCol{display:grid;gap:10px}.problemGrid{grid-template-columns:1.2fr .8fr}.benefits{grid-template-columns:repeat(4,1fr)}.curriculum{grid-template-columns:repeat(2,1fr)}.formats{grid-template-columns:repeat(3,1fr)}.twoCol{grid-template-columns:1fr 1fr}
+.card,.panel{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.card p,.panel p{font-size:10.5px;color:var(--muted);margin-bottom:0}.card strong{font-size:12px}
+.soft{background:var(--soft)}.warm{background:var(--warm);border-color:#f0dfb7}.green{background:#edf7f4;border-color:#cbe4dd}.dark{background:var(--blue);color:#fff;border:0}.dark p{color:#dce8ef}
+.factline{display:flex;gap:12px;margin:10px 0 14px}.fact{flex:1;border-left:3px solid var(--green);padding-left:10px}.fact b{display:block;font-size:18px}.fact span{font-size:10px;color:var(--muted)}
+.section{margin-top:12mm}.section:first-child{margin-top:0}.sectionHead{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:8px}.sectionHead p{font-size:10px;color:var(--muted);max-width:70mm;margin:0}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.step{padding:12px;border-radius:12px;background:var(--soft)}.step span{display:flex;width:27px;height:27px;border-radius:50%;background:var(--green);color:#fff;align-items:center;justify-content:center;font-weight:800;font-size:11px;margin-bottom:8px}.step p{font-size:10px;color:var(--muted);margin:0}
+.pricebox{display:grid;grid-template-columns:1.1fr .9fr;gap:12px;background:var(--blue);color:#fff;border-radius:14px;padding:14px}.pricebox p{color:#d9e4eb;font-size:11px}.priceFactors{display:grid;grid-template-columns:1fr 1fr;gap:8px}.priceFactors div{background:rgba(255,255,255,.09);border-radius:8px;padding:8px;font-size:9.5px}
+.cta{background:var(--green);color:#fff;border-radius:14px;padding:15px}.cta h2{margin-bottom:6px}.cta p{font-size:11px;color:#e3f0ed}.contact{font-size:12px;line-height:1.6}.contact a{color:#fff;text-decoration:none;font-weight:800}
+.footer{position:absolute;left:15mm;right:15mm;bottom:8mm;display:flex;justify-content:space-between;font-size:8px;color:#8795a3}
+.source{font-size:8.5px;color:#7d8a97;line-height:1.4}
+ul.clean{padding-left:16px;margin:6px 0}ul.clean li{font-size:10px;color:var(--muted);margin:4px 0}
+.badge{display:inline-block;background:#eaf4f1;color:#176a5b;border-radius:6px;padding:4px 6px;font-size:9px;font-weight:800}
+@media print{body{background:#fff}.print{display:none}.sheet{margin:0;page-break-after:always}.sheet:last-child{page-break-after:auto}}
+@media(max-width:850px){.sheet{width:100%;min-height:auto;margin:0;padding:24px}.cover{display:block}.coverHero{height:520px}.coverBottom{padding:28px}.benefits{grid-template-columns:1fr 1fr}.curriculum,.twoCol,.problemGrid,.pricebox{grid-template-columns:1fr}.formats,.steps{grid-template-columns:1fr}.footer{position:static;margin-top:30px}}
+</style>
+</head>
+<body>
 <button class="print" onclick="window.print()">Descarcă / tipărește PDF</button>
-<main class="p">
-<section class="hero"><div class="t"><div class="kicker">Pentru angajatori</div><h1>Română pentru Muncă</h1><p>Cursuri de limba română pentru angajați străini. Simplu. Organizat. Fără bătaie de cap pentru firmă.</p></div><img src="https://images.pexels.com/photos/7698712/pexels-photo-7698712.jpeg?w=1080" alt=""></section>
-<div class="grid"><div class="card"><h3>Organizăm cursul</h3><p>Stabilim programul potrivit după numărul de oameni și modul de lucru.</p></div><div class="card"><h3>Ținem evidența</h3><p>Urmărim participarea și pregătim documentele programului.</p></div><div class="card"><h3>Română utilă</h3><p>Accent pe comunicarea de la muncă și viața de zi cu zi.</p></div></div>
-<section class="steps"><h2>Cum funcționează</h2><ol><li>Ne spui câți angajați ai și cum lucrează.</li><li>Îți propunem varianta de organizare și oferta.</li><li>Pornim cursul și documentăm participarea.</li></ol></section>
-<section class="cols"><div class="box"><h2>Experiență în formarea adulților</h2><p>Avem experiență în organizarea și derularea de programe de formare pentru adulți, cu grupuri diverse și contexte reale de muncă. Lucrăm aplicat, clar și orientat spre nevoile angajatorului.</p></div><div class="box alt"><h2>Repere utile</h2><p>Pentru obligația vizată de OUG 32/2026, cadrul legal prevede minimum 6 luni și minimum 6 ore pe săptămână, împreună cu elemente de integrare culturală și socială. Cursul este o componentă a unui regim mai larg de obligații ale angajatorului.</p></div></section>
-<section class="cta"><h2>Primul pas este simplu</h2><p>Spune-ne câți angajați străini ai sau urmează să aduci și îți spunem rapid cum organizăm cursul.</p><p><strong>Contact: Fundația Antreprenoriat Social</strong></p><p>office@partener.eu · 0770 594 964</p><p class="small">Foto hero: Yan Krukau / Pexels. Sursă legală: OUG nr. 32/2026 - Portal Legislativ.</p></section>
-</main></body></html>
+
+<section class="sheet cover">
+  <div class="coverHero">
+    <img src="https://images.pexels.com/photos/7698712/pexels-photo-7698712.jpeg?w=1600" alt="">
+    <div class="coverOverlay">
+      <div class="kicker">Soluție pentru angajatori</div>
+      <h1>Română pentru Muncă</h1>
+      <p class="lead">Cursuri de limba română pentru angajați străini, organizate în jurul programului real al firmei.</p>
+    </div>
+  </div>
+  <div class="coverBottom">
+    <h2>Tu îți vezi de oameni și de activitatea firmei. Noi organizăm partea de limba română.</h2>
+    <p class="muted">Program, participare, documente clare și conținut practic pentru muncă și viața de zi cu zi.</p>
+    <div class="pillrow">
+      <span class="pill">La locul de muncă</span>
+      <span class="pill">Online live</span>
+      <span class="pill">Hibrid</span>
+      <span class="pill">Adaptat pe sector</span>
+    </div>
+  </div>
+</section>
+
+<section class="sheet">
+  <div class="kicker">01 · Problema și soluția</div>
+  <h2>Ai angajați străini? Partea de limba română trebuie organizată din timp.</h2>
+  <div class="problemGrid">
+    <div class="panel soft">
+      <h3>Ce are de rezolvat angajatorul</h3>
+      <p>Cadrul legal aplicabil prevede cursuri de limba română care includ elemente de integrare culturală și socială pentru lucrătorii străini vizați de regim.</p>
+      <div class="factline">
+        <div class="fact"><b>minimum 6 luni</b><span>de la începerea activității</span></div>
+        <div class="fact"><b>minimum 6 ore</b><span>pe săptămână</span></div>
+      </div>
+      <p>Română pentru Muncă este construit pentru a ajuta firma să organizeze această componentă clar, practic și documentat.</p>
+    </div>
+    <div class="panel green">
+      <h3>Ce facem noi</h3>
+      <ul class="clean">
+        <li>stabilim forma de organizare;</li>
+        <li>adaptăm programul la schimburi și disponibilitate;</li>
+        <li>livrăm cursul;</li>
+        <li>urmărim participarea;</li>
+        <li>pregătim documentele programului;</li>
+        <li>adaptăm vocabularul la activitatea firmei.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="sectionHead"><div><div class="kicker">Beneficii</div><h2>Mai puțină bătaie de cap pentru patron și HR.</h2></div></div>
+    <div class="benefits">
+      <div class="card"><strong>Un singur punct de coordonare</strong><p>Nu construiești intern un program de la zero.</p></div>
+      <div class="card"><strong>Program realist</strong><p>Pornim de la schimburile și ritmul de lucru al oamenilor.</p></div>
+      <div class="card"><strong>Evidențe clare</strong><p>Participarea și documentele programului sunt urmărite organizat.</p></div>
+      <div class="card"><strong>Conținut util</strong><p>Română folosită efectiv la muncă și în viața de zi cu zi.</p></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="kicker">Cum începi</div>
+    <div class="steps">
+      <div class="step"><span>1</span><h3>Ne spui situația</h3><p>Câți angajați ai, când au început sau urmează să înceapă și cum lucrează.</p></div>
+      <div class="step"><span>2</span><h3>Configurăm programul</h3><p>Stabilim formatul, programul și organizarea potrivită.</p></div>
+      <div class="step"><span>3</span><h3>Pornim și documentăm</h3><p>Livrăm cursul, urmărim participarea și pregătim documentele.</p></div>
+    </div>
+  </div>
+  <div class="footer"><span>Română pentru Muncă</span><span>2 / 4</span></div>
+</section>
+
+<section class="sheet">
+  <div class="kicker">02 · Programul de învățare</div>
+  <h2>Română practică pentru muncă și viața de zi cu zi.</h2>
+  <p class="muted">Programa este orientată spre situații reale și se adaptează sectorului și activității firmei.</p>
+
+  <div class="curriculum section">
+    <div class="card"><span class="badge">Comunicare de bază</span><h3>Primele conversații</h3><p>Salut, prezentare, întrebări simple, numere, ore, date și expresii uzuale.</p></div>
+    <div class="card"><span class="badge">La locul de muncă</span><h3>Instrucțiuni și sarcini</h3><p>Echipamente, materiale, sarcini, program, schimburi și comunicarea cu șefii și colegii.</p></div>
+    <div class="card"><span class="badge">Siguranță</span><h3>Sănătate și securitate</h3><p>Semnalarea problemelor, accidente, urgențe și înțelegerea mesajelor esențiale de securitate.</p></div>
+    <div class="card"><span class="badge">Viața de zi cu zi</span><h3>Integrare practică</h3><p>Transport, cumpărături, locuință, servicii, programări și interacțiuni în comunitate.</p></div>
+    <div class="card"><span class="badge">Cultură și integrare</span><h3>Adaptare la mediul românesc</h3><p>Reguli și obiceiuri de bază, comunicare respectuoasă și relația cu colegii.</p></div>
+    <div class="card"><span class="badge">Progres</span><h3>Consolidare și recuperare</h3><p>Exerciții practice, recapitulare, verificări de progres și recuperarea conținutului ratat.</p></div>
+  </div>
+
+  <div class="section">
+    <div class="kicker">Formate de livrare</div>
+    <div class="formats">
+      <div class="panel"><h3>La locul de muncă</h3><p>Potrivit când firma vrea să reducă deplasările și să integreze cursul în programul operațional.</p></div>
+      <div class="panel"><h3>Online live</h3><p>Util pentru echipe distribuite, mai multe locații sau programe în care participarea la distanță este mai simplă.</p></div>
+      <div class="panel"><h3>Hibrid</h3><p>Combină sesiunile față în față cu cele online, în funcție de schimburi, locații și ritmul firmei.</p></div>
+    </div>
+  </div>
+
+  <div class="section twoCol">
+    <div class="panel green">
+      <h3>Experiență în formarea adulților</h3>
+      <p>Avem experiență în organizarea și derularea de programe de formare pentru adulți, cu grupuri diverse și contexte reale de muncă. Lucrăm aplicat, clar și orientat spre nevoile angajatorului.</p>
+    </div>
+    <div class="panel warm">
+      <h3>Ce primește firma</h3>
+      <p>Calendarul programului, evidențele de participare și documentele agreate prin ofertă și contract. Forma exactă se stabilește în funcție de configurația programului.</p>
+    </div>
+  </div>
+  <div class="footer"><span>Română pentru Muncă</span><span>3 / 4</span></div>
+</section>
+
+<section class="sheet">
+  <div class="kicker">03 · Investiție și pasul următor</div>
+  <h2>Tariful este configurat pentru situația reală a firmei.</h2>
+  <div class="pricebox">
+    <div>
+      <h3>Nu folosim un preț unic pentru toate companiile.</h3>
+      <p>Costul depinde de modul în care trebuie organizat programul. După o discuție scurtă, îți trimitem o ofertă clară, raportată la configurația reală a firmei.</p>
+      <p><strong>Nu trebuie să pregătești un dosar ca să afli tariful.</strong> Sunt suficiente câteva informații despre numărul de oameni și programul lor.</p>
+    </div>
+    <div class="priceFactors">
+      <div><strong>Număr de participanți</strong><br>și modul de grupare</div>
+      <div><strong>Formatul cursului</strong><br>la sediu / online / hibrid</div>
+      <div><strong>Programul de lucru</strong><br>schimburi și intervale disponibile</div>
+      <div><strong>Contextul firmei</strong><br>sector, locații și nevoi specifice</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="kicker">Întrebări frecvente</div>
+    <div class="twoCol">
+      <div class="panel"><h3>Trebuie cursul pentru toți angajații străini?</h3><p>Aplicabilitatea exactă depinde de situația lucrătorilor și de momentul începerii activității. Pentru oamenii deja aflați în firmă verificăm cazul concret.</p></div>
+      <div class="panel"><h3>Se poate organiza în schimburi?</h3><p>Da. Programul se configurează pornind de la realitatea operațională a firmei, în limitele cerințelor aplicabile.</p></div>
+      <div class="panel"><h3>Se poate face la sediul nostru?</h3><p>Da, poate fi o opțiune. Confirmăm forma potrivită după numărul de participanți și logistică.</p></div>
+      <div class="panel"><h3>Cursul garantează conformitatea completă?</h3><p>Nu. Cursul este o componentă a unui regim mai larg de obligații ale angajatorului.</p></div>
+    </div>
+  </div>
+
+  <div class="section cta">
+    <div class="kicker" style="color:#b8e4da">Următorul pas</div>
+    <h2>Spune-ne câți angajați străini ai sau urmează să aduci.</h2>
+    <p>Îți spunem rapid cum se poate organiza programul și ce informații ne trebuie pentru o ofertă.</p>
+    <div class="contact">
+      <strong>Contact: Fundația Antreprenoriat Social</strong><br>
+      <a href="mailto:office@partener.eu">office@partener.eu</a><br>
+      <a href="tel:+40770594964">0770 594 964</a><br>
+      <a href="https://partener.eu/romana-pentru-munca/">partener.eu/romana-pentru-munca/</a>
+    </div>
+  </div>
+
+  <div class="section source">
+    <strong>Notă juridică.</strong> OUG nr. 32/2026 prevede, pentru obligația vizată, cursuri de limba română cu elemente de integrare culturală și socială, minimum 6 luni și minimum 6 ore pe săptămână. Programul Română pentru Muncă susține această componentă specifică; nu reprezintă și nu garantează întreaga conformitate juridică a angajatorului, viza, permisul de ședere, dreptul de muncă sau autorizarea angajatorului.
+  </div>
+  <div class="footer"><span>Română pentru Muncă</span><span>4 / 4</span></div>
+</section>
+
+</body>
+</html>
