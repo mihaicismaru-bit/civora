@@ -145,8 +145,9 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 8,
+    "autonomous_stories_published_24h": 9,
     "autonomous_story_ids_24h": [
+      "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
       "brezoi-ziua-recoltei-pregatiri-20260922",
       "calimanesti-concurs-contabil-sef-20260921",
       "calimanesti-restrictii-trotuare-20260922",
@@ -158,8 +159,8 @@
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 8,
-      "published": 8,
+      "measured": 9,
+      "published": 9,
       "stories": [
         {
           "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
@@ -208,6 +209,12 @@
           "seconds": 1610012,
           "discovered_at_utc": "2026-09-04T13:59:21Z",
           "published_at_utc": "2026-09-23T05:12:53Z"
+        },
+        {
+          "story_id": "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
+          "seconds": 517,
+          "discovered_at_utc": "2026-09-23T05:09:27Z",
+          "published_at_utc": "2026-09-23T05:18:04Z"
         }
       ],
       "max_seconds": 1610012,
@@ -216,19 +223,30 @@
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 8,
+      "published_stories": 9,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
       "status": "BLOCKED",
-      "eligible": 8,
+      "eligible": 9,
       "readback_ok": 7,
-      "value": 0.875,
+      "value": 0.7778,
       "blocker_story_ids": [
+        "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
         "isu-valcea-interventii-zilnice"
       ],
       "checks": [
+        {
+          "story_id": "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
+          "url": "https://valceaclar.ro/stiri/brezoi-acces-ingrijire-domiciliu-selectie-20260923/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
         {
           "story_id": "brezoi-ziua-recoltei-pregatiri-20260922",
           "url": "https://valceaclar.ro/stiri/brezoi-ziua-recoltei-pregatiri-20260922/",
@@ -323,8 +341,8 @@
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 6,
-      "eligible": 8,
-      "value": 0.75,
+      "eligible": 9,
+      "value": 0.6667,
       "delivered_story_ids": [
         "brezoi-ziua-recoltei-pregatiri-20260922",
         "calimanesti-restrictii-trotuare-20260922",
@@ -337,8 +355,8 @@
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 7,
-      "eligible": 8,
-      "value": 0.875,
+      "eligible": 9,
+      "value": 0.7778,
       "delivered_story_ids": [
         "brezoi-ziua-recoltei-pregatiri-20260922",
         "calimanesti-concurs-contabil-sef-20260921",
@@ -369,6 +387,38 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35822001678,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T05:20:28Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35821957588,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-23T05:19:50Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35821845978,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-23T05:18:09Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35821754752,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-23T05:16:45Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 35821641430,
