@@ -24,7 +24,7 @@
     "zero_paid_dependency"
   ],
   "properties": {
-    "schema_version": {"const": "1.0"},
+    "schema_version": {"enum": ["1.0", "1.1"]},
     "channel_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"},
     "instance_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{1,63}$"},
     "platform": {
@@ -46,7 +46,24 @@
       "minItems": 1,
       "uniqueItems": true,
       "items": {
-        "enum": ["text", "single_photo", "carousel", "story", "reel", "short", "long_video", "thread", "alert", "digest", "live"]
+        "enum": [
+          "text",
+          "single_photo",
+          "carousel",
+          "story",
+          "reel",
+          "short",
+          "long_video",
+          "thread",
+          "alert",
+          "digest",
+          "live",
+          "editorial_card",
+          "editorial_fact_card",
+          "data_card",
+          "document_led",
+          "editorial_layout"
+        ]
       }
     },
     "cadence": {
@@ -81,13 +98,25 @@
     "media_policy": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["real_media_only", "provenance_required", "reuse_rights_required", "synthetic_real_person_forbidden"],
+      "required": ["real_media_only", "provenance_required", "synthetic_real_person_forbidden"],
       "properties": {
         "real_media_only": {"type": "boolean"},
         "provenance_required": {"type": "boolean"},
         "reuse_rights_required": {"type": "boolean"},
-        "synthetic_real_person_forbidden": {"type": "boolean"}
-      }
+        "reuse_rights_required_for_third_party_media": {"type": "boolean"},
+        "synthetic_real_person_forbidden": {"type": "boolean"},
+        "allowed_families": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+        "editorial_card_allowed": {"type": "boolean"},
+        "editorial_card_site_reuse_forbidden": {"type": "boolean"},
+        "invented_documentary_photo_forbidden": {"type": "boolean"},
+        "generic_photo_only_to_fill_space_forbidden": {"type": "boolean"},
+        "native_feed_ratio": {"type": "string"},
+        "story_or_reel_cover_ratio": {"type": "string"}
+      },
+      "anyOf": [
+        {"required": ["reuse_rights_required"]},
+        {"required": ["reuse_rights_required_for_third_party_media"]}
+      ]
     },
     "link_policy": {
       "type": "object",
@@ -131,6 +160,15 @@
         "state_path": {"type": "string", "minLength": 3},
         "dedupe_by_id": {"type": "boolean"},
         "last_known_good": {"type": "boolean"}
+      }
+    },
+    "delivery_truth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["delivered_requires_external_receipt_or_readback", "workflow_success_is_not_delivery"],
+      "properties": {
+        "delivered_requires_external_receipt_or_readback": {"const": true},
+        "workflow_success_is_not_delivery": {"const": true}
       }
     },
     "metrics": {
