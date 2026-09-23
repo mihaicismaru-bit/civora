@@ -28,3 +28,19 @@
 .rpmContactBox span,.rpmContactBox a{color:var(--rpm-muted);text-decoration:none}
 .rpmContactBox a[href^="tel:"]{font-size:1.15rem;font-weight:800;color:var(--rpm-accent2)}
 @media(max-width:860px){.rpmHeroGrid,.rpmExperienceGrid{grid-template-columns:1fr}.rpmHero .rpmFactCard{grid-column:auto}.rpmHeroVisual img{height:240px}.rpmContactBox{min-width:0}}
+
+.rpmHeroSide{display:grid;gap:16px}
+.rpmHeroVisual{margin:0}
+.rpmHeroVisual figcaption{display:block;padding:8px 12px;color:var(--rpm-muted);font-size:.72rem}
+.rpmHero .rpmFactCard{grid-column:auto}
+.rpmBrochureCard{display:grid;grid-template-columns:150px 1fr;gap:22px;align-items:center}
+.rpmBrochurePreview{display:flex;justify-content:center}
+.rpmBrochureCover{width:128px;aspect-ratio:210/297;border-radius:7px;background:linear-gradient(160deg,#12335b 0 56%,#f4f8fa 56%);box-shadow:0 10px 30px rgba(19,34,56,.15);padding:14px;color:#fff;display:flex;flex-direction:column}
+.rpmBrochureCover span{font-size:.55rem;text-transform:uppercase;letter-spacing:.08em;color:#8fd3c5}
+.rpmBrochureCover strong{font-size:1.05rem;line-height:1.02;margin-top:12px}
+.rpmBrochureCover small{font-size:.55rem;line-height:1.25;margin-top:8px}
+.rpmPromo{display:grid;grid-template-columns:128px 1fr auto}
+.rpmPromoImg{width:128px;height:92px;object-fit:cover;border-radius:10px}
+.rpmPromoCopy{min-width:0}
+@media(max-width:860px){.rpmBrochureCard{grid-template-columns:110px 1fr}.rpmPromo{grid-template-columns:96px 1fr}.rpmPromo>a{grid-column:1/-1}.rpmPromoImg{width:96px;height:78px}}
+@media(max-width:560px){.rpmBrochureCard{grid-template-columns:1fr}.rpmBrochurePreview{justify-content:flex-start}.rpmPromo{grid-template-columns:82px 1fr}.rpmPromoImg{width:82px;height:70px}}
