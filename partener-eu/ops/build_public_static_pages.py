@@ -186,7 +186,7 @@ def canonical(path: str) -> str:
 
 
 def json_ld(value: dict[str, Any]) -> str:
-    return json.dumps(value, ensure_ascii=False, separators=(",", ":")).replace("</", "<\/")
+    return json.dumps(value, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/")
 
 
 def common_nav(current: str = "") -> str:
