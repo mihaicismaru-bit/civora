@@ -74,7 +74,32 @@ def stable_hash(value: Any) -> str:
 
 
 def article_version(item: dict[str, Any]) -> str:
-    return stable_hash(item)[:16]
+    """Version the editorial product, not volatile recap/source metadata."""
+    product = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
+    product_fp = str(product.get("product_fingerprint_sha256") or "").strip().lower()
+    if len(product_fp) == 64 and all(ch in "0123456789abcdef" for ch in product_fp):
+        return product_fp[:16]
+
+    stable_sources = []
+    for src in item.get("sources") or []:
+        if not isinstance(src, dict):
+            continue
+        stable_sources.append({
+            "name": src.get("name"),
+            "url": src.get("url"),
+            "tier": src.get("tier"),
+        })
+    stable_payload = {
+        "headline": item.get("headline"),
+        "dek": item.get("dek"),
+        "paragraphs": item.get("paragraphs") or [],
+        "section": item.get("section"),
+        "material_fact_gate": item.get("material_fact_gate"),
+        "factbox": item.get("factbox") or [],
+        "article_sections": item.get("article_sections") or [],
+        "sources": stable_sources,
+    }
+    return stable_hash(stable_payload)[:16]
 
 
 def delivery_id(edition_id: str, article_id: str, version: str, channel: str) -> str:
@@ -111,6 +136,22 @@ def selected_channel_state(root: Path, channel: str, article_id: str) -> dict[st
         blocker = item.get("reason") or item.get("hold_reason")
         if status in {"hold", "blocked"}:
             return {"selected": True, "queue_status": "blocked", "blocker": blocker or status}
+
+        # Match the direct Threads adapter exactly: a current newsroom event
+        # with an explicit empty/new-story edge must never replay backlog.
+        event = read_json(root / "site/story_publication_event.json", {}) or {}
+        canonical_ids = event.get("new_story_ids")
+        if not isinstance(canonical_ids, list):
+            canonical_ids = event.get("story_ids")
+        if isinstance(canonical_ids, list):
+            wanted = {str(value) for value in canonical_ids if str(value).strip()}
+            if article_id not in wanted:
+                return {
+                    "selected": True,
+                    "queue_status": "blocked",
+                    "blocker": "threads_not_new_in_current_publication_event",
+                }
+
         return {"selected": True, "queue_status": "pending", "blocker": None}
 
     item = find_multi_outbox_item(outbox, article_id)
@@ -193,6 +234,55 @@ def existing_records(root: Path) -> list[dict[str, Any]]:
     return [r for r in records if isinstance(r, dict)]
 
 
+def edition_article_version(root: Path, edition_id: str, article_id: str) -> str | None:
+    """Recompute the stable editorial version from a historical recap.
+
+    This is also the migration bridge for S1 records written before the stable
+    editorial-product version identity existed.
+    """
+    edition = read_json(root / "editions" / f"{edition_id}.json", {}) or {}
+    for item in edition.get("items", []):
+        if isinstance(item, dict) and str(item.get("id", "")) == article_id:
+            return article_version(item)
+    return None
+
+
+def prior_terminal_record(
+    root: Path,
+    records: list[dict[str, Any]],
+    article_id: str,
+    content_version: str,
+    channel: str,
+    edition_id: str,
+) -> dict[str, Any] | None:
+    """Carry story-version delivery truth across recap editions.
+
+    For legacy records, compare against a recomputed stable version of the
+    historical edition item instead of trusting the obsolete stored hash.
+    """
+    candidates: list[dict[str, Any]] = []
+    for record in records:
+        prior_edition = str(record.get("edition_id") or "")
+        if (
+            not prior_edition
+            or prior_edition == edition_id
+            or record.get("article_id") != article_id
+            or record.get("channel") != channel
+            or record.get("status") not in {"delivered", "blocked"}
+        ):
+            continue
+        stored_match = record.get("content_version") == content_version
+        historical_match = edition_article_version(root, prior_edition, article_id) == content_version
+        if stored_match or historical_match:
+            candidates.append(record)
+
+    delivered = [r for r in candidates if r.get("status") == "delivered"]
+    if delivered:
+        return delivered[-1]
+    blocked = [r for r in candidates if r.get("status") == "blocked"]
+    return blocked[-1] if blocked else None
+
+
 def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
     prior = read_json(root / DELIVERY_DIR / "queue.json", {"records": [], "policy": {}}) or {"records": [], "policy": {}}
     prior_records = prior.get("records", []) if isinstance(prior, dict) else []
@@ -208,6 +298,24 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
             )
             record = by_id.get(did)
             if record is None:
+                inherited = prior_terminal_record(
+                    root,
+                    records,
+                    article["article_id"],
+                    article["content_version"],
+                    channel,
+                    manifest["edition_id"],
+                )
+                inherited_status = inherited.get("status") if inherited else None
+                inherited_blocker = inherited.get("blocker") if inherited_status == "blocked" else None
+                inherited_confirmation = (
+                    copy.deepcopy(inherited.get("confirmation"))
+                    if inherited_status == "delivered" and inherited.get("confirmation")
+                    else None
+                )
+                if inherited_confirmation:
+                    inherited_confirmation["bound_content_version"] = article["content_version"]
+                    inherited_confirmation["migrated_from_delivery_id"] = inherited.get("delivery_id")
                 record = {
                     "delivery_id": did,
                     "edition_id": manifest["edition_id"],
@@ -215,11 +323,12 @@ def ensure_queue(root: Path, manifest: dict[str, Any]) -> dict[str, Any]:
                     "content_version": article["content_version"],
                     "channel": channel,
                     "canonical_url": article["canonical_url"],
-                    "status": selection.get("queue_status", "pending"),
-                    "blocker": selection.get("blocker"),
+                    "status": inherited_status or selection.get("queue_status", "pending"),
+                    "blocker": inherited_blocker if inherited_status == "blocked" else selection.get("blocker"),
                     "created_at": utc_now(),
                     "last_reconciled_at": None,
-                    "confirmation": None,
+                    "confirmation": inherited_confirmation,
+                    "inherited_from_delivery_id": inherited.get("delivery_id") if inherited else None,
                 }
                 records.append(record)
                 by_id[did] = record
@@ -480,8 +589,60 @@ def self_test() -> None:
         assert rec("alpha", "threads")["status"] == "blocked"
         assert rec("alpha", "threads")["blocker"] == PRE_S1_BLOCKER
         assert rec("beta", "facebook")["status"] == "blocked"
+
+        # Threads direct publisher is event-edge based: an explicit empty
+        # new_story_ids list means no backlog replay, so S1 must record an
+        # explicit block rather than inventing a pending delivery.
+        write_json(root / "site/story_publication_event.json", {
+            "fingerprint": "event-empty-new-edge",
+            "story_ids": ["alpha"],
+            "new_story_ids": [],
+        })
+        threads_selection = selected_channel_state(root, "threads", "alpha")
+        assert threads_selection == {
+            "selected": True,
+            "queue_status": "blocked",
+            "blocker": "threads_not_new_in_current_publication_event",
+        }
+        (root / "site/story_publication_event.json").unlink()
+
         assert first["complete"] is True
         assert first["fully_delivered"] is False
+
+        morning_records = read_json(root / "delivery/queue.json")["records"]
+        morning_versions = {
+            (r["article_id"], r["channel"]): r["content_version"]
+            for r in morning_records if r["edition_id"] == "2026-09-22-morning"
+        }
+        morning = read_json(root / "editions/2026-09-22-morning.json")
+        evening = copy.deepcopy(morning)
+        evening["edition_id"] = "2026-09-22-evening"
+        write_json(root / "editions/2026-09-22-evening.json", evening)
+        write_json(root / "site/current_edition.json", {
+            "edition_id": "2026-09-22-evening", "json_source": "editions/2026-09-22-evening.json"
+        })
+        evening_report = run(root)
+        evening_records = [
+            r for r in read_json(root / "delivery/queue.json")["records"]
+            if r["edition_id"] == "2026-09-22-evening"
+        ]
+        assert evening_report["complete"] is True
+        assert not any(r["status"] == "pending" for r in evening_records)
+        for r in evening_records:
+            key=(r["article_id"], r["channel"])
+            assert r["content_version"] == morning_versions[key]
+            if key == ("alpha", "facebook"):
+                assert r["status"] == "delivered"
+                assert (r.get("confirmation") or {}).get("remote_id") == "fb-1"
+                assert r.get("inherited_from_delivery_id")
+            if key == ("alpha", "threads"):
+                assert r["status"] == "blocked"
+                assert r["blocker"] == PRE_S1_BLOCKER
+
+        # Return to the morning edition for version-change isolation tests.
+        write_json(root / "site/current_edition.json", {
+            "edition_id": "2026-09-22-morning", "json_source": "editions/2026-09-22-morning.json"
+        })
 
         write_json(root / "social/facebook_state.json", {"published": {}})
         run(root)
@@ -500,6 +661,7 @@ def self_test() -> None:
         alpha_fb = [
             r for r in read_json(root / "delivery/queue.json")["records"]
             if r["article_id"] == "alpha" and r["channel"] == "facebook"
+            and r["edition_id"] == "2026-09-22-morning"
         ]
         assert len(alpha_fb) == 2
         assert sorted(r["status"] for r in alpha_fb) == ["delivered", "pending"]
@@ -512,6 +674,7 @@ def self_test() -> None:
         alpha_fb = [
             r for r in read_json(root / "delivery/queue.json")["records"]
             if r["article_id"] == "alpha" and r["channel"] == "facebook"
+            and r["edition_id"] == "2026-09-22-morning"
         ]
         assert sorted(r["status"] for r in alpha_fb) == ["delivered", "delivered"]
         assert {r["confirmation"].get("remote_id") for r in alpha_fb} == {"fb-1", "fb-2"}
@@ -520,7 +683,7 @@ def self_test() -> None:
         "self_test": "PASS",
         "invariants": [
             "dedupe", "monotonic_confirmation", "versioned_delivery",
-            "provider_snapshot_single_version_binding", "legacy_pending_quarantine", "explicit_blockers"
+            "provider_snapshot_single_version_binding", "editorial_product_version_identity", "legacy_version_recompute_bridge", "recap_delivery_truth_carryover", "threads_event_no_replay_alignment", "legacy_pending_quarantine", "explicit_blockers"
         ],
     }))
 

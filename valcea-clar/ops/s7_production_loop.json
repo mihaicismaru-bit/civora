@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0",
+  "product": "VÂLCEA CLAR",
+  "stage": "S7_PRODUCTION_LOOP",
+  "cycle_id": "S7-2026-09-22-evening-001",
+  "status": "RECONCILING_S1_S6",
+  "requested_intent": "Run one real production cycle without forcing publication; close the loop through public readback, social distribution, S1 delivery reconciliation and S6 governance.",
+  "canonical_cycle": {
+    "newsroom_run_id": 35742987909,
+    "newsroom_status": "SUCCESS",
+    "evaluated_local": "2026-09-22T17:50:49+03:00",
+    "current_edition": "2026-09-22-evening",
+    "publishable_story_count": 75,
+    "new_story_ids": [],
+    "publication_forced": false,
+    "decision_fingerprint": "ba1c4700cb820e146c8b3f793d3d234c1496d660b1dcf81332376a219a5ce6aa"
+  },
+  "public_projection": {
+    "repository": "mihaicismaru-bit/valcea-clar",
+    "trigger_commit": "ab7bbcc7afd8e5f981b340fb2a8037d8fbee0ad9",
+    "sync_run_id": 35743728299,
+    "status": "SUCCESS",
+    "source_generated_at": "2026-09-22T14:50:47.010513Z",
+    "story_count": 103,
+    "current_story_count": 75,
+    "archive_story_count": 28,
+    "verified_visual_count": 18,
+    "lead_story_id": "calimanesti-restrictii-trotuare-20260922",
+    "readback": {
+      "canonical_lead": "PASS",
+      "exact_story_set": "PASS",
+      "historical_archive": "PASS",
+      "verified_media": "PASS"
+    }
+  },
+  "social_distribution": {
+    "run_id": 35743173564,
+    "attempt_1": {
+      "status": "FAIL_CLOSED",
+      "blocker": "__public_projection__",
+      "external_delivery_performed": false
+    },
+    "attempt_2": {
+      "status": "SUCCESS",
+      "public_readback_gate": "PASS",
+      "facebook_apply": "SUCCESS",
+      "instagram_primary": "SKIPPED_BY_PRODUCT_GATE",
+      "instagram_verified_fact_card_fallback": "SUCCESS",
+      "tiktok": "SKIPPED_FAIL_CLOSED",
+      "persisted_state": true
+    },
+    "observed_new_receipts": [
+      {
+        "channel": "facebook",
+        "story_id": "auto-raliul-valcii-official-news-f6e28bbb1533",
+        "remote_id": "1234360446430980_122115332055440772",
+        "published_at": "2026-09-22T14:58:14Z"
+      },
+      {
+        "channel": "instagram",
+        "story_id": "auto-raliul-valcii-official-news-f6e28bbb1533",
+        "remote_id": "17963299376981382",
+        "published_at": "2026-09-22T14:58:24Z"
+      }
+    ]
+  },
+  "discovery": {
+    "canonical_discovery_ran": true,
+    "sources_total": 22,
+    "sources_ok": 18,
+    "host_incident_count": 0,
+    "new_publishable_story_selected": false,
+    "rule": "No story is forced merely because S7 was requested."
+  },
+  "reconciliation": {
+    "s1_delivery": "PENDING_CURRENT_EVENING_RECONCILIATION",
+    "s6_governance": "PENDING_AFTER_S1",
+    "closure_rule": "S7 closes only when delivery.report.edition_id and S6 s1_delivery.edition_id both equal current_edition and S6 has zero material blockers."
+  }
+}
