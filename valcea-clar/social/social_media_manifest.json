@@ -145,16 +145,18 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 3,
+    "autonomous_stories_published_24h": 5,
     "autonomous_story_ids_24h": [
+      "ansambluri-rezidentiale-ramnicu-valcea",
       "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
+      "horezu-drum-vf-roman-inchis-20260926",
       "isu-valcea-interventii-zilnice",
       "transalpina-ranca-obarsia-lotrului-weather-20260923"
     ],
     "discovery_to_publish_latency": {
-      "status": "MEASURED",
-      "measured": 3,
-      "published": 3,
+      "status": "PARTIAL",
+      "measured": 4,
+      "published": 5,
       "stories": [
         {
           "story_id": "isu-valcea-interventii-zilnice",
@@ -173,6 +175,12 @@
           "seconds": 190,
           "discovered_at_utc": "2026-09-23T15:11:25Z",
           "published_at_utc": "2026-09-23T15:14:35Z"
+        },
+        {
+          "story_id": "horezu-drum-vf-roman-inchis-20260926",
+          "seconds": 197,
+          "discovered_at_utc": "2026-09-23T21:20:09Z",
+          "published_at_utc": "2026-09-23T21:23:26Z"
         }
       ],
       "max_seconds": 1610012,
@@ -181,19 +189,31 @@
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 3,
+      "published_stories": 5,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
       "status": "BLOCKED",
-      "eligible": 3,
+      "eligible": 5,
       "readback_ok": 2,
-      "value": 0.6667,
+      "value": 0.4,
       "blocker_story_ids": [
+        "ansambluri-rezidentiale-ramnicu-valcea",
+        "horezu-drum-vf-roman-inchis-20260926",
         "transalpina-ranca-obarsia-lotrului-weather-20260923"
       ],
       "checks": [
+        {
+          "story_id": "ansambluri-rezidentiale-ramnicu-valcea",
+          "url": "https://valceaclar.ro/stiri/ansambluri-rezidentiale-ramnicu-valcea/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
         {
           "story_id": "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
           "url": "https://valceaclar.ro/stiri/brezoi-acces-ingrijire-domiciliu-selectie-20260923/",
@@ -203,6 +223,16 @@
           "headline_ok": true,
           "ok": true,
           "error": null
+        },
+        {
+          "story_id": "horezu-drum-vf-roman-inchis-20260926",
+          "url": "https://valceaclar.ro/stiri/horezu-drum-vf-roman-inchis-20260926/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
         },
         {
           "story_id": "isu-valcea-interventii-zilnice",
@@ -238,8 +268,8 @@
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 2,
-      "eligible": 3,
-      "value": 0.6667,
+      "eligible": 5,
+      "value": 0.4,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
         "isu-valcea-interventii-zilnice"
@@ -248,8 +278,8 @@
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 2,
-      "eligible": 3,
-      "value": 0.6667,
+      "eligible": 5,
+      "value": 0.4,
       "delivered_story_ids": [
         "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
         "isu-valcea-interventii-zilnice"
@@ -262,6 +292,7 @@
       "facebook_receipt_groups": [],
       "instagram_receipt_groups": [],
       "missing_editorial_evidence": [
+        "ansambluri-rezidentiale-ramnicu-valcea",
         "transalpina-ranca-obarsia-lotrului-weather-20260923"
       ]
     },
@@ -271,6 +302,7 @@
       "definition": "zero is asserted only when every measured published story passes material-fact and complete claim-source trace gates",
       "trace_violations": [],
       "missing_editorial_evidence": [
+        "ansambluri-rezidentiale-ramnicu-valcea",
         "transalpina-ranca-obarsia-lotrului-weather-20260923"
       ]
     },
@@ -278,7 +310,56 @@
       "status": "MEASURED",
       "value": 0,
       "workflow_dispatch_runs": [],
-      "automated_workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35922135642,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-23T21:23:30Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35921950504,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-23T21:21:45Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35916666676,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T20:32:44Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35916204389,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-23T20:28:40Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35915453467,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T20:22:02Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 35912834838,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-23T19:58:21Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
       "manual_story_route_additions": [],
       "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
