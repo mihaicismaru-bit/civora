@@ -47,8 +47,13 @@ jobs:
           python partener-eu/ops/recover_decision_products_lkg.py
           node --check partener-eu/web/decision-intelligence-v2.js
           node --check partener-eu/web/step-lll-dossier-bridge-v2.js
+          node --check partener-eu/web/public-heavy-loader-v1.js
           python partener-eu/ops/test_public_language.py
-          grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/index.html
+          grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/public-heavy-loader-v1.js
+          if grep -F 'src="decision-products.js' partener-eu/web/index.html; then
+            echo 'FAIL heavy decision-products.js returned to eager public path' >&2
+            exit 2
+          fi
 
       - name: Generate and validate crawlable public IA, sitemap and dossiers
         run: |
@@ -57,6 +62,7 @@ jobs:
           python -m json.tool partener-eu/web/static-public-manifest.json >/dev/null
           grep -F 'Sitemap: https://partener.eu/sitemap.xml' partener-eu/web/robots.txt
           grep -F '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' partener-eu/web/sitemap.xml
+          test -s partener-eu/web/home-public-data.js
 
       - id: configure
         continue-on-error: true
