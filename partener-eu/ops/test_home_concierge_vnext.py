@@ -13,8 +13,11 @@ css=CSS.read_text(encoding='utf-8')
 
 assert 'home-concierge-vnext.css' in index
 assert 'home-concierge-vnext.js' in index
+assert 'home-public-data.js' in index
+assert 'public-heavy-loader-v1.js' in index
 assert index.index('home-concierge-vnext.css') > index.index('ux-card-scannability-v4.css')
-assert index.index('home-concierge-vnext.js') > index.index('ux-mobile-density-v3.js')
+assert index.index('home-public-data.js') < index.index('home-concierge-vnext.js')
+assert index.index('public-heavy-loader-v1.js') < index.index('home-public-data.js')
 
 # Superseded homepage renderers must not remain on the active boot path.
 for retired in (
@@ -48,18 +51,24 @@ for token in (
     "['Primărie','primărie']",
     "['Agricultură','agricultură']",
     "['Educație','educație']",
-    'window.PARTENER_DECISION_UI?.openDossier',
+    'const P=window.PARTENER_HOME_DATA||{};',
+    'd?.canonicalPath',
+    "location.assign('/?q='+encodeURIComponent(query))",
+    "open:'/finantari/deschise/'",
+    "prepare:'/finantari/in-pregatire/'",
+    "news:'/schimbari/'",
     'isTypingTarget',
     "if(!search)",
     'inputmode="search"',
 ):
     assert token in js, token
 
-# The public home surface reads the canonical decision product only. It must not
-# fetch, persist, infer or mutate canonical data independently.
+# The public home surface reads only the compact, generated read-only projection.
+# It must not fetch, persist, infer or mutate canonical data independently.
 for forbidden in (
     'fetch(', 'localStorage', 'sessionStorage',
     'window.PARTENER_DATA=', 'window.PARTENER_DECISION_PRODUCTS=',
+    'window.PARTENER_HOME_DATA=', 'PARTENER_DECISION_PRODUCTS',
     'Math.random(',
     "hero.querySelectorAll('.conciergeSearch,.conciergeProfiles').forEach(x=>x.remove())",
 ):
