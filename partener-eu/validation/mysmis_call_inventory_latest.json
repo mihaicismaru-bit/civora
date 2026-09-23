@@ -1,14 +1,14 @@
 {
   "schema": "CIVORA_MYSMIS_EXACT_CALL_INVENTORY_V1",
-  "observedAt": "2026-09-23T16:04:39.106317+00:00",
-  "runId": "35886117017",
-  "parserVersion": "MYSMIS_EXACT_CALL_INVENTORY_V1",
+  "observedAt": "2026-09-23T16:11:22.410063+00:00",
+  "runId": "35886937059",
+  "parserVersion": "MYSMIS_EXACT_CALL_INVENTORY_V2",
   "authorityClass": "T1_OFFICIAL_MYSMIS_REPORTING",
   "sourceFamily": "ROMANIA_MIPE_MYSMIS",
   "canonicalUrl": "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
-  "rawSha256": "c200fac3842515dc6e686886e788ab7a2fdeed5251e47ae843bd103288b8fe84",
+  "rawSha256": "b9ec7368e36f72b70bab905c992c6137191c68402745976fdfdf7b0fab1b0e99",
   "contentType": "text/html;charset=utf-8",
-  "status": "PROVISIONAL_FAIL_CLOSED",
+  "status": "PASS_CANDIDATE_ONLY",
   "materialFactUse": false,
   "publishAuthorized": false,
   "openCallAuthorized": false,
@@ -18,15 +18,17 @@
   "candidateInventory": {
     "validatedCallCount": 954,
     "visibleRowCount": 50,
-    "exactIdentityRowCount": 50,
+    "exactIdentityRowCount": 49,
     "identityFailures": [],
-    "duplicateCallCodes": [
+    "duplicateCallCodes": [],
+    "mirroredDuplicateCallCodes": [
       "PIDS/420/PIDS_P5/OP4"
     ],
-    "exactIdentityCompleteForVisiblePage": false,
+    "mirroredDuplicateRowCount": 1,
+    "exactIdentityCompleteForVisiblePage": true,
     "pageComplete": false,
     "paginationRequired": true,
-    "materialSemanticSha256": "1b4da31deba5a475ace073246edb77e2bf2cf26f75590be35f3e86da6f19b6b8",
+    "materialSemanticSha256": "ece84c795b6121c19d92e2198b67c2d5e2881cfd182f205b4119786cc8bd0717",
     "rows": [
       {
         "callCode": "PFM/169/PFM_P1/NA/P1_OS1/FM_1.1",
@@ -488,23 +490,6 @@
         }
       },
       {
-        "callCode": "PIDS/420/PIDS_P5/OP4",
-        "programme": "Program Incluziune și Demnitate Socială",
-        "callType": "Competitiv cu termen-limită de depunere",
-        "callTitle": "CENTRE MULTIFUNCȚIONALE CU DOTĂRI SPORTIVE ȘI CULTURALE PENTRU COPII",
-        "status": "FINALIZAT",
-        "callBudgetRon": "553.662.609",
-        "operationalCounters": {
-          "entities": "269",
-          "drafts": "77",
-          "submitted": "243",
-          "contracts": "109",
-          "withdrawn": "3",
-          "totalProjectBudgetRon": "379.874.637.616",
-          "submittedGrantBudgetRon": "3.080.169.981"
-        }
-      },
-      {
         "callCode": "PFM/320/PFM_P1/NA",
         "programme": "Program Fondul pentru Modernizare",
         "callType": "Competitiv cu depunere continuă si cu termen de închidere a apelului",
@@ -899,6 +884,7 @@
       "totalProjectBudgetRon",
       "submittedGrantBudgetRon"
     ],
+    "identicalDuplicateRows": "collapse only when the full normalized call row, including operational counters, is identical; conflicting repeats remain fail-closed",
     "publicationEffect": "NONE",
     "nextRequiredStep": "paginate the official report and reconcile each exact call identity before any material publication"
   }
