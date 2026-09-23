@@ -70,7 +70,7 @@ def audit(browser,name:str,width:int,height:int)->dict:
     # frontend gate when re-evaluated against canonical decision products.
     open_ids=page.eval_on_selector_all('.conciergeOpen [data-concierge-dossier]','els=>els.map(e=>e.dataset.conciergeDossier)')
     gate=page.evaluate('''() => {
-      const P=window.PARTENER_DECISION_PRODUCTS||{};
+      const P=window.PARTENER_HOME_DATA||{};
       const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\\u0300-\\u036f]/g,'');
       const overrides=P.freshnessGuard?.dossierStatusOverrides||{};
       const status=d=>overrides[d?.id]||d?.status||'REVIEW';
@@ -88,6 +88,17 @@ def audit(browser,name:str,width:int,height:int)->dict:
     if invalid:
         errors.append(f'open cards bypass strict gate: {invalid[:5]}')
 
+    lazy_state=page.evaluate('''() => ({
+      decisionProductsLoaded: !!window.PARTENER_DECISION_PRODUCTS,
+      canonicalCallsLoaded: !!window.PARTENER_MIPE_CANONICAL_CALLS,
+      lifecycleLoaded: !!window.PARTENER_CALL_LIFECYCLE,
+      homeSnapshotLoaded: !!window.PARTENER_HOME_DATA
+    })''')
+    if not lazy_state['homeSnapshotLoaded']:
+        errors.append('compact home snapshot did not load')
+    if lazy_state['decisionProductsLoaded'] or lazy_state['canonicalCallsLoaded'] or lazy_state['lifecycleLoaded']:
+        errors.append(f"heavy public data loaded eagerly: {lazy_state}")
+
     metrics=page.evaluate('''() => ({
       scrollWidth:document.documentElement.scrollWidth,
       clientWidth:document.documentElement.clientWidth,
@@ -97,15 +108,23 @@ def audit(browser,name:str,width:int,height:int)->dict:
     if metrics['scrollWidth']-metrics['clientWidth']>2:
         errors.append(f"horizontal overflow: {metrics['scrollWidth']-metrics['clientWidth']}px")
 
-    # Verify that the profile shortcut enters the existing canonical dossier hub.
+    # Verify that the profile shortcut enters the lightweight base explorer and
+    # carries its natural-language query without loading multi-megabyte datasets.
     if name.startswith('desktop'):
         page.locator('.conciergeProfiles button').first.click()
-        page.wait_for_timeout(650)
-        if page.locator('.diHubHero').count()!=1:
-            errors.append('profile shortcut did not open canonical dossier hub')
-        q=page.locator('#diQ')
+        page.wait_for_load_state('networkidle')
+        page.wait_for_timeout(500)
+        if page.locator('.resultbar').count()!=1:
+            errors.append('profile shortcut did not open lightweight explorer')
+        q=page.locator('#fq')
         if q.count()!=1 or 'firm' not in q.input_value().lower():
-            errors.append('profile shortcut did not carry its query into dossier search')
+            errors.append('profile shortcut did not carry its query into explorer search')
+        after=page.evaluate('''() => ({
+          decisionProductsLoaded: !!window.PARTENER_DECISION_PRODUCTS,
+          canonicalCallsLoaded: !!window.PARTENER_MIPE_CANONICAL_CALLS
+        })''')
+        if after['decisionProductsLoaded'] or after['canonicalCallsLoaded']:
+            errors.append(f'profile discovery loaded heavy datasets: {after}')
 
     shot=SHOT_DIR/f'{name}.png'
     page.screenshot(path=str(shot),full_page=True)
@@ -114,6 +133,7 @@ def audit(browser,name:str,width:int,height:int)->dict:
         'openCardIds':open_ids,
         'strictGateIds':gate,
         'metrics':metrics,
+        'lazyState':lazy_state,
         'failedResponses':failed_responses,
         'consoleErrors':console_errors,
         'errors':errors,
