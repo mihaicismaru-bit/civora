@@ -4,6 +4,9 @@
 
 /* UX/SEO IA bridge: the no-JS fallback and live SPA share a crawlable hierarchy. */
 .brand{color:inherit;text-decoration:none}
+.navlinks{min-width:0;overflow-x:auto;scrollbar-width:none}
+.navlinks::-webkit-scrollbar{display:none}
+.navlink{flex:0 0 auto;text-decoration:none}
 .skipLink{position:fixed;left:14px;top:10px;z-index:100;transform:translateY(-160%);background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-weight:800;color:var(--ink);text-decoration:none}
 .skipLink:focus{transform:none}
 .fallbackNav{display:flex;gap:3px;align-items:center;flex:1;overflow-x:auto;scrollbar-width:none}
