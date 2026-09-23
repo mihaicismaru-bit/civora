@@ -10,10 +10,13 @@ JS=WEB/'ux-optimization-v1.js'
 index=INDEX.read_text(encoding='utf-8')
 css=CSS.read_text(encoding='utf-8')
 js=JS.read_text(encoding='utf-8')
+loader=(WEB/'public-heavy-loader-v1.js').read_text(encoding='utf-8')
 
 assert 'ux-optimization-v1.css' in index
 assert 'ux-optimization-v1.js' in index
-assert index.index('ux-optimization-v1.css') > index.index('ask-partener-v2.css')
+assert 'ask-partener-v2.css' not in index
+assert 'ask-partener-v2.css' in loader
+assert index.index('ux-optimization-v1.css') > index.index('public-product-v3.css')
 assert index.index('ux-optimization-v1.js') > index.index('public-product-v3.js')
 
 for token in (
