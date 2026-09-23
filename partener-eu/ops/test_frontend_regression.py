@@ -94,7 +94,7 @@ for required in (
 
 # Decision-maker promotion remains a homepage-only, fail-closed decision aid.
 for required in (
-    'function isHome(){return !!document.querySelector(\'.main [data-decision-home="1"]\')}',
+    "function isHome(){return document.body.classList.contains('conciergeHome')||!!document.querySelector('.main .hero')}",
     'if(!isHome()){removePromo();return}',
     'function impactText(x)',
     'x.whyItMatters||x.analysis',
@@ -125,13 +125,21 @@ for script in [
     if pos >= 0 and pos < app_pos:
         errors.append(f"enhancement {script} gates app.js first paint")
 
-decision_data_pos = index.find('src="decision-products.js')
-decision_ui_pos = index.find('src="decision-intelligence-v2.js')
+heavy_loader_pos = index.find('src="public-heavy-loader-v1.js')
+home_data_pos = index.find('src="home-public-data.js')
 concierge_pos = index.find('src="home-concierge-vnext.js')
-if min(decision_data_pos, decision_ui_pos, concierge_pos) < 0 or not (
-    app_pos < decision_data_pos < decision_ui_pos < concierge_pos
+if min(heavy_loader_pos, home_data_pos, concierge_pos) < 0 or not (
+    app_pos < heavy_loader_pos < home_data_pos < concierge_pos
 ):
-    errors.append("decision products, decision UI and funding concierge must load after app.js in order")
+    errors.append("heavy loader, compact home data and funding concierge must load after app.js in order")
+for heavy in (
+    "decision-products.js", "mipe-canonical-calls.js", "mipe-news.js",
+    "call-lifecycle.js", "decision-intelligence-v2.js", "ask-partener-v2.js",
+    "step-lll-dossier-bridge-v2.js", "home-freshness-guard-v1.js",
+    "call-lifecycle-ui.js",
+):
+    if f'src="{heavy}' in index:
+        errors.append(f"heavy public asset remains eager: {heavy}")
 
 active_app = (WEB / "app.js").read_text(encoding="utf-8").casefold()
 for marker in (
@@ -156,11 +164,12 @@ if "new MutationObserver" in public_copy:
 if "characterData:true" in public_copy.replace(" ", ""):
     errors.append("public-product-copy-v1.js observes characterData")
 
-# The concierge may read canonical decision products, but it may not become a
-# second source of truth or persist inferred user-facing facts.
+# The concierge may read the compact generated projection, but it may not
+# become a second source of truth or persist inferred user-facing facts.
 for forbidden in (
     'fetch(', 'localStorage', 'sessionStorage',
     'window.PARTENER_DATA=', 'window.PARTENER_DECISION_PRODUCTS=',
+    'window.PARTENER_HOME_DATA=', 'PARTENER_DECISION_PRODUCTS',
 ):
     if forbidden in concierge:
         errors.append(f"funding concierge violates read-only projection rule: {forbidden}")
