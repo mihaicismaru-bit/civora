@@ -1,0 +1,81 @@
+{
+  "schema_version": "1.0",
+  "run_id": "operator-run-20260923T035838+0300",
+  "observed_at_local": "2026-09-23T03:58:38+03:00",
+  "scope": "delta_scan_and_followups",
+  "previous_checkpoint": "valcea-clar/editorial/operator_runs/2026-09-23T0302+0300.json",
+  "state_reconciliation": {
+    "signal_radar_observed_at": "2026-09-23T03:28:58+03:00",
+    "source_count": 17,
+    "sources_ok": 15,
+    "current_signal_count": 44,
+    "today_signal_count": 1,
+    "repository_delta_since_previous_checkpoint": "Source-radar/source-discovery refresh only; no new low-risk canonical fact/story publication state crossed the editorial publication gate."
+  },
+  "fresh_scan_summary": {
+    "material_delta": false,
+    "county_scope": "Vâlcea countywide",
+    "surfaces_checked": [
+      "VÂLCEA CLAR canonical signal radar and primary-verification state",
+      "Ziarul de Vâlcea",
+      "Eveniment Vâlcean",
+      "Curierul de Râmnic",
+      "Raliul Vâlcii organizer",
+      "searches for IPJ Vâlcea, Primăria Râmnicu Vâlcea and CJ Vâlcea authority follow-ups"
+    ],
+    "new_publishable_story_ids": [],
+    "note": "The only strict-date signal newly surfaced by the canonical radar after the prior checkpoint is duplicate coverage of the already-held Ionești homicide. No new underlying fact was established from a competent primary source. Fresh searches also found no competent-authority confirmation of the detailed Raliul Vâlcii street closures."
+  },
+  "fact_kernel": [
+    {
+      "type": "CONFIRMED_FACT",
+      "text": "The canonical radar at 03:28:58 recorded 17 sources, 15 responding successfully, 44 current signals and one strict-date 23 September signal."
+    },
+    {
+      "type": "SOURCE_CLAIM",
+      "text": "A local outlet published fresh duplicate coverage of the Ionești homicide after midnight, repeating that a young woman's body was found in a suitcase in the Olt and attributing details to the prosecutor/investigation."
+    },
+    {
+      "type": "UNVERIFIED",
+      "text": "No new material case fact from the post-midnight duplicate was independently confirmed in this pass; the canonical primary-verification attempt found no primary match."
+    },
+    {
+      "type": "SOURCE_CLAIM",
+      "text": "The Raliul Vâlcii organizer still lists detailed 24 and 26 September traffic restrictions."
+    },
+    {
+      "type": "UNKNOWN",
+      "text": "A current competent-authority notice from IPJ/municipality confirming the detailed Raliul Vâlcii closures was not located; direct official routes remained degraded/unavailable in this pass."
+    },
+    {
+      "type": "EDITORIAL_INTERPRETATION",
+      "text": "Neither duplicate homicide coverage nor an unchanged organizer-only traffic notice justifies a new article or repost. No item crossed the combined novelty, verification, public-value and proportional-risk threshold."
+    }
+  ],
+  "sensitive_followups": [
+    {
+      "topic": "Ionești homicide / body found in suitcase",
+      "status": "HOLD",
+      "reason": "Active homicide investigation involving an identifiable victim/suspect and material legal/reputational risk; post-midnight coverage is duplicate and adds no independently confirmed underlying fact."
+    }
+  ],
+  "publication_summary": {
+    "site_published": 0,
+    "site_updated_editorial": 0,
+    "facebook_delivered": 0,
+    "facebook_outbox_or_hold_new": 0,
+    "instagram_delivered": 0,
+    "instagram_outbox_or_hold_new": 0,
+    "delivery_truth": "No new durable story publication event and no new channel delivery claimed."
+  },
+  "channel_truth": {
+    "facebook": {"new_delivery_this_run": false, "receipt": null},
+    "instagram": {"new_delivery_this_run": false, "receipt": null}
+  },
+  "followups": [
+    "Continue competent-authority verification of detailed Raliul Vâlcii traffic restrictions before any service update beyond attributed SOURCE_CLAIM.",
+    "Keep the Ionești homicide fail-closed until a genuinely new, primary-confirmed fact changes the editorial case and all sensitive-topic gates are met.",
+    "Continue countywide delta scanning; do not publish legacy/document-summary or duplicate material merely to create activity."
+  ],
+  "human_decisions_required": []
+}
