@@ -1,51 +1,13 @@
 name: PARTENER.EU P11 Artifact Refresh TEMP
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - 'partener-eu/p11/**'
-      - '.github/workflows/partener-eu-p11-artifact-refresh-temp.yml'
+  workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: partener-eu-p11-artifact-refresh-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  contents: read
 
 jobs:
-  materialize:
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+  disabled:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-      - name: Materialize deterministic P11 artifacts
-        run: |
-          python partener-eu/p11/apply_resolutions.py
-          python partener-eu/p11/build_public_projection.py
-          python partener-eu/p11/build_staging_ledger.py
-          python partener-eu/ingest/build_decision_products.py
-      - name: Persist generated artifacts on PR branch
-        shell: bash
-        run: |
-          git config user.name "civora-partener-bot"
-          git config user.email "civora-partener-bot@users.noreply.github.com"
-          git add \
-            partener-eu/p11/opportunity_bundle.json \
-            partener-eu/p11/staging_ledger.json \
-            partener-eu/web/p11-public-data.js \
-            partener-eu/ingest/state/decision_products.json \
-            partener-eu/web/decision-products.js
-          if git diff --cached --quiet; then
-            echo "Artifacts already current."
-            exit 0
-          fi
-          git commit -m "PARTENER: materialize verified FAMI call artifacts"
-          git push origin HEAD:${{ github.event.pull_request.head.ref }}
+      - run: echo "Temporary writer disabled; branch cleanup in progress."
