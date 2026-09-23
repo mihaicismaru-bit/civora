@@ -8,22 +8,24 @@ REGISTRY = ROOT / "partener-eu" / "ingest" / "source_registry.json"
 
 EXPECTED = {
     "SRC-OI-RESEARCH-POCIDIF": {
-        "primary_url": "https://newpoc.research.gov.ro/ro/categorie/108/pocidif-2021-2027",
+        "primary_url": "https://www2.poc.research.gov.ro/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1",
         "required_aliases": {
+            "https://newpoc.research.gov.ro/ro/categorie/108/pocidif-2021-2027",
             "https://poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
             "https://www.poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
             "https://poc.mcid.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
         },
-        "current_transport_candidate": "https://poc.mcid.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
+        "programme_path": "/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1",
     },
     "SRC-OI-RESEARCH-HEALTH": {
-        "primary_url": "https://newpoc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
+        "primary_url": "https://www2.poc.research.gov.ro/ro/articol/4429/apeluri-de-proiecte-pos-prioritatea-5",
         "required_aliases": {
+            "https://newpoc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
             "https://poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
             "https://www.poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
             "https://poc.mcid.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
         },
-        "current_transport_candidate": "https://poc.mcid.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
+        "programme_path": "/ro/articol/4429/apeluri-de-proiecte-pos-prioritatea-5",
     },
 }
 
@@ -38,28 +40,28 @@ def main():
         assert row.get("url") == expected["primary_url"], (source_id, row.get("url"))
         parsed = urlparse(row["url"])
         assert parsed.scheme == "https"
-        assert parsed.hostname == "newpoc.research.gov.ro"
+        assert parsed.hostname == "www2.poc.research.gov.ro"
+        assert parsed.path == expected["programme_path"]
         assert row.get("tier") == "T1B"
         assert row.get("material_fact_use") is True
 
         aliases = set(row.get("canonical_aliases") or [])
         assert expected["required_aliases"].issubset(aliases), (source_id, aliases)
 
-        candidate = urlparse(expected["current_transport_candidate"])
-        assert candidate.scheme == "https"
-        assert candidate.hostname == "poc.mcid.gov.ro"
-        assert expected["current_transport_candidate"] in aliases
+        note = str(row.get("note") or "").lower()
+        for blocked_fact in ("deadline", "status", "budget", "eligibility"):
+            assert blocked_fact in note, (source_id, blocked_fact, note)
+        assert "exact current call-level evidence" in note, (source_id, note)
+        assert "reconciliation" in note, (source_id, note)
 
     stale_primary = [
         row["id"]
         for row in data.get("sources", [])
-        if urlparse(row.get("url") or "").hostname in {
-            "poc.research.gov.ro",
-            "www.poc.research.gov.ro",
-        }
+        if row.get("id") in EXPECTED
+        and urlparse(row.get("url") or "").hostname != "www2.poc.research.gov.ro"
     ]
-    assert not stale_primary, f"legacy OI Research host still primary: {stale_primary}"
-    print("PASS fixed OI Research canonical identities and declared official transport aliases")
+    assert not stale_primary, f"non-current OI Research host still primary: {stale_primary}"
+    print("PASS current official OI Research programme hosts and fail-closed material-fact boundary")
 
 
 if __name__ == "__main__":
