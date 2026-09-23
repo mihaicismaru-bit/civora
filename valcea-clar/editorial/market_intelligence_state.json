@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-23T19:05:59Z",
+  "generated_at": "2026-09-23T19:17:52Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -183,7 +183,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "47eecdfa516e8b8f3155ee5eb5a4728f71acf69bbef6b8492c1f3cadece952cb",
+          "fingerprint": "42b8138fe57d1dc3e7fe3497d5dbc93badc959522bfd58526d3b28155433e7bb",
           "match_count": 17,
           "matched_terms": [
             "Vâlcea",
@@ -310,7 +310,10 @@
         "termene-top50-valcea"
       ],
       "official_changed_sources": [],
-      "degraded_sources": [],
+      "degraded_sources": [
+        "data-gov-onrc-datasets",
+        "data-gov-finance-datasets"
+      ],
       "sources": [
         {
           "id": "data-gov-onrc-datasets",
@@ -318,27 +321,15 @@
           "url": "https://data.gov.ro/dataset?organization=onrc",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/dataset?organization=onrc",
-          "fingerprint": "3bd9e8545e30f4d7318bf390a212c73447b862dc22548d085eb252de701bbd35",
-          "match_count": 8,
-          "matched_terms": [
-            "Firme înregistrate la Registrul Comerțului"
-          ],
-          "numeric_signals": [
-            {
-              "kind": "companies",
-              "value_text": "3"
-            },
-            {
-              "kind": "companies",
-              "value_text": "1"
-            }
-          ],
-          "health": "OK",
-          "error": null,
-          "change": "UNCHANGED"
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "data-gov-finance-datasets",
@@ -346,19 +337,15 @@
           "url": "https://data.gov.ro/organization/mfp",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/organization/mfp",
-          "fingerprint": "410ab3cc8cf7b71cd669ea83c68f73d938b2ae35a708cc55c1a3f11b9764216c",
-          "match_count": 6,
-          "matched_terms": [
-            "Situații financiare",
-            "CSV"
-          ],
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "UNCHANGED"
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "onrc-services",
