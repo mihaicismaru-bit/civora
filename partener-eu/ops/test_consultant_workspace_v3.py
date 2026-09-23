@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 WEB = ROOT / "partener-eu" / "web"
 index = (WEB / "index.html").read_text(encoding="utf-8")
 loader = (WEB / "consultant-loader-v1.js").read_text(encoding="utf-8")
+heavy_loader = (WEB / "public-heavy-loader-v1.js").read_text(encoding="utf-8")
 js = (WEB / "consultant-workspace-v3.js").read_text(encoding="utf-8")
 css = (WEB / "consultant-workspace-v3.css").read_text(encoding="utf-8")
 onboarding_js = (WEB / "consultant-onboarding-v3.js").read_text(encoding="utf-8")
@@ -23,7 +24,8 @@ registry_text = (WEB / "mysmis-registry.js").read_text(encoding="utf-8")
 # public data path. This contract prevents a regression back to eager loading.
 assert 'consultant-loader-v1.js' in index, "index missing consultant lazy loader"
 assert 'mysmis-registry.js' in index, "index missing MySMIS registry"
-assert index.index('mipe-news.js') < index.index('mysmis-registry.js')
+assert 'mipe-news.js' not in index, "MIPE news corpus must be lazy on public boot"
+assert 'mipe-news.js' in heavy_loader, "heavy public loader missing MIPE news corpus"
 
 lazy_assets = [
     'consultant-workspace-v3.css','consultant-workspace-v3.js',
