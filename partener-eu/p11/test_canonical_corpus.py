@@ -39,7 +39,7 @@ class CanonicalCorpusTests(unittest.TestCase):
     def test_bundle_passes_contract(self):
         counts = validate_bundle(self.bundle)
         self.assertEqual(counts["opportunities"], 33)
-        self.assertEqual(counts["changesets"], 6)
+        self.assertEqual(counts["changesets"], 7)
 
     def test_publishable_set_is_explicit_and_fail_closed(self):
         publishable = [x["opportunity_id"] for x in self.bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
