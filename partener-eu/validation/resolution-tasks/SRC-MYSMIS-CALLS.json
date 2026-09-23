@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.1",
   "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "source_id": "SRC-MYSMIS-CALLS",
   "source_tier": "T1",
@@ -25,31 +25,5 @@
   "registry_class": "authoritative_call_registry",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false,
-  "reconciliation": {
-    "schema_version": "1.0",
-    "classification": "CONFIRMED_MATERIAL_COVERAGE_DELTA",
-    "candidate_semantic_sha256": "ede197eb55b4fee396d1c608e9d7a58d30e6f30c196503907f057fe84250cb04",
-    "observed_at": "2026-09-23T13:22:52Z",
-    "source_url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
-    "source_raw_sha256": "e2ecfa6a43873abf38402b93630a6958f6774ca66e43273763433f28411f9af4",
-    "official_validated_calls": 1103,
-    "official_inventory_semantics": "Validated calls in the official MySMIS funding registry; this is an inventory count, not an OPEN-call count.",
-    "canonical_calls": 182,
-    "canonical_calls_blob_sha": "933cdcbf7c76679df9e7fd83b2de86d59f27fa81",
-    "coverage_gap": 921,
-    "coverage_gap_semantics": "Authoritative inventory coverage gap only. It does not imply 921 currently OPEN or publishable opportunities.",
-    "material_delta_reason": "The official validated-call inventory materially exceeds the current canonical MySMIS-derived call inventory, so the semantic hash change cannot be dismissed as counter-only noise.",
-    "publish_authorized": false,
-    "blocked_fact_classes": [
-      "deadline",
-      "eligibility",
-      "budget",
-      "scoring",
-      "beneficiaries",
-      "material_call_status",
-      "other_material_facts"
-    ],
-    "next_action": "Build direct call-level/paginated reconciliation from the official MySMIS registry, classify each call lifecycle independently, and publish material facts only after field-level authoritative reconciliation."
-  }
+  "automatic_material_fact_update_allowed": false
 }

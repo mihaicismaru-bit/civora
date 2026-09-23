@@ -4,18 +4,12 @@
   "source_id": "SRC-ANOFM-VALCEA-STATS",
   "source_tier": "T1B",
   "source_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/",
-  "status": "RESOLVED_NON_MATERIAL_CHANGE",
+  "status": "OPEN",
   "first_observed_at": "2026-08-21T21:03:31.736109Z",
-  "last_observed_at": "2026-09-22T21:29:28.947391Z",
-  "resolved_at": "2026-09-23T00:19:10Z",
-  "previous_semantic_sha256": "5653b79d0224eada3c00bca5a362c826122ba1ad293d6a321550e423befe86e0",
-  "current_semantic_sha256": "82a41c7f30215ee946e607517ef9cd8a241cb908649105308d33bfabf6028614",
-  "candidate_semantic_sha256": "82a41c7f30215ee946e607517ef9cd8a241cb908649105308d33bfabf6028614",
-  "resolved_semantic_sha256": "82a41c7f30215ee946e607517ef9cd8a241cb908649105308d33bfabf6028614",
+  "last_observed_at": "2026-09-23T13:43:27.137834Z",
+  "previous_semantic_sha256": "82a41c7f30215ee946e607517ef9cd8a241cb908649105308d33bfabf6028614",
+  "current_semantic_sha256": "d818382f4677fd69feac29c4552fc1c6d9c4e8eeb5a41982ad2aa0d5531862b2",
   "material_fact_autoupdate_allowed": false,
-  "automatic_material_fact_update_allowed": false,
-  "material_fact_action": "NONE",
-  "publish_authorized": false,
   "blocked_fact_classes": [
     "deadline",
     "eligibility",
@@ -25,18 +19,5 @@
     "material_call_status",
     "other_material_facts"
   ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
-  "resolution_reason": "Reviewed the current official AJOFM Valcea unemployment-statistics listing. The semantic delta reflects routine labour-market statistical content/publication updates and does not establish any funding-call-specific change to deadline, eligibility, budget, scoring, beneficiaries or lifecycle status. No material funding fact update is authorized.",
-  "evidence": [
-    {
-      "url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
-      "authority": "AJOFM Valcea / ANOFM",
-      "observed_content": "Official 2026 unemployment-statistics listing with periodic monthly statistical publications.",
-      "material_funding_fact_change_found": false
-    }
-  ],
-  "source_name": "official_county_employment_statistics",
-  "registry_class": "official_county_employment_statistics",
-  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication."
+  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
 }
