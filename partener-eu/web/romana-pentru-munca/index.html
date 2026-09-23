@@ -95,7 +95,8 @@
           <p class="rpmPricingLead">Nu folosim un preț unic pentru toate companiile, pentru că organizarea diferă în funcție de numărul de participanți, programul de lucru și formatul ales. Îți spunem clar costul înainte de pornirea programului.</p>
           <a class="rpmPrimary" href="#contact">Cere o ofertă</a>
         </div>
-        <div class="rpmPricingCard">
+        <div>
+          <div class="rpmPricingCard">
           <strong>Ce influențează tariful</strong>
           <ul>
             <li>numărul de participanți și modul de grupare;</li>
@@ -105,6 +106,38 @@
             <li>adaptarea vocabularului la sectorul firmei.</li>
           </ul>
           <p><b>Ca să primești oferta</b>, sunt suficiente câteva informații: câți oameni ai, cum lucrează și ce format preferi.</p>
+          </div>
+        <form class="rpmLeadForm" id="rpmLeadForm">
+          <div class="rpmLeadFormHead">
+            <strong>Cere oferta</strong>
+            <span>Completezi în mai puțin de un minut.</span>
+          </div>
+          <label>Firma
+            <input type="text" name="company" autocomplete="organization" required>
+          </label>
+          <label>Persoană de contact
+            <input type="text" name="name" autocomplete="name" required>
+          </label>
+          <div class="rpmFormRow">
+            <label>Telefon sau email
+              <input type="text" name="contact" autocomplete="email" required>
+            </label>
+            <label>Număr aproximativ de angajați
+              <input type="number" name="employees" min="1" step="1" inputmode="numeric" required>
+            </label>
+          </div>
+          <label>Format preferat
+            <select name="format" required>
+              <option value="">Alege</option>
+              <option>La locul de muncă</option>
+              <option>Online live</option>
+              <option>Hibrid</option>
+              <option>Nu știu încă</option>
+            </select>
+          </label>
+          <button class="rpmPrimary" type="submit">Trimite cererea de ofertă</button>
+          <p class="rpmFormNote">La trimitere se deschide aplicația ta de email cu cererea completată către office@partener.eu. Nu stocăm datele în această pagină.</p>
+        </form>
         </div>
       </div>
     </section>
@@ -208,5 +241,29 @@
       <span>Contact: office@partener.eu · 0770 594 964</span>
     </div>
   </footer>
+<script>
+(function(){
+  const form=document.getElementById('rpmLeadForm');
+  if(!form) return;
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    const d=new FormData(form);
+    const body=[
+      'Bună ziua,',
+      '',
+      'Doresc o ofertă pentru programul Română pentru Muncă.',
+      '',
+      'Firmă: '+(d.get('company')||''),
+      'Persoană de contact: '+(d.get('name')||''),
+      'Telefon/email: '+(d.get('contact')||''),
+      'Număr aproximativ de angajați: '+(d.get('employees')||''),
+      'Format preferat: '+(d.get('format')||''),
+      '',
+      'Vă rog să mă contactați pentru detalii.'
+    ].join('\n');
+    location.href='mailto:office@partener.eu?subject='+encodeURIComponent('Cerere ofertă — Română pentru Muncă')+'&body='+encodeURIComponent(body);
+  });
+})();
+</script>
 </body>
 </html>
