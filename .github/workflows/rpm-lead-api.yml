@@ -45,3 +45,13 @@ jobs:
 
       - name: Deploy Worker
         run: npx wrangler@latest deploy
+
+      - name: Smoke test Worker to D1
+        run: |
+          TEST_COMPANY="RPM-SMOKE-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          RESPONSE=$(curl --fail-with-body -sS -X POST "https://partener-rpm-leads.mihai-cismaru.workers.dev" \
+            -H "Origin: https://partener.eu" \
+            -H "Content-Type: application/json" \
+            --data "{\"company\":\"${TEST_COMPANY}\",\"name\":\"Automated Smoke Test\",\"contact\":\"smoke-test@partener.eu\",\"employees\":1,\"format\":\"Online live\",\"source_url\":\"https://partener.eu/romana-pentru-munca/\",\"referrer\":\"https://partener.eu/\",\"utm_source\":\"github-actions\",\"utm_medium\":\"qa\",\"utm_campaign\":\"rpm-smoke\"}")
+          echo "$RESPONSE" | grep -q '"ok":true'
+          npx wrangler@latest d1 execute partener-rpm-leads --remote --command "DELETE FROM rpm_leads WHERE company='${TEST_COMPANY}';"
