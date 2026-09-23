@@ -2,19 +2,118 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-23T17:49:52+03:00",
+  "generated_at": "2026-09-23T21:43:10+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-23T17:48:24+03:00",
-  "task_count": 95,
+  "queue_generated_at": "2026-09-23T21:41:34+03:00",
+  "task_count": 88,
   "primary_match_count": 0,
-  "no_match_count": 36,
-  "unrouted_count": 59,
+  "no_match_count": 35,
+  "unrouted_count": 53,
   "target_count": 18,
   "targets_ok": 14,
   "results": [
+    {
+      "signal_id": "f1a7915ecdec04369dd898b4",
+      "signal_title": "Iubitul fetei găsită moartă într-o valiză, dat în urmărire după ce ar fi fugit în Ungaria. Bărbatul a fost arestat preventiv în lipsă",
+      "signal_url": "https://vocea-valcii.ro/dezvaluiri/iubitul-fetei-gasita-moarta-intr-o-valiza-dat-in-urmarire-dupa-ce-ar-fi-fugit-in-ungaria-barbatul-a-fost-arestat-preventiv-in-lipsa/",
+      "signal_publisher": "Vocea Vâlcii",
+      "signal_published_at": "2026-09-23T20:55:19+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "56dd5c0dfc43ee461dfc872f",
+      "signal_title": "Intervenție a Poliției la Gura Văii – Bujoreni, după sesizări privind consumul de alcool și tulburarea ordinii publice. Patru persoane, sancționate",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/23/interventie-a-politiei-la-gura-vaii-bujoreni-dupa-sesizari-privind-consumul-de-alcool-si-tulburarea-ordinii-publice-patru-persoane-sanctionate/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-23T19:54:30+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "4148fe11591d01ef033c941a",
+      "signal_title": "Mureșan promite un guvern fără taxe noi, cu trei vicepremieri și reformarea companiilor de stat. PSD rămâne obstacolul învestirii",
+      "signal_url": "https://www.indiscret.ro/2026/09/23/muresan-promite-un-guvern-fara-taxe-noi-cu-trei-vicepremieri-si-reformarea-companiilor-de-stat-psd-ramane-obstacolul-investirii/",
+      "signal_publisher": "Indiscret în Oltenia",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-23T17:58:19+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "1152f4e97d8e9d8c5aa211d2",
       "signal_title": "FOTO Antreprenoriat și inovare, în centrul unui dialog despre viitorul economiei la Râmnicu Vâlcea",
@@ -92,7 +191,7 @@
     },
     {
       "signal_id": "b75e9f9ecce72a8d1dec5f57",
-      "signal_title": "Ultima oră 4 ore in urma Raliul Vâlcii Nurvil revine la Vaideeni pe 26 septembrie",
+      "signal_title": "Ultima oră 7 ore in urma Raliul Vâlcii Nurvil revine la Vaideeni pe 26 septembrie",
       "signal_url": "https://www.primplanpress.ro/raliul-valcii-nurvil-revine-la-vaideeni-pe-26-septembrie/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-09-23T14:13:39+03:00",
@@ -1097,30 +1196,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "dfecdac2e1de2743dae3c917",
-      "signal_title": "Bijuterii Pandora contrafăcute, vândute pe TikTok: „Chinezii copiază, e normal că seamănă, nu?”. Sibianca trebuie să plătească companiei 24 de mii de euro",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/22/bijuterii-pandora-contrafacute-vandute-pe-tiktok-chinezii-copiaza-e-normal-ca-seamana-nu-sibianca-trebuie-sa-plateasca-companiei-24-de-mii-de-euro/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-22T07:40:41+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "6eaf2d49a1507f1502537992",
-      "signal_title": "Un adăpost de protecție civilă nu înseamnă doar pereți de beton. La Sibiu, situația dotărilor de bază rămâne neclară. „Cât poți rezista fără să mergi la baie?”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/22/un-adapost-de-protectie-civila-nu-inseamna-doar-pereti-de-beton-la-sibiu-situatia-dotarilor-de-baza-ramane-neclara-cat-poti-rezista-fara-sa-mergi-la-baie/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-22T07:36:06+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "4a9d86d26c816fb77e82ac07",
       "signal_title": "Primăria Sibiu vrea să scape de toate datoriile: luna viitoare va fi rambursat anticipat și cel mai mare credit. „Pentru a scădea vulnerabilitatea administrației locale”",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/22/primaria-sibiu-vrea-sa-scape-de-toate-datoriile-luna-viitoare-va-fi-rambursat-anticipat-si-cel-mai-mare-credit-pentru-a-scadea-vulnerabilitatea-administratiei-locale/",
@@ -1476,55 +1551,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "f3d8d81ca62b20a0126261ab",
-      "signal_title": "FOTO. Încă un incendiu de vegetație în Vâlcea. 30 de hectare afectate până acum…",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/21/foto-inca-un-incendiu-de-vegetatie-in-valcea-30-de-hectare-afectate-pana-acum/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-21T19:12:26+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "350dcad64bdfe66260f7333c",
       "signal_title": "Protest în Parlament după reținerea lui Călin Georgescu. Reprezentanții AUR acuză „abuzuri” din partea instituțiilor statului",
       "signal_url": "https://www.indiscret.ro/2026/09/21/protest-in-parlament-dupa-retinerea-lui-calin-georgescu-reprezentantii-aur-acuza-abuzuri-din-partea-institutiilor-statului/",
@@ -1535,55 +1561,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "18a19e1bddc41dd448dac702",
-      "signal_title": "Intervenție a pompierilor într-o comună din Vâlcea. Ard peste 10 hectare…",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/21/interventie-a-pompierilor-intr-o-comuna-din-valcea-ard-peste-10-hectare/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-21T18:29:32+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "8f5399aafaed482fe81189cb",
@@ -1739,42 +1716,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "c28c31170c82dd369949b676",
-      "signal_title": "Reabilitare cămin cultural din oraș Băile Olănești",
-      "signal_url": "https://curierulderamnic.ro/2026/09/21/60478/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_published_at": "2026-09-21T12:24:54+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "b3ee9401a0d406ce3e13113f",
-      "signal_title": "Zilele Bibliotecii Județene „Antim Ivireanul”, la Râmnicu Vâlcea, între 21 și 25 septembrie",
-      "signal_url": "https://curierulderamnic.ro/2026/09/21/zilele-bibliotecii-judetene-antim-ivireanul-la-ramnicu-valcea-intre-21-si-25-septembrie/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_published_at": "2026-09-21T10:40:19+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "89623abf34ed987f313cbda2",
-      "signal_title": "3,03% – rata şomajului la 31.08.2026, în județul Vâlcea",
-      "signal_url": "https://curierulderamnic.ro/2026/09/21/303-rata-somajului-la-31-08-2026-in-judetul-valcea/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_published_at": "2026-09-21T10:35:47+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "766c81e337faf1d473711648",
       "signal_title": "Când toată lumea zboară în aceeași direcție, cine mai alege drumul? Spectacolul „Liber Volatilium” ajunge la Râmnicu-Vâlcea",
       "signal_url": "https://curierulderamnic.ro/2026/09/21/cand-toata-lumea-zboara-in-aceeasi-directie-cine-mai-alege-drumul-spectacolul-liber-volatilium-ajunge-la-ramnicu-valcea/",
@@ -1883,45 +1824,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "1484d79ea8862455a64755a7",
-      "signal_title": "Sărbătorirea Sfântului Ierarh Martir Antim Ivireanul",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/sarbatorirea-sfantului-ierarh-martir-antim-ivireanul/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_published_at": "2026-09-21T01:59:31+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "6406ec9def75b71cb07cc97b",
-      "signal_title": "FOTO – ACCIDENT CUMPLIT în județul vecin. Polițiști răniți în misiune și copil transportat la spital",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/20/foto-accident-cumplit-in-judetul-vecin-politisti-raniti-in-misiune-si-copil-transportat-la-spital/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-20T21:06:56+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "ea3ee7fbbca31ec707bbf239",
       "signal_title": "Anunț public privind elaborarea PUZ pentru imobilul NC 52803, Râmnicu Vâlcea – punctul „Piscupie”",
       "signal_url": "https://www.eurovalcea.ro/2026/09/15/anunt-public-privind-elaborarea-puz-pentru-imobilul-nc-52803-ramnicu-valcea-punctul-piscupie/",
@@ -1983,30 +1885,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "acd6dd07c7b8fb1beb8f487c",
-      "signal_title": "Schimbarea la față a Sibiului",
-      "signal_url": "https://www.turnulsfatului.ro/exclusiv/schimbarea-la-fata-a-sibiului/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "a60beaad93c15f0dc610a86e",
-      "signal_title": "Micile afaceri din Sibiu",
-      "signal_url": "https://www.turnulsfatului.ro/exclusiv/micile-afaceri-din-sibiu/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "6f8b28cecf97b87ba7b1648d",
       "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
       "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Ffemeie-de-28-de-ani-omorata-si-aruncata-intr-un-geamantan-in-raul-olt%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
@@ -2055,6 +1933,30 @@
       "fact_kernel_ready": false
     },
     {
+      "signal_id": "acd6dd07c7b8fb1beb8f487c",
+      "signal_title": "Schimbarea la față a Sibiului",
+      "signal_url": "https://www.turnulsfatului.ro/exclusiv/schimbarea-la-fata-a-sibiului/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "a60beaad93c15f0dc610a86e",
+      "signal_title": "Micile afaceri din Sibiu",
+      "signal_url": "https://www.turnulsfatului.ro/exclusiv/micile-afaceri-din-sibiu/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "4a863b9b4d18be6d574441af",
       "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
       "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fliga-2-scm-ramnicu-valcea-la-intaiul-succes-pe-teren-propriu-jocul-bun-al-lui-danciu-centrarile-lui-pitulac-si-primul-gol-al-lui-huiban%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
@@ -2083,18 +1985,6 @@
       "signal_title": "„Latino Simfonic”, cu Analia Selis, luni, 21 septembrie, la Râmnicu Vâlcea, ora 19:00",
       "signal_url": "https://curierulderamnic.ro/2026/09/21/latino-simfonic-cu-analia-selis-luni-21-septembrie-la-ramnicu-valcea-ora-1900/",
       "signal_publisher": "Curierul de Râmnic",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "0c0a88b35dd57149f7776e80",
-      "signal_title": "Anunț public privind elaborarea PUZ în punctul „Piscupie” – Râmnicu Vâlcea",
-      "signal_url": "https://www.eurovalcea.ro/2026/09/15/anunt-public-privind-elaborarea-puz-in-punctul-piscupie-ramnicu-valcea/",
-      "signal_publisher": "EuroVâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
