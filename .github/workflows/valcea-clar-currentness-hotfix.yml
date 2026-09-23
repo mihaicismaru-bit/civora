@@ -1,0 +1,71 @@
+name: VÂLCEA CLAR Currentness Hotfix
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/valcea-clar-currentness-hotfix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: valcea-clar-currentness-hotfix
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+      - name: Apply bounded evergreen currentness policy
+        shell: python
+        run: |
+          from pathlib import Path
+
+          gen = Path('valcea-clar/scripts/generate_edition.py')
+          text = gen.read_text(encoding='utf-8')
+          old = '''        if not (parse_dt(fact["valid_from"]) <= now <= parse_dt(fact["valid_until"])):\n            continue\n        # Durable newsroom copy must remain true when read later. Relative time\n'''
+          new = '''        valid_from = parse_dt(fact["valid_from"])\n        valid_until = parse_dt(fact["valid_until"])\n        if not (valid_from <= now <= valid_until):\n            continue\n        # Evergreen means the canonical article remains available in the archive;\n        # it does not mean the story remains current on the live feed forever.\n        # Keep evergreen items current only inside the first freshness band.\n        if str(fact.get("publication_lifecycle") or "").strip().lower() == "evergreen":\n            age_hours = max(0.0, (now - valid_from).total_seconds() / 3600.0)\n            if age_hours > FRESHNESS_BUCKET_HOURS[0]:\n                continue\n        # Durable newsroom copy must remain true when read later. Relative time\n'''
+          assert text.count(old) == 1, 'generate_edition validity gate drifted'
+          text = text.replace(old, new)
+          old_test = '''    assert freshness_bucket(recent, ranking_now) == 0\n    assert freshness_bucket(older, ranking_now) == 2\n\n    assert pointer_is_publishable'''
+          new_test = '''    assert freshness_bucket(recent, ranking_now) == 0\n    assert freshness_bucket(older, ranking_now) == 2\n\n    evergreen_old = {\n        **older,\n        "id": "evergreen-old",\n        "publication_lifecycle": "evergreen",\n        "valid_until": "2099-12-31T23:59:59+03:00",\n    }\n    assert eligible_facts({"facts": [evergreen_old]}, ranking_now, "evening") == []\n\n    assert pointer_is_publishable'''
+          assert text.count(old_test) == 1, 'generate_edition self-test anchor drifted'
+          gen.write_text(text.replace(old_test, new_test), encoding='utf-8')
+
+          legacy = Path('valcea-clar/scripts/repair_continuous_frontpage_legacy.py')
+          text = legacy.read_text(encoding='utf-8')
+          old = '''BASE = "https://valceaclar.ro"\n\n\ndef load'''
+          new = '''BASE = "https://valceaclar.ro"\nCURRENT_EVERGREEN_FEED_HOURS = 36\n\n\ndef load'''
+          assert text.count(old) == 1, 'legacy constant anchor drifted'
+          text = text.replace(old, new)
+          old = '''def mark_activity(stories: list[dict[str, Any]], now: datetime) -> list[dict[str, Any]]:\n    facts = current_fact_index()\n    for story in stories:\n        fact = facts.get(str(story.get("id"))) or {}\n        valid_from = parse_stamp(fact.get("valid_from"))\n        valid_until = parse_stamp(fact.get("valid_until"))\n        active = bool(valid_from and valid_until and valid_from <= now <= valid_until)\n        story["archive_status"] = "active" if active else "published_archive"\n'''
+          new = '''def fact_active_now(fact: dict[str, Any], now: datetime) -> bool:\n    valid_from = parse_stamp(fact.get("valid_from"))\n    valid_until = parse_stamp(fact.get("valid_until"))\n    if not (valid_from and valid_until and valid_from <= now <= valid_until):\n        return False\n    if str(fact.get("publication_lifecycle") or "").strip().lower() == "evergreen":\n        age_hours = max(0.0, (now - valid_from).total_seconds() / 3600.0)\n        return age_hours <= CURRENT_EVERGREEN_FEED_HOURS\n    return True\n\n\ndef mark_activity(stories: list[dict[str, Any]], now: datetime) -> list[dict[str, Any]]:\n    facts = current_fact_index()\n    for story in stories:\n        fact = facts.get(str(story.get("id"))) or {}\n        active = fact_active_now(fact, now)\n        story["archive_status"] = "active" if active else "published_archive"\n'''
+          assert text.count(old) == 1, 'legacy activity gate drifted'
+          text = text.replace(old, new)
+          old_test = '''    assert _is_newer("2026-08-15T10:00:00+03:00", "2026-08-16T10:00:00+03:00") is False\n    candidate = legacy.archive_payload'''
+          new_test = '''    assert _is_newer("2026-08-15T10:00:00+03:00", "2026-08-16T10:00:00+03:00") is False\n    evergreen = {\n        "valid_from": "2026-08-17T08:00:00+03:00",\n        "valid_until": "2099-12-31T23:59:59+03:00",\n        "publication_lifecycle": "evergreen",\n    }\n    assert legacy.fact_active_now(evergreen, datetime(2026, 8, 17, 12, 0, tzinfo=legacy.TZ)) is True\n    assert legacy.fact_active_now(evergreen, datetime(2026, 8, 20, 12, 0, tzinfo=legacy.TZ)) is False\n    bounded = {**evergreen, "publication_lifecycle": "time_bounded", "valid_until": "2026-08-21T12:00:00+03:00"}\n    assert legacy.fact_active_now(bounded, datetime(2026, 8, 20, 12, 0, tzinfo=legacy.TZ)) is True\n    candidate = legacy.archive_payload'''
+          assert text.count(old_test) == 1, 'wrapper self-test anchor drifted'
+          text = text.replace(old_test, new_test)
+          legacy.write_text(text, encoding='utf-8')
+      - name: Test repair
+        run: |
+          python valcea-clar/scripts/generate_edition.py --self-test
+          python valcea-clar/scripts/repair_continuous_frontpage.py --self-test
+          python valcea-clar/scripts/public_ux_currentness.py --self-test
+      - name: Commit repair and remove one-shot workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'vâlcea-clar-repair[bot]'
+          git config user.email 'valcea-clar-repair@users.noreply.github.com'
+          git rm .github/workflows/valcea-clar-currentness-hotfix.yml
+          git add valcea-clar/scripts/generate_edition.py valcea-clar/scripts/repair_continuous_frontpage_legacy.py
+          git commit -m 'Bound evergreen stories to current-news freshness window'
+          git push origin HEAD:main
