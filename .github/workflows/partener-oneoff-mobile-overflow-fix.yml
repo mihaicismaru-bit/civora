@@ -1,0 +1,55 @@
+name: PARTENER one-off mobile overflow repair
+
+on:
+  push:
+    branches:
+      - partener/funding-summary-budget-fallback-20260923-r2
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: partener/funding-summary-budget-fallback-20260923-r2
+          fetch-depth: 0
+      - name: Repair mobile card intrinsic sizing
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              path=Path(path)
+              text=path.read_text(encoding='utf-8')
+              if text.count(old)!=1:
+                  raise SystemExit(f'anchor count {text.count(old)} for {old!r}')
+              path.write_text(text.replace(old,new,1),encoding='utf-8')
+
+          css='partener-eu/web/home-concierge-vnext.css'
+          replace_once(css,'.conciergeSurface{margin-top:4px}', '.conciergeSurface{min-width:0;max-width:100%;margin-top:4px}')
+          replace_once(css,'.conciergeGrid{display:grid;', '.conciergeGrid{min-width:0;max-width:100%;display:grid;')
+          replace_once(css,'.conciergeCard{display:flex;', '.conciergeCard{display:flex;min-width:0;max-width:100%;')
+          replace_once(css,'.conciergeCardMeta{display:flex;', '.conciergeCardMeta{min-width:0;max-width:100%;display:flex;')
+          replace_once(css,'.conciergeCard h3{font-size:', '.conciergeCard h3{min-width:0;max-width:100%;overflow-wrap:anywhere;font-size:')
+          replace_once(css,'.conciergeFacts{display:flex;', '.conciergeFacts{min-width:0;max-width:100%;display:flex;')
+          replace_once(css,'.conciergeFacts strong{font-size:', '.conciergeFacts strong{min-width:0;max-width:100%;overflow-wrap:anywhere;font-size:')
+          replace_once(css,'.conciergeCard p{font-size:', '.conciergeCard p{min-width:0;max-width:100%;overflow-wrap:anywhere;font-size:')
+          replace_once(css,'.conciergeCard>button{margin-top:', '.conciergeCard>button{min-width:0;max-width:100%;overflow-wrap:anywhere;margin-top:')
+
+          test='partener-eu/ops/test_home_concierge_vnext.py'
+          replace_once(test, "    '.conciergeHero', '.conciergeSearch', '.conciergeSection',\n", "    '.conciergeHero', '.conciergeSearch', '.conciergeSection',\n    '.conciergeCard{display:flex;min-width:0;max-width:100%',\n    '.conciergeFacts strong{min-width:0;max-width:100%;overflow-wrap:anywhere',\n")
+          PY
+          python partener-eu/ops/test_home_concierge_vnext.py
+      - name: Commit repair and remove one-off workflow
+        shell: bash
+        run: |
+          rm -f .github/workflows/partener-oneoff-mobile-overflow-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add partener-eu/web/home-concierge-vnext.css partener-eu/ops/test_home_concierge_vnext.py .github/workflows/partener-oneoff-mobile-overflow-fix.yml
+          git commit -m "PARTENER: prevent concierge card overflow on mobile"
+          git push origin HEAD:partener/funding-summary-budget-fallback-20260923-r2
