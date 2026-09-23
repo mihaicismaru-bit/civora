@@ -26,6 +26,25 @@ if 'src="public-product-copy-v1.js' in index:
 
 if 'id="boot-fallback"' not in index:
     errors.append("visible boot fallback missing")
+
+# The public fallback must expose the same information architecture to users,
+# crawlers and no-JS clients through ordinary links and a GET search.
+for marker in (
+    'href="/finantari/"',
+    'href="/finantari/deschise/"',
+    'href="/finantari/in-pregatire/"',
+    'href="/consultari/"',
+    'href="/dosare/"',
+    'href="/schimbari/"',
+    'class="fallbackSearch"',
+    'name="q"',
+    'action="/"',
+    '"@type":"WebSite"',
+    '"@type":"Organization"',
+):
+    if marker not in index:
+        errors.append(f"crawlable public IA missing: {marker}")
+
 for marker in (
     "Ce vrei să finanțezi?",
     "Descrie investiția în câteva cuvinte",
@@ -115,6 +134,17 @@ if min(decision_data_pos, decision_ui_pos, concierge_pos) < 0 or not (
     errors.append("decision products, decision UI and funding concierge must load after app.js in order")
 
 active_app = (WEB / "app.js").read_text(encoding="utf-8").casefold()
+for marker in (
+    "new urlsearchparams(location.search)",
+    "initialq=(urlparams.get('q')||'').trim()",
+    'href="/finantari/" data-r="explorer"',
+    'href="/finantari/in-pregatire/" data-r="calendar"',
+    'href="/?view=ask" data-r="ask"',
+    "e.preventdefault();s.route=x.dataset.r",
+):
+    if marker not in active_app:
+        errors.append(f"crawlable SPA bridge missing: {marker}")
+
 for stale_public_label in ("pilot", "facts demo", "corpusul canonic demo", "apeluri deschise în pilot"):
     if stale_public_label in active_app:
         errors.append(f"development label remains in active public app: {stale_public_label}")
