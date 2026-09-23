@@ -18,6 +18,27 @@ assert spec and spec.loader
 spec.loader.exec_module(module)
 
 payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
+
+# A confirmed call budget is a valid financing summary when grant size is still
+# unknown. This protects FAMI-like dossiers from rendering "Neconfirmat" even
+# though the canonical signed guide already confirms the call allocation.
+budget_probe = {
+    "id": "budget-probe",
+    "title": "Budget probe",
+    "programme": "TEST",
+    "publicationState": "PUBLISHABLE",
+    "status": "OPEN",
+    "quickFacts": [
+        {"label": "Grant", "value": "Neconfirmat", "confidence": "UNKNOWN"},
+        {"label": "Buget", "value": {"amount": 5_250_000, "currency": "RON", "basis": "FEN_AVAILABLE_CALL_ALLOCATION"}, "confidence": "CONFIRMED"},
+    ],
+}
+assert module.display_value(budget_probe["quickFacts"][1]["value"]) == "5.250.000 RON"
+probe_card = module.card(budget_probe, {"budget-probe": "budget-probe"})
+assert "Buget apel:</b> 5.250.000 RON" in probe_card
+assert "Finanțare:</b> Neconfirmat" not in probe_card
+probe_home = module.compact_home_dossier(budget_probe, {"budget-probe": "budget-probe"})
+assert any(row.get("label") == "Buget" for row in probe_home.get("quickFacts") or [])
 publishable = [
     row
     for row in (payload.get("dossiers") or [])
