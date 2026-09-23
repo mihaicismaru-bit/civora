@@ -61,3 +61,14 @@
 .rpmPricingCard{background:#fff;color:var(--rpm-ink);border-radius:16px;padding:26px}
 .rpmPricingCard>strong{display:block;font-size:1.2rem;margin-bottom:10px}.rpmPricingCard ul{margin:0 0 16px;padding-left:20px;color:var(--rpm-muted)}.rpmPricingCard li{margin:7px 0}.rpmPricingCard p{margin:0;color:var(--rpm-muted)}
 @media(max-width:860px){.rpmPricingGrid{grid-template-columns:1fr}}
+
+.rpmLeadForm{margin-top:16px;background:#f7faf9;border:1px solid #d9e8e3;border-radius:16px;padding:22px;color:var(--rpm-ink)}
+.rpmLeadFormHead{display:flex;flex-direction:column;gap:2px;margin-bottom:16px}.rpmLeadFormHead strong{font-size:1.2rem}.rpmLeadFormHead span{font-size:.9rem;color:var(--rpm-muted)}
+.rpmLeadForm label{display:flex;flex-direction:column;gap:6px;font-size:.86rem;font-weight:700;margin-top:12px}
+.rpmLeadForm input,.rpmLeadForm select{width:100%;border:1px solid #cfdad6;border-radius:9px;background:#fff;padding:12px 13px;font:inherit;color:var(--rpm-ink);outline:none}
+.rpmLeadForm input:focus,.rpmLeadForm select:focus{border-color:var(--rpm-accent);box-shadow:0 0 0 3px rgba(23,106,91,.1)}
+.rpmFormRow{display:grid;grid-template-columns:1.1fr .9fr;gap:12px}
+.rpmLeadForm .rpmPrimary{margin-top:16px;width:100%;border:0;cursor:pointer;background:var(--rpm-accent);color:#fff}
+.rpmLeadForm .rpmPrimary:hover{background:var(--rpm-accent2)}
+.rpmFormNote{font-size:.78rem!important;color:var(--rpm-muted)!important;margin:10px 0 0!important}
+@media(max-width:560px){.rpmFormRow{grid-template-columns:1fr}}
