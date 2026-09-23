@@ -1,12 +1,25 @@
 {
-  "requested_at": "2026-09-23T21:01:15+03:00",
+  "requested_at": "2026-09-23T21:58:13+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "COUNTY-WIDE DELTA + CURRENTNESS CORRECTION. Rebuild canonical current projection after adding a publication hold for the date-specific Transalpina 23 Sep service story: its own verified copy states a 09:00-20:00 operating window, so after 20:00 it must not remain the current lead without fresh primary readback. Keep it archived, remove it from current/homepage projection, and do not social-redistribute. Preserve all other editorial, provenance and risk gates. New sensitive criminal delta: at 20:49 on 23 Sep, News.ro reported that Tribunalul Vâlcea issued an arrest-in-absentia warrant for the 30-year-old man in the Ionești/Tomșani homicide investigation and that he is now an inculpat for murder. This remains NEEDS_HUMAN_REVIEW: no autonomous publication, no victim identification, no graphic details, preserve presumption of innocence, and require primary prosecutorial/court readback before any article. New traffic signal: a secondary report says a defective machine impeded DN7 at km 200+400 in Călimănești on 23 Sep, with traffic directed by pilots/police. At 21:01 there is no fresh primary confirmation that the obstruction remains active; treat as EXPIRED_OR_UNVERIFIED_SERVICE_SIGNAL, do not publish as current traffic. Continue county rotation; no filler.",
+  "reason": "COUNTY-WIDE DELTA + EDITORIAL CORRECTION. The public homepage readback confirms the Transalpina date-specific service story is no longer the lead/current story, so that currentness repair is effective. A new quality audit found three reader-facing HCL register-derived routes (rm-valcea-hcl-343-20260916, -344-, -345-) still exposed with raw administrative titles and generic document summaries. This violates the canonical rule that public documents are evidence/raw material, not the editorial product. Publication holds have now been added for all three pending full journalistic rewrites; rebuild public surfaces so those routes disappear from current/news/category projection and are not social-distributed. Preserve archive/audit evidence and do not silently rewrite unsupported details. MATERIAL SERVICE FOLLOW-UP: official Raliul Vâlcii channels published traffic restrictions on 22 September for 24 and 26 September, corroborated by the event's official program and FRAS coverage. Treat this as a low-risk CE URMEAZĂ / PE SCURT service update candidate, not PR copy: explain what changes for drivers, exact streets/times, what remains open/unknown, the 24 September start-festive timing, and the 26 September superspecial. Source claims must stay attributed to organizer/FRAS unless police/municipality primary corroboration is resolved. Do not invent closures beyond the published list. Continue whole-county rotation; no filler.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533"
   ],
   "editorial_signals": [
+    {
+      "signal_id": "raliul-valcii-traffic-restrictions-20260922",
+      "locality": "Râmnicu Vâlcea / județul Vâlcea",
+      "status": "CONFIRMED_SOURCE_CLAIM_PRIMARY_ORGANISER_PLUS_FRAS_CONTEXT",
+      "product_candidate": "CE_URMEAZA_OR_PE_SCURT_SERVICE_UPDATE",
+      "risk": "LOW_SERVICE_TRAFFIC",
+      "claim": "Raliul Vâlcii official site lists traffic restrictions in central Râmnicu Vâlcea for 24 September 18:00–20:00 (taxi station Centrul Civic–Romarta) and 26 September 07:00–22:00 for the Superspeciala Nurvil Show, including named segments of Calea lui Traian, Știrbei Vodă, Căpitan Negoescu and Tudor Vladimirescu plus resident-access rules. FRAS confirms the rally runs 24–26 September, starts ceremonially at 19:00 on 24 September and ends sportively with the city superspecial on 26 September.",
+      "source_url": "https://raliulvalcii.ro/stiri/restrictii-circulatie-raliul-valcii-2026/",
+      "corroboration_url": "https://fras.ro/raliul-valcii-nurvil-finala-sezonului-probe-pe-macadam-si-doua-concerte-la-ramnicu-valcea/",
+      "source_tier": "T1_ORGANISER_PLUS_T1_SPORT_FEDERATION_CONTEXT",
+      "checked_at": "2026-09-23T21:58:13+03:00",
+      "next_action": "Build/update a reader-service fact kernel with exact restriction intervals and streets; seek municipality/police corroboration if available, but do not delay the rest of the newsroom."
+    },
     {
       "signal_id": "ionesti-homicide-arrest-warrant-20260923-2049",
       "locality": "Ionești / Tomșani / județul Vâlcea",
@@ -32,12 +45,19 @@
       "next_action": "Do not publish as current traffic unless a fresh primary Infotrafic/CNAIR/DRDP/IPJ source confirms the obstruction remains active."
     }
   ],
+  "editorial_corrections": [
+    {
+      "story_ids": ["rm-valcea-hcl-343-20260916", "rm-valcea-hcl-344-20260916", "rm-valcea-hcl-345-20260916"],
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Public readback shows raw administrative HCL titles/generic document summaries. Documents are evidence, not product. Remove from public projections until rewritten with consequences, actors, money/beneficiaries, context, unknowns and complete claim-level provenance."
+    }
+  ],
   "coverage_cycle": {
-    "deep_scan_zone": "county_delta_plus_currentness",
-    "scanned_localities": ["Drăgășani", "Bălcești", "Călimănești", "Brezoi", "Horezu", "Voineasa", "Ionești", "Tomșani"],
-    "material_delta_localities": ["Ionești/Tomșani", "Călimănești"],
+    "deep_scan_zone": "county_delta_plus_currentness_and_reader_quality",
+    "scanned_localities": ["Drăgășani", "Bălcești", "Călimănești", "Brezoi", "Horezu", "Voineasa", "Ionești", "Tomșani", "Râmnicu Vâlcea"],
+    "material_delta_localities": ["Râmnicu Vâlcea", "Ionești/Tomșani"],
     "no_material_delta_noted": ["Drăgășani", "Bălcești", "Horezu", "Voineasa"],
-    "policy": "No filler; stale time-bounded service items fail closed from current surfaces."
+    "policy": "No filler; stale time-bounded service items and document-as-product stories fail closed from reader surfaces."
   },
   "event_deltas": []
 }
