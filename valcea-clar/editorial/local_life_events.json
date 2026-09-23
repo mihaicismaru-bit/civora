@@ -1,6 +1,6 @@
 {
-  "schema_version": "1.0",
-  "updated_at": "2026-09-24T00:28:39+03:00",
+  "schema_version": "1.1",
+  "updated_at": "2026-09-24T01:07:14+03:00",
   "events": [
     {
       "event_id": "uap-fragmente-de-sine-20260924",
@@ -21,7 +21,8 @@
       "source_url": "https://uap.ro/fragmente-de-sine-valcea/",
       "source_tier": "T1",
       "checked_at": "2026-09-23T17:00:00+03:00",
-      "status": "scheduled"
+      "status": "scheduled",
+      "identity_key": "c67ce484cc32a4850c59"
     },
     {
       "event_id": "ticketstore-o-noapte-furtunoasa-dragasani-20260924",
@@ -42,7 +43,8 @@
       "source_url": "https://ticketstore.ro/ro/bilete/12379/o-noapte-furtunoasa-dragasani",
       "source_tier": "T2",
       "checked_at": "2026-09-23T17:00:00+03:00",
-      "status": "sold_out"
+      "status": "sold_out",
+      "identity_key": "5e5c9adb5ae50ca45818"
     },
     {
       "event_id": "uap-startisti-valceni-20260925",
@@ -63,7 +65,8 @@
       "source_url": "https://uap.ro/startisti-valceni-ramnicu-valcea/",
       "source_tier": "T1",
       "checked_at": "2026-09-23T17:00:00+03:00",
-      "status": "scheduled"
+      "status": "scheduled",
+      "identity_key": "92c15c707a2054986a58"
     },
     {
       "event_id": "filarmonica-paralele-corale-20260925",
@@ -84,7 +87,8 @@
       "source_url": "https://filarmonica-valcea.ro/eveniment/paralele-corale/",
       "source_tier": "T1",
       "checked_at": "2026-09-24T00:31:00+03:00",
-      "status": "scheduled"
+      "status": "scheduled",
+      "identity_key": "5ad692aa1bdaecc5cddf"
     },
     {
       "event_id": "filarmonica-floarea-darului-20260926",
@@ -105,7 +109,8 @@
       "source_url": "https://filarmonica-valcea.ro/eveniment/floarea-darului/",
       "source_tier": "T1",
       "checked_at": "2026-09-24T00:31:00+03:00",
-      "status": "scheduled"
+      "status": "scheduled",
+      "identity_key": "4d8f65e5bcbfe3116f82"
     },
     {
       "event_id": "ariel-cantecul-de-lebada-20261002",
@@ -126,7 +131,8 @@
       "source_url": "https://www.arieltheatre.ro/teatru/program",
       "source_tier": "T1",
       "checked_at": "2026-09-23T17:00:00+03:00",
-      "status": "scheduled"
+      "status": "scheduled",
+      "identity_key": "4f54d52b6e5a39be9612"
     },
     {
       "event_id": "ariel-cele-trei-gratii-20261009",
@@ -147,7 +153,8 @@
       "source_url": "https://www.arieltheatre.ro/teatru/program",
       "source_tier": "T1",
       "checked_at": "2026-09-23T17:00:00+03:00",
-      "status": "scheduled"
+      "status": "scheduled",
+      "identity_key": "20086d0d727fae8226c8"
     },
     {
       "event_id": "ariel-talk-show-20261016",
@@ -168,12 +175,22 @@
       "source_url": "https://www.arieltheatre.ro/teatru/program",
       "source_tier": "T1",
       "checked_at": "2026-09-23T17:00:00+03:00",
-      "status": "scheduled"
+      "status": "scheduled",
+      "identity_key": "90cef894a4773c19bdb9"
     }
   ],
   "policy": {
     "operator_delta_is_structured": true,
-    "dedupe_by_event_id_and_fingerprint": true,
+    "dedupe_by_event_id_fingerprint_and_manifestation_identity": true,
+    "manifestation_identity_fields": [
+      "title",
+      "event_start",
+      "start_time",
+      "venue",
+      "locality"
+    ],
+    "source_wording_does_not_create_duplicate_event": true,
+    "prefer_primary_then_fresher_verification": true,
     "unknown_price_never_invented": true,
     "status_requires_provenance": true
   }
