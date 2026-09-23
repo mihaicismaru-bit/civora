@@ -9,6 +9,8 @@ on:
       - 'partener-eu/ops/test_web_hygiene.py'
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
+      - 'partener-eu/ops/build_public_static_pages.py'
+      - 'partener-eu/ops/test_public_static_pages.py'
       - 'partener-eu/ops/test_home_concierge_vnext.py'
       - 'partener-eu/ops/check_public_site.py'
       - 'partener-eu/ops/test_public_site_transport.py'
@@ -29,6 +31,8 @@ on:
       - 'partener-eu/ops/test_web_hygiene.py'
       - 'partener-eu/ops/test_public_boot_performance.py'
       - 'partener-eu/ops/test_frontend_regression.py'
+      - 'partener-eu/ops/build_public_static_pages.py'
+      - 'partener-eu/ops/test_public_static_pages.py'
       - 'partener-eu/ops/test_home_concierge_vnext.py'
       - 'partener-eu/ops/check_public_site.py'
       - 'partener-eu/ops/test_public_site_transport.py'
@@ -68,6 +72,7 @@ jobs:
           python partener-eu/ops/test_web_hygiene.py
           python partener-eu/ops/test_public_boot_performance.py
           python partener-eu/ops/test_frontend_regression.py
+          python partener-eu/ops/test_public_static_pages.py
           python partener-eu/ops/test_public_site_transport.py
 
       - name: Homepage and Ask contracts
@@ -91,6 +96,8 @@ jobs:
 
       - name: Syntax-check active web control modules
         run: |
+          python -m py_compile partener-eu/ops/build_public_static_pages.py
+          python -m py_compile partener-eu/ops/test_public_static_pages.py
           node --check partener-eu/web/app.js
           node --check partener-eu/web/ask-partener-v2.js
           node --check partener-eu/web/consultant-loader-v1.js
