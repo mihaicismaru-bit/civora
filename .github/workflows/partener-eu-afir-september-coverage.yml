@@ -1,0 +1,91 @@
+name: PARTENER.EU AFIR September Coverage
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'partener-eu/ingest/apply_afir_september_2026_updates.py'
+      - 'partener-eu/ops/test_afir_september_2026_updates.py'
+      - '.github/workflows/partener-eu-afir-september-coverage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/ingest/apply_afir_september_2026_updates.py'
+      - 'partener-eu/ops/test_afir_september_2026_updates.py'
+      - '.github/workflows/partener-eu-afir-september-coverage.yml'
+  workflow_run:
+    workflows:
+      - 'PARTENER.EU AFIR Ingestion'
+    types: [completed]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-afir-september-coverage
+  cancel-in-progress: true
+
+jobs:
+  coverage:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
+
+      - name: Apply authoritative September AFIR overlay in workspace
+        run: |
+          cp partener-eu/ingest/state/decision_products.json /tmp/partener-products-baseline.json
+          python partener-eu/ingest/apply_afir_september_2026_updates.py
+
+      - name: Validate source-bound dossiers and fail-closed lifecycle
+        run: |
+          python partener-eu/ops/test_afir_september_2026_updates.py
+          python partener-eu/ops/test_decision_products.py
+          python partener-eu/ops/test_public_language.py
+          python partener-eu/ops/validate_decision_products_lkg.py \
+            --baseline /tmp/partener-products-baseline.json \
+            --candidate partener-eu/ingest/state/decision_products.json
+
+      - name: Persist validated coverage conflict-safe
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+          for attempt in 1 2 3 4 5; do
+            git fetch origin main
+            git reset --hard origin/main
+            cp partener-eu/ingest/state/decision_products.json /tmp/partener-products-current-main.json
+
+            python partener-eu/ingest/apply_afir_september_2026_updates.py
+            python partener-eu/ops/test_afir_september_2026_updates.py
+            python partener-eu/ops/test_decision_products.py
+            python partener-eu/ops/test_public_language.py
+            python partener-eu/ops/validate_decision_products_lkg.py \
+              --baseline /tmp/partener-products-current-main.json \
+              --candidate partener-eu/ingest/state/decision_products.json
+
+            git add \
+              partener-eu/ingest/state/decision_products.json \
+              partener-eu/web/decision-products.js
+            if git diff --cached --quiet; then
+              echo 'September AFIR coverage already current.'
+              exit 0
+            fi
+
+            git commit -m 'Publish authoritative AFIR September funding coverage'
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            echo "main advanced during AFIR September coverage persistence; retrying ${attempt}/5."
+            sleep $((attempt * 2))
+          done
+
+          echo 'Unable to persist AFIR September coverage after five attempts.' >&2
+          exit 1
