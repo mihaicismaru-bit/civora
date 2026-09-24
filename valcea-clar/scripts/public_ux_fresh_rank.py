@@ -13,6 +13,13 @@ every Public UX rebuild.
 can be re-seen during a new newsroom transaction without becoming newly
 published. This prevents yesterday's still-active dossiers from hiding stories
 that were actually first published today.
+
+During the story-page rematerialization step the temporary story manifest is
+rewritten before ``public_ux_manifest`` restores its current/archive markers.
+If both the compatibility feed and that temporary manifest carry no explicit
+currentness, reuse only the live prefix from the immediately preceding,
+validated Public UX state. This is a bounded bridge across one build
+transaction, not a new source of editorial truth.
 """
 from __future__ import annotations
 
@@ -53,8 +60,54 @@ def rank_key(story: dict[str, Any], live_ids: set[str]) -> tuple:
     )
 
 
+def _manifest_has_explicit_currentness() -> bool:
+    try:
+        manifest = base.load(currentness.STORY_MANIFEST, {"stories": []})
+    except Exception:
+        return False
+    rows = [row for row in manifest.get("stories") or [] if isinstance(row, dict)]
+    return any(
+        "active_now" in row or bool(str(row.get("archive_status") or "").strip())
+        for row in rows
+    )
+
+
+def _feed_has_explicit_currentness(feed: dict[str, Any]) -> bool:
+    return any(
+        isinstance(row, dict)
+        and ("active_now" in row or bool(str(row.get("archive_status") or "").strip()))
+        for row in feed.get("stories") or []
+    )
+
+
+def _state_live_ids(stories: list[dict[str, Any]]) -> set[str]:
+    """Recover the last validated live prefix only during marker rematerialization."""
+    try:
+        state = base.load(base.STATE, {})
+    except Exception:
+        return set()
+    try:
+        count = int(state.get("live_story_count") or 0)
+    except (TypeError, ValueError):
+        return set()
+    if count <= 0:
+        return set()
+    ordered = [str(value) for value in (state.get("story_ids") or []) if value]
+    if len(ordered) < count:
+        return set()
+    available = {str(row.get("id")) for row in stories if isinstance(row, dict) and row.get("id")}
+    recovered = {sid for sid in ordered[:count] if sid in available}
+    return recovered if len(recovered) == count else set()
+
+
 def union_stories(feed: dict[str, Any], archive: dict[str, Any]):
     stories, live_ids = _ORIGINAL_UNION(feed, archive)
+    if (
+        not live_ids
+        and not _feed_has_explicit_currentness(feed)
+        and not _manifest_has_explicit_currentness()
+    ):
+        live_ids = _state_live_ids(stories)
     stories.sort(key=lambda row: rank_key(row, live_ids))
     return stories, live_ids
 
