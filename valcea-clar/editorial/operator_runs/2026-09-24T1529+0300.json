@@ -1,0 +1,73 @@
+{
+  "schema_version": "1.0",
+  "run_at": "2026-09-24T15:29:19+03:00",
+  "product": "VÂLCEA CLAR / CIVORA",
+  "scope": "hourly delta editorial cycle",
+  "state_read": {
+    "news_discovery_observed_at": "2026-09-24T15:19:58+03:00",
+    "sources_total": 22,
+    "sources_ok": 18,
+    "facts_admitted": 6,
+    "source_notice_briefs": 2
+  },
+  "fact_kernel": [
+    {
+      "subject": "SCM Râmnicu Vâlcea – SCM Universitatea Craiova",
+      "classification": "CONFIRMED_FACT",
+      "fact": "FRH Program nr. 36 lists the Liga Florilor match on 2026-09-30 at 17:00, Sala Traian.",
+      "source": "https://frh.ro/program.php?id=598",
+      "action": "Corrected canonical Local Life sport registry and runtime from stale T2 18:00 to T1 official 17:00.",
+      "commits": [
+        "22a9252da0245aa9d191fd478166519d787bd0ad",
+        "f85c6ab4d29841a12d73581d0f5ed7dbd3c14950"
+      ]
+    },
+    {
+      "subject": "Local Life child surfaces",
+      "classification": "CONFIRMED_FACT",
+      "fact": "Canonical child surfaces are generated from local_life_surface_registry.json; fitness contains Fitness Cool at Bulevardul Dem Rădulescu 53–55, Bloc X3, parter; menu is fail-closed with no stale rows; cinema contains same-day verified screenings.",
+      "delivery_status": "PUBLIC_READBACK_PENDING",
+      "note": "Workflow success is not treated as delivery; Local Life Sync and Public HTTP Health were still running/queued at check time."
+    },
+    {
+      "subject": "CJ Vâlcea meeting 2026-09-25",
+      "classification": "CONFIRMED_FACT",
+      "fact": "The official agenda lists 26 items, including budget rectification/use of 600.0 thousand lei reserve, CET Govora concession addenda, hospital organization changes, DJ676/Slătioara administration, and territorial/urbanism commission items.",
+      "unknowns": [
+        "vote outcome",
+        "exact allocation/beneficiary of reserve funds without annex reconciliation",
+        "exact clauses/effects of CET Govora addenda",
+        "practical effects of hospital and urbanism changes"
+      ],
+      "editorial_interpretation": "CE URMEAZĂ candidate; not published as a raw agenda summary."
+    },
+    {
+      "subject": "Govora controlled demolition",
+      "classification": "SOURCE_CLAIM",
+      "fact": "Secondary reporting attributes a controlled-demolition notice to IPJ Vâlcea.",
+      "verification": "UNVERIFIED_PRIMARY",
+      "reason": "IPJ primary source remained unavailable due SSL/source access failure; no autonomous publication."
+    },
+    {
+      "subject": "Raliul Vâlcii",
+      "classification": "CONFIRMED_FACT",
+      "fact": "Official rally and service-park sources were rechecked; no material delta versus already known program/restrictions in this cycle.",
+      "action": "No duplicate publication."
+    }
+  ],
+  "site": {
+    "new_standalone_articles": 0,
+    "updated_surfaces": ["/unde-iesim/sport/"],
+    "delivery_truth": "CANONICAL_RUNTIME_CORRECTED_PUBLIC_DELIVERY_PENDING"
+  },
+  "channels": {
+    "facebook": {"delivered": 0, "outbox": 0, "hold": 0, "reason": "No newly confirmed site story; no receipt/post ID."},
+    "instagram": {"delivered": 0, "outbox": 0, "hold": 0, "reason": "No newly confirmed site story; no receipt/post ID."}
+  },
+  "follow_ups": [
+    "Verify public readback of Local Life child routes after current deployment/health cycle.",
+    "Reconcile CJ Vâlcea 25 September agenda annexes before any CE URMEAZĂ publication.",
+    "Revalidate SCM Râmnicu Vâlcea – SCM Universitatea Craiova within 48h of kickoff."
+  ],
+  "human_decisions_required": 0
+}
