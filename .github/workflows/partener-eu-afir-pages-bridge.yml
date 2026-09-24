@@ -1,6 +1,10 @@
 name: PARTENER.EU AFIR Coverage Pages Bridge
 
 on:
+  pull_request:
+    paths:
+      - '.github/workflows/partener-eu-afir-pages-bridge.yml'
+      - 'partener-eu/ops/test_pages_trigger_contract.py'
   push:
     branches: [main]
     paths:
@@ -17,7 +21,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: partener-eu-afir-pages-bridge
+  group: partener-eu-afir-pages-bridge-${{ github.event.pull_request.number || 'main' }}
   cancel-in-progress: true
 
 jobs:
@@ -28,13 +32,14 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: main
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
           fetch-depth: 1
 
       - name: Validate publication trigger contract
         run: python partener-eu/ops/test_pages_trigger_contract.py
 
       - name: Dispatch canonical PARTENER.EU Pages on current main
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           REPOSITORY: ${{ github.repository }}
