@@ -69,7 +69,8 @@ def dedupe(events:list[dict])->tuple[list[dict],int]:
         for row in rows:
             for cluster in clusters:
                 if venue_equivalent(cluster[0].get("venue"),row.get("venue")):
-                    cluster.append(row); break
+                    cluster.append(row)
+                    break
             else:
                 clusters.append([row])
         for cluster in clusters:
