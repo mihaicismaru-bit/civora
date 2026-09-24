@@ -4,12 +4,22 @@
   "source_id": "SRC-MEC-CNDIPT",
   "source_tier": "T1",
   "source_url": "https://www.edu.ro/profesional_tehnic",
-  "status": "OPEN",
+  "status": "RESOLVED_NON_MATERIAL_CHANGE",
   "first_observed_at": "2026-08-21T15:59:24.271132Z",
   "last_observed_at": "2026-09-24T11:03:17.561046Z",
   "previous_semantic_sha256": "42b017fe5c261b784353d4928d8a1004b5cc2776957ebf923d98980da1af1c52",
   "current_semantic_sha256": "d39f9ec0c818cafdb7fdec94a661c2572dd33f3295c2a5b9da13b0839f4d06c6",
+  "candidate_semantic_sha256": "d39f9ec0c818cafdb7fdec94a661c2572dd33f3295c2a5b9da13b0839f4d06c6",
+  "resolved_semantic_sha256": "d39f9ec0c818cafdb7fdec94a661c2572dd33f3295c2a5b9da13b0839f4d06c6",
+  "resolved_at": "2026-09-24T11:05:13Z",
+  "resolution_reason": "Reviewed the fresh post-probe semantic candidate against the current official Ministry of Education and Research CNDIPT page. The page remains an institutional vocational/technical-education description and does not establish any funding-call-specific deadline, eligibility, budget, scoring, beneficiary or lifecycle change. No material fact update is authorized.",
+  "source_name": "official_vet_policy_source",
+  "registry_class": "official_vet_policy_source",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "material_fact_autoupdate_allowed": false,
+  "automatic_material_fact_update_allowed": false,
+  "material_fact_action": "NONE",
+  "publish_authorized": false,
   "blocked_fact_classes": [
     "deadline",
     "eligibility",
@@ -19,5 +29,9 @@
     "material_call_status",
     "other_material_facts"
   ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
+  "required_resolution": "RESOLVED: reviewed exact fresh semantic candidate against authoritative current page; no material fact publication authorized.",
+  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "evidence_urls": [
+    "https://www.edu.ro/profesional_tehnic"
+  ]
 }
