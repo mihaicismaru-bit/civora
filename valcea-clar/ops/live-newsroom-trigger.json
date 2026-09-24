@@ -1,7 +1,7 @@
 {
   "requested_at": "2026-09-24T04:11:24+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "CANONICAL INDEXING REPAIR + COUNTY DELTA FOLLOW-UP. The 24 Sep presentation refresh exposed a technical regression: Public UX preserves 76 reader-authorized durable stories, but sitemap.xml was rebuilt from the 16-story live manifest and silently dropped archive URLs. PR #1314 fixes overlay_runtime_export so post-integrity Public UX routes are persisted in runtime indexing extras and survive live-manifest rollover. Reconcile the canonical runtime and public readback after this repair. Editorially, no new low-risk county story justifies filler in this cycle. One official service delta is useful for the existing Raliul Valcii story: Shopping City Ramnicu Valcea publishes the Service Park schedule for 25-26 Sep in the Decathlon parking zone, with times explicitly marked estimated and subject to change. Update the existing Raliul service context if useful; do not create a duplicate article. Public homepage has partially converged (Horezu appears) but its global update label remains stale, while /unde-iesim/ still serves 18 rows with duplicate Paralele Corale/Floarea Darului and does not yet show the canonical Malaia event. Keep social fail-closed until public story readback and receipts exist.",
+  "reason": "CANONICAL INDEXING REPAIR + COUNTY DELTA FOLLOW-UP. The 24 Sep presentation refresh exposed a technical regression: Public UX preserves 76 reader-authorized durable stories, but sitemap.xml was rebuilt from the 16-story live manifest and silently dropped archive URLs. PR #1314 fixes overlay_runtime_export so post-integrity Public UX routes are persisted in runtime indexing extras and survive live-manifest rollover. Reconcile the canonical runtime and public readback after this repair. Bootstrap commit 8b58862288dcb1c576fcb6769ab05680bb142ba4 now materializes the current durable Public UX HTML routes into indexing_extra_routes.json so the no-change indexing path can immediately rebuild a complete sitemap; overlay commit 329503cd67f5f0d9185ad5f9e4b5c3e31e69d66c also excludes the non-HTML RSS feed from HTML route validation. Editorially, no new low-risk county story justifies filler in this cycle. One official service delta is useful for the existing Raliul Valcii story: Shopping City Ramnicu Valcea publishes the Service Park schedule for 25-26 Sep in the Decathlon parking zone, with times explicitly marked estimated and subject to change. Update the existing Raliul service context if useful; do not create a duplicate article. Public homepage has partially converged (Horezu appears) but its global update label remains stale, while /unde-iesim/ still serves 18 rows with duplicate Paralele Corale/Floarea Darului and does not yet show the canonical Malaia event. Keep social fail-closed until public story readback and receipts exist.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533",
@@ -106,6 +106,8 @@
     "live_story_count": 16,
     "fix_pr": 1314,
     "fix_commit": "6dfacf30b77a244744ef39a9e4213a2bdcbcaf61",
-    "expected_policy": "sitemap includes reader-authorized durable Public UX routes plus current live stories and configured static routes; explicit holds remain excluded"
+    "bootstrap_indexing_extra_commit": "8b58862288dcb1c576fcb6769ab05680bb142ba4",
+    "overlay_feed_exclusion_commit": "329503cd67f5f0d9185ad5f9e4b5c3e31e69d66c",
+    "expected_policy": "sitemap includes reader-authorized durable Public UX HTML routes plus current live stories and configured static routes; explicit holds remain excluded; RSS remains a feed asset but is not validated as an HTML route"
   }
 }
