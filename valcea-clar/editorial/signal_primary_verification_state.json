@@ -2,19 +2,129 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-24T03:03:37+03:00",
+  "generated_at": "2026-09-24T07:43:52+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-24T03:02:24+03:00",
-  "task_count": 87,
+  "queue_generated_at": "2026-09-24T07:42:09+03:00",
+  "task_count": 86,
   "primary_match_count": 0,
   "no_match_count": 36,
-  "unrouted_count": 51,
-  "target_count": 19,
-  "targets_ok": 14,
+  "unrouted_count": 50,
+  "target_count": 21,
+  "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "4e6fc677b12c40b8f12ffeaa",
+      "signal_title": "Cancerul, de la prevenție la terapii personalizate. Medicul Alexandra Mihaela Cipăian, de la Spitalul Județean Sibiu, răspunde la întrebările pacienților",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/24/cancerul-de-la-preventie-la-terapii-personalizate-medicul-alexandra-mihaela-cipaian-de-la-spitalul-judetean-sibiu-raspunde-la-intrebarile-pacientilor/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-24T07:32:05+03:00",
+      "verification_route_id": "health",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "dsp-valcea-anunturi",
+            "name": "Direcția de Sănătate Publică Vâlcea",
+            "url": "https://www.aspjvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "spital-horezu-noutati",
+            "name": "Spitalul Orășenesc Horezu",
+            "url": "https://spitalulhorezu.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 9
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "c67caef4faefdbc794d21f66",
+      "signal_title": "„Starea avansată de degradare” a Liceului „Avram Iancu” din Sibiu. Primăria propune lucrări de peste 16 milioane de lei pentru scoaterea clădirilor din clasa de risc seismic RsII",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/24/starea-avansata-de-degradare-a-liceului-avram-iancu-din-sibiu-primaria-propune-lucrari-de-peste-16-milioane-de-lei-pentru-scoaterea-cladirilor-din-clasa-de-risc-se/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-24T07:19:00+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "68fdb21cf65e1bf3c2f75d1e",
+      "signal_title": "CRIMĂ ȘOCANTĂ ÎN VÂLCEA! Două lovituri în cap, răni de cuțit și cinci coaste rupte. Iubitul tinerei, căutat pentru omor",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/crima-socanta-in-valcea-doua-lovituri-in-cap-rani-de-cutit-si-cinci-coaste-rupte-iubitul-tinerei-cautat-pentru-omor/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-24T03:13:26+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "896368846952df48212a99e3",
       "signal_title": "Cât de digitalizați sunt consumatorii din Vâlcea în ceea ce privește plățile cotidiene?",
@@ -341,7 +451,7 @@
     },
     {
       "signal_id": "b75e9f9ecce72a8d1dec5f57",
-      "signal_title": "Ultima oră 13 ore in urma Raliul Vâlcii Nurvil revine la Vaideeni pe 26 septembrie",
+      "signal_title": "Ultima oră 17 ore in urma Raliul Vâlcii Nurvil revine la Vaideeni pe 26 septembrie",
       "signal_url": "https://www.primplanpress.ro/raliul-valcii-nurvil-revine-la-vaideeni-pe-26-septembrie/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-09-23T14:13:39+03:00",
@@ -1053,18 +1163,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "380f52f77929fc860aab7512",
-      "signal_title": "Peste 5.000 de încălcări ale ordinelor de protecție în șapte luni. Propunere pentru folosirea obligatorie a brățării electronice",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/22/peste-5-000-de-incalcari-ale-ordinelor-de-protectie-in-sapte-luni-propunere-pentru-folosirea-obligatorie-a-bratarii-electronice/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-22T14:27:17+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "97e2c27789f3aeef8b526664",
       "signal_title": "Explozie de reacții împotriva proiectului minier propus în Mărginimea Sibiului. „Va fi mai rău decât la Copșa Mică”. Legăturile cu Roșia Montană",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/22/explozie-de-reactii-impotriva-proiectului-minier-propus-marginimea-sibiului-va-fi-mai-rau-decat-la-copsa-mica-legaturile-cu-rosia-montana/",
@@ -1219,33 +1317,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "0b8706fa58486ab9d7785012",
-      "signal_title": "Tânăr din Călimănești, reținut după ce și-ar fi agresat fosta concubină și ar fi amenințat-o publicarea unor imagini intime",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/22/tanar-din-calimanesti-retinut-dupa-ce-si-ar-fi-agresat-fosta-concubina-si-ar-fi-amenintat-o-publicarea-unor-imagini-intime/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-22T09:59:49+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "624326ae66ef72799bf92252",
       "signal_title": "ACCIDENT MORTAL pe VALEA OLTULUI. O tânără de 21 de ani și-a pierdut viața",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/22/accident-mortal-pe-valea-oltului-o-tanara-de-21-de-ani-si-a-pierdut-viata/",
@@ -1302,7 +1373,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
@@ -1476,7 +1547,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
@@ -1525,7 +1596,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
@@ -1722,78 +1793,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "993c28c9265fbc639c09d26e",
-      "signal_title": "Călin Georgescu, ridicat din trafic într-o anchetă DIICOT cu prejudiciu de peste 1,1 milioane de euro",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/calin-georgescu-ridicat-din-trafic-intr-o-ancheta-diicot-cu-prejudiciu-de-peste-11-milioane-de-euro/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_published_at": "2026-09-21T09:12:49+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "80582083d680b70cf45a6555",
-      "signal_title": "Slătioara rămâne fără energie electrică, miercuri, în mai multe zone",
-      "signal_url": "https://evenimentvalcean.ro/slatioara-ramane-fara-energie-electrica-miercuri-in-mai-multe-zone/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-21T09:09:06+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "ea3ee7fbbca31ec707bbf239",
       "signal_title": "Anunț public privind elaborarea PUZ pentru imobilul NC 52803, Râmnicu Vâlcea – punctul „Piscupie”",
       "signal_url": "https://www.eurovalcea.ro/2026/09/15/anunt-public-privind-elaborarea-puz-pentru-imobilul-nc-52803-ramnicu-valcea-punctul-piscupie/",
@@ -1823,7 +1822,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 10
+          "documents_examined": 6
         },
         {
           "target": {
