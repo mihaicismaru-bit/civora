@@ -25,6 +25,7 @@ from indexing_assets import write_indexing_assets  # noqa: E402
 
 RUNTIME = ROOT / "site" / "runtime"
 STORY_MANIFEST = RUNTIME / "stiri" / "manifest.json"
+PUBLIC_UX_STATE = ROOT / "site" / "public_ux_state.json"
 INDEXING_CONTRACT = ROOT / "site" / "indexing_routes.json"
 RUNTIME_EXTRA_INDEXING = RUNTIME / "indexing_extra_routes.json"
 LEGAL_PATHS = {"/termeni/", "/confidentialitate/", "/corectii/"}
@@ -165,15 +166,46 @@ def story_paths() -> list[str]:
     return paths
 
 
+def public_ux_routes() -> list[str]:
+    """Return the complete current + durable reader route set.
+
+    The live story manifest intentionally contains only the current publishable
+    set. `public_ux_state.json` is written after currentness/integrity cleanup and
+    additionally records already-published durable story routes that were
+    preserved as archive pages. Indexing must follow that reader-authorized route
+    set rather than silently dropping archive URLs when a story ages out of the
+    live manifest.
+    """
+    if not PUBLIC_UX_STATE.is_file():
+        raise RuntimeError("public UX state missing after reader-presentation pass")
+    doc = json.loads(PUBLIC_UX_STATE.read_text(encoding="utf-8"))
+    routes = doc.get("routes")
+    if not isinstance(routes, list) or not routes:
+        raise RuntimeError("public UX state requires a non-empty routes list")
+
+    admitted: list[str] = []
+    for raw in routes:
+        route = str(raw or "").strip()
+        if not route.startswith("/"):
+            raise RuntimeError(f"invalid public UX route: {route!r}")
+        target = route_index(RUNTIME, route)
+        if not target.is_file():
+            raise RuntimeError(f"public UX route missing static page: {route}")
+        admitted.append(route)
+    return list(dict.fromkeys(admitted))
+
+
 def write_runtime_extra_indexing(routes: list[str]) -> None:
     """Persist renderer-owned routes so later index-only refreshes keep them."""
     payload = {
-        "schema_version": "1.0",
+        "schema_version": "1.1",
         "contract_id": "valcea-clar-runtime-extra-indexing-v1",
         "routes": routes,
         "policy": {
             "require_static_index_html": True,
             "owner": "overlay_runtime_export",
+            "durable_public_ux_routes_preserved": True,
+            "archive_story_routes_may_not_drop_on_live_manifest_rollover": True,
         },
     }
     RUNTIME_EXTRA_INDEXING.write_text(
@@ -192,11 +224,15 @@ def main() -> int:
     legal_report = build_legal_pages.build()
     static_materialized = materialize_static_runtime_routes()
     apply_reader_presentation()
+    durable_routes = public_ux_routes()
     editions_report = render_editions_archive.build()
     edition_routes = [str(route) for route in editions_report.get("routes") or []]
-    write_runtime_extra_indexing(edition_routes)
+    write_runtime_extra_indexing(list(dict.fromkeys(durable_routes + edition_routes)))
 
-    routes = list(dict.fromkeys(["/"] + story_paths() + edition_routes))
+    # Current story routes remain the strict caller-owned dynamic set. Durable
+    # archive/static routes are appended by indexing_assets from the runtime
+    # extra contract written above, so later index-only refreshes preserve them.
+    routes = list(dict.fromkeys(["/"] + story_paths()))
     indexing = write_indexing_assets(RUNTIME, BASE_URL, routes)
     if indexing.get("status") != "PASS":
         raise RuntimeError(f"refusing runtime with deferred indexing: {indexing}")
@@ -206,6 +242,7 @@ def main() -> int:
         "publication_model": "continuous_story_first",
         "runtime": "site/runtime",
         "news_index_stories": news_index_report.get("story_count"),
+        "durable_public_ux_routes": len(durable_routes),
         "edition_archive_count": editions_report.get("edition_count"),
         "edition_archive_routes": len(edition_routes),
         "legal_status": legal_report.get("status"),
