@@ -8,7 +8,10 @@ then decorates already-published stories with either:
    ``social/contextual_story_media.json``.
 
 No automatic keyword substitution is allowed. Missing media never authorizes,
-blocks or alters editorial publication.
+blocks or alters editorial publication. A text-only homepage is valid when the
+currently surfaced stories have no eligible visual; the validator must not
+force an unrelated archive image into the homepage merely to satisfy a media
+count.
 """
 from __future__ import annotations
 
@@ -204,21 +207,38 @@ def validate_media_projection() -> dict[str, int]:
     home = (RUNTIME / "index.html").read_text(encoding="utf-8")
     news = (RUNTIME / "stiri" / "index.html").read_text(encoding="utf-8")
     feed = load_json(RUNTIME / "live-feed.json", {"stories": []})
-    first = ranked_reader_lead(feed)
+    archive = load_json(base.ARCHIVE, {"stories": []})
+    stories, _live_ids = base.union_stories(feed, archive)
+    first = next((row for row in stories if isinstance(row, dict) and row.get("id")), None)
     if not first:
         raise SystemExit("Media projection validation requires a reader-facing story")
-    expected = media_for_story(str(first["id"]))
-    if expected and f'data-story-image="{first["id"]}"' not in home:
+
+    expected_lead = media_for_story(str(first["id"]))
+    if expected_lead and f'data-story-image="{first["id"]}"' not in home:
         raise SystemExit(f"Homepage ranked-lead media missing: {first['id']}")
-    if 'data-story-image=' not in home:
-        raise SystemExit("Homepage contains no story media")
-    if 'data-story-image=' not in news:
-        raise SystemExit("News index contains no story media")
+
+    eligible_ids = {
+        str(row.get("id")) for row in stories
+        if row.get("id") and media_for_story(str(row.get("id")))
+    }
+    home_images = home.count('data-story-image=')
+    news_images = news.count('data-story-image=')
+    if eligible_ids and news_images == 0:
+        raise SystemExit("News index omitted all provenance-backed eligible story media")
+
     contextual = home.count('data-media-context="contextual"')
     exact = home.count('data-media-context="exact"')
-    if contextual == 0 and exact == 0:
-        raise SystemExit("Homepage media projection has no provenance role")
-    result = {"homepage_images": home.count('data-story-image='), "news_index_images": news.count('data-story-image='), "homepage_contextual": contextual, "homepage_exact": exact}
+    if home_images and contextual == 0 and exact == 0:
+        raise SystemExit("Homepage media projection has images without a provenance role")
+
+    result = {
+        "homepage_images": home_images,
+        "news_index_images": news_images,
+        "homepage_contextual": contextual,
+        "homepage_exact": exact,
+        "eligible_story_media": len(eligible_ids),
+        "text_only_home_allowed": 1,
+    }
     print(json.dumps({"status": "PASS", **result}, ensure_ascii=False))
     return result
 
@@ -244,7 +264,7 @@ def main() -> int:
         return 0
     state = base.build()
     validate_media_projection()
-    print(json.dumps({"status": "PASS", "stories": state["safe_story_count"], "live": state["live_story_count"], "media": "site_eligible_verified_visual_or_explicit_contextual_no_social_cards"}, ensure_ascii=False))
+    print(json.dumps({"status": "PASS", "stories": state["safe_story_count"], "live": state["live_story_count"], "media": "verified_when_eligible_text_only_allowed"}, ensure_ascii=False))
     return 0
 
 
