@@ -167,14 +167,15 @@ def story_paths() -> list[str]:
 
 
 def public_ux_routes() -> list[str]:
-    """Return the complete current + durable reader route set.
+    """Return the complete current + durable reader HTML route set.
 
     The live story manifest intentionally contains only the current publishable
     set. `public_ux_state.json` is written after currentness/integrity cleanup and
     additionally records already-published durable story routes that were
     preserved as archive pages. Indexing must follow that reader-authorized route
     set rather than silently dropping archive URLs when a story ages out of the
-    live manifest.
+    live manifest. Non-HTML feed assets (currently `/rss.xml`) are deliberately
+    excluded because sitemap route validation is based on static index.html pages.
     """
     if not PUBLIC_UX_STATE.is_file():
         raise RuntimeError("public UX state missing after reader-presentation pass")
@@ -186,6 +187,8 @@ def public_ux_routes() -> list[str]:
     admitted: list[str] = []
     for raw in routes:
         route = str(raw or "").strip()
+        if route == "/rss.xml":
+            continue
         if not route.startswith("/"):
             raise RuntimeError(f"invalid public UX route: {route!r}")
         target = route_index(RUNTIME, route)
@@ -206,6 +209,7 @@ def write_runtime_extra_indexing(routes: list[str]) -> None:
             "owner": "overlay_runtime_export",
             "durable_public_ux_routes_preserved": True,
             "archive_story_routes_may_not_drop_on_live_manifest_rollover": True,
+            "non_html_feed_assets_excluded": ["/rss.xml"],
         },
     }
     RUNTIME_EXTRA_INDEXING.write_text(
