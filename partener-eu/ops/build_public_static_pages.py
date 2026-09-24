@@ -352,7 +352,7 @@ def page_shell(
   <meta name="description" content="{esc(description)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="{esc(canonical(path))}">
-  <link rel="stylesheet" href="/public-static-v1.css?v=20260923-ux1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:opsz,wght@8..60,400..800&family=Source+Serif+4:opsz,wght@8..60,600..700&display=swap">\n  <link rel="stylesheet" href="/public-static-v1.css?v=20260923-ux1">\n  <link rel="stylesheet" href="/brand-civic-intelligence-v1.css?v=20260924-brand1">\n  <link rel="icon" type="image/svg+xml" href="/brand-mark-v1.svg?v=20260924-brand1">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="PARTENER.EU">
   <meta property="og:title" content="{esc(title)}">
@@ -364,7 +364,7 @@ def page_shell(
 <a class="skipLink" href="#continut">Sari la conținut</a>
 <header class="staticTopbar">
   <div class="staticNav">
-    <a class="staticBrand" href="/">PARTENER<span>.EU</span></a>
+    <a class="staticBrand" href="/" aria-label="PARTENER.EU — Acasă"><img src="/brand-mark-v1.svg?v=20260924-brand1" alt="" aria-hidden="true" width="30" height="30">PARTENER<span>.EU</span></a>
     <nav aria-label="Navigație principală">{common_nav(current_nav)}</nav>
     <a class="staticAsk" href="/?view=ask">Întreabă PARTENER.EU</a>
   </div>
