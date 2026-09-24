@@ -1,0 +1,113 @@
+:root{
+  --brand-950:#0f172a;
+  --brand-900:#1e293b;
+  --brand-accent-700:#047857;
+  --brand-accent-100:#d1fae5;
+
+  --text-primary:#0f172a;
+  --text-secondary:#475569;
+  --text-muted:#64748b;
+  --text-inverse:#ffffff;
+
+  --surface-page:#f8fafc;
+  --surface-raised:#ffffff;
+  --surface-subtle:#f1f5f9;
+  --border-default:#cbd5e1;
+  --border-strong:#94a3b8;
+
+  --success:#047857;
+  --warning:#92400e;
+  --danger:#b91c1c;
+  --info:#1d4ed8;
+  --link:#1d4ed8;
+  --focus:#2563eb;
+
+  --status-open-fg:#065f46;
+  --status-open-bg:#d1fae5;
+  --status-prepare-fg:#4338ca;
+  --status-prepare-bg:#eef2ff;
+  --status-consult-fg:#92400e;
+  --status-consult-bg:#fffbeb;
+  --status-closed-fg:#475569;
+  --status-closed-bg:#e2e8f0;
+  --status-fail-fg:#991b1b;
+  --status-fail-bg:#fee2e2;
+
+  --font-ui:"Source Sans 3","Segoe UI",system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-editorial:"Source Serif 4",Georgia,"Times New Roman",serif;
+
+  --text-xs:.75rem;
+  --text-sm:.875rem;
+  --text-base:1rem;
+  --text-lg:1.125rem;
+  --text-xl:1.25rem;
+  --text-2xl:1.5rem;
+  --text-3xl:2rem;
+  --text-4xl:clamp(2rem,5vw,3rem);
+
+  --radius-sm:.375rem;
+  --radius-md:.625rem;
+  --radius-lg:.875rem;
+  --radius-xl:1.125rem;
+
+  --bg:var(--surface-page);
+  --surface:var(--surface-raised);
+  --ink:var(--text-primary);
+  --muted:var(--text-secondary);
+  --line:var(--border-default);
+  --green:var(--brand-accent-700);
+  --green2:var(--brand-accent-100);
+  --navy:var(--brand-950);
+  --amber:var(--warning);
+  --amberbg:#fff7ed;
+  --red:var(--danger);
+  --redbg:var(--status-fail-bg);
+  --blue:var(--info);
+  --bluebg:#dbeafe;
+  --shadow:0 12px 28px rgba(15,23,42,.07);
+  --radius:var(--radius-lg);
+}
+
+html{background:var(--surface-page)}
+body{font-family:var(--font-ui);font-size:var(--text-base);line-height:1.5;color:var(--text-primary);background:var(--surface-page)}
+body,input,select,button,textarea{font-family:var(--font-ui)}
+h1,h2,.hero h1,.staticHero h1,.detailHero h1,.diArticleHero h1,.diDossierHero h1,.conciergeHero h1{font-family:var(--font-editorial);font-weight:650;letter-spacing:-.025em}
+h1,.hero h1,.staticHero h1,.conciergeHero h1{line-height:1.12}
+h2,.section h2,.sectionHead h2,.conciergeSectionHead h2{line-height:1.2}
+
+.brand,.staticBrand,.siteBrand{display:inline-flex;align-items:center;gap:.55rem;font-family:var(--font-ui);font-weight:800;letter-spacing:-.025em;color:var(--brand-950);text-decoration:none}
+.brand img,.staticBrand img,.siteBrand img{width:30px;height:30px;display:block;flex:0 0 auto}
+.brand span,.staticBrand span,.siteBrand span{color:var(--brand-accent-700)}
+
+.topbar,.staticTopbar{background:rgba(255,255,255,.97);border-color:var(--border-default)}
+.navlink,.fallbackNav a,.staticNav nav a{color:var(--text-secondary)}
+.navlink:hover,.navlink.active,.fallbackNav a:hover,.staticNav nav a:hover,.staticNav nav a[aria-current=page]{background:var(--surface-subtle);color:var(--text-primary)}
+
+.btn,.fallbackSearch button,.conciergeSearch button,.staticSearch button{background:var(--brand-accent-700);color:#fff}
+.btn:hover,.fallbackSearch button:hover,.conciergeSearch button:hover,.staticSearch button:hover{filter:brightness(.94)}
+.btn.secondary{background:var(--surface-subtle);color:var(--text-primary)}
+.btn.ghost{background:#fff;border-color:var(--border-default);color:var(--text-primary)}
+
+.heroCard,.detailHeader,.detailHero{background:linear-gradient(135deg,var(--brand-950),#173c36)}
+.eyebrow,.conciergeHero .eyebrow{color:var(--brand-accent-700)}
+
+.badge,.status{font-variant-numeric:tabular-nums}
+.OPEN,.status-open{background:var(--status-open-bg)!important;color:var(--status-open-fg)!important}
+.EXPECTED,.ANNOUNCED,.UPCOMING,.PREPARE_NOW,.status-expected,.status-announced,.status-upcoming,.status-prepare_now{background:var(--status-prepare-bg)!important;color:var(--status-prepare-fg)!important}
+.PUBLIC_CONSULTATION,.status-public_consultation{background:var(--status-consult-bg)!important;color:var(--status-consult-fg)!important}
+.CLOSED,.status-closed{background:var(--status-closed-bg)!important;color:var(--status-closed-fg)!important}
+.FAIL,.QUARANTINED,.status-fail,.status-quarantined{background:var(--status-fail-bg)!important;color:var(--status-fail-fg)!important}
+
+a{color:inherit}
+.source a,.cardAction,.sectionHead>a,.staticFooter a,.sourceRow strong,.conciergeCard>button,.conciergeSectionHead>button,.conciergeNews>button{color:var(--brand-accent-700)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--focus)!important;outline-offset:3px!important}
+input:focus,.input:focus,.select:focus{border-color:#60a5fa!important;box-shadow:0 0 0 3px rgba(37,99,235,.15)!important}
+
+.fact .v,.detailFact b,.cardFacts strong,.conciergeFacts strong,.stat .n,.metric b{font-variant-numeric:tabular-nums}
+
+.card,.staticCard,.conciergeCard,.detailSection,.decisionBox,.qualityBox,.sourcesBox{box-shadow:none;border-color:var(--border-default)}
+.card.clickable:hover,.staticCard:hover,.conciergeCard:hover{box-shadow:var(--shadow);border-color:var(--border-strong)}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
