@@ -5,12 +5,14 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/apply_afir_september_2026_updates.py'
+      - 'partener-eu/ingest/finalize_afir_september_2026_updates.py'
       - 'partener-eu/ops/test_afir_september_2026_updates.py'
       - '.github/workflows/partener-eu-afir-september-coverage.yml'
   push:
     branches: [main]
     paths:
       - 'partener-eu/ingest/apply_afir_september_2026_updates.py'
+      - 'partener-eu/ingest/finalize_afir_september_2026_updates.py'
       - 'partener-eu/ops/test_afir_september_2026_updates.py'
       - '.github/workflows/partener-eu-afir-september-coverage.yml'
   workflow_run:
@@ -40,6 +42,7 @@ jobs:
         run: |
           cp partener-eu/ingest/state/decision_products.json /tmp/partener-products-baseline.json
           python partener-eu/ingest/apply_afir_september_2026_updates.py
+          python partener-eu/ingest/finalize_afir_september_2026_updates.py
 
       - name: Validate September AFIR source-bound lifecycle
         run: python partener-eu/ops/test_afir_september_2026_updates.py
@@ -70,6 +73,7 @@ jobs:
             cp partener-eu/ingest/state/decision_products.json /tmp/partener-products-current-main.json
 
             python partener-eu/ingest/apply_afir_september_2026_updates.py
+            python partener-eu/ingest/finalize_afir_september_2026_updates.py
             python partener-eu/ops/test_afir_september_2026_updates.py
             python partener-eu/ops/test_decision_products.py
             python partener-eu/ops/test_public_language.py
