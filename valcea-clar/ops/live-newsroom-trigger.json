@@ -1,7 +1,7 @@
 {
-  "requested_at": "2026-09-24T03:04:45+03:00",
+  "requested_at": "2026-09-24T04:11:24+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "COUNTY-WIDE DELTA + LOCAL LIFE HOT WATCH. One new low-risk Local Life event in Săliștea, Mălaia is supported by the official European Folk Day event listing and is safe to add with price/access left unknown. New Vaideeni council-agenda reporting is T2 only and remains a verification follow-up. Three newly discovered Ziarul de Vâlcea signals were triaged: one generic digital-payments item is low editorial value; two judiciary/asset allegations are reputational and remain NEEDS_HUMAN_REVIEW pending primary records and right-of-reply work. No filler and no autonomous publication of those allegations.",
+  "reason": "CANONICAL INDEXING REPAIR + COUNTY DELTA FOLLOW-UP. The 24 Sep presentation refresh exposed a technical regression: Public UX preserves 76 reader-authorized durable stories, but sitemap.xml was rebuilt from the 16-story live manifest and silently dropped archive URLs. PR #1314 fixes overlay_runtime_export so post-integrity Public UX routes are persisted in runtime indexing extras and survive live-manifest rollover. Reconcile the canonical runtime and public readback after this repair. Editorially, no new low-risk county story justifies filler in this cycle. One official service delta is useful for the existing Raliul Valcii story: Shopping City Ramnicu Valcea publishes the Service Park schedule for 25-26 Sep in the Decathlon parking zone, with times explicitly marked estimated and subject to change. Update the existing Raliul service context if useful; do not create a duplicate article. Public homepage has partially converged (Horezu appears) but its global update label remains stale, while /unde-iesim/ still serves 18 rows with duplicate Paralele Corale/Floarea Darului and does not yet show the canonical Malaia event. Keep social fail-closed until public story readback and receipts exist.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533",
@@ -9,6 +9,18 @@
     "dragasani-ct-radiologie-program-clarificare-20260924"
   ],
   "editorial_signals": [
+    {
+      "signal_id": "raliul-valcii-service-park-shopping-city-20260924",
+      "locality": "Râmnicu Vâlcea",
+      "status": "CONFIRMED_FACT",
+      "product_candidate": "UPDATE_EXISTING_SERVICE_STORY_OR_LOCAL_LIFE_DETAIL",
+      "risk": "LOW",
+      "claim": "Shopping City Râmnicu Vâlcea publishes the Raliul Vâlcii Service Park in the Decathlon parking zone for 24-26 September, with detailed service/re-grouping windows for Friday 25 and Saturday 26 September; the page explicitly says passage times are estimates and may change.",
+      "source_url": "https://www.shoppingcityramnicuvalcea.ro/evenimente/parcul-service-al-raliului-valcii-2026",
+      "source_tier": "T1_VENUE",
+      "checked_at": "2026-09-24T04:11:24+03:00",
+      "next_action": "Use as a service-detail update to the existing Raliul story or structured Local Life context; do not create a duplicate Raliul article. Preserve the estimated-times caveat."
+    },
     {
       "signal_id": "vaideeni-cl-session-20260924",
       "locality": "Vaideeni",
@@ -27,11 +39,11 @@
       "status": "NEEDS_HUMAN_REVIEW",
       "product_candidate": "VERIFICAT_OR_DOSAR_ONLY_AFTER_PRIMARY_RECORDS",
       "risk": "HIGH_REPUTATIONAL_LEGAL",
-      "claim": "Ziarul de Vâlcea alleges an impartiality/conflict concern involving judge Mioara Dumitrașcu and a case in which a journalist who criticised her is a claimant. The headline is advocacy, not proof.",
+      "claim": "A local outlet alleges an impartiality/conflict concern involving a judge and a case in which a journalist who criticised her is a claimant. The claim remains an investigation lead, not proof.",
       "source_url": "https://ziaruldevalcea.ro/2026/09/poate-judecatoarea-mioara-dumitrascu-de-la-tribunalul-valcea-sa-judece-un-dosar-in-care-reclamant-este-jurnalistul-care-a-criticat-o-public-moral-dar-si-legal-nu/",
       "source_tier": "T2_OPINIONATED_LOCAL_PRESS",
       "checked_at": "2026-09-24T03:04:45+03:00",
-      "next_action": "Resolve the exact case number, docket, panel assignment, recusation/abstention record and the judge/court response before any publication. Do not adopt the source's legal conclusion."
+      "next_action": "Resolve the exact case number, docket, panel assignment, recusation/abstention record and the court response before any publication. Do not adopt the source's legal conclusion."
     },
     {
       "signal_id": "asset-declarations-donation-125k-eur-20260924",
@@ -39,23 +51,11 @@
       "status": "NEEDS_HUMAN_REVIEW",
       "product_candidate": "DOSAR_LEAD_ONLY",
       "risk": "HIGH_REPUTATIONAL_FINANCIAL",
-      "claim": "Ziarul de Vâlcea alleges that 2023 asset declarations involving judge Andreea Ghinea-Vlăsceanu and local councillor Nicolae Vlăsceanu show a 125,000-euro donation. This is an investigation lead only; the primary declarations have not yet been resolved in this cycle.",
+      "claim": "A local outlet alleges that 2023 asset declarations show a 125,000-euro donation. This remains an investigation lead only; primary declarations and the exact donor/recipient fields have not been reconciled.",
       "source_url": "https://ziaruldevalcea.ro/2026/09/dezvaluiri-in-atentia-ani-donatie-de-125-000-de-euro-ce-arata-declaratiile-de-avere-ale-judecatoarei-andreea-ghinea-vlasceanu-si-ale-consilierului-local-nicolae-vlasceanu/",
       "source_tier": "T2_LOCAL_PRESS",
       "checked_at": "2026-09-24T03:04:45+03:00",
-      "next_action": "Obtain both original declarations from the competent official repositories, reconcile dates/amount/currency/donor-recipient fields, check later declarations and seek responses before considering publication."
-    },
-    {
-      "signal_id": "digital-payments-valcea-generic-20260924",
-      "locality": "Vâlcea / Râmnicu Vâlcea",
-      "status": "REJECT_LOW_EDITORIAL_VALUE",
-      "product_candidate": "NONE",
-      "risk": "LOW",
-      "claim": "A newly indexed article about digital payment adoption in Vâlcea contains a generic market framing and no verified new local public-interest delta sufficient for VÂLCEA CLAR.",
-      "source_url": "https://ziaruldevalcea.ro/2026/09/cat-de-digitalizati-sunt-consumatorii-din-valcea-in-ceea-ce-priveste-platile-cotidiene/",
-      "source_tier": "T2",
-      "checked_at": "2026-09-24T03:04:45+03:00",
-      "next_action": "No publication unless a verifiable local dataset or material consumer-impact fact emerges."
+      "next_action": "Obtain both original declarations from competent official repositories, reconcile date/amount/currency/donor-recipient fields, check later declarations and seek responses before considering publication."
     }
   ],
   "coverage_cycle": {
@@ -73,14 +73,14 @@
       "Tomșani",
       "Ocnele Mari",
       "Băile Olănești",
+      "Mihăești",
+      "Nicolae Bălcescu",
       "Râmnicu Vâlcea"
     ],
     "material_delta_localities": [
-      "Mălaia",
-      "Vaideeni",
       "Râmnicu Vâlcea"
     ],
-    "policy": "No filler; stable sources without delta remain in rotation. Reputational allegations fail closed pending primary records and right of reply."
+    "policy": "No filler; use new Raliul service detail as an update, not a duplicate. Reputational allegations fail closed pending primary records and right of reply."
   },
   "event_deltas": [
     {
@@ -99,5 +99,13 @@
       "checked_at": "2026-09-24T03:04:45+03:00",
       "status": "scheduled"
     }
-  ]
+  ],
+  "technical_reconciliation": {
+    "issue": "sitemap_dropped_durable_archive_routes_when_live_manifest_rolled_to_current_set",
+    "canonical_safe_story_count": 76,
+    "live_story_count": 16,
+    "fix_pr": 1314,
+    "fix_commit": "6dfacf30b77a244744ef39a9e4213a2bdcbcaf61",
+    "expected_policy": "sitemap includes reader-authorized durable Public UX routes plus current live stories and configured static routes; explicit holds remain excluded"
+  }
 }
