@@ -1,7 +1,7 @@
 {
-  "requested_at": "2026-09-24T09:58:34+03:00",
+  "requested_at": "2026-09-24T10:09:00+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "HOURLY COUNTY DELTA + LOCAL LIFE HOT WATCH. No filler. Add the newly verified 26-27 Sep Race The Vibe manifestation in Nicolae Balcescu to the structured event inventory. Keep the traffic restriction details as SOURCE_CLAIM because the fresh restriction article contains an internal year typo (2025) even though multiple September 2026 agenda/event sources place the event on 26-27 September 2026. Preserve the Fitness Cool current-location correction: Dem Radulescu 53-55, Bloc X3, parter; Gib Mihaescu is stale/historical and must not be rendered as current.",
+  "reason": "HOURLY COUNTY DELTA + LOCAL LIFE HOT WATCH. No filler. Race The Vibe 2026 is verified for 26-27 Sep in Serbaneasa, Nicolae Balcescu. A newer 23 Sep report reproduces the municipal traffic notice with the correct 2026 dates, resolving the earlier secondary-source year typo. Preserve the Fitness Cool current-location correction: Dem Radulescu 53-55, Bloc X3, parter; Gib Mihaescu is stale/historical and must not be rendered as current. Public readback currently shows stale Local Life/Fitness projections, so do not claim those corrections are live until readback passes.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533",
@@ -15,23 +15,23 @@
       "status": "CONFIRMED_FACT",
       "product_candidate": "UNDE_IESIM_SERVICE",
       "risk": "LOW",
-      "claim": "Race The Vibe is scheduled in Serbaneasa, Nicolae Balcescu, on 26-27 September 2026 on DJ 678A. Multiple September 2026 sources independently place the event on those dates; categories include moto and auto competition.",
-      "source_url": "https://www.impactreal.ro/2026/09/18/adrenalina-viteza-si-spectacol-la-nicolae-balcescu-race-the-vibe-revine-la-serbaneasa/",
-      "source_tier": "T2_CORROBORATED_BY_MONTHLY_CULTURAL_AGENDA",
-      "checked_at": "2026-09-24T09:58:34+03:00",
-      "next_action": "Add/update the event registry with unknown price/access unless a stronger source verifies it."
+      "claim": "Race The Vibe 2026 is scheduled in Serbaneasa, Nicolae Balcescu, on 26-27 September 2026 on DJ 678A.",
+      "source_url": "https://www.impactreal.ro/2026/09/23/atentie-soferi-circulatia-pe-dj-678a-se-inchide-la-serbaneasa-in-comuna-nicolae-balcescu-pe-26-si-27-septembrie/",
+      "source_tier": "T2_REPRODUCES_MUNICIPAL_NOTICE",
+      "checked_at": "2026-09-24T10:09:00+03:00",
+      "next_action": "Keep one event_id; update public projection only after canonical sync and readback."
     },
     {
       "signal_id": "race-the-vibe-traffic-restrictions-20260926",
       "locality": "Nicolae Balcescu / Serbaneasa",
-      "status": "SOURCE_CLAIM",
-      "product_candidate": "UPDATE_SERVICE_DETAIL_AFTER_PRIMARY_CONFIRMATION",
-      "risk": "LOW_BUT_DATE_CONTRADICTION",
-      "claim": "A fresh local report attributes to Primaria Nicolae Balcescu a closure of about 1.1 km of DJ 678A (km 17+200 to 18+300), 10:00-21:00, plus restrictions for vehicles over 7.5 t and alternative routes. The article says 26-27 September but prints year 2025, conflicting with the independently corroborated 2026 event date.",
-      "source_url": "https://seintamplainvalcea.ro/2026/09/23/restrictii-de-circulatie-la-nicolae-balcescu-pentru-race-the-vibe/",
-      "source_tier": "T2",
-      "checked_at": "2026-09-24T09:58:34+03:00",
-      "next_action": "Do not publish the restriction details as confirmed until a primary municipal/CJ/police notice or corrected source resolves the year typo."
+      "status": "CONFIRMED_FACT",
+      "product_candidate": "SERVICE_UPDATE",
+      "risk": "LOW",
+      "claim": "The municipal notice reproduced on 23 Sep states full closure of DJ 678A km 17+200-km 18+300 on 26-27 Sep 2026, with the daily event/traffic window 10:00-21:00, restrictions for vehicles over 7.5 t, controlled local access below 7.5 t outside the competition sector, and signed alternatives. Competition runs 12:00-19:00; restrictions are installed 10:00-12:00 and lifted 19:00-20:00.",
+      "source_url": "https://www.impactreal.ro/2026/09/23/atentie-soferi-circulatia-pe-dj-678a-se-inchide-la-serbaneasa-in-comuna-nicolae-balcescu-pe-26-si-27-septembrie/",
+      "source_tier": "T2_REPRODUCES_MUNICIPAL_NOTICE",
+      "checked_at": "2026-09-24T10:09:00+03:00",
+      "next_action": "Use as service detail with attribution to Primaria Nicolae Balcescu; continue seeking the direct municipal notice for T1 provenance."
     },
     {
       "signal_id": "fitness-cool-location-correction-20260924",
@@ -42,8 +42,8 @@
       "claim": "Fitness Cool's current public location is Bulevardul Dem Radulescu 53-55, Bloc X3, parter. The Gib Mihaescu address is stale/historical and must not be rendered as the current gym location.",
       "source_url": "https://stilhub.ro/valcea/ramnicu-valcea/fitness-cool",
       "source_tier": "T2_CORROBORATED",
-      "checked_at": "2026-09-24T09:58:34+03:00",
-      "next_action": "Apply the canonical entity correction whenever the fitness surface is materialized; never resurrect Gib Mihaescu from stale directories/company-registration data."
+      "checked_at": "2026-09-24T10:09:00+03:00",
+      "next_action": "Apply the canonical entity correction whenever the fitness surface is materialized; public readback still shows Gib Mihaescu, so keep delivery status PENDING until replaced."
     }
   ],
   "coverage_cycle": {
@@ -65,8 +65,8 @@
       "Mihaesti",
       "Nicolae Balcescu"
     ],
-    "material_delta_localities": ["Nicolae Balcescu"],
-    "policy": "No filler; hot-watch the next 72h. Material traffic claims with unresolved date contradiction remain fail-closed."
+    "material_delta_localities": ["Nicolae Balcescu", "Ramnicu Valcea"],
+    "policy": "No filler; hot-watch the next 72h; Local Life delivery truth requires public readback."
   },
   "event_deltas": [
     {
@@ -82,10 +82,10 @@
       "free": null,
       "ticket_url": null,
       "reservation_url": null,
-      "organiser": "Asociatia Ride The Vibe / Club Sportiv Valcea / Consiliul Judetean Valcea",
-      "source_url": "https://www.impactreal.ro/2026/09/18/adrenalina-viteza-si-spectacol-la-nicolae-balcescu-race-the-vibe-revine-la-serbaneasa/",
-      "source_tier": "T2_CORROBORATED_BY_MONTHLY_CULTURAL_AGENDA",
-      "checked_at": "2026-09-24T09:58:34+03:00",
+      "organiser": "Asociatia Ride The Vibe / Club Sportiv Valcea / Consiliul Judetean Valcea / Primaria Nicolae Balcescu",
+      "source_url": "https://www.impactreal.ro/2026/09/23/atentie-soferi-circulatia-pe-dj-678a-se-inchide-la-serbaneasa-in-comuna-nicolae-balcescu-pe-26-si-27-septembrie/",
+      "source_tier": "T2_REPRODUCES_MUNICIPAL_NOTICE",
+      "checked_at": "2026-09-24T10:09:00+03:00",
       "status": "scheduled"
     }
   ]
