@@ -22,16 +22,22 @@ assert "github.event.workflow_run.conclusion == 'success'" in bridge, (
     'Bridge must not dispatch Pages after a failed upstream writer run'
 )
 assert "github.event.workflow_run.head_branch == 'main'" in bridge, (
-    'Bridge must not publish PR/head-branch coverage runs'
+    'Bridge must not publish non-main coverage runs'
 )
 assert 'actions: write' in bridge, 'Bridge needs bounded Actions dispatch permission'
 assert 'contents: read' in bridge, 'Bridge must remain read-only for repository contents'
-assert 'gh workflow run partener-eu-pages.yml --ref main' in bridge, (
+assert 'gh workflow run partener-eu-pages.yml --repo "$REPOSITORY" --ref main' in bridge, (
     'Bridge must dispatch the canonical PARTENER.EU Pages workflow on main'
 )
 assert "- '.github/workflows/partener-eu-afir-pages-bridge.yml'" in bridge, (
     'Bridge installation itself must trigger one deployment so current persisted data is published'
 )
+assert "if: github.event_name != 'pull_request'" in bridge, (
+    'PR regression runs must never dispatch a production Pages deployment'
+)
+assert "github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main'" in bridge, (
+    'PR regression must test the proposed bridge, while production events must operate on main'
+)
 assert 'workflow_dispatch:' in pages, 'Canonical Pages workflow must remain dispatchable'
 
-print('PASS: AFIR writer -> Pages publication handoff is explicit, main-scoped and fail-closed.')
+print('PASS: AFIR writer -> Pages publication handoff is explicit, main-scoped, PR-safe and fail-closed.')
