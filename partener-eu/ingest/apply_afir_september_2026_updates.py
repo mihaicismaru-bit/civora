@@ -388,5 +388,14 @@ def main() -> int:
     return 0
 
 
+def apply_regional_step_overlay() -> int:
+    from apply_prnv_step_2026_update import main as prnv_main, self_test as prnv_self_test
+    prnv_self_test()
+    return prnv_main()
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    rc = main()
+    if rc == 0:
+        rc = apply_regional_step_overlay()
+    raise SystemExit(rc)
