@@ -4,12 +4,22 @@
   "source_id": "SRC-MEC-CNDIPT",
   "source_tier": "T1",
   "source_url": "https://www.edu.ro/profesional_tehnic",
-  "status": "OPEN",
+  "status": "RESOLVED_NON_MATERIAL_CHANGE",
   "first_observed_at": "2026-08-21T15:59:24.271132Z",
   "last_observed_at": "2026-09-24T05:04:17.421123Z",
   "previous_semantic_sha256": "80e68eee35b68d30b2809b00e037c017122ae7fcda50b75bd5964013292ca318",
   "current_semantic_sha256": "42b017fe5c261b784353d4928d8a1004b5cc2776957ebf923d98980da1af1c52",
+  "candidate_semantic_sha256": "42b017fe5c261b784353d4928d8a1004b5cc2776957ebf923d98980da1af1c52",
+  "resolved_semantic_sha256": "42b017fe5c261b784353d4928d8a1004b5cc2776957ebf923d98980da1af1c52",
+  "resolved_at": "2026-09-24T10:51:11Z",
+  "resolution_reason": "Reviewed the current official Ministry of Education and Research CNDIPT page after the new semantic candidate was observed. The page still contains the institutional description of the National Centre for Development of Technical and Vocational Education, published 1 February 2016, together with site navigation and public view-count telemetry. It does not establish a funding-call-specific change to deadline, eligibility, budget, scoring, beneficiaries or lifecycle status. No material fact update is authorized.",
+  "source_name": "official_vet_policy_source",
+  "registry_class": "official_vet_policy_source",
+  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "material_fact_autoupdate_allowed": false,
+  "automatic_material_fact_update_allowed": false,
+  "material_fact_action": "NONE",
+  "publish_authorized": false,
   "blocked_fact_classes": [
     "deadline",
     "eligibility",
@@ -19,11 +29,9 @@
     "material_call_status",
     "other_material_facts"
   ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
-  "source_name": "official_vet_policy_source",
-  "candidate_semantic_sha256": "42b017fe5c261b784353d4928d8a1004b5cc2776957ebf923d98980da1af1c52",
-  "registry_class": "official_vet_policy_source",
-  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "required_resolution": "RESOLVED: reviewed authoritative evidence and current semantic state; no material fact publication authorized.",
   "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false
+  "evidence_urls": [
+    "https://www.edu.ro/profesional_tehnic"
+  ]
 }
