@@ -7,6 +7,7 @@ on:
       - 'partener-eu/web/**'
       - 'partener-eu/ops/build_public_static_pages.py'
       - 'partener-eu/ops/test_public_static_pages.py'
+      - 'partener-eu/ops/sanitize_public_prepare_cards.py'
       - '.github/workflows/partener-eu-pages.yml'
   workflow_run:
     workflows:
@@ -58,6 +59,9 @@ jobs:
       - name: Generate and validate crawlable public IA, sitemap and dossiers
         run: |
           python partener-eu/ops/build_public_static_pages.py
+          python partener-eu/ops/sanitize_public_prepare_cards.py --self-test
+          python partener-eu/ops/sanitize_public_prepare_cards.py
+          python partener-eu/ops/sanitize_public_prepare_cards.py --check
           python partener-eu/ops/test_public_static_pages.py
           python -m json.tool partener-eu/web/static-public-manifest.json >/dev/null
           grep -F 'Sitemap: https://partener.eu/sitemap.xml' partener-eu/web/robots.txt
