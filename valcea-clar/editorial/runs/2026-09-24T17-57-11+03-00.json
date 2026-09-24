@@ -1,0 +1,50 @@
+{
+  "run_at": "2026-09-24T17:57:11+03:00",
+  "scope": "VALCEA_CLAR_CIVORA",
+  "fact_kernel": [
+    {
+      "story_key": "race-the-vibe-20260926-27",
+      "classification": "CONFIRMED_FACT",
+      "facts": [
+        "Race The Vibe 2026 is scheduled for 26-27 September 2026 on DJ 678A in Nicolae Balcescu commune.",
+        "The public traffic notice states the event interval as 10:00-21:00 on both days.",
+        "Road traffic is closed on DJ 678A between km 17+200 and km 18+300 during 10:00-21:00.",
+        "The event notice states entrance and participation are free.",
+        "Vehicles over 7.5 t are restricted on the DJ 678A sector between DJ 678 Cocoru and DN7 Milcoiu; alternative routes are published."
+      ],
+      "source_url": "https://www.radiooltenia.ro/valcea-restrictii-de-circulatie-pe-dj-678a-pe-26-si-27-septembrie/",
+      "source_tier": "T2_PUBLIC_SERVICE_REPRODUCES_MUNICIPAL_NOTICE",
+      "checked_at": "2026-09-24T17:57:11+03:00",
+      "editorial_delta": "price/access changes from unknown to free; traffic-service details expanded",
+      "publication_action": "UPDATE_EXISTING_LOCAL_LIFE_EVENT_NOT_NEW_STORY"
+    },
+    {
+      "story_key": "govora-controlled-demolition-20260924",
+      "classification": "SOURCE_CLAIM",
+      "facts": [
+        "Multiple current secondary reports attribute to IPJ Valcea that controlled demolition with explosives at the former Uzina de Soda Govora begins on 24 September 2026.",
+        "The first operation is reported for approximately 18:30-18:45.",
+        "Similar controlled demolition operations may continue for about two weeks, depending on the work schedule."
+      ],
+      "sources": [
+        "https://www.gds.ro/Local/Valcea/2026-09-24/detonari-controlate-la-fosta-uzina-de-soda-govora/",
+        "https://unziarist.ro/articol/demolari-controlate-la-fosta-uzina-de-soda-govora-cu-explozivi-d1a14cc2"
+      ],
+      "primary_source_status": "NOT_RETRIEVED",
+      "risk": "PUBLIC_SAFETY_EXPLOSIVES",
+      "publication_action": "HOLD_PRE_PUBLICATION_UNTIL_PRIMARY_OR_POST_EVENT_CONFIRMATION"
+    }
+  ],
+  "public_projection_audit": {
+    "fitness": "STALE: public page still shows Fitness Cool at Gib Mihaescu 15B; canonical correction is Bd. Dem Radulescu 53-55, Bl. X3, parter.",
+    "meniul_zilei": "PASS_DATE_FRESHNESS: public page now contains only 24 September rows checked today.",
+    "cinema": "PARTIAL: 23 September rows are gone, but screenings earlier than the current time on 24 September remain visible despite the stated expiry contract.",
+    "unde_iesim": "FAIL_DEDUPE: Race The Vibe is still rendered twice, one stale unknown-time row and one current 10:00 row."
+  },
+  "social": {
+    "facebook_delivered": 0,
+    "instagram_delivered": 0,
+    "reason": "No new site-confirmed article in this cycle."
+  },
+  "needs_human_decision": false
+}
