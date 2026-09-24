@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-23T23:41:10Z",
+  "generated_at": "2026-09-24T04:45:15Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -183,7 +183,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "cdc54c63428f6c412987c162e386f4caec90065435d521b3eb4f30fd15728c48",
+          "fingerprint": "3c123f72312cd8a17fec2cc318e539444f51c7187de36600990353577495b186",
           "match_count": 17,
           "matched_terms": [
             "Vâlcea",
@@ -204,7 +204,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "04e29cee5afe8c8c5f7b5f7d7cade1fbc0897f8071877aa843d3f0094dfff844",
+          "fingerprint": "54eeded3824b3d5bcd6ff20ae41070adcd6da95fd9fa62e09f93d5a526695573",
           "match_count": 20,
           "matched_terms": [
             "Joburi",
@@ -231,7 +231,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
-          "fingerprint": "c20ab98835963f3cc68b26647265e96130f8e358213a7c4777f6fc894564003c",
+          "fingerprint": "c3752975ac2cff60f49d072817a9c52c3c737becfa960006dfe5dfec3c0bb871",
           "match_count": 26,
           "matched_terms": [
             "locuri de munca",
@@ -253,16 +253,18 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "e40c316879126d8fadb2ed279ab78b6f8311c72911989b6f89fa655decdff02e",
-          "match_count": 16,
+          "fingerprint": "88ffbf88973ca7eafb6fc60f09fdf94c5b1e061a8cf3f0ad666a5f538a93f6b8",
+          "match_count": 20,
           "matched_terms": [
             "joburi",
-            "Vîlcea"
+            "Vîlcea",
+            "Vâlcea",
+            "Râmnicu Vâlcea"
           ],
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "7"
+              "value_text": "8"
             }
           ],
           "health": "OK",
@@ -310,7 +312,10 @@
         "termene-top50-valcea"
       ],
       "official_changed_sources": [],
-      "degraded_sources": [],
+      "degraded_sources": [
+        "data-gov-onrc-datasets",
+        "data-gov-finance-datasets"
+      ],
       "sources": [
         {
           "id": "data-gov-onrc-datasets",
@@ -318,27 +323,15 @@
           "url": "https://data.gov.ro/dataset?organization=onrc",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/dataset?organization=onrc",
-          "fingerprint": "3bd9e8545e30f4d7318bf390a212c73447b862dc22548d085eb252de701bbd35",
-          "match_count": 8,
-          "matched_terms": [
-            "Firme înregistrate la Registrul Comerțului"
-          ],
-          "numeric_signals": [
-            {
-              "kind": "companies",
-              "value_text": "3"
-            },
-            {
-              "kind": "companies",
-              "value_text": "1"
-            }
-          ],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "data-gov-finance-datasets",
@@ -346,19 +339,15 @@
           "url": "https://data.gov.ro/organization/mfp",
           "source_class": "T1_OFFICIAL_OPEN_DATA",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://data.gov.ro/organization/mfp",
-          "fingerprint": "410ab3cc8cf7b71cd669ea83c68f73d938b2ae35a708cc55c1a3f11b9764216c",
-          "match_count": 6,
-          "matched_terms": [
-            "Situații financiare",
-            "CSV"
-          ],
+          "reachable": false,
+          "http_status": null,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "NEW_BASELINE"
+          "health": "UNREACHABLE",
+          "error": "URLError: <urlopen error timed out>",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "onrc-services",
