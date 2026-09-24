@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Render VÂLCEA CLAR Public UX with freshness-first live-story ranking.
 
-This module is a derived presentation adapter only. It delegates all filtering,
-rendering, taxonomy, holds and validation to ``public_ux_reset`` and changes
-only the order of already-published reader-facing stories:
+This module is a derived presentation adapter only. It layers freshness-first
+story ordering on top of ``public_ux_currentness`` so the canonical current /
+archive rules and Local Life event-aware ``/unde-iesim/`` projection survive
+every Public UX rebuild.
 
-    live publication -> first publication freshness -> editorial priority ->
-    current activity -> stable story id
+    current live publication -> first publication freshness -> editorial
+    priority -> current activity -> stable story id
 
 ``last_seen_at`` is deliberately a last-resort timestamp because an old story
 can be re-seen during a new newsroom transaction without becoming newly
@@ -20,8 +21,12 @@ import json
 from datetime import datetime
 from typing import Any
 
-import public_ux_reset as base
+import public_ux_currentness as currentness
 
+# Install current/archive and Local Life projection first; freshness ranking then
+# wraps its canonical union instead of bypassing it through public_ux_reset.
+currentness.install()
+base = currentness.base
 _ORIGINAL_UNION = base.union_stories
 
 
@@ -88,7 +93,9 @@ def self_test() -> int:
     assert rank_key(fresh, live) < rank_key(fresh_lower, live)
     assert rank_key(fresh_lower, live) < rank_key(old_active, live)
     assert rank_key(fresh, live) < rank_key(archived_newer, live)
-    print("VÂLCEA CLAR freshness-first Public UX ranking self-test: PASS")
+    assert base.render_venues is currentness.event_aware_venues
+    assert base.render_home is currentness.current_home
+    print("VÂLCEA CLAR freshness-first + currentness/Local Life Public UX self-test: PASS")
     return 0
 
 
@@ -108,7 +115,8 @@ def main() -> int:
         "stories": state["safe_story_count"],
         "live": state["live_story_count"],
         "navigation": state["navigation_contract"],
-        "ranking": "live_first_publication_freshness_priority_activity",
+        "ranking": "current_live_first_publication_freshness_priority_activity",
+        "local_life_projection": "event_aware",
     }, ensure_ascii=False))
     return 0
 
