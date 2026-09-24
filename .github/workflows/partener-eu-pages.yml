@@ -51,6 +51,7 @@ jobs:
           node --check partener-eu/web/step-lll-dossier-bridge-v2.js
           node --check partener-eu/web/public-heavy-loader-v1.js
           python partener-eu/ops/test_public_language.py
+          python partener-eu/ops/test_brand_civic_intelligence_v1.py
           python partener-eu/ops/prove_public_deploy.py --self-test
           grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/public-heavy-loader-v1.js
           if grep -F 'src="decision-products.js' partener-eu/web/index.html; then
