@@ -30,7 +30,10 @@ PREPARE_STATUS_CLASSES = {
     "status-prepare-now",
 }
 ARTICLE_RE = re.compile(r'<article class="staticCard"[^>]*>.*?</article>', re.S)
-PLAIN_PARAGRAPH_RE = re.compile(r'(?P<full>\s*<p>(?P<body>.*?)</p>)', re.S | re.I)
+# Generated card summaries use both bare <p> tags and attributed paragraphs.
+# Scope remains fail-closed because matching is still restricted to prepare cards
+# and to explicit, parseable application-window sentences.
+PLAIN_PARAGRAPH_RE = re.compile(r'(?P<full>\s*<p\b[^>]*>(?P<body>.*?)</p>)', re.S | re.I)
 TAG_RE = re.compile(r"<[^>]+>")
 NUMERIC_RANGE_RE = re.compile(
     r"\b(?:perioada\s+)?\d{1,2}[./]\d{1,2}(?:[./](?:20)?\d{2})?\s*[-–—]\s*"
@@ -228,7 +231,7 @@ def self_test() -> None:
     fixture = f'''<article class="staticCard" data-dossier-id="prepare-old">
 <span class="status status-expected">ÎN PREGĂTIRE</span>
 <p class="standfirst">Oportunitate în pregătire.</p><div class="cardFacts"></div>
-<p>{old_numeric}</p><a>Deschide dosarul</a></article>
+<p class="cardAudience">{old_numeric}</p><a>Deschide dosarul</a></article>
 <article class="staticCard" data-dossier-id="prepare-future">
 <span class="status status-upcoming">ÎN PREGĂTIRE</span><p>{future}</p></article>
 <article class="staticCard" data-dossier-id="open-old">
