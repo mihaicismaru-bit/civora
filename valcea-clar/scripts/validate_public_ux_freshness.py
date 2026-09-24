@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Fail closed when the reader-facing VÂLCEA CLAR presentation lags the live feed."""
+"""Fail closed when the reader-facing VÂLCEA CLAR presentation lags the live feed.
+
+Currentness is resolved through the canonical current/archive adapter rather
+than treating every durable feed row as a live/current story. This keeps the
+freshness validator aligned with the reader presentation and Local Life-aware
+projector.
+"""
 from __future__ import annotations
 
 import json
@@ -10,7 +16,12 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 RUNTIME = SITE / "runtime"
 sys.path.insert(0, str(ROOT / "scripts"))
-import public_ux_reset as ux  # noqa: E402
+import public_ux_currentness as currentness  # noqa: E402
+
+# Install canonical current/archive + Local Life hooks before deriving reader
+# counts. The durable live feed intentionally retains published archive rows.
+currentness.install()
+ux = currentness.base
 
 
 def load(path: Path) -> dict:
@@ -37,14 +48,13 @@ def validate() -> dict:
     if not expected_live.issubset(actual_story_ids):
         missing = sorted(expected_live - actual_story_ids)
         raise SystemExit(f"Public UX missing live stories: {missing}")
-    if feed.get("stories") and not expected_live:
-        raise SystemExit("Public live feed has stories but Public UX resolved zero live reader stories")
+    if feed.get("stories") and not reader_ids:
+        raise SystemExit("Public durable feed has stories but Public UX resolved zero reader stories")
 
     home = (RUNTIME / "index.html").read_text(encoding="utf-8")
-    if expected_live:
-        marker = live_count_marker(len(expected_live))
-        if marker not in home:
-            raise SystemExit(f"Public UX homepage live-count marker missing: {marker}")
+    marker = live_count_marker(len(expected_live))
+    if marker not in home:
+        raise SystemExit(f"Public UX homepage live-count marker missing: {marker}")
 
     manifest = load(RUNTIME / "stiri" / "manifest.json")
     for row in manifest.get("stories") or []:
@@ -62,8 +72,8 @@ def validate() -> dict:
     result = {
         "status": "PASS",
         "safe_story_count": len(stories),
-        "live_story_count": len(expected_live),
-        "feed_story_count": len(feed.get("stories") or []),
+        "current_story_count": len(expected_live),
+        "durable_feed_story_count": len(feed.get("stories") or []),
     }
     print(json.dumps(result, ensure_ascii=False))
     return result
@@ -71,10 +81,11 @@ def validate() -> dict:
 
 def self_test() -> int:
     assert live_count_marker(0) == "0 materiale în fluxul curent"
-    assert live_count_marker(30) == "30 materiale în fluxul curent"
-    assert live_count_marker(0) != live_count_marker(30)
-    assert live_count_marker(30).startswith("30 ")
-    print("VÂLCEA CLAR Public UX freshness gate self-test: PASS")
+    assert live_count_marker(16) == "16 materiale în fluxul curent"
+    assert live_count_marker(0) != live_count_marker(16)
+    assert ux.render_venues is currentness.event_aware_venues
+    assert ux.render_home is currentness.current_home
+    print("VÂLCEA CLAR Public UX canonical-currentness freshness gate self-test: PASS")
     return 0
 
 
