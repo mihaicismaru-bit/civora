@@ -5,7 +5,11 @@ on:
     branches: [main]
     paths:
       - 'valcea-clar/ops/live-newsroom-trigger.json'
+      - 'valcea-clar/editorial/local_life_surface_registry.json'
+      - 'valcea-clar/editorial/local_life_entity_corrections.json'
       - 'valcea-clar/scripts/sync_local_life_events.py'
+      - 'valcea-clar/scripts/repair_local_life_event_projection.py'
+      - 'valcea-clar/scripts/sync_local_life_surfaces.py'
   workflow_dispatch:
 
 permissions:
@@ -25,30 +29,36 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.13'
-      - name: Validate Local Life writer
+      - name: Validate Local Life event writer
         run: python valcea-clar/scripts/sync_local_life_events.py --self-test
       - name: Materialize operator event deltas
         run: python valcea-clar/scripts/sync_local_life_events.py
-      - name: Persist Local Life registry and route
+      - name: Repair event projection deduplication
+        run: python valcea-clar/scripts/repair_local_life_event_projection.py
+      - name: Materialize Local Life child surfaces
+        run: python valcea-clar/scripts/sync_local_life_surfaces.py
+      - name: Persist Local Life registries and complete route tree
         shell: bash
         run: |
           set -euo pipefail
           cp valcea-clar/editorial/local_life_events.json /tmp/local-life-events.json
-          cp valcea-clar/site/runtime/unde-iesim/index.html /tmp/unde-iesim-index.html
+          rm -rf /tmp/unde-iesim-runtime
+          cp -a valcea-clar/site/runtime/unde-iesim /tmp/unde-iesim-runtime
           git config user.name 'vâlcea-clar-local-life[bot]'
           git config user.email 'valcea-clar-local-life@users.noreply.github.com'
           for attempt in 1 2 3 4 5; do
             git fetch origin main
             git reset --hard origin/main
-            mkdir -p valcea-clar/editorial valcea-clar/site/runtime/unde-iesim
+            mkdir -p valcea-clar/editorial valcea-clar/site/runtime
             cp /tmp/local-life-events.json valcea-clar/editorial/local_life_events.json
-            cp /tmp/unde-iesim-index.html valcea-clar/site/runtime/unde-iesim/index.html
-            git add valcea-clar/editorial/local_life_events.json valcea-clar/site/runtime/unde-iesim/index.html
+            rm -rf valcea-clar/site/runtime/unde-iesim
+            cp -a /tmp/unde-iesim-runtime valcea-clar/site/runtime/unde-iesim
+            git add -A valcea-clar/editorial/local_life_events.json valcea-clar/site/runtime/unde-iesim
             if git diff --cached --quiet; then
               echo 'Local Life state already current.'
               exit 0
             fi
-            git commit -m 'Sync VÂLCEA CLAR Local Life event inventory'
+            git commit -m 'Sync VÂLCEA CLAR Local Life complete surfaces'
             if git push origin HEAD:main; then
               exit 0
             fi
