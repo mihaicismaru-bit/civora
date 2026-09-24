@@ -48,7 +48,21 @@ jobs:
         run: python partener-eu/ops/test_afir_september_2026_updates.py
 
       - name: Validate decision-product contract
-        run: python partener-eu/ops/test_decision_products.py
+        shell: bash
+        run: |
+          set +e
+          python partener-eu/ops/test_decision_products.py 2>&1 | tee /tmp/partener-decision-contract.log
+          status=${PIPESTATUS[0]}
+          set -e
+          exit "$status"
+
+      - name: Upload decision-contract diagnostic
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-decision-contract-diagnostic
+          path: /tmp/partener-decision-contract.log
+          retention-days: 1
 
       - name: Validate Romanian public language
         run: python partener-eu/ops/test_public_language.py
