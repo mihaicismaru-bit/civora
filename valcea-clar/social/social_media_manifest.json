@@ -145,90 +145,42 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 2,
-    "autonomous_story_ids_24h": [
-      "dragasani-ct-radiologie-program-clarificare-20260924",
-      "horezu-drum-vf-roman-inchis-20260926"
-    ],
+    "autonomous_stories_published_24h": 0,
+    "autonomous_story_ids_24h": [],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 2,
-      "published": 2,
-      "stories": [
-        {
-          "story_id": "horezu-drum-vf-roman-inchis-20260926",
-          "seconds": 197,
-          "discovered_at_utc": "2026-09-23T21:20:09Z",
-          "published_at_utc": "2026-09-23T21:23:26Z"
-        },
-        {
-          "story_id": "dragasani-ct-radiologie-program-clarificare-20260924",
-          "seconds": 251,
-          "discovered_at_utc": "2026-09-23T22:07:24Z",
-          "published_at_utc": "2026-09-23T22:11:35Z"
-        }
-      ],
-      "max_seconds": 251,
-      "median_seconds": 251
+      "measured": 0,
+      "published": 0,
+      "stories": [],
+      "max_seconds": null,
+      "median_seconds": null
     },
     "photo_coverage": {
-      "status": "MEASURED",
+      "status": "NO_PUBLISHED_STORIES",
       "real_photo_stories": 0,
-      "published_stories": 2,
-      "value": 0.0,
+      "published_stories": 0,
+      "value": null,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "PASS",
-      "eligible": 2,
-      "readback_ok": 2,
-      "value": 1.0,
-      "blocker_story_ids": [],
-      "checks": [
-        {
-          "story_id": "dragasani-ct-radiologie-program-clarificare-20260924",
-          "url": "https://valceaclar.ro/stiri/dragasani-ct-radiologie-program-clarificare-20260924/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        },
-        {
-          "story_id": "horezu-drum-vf-roman-inchis-20260926",
-          "url": "https://valceaclar.ro/stiri/horezu-drum-vf-roman-inchis-20260926/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        }
-      ],
-      "projection_evidence": {
-        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
-        "http_status": 200,
-        "error": null,
-        "updated_local": "2026-09-24T15:19:29.978428Z",
-        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 76
-      },
+      "status": "NO_ELIGIBLE_STORIES",
+      "eligible": 0,
+      "readback_ok": 0,
+      "value": null,
+      "checks": [],
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "MEASURED",
+      "status": "NO_ELIGIBLE_STORIES",
       "delivered": 0,
-      "eligible": 2,
-      "value": 0.0,
-      "delivered_story_ids": []
+      "eligible": 0,
+      "value": null
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "MEASURED",
+      "status": "NO_ELIGIBLE_STORIES",
       "delivered": 0,
-      "eligible": 2,
-      "value": 0.0,
-      "delivered_story_ids": []
+      "eligible": 0,
+      "value": null
     },
     "duplicates": {
       "status": "MEASURED",
@@ -259,6 +211,38 @@
         }
       ],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36067627916,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-24T22:28:31Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36067568386,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-24T22:27:53Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36057308366,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-24T20:48:06Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36056812175,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-24T20:43:41Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 36047096733,
