@@ -41,11 +41,17 @@ jobs:
           cp partener-eu/ingest/state/decision_products.json /tmp/partener-products-baseline.json
           python partener-eu/ingest/apply_afir_september_2026_updates.py
 
-      - name: Validate source-bound dossiers and fail-closed lifecycle
+      - name: Validate September AFIR source-bound lifecycle
+        run: python partener-eu/ops/test_afir_september_2026_updates.py
+
+      - name: Validate decision-product contract
+        run: python partener-eu/ops/test_decision_products.py
+
+      - name: Validate Romanian public language
+        run: python partener-eu/ops/test_public_language.py
+
+      - name: Validate public last-known-good continuity
         run: |
-          python partener-eu/ops/test_afir_september_2026_updates.py
-          python partener-eu/ops/test_decision_products.py
-          python partener-eu/ops/test_public_language.py
           python partener-eu/ops/validate_decision_products_lkg.py \
             --baseline /tmp/partener-products-baseline.json \
             --candidate partener-eu/ingest/state/decision_products.json
