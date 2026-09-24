@@ -1,7 +1,7 @@
 {
-  "requested_at": "2026-09-24T04:11:24+03:00",
+  "requested_at": "2026-09-24T09:58:34+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "CANONICAL INDEXING REPAIR + COUNTY DELTA FOLLOW-UP. The 24 Sep presentation refresh exposed a technical regression: Public UX preserves 76 reader-authorized durable stories, but sitemap.xml was rebuilt from the 16-story live manifest and silently dropped archive URLs. PR #1314 fixes overlay_runtime_export so post-integrity Public UX routes are persisted in runtime indexing extras and survive live-manifest rollover. Reconcile the canonical runtime and public readback after this repair. Bootstrap commit 8b58862288dcb1c576fcb6769ab05680bb142ba4 now materializes the current durable Public UX HTML routes into indexing_extra_routes.json so the no-change indexing path can immediately rebuild a complete sitemap; overlay commit 329503cd67f5f0d9185ad5f9e4b5c3e31e69d66c also excludes the non-HTML RSS feed from HTML route validation. Editorially, no new low-risk county story justifies filler in this cycle. One official service delta is useful for the existing Raliul Valcii story: Shopping City Ramnicu Valcea publishes the Service Park schedule for 25-26 Sep in the Decathlon parking zone, with times explicitly marked estimated and subject to change. Update the existing Raliul service context if useful; do not create a duplicate article. Public homepage has partially converged (Horezu appears) but its global update label remains stale, while /unde-iesim/ still serves 18 rows with duplicate Paralele Corale/Floarea Darului and does not yet show the canonical Malaia event. Keep social fail-closed until public story readback and receipts exist.",
+  "reason": "HOURLY COUNTY DELTA + LOCAL LIFE HOT WATCH. No filler. Add the newly verified 26-27 Sep Race The Vibe manifestation in Nicolae Balcescu to the structured event inventory. Keep the traffic restriction details as SOURCE_CLAIM because the fresh restriction article contains an internal year typo (2025) even though multiple September 2026 agenda/event sources place the event on 26-27 September 2026. Preserve the Fitness Cool current-location correction: Dem Radulescu 53-55, Bloc X3, parter; Gib Mihaescu is stale/historical and must not be rendered as current.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533",
@@ -10,104 +10,83 @@
   ],
   "editorial_signals": [
     {
-      "signal_id": "raliul-valcii-service-park-shopping-city-20260924",
-      "locality": "Râmnicu Vâlcea",
+      "signal_id": "race-the-vibe-nicolae-balcescu-20260926",
+      "locality": "Nicolae Balcescu / Serbaneasa",
       "status": "CONFIRMED_FACT",
-      "product_candidate": "UPDATE_EXISTING_SERVICE_STORY_OR_LOCAL_LIFE_DETAIL",
+      "product_candidate": "UNDE_IESIM_SERVICE",
       "risk": "LOW",
-      "claim": "Shopping City Râmnicu Vâlcea publishes the Raliul Vâlcii Service Park in the Decathlon parking zone for 24-26 September, with detailed service/re-grouping windows for Friday 25 and Saturday 26 September; the page explicitly says passage times are estimates and may change.",
-      "source_url": "https://www.shoppingcityramnicuvalcea.ro/evenimente/parcul-service-al-raliului-valcii-2026",
-      "source_tier": "T1_VENUE",
-      "checked_at": "2026-09-24T04:11:24+03:00",
-      "next_action": "Use as a service-detail update to the existing Raliul story or structured Local Life context; do not create a duplicate Raliul article. Preserve the estimated-times caveat."
+      "claim": "Race The Vibe is scheduled in Serbaneasa, Nicolae Balcescu, on 26-27 September 2026 on DJ 678A. Multiple September 2026 sources independently place the event on those dates; categories include moto and auto competition.",
+      "source_url": "https://www.impactreal.ro/2026/09/18/adrenalina-viteza-si-spectacol-la-nicolae-balcescu-race-the-vibe-revine-la-serbaneasa/",
+      "source_tier": "T2_CORROBORATED_BY_MONTHLY_CULTURAL_AGENDA",
+      "checked_at": "2026-09-24T09:58:34+03:00",
+      "next_action": "Add/update the event registry with unknown price/access unless a stronger source verifies it."
     },
     {
-      "signal_id": "vaideeni-cl-session-20260924",
-      "locality": "Vaideeni",
+      "signal_id": "race-the-vibe-traffic-restrictions-20260926",
+      "locality": "Nicolae Balcescu / Serbaneasa",
       "status": "SOURCE_CLAIM",
-      "product_candidate": "CE_URMEAZA_OR_CLARIFICAM_AFTER_PRIMARY",
-      "risk": "LOW_ADMINISTRATION_BUT_PRIMARY_PENDING",
-      "claim": "Eveniment Vâlcean reports that the Vaideeni Local Council is scheduled to meet on 24 September 2026 at 07:00, with agenda items including the day-centre food allowance, local-budget rectification, a pasture-lease addendum, school leadership competition representatives, vehicle-registration rules and rules for authorising gambling/loto/sports-betting premises.",
-      "source_url": "https://evenimentvalcean.ro/consiliul-local-vaideeni-se-reuneste-joi-24-septembrie-2026-mai-multe-proiecte-importante-pe-ordinea-de-zi/",
+      "product_candidate": "UPDATE_SERVICE_DETAIL_AFTER_PRIMARY_CONFIRMATION",
+      "risk": "LOW_BUT_DATE_CONTRADICTION",
+      "claim": "A fresh local report attributes to Primaria Nicolae Balcescu a closure of about 1.1 km of DJ 678A (km 17+200 to 18+300), 10:00-21:00, plus restrictions for vehicles over 7.5 t and alternative routes. The article says 26-27 September but prints year 2025, conflicting with the independently corroborated 2026 event date.",
+      "source_url": "https://seintamplainvalcea.ro/2026/09/23/restrictii-de-circulatie-la-nicolae-balcescu-pentru-race-the-vibe/",
       "source_tier": "T2",
-      "checked_at": "2026-09-24T03:04:45+03:00",
-      "next_action": "Find the municipal convocation/order-of-business or adopted decisions before any article; then explain practical effects rather than reproducing the agenda."
+      "checked_at": "2026-09-24T09:58:34+03:00",
+      "next_action": "Do not publish the restriction details as confirmed until a primary municipal/CJ/police notice or corrected source resolves the year typo."
     },
     {
-      "signal_id": "judiciary-impartiality-claim-mioara-dumitrascu-20260924",
-      "locality": "Râmnicu Vâlcea / Tribunalul Vâlcea",
-      "status": "NEEDS_HUMAN_REVIEW",
-      "product_candidate": "VERIFICAT_OR_DOSAR_ONLY_AFTER_PRIMARY_RECORDS",
-      "risk": "HIGH_REPUTATIONAL_LEGAL",
-      "claim": "A local outlet alleges an impartiality/conflict concern involving a judge and a case in which a journalist who criticised her is a claimant. The claim remains an investigation lead, not proof.",
-      "source_url": "https://ziaruldevalcea.ro/2026/09/poate-judecatoarea-mioara-dumitrascu-de-la-tribunalul-valcea-sa-judece-un-dosar-in-care-reclamant-este-jurnalistul-care-a-criticat-o-public-moral-dar-si-legal-nu/",
-      "source_tier": "T2_OPINIONATED_LOCAL_PRESS",
-      "checked_at": "2026-09-24T03:04:45+03:00",
-      "next_action": "Resolve the exact case number, docket, panel assignment, recusation/abstention record and the court response before any publication. Do not adopt the source's legal conclusion."
-    },
-    {
-      "signal_id": "asset-declarations-donation-125k-eur-20260924",
-      "locality": "Râmnicu Vâlcea / județul Vâlcea",
-      "status": "NEEDS_HUMAN_REVIEW",
-      "product_candidate": "DOSAR_LEAD_ONLY",
-      "risk": "HIGH_REPUTATIONAL_FINANCIAL",
-      "claim": "A local outlet alleges that 2023 asset declarations show a 125,000-euro donation. This remains an investigation lead only; primary declarations and the exact donor/recipient fields have not been reconciled.",
-      "source_url": "https://ziaruldevalcea.ro/2026/09/dezvaluiri-in-atentia-ani-donatie-de-125-000-de-euro-ce-arata-declaratiile-de-avere-ale-judecatoarei-andreea-ghinea-vlasceanu-si-ale-consilierului-local-nicolae-vlasceanu/",
-      "source_tier": "T2_LOCAL_PRESS",
-      "checked_at": "2026-09-24T03:04:45+03:00",
-      "next_action": "Obtain both original declarations from competent official repositories, reconcile date/amount/currency/donor-recipient fields, check later declarations and seek responses before considering publication."
+      "signal_id": "fitness-cool-location-correction-20260924",
+      "locality": "Ramnicu Valcea",
+      "status": "CONFIRMED_FACT",
+      "product_candidate": "FITNESS_REGISTRY_CORRECTION",
+      "risk": "LOW",
+      "claim": "Fitness Cool's current public location is Bulevardul Dem Radulescu 53-55, Bloc X3, parter. The Gib Mihaescu address is stale/historical and must not be rendered as the current gym location.",
+      "source_url": "https://stilhub.ro/valcea/ramnicu-valcea/fitness-cool",
+      "source_tier": "T2_CORROBORATED",
+      "checked_at": "2026-09-24T09:58:34+03:00",
+      "next_action": "Apply the canonical entity correction whenever the fitness surface is materialized; never resurrect Gib Mihaescu from stale directories/company-registration data."
     }
   ],
   "coverage_cycle": {
     "deep_scan_zone": "county_delta_plus_local_life_hot_watch",
     "scanned_localities": [
-      "Drăgășani",
-      "Bălcești",
-      "Călimănești",
-      "Brezoi",
+      "Ramnicu Valcea",
+      "Dragasani",
       "Horezu",
+      "Calimanesti",
+      "Brezoi",
+      "Balcesti",
       "Voineasa",
       "Vaideeni",
-      "Mălaia",
-      "Ionești",
-      "Tomșani",
-      "Ocnele Mari",
-      "Băile Olănești",
-      "Mihăești",
-      "Nicolae Bălcescu",
-      "Râmnicu Vâlcea"
+      "Malaia",
+      "Ionesti",
+      "Tetoiu",
+      "Fartatesti",
+      "Bunesti",
+      "Mihaesti",
+      "Nicolae Balcescu"
     ],
-    "material_delta_localities": [
-      "Râmnicu Vâlcea"
-    ],
-    "policy": "No filler; use new Raliul service detail as an update, not a duplicate. Reputational allegations fail closed pending primary records and right of reply."
+    "material_delta_localities": ["Nicolae Balcescu"],
+    "policy": "No filler; hot-watch the next 72h. Material traffic claims with unresolved date contradiction remain fail-closed."
   },
   "event_deltas": [
     {
-      "event_id": "european-folk-day-salistea79-malaia-20260927",
-      "title": "Săliștea 79. Între vis și suspendare",
-      "event_start": "2026-09-27",
-      "start_time": "11:00",
-      "venue": "Expoziția Fluierelor Lumii",
-      "locality": "Săliștea, Mălaia",
-      "category": "patrimoniu / gastronomie / cultură",
+      "event_id": "race-the-vibe-nicolae-balcescu-20260926",
+      "title": "Race The Vibe 2026",
+      "event_start": "2026-09-26",
+      "event_end": "2026-09-27",
+      "start_time": "10:00",
+      "venue": "DJ 678A, sat Serbaneasa",
+      "locality": "Nicolae Balcescu",
+      "category": "sport auto-moto",
       "price": "unknown",
       "free": null,
-      "organiser": null,
-      "source_url": "https://www.europeanfolkday.eu/events/",
-      "source_tier": "T1_OFFICIAL_EVENT_NETWORK",
-      "checked_at": "2026-09-24T03:04:45+03:00",
+      "ticket_url": null,
+      "reservation_url": null,
+      "organiser": "Asociatia Ride The Vibe / Club Sportiv Valcea / Consiliul Judetean Valcea",
+      "source_url": "https://www.impactreal.ro/2026/09/18/adrenalina-viteza-si-spectacol-la-nicolae-balcescu-race-the-vibe-revine-la-serbaneasa/",
+      "source_tier": "T2_CORROBORATED_BY_MONTHLY_CULTURAL_AGENDA",
+      "checked_at": "2026-09-24T09:58:34+03:00",
       "status": "scheduled"
     }
-  ],
-  "technical_reconciliation": {
-    "issue": "sitemap_dropped_durable_archive_routes_when_live_manifest_rolled_to_current_set",
-    "canonical_safe_story_count": 76,
-    "live_story_count": 16,
-    "fix_pr": 1314,
-    "fix_commit": "6dfacf30b77a244744ef39a9e4213a2bdcbcaf61",
-    "bootstrap_indexing_extra_commit": "8b58862288dcb1c576fcb6769ab05680bb142ba4",
-    "overlay_feed_exclusion_commit": "329503cd67f5f0d9185ad5f9e4b5c3e31e69d66c",
-    "expected_policy": "sitemap includes reader-authorized durable Public UX HTML routes plus current live stories and configured static routes; explicit holds remain excluded; RSS remains a feed asset but is not validated as an HTML route"
-  }
+  ]
 }
