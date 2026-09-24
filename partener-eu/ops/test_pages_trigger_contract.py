@@ -1,27 +1,37 @@
 #!/usr/bin/env python3
-"""Regression guard for publication-trigger coverage.
+"""Regression guard for PARTENER.EU publication-trigger coverage.
 
-PARTENER.EU contains writer workflows that persist validated public artifacts back to
-main with GITHUB_TOKEN. Those bot-authored commits do not recursively emit ordinary
-push-triggered Actions runs. The Pages workflow therefore must subscribe directly to
-successful upstream writer workflow completions that can change public artifacts.
+Validated writer workflows may persist public artifacts to ``main`` with GITHUB_TOKEN.
+GitHub deliberately suppresses most recursive workflow events from such token-authored
+commits, so a writer can make repo truth newer than the public Pages deployment unless
+there is an explicit handoff. This test keeps the AFIR coverage -> Pages handoff
+fail-closed and auditable.
 """
 from pathlib import Path
 
-WORKFLOW = Path('.github/workflows/partener-eu-pages.yml')
-text = WORKFLOW.read_text(encoding='utf-8')
+BRIDGE = Path('.github/workflows/partener-eu-afir-pages-bridge.yml')
+PAGES = Path('.github/workflows/partener-eu-pages.yml')
 
-required_workflow_run_sources = (
-    'PARTENER.EU MIPE Ingestion',
-    'PARTENER.EU MIPE Engine v3',
-    'PARTENER.EU PEO Calendar',
-    'PARTENER.EU Editorial Daily Products',
-    'PARTENER.EU AFIR September Coverage',
+bridge = BRIDGE.read_text(encoding='utf-8')
+pages = PAGES.read_text(encoding='utf-8')
+
+assert "- 'PARTENER.EU AFIR September Coverage'" in bridge, (
+    'AFIR coverage writer must have an explicit publication handoff'
 )
+assert "github.event.workflow_run.conclusion == 'success'" in bridge, (
+    'Bridge must not dispatch Pages after a failed upstream writer run'
+)
+assert "github.event.workflow_run.head_branch == 'main'" in bridge, (
+    'Bridge must not publish PR/head-branch coverage runs'
+)
+assert 'actions: write' in bridge, 'Bridge needs bounded Actions dispatch permission'
+assert 'contents: read' in bridge, 'Bridge must remain read-only for repository contents'
+assert 'gh workflow run partener-eu-pages.yml --ref main' in bridge, (
+    'Bridge must dispatch the canonical PARTENER.EU Pages workflow on main'
+)
+assert "- '.github/workflows/partener-eu-afir-pages-bridge.yml'" in bridge, (
+    'Bridge installation itself must trigger one deployment so current persisted data is published'
+)
+assert 'workflow_dispatch:' in pages, 'Canonical Pages workflow must remain dispatchable'
 
-missing = [name for name in required_workflow_run_sources if f"- '{name}'" not in text]
-assert not missing, f'Pages workflow missing workflow_run sources: {missing}'
-assert "github.event.workflow_run.conclusion == 'success'" in text, 'Pages must fail closed on upstream workflow failure'
-assert "github.event.workflow_run.head_branch == 'main'" in text, 'Pages workflow_run must be main-scoped'
-
-print('PASS: Pages trigger contract covers validated upstream public writers and remains fail-closed.')
+print('PASS: AFIR writer -> Pages publication handoff is explicit, main-scoped and fail-closed.')
