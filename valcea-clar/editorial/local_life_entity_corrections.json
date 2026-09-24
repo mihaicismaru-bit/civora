@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-09-24T09:06:00+03:00",
+  "corrections": [
+    {
+      "entity_id": "fitness-cool-ramnicu-valcea",
+      "name": "Fitness Cool",
+      "entity_type": "fitness",
+      "locality": "Râmnicu Vâlcea",
+      "canonical_current_address": "Bulevardul Dem Rădulescu 53-55, Bloc X3, parter",
+      "stale_or_historical_addresses": [
+        "Strada Gib Mihăescu 15B, parter"
+      ],
+      "correction_reason": "User-reported relocation corroborated by multiple current public sources; the Gib Mihăescu address persists in stale directories/company-registration data and must not be used as the current gym location.",
+      "verification": {
+        "status": "CORROBORATED_CURRENT_LOCATION",
+        "checked_at": "2026-09-24T09:06:00+03:00",
+        "sources": [
+          {
+            "url": "https://ramnicu-valcea.cylex.ro/cluburi-de-fitness/",
+            "tier": "T2",
+            "note": "Lists Fitness Cool at Bulevardul Dem Radulescu 53-55 and separately retains a stale company listing at Gib Mihăescu."
+          },
+          {
+            "url": "https://stilhub.ro/valcea/ramnicu-valcea/fitness-cool",
+            "tier": "T2",
+            "note": "Lists Bulevardul Dem Radulescu 53-55, Bloc X3, parter."
+          },
+          {
+            "url": "https://fitnet.ro/club-fitness-fitness-cool",
+            "tier": "T2",
+            "note": "Lists Bulevard Dem Radulescu, Bloc X3, parter."
+          }
+        ]
+      },
+      "publication_policy": {
+        "current_public_address_must_use_canonical_current_address": true,
+        "stale_address_must_not_be_rendered_as_current": true,
+        "if_conflict_reappears": "prefer current corroborated business location; flag stale registry/directory source"
+      }
+    }
+  ]
+}
