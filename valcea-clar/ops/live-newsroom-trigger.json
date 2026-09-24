@@ -1,7 +1,7 @@
 {
-  "requested_at": "2026-09-24T10:09:00+03:00",
+  "requested_at": "2026-09-24T12:01:40+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "HOURLY COUNTY DELTA + LOCAL LIFE HOT WATCH. No filler. Race The Vibe 2026 is verified for 26-27 Sep in Serbaneasa, Nicolae Balcescu. A newer 23 Sep report reproduces the municipal traffic notice with the correct 2026 dates, resolving the earlier secondary-source year typo. Preserve the Fitness Cool current-location correction: Dem Radulescu 53-55, Bloc X3, parter; Gib Mihaescu is stale/historical and must not be rendered as current. Public readback currently shows stale Local Life/Fitness projections, so do not claim those corrections are live until readback passes.",
+  "reason": "HOURLY COUNTY DELTA + POST-NOON LOCAL LIFE REFRESH. No filler. New low-risk public-service signal: controlled demolitions/detonations at the former Uzina de Soda Govora industrial platform begin 24 Sep 2026; a same-day report citing IPJ Valcea says the first operation is planned for 18:30-18:45 and similar works may continue for about two weeks. Treat precise operational details as SOURCE_CLAIM until direct IPJ readback is obtained. Cinema second refresh and menu-of-the-day post-noon delta check are due; fail closed on stale rows. Preserve Fitness Cool correction: Dem Radulescu 53-55, Bloc X3, parter; Gib Mihaescu is stale/historical.",
   "expected_story_ids": [
     "brezoi-acces-ingrijire-domiciliu-selectie-20260923",
     "auto-raliul-valcii-official-news-f6e28bbb1533",
@@ -44,10 +44,34 @@
       "source_tier": "T2_CORROBORATED",
       "checked_at": "2026-09-24T10:09:00+03:00",
       "next_action": "Apply the canonical entity correction whenever the fitness surface is materialized; public readback still shows Gib Mihaescu, so keep delivery status PENDING until replaced."
+    },
+    {
+      "signal_id": "govora-controlled-demolition-20260924",
+      "locality": "Ramnicu Valcea / platforma industriala Govora",
+      "status": "SOURCE_CLAIM",
+      "product_candidate": "PE_SCURT_SERVICE",
+      "risk": "LOW",
+      "claim": "A same-day report citing IPJ Valcea says controlled demolition of disused structures at the former Uzina de Soda Govora begins on 24 September 2026 using explosive materials; the first operation is planned for 18:30-18:45 and similar controlled operations may continue for about two weeks. Residents may hear loud noises from the industrial platform.",
+      "source_url": "https://www.gds.ro/Local/Valcea/2026-09-24/detonari-controlate-la-fosta-uzina-de-soda-govora/",
+      "source_tier": "T2_CITES_IPJ_VALCEA",
+      "checked_at": "2026-09-24T12:01:40+03:00",
+      "next_action": "Seek direct IPJ source/readback; if no contradiction, publish low-risk service brief with transparent attribution and without inventing traffic restrictions, evacuation zones or exact future detonation times."
+    },
+    {
+      "signal_id": "cinema-geo-post-noon-refresh-20260924",
+      "locality": "Ramnicu Valcea",
+      "status": "CONFIRMED_FACT",
+      "product_candidate": "CINEMA_REGISTRY_REFRESH",
+      "risk": "LOW",
+      "claim": "The official Cinema Geo Saizescu site is serving a current programme page on 24 September 2026; entries with exhibition windows ending on 24 September remain current for today, while titles starting 25 September must not be rendered as today's screenings without a screening-time record.",
+      "source_url": "https://cinemageosaizescu.ro/",
+      "source_tier": "T1_OFFICIAL",
+      "checked_at": "2026-09-24T12:01:40+03:00",
+      "next_action": "Run the scheduled post-noon cinema delta refresh and expire only past screenings; do not infer showtimes from exhibition-date ranges."
     }
   ],
   "coverage_cycle": {
-    "deep_scan_zone": "county_delta_plus_local_life_hot_watch",
+    "deep_scan_zone": "county_delta_plus_post_noon_local_life",
     "scanned_localities": [
       "Ramnicu Valcea",
       "Dragasani",
@@ -65,8 +89,10 @@
       "Mihaesti",
       "Nicolae Balcescu"
     ],
-    "material_delta_localities": ["Nicolae Balcescu", "Ramnicu Valcea"],
-    "policy": "No filler; hot-watch the next 72h; Local Life delivery truth requires public readback."
+    "material_delta_localities": [
+      "Ramnicu Valcea"
+    ],
+    "policy": "No filler; hot-watch next 72h; post-noon Cinema and Meniul Zilei freshness gates apply; Local Life delivery truth requires public readback."
   },
   "event_deltas": [
     {
