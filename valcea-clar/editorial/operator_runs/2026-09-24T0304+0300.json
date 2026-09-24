@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "run_at": "2026-09-24T03:04:45+03:00",
+  "mode": "autonomous_county_delta",
+  "coverage": {
+    "localities": ["Drăgășani", "Bălcești", "Călimănești", "Brezoi", "Horezu", "Voineasa", "Vaideeni", "Mălaia", "Ionești", "Tomșani", "Ocnele Mari", "Băile Olănești", "Râmnicu Vâlcea"],
+    "material_delta_localities": ["Mălaia", "Vaideeni", "Râmnicu Vâlcea"]
+  },
+  "newsroom_state": {
+    "publishable_story_count_before_cycle": 16,
+    "new_low_risk_story_ids": [],
+    "publication_policy": "no_filler"
+  },
+  "signals": [
+    {
+      "id": "vaideeni-cl-session-20260924",
+      "classification": "SOURCE_CLAIM",
+      "risk": "LOW_ADMINISTRATION_PRIMARY_PENDING",
+      "disposition": "FOLLOW_UP_PRIMARY_BEFORE_ARTICLE"
+    },
+    {
+      "id": "judiciary-impartiality-claim-mioara-dumitrascu-20260924",
+      "classification": "UNVERIFIED_REPUTATIONAL_CLAIM",
+      "risk": "HIGH_REPUTATIONAL_LEGAL",
+      "disposition": "NEEDS_HUMAN_REVIEW_AFTER_PRIMARY_RECORDS_AND_RIGHT_OF_REPLY"
+    },
+    {
+      "id": "asset-declarations-donation-125k-eur-20260924",
+      "classification": "UNVERIFIED_REPUTATIONAL_FINANCIAL_CLAIM",
+      "risk": "HIGH_REPUTATIONAL_FINANCIAL",
+      "disposition": "DOSAR_LEAD_ONLY_PRIMARY_DOCUMENTS_REQUIRED"
+    },
+    {
+      "id": "digital-payments-valcea-generic-20260924",
+      "classification": "LOW_EDITORIAL_VALUE",
+      "disposition": "REJECT_NO_FILLER"
+    }
+  ],
+  "local_life": {
+    "canonical_registry_commit": "7d05de9c72fb482d6eb839b2bc5aca5274584606",
+    "event_id": "european-folk-day-salistea79-malaia-20260927",
+    "classification": "CONFIRMED_FACT",
+    "title": "Săliștea 79. Între vis și suspendare",
+    "event_start": "2026-09-27",
+    "start_time": "11:00",
+    "venue": "Expoziția Fluierelor Lumii",
+    "locality": "Săliștea, Mălaia",
+    "price": "unknown",
+    "free": null,
+    "source_url": "https://www.europeanfolkday.eu/events/",
+    "source_tier": "T1_OFFICIAL_EVENT_NETWORK",
+    "status": "scheduled",
+    "canonical_event_count_after_sync": 12
+  },
+  "delivery_truth": {
+    "canonical_local_life_updated": true,
+    "public_unde_iesim_readback": "NOT_CONVERGED",
+    "public_homepage_last_update_visible": "2026-09-23T12:12:00+03:00",
+    "public_page_contains_malaia_event": false,
+    "facebook_delivered": 0,
+    "instagram_delivered": 0,
+    "reason_social_not_sent": "No new publicly read-back news story; Local Life inventory delta is not auto-cross-posted."
+  },
+  "follow_ups": [
+    "Resolve Vaideeni municipal primary convocation/agenda or adopted decisions before publication.",
+    "Resolve official docket/recusal records and obtain right of reply before any judiciary impartiality story.",
+    "Obtain original asset declarations and reconcile the alleged 125,000-euro donation before any dossier publication.",
+    "Repair or reconcile runtime-to-public-host currentness so canonical Local Life dedupe and Mălaia event reach valceaclar.ro."
+  ]
+}
