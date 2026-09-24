@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-09-24T15:02:00+03:00",
+  "policy": {
+    "fail_closed_on_stale_rows": true,
+    "menu_requires_same_day_check": true,
+    "cinema_screening_requires_explicit_date_and_time": true,
+    "fitness_current_location_overrides_stale_directories": true,
+    "sport_time_recheck_within_48h": true
+  },
+  "sport": {
+    "entries": [
+      {
+        "sport": "handbal feminin",
+        "competition": "Liga Florilor MOL",
+        "date": "2026-09-30",
+        "time": "18:00",
+        "home": "SCM Râmnicu Vâlcea",
+        "away": "SCM Universitatea Craiova",
+        "venue": "Sala Sporturilor Traian",
+        "locality": "Râmnicu Vâlcea",
+        "status": "scheduled",
+        "source_url": "https://handbalmania.ro/2026/09/17/liga-florilor-bistrita-bate-valcea-remiza-spectaculoasa-intre-corona-si-rapid/",
+        "source_tier": "T2_SPECIALIST",
+        "checked_at": "2026-09-24T15:02:00+03:00",
+        "note": "Ora 18:00 este corroborată de sursa de specialitate; revalidare obligatorie în ultimele 48h înaintea meciului."
+      }
+    ]
+  },
+  "cinema": {
+    "date": "2026-09-24",
+    "entries": [
+      {
+        "film": "The Pout-Pout Fish – Povestea peștelui posac",
+        "cinema": "Cinema Geo Șaizescu",
+        "time": "17:00",
+        "format": "Digital 2D",
+        "locality": "Râmnicu Vâlcea",
+        "source_url": "https://www.cinemageosaizescu.ro/filme/the-pout-pout-fish",
+        "source_tier": "T1_OFFICIAL",
+        "checked_at": "2026-09-24T15:02:00+03:00"
+      },
+      {
+        "film": "Handbook for Superheroes",
+        "cinema": "Cinema Geo Șaizescu",
+        "time": "19:00",
+        "format": "Digital 2D",
+        "locality": "Râmnicu Vâlcea",
+        "source_url": "https://www.cinemageosaizescu.ro/filme/handbook-for-superheroes",
+        "source_tier": "T1_OFFICIAL",
+        "checked_at": "2026-09-24T15:02:00+03:00"
+      }
+    ]
+  },
+  "menu": {
+    "date": "2026-09-24",
+    "entries": [],
+    "empty_reason": "Nu există în acest refresh o sursă publică same-day suficient de clară pentru a menține meniurile din 23 septembrie. Rândurile vechi sunt retrase fail-closed."
+  },
+  "fitness": {
+    "entries": [
+      {
+        "name": "Stay Fit Gym Vâlcea Central",
+        "locality": "Râmnicu Vâlcea",
+        "address": "Calea lui Traian 127, Winmarkt",
+        "activities": ["fitness", "aerobic", "functional training", "cycling", "cardio"],
+        "source_url": "https://stayfit.ro/valcea/",
+        "source_tier": "T1_OFFICIAL",
+        "checked_at": "2026-09-24T15:02:00+03:00"
+      },
+      {
+        "name": "Sportify",
+        "locality": "Râmnicu Vâlcea",
+        "address": "Calea lui Traian 68",
+        "activities": ["group fitness", "forță", "antrenamente personale"],
+        "source_url": "https://sportifygym.ro/",
+        "source_tier": "T1_OFFICIAL",
+        "checked_at": "2026-09-24T15:02:00+03:00"
+      },
+      {
+        "name": "Fitness Cool",
+        "locality": "Râmnicu Vâlcea",
+        "address": "Bulevardul Dem Rădulescu 53–55, Bloc X3, parter",
+        "activities": ["fitness"],
+        "source_url": "https://stilhub.ro/valcea/ramnicu-valcea/fitness-cool",
+        "source_tier": "T2_CORROBORATED",
+        "checked_at": "2026-09-24T15:02:00+03:00",
+        "note": "Adresa Gib Mihăescu 15B este stale/istorică și nu se afișează ca locație curentă."
+      }
+    ]
+  }
+}
