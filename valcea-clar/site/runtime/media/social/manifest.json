@@ -203,11 +203,10 @@
     "public_http_readback": {
       "status": "BLOCKED",
       "eligible": 6,
-      "readback_ok": 3,
-      "value": 0.5,
+      "readback_ok": 4,
+      "value": 0.6667,
       "blocker_story_ids": [
         "ansambluri-rezidentiale-ramnicu-valcea",
-        "dragasani-ct-radiologie-program-clarificare-20260924",
         "transalpina-ranca-obarsia-lotrului-weather-20260923"
       ],
       "checks": [
@@ -234,12 +233,12 @@
         {
           "story_id": "dragasani-ct-radiologie-program-clarificare-20260924",
           "url": "https://valceaclar.ro/stiri/dragasani-ct-radiologie-program-clarificare-20260924/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "horezu-drum-vf-roman-inchis-20260926",
@@ -276,9 +275,9 @@
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-23T21:25:00.297320Z",
+        "updated_local": "2026-09-23T22:18:32.952201Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 75
+        "public_story_count": 76
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
@@ -324,12 +323,35 @@
       ]
     },
     "manual_intervention": {
-      "status": "UNKNOWN",
-      "value": null,
-      "reason": "system_structural_baseline_unavailable"
+      "status": "MEASURED",
+      "value": 0,
+      "workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [],
+      "manual_story_route_additions": [],
+      "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
     "soak_48h": {
-      "status": "UNKNOWN",
+      "status": "IN_PROGRESS",
+      "structural_baseline_sha": "6dfacf30b77a244744ef39a9e4213a2bdcbcaf61",
+      "structural_baseline_at_utc": "2026-09-24T01:17:35Z",
+      "structural_baseline_repository": "mihaicismaru-bit/civora",
+      "structural_baseline_path": "civora_structural_paths",
+      "structural_components": [
+        {
+          "sha": "6dfacf30b77a244744ef39a9e4213a2bdcbcaf61",
+          "at_utc": "2026-09-24T01:17:35Z",
+          "repository": "mihaicismaru-bit/civora",
+          "path": "civora_structural_paths"
+        },
+        {
+          "sha": "c315f2a64b017085a4b4723f3b9b1d057778788f",
+          "at_utc": "2026-09-22T19:00:53Z",
+          "repository": "mihaicismaru-bit/valcea-clar",
+          "path": "scripts/sync_civora.py",
+          "source_sha": "59e10f8f20e483786292d62505a232b270afcdf1"
+        }
+      ],
+      "eligible_after_utc": "2026-09-26T01:17:35Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
