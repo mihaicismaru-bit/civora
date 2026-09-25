@@ -17,13 +17,13 @@ Actualizat: 23 septembrie 2026
 
 - driftul semantic al indexului oficial de calendare a fost revizuit: pagina continuă să indice calendarul IMFV v11.0, fără dovadă de versiune nouă; schimbarea este tratată ca non-materială și nu autorizează actualizări de termen/buget/status;
 - driftul semantic al paginii Ghidului general a fost revizuit: versiunea curentă rămâne PNAI v4.0, 17.03.2026, Instrucțiunea AM 19; schimbarea este tratată ca non-materială;
-- registrul oficial de apeluri are însă o schimbare materială reală: șapte apeluri FAMI au fost lansate la 16.09.2026 — AM41D, AM22M, AM22L, AM22N, AM11I, AM11H și AM2A1G — iar paginile oficiale le marchează Activ, cu termen 16.10.2026 ora 16:00;
-- publicarea bugetelor pentru aceste șapte apeluri rămâne blocată până la reconciliere: pe aceleași pagini oficiale textul narativ exprimă suma în lei, în timp ce sumarul paginii etichetează aceeași valoare numerică în EUR;
-- taskul `SRC-MAI-FED-CALLS` rămâne deschis până când apelurile sunt reprezentate în dosare/lifecycle cu provenance verificat și conflictul de monedă este rezolvat din ghidurile specifice semnate.
+- registrul oficial de apeluri are o schimbare materială deja reconciliată: șapte apeluri FAMI au fost lansate la 16.09.2026 — AM41D, AM22M, AM22L, AM22N, AM11I, AM11H și AM2A1G — cu termen 16.10.2026 ora 16:00;
+- conflictul de monedă din sumarul paginilor de lansare a fost rezolvat prin ghidurile specifice semnate: alocările publicate sunt în RON/lei; overlay-ul canonic `RES-MAI-FED-FAMI-OPEN-CALLS-20260923` păstrează separat dovezile pentru status/termen și pentru buget;
+- cele șapte apeluri sunt deja PUBLISHABLE în dosare și lifecycle, cu linkuri către paginile oficiale de lansare și ghidurile specifice semnate; următoarea muncă este enrichment-ul câmpurilor încă UNKNOWN, nu republicarea statusului sau a bugetului.
 
 ## Ordine de execuție
 
-1. Finalizarea reconcilierii celor șapte apeluri MAI/FED: ghid specific semnat → monedă/buget → beneficiari → activități → criterii → dosar → lifecycle → public projection.
+1. Enrichment-ul celor șapte apeluri MAI/FED deja publicate: beneficiari → activități → costuri → cofinanțare → criterii → indicatori, exclusiv din ghidurile specifice semnate și anexele oficiale.
 2. Reducerea blocajelor materiale de freshness/transport rămase, fără relaxarea fail-closed.
 3. Continuarea enrichment-ului dosarelor OPEN, apoi PUBLIC_CONSULTATION și EXPECTED/UPCOMING.
 4. Extinderea coverage cu surse oficiale lipsă și generarea de dosar pentru fiecare apel identificat.
