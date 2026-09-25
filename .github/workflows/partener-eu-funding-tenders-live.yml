@@ -12,6 +12,8 @@ on:
       - 'partener-eu/ops/test_funding_tenders_reconcile.py'
       - 'partener-eu/p11/funding_tenders_stage.py'
       - 'partener-eu/p11/test_funding_tenders_stage.py'
+      - 'partener-eu/p11/funding_tenders_run_gate.py'
+      - 'partener-eu/p11/test_funding_tenders_run_gate.py'
       - 'partener-eu/p11/funding_tenders_programme_resolution.py'
       - 'partener-eu/p11/test_funding_tenders_programme_resolution.py'
       - 'partener-eu/p11/funding_tenders_projection_gate.py'
@@ -50,6 +52,8 @@ jobs:
           python -m py_compile partener-eu/ops/test_funding_tenders_reconcile.py
           python -m py_compile partener-eu/p11/funding_tenders_stage.py
           python -m py_compile partener-eu/p11/test_funding_tenders_stage.py
+          python -m py_compile partener-eu/p11/funding_tenders_run_gate.py
+          python -m py_compile partener-eu/p11/test_funding_tenders_run_gate.py
           python -m py_compile partener-eu/p11/funding_tenders_programme_resolution.py
           python -m py_compile partener-eu/p11/test_funding_tenders_programme_resolution.py
           python -m py_compile partener-eu/p11/funding_tenders_projection_gate.py
@@ -66,6 +70,9 @@ jobs:
 
       - name: Validate deterministic direct-call staging boundary
         run: python partener-eu/p11/test_funding_tenders_stage.py
+
+      - name: Validate zero-ready fail-closed run gate
+        run: python partener-eu/p11/test_funding_tenders_run_gate.py
 
       - name: Validate authoritative programme-resolution boundary
         run: python partener-eu/p11/test_funding_tenders_programme_resolution.py
@@ -133,7 +140,43 @@ jobs:
           print(json.dumps(d['stats'], ensure_ascii=False, sort_keys=True))
           PY
 
+      - name: Classify reconciliation outcome
+        id: reconciliation_gate
+        run: |
+          python partener-eu/p11/funding_tenders_run_gate.py \
+            /tmp/partener-funding-tenders-evidence/reconciliation-receipt.json \
+            --output /tmp/partener-funding-tenders-evidence/run-gate.json
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          d=json.loads(Path('/tmp/partener-funding-tenders-evidence/run-gate.json').read_text(encoding='utf-8'))
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as handle:
+              handle.write(f"ready={'true' if d['ready'] else 'false'}\n")
+              handle.write(f"mode={d['mode']}\n")
+          PY
+
+      - name: Validate zero-ready outcome stays fail-closed
+        if: steps.reconciliation_gate.outputs.ready == 'false'
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          gate=json.loads(Path('/tmp/partener-funding-tenders-evidence/run-gate.json').read_text(encoding='utf-8'))
+          receipt=json.loads(Path('/tmp/partener-funding-tenders-evidence/reconciliation-receipt.json').read_text(encoding='utf-8'))
+          assert gate['mode'] == 'NO_DIRECT_CALLS_FAIL_CLOSED'
+          assert gate['ready_for_staging'] == 0
+          assert receipt['records'] == []
+          assert receipt['material_fact_use'] is False
+          assert receipt['ready_for_staging'] is False
+          assert receipt['publish_authorized'] is False
+          assert receipt['publication_effect'] == 'NONE'
+          assert all(row['reconciliation_status'] == 'REVIEW_REQUIRED' for row in receipt['quarantined_records'])
+          print(json.dumps(gate, ensure_ascii=False, sort_keys=True))
+          PY
+
       - name: Admit reconciled direct EU calls to deterministic P11 staging
+        if: steps.reconciliation_gate.outputs.ready == 'true'
         run: |
           python partener-eu/p11/funding_tenders_stage.py \
             /tmp/partener-funding-tenders-evidence/reconciliation-receipt.json \
@@ -141,6 +184,7 @@ jobs:
             --output /tmp/partener-funding-tenders-evidence/staging-admission.json
 
       - name: Validate canonical staging remains non-publishing
+        if: steps.reconciliation_gate.outputs.ready == 'true'
         run: |
           python - <<'PY'
           import json
@@ -167,6 +211,7 @@ jobs:
           PY
 
       - name: Resolve programme identity from exact official Facet bytes
+        if: steps.reconciliation_gate.outputs.ready == 'true'
         run: |
           python partener-eu/p11/funding_tenders_programme_resolution.py \
             /tmp/partener-funding-tenders-evidence/staging-admission.json \
@@ -175,6 +220,7 @@ jobs:
             --output /tmp/partener-funding-tenders-evidence/programme-resolution.json
 
       - name: Validate programme resolution remains non-publishing
+        if: steps.reconciliation_gate.outputs.ready == 'true'
         run: |
           python - <<'PY'
           import json
@@ -203,6 +249,7 @@ jobs:
           PY
 
       - name: Build read-only public projection quality receipt
+        if: steps.reconciliation_gate.outputs.ready == 'true'
         run: |
           python partener-eu/p11/funding_tenders_projection_gate.py \
             /tmp/partener-funding-tenders-evidence/evidence.json \
@@ -212,6 +259,7 @@ jobs:
             --output /tmp/partener-funding-tenders-evidence/projection-quality-gate.json
 
       - name: Validate public projection quality gate remains read-only
+        if: steps.reconciliation_gate.outputs.ready == 'true'
         run: |
           python - <<'PY'
           import json
