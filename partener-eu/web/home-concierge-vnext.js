@@ -110,9 +110,9 @@ function render(){
  if(!home)return;
  hero.classList.add('conciergeHero');
  const eyebrow=hero.querySelector('.eyebrow'),h1=hero.querySelector('h1'),p=hero.querySelector('p');
- if(eyebrow)eyebrow.textContent='PARTENER.EU · funding intelligence pentru România';
- if(h1)h1.textContent='Găsește finanțarea potrivită. Vezi ce ai de făcut.';
- if(p)p.textContent='Spune-ne ce vrei să finanțezi. Îți arătăm oportunitățile relevante, ce este confirmat din surse oficiale și următorul pas concret.';
+ if(eyebrow)eyebrow.textContent='PARTENER.EU · finanțări explicate simplu';
+ if(h1)h1.textContent='Ce vrei să finanțezi?';
+ if(p)p.textContent='Descrie investiția în câteva cuvinte. Îți arătăm apelurile care merită verificate, ce știm sigur și ce trebuie să faci mai departe.';
  let search=hero.querySelector('.conciergeSearch');
  if(!search){
    search=document.createElement('form');search.className='conciergeSearch';
