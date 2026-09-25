@@ -7,6 +7,7 @@ on:
       - 'partener-eu/web/**'
       - 'partener-eu/ops/build_public_static_pages.py'
       - 'partener-eu/ops/test_public_static_pages.py'
+      - 'partener-eu/ops/test_romana_pentru_munca_home_hero.py'
       - 'partener-eu/ops/sanitize_public_prepare_cards.py'
       - 'partener-eu/ops/prove_public_deploy.py'
       - '.github/workflows/partener-eu-pages.yml'
@@ -51,6 +52,7 @@ jobs:
           node --check partener-eu/web/step-lll-dossier-bridge-v2.js
           node --check partener-eu/web/public-heavy-loader-v1.js
           python partener-eu/ops/test_public_language.py
+          python partener-eu/ops/test_romana_pentru_munca_home_hero.py
           python partener-eu/ops/test_brand_civic_intelligence_v1.py
           python partener-eu/ops/prove_public_deploy.py --self-test
           grep -F 'step-lll-dossier-bridge-v2.js' partener-eu/web/public-heavy-loader-v1.js
