@@ -8,19 +8,22 @@ Verticală CIVORA pentru știri locale, restaurante, cafenele, puburi, terase, e
 
 ## Proprietatea execuției
 
-Sursa tehnică unică este `mihaicismaru-bit/civora`, directorul `valcea-clar/`. Toate joburile recurente sunt înregistrate în `engine/automation_registry.json` și sunt executate numai de runner-e GitHub-hosted.
+VÂLCEA CLAR are două planuri separate, fără dublarea autorității:
 
-ChatGPT are exclusiv rol de consolă de administrare și dezvoltare. Nu este scheduler, runtime editorial, depozit de stare, motor de generare sau instrument de publicare socială. Sunt interzise pentru producție:
+1. **Production plane — CIVORA/GitHub.** `mihaicismaru-bit/civora`, directorul `valcea-clar/`, rămâne singurul runtime executabil, scheduler de producție, writer canonic, depozit de stare și mecanism de publicare/distribuție. Joburile recurente de producție sunt înregistrate în `engine/automation_registry.json` și rulează pe GitHub-hosted runners.
+2. **External editorial control plane — workerul ChatGPT „Vâlcea Clar Redacție”.** Poate rula orar pentru a citi canonul editorial din Google Drive, a consuma starea și semnalele CIVORA, a face cercetare publică țintită, a construi/verifica Fact Kernel, a decide produsul editorial, a propune sau aplica patch-uri sigure în repository și a declanșa numai workflow-urile canonice deja înregistrate.
 
-- taskuri sau monitoare recurente ChatGPT;
-- publicarea directă ori programată pe rețele din ChatGPT;
-- accesul ChatGPT la credențialele platformelor sociale;
-- execuția dintr-o conversație sau de pe calculatorul utilizatorului;
-- runner-e `self-hosted` ori cron-uri locale;
-- chei și endpointuri OpenAI, Anthropic sau Gemini în fluxurile VÂLCEA CLAR;
-- orice dependență de API LLM plătit pentru monitorizare, generare sau publicare.
+Workerul extern **nu este** runtime de producție și nu poate deveni un al doilea writer/scheduler al site-ului. Sunt interzise:
 
-`validate_site_engine_ownership.py` și `social/validate_social_engine.py` verifică fail-closed aceste reguli. Workflow-ul `valcea-clar-engine-guard.yml` rulează la fiecare modificare relevantă, în pull request și zilnic.
+- păstrarea stării canonice numai în conversație;
+- publicarea socială directă din ChatGPT sau accesul ChatGPT la credențialele platformelor;
+- introducerea de chei/endpoints OpenAI, Anthropic sau Gemini în runtime-ul VÂLCEA CLAR;
+- runner-e `self-hosted`, cron-uri locale sau un publisher paralel;
+- mutații care ocolesc repository-ul, registrele de stare, quality gates sau receipt/readback-ul canonic.
+
+Workerul poate programa **doar propria rundă externă de control-plane**. Programarea și execuția joburilor de producție rămân exclusiv în GitHub Actions. Regula de single-writer rămâne nenegociabilă.
+
+Ordinea operațională a surselor pentru control-plane este machine-readable în `editorial/source_control_map.json`. Workerul consumă mai întâi rezultatele proaspete ale engine-ului și recurge la fetch/cercetare directă numai pentru gap-uri, stale state, contradicții, surse noi sau verificări editoriale care nu sunt deja rezolvate de runtime.
 
 ## Joburi canonice
 

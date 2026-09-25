@@ -1,5 +1,5 @@
 {
-  "schema_version": 15,
+  "schema_version": 16,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -8,13 +8,22 @@
   "publication_model": "continuous_story_first",
   "publication_rule": "publish_each_story_as_soon_as_it_passes_editorial_and_quality_gates; editions_are_recaps_not_gates",
   "chatgpt": {
-    "scheduled_tasks_allowed": false,
+    "scheduled_tasks_allowed": true,
     "conversation_runtime_allowed": false,
     "direct_social_publication_allowed": false,
     "social_credential_access_allowed": false,
-    "role": "operator_console_only",
+    "role": "external_editorial_control_plane_orchestrator",
     "presentation_bridge_may_exist": true,
-    "presentation_bridge_is_not_scheduler": true
+    "presentation_bridge_is_not_scheduler": true,
+    "scheduled_task_scope": "external_control_plane_only",
+    "external_control_plane_worker_allowed": true,
+    "external_control_plane_worker_title": "Vâlcea Clar Redacție",
+    "external_control_plane_cadence": "hourly",
+    "production_scheduler_allowed": false,
+    "state_ownership_allowed": false,
+    "canonical_mutation_route": "repository_and_registered_workflows_only",
+    "runtime_scheduler_owner": "github_actions",
+    "canonical_state_owner": "repository"
   },
   "content_engine": {
     "generator": "deterministic_zero_llm_v2",
@@ -475,9 +484,9 @@
     },
     {
       "id": "LEGACY-CHATGPT-VALCEA-CLAR-*",
-      "scope": "all recurring CIVORA/VÂLCEA CLAR monitoring and content-generation tasks outside the site engine",
+      "scope": "all legacy recurring ChatGPT monitoring/content tasks outside the single canonical external control-plane worker",
       "status": "retired",
-      "replacement": "registered GitHub Actions workflows in this file"
+      "replacement": "Vâlcea Clar Redacție external hourly control-plane worker + registered GitHub Actions production workflows"
     },
     {
       "id": "LEGACY-CHATGPT-SOCIAL-PUBLISHING-*",
@@ -492,5 +501,25 @@
       "status": "retired",
       "replacement_workflow": ".github/workflows/valcea-clar-social-publishing.yml"
     }
-  ]
+  ],
+  "external_control_plane": {
+    "worker": "Vâlcea Clar Redacție",
+    "authority": "Google Drive VÂLCEA CLAR control stack",
+    "execution_scope": [
+      "consume_civora_runtime_state",
+      "targeted_public_research",
+      "fact_kernel_and_editorial_judgment",
+      "safe_repository_patch",
+      "dispatch_registered_workflows",
+      "public_readback_and_receipt_verification"
+    ],
+    "forbidden": [
+      "parallel_writer",
+      "direct_social_credentials",
+      "direct_social_publication",
+      "conversation_only_state",
+      "production_scheduler_ownership"
+    ],
+    "source_control_map": "valcea-clar/editorial/source_control_map.json"
+  }
 }

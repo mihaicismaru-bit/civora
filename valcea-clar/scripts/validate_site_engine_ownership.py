@@ -117,10 +117,16 @@ def validate(repo_root: Path) -> dict[str, Any]:
         "execution_owner": registry.get("execution_owner") == "civora_site_engine",
         "scheduler": registry.get("scheduler") == "github_actions",
         "state_owner": registry.get("state_owner") == "repository",
-        "chatgpt_scheduled_tasks_disabled": chatgpt.get("scheduled_tasks_allowed") is False,
+        "chatgpt_external_control_plane_enabled": chatgpt.get("external_control_plane_worker_allowed") is True,
+        "chatgpt_scheduled_scope_control_plane_only": (
+            chatgpt.get("scheduled_tasks_allowed") is True
+            and chatgpt.get("scheduled_task_scope") == "external_control_plane_only"
+        ),
+        "chatgpt_production_scheduler_disabled": chatgpt.get("production_scheduler_allowed") is False,
         "chatgpt_conversation_runtime_disabled": chatgpt.get("conversation_runtime_allowed") is False,
         "chatgpt_direct_social_publication_disabled": chatgpt.get("direct_social_publication_allowed") is False,
         "chatgpt_social_credential_access_disabled": chatgpt.get("social_credential_access_allowed") is False,
+        "chatgpt_state_ownership_disabled": chatgpt.get("state_ownership_allowed") is False,
         "paid_llm_api_not_required": registry.get("content_engine", {}).get("paid_llm_api_required") is False,
         "local_agent_runtime_not_required": registry.get("content_engine", {}).get("local_agent_runtime_required") is False,
         "self_hosted_runner_disabled": registry.get("content_engine", {}).get("self_hosted_runner_allowed") is False,

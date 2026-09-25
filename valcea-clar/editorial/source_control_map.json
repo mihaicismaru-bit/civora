@@ -1,0 +1,176 @@
+{
+  "schema_version": "2.1",
+  "effective_date": "2026-09-25",
+  "product": "VÂLCEA CLAR / CIVORA",
+  "purpose": "Machine-readable authority map and consumption order for the external editorial control-plane. It does not replace specialist source registries.",
+  "invariants": {
+    "canonical_source_identity": "source_id",
+    "authority_and_priority_are_separate": true,
+    "runtime_observation_precedes_duplicate_control_plane_recrawl": true,
+    "direct_fetch_is_exception_not_default": true,
+    "source_popularity_never_upgrades_evidence_tier": true,
+    "stale_or_failed_source_never_relaxes_publication_gate": true
+  },
+  "registry_roles": [
+    {
+      "path": "valcea-clar/editorial/news_sources.json",
+      "role": "primary institutional/editorial source definitions and eligibility",
+      "write_authority": "runtime_policy"
+    },
+    {
+      "path": "valcea-clar/editorial/manual_watch_sources.json",
+      "role": "primary/manual verification targets that cannot safely autopublish",
+      "write_authority": "runtime_policy"
+    },
+    {
+      "path": "valcea-clar/editorial/source_intelligence_seed_registry.json",
+      "role": "seed frontier for discovery and source intelligence",
+      "write_authority": "discovery_policy"
+    },
+    {
+      "path": "valcea-clar/editorial/source_intelligence_seed_supplement_v1.json",
+      "role": "supplemental discovery frontier",
+      "write_authority": "discovery_policy"
+    },
+    {
+      "path": "valcea-clar/editorial/signal_radar_config.json",
+      "role": "signal classes and verification routing",
+      "write_authority": "signal_policy"
+    },
+    {
+      "path": "valcea-clar/ingest/source_registry.json",
+      "role": "venue/local-life ingest sources",
+      "write_authority": "local_life_ingest"
+    },
+    {
+      "path": "valcea-clar/data/sources.json",
+      "role": "evidence/source objects attached to public catalog; not the crawl scheduler",
+      "write_authority": "catalog_evidence"
+    },
+    {
+      "path": "valcea-clar/state/source_health.json",
+      "role": "observed health snapshot; evidence, not source policy",
+      "write_authority": "source_radar_runtime"
+    },
+    {
+      "path": "valcea-clar/editorial/signal_primary_verification_state.json",
+      "role": "fresh primary-verification results to consume before manual recrawl",
+      "write_authority": "source_radar_runtime"
+    },
+    {
+      "path": "valcea-clar/editorial/news_discovery_state.json",
+      "role": "news discovery progress/state",
+      "write_authority": "news_discovery_runtime"
+    },
+    {
+      "path": "valcea-clar/editorial/source_intelligence_discovery_state.json",
+      "role": "discovery frontier state",
+      "write_authority": "source_intelligence_runtime"
+    }
+  ],
+  "consumption_order": [
+    {
+      "order": 0,
+      "lane": "RUNTIME_FRESH_STATE",
+      "priority": "mandatory_first",
+      "consume": [
+        "valcea-clar/editorial/signal_primary_verification_state.json",
+        "valcea-clar/editorial/structured_alert_events.json",
+        "valcea-clar/editorial/news_discovery_state.json",
+        "valcea-clar/state/source_health.json",
+        "valcea-clar/ops/governance_state.json"
+      ],
+      "rule": "If the producing job is within its declared cadence/SLA, do not recrawl the same source merely to repeat a check."
+    },
+    {
+      "order": 1,
+      "lane": "P0_HOT_WATCH",
+      "priority": "every_hour",
+      "source_classes": [
+        "public_safety",
+        "utilities",
+        "weather_hydrology",
+        "traffic_transport",
+        "open_followups"
+      ],
+      "registries": [
+        "valcea-clar/editorial/news_sources.json",
+        "valcea-clar/editorial/manual_watch_sources.json",
+        "valcea-clar/editorial/signal_radar_config.json"
+      ],
+      "direct_fetch_when": [
+        "runtime_state_stale",
+        "runtime_fetch_failed",
+        "material_contradiction",
+        "breaking_signal_not_yet_ingested"
+      ]
+    },
+    {
+      "order": 2,
+      "lane": "P1_P2_EDITORIAL_DELTA",
+      "priority": "delta_only",
+      "source_classes": [
+        "administration",
+        "public_money",
+        "health",
+        "education",
+        "economy",
+        "justice",
+        "environment"
+      ],
+      "rule": "Consume changed candidates and verification queues first; deep-fetch only the sources needed to clear a material Fact Kernel."
+    },
+    {
+      "order": 3,
+      "lane": "UAT_ROTATION",
+      "priority": "one_bucket_per_hour",
+      "authority": "Drive 51_UAT_COVERAGE_AND_SCAN_PLAN",
+      "rule": "Scan the next deterministic bucket and use source-intelligence seeds/official UAT sources. Persist exact UATs and source_ids checked."
+    },
+    {
+      "order": 4,
+      "lane": "LOCAL_LIFE",
+      "priority": "window_and_ttl_driven",
+      "authority": "Drive 32_LOCAL_LIFE_CANON",
+      "registries": [
+        "valcea-clar/ingest/source_registry.json",
+        "valcea-clar/editorial/local_life_events.json",
+        "valcea-clar/editorial/local_life_surface_registry.json"
+      ],
+      "rule": "No full hourly recrawl. Run only the window, expiry or delta work due at the current time."
+    },
+    {
+      "order": 5,
+      "lane": "SOURCE_DISCOVERY",
+      "priority": "bounded_after_core_editorial_work",
+      "registries": [
+        "valcea-clar/editorial/source_intelligence_seed_registry.json",
+        "valcea-clar/editorial/source_intelligence_seed_supplement_v1.json"
+      ],
+      "rule": "Promote a discovered source only after identity, authority, geography, health and role are established."
+    }
+  ],
+  "direct_fetch_gate": {
+    "allowed_when": [
+      "producer_state_older_than_its_SLA",
+      "material_candidate_requires_claim_level_verification",
+      "contradiction_between_sources",
+      "source_access_or_parser_health_unknown",
+      "UAT_bucket_requires_source_not_covered_by_runtime",
+      "new_source_candidate"
+    ],
+    "prohibited_when": [
+      "fresh_runtime_state_already_answers_the_same_check",
+      "only_reason_is_to_make_the_run_look_active"
+    ]
+  },
+  "receipt_requirements": [
+    "exact_source_ids_consumed",
+    "exact_source_ids_directly_fetched",
+    "runtime_states_consumed",
+    "uat_bucket_and_uats_checked",
+    "sources_skipped_because_fresh_runtime_state",
+    "material_deltas",
+    "source_health_changes"
+  ]
+}
