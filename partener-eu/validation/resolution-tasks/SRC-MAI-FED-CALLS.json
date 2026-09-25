@@ -25,5 +25,86 @@
   "registry_class": "managing_authority_call_registry",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false
+  "automatic_material_fact_update_allowed": false,
+  "reconciliation_progress": {
+    "observed_at": "2026-09-25T11:18:35Z",
+    "status": "PARTIAL_RECONCILIATION_COVERAGE_GAP_CONFIRMED",
+    "resolved_subset": {
+      "resolution_id": "RES-MAI-FED-FAMI-OPEN-CALLS-20260923",
+      "call_codes": [
+        "AM41D",
+        "AM22M",
+        "AM22L",
+        "AM22N",
+        "AM11I",
+        "AM11H",
+        "AM2A1G"
+      ],
+      "note": "Existing P11 overlay already reconciles status, deadline and RON call allocation for the seven September FAMI calls."
+    },
+    "missing_from_p11": [
+      {
+        "code": "IS12B",
+        "source_url": "https://fed.mai.gov.ro/10381/is12b-dezvoltarea-sau-adaptarea-unor-sisteme-tic-si-baze-de-date-nationale-lansare-apel-de-proiecte/",
+        "deadline": "2026-09-25T16:00:00+03:00",
+        "admission_note": "Do not admit as OPEN after this deadline without fresh authoritative status evidence."
+      },
+      {
+        "code": "BV23A",
+        "source_url": "https://fed.mai.gov.ro/8828/bv23a-dezvoltarea-cooperarii-consulare-si-a-programelor-de-formare-lansare-apel-de-proiecte/",
+        "deadline": "2026-09-30T16:00:00+03:00"
+      },
+      {
+        "code": "AM1A1A",
+        "source_url": "https://fed.mai.gov.ro/10625/am1a1a-actiune-specifica-pact-migratie-consolidarea-capacitatii-sistemului-national-de-azil-in-ceea-ce-priveste-infrastructura/",
+        "deadline": "2026-10-22T16:00:00+03:00"
+      },
+      {
+        "code": "AM31C",
+        "source_url": "https://fed.mai.gov.ro/10780/am31c-continuarea-dezvoltarii-si-imbunatatirii-infrastructurii-procedurilor-si-serviciilor-in-conformitate-cu-acquis-ul-ue-si-a-prioritatilor-de-politica-conditii-de-primire-luare-in-custodie-pub/",
+        "deadline": "2026-11-14T16:00:00+02:00"
+      },
+      {
+        "code": "AM10B",
+        "source_url": "https://fed.mai.gov.ro/11228/am10b-sprijin-operational-sistemul-european-comun-de-azil/",
+        "deadline": "2027-08-27T16:00:00+03:00"
+      },
+      {
+        "code": "BV1A10",
+        "source_url": "https://fed.mai.gov.ro/11155/lansare-apel-bv1a10-dotarea-politiei-de-frontiera-romane-pentru-cresterea-capacitatii-operationale-a-frontex-ii/",
+        "deadline": "2027-07-31T16:00:00+03:00"
+      },
+      {
+        "code": "BV13C",
+        "source_url": "https://fed.mai.gov.ro/10862/bv13c-imbunatatirea-verificarilor-la-frontiere-prin-consolidarea-capacitatilor-pentru-prevenirea-si-depistarea-criminalitatii-transfrontaliere-si-pentru-facilitarea-trecerii-legale-a-frontierei-lansa/",
+        "deadline": "2027-05-29T16:00:00+03:00"
+      },
+      {
+        "code": "BV20B",
+        "source_url": "https://fed.mai.gov.ro/10859/bv20b-sprijin-operational-vize-lansare-apel-de-proiecte/",
+        "deadline": "2027-05-29T16:00:00+03:00"
+      },
+      {
+        "code": "BV14C",
+        "source_url": "https://fed.mai.gov.ro/10283/bv14c-instituirea-dezvoltarea-si-optimizarea-sistemelor-tic-pentru-managementul-integrat-al-frontierelor-lansare-apel-de-proiecte/",
+        "deadline": "2027-03-16T16:00:00+02:00"
+      },
+      {
+        "code": "BV18A",
+        "source_url": "https://fed.mai.gov.ro/10291/bv18a-implementarea-pactului-privind-azilul-si-migratia-lansare-apel-de-proiecte/",
+        "deadline": "2027-03-16T16:00:00+02:00"
+      },
+      {
+        "code": "BV12C",
+        "source_url": "https://fed.mai.gov.ro/10280/bv12c-consolidarea-capacitatilor-privind-supravegherea-frontierelor-lansare-apel-de-proiecte/",
+        "deadline": "2027-03-16T16:00:00+02:00"
+      },
+      {
+        "code": "BV10B",
+        "source_url": "https://fed.mai.gov.ro/8819/bv10b-sprijin-operational-frontiere-lansare-apel-de-proiecte/",
+        "deadline": "2026-09-30T16:00:00+03:00"
+      }
+    ],
+    "action": "Admit each missing identity fail-closed from its direct official call page; reconcile any internal page conflict before publishing the affected fact class; generate dossier, lifecycle and public projection with normal P11 gates."
+  }
 }
