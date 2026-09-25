@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-09-25T14:01:34Z",
+    "utc": "2026-09-25T14:06:32Z",
     "source_pass": 4,
     "source_degraded": 1,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-PR-CENTRU-DIGITAL-2 — ADR Centru — Întreprinderi digitale Apel 2; dependent material facts blocked fail-closed; SRC-PR-CENTRU-ACTIUNI — ADR Centru — Acțiuni; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-09-25T14:01:44Z",
+    "utc": "2026-09-25T14:06:43Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260925T140144Z",
+    "final_url": "https://partener.eu/?p10_probe=20260925T140643Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260925T140144Z",
+        "final_url": "https://partener.eu/?p10_probe=20260925T140643Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260925T140144Z",
+        "final_url": "https://partener.eu/?p10_probe=20260925T140643Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260925T140144Z",
-            "to_url": "https://partener.eu/?p10_probe=20260925T140144Z"
+            "from_url": "http://partener.eu/?p10_probe=20260925T140643Z",
+            "to_url": "https://partener.eu/?p10_probe=20260925T140643Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260925T140144Z",
+        "final_url": "https://partener.eu/?p10_probe=20260925T140643Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260925T140144Z",
-            "to_url": "https://partener.eu/?p10_probe=20260925T140144Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260925T140643Z",
+            "to_url": "https://partener.eu/?p10_probe=20260925T140643Z"
           }
         ],
         "content_verified": true,
@@ -92,8 +92,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "https://partener.eu/",
-      "git_sha": "543efe2fa862035100251a640ae02af0851a11c5",
-      "observed_at": "2026-09-25T13:59:53.475598+00:00",
+      "git_sha": "b4eec0c9c803147ae12f10579e715055f997b5d4",
+      "observed_at": "2026-09-25T14:05:57.884251+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-09-25T14:01:44Z",
-    "validation_run_started": "2026-09-25T14:01:34Z",
+    "utc": "2026-09-25T14:06:42Z",
+    "validation_run_started": "2026-09-25T14:06:32Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "060c06c35e08978dc25552fb8b00c330f8e4e32697557e7014cffdae64636d9e",
-      "history_sha256": "060c06c35e08978dc25552fb8b00c330f8e4e32697557e7014cffdae64636d9e",
-      "history_path": "validation/history/20260925T140134Z.json",
+      "latest_sha256": "a3b191fa197d6ad629443d84186edb75bb4a13a2363308b90d3c6aca4e34c96a",
+      "history_sha256": "a3b191fa197d6ad629443d84186edb75bb4a13a2363308b90d3c6aca4e34c96a",
+      "history_path": "validation/history/20260925T140632Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "59d5ed800f3b18a4e8c7a17b75fbdcd77caa5519ee9a10f3a1bd2a0d7bbaf0f4",
-      "checkpoint_sha256": "59d5ed800f3b18a4e8c7a17b75fbdcd77caa5519ee9a10f3a1bd2a0d7bbaf0f4",
+      "source_state_sha256": "5f1b1087189b1ca5e51d357c98a2b861c1727b2520ea9558542920e242d8d023",
+      "checkpoint_sha256": "5f1b1087189b1ca5e51d357c98a2b861c1727b2520ea9558542920e242d8d023",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-09-25T13:57:00.787799Z",
-      "age_seconds": 283,
+      "age_seconds": 581,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -184,12 +184,12 @@
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-09-25T08:05:09.473515+00:00",
+      "observed_at": "2026-09-25T14:03:59.950317+00:00",
       "status": "PASS",
       "item_count": 32,
       "error_count": 48,
-      "hash_change_candidates": 1,
-      "material_signal_candidates": 1,
+      "hash_change_candidates": 2,
+      "material_signal_candidates": 2,
       "auth_dependency_count": 29,
       "auth_dependencies": [
         {
@@ -368,6 +368,13 @@
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
         },
         {
+          "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fdeschidere-sesiuni-proiecte-energie-regenerabila-benficiari-publici%2F&culture=ro",
+          "sourcePage": "https://www.afir.ro/info-la-zi/deschidere-sesiuni-proiecte-energie-regenerabila-benficiari-publici/",
+          "status": "AUTH_OR_ACCESS_DEPENDENT",
+          "materialFactAction": "NONE",
+          "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+        },
+        {
           "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Finformatii-sesiune-energie-regenerabila-solicitanti-publici%2F&culture=ro",
           "sourcePage": "https://www.afir.ro/info-la-zi/informatii-sesiune-energie-regenerabila-solicitanti-publici/",
           "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -384,13 +391,6 @@
         {
           "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fversiunea-consultativa-a-ghidului-dr-21%2F&culture=ro",
           "sourcePage": "https://www.afir.ro/info-la-zi/versiunea-consultativa-a-ghidului-dr-21/",
-          "status": "AUTH_OR_ACCESS_DEPENDENT",
-          "materialFactAction": "NONE",
-          "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-        },
-        {
-          "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fcomunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici%2F&culture=ro",
-          "sourcePage": "https://www.afir.ro/info-la-zi/comunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici/",
           "status": "AUTH_OR_ACCESS_DEPENDENT",
           "materialFactAction": "NONE",
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -487,7 +487,7 @@
       "integrity_pass": true,
       "registry_health": "DEGRADED",
       "registry_hash_changes": 4,
-      "afir_hash_changes": 1,
+      "afir_hash_changes": 2,
       "peo_calendar_changes": 0,
       "mipe_health": "PASS",
       "autonomous_orchestration_configured": true,

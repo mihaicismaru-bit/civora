@@ -3,15 +3,22 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "456aa04f15e6913d168bedd23cb37181a52065d91bcd300387f136e25a42de78",
+  "candidate_fingerprint": "2d8509f7619999034c3fdc43a791fe2f031b771215436d3f898c8522a9f86aa8",
   "previous_candidate_fingerprint": "456aa04f15e6913d168bedd23cb37181a52065d91bcd300387f136e25a42de78",
-  "candidate_count": 1,
-  "material_signal_count": 1,
+  "candidate_count": 2,
+  "material_signal_count": 2,
   "candidates": [
     {
       "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "56eb160e3c77ce63df37583efb134f266c4982e08de7a04fb8eca3777cde3047",
+      "sha256": "df9191873fa2353c7e97bd27d6fde7d5a92091f065cb99c81ab8e3b787e33dd4",
+      "material_change_candidate": true,
+      "material_fact_action": "RESOLUTION_TASK_ONLY"
+    },
+    {
+      "url": "https://www.afir.ro/info-la-zi/",
+      "title": "Info la zi",
+      "sha256": "fd48e9b2dfe7c84d62de212ca27bd10f1577e81bddcbca6552ff8baad73b3056",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     }
@@ -194,6 +201,13 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fdeschidere-sesiuni-proiecte-energie-regenerabila-benficiari-publici%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/info-la-zi/deschidere-sesiuni-proiecte-energie-regenerabila-benficiari-publici/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Finformatii-sesiune-energie-regenerabila-solicitanti-publici%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/info-la-zi/informatii-sesiune-energie-regenerabila-solicitanti-publici/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -213,18 +227,11 @@
       "status": "AUTH_OR_ACCESS_DEPENDENT",
       "materialFactAction": "NONE",
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-    },
-    {
-      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fcomunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici%2F&culture=ro",
-      "sourcePage": "https://www.afir.ro/info-la-zi/comunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici/",
-      "status": "AUTH_OR_ACCESS_DEPENDENT",
-      "materialFactAction": "NONE",
-      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     }
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-09-25T08:05:09.473515+00:00",
+  "last_observed_at": "2026-09-25T14:03:59.950317+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
