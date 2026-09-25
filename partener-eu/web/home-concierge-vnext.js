@@ -110,9 +110,9 @@ function render(){
  if(!home)return;
  hero.classList.add('conciergeHero');
  const eyebrow=hero.querySelector('.eyebrow'),h1=hero.querySelector('h1'),p=hero.querySelector('p');
- if(eyebrow)eyebrow.textContent='PARTENER.EU · finanțări explicate simplu';
- if(h1)h1.textContent='Ce vrei să finanțezi?';
- if(p)p.textContent='Descrie investiția în câteva cuvinte. Îți arătăm apelurile care merită verificate, ce știm sigur și ce trebuie să faci mai departe.';
+ if(eyebrow)eyebrow.textContent='PARTENER.EU · funding intelligence pentru România';
+ if(h1)h1.textContent='Găsește finanțarea potrivită. Vezi ce ai de făcut.';
+ if(p)p.textContent='Spune-ne ce vrei să finanțezi. Îți arătăm oportunitățile relevante, ce este confirmat din surse oficiale și următorul pas concret.';
  let search=hero.querySelector('.conciergeSearch');
  if(!search){
    search=document.createElement('form');search.className='conciergeSearch';
@@ -126,6 +126,12 @@ function render(){
    search.insertAdjacentElement('afterend',profiles);
    profiles.querySelectorAll('[data-concierge-query]').forEach(b=>b.onclick=()=>openHub(b.dataset.conciergeQuery,'dossiers'));
  }
+ let proof=hero.querySelector('.conciergeProof');
+ if(!proof){
+   proof=document.createElement('div');proof.className='conciergeProof';
+   proof.innerHTML='<span>Surse oficiale</span><span>Actualizare continuă</span><span>Necunoscutele rămân necunoscute</span>';
+   profiles.insertAdjacentElement('afterend',proof);
+ }
 
  document.querySelector('[data-concierge-surface]')?.remove();
  const open=P.dossiers.filter(isOpen).sort((a,b)=>score(b)-score(a));
@@ -134,6 +140,11 @@ function render(){
  const changes=recentNews();
  const surface=document.createElement('div');surface.className='conciergeSurface';surface.dataset.conciergeSurface='1';
  surface.innerHTML=`
+   <section class="conciergeService" data-rpm-promo="1" aria-label="Română pentru Muncă">
+     <div class="conciergeServiceIcon" aria-hidden="true">RO</div>
+     <div class="conciergeServiceCopy"><span>Serviciu pentru angajatori</span><h2>Ai angajați străini? Română pentru Muncă.</h2><p>Curs de limba română organizat pentru echipe: program, participare și documentele necesare, într-un singur flux.</p></div>
+     <a href="/romana-pentru-munca/">Vezi oferta <b>→</b></a>
+   </section>
    <section class="conciergeSection conciergeOpen">
      <div class="conciergeSectionHead"><div><span>Deschise acum</span><h2>Finanțări la care poți lucra acum</h2><p>Doar apeluri cu stare și termen confirmate din surse oficiale.</p></div><button data-concierge-hub="open">Vezi toate ${open.length?`(${open.length})`:''} →</button></div>
      <div class="conciergeGrid">${open.slice(0,6).map(d=>card(d,'open')).join('')||'<div class="conciergeEmpty">Nu există acum apeluri deschise care trec toate verificările noastre.</div>'}</div>
