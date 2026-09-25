@@ -1,5 +1,5 @@
 {
-  "schema_version": 16,
+  "schema_version": 17,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -472,6 +472,28 @@
         "valcea-clar/ops/audit_log.jsonl",
         "explicit_manual_runtime_rollback_scope_only"
       ],
+      "owner": "site_engine"
+    },
+    {
+      "id": "publication_hold_projection",
+      "kind": "event_driven_fail_closed_publication_hold_reader_projection",
+      "workflow": ".github/workflows/valcea-clar-hold-projection.yml",
+      "schedule": [],
+      "event_driven": true,
+      "trigger": "publication_holds_or_projection_code_change",
+      "publication_authority": "presentation_only",
+      "editorial_fact_authority": "none",
+      "owner": "site_engine"
+    },
+    {
+      "id": "local_life_sync",
+      "kind": "event_driven_local_life_registry_and_surface_materialization",
+      "workflow": ".github/workflows/valcea-clar-local-life-sync.yml",
+      "schedule": [],
+      "event_driven": true,
+      "trigger": "operator_or_local_life_registry_delta",
+      "publication_authority": "presentation_only",
+      "editorial_fact_authority": "none",
       "owner": "site_engine"
     }
   ],

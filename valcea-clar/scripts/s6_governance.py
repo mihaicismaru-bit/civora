@@ -89,7 +89,12 @@ def audit()->dict[str,Any]:
     boundary_ok=(
       chatgpt.get("direct_social_publication_allowed") is False
       and chatgpt.get("social_credential_access_allowed") is False
-      and chatgpt.get("scheduled_tasks_allowed") is False
+      and chatgpt.get("conversation_runtime_allowed") is False
+      and chatgpt.get("state_ownership_allowed") is False
+      and chatgpt.get("production_scheduler_allowed") is False
+      and chatgpt.get("scheduled_tasks_allowed") is True
+      and chatgpt.get("scheduled_task_scope") == "external_control_plane_only"
+      and chatgpt.get("external_control_plane_worker_allowed") is True
     )
     checks["chatgpt_boundary"]={"ok":boundary_ok}
     if not boundary_ok:
