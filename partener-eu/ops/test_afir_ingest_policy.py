@@ -29,4 +29,7 @@ dependency = afir_ingest.auth_link_dependency(
 )
 assert dependency and dependency["status"] == "AUTH_OR_ACCESS_DEPENDENT"
 assert dependency["materialFactAction"] == "NONE"
+assert afir_ingest.classify_page("https://www.afir.ro/info-la-zi/", "Info la zi", "termen buget") == "DISCOVERY_INDEX"
+assert not afir_ingest.material_change_candidate("https://www.afir.ro/info-la-zi/", True, "Info la zi", "termen buget")
+assert afir_ingest.material_change_candidate("https://www.afir.ro/info-la-zi/copil", True, "Apel", "termen buget")
 print("PASS AFIR auth-boundary regression")
