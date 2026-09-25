@@ -17,13 +17,13 @@ Actualizat: 23 septembrie 2026
 
 - driftul semantic al indexului oficial de calendare a fost revizuit: pagina continuă să indice calendarul IMFV v11.0, fără dovadă de versiune nouă; schimbarea este tratată ca non-materială și nu autorizează actualizări de termen/buget/status;
 - driftul semantic al paginii Ghidului general a fost revizuit: versiunea curentă rămâne PNAI v4.0, 17.03.2026, Instrucțiunea AM 19; schimbarea este tratată ca non-materială;
-- registrul oficial de apeluri are însă o schimbare materială reală: șapte apeluri FAMI au fost lansate la 16.09.2026 — AM41D, AM22M, AM22L, AM22N, AM11I, AM11H și AM2A1G — iar paginile oficiale le marchează Activ, cu termen 16.10.2026 ora 16:00;
-- publicarea bugetelor pentru aceste șapte apeluri rămâne blocată până la reconciliere: pe aceleași pagini oficiale textul narativ exprimă suma în lei, în timp ce sumarul paginii etichetează aceeași valoare numerică în EUR;
-- taskul `SRC-MAI-FED-CALLS` rămâne deschis până când apelurile sunt reprezentate în dosare/lifecycle cu provenance verificat și conflictul de monedă este rezolvat din ghidurile specifice semnate.
+- șapte apeluri FAMI lansate la 16.09.2026 — AM41D, AM22M, AM22L, AM22N, AM11I, AM11H și AM2A1G — sunt deja reconciliate în P11, PUBLISHABLE, cu termen 16.10.2026 ora 16:00;
+- conflictul de monedă din paginile de lansare pentru aceste șapte apeluri este rezolvat de ghidurile specifice semnate în favoarea RON/lei;
+- registrul oficial MAI/FED evidențiază suplimentar apeluri active încă absente din corpusul P11; acestea intră în admitere fail-closed numai după dovadă autoritativă pe status, termen și identitate, fără inferarea automată a altor fapte materiale.
 
 ## Ordine de execuție
 
-1. Finalizarea reconcilierii celor șapte apeluri MAI/FED: ghid specific semnat → monedă/buget → beneficiari → activități → criterii → dosar → lifecycle → public projection.
+1. Admiterea fail-closed a apelurilor MAI/FED active confirmate oficial dar încă absente din P11, apoi enrichment-ul celor șapte FAMI deja publicate.
 2. Reducerea blocajelor materiale de freshness/transport rămase, fără relaxarea fail-closed.
 3. Continuarea enrichment-ului dosarelor OPEN, apoi PUBLIC_CONSULTATION și EXPECTED/UPCOMING.
 4. Extinderea coverage cu surse oficiale lipsă și generarea de dosar pentru fiecare apel identificat.
