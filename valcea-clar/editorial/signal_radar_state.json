@@ -2,69 +2,24 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-09-25T22:19:50+03:00",
+  "observed_at": "2026-09-26T01:32:36+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 17,
-  "sources_ok": 15,
-  "current_signal_count": 41,
-  "today_signal_count": 26,
+  "sources_ok": 14,
+  "current_signal_count": 37,
+  "today_signal_count": 1,
   "observations": [
     {
       "seed_id": "press-curierul-de-ramnic",
       "publisher": "Curierul de Râmnic",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "PASS",
-      "error": null,
-      "signals": [
-        {
-          "signal_id": "65a43b484d50716a02b3dd1e",
-          "signal_title": "Violoncellissimo – luni, 28 septembrie 2026, ora 19.00 – Sala Lahovari, Filarmonica „Ion Dumitrescu”, Centrul Cultural Municipal Râmnicu Vâlcea",
-          "signal_url": "https://curierulderamnic.ro/2026/09/25/violoncellissimo-luni-28-septembrie-2026-ora-19-00-sala-lahovari-filarmonica-ion-dumitrescu-centrul-cultural-municipal-ramnicu-valcea/",
-          "signal_publisher": "Curierul de Râmnic",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-25T13:52:43+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
-          "verification_route_id": "police_public_safety",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "ipj-valcea-stiri"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-curierul-de-ramnic"
-        }
-      ],
-      "final_url": "https://curierulderamnic.ro/",
-      "links_examined": 14,
-      "hygiene_dropped_count": 4,
-      "hygiene_dropped": [
-        {
-          "title": "Constantin Rădulescu:”Fără rectificare bugetară, țara este în pericol!”",
-          "url": "https://curierulderamnic.ro/2026/09/25/constantin-radulescufara-rectificare-bugetara-tara-este-in-pericol/"
-        },
-        {
-          "title": "Raport „Start în educație”: Familia, mai aproape de grădiniță – 7 din 10 directori observă o implicare mai mare a părinților după participarea în proiect",
-          "url": "https://curierulderamnic.ro/2026/09/25/raport-start-in-educatie-familia-mai-aproape-de-gradinita-7-din-10-directori-observa-o-implicare-mai-mare-a-parintilor-dupa-participarea-in-proiect/"
-        },
-        {
-          "title": "Logiscool lansează în România traseul educațional „Digital Intelligence”: de la clasa pregătitoare și până la liceu. 10 abilități esențiale pentru prezent și viitor",
-          "url": "https://curierulderamnic.ro/2026/09/25/logiscool-lanseaza-in-romania-traseul-educational-digital-intelligence-de-la-clasa-pregatitoare-si-pana-la-liceu-10-abilitati-esentiale-pentru-prezent-si-viitor/"
-        },
-        {
-          "title": "Deciziile adoptate de Consiliul Autorității de Supraveghere Financiară",
-          "url": "https://curierulderamnic.ro/2026/09/25/deciziile-adoptate-de-consiliul-autoritatii-de-supraveghere-financiara-19/"
-        }
-      ]
+      "status": "DEGRADED",
+      "error": "TimeoutError: The read operation timed out",
+      "signals": [],
+      "hygiene_dropped_count": 0,
+      "hygiene_dropped": []
     },
     {
       "seed_id": "press-curierul-valcea",
@@ -73,44 +28,10 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [
-        {
-          "signal_id": "887d59f51e80f8fad62d5e32",
-          "signal_title": "Continuare about Uzinele Sodice Govora, dinamitate și vândute la fier vechi. Astăzi prima explozie👇🏻👇🏻👇🏻",
-          "signal_url": "https://www.curierul.ro/uzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/",
-          "signal_publisher": "Curierul de Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-24T10:46:33+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
-          "verification_route_id": "fire_rescue_alert",
-          "verification_targets": [
-            {
-              "ref_type": "primary_target_id",
-              "id": "isu-valcea-stiri-locale"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "isu-valcea-comunicate"
-            },
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "inhga-avertizari-hidrologice-valcea"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-curierul-valcea"
-        }
-      ],
+      "signals": [],
       "final_url": "https://www.curierul.ro/",
       "links_examined": 14,
-      "hygiene_dropped_count": 3,
+      "hygiene_dropped_count": 2,
       "hygiene_dropped": [
         {
           "title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
@@ -119,10 +40,6 @@
         {
           "title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
           "url": "https://x.com/intent/tweet?via=curierulvl&text=Uzinele%20Sodice%20Govora%2C%20dinamitate%20%C8%99i%20v%C3%A2ndute%20la%20fier%20vechi.%20Ast%C4%83zi%20prima%20explozie%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F"
-        },
-        {
-          "title": "Imprimare(Se deschide într-o fereastră nouă) Imprimare",
-          "url": "https://www.curierul.ro/uzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/?share=print"
         }
       ]
     },
@@ -144,7 +61,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -164,7 +81,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -189,36 +106,16 @@
       "error": null,
       "signals": [
         {
-          "signal_id": "53cd5a6b10989c6c13a44951",
-          "signal_title": "Tiberiu Costea, despre proiectele depuse la CNI și cofinanțările imposibil de acoperit din bugetul local",
-          "signal_url": "https://www.impactreal.ro/2026/09/25/tiberiu-costea-despre-proiectele-depuse-la-cni-si-cofinantarile-imposibil-de-acoperit-din-bugetul-local/",
+          "signal_id": "62606e20e28cc5880d4c867d",
+          "signal_title": "Nicolae Sărdărescu, despre blocurile ridicate pe locul fostelor sere din Horezu: „Te închini de frumos ce este”",
+          "signal_url": "https://www.impactreal.ro/2026/09/25/nicolae-sardarescu-despre-blocurile-ridicate-pe-locul-fostelor-sere-din-horezu-te-inchini-de-frumos-ce-este/",
           "signal_publisher": "Impact Real",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-25T22:16:02+03:00",
+          "published_at": "2026-09-25T23:51:56+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-impact-real"
-        },
-        {
-          "signal_id": "1a6aa093f84340308871e7f0",
-          "signal_title": "Tiberiu Costea, despre noile proiecte ale comunei Lungești: parc fotovoltaic și centru multifuncțional",
-          "signal_url": "https://www.impactreal.ro/2026/09/24/tiberiu-costea-despre-noile-proiecte-ale-comunei-lungesti-parc-fotovoltaic-si-centru-multifunctional/",
-          "signal_publisher": "Impact Real",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-24T22:41:06+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -238,7 +135,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-24T20:40:43+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -258,7 +155,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-24T15:19:08+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -283,7 +180,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-24T13:34:11+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -317,7 +214,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-25T18:18:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -337,7 +234,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-24T19:10:27+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -357,7 +254,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-24T16:52:13+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -402,28 +299,7 @@
       "family": "LOCAL_PRESS",
       "status": "PASS",
       "error": null,
-      "signals": [
-        {
-          "signal_id": "aadf8df6d9d2fc745d9069c2",
-          "signal_title": "Drăgășani în Prim-plan o zi in urma Prima ediție a Festivalului „Viei și Vinului” aduce trei seri de spectacole la Drăgășani",
-          "signal_url": "https://www.primplanpress.ro/prima-editie-a-festivalului-viei-si-vinului-aduce-trei-seri-de-spectacole-la-dragasani/",
-          "signal_publisher": "Primplan Press",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-24T12:57:06+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-primplan"
-        }
-      ],
+      "signals": [],
       "final_url": "https://www.primplanpress.ro/",
       "links_examined": 14,
       "hygiene_dropped_count": 0,
@@ -447,7 +323,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -467,7 +343,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -501,7 +377,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T08:16:50+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -552,7 +428,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -572,7 +448,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -592,7 +468,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T17:55:17+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -629,7 +505,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T22:05:12+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -663,27 +539,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-24T17:55:42+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "press-vocea-valcii"
-        },
-        {
-          "signal_id": "74849d3cc5b5826b641877a0",
-          "signal_title": "Anchetatorii au identificat mașina folosită pentru transportarea trupului Valentinei",
-          "signal_url": "https://vocea-valcii.ro/dezvaluiri/anchetatorii-au-identificat-masina-folosita-pentru-transportarea-trupului-valentinei/",
-          "signal_publisher": "Vocea Vâlcii",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-24T11:40:57+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -708,6 +564,26 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "3fd3998131772f8ac19f1245",
+          "signal_title": "Oamenii care își lipesc gura noaptea: ce este „mouth taping\" și de ce a devenit viral",
+          "signal_url": "https://ziaruldevalcea.ro/2026/09/oamenii-care-isi-lipesc-gura-noaptea-ce-este-mouth-taping-si-de-ce-a-devenit-viral/",
+          "signal_publisher": "Ziarul de Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": true,
+          "published_at": "2026-09-26T01:30:55+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-26T01:32:36+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-ziarul-de-valcea"
+        },
+        {
           "signal_id": "c681bf5272c2dad34cd60a04",
           "signal_title": "Constantin Rădulescu se implică pentru salvarea RAJDP Vâlcea: cere rectificare bugetară urgentă pentru plata salariilor și evitarea insolvenței",
           "signal_url": "https://ziaruldevalcea.ro/2026/09/constantin-radulescu-se-implica-pentru-salvarea-rajdp-valcea-cere-rectificare-bugetara-urgenta-pentru-plata-salariilor-si-evitarea-insolventei/",
@@ -717,7 +593,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-25T18:46:36+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -737,7 +613,27 @@
           "signal_sensitive": true,
           "published_at": "2026-09-25T02:06:40+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-ziarul-de-valcea"
+        },
+        {
+          "signal_id": "d92a7b9c34d7601e376771a8",
+          "signal_title": "Pata de vin nu strică broderia peste noapte, ciclul de spălare o poate face",
+          "signal_url": "https://ziaruldevalcea.ro/2026/09/pata-de-vin-nu-strica-broderia-peste-noapte-ciclul-de-spalare-o-poate-face/",
+          "signal_publisher": "Ziarul de Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": true,
+          "published_at": "2026-09-25T01:26:52+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -757,7 +653,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-25T01:11:24+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "county_roadworks",
           "verification_targets": [
             {
@@ -782,7 +678,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-25T00:47:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -802,7 +698,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-25T00:35:55+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -822,7 +718,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-24T16:55:50+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "education",
           "verification_targets": [
             {
@@ -865,7 +761,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -885,42 +781,9 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-curierul-valcea"
-        },
-        {
-          "signal_id": "9fc0f2087e5c22360f084e47",
-          "signal_title": "Continuare about Uzinele Sodice Govora, dinamitate și vândute la fier vechi. Astăzi prima explozie👇🏻👇🏻👇🏻",
-          "signal_url": "https://www.curierul.ro/uzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/",
-          "signal_publisher": "Curierul de Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-24T10:46:33+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
-          "verification_route_id": "fire_rescue_alert",
-          "verification_targets": [
-            {
-              "ref_type": "primary_target_id",
-              "id": "isu-valcea-stiri-locale"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "isu-valcea-comunicate"
-            },
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "inhga-avertizari-hidrologice-valcea"
-            }
-          ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -931,13 +794,8 @@
       ],
       "final_url": "https://www.curierul.ro/",
       "links_examined": 14,
-      "hygiene_dropped_count": 1,
-      "hygiene_dropped": [
-        {
-          "title": "Imprimare(Se deschide într-o fereastră nouă) Imprimare",
-          "url": "https://www.curierul.ro/uzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/?share=print"
-        }
-      ]
+      "hygiene_dropped_count": 0,
+      "hygiene_dropped": []
     },
     {
       "seed_id": "signal-eveniment-valcean",
@@ -957,7 +815,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T15:56:38+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -994,7 +852,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T15:44:34+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -1014,7 +872,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T11:09:40+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -1078,7 +936,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T22:01:50+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -1098,7 +956,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T21:27:13+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -1123,7 +981,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T15:01:33+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -1156,7 +1014,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T14:46:30+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -1176,7 +1034,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-25T13:11:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -1213,7 +1071,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-24T20:46:35+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -1238,7 +1096,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-24T14:07:36+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-25T22:19:50+03:00",
+          "observed_at": "2026-09-26T01:32:36+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
