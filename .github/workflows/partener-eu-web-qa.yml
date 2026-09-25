@@ -15,6 +15,7 @@ on:
       - 'partener-eu/ops/build_public_static_pages.py'
       - 'partener-eu/ops/test_public_static_pages.py'
       - 'partener-eu/ops/test_home_concierge_vnext.py'
+      - 'partener-eu/ops/test_romana_pentru_munca_home_hero.py'
       - 'partener-eu/ops/check_public_site.py'
       - 'partener-eu/ops/test_public_site_transport.py'
       - 'partener-eu/ops/test_public_product_v3.py'
@@ -40,6 +41,7 @@ on:
       - 'partener-eu/ops/build_public_static_pages.py'
       - 'partener-eu/ops/test_public_static_pages.py'
       - 'partener-eu/ops/test_home_concierge_vnext.py'
+      - 'partener-eu/ops/test_romana_pentru_munca_home_hero.py'
       - 'partener-eu/ops/check_public_site.py'
       - 'partener-eu/ops/test_public_site_transport.py'
       - 'partener-eu/ops/test_public_product_v3.py'
@@ -85,6 +87,7 @@ jobs:
       - name: Homepage and Ask contracts
         run: |
           python partener-eu/ops/test_home_concierge_vnext.py
+          python partener-eu/ops/test_romana_pentru_munca_home_hero.py
           python partener-eu/ops/test_public_product_v3.py
           python partener-eu/ops/test_ask_partener_v2.py
           node partener-eu/ops/test_ask_eligibility_projection.js
