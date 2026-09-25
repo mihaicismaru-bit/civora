@@ -303,8 +303,24 @@ def build_payload(prior, observed_at, discovered_items, errors, access_dependenc
 
 
 
+def is_discovery_index(url):
+    """True only for AFIR listing/index surfaces used to discover child evidence."""
+    path = urllib.parse.urlparse(url or "").path.rstrip("/").lower()
+    return path == "/info-la-zi"
+
+
+def material_change_candidate(url, changed, title, text):
+    """Flag material drift only on evidence-bearing pages, never listing indexes."""
+    if not changed or is_discovery_index(url):
+        return False
+    sample = (text[:150000] + " " + title).lower()
+    return any(term in sample for term in MATERIAL_TERMS)
+
+
 def classify_page(url, title, text):
     """Classify an AFIR object without promoting material facts."""
+    if is_discovery_index(url):
+        return "DISCOVERY_INDEX"
     value = clean(f"{url} {title} {text[:2500]}").lower()
     if re.search(r"\bdr\s*[-–]?\s*\d{1,3}\b", value) or "schema de energie" in value or "investalim" in value:
         return "INTERVENTION_OR_CALL"
@@ -415,7 +431,7 @@ def main():
 
         oldrow = old.get(url) or {}
         changed = bool(oldrow.get("sha256") and oldrow.get("sha256") != sha)
-        material_signal = changed and any(k in (text[:150000] + " " + title).lower() for k in MATERIAL_TERMS)
+        material_signal = material_change_candidate(url, changed, title, text)
         page_class = classify_page(url, title, text)
         document_links, relevant_links = linked_evidence(links, url) if links else ([], [])
         keep_text = page_class in {"INTERVENTION_OR_CALL", "SESSION", "GUIDE", "CALL_CANDIDATE", "DOCUMENT"}
