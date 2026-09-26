@@ -135,6 +135,10 @@ function render(){
 
  document.querySelector('[data-concierge-surface]')?.remove();
  const open=P.dossiers.filter(isOpen).sort((a,b)=>score(b)-score(a));
+ const openTotal=Number(P?.summary?.openCount);
+ const canonicalOpenTotal=Number.isFinite(openTotal)?openTotal:open.length;
+ const legacyOpenMetric=hero.querySelector('.heroCard .big');
+ if(legacyOpenMetric)legacyOpenMetric.textContent=String(canonicalOpenTotal);
  const upcoming=P.dossiers.filter(isUpcoming).sort((a,b)=>score(b)-score(a));
  const consultation=P.dossiers.filter(isConsultation).sort((a,b)=>score(b)-score(a));
  const changes=recentNews();
@@ -146,7 +150,7 @@ function render(){
      <a href="/romana-pentru-munca/">Vezi oferta <b>→</b></a>
    </section>
    <section class="conciergeSection conciergeOpen">
-     <div class="conciergeSectionHead"><div><span>Deschise acum</span><h2>Finanțări la care poți lucra acum</h2><p>Doar apeluri cu stare și termen confirmate din surse oficiale.</p></div><button data-concierge-hub="open">Vezi toate ${open.length?`(${open.length})`:''} →</button></div>
+     <div class="conciergeSectionHead"><div><span>Deschise acum</span><h2>Finanțări la care poți lucra acum</h2><p>Doar apeluri cu stare și termen confirmate din surse oficiale.</p></div><button data-concierge-hub="open">Vezi toate ${canonicalOpenTotal?`(${canonicalOpenTotal})`:''} →</button></div>
      <div class="conciergeGrid">${open.slice(0,6).map(d=>card(d,'open')).join('')||'<div class="conciergeEmpty">Nu există acum apeluri deschise care trec toate verificările noastre.</div>'}</div>
    </section>
    <section class="conciergeSection conciergeUpcoming">

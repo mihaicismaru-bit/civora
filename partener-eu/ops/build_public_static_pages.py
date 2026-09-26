@@ -53,6 +53,13 @@ FAIL_CLOSED_OPEN_STANDFIRST = (
 FAIL_CLOSED_OPEN_ACTION = (
     "Reverifică starea curentă și orice termen nou în sursa oficială înainte de a pregăti sau depune o cerere."
 )
+FAIL_CLOSED_CONSULTATION_STANDFIRST = (
+    "Consultarea necesită reverificare la sursa oficială. "
+    "Termenul din dosar este expirat sau nu este confirmat pentru momentul curent."
+)
+FAIL_CLOSED_CONSULTATION_ACTION = (
+    "Verifică sursa oficială înainte de a transmite observații; PARTENER.EU nu tratează această consultare ca activă."
+)
 
 
 def esc(value: Any) -> str:
@@ -182,6 +189,31 @@ def requires_open_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     )
 
 
+def current_consultation(dossier: dict[str, Any], clock: dt.datetime) -> bool:
+    """Only confirmed, still-current consultations may be presented as active."""
+    if (
+        dossier.get("status") != "PUBLIC_CONSULTATION"
+        or dossier.get("publicationState") != "PUBLISHABLE"
+    ):
+        return False
+    status = fact(dossier, "Status")
+    deadline = fact(dossier, "Termen")
+    if not status or str(status.get("confidence") or "").upper() != "CONFIRMED":
+        return False
+    if not deadline or str(deadline.get("confidence") or "").upper() != "CONFIRMED":
+        return False
+    closes = parse_date(deadline.get("value"))
+    return closes is not None and closes >= clock
+
+
+def requires_consultation_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
+    return (
+        dossier.get("publicationState") == "PUBLISHABLE"
+        and dossier.get("status") == "PUBLIC_CONSULTATION"
+        and not current_consultation(dossier, clock)
+    )
+
+
 def fail_closed_render_dossier(
     dossier: dict[str, Any], clock: dt.datetime
 ) -> dict[str, Any]:
@@ -191,17 +223,31 @@ def fail_closed_render_dossier(
     deadline: the public static layer moves the lifecycle state to REVIEW and asks
     for a fresh authoritative observation.
     """
-    if not requires_open_refresh(dossier, clock):
+    open_refresh = requires_open_refresh(dossier, clock)
+    consultation_refresh = requires_consultation_refresh(dossier, clock)
+    if not open_refresh and not consultation_refresh:
         return dossier
 
     rendered = copy.deepcopy(dossier)
     rendered["status"] = "REVIEW"
     rendered["statusLabel"] = STATUS_LABELS["REVIEW"]
-    rendered["standfirst"] = FAIL_CLOSED_OPEN_STANDFIRST
+    rendered["standfirst"] = (
+        FAIL_CLOSED_OPEN_STANDFIRST
+        if open_refresh
+        else FAIL_CLOSED_CONSULTATION_STANDFIRST
+    )
     rendered["decisionLabel"] = "VERIFICĂ STAREA"
     rendered["decision"] = "VERIFY"
-    rendered["decisionAction"] = FAIL_CLOSED_OPEN_ACTION
-    rendered["renderFailClosedReason"] = "OPEN_DEADLINE_EXPIRED_OR_UNVERIFIED_REQUIRES_REFRESH"
+    rendered["decisionAction"] = (
+        FAIL_CLOSED_OPEN_ACTION
+        if open_refresh
+        else FAIL_CLOSED_CONSULTATION_ACTION
+    )
+    rendered["renderFailClosedReason"] = (
+        "OPEN_DEADLINE_EXPIRED_OR_UNVERIFIED_REQUIRES_REFRESH"
+        if open_refresh
+        else "CONSULTATION_DEADLINE_EXPIRED_OR_UNVERIFIED_REQUIRES_REFRESH"
+    )
 
     quick_facts = []
     saw_status = False
@@ -225,7 +271,11 @@ def fail_closed_render_dossier(
         heading = fold(item.get("title"))
         rows = [str(value).strip() for value in (item.get("items") or []) if str(value).strip()]
         if heading in {"decizia rapida", "ce trebuie facut acum"}:
-            rows = [FAIL_CLOSED_OPEN_ACTION]
+            rows = [
+                FAIL_CLOSED_OPEN_ACTION
+                if open_refresh
+                else FAIL_CLOSED_CONSULTATION_ACTION
+            ]
         elif heading == "rezumat executiv":
             replaced = False
             safe_rows: list[str] = []
@@ -573,7 +623,7 @@ def build(
     consultation_rows = [
         row
         for row in publishable
-        if row.get("status") == "PUBLIC_CONSULTATION"
+        if current_consultation(row, generated)
     ]
     closed_rows = [row for row in publishable if row.get("status") == "CLOSED"]
 
@@ -660,6 +710,8 @@ def build(
             "materialFactsInvented": False,
             "openRequiresConfirmedCurrentDeadline": True,
             "expiredOrUnverifiedOpenRenderedAsReview": True,
+            "consultationRequiresConfirmedCurrentDeadline": True,
+            "expiredOrUnverifiedConsultationRenderedAsReview": True,
             "fullDossiersLazyLoaded": True,
         },
     }
@@ -1026,6 +1078,9 @@ def build(
         "prepare": len(prepare_rows),
         "consultations": len(consultation_rows),
         "failClosedOpenRefresh": fail_closed_open_refresh_count,
+        "failClosedConsultationRefresh": sum(
+            1 for row in source_publishable if requires_consultation_refresh(row, generated)
+        ),
         "sitemapUrls": len(urls),
         "homeSnapshotBytes": home_snapshot_bytes,
         "homeSnapshotDossiers": len(snapshot_rows),
