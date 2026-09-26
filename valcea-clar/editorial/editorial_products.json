@@ -329,7 +329,7 @@
     },
     {
       "id": "baile-olanesti-incendiu-iezer-13ha-20260925",
-      "status": "editorial_hold",
+      "status": "verified",
       "section": "URGENȚE",
       "editorial_type": "service",
       "editorial_form": "continuous_update",
@@ -345,17 +345,18 @@
       "headline": "Băile Olănești: incendiul de la Iezer s-a extins la aproximativ 22 de hectare; intervine și un Black Hawk",
       "dek": "Incendiul din fondul forestier de la Băile Olănești s-a extins în noaptea de vineri spre sâmbătă. Potrivit informațiilor ISU Vâlcea preluate sâmbătă de AGERPRES și presa locală, suprafața afectată era estimată la circa 22 de hectare, iar intervenția continua cu sprijin aerian.",
       "paragraphs": [
-        "Incendiul din fondul forestier de la Băile Olănești, în zona Schitului Iezer, s-a extins în noaptea de vineri spre sâmbătă. Potrivit informațiilor ISU Vâlcea preluate sâmbătă de AGERPRES și de presa locală, suprafața afectată era estimată la aproximativ 22 de hectare.",
-        "Față de bilanțul de vineri seara, când suprafața afectată era estimată la circa 13 hectare, actualizarea de sâmbătă arată o extindere importantă. Focul se manifestă într-o zonă greu accesibilă, iar pompierii continuă operațiunile pentru localizare și limitarea extinderii.",
-        "În sprijinul echipelor terestre au fost folosite o dronă pentru monitorizare și un elicopter Black Hawk pentru intervenție aeriană, potrivit relatărilor care citează ISU Vâlcea.",
-        "Nu au fost raportate victime în actualizările consultate. Situația rămâne în dinamică, iar VÂLCEA CLAR va actualiza aceeași poveste dacă ISU anunță localizarea sau stingerea incendiului ori un nou bilanț al suprafeței afectate."
+        "Sâmbătă, suprafața afectată de incendiul din fondul forestier de la Băile Olănești era estimată la aproximativ 22 de hectare.",
+        "La intervenție participă și un elicopter Black Hawk, iar o dronă este folosită pentru monitorizarea zonei.",
+        "Nu au fost raportate victime în actualizările consultate.",
+        "Pompierii continuă intervenția pentru localizarea incendiului și limitarea extinderii.",
+        "Până la o nouă actualizare oficială, incendiul trebuie tratat ca intervenție în curs; nu este prezentat ca localizat sau stins."
       ],
       "material_fact_gate": "PASS",
       "sources": [
         {
           "name": "ȘtiriPeSurse — relatare AGERPRES pe baza informațiilor ISU Vâlcea, 26.09.2026",
           "url": "https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447",
-          "tier": "T1B_RELAY"
+          "tier": "T2"
         },
         {
           "name": "Se întâmplă în Vâlcea — actualizare atribuită ISU Vâlcea, 26.09.2026",
@@ -450,15 +451,75 @@
           }
         ]
       },
-      "editorial_note": "UPDATE_EXISTING_STORY. Saturday status supersedes the Friday-evening 13 ha state for current reporting. Claims are explicitly attributed to ISU Vâlcea through AGERPRES/local relay because the direct ISU page did not expose the Saturday item in the canonical verifier. Do not claim localized/extinguished until new direct or authoritative confirmation.",
+      "editorial_note": "UPDATE_EXISTING_STORY. Saturday status supersedes the Friday-evening 13 ha state for current reporting. Claims are explicitly attributed to ISU Vâlcea through AGERPRES/local relay because the direct ISU page did not expose the Saturday item in the canonical verifier. Do not claim localized/extinguished until new direct or authoritative confirmation. Pipeline repair 2026-09-26: AGERPRES relay is classified as secondary evidence (T2) rather than a non-canonical custom tier, so the canonical Editorial Writer can validate provenance without changing the factual claim.",
       "editorial_product": {
         "writer_id": "manual_journalism_v1",
-        "writer_mode": "FACT_KERNEL_REJECTED_FAIL_CLOSED",
-        "format": "service_news",
-        "claim_trace_complete": false,
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "continuous_update",
+        "claim_trace_complete": true,
         "source_level_trace": true,
-        "auto_publish_eligible_by_format": false,
-        "hold_reason": "headline_unknown_source:https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447"
+        "headline_source_urls": [
+          "https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447",
+          "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/"
+        ],
+        "dek_source_urls": [
+          "https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447",
+          "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "iezer-fire-22ha-20260926",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "a15ffd748899d2719c2969179376328faff0657a5eca744a94d8e43041519a65",
+            "source_urls": [
+              "https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447",
+              "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/"
+            ]
+          },
+          {
+            "claim_id": "iezer-fire-air-support-20260926",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "text_sha256": "278c9dc8c3348afef05c808ee05af304d17def9e18b1a323c2f89319b89f7653",
+            "source_urls": [
+              "https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447",
+              "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/"
+            ]
+          },
+          {
+            "claim_id": "iezer-fire-no-victims-20260926",
+            "role": "context",
+            "kind": "attributed_statement",
+            "text_sha256": "4bf3acef097ff2b79d63afe4d02bdb5cc973fb6e6f0830d271dff1375b7d2c2b",
+            "source_urls": [
+              "https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447",
+              "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/"
+            ]
+          },
+          {
+            "claim_id": "iezer-fire-localization-ongoing-20260926",
+            "role": "current_state",
+            "kind": "attributed_statement",
+            "text_sha256": "227b8e1604f2359be11d5094b813d4e6c0c86da7cb4f9f0ade9e58bccb16aa58",
+            "source_urls": [
+              "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/"
+            ]
+          },
+          {
+            "claim_id": "iezer-fire-state-caution-20260926",
+            "role": "reader_service",
+            "kind": "reader_service",
+            "text_sha256": "26f1700c27be8cba6150a8ae8b35fc0a795857828a6ae9aea5be58099725e605",
+            "source_urls": [
+              "https://www.stiripesurse.ro/incendiu-de-vegetatie-la-baile-olanesti-22-de-hectare-de-padure-cuprinse-de-flacari-intervin-un-elicopter-black-hawk-si-o-drona_3923447",
+              "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "23d4e68e5b355b48bb3462df82c8716d1a89c8f63e34e3a4a07f6eff60ecc0b4"
       }
     },
     {
@@ -4660,7 +4721,7 @@
         ]
       },
       "primary_source_verification": {
-        "verified_at": "2026-09-26T19:20:43+03:00",
+        "verified_at": "2026-09-26T19:29:10+03:00",
         "promotion_gate": "ISU_HOMEPAGE_NUMERIC_SUMMARY_V1",
         "source_family": "ISU",
         "direct_first_party_homepage_numeric_readback": true,
@@ -15266,7 +15327,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "dc8ef72c62979b0fd22d8813984cc96e37703c97bb980a9fded81af5ea21974d"
+          "sha256": "77ffff63ee97ae7a3144ca3475a9ce49b7f34622de8ae0031152e9b0621be2eb"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 343/2026-09-16",
@@ -15484,7 +15545,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "dc8ef72c62979b0fd22d8813984cc96e37703c97bb980a9fded81af5ea21974d"
+          "sha256": "77ffff63ee97ae7a3144ca3475a9ce49b7f34622de8ae0031152e9b0621be2eb"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 344/2026-09-16",
@@ -15683,7 +15744,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "dc8ef72c62979b0fd22d8813984cc96e37703c97bb980a9fded81af5ea21974d"
+          "sha256": "77ffff63ee97ae7a3144ca3475a9ce49b7f34622de8ae0031152e9b0621be2eb"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 345/2026-09-16",
@@ -21461,9 +21522,9 @@
   ],
   "stats": {
     "story_count": 140,
-    "fact_kernel_composed": 111,
+    "fact_kernel_composed": 112,
     "legacy_passthrough": 25,
-    "editorial_holds": 4
+    "editorial_holds": 3
   },
   "policy": {
     "writer_may_add_unsupported_fact": false,
@@ -21472,5 +21533,5 @@
     "reputational_formats_fail_closed": true,
     "satire_routed_separately": true
   },
-  "registry_fingerprint_sha256": "b109b2765353cd7c569b1f0dbc794c68a0394dff06b0e8634f9cf1ce0a72e576"
+  "registry_fingerprint_sha256": "09f7f40ba6f0f51247573ca9c694cc07cd4ec6cfca3fe2701721c89e8dc862d5"
 }
