@@ -2,23 +2,24 @@
   "schema_version": "1.0",
   "product": "VÂLCEA CLAR",
   "stage": "S6_OPERATIONS_GOVERNANCE",
-  "observed_at": "2026-09-25T22:45:16+00:00",
-  "material_fingerprint_sha256": "b9bea6feea1480b6407199c35b5b4905a3c5b5d4cdb611d66f8f1b580acdafb0",
+  "observed_at": "2026-09-26T07:58:44+00:00",
+  "material_fingerprint_sha256": "c99041c1415f87f0c849a1c3e9728c7df774e52d3c8f8a5e57b96897e7ec3663",
   "policy_version": "1.0",
-  "status": "READY_WITH_KNOWN_LIMITATIONS",
-  "blockers": [],
-  "warnings": [
+  "status": "BLOCKED",
+  "blockers": [
     {
-      "code": "KNOWN_CHANNEL_MEDIA_BACKLOG",
-      "summary": "S1 has explicit blocked channel deliveries",
+      "code": "CANONICAL_STAGE_REGRESSION",
+      "summary": "S1 delivery ledger is no longer reconciled",
       "evidence": {
-        "delivered": 160,
-        "pending": 0,
-        "blocked": 220,
+        "delivered": 30,
+        "pending": 12,
+        "blocked": 33,
         "cancelled": 0,
         "other": 0
       }
-    },
+    }
+  ],
+  "warnings": [
     {
       "code": "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION",
       "summary": "Historical correction migration is intentionally not claimed complete"
@@ -42,13 +43,13 @@
       "unsafe": []
     },
     "s1_delivery": {
-      "edition_id": "2026-09-22-morning",
-      "complete": true,
+      "edition_id": "2026-09-26-morning",
+      "complete": false,
       "fully_delivered": false,
       "counts": {
-        "delivered": 160,
-        "pending": 0,
-        "blocked": 220,
+        "delivered": 30,
+        "pending": 12,
+        "blocked": 33,
         "cancelled": 0,
         "other": 0
       }
@@ -84,9 +85,9 @@
     },
     "public_runtime": {
       "edition_id": "2026-09-26-morning",
-      "story_routes": 76,
-      "ux_routes": 112,
-      "safe_story_count": 76
+      "story_routes": 78,
+      "ux_routes": 114,
+      "safe_story_count": 78
     }
   },
   "lkg": {
