@@ -29,5 +29,29 @@
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
   "automatic_material_fact_update_allowed": false,
-  "registry_class": "authoritative_call_registry"
+  "registry_class": "authoritative_call_registry",
+  "reconciliation_progress": {
+    "observed_at": "2026-09-26T05:13:30.913422+00:00",
+    "status": "VISIBLE_PAGE_MATERIAL_SEMANTICS_STABLE_PAGINATION_INCOMPLETE",
+    "exact_inventory_runs": [
+      {
+        "run_id": "36219447809",
+        "observed_at": "2026-09-26T05:00:01.114061+00:00",
+        "material_semantic_sha256": "ece84c795b6121c19d92e2198b67c2d5e2881cfd182f205b4119786cc8bd0717",
+        "validated_call_count": 955,
+        "visible_row_count": 50
+      },
+      {
+        "run_id": "36220116011",
+        "observed_at": "2026-09-26T05:13:30.913422+00:00",
+        "material_semantic_sha256": "ece84c795b6121c19d92e2198b67c2d5e2881cfd182f205b4119786cc8bd0717",
+        "validated_call_count": 955,
+        "visible_row_count": 50
+      }
+    ],
+    "exact_visible_row_delta": 0,
+    "conclusion": "No material call-identity/status/budget delta was observed on the 50 visible rows across consecutive exact-inventory runs. Keep task OPEN because the source reports 955 validated calls and the inventory is not page-complete.",
+    "next_action": "Extend or replay exact-call inventory across pagination before resolving this source-level semantic hash task.",
+    "publish_authorized": false
+  }
 }
