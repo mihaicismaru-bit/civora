@@ -62,6 +62,9 @@ for token in (
     'isTypingTarget',
     "if(!search)",
     'inputmode="search"',
+    "P?.summary?.openCount",
+    "canonicalOpenTotal",
+    "hero.querySelector('.heroCard .big')",
 ):
     assert token in js, token
 
