@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-26T19:52:01Z",
+  "generated_at": "2026-09-26T22:47:53Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -117,12 +117,14 @@
       "registry_status": "ACTIVE_REVERIFY",
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [
+        "ajofm-valcea-statistics",
         "posturi-gov-valcea-all",
         "ejobs-valcea",
         "bestjobs-valcea",
         "linkedin-jobs-valcea"
       ],
       "official_changed_sources": [
+        "ajofm-valcea-statistics",
         "posturi-gov-valcea-all"
       ],
       "degraded_sources": [
@@ -147,7 +149,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "ajofm-valcea-statistics",
@@ -158,7 +160,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
-          "fingerprint": "b9e3c4a3609bda0c2c73a2cd016e7578ab98a0fff6506c850a2d1fece9d839ac",
+          "fingerprint": "a593399e014e759a4e3ab9b41e69a4eac249e44e4f748693f08351a7f0e76f6e",
           "match_count": 24,
           "matched_terms": [
             "șomaj",
@@ -168,7 +170,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "CHANGED_REVIEW_REQUIRED"
         },
         {
           "id": "posturi-gov-valcea-all",
@@ -179,7 +181,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "4819dde5181012b624ff9aee4ae013f366425e48f1bd8f7f128c6cbfacd1d4a2",
+          "fingerprint": "dd73355cf591d84f238e9435ff422db02a4e133db8d9c191704e171249ef454f",
           "match_count": 17,
           "matched_terms": [
             "Vâlcea",
@@ -200,7 +202,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "f7f2e0d8ccbca8e0b82c6510a504037a421bf6909dcd5d2552e68e17bdba7a92",
+          "fingerprint": "798a52d3dfe7becdb60982c7999e5a3cb4b5356544dca05e5409b34ae283a6d8",
           "match_count": 19,
           "matched_terms": [
             "Joburi",
@@ -211,7 +213,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1364"
+              "value_text": "1272"
             }
           ],
           "health": "OK",

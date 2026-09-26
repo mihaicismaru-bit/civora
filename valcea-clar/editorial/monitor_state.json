@@ -4,11 +4,11 @@
   "product": "VÂLCEA CLAR durable monitor state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-26T19:51:22Z",
-  "last_live_probe_at": "2026-09-26T19:51:22Z",
+  "generated_at": "2026-09-26T22:47:13Z",
+  "last_live_probe_at": "2026-09-26T22:47:13Z",
   "mode": "LIVE_SOURCE_HEALTH",
-  "discovery_observed_at": "2026-09-26T20:59:07+03:00",
-  "monitor_count": 194,
+  "discovery_observed_at": "2026-09-27T00:04:08+03:00",
+  "monitor_count": 197,
   "monitors": [
     {
       "id": "health-sju-valcea-recruitment-watch",
@@ -34,8 +34,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "896dd9f2858ac786346332602a19ad6caed9f0a61b6adb5df318cab8ccad28b7",
-          "match_count": 0,
+          "fingerprint": "0dfabe78a0e708e4bbed5c45bcd866ebf201883da21f53d3caa8cdc648202da1",
+          "match_count": 1,
           "error": null,
           "health": "OK",
           "change": "CHANGED_REVIEW_REQUIRED"
@@ -5292,6 +5292,84 @@
       ],
       "lead_ids": [
         "performing-arts-lead-1dfe9a5a1b5b9642eff2"
+      ],
+      "public_projection": false
+    },
+    {
+      "id": "performing-arts-signal-64d283c1166e63ae8fd9",
+      "label": "Centrul Cultural Municipal Râmnicu Vâlcea — Filarmonica Ion Dumitrescu — semnal nou: program/stagiune, bani publici",
+      "registry_status": "ACTIVE_REVERIFY",
+      "attention": "REVIEW_REQUIRED",
+      "changed_sources": [],
+      "degraded_sources": [],
+      "reverify_leads": [
+        "performing-arts-lead-64d283c1166e63ae8fd9"
+      ],
+      "sources": [
+        {
+          "id": "filarmonica-valcea-events",
+          "ref_type": "url",
+          "url": "https://filarmonica-valcea.ro/evenimente/",
+          "publisher": "Centrul Cultural Municipal Râmnicu Vâlcea — Filarmonica Ion Dumitrescu",
+          "tier": "T1",
+          "health": "REGISTERED_NO_PROBE",
+          "change": "NO_CHANGE_SIGNAL"
+        }
+      ],
+      "lead_ids": [
+        "performing-arts-lead-64d283c1166e63ae8fd9"
+      ],
+      "public_projection": false
+    },
+    {
+      "id": "performing-arts-signal-af7d18c63fb7ab53db13",
+      "label": "Centrul Cultural Municipal Râmnicu Vâlcea — Filarmonica Ion Dumitrescu — semnal nou: program/stagiune, bani publici",
+      "registry_status": "ACTIVE_REVERIFY",
+      "attention": "REVIEW_REQUIRED",
+      "changed_sources": [],
+      "degraded_sources": [],
+      "reverify_leads": [
+        "performing-arts-lead-af7d18c63fb7ab53db13"
+      ],
+      "sources": [
+        {
+          "id": "filarmonica-valcea-home",
+          "ref_type": "url",
+          "url": "https://filarmonica-valcea.ro/",
+          "publisher": "Centrul Cultural Municipal Râmnicu Vâlcea — Filarmonica Ion Dumitrescu",
+          "tier": "T1",
+          "health": "REGISTERED_NO_PROBE",
+          "change": "NO_CHANGE_SIGNAL"
+        }
+      ],
+      "lead_ids": [
+        "performing-arts-lead-af7d18c63fb7ab53db13"
+      ],
+      "public_projection": false
+    },
+    {
+      "id": "performing-arts-signal-00116caa7aaae16f03f4",
+      "label": "Consiliul Județean Vâlcea — Agenda Culturală Vâlceană — semnal nou: program/stagiune, bani publici",
+      "registry_status": "ACTIVE_REVERIFY",
+      "attention": "REVIEW_REQUIRED",
+      "changed_sources": [],
+      "degraded_sources": [],
+      "reverify_leads": [
+        "performing-arts-lead-00116caa7aaae16f03f4"
+      ],
+      "sources": [
+        {
+          "id": "cj-valcea-cultural-agenda",
+          "ref_type": "url",
+          "url": "https://filarmonica-valcea.ro/",
+          "publisher": "Consiliul Județean Vâlcea — Agenda Culturală Vâlceană",
+          "tier": "T1B",
+          "health": "REGISTERED_NO_PROBE",
+          "change": "NO_CHANGE_SIGNAL"
+        }
+      ],
+      "lead_ids": [
+        "performing-arts-lead-00116caa7aaae16f03f4"
       ],
       "public_projection": false
     }
