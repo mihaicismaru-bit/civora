@@ -2,6 +2,14 @@ name: VÂLCEA CLAR S1 Edition Delivery
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "VÂLCEA CLAR Live Newsroom"
+      - "VÂLCEA CLAR Autonomous Editions"
+      - "VÂLCEA CLAR Edition Recovery"
+    types: [completed]
+  schedule:
+    - cron: "12 * * * *"
   pull_request:
     paths:
       - "valcea-clar/delivery/edition_delivery.py"
