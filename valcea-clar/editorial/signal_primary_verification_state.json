@@ -2,19 +2,43 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-26T03:53:01+03:00",
+  "generated_at": "2026-09-26T08:57:20+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-26T03:51:53+03:00",
-  "task_count": 87,
+  "queue_generated_at": "2026-09-26T08:56:07+03:00",
+  "task_count": 84,
   "primary_match_count": 0,
-  "no_match_count": 30,
+  "no_match_count": 27,
   "unrouted_count": 57,
-  "target_count": 16,
-  "targets_ok": 11,
+  "target_count": 13,
+  "targets_ok": 9,
   "results": [
+    {
+      "signal_id": "06017a26d4f032395818d9f4",
+      "signal_title": "Constantin Rădulescu: ”Dacă nu se face rectificare, țara moare”",
+      "signal_url": "https://www.impactreal.ro/2026/09/26/constantin-radulescu-daca-nu-se-face-rectificare-tara-moare/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-26T08:43:28+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "89e9d7e2a9f7101220424788",
+      "signal_title": "Nicolae Ceaușescu este cetățean de onoare al orașului, iar Paul Goma a fost exmatriculat de la Lazăr. Ce am aflat în turul despre comunism",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/26/nicolae-ceausescu-este-cetatean-de-onoare-al-orasului-iar-paul-goma-a-fost-exmatriculat-de-la-lazar-ce-am-aflat-in-turul-despre-comunism/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-26T07:02:41+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "81e2cf381699fed307fed776",
       "signal_title": "Sănătate pentru sate: Localnicii din comuna Frâncești au beneficiat gratuit de consultații medicale de specialitate",
@@ -277,6 +301,66 @@
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "1ae251beb76d124e07615fb6",
+      "signal_title": "Primarul din Săliște a inițiat proiect de respingere a fabricii MPI Magnesium. „Magneziul sub formă de pulbere este extrem de inflamabil”. Primarul din Rășinari cere clarificări",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/25/primarul-din-saliste-a-initiat-proiect-de-respingere-a-fabricii-mpi-magnesium-magneziul-sub-forma-de-pulbere-este-extrem-de-inflamabil-primarul-din-rasinari-cere-clarificari/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-25T19:07:51+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1214,18 +1298,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "ef1b1bc0cc21085b1b8a75ea",
-      "signal_title": "Locuitorii de pe strada Cerbului cer salvarea a două podețe peste Rossbach. Astrid Fodor: „Dacă sunt sigure și nu ne obligă nimeni, nu le demolăm”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/24/locuitorii-de-pe-strada-cerbului-cer-salvarea-a-doua-podete-peste-rossbach-astrid-fodor-daca-sunt-sigure-si-nu-ne-obliga-nimeni-nu-le-demolam/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-24T15:26:35+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "87879c551169030fbbc4cc0f",
       "signal_title": "Radiologie și tomografie computerizată, de acum la Spitalul Municipal Drăgășani",
       "signal_url": "https://www.impactreal.ro/2026/09/24/radiologie-si-tomografie-computerizata-de-acum-la-spitalul-municipal-dragasani/",
@@ -1263,66 +1335,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "e43d12de003ddcaac9a27e2a",
-      "signal_title": "Primăria Sibiu reziliază contractul firmei care a închiriat terasa de la Lacul lui Binder și depune plângere penală. Fodor: A adus acte false",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/24/primaria-sibiu-reziliaza-contractul-firmei-care-a-inchiriat-terasa-de-la-lacul-lui-binder-si-depune-plangere-penala-fodor-a-depus-acte-false/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-24T15:02:37+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "1aabf124e4a7c7dd1a54e91d",
@@ -1393,18 +1405,6 @@
       "signal_url": "https://www.primplanpress.ro/prima-editie-a-festivalului-viei-si-vinului-aduce-trei-seri-de-spectacole-la-dragasani/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-09-24T12:57:06+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "64d030f94df858528f42a23c",
-      "signal_title": "FOTO – BMW-ul cu care ar fi fost transportată valiza cu trupul Valentinei, abandonat în Sibiu",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/24/foto-bmw-ul-cu-care-ar-fi-fost-transportata-valiza-cu-trupul-valentinei-abandonat-in-sibiu/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-24T12:51:33+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -1740,33 +1740,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "0732d6395046481029ca4b92",
-      "signal_title": "Detalii oficiale din ancheta crimei de la Ionești: Parchetul și Poliția confirmă că moartea tinerei a fost violentă. Suspectul ar fi părăsit țara",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/detalii-oficiale-din-ancheta-crimei-de-la-ionesti-parchetul-si-politia-confirma-ca-moartea-tinerei-a-fost-violenta-suspectul-ar-fi-parasit-tara/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-23T13:37:25+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "bab4c4f14e353eb8246d2ddf",
       "signal_title": "CRIMĂ ÎN VÂLCEA. Iubitul tinerei găsite moarte într-o valiză pe Olt, suspect de omor. Poliția îl caută",
       "signal_url": "https://ziaruldevalcea.ro/2026/09/crima-in-valcea-iubitul-tinerei-gasite-moarte-intr-o-valiza-pe-olt-suspect-de-omor-politia-il-cauta/",
@@ -1866,45 +1839,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "dc2b8a0a90e76548d3810e05",
-      "signal_title": "ATENȚIE, ȘOFERI! Circulația pe DJ 678A se închide la Șerbăneasa, în comuna Nicolae Bălcescu, pe 26 și 27 septembrie",
-      "signal_url": "https://www.impactreal.ro/2026/09/23/atentie-soferi-circulatia-pe-dj-678a-se-inchide-la-serbaneasa-in-comuna-nicolae-balcescu-pe-26-si-27-septembrie/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-23T09:40:07+03:00",
-      "verification_route_id": "county_roadworks",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "cj-valcea-roadworks",
-            "name": "Consiliul Județean Vâlcea — drumuri județene",
-            "url": "https://cjvalcea.ro/categorie/consiliul-judetean-la-zi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "ea3ee7fbbca31ec707bbf239",
-      "signal_title": "Anunț public privind elaborarea PUZ pentru imobilul NC 52803, Râmnicu Vâlcea – punctul „Piscupie”",
-      "signal_url": "https://www.eurovalcea.ro/2026/09/15/anunt-public-privind-elaborarea-puz-pentru-imobilul-nc-52803-ramnicu-valcea-punctul-piscupie/",
-      "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "c1ae98cbdfb43a82470bea8c",
       "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
       "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
@@ -1977,6 +1911,18 @@
       "fact_kernel_ready": false
     },
     {
+      "signal_id": "ea3ee7fbbca31ec707bbf239",
+      "signal_title": "Anunț public privind elaborarea PUZ pentru imobilul NC 52803, Râmnicu Vâlcea – punctul „Piscupie”",
+      "signal_url": "https://www.eurovalcea.ro/2026/09/15/anunt-public-privind-elaborarea-puz-pentru-imobilul-nc-52803-ramnicu-valcea-punctul-piscupie/",
+      "signal_publisher": "EuroVâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "06c251ddb7d03ad2c44a5272",
       "signal_title": "UE schimbă regulile pentru comenzile online din afara Uniunii. Noua taxă va fi introdusă până la 1 noiembrie 2026",
       "signal_url": "https://www.eurovalcea.ro/2026/09/22/ue-schimba-regulile-pentru-comenzile-online-din-afara-uniunii-noua-taxa-va-fi-introdusa-pana-la-1-noiembrie-2026/",
@@ -1987,55 +1933,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "cedf55e3f914d0a26b5981e8",
-      "signal_title": "SCM Râmnicu Vâlcea, debut cu VICTORIE în PRIMUL MECI din CAMPIONAT! »",
-      "signal_url": "http://www.realitateavalceana.ro/scm-ramnicu-valcea-debut-cu-victorie-in-primul-meci-din-campionat/",
-      "signal_publisher": "Realitatea Vâlceană",
-      "signal_tier": "T2",
-      "signal_published_at": null,
-      "verification_route_id": "sport",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "scm-rm-valcea",
-            "name": "SCM Râmnicu Vâlcea",
-            "url": "https://scmramnicuvalcea.ro/category/stiri/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cs-valcea-1924-social-feed",
-            "name": "Clubul Sportiv Vâlcea 1924",
-            "url": "https://www.csvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ajf-valcea-comunicate",
-            "name": "Asociația Județeană de Fotbal Vâlcea",
-            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
-          },
-          "status": "DEGRADED",
-          "error": "HTTPError: HTTP Error 403: Forbidden",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     }
   ],
   "verification_policy": {
