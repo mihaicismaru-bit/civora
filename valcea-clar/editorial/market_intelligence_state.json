@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-25T22:18:37Z",
+  "generated_at": "2026-09-26T01:32:29Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -204,7 +204,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "9584d0c7dea0943f837d68e9d528ecd243ac4c8f500bea1b5a4fe785a4065ec0",
+          "fingerprint": "3304bdda692513bc5335790019c5f731e468223d326ee14203011e4ea541cddd",
           "match_count": 19,
           "matched_terms": [
             "Joburi",
@@ -215,7 +215,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1362"
+              "value_text": "1364"
             }
           ],
           "health": "OK",
@@ -231,7 +231,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
-          "fingerprint": "6c4dcde249ea41cd44378685458e56f74b8bec45beede95a923bc56482b80581",
+          "fingerprint": "0a26c8ec840287e74b1312729e7f4b3144e3a19b928662cf74194a1a7ed6f3bb",
           "match_count": 26,
           "matched_terms": [
             "locuri de munca",
@@ -253,7 +253,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "735a4dcef04ec42c1d0f2fbecf5e1bc07b23f48153e1cffa9e969ac14d15c4f3",
+          "fingerprint": "de9eed8d2cf5c2b479c9b8ce653a0db4ab704c210e470cf80ae600a2491b866a",
           "match_count": 20,
           "matched_terms": [
             "joburi",
@@ -264,7 +264,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "6"
+              "value_text": "5"
             }
           ],
           "health": "OK",
@@ -314,7 +314,8 @@
       "official_changed_sources": [],
       "degraded_sources": [
         "data-gov-onrc-datasets",
-        "data-gov-finance-datasets"
+        "data-gov-finance-datasets",
+        "ccivl-members"
       ],
       "sources": [
         {
@@ -506,20 +507,15 @@
           "url": "https://www.ccivl.ro/lista-membri/",
           "source_class": "T1B_INSTITUTIONAL_SIGNAL",
           "publication_authority": true,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://www.ccivl.ro/lista-membri/",
-          "fingerprint": "e23e24ba7e83f40d0f8bd682f69b25e848900314fe1340256e3a194fb54a3d8f",
-          "match_count": 20,
-          "matched_terms": [
-            "membri",
-            "SRL",
-            "SA"
-          ],
+          "reachable": false,
+          "http_status": 403,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
           "numeric_signals": [],
-          "health": "OK",
-          "error": null,
-          "change": "UNCHANGED"
+          "health": "UNREACHABLE",
+          "error": "HTTP 403",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "seap-business-contracts",
