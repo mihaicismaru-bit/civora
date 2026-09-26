@@ -179,43 +179,40 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 2,
-      "readback_ok": 0,
-      "value": 0.0,
-      "blocker_story_ids": [
-        "baile-olanesti-incendiu-iezer-13ha-20260925",
-        "transalpina-program-0900-1800-20260926"
-      ],
+      "readback_ok": 2,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "baile-olanesti-incendiu-iezer-13ha-20260925",
           "url": "https://valceaclar.ro/stiri/baile-olanesti-incendiu-iezer-13ha-20260925/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "transalpina-program-0900-1800-20260926",
           "url": "https://valceaclar.ro/stiri/transalpina-program-0900-1800-20260926/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         }
       ],
       "projection_evidence": {
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-25T21:32:06.284746Z",
+        "updated_local": "2026-09-26T05:09:29.991423Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 76
+        "public_story_count": 78
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
@@ -253,6 +250,22 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36222997792,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-26T06:11:17Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36220066664,
+          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
+          "created_at": "2026-09-26T05:11:39Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 36219961722,
