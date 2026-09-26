@@ -15,7 +15,7 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-09-26T17:20:54Z",
+    "utc": "2026-09-26T17:24:41Z",
     "source_pass": 4,
     "source_degraded": 1,
     "source_fail": 2,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-PR-CENTRU-DIGITAL-2 — ADR Centru — Întreprinderi digitale Apel 2; dependent material facts blocked fail-closed; SRC-PR-CENTRU-ACTIUNI — ADR Centru — Acțiuni; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-09-26T17:21:04Z",
+    "utc": "2026-09-26T17:24:51Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20260926T172104Z",
+    "final_url": "https://partener.eu/?p10_probe=20260926T172451Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260926T172104Z",
+        "final_url": "https://partener.eu/?p10_probe=20260926T172451Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260926T172104Z",
+        "final_url": "https://partener.eu/?p10_probe=20260926T172451Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20260926T172104Z",
-            "to_url": "https://partener.eu/?p10_probe=20260926T172104Z"
+            "from_url": "http://partener.eu/?p10_probe=20260926T172451Z",
+            "to_url": "https://partener.eu/?p10_probe=20260926T172451Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20260926T172104Z",
+        "final_url": "https://partener.eu/?p10_probe=20260926T172451Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260926T172104Z",
-            "to_url": "https://partener.eu/?p10_probe=20260926T172104Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20260926T172451Z",
+            "to_url": "https://partener.eu/?p10_probe=20260926T172451Z"
           }
         ],
         "content_verified": true,
@@ -92,8 +92,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "https://partener.eu/",
-      "git_sha": "82b550f33eaa4c8ec15d32ccf1e6c05d4dc7d1a8",
-      "observed_at": "2026-09-26T17:19:14.101726+00:00",
+      "git_sha": "b468a246f1af0d8097c131fedd1f8670c86b9cac",
+      "observed_at": "2026-09-26T17:23:41.093551+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-09-26T17:21:03Z",
-    "validation_run_started": "2026-09-26T17:20:54Z",
+    "utc": "2026-09-26T17:24:51Z",
+    "validation_run_started": "2026-09-26T17:24:41Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "5a37938538ef68d1e0aa767c14c39e915040041d3abc6c98adf3dd20b5ea21f8",
-      "history_sha256": "5a37938538ef68d1e0aa767c14c39e915040041d3abc6c98adf3dd20b5ea21f8",
-      "history_path": "validation/history/20260926T172054Z.json",
+      "latest_sha256": "e862f2d5fb271232dd1f74efd6295db71995e6b03db49c37bb312a7f7d53213d",
+      "history_sha256": "e862f2d5fb271232dd1f74efd6295db71995e6b03db49c37bb312a7f7d53213d",
+      "history_path": "validation/history/20260926T172441Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "487d59cc92966a21c65d3d14bfa09975ace8fc8754cb6b8e7fd5454299ef1101",
-      "checkpoint_sha256": "487d59cc92966a21c65d3d14bfa09975ace8fc8754cb6b8e7fd5454299ef1101",
+      "source_state_sha256": "2c4a19c86445aa5c2bdbbe451194fbe593d1ef3a7de562b67066a67dfeaf4606",
+      "checkpoint_sha256": "2c4a19c86445aa5c2bdbbe451194fbe593d1ef3a7de562b67066a67dfeaf4606",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-09-26T16:31:58.107488Z",
-      "age_seconds": 2945,
+      "age_seconds": 3173,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -179,12 +179,12 @@
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-09-26T13:18:57.633264+00:00",
+      "observed_at": "2026-09-26T17:21:17.525883+00:00",
       "status": "PASS",
       "item_count": 32,
       "error_count": 48,
-      "hash_change_candidates": 1,
-      "material_signal_candidates": 1,
+      "hash_change_candidates": 0,
+      "material_signal_candidates": 0,
       "auth_dependency_count": 29,
       "auth_dependencies": [
         {
@@ -391,12 +391,12 @@
           "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
         }
       ],
-      "resolution_task_required": true,
+      "resolution_task_required": false,
       "resolution_task_present_fail_closed": true,
       "material_facts_auto_promoted": false
     },
     "peo_calendar": {
-      "observed_at": "2026-09-26T13:21:28.221978+00:00",
+      "observed_at": "2026-09-26T17:22:37.663181+00:00",
       "status": "OK_OFFICIAL_OIR_COPY",
       "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
       "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
@@ -482,7 +482,7 @@
       "integrity_pass": true,
       "registry_health": "DEGRADED",
       "registry_hash_changes": 0,
-      "afir_hash_changes": 1,
+      "afir_hash_changes": 0,
       "peo_calendar_changes": 0,
       "mipe_health": "PASS",
       "autonomous_orchestration_configured": true,
