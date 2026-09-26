@@ -53,6 +53,13 @@ FAIL_CLOSED_OPEN_STANDFIRST = (
 FAIL_CLOSED_OPEN_ACTION = (
     "Reverifică starea curentă și orice termen nou în sursa oficială înainte de a pregăti sau depune o cerere."
 )
+FAIL_CLOSED_CONSULTATION_STANDFIRST = (
+    "Consultarea necesită reverificare la sursa oficială. "
+    "Termenul din dosar este expirat sau nu este confirmat pentru momentul curent."
+)
+FAIL_CLOSED_CONSULTATION_ACTION = (
+    "Verifică sursa oficială înainte de a transmite observații; PARTENER.EU nu tratează această consultare ca activă."
+)
 
 
 def esc(value: Any) -> str:
@@ -224,10 +231,18 @@ def fail_closed_render_dossier(
     rendered = copy.deepcopy(dossier)
     rendered["status"] = "REVIEW"
     rendered["statusLabel"] = STATUS_LABELS["REVIEW"]
-    rendered["standfirst"] = FAIL_CLOSED_OPEN_STANDFIRST
+    rendered["standfirst"] = (
+        FAIL_CLOSED_OPEN_STANDFIRST
+        if open_refresh
+        else FAIL_CLOSED_CONSULTATION_STANDFIRST
+    )
     rendered["decisionLabel"] = "VERIFICĂ STAREA"
     rendered["decision"] = "VERIFY"
-    rendered["decisionAction"] = FAIL_CLOSED_OPEN_ACTION
+    rendered["decisionAction"] = (
+        FAIL_CLOSED_OPEN_ACTION
+        if open_refresh
+        else FAIL_CLOSED_CONSULTATION_ACTION
+    )
     rendered["renderFailClosedReason"] = (
         "OPEN_DEADLINE_EXPIRED_OR_UNVERIFIED_REQUIRES_REFRESH"
         if open_refresh
@@ -256,7 +271,11 @@ def fail_closed_render_dossier(
         heading = fold(item.get("title"))
         rows = [str(value).strip() for value in (item.get("items") or []) if str(value).strip()]
         if heading in {"decizia rapida", "ce trebuie facut acum"}:
-            rows = [FAIL_CLOSED_OPEN_ACTION]
+            rows = [
+                FAIL_CLOSED_OPEN_ACTION
+                if open_refresh
+                else FAIL_CLOSED_CONSULTATION_ACTION
+            ]
         elif heading == "rezumat executiv":
             replaced = False
             safe_rows: list[str] = []
