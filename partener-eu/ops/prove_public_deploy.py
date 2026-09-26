@@ -66,6 +66,16 @@ def count_cards(raw: bytes) -> int:
     return len(CARD_RE.findall(raw.decode("utf-8", "replace")))
 
 
+def consultation_semantics_ok(raw: bytes) -> bool:
+    """Active consultation hub must not expose unverified deadline copy."""
+    text = raw.decode("utf-8", "replace")
+    return (
+        "Termen:</b> Neconfirmat" not in text
+        and "Termen:</b> Necunoscut" not in text
+        and "UNKNOWN" not in text
+    )
+
+
 def compare_manifest(expected: dict[str, Any], observed: dict[str, Any]) -> tuple[bool, list[str]]:
     if expected == observed:
         return True, []
@@ -92,6 +102,8 @@ def self_test() -> int:
     assert not ok and mismatches == ["prepare"]
     assert count_cards(b'<article data-dossier-id="a"></article><div data-dossier-id=\'b\'></div>') == 2
     assert count_cards(b"<article></article>") == 0
+    assert consultation_semantics_ok(b"<article><b>Termen:</b> 29 septembrie 2026</article>")
+    assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
     print("PASS public deploy readback proof self-test")
@@ -161,13 +173,17 @@ def main() -> int:
                 route_url = urllib.parse.urljoin(base_url, route)
                 r_code, r_raw, r_resolved = fetch_bytes(route_url, timeout=args.timeout_seconds, token=token)
                 observed_count = count_cards(r_raw)
-                route_ok = r_code == 200 and observed_count == expected_count
+                semantic_ok = True
+                if route == "consultari/":
+                    semantic_ok = consultation_semantics_ok(r_raw)
+                route_ok = r_code == 200 and observed_count == expected_count and semantic_ok
                 route_results[route] = {
                     "http_status": r_code,
                     "resolved_url": r_resolved,
                     "expected_cards": expected_count,
                     "observed_cards": observed_count,
                     "matches": route_ok,
+                    "semantic_freshness_ok": semantic_ok,
                 }
                 routes_ok = routes_ok and route_ok
             record["routes"] = route_results
