@@ -1,29 +1,26 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.3",
   "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "source_id": "SRC-MAI-FED-CALENDAR-INDEX",
   "source_tier": "T1",
   "source_url": "https://fed.mai.gov.ro/despre/lansare-apeluri/",
-  "status": "OPEN",
+  "status": "RESOLVED_NON_MATERIAL_CHANGE",
   "first_observed_at": "2026-08-13T05:19:22.391140Z",
   "last_observed_at": "2026-09-26T05:10:17.447869Z",
   "previous_semantic_sha256": "b61f71d5916bd560d56edc2ddf031e6453909535b9f6d9bef55a1552918dab74",
-  "current_semantic_sha256": "3e1c05239aee70ade1d55a08a0e3b063bef65a86bac34fc5f3fa41dae5eb5a4a",
-  "material_fact_autoupdate_allowed": false,
-  "blocked_fact_classes": [
-    "deadline",
-    "eligibility",
-    "budget",
-    "scoring",
-    "beneficiaries",
-    "material_call_status",
-    "other_material_facts"
-  ],
-  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update.",
-  "source_name": "managing_authority_calendar_index",
   "candidate_semantic_sha256": "3e1c05239aee70ade1d55a08a0e3b063bef65a86bac34fc5f3fa41dae5eb5a4a",
+  "current_semantic_sha256": "3e1c05239aee70ade1d55a08a0e3b063bef65a86bac34fc5f3fa41dae5eb5a4a",
+  "resolved_semantic_sha256": "3e1c05239aee70ade1d55a08a0e3b063bef65a86bac34fc5f3fa41dae5eb5a4a",
+  "resolved_at": "2026-09-26T20:22:15Z",
+  "resolution_reason": "Authoritative MAI/FED readback still identifies the IMFV launch calendar as version 11.0 dated 14 January 2026; the semantic hash drift does not establish a newer calendar version or any material call-fact change.",
+  "material_fact_action": "NONE",
+  "publish_authorized": false,
+  "evidence_urls": [
+    "https://fed.mai.gov.ro/despre/lansare-apeluri/"
+  ],
+  "source_name": "managing_authority_calendar_index",
   "registry_class": "managing_authority_calendar_index",
   "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
+  "material_fact_autoupdate_allowed": false,
   "automatic_material_fact_update_allowed": false
 }
