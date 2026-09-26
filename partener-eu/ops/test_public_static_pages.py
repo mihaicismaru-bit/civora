@@ -76,6 +76,37 @@ assert "DESCHIS" not in expired_card
 assert "Sunt confirmate: open" not in expired_card
 assert module.FAIL_CLOSED_OPEN_STANDFIRST in expired_card
 
+# Consultation freshness is fail-closed just like OPEN freshness.
+consultation_clock = module.parse_date("2026-09-26T12:00:00Z")
+assert consultation_clock is not None
+def consultation_probe(deadline, confidence="CONFIRMED"):
+    return {
+        "id": "consultation-probe",
+        "title": "Consultation probe",
+        "programme": "TEST",
+        "publicationState": "PUBLISHABLE",
+        "status": "PUBLIC_CONSULTATION",
+        "statusLabel": "ÎN CONSULTARE",
+        "quickFacts": [
+            {"label": "Status", "value": "PUBLIC_CONSULTATION", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": deadline, "confidence": confidence},
+        ],
+        "sections": [],
+    }
+
+expired_consultation = consultation_probe("8 septembrie 2026")
+unknown_consultation = consultation_probe("Neconfirmat", "UNKNOWN")
+current_consultation = consultation_probe("29 septembrie 2026")
+assert module.current_consultation(expired_consultation, consultation_clock) is False
+assert module.current_consultation(unknown_consultation, consultation_clock) is False
+assert module.current_consultation(current_consultation, consultation_clock) is True
+assert module.requires_consultation_refresh(expired_consultation, consultation_clock) is True
+assert module.requires_consultation_refresh(unknown_consultation, consultation_clock) is True
+assert module.requires_consultation_refresh(current_consultation, consultation_clock) is False
+assert module.fail_closed_render_dossier(expired_consultation, consultation_clock)["status"] == "REVIEW"
+assert module.fail_closed_render_dossier(unknown_consultation, consultation_clock)["status"] == "REVIEW"
+assert module.fail_closed_render_dossier(current_consultation, consultation_clock)["status"] == "PUBLIC_CONSULTATION"
+
 publishable = [
     row
     for row in (payload.get("dossiers") or [])
@@ -272,7 +303,10 @@ with tempfile.TemporaryDirectory() as td:
         status = str(row.get("status") or "")
         marker = f'data-dossier-id="{row.get("id")}"'
         if status == "PUBLIC_CONSULTATION":
-            assert marker in consultation_index
+            if module.current_consultation(row, clock):
+                assert marker in consultation_index
+            else:
+                assert marker not in consultation_index
             assert marker not in open_index
         if status in module.PREPARE_STATUSES:
             assert marker in prepare_index
