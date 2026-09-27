@@ -1,0 +1,57 @@
+name: PARTENER.EU IMFV PR Materialize
+
+on:
+  push:
+    branches:
+      - 'partener/imfv-bv23a-bv10b-forwardport-20260927-r20'
+    paths:
+      - 'partener-eu/p11/opportunity_bundle.json'
+      - 'partener-eu/web/p11-public-data.js'
+      - 'partener-eu/p11/resolutions/mai_fed_imfv_urgent_open_calls_resolution.json'
+      - 'partener-eu/p11/test_resolution_overlays.py'
+      - '.github/workflows/partener-eu-imfv-pr-materialize.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: partener-eu-imfv-pr-materialize
+  cancel-in-progress: true
+
+jobs:
+  materialize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Rebuild canonical decision dossiers
+        run: |
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
+          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
+          python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/sync_decision_products_projection.py
+          python partener-eu/ops/test_decision_products.py
+      - name: Persist only regenerated decision products
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add partener-eu/ingest/state/decision_products.json partener-eu/web/decision-products.js
+          if git diff --cached --quiet; then
+            echo 'Decision products already current.'
+            exit 0
+          fi
+          git commit -m 'Regenerate verified IMFV decision dossiers'
+          git push origin HEAD:${{ github.ref_name }}
