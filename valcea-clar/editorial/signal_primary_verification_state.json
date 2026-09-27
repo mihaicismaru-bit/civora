@@ -2,19 +2,117 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-27T02:48:09+03:00",
+  "generated_at": "2026-09-27T04:55:49+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-27T02:46:51+03:00",
-  "task_count": 79,
+  "queue_generated_at": "2026-09-27T04:54:36+03:00",
+  "task_count": 81,
   "primary_match_count": 0,
-  "no_match_count": 33,
+  "no_match_count": 35,
   "unrouted_count": 46,
   "target_count": 13,
   "targets_ok": 9,
   "results": [
+    {
+      "signal_id": "3aea0c2e1293cc3a0558c144",
+      "signal_title": "DEZVĂLUIRI: Afacerile lui Siegfried Mureșan și traseul care ajunge la un personaj investigat într-un dosar cu legături MAFIA- Camorra",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/dezvaluiri-afacerile-lui-siegfried-muresan-si-traseul-care-ajunge-la-un-personaj-investigat-intr-un-dosar-cu-legaturi-mafia-camorra/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-27T03:37:33+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "e3a33eae18167795fba8f558",
+      "signal_title": "Senatoarea Andra Bică: „Nu voi vota învestirea Guvernului Mureșan! Profesorii și elevii au nevoie de soluții concrete, nu de promisiuni”",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/senatoarea-andra-bica-nu-voi-vota-investirea-guvernului-muresan-profesorii-si-elevii-au-nevoie-de-solutii-concrete-nu-de-promisiuni/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-27T03:25:24+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "28fbe8080a24e614a165c1e7",
       "signal_title": "FOTO/VIDEO. SCANDAL în centrul RÂMNICULUI, în zona unui cazino",
