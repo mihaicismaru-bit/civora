@@ -10,6 +10,7 @@ EXPECTED = {
     "SRC-OI-RESEARCH-POCIDIF": {
         "primary_url": "https://www2.poc.research.gov.ro/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1",
         "required_aliases": {
+            "https://www2.poc.mcid.gov.ro/ro/categorie/116/pocidif-prioritatea-1",
             "https://newpoc.research.gov.ro/ro/categorie/108/pocidif-2021-2027",
             "https://poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
             "https://www.poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
@@ -20,6 +21,7 @@ EXPECTED = {
     "SRC-OI-RESEARCH-HEALTH": {
         "primary_url": "https://www2.poc.research.gov.ro/ro/articol/4429/apeluri-de-proiecte-pos-prioritatea-5",
         "required_aliases": {
+            "https://www2.poc.mcid.gov.ro/ro/articol/4429/apeluri-de-proiecte-pos-prioritatea-5",
             "https://newpoc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
             "https://poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
             "https://www.poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
