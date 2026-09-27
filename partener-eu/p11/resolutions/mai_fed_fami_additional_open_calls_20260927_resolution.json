@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-MAI-FED-FAMI-ADDITIONAL-OPEN-CALLS-20260927",
+  "resolved_at": "2026-09-27T12:17:58Z",
+  "policy": {
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "Admit only current official MAI/FED launch-page facts that are semantically consistent. AM1A1A and AM10B are admitted as OPEN using official status, deadline and beneficiary class. Budget is deliberately withheld because each launch page contains a material narrative-vs-summary currency/value conflict; UNKNOWN remains UNKNOWN until reconciled from the signed specific guide."
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-AM1A1A-LAUNCH-20260927",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/10625/am1a1a-actiune-specifica-pact-migratie-consolidarea-capacitatii-sistemului-national-de-azil-in-ceea-ce-priveste-infrastructura/",
+      "observed_at": "2026-09-27T12:17:58Z",
+      "semantic_sha256": "f6a441d0c137e8b5fe02c3066702aa20908fe5fa4d1d69f1adfc495943a7effb",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies AM1A1A as active, sets the submission deadline to 22 October 2026 at 16:00 and lists the eligible beneficiary class as Autoritate publică centrală. Budget is withheld because the same page states 85,462,836 lei in narrative text but 16,765,308 EUR in the summary.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v2"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-AM10B-LAUNCH-20260927",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/11228/am10b-sprijin-operational-sistemul-european-comun-de-azil/",
+      "observed_at": "2026-09-27T12:17:58Z",
+      "semantic_sha256": "10d4674ba767897ed250e1a3d8b46b1e181d0aaaba642777623973e73bd8783f",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies AM10B as active, sets the submission deadline to 27 August 2027 at 16:00 and lists the eligible beneficiary class as Autoritate publică centrală. Budget is withheld because the same page states 4,000,000 lei in narrative text but 800,000 EUR in the summary.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v2"
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-fami-am1a1a-2026",
+      "title": "AM1A1A — Acțiune specifică Pact Migrație – Consolidarea capacității sistemului național de azil în ceea ce privește infrastructura",
+      "programme": "Program Național 2021-2027 Azil, Migrație și Integrare (FAMI)",
+      "code": "AM1A1A",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-AM1A1A-LAUNCH-20260927"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2026-10-22T16:00:00+03:00"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-AM1A1A-LAUNCH-20260927"
+        ],
+        "deadline": [
+          "EV-MAI-FED-AM1A1A-LAUNCH-20260927"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-AM1A1A-LAUNCH-20260927"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-fami-am10b-2026",
+      "title": "AM10B — Sprijin operațional – Sistemul european comun de azil",
+      "programme": "Program Național 2021-2027 Azil, Migrație și Integrare (FAMI)",
+      "code": "AM10B",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-AM10B-LAUNCH-20260927"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2027-08-27T16:00:00+03:00"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-AM10B-LAUNCH-20260927"
+        ],
+        "deadline": [
+          "EV-MAI-FED-AM10B-LAUNCH-20260927"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-AM10B-LAUNCH-20260927"
+        ]
+      }
+    }
+  ]
+}
