@@ -187,6 +187,36 @@ def remove_recap_items(outbox: dict) -> list[str]:
     return removed
 
 
+def retire_non_current_story_items(outbox: dict, current_story_ids: set[str]) -> list[str]:
+    """Fail-close stale story products that are no longer in the live edition."""
+    retired: list[str] = []
+    for item in outbox.get("items", []):
+        if not isinstance(item, dict):
+            continue
+        item_id = str(item.get("id") or "")
+        source_story_id = str(item.get("source_story_id") or "")
+        if not item_id.startswith("story-") or not source_story_id:
+            continue
+        if source_story_id in current_story_ids:
+            continue
+
+        item["status"] = "disabled"
+        item["disabled_reason"] = "story_not_in_current_edition"
+        platforms = item.get("platforms")
+        if isinstance(platforms, dict):
+            for platform, package in platforms.items():
+                if not isinstance(package, dict):
+                    continue
+                package["status"] = "disabled"
+                package["reason"] = "story_not_in_current_edition"
+                if platform == "tiktok":
+                    package["editorial_product_status"] = "HOLD_ARCHIVE"
+                    package["hold_reason"] = "story_not_in_current_edition"
+                    package["archive_as_current_forbidden"] = True
+        retired.append(item_id)
+    return retired
+
+
 def tiktok_platform_config(story: dict, visual: dict | None) -> dict:
     product = tiktok_editorial.package(story, visual)
     tt_title, tt_description = tiktok_copy(product, visual)
@@ -317,6 +347,8 @@ def main() -> int:
 
     removed_recaps = remove_recap_items(outbox)
     removed_holds = remove_socially_held_items(outbox)
+    current_story_ids = {str(story.get("id") or "") for story in stories if str(story.get("id") or "")}
+    retired_non_current = retire_non_current_story_items(outbox, current_story_ids)
     existing_by_id = {
         str(item.get("id")): item for item in outbox.get("items", [])
         if isinstance(item, dict) and item.get("id")
@@ -358,6 +390,7 @@ def main() -> int:
         "held_for_story_specific_media": held,
         "removed_recap_items": removed_recaps,
         "removed_publication_holds": removed_holds,
+        "retired_non_current_story_items": retired_non_current,
         "decision_snapshot_fallback_enabled": True,
     }
     print(json.dumps(result, ensure_ascii=False))
