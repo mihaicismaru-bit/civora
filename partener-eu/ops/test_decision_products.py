@@ -257,6 +257,25 @@ for dossier in dossiers:
         assert section.get("title")
         assert section.get("items"), f"empty section in {dossier.get('id')}: {section.get('title')}"
 
+storage = next((row for row in dossiers if row.get("id") == "me-fm-storage-standalone-2026"), None)
+if storage is not None:
+    storage_facts = {norm(row.get("label")): str(row.get("value") or "") for row in storage.get("quickFacts") or []}
+    funding_value = storage_facts.get("finantare") or storage_facts.get("grant") or ""
+    assert "69.000" in funding_value and "15.000.000" in funding_value, funding_value
+    assert "100%" in (storage_facts.get("intensitate maxima") or ""), storage_facts
+    assert "150.000.000 EUR" in storage_facts.get("buget", ""), storage_facts
+
+    storage_docs = next((row for row in storage.get("sections") or [] if norm(row.get("title")) == norm("Documente de pregătit")), None)
+    assert storage_docs and any("studiu de fezabilitate" in norm(row) for row in storage_docs.get("items") or []), storage_docs
+
+    storage_costs = next((row for row in storage.get("sections") or [] if norm(row.get("title")) == norm("Costuri, cofinanțare și ajutor de stat")), None)
+    assert storage_costs and any("tva" == norm(row).replace("cheltuiala neeligibila ", "").strip() or "tva" in norm(row) for row in storage_costs.get("items") or []), storage_costs
+
+    executive = storage.get("executiveSummary") or {}
+    assert "100%" in str(executive.get("cofinancing") or ""), executive
+    assert any("stand alone" in norm(row) for row in executive.get("activities") or []), executive
+    assert "ajutor de stat solicitat" in norm(executive.get("scoring") or ""), executive
+
 for story in news:
     assert story.get("headline")
     assert story.get("standfirst")
