@@ -100,12 +100,76 @@
       "missing_editorial_evidence": []
     },
     "manual_intervention": {
-      "status": "UNKNOWN",
-      "value": null,
-      "reason": "system_structural_baseline_unavailable"
+      "status": "MEASURED",
+      "value": 0,
+      "workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36317041627,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-27T11:50:43Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36317004067,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-27T11:50:03Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36305337287,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-27T08:09:56Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36302494867,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-27T07:14:35Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36302266975,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-27T07:10:06Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
+      "manual_story_route_additions": [],
+      "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
     "soak_48h": {
-      "status": "UNKNOWN",
+      "status": "IN_PROGRESS",
+      "structural_baseline_sha": "cf38d6afce751457c66aa408d1ea5065f1fe22d0",
+      "structural_baseline_at_utc": "2026-09-27T06:15:36Z",
+      "structural_baseline_repository": "mihaicismaru-bit/civora",
+      "structural_baseline_path": "civora_structural_paths",
+      "structural_components": [
+        {
+          "sha": "cf38d6afce751457c66aa408d1ea5065f1fe22d0",
+          "at_utc": "2026-09-27T06:15:36Z",
+          "repository": "mihaicismaru-bit/civora",
+          "path": "civora_structural_paths"
+        },
+        {
+          "sha": "c315f2a64b017085a4b4723f3b9b1d057778788f",
+          "at_utc": "2026-09-22T19:00:53Z",
+          "repository": "mihaicismaru-bit/valcea-clar",
+          "path": "scripts/sync_civora.py",
+          "source_sha": "59e10f8f20e483786292d62505a232b270afcdf1"
+        }
+      ],
+      "eligible_after_utc": "2026-09-29T06:15:36Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
