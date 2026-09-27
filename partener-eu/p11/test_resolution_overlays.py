@@ -20,6 +20,15 @@ FAMI_BUDGETS_RON = {
     "AM11H": 5_250_000,
     "AM2A1G": 3_922_800,
 }
+FAMI_ADDITIONAL_DEADLINES = {
+    "AM1A1A": "2026-10-22T16:00:00+03:00",
+    "AM10B": "2027-08-27T16:00:00+03:00",
+}
+IMFV_ADDITIONAL = {
+    "BV1A10": ("2027-07-31T16:00:00+03:00", 283_500_000),
+    "BV13C": ("2027-05-29T16:00:00+03:00", 51_422_789),
+    "BV20B": ("2027-05-29T16:00:00+03:00", 6_550_000),
+}
 
 
 class ResolutionOverlayTests(unittest.TestCase):
@@ -33,9 +42,8 @@ class ResolutionOverlayTests(unittest.TestCase):
             [row["opportunity_id"] for row in base["opportunities"]],
             [row["opportunity_id"] for row in merged["opportunities"]][: len(base["opportunities"])],
         )
-        # This is a corpus-growth regression: the seven reviewed calls must be
-        # additive and deterministic without weakening any pre-existing identity.
-        self.assertEqual(len(merged["opportunities"]), 35)
+        # Five new verified MAI/FED calls are additive; AM41D v2 replaces the same identity.
+        self.assertEqual(len(merged["opportunities"]), 40)
         step = next(row for row in merged["opportunities"] if row["opportunity_id"] == "PEO-STEP-LLL-ADULTI-2026")
         self.assertEqual(step["status"], "OPEN")
         self.assertEqual(step["deadline_at"], "2026-09-30T16:00:00+03:00")
@@ -53,16 +61,54 @@ class ResolutionOverlayTests(unittest.TestCase):
         self.assertEqual(regional_task["status"], "IN_REVIEW")
         self.assertEqual(set(regional_task["blocked_fact_classes"]), {"status", "deadline", "budget", "grant", "eligibility", "scoring", "beneficiaries"})
         fami = [row for row in merged["opportunities"] if row["opportunity_id"].startswith("mai-fami-")]
-        self.assertEqual(len(fami), 7)
-        for item in fami:
+        self.assertEqual(len(fami), 9)
+        fami_by_code = {row["code"]: row for row in fami}
+        for code, budget in FAMI_BUDGETS_RON.items():
+            item = fami_by_code[code]
             self.assertEqual(item["status"], "OPEN")
             self.assertEqual(item["publication_state"], "PUBLISHABLE")
             self.assertEqual(item["material_facts"]["deadline"]["closes"], "2026-10-16T16:00:00+03:00")
             self.assertEqual(
                 item["material_facts"]["budget"],
-                {"amount": FAMI_BUDGETS_RON[item["code"]], "currency": "RON", "basis": "FEN_AVAILABLE_CALL_ALLOCATION"},
+                {"amount": budget, "currency": "RON", "basis": "FEN_AVAILABLE_CALL_ALLOCATION"},
             )
             self.assertFalse(item.get("candidate_material_facts"))
+
+        for code, deadline in FAMI_ADDITIONAL_DEADLINES.items():
+            item = fami_by_code[code]
+            self.assertEqual(item["status"], "OPEN")
+            self.assertEqual(item["publication_state"], "PUBLISHABLE")
+            self.assertEqual(item["material_facts"]["deadline"]["closes"], deadline)
+            self.assertEqual(item["material_facts"]["beneficiaries"], ["Autoritate publică centrală"])
+            self.assertNotIn("budget", item["material_facts"])
+
+        imfv_by_code = {
+            row["code"]: row
+            for row in merged["opportunities"]
+            if row["opportunity_id"].startswith("mai-imfv-")
+        }
+        for code, (deadline, budget) in IMFV_ADDITIONAL.items():
+            item = imfv_by_code[code]
+            self.assertEqual(item["status"], "OPEN")
+            self.assertEqual(item["publication_state"], "PUBLISHABLE")
+            self.assertEqual(item["material_facts"]["deadline"]["closes"], deadline)
+            self.assertEqual(item["material_facts"]["beneficiaries"], ["Autoritate publică centrală"])
+            self.assertEqual(
+                item["material_facts"]["budget"],
+                {"amount": budget, "currency": "RON", "basis": "FEN_AVAILABLE_CALL_ALLOCATION"},
+            )
+
+        am41d = fami_by_code["AM41D"]
+        self.assertEqual(am41d["evidence_refs"], ["EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"])
+        self.assertEqual(am41d["material_facts"]["budget"]["cofinancing_rate_percent"], 100)
+        self.assertEqual(am41d["material_facts"]["budget"]["fen_percent"], 75)
+        self.assertEqual(am41d["material_facts"]["budget"]["fnn_percent"], 25)
+        self.assertEqual(
+            am41d["material_facts"]["budget"]["maximum_total_eligible_cost_per_operation"],
+            {"amount": 6_666_666, "currency": "RON"},
+        )
+        self.assertEqual(am41d["material_facts"]["scoring"]["minimum_quality_score"], 70)
+        self.assertIn("Instituții publice din România", am41d["material_facts"]["beneficiaries"])
 
         fami_change = next(row for row in merged["changesets"] if row["changeset_id"] == "CS-MAI-FED-FAMI-OPEN-CALLS-20260923")
         self.assertEqual(fami_change["resolution_state"], "VERIFIED")
