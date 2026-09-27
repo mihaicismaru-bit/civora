@@ -21,7 +21,7 @@ on:
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/market_intelligence_watch.py'
-      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
   pull_request:
@@ -39,7 +39,7 @@ on:
       - 'valcea-clar/scripts/monitor_ledger.py'
       - 'valcea-clar/scripts/infrastructure_watch.py'
       - 'valcea-clar/scripts/market_intelligence_watch.py'
-      - 'valcea-clar/scripts/council_watch_rm_valcea.py'
+      - 'valcea-clar/scripts/council_watch_rm_valcea_v2.py'
       - 'valcea-clar/scripts/validate_monitor_registry.py'
       - '.github/workflows/valcea-clar-monitor-ledger.yml'
 
@@ -81,7 +81,7 @@ jobs:
         run: python valcea-clar/scripts/market_intelligence_watch.py --check
 
       - name: Validate Râmnicu Vâlcea Council Watch extractor
-        run: python valcea-clar/scripts/council_watch_rm_valcea.py --self-test
+        run: python valcea-clar/scripts/council_watch_rm_valcea_v2.py --self-test
 
       - name: Probe monitor sources
         if: github.event_name != 'pull_request'
@@ -96,7 +96,7 @@ jobs:
         run: python valcea-clar/scripts/market_intelligence_watch.py --live
 
       - name: Read official Râmnicu Vâlcea adopted decisions
-        run: python valcea-clar/scripts/council_watch_rm_valcea.py
+        run: python valcea-clar/scripts/council_watch_rm_valcea_v2.py
 
       - name: Upload monitor review snapshots
         if: always()
