@@ -35,7 +35,7 @@ class ResolutionOverlayTests(unittest.TestCase):
         )
         # This is a corpus-growth regression: the seven reviewed calls must be
         # additive and deterministic without weakening any pre-existing identity.
-        self.assertEqual(len(merged["opportunities"]), 33)
+        self.assertEqual(len(merged["opportunities"]), 35)
         step = next(row for row in merged["opportunities"] if row["opportunity_id"] == "PEO-STEP-LLL-ADULTI-2026")
         self.assertEqual(step["status"], "OPEN")
         self.assertEqual(step["deadline_at"], "2026-09-30T16:00:00+03:00")

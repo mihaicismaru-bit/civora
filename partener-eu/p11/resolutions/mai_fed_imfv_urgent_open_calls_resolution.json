@@ -1,0 +1,135 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-MAI-FED-IMFV-URGENT-OPEN-CALLS-20260925",
+  "resolved_at": "2026-09-25T15:17:59Z",
+  "policy": {
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "Admit only facts explicitly consistent on the current official MAI/FED launch page. Status, deadline, FEN call allocation and beneficiary class are verified directly from the authority page; all other fact classes remain absent until separately reconciled."
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-BV23A-LAUNCH-20260925",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/8828/bv23a-dezvoltarea-cooperarii-consulare-si-a-programelor-de-formare-lansare-apel-de-proiecte/",
+      "observed_at": "2026-09-25T15:17:59Z",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "budget",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies BV23A as active, sets the submission deadline to 30 September 2026 at 16:00, states a FEN call allocation of 1,000,000 RON, and lists the eligible beneficiary class as Autoritate publică centrală.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v1",
+      "semantic_sha256": "5cd11c448b56b9a343b9d6037b4a62323a056215d7f3ac78a3aa112c50f05782"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-BV10B-LAUNCH-20260925",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/8819/bv10b-sprijin-operational-frontiere-lansare-apel-de-proiecte/",
+      "observed_at": "2026-09-25T15:17:59Z",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "budget",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies BV10B as active, sets the submission deadline to 30 September 2026 at 16:00, states a FEN call allocation of 13,203,953 RON, and lists the eligible beneficiary class as Autoritate publică centrală.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v1",
+      "semantic_sha256": "134d62ceba22de95fe1163ed89a0f016c033a214c04b8c1d25f56aa2d0a87b54"
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-imfv-bv23a-2026",
+      "title": "BV23A — Dezvoltarea cooperării consulare și a programelor de formare a personalului care contribuie la politica comună în domeniul vizelor și la cooperarea consulară",
+      "programme": "Program Național 2021-2027 Managementul Frontierelor și Vize (IMFV)",
+      "code": "BV23A",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-BV23A-LAUNCH-20260925"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2026-09-30T16:00:00+03:00"
+        },
+        "budget": {
+          "amount": 1000000,
+          "currency": "RON",
+          "basis": "FEN_AVAILABLE_CALL_ALLOCATION"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-BV23A-LAUNCH-20260925"
+        ],
+        "deadline": [
+          "EV-MAI-FED-BV23A-LAUNCH-20260925"
+        ],
+        "budget": [
+          "EV-MAI-FED-BV23A-LAUNCH-20260925"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-BV23A-LAUNCH-20260925"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-imfv-bv10b-2026",
+      "title": "BV10B — Sprijin operațional – frontiere",
+      "programme": "Program Național 2021-2027 Managementul Frontierelor și Vize (IMFV)",
+      "code": "BV10B",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-BV10B-LAUNCH-20260925"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2026-09-30T16:00:00+03:00"
+        },
+        "budget": {
+          "amount": 13203953,
+          "currency": "RON",
+          "basis": "FEN_AVAILABLE_CALL_ALLOCATION"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-BV10B-LAUNCH-20260925"
+        ],
+        "deadline": [
+          "EV-MAI-FED-BV10B-LAUNCH-20260925"
+        ],
+        "budget": [
+          "EV-MAI-FED-BV10B-LAUNCH-20260925"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-BV10B-LAUNCH-20260925"
+        ]
+      }
+    }
+  ]
+}
