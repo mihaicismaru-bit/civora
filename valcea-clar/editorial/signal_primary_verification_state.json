@@ -2,19 +2,80 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-27T04:55:49+03:00",
+  "generated_at": "2026-09-27T10:43:36+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-27T04:54:36+03:00",
-  "task_count": 81,
+  "queue_generated_at": "2026-09-27T10:42:24+03:00",
+  "task_count": 73,
   "primary_match_count": 0,
-  "no_match_count": 35,
-  "unrouted_count": 46,
+  "no_match_count": 31,
+  "unrouted_count": 42,
   "target_count": 13,
   "targets_ok": 9,
   "results": [
+    {
+      "signal_id": "59968b71712cc396410c5cd0",
+      "signal_title": "Incendiul de pădure de la Băile Olănești s-a extins la 27 de hectare. Pompierii intervin pentru a treia zi",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/27/incendiul-de-padure-de-la-baile-olanesti-s-a-extins-la-27-de-hectare-pompierii-intervin-pentru-a-treia-zi/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-27T10:15:42+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "1ed63e3156d90a615f28ba3f",
+      "signal_title": "Activitatea Palatului Brukenthal Avrig a fost suspendată. Inspectorii sanitari au dat amenzi de 30.000 de lei, în urma cazurilor de toxiinfecție alimentară",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/27/activitatea-palatului-brukenthal-avrig-a-fost-suspendata-inspectorii-au-sanitari-au-dat-amenzi-de-30-000-de-lei-in-urma-cazurilor-de-toxiinfectie-alimentara/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-27T07:40:22+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "3aea0c2e1293cc3a0558c144",
       "signal_title": "DEZVĂLUIRI: Afacerile lui Siegfried Mureșan și traseul care ajunge la un personaj investigat într-un dosar cu legături MAFIA- Camorra",
@@ -242,6 +303,18 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "1c321389ba7623ce2d398f0f",
+      "signal_title": "Mircea Bulboacă, CON-A: „Am făcut zeci de fabrici în opt, nouă luni, și am ajuns să fac un pod peste Olt în cinci ani?”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/26/mircea-bulboaca-con-a-am-facut-zeci-de-fabrici-in-opt-noua-luni-si-am-ajuns-sa-fac-un-pod-peste-olt-in-cinci-ani/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-26T18:52:04+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "da7af095c936fd4e9a89e187",
@@ -800,18 +873,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "53cd5a6b10989c6c13a44951",
-      "signal_title": "Tiberiu Costea, despre proiectele depuse la CNI și cofinanțările imposibil de acoperit din bugetul local",
-      "signal_url": "https://www.impactreal.ro/2026/09/25/tiberiu-costea-despre-proiectele-depuse-la-cni-si-cofinantarile-imposibil-de-acoperit-din-bugetul-local/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-09-25T22:16:02+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "2a1125cd49f28e67403cf35b",
       "signal_title": "Weekend de toamnă în Sibiu. Nori sâmbătă, vreme mai frumoasă duminică",
       "signal_url": "https://www.turnulsfatului.ro/2026/09/25/weekend-de-toamna-in-sibiu-nori-sambata-vreme-mai-frumoasa-duminica/",
@@ -1067,44 +1128,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "b7a02a2314fc1430ed555cbd",
-      "signal_title": "Noua clădire a Spitalului Militar Sibiu: urgența funcționează la parter, iar ambulanța intră practic în clădire",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/25/noua-cladire-a-spitalului-militar-sibiu-urgenta-functioneaza-la-parter-iar-ambulanta-intra-practic-in-cladire/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T15:52:21+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "45e1198075a959487f10f62b",
       "signal_title": "VIDEO Criză financiară la CJ Vâlcea: RAJDP are salariile restante de două luni. Constantin Rădulescu cere rectificare bugetară: „Fără rectificare este punerea în pericol a țării”",
       "signal_url": "https://evenimentvalcean.ro/video-criza-financiara-la-cj-valcea-rajdp-are-salariile-restante-de-doua-luni-constantin-radulescu-cere-rectificare-bugetara-fara-rectificare-este-punerea-in-pericol-a-tarii/",
@@ -1153,44 +1176,6 @@
             "id": "inhga-avertizari-hidrologice-valcea",
             "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
             "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "52fad84d30bc04778644eb25",
-      "signal_title": "Pîslaru, ministrul interimar al Proiectelor Europene: noul Spital Județean Sibiu ar putea fi construit în parteneriat public-privat, cu sprijinul BERD",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/25/pislaru-ministrul-interimar-al-proiectelor-eurpene-noul-spital-judetean-sibiu-ar-putea-fi-construit-in-parteneriat-public-privat-cu-sprijinul-berd/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T14:52:27+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
           },
           "status": "PASS",
           "error": null,
@@ -1423,18 +1408,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "9fe3df65d68e89958887acbf",
-      "signal_title": "Ionuț Antonie se întoarce acasă, în Vâlcea. Actorul va fi înmormântat sâmbătă, la Cheia",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/25/ionut-antonie-se-intoarce-acasa-in-valcea-actorul-va-fi-inmormantat-sambata-la-cheia/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-25T11:05:15+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "d692ad8757f23c99894d08d4",
       "signal_title": "Monsson Trading sponsorizează modernizarea Terapiei Intensive Pediatrice din Constanța cu 3 milioane de lei",
       "signal_url": "https://stirileolteniei.ro/monsson-trading-sponsorizeaza-modernizarea-terapiei-intensive-pediatrice-din-constanta-cu-3-milioane-de-lei/",
@@ -1563,18 +1536,6 @@
       "signal_url": "https://ziaruldevalcea.ro/2026/09/dezvaluiri-in-crima-din-valcea-suspectul-legaturi-cu-un-influencer-al-carui-frate-ar-fi-judecator-ce-ascunde-anturajul-lui-vlad-baltateanu/",
       "signal_publisher": "Ziarul de Vâlcea",
       "signal_published_at": "2026-09-25T00:35:55+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "1a6aa093f84340308871e7f0",
-      "signal_title": "Tiberiu Costea, despre noile proiecte ale comunei Lungești: parc fotovoltaic și centru multifuncțional",
-      "signal_url": "https://www.impactreal.ro/2026/09/24/tiberiu-costea-despre-noile-proiecte-ale-comunei-lungesti-parc-fotovoltaic-si-centru-multifunctional/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-09-24T22:41:06+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -1759,178 +1720,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "aadf8df6d9d2fc745d9069c2",
-      "signal_title": "Drăgășani în Prim-plan o zi in urma Prima ediție a Festivalului „Viei și Vinului” aduce trei seri de spectacole la Drăgășani",
-      "signal_url": "https://www.primplanpress.ro/prima-editie-a-festivalului-viei-si-vinului-aduce-trei-seri-de-spectacole-la-dragasani/",
-      "signal_publisher": "Primplan Press",
-      "signal_published_at": "2026-09-24T12:57:06+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "74849d3cc5b5826b641877a0",
-      "signal_title": "Anchetatorii au identificat mașina folosită pentru transportarea trupului Valentinei",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/anchetatorii-au-identificat-masina-folosita-pentru-transportarea-trupului-valentinei/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_published_at": "2026-09-24T11:40:57+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "e5250c62149bd9a0c73cd7ae",
-      "signal_title": "Costinel Stoica îi invită pe vâlceni la Drăgășani, între 2 și 4 octombrie: „Vă aștept să sărbătorim împreună via, vinul și tradițiile care ne definesc ”",
-      "signal_url": "https://www.impactreal.ro/2026/09/24/costinel-stoica-ii-invita-pe-valceni-la-dragasani-intre-2-si-4-octombrie-va-astept-sa-sarbatorim-impreuna-via-vinul-si-traditiile-care-ne-definesc/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-09-24T11:23:24+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "9fc0f2087e5c22360f084e47",
-      "signal_title": "Continuare about Uzinele Sodice Govora, dinamitate și vândute la fier vechi. Astăzi prima explozie👇🏻👇🏻👇🏻",
-      "signal_url": "https://www.curierul.ro/uzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-24T10:46:33+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "887d59f51e80f8fad62d5e32",
-      "signal_title": "Continuare about Uzinele Sodice Govora, dinamitate și vândute la fier vechi. Astăzi prima explozie👇🏻👇🏻👇🏻",
-      "signal_url": "https://www.curierul.ro/uzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb%f0%9f%91%87%f0%9f%8f%bb/",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-24T10:46:33+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "f17bfb6147d19937e0488973",
-      "signal_title": "FOTO Veste importantă pentru pacienții din Drăgășani: spitalul are acum CT și radiologie moderne",
-      "signal_url": "https://evenimentvalcean.ro/foto-veste-importanta-pentru-pacientii-din-dragasani-spitalul-are-acum-ct-si-radiologie-moderne/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-24T09:23:18+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "ea3ee7fbbca31ec707bbf239",
