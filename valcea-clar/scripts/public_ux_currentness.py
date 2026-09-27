@@ -52,19 +52,44 @@ def manifest_current_ids() -> set[str]:
 def current_union(
     feed: dict[str, Any], archive: dict[str, Any]
 ) -> tuple[list[dict[str, Any]], set[str]]:
-    stories, _legacy_live_ids = _BASE_UNION(feed, archive)
-    manifest_ids = manifest_current_ids()
-    current_ids: set[str] = set()
-    for story in feed.get("stories") or []:
-        if not isinstance(story, dict) or not story.get("id"):
-            continue
-        sid = str(story.get("id"))
-        if is_current(story) or (
-            "active_now" not in story
-            and not str(story.get("archive_status") or "").strip()
-            and sid in manifest_ids
-        ):
-            current_ids.add(sid)
+    stories, legacy_live_ids = _BASE_UNION(feed, archive)
+    feed_rows = [
+        story for story in feed.get("stories") or []
+        if isinstance(story, dict) and story.get("id")
+    ]
+    feed_has_explicit_currentness = any(
+        "active_now" in story or bool(str(story.get("archive_status") or "").strip())
+        for story in feed_rows
+    )
+
+    # During a canonical continuous-story publication transaction,
+    # render_story_pages.py rematerializes the story manifest before the
+    # current/archive adapter runs. That temporary manifest intentionally has
+    # no active_now/archive_status markers. In that bounded state, the live
+    # feed membership is the authoritative current set; consulting the previous
+    # manifest would archive a just-published story before presentation catches
+    # up. If feed rows ever carry explicit currentness, those markers win.
+    if feed.get("publication_model") == "continuous_story_first" and not feed_has_explicit_currentness:
+        current_ids = {
+            str(story.get("id")) for story in feed_rows
+            if str(story.get("id") or "")
+        }
+    else:
+        manifest_ids = manifest_current_ids()
+        current_ids: set[str] = set()
+        for story in feed_rows:
+            sid = str(story.get("id"))
+            if is_current(story) or (
+                "active_now" not in story
+                and not str(story.get("archive_status") or "").strip()
+                and sid in manifest_ids
+            ):
+                current_ids.add(sid)
+
+    # Preserve the base contract as a final fail-safe for older compatible
+    # payloads that do not declare the continuous-story publication model.
+    if not current_ids and not feed_has_explicit_currentness and feed.get("publication_model") != "continuous_story_first":
+        current_ids = {str(sid) for sid in legacy_live_ids}
 
     # The lead must come from the current set. Archive rows remain available for
     # context, but can never outrank a verified current story merely because the
@@ -152,9 +177,15 @@ def eligible_events(doc: dict[str, Any], now: datetime | None = None) -> list[di
             continue
         if event_id in seen:
             continue
-        if event_start.date() < effective_now.date() or status == "past":
+
+        end_text = str(raw.get("event_end") or raw.get("event_start") or "").strip()
+        try:
+            end_date = datetime.fromisoformat(end_text).date() if end_text else event_start.date()
+        except ValueError:
+            end_date = event_start.date()
+        if end_date < effective_now.date() or status == "past":
             continue
-        days = (event_start.date() - effective_now.date()).days
+        days = max(0, (event_start.date() - effective_now.date()).days)
         age_hours = max(0.0, (effective_now - checked).total_seconds() / 3600.0)
         if days <= 1 and age_hours > 12:
             continue
@@ -286,6 +317,20 @@ def self_test() -> None:
     assert is_current({"archive_status": "published_archive"}) is False
     assert is_current({}) is False
 
+    # Regression: a newly admitted story in a canonical continuous-story feed
+    # must remain current while the rematerialized manifest temporarily lacks
+    # current/archive markers.
+    tx_feed = {
+        "publication_model": "continuous_story_first",
+        "stories": [
+            {"id": "existing", "headline": "Existing", "sources": [{"url": "https://example.test/existing"}]},
+            {"id": "newly-published", "headline": "New", "sources": [{"url": "https://example.test/new"}]},
+        ],
+    }
+    tx_rows, tx_current = current_union(tx_feed, {"stories": []})
+    assert {str(row.get("id")) for row in tx_rows} == {"existing", "newly-published"}
+    assert tx_current == {"existing", "newly-published"}
+
     sample_events = {"events": [
         {"event_id": "e1", "fingerprint": "fp1", "title": "Test Drăgășani", "event_start": "2026-09-24", "start_time": "19:00", "venue": "Casa de Cultură", "locality": "Drăgășani", "category": "teatru", "price": "unknown", "source_url": "https://example.test/e1", "source_tier": "T1", "checked_at": "2026-09-23T17:00:00+03:00", "status": "scheduled"},
         {"event_id": "e2", "fingerprint": "fp2", "title": "Stale", "event_start": "2026-09-24", "venue": "V", "locality": "L", "source_url": "https://example.test/e2", "source_tier": "T1", "checked_at": "2026-09-22T01:00:00+03:00", "status": "scheduled"},
@@ -293,6 +338,15 @@ def self_test() -> None:
     eligible = eligible_events(sample_events, datetime(2026, 9, 23, 18, 0, tzinfo=TZ))
     assert [row["event_id"] for row in eligible] == ["e1"]
     assert "Drăgășani" in event_card(eligible[0])
+
+    multiday_events = {"events": [{
+        "event_id": "race", "fingerprint": "race-fp", "title": "Race",
+        "event_start": "2026-09-26", "event_end": "2026-09-27", "start_time": "10:00",
+        "venue": "Nicolae Bălcescu", "locality": "Nicolae Bălcescu", "source_url": "https://example.test/race",
+        "source_tier": "T1", "checked_at": "2026-09-26T22:00:00+03:00", "status": "scheduled"
+    }]}
+    multiday_eligible = eligible_events(multiday_events, datetime(2026, 9, 27, 9, 0, tzinfo=TZ))
+    assert [row["event_id"] for row in multiday_eligible] == ["race"]
 
     nav = {
         "contract_id": "valcea-clar-primary-v2",
