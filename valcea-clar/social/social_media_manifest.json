@@ -14,15 +14,16 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 2,
+    "autonomous_stories_published_24h": 3,
     "autonomous_story_ids_24h": [
       "baile-olanesti-incendiu-iezer-13ha-20260925",
-      "transalpina-program-0900-1800-20260926"
+      "transalpina-program-0900-1800-20260926",
+      "valcea-campanie-antirabica-toamna-20260925"
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 2,
-      "published": 2,
+      "measured": 3,
+      "published": 3,
       "stories": [
         {
           "story_id": "baile-olanesti-incendiu-iezer-13ha-20260925",
@@ -35,6 +36,12 @@
           "seconds": 258,
           "discovered_at_utc": "2026-09-26T05:05:15Z",
           "published_at_utc": "2026-09-26T05:09:33Z"
+        },
+        {
+          "story_id": "valcea-campanie-antirabica-toamna-20260925",
+          "seconds": 195,
+          "discovered_at_utc": "2026-09-27T05:01:16Z",
+          "published_at_utc": "2026-09-27T05:04:31Z"
         }
       ],
       "max_seconds": 258,
@@ -43,16 +50,18 @@
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 2,
+      "published_stories": 3,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "PASS",
-      "eligible": 2,
+      "status": "BLOCKED",
+      "eligible": 3,
       "readback_ok": 2,
-      "value": 1.0,
-      "blocker_story_ids": [],
+      "value": 0.6667,
+      "blocker_story_ids": [
+        "valcea-campanie-antirabica-toamna-20260925"
+      ],
       "checks": [
         {
           "story_id": "baile-olanesti-incendiu-iezer-13ha-20260925",
@@ -73,6 +82,16 @@
           "headline_ok": true,
           "ok": true,
           "error": null
+        },
+        {
+          "story_id": "valcea-campanie-antirabica-toamna-20260925",
+          "url": "https://valceaclar.ro/stiri/valcea-campanie-antirabica-toamna-20260925/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
         }
       ],
       "projection_evidence": {
@@ -88,8 +107,8 @@
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 1,
-      "eligible": 2,
-      "value": 0.5,
+      "eligible": 3,
+      "value": 0.3333,
       "delivered_story_ids": [
         "baile-olanesti-incendiu-iezer-13ha-20260925"
       ]
@@ -97,7 +116,7 @@
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 0,
-      "eligible": 2,
+      "eligible": 3,
       "value": 0.0,
       "delivered_story_ids": []
     },
@@ -120,20 +139,45 @@
       "status": "MEASURED",
       "value": 0,
       "workflow_dispatch_runs": [],
-      "automated_workflow_dispatch_runs": [],
+      "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36296229983,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-27T05:06:17Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36296144089,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-27T05:04:35Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36296069051,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-27T05:03:00Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        }
+      ],
       "manual_story_route_additions": [],
       "definition": "only non-bot workflow_dispatch triggers across CIVORA/public projection and human-authored public story route additions count as manual intervention"
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "cabd59c6408ecd2bdb9642c669ea8d94fd0ffda8",
-      "structural_baseline_at_utc": "2026-09-27T04:41:04Z",
+      "structural_baseline_sha": "d47a368d0a7867030893a392a15c89ca5e5eca7a",
+      "structural_baseline_at_utc": "2026-09-27T04:42:02Z",
       "structural_baseline_repository": "mihaicismaru-bit/civora",
       "structural_baseline_path": "civora_structural_paths",
       "structural_components": [
         {
-          "sha": "cabd59c6408ecd2bdb9642c669ea8d94fd0ffda8",
-          "at_utc": "2026-09-27T04:41:04Z",
+          "sha": "d47a368d0a7867030893a392a15c89ca5e5eca7a",
+          "at_utc": "2026-09-27T04:42:02Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
@@ -145,7 +189,7 @@
           "source_sha": "59e10f8f20e483786292d62505a232b270afcdf1"
         }
       ],
-      "eligible_after_utc": "2026-09-29T04:41:04Z",
+      "eligible_after_utc": "2026-09-29T04:42:02Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
