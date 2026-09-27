@@ -1,0 +1,99 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-MAI-FED-AM41D-V2-20260927",
+  "resolved_at": "2026-09-27T12:17:58Z",
+  "policy": {
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "Signed guide v2.0 controls revised AM41D facts."
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — OI FAMI",
+      "source_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-apel-AM41D-Relocare-v2.0.sIG_.pdf",
+      "observed_at": "2026-09-27T12:17:58Z",
+      "semantic_sha256": "44bb6b2d01cdfc3dc78fdd3f3bbbf353f1f022f5ed97cadfce3861eb3946026c",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "budget",
+        "deadline",
+        "eligibility",
+        "scoring",
+        "status"
+      ],
+      "semantic_assertion": "AM41D guide v2.0 confirms deadline, RON budget, cofinancing, beneficiary classes, eligibility rules and 70-point quality threshold.",
+      "temporal_role": "CURRENT_SIGNED_SPECIFIC_GUIDE",
+      "retrieval_state": "DIRECT_OFFICIAL_SIGNED_PDF_REVIEWED",
+      "parser_version": "signed-guide-semantic-review-v2"
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-fami-am41d-2026",
+      "title": "AM41D — Consolidarea solidarității și cooperării cu țările terțe afectate de fluxurile migratorii, inclusiv prin relocare în Uniune și prin alte căi legale de obținere a protecției în Uniune",
+      "programme": "Program Național 2021-2027 Azil, Migrație și Integrare (FAMI)",
+      "code": "AM41D",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2026-10-16T16:00:00+03:00"
+        },
+        "budget": {
+          "amount": 5000000,
+          "currency": "RON",
+          "basis": "FEN_AVAILABLE_CALL_ALLOCATION",
+          "cofinancing_rate_percent": 100,
+          "fen_percent": 75,
+          "fnn_percent": 25,
+          "maximum_total_eligible_cost_per_operation": {
+            "amount": 6666666,
+            "currency": "RON"
+          }
+        },
+        "beneficiaries": [
+          "Instituții publice din România",
+          "Asociații/fundații din România",
+          "Instituții de învățământ/cercetare autorizate în România",
+          "Organizații internaționale"
+        ],
+        "eligibility": {
+          "target_group": "Refugiați aflați în nevoie de relocare din Kenya și/sau Egipt",
+          "cross_border_partner_rule": "Entitățile din alte state sunt eligibile numai ca cobeneficiar."
+        },
+        "scoring": {
+          "minimum_quality_score": 70
+        }
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"
+        ],
+        "deadline": [
+          "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"
+        ],
+        "budget": [
+          "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"
+        ],
+        "eligibility": [
+          "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"
+        ],
+        "scoring": [
+          "EV-MAI-FED-AM41D-SIGNED-GUIDE-V2-20260927"
+        ]
+      }
+    }
+  ]
+}
