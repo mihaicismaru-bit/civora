@@ -38,8 +38,8 @@ class CanonicalCorpusTests(unittest.TestCase):
 
     def test_bundle_passes_contract(self):
         counts = validate_bundle(self.bundle)
-        self.assertEqual(counts["opportunities"], 35)
-        self.assertEqual(counts["changesets"], 7)
+        self.assertEqual(counts["opportunities"], 36)
+        self.assertEqual(counts["changesets"], 8)
 
     def test_publishable_set_is_explicit_and_fail_closed(self):
         publishable = [x["opportunity_id"] for x in self.bundle["opportunities"] if x["publication_state"] == "PUBLISHABLE"]
@@ -61,6 +61,7 @@ class CanonicalCorpusTests(unittest.TestCase):
                 "mai-fami-am2a1g-2026",
                 "mai-imfv-bv23a-2026",
                 "mai-imfv-bv10b-2026",
+                "me-fm-storage-standalone-2026",
             ],
         )
         self.assertTrue(all(x.get("automatic_material_fact_update_allowed") is False for x in self.bundle["opportunities"]))
@@ -117,7 +118,7 @@ class CanonicalCorpusTests(unittest.TestCase):
 
     def test_canonical_target_is_met_without_dropping_resolved_calls(self):
         self.assertGreaterEqual(len(self.bundle["opportunities"]), 25)
-        self.assertEqual(len({x["opportunity_id"] for x in self.bundle["opportunities"]}), 35)
+        self.assertEqual(len({x["opportunity_id"] for x in self.bundle["opportunities"]}), 36)
 
 
 if __name__ == "__main__":
