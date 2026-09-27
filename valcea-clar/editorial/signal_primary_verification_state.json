@@ -2,19 +2,70 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-27T20:55:32+03:00",
+  "generated_at": "2026-09-28T00:03:04+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-27T20:54:17+03:00",
-  "task_count": 67,
+  "queue_generated_at": "2026-09-28T00:01:30+03:00",
+  "task_count": 66,
   "primary_match_count": 0,
-  "no_match_count": 29,
-  "unrouted_count": 38,
+  "no_match_count": 26,
+  "unrouted_count": 40,
   "target_count": 16,
-  "targets_ok": 10,
+  "targets_ok": 11,
   "results": [
+    {
+      "signal_id": "931af8d7819e8e456a425df8",
+      "signal_title": "Continuare about Fără rectificare bugetară, VÂLCEA ÎMPRUMUTĂ 50 DE MILIOANE LEI",
+      "signal_url": "https://www.curierul.ro/fara-rectificare-bugetaravalcea-imprumuta-50-de-milioane-lei/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": "2026-09-27T22:09:45+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "1ff761ab46ea899d0beb14cd",
+      "signal_title": "Continuare about Fără rectificare bugetară, VÂLCEA ÎMPRUMUTĂ 50 DE MILIOANE LEI",
+      "signal_url": "https://www.curierul.ro/fara-rectificare-bugetaravalcea-imprumuta-50-de-milioane-lei/",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": "2026-09-27T22:09:45+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "d525116f313754dd2d06b6ac",
+      "signal_title": "FOTO – Scandal după o șicanare în trafic, la Râmnicu Vâlcea. Bărbatul care a urmărit o șoferiță era beat",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/27/foto-scandal-dupa-o-sicanare-in-trafic-la-ramnicu-valcea-barbatul-care-a-urmarit-o-soferita-era-beat/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-27T21:18:54+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "924cfabdf58ecd93cb2b545d",
       "signal_title": "SCM, învinsă în amicalul cu Lugodortes: vâlcenii au pus probleme bulgarilor / video",
@@ -403,9 +454,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -737,9 +788,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -787,9 +838,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -927,9 +978,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "DEGRADED",
-          "error": "TimeoutError: The read operation timed out",
-          "documents_examined": 0
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1096,18 +1147,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "62606e20e28cc5880d4c867d",
-      "signal_title": "Nicolae Sărdărescu, despre blocurile ridicate pe locul fostelor sere din Horezu: „Te închini de frumos ce este”",
-      "signal_url": "https://www.impactreal.ro/2026/09/25/nicolae-sardarescu-despre-blocurile-ridicate-pe-locul-fostelor-sere-din-horezu-te-inchini-de-frumos-ce-este/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-09-25T23:51:56+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "571d21f195ff987b5dab1482",
       "signal_title": "FOTO – Ministrul Transporturilor a văzut cu ochii lui haosul de pe Valea Oltului, după ani în care șoferii au suportat blocaje, cozi și ore pierdute în trafic",
       "signal_url": "https://seintamplainvalcea.ro/2026/09/25/foto-ministrul-transporturilor-a-vazut-cu-ochii-lui-haosul-de-pe-valea-oltului-dupa-ani-in-care-soferii-au-suportat-blocaje-cozi-si-ore-pierdute-in-trafic/",
@@ -1138,66 +1177,6 @@
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "1ae251beb76d124e07615fb6",
-      "signal_title": "Primarul din Săliște a inițiat proiect de respingere a fabricii MPI Magnesium. „Magneziul sub formă de pulbere este extrem de inflamabil”. Primarul din Rășinari cere clarificări",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/25/primarul-din-saliste-a-initiat-proiect-de-respingere-a-fabricii-mpi-magnesium-magneziul-sub-forma-de-pulbere-este-extrem-de-inflamabil-primarul-din-rasinari-cere-clarificari/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T19:07:51+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1303,55 +1282,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "81acb455b57416aea019cf1f",
-      "signal_title": "FOTO – Incendiu de pădure în zona Schitului Iezer. Pompierii intervin într-o zonă greu accesibilă",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/25/acum-incendiu-de-padure-in-zona-schitului-iezer-pompierii-intervin-intr-o-zona-greu-accesibila/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T15:01:33+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "3430c82d38e2eba004958497",
       "signal_title": "Ultima oră o zi in urma Bujoreni primește finanțare pentru modernizarea iluminatului public: 359 de corpuri LED și sisteme fotovoltaice",
       "signal_url": "https://www.primplanpress.ro/bujoreni-primeste-finantare-pentru-modernizarea-iluminatului-public-359-de-corpuri-led-si-sisteme-fotovoltaice/",
@@ -1412,18 +1342,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "883722edc3b93a240acc84f6",
-      "signal_title": "CJ Vâlcea și-a epuizat soluțiile financiare. RAJDP, la un pas de insolvență. Președintele Rădulescu cere rectificare bugetară de urgență",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/25/cj-valcea-si-a-epuizat-solutiile-financiare-rajdp-la-un-pas-de-insolventa-presedintele-radulescu-cere-rectificare-bugetara-de-urgenta/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-25T14:46:30+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "65a43b484d50716a02b3dd1e",
       "signal_title": "Violoncellissimo – luni, 28 septembrie 2026, ora 19.00 – Sala Lahovari, Filarmonica „Ion Dumitrescu”, Centrul Cultural Municipal Râmnicu Vâlcea",
       "signal_url": "https://curierulderamnic.ro/2026/09/25/violoncellissimo-luni-28-septembrie-2026-ora-19-00-sala-lahovari-filarmonica-ion-dumitrescu-centrul-cultural-municipal-ramnicu-valcea/",
@@ -1442,126 +1360,6 @@
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "5265d0f25f45abb6f03362e4",
-      "signal_title": "Bujoreni: proiect de peste 2,2 milioane de lei pentru modernizarea iluminatului public",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/25/bujoreni-proiect-de-peste-22-milioane-de-lei-pentru-modernizarea-iluminatului-public/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T13:11:47+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "ef1fb30cddf3e6e7d60ef70c",
-      "signal_title": "Lăcusteni lasă în urmă anii grei și intră într-o nouă etapă de investiții",
-      "signal_url": "https://evenimentvalcean.ro/lacusteni-lasa-in-urma-anii-grei-si-intra-intr-o-noua-etapa-de-investitii/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T11:09:40+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1643,34 +1441,10 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "c1ae98cbdfb43a82470bea8c",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "acd6dd07c7b8fb1beb8f487c",
       "signal_title": "Schimbarea la față a Sibiului",
       "signal_url": "https://www.turnulsfatului.ro/exclusiv/schimbarea-la-fata-a-sibiului/",
       "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "a6374523400981e1f23381d6",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=Uzinele%20Sodice%20Govora%2C%20dinamitate%20%C8%99i%20v%C3%A2ndute%20la%20fier%20vechi.%20Ast%C4%83zi%20prima%20explozie%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
-      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
@@ -1703,6 +1477,18 @@
       "fact_kernel_ready": false
     },
     {
+      "signal_id": "15fe313bbf22e132abe07fd6",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Ffara-rectificare-bugetaravalcea-imprumuta-50-de-milioane-lei%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
       "signal_id": "0a9f0e5efa5edfde1c95a354",
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
@@ -1719,6 +1505,42 @@
       "signal_title": "UE schimbă regulile pentru comenzile online din afara Uniunii. Noua taxă va fi introdusă până la 1 noiembrie 2026",
       "signal_url": "https://www.eurovalcea.ro/2026/09/22/ue-schimba-regulile-pentru-comenzile-online-din-afara-uniunii-noua-taxa-va-fi-introdusa-pana-la-1-noiembrie-2026/",
       "signal_publisher": "EuroVâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "007effe096936171fe4011cd",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=F%C4%83r%C4%83%20rectificare%20bugetar%C4%83%2CV%C3%82LCEA%20%C3%8EMPRUMUT%C4%82%2050%20DE%20MILIOANE%20LEI&url=https%3A%2F%2Fwww.curierul.ro%2Ffara-rectificare-bugetaravalcea-imprumuta-50-de-milioane-lei%2F",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "c1ae98cbdfb43a82470bea8c",
+      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
+      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%2525f0%25259f%252591%252587%2525f0%25259f%25258f%2525bb%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
+      "signal_publisher": "Curierul de Vâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "a6374523400981e1f23381d6",
+      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
+      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=Uzinele%20Sodice%20Govora%2C%20dinamitate%20%C8%99i%20v%C3%A2ndute%20la%20fier%20vechi.%20Ast%C4%83zi%20prima%20explozie%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
+      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
