@@ -75,6 +75,19 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Rebuild derived funding decision products for QA
+        run: |
+          python partener-eu/ingest/build_decision_products.py
+          python partener-eu/ingest/merge_mipe_canonical_dossiers.py
+          python partener-eu/ingest/polish_decision_products.py
+          python partener-eu/ingest/finalize_decision_products.py
+          python partener-eu/ingest/localize_decision_products.py
+          python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
+          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
+          python partener-eu/ingest/score_dossier_depth.py
+          python partener-eu/ingest/sync_decision_products_projection.py
+
       - name: Repository, public-shell and boot-performance hygiene
         run: |
           python partener-eu/ops/test_web_hygiene.py
