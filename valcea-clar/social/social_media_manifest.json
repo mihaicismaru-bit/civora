@@ -55,13 +55,11 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 3,
-      "readback_ok": 2,
-      "value": 0.6667,
-      "blocker_story_ids": [
-        "valcea-campanie-antirabica-toamna-20260925"
-      ],
+      "readback_ok": 3,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "baile-olanesti-incendiu-iezer-13ha-20260925",
@@ -86,21 +84,21 @@
         {
           "story_id": "valcea-campanie-antirabica-toamna-20260925",
           "url": "https://valceaclar.ro/stiri/valcea-campanie-antirabica-toamna-20260925/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         }
       ],
       "projection_evidence": {
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-26T21:05:15.622257Z",
+        "updated_local": "2026-09-27T05:04:28.426542Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 78
+        "public_story_count": 79
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
@@ -140,6 +138,14 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36296261515,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-27T05:06:58Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 36296229983,
