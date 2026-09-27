@@ -2,19 +2,104 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-27T16:21:54+03:00",
+  "generated_at": "2026-09-27T20:55:32+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-27T16:20:51+03:00",
-  "task_count": 63,
+  "queue_generated_at": "2026-09-27T20:54:17+03:00",
+  "task_count": 67,
   "primary_match_count": 0,
-  "no_match_count": 28,
-  "unrouted_count": 35,
-  "target_count": 13,
-  "targets_ok": 9,
+  "no_match_count": 29,
+  "unrouted_count": 38,
+  "target_count": 16,
+  "targets_ok": 10,
   "results": [
+    {
+      "signal_id": "924cfabdf58ecd93cb2b545d",
+      "signal_title": "SCM, învinsă în amicalul cu Lugodortes: vâlcenii au pus probleme bulgarilor / video",
+      "signal_url": "https://www.impactreal.ro/2026/09/27/scm-invinsa-in-amicalul-cu-lugodortes-valcenii-au-pus-probleme-bulgarilor/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-27T19:40:16+03:00",
+      "verification_route_id": "sport",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "scm-rm-valcea",
+            "name": "SCM Râmnicu Vâlcea",
+            "url": "https://scmramnicuvalcea.ro/category/stiri/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cs-valcea-1924-social-feed",
+            "name": "Clubul Sportiv Vâlcea 1924",
+            "url": "https://www.csvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ajf-valcea-comunicate",
+            "name": "Asociația Județeană de Fotbal Vâlcea",
+            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "94a5fb4194b91340505b9957",
+      "signal_title": "CJ Vâlcea are nevoie urgent de urgent 15 milioane de lei pentru CET Govora: „Nu mai este timp de pierdut”",
+      "signal_url": "https://evenimentvalcean.ro/cj-valcea-are-nevoie-urgent-de-urgent-15-milioane-de-lei-pentru-cet-govora-nu-mai-este-timp-de-pierdut/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-09-27T18:44:06+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "d5e754cf4d18fb979bd61ed1",
+      "signal_title": "Am fost să mănânc cu vârfurile Bătrâna și Surdu drept priveliște și-am plătit ca-n centrul Sibiului. Pe terasă la Traxilvania",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/27/am-fost-sa-mananc-cu-varfurile-batrana-si-surdu-drept-priveliste-si-am-platit-ca-n-centrul-sibiului-pe-terasa-la-traxilvania/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-27T18:16:10+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "6ea649ac1a4346552ec74dad",
+      "signal_title": "Alin Chipăilă, președintele AJT Sibiu: Sibiul vrea să fie o destinație pentru un turist de calitate. Județul, pe locul trei în țară la turiști străini",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/27/alin-chipaila-presedintele-ajt-sibiu-sibiul-vrea-sa-fie-o-destinatie-pentru-un-turist-de-calitate-judetul-pe-locul-trei-in-tara-la-turisti-straini/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-27T17:54:49+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "c143801293b9116fe2c1e36a",
       "signal_title": "Scandal la Liceul Forestier din Râmnicu Vâlcea: elevii, mobilizați pentru un protest politic? „Obligatoriu să transmiteți mesajele!”",
@@ -318,9 +403,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -396,7 +481,7 @@
     },
     {
       "signal_id": "2db7c9ce7286c616be538081",
-      "signal_title": "Drăgășani în Prim-plan 20 de ore in urma Ilie Bolojan, la Drăgășani pentru inaugurarea sediului renovat al Primăriei",
+      "signal_title": "Drăgășani în Prim-plan o zi in urma Ilie Bolojan, la Drăgășani pentru inaugurarea sediului renovat al Primăriei",
       "signal_url": "https://www.primplanpress.ro/ilie-bolojan-la-dragasani-pentru-inaugurarea-sediului-renovat-al-primariei/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -652,9 +737,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -702,9 +787,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
@@ -842,9 +927,9 @@
             "name": "Spitalul Orășenesc Horezu",
             "url": "https://spitalulhorezu.ro/blog/"
           },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
+          "status": "DEGRADED",
+          "error": "TimeoutError: The read operation timed out",
+          "documents_examined": 0
         }
       ],
       "publication_authority": "NONE",
