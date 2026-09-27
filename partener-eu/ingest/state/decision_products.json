@@ -30,9 +30,9 @@
     "prepareCount": 108,
     "newsCount": 18,
     "highCompletenessCount": 60,
-    "completeDossierCount": 17,
-    "advancedDossierCount": 24,
-    "constructionDossierCount": 129,
+    "completeDossierCount": 18,
+    "advancedDossierCount": 35,
+    "constructionDossierCount": 117,
     "identificationDossierCount": 27,
     "needsEnrichmentCount": 191
   },
@@ -208,9 +208,16 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Finanțare · Form: grant",
+            "Finanțare · Grant minim: 300.000",
+            "Finanțare · Grant maxim: 3.500.000",
+            "Finanțare · Cluster investment aid maximum percent: 65",
+            "Finanțare · Sme innovation consulting and support maximum percent: 100",
+            "Finanțare · Sme innovation consulting and support cap eur per three years: 220.000",
+            "Finanțare · De minimis maximum percent: 100",
+            "Finanțare · De minimis cap eur per three years: 300.000"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -329,7 +336,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
@@ -338,7 +345,7 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": false,
           "scoring": true,
           "indicators": false,
@@ -346,7 +353,6 @@
           "actions": true
         },
         "missingDepthClasses": [
-          "costs",
           "documents",
           "indicators"
         ]
@@ -375,10 +381,9 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "level": "DOSAR AVANSAT",
         "missing": [
-          "costs",
           "documents",
           "indicators"
         ],
@@ -1699,7 +1704,7 @@
       "decision": "ACȚIONEAZĂ",
       "decisionAction": "Începe screeningul și planul de depunere pe ghidul final aplicabil.",
       "publicationState": "PUBLISHABLE",
-      "standfirst": "Sprijinirea investițiilor în dezvoltarea instalațiilor autonome (stand-alone) de stocare în baterii a energiei electrice. Sunt confirmate: open; termen 2026-10-30.",
+      "standfirst": "Sprijinirea investițiilor în dezvoltarea instalațiilor autonome (stand-alone) de stocare în baterii a energiei electrice. Sunt confirmate: open; termen 2026-10-30; max. 69.000 EUR/MWh · max. 15.000.000 EUR/întreprindere · intensitate max. 100%.",
       "audience": [
         "Operatori economici de tip societăți: microîntreprinderi, întreprinderi mici, mijlocii și mari, inclusiv întreprinderi nou-înființate",
         "Solicitantul trebuie să fie înregistrat la ONRC în România până la data semnării contractului de finanțare",
@@ -1718,19 +1723,19 @@
           "confidence": "CONFIRMED"
         },
         {
-          "label": "Finanțare",
-          "value": "rambursarea cheltuielilor eligibile în lei",
+          "label": "Grant",
+          "value": "max. 69.000 EUR/MWh · max. 15.000.000 EUR/întreprindere · intensitate max. 100%",
           "confidence": "CONFIRMED"
         },
         {
           "label": "Buget",
-          "value": "Amount: 150.000.000 · Currency: EUR · Fund: Fondul pentru modernizare",
+          "value": "150.000.000 EUR",
           "confidence": "CONFIRMED"
         },
         {
-          "label": "Contribuție proprie",
-          "value": "Neconfirmat",
-          "confidence": "UNKNOWN"
+          "label": "Intensitate maximă",
+          "value": "100%",
+          "confidence": "CONFIRMED"
         },
         {
           "label": "Completitudine critică",
@@ -1749,11 +1754,12 @@
             "Cine poate aplica: Solicitantul trebuie să fie înregistrat la ONRC în România până la data semnării contractului de finanțare",
             "Cine poate aplica: Întreprinderile nou-înființate trebuie să aibă capital social subscris și vărsat de minimum 100.000 lei",
             "Cine poate aplica: Actul constitutiv trebuie să includă activități corespunzătoare Diviziunii 35 CAEN Rev. 3 sau echivalent",
-            "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 150.000.000.",
+            "Activități finanțate: instalații noi autonome (stand-alone) de stocare în baterii conectate la rețeaua publică de transport/distribuție",
+            "Valoarea apelului: 150.000.000 EUR.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
-            "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
-            "Arie geografică: România."
+            "Cofinanțare / contribuție proprie: intensitate nerambursabilă de până la 100% · diferența până la costul total se acoperă din surse proprii sau atrase fără alt ajutor de stat pentru aceleași cheltuieli.",
+            "Arie geografică: România.",
+            "Evaluare: criteriu: ajutor de stat solicitat (EUR) / capacitate de stocare instalată (MWh) · cel mai mic ajutor solicitat/MWh primește 100 puncte; cel mai mare primește 0; valorile intermediare se punctează liniar."
           ],
           "empty": false,
           "schemaVersion": 1
@@ -1780,29 +1786,66 @@
         {
           "title": "Ce finanțează și în ce condiții",
           "items": [
+            "Investment: instalații noi autonome (stand-alone) de stocare în baterii conectate la rețeaua publică de transport/distribuție",
+            "Minimum power mw per installation: 1",
+            "Minimum capacity to power ratio: C/P >= 2",
+            "Minimum discharge duration hours: 2",
+            "Dedicated connection and metering: Da",
+            "Charge discharge: din/către rețeaua publică",
+            "Integrated with generation or consumption site: Nu",
             "Domeniu tehnic · Investment: instalații noi autonome (stand-alone) de stocare în baterii conectate la rețeaua publică de transport/distribuție",
             "Domeniu tehnic · Minimum power mw per installation: 1",
             "Domeniu tehnic · Minimum capacity to power ratio: C/P >= 2",
             "Domeniu tehnic · Minimum discharge duration hours: 2",
             "Domeniu tehnic · Dedicated connection and metering: Da",
             "Domeniu tehnic · Charge discharge: din/către rețeaua publică",
-            "Domeniu tehnic · Integrated with generation or consumption site: Nu"
+            "Domeniu tehnic · Integrated with generation or consumption site: Nu",
+            "Application channel: cererea se depune prin MySMIS2021, conform Ghidului",
+            "Incentive effect: cererea de finanțare trebuie depusă înainte de demararea lucrărilor; o comandă obligatorie de echipamente sau alt angajament ireversibil poate constitui demararea lucrărilor",
+            "proprietate",
+            "concesiune",
+            "superficie",
+            "administrare",
+            "Drepturi asupra amplasamentului · Minimum validity: cel puțin 5 ani de la data previzionată a plății finale",
+            "închiriere",
+            "leasing",
+            "comodat",
+            "Grid connection · Atr at application: nu este obligatoriu la depunerea cererii",
+            "Grid connection · Atr deadline: obligatoriu cel târziu la prima cerere de plată/rambursare, conform Ghidului",
+            "Implementation: maximum 48 luni de la acordarea ajutorului, în limitele schemei"
           ],
           "empty": false
         },
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Finanțare · Max intensity percent: 100",
+            "Finanțare · Max eur per mwh: 69.000",
+            "Finanțare · Max eur per enterprise: 15.000.000",
+            "Finanțare · Form: rambursarea cheltuielilor eligibile în lei",
+            "Finanțare · Beneficiary financing: diferența până la costul total se acoperă din surse proprii sau atrase fără alt ajutor de stat pentru aceleași cheltuieli",
+            "Cheltuială neeligibilă: costuri de operare",
+            "Cheltuială neeligibilă: TVA",
+            "Cheltuială neeligibilă: achiziția terenurilor",
+            "Cheltuială neeligibilă: leasing/chirii",
+            "Cheltuială neeligibilă: echipamente second-hand",
+            "Cheltuială neeligibilă: dobânzi și comisioane de credit",
+            "Cheltuială neeligibilă: amenzi și penalități"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
           "items": [
-            "Lista exactă se verifică în ghid și anexe."
+            "Studiu de fezabilitate conform HG nr. 907/2016",
+            "Certificat constatator ONRC și act constitutiv",
+            "Bugetul proiectului / Anexa 7 corelată cu devizul general",
+            "Documente DNSH și de mediu aplicabile",
+            "Hotărârea organului statutar competent de aprobare a proiectului",
+            "Documente privind dreptul real asupra amplasamentului",
+            "Dovada capacității de finanțare; scrisoare de confort bancară/IFN în cazurile prevăzute de Ghid"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Cum se punctează",
@@ -1846,9 +1889,9 @@
         {
           "title": "Ce nu este încă confirmat",
           "items": [
-            "Lista completă a documentelor nu este încă structurată în corpus; se verifică în ghid și anexe."
+            "Nu există necunoscute materiale în proiecția curentă."
           ],
-          "empty": false
+          "empty": true
         }
       ],
       "timeline": [
@@ -1906,8 +1949,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 75,
-        "dossierLevel": "DOSAR AVANSAT",
+        "depthCompleteness": 92,
+        "dossierLevel": "DOSAR COMPLET",
         "depthDimensions": {
           "status": true,
           "deadline": true,
@@ -1915,16 +1958,14 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
-          "documents": false,
+          "costs": true,
+          "documents": true,
           "scoring": true,
           "indicators": false,
           "risks": true,
           "actions": true
         },
         "missingDepthClasses": [
-          "costs",
-          "documents",
           "indicators"
         ]
       },
@@ -1940,22 +1981,22 @@
           "Actul constitutiv trebuie să includă activități corespunzătoare Diviziunii 35 CAEN Rev. 3 sau echivalent"
         ],
         "targetGroup": [],
-        "activities": [],
-        "callBudget": "amount: 150.000.000",
+        "activities": [
+          "instalații noi autonome (stand-alone) de stocare în baterii conectate la rețeaua publică de transport/distribuție"
+        ],
+        "callBudget": "150.000.000 EUR",
         "projectValue": "Neconfirmat în ghidul structurat.",
-        "cofinancing": "Neconfirmat în ghidul structurat.",
+        "cofinancing": "intensitate nerambursabilă de până la 100% · diferența până la costul total se acoperă din surse proprii sau atrase fără alt ajutor de stat pentru aceleași cheltuieli",
         "region": "România",
         "submissionSystem": null,
-        "scoring": null,
+        "scoring": "criteriu: ajutor de stat solicitat (EUR) / capacitate de stocare instalată (MWh) · cel mai mic ajutor solicitat/MWh primește 100 puncte; cel mai mare primește 0; valorile intermediare se punctează liniar",
         "sourcePolicy": "GUIDE_EXPLICIT_ONLY"
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 75,
-        "level": "DOSAR AVANSAT",
+        "depthCompleteness": 92,
+        "level": "DOSAR COMPLET",
         "missing": [
-          "costs",
-          "documents",
           "indicators"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -2058,9 +2099,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 40.027.059 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -3254,7 +3295,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -3263,7 +3304,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -3273,7 +3314,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -3315,12 +3355,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -3362,7 +3401,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 13.203.953 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "13.203.953 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -3385,7 +3424,7 @@
             "Închidere: 2026-09-30T16:00:00+03:00.",
             "Cine poate aplica: Autoritate publică centrală",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 13.203.953.",
+            "Valoarea apelului: 13.203.953 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -3545,7 +3584,7 @@
         ],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 13.203.953",
+        "callBudget": "13.203.953 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -3602,7 +3641,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 1.000.000 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "1.000.000 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -3625,7 +3664,7 @@
             "Închidere: 2026-09-30T16:00:00+03:00.",
             "Cine poate aplica: Autoritate publică centrală",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 1.000.000.",
+            "Valoarea apelului: 1.000.000 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -3785,7 +3824,7 @@
         ],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 1.000.000",
+        "callBudget": "1.000.000 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -3840,7 +3879,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 5.250.000 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "5.250.000 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -3863,7 +3902,7 @@
             "Închidere: 2026-10-16T16:00:00+03:00.",
             "Cine poate aplica: Neconfirmat — lista solicitanților eligibili nu este încă extrasă cu evidență explicită din ghidul oficial.",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 5.250.000.",
+            "Valoarea apelului: 5.250.000 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -4036,7 +4075,7 @@
         "applicants": [],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 5.250.000",
+        "callBudget": "5.250.000 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -4092,7 +4131,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 5.250.000 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "5.250.000 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -4115,7 +4154,7 @@
             "Închidere: 2026-10-16T16:00:00+03:00.",
             "Cine poate aplica: Neconfirmat — lista solicitanților eligibili nu este încă extrasă cu evidență explicită din ghidul oficial.",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 5.250.000.",
+            "Valoarea apelului: 5.250.000 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -4288,7 +4327,7 @@
         "applicants": [],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 5.250.000",
+        "callBudget": "5.250.000 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -4344,7 +4383,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 4.430.000 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "4.430.000 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -4367,7 +4406,7 @@
             "Închidere: 2026-10-16T16:00:00+03:00.",
             "Cine poate aplica: Neconfirmat — lista solicitanților eligibili nu este încă extrasă cu evidență explicită din ghidul oficial.",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 4.430.000.",
+            "Valoarea apelului: 4.430.000 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -4540,7 +4579,7 @@
         "applicants": [],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 4.430.000",
+        "callBudget": "4.430.000 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -4596,7 +4635,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 4.430.000 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "4.430.000 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -4619,7 +4658,7 @@
             "Închidere: 2026-10-16T16:00:00+03:00.",
             "Cine poate aplica: Neconfirmat — lista solicitanților eligibili nu este încă extrasă cu evidență explicită din ghidul oficial.",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 4.430.000.",
+            "Valoarea apelului: 4.430.000 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -4792,7 +4831,7 @@
         "applicants": [],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 4.430.000",
+        "callBudget": "4.430.000 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -4848,7 +4887,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 2.000.000 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "2.000.000 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -4871,7 +4910,7 @@
             "Închidere: 2026-10-16T16:00:00+03:00.",
             "Cine poate aplica: Neconfirmat — lista solicitanților eligibili nu este încă extrasă cu evidență explicită din ghidul oficial.",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 2.000.000.",
+            "Valoarea apelului: 2.000.000 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -5044,7 +5083,7 @@
         "applicants": [],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 2.000.000",
+        "callBudget": "2.000.000 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -5100,7 +5139,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 3.922.800 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "3.922.800 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -5123,7 +5162,7 @@
             "Închidere: 2026-10-16T16:00:00+03:00.",
             "Cine poate aplica: Neconfirmat — lista solicitanților eligibili nu este încă extrasă cu evidență explicită din ghidul oficial.",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 3.922.800.",
+            "Valoarea apelului: 3.922.800 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -5296,7 +5335,7 @@
         "applicants": [],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 3.922.800",
+        "callBudget": "3.922.800 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -5352,7 +5391,7 @@
         },
         {
           "label": "Buget",
-          "value": "Amount: 5.000.000 · Currency: RON · Basis: FEN_AVAILABLE_CALL_ALLOCATION",
+          "value": "5.000.000 RON",
           "confidence": "CONFIRMED"
         },
         {
@@ -5375,7 +5414,7 @@
             "Închidere: 2026-10-16T16:00:00+03:00.",
             "Cine poate aplica: Neconfirmat — lista solicitanților eligibili nu este încă extrasă cu evidență explicită din ghidul oficial.",
             "Activități finanțate: Neconfirmat în ghidul structurat.",
-            "Valoarea apelului: amount: 5.000.000.",
+            "Valoarea apelului: 5.000.000 RON.",
             "Valoarea proiectului individual: Neconfirmat în ghidul structurat..",
             "Cofinanțare / contribuție proprie: Neconfirmat în ghidul structurat..",
             "Arie geografică: România."
@@ -5548,7 +5587,7 @@
         "applicants": [],
         "targetGroup": [],
         "activities": [],
-        "callBudget": "amount: 5.000.000",
+        "callBudget": "5.000.000 RON",
         "projectValue": "Neconfirmat în ghidul structurat.",
         "cofinancing": "Neconfirmat în ghidul structurat.",
         "region": "România",
@@ -7333,9 +7372,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 66.711.765 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -7438,7 +7477,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -7447,7 +7486,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -7457,7 +7496,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -7493,12 +7531,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -7940,9 +7977,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 17.387.535 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -8080,7 +8117,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 50,
+        "depthCompleteness": 58,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -8089,7 +8126,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": false,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -8100,7 +8137,6 @@
           "deadline",
           "beneficiaries",
           "activities",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -8136,13 +8172,12 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 50,
+        "depthCompleteness": 58,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
           "activities",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -8246,9 +8281,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 842.424.950 lei"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -8450,7 +8485,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -8459,7 +8494,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -8469,7 +8504,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -8514,12 +8548,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -13182,9 +13215,16 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Finanțare · Form: grant",
+            "Finanțare · Minimum eligible project eur: 500.000",
+            "Finanțare · Maximum eligible project eur: 7.500.000",
+            "Finanțare · Programme contribution maximum percent: 98",
+            "Finanțare · Fedr maximum percent: 85",
+            "Finanțare · State budget maximum percent: 13",
+            "Finanțare · Contribuție minimă solicitant: 2",
+            "Finanțare · Profit generating projects: The applicant or partnership members adjust their contribution according to estimated profit."
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -13311,7 +13351,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
@@ -13320,7 +13360,7 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": false,
           "scoring": true,
           "indicators": false,
@@ -13328,7 +13368,6 @@
           "actions": true
         },
         "missingDepthClasses": [
-          "costs",
           "documents",
           "indicators"
         ]
@@ -13357,10 +13396,9 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "level": "DOSAR AVANSAT",
         "missing": [
-          "costs",
           "documents",
           "indicators"
         ],
@@ -13480,9 +13518,15 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Finanțare · Form: grant",
+            "Finanțare · Grant minim: 200.000",
+            "Finanțare · Grant maxim: 1.000.000",
+            "Finanțare · Programme contribution percent: 98",
+            "Finanțare · Contribuție minimă solicitant: 2",
+            "Finanțare · Fedr maximum percent: 85",
+            "Finanțare · State budget maximum percent: 13"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -13603,7 +13647,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
@@ -13612,7 +13656,7 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": false,
           "scoring": true,
           "indicators": false,
@@ -13620,7 +13664,6 @@
           "actions": true
         },
         "missingDepthClasses": [
-          "costs",
           "documents",
           "indicators"
         ]
@@ -13647,10 +13690,9 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "level": "DOSAR AVANSAT",
         "missing": [
-          "costs",
           "documents",
           "indicators"
         ],
@@ -17262,9 +17304,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului de proiecte este de 15.043.700,74 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -17480,7 +17522,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
@@ -17489,7 +17531,7 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -17498,7 +17540,6 @@
         },
         "missingDepthClasses": [
           "deadline",
-          "costs",
           "scoring"
         ]
       },
@@ -17552,11 +17593,10 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -46653,7 +46693,9 @@
             "Toamnei, nr.14, municipiul Sfantu Gheorghe, Covasna Alba, Brasov, Covasna, Hargita, Mures, Sibiu, Teleorman, Prahova, Ialomita, Giurgiu, Dambovita, Calarasi, Arges Centru si Sud-Muntenia A.D.A.P.T. – Accesibilitate Durabilă și Activarea Profesională a Tinerilor 94,00 3.544.450,24 3.473.711,39 2.952.654,68 521.056,71 70.738,85 5 / 8 Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 Titlu proiect Punctaj*Nr. crt.",
             "Violetelor, nr.36, Branesti, Ilfov Teleorman, Prahova, Ialomita, Giurgiu, Dambovita, Calarasi, Arges Sud-Muntenia PASI-SM: Programe de Activare și Servicii Integrate pentru Accesul Tinerilor pe Piața Muncii din regiunea Sud Muntenia 92,50 4.970.365,92 4.721.847,62 4.013.570,48 708.277,14 248.518,30 6 / 8 Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 Titlu proiect Punctaj*Nr. crt.",
             "84,00 4.190.242,05 4.098.342,17 3.483.590,84 614.751,33 91.899,88 7 / 8 Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 Titlu proiect Punctaj*Nr. crt.",
-            "Cod SMIS CUI Solicitant Categorie solicitant Adresa Lider/Solicitant Județ implementare proiect Regiune implementare proiect 1/1 Lista intermediară nr.2 a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) - [Apel 440] Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 1 336098 11872994 FIRST JOB SCHOOL SRL Furnizor de formare profesională autorizat privat str."
+            "Cod SMIS CUI Solicitant Categorie solicitant Adresa Lider/Solicitant Județ implementare proiect Regiune implementare proiect 1/1 Lista intermediară nr.2 a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) - [Apel 440] Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 1 336098 11872994 FIRST JOB SCHOOL SRL Furnizor de formare profesională autorizat privat str.",
+            "Valoarea apelului 7.167.451,00 euro",
+            "Valoarea apelului 2.000.000 euro"
           ],
           "empty": false
         },
@@ -49876,9 +49918,11 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 1.666.466 euro",
+            "Valoarea apelului Bugetul total alocat acestei intervenții este de 3.773.912,79 euro",
+            "Valoarea apelului 691.268,83 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -50130,7 +50174,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
@@ -50139,7 +50183,7 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -50148,7 +50192,6 @@
         },
         "missingDepthClasses": [
           "deadline",
-          "costs",
           "scoring"
         ]
       },
@@ -50198,11 +50241,10 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -50673,9 +50715,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului Bugetul total alocat pentru prezentul apel este de 44.283.090 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -51015,8 +51057,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -51024,7 +51066,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -51034,7 +51076,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -51083,12 +51124,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -51251,7 +51291,10 @@
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
             "3 a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) - apel 406 Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 1 337075 11370190 AGENTIA NATIONALA PENTRU OCUPAREA FORTEI DE MUNCA Entitate de drept public Str.",
-            "2 a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) - apel 406 Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 1 337075 11370190 AGENTIA NATIONALA PENTRU OCUPAREA FORTEI DE MUNCA entitate de drept public Str."
+            "2 a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă (ETFC) - apel 406 Total buget eligibil [LEI] Total buget nerambursabil (AFN) [LEI] Buget (UE) [lei] Buget de stat (BS) [lei] Contribuţie proprie [LEI] 1 = 2+5 2 = 3+4 3 4 5 1 337075 11370190 AGENTIA NATIONALA PENTRU OCUPAREA FORTEI DE MUNCA entitate de drept public Str.",
+            "Valoarea apelului 3.711.690,59 euro",
+            "Valoarea apelului 2.279.055,00 euro",
+            "Valoarea apelului 6.735.201,18 euro"
           ],
           "empty": false
         },
@@ -53177,9 +53220,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului Bugetul alocat pentru prezentul apel este de 37.358.589,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -53320,7 +53363,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -53329,7 +53372,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -53339,7 +53382,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -53378,12 +53420,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -54199,9 +54240,10 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 18.546.172,60 euro",
+            "Valoarea apelului 6.365.334,76 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -55131,8 +55173,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -55140,7 +55182,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -55150,7 +55192,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -55234,12 +55275,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -55359,9 +55399,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 81.593.710,14 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -55711,8 +55751,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -55720,7 +55760,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -55730,7 +55770,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -55784,12 +55823,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -55901,9 +55939,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 108.126.052,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -56090,8 +56128,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -56099,7 +56137,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -56109,7 +56147,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -56151,12 +56188,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -56262,9 +56298,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 6.730.796,47 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -56368,7 +56404,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -56377,7 +56413,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -56387,7 +56423,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -56423,12 +56458,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -58264,9 +58298,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 120.000.000 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -58401,7 +58435,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -58410,7 +58444,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -58420,7 +58454,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -58459,12 +58492,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -58568,9 +58600,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 26.767.012 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -58690,7 +58722,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -58699,7 +58731,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -58709,7 +58741,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -58746,12 +58777,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -58858,9 +58888,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 12.820.716,12 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -58973,7 +59003,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -58982,7 +59012,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -58992,7 +59022,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -59022,12 +59051,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -59532,9 +59560,11 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 3.123.548 euro",
+            "Valoarea apelului 1.133. 660 euro",
+            "Valoarea apelului 1.399.706 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -60044,8 +60074,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -60053,7 +60083,7 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -60062,7 +60092,6 @@
         },
         "missingDepthClasses": [
           "deadline",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -60129,11 +60158,10 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -60781,9 +60809,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului Bugetul alocat pentru prezentul apel este de 24.000.000 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -60940,8 +60968,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -60949,7 +60977,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -60959,7 +60987,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -60995,12 +61022,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -61112,9 +61138,10 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 534.932,94 euro",
+            "Valoarea apelului 1.032.941,18 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -61249,7 +61276,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -61258,7 +61285,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -61268,7 +61295,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -61306,12 +61332,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -61423,9 +61448,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 2.565.720,72 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -61595,8 +61620,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -61604,7 +61629,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -61614,7 +61639,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -61657,12 +61681,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -61781,9 +61804,11 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului Bugetul alocat pentru prezentul apel este de 266.434.146 euro",
+            "Valoarea apelului Bugetul alocat pentru prezentul apel este de 570.930.000 euro",
+            "Valoarea apelului Bugetul alocat pentru prezentul apel este de 570.930.000,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -62166,7 +62191,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -62175,7 +62200,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -62185,7 +62210,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -62236,12 +62260,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -62348,9 +62371,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 6.135.233,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -62581,8 +62604,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -62590,7 +62613,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -62600,7 +62623,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -62644,12 +62666,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -62759,9 +62780,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 815.040.736 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -62923,7 +62944,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": true,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
@@ -62932,7 +62953,7 @@
           "provenance": true,
           "beneficiaries": true,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -62941,7 +62962,6 @@
         },
         "missingDepthClasses": [
           "deadline",
-          "costs",
           "scoring"
         ]
       },
@@ -62983,11 +63003,10 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 75,
+        "depthCompleteness": 83,
         "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -63600,9 +63619,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 19.714.235,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -63755,7 +63774,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -63764,7 +63783,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -63774,7 +63793,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -63811,12 +63829,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -63920,9 +63937,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 6.394.290,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -64061,8 +64078,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -64070,7 +64087,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -64080,7 +64097,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -64115,12 +64131,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -64223,9 +64238,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 27.959.559,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -64364,8 +64379,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -64373,7 +64388,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -64383,7 +64398,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -64418,12 +64432,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -64538,9 +64551,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 76.100.065 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -64954,8 +64967,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -64963,7 +64976,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -64973,7 +64986,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -65031,12 +65043,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -65139,9 +65150,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 45.786.298 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -65248,7 +65259,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -65257,7 +65268,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -65267,7 +65278,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -65301,12 +65311,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
@@ -65436,9 +65445,9 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 97.462.772,00 euro"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -66191,8 +66200,8 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 67,
-        "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "dossierLevel": "DOSAR AVANSAT",
         "depthDimensions": {
           "status": true,
           "deadline": false,
@@ -66200,7 +66209,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": true,
@@ -66210,7 +66219,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ]
       },
@@ -66303,12 +66311,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 67,
-        "level": "DOSAR ÎN CONSTRUCȚIE",
+        "depthCompleteness": 75,
+        "level": "DOSAR AVANSAT",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring"
         ],
         "nextPass": "SEARCH_OFFICIAL_EVIDENCE"
@@ -66758,9 +66765,10 @@
         {
           "title": "Costuri, cofinanțare și ajutor de stat",
           "items": [
-            "Regulile financiare nu sunt încă structurate complet."
+            "Valoarea apelului 413.778.663,00 lei",
+            "valoare nominală de 1.500 lei"
           ],
-          "empty": true
+          "empty": false
         },
         {
           "title": "Documente de pregătit",
@@ -66912,7 +66920,7 @@
         "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
         "applicantEvidenceAuthorized": false,
         "executiveSummaryPresent": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "dossierLevel": "DOSAR ÎN CONSTRUCȚIE",
         "depthDimensions": {
           "status": true,
@@ -66921,7 +66929,7 @@
           "provenance": true,
           "beneficiaries": false,
           "activities": true,
-          "costs": false,
+          "costs": true,
           "documents": true,
           "scoring": false,
           "indicators": false,
@@ -66931,7 +66939,6 @@
         "missingDepthClasses": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ]
@@ -66968,12 +66975,11 @@
       },
       "dossierConstruction": {
         "autonomous": true,
-        "depthCompleteness": 58,
+        "depthCompleteness": 67,
         "level": "DOSAR ÎN CONSTRUCȚIE",
         "missing": [
           "deadline",
           "beneficiaries",
-          "costs",
           "scoring",
           "indicators"
         ],
