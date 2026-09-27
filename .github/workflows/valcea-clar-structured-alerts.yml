@@ -7,7 +7,7 @@ name: VÂLCEA CLAR Structured Primary Alerts
 on:
   workflow_dispatch:
   schedule:
-    - cron: '2-57/5 * * * *'
+    - cron: '2,22,42 * * * *'
   push:
     branches: [main]
     paths:
@@ -42,12 +42,12 @@ permissions:
 
 concurrency:
   group: valcea-clar-structured-alerts-${{ github.event.pull_request.number || 'main' }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   structured-alerts:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v6
         with:
