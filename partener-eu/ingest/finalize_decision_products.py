@@ -350,6 +350,9 @@ def budget_summary(source: dict[str, Any] | None) -> str:
     for key, currency in preferred:
         if value.get(key) is not None:
             return money(value[key], currency)
+    if value.get("amount") is not None:
+        currency = str(value.get("currency") or "").strip().upper()
+        return money(value["amount"], currency) if currency else format_number(value["amount"])
     rows = []
     for key, item in value.items():
         if isinstance(item, (int, float)):
@@ -406,6 +409,11 @@ def cofinancing_summary(source: dict[str, Any] | None) -> str:
                 return " · ".join(values)
         if grant.get("eligible_cost_intensity_percent") is not None:
             return f"intensitate nerambursabilă {format_number(grant['eligible_cost_intensity_percent'])}%"
+        if grant.get("max_intensity_percent") is not None:
+            parts = [f"intensitate nerambursabilă de până la {format_number(grant['max_intensity_percent'])}%"]
+            if grant.get("beneficiary_financing"):
+                parts.append(str(grant["beneficiary_financing"]))
+            return " · ".join(parts)
         if grant.get("programme_contribution_percent") is not None:
             return f"contribuție program {format_number(grant['programme_contribution_percent'])}%"
     values = collect_strings(facts.get("cofinancing"), limit=4)
@@ -420,6 +428,13 @@ def activity_summary(source: dict[str, Any] | None, dossier: dict[str, Any]) -> 
     direct = []
     for key in ("activities", "eligible_activities"):
         direct.extend(collect_strings(facts.get(key), limit=8))
+    if "eligibility" in verified:
+        eligibility = facts.get("eligibility") or {}
+        technical_scope = eligibility.get("technical_scope") if isinstance(eligibility, dict) else None
+        if isinstance(technical_scope, dict):
+            for key in ("investment", "activity", "scope"):
+                if technical_scope.get(key):
+                    direct.extend(collect_strings(technical_scope.get(key), limit=4))
     if direct and ("eligibility" in verified or "activities" in verified):
         return direct[:5]
     if "eligibility" not in verified:
@@ -446,7 +461,11 @@ def scoring_summary(source: dict[str, Any] | None) -> str | None:
         if scoring.get(key) is not None:
             parts.append(f"prag minim: {format_number(scoring[key])} puncte")
             break
-    return " · ".join(parts) if parts else None
+    if scoring.get("criterion"):
+        parts.append(f"criteriu: {str(scoring['criterion']).strip()}")
+    if scoring.get("rule"):
+        parts.append(str(scoring["rule"]).strip())
+    return " · ".join(parts[:3]) if parts else None
 
 
 def eligibility_conditions_from_old_section(old_items: list[str], applicants: list[str], target_groups: list[str]) -> list[str]:
