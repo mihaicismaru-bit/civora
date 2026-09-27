@@ -226,6 +226,21 @@ def first_scalar(value: Any) -> str | None:
     if primitive(value) and value not in (None, ""):
         return format_number(value)
     if isinstance(value, dict):
+        if value.get("amount") is not None:
+            currency = str(value.get("currency") or "").strip().upper()
+            rendered = format_number(value["amount"])
+            return rendered + (f" {currency}" if currency else "")
+
+        funding_parts: list[str] = []
+        if value.get("max_eur_per_mwh") is not None:
+            funding_parts.append(f"max. {format_number(value['max_eur_per_mwh'])} EUR/MWh")
+        if value.get("max_eur_per_enterprise") is not None:
+            funding_parts.append(f"max. {format_number(value['max_eur_per_enterprise'])} EUR/întreprindere")
+        if value.get("max_intensity_percent") is not None:
+            funding_parts.append(f"intensitate max. {format_number(value['max_intensity_percent'])}%")
+        if funding_parts:
+            return " · ".join(funding_parts[:3])
+
         preferred = [
             "maximum_eur", "minimum_eur", "eligible_cost_intensity_percent",
             "total_eur", "session_total_eur", "applicant_minimum_contribution_percent",
@@ -309,10 +324,39 @@ def build_p11_dossier(item: dict[str, Any], generated_at: str) -> dict[str, Any]
     eligibility = facts.get("eligibility") or {}
     who = beneficiaries + flatten({k: v for k, v in eligibility.items() if any(token in k for token in ("applicant", "partner", "beneficiar"))}, limit=18)
     project_rules = flatten({k: v for k, v in eligibility.items() if any(token in k for token in ("project", "technical", "building", "activity", "geographic"))}, limit=20)
-    technical = flatten(facts.get("technical_scope"), limit=18)
+    technical = flatten(facts.get("technical_scope") or eligibility.get("technical_scope"), limit=18)
     activities = flatten(facts.get("activities") or facts.get("eligible_activities"), limit=18)
     costs = flatten(facts.get("costs") or facts.get("state_aid_and_cost_rules") or eligibility.get("state_aid_and_cost_rules"), limit=20)
-    documents = flatten(facts.get("documents") or facts.get("required_documents"), limit=24)
+    if not costs and "grant" in verified:
+        costs.extend(flatten(facts.get("grant"), prefix="Finanțare", limit=12))
+    if "eligibility" in verified and eligibility.get("key_ineligible_costs"):
+        costs.extend(
+            f"Cheltuială neeligibilă: {row}"
+            for row in flatten(eligibility.get("key_ineligible_costs"), limit=12)
+        )
+    documents = flatten(
+        facts.get("documents")
+        or facts.get("required_documents")
+        or eligibility.get("core_documents")
+        or eligibility.get("required_documents"),
+        limit=24,
+    )
+    operational_conditions = []
+    if "eligibility" in verified:
+        operational_conditions = flatten(
+            {
+                key: eligibility[key]
+                for key in (
+                    "application_channel",
+                    "incentive_effect",
+                    "site_rights",
+                    "grid_connection",
+                    "implementation",
+                )
+                if eligibility.get(key) not in (None, "", [], {})
+            },
+            limit=24,
+        )
     scoring = flatten(facts.get("scoring"), limit=24)
     indicators = flatten(facts.get("indicators"), limit=18)
     obligations = flatten({k: v for k, v in facts.items() if any(token in k for token in ("sustain", "ownership", "procurement", "employment", "implementation", "dnsh", "capacity"))}, limit=20)
@@ -356,8 +400,12 @@ def build_p11_dossier(item: dict[str, Any], generated_at: str) -> dict[str, Any]
     grant = facts.get("grant")
     budget = facts.get("budget")
     cofinance = None
+    cofinance_label = "Contribuție proprie"
     if isinstance(grant, dict):
         cofinance = grant.get("applicant_minimum_contribution_percent")
+        if cofinance is None and grant.get("max_intensity_percent") is not None:
+            cofinance = f"{format_number(grant['max_intensity_percent'])}%"
+            cofinance_label = "Intensitate maximă"
     if cofinance is None and isinstance(facts.get("cofinancing"), (dict, str, int, float)):
         cofinance = facts.get("cofinancing")
 
@@ -394,13 +442,13 @@ def build_p11_dossier(item: dict[str, Any], generated_at: str) -> dict[str, Any]
             fact_card("Termen", deadline, "CONFIRMED" if "deadline" in verified else "UNKNOWN"),
             fact_card("Grant", grant, "CONFIRMED" if "grant" in verified else "UNKNOWN"),
             fact_card("Buget", budget, "CONFIRMED" if "budget" in verified else "UNKNOWN"),
-            fact_card("Contribuție proprie", cofinance, "CONFIRMED" if cofinance is not None and "grant" in verified else "UNKNOWN"),
+            fact_card(cofinance_label, cofinance, "CONFIRMED" if cofinance is not None and "grant" in verified else "UNKNOWN"),
             fact_card("Completitudine critică", f"{completeness}%", "SYSTEM"),
         ],
         "sections": [
             section("Decizia rapidă", [decision_action, f"Stare editorială: {item.get('publicationState') or 'REVIEW_REQUIRED'}."], "Decizia necesită verificare."),
             section("Cine poate aplica", who, "Solicitanții eligibili nu sunt încă structurați complet."),
-            section("Ce finanțează și în ce condiții", activities + technical + project_rules, "Activitățile și condițiile tehnice trebuie citite în ghidul final."),
+            section("Ce finanțează și în ce condiții", activities + technical + project_rules + operational_conditions, "Activitățile și condițiile tehnice trebuie citite în ghidul final."),
             section("Costuri, cofinanțare și ajutor de stat", costs, "Regulile financiare nu sunt încă structurate complet."),
             section("Documente de pregătit", documents, "Lista exactă se verifică în ghid și anexe."),
             section("Cum se punctează", scoring, "Grila finală nu este încă structurată sau autorizată pentru publicare."),
