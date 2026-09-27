@@ -1,0 +1,196 @@
+{
+  "schema_version": "1.0",
+  "resolution_id": "RES-MAI-FED-IMFV-ADDITIONAL-OPEN-CALLS-20260927",
+  "resolved_at": "2026-09-27T12:17:58Z",
+  "policy": {
+    "automatic_material_fact_update_allowed": false,
+    "resolution_rule": "Admit status, deadline, FEN call allocation and beneficiary class only when they are explicitly consistent on the current official MAI/FED launch page. Other fact classes remain absent until separately reconciled."
+  },
+  "evidence": [
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-BV1A10-LAUNCH-20260927",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/11155/lansare-apel-bv1a10-dotarea-politiei-de-frontiera-romane-pentru-cresterea-capacitatii-operationale-a-frontex-ii/",
+      "observed_at": "2026-09-27T12:17:58Z",
+      "semantic_sha256": "fbbf2ef7f929e0f586226e3bdff616995936c0d48ab2778dadffe8706dbfffeb",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "budget",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies BV1A10 as active, sets the submission deadline to 31 July 2027 at 16:00, states a FEN call allocation of 283,500,000 RON and lists the eligible beneficiary class as Autoritate publică centrală.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v2"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-BV13C-LAUNCH-20260927",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/10862/bv13c-imbunatatirea-verificarilor-la-frontiere-prin-consolidarea-capacitatilor-pentru-prevenirea-si-depistarea-criminalitatii-transfrontaliere-si-pentru-facilitarea-trecerii-legale-a-frontierei-lansa/",
+      "observed_at": "2026-09-27T12:17:58Z",
+      "semantic_sha256": "702ef0daa1123f87414a27d0e5ccbf4a7aea8bfe4b96f62d545bfc5fce94e6f0",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "budget",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies BV13C as active, sets the submission deadline to 29 May 2027 at 16:00, states a FEN call allocation of 51,422,789 RON and lists the eligible beneficiary class as Autoritate publică centrală.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v2"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-BV20B-LAUNCH-20260927",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/10859/bv20b-sprijin-operational-vize-lansare-apel-de-proiecte/",
+      "observed_at": "2026-09-27T12:17:58Z",
+      "semantic_sha256": "0d2189d95f1d582c1e03926a130374e5e886f9c94bd49571e810726ed130042a",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "budget",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies BV20B as active, sets the submission deadline to 29 May 2027 at 16:00, states a FEN call allocation of 6,550,000 RON and lists the eligible beneficiary class as Autoritate publică centrală.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v2"
+    }
+  ],
+  "opportunities": [
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-imfv-bv1a10-2026",
+      "title": "BV1A10 — Dotarea Poliției de Frontieră Române pentru creșterea capacității operaționale a Frontex II",
+      "programme": "Program Național 2021-2027 Managementul Frontierelor și Vize (IMFV)",
+      "code": "BV1A10",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-BV1A10-LAUNCH-20260927"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2027-07-31T16:00:00+03:00"
+        },
+        "budget": {
+          "amount": 283500000,
+          "currency": "RON",
+          "basis": "FEN_AVAILABLE_CALL_ALLOCATION"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-BV1A10-LAUNCH-20260927"
+        ],
+        "deadline": [
+          "EV-MAI-FED-BV1A10-LAUNCH-20260927"
+        ],
+        "budget": [
+          "EV-MAI-FED-BV1A10-LAUNCH-20260927"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-BV1A10-LAUNCH-20260927"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-imfv-bv13c-2026",
+      "title": "BV13C — Îmbunătățirea verificărilor la frontiere și consolidarea capacităților pentru prevenirea și depistarea criminalității transfrontaliere",
+      "programme": "Program Național 2021-2027 Managementul Frontierelor și Vize (IMFV)",
+      "code": "BV13C",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-BV13C-LAUNCH-20260927"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2027-05-29T16:00:00+03:00"
+        },
+        "budget": {
+          "amount": 51422789,
+          "currency": "RON",
+          "basis": "FEN_AVAILABLE_CALL_ALLOCATION"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-BV13C-LAUNCH-20260927"
+        ],
+        "deadline": [
+          "EV-MAI-FED-BV13C-LAUNCH-20260927"
+        ],
+        "budget": [
+          "EV-MAI-FED-BV13C-LAUNCH-20260927"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-BV13C-LAUNCH-20260927"
+        ]
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-imfv-bv20b-2026",
+      "title": "BV20B — Sprijin operațional – vize",
+      "programme": "Program Național 2021-2027 Managementul Frontierelor și Vize (IMFV)",
+      "code": "BV20B",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-BV20B-LAUNCH-20260927"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2027-05-29T16:00:00+03:00"
+        },
+        "budget": {
+          "amount": 6550000,
+          "currency": "RON",
+          "basis": "FEN_AVAILABLE_CALL_ALLOCATION"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-BV20B-LAUNCH-20260927"
+        ],
+        "deadline": [
+          "EV-MAI-FED-BV20B-LAUNCH-20260927"
+        ],
+        "budget": [
+          "EV-MAI-FED-BV20B-LAUNCH-20260927"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-BV20B-LAUNCH-20260927"
+        ]
+      }
+    }
+  ]
+}
