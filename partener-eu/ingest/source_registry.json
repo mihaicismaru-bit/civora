@@ -14,60 +14,1373 @@
     "direct_funding_gateway_rule": "Official programme gateways, call indexes, programme guides and work-programme pages may support discovery and planning, but material call facts require the exact current call/topic/action evidence. Use the programme-specific dedicated adapter or structured Funding & Tenders adapter declared by the source; never treat a generic programme page, call index, guide or portal shell as call evidence."
   },
   "sources": [
-    {"id":"SRC-MYSMIS-CALLS","tier":"T1","class":"authoritative_call_registry","owner":"MySMIS2021 / MIPE ecosystem","url":"https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027","programmes":["2021-2027"],"extract":["call_id","call_name","status","programme","budget","project_counts"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OIRBI-PEO","tier":"T1B","class":"official_intermediate_body","owner":"OIR PECU Bucuresti-Ilfov","url":"https://www.oirbi.ro/peo-2021-2027/","programmes":["PEO"],"extract":["programme_versions","decisions","official_documents","MIPE-linked_attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OIRBI-PIDS","tier":"T1B","class":"official_intermediate_body","owner":"OIR PECU Bucuresti-Ilfov","url":"https://www.oirbi.ro/pids-2021-2027/","programmes":["PoIDS"],"extract":["programme_versions","decisions","official_documents","MIPE-linked_attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OIRVEST-PEO-GUIDES","tier":"T1B","class":"official_intermediate_body_guides","owner":"OIR PECU Regiunea Vest","url":"https://oirvest.ro/ghiduri-peo/","programmes":["PEO"],"extract":["guides","corrigenda","methodologies","indicator_documents","attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OIRVEST-PEO-MANUALS","tier":"T1B","class":"official_intermediate_body_implementation","owner":"OIR PECU Regiunea Vest","url":"https://oirvest.ro/manualul-beneficiarului-instructiuni-peo/","programmes":["PEO","PoIDS"],"extract":["beneficiary_manuals","instructions","implementation_guidance","attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OIRVEST-PEO","tier":"T1B","class":"official_intermediate_body","owner":"OIR PECU Regiunea Vest","url":"https://oirvest.ro/peo-2021-2027/","programmes":["PEO"],"extract":["programme_documents","monitoring_documents","announcements","attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OIRCENTRU-PEO","tier":"T1B","class":"official_intermediate_body","owner":"OIR PECU Regiunea Centru","url":"https://oircentru.ro/peo-2021-2027/","programmes":["PEO"],"extract":["programme_documents","decisions","attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OIRNE-PEO","tier":"T1B","class":"official_intermediate_body","owner":"OIR PECU Regiunea Nord-Est","url":"https://www.fsenordest.ro/contact_program.html","programmes":["PEO","PoIDS"],"extract":["programme_documents","announcements","technical_assistance"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-OI-RESEARCH-POCIDIF","tier":"T1B","class":"official_intermediate_body","owner":"Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare","url":"https://www2.poc.research.gov.ro/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1","programmes":["PoCIDIF"],"extract":["launched_calls","guides","corrigenda","beneficiary_manuals","instructions"],"material_fact_use":true,"credentials_required":false,"canonical_aliases":["https://newpoc.research.gov.ro/ro/categorie/108/pocidif-2021-2027","https://poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027","https://www.poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027","https://poc.mcid.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027"],"note":"Official OI Research POCIDIF Priority 1 programme/call index. Registry health does not authorize a material call fact; deadline, status, budget and eligibility still require exact current call-level evidence and reconciliation."},
-    {"id":"SRC-OI-RESEARCH-HEALTH","tier":"T1B","class":"official_intermediate_body","owner":"Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare","url":"https://www2.poc.research.gov.ro/ro/articol/4429/apeluri-de-proiecte-pos-prioritatea-5","programmes":["Programul Sanatate"],"extract":["launched_calls","guides","corrigenda","beneficiary_manuals"],"material_fact_use":true,"credentials_required":false,"canonical_aliases":["https://newpoc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027","https://poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027","https://www.poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027","https://poc.mcid.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027"],"note":"Official OI Research Programul Sanatate Priority 5 programme/call index. Registry health does not authorize a material call fact; deadline, status, budget and eligibility still require exact current call-level evidence and reconciliation."},
-    {"id":"SRC-MAI-FED-CALLS","tier":"T1","class":"managing_authority_call_registry","owner":"Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne","url":"https://fed.mai.gov.ro/in/apeluri/","programmes":["FAMI","FSI","IMFV"],"extract":["call_calendars","launched_calls","guides","deadlines","budgets"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-MAI-FED-GENERAL-GUIDE","tier":"T1","class":"managing_authority_general_guide","owner":"Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne","url":"https://fed.mai.gov.ro/fed-2021-2027/ghidul-general/","programmes":["FAMI","FSI","IMFV"],"extract":["general_rules","contractual_rules","guide_version","instructions","attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-MAI-FED-CALENDAR-INDEX","tier":"T1","class":"managing_authority_calendar_index","owner":"Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne","url":"https://fed.mai.gov.ro/despre/lansare-apeluri/","programmes":["FAMI","FSI","IMFV"],"extract":["calendar_versions","calendar_updates","call_launches","attachments"],"material_fact_use":true,"credentials_required":false},
-    {"id":"SRC-ADRVEST-PTJ-ACTIVE","tier":"T1B","class":"official_intermediate_body_active_guides","owner":"ADR Vest / OI Programul Tranzitie Justa","url":"https://adrvest.ro/programul-tranzitie-justa-ghiduri-de-finantare-active/","programmes":["PTJ","PDDTJ"],"extract":["active_calls","submission_windows","guides","attachments","MIPE_republication_links"],"material_fact_use":true,"credentials_required":false,"note":"ADR Vest republishes official PTJ/PDDTJ call material in its delegated OI scope; T1 MIPE/MySMIS prevails on conflict."},
-    {"id":"SRC-ADRCENTRU-PTJ-CONSULT","tier":"T1B","class":"official_intermediate_body_consultation_index","owner":"ADR Centru / OI Programul Tranzitie Justa","url":"https://www.adrcentru.ro/category/ptj-centru/ptj-implementare/ptj-ghiduri-consultare/","programmes":["PTJ","PDDTJ"],"extract":["consultation_guides","MIPE_orders","attachments","consultation_windows","MIPE_republication_links"],"material_fact_use":true,"credentials_required":false,"note":"Use within delegated PTJ/PDDTJ scope; do not treat consultation drafts as launched-call facts."},
-    {"id":"SRC-ADRCENTRU-FUNDING-CATALOG","tier":"T2","class":"official_regional_funding_catalog","owner":"ADR Centru","url":"https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-iulie-2026/","programmes":["multiple"],"extract":["discovery_links","open_call_mentions","consultation_mentions","cross_checks"],"material_fact_use":false,"credentials_required":false,"note":"Discovery/corroboration only; resolve every material fact to the relevant T1/T1B programme source."},
-    {"id":"SRC-ADR-CENTRU-PR-ACTIONS","tier":"T1","class":"official_regional_programme_call_registry","owner":"ADR Centru / Autoritatea de Management Programul Regiunea Centru","url":"https://www.regiocentru.ro/actiuni/","programmes":["Programul Regiunea Centru 2021-2027"],"programme_family":"Programul Regiunea Centru 2021-2027","extract":["action_call_discovery","exact_action_links","mysmis_call_identifier_discovery","programme_guides_and_corrigenda_discovery","geography_and_applicant_fit_discovery"],"material_fact_use":false,"credentials_required":false,"source_families":["ROMANIA","ADR","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CALL_INDEX_DISCOVERY","adapter_required":"REGIOCENTRU_ACTIONS_V1","jurisdiction":"Regiunea Centru","freshness_hours":24,"note":"Official Managing Authority action registry. Index evidence is discovery-only. OPEN/status/deadline/budget/eligibility require an exact action/call or MySMIS identifier, a current official exact-action endpoint, explicit current status and semantic reconciliation before any material fact may move."},
-    {"id":"SRC-PREFECTURA-TM-FUNDING","tier":"T2","class":"official_public_sector_aggregator","owner":"Institutia Prefectului Timis","url":"https://tm.prefectura.mai.gov.ro/informatii-de-interes-public/apeluri-de-finantare-deschise-si-viitoare/","programmes":["multiple"],"extract":["discovery_links","cross_checks"],"material_fact_use":false,"credentials_required":false,"note":"Useful for discovery/corroboration only; material facts must resolve to the linked official programme/guide source."},
-    {"id":"SRC-OLD-FONDURI-UE","tier":"T2","class":"official_legacy_registry","owner":"Fonduri UE legacy reporting","url":"https://b.fonduri-ue.ro/ords/f?p=110:10","programmes":["legacy"],"extract":["legacy_call_history","discovery_links"],"material_fact_use":false,"credentials_required":false,"note":"The service itself points 2021-2027 users to MySMIS resources; do not use as current authority for 2021-2027."},
-    {"id":"SRC-INS-TEMPO","tier":"T1","class":"official_statistical_database","owner":"Institutul National de Statistica","url":"https://statistici.insse.ro/tempoins/","programmes":["multiple"],"extract":["time_series","population","education","labour_market","territorial_statistics"],"material_fact_use":true,"credentials_required":false,"source_families":["INS"],"note":"Authoritative statistical source. Every promoted measure must preserve matrix/indicator, period, territory, universe and document/query provenance."},
-    {"id":"SRC-ANOFM-VALCEA-STATS","tier":"T1B","class":"official_county_employment_statistics","owner":"AJOFM Valcea / ANOFM","url":"https://www.anofm.ro/valcea/categorie/statistica-somaj/","programmes":["multiple"],"extract":["registered_unemployment","vacancies","employment_outcomes","county_labour_market_series"],"material_fact_use":true,"credentials_required":false,"source_families":["AJOFM","ANOFM"],"note":"Official county employment-service statistics. Child reports must retain explicit document provenance and period."},
-    {"id":"SRC-ISJ-VALCEA","tier":"T1B","class":"official_county_education_authority","owner":"Inspectoratul Scolar Judetean Valcea","url":"https://www.isjvalcea.ro/","programmes":["multiple"],"extract":["admission_brochures","school_offer","vocational_technical_offer","county_education_documents"],"material_fact_use":true,"credentials_required":false,"source_families":["ISJ"],"note":"Official county education source. Qualification-offer claims require the exact brochure/document and school-level scope where applicable."},
-    {"id":"SRC-ARACIP-SCHOOL-REGISTRY","tier":"T1","class":"official_school_accreditation_registry","owner":"ARACIP","url":"https://aracip.eu/categorii-documente/info-unitati-invatamant-registre","programmes":["multiple"],"extract":["accredited_schools","provisionally_authorized_schools","school_registry_snapshots"],"material_fact_use":true,"credentials_required":false,"source_families":["ARACIP"],"note":"Use the exact dated national registry attachment for authorization/accreditation facts; it does not measure practice quality or student skills."},
-    {"id":"SRC-MEC-CNDIPT","tier":"T1","class":"official_vet_policy_source","owner":"Ministerul Educatiei si Cercetarii / CNDIPT","url":"https://www.edu.ro/profesional_tehnic","programmes":["multiple"],"extract":["vet_policy","vocational_technical_system_context","official_documents"],"material_fact_use":true,"credentials_required":false,"source_families":["Ministerul Educatiei","CNDIPT"],"note":"System-level source only unless the exact linked evidence establishes a narrower scope."},
-    {"id":"SRC-EU-FUNDING-TENDERS-GATEWAY","tier":"T1","class":"official_direct_funding_gateway","owner":"European Commission / Funding & Tenders Portal","url":"https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/home","programmes":["EU direct programmes"],"programme_family":"EU Direct Funding","extract":["call_topic_discovery","programme_discovery","tender_discovery","prize_discovery"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS"],"authority_scope":"GATEWAY_ONLY","observation_state":"GATEWAY_ONLY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Authoritative gateway, but the generic portal shell is not material call evidence. OPEN/status/deadline/budget/eligibility require an exact current call/topic record through a dedicated structured adapter."},
-    {"id":"SRC-EU-HORIZON-EUROPE","tier":"T1","class":"official_direct_programme_gateway","owner":"European Commission / DG Research and Innovation","url":"https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe_en","programmes":["EU direct programmes"],"programme_family":"Horizon Europe","extract":["programme_structure","work_programmes","funding_opportunity_discovery","missions","partnerships"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS"],"authority_scope":"PROGRAMME_GATEWAY","observation_state":"GATEWAY_ONLY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Authoritative programme gateway for Horizon Europe discovery and fit. Exact topic/call identifier plus current Funding & Tenders topic evidence is required for OPEN/status/deadline/budget/eligibility."},
-    {"id":"SRC-EU-EIC-WP-2026","tier":"T1","class":"official_programming_pipeline","owner":"European Innovation Council / EISMEA","url":"https://eic.ec.europa.eu/eic-funding-opportunities/eic-2026-work-programme_en","programmes":["EU direct programmes"],"programme_family":"European Innovation Council","extract":["annual_work_programme","instrument_calendar","planned_calls","budget_signals","eligibility_signals","amendments"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMME_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Official EIC 2026 work-programme intelligence. Instrument calendars, planned calls, budgets and eligibility signals are non-authorizing until resolved to an exact current topic/call record."},
-    {"id":"SRC-EU-LIFE-CALLS-2026","tier":"T1","class":"official_direct_call_registry","owner":"CINEA / LIFE Programme","url":"https://cinea.ec.europa.eu/life-calls-proposals-2026_en","programmes":["EU direct programmes"],"programme_family":"LIFE","extract":["call_detail_links","topic_references","status_labels","deadlines","info_days"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Official LIFE 2026 call index for discovery and cross-checking. Material call facts require exact current call/topic evidence; index-level status/deadline text is non-authorizing."},
-    {"id":"SRC-EU-DIGITAL-WORK-PROGRAMMES","tier":"T1","class":"official_programming_pipeline","owner":"European Commission / DG CONNECT","url":"https://digital-strategy.ec.europa.eu/en/activities/work-programmes-digital","programmes":["EU direct programmes"],"programme_family":"Digital Europe","extract":["current_work_programmes","amendments","planned_actions","topic_scope","budget_signals"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMME_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Official DIGITAL work-programme intelligence, including amendments. It can prioritize future opportunities but cannot authorize an OPEN call without exact current topic evidence."},
-    {"id":"SRC-EU-CEF-GATEWAY","tier":"T1","class":"official_direct_programme_gateway","owner":"CINEA / Connecting Europe Facility","url":"https://cinea.ec.europa.eu/programmes/connecting-europe-facility_en","programmes":["EU direct programmes"],"programme_family":"Connecting Europe Facility","extract":["programme_sectors","funding_opportunity_discovery","calls_discovery","programme_updates","implementation_context"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS"],"authority_scope":"PROGRAMME_GATEWAY","observation_state":"GATEWAY_ONLY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Authoritative CEF programme gateway for Transport/Energy/Digital discovery. Exact call/topic evidence is required before material facts or OPEN status can be used."},
-    {"id":"SRC-EU-INNOVATION-FUND-CALLS","tier":"T1","class":"official_direct_call_registry","owner":"European Commission / DG CLIMA Innovation Fund","url":"https://climate.ec.europa.eu/areas-action/eu-funding-climate-action/innovation-fund/calls-proposals_en","programmes":["EU direct programmes"],"programme_family":"Innovation Fund","extract":["open_call_index","previous_calls","auction_consultations","planned_auctions","programme_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Official Innovation Fund call index. Consultation/planned-auction signals are pipeline-only; exact current call/topic evidence is required for OPEN/status/deadline/budget/eligibility."},
-    {"id":"SRC-EU-EU4HEALTH-GATEWAY","tier":"T1","class":"official_direct_programme_gateway","owner":"European Commission / DG SANTE EU4Health","url":"https://health.ec.europa.eu/funding/eu4health-programme-2021-2027-vision-healthier-european-union_en","programmes":["EU direct programmes"],"programme_family":"EU4Health","extract":["annual_work_programmes","programme_priorities","participating_countries","funding_opportunity_discovery","hadea_call_links"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS"],"authority_scope":"PROGRAMME_GATEWAY","observation_state":"GATEWAY_ONLY","adapter_required":"EU4HEALTH_HADEA_CALLS_V1","note":"Official EU4Health programme gateway. Work-programme and programme-level funding signals are non-authorizing; exact current HaDEA call reference/detail plus application endpoint evidence is required for OPEN/status/deadline/budget/eligibility."},
-    {"id":"SRC-EU-CERV-GATEWAY","tier":"T1","class":"official_direct_programme_gateway","owner":"European Commission / DG JUST CERV","url":"https://commission.europa.eu/funding-and-tenders/find-funding/eu-funding-programmes/citizens-equality-rights-and-values-programme_en","programmes":["EU direct programmes"],"programme_family":"Citizens Equality Rights and Values","extract":["programme_strands","beneficiary_fit","funding_opportunity_discovery","programme_documents"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS"],"authority_scope":"PROGRAMME_GATEWAY","observation_state":"GATEWAY_ONLY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Official CERV programme gateway. Material call facts require an exact current Funding & Tenders call/topic record and cannot be inferred from programme copy."},
-    {"id":"SRC-EU-SMP-CALLS","tier":"T1","class":"official_direct_call_registry","owner":"European Commission / Single Market Programme","url":"https://commission.europa.eu/funding-and-tenders/find-funding/eu-funding-programmes/single-market-programme/overview/calls-proposals_en","programmes":["EU direct programmes"],"programme_family":"Single Market Programme","extract":["objective_call_discovery","agency_routes","funding_tenders_links","programme_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Official SMP call index. It routes opportunities by programme objective and executive agency but cannot authorize OPEN/status/deadline/budget/eligibility without exact current call/topic evidence."},
-    {"id":"SRC-EU-ERASMUS-GUIDE-2026","tier":"T1","class":"official_direct_programme_guide","owner":"European Commission / Erasmus+","url":"https://erasmus-plus.ec.europa.eu/erasmus-programme-guide","programmes":["EU direct programmes"],"programme_family":"Erasmus+","extract":["2026_call_framework","action_taxonomy","participation_rules","application_routes","annual_budget_context"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS"],"authority_scope":"PROGRAMME_GUIDE","observation_state":"GATEWAY_ONLY","adapter_required":"ERASMUS_ACTION_ROUTER_V1","note":"Official 2026 Erasmus+ Programme Guide. Centralised and decentralised actions have different authoritative application endpoints; action-level identifier, route and current deadline evidence are mandatory before OPEN/material facts."},
-    {"id":"SRC-EU-CREATIVE-EUROPE-CALLS","tier":"T1","class":"official_direct_call_registry","owner":"European Commission / Creative Europe","url":"https://culture.ec.europa.eu/funding/calls","programmes":["EU direct programmes"],"programme_family":"Creative Europe","extract":["call_references","call_status_labels","deadlines","strand_discovery","application_links"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"CREATIVE_EUROPE_CALLS_V1","note":"Official culture/Creative Europe funding index. It includes programme calls and other culture opportunities; exact call detail and authoritative application route must be reconciled before any material fact or OPEN classification."},
-    {"id":"SRC-EU-EUI-CALLS","tier":"T1","class":"official_direct_call_registry","owner":"European Urban Initiative","url":"https://portico.urban-initiative.eu/urban-panorama/call-for-proposals","programmes":["EU direct programmes"],"programme_family":"European Urban Initiative","extract":["innovative_actions_calls","call_status","terms_of_reference","urban_authority_fit","future_call_signals"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"EUI_CALLS_V1","canonical_aliases":["https://www.urban-initiative.eu/calls-proposals"],"note":"Official EUI Portico call index for discovery and city-fit intelligence. Index labels such as Open/Upcoming/Closed are discovery candidates only; exact current call detail/Terms of Reference, call identifier and authoritative current status evidence are required before OPEN/status/deadline/budget/eligibility."},
-    {"id":"SRC-EU-SOLIDARITY-CALL-2026","tier":"T1","class":"official_direct_call_framework","owner":"European Commission / European Solidarity Corps","url":"https://youth.europa.eu/solidarity/organisations/calls-for-proposals_en","programmes":["EU direct programmes"],"programme_family":"European Solidarity Corps","extract":["2026_general_call","call_reference","programme_guide","action_routes","deadline_framework"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"ESC_ACTION_ROUTER_V1","note":"Official European Solidarity Corps 2026 call framework and guide index. The annual call/reference is discovery and planning evidence only here; an exact action identifier, current application route and authoritative action-level deadline/status evidence are required before OPEN/material facts."},
-    {"id":"SRC-EU-JUSTICE-GATEWAY","tier":"T1","class":"official_direct_programme_gateway","owner":"European Commission / DG Justice and Consumers","url":"https://commission.europa.eu/funding-and-tenders/find-funding/eu-funding-programmes/justice-programme_en","programmes":["EU direct programmes"],"programme_family":"Justice Programme","extract":["programme_objectives","management_mode","funding_opportunity_discovery","beneficiary_fit","programme_documents"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS"],"authority_scope":"PROGRAMME_GATEWAY","observation_state":"GATEWAY_ONLY","adapter_required":"FUNDING_TENDERS_STRUCTURED","note":"Official Justice Programme gateway for fit and opportunity discovery. Programme copy cannot authorize OPEN/status/deadline/budget/eligibility; material facts require an exact current Funding & Tenders call/topic record."},
-    {"id":"SRC-EU-MFF-2028-2034","tier":"T1","class":"official_programming_pipeline","owner":"European Commission","url":"https://commission.europa.eu/strategy-and-policy/eu-budget/long-term-eu-budget/eu-budget-2028-2034_en","programmes":["MFF 2028-2034"],"extract":["commission_proposals","sectoral_proposals","national_regional_partnership_plans","proposed_programme_architecture","member_state_allocation_signals","future_funding_architecture","programming_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["EU_DIRECT","BRUSSELS","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMME_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Commission proposal/programming intelligence only. The 16 July 2025 MFF proposal and subsequent sectoral proposal package remain negotiation inputs; never convert proposed envelopes, successor instruments, programme names or implementation dates into OPEN_CALL or current-funding facts."},
-    {"id":"SRC-EEA-GRANTS-ROMANIA-EEA-MOU","tier":"T1","class":"official_programming_framework","owner":"Financial Mechanism Office / EEA and Norway Grants","url":"https://eeagrants.org/en/fmo/documents-library/mou-romania-2021-2028-eea-1","programmes":["EEA Grants 2021-2028"],"extract":["memorandum_of_understanding","programme_areas","programme_operators","allocations","implementation_framework"],"material_fact_use":false,"credentials_required":false,"source_families":["EEA_NORWAY","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMME_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Authoritative framework for Romania, not an open-call registry. Call facts require the responsible programme operator/NFP/FMO call publication."},
-    {"id":"SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU","tier":"T1","class":"official_programming_framework","owner":"Financial Mechanism Office / EEA and Norway Grants","url":"https://eeagrants.org/en/fmo/documents-library/mou-romania-2021-2028-norway","programmes":["Norway Grants 2021-2028"],"extract":["memorandum_of_understanding","programme_areas","programme_operators","allocations","implementation_framework"],"material_fact_use":false,"credentials_required":false,"source_families":["EEA_NORWAY","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMME_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Authoritative framework for Romania, not an open-call registry. Call facts require the responsible programme operator/NFP/FMO call publication."},
-    {"id":"SRC-EEA-CSF-ROMANIA-CALLS","tier":"T1","class":"official_eea_call_registry","owner":"Financial Mechanism Office / EEA Civil Society Fund in Romania","url":"https://eeagrants.org/en/eea-civil-society-fund-romania/calls","programmes":["EEA Civil Society Fund Romania 2021-2028"],"extract":["call_detail_links","status_labels","submission_deadlines","call_numbers","support_documents"],"material_fact_use":false,"credentials_required":false,"source_families":["EEA_NORWAY","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"EEA_CSF_ROMANIA_CALLS_V1","note":"Official call index for discovery and monitoring. Material call facts require exact current call-detail page readback through the dedicated EEA CSF adapter; index-level status/deadline text does not by itself authorize publication."},
-    {"id":"SRC-INTERREG-ROBG","tier":"T1","class":"official_interreg_programme_portal","owner":"Interreg VI-A Romania-Bulgaria Managing Authority / Joint Secretariat","url":"https://www.interregviarobg.eu/en","programmes":["Interreg VI-A Romania-Bulgaria 2021-2027"],"extract":["calls","applicant_guides","corrigenda","programme_documents","planned_calls"],"material_fact_use":true,"credentials_required":false,"source_families":["INTERREG","CBC"],"authority_scope":"PROGRAMME_AND_CALL","observation_state":"CURRENT_PROGRAMME","canonical_aliases":["https://interregviarobg.eu/en"],"note":"Material call facts must resolve to the exact call/applicant-guide page; programme-level news alone cannot authorize OPEN."},
-    {"id":"SRC-INTERREG-ROBG-POST2027","tier":"T1","class":"official_programming_pipeline","owner":"Interreg VI-A Romania-Bulgaria Managing Authority / Joint Secretariat","url":"https://www.interregviarobg.eu/en/post-2027-en","programmes":["Interreg Romania-Bulgaria post-2027"],"extract":["stakeholder_consultations","harvesting_reports","future_priorities","programming_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["INTERREG","CBC","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMMING_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Post-2027 consultation/programming intelligence only; never an OPEN_CALL authority."},
-    {"id":"SRC-INTERREG-ROHU","tier":"T1","class":"official_interreg_programme_portal","owner":"Interreg VI-A Romania-Hungary Managing Authority / Joint Secretariat","url":"https://interreg-rohu.eu/en/","programmes":["Interreg VI-A Romania-Hungary 2021-2027"],"extract":["calls","applicant_guides","programme_documents","monitoring_committee_updates"],"material_fact_use":true,"credentials_required":false,"source_families":["INTERREG","CBC"],"authority_scope":"PROGRAMME_AND_CALL","observation_state":"CURRENT_PROGRAMME","note":"Exact current call evidence is required for material facts. Future programming is isolated in SRC-INTERREG-ROHU-2028-2034 and remains non-authorizing."},
-    {"id":"SRC-INTERREG-ROHU-2028-2034","tier":"T1","class":"official_programming_pipeline","owner":"Interreg VI-A Romania-Hungary Managing Authority / Joint Secretariat","url":"https://interreg-rohu.eu/ro/programare-2027/","programmes":["Interreg Romania-Hungary 2028-2034"],"extract":["proposed_regulations","stakeholder_consultations","future_priorities","programming_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["INTERREG","CBC","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMMING_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Official Romania-Hungary 2028-2034 programming source. Draft regulations, consultation windows, proposed priorities and future architecture are intelligence only; never authorize OPEN_CALL, current status, deadline, budget or eligibility without exact current call evidence."},
-    {"id":"SRC-INTERREG-RORS","tier":"T1","class":"official_interreg_programme_portal","owner":"Interreg IPA Romania-Serbia Managing Authority / Joint Secretariat","url":"https://romania-serbia.net/","programmes":["Interreg IPA Romania-Serbia 2021-2027"],"extract":["calls","planned_call_timetable","applicant_guides","programme_documents","implementation_updates"],"material_fact_use":true,"credentials_required":false,"source_families":["INTERREG","CBC"],"authority_scope":"PROGRAMME_AND_CALL","observation_state":"CURRENT_PROGRAMME","note":"Exact call page/guide required for OPEN or deadline facts."},
-    {"id":"SRC-INTERREG-RORS-2028-2034","tier":"T1","class":"official_programming_pipeline","owner":"Interreg IPA Romania-Serbia Managing Authority / Joint Secretariat","url":"https://romania-serbia.net/post-2027/","programmes":["Interreg Romania-Serbia 2028-2034"],"extract":["stakeholder_consultations","future_priorities","programming_calendar","consultation_events"],"material_fact_use":false,"credentials_required":false,"source_families":["INTERREG","CBC","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMMING_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Official 2028-2034 consultation source. Consultation dates and proposed priorities are intelligence, not call-launch facts."},
-    {"id":"SRC-INTERREG-ROUA","tier":"T1","class":"official_interreg_call_registry","owner":"Interreg NEXT Romania-Ukraine Managing Authority / Joint Secretariat","url":"https://ro-ua.net/en/funding/calls-for-proposals","programmes":["Interreg NEXT Romania-Ukraine 2021-2027"],"extract":["calls","applicant_guides","corrigenda","deadlines","programme_updates"],"material_fact_use":true,"credentials_required":false,"source_families":["INTERREG","CBC","NEXT"],"authority_scope":"CALL_REGISTRY","observation_state":"CURRENT_PROGRAMME","canonical_aliases":["https://www.ro-ua.net/en/funding/calls-for-proposals"],"note":"A transient transport failure must remain fail-closed; do not infer call state from cached or secondary sources."},
-    {"id":"SRC-INTERREG-ROMD","tier":"T1","class":"official_interreg_call_registry","owner":"Interreg NEXT Romania-Republic of Moldova Managing Authority / Joint Secretariat","url":"https://www.ro-md.net/en/funding/calls-for-proposals","programmes":["Interreg NEXT Romania-Republic of Moldova 2021-2027"],"extract":["calls","applicant_guides","corrigenda","deadlines","programme_updates"],"material_fact_use":true,"credentials_required":false,"source_families":["INTERREG","CBC","NEXT"],"authority_scope":"CALL_REGISTRY","observation_state":"CURRENT_PROGRAMME","canonical_aliases":["https://ro-md.net/en/funding/calls-for-proposals"]},
-    {"id":"SRC-INTERREG-ROMD-2028-2034","tier":"T1","class":"official_programming_pipeline","owner":"Interreg NEXT Romania-Republic of Moldova Managing Authority / Joint Secretariat","url":"https://ro-md.net/en/news-2021-2027/public-consultation-on-the-future-interreg-romania-moldova-chapter-2028-2034","programmes":["Interreg Romania-Republic of Moldova 2028-2034"],"extract":["stakeholder_consultations","future_priorities","territorial_scope","programming_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["INTERREG","CBC","NEXT","PROGRAMMING_PIPELINE"],"authority_scope":"PROGRAMMING_FRAMEWORK","observation_state":"PROGRAMMING_PIPELINE","note":"Official 2028-2034 public consultation/programming source. Territorial scope and consultation evidence are intelligence only and can never authorize OPEN_CALL or material call facts."},
-    {"id":"SRC-INTERREG-NEXT-BSB","tier":"T1","class":"official_interreg_call_registry","owner":"Interreg NEXT Black Sea Basin Managing Authority / Joint Secretariat","url":"https://www.blacksea-cbc.net/interreg-next-bsb-2021-2027/calls-for-proposals","programmes":["Interreg NEXT Black Sea Basin 2021-2027"],"extract":["calls","applicant_guides","corrigenda","deadlines","eligible_area","programme_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["INTERREG","NEXT","TRANSNATIONAL","BLACK_SEA_BASIN","CALL_REGISTRY"],"authority_scope":"CALL_INDEX_DISCOVERY","observation_state":"CURRENT_CALL_REGISTRY","adapter_required":"INTERREG_CALL_V1","eligible_territories_romania":["Braila","Buzau","Constanta","Galati","Tulcea","Vrancea"],"note":"Official Interreg NEXT Black Sea Basin call index and programme source. Romania fit is territorially limited to Braila, Buzau, Constanta, Galati, Tulcea and Vrancea. Index labels, historical deadlines and programme news are discovery/market-intelligence only; material OPEN/status/deadline/budget/eligibility require an exact call identifier, current authoritative call/application endpoint and semantic reconciliation."},
-    {"id":"SRC-INTERREG-DANUBE","tier":"T1","class":"official_interreg_call_registry","owner":"Interreg Danube Region Programme Managing Authority / Joint Secretariat","url":"https://interreg-danube.eu/calls-for-proposals","programmes":["Interreg Danube Region Programme 2021-2027"],"extract":["calls","pre_announcements","applicant_manuals","deadlines","programme_updates"],"material_fact_use":true,"credentials_required":false,"source_families":["INTERREG","TRANSNATIONAL"],"authority_scope":"CALL_REGISTRY","observation_state":"CURRENT_PROGRAMME","note":"Pre-announcements are UPCOMING/PIPELINE until an official open call page confirms launch."},
-    {"id":"SRC-INTERREG-EUROPE","tier":"T1","class":"official_interreg_programme_portal","owner":"Interreg Europe Managing Authority / Joint Secretariat","url":"https://www.interregeurope.eu/","programmes":["Interreg Europe 2021-2027"],"extract":["funding_calls","programme_documents","applicant_support","future_programming_updates"],"material_fact_use":false,"credentials_required":false,"source_families":["INTERREG","INTERREGIONAL"],"authority_scope":"PROGRAMME_GATEWAY","observation_state":"GATEWAY_ONLY","note":"Programme gateway for discovery and planning. Material call facts require the exact call terms/current call page."}
+    {
+      "id": "SRC-MYSMIS-CALLS",
+      "tier": "T1",
+      "class": "authoritative_call_registry",
+      "owner": "MySMIS2021 / MIPE ecosystem",
+      "url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "programmes": [
+        "2021-2027"
+      ],
+      "extract": [
+        "call_id",
+        "call_name",
+        "status",
+        "programme",
+        "budget",
+        "project_counts"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRBI-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Bucuresti-Ilfov",
+      "url": "https://www.oirbi.ro/peo-2021-2027/",
+      "programmes": [
+        "PEO"
+      ],
+      "extract": [
+        "programme_versions",
+        "decisions",
+        "official_documents",
+        "MIPE-linked_attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRBI-PIDS",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Bucuresti-Ilfov",
+      "url": "https://www.oirbi.ro/pids-2021-2027/",
+      "programmes": [
+        "PoIDS"
+      ],
+      "extract": [
+        "programme_versions",
+        "decisions",
+        "official_documents",
+        "MIPE-linked_attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRVEST-PEO-GUIDES",
+      "tier": "T1B",
+      "class": "official_intermediate_body_guides",
+      "owner": "OIR PECU Regiunea Vest",
+      "url": "https://oirvest.ro/ghiduri-peo/",
+      "programmes": [
+        "PEO"
+      ],
+      "extract": [
+        "guides",
+        "corrigenda",
+        "methodologies",
+        "indicator_documents",
+        "attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRVEST-PEO-MANUALS",
+      "tier": "T1B",
+      "class": "official_intermediate_body_implementation",
+      "owner": "OIR PECU Regiunea Vest",
+      "url": "https://oirvest.ro/manualul-beneficiarului-instructiuni-peo/",
+      "programmes": [
+        "PEO",
+        "PoIDS"
+      ],
+      "extract": [
+        "beneficiary_manuals",
+        "instructions",
+        "implementation_guidance",
+        "attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRVEST-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Regiunea Vest",
+      "url": "https://oirvest.ro/peo-2021-2027/",
+      "programmes": [
+        "PEO"
+      ],
+      "extract": [
+        "programme_documents",
+        "monitoring_documents",
+        "announcements",
+        "attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRCENTRU-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Regiunea Centru",
+      "url": "https://oircentru.ro/peo-2021-2027/",
+      "programmes": [
+        "PEO"
+      ],
+      "extract": [
+        "programme_documents",
+        "decisions",
+        "attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OIRNE-PEO",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "OIR PECU Regiunea Nord-Est",
+      "url": "https://www.fsenordest.ro/contact_program.html",
+      "programmes": [
+        "PEO",
+        "PoIDS"
+      ],
+      "extract": [
+        "programme_documents",
+        "announcements",
+        "technical_assistance"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-OI-RESEARCH-POCIDIF",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
+      "url": "https://www2.poc.research.gov.ro/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1",
+      "programmes": [
+        "PoCIDIF"
+      ],
+      "extract": [
+        "launched_calls",
+        "guides",
+        "corrigenda",
+        "beneficiary_manuals",
+        "instructions"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "canonical_aliases": [
+        "https://www2.poc.mcid.gov.ro/ro/categorie/116/pocidif-prioritatea-1",
+        "https://newpoc.research.gov.ro/ro/categorie/108/pocidif-2021-2027",
+        "https://poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
+        "https://www.poc.research.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027",
+        "https://poc.mcid.gov.ro/ro/articol/4382/2021-2027-pocidif-2021-2027"
+      ],
+      "note": "Official OI Research POCIDIF Priority 1 programme/call index. Registry health does not authorize a material call fact; deadline, status, budget and eligibility still require exact current call-level evidence and reconciliation."
+    },
+    {
+      "id": "SRC-OI-RESEARCH-HEALTH",
+      "tier": "T1B",
+      "class": "official_intermediate_body",
+      "owner": "Organism Intermediar pentru Cercetare / Autoritatea Nationala pentru Cercetare",
+      "url": "https://www2.poc.research.gov.ro/ro/articol/4429/apeluri-de-proiecte-pos-prioritatea-5",
+      "programmes": [
+        "Programul Sanatate"
+      ],
+      "extract": [
+        "launched_calls",
+        "guides",
+        "corrigenda",
+        "beneficiary_manuals"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "canonical_aliases": [
+        "https://www2.poc.mcid.gov.ro/ro/articol/4429/apeluri-de-proiecte-pos-prioritatea-5",
+        "https://newpoc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
+        "https://poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
+        "https://www.poc.research.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027",
+        "https://poc.mcid.gov.ro/ro/articol/4427/2021-2027-pos-2021-2027"
+      ],
+      "note": "Official OI Research Programul Sanatate Priority 5 programme/call index. Registry health does not authorize a material call fact; deadline, status, budget and eligibility still require exact current call-level evidence and reconciliation."
+    },
+    {
+      "id": "SRC-MAI-FED-CALLS",
+      "tier": "T1",
+      "class": "managing_authority_call_registry",
+      "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
+      "url": "https://fed.mai.gov.ro/in/apeluri/",
+      "programmes": [
+        "FAMI",
+        "FSI",
+        "IMFV"
+      ],
+      "extract": [
+        "call_calendars",
+        "launched_calls",
+        "guides",
+        "deadlines",
+        "budgets"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-MAI-FED-GENERAL-GUIDE",
+      "tier": "T1",
+      "class": "managing_authority_general_guide",
+      "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
+      "url": "https://fed.mai.gov.ro/fed-2021-2027/ghidul-general/",
+      "programmes": [
+        "FAMI",
+        "FSI",
+        "IMFV"
+      ],
+      "extract": [
+        "general_rules",
+        "contractual_rules",
+        "guide_version",
+        "instructions",
+        "attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-MAI-FED-CALENDAR-INDEX",
+      "tier": "T1",
+      "class": "managing_authority_calendar_index",
+      "owner": "Ministerul Afacerilor Interne / Autoritatea de Management Afaceri Interne",
+      "url": "https://fed.mai.gov.ro/despre/lansare-apeluri/",
+      "programmes": [
+        "FAMI",
+        "FSI",
+        "IMFV"
+      ],
+      "extract": [
+        "calendar_versions",
+        "calendar_updates",
+        "call_launches",
+        "attachments"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false
+    },
+    {
+      "id": "SRC-ADRVEST-PTJ-ACTIVE",
+      "tier": "T1B",
+      "class": "official_intermediate_body_active_guides",
+      "owner": "ADR Vest / OI Programul Tranzitie Justa",
+      "url": "https://adrvest.ro/programul-tranzitie-justa-ghiduri-de-finantare-active/",
+      "programmes": [
+        "PTJ",
+        "PDDTJ"
+      ],
+      "extract": [
+        "active_calls",
+        "submission_windows",
+        "guides",
+        "attachments",
+        "MIPE_republication_links"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "note": "ADR Vest republishes official PTJ/PDDTJ call material in its delegated OI scope; T1 MIPE/MySMIS prevails on conflict."
+    },
+    {
+      "id": "SRC-ADRCENTRU-PTJ-CONSULT",
+      "tier": "T1B",
+      "class": "official_intermediate_body_consultation_index",
+      "owner": "ADR Centru / OI Programul Tranzitie Justa",
+      "url": "https://www.adrcentru.ro/category/ptj-centru/ptj-implementare/ptj-ghiduri-consultare/",
+      "programmes": [
+        "PTJ",
+        "PDDTJ"
+      ],
+      "extract": [
+        "consultation_guides",
+        "MIPE_orders",
+        "attachments",
+        "consultation_windows",
+        "MIPE_republication_links"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "note": "Use within delegated PTJ/PDDTJ scope; do not treat consultation drafts as launched-call facts."
+    },
+    {
+      "id": "SRC-ADRCENTRU-FUNDING-CATALOG",
+      "tier": "T2",
+      "class": "official_regional_funding_catalog",
+      "owner": "ADR Centru",
+      "url": "https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-iulie-2026/",
+      "programmes": [
+        "multiple"
+      ],
+      "extract": [
+        "discovery_links",
+        "open_call_mentions",
+        "consultation_mentions",
+        "cross_checks"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "note": "Discovery/corroboration only; resolve every material fact to the relevant T1/T1B programme source."
+    },
+    {
+      "id": "SRC-ADR-CENTRU-PR-ACTIONS",
+      "tier": "T1",
+      "class": "official_regional_programme_call_registry",
+      "owner": "ADR Centru / Autoritatea de Management Programul Regiunea Centru",
+      "url": "https://www.regiocentru.ro/actiuni/",
+      "programmes": [
+        "Programul Regiunea Centru 2021-2027"
+      ],
+      "programme_family": "Programul Regiunea Centru 2021-2027",
+      "extract": [
+        "action_call_discovery",
+        "exact_action_links",
+        "mysmis_call_identifier_discovery",
+        "programme_guides_and_corrigenda_discovery",
+        "geography_and_applicant_fit_discovery"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "ROMANIA",
+        "ADR",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "adapter_required": "REGIOCENTRU_ACTIONS_V1",
+      "jurisdiction": "Regiunea Centru",
+      "freshness_hours": 24,
+      "note": "Official Managing Authority action registry. Index evidence is discovery-only. OPEN/status/deadline/budget/eligibility require an exact action/call or MySMIS identifier, a current official exact-action endpoint, explicit current status and semantic reconciliation before any material fact may move."
+    },
+    {
+      "id": "SRC-PREFECTURA-TM-FUNDING",
+      "tier": "T2",
+      "class": "official_public_sector_aggregator",
+      "owner": "Institutia Prefectului Timis",
+      "url": "https://tm.prefectura.mai.gov.ro/informatii-de-interes-public/apeluri-de-finantare-deschise-si-viitoare/",
+      "programmes": [
+        "multiple"
+      ],
+      "extract": [
+        "discovery_links",
+        "cross_checks"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "note": "Useful for discovery/corroboration only; material facts must resolve to the linked official programme/guide source."
+    },
+    {
+      "id": "SRC-OLD-FONDURI-UE",
+      "tier": "T2",
+      "class": "official_legacy_registry",
+      "owner": "Fonduri UE legacy reporting",
+      "url": "https://b.fonduri-ue.ro/ords/f?p=110:10",
+      "programmes": [
+        "legacy"
+      ],
+      "extract": [
+        "legacy_call_history",
+        "discovery_links"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "note": "The service itself points 2021-2027 users to MySMIS resources; do not use as current authority for 2021-2027."
+    },
+    {
+      "id": "SRC-INS-TEMPO",
+      "tier": "T1",
+      "class": "official_statistical_database",
+      "owner": "Institutul National de Statistica",
+      "url": "https://statistici.insse.ro/tempoins/",
+      "programmes": [
+        "multiple"
+      ],
+      "extract": [
+        "time_series",
+        "population",
+        "education",
+        "labour_market",
+        "territorial_statistics"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "INS"
+      ],
+      "note": "Authoritative statistical source. Every promoted measure must preserve matrix/indicator, period, territory, universe and document/query provenance."
+    },
+    {
+      "id": "SRC-ANOFM-VALCEA-STATS",
+      "tier": "T1B",
+      "class": "official_county_employment_statistics",
+      "owner": "AJOFM Valcea / ANOFM",
+      "url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/",
+      "programmes": [
+        "multiple"
+      ],
+      "extract": [
+        "registered_unemployment",
+        "vacancies",
+        "employment_outcomes",
+        "county_labour_market_series"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "AJOFM",
+        "ANOFM"
+      ],
+      "note": "Official county employment-service statistics. Child reports must retain explicit document provenance and period."
+    },
+    {
+      "id": "SRC-ISJ-VALCEA",
+      "tier": "T1B",
+      "class": "official_county_education_authority",
+      "owner": "Inspectoratul Scolar Judetean Valcea",
+      "url": "https://www.isjvalcea.ro/",
+      "programmes": [
+        "multiple"
+      ],
+      "extract": [
+        "admission_brochures",
+        "school_offer",
+        "vocational_technical_offer",
+        "county_education_documents"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "ISJ"
+      ],
+      "note": "Official county education source. Qualification-offer claims require the exact brochure/document and school-level scope where applicable."
+    },
+    {
+      "id": "SRC-ARACIP-SCHOOL-REGISTRY",
+      "tier": "T1",
+      "class": "official_school_accreditation_registry",
+      "owner": "ARACIP",
+      "url": "https://aracip.eu/categorii-documente/info-unitati-invatamant-registre",
+      "programmes": [
+        "multiple"
+      ],
+      "extract": [
+        "accredited_schools",
+        "provisionally_authorized_schools",
+        "school_registry_snapshots"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "ARACIP"
+      ],
+      "note": "Use the exact dated national registry attachment for authorization/accreditation facts; it does not measure practice quality or student skills."
+    },
+    {
+      "id": "SRC-MEC-CNDIPT",
+      "tier": "T1",
+      "class": "official_vet_policy_source",
+      "owner": "Ministerul Educatiei si Cercetarii / CNDIPT",
+      "url": "https://www.edu.ro/profesional_tehnic",
+      "programmes": [
+        "multiple"
+      ],
+      "extract": [
+        "vet_policy",
+        "vocational_technical_system_context",
+        "official_documents"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "Ministerul Educatiei",
+        "CNDIPT"
+      ],
+      "note": "System-level source only unless the exact linked evidence establishes a narrower scope."
+    },
+    {
+      "id": "SRC-EU-FUNDING-TENDERS-GATEWAY",
+      "tier": "T1",
+      "class": "official_direct_funding_gateway",
+      "owner": "European Commission / Funding & Tenders Portal",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/home",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "EU Direct Funding",
+      "extract": [
+        "call_topic_discovery",
+        "programme_discovery",
+        "tender_discovery",
+        "prize_discovery"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS"
+      ],
+      "authority_scope": "GATEWAY_ONLY",
+      "observation_state": "GATEWAY_ONLY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Authoritative gateway, but the generic portal shell is not material call evidence. OPEN/status/deadline/budget/eligibility require an exact current call/topic record through a dedicated structured adapter."
+    },
+    {
+      "id": "SRC-EU-HORIZON-EUROPE",
+      "tier": "T1",
+      "class": "official_direct_programme_gateway",
+      "owner": "European Commission / DG Research and Innovation",
+      "url": "https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Horizon Europe",
+      "extract": [
+        "programme_structure",
+        "work_programmes",
+        "funding_opportunity_discovery",
+        "missions",
+        "partnerships"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS"
+      ],
+      "authority_scope": "PROGRAMME_GATEWAY",
+      "observation_state": "GATEWAY_ONLY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Authoritative programme gateway for Horizon Europe discovery and fit. Exact topic/call identifier plus current Funding & Tenders topic evidence is required for OPEN/status/deadline/budget/eligibility."
+    },
+    {
+      "id": "SRC-EU-EIC-WP-2026",
+      "tier": "T1",
+      "class": "official_programming_pipeline",
+      "owner": "European Innovation Council / EISMEA",
+      "url": "https://eic.ec.europa.eu/eic-funding-opportunities/eic-2026-work-programme_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "European Innovation Council",
+      "extract": [
+        "annual_work_programme",
+        "instrument_calendar",
+        "planned_calls",
+        "budget_signals",
+        "eligibility_signals",
+        "amendments"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMME_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Official EIC 2026 work-programme intelligence. Instrument calendars, planned calls, budgets and eligibility signals are non-authorizing until resolved to an exact current topic/call record."
+    },
+    {
+      "id": "SRC-EU-LIFE-CALLS-2026",
+      "tier": "T1",
+      "class": "official_direct_call_registry",
+      "owner": "CINEA / LIFE Programme",
+      "url": "https://cinea.ec.europa.eu/life-calls-proposals-2026_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "LIFE",
+      "extract": [
+        "call_detail_links",
+        "topic_references",
+        "status_labels",
+        "deadlines",
+        "info_days"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Official LIFE 2026 call index for discovery and cross-checking. Material call facts require exact current call/topic evidence; index-level status/deadline text is non-authorizing."
+    },
+    {
+      "id": "SRC-EU-DIGITAL-WORK-PROGRAMMES",
+      "tier": "T1",
+      "class": "official_programming_pipeline",
+      "owner": "European Commission / DG CONNECT",
+      "url": "https://digital-strategy.ec.europa.eu/en/activities/work-programmes-digital",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Digital Europe",
+      "extract": [
+        "current_work_programmes",
+        "amendments",
+        "planned_actions",
+        "topic_scope",
+        "budget_signals"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMME_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Official DIGITAL work-programme intelligence, including amendments. It can prioritize future opportunities but cannot authorize an OPEN call without exact current topic evidence."
+    },
+    {
+      "id": "SRC-EU-CEF-GATEWAY",
+      "tier": "T1",
+      "class": "official_direct_programme_gateway",
+      "owner": "CINEA / Connecting Europe Facility",
+      "url": "https://cinea.ec.europa.eu/programmes/connecting-europe-facility_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Connecting Europe Facility",
+      "extract": [
+        "programme_sectors",
+        "funding_opportunity_discovery",
+        "calls_discovery",
+        "programme_updates",
+        "implementation_context"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS"
+      ],
+      "authority_scope": "PROGRAMME_GATEWAY",
+      "observation_state": "GATEWAY_ONLY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Authoritative CEF programme gateway for Transport/Energy/Digital discovery. Exact call/topic evidence is required before material facts or OPEN status can be used."
+    },
+    {
+      "id": "SRC-EU-INNOVATION-FUND-CALLS",
+      "tier": "T1",
+      "class": "official_direct_call_registry",
+      "owner": "European Commission / DG CLIMA Innovation Fund",
+      "url": "https://climate.ec.europa.eu/areas-action/eu-funding-climate-action/innovation-fund/calls-proposals_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Innovation Fund",
+      "extract": [
+        "open_call_index",
+        "previous_calls",
+        "auction_consultations",
+        "planned_auctions",
+        "programme_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Official Innovation Fund call index. Consultation/planned-auction signals are pipeline-only; exact current call/topic evidence is required for OPEN/status/deadline/budget/eligibility."
+    },
+    {
+      "id": "SRC-EU-EU4HEALTH-GATEWAY",
+      "tier": "T1",
+      "class": "official_direct_programme_gateway",
+      "owner": "European Commission / DG SANTE EU4Health",
+      "url": "https://health.ec.europa.eu/funding/eu4health-programme-2021-2027-vision-healthier-european-union_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "EU4Health",
+      "extract": [
+        "annual_work_programmes",
+        "programme_priorities",
+        "participating_countries",
+        "funding_opportunity_discovery",
+        "hadea_call_links"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS"
+      ],
+      "authority_scope": "PROGRAMME_GATEWAY",
+      "observation_state": "GATEWAY_ONLY",
+      "adapter_required": "EU4HEALTH_HADEA_CALLS_V1",
+      "note": "Official EU4Health programme gateway. Work-programme and programme-level funding signals are non-authorizing; exact current HaDEA call reference/detail plus application endpoint evidence is required for OPEN/status/deadline/budget/eligibility."
+    },
+    {
+      "id": "SRC-EU-CERV-GATEWAY",
+      "tier": "T1",
+      "class": "official_direct_programme_gateway",
+      "owner": "European Commission / DG JUST CERV",
+      "url": "https://commission.europa.eu/funding-and-tenders/find-funding/eu-funding-programmes/citizens-equality-rights-and-values-programme_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Citizens Equality Rights and Values",
+      "extract": [
+        "programme_strands",
+        "beneficiary_fit",
+        "funding_opportunity_discovery",
+        "programme_documents"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS"
+      ],
+      "authority_scope": "PROGRAMME_GATEWAY",
+      "observation_state": "GATEWAY_ONLY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Official CERV programme gateway. Material call facts require an exact current Funding & Tenders call/topic record and cannot be inferred from programme copy."
+    },
+    {
+      "id": "SRC-EU-SMP-CALLS",
+      "tier": "T1",
+      "class": "official_direct_call_registry",
+      "owner": "European Commission / Single Market Programme",
+      "url": "https://commission.europa.eu/funding-and-tenders/find-funding/eu-funding-programmes/single-market-programme/overview/calls-proposals_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Single Market Programme",
+      "extract": [
+        "objective_call_discovery",
+        "agency_routes",
+        "funding_tenders_links",
+        "programme_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Official SMP call index. It routes opportunities by programme objective and executive agency but cannot authorize OPEN/status/deadline/budget/eligibility without exact current call/topic evidence."
+    },
+    {
+      "id": "SRC-EU-ERASMUS-GUIDE-2026",
+      "tier": "T1",
+      "class": "official_direct_programme_guide",
+      "owner": "European Commission / Erasmus+",
+      "url": "https://erasmus-plus.ec.europa.eu/erasmus-programme-guide",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Erasmus+",
+      "extract": [
+        "2026_call_framework",
+        "action_taxonomy",
+        "participation_rules",
+        "application_routes",
+        "annual_budget_context"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS"
+      ],
+      "authority_scope": "PROGRAMME_GUIDE",
+      "observation_state": "GATEWAY_ONLY",
+      "adapter_required": "ERASMUS_ACTION_ROUTER_V1",
+      "note": "Official 2026 Erasmus+ Programme Guide. Centralised and decentralised actions have different authoritative application endpoints; action-level identifier, route and current deadline evidence are mandatory before OPEN/material facts."
+    },
+    {
+      "id": "SRC-EU-CREATIVE-EUROPE-CALLS",
+      "tier": "T1",
+      "class": "official_direct_call_registry",
+      "owner": "European Commission / Creative Europe",
+      "url": "https://culture.ec.europa.eu/funding/calls",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Creative Europe",
+      "extract": [
+        "call_references",
+        "call_status_labels",
+        "deadlines",
+        "strand_discovery",
+        "application_links"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "CREATIVE_EUROPE_CALLS_V1",
+      "note": "Official culture/Creative Europe funding index. It includes programme calls and other culture opportunities; exact call detail and authoritative application route must be reconciled before any material fact or OPEN classification."
+    },
+    {
+      "id": "SRC-EU-EUI-CALLS",
+      "tier": "T1",
+      "class": "official_direct_call_registry",
+      "owner": "European Urban Initiative",
+      "url": "https://portico.urban-initiative.eu/urban-panorama/call-for-proposals",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "European Urban Initiative",
+      "extract": [
+        "innovative_actions_calls",
+        "call_status",
+        "terms_of_reference",
+        "urban_authority_fit",
+        "future_call_signals"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "EUI_CALLS_V1",
+      "canonical_aliases": [
+        "https://www.urban-initiative.eu/calls-proposals"
+      ],
+      "note": "Official EUI Portico call index for discovery and city-fit intelligence. Index labels such as Open/Upcoming/Closed are discovery candidates only; exact current call detail/Terms of Reference, call identifier and authoritative current status evidence are required before OPEN/status/deadline/budget/eligibility."
+    },
+    {
+      "id": "SRC-EU-SOLIDARITY-CALL-2026",
+      "tier": "T1",
+      "class": "official_direct_call_framework",
+      "owner": "European Commission / European Solidarity Corps",
+      "url": "https://youth.europa.eu/solidarity/organisations/calls-for-proposals_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "European Solidarity Corps",
+      "extract": [
+        "2026_general_call",
+        "call_reference",
+        "programme_guide",
+        "action_routes",
+        "deadline_framework"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "ESC_ACTION_ROUTER_V1",
+      "note": "Official European Solidarity Corps 2026 call framework and guide index. The annual call/reference is discovery and planning evidence only here; an exact action identifier, current application route and authoritative action-level deadline/status evidence are required before OPEN/material facts."
+    },
+    {
+      "id": "SRC-EU-JUSTICE-GATEWAY",
+      "tier": "T1",
+      "class": "official_direct_programme_gateway",
+      "owner": "European Commission / DG Justice and Consumers",
+      "url": "https://commission.europa.eu/funding-and-tenders/find-funding/eu-funding-programmes/justice-programme_en",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Justice Programme",
+      "extract": [
+        "programme_objectives",
+        "management_mode",
+        "funding_opportunity_discovery",
+        "beneficiary_fit",
+        "programme_documents"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS"
+      ],
+      "authority_scope": "PROGRAMME_GATEWAY",
+      "observation_state": "GATEWAY_ONLY",
+      "adapter_required": "FUNDING_TENDERS_STRUCTURED",
+      "note": "Official Justice Programme gateway for fit and opportunity discovery. Programme copy cannot authorize OPEN/status/deadline/budget/eligibility; material facts require an exact current Funding & Tenders call/topic record."
+    },
+    {
+      "id": "SRC-EU-MFF-2028-2034",
+      "tier": "T1",
+      "class": "official_programming_pipeline",
+      "owner": "European Commission",
+      "url": "https://commission.europa.eu/strategy-and-policy/eu-budget/long-term-eu-budget/eu-budget-2028-2034_en",
+      "programmes": [
+        "MFF 2028-2034"
+      ],
+      "extract": [
+        "commission_proposals",
+        "sectoral_proposals",
+        "national_regional_partnership_plans",
+        "proposed_programme_architecture",
+        "member_state_allocation_signals",
+        "future_funding_architecture",
+        "programming_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMME_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Commission proposal/programming intelligence only. The 16 July 2025 MFF proposal and subsequent sectoral proposal package remain negotiation inputs; never convert proposed envelopes, successor instruments, programme names or implementation dates into OPEN_CALL or current-funding facts."
+    },
+    {
+      "id": "SRC-EEA-GRANTS-ROMANIA-EEA-MOU",
+      "tier": "T1",
+      "class": "official_programming_framework",
+      "owner": "Financial Mechanism Office / EEA and Norway Grants",
+      "url": "https://eeagrants.org/en/fmo/documents-library/mou-romania-2021-2028-eea-1",
+      "programmes": [
+        "EEA Grants 2021-2028"
+      ],
+      "extract": [
+        "memorandum_of_understanding",
+        "programme_areas",
+        "programme_operators",
+        "allocations",
+        "implementation_framework"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EEA_NORWAY",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMME_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Authoritative framework for Romania, not an open-call registry. Call facts require the responsible programme operator/NFP/FMO call publication."
+    },
+    {
+      "id": "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU",
+      "tier": "T1",
+      "class": "official_programming_framework",
+      "owner": "Financial Mechanism Office / EEA and Norway Grants",
+      "url": "https://eeagrants.org/en/fmo/documents-library/mou-romania-2021-2028-norway",
+      "programmes": [
+        "Norway Grants 2021-2028"
+      ],
+      "extract": [
+        "memorandum_of_understanding",
+        "programme_areas",
+        "programme_operators",
+        "allocations",
+        "implementation_framework"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EEA_NORWAY",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMME_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Authoritative framework for Romania, not an open-call registry. Call facts require the responsible programme operator/NFP/FMO call publication."
+    },
+    {
+      "id": "SRC-EEA-CSF-ROMANIA-CALLS",
+      "tier": "T1",
+      "class": "official_eea_call_registry",
+      "owner": "Financial Mechanism Office / EEA Civil Society Fund in Romania",
+      "url": "https://eeagrants.org/en/eea-civil-society-fund-romania/calls",
+      "programmes": [
+        "EEA Civil Society Fund Romania 2021-2028"
+      ],
+      "extract": [
+        "call_detail_links",
+        "status_labels",
+        "submission_deadlines",
+        "call_numbers",
+        "support_documents"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EEA_NORWAY",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "EEA_CSF_ROMANIA_CALLS_V1",
+      "note": "Official call index for discovery and monitoring. Material call facts require exact current call-detail page readback through the dedicated EEA CSF adapter; index-level status/deadline text does not by itself authorize publication."
+    },
+    {
+      "id": "SRC-INTERREG-ROBG",
+      "tier": "T1",
+      "class": "official_interreg_programme_portal",
+      "owner": "Interreg VI-A Romania-Bulgaria Managing Authority / Joint Secretariat",
+      "url": "https://www.interregviarobg.eu/en",
+      "programmes": [
+        "Interreg VI-A Romania-Bulgaria 2021-2027"
+      ],
+      "extract": [
+        "calls",
+        "applicant_guides",
+        "corrigenda",
+        "programme_documents",
+        "planned_calls"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC"
+      ],
+      "authority_scope": "PROGRAMME_AND_CALL",
+      "observation_state": "CURRENT_PROGRAMME",
+      "canonical_aliases": [
+        "https://interregviarobg.eu/en"
+      ],
+      "note": "Material call facts must resolve to the exact call/applicant-guide page; programme-level news alone cannot authorize OPEN."
+    },
+    {
+      "id": "SRC-INTERREG-ROBG-POST2027",
+      "tier": "T1",
+      "class": "official_programming_pipeline",
+      "owner": "Interreg VI-A Romania-Bulgaria Managing Authority / Joint Secretariat",
+      "url": "https://www.interregviarobg.eu/en/post-2027-en",
+      "programmes": [
+        "Interreg Romania-Bulgaria post-2027"
+      ],
+      "extract": [
+        "stakeholder_consultations",
+        "harvesting_reports",
+        "future_priorities",
+        "programming_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMMING_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Post-2027 consultation/programming intelligence only; never an OPEN_CALL authority."
+    },
+    {
+      "id": "SRC-INTERREG-ROHU",
+      "tier": "T1",
+      "class": "official_interreg_programme_portal",
+      "owner": "Interreg VI-A Romania-Hungary Managing Authority / Joint Secretariat",
+      "url": "https://interreg-rohu.eu/en/",
+      "programmes": [
+        "Interreg VI-A Romania-Hungary 2021-2027"
+      ],
+      "extract": [
+        "calls",
+        "applicant_guides",
+        "programme_documents",
+        "monitoring_committee_updates"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC"
+      ],
+      "authority_scope": "PROGRAMME_AND_CALL",
+      "observation_state": "CURRENT_PROGRAMME",
+      "note": "Exact current call evidence is required for material facts. Future programming is isolated in SRC-INTERREG-ROHU-2028-2034 and remains non-authorizing."
+    },
+    {
+      "id": "SRC-INTERREG-ROHU-2028-2034",
+      "tier": "T1",
+      "class": "official_programming_pipeline",
+      "owner": "Interreg VI-A Romania-Hungary Managing Authority / Joint Secretariat",
+      "url": "https://interreg-rohu.eu/ro/programare-2027/",
+      "programmes": [
+        "Interreg Romania-Hungary 2028-2034"
+      ],
+      "extract": [
+        "proposed_regulations",
+        "stakeholder_consultations",
+        "future_priorities",
+        "programming_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMMING_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Official Romania-Hungary 2028-2034 programming source. Draft regulations, consultation windows, proposed priorities and future architecture are intelligence only; never authorize OPEN_CALL, current status, deadline, budget or eligibility without exact current call evidence."
+    },
+    {
+      "id": "SRC-INTERREG-RORS",
+      "tier": "T1",
+      "class": "official_interreg_programme_portal",
+      "owner": "Interreg IPA Romania-Serbia Managing Authority / Joint Secretariat",
+      "url": "https://romania-serbia.net/",
+      "programmes": [
+        "Interreg IPA Romania-Serbia 2021-2027"
+      ],
+      "extract": [
+        "calls",
+        "planned_call_timetable",
+        "applicant_guides",
+        "programme_documents",
+        "implementation_updates"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC"
+      ],
+      "authority_scope": "PROGRAMME_AND_CALL",
+      "observation_state": "CURRENT_PROGRAMME",
+      "note": "Exact call page/guide required for OPEN or deadline facts."
+    },
+    {
+      "id": "SRC-INTERREG-RORS-2028-2034",
+      "tier": "T1",
+      "class": "official_programming_pipeline",
+      "owner": "Interreg IPA Romania-Serbia Managing Authority / Joint Secretariat",
+      "url": "https://romania-serbia.net/post-2027/",
+      "programmes": [
+        "Interreg Romania-Serbia 2028-2034"
+      ],
+      "extract": [
+        "stakeholder_consultations",
+        "future_priorities",
+        "programming_calendar",
+        "consultation_events"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMMING_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Official 2028-2034 consultation source. Consultation dates and proposed priorities are intelligence, not call-launch facts."
+    },
+    {
+      "id": "SRC-INTERREG-ROUA",
+      "tier": "T1",
+      "class": "official_interreg_call_registry",
+      "owner": "Interreg NEXT Romania-Ukraine Managing Authority / Joint Secretariat",
+      "url": "https://ro-ua.net/en/funding/calls-for-proposals",
+      "programmes": [
+        "Interreg NEXT Romania-Ukraine 2021-2027"
+      ],
+      "extract": [
+        "calls",
+        "applicant_guides",
+        "corrigenda",
+        "deadlines",
+        "programme_updates"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC",
+        "NEXT"
+      ],
+      "authority_scope": "CALL_REGISTRY",
+      "observation_state": "CURRENT_PROGRAMME",
+      "canonical_aliases": [
+        "https://www.ro-ua.net/en/funding/calls-for-proposals"
+      ],
+      "note": "A transient transport failure must remain fail-closed; do not infer call state from cached or secondary sources."
+    },
+    {
+      "id": "SRC-INTERREG-ROMD",
+      "tier": "T1",
+      "class": "official_interreg_call_registry",
+      "owner": "Interreg NEXT Romania-Republic of Moldova Managing Authority / Joint Secretariat",
+      "url": "https://www.ro-md.net/en/funding/calls-for-proposals",
+      "programmes": [
+        "Interreg NEXT Romania-Republic of Moldova 2021-2027"
+      ],
+      "extract": [
+        "calls",
+        "applicant_guides",
+        "corrigenda",
+        "deadlines",
+        "programme_updates"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC",
+        "NEXT"
+      ],
+      "authority_scope": "CALL_REGISTRY",
+      "observation_state": "CURRENT_PROGRAMME",
+      "canonical_aliases": [
+        "https://ro-md.net/en/funding/calls-for-proposals"
+      ]
+    },
+    {
+      "id": "SRC-INTERREG-ROMD-2028-2034",
+      "tier": "T1",
+      "class": "official_programming_pipeline",
+      "owner": "Interreg NEXT Romania-Republic of Moldova Managing Authority / Joint Secretariat",
+      "url": "https://ro-md.net/en/news-2021-2027/public-consultation-on-the-future-interreg-romania-moldova-chapter-2028-2034",
+      "programmes": [
+        "Interreg Romania-Republic of Moldova 2028-2034"
+      ],
+      "extract": [
+        "stakeholder_consultations",
+        "future_priorities",
+        "territorial_scope",
+        "programming_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "CBC",
+        "NEXT",
+        "PROGRAMMING_PIPELINE"
+      ],
+      "authority_scope": "PROGRAMMING_FRAMEWORK",
+      "observation_state": "PROGRAMMING_PIPELINE",
+      "note": "Official 2028-2034 public consultation/programming source. Territorial scope and consultation evidence are intelligence only and can never authorize OPEN_CALL or material call facts."
+    },
+    {
+      "id": "SRC-INTERREG-NEXT-BSB",
+      "tier": "T1",
+      "class": "official_interreg_call_registry",
+      "owner": "Interreg NEXT Black Sea Basin Managing Authority / Joint Secretariat",
+      "url": "https://www.blacksea-cbc.net/interreg-next-bsb-2021-2027/calls-for-proposals",
+      "programmes": [
+        "Interreg NEXT Black Sea Basin 2021-2027"
+      ],
+      "extract": [
+        "calls",
+        "applicant_guides",
+        "corrigenda",
+        "deadlines",
+        "eligible_area",
+        "programme_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "NEXT",
+        "TRANSNATIONAL",
+        "BLACK_SEA_BASIN",
+        "CALL_REGISTRY"
+      ],
+      "authority_scope": "CALL_INDEX_DISCOVERY",
+      "observation_state": "CURRENT_CALL_REGISTRY",
+      "adapter_required": "INTERREG_CALL_V1",
+      "eligible_territories_romania": [
+        "Braila",
+        "Buzau",
+        "Constanta",
+        "Galati",
+        "Tulcea",
+        "Vrancea"
+      ],
+      "note": "Official Interreg NEXT Black Sea Basin call index and programme source. Romania fit is territorially limited to Braila, Buzau, Constanta, Galati, Tulcea and Vrancea. Index labels, historical deadlines and programme news are discovery/market-intelligence only; material OPEN/status/deadline/budget/eligibility require an exact call identifier, current authoritative call/application endpoint and semantic reconciliation."
+    },
+    {
+      "id": "SRC-INTERREG-DANUBE",
+      "tier": "T1",
+      "class": "official_interreg_call_registry",
+      "owner": "Interreg Danube Region Programme Managing Authority / Joint Secretariat",
+      "url": "https://interreg-danube.eu/calls-for-proposals",
+      "programmes": [
+        "Interreg Danube Region Programme 2021-2027"
+      ],
+      "extract": [
+        "calls",
+        "pre_announcements",
+        "applicant_manuals",
+        "deadlines",
+        "programme_updates"
+      ],
+      "material_fact_use": true,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "TRANSNATIONAL"
+      ],
+      "authority_scope": "CALL_REGISTRY",
+      "observation_state": "CURRENT_PROGRAMME",
+      "note": "Pre-announcements are UPCOMING/PIPELINE until an official open call page confirms launch."
+    },
+    {
+      "id": "SRC-INTERREG-EUROPE",
+      "tier": "T1",
+      "class": "official_interreg_programme_portal",
+      "owner": "Interreg Europe Managing Authority / Joint Secretariat",
+      "url": "https://www.interregeurope.eu/",
+      "programmes": [
+        "Interreg Europe 2021-2027"
+      ],
+      "extract": [
+        "funding_calls",
+        "programme_documents",
+        "applicant_support",
+        "future_programming_updates"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "INTERREG",
+        "INTERREGIONAL"
+      ],
+      "authority_scope": "PROGRAMME_GATEWAY",
+      "observation_state": "GATEWAY_ONLY",
+      "note": "Programme gateway for discovery and planning. Material call facts require the exact call terms/current call page."
+    }
   ]
 }
