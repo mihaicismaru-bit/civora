@@ -14,17 +14,20 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 4,
+    "autonomous_stories_published_24h": 7,
     "autonomous_story_ids_24h": [
+      "alunu-educator-concurs-20260923",
+      "bunesti-terapeut-ocupational-concurs-20260925",
       "caineni-cornetu-avrig-acord-mediu-20260921",
       "costesti-iluminat-public-achizitie-20260928",
       "gusoeni-asistent-medical-comunitar-concurs-20260917",
-      "muereasca-statii-incarcare-finantare-cj-20260831"
+      "muereasca-statii-incarcare-finantare-cj-20260831",
+      "runcu-eci-trei-posturi-septembrie-2026"
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 4,
-      "published": 4,
+      "measured": 7,
+      "published": 7,
       "stories": [
         {
           "story_id": "caineni-cornetu-avrig-acord-mediu-20260921",
@@ -49,25 +52,67 @@
           "seconds": 38770,
           "discovered_at_utc": "2026-09-27T19:26:00Z",
           "published_at_utc": "2026-09-28T06:12:10Z"
+        },
+        {
+          "story_id": "alunu-educator-concurs-20260923",
+          "seconds": 222,
+          "discovered_at_utc": "2026-09-28T10:06:28Z",
+          "published_at_utc": "2026-09-28T10:10:10Z"
+        },
+        {
+          "story_id": "bunesti-terapeut-ocupational-concurs-20260925",
+          "seconds": 222,
+          "discovered_at_utc": "2026-09-28T10:06:28Z",
+          "published_at_utc": "2026-09-28T10:10:10Z"
+        },
+        {
+          "story_id": "runcu-eci-trei-posturi-septembrie-2026",
+          "seconds": 222,
+          "discovered_at_utc": "2026-09-28T10:06:28Z",
+          "published_at_utc": "2026-09-28T10:10:10Z"
         }
       ],
       "max_seconds": 38770,
-      "median_seconds": 38770
+      "median_seconds": 222
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 4,
+      "published_stories": 7,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "PASS",
-      "eligible": 4,
+      "status": "BLOCKED",
+      "eligible": 7,
       "readback_ok": 4,
-      "value": 1.0,
-      "blocker_story_ids": [],
+      "value": 0.5714,
+      "blocker_story_ids": [
+        "alunu-educator-concurs-20260923",
+        "bunesti-terapeut-ocupational-concurs-20260925",
+        "runcu-eci-trei-posturi-septembrie-2026"
+      ],
       "checks": [
+        {
+          "story_id": "alunu-educator-concurs-20260923",
+          "url": "https://valceaclar.ro/stiri/alunu-educator-concurs-20260923/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "bunesti-terapeut-ocupational-concurs-20260925",
+          "url": "https://valceaclar.ro/stiri/bunesti-terapeut-ocupational-concurs-20260925/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
         {
           "story_id": "caineni-cornetu-avrig-acord-mediu-20260921",
           "url": "https://valceaclar.ro/stiri/caineni-cornetu-avrig-acord-mediu-20260921/",
@@ -107,6 +152,16 @@
           "headline_ok": true,
           "ok": true,
           "error": null
+        },
+        {
+          "story_id": "runcu-eci-trei-posturi-septembrie-2026",
+          "url": "https://valceaclar.ro/stiri/runcu-eci-trei-posturi-septembrie-2026/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
         }
       ],
       "projection_evidence": {
@@ -122,14 +177,14 @@
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 0,
-      "eligible": 4,
+      "eligible": 7,
       "value": 0.0,
       "delivered_story_ids": []
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 0,
-      "eligible": 4,
+      "eligible": 7,
       "value": 0.0,
       "delivered_story_ids": []
     },
@@ -159,6 +214,30 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36408075593,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-28T10:10:15Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36407971578,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-28T10:09:18Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36407868114,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-28T10:08:18Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 36407727581,
