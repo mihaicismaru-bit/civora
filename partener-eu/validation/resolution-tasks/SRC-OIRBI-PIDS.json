@@ -1,19 +1,14 @@
 {
-  "source_name": "OIR București-Ilfov — PIDS",
-  "source_url": "https://www.oirbi.ro/pids-2021-2027/",
-  "source_tier": "T1B",
-  "previous_semantic_sha256": "0b8bc6aa1e3cea2b41140b12e2793b6e50899972e0779e6b08e117f1a00cd341",
-  "candidate_semantic_sha256": "9fb9727468036327acbaf56944b46d3145954e758152337948f85c8347ab4ca0",
-  "current_semantic_sha256": "3a00508e12bccef917270676b52485726f5e4281c4e8182365fa6926ece83e85",
-  "first_observed_at": "2026-08-11T14:02:43Z",
-  "last_observed_at": "2026-09-28T07:23:01Z",
-  "registry_class": "official_intermediate_body",
-  "schema_version": "1.2",
-  "task_type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
+  "schema_version": "1.1",
+  "type": "OFFICIAL_SOURCE_HASH_RESOLUTION",
   "source_id": "SRC-OIRBI-PIDS",
+  "source_tier": "T1B",
+  "source_url": "https://www.oirbi.ro/pids-2021-2027/",
   "status": "OPEN",
-  "policy": "Do not automatically change deadline, eligibility, budget, scoring, beneficiaries, call status, or any other material fact. Resolve only from authoritative evidence and record provenance before publication.",
-  "automatic_material_fact_update_allowed": false,
+  "first_observed_at": "2026-08-11T14:02:43Z",
+  "last_observed_at": "2026-09-28T14:12:23.897132Z",
+  "previous_semantic_sha256": "3a00508e12bccef917270676b52485726f5e4281c4e8182365fa6926ece83e85",
+  "current_semantic_sha256": "ecfc29bc445e2c16d21d6b0327e58f9cfabaf7a98b6836eb384a4eb951549e8c",
   "material_fact_autoupdate_allowed": false,
   "blocked_fact_classes": [
     "deadline",
@@ -24,8 +19,5 @@
     "material_call_status",
     "other_material_facts"
   ],
-  "criticality": "MEDIUM",
-  "baseline_semantic_sha256": "9fb9727468036327acbaf56944b46d3145954e758152337948f85c8347ab4ca0",
-  "confirmation_observations": 2,
-  "checkpoint": "PARTENER-EU-CIVORA-P10-0020"
+  "required_resolution": "Re-establish authoritative evidence and provenance before any material fact update."
 }
