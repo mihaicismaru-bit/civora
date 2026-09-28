@@ -72,7 +72,7 @@ STOPWORDS = {
 }
 GENERIC_TITLES = {
     "ministerul investitiilor si proiectelor europene", "programul educatie si ocupare",
-    "programul incluziune si demnitate sociala", "programul sanatate", "pnrr",
+    "programul incluziune si demnitate sociala", "programul sanatate", "programare ghiduri", "pnrr",
 }
 CODE_PATTERNS = [
     re.compile(r"\bPEO/\d+(?:/[A-Z0-9_.-]+){3,8}\b", re.I),
