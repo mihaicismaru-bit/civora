@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-28T05:02:18+03:00",
+  "generated_at": "2026-09-28T11:40:30+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-28T05:01:18+03:00",
+  "queue_generated_at": "2026-09-28T11:39:09+03:00",
   "task_count": 66,
   "primary_match_count": 0,
   "no_match_count": 28,
@@ -15,6 +15,160 @@
   "target_count": 16,
   "targets_ok": 11,
   "results": [
+    {
+      "signal_id": "8aecd59c1da850ebc75de54d",
+      "signal_title": "Centrul de permanență din Milcoiu va fi reabilitat cu fonduri europene: un cabinet stomatologic pentru elevi completează proiectele medicale",
+      "signal_url": "https://www.impactreal.ro/2026/09/28/centrul-de-permanenta-din-milcoiu-va-fi-reabilitat-cu-fonduri-europene-un-cabinet-stomatologic-pentru-elevi-completeaza-proiectele-medicale/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-28T11:31:58+03:00",
+      "verification_route_id": "health",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "dsp-valcea-anunturi",
+            "name": "Direcția de Sănătate Publică Vâlcea",
+            "url": "https://www.aspjvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "spital-horezu-noutati",
+            "name": "Spitalul Orășenesc Horezu",
+            "url": "https://spitalulhorezu.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "68c7c2e5c6610c9b3c7a5368",
+      "signal_title": "Râmnicu Vâlcea: tradiție, cultură și limbă.",
+      "signal_url": "https://curierulderamnic.ro/2026/09/28/ramnicu-valcea-traditie-cultura-si-limba/",
+      "signal_publisher": "Curierul de Râmnic",
+      "signal_published_at": "2026-09-28T11:18:58+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "05ae6103354155992b852ae5",
+      "signal_title": "VIDEO – Tânăr de 25 de ani, reținut după ce și-ar fi agresat și amenințat iubita, la Vaideeni",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/28/video-tanar-de-25-de-ani-retinut-dupa-ce-si-ar-fi-agresat-si-amenintat-iubita-la-vaideeni/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-28T10:52:41+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "b32fde9a81080d201b14296e",
+      "signal_title": "Sibiul, pe primul loc în țară la plecările spre Germania în ultimii ani ai regimului Ceaușescu. „Epicentrul birocratic al emigraţiei a fost Sibiul cu record național la dosare blocate și aprobări oficiale”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/28/sibiul-pe-primul-loc-in-tara-la-plecarile-spre-germania-in-ultimii-ani-ai-regimului-ceausescu-epicentrul-birocratic-al-emigratiei-a-fost-sibiul-cu-record-national-la-dosare-blocate-si-aprob/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-28T10:16:01+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "f1e7c196aa04e781a068a7b0",
+      "signal_title": "FOTO – Polițiștii au ieșit în căutarea „chiulangiilor” din Râmnicu Vâlcea: zeci de elevi prinși lipsind de la ore",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/28/foto-politistii-au-iesit-in-cautarea-ciulangiilor-din-ramnicu-valcea-zeci-de-elevi-prinsi-lipsind-de-la-ore/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-28T09:57:43+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "d4d87f0f38907e839f5aa6a4",
+      "signal_title": "„Azi am decis noi cum să ne îmbrăcăm și sperăm să decidem și de acum încolo”. Elevii sibieni protestează „în negru” împotriva uniformelor școlare",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/28/azi-am-decis-noi-cum-sa-ne-imbracam-si-speram-sa-decidem-si-de-acum-incolo-elevii-sibieni-protesteaza-in-negru-impotriva-uniformelor-scolare/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-28T09:32:35+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "1067505a835a7b095cd49aa1",
       "signal_title": "Neomarxismul le-a „șters creierul” unora! Când ura politică ia locul argumentelor",
@@ -188,7 +342,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 2
         },
         {
           "target": {
@@ -446,7 +600,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -549,7 +703,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -674,7 +828,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -701,18 +855,6 @@
       "signal_url": "https://seintamplainvalcea.ro/2026/09/26/wizz-air-reduce-zborurile-de-la-craiova-pasagerii-din-valcea-afectati-de-schimbarile-din-octombrie/",
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_published_at": "2026-09-26T17:16:09+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "154f2822413eb95be7a1eab2",
-      "signal_title": "Lucrările de amenajare a piațetei din fața Cercului Militar din Sibiu sunt aproape gata. Termenul de finalizare este 30 septembrie",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/26/lucrarile-de-amenajare-a-piatetei-din-fata-cercului-militar-din-sibiu-sunt-aproape-gata-termenul-de-finalizare-este-30-septembrie/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-26T15:53:29+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -756,67 +898,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "c984a78a0c45f1eff693e5e2",
-      "signal_title": "FOTO/VIDEO. Incendiul din fondul forestier de la Băile Olănești s-a extins în cursul nopții. Pompierii acționează pentru localizare",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/26/foto-video-incendiul-din-fondul-forestier-de-la-baile-olanesti-s-a-extins-in-cursul-noptii-pompierii-actioneaza-pentru-localizare/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-26T12:50:47+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "1696eca6041e5cf2d2ec03d3",
-      "signal_title": "VIDEO. Premierul demis Bolojan, huiduit la Drăgășani în timp ce inaugura noul sediu al Primăriei",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/26/video-premierul-demis-bolojan-huiduit-la-dragasani-in-timp-ce-inaugura-noul-sediu-al-primariei/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-26T12:32:17+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "7f869bd2b2d1170450a5ec8c",
       "signal_title": "Budești: un nou an școlar, în școli modernizate și cu servicii medicale pentru copii",
       "signal_url": "https://evenimentvalcean.ro/budesti-un-nou-an-scolar-in-scoli-modernizate-si-cu-servicii-medicale-pentru-copii/",
@@ -845,7 +926,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -865,44 +946,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "5f1331c12133250668b5763c",
-      "signal_title": "Vâlcea, început de an școlar: 108 cazuri de boli depistate oficial. Dincolo de statistici, o realitate medicală îngrijorătoare",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/26/valcea-inceput-de-an-scolar-108-cazuri-de-boli-depistate-oficial-dincolo-de-statistici-o-realitate-medicala-ingrijoratoare/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-26T11:55:20+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 9
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "9bee18fe0d6c018b77a455e4",
@@ -956,33 +999,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "e8d36ba92a8ecd1b13d0f949",
-      "signal_title": "O parte a Sibiului care dispare. De la merceria doamnei Eli la ultimul maestru pantofar, care a încălțat generații întregi: „Aici e cea mai bună marfă”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/26/o-parte-a-sibiului-care-dispare-de-la-merceria-doamnei-eli-la-ultimul-maestru-pantofar-care-a-incaltat-generatii-intregi-aici-e-cea-mai-buna-marfa/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-26T06:30:11+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "81e2cf381699fed307fed776",
       "signal_title": "Sănătate pentru sate: Localnicii din comuna Frâncești au beneficiat gratuit de consultații medicale de specialitate",
       "signal_url": "https://ziaruldevalcea.ro/2026/09/sanatate-pentru-sate-localnicii-din-comuna-francesti-au-beneficiat-gratuit-de-consultatii-medicale-de-specialitate/",
@@ -1011,7 +1027,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 9
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1107,7 +1123,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1279,7 +1295,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
+          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1351,94 +1367,7 @@
           },
           "status": "PASS",
           "error": null,
-          "documents_examined": 1
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "65a43b484d50716a02b3dd1e",
-      "signal_title": "Violoncellissimo – luni, 28 septembrie 2026, ora 19.00 – Sala Lahovari, Filarmonica „Ion Dumitrescu”, Centrul Cultural Municipal Râmnicu Vâlcea",
-      "signal_url": "https://curierulderamnic.ro/2026/09/25/violoncellissimo-luni-28-septembrie-2026-ora-19-00-sala-lahovari-filarmonica-ion-dumitrescu-centrul-cultural-municipal-ramnicu-valcea/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T13:52:43+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "d692ad8757f23c99894d08d4",
-      "signal_title": "Monsson Trading sponsorizează modernizarea Terapiei Intensive Pediatrice din Constanța cu 3 milioane de lei",
-      "signal_url": "https://stirileolteniei.ro/monsson-trading-sponsorizeaza-modernizarea-terapiei-intensive-pediatrice-din-constanta-cu-3-milioane-de-lei/",
-      "signal_publisher": "Știrile Olteniei",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-25T08:16:50+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
           "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
         }
       ],
       "publication_authority": "NONE",
@@ -1446,6 +1375,18 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "c52e868a5a3d98fbccfad113",
+      "signal_title": "TollRo de la 1 octombrie: COTAR cere suspendarea amenzilor, CNAIR anunță că platforma este pregătită",
+      "signal_url": "https://www.eurovalcea.ro/2026/09/28/tollro-de-la-1-octombrie-cotar-cere-suspendarea-amenzilor-cnair-anunta-ca-platforma-este-pregatita/",
+      "signal_publisher": "EuroVâlcea",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "acd6dd07c7b8fb1beb8f487c",
@@ -1470,6 +1411,33 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "52ca24f8904c84305da5a651",
+      "signal_title": "Cornetu–Avrig, proiect început în 1989: acord de mediu pentru continuarea lucrărilor din Defileul Oltului",
+      "signal_url": "https://www.eurovalcea.ro/2026/09/28/cornetu-avrig-proiect-inceput-in-1989-acord-de-mediu-pentru-continuarea-lucrarilor-din-defileul-oltului/",
+      "signal_publisher": "EuroVâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": null,
+      "verification_route_id": "national_road_restrictions",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "igpr-infotrafic-live",
+            "name": "Centrul INFOTRAFIC — Poliția Română",
+            "url": "https://politiaromana.ro/ro/info-trafic"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "4ceef97712163d893d6c17b7",
@@ -1559,18 +1527,6 @@
       "signal_id": "a6374523400981e1f23381d6",
       "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
       "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=Uzinele%20Sodice%20Govora%2C%20dinamitate%20%C8%99i%20v%C3%A2ndute%20la%20fier%20vechi.%20Ast%C4%83zi%20prima%20explozie%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB%F0%9F%91%87%F0%9F%8F%BB&url=https%3A%2F%2Fwww.curierul.ro%2Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "eb20b1b10f56d5b01ba358be",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/share_channel/?type=reshare&link=https%3A%2F%2Fwww.curierul.ro%2Fuzinele-sodice-govora-dinamitate-si-vandute-la-fier-vechi-astazi-prima-explozie%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%25f0%259f%2591%2587%25f0%259f%258f%25bb%2F&app_id=966242223397117&source_surface=external_reshare&display&hashtag",
       "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
