@@ -24,6 +24,7 @@ for c in calls:
     assert not folded.startswith('instrucțiunea '), f'administrative instruction leaked as call: {c.get("title")}'
     assert not folded.startswith('lista plăților '), f'payment list leaked as call: {c.get("title")}'
     assert 'lista proiectelor contractate pe regiuni' not in folded, f'cross-call report leaked as call: {c.get("title")}'
+    assert folded != 'programare ghiduri', f'programme-level guide index leaked as call: {c.get("title")}'
     for e in c.get('verificationEvidence',[]):
         assert str(e.get('sourceUrl','')).startswith('https://mfe.gov.ro/')
 
