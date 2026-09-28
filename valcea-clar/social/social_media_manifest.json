@@ -83,35 +83,31 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 7,
-      "readback_ok": 4,
-      "value": 0.5714,
-      "blocker_story_ids": [
-        "alunu-educator-concurs-20260923",
-        "bunesti-terapeut-ocupational-concurs-20260925",
-        "runcu-eci-trei-posturi-septembrie-2026"
-      ],
+      "readback_ok": 7,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "alunu-educator-concurs-20260923",
           "url": "https://valceaclar.ro/stiri/alunu-educator-concurs-20260923/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "bunesti-terapeut-ocupational-concurs-20260925",
           "url": "https://valceaclar.ro/stiri/bunesti-terapeut-ocupational-concurs-20260925/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "caineni-cornetu-avrig-acord-mediu-20260921",
@@ -156,21 +152,21 @@
         {
           "story_id": "runcu-eci-trei-posturi-septembrie-2026",
           "url": "https://valceaclar.ro/stiri/runcu-eci-trei-posturi-septembrie-2026/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         }
       ],
       "projection_evidence": {
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-28T08:41:57.673858Z",
+        "updated_local": "2026-09-28T10:10:06.356752Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 83
+        "public_story_count": 86
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
@@ -214,6 +210,54 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36480062064,
+          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
+          "created_at": "2026-09-28T20:33:37Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36475479988,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-28T19:54:36Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36473106857,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-28T19:33:55Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36456072068,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-28T17:08:53Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36455571895,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-28T17:04:39Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36443757396,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-09-28T15:27:45Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 36434404008,
