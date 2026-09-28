@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -114,7 +115,36 @@ def collect_source(
 def run(instance_id: str, output: Path) -> dict[str, Any]:
     instance, pack, tz = base.instance_and_pack(instance_id)
     now = datetime.now(tz)
-    observations = [collect_source(instance, source, tz, now) for source in pack.get("sources") or []]
+    observations = []
+    for source in pack.get("sources") or []:
+        source_id = str(source.get("id") or "<missing-source-id>")
+        parser_id = str(source.get("parser") or "<missing-parser>")
+        started = time.perf_counter()
+        print(
+            f"STRUCTURED_ALERT_SOURCE START source_id={source_id} parser={parser_id}",
+            flush=True,
+        )
+        try:
+            observation = collect_source(instance, source, tz, now)
+        except Exception as exc:
+            elapsed = time.perf_counter() - started
+            print(
+                "STRUCTURED_ALERT_SOURCE END "
+                f"source_id={source_id} parser={parser_id} status=EXCEPTION "
+                f"elapsed_s={elapsed:.3f} error={type(exc).__name__}:{exc}",
+                flush=True,
+            )
+            raise
+        elapsed = time.perf_counter() - started
+        print(
+            "STRUCTURED_ALERT_SOURCE END "
+            f"source_id={source_id} parser={parser_id} "
+            f"status={observation.get('status')} elapsed_s={elapsed:.3f} "
+            f"events={len(observation.get('events') or [])}",
+            flush=True,
+        )
+        observation["elapsed_seconds"] = round(elapsed, 3)
+        observations.append(observation)
     events = [event for row in observations for event in row.get("events") or []]
     doc = {
         "schema_version": "1.0",
@@ -137,6 +167,8 @@ def self_test() -> int:
     assert heat.self_test() == 0
     assert electricity.self_test() == 0
     assert electricity_adapter.self_test() == 0
+    assert "STRUCTURED_ALERT_SOURCE START" in Path(__file__).read_text(encoding="utf-8")
+    assert "elapsed_seconds" in Path(__file__).read_text(encoding="utf-8")
 
     tz = ZoneInfo("Europe/Bucharest")
     sample = """
