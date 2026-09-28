@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "bundle_id": "PARTENER-EU-P11-CANONICAL-0001",
-  "as_of": "2026-09-27T17:22:00Z",
+  "as_of": "2026-09-28T16:25:31Z",
   "source_snapshot": {
     "repository": "mihaicismaru-bit/civora",
     "public_data_path": "partener-eu/web/data.js",
@@ -1201,6 +1201,26 @@
       ],
       "semantic_assertion": "Pagina guvernamentală curentă «Oportunități de finanțare – Societăți comerciale – Septembrie 2026» listează apelul Ministerului Energiei pentru stocare stand-alone, confirmă bugetul de 150.000.000 EUR, plafoanele de ajutor și termenul limită 30 octombrie 2026.",
       "retrieval_state": "LIVE_GOVERNMENT_PAGE_VERIFIED"
+    },
+    {
+      "schema_version": "1.0",
+      "evidence_id": "EV-MAI-FED-BV21B-LAUNCH-20260928",
+      "source_tier": "T1",
+      "source_owner": "Ministerul Afacerilor Interne — Autoritatea de Management Afaceri Interne",
+      "source_url": "https://fed.mai.gov.ro/8826/bv21b-dezvoltarea-si-modernizarea-infrastructurii-oficiilor-consulare-lansare-apel-de-proiecte/",
+      "observed_at": "2026-09-28T16:25:31Z",
+      "semantic_verdict": "VERIFIED",
+      "supports_fact_classes": [
+        "beneficiaries",
+        "budget",
+        "deadline",
+        "status"
+      ],
+      "semantic_assertion": "The official MAI/FED launch page identifies BV21B as active, sets the submission deadline to 30 September 2026 at 16:00, states a FEN call allocation of 25,500,845 RON, and lists the eligible beneficiary class as Autoritate publică centrală.",
+      "temporal_role": "CURRENT_OFFICIAL_CALL_LAUNCH_PAGE",
+      "retrieval_state": "DIRECT_OFFICIAL_LAUNCH_PAGE_REVIEWED",
+      "parser_version": "official-launch-summary-review-v1",
+      "semantic_sha256": "faff8e522512d617b01a1fe2b35776ef90897fcd44bdc26055c09608d868d907"
     }
   ],
   "opportunities": [
@@ -3052,6 +3072,47 @@
           "EV-ME-FM-STORAGE-STANDALONE-GUIDE-20260817"
         ]
       }
+    },
+    {
+      "schema_version": "1.0",
+      "opportunity_id": "mai-imfv-bv21b-2026",
+      "title": "BV21B — Dezvoltarea și modernizarea infrastructurii oficiilor consulare pentru furnizarea de servicii eficiente și ușor de utilizat pentru solicitanții de viză",
+      "programme": "Program Național 2021-2027 Managementul Frontierelor și Vize (IMFV)",
+      "code": "BV21B",
+      "status": "OPEN",
+      "publication_state": "PUBLISHABLE",
+      "automatic_material_fact_update_allowed": false,
+      "evidence_refs": [
+        "EV-MAI-FED-BV21B-LAUNCH-20260928"
+      ],
+      "material_facts": {
+        "status": "OPEN",
+        "deadline": {
+          "closes": "2026-09-30T16:00:00+03:00"
+        },
+        "budget": {
+          "amount": 25500845,
+          "currency": "RON",
+          "basis": "FEN_AVAILABLE_CALL_ALLOCATION"
+        },
+        "beneficiaries": [
+          "Autoritate publică centrală"
+        ]
+      },
+      "fact_evidence": {
+        "status": [
+          "EV-MAI-FED-BV21B-LAUNCH-20260928"
+        ],
+        "deadline": [
+          "EV-MAI-FED-BV21B-LAUNCH-20260928"
+        ],
+        "budget": [
+          "EV-MAI-FED-BV21B-LAUNCH-20260928"
+        ],
+        "beneficiaries": [
+          "EV-MAI-FED-BV21B-LAUNCH-20260928"
+        ]
+      }
     }
   ],
   "changesets": [
@@ -3943,7 +4004,8 @@
       "RES-PR-CENTRU-PARCURI-RIS-20260813",
       "RES-PR-CENTRU-URBAN-81-20260813",
       "RES-PR-NE-ENERGY-RESIDENTIAL-TOWNS-20260813",
-      "RES-PEO-STEP-LLL-20260812"
+      "RES-PEO-STEP-LLL-20260812",
+      "RES-MAI-FED-IMFV-BV21B-OPEN-20260928"
     ]
   }
 }
