@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-09-29T13:08:00Z",
-  "validation_run_started": "2026-09-29T13:07:52Z",
+  "observed_at": "2026-09-29T16:07:00Z",
+  "validation_run_started": "2026-09-29T16:06:50Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "bceac2ecadbfca40b7a6e0e13aab52b489da67f90f8df8260774b9cf5d2f9638",
-    "history_sha256": "bceac2ecadbfca40b7a6e0e13aab52b489da67f90f8df8260774b9cf5d2f9638",
-    "history_path": "validation/history/20260929T130752Z.json",
+    "latest_sha256": "204f111335922d3823184318f6266578b1cedb581a009680ad0bd94fe6ac309f",
+    "history_sha256": "204f111335922d3823184318f6266578b1cedb581a009680ad0bd94fe6ac309f",
+    "history_path": "validation/history/20260929T160650Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "b36a6f93255aa07615aab16ec4c1801cec19b747326e73dc3a1b6bef870a8cbf",
-    "checkpoint_sha256": "b36a6f93255aa07615aab16ec4c1801cec19b747326e73dc3a1b6bef870a8cbf",
+    "source_state_sha256": "8c365ee68a36169ccb104274ee5808429e6d34da4283e27474374986bb7849f2",
+    "checkpoint_sha256": "8c365ee68a36169ccb104274ee5808429e6d34da4283e27474374986bb7849f2",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-09-29T08:43:26.424568Z",
-    "age_seconds": 15873,
+    "age_seconds": 26614,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -58,7 +58,7 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-09-29T08:52:10.112526+00:00",
+    "observed_at": "2026-09-29T16:04:03.926782+00:00",
     "status": "PASS",
     "item_count": 32,
     "error_count": 48,
@@ -242,6 +242,13 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fsesiune-depunere-de-proiecte-dr-12%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/info-la-zi/sesiune-depunere-de-proiecte-dr-12/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fdeschidere-sesiuni-proiecte-energie-regenerabila-beneficiari-publici%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/info-la-zi/deschidere-sesiuni-proiecte-energie-regenerabila-beneficiari-publici/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -261,13 +268,6 @@
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fversiunea-consultativa-a-ghidului-dr-21%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/versiunea-consultativa-a-ghidului-dr-21/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       }
     ],
     "resolution_task_required": true,
@@ -275,7 +275,7 @@
     "material_facts_auto_promoted": false
   },
   "peo_calendar": {
-    "observed_at": "2026-09-29T08:58:59.410879+00:00",
+    "observed_at": "2026-09-29T16:05:59.543062+00:00",
     "status": "OK_OFFICIAL_OIR_COPY",
     "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
     "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
