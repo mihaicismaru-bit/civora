@@ -2,13 +2,13 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_SIGNAL_RADAR_STATE_V1",
   "instance_id": "valcea",
-  "observed_at": "2026-09-29T11:42:51+03:00",
+  "observed_at": "2026-09-29T18:08:46+03:00",
   "publication_authority": "NONE",
   "health": "PASS",
   "source_count": 17,
-  "sources_ok": 14,
-  "current_signal_count": 32,
-  "today_signal_count": 12,
+  "sources_ok": 15,
+  "current_signal_count": 37,
+  "today_signal_count": 23,
   "observations": [
     {
       "seed_id": "press-curierul-de-ramnic",
@@ -28,7 +28,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-29T10:48:21+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -48,7 +48,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-28T11:18:58+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -121,7 +121,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -141,7 +141,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -162,9 +162,115 @@
       "publisher": "Impact Real",
       "tier": "T2",
       "family": "LOCAL_PRESS",
-      "status": "DEGRADED",
-      "error": "URLError: <urlopen error timed out>",
-      "signals": [],
+      "status": "PASS",
+      "error": null,
+      "signals": [
+        {
+          "signal_id": "168e40b6eacfa6f58db1349f",
+          "signal_title": "Eficientizare Școală Bodești, Comuna Bărbătești",
+          "signal_url": "https://www.impactreal.ro/2026/09/29/eficientizare-scoala-bodesti-comuna-barbatesti/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-29T16:40:24+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "education",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "ccd-valcea-noutati"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "isj-valcea-comunicate"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "a02162e484de1bbaf7e6288c",
+          "signal_title": "Tiberiu Costea, despre proiectele depuse la CNI și cofinanțările imposibil de acoperit din bugetul local",
+          "signal_url": "https://www.impactreal.ro/2026/09/29/tiberiu-costea-despre-proiectele-depuse-la-cni-si-cofinantarile-imposibil-de-acoperit-din-bugetul-local/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-29T12:16:02+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "2619fd5c0c09da392ac82601",
+          "signal_title": "Incidente grave la meciul de județ Măldărești – Bujoreni. Un jucător al gazdelor, reținut de Poliție pentru violențe",
+          "signal_url": "https://www.impactreal.ro/2026/09/28/incidente-grave-la-meciul-de-judet-maldaresti-bujoreni-un-jucator-al-gazdelor-retinut-de-politie-pentru-violente/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-28T21:30:00+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        },
+        {
+          "signal_id": "8aecd59c1da850ebc75de54d",
+          "signal_title": "Centrul de permanență din Milcoiu va fi reabilitat cu fonduri europene: un cabinet stomatologic pentru elevi completează proiectele medicale",
+          "signal_url": "https://www.impactreal.ro/2026/09/28/centrul-de-permanenta-din-milcoiu-va-fi-reabilitat-cu-fonduri-europene-un-cabinet-stomatologic-pentru-elevi-completeaza-proiectele-medicale/",
+          "signal_publisher": "Impact Real",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-28T11:31:58+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "health",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "dsp-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "spital-horezu-noutati"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-impact-real"
+        }
+      ],
+      "final_url": "https://www.impactreal.ro/",
+      "links_examined": 14,
       "hygiene_dropped_count": 0,
       "hygiene_dropped": []
     },
@@ -186,7 +292,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-28T14:45:31+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -255,7 +361,7 @@
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -266,16 +372,16 @@
           "signal_seed_id": "press-realitatea-valceana"
         },
         {
-          "signal_id": "4ceef97712163d893d6c17b7",
-          "signal_title": "26-27 septembrie: RACE THE VIBE revine la Nicolae Bălcescu! Viteză, adrenalină, pasiune și spectacol garantat! »",
-          "signal_url": "http://www.realitateavalceana.ro/26-27-septembrie-race-the-vibe-revine-la-nicolae-balcescu-viteza-adrenalina-pasiune-%c8%99i-spectacol-garantat/",
+          "signal_id": "041de1bb45292feba0960003",
+          "signal_title": "Moment istoric pentru infrastructura rutieră din România! »",
+          "signal_url": "http://www.realitateavalceana.ro/moment-istoric-pentru-infrastructura-rutiera-din-romania/",
           "signal_publisher": "Realitatea Vâlceană",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": true,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -322,7 +428,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -342,7 +448,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -353,18 +459,35 @@
           "signal_seed_id": "press-turnul-sfatului"
         },
         {
-          "signal_id": "f230c0680171966872a42bd8",
-          "signal_title": "Am testat drumul peste câmp, între Cartierul Arhitecților și Troiță. Înjumătățești timpul, dar e mult praf",
-          "signal_url": "https://www.turnulsfatului.ro/2026/09/29/am-testat-drumul-peste-camp-intre-cartierul-arhitectilor-si-troita-injumatatesti-timpul-dar-e-mult-praf/",
+          "signal_id": "52a91e23bf0da6cbd6e9a774",
+          "signal_title": "Referendum la Rășinari în 8 noiembrie, dacă propunerea primarului trece de Consiliul Local. „Sunteți de acord cu exploatarea minieră de pe Valea Dobra?”",
+          "signal_url": "https://www.turnulsfatului.ro/2026/09/29/referendum-la-rasinari-in-8-noiembrie-daca-propunerea-primarului-trece-de-consiliul-local-sunteti-de-acord-cu-exploatarea-miniera-de-pe-valea-dobra/",
           "signal_publisher": "Turnul Sfatului",
           "signal_tier": "T2",
           "signal_family": "REGIONAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-29T07:09:57+03:00",
+          "published_at": "2026-09-29T15:19:12+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "administration_projects",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "prefectura-valcea"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "cj-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "primaria-rm-valcea-comunicate"
+            },
+            {
+              "ref_type": "primary_target_id",
+              "id": "romsilva-valcea-torrents"
+            }
+          ],
           "status": "NEEDS_PRIMARY_VERIFICATION",
           "required_authority": "T1_OR_T1B_PRIMARY",
           "publication_authority": "NONE",
@@ -373,16 +496,16 @@
           "signal_seed_id": "press-turnul-sfatului"
         },
         {
-          "signal_id": "0f901afb3abde32ea6496e9d",
-          "signal_title": "Capsula timpului din Turnul Sfatului nu poate fi încă văzută de public. Muzeul Brukenthal va reveni cu informații despre conținut și proveniență",
-          "signal_url": "https://www.turnulsfatului.ro/2026/09/29/capsula-timpului-din-turnul-sfatului-nu-poate-fi-inca-vazuta-de-public-muzeul-brukenthal-va-reveni-cu-informatii-despre-continut-si-provenienta/",
+          "signal_id": "34105712d59c3f6b48a85c26",
+          "signal_title": "Campusul dual al Sibiului va fi inaugurat pe 7 octombrie. Rectorul ULBS: „Am vrut ca inaugurarea să fie sinonimă cu utilizarea campusului”",
+          "signal_url": "https://www.turnulsfatului.ro/2026/09/29/campusul-dual-al-sibiului-va-fi-inaugurat-pe-7-octombrie-rectorul-ulbs-am-vrut-ca-inaugurarea-sa-fie-sinonima-cu-utilizarea-campusului/",
           "signal_publisher": "Turnul Sfatului",
           "signal_tier": "T2",
           "signal_family": "REGIONAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-29T10:39:41+03:00",
+          "published_at": "2026-09-29T17:17:52+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -407,6 +530,26 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "c6764dec2416092a28d3ea39",
+          "signal_title": "Tatăl Valentinei, răvășit după ce suspectul în cazul morții fiicei sale s-a predat: „El o să vină acasă, dar copilul meu nu mai vine”",
+          "signal_url": "https://vocea-valcii.ro/dezvaluiri/tatal-valentinei-ravasit-dupa-ce-suspectul-in-cazul-mortii-fiicei-sale-a-fost-prins-el-o-sa-vina-acasa-dar-copilul-meu-nu-mai-vine/",
+          "signal_publisher": "Vocea Vâlcii",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-29T12:48:29+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "press-vocea-valcii"
+        },
+        {
           "signal_id": "737049c4e8ab9d5a170f7130",
           "signal_title": "Suspectul crimei din Vâlcea s-a predat în Elveția. Bărbatul de 30 de ani, în custodia poliției",
           "signal_url": "https://vocea-valcii.ro/dezvaluiri/suspectul-crimei-din-valcea-s-a-predat-in-elvetia-barbatul-de-30-de-ani-in-custodia-politiei/",
@@ -416,7 +559,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-29T08:45:44+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "police_public_safety",
           "verification_targets": [
             {
@@ -455,7 +598,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-29T11:20:21+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -492,7 +635,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-29T10:12:27+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -512,7 +655,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-29T01:47:02+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "fire_rescue_alert",
           "verification_targets": [
             {
@@ -545,7 +688,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-29T01:41:42+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -565,7 +708,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-29T00:37:23+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -585,7 +728,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-28T23:41:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -605,7 +748,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-28T23:35:15+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -642,7 +785,7 @@
           "signal_sensitive": true,
           "published_at": "2026-09-28T23:27:16+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -676,7 +819,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -696,7 +839,7 @@
           "signal_sensitive": false,
           "published_at": null,
           "date_provenance": "DATE_UNVERIFIED_SIGNAL_ONLY",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -716,7 +859,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-29T08:00:00+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -746,21 +889,58 @@
       "error": null,
       "signals": [
         {
-          "signal_id": "570ecc98b57dd02f461c3eca",
-          "signal_title": "ALERTĂ PENTRU CĂLDURA VÂLCENILOR! CJ Vâlcea face demersuri urgente pentru CET Govora",
-          "signal_url": "https://evenimentvalcean.ro/alerta-pentru-caldura-valcenilor-cj-valcea-face-demersuri-urgente-pentru-cet-govora/",
+          "signal_id": "11dd9a0ced8c8e33cae5ac64",
+          "signal_title": "Lăpușata, parte din proiectul SCI2000. Servicii sociale, educaționale și medicale mai aproape de oameni",
+          "signal_url": "https://evenimentvalcean.ro/lapusata-parte-din-proiectul-sci2000-servicii-sociale-educationale-si-medicale-mai-aproape-de-oameni/",
           "signal_publisher": "Eveniment Vâlcean",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-28T20:28:12+03:00",
+          "published_at": "2026-09-29T16:16:03+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
-          "verification_route_id": "environment_weather",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "health",
           "verification_targets": [
             {
+              "ref_type": "news_source_id",
+              "id": "dsp-valcea-anunturi"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "spital-horezu-noutati"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-eveniment-valcean"
+        },
+        {
+          "signal_id": "9a18744ac7373141bbccbbec",
+          "signal_title": "Autobuzul 3 va ajunge până în Priporu. Vlădești pregătește și transport electric spre Fundătura",
+          "signal_url": "https://evenimentvalcean.ro/autobuzul-3-va-ajunge-pana-in-priporu-vladesti-pregateste-si-transport-electric-spre-fundatura/",
+          "signal_publisher": "Eveniment Vâlcean",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-29T16:05:24+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "utilities",
+          "verification_targets": [
+            {
+              "ref_type": "news_source_id",
+              "id": "apavil-comunicate"
+            },
+            {
               "ref_type": "manual_watch_source_id",
-              "id": "inhga-avertizari-hidrologice-valcea"
+              "id": "apavil-opriri-programate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "cet-govora-termoficare-advisories"
             },
             {
               "ref_type": "primary_target_id",
@@ -775,53 +955,16 @@
           "signal_seed_id": "signal-eveniment-valcean"
         },
         {
-          "signal_id": "395660cd8fad4591b10c18d3",
-          "signal_title": "Ostroveni intră într-un amplu proces de regenerare urbană. Investiția de peste 15 milioane de lei începe în forță",
-          "signal_url": "https://evenimentvalcean.ro/ostroveni-intra-intr-un-amplu-proces-de-regenerare-urbana-investitia-de-peste-15-milioane-de-lei-incepe-in-forta/",
+          "signal_id": "fb5917043e6eefd709656d66",
+          "signal_title": "Primăria Mihăești își schimbă fața. Sediul administrației locale intră într-un amplu proces de modernizare",
+          "signal_url": "https://evenimentvalcean.ro/primaria-mihaesti-isi-schimba-fata-sediul-administratiei-locale-intra-intr-un-amplu-proces-de-modernizare/",
           "signal_publisher": "Eveniment Vâlcean",
           "signal_tier": "T2",
           "signal_family": "LOCAL_PRESS",
           "signal_sensitive": false,
-          "published_at": "2026-09-28T14:20:46+03:00",
+          "published_at": "2026-09-29T13:03:47+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
-          "verification_route_id": "administration_projects",
-          "verification_targets": [
-            {
-              "ref_type": "news_source_id",
-              "id": "prefectura-valcea"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "cj-valcea-anunturi"
-            },
-            {
-              "ref_type": "news_source_id",
-              "id": "primaria-rm-valcea-comunicate"
-            },
-            {
-              "ref_type": "primary_target_id",
-              "id": "romsilva-valcea-torrents"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-eveniment-valcean"
-        },
-        {
-          "signal_id": "392e9bc2fd2817aeccc1a0e2",
-          "signal_title": "Păușești-Otăsău intră în toamnă cu investiții importante în infrastructură și sport",
-          "signal_url": "https://evenimentvalcean.ro/pausesti-otasau-intra-in-toamna-cu-investitii-importante-in-infrastructura-si-sport/",
-          "signal_publisher": "Eveniment Vâlcean",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-28T12:35:41+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "administration_projects",
           "verification_targets": [
             {
@@ -876,6 +1019,84 @@
       "error": null,
       "signals": [
         {
+          "signal_id": "96a7322441b9f96300b13892",
+          "signal_title": "FOTO – O nouă zonă de locuințe la Horezu: 24 de apartamente construite pe terenul fostelor sere",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/29/foto-o-noua-zona-de-locuinte-la-horezu-24-de-apartamente-construite-pe-terenul-fostelor-sere/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-29T16:13:39+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "general_local_signal",
+          "verification_targets": [],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "2603df503656f3a9d292929f",
+          "signal_title": "Ce spune Poliția din Elveția despre Vlad Bălțățeanu. A fost arestat la St. Gallen și urmează procedura de extrădare",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/29/ce-spune-politia-din-elvetia-despre-vlad-baltateanu-a-fost-arestat-la-st-gallen-si-urmeaza-procedura-de-extradare/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-29T15:35:18+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "police_public_safety",
+          "verification_targets": [
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "ipj-valcea-stiri"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
+          "signal_id": "24d25fca0db1b86f6916a676",
+          "signal_title": "FOTO/VIDEO. Incendiul din pădurea de la Băile Olănești a ajuns la 34 de hectare. Pompierii se luptă cu focul pe un teren extrem de dificil",
+          "signal_url": "https://seintamplainvalcea.ro/2026/09/29/foto-video-incendiul-din-padurea-de-la-baile-olanesti-a-ajuns-la-34-de-hectare-pompierii-se-lupta-cu-focul-pe-un-teren-extrem-de-dificil/",
+          "signal_publisher": "Se întâmplă în Vâlcea",
+          "signal_tier": "T2",
+          "signal_family": "LOCAL_PRESS",
+          "signal_sensitive": false,
+          "published_at": "2026-09-29T11:54:57+03:00",
+          "date_provenance": "STRICT_SOURCE_METADATA",
+          "observed_at": "2026-09-29T18:08:46+03:00",
+          "verification_route_id": "fire_rescue_alert",
+          "verification_targets": [
+            {
+              "ref_type": "primary_target_id",
+              "id": "isu-valcea-stiri-locale"
+            },
+            {
+              "ref_type": "news_source_id",
+              "id": "isu-valcea-comunicate"
+            },
+            {
+              "ref_type": "manual_watch_source_id",
+              "id": "inhga-avertizari-hidrologice-valcea"
+            }
+          ],
+          "status": "NEEDS_PRIMARY_VERIFICATION",
+          "required_authority": "T1_OR_T1B_PRIMARY",
+          "publication_authority": "NONE",
+          "public_projection": false,
+          "auto_publication": false,
+          "signal_seed_id": "signal-se-intampla-in-valcea"
+        },
+        {
           "signal_id": "77ca63866b52611d8564aa24",
           "signal_title": "Primarii din Vâlcea își pun specialiștii la comun. ACoR construiește o soluție pentru comunele care nu pot ține singure pasul cu urbanismul",
           "signal_url": "https://seintamplainvalcea.ro/2026/09/29/primarii-din-valcea-isi-pun-specialistii-la-comun-acor-construieste-o-solutie-pentru-comunele-care-nu-pot-tine-singure-pasul-cu-urbanismul/",
@@ -885,7 +1106,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-29T11:19:32+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -905,72 +1126,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-29T08:50:59+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "72ad5de3e58569afeda51945",
-          "signal_title": "Căldura Râmnicului, la mâna Guvernului. CJ Vâlcea cere convocarea de urgență a Comitetului pentru Situații de Urgență",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/28/caldura-ramnicului-la-mana-guvernului-cj-valcea-cere-convocarea-de-urgenta-a-comitetului-pentru-situatii-de-urgenta/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-28T21:24:39+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
-          "verification_route_id": "general_local_signal",
-          "verification_targets": [],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "929da6c38e092ebe3dc551ea",
-          "signal_title": "L-AȚI VĂZUT? Constantin a dispărut de la Tetoiu",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/28/l-ati-vazut-constantin-a-disparut-de-la-tetoiu/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-28T17:01:02+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
-          "verification_route_id": "police_public_safety",
-          "verification_targets": [
-            {
-              "ref_type": "manual_watch_source_id",
-              "id": "ipj-valcea-stiri"
-            }
-          ],
-          "status": "NEEDS_PRIMARY_VERIFICATION",
-          "required_authority": "T1_OR_T1B_PRIMARY",
-          "publication_authority": "NONE",
-          "public_projection": false,
-          "auto_publication": false,
-          "signal_seed_id": "signal-se-intampla-in-valcea"
-        },
-        {
-          "signal_id": "3e222e51543c42995918462a",
-          "signal_title": "S-a dat ordinul de începere a lucrărilor la proiectul de regenerare urbană care vizează o zonă de aproape14.000 mp din cartierul Ostroveni",
-          "signal_url": "https://seintamplainvalcea.ro/2026/09/28/s-a-dat-ordinul-de-incepere-a-lucrarilor-la-proiectul-de-regenerare-urbana-care-vizeaza-o-zona-de-aproape14-000-mp-din-cartierul-ostroveni/",
-          "signal_publisher": "Se întâmplă în Vâlcea",
-          "signal_tier": "T2",
-          "signal_family": "LOCAL_PRESS",
-          "signal_sensitive": false,
-          "published_at": "2026-09-28T14:34:40+03:00",
-          "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
@@ -990,7 +1146,7 @@
           "signal_sensitive": false,
           "published_at": "2026-09-28T14:23:25+03:00",
           "date_provenance": "STRICT_SOURCE_METADATA",
-          "observed_at": "2026-09-29T11:42:51+03:00",
+          "observed_at": "2026-09-29T18:08:46+03:00",
           "verification_route_id": "general_local_signal",
           "verification_targets": [],
           "status": "NEEDS_PRIMARY_VERIFICATION",
