@@ -14,42 +14,111 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 0,
-    "autonomous_story_ids_24h": [],
+    "autonomous_stories_published_24h": 3,
+    "autonomous_story_ids_24h": [
+      "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
+      "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346",
+      "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678"
+    ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 0,
-      "published": 0,
-      "stories": [],
-      "max_seconds": null,
-      "median_seconds": null
+      "measured": 3,
+      "published": 3,
+      "stories": [
+        {
+          "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
+          "seconds": 104,
+          "discovered_at_utc": "2026-09-29T15:08:44Z",
+          "published_at_utc": "2026-09-29T15:10:28Z"
+        },
+        {
+          "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346",
+          "seconds": 104,
+          "discovered_at_utc": "2026-09-29T15:08:44Z",
+          "published_at_utc": "2026-09-29T15:10:28Z"
+        },
+        {
+          "story_id": "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678",
+          "seconds": 104,
+          "discovered_at_utc": "2026-09-29T15:08:44Z",
+          "published_at_utc": "2026-09-29T15:10:28Z"
+        }
+      ],
+      "max_seconds": 104,
+      "median_seconds": 104
     },
     "photo_coverage": {
-      "status": "NO_PUBLISHED_STORIES",
+      "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 0,
-      "value": null,
+      "published_stories": 3,
+      "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "eligible": 0,
+      "status": "BLOCKED",
+      "eligible": 3,
       "readback_ok": 0,
-      "value": null,
-      "checks": [],
+      "value": 0.0,
+      "blocker_story_ids": [
+        "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
+        "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346",
+        "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678"
+      ],
+      "checks": [
+        {
+          "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
+          "url": "https://valceaclar.ro/stiri/fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346",
+          "url": "https://valceaclar.ro/stiri/fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
+        {
+          "story_id": "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678",
+          "url": "https://valceaclar.ro/stiri/fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        }
+      ],
+      "projection_evidence": {
+        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
+        "http_status": 200,
+        "error": null,
+        "updated_local": "2026-09-28T22:35:12.845443Z",
+        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+        "public_story_count": 86
+      },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
+      "status": "MEASURED",
       "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "eligible": 3,
+      "value": 0.0,
+      "delivered_story_ids": []
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
+      "status": "MEASURED",
       "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "eligible": 3,
+      "value": 0.0,
+      "delivered_story_ids": []
     },
     "duplicates": {
       "status": "MEASURED",
@@ -71,6 +140,38 @@
       "value": 0,
       "workflow_dispatch_runs": [],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36588409051,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-29T15:12:24Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36588169473,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-09-29T15:10:32Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36587946742,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-09-29T15:08:48Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 36573040816,
+          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
+          "created_at": "2026-09-29T13:09:14Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 36557899518,
