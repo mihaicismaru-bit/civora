@@ -173,9 +173,27 @@ def render_story(nav: dict, story: dict, stories: list[dict], published_at: str,
 
 
 def reader_stories(feed: dict, archive: dict) -> list[dict]:
-    """Return the safe presentation subset without mutating durable inputs."""
+    """Return the safe presentation subset with feed-authoritative currentness.
+
+    Durable archive rows remain valid reader routes, but only stories present in
+    the canonical live feed may be marked active. This normalization is owned by
+    the integrity stage itself because overlay_runtime_export runs currentness
+    and integrity in separate processes.
+    """
     stories, _live_ids = ux.union_stories(feed, archive)
-    return stories
+    live_ids = {
+        str(row.get("id"))
+        for row in (feed.get("stories") or [])
+        if isinstance(row, dict) and row.get("id")
+    }
+    normalized: list[dict] = []
+    for row in stories:
+        safe = dict(row)
+        is_live = str(safe.get("id")) in live_ids
+        safe["active_now"] = is_live
+        safe["archive_status"] = "active" if is_live else "published_archive"
+        normalized.append(safe)
+    return normalized
 
 
 def build() -> dict:
@@ -263,6 +281,24 @@ def check() -> None:
     manifest_ids = {str(row.get("id")) for row in manifest.get("stories") or [] if row.get("id")}
     if expected_ids != manifest_ids:
         raise SystemExit("Story integrity reader-set/manifest drift")
+    feed_ids = {
+        str(row.get("id"))
+        for row in (feed.get("stories") or [])
+        if isinstance(row, dict) and row.get("id")
+    }
+    manifest_active_ids = {
+        str(row.get("id"))
+        for row in (manifest.get("stories") or [])
+        if row.get("id") and (
+            row.get("active_now") is True
+            or str(row.get("archive_status") or "") == "active"
+        )
+    }
+    if feed_ids != manifest_active_ids:
+        raise SystemExit(
+            "Story integrity currentness drift: "
+            f"feed={sorted(feed_ids)} manifest_active={sorted(manifest_active_ids)}"
+        )
     for row in manifest.get("stories") or []:
         text = (RUNTIME / str(row["path"]).strip("/") / "index.html").read_text(encoding="utf-8")
         if '<script type="application/ld+json">' not in text:
@@ -296,6 +332,11 @@ def self_test() -> None:
     archive_before = json.loads(json.dumps(archive))
     selected = reader_stories(feed, archive)
     assert {row["id"] for row in selected} == {"a", "b"}
+    selected_by_id = {row["id"]: row for row in selected}
+    assert selected_by_id["b"]["active_now"] is True
+    assert selected_by_id["b"]["archive_status"] == "active"
+    assert selected_by_id["a"]["active_now"] is False
+    assert selected_by_id["a"]["archive_status"] == "published_archive"
     assert archive == archive_before, "reader selection must not mutate durable archive input"
 
     nav = {"contract_id":"test","brand":"VÂLCEA CLAR","tagline":"Test","items":[],"footer":{"links":[],"line":"Test"}}
