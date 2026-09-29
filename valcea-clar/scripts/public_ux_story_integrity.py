@@ -174,7 +174,11 @@ def render_story(nav: dict, story: dict, stories: list[dict], published_at: str,
 
 def reader_stories(feed: dict, archive: dict) -> list[dict]:
     """Return the safe presentation subset without mutating durable inputs."""
-    stories, _live_ids = ux.union_stories(feed, archive)
+    stories, live_ids = ux.union_stories(feed, archive)
+    for story in stories:
+        is_live = str(story.get("id") or "") in live_ids
+        story["active_now"] = is_live
+        story["archive_status"] = "active" if is_live else "published_archive"
     return stories
 
 
