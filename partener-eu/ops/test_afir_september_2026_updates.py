@@ -23,6 +23,7 @@ missing = required - set(rows)
 assert not missing, f"missing authoritative AFIR September dossiers: {sorted(missing)}"
 assert payload.get("policy", {}).get("afirSeptember2026OfficialCoverage") is True
 assert payload.get("policy", {}).get("scheduledLaunchNeverAutoPromotedToOpen") is True
+assert payload.get("policy", {}).get("freshAuthoritativeLaunchEvidenceRequiredForOpen") is True
 
 
 def fact(dossier, label):
@@ -47,6 +48,28 @@ def validate_common(dossier):
         assert source.get("observedAt"), source
 
 
+def validate_energy(dossier):
+    assert dossier.get("publicationState") == "PUBLISHABLE", dossier.get("id")
+    quality = dossier.get("quality") or {}
+    assert quality.get("failClosed") is True
+    assert quality.get("applicantEvidenceAuthorized") is True
+    assert quality.get("afirSeptember2026Coverage") is True
+    assert len(dossier.get("sections") or []) >= 10
+    assert len(dossier.get("sources") or []) >= 2
+    for source in dossier.get("sources") or []:
+        assert str(source.get("url") or "").startswith("https://www.afir.ro/"), source
+        assert source.get("tier") == "T1", source
+        assert source.get("observedAt"), source
+    if dossier.get("status") == "OPEN":
+        launch = [
+            source for source in dossier.get("sources") or []
+            if "deschidere-sesiuni-proiecte-energie-regenerabila-benficiari-publici" in str(source.get("url") or "")
+        ]
+        assert len(launch) == 1, f"OPEN without exact current AFIR launch source: {dossier.get('id')}"
+        assert launch[0].get("observedAt") == "2026-09-29T13:15:54Z"
+        assert "status" in set(launch[0].get("supports") or [])
+
+
 dr21 = rows["afir-dr21-consultation-2026"]
 validate_common(dr21)
 assert dr21.get("code") == "DR-21"
@@ -65,14 +88,23 @@ for dossier_id, expected_budget, guide_token in (
     ("afir-fm-public-storage-2026", "150.000.000 EUR", "stocare-energie-beneficiari-publici"),
 ):
     dossier = rows[dossier_id]
-    validate_common(dossier)
-    assert dossier.get("status") in {"UPCOMING", "REVIEW"}
+    validate_energy(dossier)
+    assert dossier.get("status") in {"UPCOMING", "OPEN", "REVIEW"}
     if NOW < dt.datetime(2026, 9, 28, 10, 0, tzinfo=RO):
         assert dossier.get("status") == "UPCOMING"
+    elif NOW <= dt.datetime(2026, 11, 20, 23, 59, tzinfo=RO):
+        assert dossier.get("status") == "OPEN"
+        assert dossier.get("decision") == "ACT NOW"
+        assert fact(dossier, "Status")["confidence"] == "CONFIRMED"
+    else:
+        assert dossier.get("status") == "REVIEW"
     assert fact(dossier, "Buget")["value"] == expected_budget
     assert fact(dossier, "Termen")["value"] == "20 noiembrie 2026, 23:59"
     assert fact(dossier, "Contribuție proprie")["value"].startswith("0%")
-    assert "open_status" in set(dossier["quality"]["blockedFactClasses"])
+    if dossier.get("status") == "OPEN":
+        assert "open_status" not in set(dossier["quality"]["blockedFactClasses"])
+    else:
+        assert "open_status" in set(dossier["quality"]["blockedFactClasses"])
     assert "status" in set(dossier["quality"]["verifiedFactClasses"])
     assert any(guide_token in src["url"] for src in dossier["sources"])
     assert any("informatii-sesiune-energie-regenerabila-solicitanti-publici" in src["url"] for src in dossier["sources"])
@@ -80,7 +112,12 @@ for dossier_id, expected_budget, guide_token in (
 news = {row.get("id"): row for row in payload.get("news") or []}
 assert "news-afir-dr21-consultation-2026-09-18" in news
 assert "news-afir-energy-public-upcoming-2026-09-22" in news
-assert news["news-afir-energy-public-upcoming-2026-09-22"].get("kind") == "SESSION_ANNOUNCED"
+energy_story = news["news-afir-energy-public-upcoming-2026-09-22"]
+if dt.datetime(2026, 9, 28, 10, 0, tzinfo=RO) <= NOW <= dt.datetime(2026, 11, 20, 23, 59, tzinfo=RO):
+    assert energy_story.get("kind") == "CALL_OPENED"
+    assert "sunt OPEN" in energy_story.get("headline", "")
+else:
+    assert energy_story.get("kind") == "SESSION_ANNOUNCED"
 
 print(json.dumps({
     "status": "PASS",
