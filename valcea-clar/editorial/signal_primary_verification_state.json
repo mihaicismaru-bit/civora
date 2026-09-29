@@ -2,19 +2,236 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-29T23:00:19+03:00",
+  "generated_at": "2026-09-30T02:39:56+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-29T22:58:59+03:00",
-  "task_count": 84,
+  "queue_generated_at": "2026-09-30T02:38:14+03:00",
+  "task_count": 82,
   "primary_match_count": 0,
-  "no_match_count": 36,
+  "no_match_count": 34,
   "unrouted_count": 48,
-  "target_count": 20,
-  "targets_ok": 15,
+  "target_count": 22,
+  "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "360b9f602f04a6d3b0bf627c",
+      "signal_title": "Nicolae Mîndrescu coordonează AUR Valcea, inclusiv organizatia Râmnicu Vâlcea. Vicențiu Mocanu este simplu membru, iar alegerile interne încă nu au avut loc",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/nicolae-mindrescu-coordoneaza-aur-valcea-inclusiv-organizatia-ramnicu-valcea-vicentiu-mocanu-este-simplu-membru-iar-alegerile-interne-inca-nu-au-avut-loc/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-30T02:20:09+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "eefb55810527fc79f23d535a",
+      "signal_title": "Septembrie, lună a investițiilor la Călimănești: proiect de aproape 25 de milioane de lei, școli modernizate și transport public inteligent",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/septembrie-luna-a-investitiilor-la-calimanesti-proiect-de-aproape-25-de-milioane-de-lei-scoli-modernizate-si-transport-public-inteligent/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-30T02:05:31+03:00",
+      "verification_route_id": "calimanesti_administration",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-calimanesti-comunicate",
+            "name": "Primăria Orașului Călimănești",
+            "url": "https://www.primaria-calimanesti.ro/anunturi/comunicate.html"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "a475424fc091c32db2703e73",
+      "signal_title": "Primăria Prundeni continuă investițiile în modernizarea comunei. Infrastructura, utilitățile și mobilitatea verde, priorități în septembrie",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/primaria-prundeni-continua-investitiile-in-modernizarea-comunei-infrastructura-utilitatile-si-mobilitatea-verde-prioritati-in-septembrie/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-30T02:04:41+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "f08f57e3c06932cb4f2fb4a4",
+      "signal_title": "APAVIL SA – ANUNȚ privind scoaterea la concurs a doua posturi de instalator în cadrul Serviciului Branșări Frauduloase, Detectări Pierderi și Montare Apometre",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/apavil-sa-anunt-privind-scoaterea-la-concurs-a-doua-posturi-de-instalator-in-cadrul-serviciului-bransari-frauduloase-detectari-pierderi-si-montare-apometre/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-30T01:52:26+03:00",
+      "verification_route_id": "apavil_employment",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "apavil-angajari",
+            "name": "APAVIL S.A. — Anunțuri angajare",
+            "url": "https://apavil.ro/?page_id=7981"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 26
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 56
+    },
+    {
+      "signal_id": "76cb13de491bcb30c4b00e07",
+      "signal_title": "Pentru ce tip de șofer sunt potrivite anvelopele all season și când este mai bun un set sezonier",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/pentru-ce-tip-de-sofer-sunt-potrivite-anvelopele-all-season-si-cand-este-mai-bun-un-set-sezonier/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-30T01:51:15+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "3ee8b42a4718f2fbc1472b66",
+      "signal_title": "Organizația de Femei AUR Râmnicu Vâlcea lansează un program de sprijin psihologic pentru mamele copiilor cu dizabilități",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/organizatia-de-femei-aur-ramnicu-valcea-lanseaza-un-program-de-sprijin-psihologic-pentru-mamele-copiilor-cu-dizabilitati/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_published_at": "2026-09-30T01:30:23+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "13403151f8de62c6f97c4d7c",
+      "signal_title": "INVESTIGAȚIE | Cine este Tudor Duică și ce se află în spatele discursului despre o „Transilvanie liberă”? Autoritățile statului trebuie să clarifice public situația",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/investigatie-cine-este-tudor-duica-si-ce-se-afla-in-spatele-discursului-despre-o-transilvanie-libera-autoritatile-statului-trebuie-sa-clarifice-public-situatia/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-30T00:26:30+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "5e2810461c5559517a397c5d",
       "signal_title": "De la drumul spre Grădiștea la căminul cultural și sala de sport. Doru Diaconu povestește cum au trecut lucrările de la un mandat la altul",
@@ -25,7 +242,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "e21f1d7a2863322775e73437",
@@ -37,7 +255,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "a806b3b01112c627e0bfdcfc",
@@ -49,7 +268,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "339bcf6af96086d3d942221b",
@@ -61,7 +281,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "ac1235087334c838a7e2961f",
@@ -73,7 +294,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 79
     },
     {
       "signal_id": "34105712d59c3f6b48a85c26",
@@ -85,7 +307,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "168e40b6eacfa6f58db1349f",
@@ -123,7 +346,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "11dd9a0ced8c8e33cae5ac64",
@@ -161,7 +385,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "96a7322441b9f96300b13892",
@@ -173,7 +398,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "9a18744ac7373141bbccbbec",
@@ -233,7 +459,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "2603df503656f3a9d292929f",
@@ -260,7 +487,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "52a91e23bf0da6cbd6e9a774",
@@ -320,7 +548,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "fb5917043e6eefd709656d66",
@@ -380,7 +609,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 77
     },
     {
       "signal_id": "c6764dec2416092a28d3ea39",
@@ -392,7 +622,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "a02162e484de1bbaf7e6288c",
@@ -404,7 +635,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "24d25fca0db1b86f6916a676",
@@ -453,7 +685,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "432c27861485e45285f868eb",
@@ -513,7 +746,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 77
     },
     {
       "signal_id": "77ca63866b52611d8564aa24",
@@ -525,7 +759,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "0b98e4c47b5db0b0572c0cef",
@@ -537,7 +772,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "0f901afb3abde32ea6496e9d",
@@ -549,7 +785,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "51098670c28aaa016808b6a9",
@@ -561,7 +798,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "b55d8420f2b97261a97d6f56",
@@ -573,7 +811,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "737049c4e8ab9d5a170f7130",
@@ -600,7 +839,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "71cf6dd830dae7690e4af818",
@@ -612,7 +852,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "f230c0680171966872a42bd8",
@@ -624,7 +865,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "2d7ce0e7cb88e2015afedde7",
@@ -673,7 +915,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "fe7853581e68b5360a012ca4",
@@ -685,7 +928,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "680d1da784160d4992025707",
@@ -697,7 +941,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "31287efbaf2bbe7828e06d8c",
@@ -709,7 +954,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "e49a7e5c92418a0cf95b4535",
@@ -769,7 +1015,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "fa437cd16390e1b09168e0c0",
@@ -781,7 +1028,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "a8f902e0ed15437a58abe709",
@@ -793,7 +1041,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "d1f624d57c2395bdc4f20383",
@@ -805,7 +1054,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "e304cf379f52a740036229a2",
@@ -865,7 +1115,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "42ba66c8862ddb5422678c5b",
@@ -877,7 +1128,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "2619fd5c0c09da392ac82601",
@@ -904,7 +1156,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "72ad5de3e58569afeda51945",
@@ -916,7 +1169,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "570ecc98b57dd02f461c3eca",
@@ -954,7 +1208,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "46e48e35c22dc1594c9c7c73",
@@ -966,7 +1221,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "628384ad8b5eaad04a79d3d7",
@@ -993,7 +1249,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "28dde0f6a3d8858a1c5a8639",
@@ -1020,7 +1277,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "bf53a5be1fd7a7a5610998f3",
@@ -1032,7 +1290,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "929da6c38e092ebe3dc551ea",
@@ -1059,7 +1318,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "24db48b00a94b7e73800ffef",
@@ -1071,7 +1331,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "dafbd470303b77ccc3e72d82",
@@ -1109,7 +1370,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 74
     },
     {
       "signal_id": "7fa414348b327056cd720cd0",
@@ -1121,7 +1383,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "3e222e51543c42995918462a",
@@ -1133,7 +1396,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "24b6cb110d366c0a8ad155ac",
@@ -1145,7 +1409,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "395660cd8fad4591b10c18d3",
@@ -1205,7 +1470,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "392e9bc2fd2817aeccc1a0e2",
@@ -1265,7 +1531,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "e41fa9250fafcbd5e761b844",
@@ -1303,7 +1570,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "8285a35b9ce391438fec3a3f",
@@ -1352,7 +1620,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "8aecd59c1da850ebc75de54d",
@@ -1390,7 +1659,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 56
     },
     {
       "signal_id": "68c7c2e5c6610c9b3c7a5368",
@@ -1402,7 +1672,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "05ae6103354155992b852ae5",
@@ -1429,84 +1700,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "b32fde9a81080d201b14296e",
-      "signal_title": "Sibiul, pe primul loc în țară la plecările spre Germania în ultimii ani ai regimului Ceaușescu. „Epicentrul birocratic al emigraţiei a fost Sibiul cu record național la dosare blocate și aprobări oficiale”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/28/sibiul-pe-primul-loc-in-tara-la-plecarile-spre-germania-in-ultimii-ani-ai-regimului-ceausescu-epicentrul-birocratic-al-emigratiei-a-fost-sibiul-cu-record-national-la-dosare-blocate-si-aprob/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-28T10:16:01+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "f1e7c196aa04e781a068a7b0",
-      "signal_title": "FOTO – Polițiștii au ieșit în căutarea „chiulangiilor” din Râmnicu Vâlcea: zeci de elevi prinși lipsind de la ore",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/28/foto-politistii-au-iesit-in-cautarea-ciulangiilor-din-ramnicu-valcea-zeci-de-elevi-prinsi-lipsind-de-la-ore/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-28T09:57:43+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "d4d87f0f38907e839f5aa6a4",
-      "signal_title": "„Azi am decis noi cum să ne îmbrăcăm și sperăm să decidem și de acum încolo”. Elevii sibieni protestează „în negru” împotriva uniformelor școlare",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/28/azi-am-decis-noi-cum-sa-ne-imbracam-si-speram-sa-decidem-si-de-acum-incolo-elevii-sibieni-protesteaza-in-negru-impotriva-uniformelor-scolare/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-28T09:32:35+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "1067505a835a7b095cd49aa1",
@@ -1533,7 +1728,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "beeca762ccb9d7d0954c7a78",
@@ -1545,7 +1741,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "c458de5a2994f26ba37f259d",
@@ -1572,7 +1769,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "b41581a899702c74e3368e32",
@@ -1599,7 +1797,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "931af8d7819e8e456a425df8",
@@ -1611,7 +1810,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "1ff761ab46ea899d0beb14cd",
@@ -1623,34 +1823,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "d525116f313754dd2d06b6ac",
-      "signal_title": "FOTO – Scandal după o șicanare în trafic, la Râmnicu Vâlcea. Bărbatul care a urmărit o șoferiță era beat",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/27/foto-scandal-dupa-o-sicanare-in-trafic-la-ramnicu-valcea-barbatul-care-a-urmarit-o-soferita-era-beat/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-27T21:18:54+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "924cfabdf58ecd93cb2b545d",
@@ -1699,19 +1873,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "94a5fb4194b91340505b9957",
-      "signal_title": "CJ Vâlcea are nevoie urgent de urgent 15 milioane de lei pentru CET Govora: „Nu mai este timp de pierdut”",
-      "signal_url": "https://evenimentvalcean.ro/cj-valcea-are-nevoie-urgent-de-urgent-15-milioane-de-lei-pentru-cet-govora-nu-mai-este-timp-de-pierdut/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_published_at": "2026-09-27T18:44:06+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "c143801293b9116fe2c1e36a",
@@ -1738,144 +1901,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "c840c5b3b3afb261285421a5",
-      "signal_title": "Valea Oltului: lucrările au ajuns la peste 84%, dar șantierul continuă până în 2027",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/27/valea-oltului-lucrarile-au-ajuns-la-peste-84-dar-santierul-continua-pana-in-2027/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-27T15:30:44+03:00",
-      "verification_route_id": "national_road_restrictions",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "igpr-infotrafic-live",
-            "name": "Centrul INFOTRAFIC — Poliția Română",
-            "url": "https://politiaromana.ro/ro/info-trafic"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "8235050fd6cb2213e34c3793",
-      "signal_title": "15 milioane de lei, cerute urgent pentru CET Govora. Noul CET a trecut de 60%, iar CAF-urile sunt deja funcționale",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/27/15-milioane-de-lei-cerute-urgent-pentru-cet-govora-noul-cet-a-trecut-de-60-iar-caf-urile-sunt-deja-functionale/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-27T12:16:10+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "3aea0c2e1293cc3a0558c144",
-      "signal_title": "DEZVĂLUIRI: Afacerile lui Siegfried Mureșan și traseul care ajunge la un personaj investigat într-un dosar cu legături MAFIA- Camorra",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/dezvaluiri-afacerile-lui-siegfried-muresan-si-traseul-care-ajunge-la-un-personaj-investigat-intr-un-dosar-cu-legaturi-mafia-camorra/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-27T03:37:33+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "e3a33eae18167795fba8f558",
-      "signal_title": "Senatoarea Andra Bică: „Nu voi vota învestirea Guvernului Mureșan! Profesorii și elevii au nevoie de soluții concrete, nu de promisiuni”",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/senatoarea-andra-bica-nu-voi-vota-investirea-guvernului-muresan-profesorii-si-elevii-au-nevoie-de-solutii-concrete-nu-de-promisiuni/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-27T03:25:24+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "e7568c4b125b41b4121cecc4",
@@ -1887,7 +1914,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "e25ab738cbdcd1f064449118",
@@ -1899,7 +1927,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "c52e868a5a3d98fbccfad113",
@@ -1911,7 +1940,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "acd6dd07c7b8fb1beb8f487c",
@@ -1923,7 +1953,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "a60beaad93c15f0dc610a86e",
@@ -1935,7 +1966,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "a5a88efdae836760f3b22c52",
@@ -1947,7 +1979,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "0a9f0e5efa5edfde1c95a354",
@@ -1959,7 +1992,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "041de1bb45292feba0960003",
@@ -1971,7 +2005,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "4ceef97712163d893d6c17b7",
@@ -1983,7 +2018,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "52ca24f8904c84305da5a651",
@@ -2010,7 +2046,8 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "15fe313bbf22e132abe07fd6",
@@ -2022,7 +2059,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     },
     {
       "signal_id": "007effe096936171fe4011cd",
@@ -2034,7 +2072,8 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
     }
   ],
   "verification_policy": {
