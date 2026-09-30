@@ -1,316 +1,68 @@
 {
   "checkpoint": "CP58",
   "modules": [
-    {
-      "id": "M01_RADAR",
-      "stage": "RADAR",
-      "status": "CP34_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M02_RESEARCH",
-      "stage": "research",
-      "status": "CP35_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M03_SCORING",
-      "stage": "scoring",
-      "status": "CP36_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M04_MASTER_DRAFT",
-      "stage": "master_draft",
-      "status": "CP37_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M05_NATIVE_ADAPT",
-      "stage": "native_adaptations",
-      "status": "CP38_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M06_VISUAL",
-      "stage": "visual",
-      "status": "CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"
-    },
-    {
-      "id": "M07_QA",
-      "stage": "qa",
-      "status": "CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"
-    },
-    {
-      "id": "M08_QUEUE",
-      "stage": "queue",
-      "status": "CP43_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M09_PUBLISHER",
-      "stage": "publisher",
-      "status": "CP44_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M10_ANALYTICS",
-      "stage": "analytics",
-      "status": "CP45_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M11_LEARNING",
-      "stage": "learning",
-      "status": "CP46_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M12_APPROVAL",
-      "stage": "approval_dashboard",
-      "status": "CP42_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M13_RIGHTS",
-      "stage": "image_rights",
-      "status": "CP39_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M14_EXPERIMENTS",
-      "stage": "experiments",
-      "status": "CP47_MINIMAL_EXECUTABLE_SLICE"
-    },
-    {
-      "id": "M15_SOURCE_INGEST",
-      "stage": "source_ingest",
-      "status": "CP23_CP29_EVIDENCE_BOUND_SOURCE_BYTES_HOLD"
-    },
-    {
-      "id": "M16_OPERATIONS",
-      "stage": "installation_configuration_recovery",
-      "status": "CP32_PREFLIGHT_MANUAL_LOCKED"
-    },
-    {
-      "id": "M17_REHEARSAL",
-      "stage": "synthetic_golden_path_pilot_preflight",
-      "status": "CP33_CONTROL_PLANE_PASS_PILOT_VALIDATION_GATES_HOLD"
-    },
-    {
-      "id": "M18_VISUAL_IDENTITY",
-      "stage": "versioned_visual_identity",
-      "status": "CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"
-    },
-    {
-      "id": "M19_META_ADAPTERS",
-      "stage": "meta_free_api_adapters",
-      "status": "CP50_OFFLINE_REQUEST_COMPILER"
-    },
-    {
-      "id": "M20_META_CONNECTIONS",
-      "stage": "meta_connection_profiles_secret_reference_vault",
-      "status": "CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY"
-    },
-    {
-      "id": "M21_META_PREFLIGHT",
-      "stage": "meta_connection_preflight_synthetic_provisioning_readback",
-      "status": "CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY"
-    },
-    {
-      "id": "M22_META_OPERATOR_PROVISIONING",
-      "stage": "meta_operator_provisioning_packet_offline_checklist",
-      "status": "CP53_OFFLINE_OPERATOR_PACKET_CHECKLIST"
-    },
-    {
-      "id": "M23_META_TRANSPORT_TWIN",
-      "stage": "meta_transport_test_twin_request_signing_boundary",
-      "status": "CP54_SYNTHETIC_TRANSPORT_TEST_TWIN_ONLY"
-    },
-    {
-      "id": "M24_META_READ_ONLY_GATE",
-      "stage": "meta_connection_preflight_synthetic_provisioning_readback",
-      "status": "CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"
-    },
-    {
-      "id": "M25_META_LIVE_READ_ONLY_PROBE",
-      "stage": "meta_live_read_only_probe_runbook_evidence_capture_contract",
-      "status": "CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"
-    },
-    {
-      "id": "M26_META_OFFLINE_EVIDENCE_VALIDATOR",
-      "stage": "meta_offline_evidence_bundle_validator_operator_dry_run",
-      "status": "CP57_SYNTHETIC_EVIDENCE_BUNDLE_VALIDATOR_DRY_RUN_LOCAL_ONLY"
-    },
-    {
-      "id": "M27_META_PILOT_READINESS",
-      "stage": "meta_pilot_readiness_aggregator_live_connection_authorization_gate",
-      "status": "CP58_OFFLINE_READINESS_AGGREGATED_LIVE_CONNECTION_HOLD"
-    },
-    {
-      "id": "M28_PILOT_PACKAGE_ACCEPTANCE",
-      "stage": "pilot_package_completeness_manifest_final_offline_acceptance_suite",
-      "status": "CP59_FINAL_OFFLINE_ACCEPTANCE_PASS_LIVE_GATES_HOLD"
-    },
-    {
-      "id": "M29_OPERATOR_PILOT_HANDOFF",
-      "stage": "operator_pilot_handoff_explicit_authorization_packet",
-      "status": "CP60_OPERATOR_HANDOFF_READY_AUTHORIZATION_HOLD"
-    },
-    {
-      "id": "M30_CONTROL_PLANE_AUTHORIZATION_INTAKE",
-      "stage": "control_plane_promotion_authorization_intake_contract",
-      "status": "CP61_AUTHORIZATION_INTAKE_CONTRACT_LOCAL_ONLY_CONTROL_PROMOTION_HOLD"
-    },
-    {
-      "id": "M31_AUTHORIZATION_RECEIPT_VALIDATOR",
-      "stage": "authorization_receipt_validator_control_promotion_dry_run",
-      "status": "CP62_AUTHORIZATION_RECEIPT_VALIDATOR_DRY_RUN_LOCAL_ONLY_CONTROL_PROMOTION_HOLD"
-    },
-    {
-      "id": "M32_LIVE_READ_ONLY_PROBE_SESSION",
-      "stage": "live_read_only_probe_session_envelope_zero_write_recorder_dry_run",
-      "status": "CP63_SESSION_ENVELOPE_ZERO_WRITE_RECORDER_DRY_RUN_LOCAL_ONLY_LIVE_HOLD"
-    },
-    {
-      "id": "M33_LIVE_READ_ONLY_PROBE_EVIDENCE_IMPORT",
-      "stage": "live_read_only_probe_evidence_import_gate_replay_validator_dry_run",
-      "status": "CP64_EVIDENCE_IMPORT_GATE_REPLAY_VALIDATOR_DRY_RUN_LOCAL_ONLY_LIVE_HOLD"
-    },
-    {
-      "id": "M34_LIVE_READ_ONLY_PROBE_EXECUTION_ADMISSION",
-      "stage": "live_read_only_probe_execution_admission_gate_operator_preflight_packet",
-      "status": "CP65_EXECUTION_ADMISSION_PREFLIGHT_PACKET_LOCAL_ONLY_AUTHORIZATION_REQUIRED_LIVE_HOLD"
-    },
-    {
-      "id": "M35_LIVE_READ_ONLY_PROBE_SINGLE_SESSION_HARNESS",
-      "stage": "live_read_only_probe_single_session_execution_harness_dry_run",
-      "status": "CP66_SINGLE_SESSION_EXECUTION_HARNESS_DRY_RUN_MOCK_ONLY_LIVE_HOLD"
-    },
-    {
-      "id": "M36_LIVE_READ_ONLY_PROBE_AUTHORIZED_SESSION_REQUEST",
-      "stage": "live_read_only_probe_authorized_session_request_packet_operator_handoff",
-      "status": "CP67_AUTHORIZED_SESSION_REQUEST_PACKET_HANDOFF_LOCAL_ONLY_AUTHORIZATION_NOT_GRANTED_LIVE_HOLD"
-    },
-    {
-      "id": "M37_LIVE_READ_ONLY_PROBE_SESSION_AUTHORIZATION_RECEIPT",
-      "stage": "live_read_only_probe_session_authorization_receipt_intake_validator_dry_run",
-      "status": "CP68_SESSION_AUTHORIZATION_RECEIPT_INTAKE_VALIDATOR_DRY_RUN_LOCAL_ONLY_AUTHORITY_NOT_ACTIVATED_LIVE_HOLD"
-    },
-    {
-      "id": "M38_LIVE_READ_ONLY_PROBE_AUTHORITY_ACTIVATION_PRECONDITION_MATRIX",
-      "stage": "live_read_only_probe_authority_activation_precondition_matrix_zero_io_dry_run",
-      "status": "CP69_AUTHORITY_ACTIVATION_PRECONDITION_MATRIX_ZERO_IO_DRY_RUN_LOCAL_ONLY_LIVE_HOLD"
-    },
-    {
-      "id": "M39_LIVE_READ_ONLY_PROBE_AUTHORITY_ACTIVATION_TRANSACTION",
-      "stage": "live_read_only_probe_authority_activation_transaction_dry_run",
-      "status": "CP70_AUTHORITY_ACTIVATION_TRANSACTION_DRY_RUN_LOCAL_ONLY_NO_COMMIT_LIVE_HOLD"
-    },
-    {
-      "id": "M40_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_EXPIRY_REVOCATION",
-      "stage": "live_read_only_probe_authority_lease_expiry_revocation_dry_run",
-      "status": "CP71_AUTHORITY_LEASE_EXPIRY_REVOCATION_DRY_RUN_LOCAL_ONLY_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M41_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_REPLAY_STALE_RECEIPT_REJECTION",
-      "stage": "live_read_only_probe_authority_lease_replay_stale_receipt_rejection_dry_run",
-      "status": "CP72_AUTHORITY_LEASE_REPLAY_STALE_RECEIPT_REJECTION_DRY_RUN_LOCAL_ONLY_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M42_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECONCILIATION",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_reconciliation_dry_run",
-      "status": "CP73_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECONCILIATION_DRY_RUN_LOCAL_ONLY_LEDGER_CONSISTENT_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M43_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_REBUILD_RECOVERY",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_rebuild_recovery_dry_run",
-      "status": "CP74_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_REBUILD_RECOVERY_DRY_RUN_LOCAL_ONLY_EXACT_REBUILD_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M44_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_IDEMPOTENCY_ROLLBACK",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_idempotency_rollback_dry_run",
-      "status": "CP75_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_IDEMPOTENCY_ROLLBACK_DRY_RUN_LOCAL_ONLY_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M45_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_CRASH_CONSISTENCY",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_crash_consistency_dry_run",
-      "status": "CP76_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_CRASH_CONSISTENCY_DRY_RUN_LOCAL_ONLY_NO_TORN_STATE_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M46_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_CORRUPTION_REJECTION",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_corruption_rejection_dry_run",
-      "status": "CP77_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_CORRUPTION_REJECTION_DRY_RUN_LOCAL_ONLY_FAIL_CLOSED_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M47_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_PARTIAL_WRITE_TRUNCATION_REJECTION",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_partial_write_truncation_rejection_dry_run",
-      "status": "PASS_CP78_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_PARTIAL_WRITE_TRUNCATION_REJECTION_DRY_RUN_LOCAL_ONLY_FAIL_CLOSED_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M48_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_COMPLETE_WRITE_ATOMIC_VISIBILITY",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_complete_write_atomic_visibility_dry_run",
-      "status": "PASS_CP79_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_COMPLETE_WRITE_ATOMIC_VISIBILITY_DRY_RUN_LOCAL_ONLY_NO_TORN_VISIBILITY_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M49_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_CRASH_WINDOW",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_atomic_replace_crash_window_dry_run",
-      "status": "PASS_CP80_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_CRASH_WINDOW_DRY_RUN_LOCAL_ONLY_NO_TORN_REPLACE_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M50_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_IDEMPOTENCY",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_atomic_replace_retry_idempotency_dry_run",
-      "status": "PASS_CP81_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_IDEMPOTENCY_DRY_RUN_LOCAL_ONLY_EXACTLY_ONCE_ACK_NO_DUPLICATE_REPLACE_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M51_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_EXHAUSTION_FAIL_CLOSED",
-      "stage": "live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_atomic_replace_retry_exhaustion_fail_closed_dry_run",
-      "status": "PASS_CP82_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_EXHAUSTION_FAIL_CLOSED_DRY_RUN_LOCAL_ONLY_TERMINAL_HOLD_NO_RESURRECTION_NO_DUPLICATE_EFFECT_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M52_GROWTH_CAPABILITY_MATRIX_ENGAGEMENT_API_GATE",
-      "stage": "growth_capability_matrix_engagement_api_gate",
-      "status": "PASS_CP83_GROWTH_CAPABILITY_MATRIX_ENGAGEMENT_API_GATE_OFFLINE_CONTRACT_LIVE_PERMISSION_HOLD_MANUAL_FALLBACK_NO_EXTERNAL_CONNECTION_LIVE_HOLD"
-    },
-    {
-      "id": "M53_ENGAGEMENT_RADAR",
-      "stage": "engagement_radar",
-      "status": "PASS_CP84_ENGAGEMENT_RADAR_OFFLINE_DISCOVERY_SCORING_HUMAN_REVIEW_ONLY_NO_POSTING_AUTHORITY_NO_EXTERNAL_WRITE_LIVE_HOLD"
-    },
-    {
-      "id": "M54_INBOUND_REPLY_ENGINE",
-      "stage": "inbound_reply_engine",
-      "status": "PASS_CP85_INBOUND_REPLY_ENGINE_OFFLINE_CLASSIFICATION_FACT_BOUND_DRAFT_HUMAN_REVIEW_ONLY_NO_POSTING_AUTHORITY_NO_EXTERNAL_WRITE_LIVE_HOLD"
-    },
-    {
-      "id": "M55_OUTBOUND_VALUE_ADD_ENGAGEMENT_ENGINE",
-      "stage": "outbound_value_add_engagement_engine",
-      "status": "PASS_CP86_OUTBOUND_VALUE_ADD_OFFLINE_COMPOSITION_CAPABILITY_GATED_MANUAL_FALLBACK_HUMAN_REVIEW_ONLY_NO_EXTERNAL_WRITE_LIVE_HOLD"
-    },
-    {
-      "id": "M56_RELATIONSHIP_GRAPH",
-      "stage": "relationship_graph",
-      "status": "PASS_CP87_RELATIONSHIP_GRAPH_OFFLINE_PUBLIC_NON_SENSITIVE_IDEMPOTENT_CONTINUITY_ONLY_NO_SENSITIVE_PROFILING_NO_EXTERNAL_WRITE_LIVE_HOLD"
-    },
-    {
-      "id": "M57_AMPLIFICATION_ENGINE",
-      "stage": "amplification_engine",
-      "status": "PASS_CP88_AMPLIFICATION_ENGINE_OFFLINE_MATERIAL_DELTA_DUPLICATE_GUARDED_CAPABILITY_RIGHTS_GATED_MANUAL_FALLBACK_NO_EXTERNAL_WRITE_LIVE_HOLD"
-    },
-    {
-      "id": "M58_GROWTH_ANALYTICS_VIRALITY_LEARNING",
-      "stage": "growth_analytics_virality_learning",
-      "status": "PASS_CP89_GROWTH_ANALYTICS_VIRALITY_LEARNING_OFFLINE_TRUTH_BOUND_UNKNOWN_PRESERVING_NON_CAUSAL_NO_STRATEGY_MUTATION_NO_EXTERNAL_WRITE_LIVE_HOLD"
-    },
-    {
-      "id": "M59_ENGAGEMENT_SCHEDULER_RATE_QUALITY_BUDGET",
-      "stage": "engagement_scheduler_rate_quality_budget",
-      "status": "PASS_CP90_ENGAGEMENT_SCHEDULER_RATE_QUALITY_BUDGET_OFFLINE_DETERMINISTIC_KILL_SWITCH_BOUND_CAPABILITY_GATED_FAIL_CLOSED_NO_EXTERNAL_WRITE_LIVE_HOLD"
-    },
-    {
-      "id": "M60_GROWTH_DRY_RUN_ACCEPTANCE_SUITE",
-      "stage": "growth_dry_run_acceptance_suite",
-      "status": "PASS_CP91_GROWTH_DRY_RUN_ACCEPTANCE_OFFLINE_SYNTHETIC_KILL_SWITCH_BOUND_ZERO_EXTERNAL_IO_NO_LIVE_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M61_PILOT_GROWTH_OPERATIONS_MANUAL_SHADOW_PILOT_PLAN",
-      "stage": "pilot_growth_operations_manual_shadow_pilot_plan",
-      "status": "PASS_CP92_PILOT_GROWTH_OPERATIONS_MANUAL_SHADOW_PILOT_PLAN_OFFLINE_SHADOW_PLAN_ONLY_AUTHORIZATION_REQUIRED_ZERO_EXTERNAL_IO_NO_LIVE_AUTHORITY_LIVE_HOLD"
-    },
-    {
-      "id": "M62_META_READ_ONLY_RUNTIME_CONTRACT",
-      "stage": "meta_read_only_runtime_credential_env_contract",
-      "status": "PASS_SA2_1_REAL_IDENTITY_BOUND_SECRET_REDACTED_ZERO_NETWORK_AUTHORITY"
-    }
+    {"id":"M01_RADAR","stage":"RADAR","status":"CP34_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M02_RESEARCH","stage":"research","status":"CP35_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M03_SCORING","stage":"scoring","status":"CP36_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M04_MASTER_DRAFT","stage":"master_draft","status":"CP37_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M05_NATIVE_ADAPT","stage":"native_adaptations","status":"CP38_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M06_VISUAL","stage":"visual","status":"CP49_IDENTITY_V2_RUNTIME_ACTIVE_EXACT_BINDING"},
+    {"id":"M07_QA","stage":"qa","status":"CP49_IDENTITY_V2_EXACT_QA_GATE_ACTIVE"},
+    {"id":"M08_QUEUE","stage":"queue","status":"CP43_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M09_PUBLISHER","stage":"publisher","status":"CP44_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M10_ANALYTICS","stage":"analytics","status":"CP45_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M11_LEARNING","stage":"learning","status":"CP46_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M12_APPROVAL","stage":"approval_dashboard","status":"CP42_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M13_RIGHTS","stage":"image_rights","status":"CP39_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M14_EXPERIMENTS","stage":"experiments","status":"CP47_MINIMAL_EXECUTABLE_SLICE"},
+    {"id":"M15_SOURCE_INGEST","stage":"source_ingest","status":"CP23_CP29_EVIDENCE_BOUND_SOURCE_BYTES_HOLD"},
+    {"id":"M16_OPERATIONS","stage":"installation_configuration_recovery","status":"CP32_PREFLIGHT_MANUAL_LOCKED"},
+    {"id":"M17_REHEARSAL","stage":"synthetic_golden_path_pilot_preflight","status":"CP33_CONTROL_PLANE_PASS_PILOT_VALIDATION_GATES_HOLD"},
+    {"id":"M18_VISUAL_IDENTITY","stage":"versioned_visual_identity","status":"CP49_V2_RUNTIME_ACTIVE_LOCAL_ONLY"},
+    {"id":"M19_META_ADAPTERS","stage":"meta_free_api_adapters","status":"CP50_OFFLINE_REQUEST_COMPILER"},
+    {"id":"M20_META_CONNECTIONS","stage":"meta_connection_profiles_secret_reference_vault","status":"CP51_SECRET_REFERENCE_PROFILE_VAULT_LOCAL_ONLY"},
+    {"id":"M21_META_PREFLIGHT","stage":"meta_connection_preflight_synthetic_provisioning_readback","status":"CP52_SYNTHETIC_PROVISIONING_READBACK_LOCAL_ONLY"},
+    {"id":"M22_META_OPERATOR_PROVISIONING","stage":"meta_operator_provisioning_packet_offline_checklist","status":"CP53_OFFLINE_OPERATOR_PACKET_CHECKLIST"},
+    {"id":"M23_META_TRANSPORT_TWIN","stage":"meta_transport_test_twin_request_signing_boundary","status":"CP54_SYNTHETIC_TRANSPORT_TEST_TWIN_ONLY"},
+    {"id":"M24_META_READ_ONLY_GATE","stage":"meta_connection_preflight_synthetic_provisioning_readback","status":"CP55_READ_ONLY_CONNECTION_GATE_CONTRACT_LOCAL_ONLY"},
+    {"id":"M25_META_LIVE_READ_ONLY_PROBE","stage":"meta_live_read_only_probe_runbook_evidence_capture_contract","status":"CP56_RUNBOOK_EVIDENCE_CAPTURE_CONTRACT_LOCAL_ONLY"},
+    {"id":"M26_META_OFFLINE_EVIDENCE_VALIDATOR","stage":"meta_offline_evidence_bundle_validator_operator_dry_run","status":"CP57_SYNTHETIC_EVIDENCE_BUNDLE_VALIDATOR_DRY_RUN_LOCAL_ONLY"},
+    {"id":"M27_META_PILOT_READINESS","stage":"meta_pilot_readiness_aggregator_live_connection_authorization_gate","status":"CP58_OFFLINE_READINESS_AGGREGATED_LIVE_CONNECTION_HOLD"},
+    {"id":"M28_PILOT_PACKAGE_ACCEPTANCE","stage":"pilot_package_completeness_manifest_final_offline_acceptance_suite","status":"CP59_FINAL_OFFLINE_ACCEPTANCE_PASS_LIVE_GATES_HOLD"},
+    {"id":"M29_OPERATOR_PILOT_HANDOFF","stage":"operator_pilot_handoff_explicit_authorization_packet","status":"CP60_OPERATOR_HANDOFF_READY_AUTHORIZATION_HOLD"},
+    {"id":"M30_CONTROL_PLANE_AUTHORIZATION_INTAKE","stage":"control_plane_promotion_authorization_intake_contract","status":"CP61_AUTHORIZATION_INTAKE_CONTRACT_LOCAL_ONLY_CONTROL_PROMOTION_HOLD"},
+    {"id":"M31_AUTHORIZATION_RECEIPT_VALIDATOR","stage":"authorization_receipt_validator_control_promotion_dry_run","status":"CP62_AUTHORIZATION_RECEIPT_VALIDATOR_DRY_RUN_LOCAL_ONLY_CONTROL_PROMOTION_HOLD"},
+    {"id":"M32_LIVE_READ_ONLY_PROBE_SESSION","stage":"live_read_only_probe_session_envelope_zero_write_recorder_dry_run","status":"CP63_SESSION_ENVELOPE_ZERO_WRITE_RECORDER_DRY_RUN_LOCAL_ONLY_LIVE_HOLD"},
+    {"id":"M33_LIVE_READ_ONLY_PROBE_EVIDENCE_IMPORT","stage":"live_read_only_probe_evidence_import_gate_replay_validator_dry_run","status":"CP64_EVIDENCE_IMPORT_GATE_REPLAY_VALIDATOR_DRY_RUN_LOCAL_ONLY_LIVE_HOLD"},
+    {"id":"M34_LIVE_READ_ONLY_PROBE_EXECUTION_ADMISSION","stage":"live_read_only_probe_execution_admission_gate_operator_preflight_packet","status":"CP65_EXECUTION_ADMISSION_PREFLIGHT_PACKET_LOCAL_ONLY_AUTHORIZATION_REQUIRED_LIVE_HOLD"},
+    {"id":"M35_LIVE_READ_ONLY_PROBE_SINGLE_SESSION_HARNESS","stage":"live_read_only_probe_single_session_execution_harness_dry_run","status":"CP66_SINGLE_SESSION_EXECUTION_HARNESS_DRY_RUN_MOCK_ONLY_LIVE_HOLD"},
+    {"id":"M36_LIVE_READ_ONLY_PROBE_AUTHORIZED_SESSION_REQUEST","stage":"live_read_only_probe_authorized_session_request_packet_operator_handoff","status":"CP67_AUTHORIZED_SESSION_REQUEST_PACKET_HANDOFF_LOCAL_ONLY_AUTHORIZATION_NOT_GRANTED_LIVE_HOLD"},
+    {"id":"M37_LIVE_READ_ONLY_PROBE_SESSION_AUTHORIZATION_RECEIPT","stage":"live_read_only_probe_session_authorization_receipt_intake_validator_dry_run","status":"CP68_SESSION_AUTHORIZATION_RECEIPT_INTAKE_VALIDATOR_DRY_RUN_LOCAL_ONLY_AUTHORITY_NOT_ACTIVATED_LIVE_HOLD"},
+    {"id":"M38_LIVE_READ_ONLY_PROBE_AUTHORITY_ACTIVATION_PRECONDITION_MATRIX","stage":"live_read_only_probe_authority_activation_precondition_matrix_zero_io_dry_run","status":"CP69_AUTHORITY_ACTIVATION_PRECONDITION_MATRIX_ZERO_IO_DRY_RUN_LOCAL_ONLY_LIVE_HOLD"},
+    {"id":"M39_LIVE_READ_ONLY_PROBE_AUTHORITY_ACTIVATION_TRANSACTION","stage":"live_read_only_probe_authority_activation_transaction_dry_run","status":"CP70_AUTHORITY_ACTIVATION_TRANSACTION_DRY_RUN_LOCAL_ONLY_NO_COMMIT_LIVE_HOLD"},
+    {"id":"M40_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_EXPIRY_REVOCATION","stage":"live_read_only_probe_authority_lease_expiry_revocation_dry_run","status":"CP71_AUTHORITY_LEASE_EXPIRY_REVOCATION_DRY_RUN_LOCAL_ONLY_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M41_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_REPLAY_STALE_RECEIPT_REJECTION","stage":"live_read_only_probe_authority_lease_replay_stale_receipt_rejection_dry_run","status":"CP72_AUTHORITY_LEASE_REPLAY_STALE_RECEIPT_REJECTION_DRY_RUN_LOCAL_ONLY_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M42_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECONCILIATION","stage":"live_read_only_probe_authority_lease_terminal_tombstone_reconciliation_dry_run","status":"CP73_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECONCILIATION_DRY_RUN_LOCAL_ONLY_LEDGER_CONSISTENT_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M43_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_REBUILD_RECOVERY","stage":"live_read_only_probe_authority_lease_terminal_tombstone_rebuild_recovery_dry_run","status":"CP74_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_REBUILD_RECOVERY_DRY_RUN_LOCAL_ONLY_EXACT_REBUILD_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M44_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_IDEMPOTENCY_ROLLBACK","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_idempotency_rollback_dry_run","status":"CP75_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_IDEMPOTENCY_ROLLBACK_DRY_RUN_LOCAL_ONLY_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M45_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_CRASH_CONSISTENCY","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_crash_consistency_dry_run","status":"CP76_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_CRASH_CONSISTENCY_DRY_RUN_LOCAL_ONLY_NO_TORN_STATE_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M46_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_CORRUPTION_REJECTION","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_corruption_rejection_dry_run","status":"CP77_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_CORRUPTION_REJECTION_DRY_RUN_LOCAL_ONLY_FAIL_CLOSED_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M47_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_PARTIAL_WRITE_TRUNCATION_REJECTION","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_partial_write_truncation_rejection_dry_run","status":"PASS_CP78_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_PARTIAL_WRITE_TRUNCATION_REJECTION_DRY_RUN_LOCAL_ONLY_FAIL_CLOSED_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M48_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_COMPLETE_WRITE_ATOMIC_VISIBILITY","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_complete_write_atomic_visibility_dry_run","status":"PASS_CP79_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_COMPLETE_WRITE_ATOMIC_VISIBILITY_DRY_RUN_LOCAL_ONLY_NO_TORN_VISIBILITY_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M49_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_CRASH_WINDOW","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_atomic_replace_crash_window_dry_run","status":"PASS_CP80_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_CRASH_WINDOW_DRY_RUN_LOCAL_ONLY_NO_TORN_REPLACE_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M50_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_IDEMPOTENCY","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_atomic_replace_retry_idempotency_dry_run","status":"PASS_CP81_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_IDEMPOTENCY_DRY_RUN_LOCAL_ONLY_EXACTLY_ONCE_ACK_NO_DUPLICATE_REPLACE_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M51_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_EXHAUSTION_FAIL_CLOSED","stage":"live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_atomic_replace_retry_exhaustion_fail_closed_dry_run","status":"PASS_CP82_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_ATOMIC_REPLACE_RETRY_EXHAUSTION_FAIL_CLOSED_DRY_RUN_LOCAL_ONLY_TERMINAL_HOLD_NO_RESURRECTION_NO_DUPLICATE_EFFECT_NO_STORAGE_MUTATION_NO_RUNTIME_AUTHORITY_LIVE_HOLD"},
+    {"id":"M52_GROWTH_CAPABILITY_MATRIX_ENGAGEMENT_API_GATE","stage":"growth_capability_matrix_engagement_api_gate","status":"PASS_CP83_GROWTH_CAPABILITY_MATRIX_ENGAGEMENT_API_GATE_OFFLINE_CONTRACT_LIVE_PERMISSION_HOLD_MANUAL_FALLBACK_NO_EXTERNAL_CONNECTION_LIVE_HOLD"},
+    {"id":"M53_ENGAGEMENT_RADAR","stage":"engagement_radar","status":"PASS_CP84_ENGAGEMENT_RADAR_OFFLINE_DISCOVERY_SCORING_HUMAN_REVIEW_ONLY_NO_POSTING_AUTHORITY_NO_EXTERNAL_WRITE_LIVE_HOLD"},
+    {"id":"M54_INBOUND_REPLY_ENGINE","stage":"inbound_reply_engine","status":"PASS_CP85_INBOUND_REPLY_ENGINE_OFFLINE_CLASSIFICATION_FACT_BOUND_DRAFT_HUMAN_REVIEW_ONLY_NO_POSTING_AUTHORITY_NO_EXTERNAL_WRITE_LIVE_HOLD"},
+    {"id":"M55_OUTBOUND_VALUE_ADD_ENGAGEMENT_ENGINE","stage":"outbound_value_add_engagement_engine","status":"PASS_CP86_OUTBOUND_VALUE_ADD_OFFLINE_COMPOSITION_CAPABILITY_GATED_MANUAL_FALLBACK_HUMAN_REVIEW_ONLY_NO_EXTERNAL_WRITE_LIVE_HOLD"},
+    {"id":"M56_RELATIONSHIP_GRAPH","stage":"relationship_graph","status":"PASS_CP87_RELATIONSHIP_GRAPH_OFFLINE_PUBLIC_NON_SENSITIVE_IDEMPOTENT_CONTINUITY_ONLY_NO_SENSITIVE_PROFILING_NO_EXTERNAL_WRITE_LIVE_HOLD"},
+    {"id":"M57_AMPLIFICATION_ENGINE","stage":"amplification_engine","status":"PASS_CP88_AMPLIFICATION_ENGINE_OFFLINE_MATERIAL_DELTA_DUPLICATE_GUARDED_CAPABILITY_RIGHTS_GATED_MANUAL_FALLBACK_NO_EXTERNAL_WRITE_LIVE_HOLD"},
+    {"id":"M58_GROWTH_ANALYTICS_VIRALITY_LEARNING","stage":"growth_analytics_virality_learning","status":"PASS_CP89_GROWTH_ANALYTICS_VIRALITY_LEARNING_OFFLINE_TRUTH_BOUND_UNKNOWN_PRESERVING_NON_CAUSAL_NO_STRATEGY_MUTATION_NO_EXTERNAL_WRITE_LIVE_HOLD"},
+    {"id":"M59_ENGAGEMENT_SCHEDULER_RATE_QUALITY_BUDGET","stage":"engagement_scheduler_rate_quality_budget","status":"PASS_CP90_ENGAGEMENT_SCHEDULER_RATE_QUALITY_BUDGET_OFFLINE_DETERMINISTIC_KILL_SWITCH_BOUND_CAPABILITY_GATED_FAIL_CLOSED_NO_EXTERNAL_WRITE_LIVE_HOLD"},
+    {"id":"M60_GROWTH_DRY_RUN_ACCEPTANCE_SUITE","stage":"growth_dry_run_acceptance_suite","status":"PASS_CP91_GROWTH_DRY_RUN_ACCEPTANCE_OFFLINE_SYNTHETIC_KILL_SWITCH_BOUND_ZERO_EXTERNAL_IO_NO_LIVE_AUTHORITY_LIVE_HOLD"},
+    {"id":"M61_PILOT_GROWTH_OPERATIONS_MANUAL_SHADOW_PILOT_PLAN","stage":"pilot_growth_operations_manual_shadow_pilot_plan","status":"PASS_CP92_PILOT_GROWTH_OPERATIONS_MANUAL_SHADOW_PILOT_PLAN_OFFLINE_SHADOW_PLAN_ONLY_AUTHORIZATION_REQUIRED_ZERO_EXTERNAL_IO_NO_LIVE_AUTHORITY_LIVE_HOLD"},
+    {"id":"M62_META_READ_ONLY_RUNTIME_CONTRACT","stage":"meta_read_only_runtime_credential_env_contract","status":"PASS_SA2_1_REAL_IDENTITY_BOUND_SECRET_REDACTED_ZERO_NETWORK_AUTHORITY"}
   ],
   "schema_version": "PPOS_MODULE_REGISTRY_V1"
 }
