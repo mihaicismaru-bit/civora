@@ -37,6 +37,10 @@ PUBLIC_ARTICLES_URL = (
     "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/"
     "content/articles.json"
 )
+RUNTIME_MANIFEST_URL = (
+    "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/"
+    "valcea-clar/site/runtime/stiri/manifest.json"
+)
 REVALIDATION_TRIGGER = ROOT / "site" / "http_revalidation_trigger.json"
 DECISION_PATH = ROOT / "site" / "newsroom_decision.json"
 HOLDS_PATH = ROOT / "editorial" / "publication_holds.json"
@@ -276,11 +280,26 @@ def _public_projection_contract(
             for value in decision.get("publishable_story_ids") or []
             if str(value) and str(value) in set(feed_ids) and str(value) not in held_ids
         }
-        expected_archive_ids = set(feed_ids) - expected_current_ids
+        runtime_manifest, runtime_manifest_check = fetch_json(RUNTIME_MANIFEST_URL)
+        authorized_runtime_ids: set[str] = set()
+        if runtime_manifest is not None:
+            authorized_runtime_ids = {
+                str(row.get("id") or "")
+                for row in runtime_manifest.get("stories") or []
+                if isinstance(row, dict)
+                and row.get("id")
+                and row.get("public_ux_authorized") is True
+                and row.get("structured_data_type") == "NewsArticle"
+            }
+        if not authorized_runtime_ids:
+            missing.append("runtime_manifest_authorized_story_set")
+        expected_archive_ids = authorized_runtime_ids - expected_current_ids
         if set(current_public_ids) != expected_current_ids:
             missing.append("current_public_story_ids_match_newsroom_decision")
         if set(archive_public_ids) != expected_archive_ids:
-            missing.append("archive_public_story_ids_match_durable_feed_complement")
+            missing.append("archive_public_story_ids_match_runtime_manifest_complement")
+        if set(public_ids) != authorized_runtime_ids:
+            missing.append("public_story_ids_match_runtime_manifest")
 
     required_id = required_revalidation_story_id()
     if required_id and required_id not in current_public_ids:
