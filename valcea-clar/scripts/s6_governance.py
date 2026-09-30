@@ -111,14 +111,45 @@ def audit()->dict[str,Any]:
         blockers.append(problem("GOVERNANCE_INVARIANT_BROKEN","One or more publication holds are not fail-closed",unsafe_holds))
 
     # Stage contracts already established by S1-S5.
+    delivery_blockers = [
+      row for row in (delivery.get("blockers") or [])
+      if isinstance(row, dict)
+    ]
+    blocker_channels = sorted({
+      str(row.get("channel") or "").strip()
+      for row in delivery_blockers
+      if str(row.get("channel") or "").strip()
+    })
+    site_blockers = [
+      row for row in delivery_blockers
+      if str(row.get("channel") or "").strip() == "site"
+    ]
+    non_site_blockers = [
+      row for row in delivery_blockers
+      if str(row.get("channel") or "").strip() != "site"
+    ]
     checks["s1_delivery"]={
       "edition_id":delivery.get("edition_id"),
       "complete":delivery.get("complete"),
       "fully_delivered":delivery.get("fully_delivered"),
-      "counts":delivery.get("counts")
+      "counts":delivery.get("counts"),
+      "blocker_channels": blocker_channels,
+      "site_blocker_count": len(site_blockers),
+      "channel_backlog_count": len(non_site_blockers),
+      "lane_model": "site_core_and_each_social_channel_are_independent"
     }
-    if delivery.get("complete") is not True:
-        blockers.append(problem("CANONICAL_STAGE_REGRESSION","S1 delivery ledger is no longer reconciled",delivery.get("counts")))
+    if site_blockers:
+        blockers.append(problem(
+            "CANONICAL_STAGE_REGRESSION",
+            "S1 has unresolved SITE delivery blockers",
+            {"counts": delivery.get("counts"), "site_blockers": site_blockers[:20]},
+        ))
+    elif delivery.get("complete") is not True:
+        warnings.append(problem(
+            "CHANNEL_DELIVERY_BACKLOG",
+            "S1 is not fully reconciled because non-site channel deliveries remain pending/blocked; site core stays independently operational",
+            {"counts": delivery.get("counts"), "blocker_channels": blocker_channels},
+        ))
     elif delivery.get("fully_delivered") is not True:
         warnings.append(problem("KNOWN_CHANNEL_MEDIA_BACKLOG","S1 has explicit blocked channel deliveries",delivery.get("counts")))
 
