@@ -2,19 +2,86 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-30T18:44:34+03:00",
+  "generated_at": "2026-09-30T23:21:54+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-09-30T18:42:53+03:00",
-  "task_count": 87,
+  "queue_generated_at": "2026-09-30T23:20:22+03:00",
+  "task_count": 93,
   "primary_match_count": 0,
-  "no_match_count": 26,
-  "unrouted_count": 61,
-  "target_count": 18,
-  "targets_ok": 15,
+  "no_match_count": 28,
+  "unrouted_count": 65,
+  "target_count": 21,
+  "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "06d09f15ec72660f463430dd",
+      "signal_title": "Amenajarea târgului din Olanu, blocată la vot. Patru consilieri au spus nu proiectului",
+      "signal_url": "https://www.impactreal.ro/2026/09/30/amenajarea-targului-modern-din-olanu-blocata-la-vot-patru-consilieri-au-spus-nu-proiectului/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-30T23:03:10+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "9d607a66c8eae65997da874f",
+      "signal_title": "Tiberiu Costea, despre noile proiecte ale comunei Lungești: parc fotovoltaic și centru multifuncțional",
+      "signal_url": "https://www.impactreal.ro/2026/09/30/tiberiu-costea-despre-noile-proiecte-ale-comunei-lungesti-parc-fotovoltaic-si-centru-multifunctional/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-09-30T22:41:06+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 77
+    },
+    {
+      "signal_id": "c4b040cd596a3c4944504123",
+      "signal_title": "FOTO – ACCIDENT MORTAL într-o comună din VÂLCEA",
+      "signal_url": "https://seintamplainvalcea.ro/2026/09/30/foto-accident-mortal-intr-o-comuna-din-valcea/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-30T21:16:46+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "e3de8c151adcd0fdedc9bba1",
+      "signal_title": "Cisnădia face harta locurilor de parcare, inclusiv în Cartierul Arhitecților. Mircea Orlățan: datele ne vor ajuta să planificăm proiectele viitoare",
+      "signal_url": "https://www.turnulsfatului.ro/2026/09/30/cisnadia-face-harta-locurilor-de-parcare-inclusiv-in-cartierul-arhitectilor-mircea-orlatan-datele-ne-vor-ajuta-sa-planificam-proiectele-viitoare/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-09-30T19:34:32+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "9703952416e8d1839f9d312f",
       "signal_title": "Dispensarul medical din Stoenești, modernizat cu aproape 3 milioane de lei",
@@ -507,6 +574,34 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "eefb55810527fc79f23d535a",
+      "signal_title": "Septembrie, lună a investițiilor la Călimănești: proiect de aproape 25 de milioane de lei, școli modernizate și transport public inteligent",
+      "signal_url": "https://ziaruldevalcea.ro/2026/09/septembrie-luna-a-investitiilor-la-calimanesti-proiect-de-aproape-25-de-milioane-de-lei-scoli-modernizate-si-transport-public-inteligent/",
+      "signal_publisher": "Ziarul de Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-09-30T02:05:31+03:00",
+      "verification_route_id": "calimanesti_administration",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-calimanesti-comunicate",
+            "name": "Primăria Orașului Călimănești",
+            "url": "https://www.primaria-calimanesti.ro/anunturi/comunicate.html"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
       "listing_title_identity_rejections": 80
     },
     {
@@ -1806,34 +1901,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "eefb55810527fc79f23d535a",
-      "signal_title": "Septembrie, lună a investițiilor la Călimănești: proiect de aproape 25 de milioane de lei, școli modernizate și transport public inteligent",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/septembrie-luna-a-investitiilor-la-calimanesti-proiect-de-aproape-25-de-milioane-de-lei-scoli-modernizate-si-transport-public-inteligent/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": null,
-      "verification_route_id": "calimanesti_administration",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-calimanesti-comunicate",
-            "name": "Primăria Orașului Călimănești",
-            "url": "https://www.primaria-calimanesti.ro/anunturi/comunicate.html"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "e25ab738cbdcd1f064449118",
       "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
       "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fse-lasa-frigul-fara-caldura%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
@@ -1844,6 +1911,56 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "d7d5c9b07b4f7101b8d1af0c",
+      "signal_title": "Derby-ul Olteniei: SCM Râmnicu Vâlcea -SCM Craiova: 26:26! »",
+      "signal_url": "http://www.realitateavalceana.ro/derby-ul-olteniei-scm-ramnicu-valcea-scm-craiova-2626/",
+      "signal_publisher": "Realitatea Vâlceană",
+      "signal_tier": "T2",
+      "signal_published_at": null,
+      "verification_route_id": "sport",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "scm-rm-valcea",
+            "name": "SCM Râmnicu Vâlcea",
+            "url": "https://scmramnicuvalcea.ro/category/stiri/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cs-valcea-1924-social-feed",
+            "name": "Clubul Sportiv Vâlcea 1924",
+            "url": "https://www.csvalcea.ro/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ajf-valcea-comunicate",
+            "name": "Asociația Județeană de Fotbal Vâlcea",
+            "url": "https://www.frf-ajf.ro/valcea/stiri/comunicate-ajf-1"
+          },
+          "status": "DEGRADED",
+          "error": "HTTPError: HTTP Error 403: Forbidden",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
       "listing_title_identity_rejections": 80
     },
     {
@@ -1886,9 +2003,9 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "a5a88efdae836760f3b22c52",
-      "signal_title": "ASF propune reguli pentru promovarea pensiilor private",
-      "signal_url": "https://www.eurovalcea.ro/2026/09/29/asf-propune-reguli-pentru-promovarea-pensiilor-private/",
+      "signal_id": "8048941a337c209f6eb47452",
+      "signal_title": "CAIR obține reprezentativitate națională pentru patronate",
+      "signal_url": "https://www.eurovalcea.ro/2026/09/30/cair-obtine-reprezentativitate-nationala-pentru-patronate/",
       "signal_publisher": "EuroVâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
@@ -1899,9 +2016,9 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "8048941a337c209f6eb47452",
-      "signal_title": "CAIR obține reprezentativitate națională pentru patronate",
-      "signal_url": "https://www.eurovalcea.ro/2026/09/30/cair-obtine-reprezentativitate-nationala-pentru-patronate/",
+      "signal_id": "612bdd26c89da05dd5e03af1",
+      "signal_title": "Produse din Vâlcea, la festivalul gastronomic „Produs în Oltenia” de la Craiova",
+      "signal_url": "https://www.eurovalcea.ro/2026/09/30/produse-din-valcea-la-festivalul-gastronomic-produs-in-oltenia-de-la-craiova/",
       "signal_publisher": "EuroVâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
@@ -1916,6 +2033,19 @@
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
       "signal_publisher": "Realitatea Vâlceană",
+      "signal_published_at": null,
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "a5a88efdae836760f3b22c52",
+      "signal_title": "ASF propune reguli pentru promovarea pensiilor private",
+      "signal_url": "https://www.eurovalcea.ro/2026/09/29/asf-propune-reguli-pentru-promovarea-pensiilor-private/",
+      "signal_publisher": "EuroVâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
