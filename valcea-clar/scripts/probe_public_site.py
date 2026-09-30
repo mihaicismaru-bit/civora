@@ -38,6 +38,8 @@ PUBLIC_ARTICLES_URL = (
     "content/articles.json"
 )
 REVALIDATION_TRIGGER = ROOT / "site" / "http_revalidation_trigger.json"
+DECISION_PATH = ROOT / "site" / "newsroom_decision.json"
+HOLDS_PATH = ROOT / "editorial" / "publication_holds.json"
 USER_AGENT = "VALCEA-CLAR-Public-Health/2.0 (+https://valceaclar.ro/)"
 ARTIST_UI_MARKERS = (
     "/artisti/",
@@ -93,6 +95,16 @@ def fetch_json(url: str) -> tuple[dict[str, Any] | None, dict[str, Any]]:
         return None, check
     check["ok"] = True
     return payload, check
+
+
+def load_json(path: Path, default: dict[str, Any]) -> dict[str, Any]:
+    if not path.is_file():
+        return default
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+    return value if isinstance(value, dict) else default
 
 
 def canonical_present(html: str, canonical: str) -> bool:
