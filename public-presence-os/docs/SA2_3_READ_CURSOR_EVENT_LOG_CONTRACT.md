@@ -1,6 +1,6 @@
 # S-A2.3 — Incremental Read Cursor + Event Log Contract
 
-Status: SPECIFICATION LOCKED / LOCAL ONLY / LIVE WRITE OFF
+Status: IMPLEMENTED / LOCAL ONLY / LIVE WRITE OFF
 
 This checkpoint defines the persistence-safe boundary that follows S-A2.2 normalized read-only records.
 
@@ -24,9 +24,13 @@ The event row stores only S-A2.2 normalized fields and the source-response SHA-2
 - no deploy;
 - global kill switch remains engaged.
 
+## Implementation
+
+The executable module `src/public_presence_os/meta_read_event_log.py` now provides hash-bound cursors, append-only normalized events, deterministic record fingerprints and idempotent duplicate replay. The cursor advances only after a new accepted event; replay leaves the event set and accepted count unchanged and increments only `duplicate_count`.
+
 ## Recovery
 
-Corrupt sequence, stream mismatch, or hash mismatch fails closed. A duplicate record is not an error and does not create a second accepted event.
+Corrupt sequence, stream mismatch, cursor/event hash mismatch, or persisted duplicate events fail closed. A duplicate normalized record is a deterministic no-op and does not create a second accepted event.
 
 ## Next unit
 
