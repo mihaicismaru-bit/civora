@@ -1,5 +1,5 @@
 {
-  "schema_version": 17,
+  "schema_version": 18,
   "product": "CIVORA / VÂLCEA CLAR",
   "canonical_domain": "valceaclar.ro",
   "execution_owner": "civora_site_engine",
@@ -174,12 +174,15 @@
       "kind": "rapid_t1_structured_event_ingest",
       "workflow": ".github/workflows/valcea-clar-structured-alerts.yml",
       "schedule": [
-        "2-57/5 * * * *"
+        "2,22,42 * * * *"
       ],
       "writes": "valcea-clar/editorial/structured_alert_events.json",
       "facts_registry_write_allowed": false,
       "downstream_fact_writer": ".github/workflows/valcea-clar-fact-kernel.yml",
-      "owner": "site_engine"
+      "owner": "site_engine",
+      "schedule_role": "bounded_polling_with_per_source_deadline",
+      "per_source_deadline_seconds": 90,
+      "no_overlap": true
     },
     {
       "id": "editorial_opportunity_queue",
@@ -543,5 +546,16 @@
       "production_scheduler_ownership"
     ],
     "source_control_map": "valcea-clar/editorial/source_control_map.json"
+  },
+  "optimization_contract": {
+    "version": "1.0",
+    "effective": "2026-09-30",
+    "publication_closure_first": true,
+    "daily_uat_rotation_target": 1,
+    "hot_watch_hourly": true,
+    "channel_blockers_are_lane_local": true,
+    "social_delivery_requires_external_receipt": true,
+    "story_currentness_requires_explicit_validity": true,
+    "social_learning_requires_observed_metrics": true
   }
 }
