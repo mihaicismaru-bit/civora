@@ -55,31 +55,34 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "PASS",
+      "status": "BLOCKED",
       "eligible": 3,
-      "readback_ok": 3,
-      "value": 1.0,
-      "blocker_story_ids": [],
+      "readback_ok": 1,
+      "value": 0.3333,
+      "blocker_story_ids": [
+        "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
+        "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346"
+      ],
       "checks": [
         {
           "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
           "url": "https://valceaclar.ro/stiri/fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
         },
         {
           "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346",
           "url": "https://valceaclar.ro/stiri/fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
         },
         {
           "story_id": "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678",
@@ -96,9 +99,9 @@
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-09-29T23:44:18.647776Z",
+        "updated_local": "2026-09-30T03:20:14.531665Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 89
+        "public_story_count": 87
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
