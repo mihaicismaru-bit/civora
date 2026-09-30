@@ -6,7 +6,8 @@
     "held_story_social_distribution": false,
     "release_requires_material_verified_update": true,
     "normal_story_ready_gate_still_required": true,
-    "hold_survives_recap_and_homepage_rebuild": true
+    "hold_survives_recap_and_homepage_rebuild": true,
+    "continuous_story_duplicate_day_slices_fail_closed": true
   },
   "holds": [
     {
@@ -14,7 +15,12 @@
       "kind": "incomplete_investigation",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Dosarul Olănești–Omniasig rămâne în lucru și nu este un produs editorial complet. Nu se publică, nu se republică și nu se redistribuie până când apare informație nouă, verificată și suficient de materială pentru un articol complet.",
-      "release_when": ["verified_new_material_fact_or_document", "material_public_interest_value_beyond_routine_monitor_update", "investigation_has_sufficient_context_for_reader", "normal_story_ready_gate_passes"],
+      "release_when": [
+        "verified_new_material_fact_or_document",
+        "material_public_interest_value_beyond_routine_monitor_update",
+        "investigation_has_sufficient_context_for_reader",
+        "normal_story_ready_gate_passes"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -24,7 +30,10 @@
       "kind": "superseded_fact_kernel_route",
       "status": "HOLD_SUPERSEDED_BY_STRICT_DOCUMENT_CHAIN",
       "reason": "Ruta derivată numai din registrul HCL este supersedată de Council Fact Kernel v1.",
-      "release_when": ["never_release_this_superseded_story_id", "use_canonical_council_fact_kernel_v1_story_id_instead"],
+      "release_when": [
+        "never_release_this_superseded_story_id",
+        "use_canonical_council_fact_kernel_v1_story_id_instead"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -34,7 +43,13 @@
       "kind": "editorial_integrity_recovery",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Materialul rapid IPJ a inclus fragmente de navigație/interfață capturate eronat drept conținut factual.",
-      "release_when": ["primary_source_article_body_scoped", "navigation_and_page_chrome_fragments_rejected", "minimum_two_material_verified_claims", "editorial_writer_and_integrity_pass", "public_readback_matches_repaired_canonical_story"],
+      "release_when": [
+        "primary_source_article_body_scoped",
+        "navigation_and_page_chrome_fragments_rejected",
+        "minimum_two_material_verified_claims",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_repaired_canonical_story"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -44,7 +59,13 @@
       "kind": "editorial_integrity_recovery",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Ruta DN64 expune fragment de interfață ca afirmație editorială și rămâne blocată până la reconstrucția evidence-ului.",
-      "release_when": ["primary_source_article_body_scoped", "navigation_and_page_chrome_fragments_rejected", "minimum_two_material_verified_claims", "editorial_writer_and_integrity_pass", "public_readback_matches_repaired_canonical_story"],
+      "release_when": [
+        "primary_source_article_body_scoped",
+        "navigation_and_page_chrome_fragments_rejected",
+        "minimum_two_material_verified_claims",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_repaired_canonical_story"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -54,7 +75,14 @@
       "kind": "editorial_integrity_recovery",
       "status": "HOLD_UNTIL_MATERIAL_VERIFIED_UPDATE",
       "reason": "Materialul IPJ Bujoreni conține title echo și fragment trunchiat; necesită evidence curat din article body.",
-      "release_when": ["primary_source_article_body_scoped", "source_title_and_h1_echo_rejected_as_field_evidence", "truncated_or_unbalanced_quote_evidence_rejected", "minimum_two_material_verified_claims", "editorial_writer_and_integrity_pass", "public_readback_matches_repaired_canonical_story_and_og_metadata"],
+      "release_when": [
+        "primary_source_article_body_scoped",
+        "source_title_and_h1_echo_rejected_as_field_evidence",
+        "truncated_or_unbalanced_quote_evidence_rejected",
+        "minimum_two_material_verified_claims",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_repaired_canonical_story_and_og_metadata"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -64,7 +92,10 @@
       "kind": "time_bounded_service_expiry",
       "status": "HOLD_EXPIRED_SERVICE_STATE",
       "reason": "Materialul descrie starea verificată în 23 septembrie 2026 și nu mai poate fi proiectat drept stare curentă după expirarea intervalului verificat.",
-      "release_when": ["never_release_this_date_specific_story_id_as_current_status", "publish_new_verified_service_story_id_for_a_new_date_or_material_road_status"],
+      "release_when": [
+        "never_release_this_date_specific_story_id_as_current_status",
+        "publish_new_verified_service_story_id_for_a_new_date_or_material_road_status"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -74,7 +105,14 @@
       "kind": "document_is_not_editorial_product",
       "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
       "reason": "Titlu administrativ și rezumat generic de document; necesită rescriere jurnalistică completă.",
-      "release_when": ["full_document_and_relevant_annexes_resolved", "reader_consequence_and_budget_destination_explained", "headline_and_dek_are_journalistic_not_register_copy", "fact_kernel_claim_trace_complete", "editorial_writer_and_integrity_pass", "public_readback_matches_rewritten_story"],
+      "release_when": [
+        "full_document_and_relevant_annexes_resolved",
+        "reader_consequence_and_budget_destination_explained",
+        "headline_and_dek_are_journalistic_not_register_copy",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -84,7 +122,14 @@
       "kind": "document_is_not_editorial_product",
       "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
       "reason": "Titlu administrativ și rezumat generic de document; necesită rescriere jurnalistică completă.",
-      "release_when": ["full_document_and_annexes_resolved", "affected_school_network_change_explained", "headline_and_dek_are_journalistic_not_register_copy", "fact_kernel_claim_trace_complete", "editorial_writer_and_integrity_pass", "public_readback_matches_rewritten_story"],
+      "release_when": [
+        "full_document_and_annexes_resolved",
+        "affected_school_network_change_explained",
+        "headline_and_dek_are_journalistic_not_register_copy",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
@@ -94,40 +139,495 @@
       "kind": "document_is_not_editorial_product",
       "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
       "reason": "Titlu administrativ și rezumat generic de document; necesită rescriere jurnalistică completă.",
-      "release_when": ["full_document_resolved", "operator_location_conditions_and_public_interest_context_verified", "headline_and_dek_are_journalistic_not_register_copy", "fact_kernel_claim_trace_complete", "editorial_writer_and_integrity_pass", "public_readback_matches_rewritten_story"],
+      "release_when": [
+        "full_document_resolved",
+        "operator_location_conditions_and_public_interest_context_verified",
+        "headline_and_dek_are_journalistic_not_register_copy",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
       "public_projection": false,
       "social_distribution_allowed": false,
       "remote_historical_posts_do_not_authorize_republication": true
     },
-    {"story_id":"rm-valcea-hcl-313-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-314-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-315-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-316-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-317-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-318-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-319-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-320-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-321-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-322-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-323-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-324-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-325-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-326-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-327-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-328-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-329-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-330-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-331-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-332-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-333-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-334-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-335-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-336-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-337-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-338-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-339-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-340-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-341-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true},
-    {"story_id":"rm-valcea-hcl-342-20260831","kind":"document_is_not_editorial_product","status":"HOLD_PENDING_JOURNALISTIC_REWRITE","reason":"Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.","release_when":["journalistic_rewrite_complete","fact_kernel_claim_trace_complete","editorial_writer_and_integrity_pass","public_readback_matches_rewritten_story"],"public_projection":false,"social_distribution_allowed":false,"remote_historical_posts_do_not_authorize_republication":true}
+    {
+      "story_id": "rm-valcea-hcl-313-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-314-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-315-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-316-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-317-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-318-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-319-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-320-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-321-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-322-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-323-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-324-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-325-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-326-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-327-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-328-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-329-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-330-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-331-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-332-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-333-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-334-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-335-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-336-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-337-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-338-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-339-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-340-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-341-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "rm-valcea-hcl-342-20260831",
+      "kind": "document_is_not_editorial_product",
+      "status": "HOLD_PENDING_JOURNALISTIC_REWRITE",
+      "reason": "Document HCL proiectat ca produs editorial prin titlu administrativ și dek generic; necesită unghi, consecințe, context și fact-kernel jurnalistic.",
+      "release_when": [
+        "journalistic_rewrite_complete",
+        "fact_kernel_claim_trace_complete",
+        "editorial_writer_and_integrity_pass",
+        "public_readback_matches_rewritten_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346",
+      "kind": "duplicate_day_slice_same_rolling_story",
+      "status": "HOLD_DUPLICATE_STORY_ID",
+      "reason": "Același incendiu Iezer/Băile Olănești este o poveste continuă; comunicările pe zile se absorb în rolling story baile-olanesti-incendiu-iezer-13ha-20260925.",
+      "canonical_story_id": "baile-olanesti-incendiu-iezer-13ha-20260925",
+      "release_when": [
+        "only_if_editorial_identity_review_proves_distinct_event",
+        "otherwise_keep_archived_or_redirected_to_canonical_rolling_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    },
+    {
+      "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
+      "kind": "duplicate_day_slice_same_rolling_story",
+      "status": "HOLD_DUPLICATE_STORY_ID",
+      "reason": "Același incendiu Iezer/Băile Olănești este o poveste continuă; comunicările pe zile se absorb în rolling story baile-olanesti-incendiu-iezer-13ha-20260925.",
+      "canonical_story_id": "baile-olanesti-incendiu-iezer-13ha-20260925",
+      "release_when": [
+        "only_if_editorial_identity_review_proves_distinct_event",
+        "otherwise_keep_archived_or_redirected_to_canonical_rolling_story"
+      ],
+      "public_projection": false,
+      "social_distribution_allowed": false,
+      "remote_historical_posts_do_not_authorize_republication": true
+    }
   ]
 }
