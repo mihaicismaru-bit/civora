@@ -27,6 +27,7 @@ _BASE_RENDER_HOME = base.render_home
 TZ = ZoneInfo("Europe/Bucharest")
 EVENTS = base.ROOT / "editorial" / "local_life_events.json"
 STORY_MANIFEST = base.RUNTIME / "stiri" / "manifest.json"
+DECISION = base.ROOT / "site" / "newsroom_decision.json"
 
 
 def is_current(story: dict[str, Any]) -> bool:
@@ -49,6 +50,18 @@ def manifest_current_ids() -> set[str]:
     }
 
 
+def decision_current_ids() -> set[str]:
+    try:
+        decision = base.load(DECISION, {"publishable_story_ids": []})
+    except Exception:
+        return set()
+    return {
+        str(value).strip()
+        for value in decision.get("publishable_story_ids") or []
+        if str(value).strip()
+    }
+
+
 def current_union(
     feed: dict[str, Any], archive: dict[str, Any]
 ) -> tuple[list[dict[str, Any]], set[str]]:
@@ -57,43 +70,23 @@ def current_union(
         story for story in feed.get("stories") or []
         if isinstance(story, dict) and story.get("id")
     ]
-    feed_has_explicit_currentness = any(
-        "active_now" in story or bool(str(story.get("archive_status") or "").strip())
-        for story in feed_rows
-    )
+    feed_ids = {str(story.get("id")) for story in feed_rows if str(story.get("id") or "")}
 
-    # During a canonical continuous-story publication transaction,
-    # render_story_pages.py rematerializes the story manifest before the
-    # current/archive adapter runs. That temporary manifest intentionally has
-    # no active_now/archive_status markers. In that bounded state, the live
-    # feed membership is the authoritative current set; consulting the previous
-    # manifest would archive a just-published story before presentation catches
-    # up. If feed rows ever carry explicit currentness, those markers win.
-    if feed.get("publication_model") == "continuous_story_first" and not feed_has_explicit_currentness:
-        current_ids = {
-            str(story.get("id")) for story in feed_rows
-            if str(story.get("id") or "")
+    # The durable live feed is a transport/catalogue and may retain archive rows.
+    # Currentness comes from the newsroom publication decision. Explicit row
+    # markers are accepted only as a compatibility fallback when no decision set
+    # is available.
+    current_ids = decision_current_ids() & feed_ids
+    if not current_ids:
+        explicit_ids = {
+            str(story.get("id"))
+            for story in feed_rows
+            if is_current(story)
         }
-    else:
-        manifest_ids = manifest_current_ids()
-        current_ids: set[str] = set()
-        for story in feed_rows:
-            sid = str(story.get("id"))
-            if is_current(story) or (
-                "active_now" not in story
-                and not str(story.get("archive_status") or "").strip()
-                and sid in manifest_ids
-            ):
-                current_ids.add(sid)
-
-    # Preserve the base contract as a final fail-safe for older compatible
-    # payloads that do not declare the continuous-story publication model.
-    if not current_ids and not feed_has_explicit_currentness and feed.get("publication_model") != "continuous_story_first":
+        current_ids = explicit_ids
+    if not current_ids and feed.get("publication_model") != "continuous_story_first":
         current_ids = {str(sid) for sid in legacy_live_ids}
 
-    # The lead must come from the current set. Archive rows remain available for
-    # context, but can never outrank a verified current story merely because the
-    # compatibility feed sorts them first.
     stories.sort(
         key=lambda row: (
             0 if str(row.get("id")) in current_ids else 1,
@@ -317,20 +310,7 @@ def self_test() -> None:
     assert is_current({"archive_status": "published_archive"}) is False
     assert is_current({}) is False
 
-    # Regression: a newly admitted story in a canonical continuous-story feed
-    # must remain current while the rematerialized manifest temporarily lacks
-    # current/archive markers.
-    tx_feed = {
-        "publication_model": "continuous_story_first",
-        "stories": [
-            {"id": "existing", "headline": "Existing", "sources": [{"url": "https://example.test/existing"}]},
-            {"id": "newly-published", "headline": "New", "sources": [{"url": "https://example.test/new"}]},
-        ],
-    }
-    tx_rows, tx_current = current_union(tx_feed, {"stories": []})
-    assert {str(row.get("id")) for row in tx_rows} == {"existing", "newly-published"}
-    assert tx_current == {"existing", "newly-published"}
-
+    # Durable feed membership is not itself a currentness signal.
     sample_events = {"events": [
         {"event_id": "e1", "fingerprint": "fp1", "title": "Test Drăgășani", "event_start": "2026-09-24", "start_time": "19:00", "venue": "Casa de Cultură", "locality": "Drăgășani", "category": "teatru", "price": "unknown", "source_url": "https://example.test/e1", "source_tier": "T1", "checked_at": "2026-09-23T17:00:00+03:00", "status": "scheduled"},
         {"event_id": "e2", "fingerprint": "fp2", "title": "Stale", "event_start": "2026-09-24", "venue": "V", "locality": "L", "source_url": "https://example.test/e2", "source_tier": "T1", "checked_at": "2026-09-22T01:00:00+03:00", "status": "scheduled"},
