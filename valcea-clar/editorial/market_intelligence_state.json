@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-09-30T19:17:33Z",
+  "generated_at": "2026-09-30T23:47:56Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -117,12 +117,14 @@
       "registry_status": "ACTIVE_REVERIFY",
       "attention": "REVIEW_REQUIRED",
       "changed_sources": [
+        "ajofm-valcea-statistics",
         "posturi-gov-valcea-all",
         "ejobs-valcea",
         "bestjobs-valcea",
         "linkedin-jobs-valcea"
       ],
       "official_changed_sources": [
+        "ajofm-valcea-statistics",
         "posturi-gov-valcea-all"
       ],
       "degraded_sources": [
@@ -158,7 +160,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
-          "fingerprint": "b3db848af904a68cde6aeb4382361c8918e1b80d9aadd1580d7c63ac59f4390b",
+          "fingerprint": "4209d5399a6f43d3eb9577c0fc1fcdc600b3b232ab5357886a66ff675adb60aa",
           "match_count": 24,
           "matched_terms": [
             "șomaj",
@@ -168,7 +170,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "UNCHANGED"
+          "change": "CHANGED_REVIEW_REQUIRED"
         },
         {
           "id": "posturi-gov-valcea-all",
@@ -179,7 +181,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "3d02d8e7306f265920f89f8a4dba4371ab132376be1f8961ce31bf3db56c8853",
+          "fingerprint": "4595fb39f1e8e24be5e2341d54c9af27848d3ee4696c07ad70ebdbef3f5c155e",
           "match_count": 17,
           "matched_terms": [
             "Vâlcea",
@@ -200,8 +202,8 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "8cabec31614056520f5e1bde2c3e437478ac9820c1a096ec18da039536bf61c8",
-          "match_count": 18,
+          "fingerprint": "ac27d4250f2a491316ba7f8de3f53f2d568ec1d541c8d5b3d025e215f4629045",
+          "match_count": 17,
           "matched_terms": [
             "Joburi",
             "locuri de munca",
@@ -211,7 +213,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1408"
+              "value_text": "1412"
             }
           ],
           "health": "OK",
@@ -249,7 +251,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "938c5c156b3641e5324a16c34435b0dbfa3e71282df80335e0d695d99ede5651",
+          "fingerprint": "fd4d272684049cfdcb466416deaab76cb8bc0a5ceefac6eb155df92c2b9c23f6",
           "match_count": 20,
           "matched_terms": [
             "joburi",
@@ -336,7 +338,7 @@
           ],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "data-gov-finance-datasets",
@@ -356,7 +358,7 @@
           "numeric_signals": [],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "UNCHANGED"
         },
         {
           "id": "onrc-services",
