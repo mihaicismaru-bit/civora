@@ -46,6 +46,7 @@ from newsroom_decide import story_ready  # noqa: E402
 from social_common import is_socially_held  # noqa: E402
 
 CURRENT = VC / "site" / "current_edition.json"
+PUBLIC_MANIFEST = VC / "site" / "runtime" / "stiri" / "manifest.json"
 EVENT = VC / "site" / "story_publication_event.json"
 DECISION = VC / "site" / "newsroom_decision.json"
 STATE = SOCIAL / "instagram_state.json"
@@ -61,7 +62,7 @@ DEFAULT_GRAPH_VERSION = "v26.0"
 DEFAULT_GRAPH_HOST = "graph.facebook.com"
 LIVE_ENABLE_ENV = "VALCEA_IG_TEXT_CARD_LIVE_ENABLED"
 ADAPTER_VERSION = "instagram-editorial-fact-card-v1.1"
-RECOVERY_WINDOW = dt.timedelta(hours=48)
+RECOVERY_WINDOW = dt.timedelta(hours=36)
 CLOCK_SKEW = dt.timedelta(minutes=5)
 
 
@@ -112,6 +113,19 @@ def _parse_timestamp(value: object) -> dt.datetime | None:
     return parsed.astimezone(dt.timezone.utc)
 
 
+def _manifest_publication_times() -> dict[str, dt.datetime]:
+    manifest = load(PUBLIC_MANIFEST, {"stories": []})
+    result: dict[str, dt.datetime] = {}
+    for row in manifest.get("stories") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("id") or "").strip()
+        stamp = _parse_timestamp(row.get("published_at"))
+        if story_id and stamp is not None:
+            result[story_id] = stamp
+    return result
+
+
 def recoverable_recent_story_ids(
     snapshot: dict[str, Any],
     decision: dict[str, Any],
@@ -122,8 +136,9 @@ def recoverable_recent_story_ids(
 
     Recovery runs alongside transient ``new_story_ids``. A story must still be
     publishable in the current newsroom decision, PASS its material-fact gate,
-    remain verified, be free of social hold, and have entered its validity window
-    within 48 hours.
+    remain verified and be free of social hold. Recovery age is anchored to the
+    canonical public publication timestamp when available, preventing older
+    source notices first published today from aging out before social delivery.
     """
     current = now or dt.datetime.now(dt.timezone.utc)
     if current.tzinfo is None:
@@ -133,6 +148,7 @@ def recoverable_recent_story_ids(
         str(value) for value in decision.get("publishable_story_ids") or [] if str(value)
     }
     recovered: list[str] = []
+    publication_times = _manifest_publication_times()
     for item in snapshot.get("items") or []:
         if not isinstance(item, dict):
             continue
@@ -143,7 +159,7 @@ def recoverable_recent_story_ids(
             continue
         if str(item.get("lifecycle_status") or "").strip().lower() != "verified":
             continue
-        observed = _parse_timestamp(item.get("valid_from"))
+        observed = publication_times.get(story_id) or _parse_timestamp(item.get("valid_from"))
         if observed is None:
             continue
         age = current - observed
