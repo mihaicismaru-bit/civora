@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "generatedAt": "2026-09-30T00:40:43.880462+00:00",
+  "generatedAt": "2026-09-30T07:06:49.852325+00:00",
   "policy": {
     "purpose": "record-level-material-change-resolution",
     "failClosed": true,
@@ -10,9 +10,45 @@
     "dedicatedStructuredSnapshotsMayResolveExactCandidates": true
   },
   "summary": {
-    "candidateCount": 0,
+    "candidateCount": 1,
     "unresolvedCount": 0,
     "publishableMaterialFactCount": 0
   },
-  "items": []
+  "items": [
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+      "fingerprint": "e7250b989477828ac3cdc68879ec8c3c57903d0a510493b9e76afbf97ddd0624",
+      "observedAt": "2026-09-30T07:06:32.593745+00:00",
+      "status": "RESOLVED",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": false,
+      "publishMaterialFacts": false,
+      "materialFactAction": "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED",
+      "resolutionType": "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT",
+      "resolvedAt": "2026-09-30T07:06:49.852325+00:00",
+      "dedicatedSnapshotPublishable": true,
+      "resolutionEvidence": {
+        "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+        "sourceFingerprint": "e7250b989477828ac3cdc68879ec8c3c57903d0a510493b9e76afbf97ddd0624",
+        "snapshotFingerprint": "dcaa80d2ffcd61f89da0e2899db83abb8934b984ae29fc4e3fb477d5a8f9aa8d",
+        "rowCount": 5,
+        "interventions": [
+          "DR-14",
+          "DR-18"
+        ]
+      }
+    }
+  ]
 }
