@@ -1,0 +1,33 @@
+{
+  "schema_version": "PPOS_META_READ_EVENT_LOG_POLICY_V1",
+  "checkpoint": "S-A2.3",
+  "parent_checkpoint": "S-A2.2",
+  "mode": "LOCAL_CONTRACT_ONLY",
+  "stream_key": ["platform", "external_id"],
+  "cursor": {
+    "next_sequence_monotonic": true,
+    "last_event_id_required_after_first_accept": true,
+    "accepted_count_required": true,
+    "duplicate_count_required": true,
+    "remote_pagination_cursor_persisted": false
+  },
+  "event": {
+    "append_only": true,
+    "normalized_record_fingerprint": "SHA256",
+    "source_response_sha256_preserved": true,
+    "unknown_values_preserved": true,
+    "duplicate_replay_action": "NOOP"
+  },
+  "fail_closed_on": [
+    "STREAM_IDENTITY_MISMATCH",
+    "NON_MONOTONIC_SEQUENCE",
+    "EVENT_HASH_MISMATCH",
+    "CURSOR_HASH_MISMATCH"
+  ],
+  "authority": {
+    "network_execution": false,
+    "public_write": false,
+    "deploy": false,
+    "kill_switch_must_remain_engaged": true
+  }
+}
