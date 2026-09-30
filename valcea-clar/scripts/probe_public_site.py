@@ -250,10 +250,25 @@ def _public_projection_contract(
             missing.append("projection_generated_at_matches_editorial_feed")
         if articles_doc.get("updated_local") != feed.get("generated_at"):
             missing.append("articles_updated_at_matches_editorial_feed")
-        if set(current_public_ids) != set(feed_ids):
-            missing.append("current_public_story_ids_match_editorial_feed")
-        if set(archive_public_ids) & set(feed_ids):
-            missing.append("archive_public_story_ids_absent_from_editorial_feed")
+        decision = load_json(DECISION_PATH, {"publishable_story_ids": []})
+        holds = load_json(HOLDS_PATH, {"holds": []})
+        held_ids = {
+            str(row.get("story_id") or "")
+            for row in holds.get("holds") or []
+            if isinstance(row, dict)
+            and row.get("public_projection") is False
+            and str(row.get("status") or "").upper() not in {"RELEASED", "CLOSED", "RESOLVED"}
+        }
+        expected_current_ids = {
+            str(value)
+            for value in decision.get("publishable_story_ids") or []
+            if str(value) and str(value) in set(feed_ids) and str(value) not in held_ids
+        }
+        expected_archive_ids = set(feed_ids) - expected_current_ids
+        if set(current_public_ids) != expected_current_ids:
+            missing.append("current_public_story_ids_match_newsroom_decision")
+        if set(archive_public_ids) != expected_archive_ids:
+            missing.append("archive_public_story_ids_match_durable_feed_complement")
 
     required_id = required_revalidation_story_id()
     if required_id and required_id not in current_public_ids:
