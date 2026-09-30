@@ -18,6 +18,8 @@ from typing import Any
 from zoneinfo import ZoneInfo
 
 TZ = ZoneInfo("Europe/Bucharest")
+SOCIAL_DAILY_TARGET_MIN = 2
+SOCIAL_DAILY_TARGET_MAX = 4
 
 MONTHS = {
     "ianuarie": 1,
@@ -128,6 +130,7 @@ def social_interest_gate(
 
 
 def self_test() -> int:
+    assert 0 < SOCIAL_DAILY_TARGET_MIN <= SOCIAL_DAILY_TARGET_MAX
     now = dt.datetime(2026, 8, 18, 0, 30, tzinfo=TZ)
     stale = {
         "section": "MOBILITATE",
