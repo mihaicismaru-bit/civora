@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import signal
 import sys
 import time
 from datetime import datetime
@@ -96,6 +98,58 @@ def collect_heat_interruption_source(
     }
 
 
+class SourceDeadlineExceeded(TimeoutError):
+    """A single structured-alert source exceeded its wall-clock budget."""
+
+
+def _deadline_handler(_signum: int, _frame: Any) -> None:
+    raise SourceDeadlineExceeded("structured alert source wall-clock deadline exceeded")
+
+
+def source_deadline_seconds(source: dict[str, Any]) -> int:
+    raw = source.get("deadline_seconds")
+    if raw in (None, ""):
+        raw = os.getenv("VALCEA_STRUCTURED_ALERT_SOURCE_DEADLINE_SECONDS", "90")
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        value = 90
+    return max(15, min(value, 300))
+
+
+def collect_source_bounded(
+    instance: dict[str, Any],
+    source: dict[str, Any],
+    tz: ZoneInfo,
+    now: datetime,
+) -> dict[str, Any]:
+    """Collect one source with a hard wall-clock deadline.
+
+    Socket-level timeouts are insufficient for PDF parsing or multi-request
+    adapters. On Linux/GitHub Actions, SIGALRM interrupts the whole source call
+    and degrades only that source, allowing the rest of the structured-alert
+    lane to complete and persist.
+    """
+    timeout_seconds = source_deadline_seconds(source)
+    previous_handler = signal.getsignal(signal.SIGALRM)
+    signal.signal(signal.SIGALRM, _deadline_handler)
+    signal.setitimer(signal.ITIMER_REAL, float(timeout_seconds))
+    try:
+        return collect_source(instance, source, tz, now)
+    except SourceDeadlineExceeded as exc:
+        return {
+            "source_id": source.get("id"),
+            "status": "DEGRADED",
+            "error": f"{type(exc).__name__}: {exc}",
+            "deadline_seconds": timeout_seconds,
+            "retryable": True,
+            "events": [],
+        }
+    finally:
+        signal.setitimer(signal.ITIMER_REAL, 0.0)
+        signal.signal(signal.SIGALRM, previous_handler)
+
+
 def collect_source(
     instance: dict[str, Any],
     source: dict[str, Any],
@@ -125,7 +179,7 @@ def run(instance_id: str, output: Path) -> dict[str, Any]:
             flush=True,
         )
         try:
-            observation = collect_source(instance, source, tz, now)
+            observation = collect_source_bounded(instance, source, tz, now)
         except Exception as exc:
             elapsed = time.perf_counter() - started
             print(
@@ -169,6 +223,9 @@ def self_test() -> int:
     assert electricity_adapter.self_test() == 0
     assert "STRUCTURED_ALERT_SOURCE START" in Path(__file__).read_text(encoding="utf-8")
     assert "elapsed_seconds" in Path(__file__).read_text(encoding="utf-8")
+    assert source_deadline_seconds({"deadline_seconds": 90}) == 90
+    assert source_deadline_seconds({"deadline_seconds": 1}) == 15
+    assert source_deadline_seconds({"deadline_seconds": 999}) == 300
 
     tz = ZoneInfo("Europe/Bucharest")
     sample = """
