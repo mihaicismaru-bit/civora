@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "effective": "2026-09-30",
+  "purpose": "Explicit semantic currentness exceptions for durable stories whose route remains public but which must not remain in the live/current set.",
+  "overrides": [
+    {
+      "story_id": "apavil-joburi-fara-experienta-20260818",
+      "current": false,
+      "reason": "Both ANOFM offer validity deadlines in the story (20 and 21 August 2026) have passed.",
+      "closure_condition": "new_official_offer_or_material_followup"
+    },
+    {
+      "story_id": "costesti-iluminat-public-achizitie-20260928",
+      "current": false,
+      "reason": "Offer deadline 28 September 2026 11:00 has passed; keep route as archive and reopen currentness only on award/works-stage delta.",
+      "closure_condition": "award_or_works_stage_delta"
+    },
+    {
+      "story_id": "fast-ipj-depistat-de-politistii-serviciului-rutier1789460882-ddc5052abd",
+      "current": false,
+      "reason": "Dated public-safety brief from 15 September; no current material follow-up keeps it in the live set.",
+      "closure_condition": "material_case_followup"
+    },
+    {
+      "story_id": "fast-ipj-retinut-pentru-24-de-ore1789723053-280c27b878",
+      "current": false,
+      "reason": "Dated public-safety brief from 16 September; no current material follow-up keeps it in the live set.",
+      "closure_condition": "material_case_followup"
+    }
+  ],
+  "policy": {
+    "route_preserved": true,
+    "archive_not_delete": true,
+    "currentness_reopens_only_on_material_delta": true,
+    "explicit_override_does_not_change_factual_story_body": true
+  }
+}
