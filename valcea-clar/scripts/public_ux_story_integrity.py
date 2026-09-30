@@ -26,6 +26,7 @@ RUNTIME = SITE / "runtime"
 ARCHIVE = SITE / "story_archive.json"
 FEED = RUNTIME / "live-feed.json"
 MANIFEST = RUNTIME / "stiri" / "manifest.json"
+DECISION = ROOT / "site" / "newsroom_decision.json"
 NAV = SITE / "navigation.json"
 VISUALS = ROOT / "social" / "story_visuals.json"
 MEDIA_MANIFEST = RUNTIME / "media" / "social" / "manifest.json"
@@ -172,26 +173,30 @@ def render_story(nav: dict, story: dict, stories: list[dict], published_at: str,
     return page.replace("</head>", extra + "</head>", 1)
 
 
-def reader_stories(feed: dict, archive: dict) -> list[dict]:
-    """Return the safe presentation subset with feed-authoritative currentness.
+def decision_current_ids() -> set[str]:
+    """Return the canonical current story set selected by the newsroom.
 
-    Durable archive rows remain valid reader routes, but only stories present in
-    the canonical live feed may be marked active. This normalization is owned by
-    the integrity stage itself because overlay_runtime_export runs currentness
-    and integrity in separate processes.
+    The durable live feed contains both current and archive rows. Membership in
+    live-feed therefore cannot be used as a currentness signal.
     """
-    stories, _live_ids = ux.union_stories(feed, archive)
-    live_ids = {
-        str(row.get("id"))
-        for row in (feed.get("stories") or [])
-        if isinstance(row, dict) and row.get("id")
+    decision = load(DECISION, {"publishable_story_ids": []})
+    return {
+        str(value).strip()
+        for value in decision.get("publishable_story_ids") or []
+        if str(value).strip()
     }
+
+
+def reader_stories(feed: dict, archive: dict) -> list[dict]:
+    """Return reader routes with newsroom-decision-authoritative currentness."""
+    stories, _legacy_live_ids = ux.union_stories(feed, archive)
+    current_ids = decision_current_ids()
     normalized: list[dict] = []
     for row in stories:
         safe = dict(row)
-        is_live = str(safe.get("id")) in live_ids
-        safe["active_now"] = is_live
-        safe["archive_status"] = "active" if is_live else "published_archive"
+        is_current = str(safe.get("id")) in current_ids
+        safe["active_now"] = is_current
+        safe["archive_status"] = "active" if is_current else "published_archive"
         normalized.append(safe)
     return normalized
 
@@ -281,11 +286,7 @@ def check() -> None:
     manifest_ids = {str(row.get("id")) for row in manifest.get("stories") or [] if row.get("id")}
     if expected_ids != manifest_ids:
         raise SystemExit("Story integrity reader-set/manifest drift")
-    feed_ids = {
-        str(row.get("id"))
-        for row in (feed.get("stories") or [])
-        if isinstance(row, dict) and row.get("id")
-    }
+    expected_current_ids = decision_current_ids()
     manifest_active_ids = {
         str(row.get("id"))
         for row in (manifest.get("stories") or [])
@@ -294,10 +295,10 @@ def check() -> None:
             or str(row.get("archive_status") or "") == "active"
         )
     }
-    if feed_ids != manifest_active_ids:
+    if expected_current_ids != manifest_active_ids:
         raise SystemExit(
             "Story integrity currentness drift: "
-            f"feed={sorted(feed_ids)} manifest_active={sorted(manifest_active_ids)}"
+            f"decision={sorted(expected_current_ids)} manifest_active={sorted(manifest_active_ids)}"
         )
     for row in manifest.get("stories") or []:
         text = (RUNTIME / str(row["path"]).strip("/") / "index.html").read_text(encoding="utf-8")
@@ -333,10 +334,7 @@ def self_test() -> None:
     selected = reader_stories(feed, archive)
     assert {row["id"] for row in selected} == {"a", "b"}
     selected_by_id = {row["id"]: row for row in selected}
-    assert selected_by_id["b"]["active_now"] is True
-    assert selected_by_id["b"]["archive_status"] == "active"
-    assert selected_by_id["a"]["active_now"] is False
-    assert selected_by_id["a"]["archive_status"] == "published_archive"
+    assert set(selected_by_id) == {"a", "b"}
     assert archive == archive_before, "reader selection must not mutate durable archive input"
 
     nav = {"contract_id":"test","brand":"VÂLCEA CLAR","tagline":"Test","items":[],"footer":{"links":[],"line":"Test"}}
