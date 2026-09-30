@@ -2,350 +2,41 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_STRUCTURED_ALERT_EVENTS_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-09-15T21:30:54+03:00",
+  "generated_at": "2026-09-30T06:13:06+03:00",
   "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
   "events_are_reader_stories": false,
-  "event_count": 6,
-  "events": [
-    {
-      "event_id": "utility-electricity-9006598b99a26fd2974a",
-      "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-      "source_tier": "T1",
-      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-      "event_start": "2026-09-21T09:00+03:00",
-      "event_end": "2026-09-21T17:00+03:00",
-      "source_time_basis": "official_service_window",
-      "body_sha256": "c7484248c61612b82525b6c4a6057d47eb54c4cf59fd3e1548cf732132a53da3",
-      "structured": {
-        "utility": "electricity",
-        "service_state": "scheduled_interruption",
-        "affected_locality": "Budeşti",
-        "affected_scope": "PTA IAS Budeşti, PTA Satul Nou Racoviţa, PTAB Budeşti 2",
-        "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-        "schedule_start": "2026-09-21",
-        "schedule_end": "2026-09-27",
-        "document_extraction": "pdf_pypdf_layout"
-      },
-      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-      "reader_copy_generated": false
-    },
-    {
-      "event_id": "utility-electricity-80eb41005e4c7ae7171e",
-      "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-      "source_tier": "T1",
-      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-      "event_start": "2026-09-22T09:00+03:00",
-      "event_end": "2026-09-22T17:00+03:00",
-      "source_time_basis": "official_service_window",
-      "body_sha256": "f256ec74b06e45a2843ee09733144b8611abc66175958bd719a96c8648052f29",
-      "structured": {
-        "utility": "electricity",
-        "service_state": "scheduled_interruption",
-        "affected_locality": "Horezu",
-        "affected_scope": "PTCZ Bloc O2-O3 Horezu",
-        "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-        "schedule_start": "2026-09-21",
-        "schedule_end": "2026-09-27",
-        "document_extraction": "pdf_pypdf_layout"
-      },
-      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-      "reader_copy_generated": false
-    },
-    {
-      "event_id": "utility-electricity-9aac35465ce5d68e0219",
-      "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-      "source_tier": "T1",
-      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-      "event_start": "2026-09-23T09:00+03:00",
-      "event_end": "2026-09-23T17:00+03:00",
-      "source_time_basis": "official_service_window",
-      "body_sha256": "e33dbc2c8b0c153d590af4dc74003ca9378808fa68d425b640c31a5f38ec57fc",
-      "structured": {
-        "utility": "electricity",
-        "service_state": "scheduled_interruption",
-        "affected_locality": "Lădeşti",
-        "affected_scope": "PTA Găgeni 1, PTA Găgeni 2",
-        "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-        "schedule_start": "2026-09-21",
-        "schedule_end": "2026-09-27",
-        "document_extraction": "pdf_pypdf_layout"
-      },
-      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-      "reader_copy_generated": false
-    },
-    {
-      "event_id": "utility-electricity-8807e22da002cc15399f",
-      "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-      "source_tier": "T1",
-      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-      "event_start": "2026-09-24T09:00+03:00",
-      "event_end": "2026-09-24T17:00+03:00",
-      "source_time_basis": "official_service_window",
-      "body_sha256": "bf5d539c2029d5541c9b23f046208b584d1dd92bcc17b179c51442e82a4ef8ce",
-      "structured": {
-        "utility": "electricity",
-        "service_state": "scheduled_interruption",
-        "affected_locality": "Ioneşti",
-        "affected_scope": "PTA Bucşani, PTA Foteşti, PTA Guguianca",
-        "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-        "schedule_start": "2026-09-21",
-        "schedule_end": "2026-09-27",
-        "document_extraction": "pdf_pypdf_layout"
-      },
-      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-      "reader_copy_generated": false
-    },
-    {
-      "event_id": "utility-electricity-95437fc2aac404b4f2af",
-      "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-      "source_tier": "T1",
-      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-      "event_start": "2026-09-25T09:00+03:00",
-      "event_end": "2026-09-25T17:00+03:00",
-      "source_time_basis": "official_service_window",
-      "body_sha256": "15756151e9d30436575a6a5e5f9e27304fa3fa7c4c75a197e28f9e45feaea695",
-      "structured": {
-        "utility": "electricity",
-        "service_state": "scheduled_interruption",
-        "affected_locality": "Băile Govora",
-        "affected_scope": "PTA Gătejeşti",
-        "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-        "schedule_start": "2026-09-21",
-        "schedule_end": "2026-09-27",
-        "document_extraction": "pdf_pypdf_layout"
-      },
-      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-      "reader_copy_generated": false
-    },
-    {
-      "event_id": "utility-electricity-302aa56f5a935f2f15c1",
-      "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-      "source_tier": "T1",
-      "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-      "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-      "event_start": "2026-09-26T09:00+03:00",
-      "event_end": "2026-09-26T17:00+03:00",
-      "source_time_basis": "official_service_window",
-      "body_sha256": "9c66c6e3b4fb5476eb9b440fca8e7cd536cd7378f09b6332a3f29b5fb263902c",
-      "structured": {
-        "utility": "electricity",
-        "service_state": "scheduled_interruption",
-        "affected_locality": "Dăeşti",
-        "affected_scope": "PTA Berila",
-        "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-        "schedule_start": "2026-09-21",
-        "schedule_end": "2026-09-27",
-        "document_extraction": "pdf_pypdf_layout"
-      },
-      "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-      "reader_copy_generated": false
-    }
-  ],
+  "event_count": 0,
+  "events": [],
   "sources": [
     {
       "source_id": "igpr-infotrafic",
-      "status": "PASS",
-      "listing_url": "https://politiaromana.ro/ro/info-trafic",
-      "candidates": 0,
-      "events": []
+      "status": "DEGRADED",
+      "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+      "events": [],
+      "elapsed_seconds": 0.183
     },
     {
       "source_id": "apavil-programmed-water-interruptions",
       "status": "PASS",
       "listing_url": "https://apavil.ro/?page_id=962",
       "candidates": 40,
-      "events": []
+      "events": [],
+      "elapsed_seconds": 3.298
     },
     {
       "source_id": "cet-govora-thermal-interruptions",
       "status": "PASS",
       "listing_url": "https://cetgovora.ro/anunturi-cet-govora",
       "candidates": 40,
-      "events": []
+      "events": [],
+      "elapsed_seconds": 2.386
     },
     {
       "source_id": "distributie-oltenia-planned-electricity-interruptions",
-      "status": "PASS",
-      "listing_url": "https://www.distributieoltenia.ro/en/support/planned-maintenance-and-fault-correction/valcea.html",
-      "documents_discovered": 246,
-      "documents_selected": 2,
-      "documents": [
-        {
-          "label": "Valcea - Intreruperi 14.09 - 20.09.2026",
-          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F14.09-20.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2014_09%20-%2020_09_2026%20-%20Valcea.pdf",
-          "content_type": "application/pdf",
-          "extraction_method": "pdf_pypdf_layout",
-          "body_sha256": "608aee80133e6e02026a85c37b759e7684a3cfe2e3765c8eaab1f3ac20e00c7d",
-          "candidates": 0,
-          "events": 0
-        },
-        {
-          "label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-          "content_type": "application/pdf",
-          "extraction_method": "pdf_pypdf_layout",
-          "body_sha256": "60e5d7d777d3983e3fde38d308114320921adb2c77504b6e4f136eb5be4a0d7f",
-          "candidates": 6,
-          "events": 6
-        }
-      ],
-      "events": [
-        {
-          "event_id": "utility-electricity-9006598b99a26fd2974a",
-          "source_id": "distributie-oltenia-planned-electricity-interruptions",
-          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-          "source_tier": "T1",
-          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-          "event_start": "2026-09-21T09:00+03:00",
-          "event_end": "2026-09-21T17:00+03:00",
-          "source_time_basis": "official_service_window",
-          "body_sha256": "c7484248c61612b82525b6c4a6057d47eb54c4cf59fd3e1548cf732132a53da3",
-          "structured": {
-            "utility": "electricity",
-            "service_state": "scheduled_interruption",
-            "affected_locality": "Budeşti",
-            "affected_scope": "PTA IAS Budeşti, PTA Satul Nou Racoviţa, PTAB Budeşti 2",
-            "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-            "schedule_start": "2026-09-21",
-            "schedule_end": "2026-09-27",
-            "document_extraction": "pdf_pypdf_layout"
-          },
-          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-          "reader_copy_generated": false
-        },
-        {
-          "event_id": "utility-electricity-80eb41005e4c7ae7171e",
-          "source_id": "distributie-oltenia-planned-electricity-interruptions",
-          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-          "source_tier": "T1",
-          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-          "event_start": "2026-09-22T09:00+03:00",
-          "event_end": "2026-09-22T17:00+03:00",
-          "source_time_basis": "official_service_window",
-          "body_sha256": "f256ec74b06e45a2843ee09733144b8611abc66175958bd719a96c8648052f29",
-          "structured": {
-            "utility": "electricity",
-            "service_state": "scheduled_interruption",
-            "affected_locality": "Horezu",
-            "affected_scope": "PTCZ Bloc O2-O3 Horezu",
-            "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-            "schedule_start": "2026-09-21",
-            "schedule_end": "2026-09-27",
-            "document_extraction": "pdf_pypdf_layout"
-          },
-          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-          "reader_copy_generated": false
-        },
-        {
-          "event_id": "utility-electricity-9aac35465ce5d68e0219",
-          "source_id": "distributie-oltenia-planned-electricity-interruptions",
-          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-          "source_tier": "T1",
-          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-          "event_start": "2026-09-23T09:00+03:00",
-          "event_end": "2026-09-23T17:00+03:00",
-          "source_time_basis": "official_service_window",
-          "body_sha256": "e33dbc2c8b0c153d590af4dc74003ca9378808fa68d425b640c31a5f38ec57fc",
-          "structured": {
-            "utility": "electricity",
-            "service_state": "scheduled_interruption",
-            "affected_locality": "Lădeşti",
-            "affected_scope": "PTA Găgeni 1, PTA Găgeni 2",
-            "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-            "schedule_start": "2026-09-21",
-            "schedule_end": "2026-09-27",
-            "document_extraction": "pdf_pypdf_layout"
-          },
-          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-          "reader_copy_generated": false
-        },
-        {
-          "event_id": "utility-electricity-8807e22da002cc15399f",
-          "source_id": "distributie-oltenia-planned-electricity-interruptions",
-          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-          "source_tier": "T1",
-          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-          "event_start": "2026-09-24T09:00+03:00",
-          "event_end": "2026-09-24T17:00+03:00",
-          "source_time_basis": "official_service_window",
-          "body_sha256": "bf5d539c2029d5541c9b23f046208b584d1dd92bcc17b179c51442e82a4ef8ce",
-          "structured": {
-            "utility": "electricity",
-            "service_state": "scheduled_interruption",
-            "affected_locality": "Ioneşti",
-            "affected_scope": "PTA Bucşani, PTA Foteşti, PTA Guguianca",
-            "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-            "schedule_start": "2026-09-21",
-            "schedule_end": "2026-09-27",
-            "document_extraction": "pdf_pypdf_layout"
-          },
-          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-          "reader_copy_generated": false
-        },
-        {
-          "event_id": "utility-electricity-95437fc2aac404b4f2af",
-          "source_id": "distributie-oltenia-planned-electricity-interruptions",
-          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-          "source_tier": "T1",
-          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-          "event_start": "2026-09-25T09:00+03:00",
-          "event_end": "2026-09-25T17:00+03:00",
-          "source_time_basis": "official_service_window",
-          "body_sha256": "15756151e9d30436575a6a5e5f9e27304fa3fa7c4c75a197e28f9e45feaea695",
-          "structured": {
-            "utility": "electricity",
-            "service_state": "scheduled_interruption",
-            "affected_locality": "Băile Govora",
-            "affected_scope": "PTA Gătejeşti",
-            "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-            "schedule_start": "2026-09-21",
-            "schedule_end": "2026-09-27",
-            "document_extraction": "pdf_pypdf_layout"
-          },
-          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-          "reader_copy_generated": false
-        },
-        {
-          "event_id": "utility-electricity-302aa56f5a935f2f15c1",
-          "source_id": "distributie-oltenia-planned-electricity-interruptions",
-          "source_name": "Distribuție Oltenia — întreruperi programate Vâlcea",
-          "source_tier": "T1",
-          "source_url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Fseptembrie%2F21.09-27.09%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2021_09%20-%2027_09_2026%20-%20Valcea.pdf",
-          "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
-          "event_start": "2026-09-26T09:00+03:00",
-          "event_end": "2026-09-26T17:00+03:00",
-          "source_time_basis": "official_service_window",
-          "body_sha256": "9c66c6e3b4fb5476eb9b440fca8e7cd536cd7378f09b6332a3f29b5fb263902c",
-          "structured": {
-            "utility": "electricity",
-            "service_state": "scheduled_interruption",
-            "affected_locality": "Dăeşti",
-            "affected_scope": "PTA Berila",
-            "schedule_label": "Valcea - Intreruperi 21.09 - 27.09.2026",
-            "schedule_start": "2026-09-21",
-            "schedule_end": "2026-09-27",
-            "document_extraction": "pdf_pypdf_layout"
-          },
-          "publication_authority": "PRIMARY_STRUCTURED_EVENT_ONLY",
-          "reader_copy_generated": false
-        }
-      ]
+      "status": "DEGRADED",
+      "error": "SourceDeadlineExceeded: structured alert source wall-clock deadline exceeded",
+      "events": [],
+      "elapsed_seconds": 90.0
     }
   ]
 }
