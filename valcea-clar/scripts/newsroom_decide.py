@@ -32,6 +32,7 @@ from temporal_freshness import CONTRACT as TEMPORAL_CONTRACT, durable_story_temp
 STATE = ROOT / "site" / "newsroom_state.json"
 DECISION = ROOT / "site" / "newsroom_decision.json"
 PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
+CURRENTNESS_OVERRIDES = ROOT / "editorial" / "currentness_overrides.json"
 PUBLIC_RUNTIME = ROOT / "site" / "runtime"
 PUBLIC_MANIFEST = PUBLIC_RUNTIME / "stiri" / "manifest.json"
 PUBLIC_BASE = "https://valceaclar.ro"
@@ -84,6 +85,41 @@ def active_publication_holds() -> set[str]:
         if story_id and public_projection is False and status not in {"RELEASED", "CLOSED", "RESOLVED"}:
             held.add(story_id)
     return held
+
+
+def currentness_archive_ids() -> set[str]:
+    """Stories that keep their durable route but must leave the current set."""
+    if not CURRENTNESS_OVERRIDES.is_file():
+        return set()
+    try:
+        document = json.loads(CURRENTNESS_OVERRIDES.read_text(encoding="utf-8"))
+    except Exception:
+        return set()
+    result: set[str] = set()
+    for row in document.get("overrides") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("story_id") or "").strip()
+        if story_id and row.get("current") is False:
+            result.add(story_id)
+    return result
+
+
+def currentness_ok(item: dict, now: datetime) -> tuple[bool, str | None]:
+    story_id = str(item.get("id") or "").strip()
+    if story_id and story_id in currentness_archive_ids():
+        return False, "semantic_currentness_archive_override"
+    raw = str(item.get("valid_until") or "").strip()
+    if raw:
+        try:
+            expiry = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+            if expiry.tzinfo is None:
+                expiry = expiry.replace(tzinfo=TZ)
+            if now.astimezone(TZ) > expiry.astimezone(TZ):
+                return False, "valid_until_expired"
+        except ValueError:
+            pass
+    return True, None
 
 
 def story_ready(item: dict) -> tuple[bool, str]:
@@ -264,6 +300,10 @@ def decide(now: datetime) -> dict:
     publishable: list[dict] = []
     rejected: list[dict] = []
     for item in eligible:
+        current_ok, current_reason = currentness_ok(item, now)
+        if not current_ok:
+            rejected.append({"id": item.get("id"), "reason": current_reason})
+            continue
         ok, reason = story_ready(item)
         if ok:
             publishable.append(canonical_story(item))
@@ -347,6 +387,9 @@ def main() -> int:
         held = dict(full, id="olanesti-bridge-monitor")
         assert story_ready(held) == (False, "editorial_publication_hold")
         assert "olanesti-bridge-monitor" in active_publication_holds()
+        assert currentness_ok({"id":"apavil-joburi-fara-experienta-20260818"}, datetime(2026,9,30,5,30,tzinfo=TZ))[0] is False
+        assert currentness_ok({"id":"future","valid_until":"2026-10-01T00:00:00+03:00"}, datetime(2026,9,30,5,30,tzinfo=TZ))[0] is True
+        assert currentness_ok({"id":"expired","valid_until":"2026-09-29T23:59:00+03:00"}, datetime(2026,9,30,5,30,tzinfo=TZ))[0] is False
 
         url = "https://example.com/document"
         claim_text = (
