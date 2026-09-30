@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "product": "VÂLCEA CLAR / CIVORA",
   "stage": "S6_OPERATIONS_GOVERNANCE",
   "operating_model": "human_governance_with_bounded_automation",
@@ -12,7 +12,9 @@
     "automatic_rollback_forbidden": true,
     "rollback_requires_explicit_human_dispatch": true,
     "runtime_rollback_is_separate_from_code_rollback": true,
-    "alerts_only_for_material_conditions": true
+    "alerts_only_for_material_conditions": true,
+    "channel_failures_are_lane_local": true,
+    "site_core_not_blocked_by_optional_social_backlog": true
   },
   "authority_matrix": {
     "automation_allowed": [
@@ -59,12 +61,14 @@
       "KNOWN_CHANNEL_MEDIA_BACKLOG",
       "LEGACY_DELIVERY_QUARANTINE",
       "OPEN_P2_INCIDENT",
-      "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION"
+      "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION",
+      "CHANNEL_DELIVERY_BACKLOG"
     ],
     "ignore_as_nonincident": [
       "expected_fail_closed_social_hold",
       "editorially_valid_unpublished_candidate",
-      "known_missing_tiktok_media"
+      "known_missing_tiktok_media",
+      "non_site_channel_backlog_with_site_core_healthy"
     ]
   },
   "rollback_policy": {
@@ -103,5 +107,14 @@
       "owner_action"
     ],
     "closed_incident_requires_resolution": true
+  },
+  "lane_policy": {
+    "site_core": "blocking_on_site_integrity_or_site_delivery_failure",
+    "facebook": "lane_local",
+    "instagram": "lane_local",
+    "threads": "lane_local",
+    "tiktok": "lane_local",
+    "analytics": "nonblocking_observability",
+    "rule": "A degraded or blocked non-site channel must not set the whole newsroom to BLOCKED when site core and factual integrity are healthy."
   }
 }
