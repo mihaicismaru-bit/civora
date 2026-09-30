@@ -152,7 +152,7 @@ def parse_date(value: Any) -> dt.datetime | None:
         "decembrie": 12,
     }
     match = re.search(
-        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})(?:\D+(\d{1,2}):(\d{2}))?",
+        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})(?:\D+(\d{1,2})\D+(\d{2}))?",
         lowered,
     )
     if not match:
