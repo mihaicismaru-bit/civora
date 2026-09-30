@@ -39,6 +39,7 @@ STATE = VC / "social" / "facebook_state.json"
 EVENT = VC / "site" / "story_publication_event.json"
 DECISION = VC / "site" / "newsroom_decision.json"
 CURRENT = VC / "site" / "current_edition.json"
+PUBLIC_MANIFEST = VC / "site" / "runtime" / "stiri" / "manifest.json"
 DEFAULT_GRAPH_VERSION = "v26.0"
 ADAPTER = "facebook-text-fallback-v1.1"
 MISSING_PHOTO_REASON = "story_specific_approved_photo_required"
@@ -47,7 +48,7 @@ ENABLE_ENV = "VALCEA_FB_TEXT_FALLBACK_ENABLED"
 PUBLIC_UA = "facebookexternalhit/1.1 (+https://www.facebook.com/externalhit_uatext.php)"
 PUBLIC_PAGE_MAX_BYTES = 750_000
 OG_TITLE_SUFFIX = " — VÂLCEA CLAR"
-RECOVERY_WINDOW = dt.timedelta(hours=48)
+RECOVERY_WINDOW = dt.timedelta(hours=36)
 CLOCK_SKEW = dt.timedelta(minutes=5)
 GITHUB_404_MARKERS = (
     "page not found · github pages",
@@ -106,6 +107,19 @@ def _parse_timestamp(value: object) -> dt.datetime | None:
     return parsed.astimezone(dt.timezone.utc)
 
 
+def _manifest_publication_times() -> dict[str, dt.datetime]:
+    manifest = load(PUBLIC_MANIFEST, {"stories": []})
+    result: dict[str, dt.datetime] = {}
+    for row in manifest.get("stories") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("id") or "").strip()
+        stamp = _parse_timestamp(row.get("published_at"))
+        if story_id and stamp is not None:
+            result[story_id] = stamp
+    return result
+
+
 def recoverable_recent_story_ids(
     snapshot: dict[str, Any],
     decision: dict[str, Any],
@@ -116,8 +130,9 @@ def recoverable_recent_story_ids(
 
     This is deliberately narrower than the full current edition. It exists only
     to recover a missed/failed Facebook attempt after ``new_story_ids`` has been
-    consumed. Legacy inventory cannot become eligible merely because it remains
-    in the edition.
+    consumed. Recovery age is anchored to the canonical public publication time
+    when available, not to the source's valid_from date; otherwise a story first
+    published today from an older source notice could become unrecoverable.
     """
     current = now or dt.datetime.now(dt.timezone.utc)
     if current.tzinfo is None:
@@ -127,6 +142,7 @@ def recoverable_recent_story_ids(
         str(value) for value in decision.get("publishable_story_ids") or [] if str(value)
     }
     recovered: list[str] = []
+    publication_times = _manifest_publication_times()
     for item in snapshot.get("items") or []:
         if not isinstance(item, dict):
             continue
@@ -137,7 +153,7 @@ def recoverable_recent_story_ids(
             continue
         if str(item.get("lifecycle_status") or "").strip().lower() != "verified":
             continue
-        observed = _parse_timestamp(item.get("valid_from"))
+        observed = publication_times.get(story_id) or _parse_timestamp(item.get("valid_from"))
         if observed is None:
             continue
         age = current - observed
