@@ -24,6 +24,11 @@ REQUIRED = {
     "SRC-EU-SOLIDARITY-CALL-2026": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
     "SRC-EU-JUSTICE-GATEWAY": {"EU_DIRECT", "BRUSSELS"},
     "SRC-EU-MFF-2028-2034": {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"},
+    "SRC-EEA-GRANTS-ROMANIA-OVERVIEW": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
+    "SRC-EEA-GRANTS-ROMANIA-NATIONAL-DOCUMENTS": {"EEA_NORWAY", "NATIONAL_FOCAL_POINT"},
+    "SRC-EEA-GRANTS-ROMANIA-EEA-MOU-LEGAL": {"EEA_NORWAY", "LEGAL_FRAMEWORK"},
+    "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU-LEGAL": {"EEA_NORWAY", "LEGAL_FRAMEWORK"},
+    "SRC-MIPE-EEA-NORWAY-LANDING": {"EEA_NORWAY", "NATIONAL_FOCAL_POINT"},
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": {"EEA_NORWAY", "PROGRAMMING_PIPELINE"},
     "SRC-EEA-CSF-ROMANIA-CALLS": {"EEA_NORWAY", "CALL_REGISTRY"},
@@ -57,6 +62,11 @@ OFFICIAL_HOSTS = {
     "SRC-EU-SOLIDARITY-CALL-2026": "youth.europa.eu",
     "SRC-EU-JUSTICE-GATEWAY": "commission.europa.eu",
     "SRC-EU-MFF-2028-2034": "commission.europa.eu",
+    "SRC-EEA-GRANTS-ROMANIA-OVERVIEW": "eeagrants.org",
+    "SRC-EEA-GRANTS-ROMANIA-NATIONAL-DOCUMENTS": "www.eeagrants.ro",
+    "SRC-EEA-GRANTS-ROMANIA-EEA-MOU-LEGAL": "legislatie.just.ro",
+    "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU-LEGAL": "legislatie.just.ro",
+    "SRC-MIPE-EEA-NORWAY-LANDING": "mfe.gov.ro",
     "SRC-EEA-GRANTS-ROMANIA-EEA-MOU": "eeagrants.org",
     "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU": "eeagrants.org",
     "SRC-EEA-CSF-ROMANIA-CALLS": "eeagrants.org",
@@ -71,6 +81,14 @@ OFFICIAL_HOSTS = {
     "SRC-INTERREG-NEXT-BSB": "www.blacksea-cbc.net",
     "SRC-INTERREG-DANUBE": "interreg-danube.eu",
     "SRC-INTERREG-EUROPE": "www.interregeurope.eu",
+}
+
+EEA_NON_CALL_ROOTS = {
+    "SRC-EEA-GRANTS-ROMANIA-OVERVIEW",
+    "SRC-EEA-GRANTS-ROMANIA-NATIONAL-DOCUMENTS",
+    "SRC-EEA-GRANTS-ROMANIA-EEA-MOU-LEGAL",
+    "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU-LEGAL",
+    "SRC-MIPE-EEA-NORWAY-LANDING",
 }
 
 DIRECT_PROGRAMME_FAMILIES = {
@@ -217,6 +235,16 @@ def main():
         mapped = {domain for programme in row.get("programmes") or [] for domain in programme_domains.get(programme, [])}
         if "PROGRAMMING_FUTURE" not in mapped and row["id"] not in ({"SRC-EU-MFF-2028-2034"} | DIRECT_PIPELINE):
             fail(f"pipeline source lacks PROGRAMMING_FUTURE data-plane classification: {row['id']}")
+
+    for source_id in EEA_NON_CALL_ROOTS:
+        row = by_id[source_id]
+        if row.get("material_fact_use") is not False:
+            fail(f"{source_id} framework/discovery root cannot authorize material call facts")
+        if row.get("observation_state") in {"OPEN_CALL", "CURRENT_CALL_REGISTRY"}:
+            fail(f"{source_id} non-call root escaped into call state: {row.get('observation_state')}")
+        note = (row.get("note") or "").lower()
+        if "call" not in note:
+            fail(f"{source_id} note must preserve the call-level authority boundary")
 
     gateway = by_id["SRC-EU-FUNDING-TENDERS-GATEWAY"]
     if gateway.get("material_fact_use") is not False:
