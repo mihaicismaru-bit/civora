@@ -38,6 +38,7 @@ PUBLIC_ARTICLES_URL = (
 PUBLIC_USER_AGENT = "VALCEA-CLAR-Autonomy-Acceptance/1.0 (+https://valceaclar.ro/)"
 PUBLIC_PROJECTION_REPO = "mihaicismaru-bit/valcea-clar"
 PUBLIC_PROJECTION_STRUCTURAL_PATH = "scripts/sync_civora.py"
+RUNTIME_MANIFEST = VC / "site" / "runtime" / "stiri" / "manifest.json"
 
 STRUCTURAL_PATHS = [
     ":(glob).github/workflows/valcea-clar-*.yml",
@@ -166,6 +167,19 @@ def _public_projection_articles() -> tuple[dict[str, dict[str, Any]] | None, dic
         }
     )
     return mapped, evidence
+
+
+def authorized_runtime_story_ids() -> set[str]:
+    """Stories with a durable, public-UX-authorized NewsArticle route right now."""
+    doc = _load(RUNTIME_MANIFEST, {"stories": []})
+    return {
+        str(row.get("id"))
+        for row in doc.get("stories") or []
+        if isinstance(row, dict)
+        and row.get("id")
+        and row.get("public_ux_authorized") is True
+        and row.get("structured_data_type") == "NewsArticle"
+    }
 
 
 def public_http_readback_metric(story_ids: set[str]) -> dict[str, Any]:
@@ -612,7 +626,12 @@ def _rate(receipts: dict[str, str], story_ids: set[str]) -> dict[str, Any]:
 def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
     routes_24h = added_story_routes(now - timedelta(hours=WINDOW_HOURS))
-    autonomous = [row for row in routes_24h if row["autonomous"]]
+    autonomous_all = [row for row in routes_24h if row["autonomous"]]
+    authorized_ids = authorized_runtime_story_ids()
+    autonomous = [row for row in autonomous_all if row["story_id"] in authorized_ids]
+    excluded_after_correction = [
+        row for row in autonomous_all if row["story_id"] not in authorized_ids
+    ]
     story_ids = {row["story_id"] for row in autonomous}
 
     latency_rows: list[dict[str, Any]] = []
@@ -744,6 +763,10 @@ def build_acceptance_snapshot(now: datetime | None = None) -> dict[str, Any]:
         "window_hours": WINDOW_HOURS,
         "autonomous_stories_published_24h": len(autonomous),
         "autonomous_story_ids_24h": sorted(story_ids),
+        "excluded_after_correction_or_hold_24h": [
+            {"story_id": row["story_id"], "published_at_utc": row["published_at_utc"]}
+            for row in excluded_after_correction
+        ],
         "discovery_to_publish_latency": latency,
         "photo_coverage": photo_coverage,
         "public_http_readback": public_http_readback,
@@ -785,6 +808,7 @@ def self_test() -> int:
     assert photo["stories"]["ok"]["image"]["synthetic"] is False
     assert photo["stories"]["synthetic"]["image"]["synthetic"] is True
     assert _rate({"a": "receipt"}, {"a", "b"})["value"] == 0.5
+    assert isinstance(authorized_runtime_story_ids(), set)
     groups = _duplicate_receipts({"a": "x", "b": "x", "c": "y"}, {"a", "b", "c"})
     assert groups == [{"receipt_id": "x", "story_ids": ["a", "b"]}]
     canonical = "https://valceaclar.ro/stiri/test-story/"
