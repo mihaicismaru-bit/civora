@@ -14,19 +14,9 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 1,
-    "autonomous_story_ids_24h": [
-      "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678"
-    ],
+    "autonomous_stories_published_24h": 0,
+    "autonomous_story_ids_24h": [],
     "excluded_after_correction_or_hold_24h": [
-      {
-        "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cb8f59b74a",
-        "published_at_utc": "2026-09-29T15:10:28Z"
-      },
-      {
-        "story_id": "fast-isu-incendiu-izbucnit-in-fondul-forestier-al-localitatii-b-cc7fbe8346",
-        "published_at_utc": "2026-09-29T15:10:28Z"
-      },
       {
         "story_id": "ansambluri-rezidentiale-ramnicu-valcea",
         "published_at_utc": "2026-09-30T03:36:18Z"
@@ -34,71 +24,38 @@
     ],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 1,
-      "published": 1,
-      "stories": [
-        {
-          "story_id": "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678",
-          "seconds": 104,
-          "discovered_at_utc": "2026-09-29T15:08:44Z",
-          "published_at_utc": "2026-09-29T15:10:28Z"
-        }
-      ],
-      "max_seconds": 104,
-      "median_seconds": 104
+      "measured": 0,
+      "published": 0,
+      "stories": [],
+      "max_seconds": null,
+      "median_seconds": null
     },
     "photo_coverage": {
-      "status": "MEASURED",
+      "status": "NO_PUBLISHED_STORIES",
       "real_photo_stories": 0,
-      "published_stories": 1,
-      "value": 0.0,
+      "published_stories": 0,
+      "value": null,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "PASS",
-      "eligible": 1,
-      "readback_ok": 1,
-      "value": 1.0,
-      "blocker_story_ids": [],
-      "checks": [
-        {
-          "story_id": "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678",
-          "url": "https://valceaclar.ro/stiri/fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678/",
-          "projected": true,
-          "http_status": 200,
-          "canonical_ok": true,
-          "headline_ok": true,
-          "ok": true,
-          "error": null
-        }
-      ],
-      "projection_evidence": {
-        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
-        "http_status": 200,
-        "error": null,
-        "updated_local": "2026-09-30T03:36:14.739211Z",
-        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 87
-      },
+      "status": "NO_ELIGIBLE_STORIES",
+      "eligible": 0,
+      "readback_ok": 0,
+      "value": null,
+      "checks": [],
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "MEASURED",
-      "delivered": 1,
-      "eligible": 1,
-      "value": 1.0,
-      "delivered_story_ids": [
-        "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678"
-      ]
+      "status": "NO_ELIGIBLE_STORIES",
+      "delivered": 0,
+      "eligible": 0,
+      "value": null
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "MEASURED",
-      "delivered": 1,
-      "eligible": 1,
-      "value": 1.0,
-      "delivered_story_ids": [
-        "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678"
-      ]
+      "status": "NO_ELIGIBLE_STORIES",
+      "delivered": 0,
+      "eligible": 0,
+      "value": null
     },
     "duplicates": {
       "status": "MEASURED",
