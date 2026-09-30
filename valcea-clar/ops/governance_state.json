@@ -2,24 +2,31 @@
   "schema_version": "1.0",
   "product": "VÂLCEA CLAR",
   "stage": "S6_OPERATIONS_GOVERNANCE",
-  "observed_at": "2026-09-30T00:44:32+00:00",
-  "material_fingerprint_sha256": "6e6301dbcdeeec99b09cfce4ccc2e8eedf0c3da8bdc0c7e80ce68aa5d9482cb0",
-  "policy_version": "1.0",
-  "status": "BLOCKED",
-  "blockers": [
-    {
-      "code": "CANONICAL_STAGE_REGRESSION",
-      "summary": "S1 delivery ledger is no longer reconciled",
-      "evidence": {
-        "delivered": 30,
-        "pending": 7,
-        "blocked": 21,
-        "cancelled": 0,
-        "other": 0
-      }
-    }
-  ],
+  "observed_at": "2026-09-30T03:13:48+00:00",
+  "material_fingerprint_sha256": "f59823b87a69174c9dab9c18730509dffc9926c1cd62e34cddc6d66d9788cfbd",
+  "policy_version": "1.1",
+  "status": "READY_WITH_KNOWN_LIMITATIONS",
+  "blockers": [],
   "warnings": [
+    {
+      "code": "CHANNEL_DELIVERY_BACKLOG",
+      "summary": "S1 is not fully reconciled because non-site channel deliveries remain pending/blocked; site core stays independently operational",
+      "evidence": {
+        "counts": {
+          "delivered": 30,
+          "pending": 7,
+          "blocked": 21,
+          "cancelled": 0,
+          "other": 0
+        },
+        "blocker_channels": [
+          "facebook",
+          "instagram",
+          "threads",
+          "tiktok"
+        ]
+      }
+    },
     {
       "code": "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION",
       "summary": "Historical correction migration is intentionally not claimed complete"
@@ -52,7 +59,16 @@
         "blocked": 21,
         "cancelled": 0,
         "other": 0
-      }
+      },
+      "blocker_channels": [
+        "facebook",
+        "instagram",
+        "threads",
+        "tiktok"
+      ],
+      "site_blocker_count": 0,
+      "channel_backlog_count": 28,
+      "lane_model": "site_core_and_each_social_channel_are_independent"
     },
     "s3_visuals": {
       "stories_ready": 8,
