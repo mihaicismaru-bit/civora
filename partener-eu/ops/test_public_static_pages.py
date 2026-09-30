@@ -76,6 +76,50 @@ assert "DESCHIS" not in expired_card
 assert "Sunt confirmate: open" not in expired_card
 assert module.FAIL_CLOSED_OPEN_STANDFIRST in expired_card
 
+# Exact regression for the 30 September false-green defect: source products may
+# be generated before the official deadline while Pages renders after it.
+with tempfile.TemporaryDirectory() as td:
+    probe_root = Path(td)
+    probe_products = probe_root / "decision_products.json"
+    probe_out = probe_root / "web"
+    probe_products.write_text(
+        json.dumps(
+            {
+                "generatedAt": "2026-09-30T12:45:00Z",
+                "dossiers": [
+                    {
+                        "id": "render-clock-expiry-probe",
+                        "title": "Render clock expiry probe",
+                        "programme": "TEST",
+                        "publicationState": "PUBLISHABLE",
+                        "status": "OPEN",
+                        "statusLabel": "DESCHIS",
+                        "standfirst": "Apel deschis până la termenul oficial.",
+                        "decisionLabel": "ACȚIONEAZĂ",
+                        "decisionAction": "Verifică și depune.",
+                        "quickFacts": [
+                            {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+                            {"label": "Termen", "value": "30 septembrie 2026, 16:00", "confidence": "CONFIRMED"},
+                        ],
+                        "sections": [],
+                        "sources": [],
+                    }
+                ],
+                "news": [],
+            },
+            ensure_ascii=False,
+        ),
+        encoding="utf-8",
+    )
+    render_clock = module.parse_date("2026-09-30T13:05:00Z")
+    assert render_clock is not None
+    probe_manifest = module.build(probe_products, probe_out, as_of=render_clock)
+    assert probe_manifest["currentOpen"] == 0
+    assert probe_manifest["failClosedOpenRefresh"] == 1
+    assert probe_manifest["lifecycleEvaluatedAt"] == render_clock.isoformat()
+    probe_html = (probe_out / "finantari" / "deschise" / "index.html").read_text(encoding="utf-8")
+    assert 'data-dossier-id="render-clock-expiry-probe"' not in probe_html
+
 # Consultation freshness is fail-closed just like OPEN freshness.
 consultation_clock = module.parse_date("2026-09-26T12:00:00Z")
 assert consultation_clock is not None
@@ -247,9 +291,9 @@ with tempfile.TemporaryDirectory() as td:
 
     # OPEN static hub must contain only rows that pass the same current-open gate
     # used by the canonical decision projection.
-    clock = module.parse_date(payload.get("generatedAt"))
+    clock = module.parse_date(manifest.get("lifecycleEvaluatedAt"))
     if clock is None:
-        raise AssertionError("decision products generatedAt is not parseable")
+        raise AssertionError("public lifecycleEvaluatedAt is not parseable")
     expected_open = {
         str(row.get("id") or "")
         for row in publishable

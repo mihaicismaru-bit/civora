@@ -588,11 +588,16 @@ def compact_home_news(
 def build(
     products_path: Path = DEFAULT_PRODUCTS,
     web_root: Path = DEFAULT_WEB,
+    *,
+    as_of: dt.datetime | None = None,
 ) -> dict[str, Any]:
     payload = json.loads(products_path.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
     news = payload.get("news") or []
-    generated = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
+    generated = as_of or dt.datetime.now(dt.timezone.utc)
+    if generated.tzinfo is None:
+        raise ValueError("as_of must include a timezone")
+    generated = generated.astimezone(dt.timezone.utc)
 
     for dirname in GENERATED_DIRS:
         shutil.rmtree(web_root / dirname, ignore_errors=True)
@@ -693,6 +698,7 @@ def build(
     home_payload = {
         "schemaVersion": 1,
         "generatedAt": payload.get("generatedAt"),
+        "lifecycleEvaluatedAt": generated.isoformat(),
         "summary": {
             "dossierCount": len(publishable),
             "openCount": len(open_rows),
@@ -713,6 +719,7 @@ def build(
             "consultationRequiresConfirmedCurrentDeadline": True,
             "expiredOrUnverifiedConsultationRenderedAsReview": True,
             "fullDossiersLazyLoaded": True,
+            "lifecycleFreshnessUsesRenderClock": True,
         },
     }
     home_js = (
@@ -1073,6 +1080,7 @@ def build(
         "schemaVersion": 1,
         "generatedFrom": generated_from,
         "generatedAt": payload.get("generatedAt"),
+        "lifecycleEvaluatedAt": generated.isoformat(),
         "publishableDossiers": len(publishable),
         "currentOpen": len(open_rows),
         "prepare": len(prepare_rows),
@@ -1091,6 +1099,7 @@ def build(
             "queryPagesInSitemap": False,
             "openRequiresConfirmedCurrentDeadline": True,
             "expiredOrUnverifiedOpenRenderedAsReview": True,
+            "lifecycleFreshnessUsesRenderClock": True,
         },
     }
     write_page(
