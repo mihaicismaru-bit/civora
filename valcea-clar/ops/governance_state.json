@@ -2,31 +2,34 @@
   "schema_version": "1.0",
   "product": "VÂLCEA CLAR",
   "stage": "S6_OPERATIONS_GOVERNANCE",
-  "observed_at": "2026-09-30T19:36:21+00:00",
-  "material_fingerprint_sha256": "d912c10fe172875352ccfec6a58bdbf576f9a766444d71d9465b1132dac29d13",
+  "observed_at": "2026-09-30T23:12:30+00:00",
+  "material_fingerprint_sha256": "7e0fb90a526de6a85fbccf619603782e199e00283fda2d4d1a96d4f3958fd155",
   "policy_version": "1.1",
-  "status": "READY_WITH_KNOWN_LIMITATIONS",
-  "blockers": [],
-  "warnings": [
+  "status": "BLOCKED",
+  "blockers": [
     {
-      "code": "CHANNEL_DELIVERY_BACKLOG",
-      "summary": "S1 is not fully reconciled because non-site channel deliveries remain pending/blocked; site core stays independently operational",
+      "code": "CANONICAL_STAGE_REGRESSION",
+      "summary": "S1 has unresolved SITE delivery blockers",
       "evidence": {
         "counts": {
-          "delivered": 20,
+          "delivered": 18,
           "pending": 11,
-          "blocked": 27,
+          "blocked": 24,
           "cancelled": 0,
           "other": 0
         },
-        "blocker_channels": [
-          "facebook",
-          "instagram",
-          "threads",
-          "tiktok"
+        "site_blockers": [
+          {
+            "delivery_id": "84432b72cd5c06f32d1ffa4f",
+            "article_id": "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678",
+            "channel": "site",
+            "blocker": "unconfirmed_delivery"
+          }
         ]
       }
-    },
+    }
+  ],
+  "warnings": [
     {
       "code": "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION",
       "summary": "Historical correction migration is intentionally not claimed complete"
@@ -50,24 +53,25 @@
       "unsafe": []
     },
     "s1_delivery": {
-      "edition_id": "2026-09-30-evening",
+      "edition_id": "2026-10-01-morning",
       "complete": false,
       "fully_delivered": false,
       "counts": {
-        "delivered": 20,
+        "delivered": 18,
         "pending": 11,
-        "blocked": 27,
+        "blocked": 24,
         "cancelled": 0,
         "other": 0
       },
       "blocker_channels": [
         "facebook",
         "instagram",
+        "site",
         "threads",
         "tiktok"
       ],
-      "site_blocker_count": 0,
-      "channel_backlog_count": 38,
+      "site_blocker_count": 1,
+      "channel_backlog_count": 34,
       "lane_model": "site_core_and_each_social_channel_are_independent"
     },
     "s3_visuals": {
@@ -100,7 +104,7 @@
       "valid": true
     },
     "public_runtime": {
-      "edition_id": "2026-09-30-evening",
+      "edition_id": "2026-10-01-morning",
       "story_routes": 87,
       "ux_routes": 124,
       "safe_story_count": 87
