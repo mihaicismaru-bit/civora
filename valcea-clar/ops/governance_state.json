@@ -2,34 +2,31 @@
   "schema_version": "1.0",
   "product": "VÂLCEA CLAR",
   "stage": "S6_OPERATIONS_GOVERNANCE",
-  "observed_at": "2026-09-30T23:12:30+00:00",
-  "material_fingerprint_sha256": "7e0fb90a526de6a85fbccf619603782e199e00283fda2d4d1a96d4f3958fd155",
+  "observed_at": "2026-10-01T02:21:36+00:00",
+  "material_fingerprint_sha256": "6cf5b5c75f181926e583a71719a1be4f3c12b1c523f6165a1167cb00c13a4597",
   "policy_version": "1.1",
-  "status": "BLOCKED",
-  "blockers": [
+  "status": "READY_WITH_KNOWN_LIMITATIONS",
+  "blockers": [],
+  "warnings": [
     {
-      "code": "CANONICAL_STAGE_REGRESSION",
-      "summary": "S1 has unresolved SITE delivery blockers",
+      "code": "CHANNEL_DELIVERY_BACKLOG",
+      "summary": "S1 is not fully reconciled because non-site channel deliveries remain pending/blocked; site core stays independently operational",
       "evidence": {
         "counts": {
-          "delivered": 18,
+          "delivered": 20,
           "pending": 11,
-          "blocked": 24,
+          "blocked": 27,
           "cancelled": 0,
           "other": 0
         },
-        "site_blockers": [
-          {
-            "delivery_id": "84432b72cd5c06f32d1ffa4f",
-            "article_id": "fast-isu-incendiu-izbucnit-la-o-gospodarie-din-localitatea-lapu-b5068b7678",
-            "channel": "site",
-            "blocker": "unconfirmed_delivery"
-          }
+        "blocker_channels": [
+          "facebook",
+          "instagram",
+          "threads",
+          "tiktok"
         ]
       }
-    }
-  ],
-  "warnings": [
+    },
     {
       "code": "INCOMPLETE_HISTORICAL_CORRECTION_MIGRATION",
       "summary": "Historical correction migration is intentionally not claimed complete"
@@ -57,21 +54,20 @@
       "complete": false,
       "fully_delivered": false,
       "counts": {
-        "delivered": 18,
+        "delivered": 20,
         "pending": 11,
-        "blocked": 24,
+        "blocked": 27,
         "cancelled": 0,
         "other": 0
       },
       "blocker_channels": [
         "facebook",
         "instagram",
-        "site",
         "threads",
         "tiktok"
       ],
-      "site_blocker_count": 1,
-      "channel_backlog_count": 34,
+      "site_blocker_count": 0,
+      "channel_backlog_count": 38,
       "lane_model": "site_core_and_each_social_channel_are_independent"
     },
     "s3_visuals": {
