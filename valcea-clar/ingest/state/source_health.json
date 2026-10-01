@@ -1,20 +1,20 @@
 {
   "schemaVersion": "1.0",
   "status": "DEGRADED_PARTIAL_SOURCE_SUCCESS",
-  "observedAt": "2026-10-01T06:09:45.380623+00:00",
+  "observedAt": "2026-10-01T13:32:56.613343+00:00",
   "summary": {
     "registered": 33,
-    "ok": 24,
-    "failed": 9,
+    "ok": 23,
+    "failed": 10,
     "skipped": 0,
-    "semanticChangeCandidates": 2
+    "semanticChangeCandidates": 3
   },
   "sources": [
     {
       "id": "SRC-SPARTAN-ECONOMEDIA-2026-05",
       "tier": "T2",
       "url": "https://economedia.ro/sparta-deschide-o-noua-locatie-la-ramnicu-valcea-in-luna-mai.html",
-      "observedAt": "2026-10-01T06:09:45.380634+00:00",
+      "observedAt": "2026-10-01T13:32:56.613355+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://economedia.ro/spartan-deschide-o-noua-locatie-la-ramnicu-valcea-in-luna-mai.html",
@@ -25,13 +25,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:45.380634+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:32:56.613355+00:00"
     },
     {
       "id": "SRC-SPARTAN-MONEYBUZZ-2026-05",
       "tier": "T2",
       "url": "https://moneybuzz.ro/spartan-investitii-de-4-milioane-de-lei-anul-acesta-a-deschis-restaurantul-cu-numarul-58/",
-      "observedAt": "2026-10-01T06:09:45.860558+00:00",
+      "observedAt": "2026-10-01T13:32:56.930641+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -46,41 +46,39 @@
       "id": "SRC-LOSTERIA-ZIARUL-VALCEA-2026-07",
       "tier": "T2",
       "url": "https://ziaruldevalcea.ro/2026/07/losteria-di-stefan-isi-deschide-portile-la-buleta-mihaesti-gustul-autentic-al-italiei-ajunge-in-valcea/",
-      "observedAt": "2026-10-01T06:09:46.001220+00:00",
-      "health": "OK",
-      "httpStatus": 200,
-      "finalUrl": "https://ziaruldevalcea.ro/2026/07/losteria-di-stefan-isi-deschide-portile-la-buleta-mihaesti-gustul-autentic-al-italiei-ajunge-in-valcea/",
-      "contentType": "text/html; charset=UTF-8",
-      "title": "L'Osteria di Ștefan își deschide porțile la Buleta - Mihăești! Gustul autentic al Italiei ajunge în Vâlcea - Ziarul de Vâlcea",
-      "semanticSha256": "40978289e50478a6fb86a7e36808bba424821d58d5f395d05b36662d8d56439a",
-      "textLength": 4444,
+      "observedAt": "2026-10-01T13:32:57.084029+00:00",
+      "health": "FAILED",
+      "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
-      "semanticHashChanged": true,
-      "lastSuccessfulAt": "2026-10-01T06:09:46.001220+00:00"
+      "semanticHashChanged": false,
+      "semanticSha256": "40978289e50478a6fb86a7e36808bba424821d58d5f395d05b36662d8d56439a",
+      "lastSuccessfulAt": "2026-10-01T06:09:46.001220+00:00",
+      "title": "L'Osteria di Ștefan își deschide porțile la Buleta - Mihăești! Gustul autentic al Italiei ajunge în Vâlcea - Ziarul de Vâlcea",
+      "finalUrl": "https://ziaruldevalcea.ro/2026/07/losteria-di-stefan-isi-deschide-portile-la-buleta-mihaesti-gustul-autentic-al-italiei-ajunge-in-valcea/"
     },
     {
       "id": "SRC-LOSTERIA-VALCEA-EXPRES-2026-07",
       "tier": "T2",
       "url": "https://valceaexpres.ro/local/l-osteria-di-stefan-se-a-deschis-la-buleta-mihaesti-aducand-gustul-italiei-in-valcea",
-      "observedAt": "2026-10-01T06:09:47.552698+00:00",
+      "observedAt": "2026-10-01T13:32:57.248613+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://valceaexpres.ro/local/l-osteria-di-stefan-se-a-deschis-la-buleta-mihaesti-aducand-gustul-italiei-in-valcea",
       "contentType": "text/html; charset=utf-8",
       "title": "L'Osteria di Ștefan se a deschis la Buleta - Mihăești, aducând gustul Italiei în Vâlcea | Vâlcea Expres",
-      "semanticSha256": "a21c5fe53fed8d84967bff4d6a5c72f826d7eb5eb4cc1f8443b2e595f14aa41e",
-      "textLength": 3523,
+      "semanticSha256": "6196368ca5b96f41cec5bef24f9f5625debf40928dba2e44c71d77ed6213e6e7",
+      "textLength": 3426,
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
-      "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:47.552698+00:00"
+      "semanticHashChanged": true,
+      "lastSuccessfulAt": "2026-10-01T13:32:57.248613+00:00"
     },
     {
       "id": "SRC-DAMICI-CONTACT",
       "tier": "T1",
       "url": "https://www.damici.ro/contact-damici/",
-      "observedAt": "2026-10-01T06:09:47.947180+00:00",
+      "observedAt": "2026-10-01T13:32:57.595609+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.damici.ro/contact-damici/",
@@ -91,13 +89,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:47.947180+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:32:57.595609+00:00"
     },
     {
       "id": "SRC-DAMICI-RISTORANTE",
       "tier": "T1",
       "url": "https://www.damici.ro/ristorante-damici/",
-      "observedAt": "2026-10-01T06:09:48.825584+00:00",
+      "observedAt": "2026-10-01T13:32:59.136137+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.damici.ro/ristorante-damici/",
@@ -108,13 +106,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:48.825584+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:32:59.136137+00:00"
     },
     {
       "id": "SRC-DAMICI-TAVERNA",
       "tier": "T1",
       "url": "https://www.damici.ro/taverna-damici/",
-      "observedAt": "2026-10-01T06:09:49.694311+00:00",
+      "observedAt": "2026-10-01T13:32:59.788830+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.damici.ro/taverna-damici/",
@@ -125,13 +123,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:49.694311+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:32:59.788830+00:00"
     },
     {
       "id": "SRC-DAMICI-RISTORANTE-MENU",
       "tier": "T1",
       "url": "https://www.damici.ro/meniu-ristorante-damici/",
-      "observedAt": "2026-10-01T06:09:50.568334+00:00",
+      "observedAt": "2026-10-01T13:33:00.662886+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.damici.ro/meniu-ristorante-damici/",
@@ -142,13 +140,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:50.568334+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:00.662886+00:00"
     },
     {
       "id": "SRC-DAMICI-TAVERNA-MENU",
       "tier": "T1",
       "url": "https://www.damici.ro/meniu-taverna-damici/",
-      "observedAt": "2026-10-01T06:09:51.835685+00:00",
+      "observedAt": "2026-10-01T13:33:02.087363+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.damici.ro/meniu-taverna-damici/",
@@ -159,13 +157,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:51.835685+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:02.087363+00:00"
     },
     {
       "id": "SRC-STREET-PUB",
       "tier": "T1",
       "url": "https://www.streetpub.ro/",
-      "observedAt": "2026-10-01T06:09:53.060156+00:00",
+      "observedAt": "2026-10-01T13:33:03.236543+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.streetpub.ro/",
@@ -176,13 +174,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:53.060156+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:03.236543+00:00"
     },
     {
       "id": "SRC-RESTAURANT-CASTEL",
       "tier": "T1",
       "url": "https://www.castelrestaurant.ro/",
-      "observedAt": "2026-10-01T06:09:54.209003+00:00",
+      "observedAt": "2026-10-01T13:33:04.202832+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.castelrestaurant.ro/",
@@ -193,13 +191,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:54.209003+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:04.202832+00:00"
     },
     {
       "id": "SRC-OLD-CITY-GARDEN",
       "tier": "T1",
       "url": "https://www.oldcitygarden.ro/",
-      "observedAt": "2026-10-01T06:09:55.337694+00:00",
+      "observedAt": "2026-10-01T13:33:05.297723+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.oldcitygarden.ro/",
@@ -210,13 +208,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:55.337694+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:05.297723+00:00"
     },
     {
       "id": "SRC-AUTENTIC",
       "tier": "T1",
       "url": "https://www.autenticrestaurant.ro/",
-      "observedAt": "2026-10-01T06:09:55.620680+00:00",
+      "observedAt": "2026-10-01T13:33:05.757443+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.autenticrestaurant.ro/",
@@ -227,13 +225,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:55.620680+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:05.757443+00:00"
     },
     {
       "id": "SRC-BULEVARD-VALCEA-RO",
       "tier": "T2",
       "url": "https://valcea.ro/ro/regiuni/ramnicu-valcea/mancare-si-bautura/restaurant-bulevard",
-      "observedAt": "2026-10-01T06:09:56.523821+00:00",
+      "observedAt": "2026-10-01T13:33:06.673378+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://valcea.ro/ro/regiuni/ramnicu-valcea/mancare-si-bautura/restaurant-bulevard",
@@ -244,13 +242,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:56.523821+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:06.673378+00:00"
     },
     {
       "id": "SRC-GALLO-NERO-VALCEA-RO",
       "tier": "T2",
       "url": "https://valcea.ro/ro/regiuni/ramnicu-valcea/mancare-si-bautura/gallo-nero",
-      "observedAt": "2026-10-01T06:09:57.359076+00:00",
+      "observedAt": "2026-10-01T13:33:07.461127+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://valcea.ro/ro/regiuni/ramnicu-valcea/mancare-si-bautura/gallo-nero",
@@ -261,13 +259,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:57.359076+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:07.461127+00:00"
     },
     {
       "id": "SRC-GALLO-NERO-CYLEX",
       "tier": "T3",
       "url": "https://ramnicu-valcea.cylex.ro/firma/gallo%2Bnero%2Brm.%2Bvalcea-1202057.html",
-      "observedAt": "2026-10-01T06:09:58.136570+00:00",
+      "observedAt": "2026-10-01T13:33:08.234756+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -278,7 +276,7 @@
       "id": "SRC-GALLO-NERO-OFFICIAL",
       "tier": "T1",
       "url": "https://www.gallo-nero.ro/",
-      "observedAt": "2026-10-01T06:09:58.280056+00:00",
+      "observedAt": "2026-10-01T13:33:08.386874+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.gallo-nero.ro/",
@@ -289,13 +287,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "TO_PROBE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:09:58.280056+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:08.386874+00:00"
     },
     {
       "id": "SRC-LA-TRATTORIA-OFFICIAL",
       "tier": "T1",
       "url": "https://www.la-trattoria.ro/",
-      "observedAt": "2026-10-01T06:10:00.018162+00:00",
+      "observedAt": "2026-10-01T13:33:10.147347+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.la-trattoria.ro/",
@@ -306,13 +304,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "TO_PROBE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:00.018162+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:10.147347+00:00"
     },
     {
       "id": "SRC-LA-TRATTORIA-MIRROR",
       "tier": "T3",
       "url": "https://www.restaurants10.com/RO/R%C3%A2mnicu-V%C3%A2lcea/290440561301709/La-Trattoria---Valcea",
-      "observedAt": "2026-10-01T06:10:01.340063+00:00",
+      "observedAt": "2026-10-01T13:33:11.470673+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -323,7 +321,7 @@
       "id": "SRC-GOFRERIA-RG",
       "tier": "T3",
       "url": "https://fr.restaurantguru.com/Gofreria-Ramnicu-Valcea",
-      "observedAt": "2026-10-01T06:10:01.465611+00:00",
+      "observedAt": "2026-10-01T13:33:11.554027+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -334,24 +332,24 @@
       "id": "SRC-CARSMA-RG",
       "tier": "T3",
       "url": "https://restaurantguru.com/CarSma-Cafe-Ramnicu-Valcea",
-      "observedAt": "2026-10-01T06:10:01.585490+00:00",
+      "observedAt": "2026-10-01T13:33:11.638522+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://restaurantguru.com/CarSma-Cafe-Ramnicu-Valcea",
       "contentType": "text/html; charset=UTF-8",
       "title": "CarSma Café, Râmnicu Vâlcea - Restaurant menu, prices and reviews",
-      "semanticSha256": "ab2029226d011e71e43dd616e1a48f95624a4b1e019b61e8a7007bd5deb70cbc",
-      "textLength": 3025,
+      "semanticSha256": "cc330473ca549927854ff009b5ae4a65a7e8b86b19ea9e70d02fa401c170fb5e",
+      "textLength": 3024,
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": true,
-      "lastSuccessfulAt": "2026-10-01T06:10:01.585490+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:11.638522+00:00"
     },
     {
       "id": "SRC-TERASA-TRIUMPH-RG",
       "tier": "T3",
       "url": "https://fr.restaurantguru.com/Terasa-Triumph-Ramnicu-Valcea",
-      "observedAt": "2026-10-01T06:10:01.799349+00:00",
+      "observedAt": "2026-10-01T13:33:11.824242+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -362,24 +360,24 @@
       "id": "SRC-ARBUSTO-RG",
       "tier": "T3",
       "url": "https://de.restaurantguru.com/Arbusto-Coffee-Shop-Ramnicu-Valcea",
-      "observedAt": "2026-10-01T06:10:01.834293+00:00",
+      "observedAt": "2026-10-01T13:33:11.858621+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://de.restaurantguru.com/Arbusto-Coffee-Shop-Ramnicu-Valcea",
       "contentType": "text/html; charset=UTF-8",
       "title": "Arbusto Coffee - Centru, Râmnicu Vâlcea - Speisekarte, Preise und Bewertungen",
-      "semanticSha256": "e528a3465f9f58a470cc09997202f1498d87de6854f6b1400fa90c81cf50a459",
-      "textLength": 4214,
+      "semanticSha256": "01f67f7cea7abc866c32719a051e981dc523c865b5bb16bec78008cccd8d2601",
+      "textLength": 4215,
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
-      "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:01.834293+00:00"
+      "semanticHashChanged": true,
+      "lastSuccessfulAt": "2026-10-01T13:33:11.858621+00:00"
     },
     {
       "id": "SRC-BEAN-BELT-RG",
       "tier": "T3",
       "url": "https://fr.restaurantguru.com/Bean-Belt-Coffee-Ramnicu-Valcea",
-      "observedAt": "2026-10-01T06:10:02.072249+00:00",
+      "observedAt": "2026-10-01T13:33:12.122373+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -390,7 +388,7 @@
       "id": "SRC-GYROS-TIME",
       "tier": "T1",
       "url": "https://gyros-time.ro/about-us/contact/",
-      "observedAt": "2026-10-01T06:10:02.105929+00:00",
+      "observedAt": "2026-10-01T13:33:12.162338+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://gyros-time.ro/about-us/contact/",
@@ -401,13 +399,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:02.105929+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:12.162338+00:00"
     },
     {
       "id": "SRC-RESTAURANT-QUEEN",
       "tier": "T1",
       "url": "https://www.restaurantqueen.ro/contact/",
-      "observedAt": "2026-10-01T06:10:03.898724+00:00",
+      "observedAt": "2026-10-01T13:33:13.850998+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.restaurantqueen.ro/contact/",
@@ -418,13 +416,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:03.898724+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:13.850998+00:00"
     },
     {
       "id": "SRC-KYOS-SEMPRE-MIRROR",
       "tier": "T3",
       "url": "https://www.findglocal.com/RO/R%C3%A2mnicu-V%C3%A2lcea/1665850853690044/Kyos-Cuisine%E2%80%A2Bar",
-      "observedAt": "2026-10-01T06:10:04.121748+00:00",
+      "observedAt": "2026-10-01T13:33:14.117913+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -435,7 +433,7 @@
       "id": "SRC-FLAVIA-FAMEUP",
       "tier": "T3",
       "url": "https://fameup.com/en/flavia/",
-      "observedAt": "2026-10-01T06:10:04.213045+00:00",
+      "observedAt": "2026-10-01T13:33:14.160584+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://fameup.com/en/flavia/",
@@ -446,13 +444,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:04.213045+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:14.160584+00:00"
     },
     {
       "id": "SRC-ANDRA-SOCIALVEINS",
       "tier": "T3",
       "url": "https://socialveins.com/influencer/instagram/andraflenchescatusanu",
-      "observedAt": "2026-10-01T06:10:04.895046+00:00",
+      "observedAt": "2026-10-01T13:33:14.781368+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 503: Service Unavailable",
       "lastKnownGoodPreserved": true,
@@ -467,7 +465,7 @@
       "id": "SRC-VALCEZA-LINKTREE",
       "tier": "T3",
       "url": "https://linktr.ee/valceza",
-      "observedAt": "2026-10-01T06:10:05.277633+00:00",
+      "observedAt": "2026-10-01T13:33:15.400468+00:00",
       "health": "FAILED",
       "error": "HTTPError: HTTP Error 403: Forbidden",
       "lastKnownGoodPreserved": true,
@@ -478,7 +476,7 @@
       "id": "AUTO-T1-c50df461819c",
       "tier": "T1",
       "url": "https://www.clubwinners.ro/",
-      "observedAt": "2026-10-01T06:10:05.329281+00:00",
+      "observedAt": "2026-10-01T13:33:15.459367+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.clubwinners.ro/",
@@ -489,13 +487,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:05.329281+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:15.459367+00:00"
     },
     {
       "id": "AUTO-T1-ab1827e5a6cc",
       "tier": "T1",
       "url": "https://www.hanulhaiducilor-munteni.ro/",
-      "observedAt": "2026-10-01T06:10:08.709309+00:00",
+      "observedAt": "2026-10-01T13:33:18.966709+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://www.hanulhaiducilor-munteni.ro/",
@@ -506,13 +504,13 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:08.709309+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:18.966709+00:00"
     },
     {
       "id": "AUTO-T1-b386fdca4d34",
       "tier": "T1",
       "url": "https://restaurante-ok.ro/",
-      "observedAt": "2026-10-01T06:10:09.871247+00:00",
+      "observedAt": "2026-10-01T13:33:19.992158+00:00",
       "health": "OK",
       "httpStatus": 200,
       "finalUrl": "https://restaurante-ok.ro/",
@@ -523,7 +521,7 @@
       "lastKnownGoodPreserved": true,
       "registryStatus": "ACTIVE",
       "semanticHashChanged": false,
-      "lastSuccessfulAt": "2026-10-01T06:10:09.871247+00:00"
+      "lastSuccessfulAt": "2026-10-01T13:33:19.992158+00:00"
     }
   ]
 }
