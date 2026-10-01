@@ -1,20 +1,17 @@
 {
   "schema_version": "1.0",
   "type": "VENUE_SOURCE_CHANGE_REVIEW",
-  "source_id": "petros-official-contact",
-  "source_url": "https://gyrospetros.ro/contact/",
+  "source_id": "petros-home-prices",
+  "source_url": "https://gyrospetros.ro/",
   "source_kind": "official_site",
   "status": "OPEN",
-  "first_observed_at": "2026-08-15T06:34:39.659244Z",
+  "first_observed_at": "2026-10-01T06:34:23.181609Z",
   "last_observed_at": "2026-10-01T06:34:23.181609Z",
-  "previous_semantic_sha256": "09f2ccebcccc5668cdc048e98883c49390570fb88cc2865e4ff75952f21b9e39",
-  "current_semantic_sha256": "0e9bc4ef5e9e30f856a93a7cd0c679dccb1afa67370a02e4932b4b3e7a6b3f6f",
+  "previous_semantic_sha256": "6b14feff7873a482930f35db29dc6b8289959d70b88db31a4a376a04f82e5adb",
+  "current_semantic_sha256": "109d769ed5b14715e4bf671977adaa5372044eb87ec330c647c3b365aca67438",
   "potentially_impacted_fields": [
-    "address",
-    "phone",
-    "email",
-    "opening_hours",
-    "delivery_hours"
+    "menu_item",
+    "price"
   ],
   "material_fact_autoupdate_allowed": false,
   "required_resolution": "Reverify the changed address, hours, menu, prices, operator or other supported facts against the source before rebuilding the public projection."
