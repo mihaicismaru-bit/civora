@@ -2,19 +2,219 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-10-01T03:01:42+03:00",
+  "generated_at": "2026-10-01T08:40:41+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-10-01T03:00:05+03:00",
-  "task_count": 93,
+  "queue_generated_at": "2026-10-01T08:39:04+03:00",
+  "task_count": 95,
   "primary_match_count": 0,
-  "no_match_count": 27,
+  "no_match_count": 29,
   "unrouted_count": 66,
   "target_count": 21,
   "targets_ok": 17,
   "results": [
+    {
+      "signal_id": "a2073a6a5a1c8dbcec39905f",
+      "signal_title": "Gyan, actorul din Ecuador care joacă la Teatrul din Sibiu, a venit pentru un proiect și a rămas de patru ani. „Noi suntem oamenii de știință ai emoțiilor”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/10/01/gyan-actorul-din-ecuador-care-joaca-la-teatrul-din-sibiu-a-venit-pentru-un-proiect-si-a-ramas-de-patru-ani-noi-suntem-oamenii-de-stiinta-ai-emotiilor/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-01T08:31:42+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "9edbd8d4f49a3e04ee5b1a1e",
+      "signal_title": "S-a schimbat planul pentru Pasajul Gârlești. Primăria Craiova a preluat proiectul și pregătește licitația",
+      "signal_url": "https://jurnalulolteniei.ro/s-a-schimbat-planul-pentru-pasajul-garlesti-primaria-craiova-a-preluat-proiectul-si-pregateste-licitatia/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-01T08:27:50+03:00",
+      "verification_route_id": "administration_projects",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "prefectura-valcea",
+            "name": "Instituția Prefectului — Județul Vâlcea",
+            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "cj-valcea-anunturi",
+            "name": "Consiliul Județean Vâlcea",
+            "url": "https://cjvalcea.ro/categorie/anunturi/"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-rm-valcea-comunicate",
+            "name": "Primăria Municipiului Râmnicu Vâlcea",
+            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
+          "documents_examined": 0
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "romsilva-valcea-torrents",
+            "name": "Regia Națională a Pădurilor — Romsilva",
+            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "f5716b8588e11381b92ef1ad",
+      "signal_title": "Sibienii merg tot mai puțin cu bicicleta, deși au mai multe piste și de două ori mai multe biciclete publice: cu 21% mai puțini pe malul Cibinului, de exemplu",
+      "signal_url": "https://www.turnulsfatului.ro/2026/10/01/sibienii-merg-tot-mai-putin-cu-bicicleta-desi-au-mai-multe-piste-si-de-doua-ori-mai-multe-biciclete-publice-cu-21-mai-putini-pe-malul-cibinului-de-exemplu/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-10-01T08:21:09+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 78
+    },
+    {
+      "signal_id": "26d0605358cec9993966512c",
+      "signal_title": "Bolojan: Grindeanu, cel mai bun premier care nu deranjează",
+      "signal_url": "https://jurnalulolteniei.ro/bolojan-grindeanu-cel-mai-bun-premier-care-nu-deranjeaza/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-01T08:03:57+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "ed6ae1ad32391a80bbfa6466",
+      "signal_title": "Comunicat de presă privind implementarea proiectului “Reabilitarea ecologica a râului Balasan în vederea atingerii obiectivelor de mediu”",
+      "signal_url": "https://jurnalulolteniei.ro/comunicat-de-presa-privind-implementarea-proiectului-reabilitarea-ecologica-a-raului-balasan-in-vederea-atingerii-obiectivelor-de-mediu/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-01T08:00:00+03:00",
+      "verification_route_id": "environment_weather",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "7cddf52f4445027cfb694c33",
+      "signal_title": "Nicușor Dan exclude AUR de la guvernare! Decizia momentului",
+      "signal_url": "https://jurnalulolteniei.ro/nicusor-dan-exclude-aur-de-la-guvernare-decizia-momentului/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-01T06:52:43+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "4879e9693bd349b80ce8af87",
       "signal_title": "Validarea contului la cazino online: între automatizare și intervenție umană",
@@ -1052,19 +1252,6 @@
       "listing_title_identity_rejections": 79
     },
     {
-      "signal_id": "34105712d59c3f6b48a85c26",
-      "signal_title": "Campusul dual al Sibiului va fi inaugurat pe 7 octombrie. Rectorul ULBS: „Am vrut ca inaugurarea să fie sinonimă cu utilizarea campusului”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/29/campusul-dual-al-sibiului-va-fi-inaugurat-pe-7-octombrie-rectorul-ulbs-am-vrut-ca-inaugurarea-sa-fie-sinonima-cu-utilizarea-campusului/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-09-29T17:17:52+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "168e40b6eacfa6f58db1349f",
       "signal_title": "Eficientizare Școală Bodești, Comuna Bărbătești",
       "signal_url": "https://www.impactreal.ro/2026/09/29/eficientizare-scoala-bodesti-comuna-barbatesti/",
@@ -1235,67 +1422,6 @@
           "status": "DEGRADED",
           "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
           "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "52a91e23bf0da6cbd6e9a774",
-      "signal_title": "Referendum la Rășinari în 8 noiembrie, dacă propunerea primarului trece de Consiliul Local. „Sunteți de acord cu exploatarea minieră de pe Valea Dobra?”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/29/referendum-la-rasinari-in-8-noiembrie-daca-propunerea-primarului-trece-de-consiliul-local-sunteti-de-acord-cu-exploatarea-miniera-de-pe-valea-dobra/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-29T15:19:12+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
         }
       ],
       "publication_authority": "NONE",
@@ -1504,19 +1630,6 @@
       "listing_title_identity_rejections": 77
     },
     {
-      "signal_id": "77ca63866b52611d8564aa24",
-      "signal_title": "Primarii din Vâlcea își pun specialiștii la comun. ACoR construiește o soluție pentru comunele care nu pot ține singure pasul cu urbanismul",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/29/primarii-din-valcea-isi-pun-specialistii-la-comun-acor-construieste-o-solutie-pentru-comunele-care-nu-pot-tine-singure-pasul-cu-urbanismul/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-29T11:19:32+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "0b98e4c47b5db0b0572c0cef",
       "signal_title": "Două vernisaje de artă, joi, 1 octombrie, la Galeriile Cozia și Galeria Artex din Râmnicu Vâlcea",
       "signal_url": "https://curierulderamnic.ro/2026/09/29/doua-vernisaje-de-arta-joi-1-octombrie-la-galeriile-cozia-si-galeria-artex-din-ramnicu-valcea/",
@@ -1535,19 +1648,6 @@
       "signal_url": "https://ziaruldevalcea.ro/2026/09/vlad-baltateanu-s-a-predat-in-elvetia-suspectul-in-cazul-crimei-din-valcea-urmeaza-sa-fie-adus-in-romania/",
       "signal_publisher": "Ziarul de Vâlcea",
       "signal_published_at": "2026-09-29T10:12:27+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "b55d8420f2b97261a97d6f56",
-      "signal_title": "Final de fugă pentru iubitul Valentinei: s-a predat în Elveția, după ce tânăra a fost găsită într-o valiză pe Olt",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/29/final-de-fuga-pentru-iubitul-valentinei-s-a-predat-in-elvetia-dupa-ce-tanara-a-fost-gasita-intr-o-valiza-pe-olt/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-29T08:50:59+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
