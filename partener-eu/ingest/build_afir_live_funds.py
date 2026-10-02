@@ -99,11 +99,13 @@ def find_counter_item(corpus: dict[str, Any]) -> dict[str, Any]:
     raise ValueError("AFIR live-funds counter was not found in the corpus")
 
 
-def parse_eur(value: str) -> str:
+def parse_eur(value: str) -> str | None:
     raw = clean_cell(value).upper().replace("EUR", "").replace("\u00a0", " ").strip()
     raw = re.sub(r"\s+", "", raw)
     if not raw:
         raise ValueError("empty EUR value")
+    if raw in {"-", "–", "—", "N/A", "N/D"}:
+        return None
     if "," in raw:
         raw = raw.replace(".", "").replace(",", ".")
     else:
@@ -172,8 +174,11 @@ def parse_rows(table_rows: list[list[Any]]) -> list[dict[str, Any]]:
     return parsed
 
 
-def decimal_total(rows: list[dict[str, Any]], field: str) -> str:
-    total = sum((Decimal(row[field]) for row in rows), Decimal("0"))
+def decimal_total(rows: list[dict[str, Any]], field: str) -> str | None:
+    values = [row.get(field) for row in rows]
+    if any(value is None for value in values):
+        return None
+    total = sum((Decimal(str(value)) for value in values), Decimal("0"))
     return f"{total:.2f}"
 
 
