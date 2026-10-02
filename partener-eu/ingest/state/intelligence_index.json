@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-02T07:09:38Z",
+  "generatedAt": "2026-10-02T07:10:15Z",
   "readiness": "DEGRADED_FAIL_CLOSED",
   "policy": {
     "purpose": "unified-search-and-evidence-index",
@@ -34,7 +34,7 @@
       "observedAt": "2026-10-02T06:00:21.677643+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 1.15,
+        "ageHours": 1.16,
         "maxAgeHours": 4
       },
       "itemCount": 32,
@@ -60,7 +60,7 @@
       "observedAt": "2026-10-02T01:48:01.056716+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 5.36,
+        "ageHours": 5.37,
         "maxAgeHours": 8
       },
       "itemCount": 30,
@@ -84,16 +84,16 @@
       "dependencyScopes": [
         "MIPE_MANAGED_PROGRAMMES"
       ],
-      "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
-      "observedAt": "2026-10-02T07:06:54.587349+00:00",
+      "status": "OK",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 0.05,
+        "ageHours": 0.36,
         "maxAgeHours": 4
       },
-      "itemCount": 57,
-      "sourceAvailable": false,
-      "lastKnownGoodPreserved": true,
+      "itemCount": 129,
+      "sourceAvailable": true,
+      "lastKnownGoodPreserved": false,
       "failClosed": true
     },
     {
@@ -113,7 +113,7 @@
       "observedAt": "2026-10-02T05:53:54.934152Z",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 1.26,
+        "ageHours": 1.27,
         "maxAgeHours": 6
       },
       "itemCount": 60,
@@ -1157,7 +1157,7 @@
       "fingerprint": "33c2e6870c3471788bf3dcc36a2d5bfc238b76859bdaf7af0701d0163b4a71ef",
       "observedAt": "2026-08-21T03:57:46.837709+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1187,7 +1187,7 @@
       "fingerprint": "a0033a3aa9fb4ba227ac0fc1713964c5540df477cf512a2b2f2ca575c5b272d2",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1207,6 +1207,36 @@
       ]
     },
     {
+      "id": "mipe-fc665427ceec750c5a1d187a",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "01 octombrie 2026 Programul Dezvoltare Durabilă și Tranziție Justă: 236,89 milioane de euro, fonduri UE, transmise către ACP pentru a fi solicitate spre rambursare Comisiei Europene",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/programul-dezvoltare-durabila-si-tranzitie-justa-23689-milioane-de-euro-fonduri-ue-transmise-catre-acp-pentru-a-fi-solicitate-spre-rambursare-comisiei-europene",
+      "fingerprint": "fb16c63be946f02d60d0ec1e1e7b258f93a6f80fc97d82238ab751ada7949902",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/programul-dezvoltare-durabila-si-tranzitie-justa-23689-milioane-de-euro-fonduri-ue-transmise-catre-acp-pentru-a-fi-solicitate-spre-rambursare-comisiei-europene",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-2cf1e8474d1b16676852815e",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1217,7 +1247,7 @@
       "fingerprint": "cb1fe8f88a1ce142553e73a38985b6fb8d61d8330aa11b3b9ad7acdf14371926",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1247,7 +1277,7 @@
       "fingerprint": "c51ab61cc0218448fa1acff702adeb08da6a8b572e1317d102185e0e8ee0fb7d",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1277,7 +1307,7 @@
       "fingerprint": "ab66129d7edda76cbc9ba03ca24bddf696b38db6578959ea643a8445815695ee",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1307,7 +1337,7 @@
       "fingerprint": "5431f36416d8d230cc3cebdf1e57f88e4d1f06c2af0d2b2123269148b360515e",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1327,6 +1357,96 @@
       ]
     },
     {
+      "id": "mipe-e8d942ae7ad703d5fb0f87da",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Apelul de tip necompetitiv „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică” finanțat din Prioritatea 7. Creșterea calității ofertei de educație și formare profesională pentru asigurarea echității sistemului și o mai bună adaptare la dinamica pieței muncii și la provocările inovării și progresului tehnologic, Obiectiv specific: ESO4.5.",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-competitiv-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica-finantat-din-prioritatea-7-cres",
+      "fingerprint": "b2be5d7b137cc4ad4d3277180449da644c2af38bae2afb62e9a64d50194ec81f",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-competitiv-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didactic-auxiliar-prin-finantarea-primelor-de-cariera-didactica-finantat-din-prioritatea-7-cres",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-e5a4658421ea6ca7ddc1010a",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Apelul de tip non-competitiv Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive finanțat din Prioritatea: 6 Prevenirea părăsirii timpurii a școlii și creșterea accesului și a participării grupurilor dezavantajate la educație, Acțiunea: 6.f.4 Organizarea unor oportunități variate de dezvoltare profesională pentru personalul didactic, în vederea asigurării unui sistem de educație incluziv",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-finantat-din-prioritatea-6-prevenirea-parasirii-timpurii-a-scol",
+      "fingerprint": "4a6e6ff2dd154249121a58975284c52fb89476948fe56935ab93dbca86098cb1",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-finantat-din-prioritatea-6-prevenirea-parasirii-timpurii-a-scol",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-1de1b3c59f2cce25f96e3f24",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Apelurile de tip competitiv „Servicii de sprijin pentru incluziunea socială a persoanelor fără adăpost” finanțate din Programul Incluziune și Demnitate Socială 2021-2027, Prioritatea P08",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/ghiduri_pids/apelurile-de-tip-competitiv-servicii-de-sprijin-pentru-incluziunea-sociala-a-persoanelor-fara-adapost-finantate-din-programul-incluziune-si-demnitate-sociala-2021-2027-prioritatea-p",
+      "fingerprint": "f144f223049911602b4c6fcb0433f97bc4df52c0e2173715a03ae61935fd1182",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/ghiduri_pids/apelurile-de-tip-competitiv-servicii-de-sprijin-pentru-incluziunea-sociala-a-persoanelor-fara-adapost-finantate-din-programul-incluziune-si-demnitate-sociala-2021-2027-prioritatea-p",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-0eac7b36c2441aa1583880b6",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1337,7 +1457,7 @@
       "fingerprint": "ac2ec7d9536a55b1620e3e4c9fc67e9e87216a63138ac8ed976b10cdad295daf",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1367,7 +1487,7 @@
       "fingerprint": "5359af28970acad048f42bd053fbdc81faab1efb2c8fa738fc20402edafdddf1",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1387,6 +1507,336 @@
       ]
     },
     {
+      "id": "mipe-33327cf4f56a5151076b25dd",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Activarea potențialului antreprenorial al tinerilor – ITI Delta Dunării",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii",
+      "fingerprint": "f5b48f272a5b88028227f7046d29cac3b16a630feb61bb13d155dc4edacd11a1",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-27066f4e3a346ce2ed56c2f7",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Activarea potențialului antreprenorial al tinerilor – ITI Microregiunea Țara Făgărașului",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-microregiunea-tara-fagarasului",
+      "fingerprint": "4808878ef21089e22f6bbea955d0e10bc114d7298758bc50711b7e9538953f97",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-microregiunea-tara-fagarasului",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-f5051a5cf87e403861372791",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Condiții Specifice “Sprijin pentru stimularea ocupării prin furnizarea de măsuri active în pachete de servicii integrate – ITI Valea Jiului",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-conditii-specifice-sprijin-pentru-stimularea-ocuparii-prin-furnizarea-de-masuri-active-in-pachete-de-servicii-integrate-iti-valea-jiului",
+      "fingerprint": "a866f7d4421a21550af87878ef232dcdaaa5155696bfd8a86b58a34badd05a2e",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-conditii-specifice-sprijin-pentru-stimularea-ocuparii-prin-furnizarea-de-masuri-active-in-pachete-de-servicii-integrate-iti-valea-jiului",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-f3963d14a4453960ad8e8b1e",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Conturi personale de învățare – Inovare prin formare",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-conturi-personale-de-invatare-inovare-prin-formare",
+      "fingerprint": "4e4b5c2e60e15ada8241d1999a9fd514f354e8ee5ba243636fce274c66849272",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-conturi-personale-de-invatare-inovare-prin-formare",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-e4c1935f693b156b536db3aa",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Creșterea participării femeilor pe piața muncii prin măsuri de sprijin acordate angajatorilor",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-cresterea-participarii-femeilor-pe-piata-muncii-prin-masuri-de-sprijin-acordate-angajatorilor",
+      "fingerprint": "b05516e482fbd39812fc15f0dc166b97e665a6147f80ae5db96d605f8a77357b",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-cresterea-participarii-femeilor-pe-piata-muncii-prin-masuri-de-sprijin-acordate-angajatorilor",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-0049e222183fdc4371153b76",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Sprijin financiar suplimentar destinat studenților cu oportunități reduse care participă la mobilități studențești Erasmus+",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-ghidul-solicitantului-sprijin-financiar-suplimentar-destinat-studentilor-cu-oportunitati-reduse-care-participa-la-mobilitati-studentesti-erasmus-2",
+      "fingerprint": "5802ce3774a56d63597b46242f767412c42519155a7fe0929f86eb588d574dcf",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-ghidul-solicitantului-sprijin-financiar-suplimentar-destinat-studentilor-cu-oportunitati-reduse-care-participa-la-mobilitati-studentesti-erasmus-2",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-8c603c46b31af4e316594096",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Sprijin pentru stimularea ocupării prin furnizarea de măsuri active în pachete de servicii integrate – ITI Delta Dunării",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-stimularea-ocuparii-prin-furnizarea-de-masuri-active-in-pachete-de-servicii-integrate-iti-delta-dunarii",
+      "fingerprint": "8ef439ace15e9d83f5a9c3f6cc399b8d92d473ba8ed8b057d21100d270836b30",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-stimularea-ocuparii-prin-furnizarea-de-masuri-active-in-pachete-de-servicii-integrate-iti-delta-dunarii",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-f9ba113c8533c882649249c9",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Sprijin pentru stimularea ocupării prin furnizarea de măsuri active în pachete de servicii integrate – ITI Moții, Țara de Piatră",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-stimularea-ocuparii-prin-furnizarea-de-masuri-active-in-pachete-de-servicii-integrate-iti-motii-tara-de-piatra",
+      "fingerprint": "bda832f7fd5299176ede4099f88982686504567dc2136672f2e90b39d15f9e67",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-stimularea-ocuparii-prin-furnizarea-de-masuri-active-in-pachete-de-servicii-integrate-iti-motii-tara-de-piatra",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-5d70521fd5568b99ec800db8",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Sprijin pentru înființarea de întreprinderi sociale în mediul urban – ITI Microregiunea Țara Făgărașului",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-infiintarea-de-intreprinderi-sociale-in-mediul-urban-iti-microregiunea-tara-fagarasului",
+      "fingerprint": "53c479ce7d538108bbc24f98612658ecf9be595b20d26477c1c9ec5879037403",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-infiintarea-de-intreprinderi-sociale-in-mediul-urban-iti-microregiunea-tara-fagarasului",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-12e0a487e1e7ad11e6960bb0",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Sprijin pentru înființarea de întreprinderi sociale în mediul urban – ITI Moții, Țara de Piatră",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-infiintarea-de-intreprinderi-sociale-in-mediul-urban-iti-motii-tara-de-piatra",
+      "fingerprint": "e9ed80dbc5a28666fb5b7fa7c291da532b41cd90173d232b05d9ea8e6da3da78",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-sprijin-pentru-infiintarea-de-intreprinderi-sociale-in-mediul-urban-iti-motii-tara-de-piatra",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-a5079447cfd5b8f115ea1866",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Consultare publică, PEO: Ghidul Solicitantului Universități deschise",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-universitati-deschise",
+      "fingerprint": "8beb4701abf5e176caeec2a424d05393759a764ce2e6e35b9bc9360b5b70128d",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/consultare-publica-peo-ghidul-solicitantului-universitati-deschise",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-3ee7a7c98399474fefe4f691",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1397,7 +1847,7 @@
       "fingerprint": "33359caa9deb9c44e058b1b7befa1732e01fe428809a037f15849c557753b6bb",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1427,7 +1877,7 @@
       "fingerprint": "1af54e1bde53ca2764122ee32007ca9be0f1e53a345dc100f0e36c12e4ef5bde",
       "observedAt": "2026-08-21T03:57:46.837709+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1447,6 +1897,36 @@
       ]
     },
     {
+      "id": "mipe-03420c576d272b184c0c7fd5",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Dezvoltarea competentelor esentiale compatibile step pentru personalul implicat in implementarea interventiilor strategice in domeniul cercetarii aplicate din genomica finantate prin prioritatea 5",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/ghiduri-ms/dezvoltarea-competentelor-esentiale-compatibile-step-pentru-personalul-implicat-in-implementarea-interventiilor-strategice-in-domeniul-cercetarii-aplicate-din-genomica-finantate-prin-prioritatea-5",
+      "fingerprint": "4d18f50dae9c04f3cd0e99d20f519fc3eaff3b09cadfacb2191a35ee53bb163d",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/ghiduri-ms/dezvoltarea-competentelor-esentiale-compatibile-step-pentru-personalul-implicat-in-implementarea-interventiilor-strategice-in-domeniul-cercetarii-aplicate-din-genomica-finantate-prin-prioritatea-5",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-22ee7331133042f22f483812",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1457,7 +1937,7 @@
       "fingerprint": "1d0d5f90fba12cd7e6f42460034d1c9d65add6c9ed9fab12c6d92749f9db8083",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1487,7 +1967,7 @@
       "fingerprint": "4a689cc00937892f40164928e2757a20473b0162ff8b8b428332da4f9258fe43",
       "observedAt": "2026-08-21T03:57:46.837709+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1517,7 +1997,7 @@
       "fingerprint": "1d268b603cc24eec07815a1864191097c7bc6a1f47ea96951923daee2ee32083",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1537,6 +2017,36 @@
       ]
     },
     {
+      "id": "mipe-372f34150ace4332c22fc560",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Documente aferente reuniunii Comitetului de Monitorizare a Programului Educație și Ocupare 2021-2027 (PEO)",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/documente-aferente-reuniunii-comitetului-de-monitorizare-a-programului-educatie-si-ocupare-2021-2027-peo",
+      "fingerprint": "1e5f007a8584aa51ca551547150609524acc6ef38b11581ac9b42abf21506102",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/documente-aferente-reuniunii-comitetului-de-monitorizare-a-programului-educatie-si-ocupare-2021-2027-peo",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-3283fbc7874b354cb02482f6",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1547,7 +2057,7 @@
       "fingerprint": "0ecdf3d55c47b1b6570dc6a54ffed7418e3644366b7d9518618d68ddc56b1e81",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1577,7 +2087,7 @@
       "fingerprint": "ec0363f965b38df7f037cc501c046f5a03eff6f9d1ef8d6ea3dbe8008b081383",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1597,6 +2107,36 @@
       ]
     },
     {
+      "id": "mipe-073a1a6d6fb69519e222abe2",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Ghidul Solicitantului Condiții Specifice „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive” apel de proiecte noncompetitiv finanțat din Prioritatea: P6 Prevenirea părăsirii timpurii a școlii și creșterea accesului și a participării grupurilor dezavantajate la educație, Obiectiv specific: ESO 4.6.",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/ghiduri_peos/ghidul-solicitantului-conditii-specifice-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-apel-de-proiecte-noncompetit",
+      "fingerprint": "7733252fbef0b6ed4a07de757737d3244e28deb9d259d404a2c4afcaa104ccf3",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/ghiduri_peos/ghidul-solicitantului-conditii-specifice-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive-apel-de-proiecte-noncompetit",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-2c5372b013da16c5544f8074",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1607,7 +2147,7 @@
       "fingerprint": "92afbd455569b3271157017feb0ba43b645f7218c2e5e3420a74ce6f9367dd2c",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1637,7 +2177,7 @@
       "fingerprint": "e63d487685949e7803dca76fd7d83f69817a2e331e022b1dd93d381b5c397d1f",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1667,7 +2207,7 @@
       "fingerprint": "187eb225f83bb47ac3ccea85e3891b1ab8fe58cebed8756653537416fc8d7219",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1697,7 +2237,7 @@
       "fingerprint": "613ef07f96c283244feff1df523f7b56729dd05fbb6557c3308431a5b0f07313",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1727,7 +2267,7 @@
       "fingerprint": "dec515fa1695949fe0c643bc380934a92e6fb10ce6ada36bebafb803b5204068",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1757,7 +2297,7 @@
       "fingerprint": "ba4cc7a6957d46ab426e8adf1a95a1729166e57a594106b80bf604410b89b38a",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1787,7 +2327,7 @@
       "fingerprint": "20e8b5387582b8d14cec24134ac696a68b1ee9139393df4a92dfea8729ca5314",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1807,6 +2347,66 @@
       ]
     },
     {
+      "id": "mipe-7e466d697d5814f674477da6",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Ghiduri PEO",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/ghiduri_peos",
+      "fingerprint": "27293fe8e6e6888f40b6a71ef6662336f44a724479d2b1182023a5acd56b58bc",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/ghiduri_peos",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-4ba067406db1fba8e237f9cb",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Ghiduri PIDS",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/ghiduri_pids",
+      "fingerprint": "27293fe8e6e6888f40b6a71ef6662336f44a724479d2b1182023a5acd56b58bc",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/ghiduri_pids",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-6572c8814d6f671122bb6748",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1817,7 +2417,7 @@
       "fingerprint": "27293fe8e6e6888f40b6a71ef6662336f44a724479d2b1182023a5acd56b58bc",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1837,6 +2437,186 @@
       ]
     },
     {
+      "id": "mipe-108c7e947a336394b13aa59a",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Instrucțiunea nr. 12 privind transmiterea calendarului pentru apelurile de proiecte și a situației lunare aferente apleurilor de proiecte și contractelor de finanțare în cadrul PNRR",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/pnrr-instructiunea-nr-12-privind-transmiterea-calendarului-pentru-apelurile-de-proiecte-si-a-situatiei-lunare-aferente-apleurilor-de-proiecte-si-contractelor-de-finantare-in-cadrul-pnrr",
+      "fingerprint": "38cd55660ebb6aeb0d1939a3d5396b3a99b51a1dd1fa4c62926d26a3e4b9cee7",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/pnrr-instructiunea-nr-12-privind-transmiterea-calendarului-pentru-apelurile-de-proiecte-si-a-situatiei-lunare-aferente-apleurilor-de-proiecte-si-contractelor-de-finantare-in-cadrul-pnrr",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-ab604fa13e912adb3e03e2f7",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Instrucțiunea nr. 2 privind derularea etapei de avizare a ghidurilor specifice și a schemelor de ajutor de stat/de minimis și a etapei de urmărire a procesului de evaluare, selecție și contractare a proiectelor finanțate în cadrul PNRR",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-privind-derularea-etapei-de-avizare-a-ghidurilor-specifice-si-a-schemelor-de-ajutor-de-stat-de-minimis-si-a-etapei-de-urmarire-a-procesului-de-evaluare-selectie-si-contracta",
+      "fingerprint": "8e802d4f3e8bb8b41ad1effafb3d3f5d13628708935088607a55dd23073a78b9",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-privind-derularea-etapei-de-avizare-a-ghidurilor-specifice-si-a-schemelor-de-ajutor-de-stat-de-minimis-si-a-etapei-de-urmarire-a-procesului-de-evaluare-selectie-si-contracta",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-7bfa2bf7123f931b1ef38a5a",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Instrucțiunea nr. 2 revizia 5 privind derularea etapei de avizare a ghidurilor specifice și a schemelor de ajutor de stat/de minimis și a etapei de urmărire a procesului de evaluare, selecție și contractare a proiectelor finanțate în cadrul PNRR și emiterea de Instrucțiuni privind selecția, evaluarea și contractarea proiectelor",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-privind-derularea-etapei-de-avizare-a-ghidurilor-specifice-si-a-schemelor-de-ajutor-de-stat-de-minimis-si-a-etapei-de-urmarire-a-procesului-de-evaluare-selectie-si-contracta-2",
+      "fingerprint": "9dff1e919d042d3a2d33a4adce7f6bc7cce6e6e115255494399ab815999a04c4",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-privind-derularea-etapei-de-avizare-a-ghidurilor-specifice-si-a-schemelor-de-ajutor-de-stat-de-minimis-si-a-etapei-de-urmarire-a-procesului-de-evaluare-selectie-si-contracta-2",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-7bbcbc9282a6237990262417",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Instrucțiunea nr. 2/2024 pentru aplicarea unitară a prevederilor Ghidului specific Condiții de accesare a fondurilor europene aferente Planului Național de Redresare și Reziliență, în cadrul apelului de proiecte „Digitalizarea IMM-urilor – grant de până la 100.000 euro pe întreprinderecare să sprijine IMM-urile în adoptarea tehnologiilor digitale”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-pentru-aplicarea-unitara-a-prevederilor-ghidului-specific-conditii-de-accesare-a-fondurilor-europene-aferente-planului-national-de-redresare-si-rezilienta-in-cadrul-apelului",
+      "fingerprint": "641cd67ab6b0fb1e9f0265ba3886590646b125c6307363a8c6583be01c6b4d2c",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-pentru-aplicarea-unitara-a-prevederilor-ghidului-specific-conditii-de-accesare-a-fondurilor-europene-aferente-planului-national-de-redresare-si-rezilienta-in-cadrul-apelului",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-923789c9a83ceaa5f1cb24b8",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Instrucțiunea nr. 2/2025 privind derularea etapei de avizare a ghidurilor specific și a schemelor de ajutor de stat/de minimis și a etapei de urmărire a procesului de evaluare, selecție și contractare a proiectelor finanțate în cadrul PNRR și emiterea de Instrucțiuni privind selecția, evaluarea și contractarea proiectelor",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-privind-derularea-etapei-de-avizare-a-ghidurilor-specific-si-a-schemelor-de-ajutor-de-stat-de-minimis-si-a-etapei-de-urmarire-a-procesului-de-evaluare-selectie-si-contractar",
+      "fingerprint": "fcf4def73380a5d124187a082607b965a68316934bea23c0bc01a79918b13636",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/pnrr-instructiunea-nr-2-privind-derularea-etapei-de-avizare-a-ghidurilor-specific-si-a-schemelor-de-ajutor-de-stat-de-minimis-si-a-etapei-de-urmarire-a-procesului-de-evaluare-selectie-si-contractar",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-d9aa4befc7f9de4d63a3a2f0",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Instrucțiunea nr. 4/28.10.2024 privind modalitatea de actualizare a graficului de implementare și atenționare a beneficiarilor în vederea respectării prevederilor referitoare la determinarea valorii estimate a achizițiilor din contractele de finanțare semnate în cadrul apelului de proiecte: Digitalizarea IMM-urilor, Grant de până la 100.000 euro pe întreprindere care să sprijine IMM-urile în adoptarea tehnologiilor digitale",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/pnrr-instructiunea-nr-4-28-10-2024-privind-modalitatea-de-actualizare-a-graficului-de-implementare-si-atentionare-a-beneficiarilor-in-vederea-respectarii-prevederilor-referitoare-la-determinar",
+      "fingerprint": "624123f6776f47275b4455d62c5cfe0bd56f02078e8d4b0a4cc31344e14a7af9",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/pnrr-instructiunea-nr-4-28-10-2024-privind-modalitatea-de-actualizare-a-graficului-de-implementare-si-atentionare-a-beneficiarilor-in-vederea-respectarii-prevederilor-referitoare-la-determinar",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-bf4c614d7011ba0c9904769a",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -1847,7 +2627,7 @@
       "fingerprint": "4875b19e63f763bd4d6207d5d9620dfc6fd288e38b3b84b59623203d53d64426",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1877,7 +2657,7 @@
       "fingerprint": "d5c86a6e1f363d8ed4b362c5f2b06def131a7a0ec8de8584cee405b44a9b2fbe",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1907,7 +2687,7 @@
       "fingerprint": "93d6f0ffeaccd4caceb553d33100527931ab1a09e78eadc21e20a6f1cc13637c",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1937,7 +2717,7 @@
       "fingerprint": "98d3a6fccea9e94da84a51f9041b93950ff06749375f8cb37cda29b27f08463d",
       "observedAt": "2026-08-21T03:57:46.837709+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1967,7 +2747,7 @@
       "fingerprint": "291da56406029437f220281e19d0d0f66089976af1b051bbff2625389626f585",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -1997,7 +2777,7 @@
       "fingerprint": "271f89a2029e1d0e303d7b2e395134b8f660e41cd9851bb8920f878e39b546f7",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2027,7 +2807,7 @@
       "fingerprint": "27293fe8e6e6888f40b6a71ef6662336f44a724479d2b1182023a5acd56b58bc",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2057,7 +2837,7 @@
       "fingerprint": "27293fe8e6e6888f40b6a71ef6662336f44a724479d2b1182023a5acd56b58bc",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2087,7 +2867,7 @@
       "fingerprint": "27293fe8e6e6888f40b6a71ef6662336f44a724479d2b1182023a5acd56b58bc",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2117,7 +2897,7 @@
       "fingerprint": "27293fe8e6e6888f40b6a71ef6662336f44a724479d2b1182023a5acd56b58bc",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2145,9 +2925,9 @@
       "programme": "MIPE",
       "canonicalUrl": "https://mfe.gov.ro/pnrr",
       "fingerprint": "85b23f68c548b88a3db0bea74d244edd70ec137f291eb84f4828d1f2e193fbe7",
-      "observedAt": "2026-09-22T18:17:06.350636+00:00",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2177,7 +2957,7 @@
       "fingerprint": "a7e783c350eb82cad55c07737d4ba3a06d9c2e9166b33332ffafdc4e57e1f41e",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2207,7 +2987,7 @@
       "fingerprint": "35d51b813125f3cae3bf1c86192d1500507979d83885d3035dad80f82daacd14",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2237,7 +3017,7 @@
       "fingerprint": "928bbfcfc931684328bf332140ac6f89b195075b19b2f6d3f6112deebf3e1b8f",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2267,7 +3047,7 @@
       "fingerprint": "799e3755eba3a03af10e67d5fe5e4e78dab36f83a62c65c410dd2733e1a39b52",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2297,7 +3077,7 @@
       "fingerprint": "4dbff8b986f3e0b55dfe288fcb55b4cbb2958bdfd725e63d44afbfc4b5228a31",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2327,7 +3107,7 @@
       "fingerprint": "28725a8228afba63911bd8fd4c95c18c6a4ecf1e3873b6f8a98bfec8f8894131",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2357,7 +3137,7 @@
       "fingerprint": "1810efb0db986229a52fbe79ae83505be2e46c3d9ab07c20ae6fceee17f67759",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2377,6 +3157,846 @@
       ]
     },
     {
+      "id": "mipe-3d39892e424a956d4fdc46f7",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO publică un corrigendum la Ghidul Solicitantului – STEP-LLL – Competențe pentru viitor: formare la locul de muncă și educația adulților în tehnologiile critice – Adulți",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/110474-2",
+      "fingerprint": "b73391bea7b079e8712f2543af11db9f95160d57da536d6b3f491fb35174dab8",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/110474-2",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-2d8f2094e13d2d61798390f2",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Actualizează Ghidul Solicitantului „Incluziunea copiilor și tinerilor cu cerințe educaționale speciale”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-actualizeaza-ghidul-solicitantului-incluziunea-copiilor-si-tinerilor-cu-cerinte-educationale-speciale-2",
+      "fingerprint": "970f7bd301dadf06eddbad2f35a8e4040c3cd0c1182b598f7f614de1a8da2aa4",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-actualizeaza-ghidul-solicitantului-incluziunea-copiilor-si-tinerilor-cu-cerinte-educationale-speciale-2",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-9f3f190252976af28b13f2ca",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării nr. G2025 – 44565/07.04.2026 privind proiectul „Calificare și competențe de bază pentru viitor”, PEO cod SMIS 338099, beneficiar DRD PROCONS SRL",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-nr-g2025-44565-07-04-2026-privind-proiectul-calificare-si-competente-de-baza-pentru-viitor-peo-cod-smis-338099-beneficiar-drd",
+      "fingerprint": "565241a240230157bb0ce151b98893045312c8b873926a1faa5c3837f1179cfd",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-nr-g2025-44565-07-04-2026-privind-proiectul-calificare-si-competente-de-baza-pentru-viitor-peo-cod-smis-338099-beneficiar-drd",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-c6925c7c9905799e685cf4ab",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării nr. G2026 – 71690/05.06.2026 privind proiectul „SOCIAL – Soluții de Organizare, Consolidare și Încurajare a Activităților Locale”, beneficiar Abeona SRL",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-nr-g2026-71690-05-06-2026-privind-proiectul-social-solutii-de-organizare-consolidare-si-incurajare-a-activitatilor-locale-be",
+      "fingerprint": "d3693d17dce9d7404b0825d48b3339f7befdd0468d4a7009da32b8b368bbfdf8",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-nr-g2026-71690-05-06-2026-privind-proiectul-social-solutii-de-organizare-consolidare-si-incurajare-a-activitatilor-locale-be",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-ba5861ff664bab3b263638d6",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării pentru proiectul „NextGen IT: Programe de formare pentru angajați în tehnologia informației”, beneficiar Asociația Scăpărici, cod SMIS 330734",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-pentru-proiectul-nextgen-it-programe-de-formare-pentru-angajati-in-tehnologia-informatiei-beneficiar-asociatia-scaparici-cod-smis-330734",
+      "fingerprint": "e5ca47364ea52edc9dba0926ea88c40a932373a09b5abfe0b3f8f2db238bf599",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-pentru-proiectul-nextgen-it-programe-de-formare-pentru-angajati-in-tehnologia-informatiei-beneficiar-asociatia-scaparici-cod-smis-330734",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-cd7378cd22f3984a80b08fe8",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul PEO/440/PEO_P2/OP4/ESO4.1/PEO_A47/337374 cu titlul „IMPREUNA PENTRU TINERII DIN REGIUNEA SUD-MUNTENIA”, beneficiar ASOCIATIA „EUROFED”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-peo-440-peo_p2-op4-eso4-1-peo_a47-337374-cu-titlul-impreuna-pentru-tinerii-din-regiunea-sud-muntenia-beneficiar-asociati",
+      "fingerprint": "b0ec5bcf70ac3dafd569efe07c71502aeef1c5580727791f2901d393481ae508",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-peo-440-peo_p2-op4-eso4-1-peo_a47-337374-cu-titlul-impreuna-pentru-tinerii-din-regiunea-sud-muntenia-beneficiar-asociati",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-4f1a3c26591440a7ccb6b49b",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul nr. 71257/04.06.2026 „Măsuri pentru persoanele fără/cu nivel scăzut de formare – Clejani”, beneficiar ASOCIATIA „SFANTUL STELIAN”, partener SAN GIORGIO PROIECT CONSULT S.R.L.",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-nr-71257-04-06-2026-masuri-pentru-persoanele-fara-cu-nivel-scazut-de-formare-clejani-beneficiar-asociatia-sf",
+      "fingerprint": "4b6bdd98e6c3bfdde49dd158e545e7e49675b18210edac87859a0723bde2530c",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-nr-71257-04-06-2026-masuri-pentru-persoanele-fara-cu-nivel-scazut-de-formare-clejani-beneficiar-asociatia-sf",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-0fcaa3da1776ecac0d32a38b",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „Ai un nivel scăzut de formarea, participă la calificare”, beneficiar Fundația „Centrul Român pentru Întreprinderi Mici și Mijlocii” (CRIMM)",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-ai-un-nivel-scazut-de-formarea-participa-la-calificare-beneficiar-fundatia-centrul-roman-pentru-intreprinderi",
+      "fingerprint": "9e777124436d26dfc624e279a835af1bee1c8e4df64fa741b30b645e5c8b1aa7",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-ai-un-nivel-scazut-de-formarea-participa-la-calificare-beneficiar-fundatia-centrul-roman-pentru-intreprinderi",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-0660b30f3248e5fbe1f8d8c3",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „CITIZEN – Competențe și Instruire în Tehnologii pentru Îmbunătățirea Nivelului de Educație”, beneficiar IOANIDA TURISM S.R.L.",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-citizen-competente-si-instruire-in-tehnologii-pentru-imbunatatirea-nivelului-de-educatie-beneficiar-ioanida-turism-s-r",
+      "fingerprint": "09a94ca88e60c1972b1531d1046edc98ad6d67d5b97b0d5433a33dcca35de5ad",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-citizen-competente-si-instruire-in-tehnologii-pentru-imbunatatirea-nivelului-de-educatie-beneficiar-ioanida-turism-s-r",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-baaa8a09a22a85bd24adaa43",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „CRED – Creșterea Responsabilității Economiei sociale Durabile”, beneficiar SC Acquisition Career Management SRL, cod SMIS 309474",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-cred-cresterea-responsabilitatii-economiei-sociale-durabile-beneficiar-sc-acquisition-career-management-srl-cod-smis",
+      "fingerprint": "7e0a0950fce5b18edd8641a0c25c396222910ea48cb882181ec23b2beb518f1b",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-cred-cresterea-responsabilitatii-economiei-sociale-durabile-beneficiar-sc-acquisition-career-management-srl-cod-smis",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-f4bcbf0d89abb1494a4d5d5c",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „Competențe pentru o viață mai bună” PEO/382/PEO_P9/OP4/ESO4.7/PEO_A35/332006, beneficiar FUNDAȚIA HELATH ACTION OVERSEAS",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-competente-pentru-o-viata-mai-buna-peo-382-peo_p9-op4-eso4-7-peo_a35-332006-beneficiar-fundatia-helath-action-overseas",
+      "fingerprint": "a017e4a9776b72053117cf11b764b4c4defe3357c67fbf7c4396152ddd2bf2ce",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-competente-pentru-o-viata-mai-buna-peo-382-peo_p9-op4-eso4-7-peo_a35-332006-beneficiar-fundatia-helath-action-overseas",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-1dc1c63e602a6f492727b257",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „Dezvoltare prin calificare!” PEO/78/PEO_P9/OP4/ESO4.7/PEO_A36_311671, beneficiar ASOCIAȚIA ARION",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-dezvoltare-prin-calificare-peo-78-peo_p9-op4-eso4-7-peo_a36_311671-beneficiar-asociatia-arion",
+      "fingerprint": "220c6b046109a70ad601d8b0251bb6a0766ca68f1630db2078f3343eb5b48559",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-dezvoltare-prin-calificare-peo-78-peo_p9-op4-eso4-7-peo_a36_311671-beneficiar-asociatia-arion",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-9823faefe9e51f44c0b7f6b0",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „Digital Skills – Dezvoltarea competențelor digitale pentru piața muncii în Regiunile Centru și Nord-Est”, beneficiar VERIFIELD SRL",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-digital-skills-dezvoltarea-competentelor-digitale-pentru-piata-muncii-in-regiunile-centru-si-nord-est-beneficiar-verif",
+      "fingerprint": "c10425d694c7e026a950ebb65820402f53e74faee3326772fc33c6ccea309e0d",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-digital-skills-dezvoltarea-competentelor-digitale-pentru-piata-muncii-in-regiunile-centru-si-nord-est-beneficiar-verif",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-061b7a20d3c5fc01c108494e",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „EduSprint – Stagii de practică pentru elevi în Acceleratorul Performanței!”, beneficiar ROYAL AUDIT HOUSE SRL, PEO/77/PEO_P8/OP4/ESO4.5/PEO_A3, cod proiect 305193",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-edusprint-stagii-de-practica-pentru-elevi-in-acceleratorul-performantei-beneficiar-royal-audit-house-srl-peo-77-peo_",
+      "fingerprint": "b76857d3604670835dec394fa12131ccdae92f1a079181f3dd16a8b809ff6947",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-edusprint-stagii-de-practica-pentru-elevi-in-acceleratorul-performantei-beneficiar-royal-audit-house-srl-peo-77-peo_",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-627a98d64867eeaed6312fff",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „Evoluează împreună cu noi” PEO/79/PEO_P9/OP4/ESO4.7/PEO_A36_311761, beneficiar ASOCIAȚIA EUROFED",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-evolueaza-impreuna-cu-noi-peo-79-peo_p9-op4-eso4-7-peo_a36_311761-beneficiar-asociatia-eurofed",
+      "fingerprint": "bb683e90a104705c33b8987b7fe14ab4cee6ac15d4282623e13e531a2ae25c09",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-evolueaza-impreuna-cu-noi-peo-79-peo_p9-op4-eso4-7-peo_a36_311761-beneficiar-asociatia-eurofed",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-bd127037049ce25edc1558bd",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „IDEA – Inovare digitală esențială pentru angajați”, Cod proiect 332661, beneficiar SC GET YOU HIRED SRL",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-idea-inovare-digitala-esentiala-pentru-angajati-cod-proiect-332661-beneficiar-sc-get-you-hired-srl",
+      "fingerprint": "1abb1446ba21ad535e2d1d6f41fab893b5b66f4a920b0150db1d65a7bf3b4dd9",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-idea-inovare-digitala-esentiala-pentru-angajati-cod-proiect-332661-beneficiar-sc-get-you-hired-srl",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-41925d06a6aae7fb0e81d456",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „IDEA – Inovare digitală esențială pentru angajați”, cod proiect 332661, beneficiar SC GET YOU HIRED SRL",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-idea-inovare-digitala-esentiala-pentru-angajati-cod-proiect-332661-beneficiar-sc-get-you-hired-srl-2",
+      "fingerprint": "6c0ad5a1ead3e22687920e9829c732a2221c82c481fabf3868ddd1c958d19e23",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-idea-inovare-digitala-esentiala-pentru-angajati-cod-proiect-332661-beneficiar-sc-get-you-hired-srl-2",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-560593496ed4a2e84526d727",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „PROFORM: Program integrat de informare-consiliere-formare profesională”, beneficiar ASOCIAȚIA EUROFED",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-proform-program-integrat-de-informare-consiliere-formare-profesionala-beneficiar-asociatia-eurofed",
+      "fingerprint": "632f0bf764d19d4e392a3ce2a71bcef3b28188e126ea4e081021eebb9cbb7341",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-proform-program-integrat-de-informare-consiliere-formare-profesionala-beneficiar-asociatia-eurofed",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-27e15c1ac117da30b92fee34",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „Pachet de servicii pentru persoanele fără/ cu nivel scăzut de formare – Clejani” PEO/382/PEO_P9/OP4/ESO4.7/PEO_A35, cod SMIS 336579, beneficiar Asociața „Sfântul Stelian”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-pachet-de-servicii-pentru-persoanele-fara-cu-nivel-scazut-de-formare-clejani-peo-382-peo_p9-op4-eso4-7-peo_a35-cod-sm",
+      "fingerprint": "faafa4dca8bc7903239a3082f0cbf6fd0b86dcc5ea82d1254f4c221aa29f9277",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-pachet-de-servicii-pentru-persoanele-fara-cu-nivel-scazut-de-formare-clejani-peo-382-peo_p9-op4-eso4-7-peo_a35-cod-sm",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-275307ef86ca8326222b46ab",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării privind proiectul „ReStart Tineri NEET”, beneficiar Asociația Grupul de acțiune locală lider Bistrița Năsăud",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-restart-tineri-neet-beneficiar-asociatia-grupul-de-actiune-locala-lider-bistrita-nasaud",
+      "fingerprint": "72046087642e41442e0b03af266dd6ba09728a881ebadda78c49d8de7221298b",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-privind-proiectul-restart-tineri-neet-beneficiar-asociatia-grupul-de-actiune-locala-lider-bistrita-nasaud",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-1ee88600f90fd6ed155b2655",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării încheiată la 17.11.2025 privind proiectul „ACTIV – Activarea comunităților din mediul rural prin promovarea economiei sociale”, cod proiect 309524, beneficiar ACQUISITION CAREER MANAGMENT SRL",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-incheiata-la-17-11-2025-privind-proiectul-activ-activarea-comunitatilor-din-mediul-rural-prin-promovarea-economiei-sociale-cod-p",
+      "fingerprint": "cca56269cd9a653ce74893ddf66f1ba1ceb7a59330a546b2d30506a56089f67c",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-incheiata-la-17-11-2025-privind-proiectul-activ-activarea-comunitatilor-din-mediul-rural-prin-promovarea-economiei-sociale-cod-p",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-de8c87bd2a3af36d2834bbd2",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare a prefinanțării încheiată la 17.11.2025 privind proiectul „Dezvoltarea Competențelor pentru Excelență în Carieră – Regiunea Sud-Est”, cod proiect 317627, Beneficiar FUNDAȚIA AMFITEATRU (pentru partenerul ASOCIAȚIA CEDCA)",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-incheiata-la-17-11-2025-privind-proiectul-dezvoltarea-competentelor-pentru-excelenta-in-cariera-regiunea-sud-est-cod-proiect-317",
+      "fingerprint": "df52e0b8641e36475512ea55400fbf708099f2a78e260f04325e52f231ac2ce1",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-a-prefinantarii-incheiata-la-17-11-2025-privind-proiectul-dezvoltarea-competentelor-pentru-excelenta-in-cariera-regiunea-sud-est-cod-proiect-317",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-08d94b11905a7738d37e9633",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperare prefinanțării privind proiectul „TechMaster: Pregătirea angajaților pentru Era Digitală”, beneficiar ASOCIAȚIA „SCĂPĂRICI”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperare-prefinantarii-privind-proiectul-techmaster-pregatirea-angajatilor-pentru-era-digitala-beneficiar-asociatia-scaparici",
+      "fingerprint": "54751cdbf8c66890b2110946e7c5df910f08ba46b078a6f8f989718e94197b7e",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperare-prefinantarii-privind-proiectul-techmaster-pregatirea-angajatilor-pentru-era-digitala-beneficiar-asociatia-scaparici",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-40040247b1ab7555f74354fc",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Decizia de recuperarea a prefinanțării privind proiectul „EVOLUEAZĂ ÎMPREUNA CU NOI” PEO/79/PEO_P9/OP4/ESO4.7/PEO_A36_311761, beneficiar ASOCIAŢIA „EUROFED”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-decizia-de-recuperarea-a-prefinantarii-privind-proiectul-evolueaza-impreuna-cu-noi-peo-79-peo_p9-op4-eso4-7-peo_a36_311761-beneficiar-asociatia-eurofed",
+      "fingerprint": "da90b1d2d44f03cb373ad12f3565a173a7324afa5618af25ae4874f5b959fb69",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-decizia-de-recuperarea-a-prefinantarii-privind-proiectul-evolueaza-impreuna-cu-noi-peo-79-peo_p9-op4-eso4-7-peo_a36_311761-beneficiar-asociatia-eurofed",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-ce6b25ab39b0fe18898aee1e",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Ghidul Solicitantului Condiții Specifice „Dezvoltarea unei rețele pentru tineret care să furnizeze servicii personalizate și de calitate tinerilor, cu precădere din categoria NEETs – TERITORIUL ITI DELTA DUNĂRII” – consultare publică",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-ghidul-solicitantului-conditii-specifice-dezvoltarea-unei-retele-pentru-tineret-care-sa-furnizeze-servicii-personalizate-si-de-calitate-tinerilor-cu-precadere-din-categoria-neets-teri",
+      "fingerprint": "87402c79a273a6d0b4ae8b7ee1e9c9f7f16f7693d147ccdb8651bece9decd9ba",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-ghidul-solicitantului-conditii-specifice-dezvoltarea-unei-retele-pentru-tineret-care-sa-furnizeze-servicii-personalizate-si-de-calitate-tinerilor-cu-precadere-din-categoria-neets-teri",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-7d90162682fab1ac4edc0878",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Ghidul Solicitantului STEP-EDU: dezvoltarea și modernizarea ofertelor educaționale universitare în domeniile tehnologice critice – Adulți",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-ghidul-solicitantului-step-edu-dezvoltarea-si-modernizarea-ofertelor-educationale-universitare-in-domeniile-tehnologice-critice-adulti",
+      "fingerprint": "5e6e2bf54c300e1f980d2043c9289585bb6fcdc7c26d7756df46b1f7f304d2ed",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-ghidul-solicitantului-step-edu-dezvoltarea-si-modernizarea-ofertelor-educationale-universitare-in-domeniile-tehnologice-critice-adulti",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-a59d73c16b76886f468beaef",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Ghidul Solicitantului STEP-EDU: dezvoltarea și modernizarea ofertelor educaționale universitare în domeniile tehnologice critice – Tineri",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-ghidul-solicitantului-step-edu-dezvoltarea-si-modernizarea-ofertelor-educationale-universitare-in-domeniile-tehnologice-critice-tineri",
+      "fingerprint": "73850f2e15f97e6e58379f47302b2ea362b01d88821d21f96b60ac2942b7167d",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-ghidul-solicitantului-step-edu-dezvoltarea-si-modernizarea-ofertelor-educationale-universitare-in-domeniile-tehnologice-critice-tineri",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-e15d5b211fa66e0990a9ed4a",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Ghidul Solicitantului „Măsuri active de ocupare pentru tineri, inclusiv pentru tineri NEET – Teritoriul Delta Dunării – 2026”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-ghidul-solicitantului-masuri-active-de-ocupare-pentru-tineri-inclusiv-pentru-tineri-neet-teritoriul-delta-dunarii-2026",
+      "fingerprint": "3a558e03f3084bf4ea92c1fb40fd45f4c6ad8d1e651f4c0a2087fe71a170ca14",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-ghidul-solicitantului-masuri-active-de-ocupare-pentru-tineri-inclusiv-pentru-tineri-neet-teritoriul-delta-dunarii-2026",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-efc5106bfa13d71306b7bc99",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -2387,7 +4007,7 @@
       "fingerprint": "50be7946d723a3ffea8b8afc04ac6232e6e7dbc7728c6fd946187bf9caf1d10a",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2417,7 +4037,7 @@
       "fingerprint": "d6e76cfc03a397a3f921531506b0be1f9d446356e6887ff4e51c9f6cbec52575",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2437,6 +4057,426 @@
       ]
     },
     {
+      "id": "mipe-40f44cf0d3f9992acce298cb",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Informează solicitanții că vor primi solicitări de clarificări aferente etapei de evaluare tehnică și financiară calitativă în cadrul apeluluiMăsuri active de ocupare pentru tineri, inclusiv pentru tineri NEET – Delta Dunării – 2026",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-informeaza-solicitantii-ca-vor-primi-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apeluluimasuri-active-de-ocupare-pentru-tineri-inclusiv-pent",
+      "fingerprint": "adfecfee130b8f5d25304a067d3f5f61d0a4501c0748d4c82167a23036b6e8d8",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-informeaza-solicitantii-ca-vor-primi-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-calitativa-in-cadrul-apeluluimasuri-active-de-ocupare-pentru-tineri-inclusiv-pent",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-86cb670a751add81b9252f55",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Lansarea apelului non-competitiv „Competențe pentru incluziune: profesionalizarea personalului din educație în sprijinul educației incluzive”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-lansarea-apelului-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive",
+      "fingerprint": "5f0dc30d6ff8f656a181cdca654cdd6c888c7133839595d84200c583bcf4a49c",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-lansarea-apelului-non-competitiv-competente-pentru-incluziune-profesionalizarea-personalului-din-educatie-in-sprijinul-educatiei-incluzive",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-1a5a9d58071f073aa0256953",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Lista finală a cererilor de finanțare respinse după soluționarea contestațiilor în etapa tehnică și financiară preliminară (ETFP) pentru apelul de proiecte „O șansă în plus prin învățământul profesional și tehnic” – Regiuni mai puțin dezvoltate",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/poids-lista-finala-a-cererilor-de-finantare-respinse-dupa-solutionarea-contestatiilor-in-etapa-tehnica-si-financiara-preliminara-etfp-pentru-apelul-de-proiecte-o-sansa-in-plus-prin-invatam",
+      "fingerprint": "f9fbc299da549e06191f0fa058c5567aab2d39dbf35537268aaf945e50492364",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/poids-lista-finala-a-cererilor-de-finantare-respinse-dupa-solutionarea-contestatiilor-in-etapa-tehnica-si-financiara-preliminara-etfp-pentru-apelul-de-proiecte-o-sansa-in-plus-prin-invatam",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-4f97f858f6e61e53ebe755a4",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Lista finală a cererilor de finanțare respinse după soluționarea contestațiilor în etapa tehnică și financiară preliminară pentru apelul Sprijin pentru sportivii aflați la final de carieră pentru dobândirea de competențe în vederea integrării pe piața muncii",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-lista-finala-a-cererilor-de-finantare-respinse-dupa-solutionarea-contestatiilor-in-etapa-tehnica-si-financiara-preliminara-pentru-apelul-sprijin-pentru-sportivii-aflati-la-final-de-cariera-pentru",
+      "fingerprint": "44bf498449a447e1c5e364b03982b5302e831fb73c18cec35ac47a5870a9de56",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-lista-finala-a-cererilor-de-finantare-respinse-dupa-solutionarea-contestatiilor-in-etapa-tehnica-si-financiara-preliminara-pentru-apelul-sprijin-pentru-sportivii-aflati-la-final-de-cariera-pentru",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-81ab5d80340c396714769fe3",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Lista finală a proiectelor selectate la finanțare și Lista finală a proiectelor rezervă aprobate după soluționarea contestațiilor în etapa de evaluare tehnică și financiară calitativă (CSC ETFC) – pentru apelul de proiecte PEO/660/PEO_P4/OP4/ESO4.1/PEO_A52 – Sprijin pentru înființarea de întreprinderi sociale în mediul urban – ITI Delta Dunării",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-lista-finala-a-proiectelor-selectate-la-finantare-si-lista-finala-a-proiectelor-rezerva-aprobate-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-csc-etfc",
+      "fingerprint": "c84948a360c910baf31bccacb1623462b3da6632a62cb6a98c7418dd555741db",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-lista-finala-a-proiectelor-selectate-la-finantare-si-lista-finala-a-proiectelor-rezerva-aprobate-dupa-solutionarea-contestatiilor-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-csc-etfc",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-cc54acba108e338574c58a73",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Lista intermediară a cererilor de finanțare care au fost respinse în etapa de evaluare tehnică și financiară preliminară (ETFP) pentru apelul de proiecte „O șansă în plus prin învățământul profesional și tehnic” – Regiuni mai puțin dezvoltate",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-lista-intermediara-a-cererilor-de-finantare-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-etfp-pentru-apelul-de-proiecte-o-sansa-in-plus-prin-invatamantu",
+      "fingerprint": "ccc253c7a72c3d9c29e2208d7a9b71e2ba063320ec04f75941e34d3bebf2f773",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-lista-intermediara-a-cererilor-de-finantare-care-au-fost-respinse-in-etapa-de-evaluare-tehnica-si-financiara-preliminara-etfp-pentru-apelul-de-proiecte-o-sansa-in-plus-prin-invatamantu",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-7b9cd30fcd1bff06af370c50",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Lista intermediară a proiectelor aprobate în etapa de evaluare tehnică și financiară calitativă aferentă apelului „Susținerea în carieră a cadrelor didactice și a personalului didactic auxiliar prin finanțarea primelor de carieră didactică”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-aferenta-apelului-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didact",
+      "fingerprint": "121a17969af981375b99c59b016a2cd0634a232cb0537f2b5baa5adda4e706d8",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-lista-intermediara-a-proiectelor-aprobate-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-aferenta-apelului-sustinerea-in-cariera-a-cadrelor-didactice-si-a-personalului-didact",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-08aa841a4ab52968a801b253",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Listele proiectelor aprobate și de rezervă în etapa de evaluare tehnică și financiară calitativă (CSC ETFC) pentru apelul Consolidarea dialogului social și a parteneriatelor pentru ocupare și formare II – Federații – relansare 2025”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-listele-proiectelor-aprobate-si-de-rezerva-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-csc-etfc-pentru-apelul-consolidarea-dialogului-social-si-a-parteneriatelor-pentru-ocupare-si-for",
+      "fingerprint": "b99ed5f9b1f6dceba8a23194eb4639efb9c7fb65fad9eb826214ab066770aa5e",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-listele-proiectelor-aprobate-si-de-rezerva-in-etapa-de-evaluare-tehnica-si-financiara-calitativa-csc-etfc-pentru-apelul-consolidarea-dialogului-social-si-a-parteneriatelor-pentru-ocupare-si-for",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-0914214e014b4651d82f6266",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Metodologia de verificare, evaluare și selecție a proiectelor în cadrul Programului Educație și Ocupare 2021-2027 actualizată la nivelul lunii decembrie 2025",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-in-cadrul-programului-educatie-si-ocupare-2021-2027",
+      "fingerprint": "904ae60a69f0e7120842faefb17a8d38311ae8ffe04d02c25ba3ed181da5203c",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/metodologia-de-verificare-evaluare-si-selectie-a-proiectelor-in-cadrul-programului-educatie-si-ocupare-2021-2027",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-1ce01b97734eb1091934f225",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Procesul verbal de constatare a neregulilor și de stabilire a crenațelor bugetare privind proiectul „PRO DIALOG SOCIAL”, cod SMIS 308683, beneficiar Federația Națională a Sindicatelor din Adiministrație",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-procesul-verbal-de-constatare-a-neregulilor-si-de-stabilire-a-crenatelor-bugetare-privind-proiectul-pro-dialog-social-cod-smis-308683-beneficiar-federatia-nationala-a-sindicat",
+      "fingerprint": "f2b62939159452b1844f9ccc0dd595b22ea85e67c7aac2e309ccf8d1def8a7a6",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-procesul-verbal-de-constatare-a-neregulilor-si-de-stabilire-a-crenatelor-bugetare-privind-proiectul-pro-dialog-social-cod-smis-308683-beneficiar-federatia-nationala-a-sindicat",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-4b797c701ed3f97b54f52807",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Răspunsurile la propunerile și observațiile formulate de petenți în cadrul procesului de consultare publică pentru Ghidul Solicitantului – Condiții Specifice „Școli pentru viitor”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-raspunsurile-la-propunerile-si-observatiile-formulate-de-petenti-in-cadrul-procesului-de-consultare-publica-pentru-ghidul-solicitantului-conditii-specifice-scoli-pentru-viitor",
+      "fingerprint": "c41b4f4ecee86c2eb06b511a30afd4e615646017ee3207367c4ca788f038a191",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-raspunsurile-la-propunerile-si-observatiile-formulate-de-petenti-in-cadrul-procesului-de-consultare-publica-pentru-ghidul-solicitantului-conditii-specifice-scoli-pentru-viitor",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-2ddaed909dbd699740b1e10e",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Solicitanții vor primi prin intermediul sistemului informatic MySMIS 2021+, solicitări de clarificări eferente apelului „O șansă în plus prin învățământul profesional și tehnic – Regiuni mai puțin dezvoltate”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-solicitantii-vor-primi-prin-intermediul-sistemului-informatic-mysmis-2021-solicitari-de-clarificari-eferente-apelului-o-sansa-in-plus-prin-invatamantul-profesional-si-tehnic-regiuni",
+      "fingerprint": "23538b82d84e1bec0c460bc666af2bc0b25ea548814c72169393bcfd1a5cc986",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-solicitantii-vor-primi-prin-intermediul-sistemului-informatic-mysmis-2021-solicitari-de-clarificari-eferente-apelului-o-sansa-in-plus-prin-invatamantul-profesional-si-tehnic-regiuni",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-04e91426aea5a4e843a175cd",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: Varianta consolidată a Ghidului Solicitantului Incluziunea copiilor și tinerilor cu cerințe educaționale speciale",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-varianta-consolidata-a-ghidului-solicitantului-incluziunea-copiilor-si-tinerilor-cu-cerinte-educationale-speciale-2",
+      "fingerprint": "e5949e1cc902a22fb5b43f3bbccc73302c611d987540a5fa87b8ff58fc60439b",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-varianta-consolidata-a-ghidului-solicitantului-incluziunea-copiilor-si-tinerilor-cu-cerinte-educationale-speciale-2",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-3e62151bfbf6a21fa1a7a159",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PEO: solicitări de clarificări aferente etapei de evaluare tehnică și financiară preliminară (ETFP), formulate de Comisia de evaluare a cererilor de finanțare depuse în cadrul apelului de proiecte – Sprijin pentru înființarea de întreprinderi sociale în mediul urban – ITI Microregiunea Țara Făgărașului",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/peo-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-formulate-de-comisia-de-evaluare-a-cererilor-de-finantare-depuse-in-cadrul-apelului-de-proiecte",
+      "fingerprint": "0ffdb86925e69aa564b5101caef7de987be9d43eac664ef8cb08e800b04a430a",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/peo-solicitari-de-clarificari-aferente-etapei-de-evaluare-tehnica-si-financiara-preliminara-etfp-formulate-de-comisia-de-evaluare-a-cererilor-de-finantare-depuse-in-cadrul-apelului-de-proiecte",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-301b90815ee31d8495515090",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -2447,7 +4487,7 @@
       "fingerprint": "390c9a74294f96cd6f44a71a798469a17319116cd87ab175048ab6216cac93d7",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2477,7 +4517,7 @@
       "fingerprint": "b98e2de121ee13c24cc2ba8f199a75b68d0ab53b827200933ec918ecabae5166",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2507,7 +4547,7 @@
       "fingerprint": "68ef9d496a3ffbc4873e8d167dfbfef1de0feef3a4d2f50f644e28602209b589",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2537,7 +4577,7 @@
       "fingerprint": "6f6c9256dc061e176ed7682e692b18aa5ab086b9e0112a6c53dcf56b094446f3",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2557,6 +4597,36 @@
       ]
     },
     {
+      "id": "mipe-8e053768df54cb63c8dbae21",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "PoIDS: Răspunsurile la propunerile și observațiile formulate în cadrul procesului de consultare publică pentru Ghidul Solicitantului – Condiții Specifice „Sprijin pentru familii monoparentale – ITI Microregiunea Țara Făgărașului”",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/poids-raspunsurile-la-propunerile-si-observatiile-formulate-in-cadrul-procesului-de-consultare-publica-pentru-ghidul-solicitantului-conditii-specifice-sprijin-pentru-familii-monopare",
+      "fingerprint": "d77a922da0c8863d04c70531b73e5362ed1c1b01c58015a9e2fc961c3c6dc350",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/poids-raspunsurile-la-propunerile-si-observatiile-formulate-in-cadrul-procesului-de-consultare-publica-pentru-ghidul-solicitantului-conditii-specifice-sprijin-pentru-familii-monopare",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-b4ad700fb070a36c85f1bb7e",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -2567,7 +4637,7 @@
       "fingerprint": "7bec5aa4cbe96f3ad985fddf625defd46e6d5f6e0430b6bbc89386b339d4545e",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2597,7 +4667,7 @@
       "fingerprint": "492314a2b132ed372688e3efbcef660e8b12adc1aa69cb68f5b6b92da4e28579",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2617,6 +4687,66 @@
       ]
     },
     {
+      "id": "mipe-f3eb85393ef1ec48038049a0",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Programul Sănătate: a fost actualizat Ghidul Solicitantului aferent apelului de proiecte Creșterea capacității de coordonare a activității în domeniul transplantului prin dezvoltarea de instrumente de lucru și prin derularea campaniilor de promovare/informare/conștientizare privind importanța donării",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/programul-sanatate-a-fost-actualizat-ghidul-solicitantului-aferent-apelului-de-proiecte-cresterea-capacitatii-de-coordonare-a-activitatii-in-domeniul-transplantului-prin-dezvoltarea-de-instrumente-de",
+      "fingerprint": "427855939e2f84158e9503928d3f60b7385ef7e274eb0817c17f698d5596524b",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/programul-sanatate-a-fost-actualizat-ghidul-solicitantului-aferent-apelului-de-proiecte-cresterea-capacitatii-de-coordonare-a-activitatii-in-domeniul-transplantului-prin-dezvoltarea-de-instrumente-de",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
+      "id": "mipe-5c09911bdd3acd3456ea3998",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "Programul Sănătate: a fost actualizat Ghidului Solicitantului aferent apelului de proiecte Creșterea eficacității și rezilienței sistemelor de sănătate în domeniul oncologie prin dezvoltarea de instrumente de lucru/mecanisme și prin formarea/actualizarea competențelor practicienilor implicați",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/programul-sanatate-a-fost-actualizat-ghidului-solicitantului-aferent-apelului-de-proiecte-cresterea-eficacitatii-si-rezilientei-sistemelor-de-sanatate-in-domeniul-oncologie-prin-dezvoltarea-de-instru",
+      "fingerprint": "69233e09853799bf1c83006d7a4e9fc7cfa326a6b8384f2c577e8939a3b3eca1",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/programul-sanatate-a-fost-actualizat-ghidului-solicitantului-aferent-apelului-de-proiecte-cresterea-eficacitatii-si-rezilientei-sistemelor-de-sanatate-in-domeniul-oncologie-prin-dezvoltarea-de-instru",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-3b17ec15255432b6f6dad420",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -2627,7 +4757,7 @@
       "fingerprint": "411a1bbf1dada315318a289c200011b21451ea054c2028c40cefa38559589c92",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2657,7 +4787,7 @@
       "fingerprint": "5dad5bfc6c3dbba097a5511cfe31f2d3666cf85a49170350f21fb66ad027a51a",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2677,6 +4807,36 @@
       ]
     },
     {
+      "id": "mipe-ca115afe856927106ab67c0c",
+      "sourceId": "MIPE_CORPUS",
+      "sourceTier": "T1",
+      "recordType": "OFFICIAL_MIPE_ITEM",
+      "title": "https://mfe.gov.ro/",
+      "programme": "MIPE",
+      "canonicalUrl": "https://mfe.gov.ro/",
+      "fingerprint": "32e5ce856107f29880900957e84b16cfff351824cc91c2f2754a01499cbb65b3",
+      "observedAt": "2026-10-02T06:48:25.465425+00:00",
+      "freshness": "CURRENT",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+      "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
+      "publishMaterialFacts": false,
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "provenance": [
+        {
+          "url": "https://mfe.gov.ro/",
+          "tier": "T1",
+          "label": "MIPE"
+        }
+      ]
+    },
+    {
       "id": "mipe-2dbd999daa81015f8d7f8efd",
       "sourceId": "MIPE_CORPUS",
       "sourceTier": "T1",
@@ -2687,7 +4847,7 @@
       "fingerprint": "e145a18dc49fea94d168f92170f680da0039b8501dce96e93d051f0a1e33988b",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2717,7 +4877,7 @@
       "fingerprint": "5fe41ea12710b0bd38dd68832b5baaf1bec6c30a6d0609f11713fc9ef5972ce9",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2747,7 +4907,7 @@
       "fingerprint": "483728815ddad57dbe368210b3eccb46221b8a912996d079e94e67ec0969f084",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2777,7 +4937,7 @@
       "fingerprint": "0c79df5e20d39898632196be67d8267e3e3bc7c3044f7929d1fe8beb233d0aca",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -2807,7 +4967,7 @@
       "fingerprint": "1bc68c8c138a37cdda745d2e15bdc869d07b71c119d012c017d90acd063b468a",
       "observedAt": "2026-09-22T18:17:06.350636+00:00",
       "freshness": "CURRENT",
-      "decisionUse": "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+      "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
       "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
       "publishMaterialFacts": false,
       "blockedFactClasses": [
@@ -3931,385 +6091,385 @@
         {
           "sourceId": "AFIR_CORPUS",
           "status": "CURRENT",
-          "ageHours": 1.15,
+          "ageHours": 1.16,
           "maxAgeHours": 4
         },
         {
           "sourceId": "MIPE_CORPUS",
           "status": "CURRENT",
-          "ageHours": 0.05,
+          "ageHours": 0.36,
           "maxAgeHours": 4
         },
         {
           "sourceId": "PEO_CALENDAR",
           "status": "CURRENT",
-          "ageHours": 5.36,
+          "ageHours": 5.37,
           "maxAgeHours": 8
         },
         {
           "sourceId": "SRC-ADR-CENTRU-PR-ACTIONS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRCENTRU-FUNDING-CATALOG",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRCENTRU-PTJ-CONSULT",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRVEST-PTJ-ACTIVE",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ANOFM-VALCEA-STATS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ARACIP-SCHOOL-REGISTRY",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-CSF-ROMANIA-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-EEA-MOU",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-EEA-MOU-LEGAL",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-NATIONAL-DOCUMENTS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU-LEGAL",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-OVERVIEW",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-CEF-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-CERV-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-CREATIVE-EUROPE-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-DIGITAL-WORK-PROGRAMMES",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-EIC-WP-2026",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-ERASMUS-GUIDE-2026",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-EU4HEALTH-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-EUI-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-FUNDING-TENDERS-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-HORIZON-EUROPE",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-INNOVATION-FUND-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-JUSTICE-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-LIFE-CALLS-2026",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-MFF-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-SMP-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-SOLIDARITY-CALL-2026",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INS-TEMPO",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-DANUBE",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-EUROPE",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-NEXT-BSB",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROBG",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROBG-POST2027",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROHU",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROHU-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROMD",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROMD-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-RORS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-RORS-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROUA",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ISJ-VALCEA",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-CALENDAR-INDEX",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-GENERAL-GUIDE",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MEC-CNDIPT",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MIPE-EEA-NORWAY-LANDING",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MYSMIS-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OI-RESEARCH-HEALTH",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OI-RESEARCH-POCIDIF",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRBI-PEO",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRBI-PIDS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRCENTRU-PEO",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRNE-PEO",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO-GUIDES",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO-MANUALS",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OLD-FONDURI-UE",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-PREFECTURA-TM-FUNDING",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         {
           "sourceId": "VERIFIED_SOURCE_REGISTRY",
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         }
       ]
@@ -4350,11 +6510,13 @@
       "requiredFamilies": [
         {
           "family": "MIPE",
-          "status": "PRESENT_DEGRADED",
+          "status": "PRESENT_AVAILABLE",
           "sourceIds": [
             "MIPE_CORPUS"
           ],
-          "availableSourceIds": []
+          "availableSourceIds": [
+            "MIPE_CORPUS"
+          ]
         },
         {
           "family": "MYSMIS",
@@ -4440,7 +6602,7 @@
         "observedAt": "2026-10-02T06:00:21.677643+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.15,
+          "ageHours": 1.16,
           "maxAgeHours": 4
         },
         "itemCount": 32,
@@ -4474,15 +6636,15 @@
         "dependencyScopes": [
           "MIPE_MANAGED_PROGRAMMES"
         ],
-        "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
-        "observedAt": "2026-10-02T07:06:54.587349+00:00",
+        "status": "OK",
+        "observedAt": "2026-10-02T06:48:25.465425+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 0.05,
+          "ageHours": 0.36,
           "maxAgeHours": 4
         },
-        "itemCount": 57,
-        "sourceAvailable": false,
+        "itemCount": 129,
+        "sourceAvailable": true,
         "lastKnownGoodPreserved": true,
         "failClosed": true,
         "kind": "CORPUS",
@@ -4518,7 +6680,7 @@
         "observedAt": "2026-10-02T01:48:01.056716+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 5.36,
+          "ageHours": 5.37,
           "maxAgeHours": 8
         },
         "itemCount": 30,
@@ -4564,7 +6726,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4600,7 +6762,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4638,7 +6800,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4676,7 +6838,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4709,7 +6871,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4742,7 +6904,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4776,7 +6938,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4810,7 +6972,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4844,7 +7006,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4880,7 +7042,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4914,7 +7076,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4948,7 +7110,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4984,7 +7146,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5017,7 +7179,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5050,7 +7212,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5083,7 +7245,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5116,7 +7278,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5149,7 +7311,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5182,7 +7344,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5215,7 +7377,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5248,7 +7410,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5281,7 +7443,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5314,7 +7476,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5347,7 +7509,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5380,7 +7542,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5413,7 +7575,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5446,7 +7608,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5479,7 +7641,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5512,7 +7674,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5545,7 +7707,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5578,7 +7740,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5611,7 +7773,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5644,7 +7806,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5677,7 +7839,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5711,7 +7873,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5744,7 +7906,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5778,7 +7940,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5811,7 +7973,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5845,7 +8007,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5878,7 +8040,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5912,7 +8074,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5945,7 +8107,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5978,7 +8140,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6018,7 +8180,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6055,7 +8217,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6092,7 +8254,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6125,7 +8287,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6161,7 +8323,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -6196,7 +8358,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6232,7 +8394,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6268,7 +8430,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6304,7 +8466,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6340,7 +8502,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6376,7 +8538,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6415,7 +8577,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6451,7 +8613,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6487,7 +8649,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6526,7 +8688,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -6559,7 +8721,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -6592,7 +8754,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -6621,7 +8783,7 @@
         "observedAt": "2026-10-02T05:53:54.934152Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.26,
+          "ageHours": 1.27,
           "maxAgeHours": 6
         },
         "itemCount": 60,
@@ -6646,7 +8808,6 @@
       "policy": "SOURCE_INCIDENTS_BLOCK_ONLY_DEPENDENT_FACT_SCOPES",
       "globalStop": false,
       "blockedSourceIds": [
-        "MIPE_CORPUS",
         "SRC-ADRCENTRU-PTJ-CONSULT",
         "SRC-ADRVEST-PTJ-ACTIVE",
         "SRC-INS-TEMPO",
@@ -6676,14 +8837,12 @@
         },
         {
           "sourceId": "MIPE_CORPUS",
-          "availability": "UNAVAILABLE_LAST_KNOWN_GOOD",
-          "materialFactGate": "BLOCKED_SOURCE_DEPENDENCIES",
+          "availability": "AVAILABLE",
+          "materialFactGate": "RECONCILIATION_REQUIRED",
           "affectedScopes": [
             "MIPE_MANAGED_PROGRAMMES"
           ],
-          "blockingReasons": [
-            "UNAVAILABLE_LAST_KNOWN_GOOD"
-          ],
+          "blockingReasons": [],
           "lastKnownGoodPreserved": true,
           "blocksUnrelatedSources": false,
           "publishMaterialFacts": false
@@ -7501,41 +9660,39 @@
     "replay": {
       "status": "PASS",
       "algorithm": "sha256-canonical-json",
-      "referenceTime": "2026-10-02T07:09:38Z",
-      "inputDigest": "8db16cf762950f0eaa09872a705d9b2acae415c4b9e9f82653bbe03f0a18135a",
-      "outputDigest": "1d5320fb4ee247388315e5aa98c11e64d9c861736cb88df03bfbce34a8ed8a2c",
-      "firstPassDigest": "0b4d597f20ec1e333a074359ba70a3f6f1ebccbd7bf475139823e222b7089cef",
-      "secondPassDigest": "0b4d597f20ec1e333a074359ba70a3f6f1ebccbd7bf475139823e222b7089cef",
+      "referenceTime": "2026-10-02T07:10:15Z",
+      "inputDigest": "1ce7d9a2861b29888d213837527ebb239c5264c91aeb460926d6504031679a74",
+      "outputDigest": "f6240393f69d69cd4996908072672b034547f342de4fd3bfa2f96ab8a082e8c6",
+      "firstPassDigest": "6a6680a76975af8f6277f7d0e835c4d2dda0ad47970224cd4624e7f26b7ade96",
+      "secondPassDigest": "6a6680a76975af8f6277f7d0e835c4d2dda0ad47970224cd4624e7f26b7ade96",
       "byteEquivalent": true
     }
   },
   "summary": {
     "sourceCount": 64,
     "corpusCount": 4,
-    "recordCount": 118,
+    "recordCount": 190,
     "duplicatesRemoved": 0,
     "recordTypes": {
       "OFFICIAL_DOCUMENT": 4,
-      "OFFICIAL_MIPE_ITEM": 56,
+      "OFFICIAL_MIPE_ITEM": 128,
       "OFFICIAL_PAGE": 28,
       "PLANNED_CALL": 30
     },
     "programmes": {
       "AFIR / PS PAC 2023-2027": 32,
-      "MIPE": 56,
+      "MIPE": 128,
       "PEO": 30
     },
     "staleOrUnknownSources": [],
     "materialStaleOrUnknownSources": [],
     "unavailableT1Sources": [
-      "MIPE_CORPUS",
       "SRC-INS-TEMPO",
       "SRC-INTERREG-ROBG",
       "SRC-INTERREG-ROMD",
       "SRC-INTERREG-ROUA"
     ],
     "operationalUnavailableT1Sources": [
-      "MIPE_CORPUS",
       "SRC-ADR-CENTRU-PR-ACTIONS",
       "SRC-EEA-GRANTS-ROMANIA-EEA-MOU-LEGAL",
       "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU-LEGAL",
