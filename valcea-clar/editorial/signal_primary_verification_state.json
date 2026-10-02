@@ -2,19 +2,282 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-10-02T01:01:16+03:00",
+  "generated_at": "2026-10-02T10:32:13+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-10-02T00:59:58+03:00",
-  "task_count": 94,
+  "queue_generated_at": "2026-10-02T10:30:26+03:00",
+  "task_count": 96,
   "primary_match_count": 0,
   "no_match_count": 33,
-  "unrouted_count": 61,
-  "target_count": 16,
-  "targets_ok": 13,
+  "unrouted_count": 63,
+  "target_count": 19,
+  "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "7eb827d9a105d7e8d51b2f37",
+      "signal_title": "„A luat foc cu o repeziciune extraordinar de mare. Am și plâns”. Un angajat al stației de sortare de la Rusciori spune cum a pornit incendiul",
+      "signal_url": "https://www.turnulsfatului.ro/2026/10/02/a-luat-foc-cu-o-repeziciune-extraordinar-de-mare-am-si-plans-un-angajat-al-statiei-de-sortare-de-la-rusciori-spune-cum-a-pornit-incendiul/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-02T10:09:35+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "7e1188548c8f1754d0487e90",
+      "signal_title": "Craiova devine punct de întâlnire pentru vin, gastronomie și turism, la „Treasures of the East”",
+      "signal_url": "https://jurnalulolteniei.ro/craiova-devine-punct-de-intalnire-pentru-vin-gastronomie-si-turism-la-treasures-of-the-east/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-02T09:51:26+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "4e4f6ff520126a57411c7fd2",
+      "signal_title": "45 de stații pentru mașini electrice, puse în funcțiune la Craiova. În ce cartiere pot fi folosite",
+      "signal_url": "https://jurnalulolteniei.ro/45-de-statii-pentru-masini-electrice-puse-in-functiune-la-craiova-in-ce-cartiere-pot-fi-folosite/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-02T09:44:16+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "557250daafcf08c156e4bf76",
+      "signal_title": "Clinica Speranța Craiova explică: ce sunt chisturile la rinichi și când trebuie verificate",
+      "signal_url": "https://jurnalulolteniei.ro/clinica-speranta-craiova-explica-ce-sunt-chisturile-la-rinichi-si-cand-trebuie-verificate/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-02T09:28:36+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "0cb9febef2d6f6deb6e0afdc",
+      "signal_title": "Toamnă cu proiecte importante la Costești. Investiții pentru iluminat, energie, sport și infrastructură",
+      "signal_url": "https://evenimentvalcean.ro/toamna-cu-proiecte-importante-la-costesti-investitii-pentru-iluminat-energie-sport-si-infrastructura/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-02T08:52:19+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH",
+      "listing_title_identity_rejections": 77
+    },
+    {
+      "signal_id": "1f6df0e38f9b7ecc7ab6ac2b",
+      "signal_title": "Iluminatul public din Gura Văii, vandalizat. Primarul din Bujoreni face apel la cetățeni",
+      "signal_url": "https://evenimentvalcean.ro/iluminatul-public-din-gura-vaii-vandalizat-primarul-din-bujoreni-face-apel-la-cetateni/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_published_at": "2026-10-02T08:48:11+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "8ee8253969bcc5c69b0bcc3c",
+      "signal_title": "Inspirată de fiul ei, o sibiancă a devenit consilier parental și organizează ateliere pentru copii și părinți. Mădălina Popianoș: „Simt că munca mea are un impact în comunitate”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/10/02/inspirata-de-fiul-ei-o-sibianca-a-devenit-consilier-parental-si-organizeaza-ateliere-pentru-copii-si-parinti-madalina-popianos-simt-ca-munca-mea-are-un-impact-in-comunitate/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-10-02T07:10:06+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 77
+    },
+    {
+      "signal_id": "77b44d83a9516d437bbb60b2",
+      "signal_title": "Iluminatul public din Gura Văii, oprit după smulgerea unei componente din cutia de comandă",
+      "signal_url": "https://www.impactreal.ro/2026/10/02/iluminatul-public-din-gura-vaii-oprit-dupa-smulgerea-unei-componente-din-cutia-de-comanda/",
+      "signal_publisher": "Impact Real",
+      "signal_published_at": "2026-10-02T07:04:58+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "b2283dd6739c8d0bbd446d62",
+      "signal_title": "Putin amenință cu arsenalul total: Mesaj pentru Europa",
+      "signal_url": "https://jurnalulolteniei.ro/putin-ameninta-cu-arsenalul-total-mesaj-pentru-europa/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-02T06:52:23+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
+    {
+      "signal_id": "ce374d47e0b73266078dfe8a",
+      "signal_title": "Alexandru Nazare: Pensiile și salariile vor fi plătite",
+      "signal_url": "https://jurnalulolteniei.ro/alexandru-nazare-pensiile-si-salariile-vor-fi-platite/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-02T06:38:25+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "listing_title_identity_rejections": 80
+    },
     {
       "signal_id": "d1d73176476495c9fd2e6a3e",
       "signal_title": "Iubitul tinerei al cărei trup a fost găsit într-o valiză, în Olt, a acceptat extrădarea simplificată din Elveția",
@@ -1486,45 +1749,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "0f2fde61c6b900502c34728e",
-      "signal_title": "„Vrem să terminăm lucrările până începe vremea rece”. Directorul Urbana, despre urmările incendiului din centrul istoric al Sibiului",
-      "signal_url": "https://www.turnulsfatului.ro/2026/09/30/vrem-sa-terminam-lucrarile-pana-incepe-vremea-rece-directorul-urbana-despre-urmarile-incendiului-din-centrul-istoric-al-sibiului/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-30T14:45:38+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 56
-    },
-    {
       "signal_id": "a0a0b14260a9daa9c5b1a141",
       "signal_title": "FOTO Zilele Recoltei 2026, în centrul Râmnicului! Trei zile de tradiții, produse locale și spectacole",
       "signal_url": "https://evenimentvalcean.ro/foto-zilele-recoltei-2026-in-centrul-ramnicului-trei-zile-de-traditii-produse-locale-si-spectacole/",
@@ -1556,19 +1780,6 @@
       "signal_url": "https://seintamplainvalcea.ro/2026/09/30/breaking-news-comitetul-pentru-situatii-de-urgenta-convocat-in-cazul-termoficarii-din-ramnicu-valcea/",
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_published_at": "2026-09-30T12:04:44+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "876a31f5bb6a27c62770b155",
-      "signal_title": "Cernișoara și-a rectificat bugetul: bani pentru administrație, asistență socială și drumuri",
-      "signal_url": "https://seintamplainvalcea.ro/2026/09/30/cernisoara-si-a-rectificat-bugetul-bani-pentru-administratie-asistenta-sociala-si-drumuri/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-09-30T10:13:13+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
@@ -1939,121 +2150,6 @@
       "listing_title_identity_rejections": 80
     },
     {
-      "signal_id": "432c27861485e45285f868eb",
-      "signal_title": "Suspiciuni grave la Primăria Olanu! Consilierii locali, chemați să voteze proiecte controversate privind terenuri, achiziții și patrimoniul comunei",
-      "signal_url": "https://ziaruldevalcea.ro/2026/09/suspiciuni-grave-la-primaria-olanu-consilierii-locali-chemati-sa-voteze-proiecte-controversate-privind-terenuri-achizitii-si-patrimoniul-comunei/",
-      "signal_publisher": "Ziarul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-29T11:20:21+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 77
-    },
-    {
-      "signal_id": "0b98e4c47b5db0b0572c0cef",
-      "signal_title": "Două vernisaje de artă, joi, 1 octombrie, la Galeriile Cozia și Galeria Artex din Râmnicu Vâlcea",
-      "signal_url": "https://curierulderamnic.ro/2026/09/29/doua-vernisaje-de-arta-joi-1-octombrie-la-galeriile-cozia-si-galeria-artex-din-ramnicu-valcea/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_published_at": "2026-09-29T10:48:21+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "737049c4e8ab9d5a170f7130",
-      "signal_title": "Suspectul crimei din Vâlcea s-a predat în Elveția. Bărbatul de 30 de ani, în custodia poliției",
-      "signal_url": "https://vocea-valcii.ro/dezvaluiri/suspectul-crimei-din-valcea-s-a-predat-in-elvetia-barbatul-de-30-de-ani-in-custodia-politiei/",
-      "signal_publisher": "Vocea Vâlcii",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-09-29T08:45:44+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "71cf6dd830dae7690e4af818",
-      "signal_title": "Continuare about SE LASĂ FRIGUL – CJ SOLICITĂ ACTIVAREA SITUAȚIEI DE URGENȚĂ!",
-      "signal_url": "https://www.curierul.ro/se-lasa-frigul-fara-caldura/",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": "2026-09-29T08:00:00+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
       "signal_id": "e25ab738cbdcd1f064449118",
       "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
       "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fse-lasa-frigul-fara-caldura%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
@@ -2148,32 +2244,6 @@
       "signal_id": "0a9f0e5efa5edfde1c95a354",
       "signal_title": "Declaratie de accesibilitate",
       "signal_url": "http://www.realitateavalceana.ro/declaratie-de-accesibilitate/",
-      "signal_publisher": "Realitatea Vâlceană",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "a5a88efdae836760f3b22c52",
-      "signal_title": "ASF propune reguli pentru promovarea pensiilor private",
-      "signal_url": "https://www.eurovalcea.ro/2026/09/29/asf-propune-reguli-pentru-promovarea-pensiilor-private/",
-      "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "041de1bb45292feba0960003",
-      "signal_title": "Moment istoric pentru infrastructura rutieră din România! »",
-      "signal_url": "http://www.realitateavalceana.ro/moment-istoric-pentru-infrastructura-rutiera-din-romania/",
       "signal_publisher": "Realitatea Vâlceană",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
