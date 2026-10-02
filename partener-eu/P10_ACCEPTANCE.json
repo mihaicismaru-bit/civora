@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-10-02T15:59:15Z",
-    "source_pass": 3,
-    "source_degraded": 2,
+    "utc": "2026-10-02T18:39:03Z",
+    "source_pass": 4,
+    "source_degraded": 1,
     "source_fail": 2,
     "source_quarantined": 2,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-PR-CENTRU-DIGITAL-2 — ADR Centru — Întreprinderi digitale Apel 2; dependent material facts blocked fail-closed; SRC-PR-CENTRU-ACTIUNI — ADR Centru — Acțiuni; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-10-02T15:59:25Z",
+    "utc": "2026-10-02T18:39:13Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
+    "final_url": "https://partener.eu/?p10_probe=20261002T183913Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
+        "final_url": "https://partener.eu/?p10_probe=20261002T183913Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
+        "final_url": "https://partener.eu/?p10_probe=20261002T183913Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20261002T155925Z",
-            "to_url": "https://partener.eu/?p10_probe=20261002T155925Z"
+            "from_url": "http://partener.eu/?p10_probe=20261002T183913Z",
+            "to_url": "https://partener.eu/?p10_probe=20261002T183913Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
+        "final_url": "https://partener.eu/?p10_probe=20261002T183913Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20261002T155925Z",
-            "to_url": "https://partener.eu/?p10_probe=20261002T155925Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20261002T183913Z",
+            "to_url": "https://partener.eu/?p10_probe=20261002T183913Z"
           }
         ],
         "content_verified": true,
@@ -92,8 +92,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "https://partener.eu/",
-      "git_sha": "8e8fe4e6dd7698bbc9782cb679139e5d40243051",
-      "observed_at": "2026-10-02T15:58:33.476964+00:00",
+      "git_sha": "1e03c6923cdb97dd4c9352d7a2640a335841d405",
+      "observed_at": "2026-10-02T16:01:55.270290+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-10-02T15:59:24Z",
-    "validation_run_started": "2026-10-02T15:59:15Z",
+    "utc": "2026-10-02T18:39:12Z",
+    "validation_run_started": "2026-10-02T18:39:03Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "6ce29972e5750ba7a60147842ecf3d8f67bec549e2226a8a5180075d8a0069b0",
-      "history_sha256": "6ce29972e5750ba7a60147842ecf3d8f67bec549e2226a8a5180075d8a0069b0",
-      "history_path": "validation/history/20261002T155915Z.json",
+      "latest_sha256": "bcb28fbb61a47bc654b36bf681c806279a71271894c09978664cce66c7ba0149",
+      "history_sha256": "bcb28fbb61a47bc654b36bf681c806279a71271894c09978664cce66c7ba0149",
+      "history_path": "validation/history/20261002T183903Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "416d8102539268daf480f196da6eb14edb5af83a3e626bb78ce48dee08652dc5",
-      "checkpoint_sha256": "416d8102539268daf480f196da6eb14edb5af83a3e626bb78ce48dee08652dc5",
+      "source_state_sha256": "707d088dcd690f7122b8f63d9fc4808afb536c1d60686b8886f1e141e6fc9450",
+      "checkpoint_sha256": "707d088dcd690f7122b8f63d9fc4808afb536c1d60686b8886f1e141e6fc9450",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-10-02T12:52:08.089364Z",
-      "age_seconds": 11236,
+      "age_seconds": 20824,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -181,12 +181,12 @@
       "fail_closed": true
     },
     "afir": {
-      "observed_at": "2026-10-02T12:59:55.597047+00:00",
+      "observed_at": "2026-10-02T18:36:18.464225+00:00",
       "status": "PASS",
       "item_count": 31,
       "error_count": 49,
-      "hash_change_candidates": 3,
-      "material_signal_candidates": 3,
+      "hash_change_candidates": 1,
+      "material_signal_candidates": 1,
       "auth_dependency_count": 28,
       "auth_dependencies": [
         {
@@ -477,7 +477,7 @@
       "integrity_pass": true,
       "registry_health": "DEGRADED",
       "registry_hash_changes": 1,
-      "afir_hash_changes": 3,
+      "afir_hash_changes": 1,
       "peo_calendar_changes": 0,
       "mipe_health": "PASS",
       "autonomous_orchestration_configured": true,
