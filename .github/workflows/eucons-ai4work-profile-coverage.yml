@@ -1,0 +1,44 @@
+name: EUCONS AI4WORK Profile Coverage Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-profile-coverage.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-profile-coverage.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-profile-coverage-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  profile-coverage-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate frozen profile coverage, pre-registered deterministic analysis plan, real-batch ranking and response-integrity diagnostics
+        working-directory: eucons/research/ai4work-step
+        shell: bash
+        run: |
+          set -o pipefail
+          python -m unittest -v test_profile_coverage_control.py test_response_integrity_control.py test_need_analysis_plan_control.py test_need_ranking_engine.py 2>&1 | tee /tmp/profile-coverage-test.log
+      - name: Preserve profile coverage diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: profile-coverage-test-log
+          path: /tmp/profile-coverage-test.log
+          if-no-files-found: error
+          retention-days: 1

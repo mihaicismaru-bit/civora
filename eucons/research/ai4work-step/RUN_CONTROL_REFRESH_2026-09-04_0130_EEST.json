@@ -1,0 +1,137 @@
+{
+  "schema_version": "eucons.ai4work_run_control_refresh.v0.4",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "observed_at": "2026-09-04T01:30:26+03:00",
+  "artifact_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "test_twin": false,
+  "prod_need_evidence_eligible": false,
+  "branch_parent_head": "7bccc13d5df80c11a097c60ee9013ae0348fe59e",
+  "secondary_evidence_refresh": {
+    "controlled_drive_registry_id": "1ZtyY7QZ8o-BebvFmrcY95QP6ONoWUCQY9wzCwSpSG20",
+    "high_water_mark_observed": "S72",
+    "dashboard_reconciled_to_observed": "S01-S72",
+    "existing_candidate_ids_reverified": ["S73", "S74", "S75"],
+    "candidate_rows_canonicalized": false,
+    "candidate_source_ids_reserved_for_review_only": ["S76", "S77", "S78"],
+    "verified_candidates": [
+      {
+        "candidate_source_id": "S76",
+        "region": "Sud-Vest Oltenia",
+        "publisher": "ADR Sud-Vest Oltenia",
+        "title": "Focus grup – un ecosistem antreprenorial competitiv",
+        "event_date": "2025-11-27",
+        "publication_date": null,
+        "url": "https://www.adroltenia.ro/focus-grup-un-ecosistem-antreprenorial-competitiv/",
+        "observed_fact": "The official ADR Sud-Vest Oltenia page reports a regional stakeholder focus group involving business, academia, enterprise associations, consultancies, public administration and RDI actors. The page states that participants highlighted development of entrepreneurial and digital competences among the key issues for the regional entrepreneurial ecosystem.",
+        "classification": "STAKEHOLDER_CONSULTATION_CONTEXT_ZERO_H1_H5",
+        "claim_boundary": "This is qualitative consultation context, not a representative adult/employer survey and not a prevalence estimate. It is not converted into H1-H5 numeric points and is not treated as proof from project activity."
+      },
+      {
+        "candidate_source_id": "S77",
+        "region": "Sud-Muntenia / Dambovita",
+        "publisher": "ANOFM / AJOFM Dambovita",
+        "title": "Programe de formare profesională – Septembrie 2026",
+        "publication_date": "2026-09-02",
+        "reference_period": "2026-09",
+        "url": "https://www.anofm.ro/dambovita/categorie/comunicate-de-presa/?anselectat=2026",
+        "observed_fact": "The official AJOFM Dambovita 2026 press-release listing exposes a new September-2026 vocational-training publication dated 02.09.2026. The controlled HTML surface used in this run does not expose the programme details, therefore no unobserved course content or numeric value is asserted.",
+        "classification": "CURRENT_TRAINING_PUBLICATION_SURFACE_ZERO_H1_H5",
+        "claim_boundary": "Training supply is not adult/employer need prevalence, digital/AI skill-gap prevalence or causal evidence and contributes zero H1-H5 points."
+      },
+      {
+        "candidate_source_id": "S78",
+        "region": "Centru",
+        "publisher": "ADR Centru",
+        "title": "STUDIU Resurse umane pentru specializarea inteligentă – nevoile și oferta de competențe digitale în administrație și economie",
+        "publication_date": "2022-01-04",
+        "url": "https://www.adrcentru.ro/dez-reg/studiu-i-resurse-umane-pentru-specializarea-inteligenta-nevoile-si-oferta-de-competente-digitale-in-administratie-si-economie/",
+        "observed_fact": "The official ADR Centru study page states that regional data were collected from local public authorities and companies regarding digitalisation and employees' digital competences, and that the collected data allowed identification of needs for improving digital competences in both public and private sectors. It also states that the study sought direct input from regional actors on needs and barriers related to digital transformation and the role of human resources.",
+        "classification": "REGIONAL_EMPIRICAL_STUDY_QUALITATIVE_SUPPORT_H5_ZERO_NUMERIC_RANK",
+        "claim_boundary": "This can support qualitative triangulation of H5 in Centru, but the current control readback does not establish a source-exact population prevalence estimate. Per the locked analysis plan, secondary evidence cannot alter the deterministic H1-H5 numeric order; no numeric ranking points are added."
+      }
+    ],
+    "duplicate_checks_against_controlled_source_register": {
+      "S76_exact_title_match_observed": false,
+      "S77_exact_title_match_observed": false,
+      "S78_exact_title_match_observed": false
+    },
+    "current_official_reverification": [
+      "S70 Olt July-2026 unemployment publication remains source-exact in the controlled registry and was not duplicated.",
+      "S74 candidate Ialomita July-2026 registered-unemployment item remains publicly listed with 5,80% and publication date 01.09.2026.",
+      "S75 candidate Harghita September-2026 training page remains publicly available and includes a digital-competence course at Toplita; it remains supply context only.",
+      "S72 Mures July-2026 administrative context remains publicly verifiable at 2,86% and 5,919 registered unemployed; it was not duplicated."
+    ],
+    "h1_h5_numeric_points_added": 0,
+    "numeric_rank_changed": false,
+    "project_activity_as_need_evidence": false,
+    "training_supply_as_need_prevalence": false,
+    "administrative_labour_market_data_as_need_prevalence": false,
+    "canonicalization_boundary": "All S73-S78 candidate material remains branch-only / NOT CANONICALIZED. Controlled Drive Source_register remains S01-S72 because merge/canonicalization is not authorized."
+  },
+  "call_requirements_refresh": {
+    "gmail_query": "newer_than:1d -in:spam -in:trash -from:notifications@github.com (AI4WORK OR eucons OR Cloudflare OR cPanel OR Claus OR OMIPE OR MIPE OR PEO)",
+    "matching_messages_observed": 0,
+    "status": "CLOSED_UNCHANGED"
+  },
+  "primary_evidence_refresh": {
+    "controlled_drive_queries": [
+      "PROD_REAL_EVIDENCE",
+      "source_export_sha256 AI4WORK_ADULTS_V1 AI4WORK_EMPLOYERS_V1"
+    ],
+    "search_result_class": "CONTROL_OR_PRE_FINAL_MATERIAL_ONLY",
+    "eligible_immutable_combined_real_adult_employer_batch_found": false,
+    "source_export_sha256_bound_real_batch_found": false,
+    "status": "NF06_PROD_FAIL_CLOSED"
+  },
+  "method_and_nf06_refresh": {
+    "need_analysis_plan_status": "APPROVED_FOR_PROD_METHOD_ONLY",
+    "core_rank_scope": "H1-H5_REAL_PRIMARY_ONLY",
+    "secondary_evidence_can_change_numeric_order": false,
+    "missing_direct_indicator_imputation_allowed": false,
+    "representativeness_claim_allowed": false,
+    "causal_claim_allowed": false,
+    "nf06_preingest_status": "PREPARED_FAIL_CLOSED",
+    "nf06_prod_ingest_allowed": false,
+    "need_synthesis_allowed": false,
+    "test_twin_evidence_class": "TEST_TWIN_NON_EVIDENCE_PERMANENTLY_NON_PROMOTABLE"
+  },
+  "forms_gdpr_refresh": {
+    "forms_definition_status": "FROZEN_WEB_DEFINITION_NOT_DEPLOYED",
+    "direct_identifiers_in_analytical_forms": false,
+    "analytical_free_text": false,
+    "commercial_tracking": false,
+    "crm_linkage": false,
+    "research_store_separation_required": true,
+    "live_provider_bound_separation_proven": false,
+    "raw_access_retention_ceiling_days": 7,
+    "account_specific_raw_access_ceiling_proven": false,
+    "residual_provider_backup_ceiling_days": 92,
+    "account_specific_backup_ceiling_proven": false,
+    "public_live_readback_this_run": "NO_NEW_POSITIVE_PROVIDER_BOUND_EVIDENCE_OBTAINED",
+    "privacy_contact_inbound_independently_verified": false
+  },
+  "repository_controls": {
+    "exact_head_before_this_receipt": "7bccc13d5df80c11a097c60ee9013ae0348fe59e",
+    "associated_pr_triggered_workflow_runs_observed": 29,
+    "success_conclusions_observed": 29,
+    "failed_conclusions_observed": 0,
+    "null_conclusions_observed": 0,
+    "interpretation": "All associated checks on the prior exact head now read completed/success. CI remains control evidence only and is not proof of live provider/account configuration or real need prevalence."
+  },
+  "remaining_external_blocker": {
+    "class": "LIVE_ACCOUNT_SPECIFIC_PROVIDER_BOUND",
+    "items": [
+      "exact rendered AI4WORK Article 13 readback on the live research surface and independently working privacy/rights inbound channel",
+      "actual eucons.ro cPanel/Cloudflare Raw Access/archive/access-security/retention readback proving the <=7-day policy on the live account",
+      "current service/account mapping and active processor/subprocessor chain",
+      "provider-bound proof that the research-only store is outside webroot and separate from CRM/commercial storage with authorised access only",
+      "account-specific confirmation of no backup override above <=92 days plus deletion/restore semantics that do not silently reintroduce erased/held records",
+      "provider-bound rights-hold/erasure and incident-response smoke evidence in TEST_TWIN_NON_EVIDENCE"
+    ]
+  },
+  "merge_authorized": false,
+  "canonicalization_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

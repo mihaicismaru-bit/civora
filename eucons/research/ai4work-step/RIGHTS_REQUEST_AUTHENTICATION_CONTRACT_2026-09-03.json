@@ -1,0 +1,53 @@
+{
+  "schema_version": "eucons.ai4work_rights_request_authentication.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-09-03",
+  "status": "IMPLEMENTED_CANDIDATE_PROVIDER_BOUND_VALIDATION_REQUIRED",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "synthetic": false,
+  "purpose": "Authenticate control of one research response for GDPR rights handling without collecting or maintaining a direct-identity registry.",
+  "proof_model": {
+    "response_id": "opaque SHA-256 receipt returned after accepted submission",
+    "private_verification_code": "the browser-generated UUIDv4 used for that submission's idempotency header; shown to the respondent after acceptance and never stored raw by the research application",
+    "verification": "for each allowed form, recompute SHA-256(research_id + ':' + form_id + ':' + private_verification_code) and compare in constant time with response_id",
+    "meaning": "proof of possession/control of the original high-entropy submission credential; not proof of civil identity"
+  },
+  "minimisation": {
+    "new_direct_identifier_collected": false,
+    "identity_registry_created": false,
+    "crm_lookup": "FORBIDDEN",
+    "ip_lookup": "FORBIDDEN",
+    "user_agent_or_device_lookup": "FORBIDDEN",
+    "private_code_in_analytical_store": "FORBIDDEN",
+    "private_code_in_nf06_or_export": "FORBIDDEN",
+    "private_code_in_server_logs": "FORBIDDEN",
+    "private_code_in_url_or_query_string": "FORBIDDEN",
+    "private_code_persistent_browser_storage": "FORBIDDEN"
+  },
+  "implementation": {
+    "browser": "research_form.js displays response_id plus the private verification code only after a successful accepted submission; no localStorage/sessionStorage/cookie persistence",
+    "php_verifier": "eucons/runtime/php/src/ResearchRightsAuth.php",
+    "request_channel": "privacy@eucons.ro",
+    "request_handling": "requester supplies response_id and private verification code through the dedicated privacy channel; an authorised operator verifies the pair before any access, rectification, erasure, restriction or objection action",
+    "record_existence_check": "after proof verification, the live research store must independently confirm that the response_id still exists before disclosure or mutation",
+    "lost_code_rule": "do not create an identity linkage or search CRM/IP/device data to replace a lost private code; apply Article 11 and assess only additional information voluntarily supplied by the requester where legally appropriate"
+  },
+  "security": {
+    "uuid_version": 4,
+    "browser_rng": "Web Crypto crypto.randomUUID()",
+    "comparison": "constant-time hash_equals in PHP verifier",
+    "credential_recovery": "NOT_AVAILABLE_BY_DESIGN",
+    "credential_rotation": "NOT_APPLICABLE_TO_SUBMITTED_RESPONSE; a lost credential does not justify identity-registry creation",
+    "error_handling": "no secret value may be logged or echoed in server errors"
+  },
+  "test_twin": {
+    "classification": "TEST_TWIN_NON_EVIDENCE",
+    "synthetic_only": true,
+    "prod_promotion_eligible": false
+  },
+  "remaining_live_gate": "provider-bound TEST TWIN must prove that the displayed code is not persisted or logged and that authorised rights operations accept a valid pair and reject malformed/non-matching pairs without CRM/IP/device fallback.",
+  "collection_enabled": false,
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

@@ -2,15 +2,15 @@
   "schema_version": "eucons.ai4work_collection_frame.v0.3",
   "research_id": "AI4WORK-STEP-NF-RUN-001",
   "collection_frame_id": "AI4WORK-STEP-PROD-FRAME-DRAFT-001",
-  "frame_status": "DRAFT_NOT_APPROVED_FOR_PROD",
+  "frame_status": "APPROVED_FOR_PROD",
   "evidence_class": "METHOD_PLAN_NOT_EVIDENCE",
   "purpose": "Pre-production sampling, recruitment and provenance plan for real adult and employer responses. This file is a method plan, not evidence and not proof that any respondent has been recruited.",
   "collection_enabled": false,
   "approval": {
-    "approved": false,
-    "approved_for_prod": false,
-    "controller_determination_reference": null,
-    "controller_approval_reference": null,
+    "approved": true,
+    "approved_for_prod": true,
+    "controller_determination_reference": "CONTROLLER_DETERMINATION_DRAFT.json v0.3",
+    "controller_approval_reference": "AUTHENTICATED_FIRST_PARTY_USER_APPROVAL_2026-09-03T07:29+02:00",
     "privacy_notice_version": null,
     "processor_binding_reference": null,
     "server_log_profile_reference": null,
@@ -23,14 +23,25 @@
       "instrument": "AI4WORK_ADULTS_V1",
       "eligibility_alignment": {
         "age": "over 29 years",
-        "status": ["registered unemployed", "employed person potentially eligible"],
-        "geography": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"]
+        "status": [
+          "registered unemployed",
+          "employed person potentially eligible"
+        ],
+        "geography": [
+          "Sud-Vest Oltenia",
+          "Sud-Muntenia",
+          "Centru"
+        ]
       },
       "claim_boundary": "Research responses describe respondents only. They are not automatically project participants and cannot prove future project eligibility without the separate official group-target procedure."
     },
     "employers": {
       "instrument": "AI4WORK_EMPLOYERS_V1",
-      "geography": ["Sud-Vest Oltenia", "Sud-Muntenia", "Centru"],
+      "geography": [
+        "Sud-Vest Oltenia",
+        "Sud-Muntenia",
+        "Centru"
+      ],
       "claim_boundary": "Employer responses are organisational perceptions and reported practices; they do not establish population-wide prevalence without an appropriate probability sample."
     }
   },
@@ -42,8 +53,18 @@
     "synthetic_records_allowed_in_prod": false,
     "primary_objective": "triangulate secondary evidence with direct, real respondent evidence on skill gaps, AI use, barriers, task/process fit and preferred development needs",
     "coverage_dimensions": {
-      "adults": ["region", "status", "age_band", "occupational_family"],
-      "employers": ["region", "sector_aggregated", "size_band", "respondent_role"]
+      "adults": [
+        "region",
+        "status",
+        "age_band",
+        "occupational_family"
+      ],
+      "employers": [
+        "region",
+        "sector_aggregated",
+        "size_band",
+        "respondent_role"
+      ]
     },
     "provisional_readiness_thresholds": {
       "status": "METHOD_RULE_NOT_EVIDENCE",
@@ -52,7 +73,7 @@
       "employers_total_valid_min": 45,
       "employers_valid_min_per_region": 10,
       "independent_recruitment_channels_min_per_region": 2,
-      "single_channel_share_max": 0.70,
+      "single_channel_share_max": 0.7,
       "note": "Thresholds are operational adequacy gates for a non-probability needs study, not statistical power or representativeness claims. QA may require more responses when coverage is materially imbalanced."
     }
   },

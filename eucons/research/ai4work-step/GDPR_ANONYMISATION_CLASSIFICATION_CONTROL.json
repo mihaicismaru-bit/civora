@@ -1,0 +1,75 @@
+{
+  "schema_version": "eucons.ai4work_gdpr_anonymisation_classification.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-29",
+  "status": "RAW_RESPONSES_TREATED_AS_PERSONAL_OUTPUT_ANONYMITY_REQUIRES_VALIDATION",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_EVIDENCE",
+  "collection_enabled": false,
+  "authority_context": {
+    "reference": "EDPB Guidelines 02/2026 on Anonymisation",
+    "version": "1.0",
+    "adoption_date": "2026-07-07",
+    "consultation_state": "ADOPTED_VERSION_FOR_PUBLIC_CONSULTATION",
+    "feedback_period": "2026-07-08/2026-10-30",
+    "official_url": "https://www.edpb.europa.eu/public-consultations/guidelines-022026-on-anonymisation_en",
+    "boundary": "The guidance is used as a current methodological control. It is not represented as a final post-consultation version."
+  },
+  "classification_policy": {
+    "raw_and_normalised_respondent_records": "PERSONAL_OR_POTENTIALLY_LINKABLE_DATA_FOR_GDPR_COMPLIANCE",
+    "reason": "The absence of names or other direct identifiers is not sufficient to establish anonymity. Combinations of respondent attributes, infrastructure logs or additional information available through relevant entities may permit record isolation, linkage, inference or identification using means reasonably likely to be used.",
+    "controller_perspective_at_collection": "GDPR_APPLIES_TO_RESPONDENT_LEVEL_COLLECTION_AND_PROCESSING_UNLESS_AND_UNTIL_ANONYMITY_IS_VALIDATED",
+    "processor_perspective": "A processor acting on behalf of EUROCONSULT must treat the data consistently with the controller perspective for the processing performed on the controller's behalf.",
+    "direct_identifier_absence_claim": "DE_IDENTIFIED_BY_DESIGN_NOT_ANONYMOUS_BY_ASSERTION",
+    "test_twin": "TEST_TWIN_NON_EVIDENCE_SYNTHETIC_ONLY"
+  },
+  "output_anonymity_test": {
+    "eligible_scope": "aggregate/disclosure-controlled analytical outputs only; never raw respondent records or operational logs",
+    "required_criteria": [
+      "NO_RECORD_ISOLATION",
+      "NO_LINKAGE",
+      "NO_INFERENCE"
+    ],
+    "relevant_perspectives": [
+      "EUROCONSULT SRL as controller",
+      "verified processor/subprocessor entities with access to respondent-level data",
+      "intended recipients of an aggregate output, including the public if an output is published"
+    ],
+    "means_reasonably_likely_test": true,
+    "required_controls": [
+      "small-cell suppression or combination for reported n < 5",
+      "no respondent-level export into the final NEEDS_ANALYSIS or public/source-register tables",
+      "no analytical output containing direct identifiers, free text or transport identifiers",
+      "no analytical joining with CRM, optional contact records, IP logs, user-agent data or device identifiers",
+      "review dimensionality and granularity before release so combinations of region, age/status/occupation or sector/size do not isolate a respondent",
+      "document the output-specific anonymity assessment and retain it with the final QA package"
+    ],
+    "pass_rule": "An aggregate output may be labelled anonymous only when all three criteria pass for the relevant perspectives or a documented further analysis establishes that the residual identification likelihood is insignificant in reality.",
+    "fail_rule": "If the anonymity test is not documented or a criterion fails without a sufficient further analysis, the output remains personal/potentially linkable and must stay under GDPR controls."
+  },
+  "anonymisation_processing_rule": {
+    "lawful_basis_required_for_anonymisation_process": true,
+    "transparency_required": true,
+    "rule": "Processing personal data in order to produce anonymous outputs remains processing subject to the GDPR. The privacy notice must not describe respondent-level data as anonymous merely because direct identifiers are not requested.",
+    "retention_effect": "Validated anonymous aggregates may be retained beyond the respondent-level retention window only when they cannot be used to reconstruct or link back to respondent records. Raw/normalised respondent records remain subject to the approved retention/deletion schedule."
+  },
+  "current_ai4work_position": {
+    "raw_anonymity_claim_relied_on_for_prod": false,
+    "ordinary_gdpr_controls_apply_to_raw_records": true,
+    "output_anonymisation_is_terminal_disclosure_control": true,
+    "additional_raw_anonymity_gate_required_before_collection": false,
+    "reason": "AI4WORK does not need to claim that raw responses are anonymous in order to collect them lawfully. It instead treats respondent-level records conservatively under GDPR and reserves an anonymity claim for validated aggregate outputs only."
+  },
+  "change_control": {
+    "reassess_if": [
+      "new fields increase granularity or dimensionality",
+      "free text, exact employer, exact locality or another quasi-identifier is introduced",
+      "new processor/subprocessor access or data linkage becomes possible",
+      "raw respondent records are proposed for disclosure or external AI/LLM processing",
+      "small-cell suppression threshold or disclosure-control policy changes"
+    ],
+    "default_if_missing": "FAIL_CLOSED_TREAT_AS_PERSONAL_OR_POTENTIALLY_LINKABLE"
+  },
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

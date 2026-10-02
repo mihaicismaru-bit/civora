@@ -4,11 +4,13 @@ on:
   pull_request:
     paths:
       - 'eucons/research/ai4work-step/**'
+      - 'eucons/deployment/build_ai4work_candidate.py'
       - '.github/workflows/eucons-ai4work-research.yml'
   push:
     branches: [main]
     paths:
       - 'eucons/research/ai4work-step/**'
+      - 'eucons/deployment/build_ai4work_candidate.py'
       - '.github/workflows/eucons-ai4work-research.yml'
   workflow_dispatch:
 
@@ -28,9 +30,15 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
-      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN chain, controller, preview-minimization and collection-frame tests
+      - name: Run AI4WORK runtime, storage, idempotency, HTTP, NF06, TEST TWIN, controller, minimization, collection-frame, primary-readiness, real-batch temporal provenance, retention, rights, DPIA, Article-13 binding, disclosure-control, scientific-research, anonymisation classification and PROD-activation tests
         working-directory: eucons/research/ai4work-step
-        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_e2e_test_twin_chain.py test_controller_determination.py test_preview_minimization.py test_collection_frame.py
+        run: python -m unittest -v test_runtime.py test_research_storage.py test_http_idempotency.py test_http_endpoint.py test_nf06_preingest.py test_nf06_method_coverage.py test_e2e_test_twin_chain.py test_controller_determination.py test_live_hosting_service_mapping.py test_preview_minimization.py test_collection_frame.py test_primary_evidence_readiness.py test_real_batch_synthesis_gate.py test_retention_schedule.py test_data_subject_rights.py test_rights_access.py test_dpia_screening.py test_article13_notice_binding_control.py test_disclosure_control.py test_scientific_research_classification.py test_anonymisation_classification.py test_prod_activation_gate.py
+      - name: Enforce repository PROD activation state
+        working-directory: eucons/research/ai4work-step
+        run: python prod_activation_gate.py
+      - name: Enforce Article 13 rendered-surface binding
+        working-directory: eucons/research/ai4work-step
+        run: python article13_notice_binding_control.py
       - name: Render preview-only research pages
         working-directory: eucons/research/ai4work-step
         run: python build_research_pages.py --target /tmp/ai4work-research-preview
@@ -48,20 +56,14 @@ jobs:
             echo 'Third-party commercial tracking detected in AI4WORK research preview' >&2
             exit 1
           fi
-      - name: Reject unproven controller identity in research preview
-        shell: bash
-        run: |
-          set -euo pipefail
-          if grep -RIE 'Operator:</strong>[[:space:]]*EUROCONSULT SRL' /tmp/ai4work-research-preview; then
-            echo 'Unproven GDPR controller identity leaked into AI4WORK research preview' >&2
-            exit 1
-          fi
-      - name: Verify collection, controller and collection-frame remain fail-closed
+      - name: Verify approved governance remains fail-closed before final collection authorization
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
+          import hashlib
           import json
+          import re
           from pathlib import Path
           root = Path('eucons/research/ai4work-step')
           contract = json.loads((root / 'form_contract.json').read_text(encoding='utf-8'))
@@ -69,19 +71,124 @@ jobs:
           assert contract.get('crm_integration') == 'FORBIDDEN'
           assert contract.get('commercial_analytics') == 'FORBIDDEN'
           notice = contract.get('pre_form_notice') or {}
-          assert notice.get('operator_status') == 'UNRESOLVED_BEFORE_COLLECTION'
-          assert notice.get('operator_legal_name') is None
-          assert notice.get('operator_cui') is None
+          assert notice.get('operator_status') == 'CONTROLLER_DETERMINED_PRIVACY_CONTACT_BOUND'
+          assert notice.get('operator_legal_name') == 'EUROCONSULT SRL'
+          assert notice.get('operator_cui') == '14250864'
+          assert notice.get('operator_contact_details') == 'privacy@eucons.ro'
+          assert notice.get('privacy_contact') == 'privacy@eucons.ro'
+          assert notice.get('privacy_contact_binding_reference') == 'PRIVACY_CONTACT_BINDING_2026-09-03.json'
+          assert 'art. 6 alin. (1) lit. (f)' in notice.get('legal_basis', '')
           controller_record = json.loads((root / 'CONTROLLER_DETERMINATION_DRAFT.json').read_text(encoding='utf-8'))
-          assert controller_record.get('controller') is None
-          assert controller_record.get('approved') is False
+          controller = controller_record.get('controller') or {}
+          assert controller_record.get('status') == 'CONTROLLER_DETERMINED_PROD_PREREQUISITES_PENDING'
+          assert controller.get('legal_name') == 'EUROCONSULT SRL'
+          assert controller.get('cui') == '14250864'
+          assert controller.get('site') == 'eucons.ro'
+          assert controller_record.get('approved') is True
           assert controller_record.get('collection_enabled') is False
           assert controller_record.get('nf06_reference_eligible') is False
+          plan = json.loads((root / 'NEED_ANALYSIS_PLAN_DRAFT.json').read_text(encoding='utf-8'))
           frame = json.loads((root / 'COLLECTION_FRAME_DRAFT.json').read_text(encoding='utf-8'))
-          assert frame.get('frame_status') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          lock = json.loads((root / 'PRECOLLECTION_ANALYSIS_PLAN_LOCK_DRAFT.json').read_text(encoding='utf-8'))
+          assert plan.get('status') == 'APPROVED_FOR_PROD'
+          assert plan.get('approval', {}).get('approved_for_prod') is True
+          assert frame.get('frame_status') == 'APPROVED_FOR_PROD'
           assert frame.get('evidence_class') == 'METHOD_PLAN_NOT_EVIDENCE'
+          assert frame.get('approval', {}).get('approved_for_prod') is True
           assert frame.get('collection_enabled') is False
-          assert frame.get('approval', {}).get('approved_for_prod') is False
           assert frame.get('nf06_handoff', {}).get('eligible_now') is False
-          print('PASS: AI4WORK collection, controller identity and collection frame remain fail-closed')
+          assert lock.get('state') == 'LOCKED_BEFORE_PROD_ACTIVATION'
+          assert re.fullmatch(r'[0-9a-f]{64}', lock.get('need_analysis_plan_sha256', ''))
+          assert re.fullmatch(r'[0-9a-f]{64}', lock.get('collection_frame_sha256', ''))
+          storage = json.loads((root / 'PROVIDER_STORAGE_CONTRACT.json').read_text(encoding='utf-8'))
+          assert storage.get('production_enabled') is False
+          assert storage.get('controller', {}).get('legal_name') == 'EUROCONSULT SRL'
+          assert storage.get('controller', {}).get('cui') == '14250864'
+          assert storage.get('controller', {}).get('privacy_contact') == 'OPEN_BEFORE_PRODUCTION'
+          mapping_path = root / 'LIVE_HOSTING_SERVICE_MAPPING_DRAFT.json'
+          mapping = json.loads(mapping_path.read_text(encoding='utf-8'))
+          assert mapping.get('status') == 'FROZEN_FIRST_PARTY_SERVICE_MAPPING_ACCOUNT_CONFIGURATION_OPEN'
+          assert mapping.get('provider') == 'CLAUS WEB SRL'
+          assert mapping.get('service_family') == 'Shared Hosting / cPanel'
+          assert mapping.get('collection_enabled') is False
+          rights = json.loads((root / 'GDPR_DATA_SUBJECT_RIGHTS_PROCEDURE_DRAFT.json').read_text(encoding='utf-8'))
+          assert rights.get('status') == 'DRAFT_BINDING_REQUIRED_BEFORE_COLLECTION'
+          assert rights.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
+          assert rights.get('controller_policy_acceptance', {}).get('approved') is True
+          assert rights.get('rights_applicability', {}).get('lawful_basis_status') == 'GDPR_ARTICLE_6_1_F_LEGITIMATE_INTERESTS'
+          assert rights.get('controller_approval') is False
+          assert rights.get('collection_enabled') is False
+          assert rights.get('identification_policy', {}).get('direct_identity_registry') == 'FORBIDDEN'
+          retention = json.loads((root / 'GDPR_RETENTION_SCHEDULE_DRAFT.json').read_text(encoding='utf-8'))
+          assert retention.get('controller_policy_acceptance', {}).get('approved') is True
+          assert retention.get('controller_policy_acceptance', {}).get('raw_access_log_retention_max_days') == 7
+          assert retention.get('controller_policy_acceptance', {}).get('backup_residual_max_days') == 92
+          assert retention.get('controller_approval') is False
+          assert retention.get('collection_enabled') is False
+          lia = json.loads((root / 'GDPR_LIA_DRAFT.json').read_text(encoding='utf-8'))
+          assert lia.get('status') == 'CONTROLLER_APPROVED_LEGAL_BASIS_OPERATIONAL_GATES_PENDING'
+          assert lia.get('controller_signoff_fields', {}).get('approved') is True
+          assert lia.get('prod_eligible') is False
+          assert lia.get('collection_enabled') is False
+          dpia = json.loads((root / 'GDPR_DPIA_SCREENING_DRAFT.json').read_text(encoding='utf-8'))
+          assert dpia.get('status') == 'CONTROLLER_ACCEPTED_SCREENING_OPERATIONAL_GATES_PENDING'
+          assert dpia.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
+          assert dpia.get('approved') is True
+          assert dpia.get('collection_enabled') is False
+          assert dpia.get('screening_conclusion') == 'DPIA_NOT_REQUIRED_APPROVED'
+          assert dpia.get('controller_acceptance', {}).get('approved') is True
+          assert dpia.get('controller_acceptance', {}).get('privacy_contact_or_dpo_review_reference') is None
+          assert dpia.get('processing_design_facts', {}).get('crm_or_contact_dataset_matching') == 'FORBIDDEN'
+          assert dpia.get('processing_design_facts', {}).get('device_fingerprinting') == 'FORBIDDEN'
+          article13 = json.loads((root / 'ARTICLE13_NOTICE_SNAPSHOT_DRAFT.json').read_text(encoding='utf-8'))
+          assert article13.get('evidence_binding_key') == 'privacy_notice'
+          assert article13.get('evidence_class') == 'CONTROL_ARTIFACT_NOT_EVIDENCE'
+          assert article13.get('synthetic') is False
+          assert article13.get('status') == 'CONTACT_BOUND_RENDERED_SURFACE_VALIDATION_PENDING'
+          assert article13.get('approved') is False
+          assert article13.get('collection_enabled') is False
+          assert article13.get('surface_fields', {}).get('privacy_contact') == 'privacy@eucons.ro'
+          assert article13.get('surface_fields', {}).get('operator_contact_details') == 'privacy@eucons.ro'
+          assert article13.get('privacy_contact_binding', {}).get('reference') == 'PRIVACY_CONTACT_BINDING_2026-09-03.json'
+          assert article13.get('privacy_contact_binding', {}).get('independent_reachability_tested') is False
+          assert 'art. 6 alin. (1) lit. (f)' in article13.get('surface_fields', {}).get('legal_basis', '')
+          assert article13.get('lawful_basis_policy_binding', {}).get('controller_approved') is True
+          anonymisation = json.loads((root / 'GDPR_ANONYMISATION_CLASSIFICATION_CONTROL.json').read_text(encoding='utf-8'))
+          assert anonymisation.get('status') == 'RAW_RESPONSES_TREATED_AS_PERSONAL_OUTPUT_ANONYMITY_REQUIRES_VALIDATION'
+          assert anonymisation.get('classification_policy', {}).get('direct_identifier_absence_claim') == 'DE_IDENTIFIED_BY_DESIGN_NOT_ANONYMOUS_BY_ASSERTION'
+          assert anonymisation.get('output_anonymity_test', {}).get('required_criteria') == ['NO_RECORD_ISOLATION', 'NO_LINKAGE', 'NO_INFERENCE']
+          assert anonymisation.get('current_ai4work_position', {}).get('raw_anonymity_claim_relied_on_for_prod') is False
+          activation = json.loads((root / 'PROD_ACTIVATION_MANIFEST_DRAFT.json').read_text(encoding='utf-8'))
+          assert activation.get('state') == 'DRAFT_NOT_APPROVED_FOR_PROD'
+          assert activation.get('approved_for_prod') is False
+          assert activation.get('collection_enabled') is False
+          assert activation.get('explicit_user_approval_reference') is None
+          assert activation.get('real_collection_authorized') is False
+          mapping_gate = activation.get('required_external_or_operational_evidence', {}).get('live_hosting_service_mapping', {})
+          assert mapping_gate.get('status') == 'FROZEN'
+          assert mapping_gate.get('reference') == 'LIVE_HOSTING_SERVICE_MAPPING_DRAFT.json'
+          assert hashlib.sha256(mapping_path.read_bytes()).hexdigest() == mapping_gate.get('sha256')
+          assert activation.get('required_external_or_operational_evidence', {}).get('privacy_notice', {}).get('status') == 'OPEN'
+          assert activation.get('required_external_or_operational_evidence', {}).get('account_server_logging_binding', {}).get('status') == 'OPEN'
+          assert activation.get('required_external_or_operational_evidence', {}).get('data_subject_rights_procedure', {}).get('status') == 'OPEN'
+          assert activation.get('required_external_or_operational_evidence', {}).get('dpia_screening_or_completed_dpia', {}).get('status') == 'OPEN'
+          print('PASS: method/LIA/DPIA/retention-rights policy and declared privacy contact are frozen while rendered Article 13, live provider/account evidence, final collection authorization and NF06 remain fail-closed')
+          PY
+      - name: Build combined eucons plus AI4WORK fail-closed candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/eucons-ai4work-combined-candidate
+          python eucons/deployment/build_ai4work_candidate.py --target /tmp/eucons-ai4work-combined-candidate > /tmp/eucons-ai4work-combined-candidate.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result = json.loads(Path('/tmp/eucons-ai4work-combined-candidate.json').read_text(encoding='utf-8'))
+          assert result.get('status') == 'PASS_FAIL_CLOSED_CANDIDATE'
+          assert result.get('merge_authorized') is False
+          assert result.get('deploy_authorized') is False
+          assert result.get('real_collection_authorized') is False
+          assert result.get('research', {}).get('production_enabled') is False
+          assert result.get('research', {}).get('test_twin_evidence_eligible') is False
+          print('PASS: combined eucons + AI4WORK candidate is non-deploying, fail-closed and TEST TWIN remains NON-EVIDENCE')
           PY
