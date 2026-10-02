@@ -104,6 +104,11 @@ def self_test() -> int:
     assert "last_seen_at" in profiles["source_signal_transaction"]
     assert "source_health" in profiles
     assert "semantic_sha256" not in profiles["source_health"]
+    assert "source_discovery" in profiles
+    assert "checked_at_epoch" in profiles["source_discovery"]
+    assert "content_sha256" in profiles["source_discovery"]
+    assert "status" not in profiles["source_discovery"]
+    assert "candidate_count" not in profiles["source_discovery"]
     assert resolve_ignored("structured_alerts", []) == {"generated_at"}
     assert resolve_ignored("threads_state", ["temporary_test_key"]) == {
         "last_auth_verified_at", "temporary_test_key"
@@ -129,6 +134,31 @@ def self_test() -> int:
             path.write_text('{"generated_at":"new","items":[{"id":1,"value":"B"}]}\n', encoding="utf-8")
             assert prune(Path("state.json"), {"generated_at"}) == "MATERIAL"
             assert b'"B"' in path.read_bytes()
+
+            discovery = Path("discovery.json")
+            discovery.write_text(
+                '{"checked_at_epoch":1,"content_sha256":"oldhash","status":"OK","candidate_count":2,"candidates":["a","b"]}\n',
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "add", "discovery.json"], cwd=root, check=True)
+            subprocess.run(["git", "commit", "-qm", "discovery fixture"], cwd=root, check=True)
+            discovery.write_text(
+                '{"checked_at_epoch":2,"content_sha256":"newhash","status":"OK","candidate_count":2,"candidates":["a","b"]}\n',
+                encoding="utf-8",
+            )
+            source_discovery_ignored = resolve_ignored("source_discovery", [])
+            assert prune(discovery, source_discovery_ignored) == "RESTORED_VOLATILE_ONLY"
+            assert b'"oldhash"' in discovery.read_bytes()
+            discovery.write_text(
+                '{"checked_at_epoch":3,"content_sha256":"thirdhash","status":"ERROR","candidate_count":2,"candidates":["a","b"]}\n',
+                encoding="utf-8",
+            )
+            assert prune(discovery, source_discovery_ignored) == "MATERIAL"
+            discovery.write_text(
+                '{"checked_at_epoch":4,"content_sha256":"fourthhash","status":"OK","candidate_count":3,"candidates":["a","b","c"]}\n',
+                encoding="utf-8",
+            )
+            assert prune(discovery, source_discovery_ignored) == "MATERIAL"
         finally:
             os.chdir(here)
     print("VÂLCEA CLAR volatile JSON write gate self-test: PASS")
