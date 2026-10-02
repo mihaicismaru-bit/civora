@@ -15,9 +15,9 @@
     "autonomous_update_evidence": "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
   },
   "latest_qualifying_run": {
-    "utc": "2026-10-02T13:19:16Z",
-    "source_pass": 4,
-    "source_degraded": 1,
+    "utc": "2026-10-02T15:59:15Z",
+    "source_pass": 3,
+    "source_degraded": 2,
     "source_fail": 2,
     "source_quarantined": 2,
     "critical_fail": false,
@@ -26,7 +26,7 @@
     "quarantined_source": "SRC-PR-CENTRU-DIGITAL-2 — ADR Centru — Întreprinderi digitale Apel 2; dependent material facts blocked fail-closed; SRC-PR-CENTRU-ACTIUNI — ADR Centru — Acțiuni; dependent material facts blocked fail-closed"
   },
   "deployment_evidence": {
-    "utc": "2026-10-02T13:19:24Z",
+    "utc": "2026-10-02T15:59:25Z",
     "status": "PASS",
     "public_content_verified": true,
     "https_verified": true,
@@ -36,7 +36,7 @@
     "http_content_verified": true,
     "content_origin": "custom_https",
     "http_status": 200,
-    "final_url": "https://partener.eu/?p10_probe=20261002T131924Z",
+    "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
     "title": "PARTENER.EU — Găsește finanțări europene pentru investiția ta",
     "required_markers_present": true,
     "critical_assets_ok": true,
@@ -46,7 +46,7 @@
       {
         "id": "custom_https",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20261002T131924Z",
+        "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
         "redirect_chain": [],
         "content_verified": true,
         "marker_ok": true,
@@ -57,12 +57,12 @@
       {
         "id": "custom_http",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20261002T131924Z",
+        "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "http://partener.eu/?p10_probe=20261002T131924Z",
-            "to_url": "https://partener.eu/?p10_probe=20261002T131924Z"
+            "from_url": "http://partener.eu/?p10_probe=20261002T155925Z",
+            "to_url": "https://partener.eu/?p10_probe=20261002T155925Z"
           }
         ],
         "content_verified": true,
@@ -74,12 +74,12 @@
       {
         "id": "pages_origin",
         "http_status": 200,
-        "final_url": "https://partener.eu/?p10_probe=20261002T131924Z",
+        "final_url": "https://partener.eu/?p10_probe=20261002T155925Z",
         "redirect_chain": [
           {
             "http_status": 301,
-            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20261002T131924Z",
-            "to_url": "https://partener.eu/?p10_probe=20261002T131924Z"
+            "from_url": "https://mihaicismaru-bit.github.io/civora/?p10_probe=20261002T155925Z",
+            "to_url": "https://partener.eu/?p10_probe=20261002T155925Z"
           }
         ],
         "content_verified": true,
@@ -92,8 +92,8 @@
     "pages_workflow": {
       "status": "LIVE",
       "page_url": "https://partener.eu/",
-      "git_sha": "fea26a0cbe49728a2d9d77f9e750f7a6cd8ad112",
-      "observed_at": "2026-10-02T13:18:29.743960+00:00",
+      "git_sha": "8e8fe4e6dd7698bbc9782cb679139e5d40243051",
+      "observed_at": "2026-10-02T15:58:33.476964+00:00",
       "configure_outcome": "success",
       "upload_outcome": "success",
       "deploy_outcome": "success",
@@ -125,16 +125,16 @@
     "civora_v1_production_baseline_closed": false
   },
   "monitor_evidence": {
-    "utc": "2026-10-02T13:19:24Z",
-    "validation_run_started": "2026-10-02T13:19:16Z",
+    "utc": "2026-10-02T15:59:24Z",
+    "validation_run_started": "2026-10-02T15:59:15Z",
     "integrity": {
       "latest_history_equal": true,
-      "latest_sha256": "4eff461ed4a1890e3f9ab4e00aae45485c88a07bffebc28a276d7deeefb2c8ff",
-      "history_sha256": "4eff461ed4a1890e3f9ab4e00aae45485c88a07bffebc28a276d7deeefb2c8ff",
-      "history_path": "validation/history/20261002T131916Z.json",
+      "latest_sha256": "6ce29972e5750ba7a60147842ecf3d8f67bec549e2226a8a5180075d8a0069b0",
+      "history_sha256": "6ce29972e5750ba7a60147842ecf3d8f67bec549e2226a8a5180075d8a0069b0",
+      "history_path": "validation/history/20261002T155915Z.json",
       "source_state_checkpoint_equal": true,
-      "source_state_sha256": "9511f18503b4829e9daf0ed81079b6c87479bdf7b698f3fd50e4824d6d813565",
-      "checkpoint_sha256": "9511f18503b4829e9daf0ed81079b6c87479bdf7b698f3fd50e4824d6d813565",
+      "source_state_sha256": "416d8102539268daf480f196da6eb14edb5af83a3e626bb78ce48dee08652dc5",
+      "checkpoint_sha256": "416d8102539268daf480f196da6eb14edb5af83a3e626bb78ce48dee08652dc5",
       "frontend_regression_pass": true,
       "frontend_pass": 10,
       "frontend_total": 10,
@@ -142,7 +142,7 @@
     },
     "source_registry": {
       "observed_at": "2026-10-02T12:52:08.089364Z",
-      "age_seconds": 1636,
+      "age_seconds": 11236,
       "stale_after_seconds": 28800,
       "stale": false,
       "health": "DEGRADED",
@@ -391,7 +391,7 @@
       "material_facts_auto_promoted": false
     },
     "peo_calendar": {
-      "observed_at": "2026-10-02T08:56:00.150533+00:00",
+      "observed_at": "2026-10-02T15:57:16.597040+00:00",
       "status": "OK_OFFICIAL_OIR_COPY",
       "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
       "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
@@ -405,12 +405,12 @@
       "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
     },
     "mipe": {
-      "observed_at": "2026-10-02T06:48:25.465425+00:00",
-      "status": "OK",
-      "source_available": true,
-      "candidate_count": 74,
-      "parsed_relevant_count": 73,
-      "published_item_count": null,
+      "observed_at": "2026-10-02T13:59:04.197630+00:00",
+      "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+      "source_available": false,
+      "candidate_count": 56,
+      "parsed_relevant_count": null,
+      "published_item_count": 56,
       "last_known_good_preserved": false,
       "health": "PASS"
     },
