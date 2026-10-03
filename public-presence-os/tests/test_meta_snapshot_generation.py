@@ -9,6 +9,7 @@ from public_presence_os.meta_cross_lane_read_coverage import (
 )
 from public_presence_os.meta_read_event_log import new_read_cursor
 from public_presence_os.meta_read_observability import compile_read_observability_snapshot
+from public_presence_os.meta_read_observability import EXPECTED_STREAM_IDENTITIES
 from public_presence_os.meta_snapshot_generation import (
     MetaSnapshotGenerationHold,
     accept_next_generation,
@@ -17,11 +18,7 @@ from public_presence_os.meta_snapshot_generation import (
     require_minimum_generation,
 )
 
-IDS = {
-    "FACEBOOK_PAGE": "1000000000000001",
-    "INSTAGRAM_PROFESSIONAL": "2000000000000002",
-    "THREADS": "3000000000000003",
-}
+IDS = EXPECTED_STREAM_IDENTITIES
 
 
 def _read_snapshot(platform="FACEBOOK_PAGE"):
