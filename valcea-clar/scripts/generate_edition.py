@@ -36,6 +36,7 @@ SITE = ROOT / "site"
 POINTER = SITE / "current_edition.json"
 LAST_ATTEMPT = SITE / "last_edition_attempt.json"
 PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
+CURRENTNESS_OVERRIDES = ROOT / "editorial" / "currentness_overrides.json"
 TZ = ZoneInfo("Europe/Bucharest")
 ALLOWED_GATES = {"PASS", "PASS_DATE_ONLY", "PASS_EXPLAINER_ONLY", "PASS_WITH_CAUTION"}
 ALLOWED_STATUSES = {"verified", "approved_carry_forward"}
@@ -58,6 +59,43 @@ def active_publication_holds() -> set[str]:
         if story_id and row.get("public_projection") is False and status not in {"RELEASED", "CLOSED", "RESOLVED"}:
             held.add(story_id)
     return held
+
+
+def currentness_archive_ids() -> set[str]:
+    """Return durable story IDs that must not appear in a current edition.
+
+    A story route may remain useful as an archive after its reader-action
+    deadline has passed.  The continuous newsroom already respected this
+    distinction; recap editions must use the same canonical gate instead of
+    silently reintroducing archived stories as current news.
+    """
+    document = load_json(CURRENTNESS_OVERRIDES, {})
+    archived: set[str] = set()
+    for row in document.get("overrides") or []:
+        if not isinstance(row, dict):
+            continue
+        story_id = str(row.get("story_id") or "").strip()
+        if story_id and row.get("current") is False:
+            archived.add(story_id)
+    return archived
+
+
+def currentness_ok(item: dict, now: datetime) -> tuple[bool, str | None]:
+    """Apply the shared semantic and timestamp currentness contract."""
+    story_id = str(item.get("id") or "").strip()
+    if story_id and story_id in currentness_archive_ids():
+        return False, "semantic_currentness_archive_override"
+
+    raw = str(item.get("valid_until") or "").strip()
+    if not raw:
+        return True, None
+    try:
+        expiry = parse_dt(raw)
+    except ValueError:
+        return False, "invalid_valid_until"
+    if now.astimezone(TZ) > expiry.astimezone(TZ):
+        return False, "valid_until_expired"
+    return True, None
 
 
 def load_json(path: Path, default=None):
@@ -171,8 +209,8 @@ def eligible_facts(registry: dict, now: datetime, slot: str, retained_ids: set[s
         if not sources or any(not source.get("url") for source in sources):
             continue
         valid_from = parse_dt(fact["valid_from"])
-        valid_until = parse_dt(fact["valid_until"])
-        if not (valid_from <= now <= valid_until):
+        current_ok, _ = currentness_ok(fact, now)
+        if valid_from > now or not current_ok:
             continue
         # Evergreen preserves the canonical article in the archive; it must not
         # keep a story in the live current-news set indefinitely. Bound evergreen
@@ -260,7 +298,7 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
     eid = edition_id(now, slot)
     title_slot = "dimineață" if slot == "morning" else "seară"
     payload = {
-        "schema_version": "2.7",
+        "schema_version": "2.8",
         "edition_id": eid,
         "slot": slot,
         "title": f"VÂLCEA CLAR — Ediția de {title_slot}",
@@ -286,6 +324,8 @@ def write_outputs(now: datetime, slot: str, facts: list[dict], auto_registry_cou
             "shorter_edition_when_evidence_is_sparse": True,
             "last_known_good_fallback": True,
             "published_story_retention_until_ineligible": True,
+            "semantic_currentness_overrides_apply_to_editions": True,
+            "archived_routes_are_not_current_news": True,
             "slot_gate_applies_to_first_publication_only": True,
             "human_override_available": True,
             "internal_operational_telemetry_public": False,
@@ -371,6 +411,22 @@ def self_test() -> int:
     assert all(item.get("id") not in {"unde-iesim-operational", "source-radar-operational"} for item in eligible)
     held_fact = {"facts": [{**sample_fact, "id": "olanesti-bridge-monitor"}]}
     assert eligible_facts(held_fact, now, "morning") == []
+    semantically_archived = {
+        "facts": [{
+            **sample_fact,
+            "id": "costesti-iluminat-public-achizitie-20260928",
+            "valid_until": "2026-12-31T23:59:59+02:00",
+        }]
+    }
+    assert eligible_facts(semantically_archived, now, "morning", retained_ids={"costesti-iluminat-public-achizitie-20260928"}) == []
+    assert currentness_ok(
+        {"id": "apavil-joburi-fara-experienta-20260818", "valid_until": "2026-12-31T23:59:59+02:00"},
+        datetime(2026, 9, 30, 5, 30, tzinfo=TZ),
+    ) == (False, "semantic_currentness_archive_override")
+    assert currentness_ok(
+        {"id": "expired", "valid_until": "2026-09-29T23:59:00+03:00"},
+        datetime(2026, 9, 30, 5, 30, tzinfo=TZ),
+    ) == (False, "valid_until_expired")
 
     sample_kernel = {
         "format_hint": "service_news",
