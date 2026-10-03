@@ -159,19 +159,27 @@ def merge(registry: dict, deltas: list[dict]) -> tuple[dict,int]:
         }
     }, changed
 
-def parse_start(row: dict):
+def parse_date(row: dict, field: str):
     try:
-        d=datetime.fromisoformat(str(row["event_start"]))
-        return d.date()
+        raw=str(row.get(field) or "").strip()
+        if not raw:
+            return None
+        return datetime.fromisoformat(raw).date()
     except Exception:
         return None
+
+def effective_end_date(row: dict):
+    return parse_date(row, "event_end") or parse_date(row, "event_start")
+
+def is_upcoming(row: dict, today) -> bool:
+    end=effective_end_date(row)
+    return end is not None and end >= today and row.get("status") != "past"
 
 def render(doc: dict) -> str:
     today=datetime.now(TZ).date()
     upcoming=[]
     for row in doc.get("events",[]):
-        d=parse_start(row)
-        if d is None or d < today or row.get("status")=="past":
+        if not is_upcoming(row, today):
             continue
         upcoming.append(row)
     cards=[]
@@ -207,6 +215,13 @@ def main() -> int:
             raise AssertionError("missing source must fail")
         except ValueError:
             pass
+        fixed_today=datetime.fromisoformat("2026-10-04").date()
+        ended={**row,"event_start":"2026-10-03","event_end":"2026-10-03","status":"scheduled"}
+        spanning={**row,"event_start":"2026-10-02","event_end":"2026-10-04","status":"scheduled"}
+        starts_today={**row,"event_start":"2026-10-04","event_end":None,"status":"scheduled"}
+        assert not is_upcoming(ended,fixed_today)
+        assert is_upcoming(spanning,fixed_today)
+        assert is_upcoming(starts_today,fixed_today)
         print("Local Life event sync self-test: PASS")
         return 0
     trigger=load(TRIGGER,{})
