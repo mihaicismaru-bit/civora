@@ -71,7 +71,7 @@ jobs:
           python valcea-clar/scripts/newsroom_candidate_diagnostic.py --self-test
           python valcea-clar/scripts/newsroom_candidate_diagnostic.py --story-id rm-valcea-gambling-authorizations-20260723
 
-      - name: Verify archived Council explainer survives without returning to current news
+      - name: Verify stale Council explainer does not return to current news
         shell: bash
         run: |
           set -euo pipefail
@@ -101,7 +101,7 @@ jobs:
           manifest_ids={str(row.get('id') or '') for row in manifest.get('stories',[]) if isinstance(row,dict)}
           feed_ids={str(row.get('id') or '') for row in feed.get('stories',[]) if isinstance(row,dict)}
           if sid in decision.get('publishable_story_ids',[]): raise SystemExit('Archived Council story returned to current decision')
-          if sid not in manifest_ids: raise SystemExit('Council story missing from rendered story manifest')
+          if sid in manifest_ids: raise SystemExit('Archived Council story returned to current story manifest')
           if sid in feed_ids: raise SystemExit('Archived Council story returned to live feed')
-          print(json.dumps({'status':'PASS','story_id':sid,'current':False,'archive_route':True,'manifest':True,'live_feed':False},ensure_ascii=False))
+          print(json.dumps({'status':'PASS','story_id':sid,'current':False,'manifest':False,'live_feed':False},ensure_ascii=False))
           PY
