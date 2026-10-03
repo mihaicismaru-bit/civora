@@ -49,23 +49,21 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 2,
-      "readback_ok": 1,
-      "value": 0.5,
-      "blocker_story_ids": [
-        "scm-program-dbd2c22d1578de50198c"
-      ],
+      "readback_ok": 2,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "scm-program-dbd2c22d1578de50198c",
           "url": "https://valceaclar.ro/stiri/scm-program-dbd2c22d1578de50198c/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         },
         {
           "story_id": "weekend-clar-20261003",
@@ -82,27 +80,29 @@
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-10-03T06:36:15.077082Z",
+        "updated_local": "2026-10-03T08:36:13.874589Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 88
+        "public_story_count": 89
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 1,
+      "delivered": 2,
       "eligible": 2,
-      "value": 0.5,
+      "value": 1.0,
       "delivered_story_ids": [
+        "scm-program-dbd2c22d1578de50198c",
         "weekend-clar-20261003"
       ]
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 1,
+      "delivered": 2,
       "eligible": 2,
-      "value": 0.5,
+      "value": 1.0,
       "delivered_story_ids": [
+        "scm-program-dbd2c22d1578de50198c",
         "weekend-clar-20261003"
       ]
     },
