@@ -42,48 +42,50 @@
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "BLOCKED",
+      "status": "PASS",
       "eligible": 1,
-      "readback_ok": 0,
-      "value": 0.0,
-      "blocker_story_ids": [
-        "weekend-clar-20261003"
-      ],
+      "readback_ok": 1,
+      "value": 1.0,
+      "blocker_story_ids": [],
       "checks": [
         {
           "story_id": "weekend-clar-20261003",
           "url": "https://valceaclar.ro/stiri/weekend-clar-20261003/",
-          "projected": false,
-          "http_status": null,
-          "canonical_ok": false,
-          "headline_ok": false,
-          "ok": false,
-          "reason": "missing_from_public_projection"
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
         }
       ],
       "projection_evidence": {
         "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
         "http_status": 200,
         "error": null,
-        "updated_local": "2026-10-03T06:00:33.935057Z",
+        "updated_local": "2026-10-03T06:36:15.077082Z",
         "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
-        "public_story_count": 87
+        "public_story_count": 88
       },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 0,
+      "delivered": 1,
       "eligible": 1,
-      "value": 0.0,
-      "delivered_story_ids": []
+      "value": 1.0,
+      "delivered_story_ids": [
+        "weekend-clar-20261003"
+      ]
     },
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
-      "delivered": 0,
+      "delivered": 1,
       "eligible": 1,
-      "value": 0.0,
-      "delivered_story_ids": []
+      "value": 1.0,
+      "delivered_story_ids": [
+        "weekend-clar-20261003"
+      ]
     },
     "duplicates": {
       "status": "MEASURED",
