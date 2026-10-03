@@ -14,43 +14,76 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 0,
-    "autonomous_story_ids_24h": [],
+    "autonomous_stories_published_24h": 1,
+    "autonomous_story_ids_24h": [
+      "weekend-clar-20261003"
+    ],
     "excluded_after_correction_or_hold_24h": [],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 0,
-      "published": 0,
-      "stories": [],
-      "max_seconds": null,
-      "median_seconds": null
+      "measured": 1,
+      "published": 1,
+      "stories": [
+        {
+          "story_id": "weekend-clar-20261003",
+          "seconds": 846,
+          "discovered_at_utc": "2026-10-03T06:22:12Z",
+          "published_at_utc": "2026-10-03T06:36:18Z"
+        }
+      ],
+      "max_seconds": 846,
+      "median_seconds": 846
     },
     "photo_coverage": {
-      "status": "NO_PUBLISHED_STORIES",
+      "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 0,
-      "value": null,
+      "published_stories": 1,
+      "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "eligible": 0,
+      "status": "BLOCKED",
+      "eligible": 1,
       "readback_ok": 0,
-      "value": null,
-      "checks": [],
+      "value": 0.0,
+      "blocker_story_ids": [
+        "weekend-clar-20261003"
+      ],
+      "checks": [
+        {
+          "story_id": "weekend-clar-20261003",
+          "url": "https://valceaclar.ro/stiri/weekend-clar-20261003/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        }
+      ],
+      "projection_evidence": {
+        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
+        "http_status": 200,
+        "error": null,
+        "updated_local": "2026-10-03T06:00:33.935057Z",
+        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+        "public_story_count": 87
+      },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
+      "status": "MEASURED",
       "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "eligible": 1,
+      "value": 0.0,
+      "delivered_story_ids": []
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
+      "status": "MEASURED",
       "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "eligible": 1,
+      "value": 0.0,
+      "delivered_story_ids": []
     },
     "duplicates": {
       "status": "MEASURED",
