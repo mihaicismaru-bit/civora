@@ -349,12 +349,22 @@ def self_test() -> int:
         }
     }
     product = transform_item(base, manual)
-    assert product["status"] == "verified"
+    assert product["status"] == "editorial_hold"
     assert product["paragraphs"][0].startswith("Consiliul local")
     meta = product["editorial_product"]
     assert meta["writer_mode"] == "FACT_KERNEL_COMPOSED"
     assert meta["claim_trace_complete"] is True
     assert meta["format"] == "straight_news"
+    assert meta["auto_publish_eligible_by_format"] is False
+    assert meta["hold_reason"] == "FULL_EDITORIAL_BODY_REQUIRED"
+
+    service = copy.deepcopy(base)
+    service["id"] = "writer-service"
+    service["editorial_type"] = "service"
+    service_product = transform_item(service, manual)
+    assert service_product["status"] == "verified"
+    assert service_product["editorial_product"]["format"] == "service_news"
+    assert service_product["editorial_product"]["auto_publish_eligible_by_format"] is True
 
     bad = copy.deepcopy(base)
     bad["id"] = "writer-bad-source"
