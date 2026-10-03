@@ -5052,7 +5052,7 @@
     },
     {
       "id": "weekend-clar-20261003",
-      "status": "editorial_hold",
+      "status": "verified",
       "section": "WEEKEND CLAR",
       "editorial_type": "service",
       "editorial_form": "weekend_clar",
@@ -5065,14 +5065,13 @@
         "morning",
         "evening"
       ],
-      "headline": "WEEKEND CLAR: ce faci în Vâlcea în 3–4 octombrie — alergare, handbal european, cinema și Zilele Recoltei",
-      "dek": "Selecția utilă pentru weekend: Vâlcea Forest Run & MTB, SCM Râmnicu Vâlcea–TUSSIES Metzingen, patru proiecții la Cinema Geo Săizescu și Zilele Recoltei în centrul Râmnicului.",
+      "headline": "WEEKEND CLAR: alergare, handbal european, cinema și Zilele Recoltei în Vâlcea",
+      "dek": "Selecția verificată pentru 3–4 octombrie include Vâlcea Forest Run & MTB, SCM Râmnicu Vâlcea–TUSSIES Metzingen, patru proiecții la Cinema Geo Săizescu și Zilele Recoltei.",
       "paragraphs": [
-        "Weekendul 3–4 octombrie aduce în Vâlcea sport, cinema și evenimente în aer liber. VÂLCEA CLAR a selectat numai opțiunile cu program verificat și păstrează necunoscute prețurile sau disponibilitatea biletelor acolo unde sursele nu le confirmă.",
-        "Vâlcea Forest Run & MTB se desfășoară sâmbătă și duminică, cu probe în zona Muzeului Satului Vâlcean și a Stadionului Zăvoi. Organizatorul indică startul programului sportiv de sâmbătă de la 09:30; înscrierile online sunt închise, astfel că nu presupunem disponibilitate de ultim moment.",
-        "La handbal, SCM Râmnicu Vâlcea joacă sâmbătă, de la ora 15:00, cu TUSSIES Metzingen, în Sala Sporturilor „Traian”, în turul 2 de calificare al EHF European League Women. Ora 15:00 este cea din programul oficial FRH.",
-        "Pentru cinema, programul direct al Cinema Geo Săizescu pentru sâmbătă include „Pisicile de la muzeu 2: Comoara din Egipt” la 11:00, „Fata din Nori” la 14:00, „În inima sălbăticiei” la 17:00 și „Avengers: Endgame” la 19:00.",
-        "Zilele Recoltei continuă până duminică, 4 octombrie, în Scuarul Mircea cel Bătrân. Ora exactă a fiecărui moment din program și condițiile de acces nu sunt complet verificate în sursa curentă, așa că VÂLCEA CLAR nu le completează prin presupunere."
+        "SCM Râmnicu Vâlcea – TUSSIES Metzingen este programat pe 3 octombrie 2026 la 15:00, în Sala Sporturilor „Traian”.",
+        "Cinema Geo Săizescu programează pe 3 octombrie „Pisicile de la muzeu 2” la 11:00, „Fata din Nori” la 14:00, „În inima sălbăticiei” la 17:00 și „Avengers: Endgame” la 19:00.",
+        "Vâlcea Forest Run & MTB se desfășoară în 3–4 octombrie 2026, iar programul sportiv de sâmbătă începe la 09:30.",
+        "Zilele Recoltei continuă în 3–4 octombrie în Scuarul Mircea cel Bătrân din Râmnicu Vâlcea."
       ],
       "material_fact_gate": "PASS",
       "social_priority": 2,
@@ -5100,66 +5099,128 @@
         {
           "name": "Zilele Recoltei — corroborare curentă",
           "url": "https://www.opiniavl.ro/2026/10/02/zilelor-recoltei-sarbatoarea-roadelor-belsugului-si-harniciei/",
-          "tier": "T1B_CURRENT_CORROBORATION"
+          "tier": "T2"
         }
       ],
       "fact_kernel": {
-        "format_hint": "weekend_clar",
+        "format_hint": "service_news",
+        "headline": {
+          "text": "WEEKEND CLAR: alergare, handbal european, cinema și Zilele Recoltei în Vâlcea",
+          "source_urls": [
+            "https://fcvl.ro/vfr/curse/6",
+            "https://frh.ro/program.php?id=600",
+            "https://cinemageosaizescu.ro/",
+            "https://www.opiniavl.ro/2026/10/02/zilelor-recoltei-sarbatoarea-roadelor-belsugului-si-harniciei/"
+          ]
+        },
+        "dek": {
+          "text": "Selecția verificată pentru 3–4 octombrie include Vâlcea Forest Run & MTB, SCM Râmnicu Vâlcea–TUSSIES Metzingen, patru proiecții la Cinema Geo Săizescu și Zilele Recoltei.",
+          "source_urls": [
+            "https://fcvl.ro/vfr/curse/6",
+            "https://frh.ro/program.php?id=600",
+            "https://cinemageosaizescu.ro/",
+            "https://www.opiniavl.ro/2026/10/02/zilelor-recoltei-sarbatoarea-roadelor-belsugului-si-harniciei/"
+          ]
+        },
         "claims": [
           {
             "id": "weekend-vfr",
-            "role": "reader_service",
-            "kind": "fact",
-            "text": "Vâlcea Forest Run & MTB se desfășoară în 3–4 octombrie 2026; programul de sâmbătă începe la 09:30.",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Vâlcea Forest Run & MTB se desfășoară în 3–4 octombrie 2026, iar programul sportiv de sâmbătă începe la 09:30.",
             "source_urls": [
               "https://fcvl.ro/vfr/curse/6"
             ]
           },
           {
             "id": "weekend-handbal",
-            "role": "reader_service",
-            "kind": "fact",
-            "text": "SCM Râmnicu Vâlcea – TUSSIES Metzingen este programat pe 3 octombrie 2026 la 15:00, Sala Sporturilor Traian.",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "SCM Râmnicu Vâlcea – TUSSIES Metzingen este programat pe 3 octombrie 2026 la 15:00, în Sala Sporturilor „Traian”.",
             "source_urls": [
               "https://frh.ro/program.php?id=600"
             ]
           },
           {
             "id": "weekend-cinema",
-            "role": "reader_service",
-            "kind": "fact",
-            "text": "Cinema Geo Săizescu are sâmbătă proiecții la 11:00, 14:00, 17:00 și 19:00 pentru cele patru titluri enumerate în articol.",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "Cinema Geo Săizescu programează pe 3 octombrie „Pisicile de la muzeu 2” la 11:00, „Fata din Nori” la 14:00, „În inima sălbăticiei” la 17:00 și „Avengers: Endgame” la 19:00.",
             "source_urls": [
               "https://cinemageosaizescu.ro/"
             ]
           },
           {
             "id": "weekend-recoltei",
-            "role": "reader_service",
-            "kind": "fact",
-            "text": "Zilele Recoltei se desfășoară 2–4 octombrie în Scuarul Mircea cel Bătrân.",
+            "role": "context",
+            "kind": "documented_context",
+            "text": "Zilele Recoltei continuă în 3–4 octombrie în Scuarul Mircea cel Bătrân din Râmnicu Vâlcea.",
             "source_urls": [
               "https://www.opiniavl.ro/2026/10/02/zilelor-recoltei-sarbatoarea-roadelor-belsugului-si-harniciei/"
             ]
-          },
-          {
-            "id": "weekend-boundaries",
-            "role": "boundary",
-            "kind": "unknown",
-            "text": "Prețurile, disponibilitatea biletelor și orele neconfirmate rămân necunoscute și nu sunt deduse.",
-            "source_urls": []
           }
         ]
       },
       "editorial_note": "WEEKEND CLAR service selection. Do not duplicate the full Local Life inventory; link readers to /unde-iesim/ for the complete verified agenda. Text-only site publication is valid if no eligible visual exists.",
       "editorial_product": {
         "writer_id": "manual_journalism_v1",
-        "writer_mode": "FACT_KERNEL_REJECTED_FAIL_CLOSED",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
         "format": "service_news",
-        "claim_trace_complete": false,
+        "claim_trace_complete": true,
         "source_level_trace": true,
-        "auto_publish_eligible_by_format": false,
-        "hold_reason": "headline_too_short"
+        "headline_source_urls": [
+          "https://fcvl.ro/vfr/curse/6",
+          "https://frh.ro/program.php?id=600",
+          "https://cinemageosaizescu.ro/",
+          "https://www.opiniavl.ro/2026/10/02/zilelor-recoltei-sarbatoarea-roadelor-belsugului-si-harniciei/"
+        ],
+        "dek_source_urls": [
+          "https://fcvl.ro/vfr/curse/6",
+          "https://frh.ro/program.php?id=600",
+          "https://cinemageosaizescu.ro/",
+          "https://www.opiniavl.ro/2026/10/02/zilelor-recoltei-sarbatoarea-roadelor-belsugului-si-harniciei/"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "weekend-handbal",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text_sha256": "7339255456974a6bc21271c1fdb974a578a3f41e1623aaed87e9eb692faafc61",
+            "source_urls": [
+              "https://frh.ro/program.php?id=600"
+            ]
+          },
+          {
+            "claim_id": "weekend-cinema",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text_sha256": "0a7575b5b092334d70f2dc63d210a552f0f0a2ce813f9e0e0e51dd178110c996",
+            "source_urls": [
+              "https://cinemageosaizescu.ro/"
+            ]
+          },
+          {
+            "claim_id": "weekend-vfr",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "126d019605e0c769440e19493f43722b046a736053c2f4e06fd38665c6079a3e",
+            "source_urls": [
+              "https://fcvl.ro/vfr/curse/6"
+            ]
+          },
+          {
+            "claim_id": "weekend-recoltei",
+            "role": "context",
+            "kind": "documented_context",
+            "text_sha256": "c406ea6044f91a197a2e3dc44241b61f0bd6cb3746b55680a81944daf6c5fcda",
+            "source_urls": [
+              "https://www.opiniavl.ro/2026/10/02/zilelor-recoltei-sarbatoarea-roadelor-belsugului-si-harniciei/"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "85a6769b44a355836985e8f1455770595f334e37a4669622c9d47f4d602e42aa"
       }
     },
     {
@@ -5454,7 +5515,7 @@
         ]
       },
       "primary_source_verification": {
-        "verified_at": "2026-10-03T09:28:11+03:00",
+        "verified_at": "2026-10-03T09:34:23+03:00",
         "promotion_gate": "ISU_HOMEPAGE_NUMERIC_SUMMARY_V1",
         "source_family": "ISU",
         "direct_first_party_homepage_numeric_readback": true,
@@ -16334,7 +16395,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d9968e11080d2aba3d0ff69e94302c95782920adbd4bd9be04701fe83c5f6024"
+          "sha256": "00f378566697b3bc708c7a6538a32edfa144d4b3ec9da420954372f585f80c20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 343/2026-09-16",
@@ -16552,7 +16613,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d9968e11080d2aba3d0ff69e94302c95782920adbd4bd9be04701fe83c5f6024"
+          "sha256": "00f378566697b3bc708c7a6538a32edfa144d4b3ec9da420954372f585f80c20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 344/2026-09-16",
@@ -16751,7 +16812,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d9968e11080d2aba3d0ff69e94302c95782920adbd4bd9be04701fe83c5f6024"
+          "sha256": "00f378566697b3bc708c7a6538a32edfa144d4b3ec9da420954372f585f80c20"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 345/2026-09-16",
@@ -23159,9 +23220,9 @@
   ],
   "stats": {
     "story_count": 153,
-    "fact_kernel_composed": 123,
+    "fact_kernel_composed": 124,
     "legacy_passthrough": 25,
-    "editorial_holds": 5
+    "editorial_holds": 4
   },
   "policy": {
     "writer_may_add_unsupported_fact": false,
@@ -23170,5 +23231,5 @@
     "reputational_formats_fail_closed": true,
     "satire_routed_separately": true
   },
-  "registry_fingerprint_sha256": "30da1c2e52dbc67f386b9189748943042898a6039a7eab674c48ea7152a0c562"
+  "registry_fingerprint_sha256": "6b61d2f54cf35dcbee7c6566404f31ca4b0368734023b60edf67d80fdb55982e"
 }
