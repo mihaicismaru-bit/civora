@@ -14,40 +14,59 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 1,
+    "autonomous_stories_published_24h": 2,
     "autonomous_story_ids_24h": [
+      "scm-program-dbd2c22d1578de50198c",
       "weekend-clar-20261003"
     ],
     "excluded_after_correction_or_hold_24h": [],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 1,
-      "published": 1,
+      "measured": 2,
+      "published": 2,
       "stories": [
         {
           "story_id": "weekend-clar-20261003",
           "seconds": 846,
           "discovered_at_utc": "2026-10-03T06:22:12Z",
           "published_at_utc": "2026-10-03T06:36:18Z"
+        },
+        {
+          "story_id": "scm-program-dbd2c22d1578de50198c",
+          "seconds": 259941,
+          "discovered_at_utc": "2026-09-30T08:22:15Z",
+          "published_at_utc": "2026-10-03T08:34:36Z"
         }
       ],
-      "max_seconds": 846,
-      "median_seconds": 846
+      "max_seconds": 259941,
+      "median_seconds": 259941
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 1,
+      "published_stories": 2,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "PASS",
-      "eligible": 1,
+      "status": "BLOCKED",
+      "eligible": 2,
       "readback_ok": 1,
-      "value": 1.0,
-      "blocker_story_ids": [],
+      "value": 0.5,
+      "blocker_story_ids": [
+        "scm-program-dbd2c22d1578de50198c"
+      ],
       "checks": [
+        {
+          "story_id": "scm-program-dbd2c22d1578de50198c",
+          "url": "https://valceaclar.ro/stiri/scm-program-dbd2c22d1578de50198c/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
+        },
         {
           "story_id": "weekend-clar-20261003",
           "url": "https://valceaclar.ro/stiri/weekend-clar-20261003/",
@@ -72,8 +91,8 @@
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 1,
-      "eligible": 1,
-      "value": 1.0,
+      "eligible": 2,
+      "value": 0.5,
       "delivered_story_ids": [
         "weekend-clar-20261003"
       ]
@@ -81,8 +100,8 @@
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 1,
-      "eligible": 1,
-      "value": 1.0,
+      "eligible": 2,
+      "value": 0.5,
       "delivered_story_ids": [
         "weekend-clar-20261003"
       ]
