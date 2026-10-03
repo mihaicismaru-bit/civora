@@ -149,7 +149,9 @@ class PublicSafetyStoryComposer:
 
         dek_bits = [f"Datele provin din informarea oficială publicată de {self.source_name}."]
         if isinstance(smurd, int):
-            dek_bits.append(f"Au fost raportate {smurd} intervenții SMURD.")
+            # Romanian uses "de" for counts ending in 00 or 20–99.
+            smurd_interventions = f"{smurd}{' de' if smurd % 100 == 0 or smurd % 100 >= 20 else ''} intervenții"
+            dek_bits.append(f"Au fost raportate {smurd_interventions} SMURD.")
         if isinstance(fires, int):
             dek_bits.append(f"Informarea menționează {fires} incendii de vegetație.")
         dek = " ".join(dek_bits)
@@ -163,7 +165,7 @@ class PublicSafetyStoryComposer:
                 detail += f" și peste sau aproximativ {hectares} de hectare afectate, conform formulării din sursă"
             paragraphs.append(detail + ".")
         if isinstance(smurd, int):
-            paragraphs.append(f"Echipajele SMURD au avut {smurd} intervenții pentru prim ajutor și asistență medicală, potrivit bilanțului oficial.")
+            paragraphs.append(f"Echipajele SMURD au avut {smurd_interventions} pentru prim ajutor și asistență medicală, potrivit bilanțului oficial.")
         if isinstance(other, int):
             paragraphs.append(f"ISU a mai consemnat {other} alte situații de urgență în același bilanț.")
         if f.get("mentions_112"):
