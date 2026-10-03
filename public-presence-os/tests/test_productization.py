@@ -95,6 +95,16 @@ def test_no_paid_or_live_runtime_dependencies():
         pat=rf"^\s*(?:from\s+{re.escape(package)}(?:\.|\s)|import\s+{re.escape(package)}(?:\.|\s|$))"
         assert not re.search(pat,txt,re.I|re.M)
 
+def test_the_only_live_network_boundary_is_get_only_and_allowlisted():
+    from public_presence_os.pilot_package_acceptance import AUDITED_LIVE_NETWORK_BOUNDARIES
+
+    assert AUDITED_LIVE_NETWORK_BOUNDARIES == {"src/public_presence_os/meta_live_runtime.py"}
+    source = (ROOT/next(iter(AUDITED_LIVE_NETWORK_BOUNDARIES))).read_text(encoding="utf-8")
+    assert 'ALLOWED_HOSTS = ("graph.facebook.com", "graph.threads.net")' in source
+    assert 'method="GET"' in source
+    for method in ('method="POST"', 'method="PUT"', 'method="PATCH"', 'method="DELETE"'):
+        assert method not in source
+
 def test_no_secret_material():
     text_suffixes={".py",".json",".md",".toml",".yml",".yaml",".txt"}
     txt="\n".join(
