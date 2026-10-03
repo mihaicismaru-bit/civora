@@ -265,13 +265,13 @@ def recommend_from_shadow_observation(
     policy: Mapping[str, Any],
     observation: ShadowObservation,
 ) -> ShadowRecommendation | ManualActionPacket:
-    """Generate a recommendation from a synthetic shadow fixture; never dispatch."""
+    """Generate a recommendation from a synthetic or normalized read-only event; never dispatch."""
     validate_policy(policy)
     if observation.platform not in ACTIVE_PLATFORMS:
         raise PilotGrowthOperationsHold("HOLD_CAPABILITY_UNVERIFIED")
     if not observation.observation_ref or not observation.public_context.strip():
         raise PilotGrowthOperationsHold("HOLD_CP92_OBSERVATION_IDENTITY_MISSING")
-    if observation.source_mode != "SYNTHETIC_FIXTURE":
+    if observation.source_mode not in {"SYNTHETIC_FIXTURE", "REAL_READ_ONLY_EVENT"}:
         raise PilotGrowthOperationsHold("HOLD_CP92_LIVE_SHADOW_OBSERVATION_NOT_AUTHORIZED")
 
     if observation.capability_state not in {

@@ -43,6 +43,12 @@ FORBIDDEN_IMPORT_ROOTS = (
     "stripe",
 )
 
+# CP59 remains an offline compiler. The separately invoked, GET-only live runtime
+# is the sole audited network boundary and is never imported by a CP59 workflow.
+AUDITED_LIVE_NETWORK_BOUNDARIES = {
+    "src/public_presence_os/meta_live_runtime.py",
+}
+
 RAW_SECRET_PATTERNS = (
     re.compile(r"authorization\s*:\s*bearer\s+[a-z0-9._~+/=-]{16,}", re.I),
     re.compile(r"(?:client_secret|access_token|refresh_token)\s*=\s*[\"'][^\"']{16,}[\"']", re.I),
@@ -241,10 +247,13 @@ def _artifact_bindings(root: Path, policy: dict) -> tuple[ArtifactBinding, ...]:
 
 def _scan_source_for_network_clients(root: Path) -> None:
     for path in (root / "src").rglob("*.py"):
+        relative = path.relative_to(root).as_posix()
         text = path.read_text(encoding="utf-8")
         for package in FORBIDDEN_IMPORT_ROOTS:
             pattern = rf"^\s*(?:from\s+{re.escape(package)}(?:\.|\s)|import\s+{re.escape(package)}(?:\.|\s|$))"
             if re.search(pattern, text, re.I | re.M):
+                if relative in AUDITED_LIVE_NETWORK_BOUNDARIES and package == "urllib.request":
+                    continue
                 raise PilotPackageAcceptanceHold(f"HOLD_CP59_NETWORK_CLIENT_IMPORT:{path.relative_to(root)}")
 
 

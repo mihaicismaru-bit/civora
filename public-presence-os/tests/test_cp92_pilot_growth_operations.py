@@ -75,6 +75,22 @@ def test_cp92_live_observation_is_not_authorized():
         recommend_from_shadow_observation(policy, observation)
 
 
+def test_cp92_normalized_real_read_only_event_is_recommendation_only():
+    policy = load_policy()
+    observation = ShadowObservation(
+        observation_ref="mle_verified_event",
+        platform="THREADS",
+        event_type="QUESTION",
+        public_context="Which official source supports this?",
+        source_mode="REAL_READ_ONLY_EVENT",
+    )
+    recommendation = recommend_from_shadow_observation(policy, observation)
+    assert recommendation.recommendation_type == "DRAFT_INBOUND_REPLY"
+    assert recommendation.external_write_allowed is False
+    assert recommendation.social_api_call_allowed is False
+    assert recommendation.live_authority == "NONE"
+
+
 @pytest.mark.parametrize("capability_state", ["MANUAL_ONLY", "HOLD_LIVE_PERMISSION"])
 def test_cp92_gated_capability_becomes_manual_packet(capability_state):
     policy = load_policy()

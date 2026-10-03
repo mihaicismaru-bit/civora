@@ -1,0 +1,11 @@
+{
+  "schema_version": "PPOS_META_ACTION_RISK_POLICY_V1",
+  "classified_at": "2026-10-03",
+  "GREEN": ["IGNORE", "MANUAL_ACTION_PACKET"],
+  "AMBER": ["POST", "REPLY", "COMMENT", "FOLLOW_UP", "AMPLIFY", "QUOTE_REPOST", "REPOST"],
+  "RED": ["AUTOMATED_FOLLOW_UNFOLLOW", "MASS_COMMENTING", "GENERIC_PRAISE", "COPY_PASTE_COMMENT", "SYNTHETIC_CONVERSATION", "FAKE_CONTROVERSY", "ARTIFICIAL_CONFLICT", "POLITICAL_MICROTARGETING", "SENSITIVE_TRAIT_INFERENCE", "SENSITIVE_RELATIONSHIP_PROFILING", "SPAM"],
+  "external_green_actions": [],
+  "promotion_rule": "No external action becomes GREEN until real shadow calibration and machine-readable transition evidence pass.",
+  "rate_budgets_are_ceilings": true,
+  "global_kill_switch_required": true
+}

@@ -1,0 +1,30 @@
+{
+  "checkpoint": "S-A2.2",
+  "schema_version": "PPOS_META_NORMALIZED_READ_ONLY_TRANSPORT_POLICY_V1",
+  "parent_checkpoint": "S-A2.1",
+  "operations": {
+    "FACEBOOK_MANAGED_PAGES": {"method":"GET","host":"graph.facebook.com","token_env_name":"PPOS_META_USER_ACCESS_TOKEN","fields":["id","name","tasks","instagram_business_account"]},
+    "FACEBOOK_PAGE_IDENTITY": {"method":"GET","host":"graph.facebook.com","token_env_name":"PPOS_META_USER_ACCESS_TOKEN","fields":["id","name","instagram_business_account"]},
+    "INSTAGRAM_PROFILE": {"method":"GET","host":"graph.facebook.com","token_env_name":"PPOS_META_PAGE_ACCESS_TOKEN","fields":["id","username","name"]},
+    "THREADS_PROFILE": {"method":"GET","host":"graph.threads.net","token_env_name":"PPOS_THREADS_USER_ACCESS_TOKEN","fields":["id","username","name"]}
+  },
+  "normalization": {
+    "missing_field_value": "UNKNOWN",
+    "exact_identity_match_required": true,
+    "exact_facebook_instagram_binding_required": true,
+    "source_response_sha256_required": true,
+    "secret_bearing_response_forbidden": true,
+    "raw_secret_persistence_forbidden": true
+  },
+  "authority": {
+    "request_plan_compile_allowed": true,
+    "response_normalization_allowed": true,
+    "method_allowlist": ["GET"],
+    "network_execution_allowed": false,
+    "token_resolution_allowed": false,
+    "external_write_allowed": false,
+    "publish_allowed": false,
+    "deploy_allowed": false,
+    "global_kill_switch_required": true
+  }
+}

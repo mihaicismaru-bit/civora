@@ -7,7 +7,10 @@ name = "public-presence-os"
 version = "0.45.0"
 description = "Pre-pilot TEXT/PHOTO public presence control plane"
 requires-python = ">=3.11"
-dependencies = ["Pillow==12.3.0"]
+dependencies = [
+    "Pillow==12.3.0",
+    "tzdata==2026.4; platform_system == 'Windows'",
+]
 
 [project.scripts]
 public-presence-os = "public_presence_os.cli:main"

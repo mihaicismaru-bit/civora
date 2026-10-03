@@ -95,6 +95,16 @@ def test_no_paid_or_live_runtime_dependencies():
         pat=rf"^\s*(?:from\s+{re.escape(package)}(?:\.|\s)|import\s+{re.escape(package)}(?:\.|\s|$))"
         assert not re.search(pat,txt,re.I|re.M)
 
+def test_the_only_live_network_boundary_is_get_only_and_allowlisted():
+    from public_presence_os.pilot_package_acceptance import AUDITED_LIVE_NETWORK_BOUNDARIES
+
+    assert AUDITED_LIVE_NETWORK_BOUNDARIES == {"src/public_presence_os/meta_live_runtime.py"}
+    source = (ROOT/next(iter(AUDITED_LIVE_NETWORK_BOUNDARIES))).read_text(encoding="utf-8")
+    assert 'ALLOWED_HOSTS = ("graph.facebook.com", "graph.threads.net")' in source
+    assert 'method="GET"' in source
+    for method in ('method="POST"', 'method="PUT"', 'method="PATCH"', 'method="DELETE"'):
+        assert method not in source
+
 def test_no_secret_material():
     text_suffixes={".py",".json",".md",".toml",".yml",".yaml",".txt"}
     txt="\n".join(
@@ -105,6 +115,17 @@ def test_no_secret_material():
     patterns = [r"access[_-]?token\s*[:=]",r"client[_-]?secret\s*[:=]",r"authorization:\s*bearer"]
     for pat in patterns:
         assert not re.search(pat,txt,re.I)
+
+def test_env_example_contains_placeholders_only():
+    values = {}
+    for line in (ROOT/".env.example").read_text(encoding="utf-8").splitlines():
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            values[key] = value
+    for key in ("META_APP_SECRET", "META_USER_ACCESS_TOKEN", "META_PAGE_ACCESS_TOKEN", "META_THREADS_ACCESS_TOKEN"):
+        assert values[key].startswith("<") and values[key].endswith(">")
+    assert values["KILL_SWITCH"] == "true"
+    assert values["LIVE_WRITE"] == "false"
 
 def test_build_is_reproducible(tmp_path):
     env=os.environ.copy(); env["PYTHONPATH"]=str(ROOT/"src")

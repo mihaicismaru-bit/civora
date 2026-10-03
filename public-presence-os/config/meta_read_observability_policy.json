@@ -1,0 +1,40 @@
+{
+  "schema_version": "PPOS_META_READ_OBSERVABILITY_POLICY_V1",
+  "checkpoint": "S-A2.4",
+  "parent_checkpoint": "S-A2.3",
+  "mode": "LOCAL_OBSERVABILITY_COMPILER_ONLY",
+  "active_platforms": ["FACEBOOK_PAGE", "INSTAGRAM_PROFESSIONAL", "THREADS"],
+  "snapshot": {
+    "source": "S-A2.3_CURSOR_AND_EVENT_LOG",
+    "hash_bound": true,
+    "accepted_event_count": true,
+    "duplicate_replay_count": true,
+    "persisted_event_count": true,
+    "latest_sequence": true,
+    "latest_event_id": true,
+    "observed_operations": true,
+    "latest_normalized_identity_fields": true,
+    "latest_unknown_fields": true
+  },
+  "external_metrics": {
+    "unavailable_value": "UNKNOWN",
+    "null_is_not_zero": true,
+    "zero_is_not_unknown": true,
+    "fabrication_forbidden": true,
+    "metric_names": ["VIEWS","REACH","IMPRESSIONS","LIKES","REACTIONS","COMMENTS","REPLIES","SHARES","REPOSTS","QUOTES","SAVES","CLICKS","CONVERSIONS","PROFILE_VISITS","FOLLOWERS"]
+  },
+  "platform_policy": {
+    "LINKEDIN": "HOLD_UNTIL_PRODUCTION_API_ACCESS",
+    "X": "EXCLUDED_WHILE_API_PAID",
+    "BLUESKY": "HOLD_UNTIL_LOCAL_ROI_TEST_PASSES"
+  },
+  "authority": {
+    "network_execution": false,
+    "external_write": false,
+    "publish": false,
+    "deploy": false,
+    "write_permissions_activation": false,
+    "paid_service_allowed": false,
+    "kill_switch_must_remain_engaged": true
+  }
+}
