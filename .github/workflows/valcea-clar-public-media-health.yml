@@ -18,12 +18,14 @@ on:
       - 'valcea-clar/site/runtime/live-feed.json'
       - 'valcea-clar/site/runtime/stiri/**'
       - 'valcea-clar/scripts/probe_public_story_media.py'
+      - 'valcea-clar/scripts/test_probe_public_story_media.py'
       - '.github/workflows/valcea-clar-public-media-health.yml'
   pull_request:
     paths:
       - 'valcea-clar/site/runtime/live-feed.json'
       - 'valcea-clar/site/runtime/stiri/**'
       - 'valcea-clar/scripts/probe_public_story_media.py'
+      - 'valcea-clar/scripts/test_probe_public_story_media.py'
       - '.github/workflows/valcea-clar-public-media-health.yml'
 
 permissions:
@@ -49,7 +51,9 @@ jobs:
           python-version: '3.13'
 
       - name: Validate media probe offline
-        run: python valcea-clar/scripts/probe_public_story_media.py --self-test
+        run: |
+          python valcea-clar/scripts/probe_public_story_media.py --self-test
+          python -m unittest discover -s valcea-clar/scripts -p 'test_probe_public_story_media.py' -v
 
       - name: Require visible verified photographs in public articles
         shell: bash
@@ -108,7 +112,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           STATUS_REPOSITORY: ${{ github.repository }}
-          STATUS_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+          STATUS_SHA: ${{ github.sha }}
           STATUS_RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           python - <<'PY'
