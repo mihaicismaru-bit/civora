@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Public photo acceptance probe for VÂLCEA CLAR story pages.
 
-The canonical live feed may carry a verified ``visual`` for a story. That media
+The canonical live feed may carry a verified ``visual`` for a story. The public
+story manifest also carries verified ``image`` records for published archives,
+which remain public even after leaving the current feed. That media
 is considered publicly projected only when the fetched story HTML contains a
 real ``<img>`` whose bytes are publicly readable and whose public delivery can
 be traced back to the exact canonical CIVORA visual.
@@ -28,6 +30,7 @@ from urllib.parse import urljoin, urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 FEED = ROOT / "site" / "runtime" / "live-feed.json"
+STORY_MANIFEST = ROOT / "site" / "runtime" / "stiri" / "manifest.json"
 DEFAULT_BASE = "https://valceaclar.ro"
 USER_AGENT = "VALCEA-CLAR-Public-Media/1.1 (+https://valceaclar.ro/)"
 MAX_HTML_BYTES = 2_000_000
@@ -105,6 +108,15 @@ def eligible_visual(story: dict[str, Any]) -> dict[str, Any] | None:
     if visual.get("provenance_status") != "VERIFIED":
         return None
     if visual.get("synthetic") is True:
+        return None
+    # The article manifest can include illustration records. This photo gate
+    # must continue to reject social layouts even if labelled VERIFIED.
+    fields = ("kind", "media_role", "rights_basis", "public_url", "relative_url", "credit", "editorial_note", "alt_text")
+    description = " ".join(str(visual.get(key) or "").lower() for key in fields)
+    if any(token in description for token in (
+        "editorial_card", "editorial card", "card editorial", "social_card",
+        "social card", "original_editorial_layout", "social/editorial",
+    )):
         return None
     public_url = str(visual.get("public_url") or "").strip()
     if not public_url.startswith(("https://", "http://")):
@@ -193,12 +205,27 @@ def verified_visible_delivery(
 def evaluate(base_url: str, limit: int | None = None) -> dict[str, Any]:
     feed = json.loads(FEED.read_text(encoding="utf-8"))
     stories = [row for row in (feed.get("stories") or []) if isinstance(row, dict)]
+    manifest = json.loads(STORY_MANIFEST.read_text(encoding="utf-8"))
+    # Live records take precedence, including an explicit missing visual. Never
+    # revive an obsolete manifest image for a currently surfaced story.
+    live_ids = {str(row.get("id")) for row in stories if row.get("id")}
+    archive_candidates = [
+        {**row, "visual": row.get("image")}
+        for row in (manifest.get("stories") or [])
+        if isinstance(row, dict)
+        and row.get("id")
+        and str(row["id"]) not in live_ids
+        and row.get("public_ux_authorized") is True
+    ]
     eligible: list[tuple[dict[str, Any], dict[str, Any]]] = []
-    for story in stories:
+    seen_paths: set[str] = set()
+    for story in stories + archive_candidates:
         visual = eligible_visual(story)
         path = str(story.get("path") or "")
-        if visual and path.startswith("/stiri/") and path.endswith("/"):
+        if visual and path.startswith("/stiri/") and path.endswith("/") and path not in seen_paths:
             eligible.append((story, visual))
+            seen_paths.add(path)
+    eligible_count = len(eligible)
     if limit is not None:
         eligible = eligible[: max(0, limit)]
 
@@ -244,7 +271,10 @@ def evaluate(base_url: str, limit: int | None = None) -> dict[str, Any]:
         "product": "VÂLCEA CLAR public story media acceptance",
         "base_url": base_url.rstrip("/"),
         "canonical_feed_generated_at": feed.get("generated_at"),
-        "eligible_verified_visual_count": len(eligible),
+        "candidate_scope": "live_feed_and_authorized_public_story_manifest",
+        "live_story_count": len(stories),
+        "authorized_archive_candidate_count": len(archive_candidates),
+        "eligible_verified_visual_count": eligible_count,
         "checked_count": len(checks),
         "public_provenance_assets": len(provenance_assets),
         "public_provenance_error": provenance_error,
