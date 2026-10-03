@@ -112,7 +112,9 @@ def apavil_story() -> dict:
         "material_fact_gate": "PASS",
         "editorial_type": "service",
         "valid_from": "2026-08-18T00:00:00+03:00",
-        "valid_until": "2026-12-31T23:59:59+02:00",
+        # The offer is a reader-action service item, not evergreen company
+        # context.  Its current-news life ends with the last stated deadline.
+        "valid_until": "2026-08-21T23:59:59+03:00",
         "slots": ["morning", "evening"],
         "headline": headline,
         "dek": dek,
@@ -267,6 +269,7 @@ def self_test() -> None:
         assert len(item["fact_kernel"]["claims"]) >= 2
         assert all(claim.get("source_urls") for claim in item["fact_kernel"]["claims"])
     assert {src["url"] for src in items[0]["sources"]} == {LAB_URL, ELEC_URL}
+    assert items[0]["valid_until"] == "2026-08-21T23:59:59+03:00"
     assert items[1]["sources"][0]["url"] == BUJORENI_ZIDAR_URL
     doc, changed_ids = upsert_all({"facts": []}, items)
     assert set(changed_ids) == {APAVIL_STORY_ID, BUJORENI_STORY_ID}

@@ -8,6 +8,7 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY = ROOT / "editorial" / "source_intelligence_seed_registry.json"
+DISCOVERY_STATE = ROOT / "editorial" / "source_intelligence_discovery_state.json"
 ALLOWED_TIERS = {"T1", "T1B", "T2", "T3"}
 REQUIRED_CAMPAIGN_FAMILIES = {
     "LOCAL_PRESS", "UAT", "PUBLIC_RECORD", "PUBLIC_INSTITUTIONS", "COMPANY",
@@ -17,6 +18,57 @@ REQUIRED_CAMPAIGN_FAMILIES = {
 
 def fail(message: str) -> None:
     raise SystemExit("SOURCE INTELLIGENCE seed validation FAIL: " + message)
+
+
+def coverage_scorecard(targets: dict) -> dict:
+    """Report delivered coverage separately from the declared contract.
+
+    Discovery candidates are not equivalent to monitored URLs.  Until the
+    engine owns an active-URL ledger, the 2,000-URL canon target is explicitly
+    unmeasured instead of being implied by a passing schema validation.
+    """
+    source_target = int(targets.get("phase_1_sources", 0))
+    url_target = int(targets.get("phase_1_monitored_urls", 0))
+    if not DISCOVERY_STATE.is_file():
+        return {
+            "status": "UNMEASURED",
+            "phase_1_source_target": source_target,
+            "realized_seed_sources": None,
+            "source_completion_percent": None,
+            "phase_1_monitored_url_target": url_target,
+            "active_monitored_urls": None,
+            "monitored_url_measurement": "MISSING_DISCOVERY_STATE",
+        }
+
+    try:
+        state = json.loads(DISCOVERY_STATE.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        fail("source intelligence discovery state is unreadable")
+    if state.get("instance_id") != "valcea":
+        fail("discovery state instance_id must be valcea")
+
+    realized_sources = int(state.get("seed_count") or 0)
+    observations = [row for row in state.get("observations") or [] if isinstance(row, dict)]
+    discovered_urls = {
+        str(candidate.get("url") or "").strip()
+        for row in observations
+        for candidate in row.get("candidates") or []
+        if isinstance(candidate, dict) and str(candidate.get("url") or "").strip()
+    }
+    degraded_sources = sum(1 for row in observations if row.get("status") != "PASS")
+    source_target_met = source_target > 0 and realized_sources >= source_target
+    return {
+        "status": "PHASE_1_SOURCE_TARGET_MET" if source_target_met else "BELOW_PHASE_1",
+        "phase_1_source_target": source_target,
+        "realized_seed_sources": realized_sources,
+        "source_completion_percent": round(100 * realized_sources / source_target, 1) if source_target else None,
+        "observed_sources": len(observations),
+        "degraded_sources": degraded_sources,
+        "phase_1_monitored_url_target": url_target,
+        "active_monitored_urls": None,
+        "discovered_unique_candidate_urls": len(discovered_urls),
+        "monitored_url_measurement": "MISSING_CANONICAL_ACTIVE_URL_LEDGER",
+    }
 
 
 def main() -> int:
@@ -80,6 +132,8 @@ def main() -> int:
 
     print(json.dumps({
         "status": "PASS",
+        "contract_status": "PASS",
+        "coverage": coverage_scorecard(targets),
         "seed_sources": len(sources),
         "campaigns": len(campaigns),
         "campaign_target_total": total_target,

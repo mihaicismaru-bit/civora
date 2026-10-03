@@ -32,7 +32,6 @@ from temporal_freshness import CONTRACT as TEMPORAL_CONTRACT, durable_story_temp
 STATE = ROOT / "site" / "newsroom_state.json"
 DECISION = ROOT / "site" / "newsroom_decision.json"
 PUBLICATION_HOLDS = ROOT / "editorial" / "publication_holds.json"
-CURRENTNESS_OVERRIDES = ROOT / "editorial" / "currentness_overrides.json"
 PUBLIC_RUNTIME = ROOT / "site" / "runtime"
 PUBLIC_MANIFEST = PUBLIC_RUNTIME / "stiri" / "manifest.json"
 PUBLIC_BASE = "https://valceaclar.ro"
@@ -87,39 +86,11 @@ def active_publication_holds() -> set[str]:
     return held
 
 
-def currentness_archive_ids() -> set[str]:
-    """Stories that keep their durable route but must leave the current set."""
-    if not CURRENTNESS_OVERRIDES.is_file():
-        return set()
-    try:
-        document = json.loads(CURRENTNESS_OVERRIDES.read_text(encoding="utf-8"))
-    except Exception:
-        return set()
-    result: set[str] = set()
-    for row in document.get("overrides") or []:
-        if not isinstance(row, dict):
-            continue
-        story_id = str(row.get("story_id") or "").strip()
-        if story_id and row.get("current") is False:
-            result.add(story_id)
-    return result
-
-
-def currentness_ok(item: dict, now: datetime) -> tuple[bool, str | None]:
-    story_id = str(item.get("id") or "").strip()
-    if story_id and story_id in currentness_archive_ids():
-        return False, "semantic_currentness_archive_override"
-    raw = str(item.get("valid_until") or "").strip()
-    if raw:
-        try:
-            expiry = datetime.fromisoformat(raw.replace("Z", "+00:00"))
-            if expiry.tzinfo is None:
-                expiry = expiry.replace(tzinfo=TZ)
-            if now.astimezone(TZ) > expiry.astimezone(TZ):
-                return False, "valid_until_expired"
-        except ValueError:
-            pass
-    return True, None
+# One gate owns currentness for both continuous publication and recap editions.
+# Keep these aliases for callers that historically imported them from this
+# module, while the implementation lives in the edition engine.
+currentness_archive_ids = edition_engine.currentness_archive_ids
+currentness_ok = edition_engine.currentness_ok
 
 
 def story_ready(item: dict) -> tuple[bool, str]:
