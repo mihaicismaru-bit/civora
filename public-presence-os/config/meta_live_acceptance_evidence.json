@@ -1,0 +1,39 @@
+{
+  "schema_version": "PPOS_META_LIVE_ACCEPTANCE_EVIDENCE_V1",
+  "recorded_at": "2026-10-03",
+  "current_stage": "READY_FOR_READ_ONLY_REAL_CREDENTIALS",
+  "source_head": "origin/main@81bb8edc6ccec32b42041556f220c35eab7927aa",
+  "verified": {
+    "sa1_identity_binding": true,
+    "facebook_page_id": "2816314015107071",
+    "instagram_professional_id": "17841429701593250",
+    "threads_user_id": "28391623420464631",
+    "sa2_1_through_sa2_7_integrated": true,
+    "sa2_7_fixture_regression_fixed": true,
+    "get_only_read_runtime_tests": true,
+    "event_log_dedup_cursor_restart_tests": true,
+    "real_event_shadow_bridge_tests": true,
+    "controlled_write_failure_soak_local": true,
+    "zero_external_writes": true
+  },
+  "live_gates": {
+    "credentials_present": false,
+    "real_read_ingestion_pass": false,
+    "identity_readback_pass": false,
+    "shadow_sample_target_100": false,
+    "calibration_pass": false,
+    "external_green_action_validated": false,
+    "owner_write_authorization_receipt": false,
+    "limited_write_allowed": false,
+    "controlled_autonomy_allowed": false,
+    "autonomous_production_allowed": false
+  },
+  "safety": {
+    "kill_switch": "ENGAGED",
+    "live_write": "OFF",
+    "write_capabilities": "LOCKED",
+    "live_authority": "NONE",
+    "production_external_green_actions": [],
+    "external_write_count": 0
+  }
+}

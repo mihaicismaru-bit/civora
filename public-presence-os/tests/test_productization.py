@@ -106,6 +106,17 @@ def test_no_secret_material():
     for pat in patterns:
         assert not re.search(pat,txt,re.I)
 
+def test_env_example_contains_placeholders_only():
+    values = {}
+    for line in (ROOT/".env.example").read_text(encoding="utf-8").splitlines():
+        if line and not line.startswith("#") and "=" in line:
+            key, value = line.split("=", 1)
+            values[key] = value
+    for key in ("META_APP_SECRET", "META_USER_ACCESS_TOKEN", "META_PAGE_ACCESS_TOKEN", "META_THREADS_ACCESS_TOKEN"):
+        assert values[key].startswith("<") and values[key].endswith(">")
+    assert values["KILL_SWITCH"] == "true"
+    assert values["LIVE_WRITE"] == "false"
+
 def test_build_is_reproducible(tmp_path):
     env=os.environ.copy(); env["PYTHONPATH"]=str(ROOT/"src")
     subprocess.run([sys.executable,str(ROOT/"scripts"/"build_release.py")],check=True,capture_output=True,text=True,env=env)

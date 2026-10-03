@@ -72,13 +72,15 @@ def manifest_hash(manifest: dict) -> str:
 def validate_repo(root: Path) -> ValidationResult:
     checks, errors = [], []
     expected = [
-        "README.md","pyproject.toml","config/runtime_policy.json","config/module_registry.json",
+        "README.md","pyproject.toml",".env.example","config/runtime_policy.json","config/module_registry.json",
         "config/operator_profile.example.json","config/reimplementation_priority.json","config/visual_identity_policy.json",
         "config/qa_policy.json","config/approval_policy.json","config/queue_policy.json","config/publisher_policy.json",
         "config/analytics_policy.json","config/learning_policy.json","config/meta_adapter_policy.json","config/meta_connection_policy.json",
         "config/meta_preflight_policy.json","config/meta_operator_provisioning_policy.json","config/meta_transport_twin_policy.json",
         "config/meta_read_only_gate_policy.json","config/meta_live_read_only_probe_policy.json",
         "config/meta_offline_evidence_validator_policy.json","config/meta_pilot_readiness_policy.json",
+        "config/meta_live_runtime_policy.json","config/meta_capability_matrix_live.json",
+        "config/meta_action_risk_policy.json","config/meta_live_acceptance_evidence.json",
         "config/pilot_package_acceptance_policy.json","config/operator_pilot_handoff_policy.json",
         "config/control_plane_authorization_intake_policy.json","config/authorization_receipt_validator_policy.json",
         "config/live_read_only_probe_session_policy.json","config/live_read_only_probe_evidence_import_policy.json",
@@ -105,6 +107,8 @@ def validate_repo(root: Path) -> ValidationResult:
         "src/public_presence_os/meta_transport_twin.py","src/public_presence_os/meta_read_only_gate.py",
         "src/public_presence_os/meta_live_read_only_probe.py","src/public_presence_os/meta_offline_evidence.py",
         "src/public_presence_os/meta_pilot_readiness.py","src/public_presence_os/pilot_package_acceptance.py",
+        "src/public_presence_os/meta_live_runtime.py","src/public_presence_os/meta_shadow_runtime.py",
+        "src/public_presence_os/meta_write_control.py",
         "src/public_presence_os/operator_pilot_handoff.py","src/public_presence_os/control_plane_authorization_intake.py",
         "src/public_presence_os/authorization_receipt_validator.py","src/public_presence_os/live_read_only_probe_session.py",
         "src/public_presence_os/live_read_only_probe_evidence_import.py","src/public_presence_os/live_read_only_probe_execution_admission.py",
@@ -146,6 +150,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "tests/test_cp77_live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_corruption_rejection.py",
         "tests/test_cp78_live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_partial_write_truncation_rejection.py",
         "tests/test_cp79_live_read_only_probe_authority_lease_terminal_tombstone_recovery_journal_complete_write_atomic_visibility.py",
+        "tests/test_meta_live_runtime.py","tests/test_meta_shadow_runtime.py","tests/test_meta_write_control.py",
         "docs/CP30_PRODUCTIZATION.md","docs/OPERATOR_INSTALLATION_CONFIGURATION_RECOVERY.md",
         "docs/CP34_RADAR_MINIMAL_EXECUTABLE_SLICE.md","docs/CP39_IMAGE_RIGHTS_ASSET_PROVENANCE.md",
         "docs/CP40_VISUAL_RENDERER.md","docs/CP41_VISUAL_QA.md","docs/CP42_APPROVAL_DASHBOARD.md","docs/CP43_QUEUE.md",
@@ -171,6 +176,7 @@ def validate_repo(root: Path) -> ValidationResult:
         "docs/CP77_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_CORRUPTION_REJECTION_DRY_RUN.md",
         "docs/CP78_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_PARTIAL_WRITE_TRUNCATION_REJECTION_DRY_RUN.md",
         "docs/CP79_LIVE_READ_ONLY_PROBE_AUTHORITY_LEASE_TERMINAL_TOMBSTONE_RECOVERY_JOURNAL_COMPLETE_WRITE_ATOMIC_VISIBILITY_DRY_RUN.md",
+        "docs/META_LIVE_AUTONOMY_CHECKPOINT_2026-10-03.md",
         ".github/workflows/public-presence-os-ci.yml",
     ]
     for rel in expected:
