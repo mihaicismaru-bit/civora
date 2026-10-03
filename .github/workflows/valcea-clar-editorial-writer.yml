@@ -71,7 +71,7 @@ jobs:
           python valcea-clar/scripts/newsroom_candidate_diagnostic.py --self-test
           python valcea-clar/scripts/newsroom_candidate_diagnostic.py --story-id rm-valcea-gambling-authorizations-20260723
 
-      - name: Dry-run Council explainer through live rendering transaction
+      - name: Verify archived Council explainer survives without returning to current news
         shell: bash
         run: |
           set -euo pipefail
@@ -81,8 +81,8 @@ jobs:
           from pathlib import Path
           d=json.loads(Path('valcea-clar/site/newsroom_decision.json').read_text(encoding='utf-8'))
           sid='rm-valcea-gambling-authorizations-20260723'
-          if sid not in d.get('publishable_story_ids',[]):
-              raise SystemExit(f'{sid} did not reach publishable_story_ids: {d.get("rejected")}')
+          if sid in d.get('publishable_story_ids',[]):
+              raise SystemExit(f'{sid} incorrectly returned to the current-news set')
           print(d['slot_for_legacy_snapshot_compatibility'])
           PY
           )
@@ -100,8 +100,8 @@ jobs:
           feed=json.loads(Path('valcea-clar/site/runtime/live-feed.json').read_text(encoding='utf-8'))
           manifest_ids={str(row.get('id') or '') for row in manifest.get('stories',[]) if isinstance(row,dict)}
           feed_ids={str(row.get('id') or '') for row in feed.get('stories',[]) if isinstance(row,dict)}
-          if sid not in decision.get('publishable_story_ids',[]): raise SystemExit('Council story missing from decision')
+          if sid in decision.get('publishable_story_ids',[]): raise SystemExit('Archived Council story returned to current decision')
           if sid not in manifest_ids: raise SystemExit('Council story missing from rendered story manifest')
-          if sid not in feed_ids: raise SystemExit('Council story missing from live feed')
-          print(json.dumps({'status':'PASS','story_id':sid,'publishable_count':decision['publishable_story_count'],'manifest':True,'live_feed':True},ensure_ascii=False))
+          if sid in feed_ids: raise SystemExit('Archived Council story returned to live feed')
+          print(json.dumps({'status':'PASS','story_id':sid,'current':False,'archive_route':True,'manifest':True,'live_feed':False},ensure_ascii=False))
           PY
