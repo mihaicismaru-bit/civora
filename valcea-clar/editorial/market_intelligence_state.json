@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-10-03T21:13:02Z",
+  "generated_at": "2026-10-03T23:49:12Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -119,6 +119,7 @@
       "changed_sources": [
         "ajofm-valcea-statistics",
         "posturi-gov-valcea-all",
+        "ejobs-valcea",
         "bestjobs-valcea",
         "linkedin-jobs-valcea"
       ],
@@ -180,12 +181,11 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "abba3f317f8bb2d1fc4466df97682e180f7ec9895f90ec1158944c96d98c95d9",
-          "match_count": 17,
+          "fingerprint": "e35a77b5321f3893cc3435fe6d2a73f86e6783682e1686e2776bd5588f4f6fd4",
+          "match_count": 16,
           "matched_terms": [
             "Vâlcea",
-            "post",
-            "perioadă nedeterminată"
+            "post"
           ],
           "numeric_signals": [],
           "health": "OK",
@@ -201,7 +201,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "f6617ad061ed7c84dab2fa43af0ba3daa80ed72dda42c97358db2279ef2185b0",
+          "fingerprint": "0f64842ffa209f5ef87d7218f2657b05fa0c637b3a85bad0678779dc21005b35",
           "match_count": 17,
           "matched_terms": [
             "Joburi",
@@ -217,7 +217,7 @@
           ],
           "health": "OK",
           "error": null,
-          "change": "NEW_BASELINE"
+          "change": "CHANGED_REVIEW_REQUIRED"
         },
         {
           "id": "bestjobs-valcea",
@@ -250,7 +250,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "d06c44a3b2655b9e806aea8e007afc281ff71e2f5db95e33a5838e9a0b9578bf",
+          "fingerprint": "81f6196c2c2b7a7dd5e8724bf8c6d6ee480c72db6451d7bcd1213d565eab51fe",
           "match_count": 20,
           "matched_terms": [
             "joburi",
