@@ -80,11 +80,26 @@ def dedupe(events:list[dict])->tuple[list[dict],int]:
     return out,removed
 
 
+def parse_date(row:dict, field:str):
+    try:
+        raw=str(row.get(field) or "").strip()
+        if not raw:
+            return None
+        return datetime.fromisoformat(raw).date()
+    except Exception:
+        return None
+
+
+def event_is_current(row:dict, today)->bool:
+    end=parse_date(row,"event_end") or parse_date(row,"event_start")
+    return end is not None and end >= today and row.get("status")!="past"
+
+
 def render(events:list[dict])->str:
-    today=datetime.now(TZ).date().isoformat()
+    today=datetime.now(TZ).date()
     cards=[]
     for e in events:
-        if str(e.get("event_start") or "") < today or e.get("status")=="past":
+        if not event_is_current(e,today):
             continue
         when=html.escape(str(e.get("event_start") or ""))
         if e.get("start_time"):
