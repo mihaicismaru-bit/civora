@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "generatedAt": "2026-10-04T08:39:43.430876+00:00",
+  "generatedAt": "2026-10-04T14:56:44.464961+00:00",
   "policy": {
     "purpose": "record-level-material-change-resolution",
     "failClosed": true,
@@ -11,7 +11,7 @@
   },
   "summary": {
     "candidateCount": 1,
-    "unresolvedCount": 1,
+    "unresolvedCount": 0,
     "publishableMaterialFactCount": 0
   },
   "items": [
@@ -20,9 +20,9 @@
       "sourceTier": "T1",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
       "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-      "fingerprint": "d1f0a89df9ae89c822d4264065995742d48adc38d1c02b34c437fd71b7f2d804",
-      "observedAt": "2026-10-04T08:39:32.226178+00:00",
-      "status": "OPEN",
+      "fingerprint": "f488790e6ee106cc57ddc32114fd31670b7d2c0039c845699c5037bd72a12bef",
+      "observedAt": "2026-10-04T14:55:51.388249+00:00",
+      "status": "RESOLVED",
       "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
       "blockedFactClasses": [
         "deadline",
@@ -32,10 +32,23 @@
         "beneficiaries",
         "material_call_status"
       ],
-      "requiresReconciliation": true,
+      "requiresReconciliation": false,
       "publishMaterialFacts": false,
-      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
-      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
+      "materialFactAction": "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED",
+      "resolutionType": "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT",
+      "resolvedAt": "2026-10-04T14:56:44.464961+00:00",
+      "dedicatedSnapshotPublishable": true,
+      "resolutionEvidence": {
+        "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+        "sourceFingerprint": "f488790e6ee106cc57ddc32114fd31670b7d2c0039c845699c5037bd72a12bef",
+        "snapshotFingerprint": "8297637c42d1257214364d90cc4d52e65048ed0c93931b6efdcb451b8bac2a89",
+        "rowCount": 5,
+        "interventions": [
+          "DR-14",
+          "DR-18"
+        ]
+      }
     }
   ]
 }

@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "status": "FAIL_PARSE",
+  "status": "PASS",
   "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-  "corpusFingerprint": "d1f0a89df9ae89c822d4264065995742d48adc38d1c02b34c437fd71b7f2d804",
-  "sourceFingerprint": "d1f0a89df9ae89c822d4264065995742d48adc38d1c02b34c437fd71b7f2d804",
+  "corpusFingerprint": "f488790e6ee106cc57ddc32114fd31670b7d2c0039c845699c5037bd72a12bef",
+  "sourceFingerprint": "f488790e6ee106cc57ddc32114fd31670b7d2c0039c845699c5037bd72a12bef",
   "sourceFingerprintMatchesCorpus": true,
-  "snapshotFingerprint": null,
-  "sourceObservedAt": "2026-10-04T08:39:32.226178+00:00",
-  "generatedAt": "2026-10-04T08:39:43.430876+00:00",
+  "snapshotFingerprint": "8297637c42d1257214364d90cc4d52e65048ed0c93931b6efdcb451b8bac2a89",
+  "sourceObservedAt": "2026-10-04T14:55:51.388249+00:00",
+  "generatedAt": "2026-10-04T14:56:44.464961+00:00",
   "httpStatus": 200,
   "contentType": "text/html; charset=utf-8",
   "currency": "EUR",
   "policy": {
     "sourceTier": "T1",
     "purpose": "dedicated-live-available-funds-snapshot",
-    "publishableDedicatedSnapshot": false,
+    "publishableDedicatedSnapshot": true,
     "autoPromoteIntoDossierBudget": false,
     "callStatusInferenceAllowed": false,
     "eligibilityInferenceAllowed": false,
@@ -23,24 +23,92 @@
     "sourceDrift": "fail-closed-require-next-corpus-observation"
   },
   "summary": {
-    "rowCount": 0,
-    "interventionCount": 0,
-    "interventions": [],
-    "sessionAllocationTotalEur": null,
+    "rowCount": 5,
+    "interventionCount": 2,
+    "interventions": [
+      "DR-14",
+      "DR-18"
+    ],
+    "sessionAllocationTotalEur": "113000000.00",
     "submissionCeilingTotalEur": null,
-    "submittedPublicValueTotalEur": null,
+    "submittedPublicValueTotalEur": "35271828.00",
     "availableFundsTotalEur": null,
-    "submittedProjectCount": 0
+    "submittedProjectCount": 739
   },
-  "rows": [],
+  "rows": [
+    {
+      "interventionCode": "DR-14",
+      "sector": "Componenta ACHIZIȚII SIMPLE (INDIFERENT DE SECTOR)",
+      "sessionAllocationEur": "18000000.00",
+      "opensAtLocal": "01.09.2026 09:00:00",
+      "opensAtIso": "2026-09-01T09:00:00+03:00",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "closesAtIso": "2026-10-31T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "20892684.00",
+      "submittedProjectCount": 447,
+      "availableFundsEur": null
+    },
+    {
+      "interventionCode": "DR-14",
+      "sector": "Componenta ALTE SECTOARE (PENTRU TOATE PROIECTELE CARE NU ÎNDEPLINESC CONDIȚIILE ÎNCADRĂRII ÎN CELELALTE COMPONENTE)",
+      "sessionAllocationEur": "30000000.00",
+      "opensAtLocal": "01.09.2026 09:00:00",
+      "opensAtIso": "2026-09-01T09:00:00+03:00",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "closesAtIso": "2026-10-31T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "6036252.00",
+      "submittedProjectCount": 123,
+      "availableFundsEur": null
+    },
+    {
+      "interventionCode": "DR-14",
+      "sector": "Componenta LEGUMICULTURĂ",
+      "sessionAllocationEur": "30000000.00",
+      "opensAtLocal": "01.09.2026 09:00:00",
+      "opensAtIso": "2026-09-01T09:00:00+03:00",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "closesAtIso": "2026-10-31T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "3910774.00",
+      "submittedProjectCount": 84,
+      "availableFundsEur": null
+    },
+    {
+      "interventionCode": "DR-14",
+      "sector": "Componenta SECTOR ZOOTEHNIC",
+      "sessionAllocationEur": "30000000.00",
+      "opensAtLocal": "01.09.2026 09:00:00",
+      "opensAtIso": "2026-09-01T09:00:00+03:00",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "closesAtIso": "2026-10-31T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "3503350.00",
+      "submittedProjectCount": 75,
+      "availableFundsEur": null
+    },
+    {
+      "interventionCode": "DR-18",
+      "sector": "Investiții în floricultură, plante medicinale și aromatice",
+      "sessionAllocationEur": "5000000.00",
+      "opensAtLocal": "01.09.2026 09:00:00",
+      "opensAtIso": "2026-09-01T09:00:00+03:00",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "closesAtIso": "2026-10-31T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "928768.00",
+      "submittedProjectCount": 10,
+      "availableFundsEur": null
+    }
+  ],
   "provenance": {
     "authority": "AFIR",
     "evidenceType": "OFFICIAL_LIVE_COUNTER",
-    "corpusFingerprint": "d1f0a89df9ae89c822d4264065995742d48adc38d1c02b34c437fd71b7f2d804",
-    "sourceFingerprint": "d1f0a89df9ae89c822d4264065995742d48adc38d1c02b34c437fd71b7f2d804",
-    "snapshotFingerprint": null,
-    "sourceObservedAt": "2026-10-04T08:39:32.226178+00:00",
+    "corpusFingerprint": "f488790e6ee106cc57ddc32114fd31670b7d2c0039c845699c5037bd72a12bef",
+    "sourceFingerprint": "f488790e6ee106cc57ddc32114fd31670b7d2c0039c845699c5037bd72a12bef",
+    "snapshotFingerprint": "8297637c42d1257214364d90cc4d52e65048ed0c93931b6efdcb451b8bac2a89",
+    "sourceObservedAt": "2026-10-04T14:55:51.388249+00:00",
     "materialFactBoundary": "snapshot-only-no-cross-field-inference"
-  },
-  "parseError": "ValueError: invalid EUR value: '-'"
+  }
 }
