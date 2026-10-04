@@ -34,7 +34,7 @@ SEEDS = [
     "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
     "https://www.afir.ro/instrumente/sesiuni/detalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte/",
     "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
-    "https://www.afir.ro/finantare/",
+    "https://www.afir.ro/comunicate/",
 ]
 UA = "Mozilla/5.0 (compatible; PARTENER.EU-CIVORA-AFIR-Ingest/1.2; +https://partener.eu)"
 REQUEST_HEADERS = {
@@ -79,7 +79,12 @@ def norm(url, base=None):
     path = (p.path or "/").lower()
     if any(marker in path for marker in AUTH_PATH_MARKERS):
         return None
-    return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", p.query, ""))
+    query = urllib.parse.urlencode(
+        urllib.parse.parse_qsl(p.query, keep_blank_values=True),
+        doseq=True,
+        quote_via=urllib.parse.quote,
+    )
+    return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", query, ""))
 
 
 def _retry_delay(attempt, retry_after=None):

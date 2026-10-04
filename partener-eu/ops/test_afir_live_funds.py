@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER = ROOT / "partener-eu" / "ingest" / "build_afir_live_funds.py"
+AFIR_INGEST = ROOT / "partener-eu" / "ingest" / "afir_ingest.py"
 
 # Five-row fixture mirrors the live AFIR counter shape observed on 2026-09-24.
 # It is a parser regression fixture only; it is not an authority/freshness
@@ -44,6 +45,14 @@ FIXTURE = """<!doctype html><html><body>
 def load_builder_module():
     sys.path.insert(0, str(BUILDER.parent))
     spec = importlib.util.spec_from_file_location("partener_afir_live_funds_builder", BUILDER)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load_ingest_module():
+    spec = importlib.util.spec_from_file_location("partener_afir_ingest", AFIR_INGEST)
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -137,6 +146,28 @@ def main() -> int:
     assert payload["summary"]["submittedPublicValueTotalEur"] == "10072991.00"
     assert payload["summary"]["availableFundsTotalEur"] == "159427009.00"
     assert payload["summary"]["submittedProjectCount"] == 210
+
+    builder = load_builder_module()
+    for marker in ("-", "–", "—", "N/A", "N/D"):
+        assert builder.parse_eur(marker) is None
+    assert builder.parse_eur("1.234,56 EUR") == "1234.56"
+    assert builder.decimal_total([{"amount": "1.00"}, {"amount": None}], "amount") is None
+    assert builder.decimal_total([{"amount": "1.00"}, {"amount": "2.50"}], "amount") == "3.50"
+
+    ingest = load_ingest_module()
+    normalized = ingest.norm(
+        "https://www.afir.ro/api/file?filename=Anunț Cerere DR-12 – Investiții.pdf&download=1"
+    )
+    assert normalized is not None
+    assert " " not in normalized
+    assert "ț" not in normalized and "–" not in normalized
+    assert "filename=Anun%C8%9B%20Cerere%20DR-12%20%E2%80%93%20Investi%C8%9Bii.pdf" in normalized
+    assert normalized.endswith("&download=1")
+    assert ingest.norm(
+        "https://www.afir.ro/umbraco/surface/authentication/login?redirectUrl=/api/file"
+    ) is None
+    assert "https://www.afir.ro/comunicate/" in ingest.SEEDS
+    assert "https://www.afir.ro/finantare/" not in ingest.SEEDS
 
     dr14 = [row for row in payload["rows"] if row["interventionCode"] == "DR-14"]
     assert len(dr14) == 4
