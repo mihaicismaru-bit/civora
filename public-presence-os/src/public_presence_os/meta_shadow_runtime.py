@@ -34,6 +34,12 @@ EVALUATION_FIELDS = (
     "rights_provenance",
     "factual_grounding",
 )
+CRITICAL_CALIBRATION_FIELDS = (
+    "false_positive",
+    "spam_risk",
+    "rights_provenance",
+    "factual_grounding",
+)
 
 
 class MetaShadowHold(ValueError):
@@ -176,18 +182,54 @@ class MetaShadowStore:
             ).fetchall()
         actions = Counter(row[0] for row in rows)
         risks = Counter(row[1] for row in rows)
-        evaluated = sum(
-            1 for _, _, raw in rows
-            if all(value != "UNKNOWN" for value in json.loads(raw).values())
+        evaluations = [json.loads(raw) for _, _, raw in rows]
+        complete_evaluations = [
+            evaluation
+            for evaluation in evaluations
+            if all(value != "UNKNOWN" for value in evaluation.values())
+        ]
+        evaluated = len(complete_evaluations)
+        fail_counts = Counter(
+            field
+            for evaluation in complete_evaluations
+            for field, value in evaluation.items()
+            if value == "FAIL"
         )
+        critical_fail_counts = {
+            field: fail_counts[field]
+            for field in CRITICAL_CALIBRATION_FIELDS
+            if fail_counts[field]
+        }
+        sample_target_met = len(rows) >= 100
+        calibration_complete = sample_target_met and evaluated == len(rows)
+        if not calibration_complete:
+            calibration_band = "PENDING"
+            calibration_reason = (
+                "SAMPLE_TARGET_UNMET"
+                if not sample_target_met
+                else "UNEVALUATED_DECISIONS"
+            )
+        elif critical_fail_counts:
+            calibration_band = "RED"
+            calibration_reason = "CRITICAL_FIELD_FAILURE"
+        elif fail_counts:
+            calibration_band = "AMBER"
+            calibration_reason = "NONCRITICAL_FIELD_FAILURE"
+        else:
+            calibration_band = "GREEN"
+            calibration_reason = "ALL_APPLICABLE_FIELDS_PASS"
         return {
             "sample_size": len(rows),
             "evaluated_count": evaluated,
             "actions": dict(sorted(actions.items())),
             "risk_classes": dict(sorted(risks.items())),
             "target_sample_size": 100,
-            "sample_target_met": len(rows) >= 100,
-            "calibration_complete": len(rows) >= 100 and evaluated == len(rows),
+            "sample_target_met": sample_target_met,
+            "calibration_complete": calibration_complete,
+            "calibration_band": calibration_band,
+            "calibration_reason": calibration_reason,
+            "evaluation_fail_counts": dict(sorted(fail_counts.items())),
+            "critical_fail_counts": dict(sorted(critical_fail_counts.items())),
             "external_write_count": 0,
             "live_authority": "NONE",
         }
