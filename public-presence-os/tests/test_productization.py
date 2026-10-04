@@ -151,3 +151,34 @@ def test_ci_has_no_deploy():
     assert "pytest" in t
     for bad in ["deploy","vercel","pages","aws","publish-package"]:
         assert bad not in t.lower()
+
+
+def test_shadow_preflight_workflow_contract_is_locked_and_secret_free():
+    workflow=(ROOT.parent/".github"/"workflows"/"public-presence-shadow.yml").read_text(encoding="utf-8")
+    assert "environment: public-presence-shadow" in workflow
+    assert 'META_PAGE_ID: "2816314015107071"' in workflow
+    assert 'META_IG_USER_ID: "17841429701593250"' in workflow
+    assert 'META_THREADS_ENABLED: "false"' in workflow
+    assert 'META_THREADS_ACCESS_TOKEN: ""' in workflow
+    assert 'KILL_SWITCH: "true"' in workflow
+    assert 'LIVE_WRITE: "false"' in workflow
+    assert "permissions:\n  contents: read" in workflow
+    assert "workflow_dispatch:" in workflow
+    assert "persist-credentials: false" in workflow
+    for forbidden in (
+        "contents: write",
+        "actions: write",
+        "packages: write",
+        "upload-artifact",
+        "meta-sync",
+        "meta-shadow",
+        "--live",
+        "META_APP_SECRET",
+        "secrets.",
+    ):
+        assert forbidden not in workflow
+
+
+def test_root_ci_watches_shadow_workflow_contract():
+    workflow=(ROOT.parent/".github"/"workflows"/"public-presence-os-ci.yml").read_text(encoding="utf-8")
+    assert ".github/workflows/public-presence-shadow.yml" in workflow
