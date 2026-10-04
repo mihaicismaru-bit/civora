@@ -53,7 +53,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: partener-eu-afir-ingest
+  # Keep PR preflight isolated from production ingestion. Push/schedule on main
+  # still share one lane so only the freshest production run persists state.
+  group: partener-eu-afir-ingest-${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
   cancel-in-progress: true
 
 jobs:

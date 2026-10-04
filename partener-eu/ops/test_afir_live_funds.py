@@ -166,6 +166,8 @@ def main() -> int:
     assert ingest.norm(
         "https://www.afir.ro/umbraco/surface/authentication/login?redirectUrl=/api/file"
     ) is None
+    assert "https://www.afir.ro/comunicate/" in ingest.SEEDS
+    assert "https://www.afir.ro/finantare/" not in ingest.SEEDS
 
     dr14 = [row for row in payload["rows"] if row["interventionCode"] == "DR-14"]
     assert len(dr14) == 4
