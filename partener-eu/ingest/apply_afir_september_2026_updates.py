@@ -408,6 +408,7 @@ def dr12_dossier() -> dict[str, Any]:
                 "Valoarea apelului: 169.589.647 EUR, împărțită în două componente egale de câte 84.794.823,50 EUR.",
                 "Valoarea proiectului individual: maximum 200.000 EUR/proiect.",
                 "Intensitate maximă: 80% pentru tinerii fermieri de până la 40 de ani și 65% pentru celelalte categorii eligibile.",
+                "Cofinanțare / contribuție proprie: minimum 20% pentru tinerii fermieri de până la 40 de ani și minimum 35% pentru celelalte categorii eligibile, raportat la costurile eligibile.",
                 "Regiune: România.",
             ], schemaVersion=1),
             section("Decizia rapidă", [decision_action, "Prima etapă are prag de calitate de 80 puncte; a doua etapă are prag de 45 puncte."]),
