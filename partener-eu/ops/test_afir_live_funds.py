@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER = ROOT / "partener-eu" / "ingest" / "build_afir_live_funds.py"
+AFIR_INGEST = ROOT / "partener-eu" / "ingest" / "afir_ingest.py"
 
 # Five-row fixture mirrors the live AFIR counter shape observed on 2026-09-24.
 # It is a parser regression fixture only; it is not an authority/freshness
