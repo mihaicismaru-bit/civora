@@ -125,6 +125,17 @@ def main() -> int:
         finally:
             builder.fetch = original_fetch
 
+    afir_ingest = load_builder_module()
+    normalized = sys.modules.get("afir_ingest")
+    if normalized is None:
+        import afir_ingest as normalized
+    raw_doc = "https://www.afir.ro/api/file?filename=Anunț Cerere DR 12.pdf&download=true"
+    safe_doc = normalized.norm(raw_doc)
+    assert safe_doc is not None
+    assert " " not in safe_doc
+    assert "Anun%C8%9B+Cerere+DR+12.pdf" in safe_doc
+    assert normalized.norm("https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=/secret") is None
+
     assert payload["status"] == "PASS"
     assert payload["sourceFingerprintMatchesCorpus"] is True
     assert payload["policy"]["publishableDedicatedSnapshot"] is True
