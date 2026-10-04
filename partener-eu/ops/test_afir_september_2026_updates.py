@@ -81,10 +81,22 @@ for dossier_id, expected_budget, guide_token in (
     assert any(guide_token in src["url"] for src in dossier["sources"])
     assert any("informatii-sesiune-energie-regenerabila-solicitanti-publici" in src["url"] for src in dossier["sources"])
 
+dr12 = rows["afir-dr12-2026"]
+validate_common(dr12)
+assert dr12.get("code") == "DR-12"
+assert dr12.get("status") == ("UPCOMING" if NOW < dt.datetime(2026, 10, 6, 9, 0, tzinfo=RO) else "REVIEW")
+assert fact(dr12, "Deschidere")["value"] == "6 octombrie 2026, 09:00"
+assert fact(dr12, "Termen")["value"] == "2 decembrie 2026, 16:00"
+assert fact(dr12, "Grant")["value"] == "maximum 200.000 EUR/proiect"
+assert fact(dr12, "Buget")["value"] == "169.589.647 EUR"
+assert any("nota-de-indrumare" in src["url"] for src in dr12["sources"])
+
 news = {row.get("id"): row for row in payload.get("news") or []}
 assert "news-afir-dr21-consultation-2026-09-18" in news
 assert "news-afir-energy-public-upcoming-2026-09-22" in news
 assert news["news-afir-energy-public-upcoming-2026-09-22"].get("kind") == "SESSION_ANNOUNCED"
+assert news["news-afir-energy-public-open-2026-09-29"].get("kind") == "CALL_OPENED"
+assert news["news-afir-dr12-upcoming-2026-10-01"].get("kind") == "SESSION_ANNOUNCED"
 
 print(json.dumps({
     "status": "PASS",
