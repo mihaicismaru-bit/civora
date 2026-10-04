@@ -34,7 +34,7 @@ SEEDS = [
     "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
     "https://www.afir.ro/instrumente/sesiuni/detalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte/",
     "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
-    "https://www.afir.ro/finantare/",
+    "https://www.afir.ro/comunicate/",
 ]
 UA = "Mozilla/5.0 (compatible; PARTENER.EU-CIVORA-AFIR-Ingest/1.2; +https://partener.eu)"
 REQUEST_HEADERS = {
