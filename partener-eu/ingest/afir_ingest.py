@@ -79,7 +79,12 @@ def norm(url, base=None):
     path = (p.path or "/").lower()
     if any(marker in path for marker in AUTH_PATH_MARKERS):
         return None
-    return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", p.query, ""))
+    query = urllib.parse.urlencode(
+        urllib.parse.parse_qsl(p.query, keep_blank_values=True),
+        doseq=True,
+        quote_via=urllib.parse.quote,
+    )
+    return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", query, ""))
 
 
 def _retry_delay(attempt, retry_after=None):
