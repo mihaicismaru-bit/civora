@@ -1,24 +1,24 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-04T14:59:22Z",
-  "validation_run_started": "2026-10-04T14:59:13Z",
+  "observed_at": "2026-10-04T15:32:12Z",
+  "validation_run_started": "2026-10-04T15:32:05Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "76d11e9df4692226a115735289536c37891cf24b4f81819668825fa390128135",
-    "history_sha256": "76d11e9df4692226a115735289536c37891cf24b4f81819668825fa390128135",
-    "history_path": "validation/history/20261004T145913Z.json",
+    "latest_sha256": "ec1578d4564f3a2468d2eb10c6dd27794236ac80dcb4ff1912227ef125d38aeb",
+    "history_sha256": "ec1578d4564f3a2468d2eb10c6dd27794236ac80dcb4ff1912227ef125d38aeb",
+    "history_path": "validation/history/20261004T153205Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "6c7c35535c727ce3d41f1138b33095af50275311f44ba9b5e0f9a430fe8f7dc3",
-    "checkpoint_sha256": "6c7c35535c727ce3d41f1138b33095af50275311f44ba9b5e0f9a430fe8f7dc3",
+    "source_state_sha256": "154c9ec82862845f900ba77cbc1f32f8aea5ffd2c062e3b47aa00e15decd707b",
+    "checkpoint_sha256": "154c9ec82862845f900ba77cbc1f32f8aea5ffd2c062e3b47aa00e15decd707b",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
     "recovery_state_integrity": "PASS"
   },
   "source_registry": {
-    "observed_at": "2026-10-04T08:33:06.185565Z",
-    "age_seconds": 23176,
+    "observed_at": "2026-10-04T15:26:03.012749Z",
+    "age_seconds": 369,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -29,7 +29,7 @@
       "fail": 17,
       "quarantined": 18,
       "low_information": 1,
-      "resolution_tasks_required": 1
+      "resolution_tasks_required": 0
     },
     "tier_counts": {
       "T1": {
@@ -38,7 +38,7 @@
         "degraded": 1,
         "fail": 12,
         "quarantined": 13,
-        "hash_changes": 1
+        "hash_changes": 0
       },
       "T1B": {
         "total": 13,
@@ -49,20 +49,18 @@
         "hash_changes": 0
       }
     },
-    "changed_source_ids": [
-      "SRC-MYSMIS-CALLS"
-    ],
+    "changed_source_ids": [],
     "missing_resolution_tasks": [],
     "unsafe_material_updates": [],
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-10-04T14:56:44.464961+00:00",
+    "observed_at": "2026-10-04T15:04:46.946965+00:00",
     "status": "PASS",
     "item_count": 65,
     "error_count": 0,
-    "hash_change_candidates": 1,
-    "material_signal_candidates": 1,
+    "hash_change_candidates": 0,
+    "material_signal_candidates": 0,
     "auth_dependency_count": 30,
     "auth_dependencies": [
       {
@@ -276,12 +274,12 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       }
     ],
-    "resolution_task_required": true,
+    "resolution_task_required": false,
     "resolution_task_present_fail_closed": true,
     "material_facts_auto_promoted": false
   },
   "peo_calendar": {
-    "observed_at": "2026-10-04T10:03:45.957542+00:00",
+    "observed_at": "2026-10-04T15:29:55.396466+00:00",
     "status": "OK_OFFICIAL_OIR_COPY",
     "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
     "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
@@ -295,7 +293,7 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-10-04T09:57:43.633751+00:00",
+    "observed_at": "2026-10-04T15:27:54.248512+00:00",
     "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "source_available": false,
     "candidate_count": 56,
@@ -379,8 +377,8 @@
   "summary": {
     "integrity_pass": true,
     "registry_health": "DEGRADED",
-    "registry_hash_changes": 1,
-    "afir_hash_changes": 1,
+    "registry_hash_changes": 0,
+    "afir_hash_changes": 0,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": true,
