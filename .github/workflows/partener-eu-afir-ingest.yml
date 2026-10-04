@@ -176,7 +176,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cp partener-eu/ingest/afir_ingest.py /tmp/afir_ingest.py
           cp partener-eu/ingest/state/afir_state.json /tmp/afir_state.json
           cp partener-eu/ingest/state/afir_corpus.json /tmp/afir_corpus.json
           cp partener-eu/ingest/state/afir_live_funds.json /tmp/afir_live_funds.json
@@ -190,19 +189,24 @@ jobs:
             git fetch origin main
             git reset --hard origin/main
             cp partener-eu/ingest/state/decision_products.json /tmp/current-main-decision-products.json
-            python partener-eu/ops/validate_decision_products_lkg.py \
+            accept_product_candidate=true
+            if ! python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/current-main-decision-products.json \
-              --candidate /tmp/decision_products.json
-            cp /tmp/afir_ingest.py partener-eu/ingest/afir_ingest.py
+              --candidate /tmp/decision_products.json; then
+              accept_product_candidate=false
+              echo 'Fresh AFIR product projection no longer supersedes latest main; preserving current public LKG while persisting fresh AFIR evidence.'
+            fi
+
             cp /tmp/afir_state.json partener-eu/ingest/state/afir_state.json
             cp /tmp/afir_corpus.json partener-eu/ingest/state/afir_corpus.json
             cp /tmp/afir_live_funds.json partener-eu/ingest/state/afir_live_funds.json
             cp /tmp/afir_material_resolution_queue.json partener-eu/ingest/state/afir_material_resolution_queue.json
-            cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
-            cp /tmp/decision-products.js partener-eu/web/decision-products.js
+            if "$accept_product_candidate"; then
+              cp /tmp/decision_products.json partener-eu/ingest/state/decision_products.json
+              cp /tmp/decision-products.js partener-eu/web/decision-products.js
+            fi
             python partener-eu/ingest/intelligence_index.py
             git add \
-              partener-eu/ingest/afir_ingest.py \
               partener-eu/ingest/state/afir_state.json \
               partener-eu/ingest/state/afir_corpus.json \
               partener-eu/ingest/state/afir_live_funds.json \
