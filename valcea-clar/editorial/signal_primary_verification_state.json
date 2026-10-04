@@ -2,19 +2,177 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-10-04T04:53:07+03:00",
+  "generated_at": "2026-10-04T10:54:38+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-10-04T04:51:49+03:00",
-  "task_count": 78,
+  "queue_generated_at": "2026-10-04T10:53:14+03:00",
+  "task_count": 77,
   "primary_match_count": 0,
-  "no_match_count": 27,
-  "unrouted_count": 51,
-  "target_count": 18,
-  "targets_ok": 14,
+  "no_match_count": 24,
+  "unrouted_count": 53,
+  "target_count": 17,
+  "targets_ok": 13,
   "results": [
+    {
+      "signal_id": "90f45bad38c76e1c9e302a40",
+      "signal_title": "Pescuitul la păstrăv în Gorj: 60 de solicitări în 2026",
+      "signal_url": "https://jurnalulolteniei.ro/pescuitul-la-pastrav-in-gorj-60-de-solicitari-in-2026/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-04T10:42:25+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "ee4efbc5928ebdebe601abce",
+      "signal_title": "Incendiu într-o casă din Slatina. Patru persoane, la spital",
+      "signal_url": "https://jurnalulolteniei.ro/incendiu-intr-o-casa-din-slatina-patru-persoane-la-spital/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-04T10:38:22+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "2f531cec7e3bd8abf224f63d",
+      "signal_title": "Fostul Palat al Telefoanelor de pe strada Nicolae Bălcescu, clădire cu o „soră” geamănă în New York, scos spre închiriere. Proprietar: Chiria se stabilește în funcție de destinația spațiului și durata contractului",
+      "signal_url": "https://www.turnulsfatului.ro/2026/10/04/fostul-palat-al-telefoanelor-de-pe-strada-nicolae-balcescu-cladire-cu-o-sora-geamana-in-new-york-scos-spre-inchiriere-proprietar-chiria-se-stabileste-in-functie-de-destinatia-spa/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-10-04T10:07:58+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "6918337560db3c16fd3de474",
+      "signal_title": "Fotografia lui Nicușor Dan cu Donald Trump este reală",
+      "signal_url": "https://jurnalulolteniei.ro/fotografia-lui-nicusor-dan-cu-donald-trump-este-reala/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-04T10:06:54+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "5ac3bfab1c69bd1125a728a3",
+      "signal_title": "Vâlcea: Incendiul de la Băile Olănești, nestins de 9 zile",
+      "signal_url": "https://jurnalulolteniei.ro/valcea-incendiul-de-la-baile-olanesti-nestins-de-9-zile/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-04T09:28:26+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "22ce8473b3a2120a6ac76bd8",
+      "signal_title": "FOTO – O mașină a luat foc în trafic la Pietrari",
+      "signal_url": "https://seintamplainvalcea.ro/2026/10/04/foto-o-masina-a-luat-foc-in-trafic-la-pietrari/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-04T09:23:59+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "074170a296aa642749415a37",
+      "signal_title": "România scapă de junk: economia rezistă, dar cu riscuri",
+      "signal_url": "https://jurnalulolteniei.ro/romania-scapa-de-junk-economia-rezista-dar-cu-riscuri/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-04T07:52:56+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "f7f2d407fc03ea44be3cbdd8",
       "signal_title": "Primarul Vasile Borăscu, despre investițiile din Costești: gaze pentru toate satele, sală de sport și un parc fotovoltaic care așteaptă decontarea",
@@ -73,12 +231,11 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "e1019af087a7741a57e5f308",
-      "signal_title": "Ultima oră 8 ore in urma Vaideeni: măsuri pentru prevenirea incendiilor Primăria Vaideeni transmite un apel preventiv comunității Primăria Comunei Vaideeni a transmis locuitorilor, turiștilor și celor care aleg traseele montane...",
+      "signal_title": "Ultima oră 14 ore in urma Vaideeni: măsuri pentru prevenirea incendiilor Primăria Vaideeni transmite un apel preventiv comunității Primăria Comunei Vaideeni a transmis locuitorilor, turiștilor și celor care aleg traseele montane...",
       "signal_url": "https://www.primplanpress.ro/vaideeni-masuri-pentru-prevenirea-incendiilor/",
       "signal_publisher": "Primplan Press",
       "signal_tier": "T2",
@@ -134,8 +291,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 79
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "b1504ac963c7e46495068060",
@@ -184,8 +340,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "1bd09aa8113a10ff3fbdde73",
@@ -197,8 +352,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "f91da2a2c67e66ffc5c2185f",
@@ -210,12 +364,11 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "7f62ab788985a9d92287100d",
-      "signal_title": "Ultima oră 10 ore in urma Vâlcea Forest Run aduce sportul la Bujoreni",
+      "signal_title": "Ultima oră 16 ore in urma Vâlcea Forest Run aduce sportul la Bujoreni",
       "signal_url": "https://www.primplanpress.ro/valcea-forest-run-aduce-sportul-la-bujoreni/",
       "signal_publisher": "Primplan Press",
       "signal_published_at": "2026-10-03T18:47:18+03:00",
@@ -223,8 +376,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d4f43d0463f24dfd1b2fc18f",
@@ -273,8 +425,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "fc82b029a7cbc1ace3ba777b",
@@ -334,8 +485,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "80c5783daa3f67ac72a4d85e",
@@ -384,8 +534,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "16d17ddd2f233d7b43848168",
@@ -445,8 +594,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "e0035dcd5e2ff755013a1e3b",
@@ -495,8 +643,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "0f91dc0ce24a727f1ec0cf3b",
@@ -508,8 +655,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "f7bee04e56841a3b5b1851c4",
@@ -547,8 +693,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "c38361ce77af46873670083b",
@@ -560,8 +705,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "6430dfb5c6021db51ff3e979",
@@ -573,8 +717,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "ec561fdcca15f0a7ad3704d5",
@@ -586,8 +729,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "5bab9fe9cd4a9d3a822b83c2",
@@ -599,8 +741,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "9dc5ed4797a610f4efe2bc7e",
@@ -649,8 +790,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "6965d3262e228b6ec2aeac87",
@@ -699,8 +839,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "022e5c80c02102c26afd45a2",
@@ -727,8 +866,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "9d4e2d9b7e9eceded881b68c",
@@ -740,8 +878,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "ef9543c520b339dc24226ab8",
@@ -753,8 +890,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "7c61edd2941df73d3b6d0451",
@@ -814,8 +950,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "c06555f6d08bd5ea1c62dd7f",
@@ -842,8 +977,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "d3bb12b4ea15195c934ac69e",
@@ -855,8 +989,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "964e7448098a7be025e3adf5",
@@ -868,8 +1001,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "6f30630bb7183b2247c45ab4",
@@ -881,8 +1013,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "714e3906d922d81f3848063f",
@@ -894,8 +1025,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "879ee6e646a63d35fc1bb259",
@@ -907,8 +1037,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "cfb62fcf9fe1d0cb9713de65",
@@ -920,8 +1049,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "1965a66b530cc4f5fc7b8940",
@@ -933,8 +1061,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "dc9d4dd8d2749d8693582814",
@@ -946,8 +1073,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "a0e4288430bd627787ae4222",
@@ -959,8 +1085,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "2343064a038d3f747bbf6de6",
@@ -972,8 +1097,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "3610aaa81e87d20ef695cf57",
@@ -985,8 +1109,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "fc905069cb5dafe01920c028",
@@ -998,8 +1121,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "3f9a9a068cd3a2cbe73d369c",
@@ -1011,8 +1133,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "323ca50b47738777acbf7f25",
@@ -1024,8 +1145,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "157b8cc51bf2ed4aeb925b2e",
@@ -1037,8 +1157,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "441800de4ffdedaa9f9781d4",
@@ -1050,8 +1169,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "5f9ffba43b1d15f4dfb23955",
@@ -1078,8 +1196,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "c3a6349b0725011e8f826de6",
@@ -1091,8 +1208,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "2ddcd0db6490094d292229dc",
@@ -1119,8 +1235,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "07c7ebf68833c3926be72b8f",
@@ -1132,8 +1247,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "836aad9de31db448baa7a0bd",
@@ -1145,8 +1259,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d5b23ba9ca3860721ca187a0",
@@ -1173,8 +1286,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "510b796160aa9963aba6186b",
@@ -1186,8 +1298,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d06267f4809c2cc689ad5309",
@@ -1199,8 +1310,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d53f2efc77cbb5d4e6b53d30",
@@ -1212,8 +1322,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "604cd2e085048494d138071a",
@@ -1240,69 +1349,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "40562357f5a6846069650a3c",
-      "signal_title": "Consiliul Județean Vâlcea a alocat 6,525 milioane de lei pentru apa caldă și căldura din Râmnicu Vâlcea. Consilierii PNL s-au abținut de la vot",
-      "signal_url": "https://seintamplainvalcea.ro/2026/10/02/consiliul-judetean-valcea-a-alocat-6525-milioane-de-lei-pentru-apa-calda-si-caldura-din-ramnicu-valcea-consilierii-pnl-s-au-abtinut-de-la-vot/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-02T14:00:18+03:00",
-      "verification_route_id": "utilities",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "apavil-comunicate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=1178"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "apavil-opriri-programate",
-            "name": "APAVIL S.A.",
-            "url": "https://apavil.ro/?page_id=962"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 2
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "cet-govora-termoficare-advisories",
-            "name": "CET Govora S.A. — Termoficare Vâlcea",
-            "url": "https://www.termoficarevalcea.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 1
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "aba-olt-sga-valcea",
-            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
-            "url": "https://olt.rowater.ro/sga-valcea/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "9a481dc00aeba46dda9355ca",
@@ -1314,8 +1361,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "7615eda3131fc68c534b9113",
@@ -1342,21 +1388,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "be0088d73453294fe1989b15",
-      "signal_title": "Incendiul de la stația de sortare a Sibiului a mistuit tot plasticul pregătit pentru valorificare. Utilajele și birourile nu au fost afectate. Cauzele sunt deocamdată bănuite",
-      "signal_url": "https://www.turnulsfatului.ro/2026/10/02/incendiul-de-la-statia-de-sortare-a-sibiului-a-mistuit-tot-plasticul-pregatit-de-valorificare-utilajele-si-birourile-nu-au-fost-afectate-cauzele-sunt-deocamdata-banuite/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-10-02T12:24:33+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "d12e5bdbe83d8ffc524b751e",
@@ -1416,8 +1448,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "5f0eb248cad144d64b4324ef",
@@ -1429,8 +1460,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d9fab99e2623615dc76a9f0f",
@@ -1479,8 +1509,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "43039a454ab86536e488c4f9",
@@ -1492,8 +1521,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "8b80dbcdd723365a5b566a38",
@@ -1505,8 +1533,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "0cb9febef2d6f6deb6e0afdc",
@@ -1566,21 +1593,7 @@
       "signal_is_fact": false,
       "material_fact_ready": false,
       "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 77
-    },
-    {
-      "signal_id": "0a591e95dbdf5810adbb84c3",
-      "signal_title": "ACTUALIZARE Primele măsurători după incendiul de la Rusciori: valori mai ridicate pentru PM10 în apropierea focarului",
-      "signal_url": "https://www.turnulsfatului.ro/2026/10/02/incendiul-de-la-statia-de-sortare-a-deseurilor-din-rusciori-institutiile-de-mediu-monitorizeaza-aerul-primele-date-arata-ca-fumul-nu-a-ajuns-in-sibiu/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_published_at": "2026-10-02T08:51:01+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "1f6df0e38f9b7ecc7ab6ac2b",
@@ -1592,8 +1605,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "77b44d83a9516d437bbb60b2",
@@ -1605,199 +1617,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "9dacd956e050f42d12c3ca62",
-      "signal_title": "Două locuri de joacă moderne pentru copiii din Șirineasa și Ciorăști. Investiția are finanțare nerambursabilă",
-      "signal_url": "https://evenimentvalcean.ro/doua-locuri-de-joaca-moderne-pentru-copiii-din-sirineasa-si-ciorasti-investitia-are-finantare-nerambursabila/",
-      "signal_publisher": "Eveniment Vâlcean",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-01T20:30:32+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "217093ef051efadd24600218",
-      "signal_title": "La Frâncești, Daniel Paraschiv pune sportul și copiii pe primul loc: „Cea mai bună investiție rămâne cea făcută pentru copii”",
-      "signal_url": "https://www.impactreal.ro/2026/10/01/la-francesti-daniel-paraschiv-pune-sportul-si-copiii-pe-primul-loc-cea-mai-buna-investitie-ramane-cea-facuta-pentru-copii/",
-      "signal_publisher": "Impact Real",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-01T17:53:41+03:00",
-      "verification_route_id": "administration_projects",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "prefectura-valcea",
-            "name": "Instituția Prefectului — Județul Vâlcea",
-            "url": "https://vl.prefectura.mai.gov.ro/media/presa/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "cj-valcea-anunturi",
-            "name": "Consiliul Județean Vâlcea",
-            "url": "https://cjvalcea.ro/categorie/anunturi/"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "primaria-rm-valcea-comunicate",
-            "name": "Primăria Municipiului Râmnicu Vâlcea",
-            "url": "https://www.primariavl.ro/informatii-publice/comunicate-de-presa"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [Errno 101] Network is unreachable>",
-          "documents_examined": 0
-        },
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "romsilva-valcea-torrents",
-            "name": "Regia Națională a Pădurilor — Romsilva",
-            "url": "https://www.rosilva.ro/comunicate_de_presa/toate_comunicatele_de_presa.htm"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
-    },
-    {
-      "signal_id": "f6cbd7bc32b5d4cc0f759c82",
-      "signal_title": "APAVIL angajează electrician la Stația de Tratare a Apei Valea lui Stan",
-      "signal_url": "https://curierulderamnic.ro/2026/10/01/apavil-angajeaza-electrician-la-statia-de-tratare-a-apei-valea-lui-stan/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-01T13:28:36+03:00",
-      "verification_route_id": "apavil_employment",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "apavil-angajari",
-            "name": "APAVIL S.A. — Anunțuri angajare",
-            "url": "https://apavil.ro/?page_id=7981"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 17
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 65
-    },
-    {
-      "signal_id": "2f0f3a2eaaca45ca46113b48",
-      "signal_title": "AJOFM VÂLCEA anunță posturi disponibile pentru transfer la cerere în cadrul proiectului SMART SPO",
-      "signal_url": "https://curierulderamnic.ro/2026/10/01/ajofm-valcea-anunta-posturi-disponibile-pentru-transfer-la-cerere-in-cadrul-proiectului-smart-spo/",
-      "signal_publisher": "Curierul de Râmnic",
-      "signal_published_at": "2026-10-01T13:25:46+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 63
-    },
-    {
-      "signal_id": "e572882841e2afb82c5bc0af",
-      "signal_title": "FOTO – ACCIDENT pe DN 64, la Băbeni. Trei autoturisme implicate, traficul este blocat",
-      "signal_url": "https://seintamplainvalcea.ro/2026/10/01/foto-accident-pe-dn-64-la-babeni-trei-autoturisme-implicate-traficul-este-blocat/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-01T13:17:24+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH",
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "e2cd3a385cfec313db0607dd",
@@ -1809,8 +1629,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "d7d5c9b07b4f7101b8d1af0c",
@@ -1822,8 +1641,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "b5fde63536acade3afedfa69",
@@ -1835,8 +1653,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "acd6dd07c7b8fb1beb8f487c",
@@ -1848,8 +1665,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "a60beaad93c15f0dc610a86e",
@@ -1861,8 +1677,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "8048941a337c209f6eb47452",
@@ -1874,8 +1689,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "612bdd26c89da05dd5e03af1",
@@ -1887,8 +1701,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "0a9f0e5efa5edfde1c95a354",
@@ -1900,8 +1713,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "df7bb2d58130028c51828cfa",
@@ -1913,8 +1725,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     },
     {
       "signal_id": "0aa66a6a44b21e2cb7403363",
@@ -1926,8 +1737,7 @@
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
       "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "listing_title_identity_rejections": 80
+      "fact_kernel_ready": false
     }
   ],
   "verification_policy": {
