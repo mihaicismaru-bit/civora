@@ -87,11 +87,12 @@ class MetaRuntimeConfig:
     graph_version: str
     threads_version: str
     user_token: str = field(repr=False)
-    threads_token: str = field(repr=False)
+    threads_token: str | None = field(default=None, repr=False)
     page_token: str | None = field(default=None, repr=False)
     app_secret: str | None = field(default=None, repr=False)
     kill_switch_engaged: bool = True
     live_write_enabled: bool = False
+    threads_enabled: bool = True
 
     @classmethod
     def from_env(cls, values: Mapping[str, str] | None = None) -> "MetaRuntimeConfig":
@@ -105,7 +106,14 @@ class MetaRuntimeConfig:
         if not graph_version.startswith("v") or not threads_version.startswith("v"):
             raise MetaLiveHold("HOLD_META_API_VERSION_INVALID")
         user_token = _required_secret(env, "META_USER_ACCESS_TOKEN")
-        threads_token = _required_secret(env, "META_THREADS_ACCESS_TOKEN")
+        threads_enabled = _bool(env.get("META_THREADS_ENABLED"), default=True)
+        threads_token = env.get("META_THREADS_ACCESS_TOKEN") or None
+        if threads_enabled:
+            threads_token = _required_secret(env, "META_THREADS_ACCESS_TOKEN")
+        elif threads_token is not None and (
+            len(threads_token.strip()) < 20 or any(ch.isspace() for ch in threads_token)
+        ):
+            raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_THREADS_ACCESS_TOKEN")
         page_token = env.get("META_PAGE_ACCESS_TOKEN") or None
         if page_token is not None and len(page_token) < 20:
             raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_PAGE_ACCESS_TOKEN")
@@ -125,6 +133,7 @@ class MetaRuntimeConfig:
             app_secret=app_secret,
             kill_switch_engaged=_bool(env.get("KILL_SWITCH"), default=True),
             live_write_enabled=_bool(env.get("LIVE_WRITE"), default=False),
+            threads_enabled=threads_enabled,
         )
 
     def redacted(self) -> dict[str, Any]:
@@ -137,7 +146,8 @@ class MetaRuntimeConfig:
             "threads_version": self.threads_version,
             "user_token_present": True,
             "page_token_present": self.page_token is not None,
-            "threads_token_present": True,
+            "threads_enabled": self.threads_enabled,
+            "threads_token_present": self.threads_token is not None,
             "app_secret_present": self.app_secret is not None,
             "kill_switch_engaged": self.kill_switch_engaged,
             "live_write_enabled": self.live_write_enabled,
@@ -642,51 +652,54 @@ class MetaReadRuntime:
             )
             accepted += a; duplicates += d
 
-        threads_identity = self._get(
-            "THREADS",
-            f"/{self.config.threads_version}/me",
-            {"fields": "id,username,name"},
-            self.config.threads_token,
-        )
-        if (
-            threads_identity.get("id") != self.config.threads_user_id
-            or threads_identity.get("username") != EXPECTED_USERNAME
-            or threads_identity.get("name") != EXPECTED_NAME
-        ):
-            raise MetaLiveHold("HOLD_META_THREADS_IDENTITY_MISMATCH")
-        identities.append(("THREADS", self.config.threads_user_id))
-        threads = self._get(
-            "THREADS",
-            f"/{self.config.threads_version}/me/threads",
-            {"fields": "id,media_product_type,media_type,permalink,username,text,timestamp,is_quote_post,has_replies", "limit": "50"},
-            self.config.threads_token,
-        )
-        a, d = self._ingest_collection(
-            platform="THREADS", object_type="POST", payload=threads,
-            fetched_at=fetched_at, provenance="THREADS_GRAPH_OWN_POSTS",
-        )
-        accepted += a; duplicates += d
-        for thread in _data(threads):
-            if not thread.get("has_replies"):
-                continue
-            thread_id = thread.get("id")
-            if not isinstance(thread_id, str):
-                continue
-            try:
-                replies = self._get(
-                    "THREADS",
-                    f"/{self.config.threads_version}/{thread_id}/replies",
-                    {"fields": "id,text,timestamp,username,is_reply,is_reply_owned_by_me,root_post,replied_to", "limit": "100"},
-                    self.config.threads_token,
-                )
-            except MetaLiveHold as exc:
-                holds.append(f"THREADS_REPLIES:{exc.reason}")
-                continue
+        if self.config.threads_enabled:
+            if self.config.threads_token is None:
+                raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_THREADS_ACCESS_TOKEN")
+            threads_identity = self._get(
+                "THREADS",
+                f"/{self.config.threads_version}/me",
+                {"fields": "id,username,name"},
+                self.config.threads_token,
+            )
+            if (
+                threads_identity.get("id") != self.config.threads_user_id
+                or threads_identity.get("username") != EXPECTED_USERNAME
+                or threads_identity.get("name") != EXPECTED_NAME
+            ):
+                raise MetaLiveHold("HOLD_META_THREADS_IDENTITY_MISMATCH")
+            identities.append(("THREADS", self.config.threads_user_id))
+            threads = self._get(
+                "THREADS",
+                f"/{self.config.threads_version}/me/threads",
+                {"fields": "id,media_product_type,media_type,permalink,username,text,timestamp,is_quote_post,has_replies", "limit": "50"},
+                self.config.threads_token,
+            )
             a, d = self._ingest_collection(
-                platform="THREADS", object_type="REPLY", payload=replies,
-                fetched_at=fetched_at, provenance=f"THREADS_GRAPH_REPLIES:{thread_id}",
+                platform="THREADS", object_type="POST", payload=threads,
+                fetched_at=fetched_at, provenance="THREADS_GRAPH_OWN_POSTS",
             )
             accepted += a; duplicates += d
+            for thread in _data(threads):
+                if not thread.get("has_replies"):
+                    continue
+                thread_id = thread.get("id")
+                if not isinstance(thread_id, str):
+                    continue
+                try:
+                    replies = self._get(
+                        "THREADS",
+                        f"/{self.config.threads_version}/{thread_id}/replies",
+                        {"fields": "id,text,timestamp,username,is_reply,is_reply_owned_by_me,root_post,replied_to", "limit": "100"},
+                        self.config.threads_token,
+                    )
+                except MetaLiveHold as exc:
+                    holds.append(f"THREADS_REPLIES:{exc.reason}")
+                    continue
+                a, d = self._ingest_collection(
+                    platform="THREADS", object_type="REPLY", payload=replies,
+                    fetched_at=fetched_at, provenance=f"THREADS_GRAPH_REPLIES:{thread_id}",
+                )
+                accepted += a; duplicates += d
 
         return SyncSummary(
             state="READ_ONLY_REAL_SYNC_PASS" if not holds else "READ_ONLY_REAL_SYNC_PARTIAL",
@@ -708,6 +721,7 @@ def environment_presence(values: Mapping[str, str] | None = None) -> dict[str, b
         "META_IG_USER_ID",
         "META_THREADS_USER_ID",
         "META_THREADS_ACCESS_TOKEN",
+        "META_THREADS_ENABLED",
     )
     return {name: bool(env.get(name)) for name in names}
 
@@ -739,6 +753,7 @@ def preflight_report(
         return report
     report["META APP"] = "PASS" if config.app_id == EXPECTED_APP_ID else "FAIL"
     report["FACEBOOK AUTH"] = "PASS"
+    report["THREADS IDENTITY"] = "FAIL" if config.threads_enabled else "HOLD_EXTERNAL"
     report["KILL SWITCH"] = "ENGAGED" if config.kill_switch_engaged else "DISENGAGED"
     if not config.kill_switch_engaged or config.live_write_enabled:
         return report
@@ -752,10 +767,13 @@ def preflight_report(
     observed = dict(summary.identities)
     report["PAGE IDENTITY"] = "PASS" if observed.get("FACEBOOK_PAGE") == EXPECTED_PAGE_ID else "FAIL"
     report["INSTAGRAM BINDING"] = "PASS" if observed.get("INSTAGRAM_PROFESSIONAL") == EXPECTED_IG_ID else "FAIL"
-    report["THREADS IDENTITY"] = "PASS" if observed.get("THREADS") == EXPECTED_THREADS_ID else "FAIL"
+    if config.threads_enabled:
+        report["THREADS IDENTITY"] = "PASS" if observed.get("THREADS") == EXPECTED_THREADS_ID else "FAIL"
     if (
         summary.state == "READ_ONLY_REAL_SYNC_PASS"
-        and all(report[key] == "PASS" for key in ("PAGE IDENTITY", "INSTAGRAM BINDING", "THREADS IDENTITY"))
+        and report["PAGE IDENTITY"] == "PASS"
+        and report["INSTAGRAM BINDING"] == "PASS"
+        and (not config.threads_enabled or report["THREADS IDENTITY"] == "PASS")
     ):
         report["READ CAPABILITIES"] = "PASS"
         report["LIVE AUTHORITY"] = "LIMITED"
