@@ -24,20 +24,20 @@ FIXTURE = """<!doctype html><html><body>
 <th>Număr proiecte depuse</th><th>Fonduri disponibile</th></tr>
 <tr><td colspan="9">Investiții în fermele de mici dimensiuni</td></tr>
 <tr><td>DR-14</td><td><strong>Componenta LEGUMICULTURĂ</strong></td><td>30.000.000,00 EUR</td>
-<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>45.000.000,00 EUR</td>
-<td>283.310</td><td>6</td><td>44.716.690,00 EUR</td></tr>
+<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>-</td>
+<td>283.310</td><td>6</td><td>-</td></tr>
 <tr><td>DR-14</td><td>Componenta SECTOR ZOOTEHNIC</td><td>30.000.000,00 EUR</td>
-<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>45.000.000,00 EUR</td>
-<td>92.500</td><td>2</td><td>44.907.500,00 EUR</td></tr>
+<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>-</td>
+<td>92.500</td><td>2</td><td>-</td></tr>
 <tr><td>DR-14</td><td>Componenta ACHIZIȚII SIMPLE (INDIFERENT DE SECTOR)</td><td>18.000.000,00 EUR</td>
-<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>27.000.000,00 EUR</td>
-<td>8.166.102</td><td>173</td><td>18.833.898,00 EUR</td></tr>
+<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>-</td>
+<td>8.166.102</td><td>173</td><td>-</td></tr>
 <tr><td>DR-14</td><td>Componenta ALTE SECTOARE (PENTRU TOATE PROIECTELE CARE NU ÎNDEPLINESC CONDIȚIILE ÎNCADRĂRII ÎN CELELALTE COMPONENTE)</td><td>30.000.000,00 EUR</td>
-<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>45.000.000,00 EUR</td>
-<td>1.340.216</td><td>27</td><td>43.659.784,00 EUR</td></tr>
+<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>-</td>
+<td>1.340.216</td><td>27</td><td>-</td></tr>
 <tr><td>DR-18</td><td>Investiții în floricultură, plante medicinale și aromatice</td><td>5.000.000,00 EUR</td>
-<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>7.500.000,00 EUR</td>
-<td>190.863</td><td>2</td><td>7.309.137,00 EUR</td></tr>
+<td>01.09.2026 09:00:00</td><td>31.10.2026 15:59:59</td><td>-</td>
+<td>190.863</td><td>2</td><td>-</td></tr>
 </table></body></html>"""
 
 
@@ -133,20 +133,16 @@ def main() -> int:
     assert payload["summary"]["rowCount"] == 5
     assert payload["summary"]["interventions"] == ["DR-14", "DR-18"]
     assert payload["summary"]["sessionAllocationTotalEur"] == "113000000.00"
-    assert payload["summary"]["submissionCeilingTotalEur"] == "169500000.00"
+    assert payload["summary"]["submissionCeilingTotalEur"] is None
     assert payload["summary"]["submittedPublicValueTotalEur"] == "10072991.00"
-    assert payload["summary"]["availableFundsTotalEur"] == "159427009.00"
+    assert payload["summary"]["availableFundsTotalEur"] is None
     assert payload["summary"]["submittedProjectCount"] == 210
 
     dr14 = [row for row in payload["rows"] if row["interventionCode"] == "DR-14"]
     assert len(dr14) == 4
     assert dr14[0]["opensAtIso"].endswith("+03:00")
-    assert {row["availableFundsEur"] for row in dr14} == {
-        "44716690.00",
-        "44907500.00",
-        "18833898.00",
-        "43659784.00",
-    }
+    assert all(row["submissionCeilingEur"] is None for row in dr14)
+    assert all(row["availableFundsEur"] is None for row in dr14)
 
     print("AFIR live-funds structured snapshot + current five-row counter + transport fail-closed regression PASS")
     return 0
