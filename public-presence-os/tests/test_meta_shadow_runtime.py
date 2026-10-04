@@ -66,3 +66,61 @@ def test_calibration_requires_all_fields_and_does_not_lower_sample_gate(tmp_path
     assert report["evaluated_count"] == 1
     assert report["sample_target_met"] is False
     assert report["calibration_complete"] is False
+
+
+def _seed_calibration_sample(events, count=100):
+    for index in range(count):
+        seed(events, "POST", f"post-{index}", f"Useful public update {index}")
+
+
+def _evaluate_all(events, shadow, *, fail_field=None):
+    for index, event in enumerate(events.events()):
+        decision = compile_shadow_decision(event, policy=load_policy())
+        ratings = {field: "PASS" for field in EVALUATION_FIELDS}
+        if index == 0 and fail_field is not None:
+            ratings[fail_field] = "FAIL"
+        shadow.evaluate(decision.decision_id, ratings)
+
+
+def test_calibration_band_green_requires_100_fully_evaluated_decisions(tmp_path):
+    events = MetaEventStore(tmp_path / "events.sqlite3")
+    _seed_calibration_sample(events)
+    shadow = MetaShadowStore(tmp_path / "shadow.sqlite3")
+    run_shadow(events, shadow)
+    _evaluate_all(events, shadow)
+    report = shadow.report()
+    assert report["sample_size"] == 100
+    assert report["evaluated_count"] == 100
+    assert report["calibration_complete"] is True
+    assert report["calibration_band"] == "GREEN"
+    assert report["calibration_reason"] == "ALL_APPLICABLE_FIELDS_PASS"
+    assert report["evaluation_fail_counts"] == {}
+    assert report["critical_fail_counts"] == {}
+
+
+def test_calibration_band_amber_for_noncritical_failure(tmp_path):
+    events = MetaEventStore(tmp_path / "events.sqlite3")
+    _seed_calibration_sample(events)
+    shadow = MetaShadowStore(tmp_path / "shadow.sqlite3")
+    run_shadow(events, shadow)
+    _evaluate_all(events, shadow, fail_field="voice")
+    report = shadow.report()
+    assert report["calibration_complete"] is True
+    assert report["calibration_band"] == "AMBER"
+    assert report["calibration_reason"] == "NONCRITICAL_FIELD_FAILURE"
+    assert report["evaluation_fail_counts"] == {"voice": 1}
+    assert report["critical_fail_counts"] == {}
+
+
+def test_calibration_band_red_for_critical_failure(tmp_path):
+    events = MetaEventStore(tmp_path / "events.sqlite3")
+    _seed_calibration_sample(events)
+    shadow = MetaShadowStore(tmp_path / "shadow.sqlite3")
+    run_shadow(events, shadow)
+    _evaluate_all(events, shadow, fail_field="factual_grounding")
+    report = shadow.report()
+    assert report["calibration_complete"] is True
+    assert report["calibration_band"] == "RED"
+    assert report["calibration_reason"] == "CRITICAL_FIELD_FAILURE"
+    assert report["evaluation_fail_counts"] == {"factual_grounding": 1}
+    assert report["critical_fail_counts"] == {"factual_grounding": 1}
