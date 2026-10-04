@@ -18,6 +18,7 @@ required = {
     "afir-dr21-consultation-2026",
     "afir-fm-public-autoconsum-2026",
     "afir-fm-public-storage-2026",
+    "afir-dr12-2026",
 }
 missing = required - set(rows)
 assert not missing, f"missing authoritative AFIR September dossiers: {sorted(missing)}"
