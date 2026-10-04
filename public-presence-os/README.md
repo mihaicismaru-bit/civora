@@ -7,7 +7,7 @@ Canonical executable-source layout introduced by CP30.
 - **Google Drive**: checkpoints, evidence, decisions, changelog and rollback evidence.
 
 ## Safety posture
-Ready for credential-gated `READ_ONLY_REAL`. Active lanes are Facebook Page, Instagram Professional and Threads. LinkedIn remains API-gated, X excluded while paid, Bluesky HOLD_ROI. The live read runtime is GET-only and requires the global kill switch to remain engaged with `LIVE_WRITE=OFF`. No network publishing, scheduler write, queue mutation, deploy, paid-service dependency, external GREEN action, or owner write authority is enabled.
+Ready for credential-gated `READ_ONLY_REAL`. The current pilot activates Facebook Page and Instagram Professional. Threads is temporarily `HOLD_EXTERNAL` and can be re-enabled with `META_THREADS_ENABLED=true` once its tester authorization/token is available. LinkedIn remains API-gated, X excluded while paid, Bluesky HOLD_ROI. The live read runtime is GET-only and requires the global kill switch to remain engaged with `LIVE_WRITE=OFF`. No network publishing, scheduler write, queue mutation, deploy, paid-service dependency, external GREEN action, or owner write authority is enabled.
 
 ## Validate
 `PYTHONPATH=src python -m public_presence_os.cli validate --root .`
