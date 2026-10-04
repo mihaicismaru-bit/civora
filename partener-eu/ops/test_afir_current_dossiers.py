@@ -19,9 +19,18 @@ def fact(dossier: dict, label: str) -> dict | None:
 def main() -> int:
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     dossiers = {row["id"]: row for row in payload.get("dossiers") or []}
-    assert {"afir-dr14-2026", "afir-dr18-2026", "afir-dr31-2026-2027"} <= set(dossiers)
+    assert {
+        "afir-dr12-2026",
+        "afir-dr14-2026",
+        "afir-dr18-2026",
+        "afir-dr31-2026-2027",
+        "afir-fm-public-autoconsum-2026",
+        "afir-fm-public-storage-2026",
+    } <= set(dossiers)
 
-    dr14, dr18, dr31 = (dossiers[key] for key in ("afir-dr14-2026", "afir-dr18-2026", "afir-dr31-2026-2027"))
+    dr12, dr14, dr18, dr31 = (
+        dossiers[key] for key in ("afir-dr12-2026", "afir-dr14-2026", "afir-dr18-2026", "afir-dr31-2026-2027")
+    )
     for dossier in (dr14, dr18):
         assert dossier["status"] == "OPEN"
         assert dossier["publicationState"] == "PUBLISHABLE"
@@ -40,6 +49,36 @@ def main() -> int:
     assert "100.000 EUR" in fact(dr18, "Grant")["value"]
     assert "85% sau 65%" in fact(dr18, "Grant")["value"]
 
+    for dossier_id in ("afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"):
+        energy = dossiers[dossier_id]
+        assert energy["status"] == "OPEN"
+        assert energy["statusLabel"] == "DESCHIS"
+        assert energy["publicationState"] == "PUBLISHABLE"
+        assert fact(energy, "Deschidere")["value"] == "28 septembrie 2026, 10:00"
+        assert fact(energy, "Termen")["value"] == "20 noiembrie 2026, 23:59"
+        assert energy["executiveSummary"]["status"] == "OPEN"
+        assert energy["executiveSummary"]["sourceBound"] is True
+        assert any(
+            row.get("url") == "https://www.afir.ro/comunicate/depunere-in-curs-a-proiectelor-in-energie-a-entitatilor-publice/"
+            and "status" in set(row.get("supports") or [])
+            for row in energy["sources"]
+        )
+        public_text = json.dumps(energy, ensure_ascii=False).lower()
+        assert "apelul nu este încă open" not in public_text
+        assert "apelul nu este inca open" not in public_text
+
+    assert dr12["status"] == "UPCOMING"
+    assert dr12["publicationState"] == "PUBLISHABLE"
+    assert fact(dr12, "Deschidere")["value"] == "6 octombrie 2026, 09:00"
+    assert fact(dr12, "Termen")["value"] == "2 decembrie 2026, 16:00"
+    assert fact(dr12, "Buget")["value"] == "169.589.647 EUR"
+    assert "200.000 EUR" in fact(dr12, "Grant")["value"]
+    assert "80 puncte" in " ".join(by_title(dr12, "Cum se punctează")["items"])
+    assert "45 puncte" in " ".join(by_title(dr12, "Cum se punctează")["items"])
+    assert "NU ESTE CAZUL" in " ".join(by_title(dr12, "Riscuri de respingere sau implementare")["items"])
+    assert dr12["executiveSummary"]["sourceBound"] is True
+    assert dr12["quality"]["afirCurrentUpcomingBundle"] is True
+
     assert dr31["status"] == "PUBLIC_CONSULTATION"
     assert dr31["publicationState"] == "PUBLISHABLE"
     assert dr31["audience"] == []
@@ -48,11 +87,14 @@ def main() -> int:
     assert "beneficiaries" in dr31["quality"]["blockedFactClasses"]
 
     codes = [str(row.get("code") or "").replace("-", "").replace(" ", "").upper() for row in payload["dossiers"]]
+    assert codes.count("DR12") == 1
     assert codes.count("DR14") == 1
     assert codes.count("DR18") == 1
     assert codes.count("DR31") == 1
     assert payload["policy"]["afirCurrentSessionsSourceBound"] is True
     assert payload["policy"]["afirConsultationsNeverPresentedAsOpen"] is True
+    assert payload["policy"]["afirEnergyPostLaunchEvidenceSourceBound"] is True
+    assert payload["policy"]["afirDr12UpcomingSourceBound"] is True
     assert payload["policy"]["derivedProjectionSynchronized"] is True
 
     home_open = payload["home"]["openDossierIds"]
