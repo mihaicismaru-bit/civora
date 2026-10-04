@@ -348,7 +348,7 @@ def energy_public_dossier(*, storage: bool) -> dict[str, Any]:
                 f"Activități finanțate: {activity}",
                 f"Valoarea apelului: {budget}.",
                 f"Valoarea proiectului individual: {project_cap}.",
-                "Intensitate: până la 100% din cheltuielile eligibile, în limitele ghidului.",
+                "Cofinanțare / contribuție proprie: finanțarea poate acoperi până la 100% din cheltuielile eligibile, în limitele ghidului.",
                 "Regiune: România.",
             ], schemaVersion=1),
             section("Decizia rapidă", [
@@ -496,7 +496,7 @@ def dr12_dossier() -> dict[str, Any]:
                 f"Activități finanțate: {activities[0]}",
                 "Valoarea apelului: 169.589.647 EUR, împărțită egal între sectorul zootehnic și alte sectoare.",
                 "Valoarea proiectului individual: maximum 200.000 EUR/proiect.",
-                "Intensitate: maximum 80% pentru tinerii fermieri de până la 40 de ani și maximum 65% pentru celelalte categorii.",
+                "Cofinanțare / contribuție proprie: intensitate maximum 80% pentru tinerii fermieri de până la 40 de ani și maximum 65% pentru celelalte categorii.",
                 "Regiune: România.",
             ], schemaVersion=1),
             section("Decizia rapidă", [decision, "Nu depune înainte de deschiderea oficială; pregătește acum documentele și punctajul."]),
