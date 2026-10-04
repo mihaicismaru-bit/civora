@@ -27,6 +27,10 @@ DR18 = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-18/"
 DR18_RELEASE = "https://www.afir.ro/comunicate/finantarea-investitiilor-in-floricultura-plante-medicinale-si-aromatice/"
 DEBATE = "https://www.afir.ro/comunicare/utile/dezbatere-publica/"
 ENERGY_PUBLIC_IN_PROGRESS = "https://www.afir.ro/comunicate/depunere-in-curs-a-proiectelor-in-energie-a-entitatilor-publice/"
+ENERGY_CONDITIONS = "https://www.afir.ro/comunicate/conditiile-finantarii-acordate-entitatilor-publice-pentru-producerea-si-stocarea-energiei-electrice/"
+ENERGY_OPENING = "https://www.afir.ro/info-la-zi/deschidere-sesiuni-proiecte-energie-regenerabila-beneficiari-publici/"
+ENERGY_AUTOCONSUM = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-producere-energie-pentru-autoconsum-beneficiari-publici/"
+ENERGY_STORAGE = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-stocare-energie-regenerabila-beneficiari-publici/"
 DR12 = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-12/"
 DR12_RELEASE = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
 DR12_NOTICE = "https://www.afir.ro/info-la-zi/sesiune-depunere-de-proiecte-dr-12/"
@@ -269,6 +273,168 @@ def promote_energy_open(dossier: dict[str, Any]) -> dict[str, Any]:
     dossier.setdefault("dossierConstruction", {})["nextPass"] = "MONITOR_LIFECYCLE_AND_SOURCE_CHANGES"
     dossier["updatedAt"] = CURRENT_OBSERVED
     return dossier
+
+
+def energy_public_dossier(*, storage: bool) -> dict[str, Any]:
+    dossier_id = "afir-fm-public-storage-2026" if storage else "afir-fm-public-autoconsum-2026"
+    title = (
+        "Fondul pentru Modernizare — Stocarea energiei regenerabile pentru entități publice"
+        if storage else
+        "Fondul pentru Modernizare — Producerea energiei regenerabile pentru autoconsum — entități publice"
+    )
+    budget = "150.000.000 EUR" if storage else "500.000.000 EUR"
+    project_cap = (
+        "maximum 10.000.000 EUR/beneficiar și maximum 200.000 EUR/MWh de stocare instalat"
+        if storage else
+        "maximum 10.000.000 EUR/beneficiar; maximum 900.000 EUR/MW sau 1.100.000 EUR/MW dacă proiectul include pompe de căldură"
+    )
+    activity = (
+        "Capacități noi de stocare în spatele contorului, conectate la instalații existente de producere a energiei din surse regenerabile, pentru autoconsum și optimizarea consumului."
+        if storage else
+        "Capacități noi de producere a energiei electrice din surse regenerabile solare, cu capacități de stocare integrate, pentru autoconsumul entității publice."
+    )
+    details_url = ENERGY_STORAGE if storage else ENERGY_AUTOCONSUM
+    applicants = [
+        "Primării și consilii județene.",
+        "Spitale publice și universități de stat.",
+        "Unități de apărare și ordine publică.",
+        "Unități de cult, institute de cercetare, instituții de învățământ superior și alte instituții publice eligibile.",
+        "Parteneriate între entitățile eligibile, în condițiile ghidului.",
+    ]
+    decision = (
+        "Depunerea este deschisă. Verifică eligibilitatea entității și investiției, folosește exclusiv formularul AFIR al sesiunii curente "
+        "și depune înainte de 20 noiembrie 2026, ora 23:59."
+    )
+    sources = [
+        source("AFIR — depunere în curs pentru energia entităților publice", ENERGY_PUBLIC_IN_PROGRESS, ["status", "opening", "deadline", "source_event"], CURRENT_OBSERVED),
+        source("AFIR — condițiile finanțării pentru entități publice", ENERGY_CONDITIONS, ["beneficiaries", "budget", "grant", "cofinancing"], CURRENT_OBSERVED),
+        source("AFIR — deschidere sesiuni energie beneficiari publici", ENERGY_OPENING, ["opening", "deadline", "documents"], CURRENT_OBSERVED),
+        source("AFIR — ghid și anexe linie energie", details_url, ["beneficiaries", "eligibility", "activities", "documents"], CURRENT_OBSERVED),
+    ]
+    return {
+        "id": dossier_id,
+        "sourceType": "AFIR_CANONICAL",
+        "title": title,
+        "slug": dossier_id,
+        "programme": "Fondul pentru Modernizare / AFIR",
+        "code": "FM-ENERGIE-STOCARE-PUBLICI-2026" if storage else "FM-ENERGIE-AUTOCONSUM-PUBLICI-2026",
+        "region": "România",
+        "status": "OPEN",
+        "statusLabel": "DESCHIS",
+        "decision": "ACȚIONEAZĂ",
+        "decisionLabel": "ACȚIONEAZĂ",
+        "decisionAction": decision,
+        "publicationState": "PUBLISHABLE",
+        "standfirst": (
+            f"Sesiune deschisă pentru entități publice din 28 septembrie 2026, ora 10:00, până la 20 noiembrie 2026, ora 23:59. "
+            f"Alocare: {budget}; finanțarea poate acoperi până la 100% din cheltuielile eligibile, în limitele ghidului."
+        ),
+        "audience": applicants,
+        "quickFacts": facts([
+            ("Status", "DESCHIS", "CONFIRMED"),
+            ("Deschidere", "28 septembrie 2026, 10:00", "CONFIRMED"),
+            ("Termen", "20 noiembrie 2026, 23:59", "CONFIRMED"),
+            ("Grant", project_cap, "CONFIRMED"),
+            ("Buget", budget, "CONFIRMED"),
+            ("Intensitate", "până la 100% din cheltuielile eligibile", "CONFIRMED"),
+            ("Completitudine critică", "93%", "SYSTEM"),
+        ]),
+        "sections": [
+            section("Rezumat executiv", [
+                "Stare apel: DESCHIS.",
+                "Deschidere: 28 septembrie 2026, ora 10:00.",
+                "Închidere: 20 noiembrie 2026, ora 23:59.",
+                f"Cine poate aplica: {'; '.join(applicants)}",
+                f"Activități finanțate: {activity}",
+                f"Valoarea apelului: {budget}.",
+                f"Valoarea proiectului individual: {project_cap}.",
+                "Intensitate: până la 100% din cheltuielile eligibile, în limitele ghidului.",
+                "Regiune: România.",
+            ], schemaVersion=1),
+            section("Decizia rapidă", [
+                decision,
+                "Nu folosi formulare vechi: AFIR validează formularul autorizat pentru sesiunea lansată la 28 septembrie 2026.",
+            ]),
+            section("Cine poate aplica", applicants, policy="GUIDE_EXPLICIT_ONLY"),
+            section("Condiții esențiale de eligibilitate", [
+                "Solicitantul și investiția trebuie să se încadreze în categoriile și condițiile prevăzute de Ghidul solicitantului.",
+                "Verdictul pentru o entitate și o investiție concretă se stabilește numai după verificarea integrală a ghidului și anexelor curente.",
+            ]),
+            section("Ce finanțează și în ce condiții", [activity]),
+            section("Costuri, cofinanțare și ajutor de stat", [
+                f"Alocarea liniei este {budget}.",
+                f"Plafonul sprijinului: {project_cap}.",
+                "Finanțarea poate acoperi până la 100% din cheltuielile eligibile, în limitele schemei și ghidului.",
+            ]),
+            section("Documente de pregătit", [
+                "Ghidul solicitantului și anexele liniei de finanțare.",
+                "Cererea de finanțare în formatul editabil autorizat de AFIR pentru sesiunea curentă.",
+                "Documentele tehnice, juridice și financiare cerute de ghid pentru solicitant și investiție.",
+            ]),
+            section("Cum se punctează", [
+                "Procesul de evaluare și selecție se aplică potrivit Ghidului solicitantului; nu proiectăm un punctaj numeric fără dovada oficială specifică.",
+            ]),
+            section("Indicatori și obligații", [
+                "Capacitatea instalată și rezultatele energetice asumate trebuie susținute de documentația tehnică și urmărite în implementare.",
+                "Păstrează trasabilitatea versiunii formularului și anexelor încărcate în sistem.",
+            ]),
+            section("Riscuri de respingere sau implementare", [
+                "Utilizarea unui formular neautorizat sau a unei versiuni vechi.",
+                "Încadrarea greșită a solicitantului ori investiției față de ghid.",
+                "Bugetarea peste plafoanele specifice liniei de finanțare.",
+            ]),
+            section("Ce trebuie făcut acum", [
+                "Verifică eligibilitatea entității și a investiției în Ghidul solicitantului.",
+                "Descarcă exclusiv formularul AFIR autorizat pentru sesiunea curentă.",
+                "Finalizează anexele tehnice și financiare și depune înainte de 20 noiembrie 2026, ora 23:59.",
+            ]),
+            section("Ce nu este confirmat", [
+                "Eligibilitatea și valoarea finanțării pentru un proiect concret nu pot fi stabilite fără datele solicitantului și verificarea integrală a documentației oficiale.",
+            ]),
+        ],
+        "timeline": [
+            {"date": "2026-09-11T20:55:00+03:00", "kind": "FINAL_GUIDE_PUBLISHED", "text": "AFIR publică ghidurile și condițiile de finanțare."},
+            {"date": "2026-09-28T10:00:00+03:00", "kind": "CALL_OPENED", "text": "AFIR deschide sesiunea online."},
+            {"date": "2026-09-29T10:15:00+03:00", "kind": "POST_LAUNCH_CONFIRMED", "text": "AFIR confirmă explicit că sesiunea este în derulare."},
+        ],
+        "sources": sources,
+        "quality": {
+            "completeness": 93,
+            "depthCompleteness": 93,
+            "dossierLevel": "DOSAR AVANSAT",
+            "verifiedFactClasses": ["status", "opening", "deadline", "beneficiaries", "activities", "budget", "grant", "cofinancing", "documents", "risks"],
+            "blockedFactClasses": ["project_specific_eligibility", "scoring_specific"],
+            "evidenceCount": len(sources),
+            "failClosed": True,
+            "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
+            "applicantEvidenceAuthorized": True,
+            "executiveSummaryPresent": True,
+            "afirEnergyPostLaunchEvidence": True,
+        },
+        "updatedAt": CURRENT_OBSERVED,
+        "canonicalLinks": [row["url"] for row in sources],
+        "executiveSummary": {
+            "status": "OPEN",
+            "opens": "2026-09-28T10:00:00+03:00",
+            "closes": "2026-11-20T23:59:00+02:00",
+            "applicants": applicants,
+            "targetGroup": [],
+            "activities": [activity],
+            "callBudget": budget,
+            "projectValue": project_cap,
+            "cofinancing": "până la 100% din cheltuielile eligibile",
+            "region": "România",
+            "sourcePolicy": "GUIDE_EXPLICIT_ONLY",
+            "sourceBound": True,
+        },
+        "dossierConstruction": {
+            "autonomous": True,
+            "depthCompleteness": 93,
+            "level": "DOSAR AVANSAT",
+            "missing": ["project_specific_eligibility", "scoring_specific"],
+            "nextPass": "MONITOR_LIFECYCLE_AND_SOURCE_CHANGES",
+        },
+    }
 
 
 def dr12_dossier() -> dict[str, Any]:
@@ -572,6 +738,8 @@ def main() -> int:
         ),
         dr31_dossier(),
         dr12_dossier(),
+        energy_public_dossier(storage=False),
+        energy_public_dossier(storage=True),
     ]
 
     replace_codes = {"dr 12", "dr 14", "dr 18", "dr 31"}
@@ -584,12 +752,16 @@ def main() -> int:
         kept.append(row)
 
     energy_ids = {"afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"}
-    present_energy_ids = {row.get("id") for row in kept if row.get("id") in energy_ids}
-    if present_energy_ids != energy_ids:
-        missing = sorted(energy_ids - present_energy_ids)
-        raise RuntimeError(f"Canonical public-energy dossier(s) missing before authoritative promotion: {missing}")
-    kept = [promote_energy_open(row) if row.get("id") in energy_ids else row for row in kept]
-    payload["dossiers"] = [*dossiers, *kept]
+    filtered_kept = []
+    for row in kept:
+        title = norm(row.get("title"))
+        is_public_energy_duplicate = (
+            row.get("id") in energy_ids
+            or ("entitati publice" in title and ("autoconsum" in title or "stocare" in title))
+        )
+        if not is_public_energy_duplicate:
+            filtered_kept.append(row)
+    payload["dossiers"] = [*dossiers, *filtered_kept]
 
     replacement_news_ids = {row["id"] for row in news_items()}
     payload["news"] = [*news_items(), *[row for row in payload.get("news") or [] if row.get("id") not in replacement_news_ids]]
