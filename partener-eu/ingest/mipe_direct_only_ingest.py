@@ -52,8 +52,6 @@ def direct_only_fetch_document(target: str):
             "policy": "direct-official-bytes-required-for-publication",
         }
 
-    # PDDS is a deliberately bounded crawl. The priority seed may never redirect
-    # the crawler outside the official /pdds/ tree.
     if canonical == PDDS_PRIORITY_SEED:
         parsed_final = urllib.parse.urlparse(final_url)
         if parsed_final.hostname != "mfe.gov.ro" or not parsed_final.path.startswith("/pdds/"):
@@ -84,7 +82,7 @@ def direct_only_fetch_document(target: str):
         parsed = base.parse_html(response["data"])
         parsed["canonical"] = final_url
         return parsed, health
-    except Exception as exc:  # persisted as parser/source health evidence
+    except Exception as exc:
         return None, {
             "target": canonical,
             "ok": False,
@@ -102,13 +100,7 @@ def preserve_only_directly_verified(item: dict) -> bool:
 
 
 def bing_rss_discovery():
-    """Discovery-only fallback when the primary index adapter is unavailable.
-
-    Bing RSS bytes and snippets are never publishable evidence. They may only
-    contribute canonical URLs on the existing official allowlist. PDDS URLs are
-    deliberately excluded here because the PDDS tree must originate from the
-    explicit priority-seed crawl.
-    """
+    """Discovery-only fallback when the primary index adapter is unavailable."""
     candidates = []
     health = []
     for query in base.DISCOVERY_QUERIES:
@@ -168,9 +160,6 @@ _original_search_discovery = base.search_discovery
 
 def search_discovery_without_pdds():
     candidates, health = _original_search_discovery()
-    # Jina Search can reject unauthenticated requests. Fall back to a separate
-    # public web index so discovery remains useful while preserving the exact
-    # same canonical-direct publication boundary.
     if not any(row.get("ok") for row in health):
         fallback_candidates, fallback_health = bing_rss_discovery()
         candidates.extend(fallback_candidates)
@@ -195,6 +184,7 @@ def search_discovery_without_pdds():
 
 
 _original_make_item = base.make_item
+_original_write_outputs = base.write_outputs
 
 
 def make_direct_item(candidate: dict, cache: dict):
@@ -214,11 +204,23 @@ def make_direct_item(candidate: dict, cache: dict):
     return item, health
 
 
-# Patch the resilient discovery engine at the factual-publication boundary.
+def carry_mysmis_candidate(previous_state: dict, output_state: dict) -> dict:
+    candidate = previous_state.get("mysmisPendingChange")
+    if isinstance(candidate, dict) and candidate:
+        output_state["mysmisPendingChange"] = candidate
+    return output_state
+
+
+def write_outputs_with_candidate(state: dict) -> None:
+    carry_mysmis_candidate(base.load_state(), state)
+    _original_write_outputs(state)
+
+
 base.fetch_document = direct_only_fetch_document
 base.previous_item_useful = preserve_only_directly_verified
 base.search_discovery = search_discovery_without_pdds
 base.make_item = make_direct_item
+base.write_outputs = write_outputs_with_candidate
 
 if __name__ == "__main__":
     raise SystemExit(base.main())
