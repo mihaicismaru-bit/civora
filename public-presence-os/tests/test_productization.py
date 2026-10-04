@@ -122,8 +122,10 @@ def test_env_example_contains_placeholders_only():
         if line and not line.startswith("#") and "=" in line:
             key, value = line.split("=", 1)
             values[key] = value
-    for key in ("META_APP_SECRET", "META_USER_ACCESS_TOKEN", "META_PAGE_ACCESS_TOKEN", "META_THREADS_ACCESS_TOKEN"):
+    for key in ("META_APP_SECRET", "META_USER_ACCESS_TOKEN", "META_PAGE_ACCESS_TOKEN"):
         assert values[key].startswith("<") and values[key].endswith(">")
+    assert values["META_THREADS_ENABLED"] == "false"
+    assert values["META_THREADS_ACCESS_TOKEN"] == ""
     assert values["KILL_SWITCH"] == "true"
     assert values["LIVE_WRITE"] == "false"
 
