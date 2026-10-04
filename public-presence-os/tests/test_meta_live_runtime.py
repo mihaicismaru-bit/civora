@@ -243,6 +243,40 @@ def test_partial_sync_never_reports_read_capabilities_pass(tmp_path):
     assert report["LIVE AUTHORITY"] == "LIMITED"
 
 
+
+def test_threads_can_be_held_without_blocking_facebook_instagram_read_only(tmp_path):
+    values = env(META_THREADS_ENABLED="false")
+    values.pop("META_THREADS_ACCESS_TOKEN")
+    config = MetaRuntimeConfig.from_env(values)
+    assert config.threads_enabled is False
+    assert config.threads_token is None
+    assert config.redacted()["threads_token_present"] is False
+
+    client = FakeClient()
+    store = MetaEventStore(tmp_path / "events.sqlite3")
+    summary = MetaReadRuntime(config, client, store).sync_once()
+    assert summary.state == "READ_ONLY_REAL_SYNC_PASS"
+    assert dict(summary.identities) == {
+        "FACEBOOK_PAGE": EXPECTED_PAGE_ID,
+        "INSTAGRAM_PROFESSIONAL": EXPECTED_IG_ID,
+    }
+    assert summary.accepted == 4
+    assert summary.write_count == 0
+    assert all(call[0] == "graph.facebook.com" for call in client.calls)
+
+    report = preflight_report(
+        db_path=tmp_path / "preflight.sqlite3",
+        values=values,
+        run_live_read=True,
+        client=FakeClient(),
+    )
+    assert report["PAGE IDENTITY"] == "PASS"
+    assert report["INSTAGRAM BINDING"] == "PASS"
+    assert report["THREADS IDENTITY"] == "HOLD_EXTERNAL"
+    assert report["READ CAPABILITIES"] == "PASS"
+    assert report["WRITE CAPABILITIES"] == "LOCKED"
+
+
 def test_cli_preflight_without_credentials_is_precise_and_secret_free(tmp_path):
     clean_env = os.environ.copy()
     for name in (
