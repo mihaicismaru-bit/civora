@@ -34,7 +34,6 @@ def fact(dossier, label):
 
 def validate_common(dossier):
     assert dossier.get("publicationState") == "PUBLISHABLE", dossier.get("id")
-    assert dossier.get("status") != "OPEN", f"scheduled/consultative AFIR signal auto-promoted to OPEN: {dossier.get('id')}"
     quality = dossier.get("quality") or {}
     assert quality.get("failClosed") is True
     assert quality.get("applicantEvidenceAuthorized") is True
@@ -66,13 +65,17 @@ for dossier_id, expected_budget, guide_token in (
 ):
     dossier = rows[dossier_id]
     validate_common(dossier)
-    assert dossier.get("status") in {"UPCOMING", "REVIEW"}
-    if NOW < dt.datetime(2026, 9, 28, 10, 0, tzinfo=RO):
+    if dt.datetime(2026, 9, 28, 10, 0, tzinfo=RO) <= NOW <= dt.datetime(2026, 11, 20, 23, 59, tzinfo=RO):
+        assert dossier.get("status") == "OPEN"
+        assert "open_status" not in set(dossier["quality"]["blockedFactClasses"])
+        assert any("depunere-in-curs-a-proiectelor-in-energie-a-entitatilor-publice" in src["url"] for src in dossier["sources"])
+    elif NOW < dt.datetime(2026, 9, 28, 10, 0, tzinfo=RO):
         assert dossier.get("status") == "UPCOMING"
+    else:
+        assert dossier.get("status") == "REVIEW"
     assert fact(dossier, "Buget")["value"] == expected_budget
     assert fact(dossier, "Termen")["value"] == "20 noiembrie 2026, 23:59"
     assert fact(dossier, "Contribuție proprie")["value"].startswith("0%")
-    assert "open_status" in set(dossier["quality"]["blockedFactClasses"])
     assert "status" in set(dossier["quality"]["verifiedFactClasses"])
     assert any(guide_token in src["url"] for src in dossier["sources"])
     assert any("informatii-sesiune-energie-regenerabila-solicitanti-publici" in src["url"] for src in dossier["sources"])
