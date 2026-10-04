@@ -53,7 +53,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: partener-eu-afir-ingest
+  group: partener-eu-afir-ingest-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
