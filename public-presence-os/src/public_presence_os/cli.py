@@ -1,5 +1,5 @@
 from __future__ import annotations
-import argparse, json
+import argparse, json, os
 from pathlib import Path
 from .control import validate_repo, build_source_manifest, manifest_hash
 from .radar import RadarObservation, RadarSourceClass, RadarKind, ingest_observations, signals_json
@@ -54,7 +54,9 @@ def main(argv=None):
         report=meta_preflight_report(db_path=args.db,run_live_read=args.live)
         for name,value in report.items():
             print(f"{name:<24} {value}")
-        required=("META_USER_ACCESS_TOKEN","META_THREADS_ACCESS_TOKEN")
+        required=["META_USER_ACCESS_TOKEN"]
+        if os.getenv("META_THREADS_ENABLED", "true").strip().lower() not in {"0", "false", "no", "off"}:
+            required.append("META_THREADS_ACCESS_TOKEN")
         presence=environment_presence()
         missing=[name for name in required if not presence[name]]
         if missing:
