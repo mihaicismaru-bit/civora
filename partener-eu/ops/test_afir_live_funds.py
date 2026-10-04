@@ -50,6 +50,14 @@ def load_builder_module():
     return module
 
 
+def load_ingest_module():
+    spec = importlib.util.spec_from_file_location("partener_afir_ingest", AFIR_INGEST)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
 def main() -> int:
     fixture_bytes = FIXTURE.encode("utf-8")
     fingerprint = hashlib.sha256(fixture_bytes).hexdigest()
@@ -144,6 +152,19 @@ def main() -> int:
     assert builder.parse_eur("1.234,56 EUR") == "1234.56"
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": None}], "amount") is None
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": "2.50"}], "amount") == "3.50"
+
+    ingest = load_ingest_module()
+    normalized = ingest.norm(
+        "https://www.afir.ro/api/file?filename=Anunț Cerere DR-12 – Investiții.pdf&download=1"
+    )
+    assert normalized is not None
+    assert " " not in normalized
+    assert "ț" not in normalized and "–" not in normalized
+    assert "filename=Anun%C8%9B%20Cerere%20DR-12%20%E2%80%93%20Investi%C8%9Bii.pdf" in normalized
+    assert normalized.endswith("&download=1")
+    assert ingest.norm(
+        "https://www.afir.ro/umbraco/surface/authentication/login?redirectUrl=/api/file"
+    ) is None
 
     dr14 = [row for row in payload["rows"] if row["interventionCode"] == "DR-14"]
     assert len(dr14) == 4
