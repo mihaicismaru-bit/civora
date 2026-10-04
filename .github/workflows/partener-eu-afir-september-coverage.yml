@@ -24,7 +24,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: partener-eu-afir-september-coverage
+  group: partener-eu-afir-september-coverage-${{ github.event_name }}-${{ github.event.pull_request.number || github.event.workflow_run.id || github.ref }}
   cancel-in-progress: true
 
 jobs:
