@@ -138,6 +138,13 @@ def main() -> int:
     assert payload["summary"]["availableFundsTotalEur"] == "159427009.00"
     assert payload["summary"]["submittedProjectCount"] == 210
 
+    builder = load_builder_module()
+    for marker in ("-", "–", "—", "N/A", "N/D"):
+        assert builder.parse_eur(marker) is None
+    assert builder.parse_eur("1.234,56 EUR") == "1234.56"
+    assert builder.decimal_total([{"amount": "1.00"}, {"amount": None}], "amount") is None
+    assert builder.decimal_total([{"amount": "1.00"}, {"amount": "2.50"}], "amount") == "3.50"
+
     dr14 = [row for row in payload["rows"] if row["interventionCode"] == "DR-14"]
     assert len(dr14) == 4
     assert dr14[0]["opensAtIso"].endswith("+03:00")
