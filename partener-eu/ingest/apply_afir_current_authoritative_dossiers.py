@@ -26,6 +26,12 @@ DR14 = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-14/"
 DR18 = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-18/"
 DR18_RELEASE = "https://www.afir.ro/comunicate/finantarea-investitiilor-in-floricultura-plante-medicinale-si-aromatice/"
 DEBATE = "https://www.afir.ro/comunicare/utile/dezbatere-publica/"
+ENERGY_PUBLIC_IN_PROGRESS = "https://www.afir.ro/comunicate/depunere-in-curs-a-proiectelor-in-energie-a-entitatilor-publice/"
+DR12 = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-12/"
+DR12_RELEASE = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
+DR12_NOTICE = "https://www.afir.ro/info-la-zi/sesiune-depunere-de-proiecte-dr-12/"
+DR12_NOTE = "https://www.afir.ro/info-la-zi/nota-de-indrumare-pentru-fisa-evaluare-proiect-dr-12/"
+CURRENT_OBSERVED = "2026-10-04T14:30:00+00:00"
 
 
 def norm(value: Any) -> str:
@@ -154,6 +160,261 @@ def open_dossier(
             "level": "DOSAR COMPLET",
             "missing": [],
             "nextPass": "MONITOR_LIFECYCLE_AND_AVAILABLE_FUNDS",
+        },
+    }
+
+
+def _section_by_title(dossier: dict[str, Any], title: str) -> dict[str, Any] | None:
+    return next((row for row in dossier.get("sections") or [] if row.get("title") == title), None)
+
+
+def _set_fact(dossier: dict[str, Any], label: str, value: str, confidence: str = "CONFIRMED") -> None:
+    for row in dossier.get("quickFacts") or []:
+        if row.get("label") == label:
+            row["value"] = value
+            row["confidence"] = confidence
+            return
+    dossier.setdefault("quickFacts", []).append({"label": label, "value": value, "confidence": confidence})
+
+
+def promote_energy_open(dossier: dict[str, Any]) -> dict[str, Any]:
+    """Promote only the two canonical public-energy dossiers on explicit post-launch AFIR evidence."""
+    dossier = json.loads(json.dumps(dossier, ensure_ascii=False))
+    dossier["status"] = "OPEN"
+    dossier["statusLabel"] = "DESCHIS"
+    dossier["decision"] = "ACȚIONEAZĂ"
+    dossier["decisionLabel"] = "ACȚIONEAZĂ"
+    dossier["decisionAction"] = (
+        "Depunerea este deschisă. Folosește exclusiv formularul AFIR publicat pentru sesiunea curentă "
+        "și verifică eligibilitatea, bugetul și anexele înainte de încărcarea online."
+    )
+    dossier["publicationState"] = "PUBLISHABLE"
+    dossier["standfirst"] = (
+        "Sesiune în derulare pentru entități publice: depunerea este deschisă din 28 septembrie 2026, "
+        "ora 10:00, până la 20 noiembrie 2026, ora 23:59."
+    )
+    _set_fact(dossier, "Status", "DESCHIS")
+    _set_fact(dossier, "Deschidere", "28 septembrie 2026, 10:00")
+    _set_fact(dossier, "Termen", "20 noiembrie 2026, 23:59")
+
+    summary = _section_by_title(dossier, "Rezumat executiv")
+    if summary is not None:
+        retained = [
+            item for item in summary.get("items") or []
+            if not any(token in norm(item) for token in (
+                "stare apel", "deschidere", "inchidere", "nu este inca open", "nu este open"
+            ))
+        ]
+        summary["items"] = [
+            "Stare apel: DESCHIS.",
+            "Deschidere: 28 septembrie 2026, ora 10:00.",
+            "Închidere: 20 noiembrie 2026, ora 23:59.",
+            *retained,
+        ]
+        summary["schemaVersion"] = 1
+
+    rapid = _section_by_title(dossier, "Decizia rapidă")
+    if rapid is not None:
+        rapid["items"] = [
+            dossier["decisionAction"],
+            "Nu folosi versiuni vechi ale formularului: AFIR a introdus validări pentru formularul autorizat al sesiunii curente.",
+        ]
+
+    now_section = _section_by_title(dossier, "Ce trebuie făcut acum")
+    if now_section is not None:
+        existing = [
+            item for item in now_section.get("items") or []
+            if "asteapta deschiderea" not in norm(item) and "monitorizeaza lansarea" not in norm(item)
+        ]
+        now_section["items"] = [
+            "Verifică eligibilitatea solicitantului și investiției în ghidul oficial curent.",
+            "Descarcă și completează exclusiv formularul AFIR autorizat pentru sesiunea lansată la 28 septembrie 2026.",
+            "Pregătește anexele și depune în sistemul AFIR înainte de 20 noiembrie 2026, ora 23:59.",
+            *existing,
+        ]
+
+    unknown = _section_by_title(dossier, "Ce nu este confirmat")
+    if unknown is not None:
+        unknown["items"] = [
+            item for item in unknown.get("items") or []
+            if not any(token in norm(item) for token in ("data lansarii", "status apel", "apelul nu este", "deschiderea apelului"))
+        ] or ["Eligibilitatea și valoarea finanțării pentru un proiect concret se stabilesc numai după verificarea ghidului și a datelor solicitantului."]
+
+    evidence = source(
+        "AFIR — depunere în curs a proiectelor în energie ale entităților publice",
+        ENERGY_PUBLIC_IN_PROGRESS,
+        ["status", "opening", "deadline", "source_event"],
+        CURRENT_OBSERVED,
+    )
+    sources = dossier.setdefault("sources", [])
+    if not any(row.get("url") == ENERGY_PUBLIC_IN_PROGRESS for row in sources if isinstance(row, dict)):
+        sources.append(evidence)
+    dossier["canonicalLinks"] = list(dict.fromkeys([*(dossier.get("canonicalLinks") or []), ENERGY_PUBLIC_IN_PROGRESS]))
+
+    executive = dossier.setdefault("executiveSummary", {})
+    executive["status"] = "OPEN"
+    executive["opens"] = "2026-09-28T10:00:00+03:00"
+    executive["closes"] = "2026-11-20T23:59:00+02:00"
+    executive["sourceBound"] = True
+
+    quality = dossier.setdefault("quality", {})
+    verified = list(quality.get("verifiedFactClasses") or [])
+    for fact_class in ("status", "opening", "deadline"):
+        if fact_class not in verified:
+            verified.append(fact_class)
+    quality["verifiedFactClasses"] = verified
+    quality["evidenceCount"] = len(sources)
+    quality["failClosed"] = True
+    quality["afirEnergyPostLaunchEvidence"] = True
+    dossier.setdefault("dossierConstruction", {})["nextPass"] = "MONITOR_LIFECYCLE_AND_SOURCE_CHANGES"
+    dossier["updatedAt"] = CURRENT_OBSERVED
+    return dossier
+
+
+def dr12_dossier() -> dict[str, Any]:
+    applicants = [
+        "Fermieri care sunt șefi ai exploatației și au cel mult 40 de ani la depunere.",
+        "Beneficiari ai submăsurii 6.1 PNDR, indiferent de vârsta la momentul depunerii.",
+        "Fermieri cu vârsta de cel mult 45 de ani la depunere, în condițiile ghidului.",
+    ]
+    activities = [
+        "Consolidarea exploatațiilor tinerilor fermieri instalați și a fermierilor cu vârsta de până la 45 de ani.",
+        "Condiționare și depozitare corelate cu producția fermei; înființarea și modernizarea fermelor pomicole.",
+        "Procesare la nivelul fermei ca activitate secundară și achiziția de utilaje, remorci, semiremorci tehnologice și echipamente agricole eligibile.",
+    ]
+    sources = [
+        source("AFIR — comunicat lansare DR-12", DR12_RELEASE, ["status", "opening", "deadline", "budget", "beneficiaries", "grant", "cofinancing", "activities", "scoring"], CURRENT_OBSERVED),
+        source("AFIR — Detalii și Anexe DR-12", DR12, ["beneficiaries", "eligibility", "activities", "grant", "cofinancing", "documents"], CURRENT_OBSERVED),
+        source("AFIR — anunț sesiune DR-12", DR12_NOTICE, ["status", "opening", "deadline"], CURRENT_OBSERVED),
+        source("AFIR — Notă de îndrumare E1.2 DR-12", DR12_NOTE, ["documents", "eligibility", "risks"], CURRENT_OBSERVED),
+        source("AFIR — contor fonduri disponibile", COUNTER, ["opening", "deadline", "budget"], CURRENT_OBSERVED),
+    ]
+    decision = (
+        "Pregătește dosarul acum pentru deschiderea din 6 octombrie 2026, ora 09:00; "
+        "verifică punctajul pentru etapa curentă și folosește ultima versiune a ghidului și anexelor."
+    )
+    return {
+        "id": "afir-dr12-2026",
+        "sourceType": "AFIR_CANONICAL",
+        "title": "DR-12 — Investiții în consolidarea exploatațiilor tinerilor fermieri",
+        "slug": "afir-dr12-2026",
+        "programme": "AFIR / Planul Strategic PAC 2023-2027",
+        "code": "DR-12",
+        "region": "România",
+        "status": "UPCOMING",
+        "statusLabel": "SE DESCHIDE ÎN CURÂND",
+        "decision": "PREGĂTEȘTE",
+        "decisionLabel": "PREGĂTEȘTE",
+        "decisionAction": decision,
+        "publicationState": "PUBLISHABLE",
+        "standfirst": (
+            "Sesiunea DR-12 se deschide la 6 octombrie 2026, ora 09:00, cu 169.589.647 EUR disponibili "
+            "și finanțare de până la 200.000 EUR/proiect."
+        ),
+        "audience": applicants,
+        "quickFacts": facts([
+            ("Status", "SE DESCHIDE ÎN CURÂND", "CONFIRMED"),
+            ("Deschidere", "6 octombrie 2026, 09:00", "CONFIRMED"),
+            ("Termen", "2 decembrie 2026, 16:00", "CONFIRMED"),
+            ("Grant", "maximum 200.000 EUR/proiect", "CONFIRMED"),
+            ("Buget", "169.589.647 EUR", "CONFIRMED"),
+            ("Intensitate", "maximum 80% pentru tinerii fermieri de până la 40 de ani; maximum 65% pentru celelalte categorii", "CONFIRMED"),
+            ("Completitudine critică", "92%", "SYSTEM"),
+        ]),
+        "sections": [
+            section("Rezumat executiv", [
+                "Stare apel: SE DESCHIDE ÎN CURÂND.",
+                "Deschidere: 6 octombrie 2026, ora 09:00.",
+                "Închidere: 2 decembrie 2026, ora 16:00.",
+                f"Cine poate aplica: {'; '.join(applicants)}",
+                f"Activități finanțate: {activities[0]}",
+                "Valoarea apelului: 169.589.647 EUR, împărțită egal între sectorul zootehnic și alte sectoare.",
+                "Valoarea proiectului individual: maximum 200.000 EUR/proiect.",
+                "Intensitate: maximum 80% pentru tinerii fermieri de până la 40 de ani și maximum 65% pentru celelalte categorii.",
+                "Regiune: România.",
+            ], schemaVersion=1),
+            section("Decizia rapidă", [decision, "Nu depune înainte de deschiderea oficială; pregătește acum documentele și punctajul."]),
+            section("Cine poate aplica", applicants, policy="GUIDE_EXPLICIT_ONLY"),
+            section("Condiții esențiale de eligibilitate", [
+                "Solicitantul trebuie să se încadreze într-una dintre categoriile de beneficiari prevăzute de ghid și să fie șef al exploatației acolo unde ghidul impune această condiție.",
+                "Persoanele fizice neautorizate nu sunt eligibile.",
+                "Verdictul final de eligibilitate se stabilește numai pe datele solicitantului și anexele oficiale curente.",
+            ]),
+            section("Ce finanțează și în ce condiții", activities),
+            section("Costuri, cofinanțare și ajutor de stat", [
+                "Alocarea totală este 169.589.647 EUR: 84.794.823,5 EUR pentru sectorul zootehnic și 84.794.823,5 EUR pentru alte sectoare.",
+                "Sprijinul poate ajunge la 200.000 EUR/proiect.",
+                "Intensitatea maximă este 80% pentru tinerii fermieri de până la 40 de ani și 65% pentru celelalte categorii eligibile.",
+            ]),
+            section("Documente de pregătit", [
+                "Ghidul solicitantului DR-12 și anexele oficiale publicate de AFIR.",
+                "Cererea de finanțare și documentele tehnico-economice aplicabile investiției.",
+                "Fișa E1.2 și Nota de îndrumare AFIR din 2 octombrie 2026.",
+            ]),
+            section("Cum se punctează", [
+                "Prag de calitate: 80 puncte în perioada 6 octombrie – 5 noiembrie 2026.",
+                "Prag de calitate: 45 puncte în perioada 6 noiembrie – 2 decembrie 2026.",
+            ]),
+            section("Indicatori și obligații", [
+                "Indicatorii și obligațiile contractuale se verifică în ghidul și contractul de finanțare aplicabile proiectului concret.",
+                "Păstrează trasabilitatea versiunii documentelor folosite la depunere.",
+            ]),
+            section("Riscuri de respingere sau implementare", [
+                "Punctaj sub pragul etapei lunare aplicabile.",
+                "Încadrare greșită a solicitantului sau investiției față de condițiile ghidului.",
+                "Pentru Fișa E1.2, punctul 3.7 privind ponderea achizițiilor simple într-un proiect complex nu este aplicabil la DR-12 și se marchează «NU ESTE CAZUL», conform notei AFIR din 2 octombrie 2026.",
+            ]),
+            section("Ce trebuie făcut acum", [
+                "Confirmă forma juridică, vârsta și istoricul instalării solicitantului.",
+                "Simulează punctajul pentru pragul de 80 de puncte al primei etape.",
+                "Fixează investițiile eligibile, bugetul și dovada contribuției proprii.",
+                "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea pentru 6 octombrie, ora 09:00.",
+            ]),
+            section("Ce nu este confirmat", [
+                "Eligibilitatea unui solicitant și punctajul unui proiect concret nu pot fi stabilite fără datele sale și verificarea integrală a documentației oficiale.",
+            ]),
+        ],
+        "timeline": [
+            {"date": "2026-09-29T13:00:00+03:00", "kind": "SESSION_ANNOUNCED", "text": "AFIR anunță sesiunea DR-12."},
+            {"date": "2026-10-02T12:30:00+03:00", "kind": "GUIDANCE_UPDATED", "text": "AFIR clarifică aplicarea Fișei E1.2 pentru DR-12."},
+            {"date": "2026-10-06T09:00:00+03:00", "kind": "CALL_OPENS", "text": "Începe sesiunea de depunere DR-12."},
+        ],
+        "sources": sources,
+        "quality": {
+            "completeness": 92,
+            "depthCompleteness": 92,
+            "dossierLevel": "DOSAR AVANSAT",
+            "verifiedFactClasses": ["status", "opening", "deadline", "beneficiaries", "activities", "budget", "grant", "cofinancing", "documents", "scoring", "risks"],
+            "blockedFactClasses": ["project_specific_eligibility"],
+            "evidenceCount": len(sources),
+            "failClosed": True,
+            "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
+            "applicantEvidenceAuthorized": True,
+            "executiveSummaryPresent": True,
+            "afirCurrentUpcomingBundle": True,
+        },
+        "updatedAt": CURRENT_OBSERVED,
+        "canonicalLinks": [row["url"] for row in sources],
+        "executiveSummary": {
+            "status": "UPCOMING",
+            "opens": "2026-10-06T09:00:00+03:00",
+            "closes": "2026-12-02T16:00:00+02:00",
+            "applicants": applicants,
+            "targetGroup": [],
+            "activities": activities,
+            "callBudget": "169.589.647 EUR",
+            "projectValue": "maximum 200.000 EUR/proiect",
+            "cofinancing": "intensitate maximum 80% / 65%, în funcție de categoria beneficiarului",
+            "region": "România",
+            "sourcePolicy": "GUIDE_EXPLICIT_ONLY",
+            "sourceBound": True,
+        },
+        "dossierConstruction": {
+            "autonomous": True,
+            "depthCompleteness": 92,
+            "level": "DOSAR AVANSAT",
+            "missing": ["project_specific_eligibility"],
+            "nextPass": "MONITOR_OPENING_AND_FIRST_SUBMISSIONS",
         },
     }
 
@@ -310,9 +571,10 @@ def main() -> int:
             standfirst="Sesiune deschisă pentru floricultură, plante medicinale, aromatice și ornamentale: 5 milioane EUR, maximum 100.000 EUR/proiect și termen 31 octombrie 2026, ora 16:00.",
         ),
         dr31_dossier(),
+        dr12_dossier(),
     ]
 
-    replace_codes = {"dr 14", "dr 18", "dr 31"}
+    replace_codes = {"dr 12", "dr 14", "dr 18", "dr 31"}
     kept = []
     for row in payload.get("dossiers") or []:
         code = norm(row.get("code"))
@@ -320,12 +582,21 @@ def main() -> int:
         if code in replace_codes or any(token in title for token in replace_codes):
             continue
         kept.append(row)
+
+    energy_ids = {"afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"}
+    present_energy_ids = {row.get("id") for row in kept if row.get("id") in energy_ids}
+    if present_energy_ids != energy_ids:
+        missing = sorted(energy_ids - present_energy_ids)
+        raise RuntimeError(f"Canonical public-energy dossier(s) missing before authoritative promotion: {missing}")
+    kept = [promote_energy_open(row) if row.get("id") in energy_ids else row for row in kept]
     payload["dossiers"] = [*dossiers, *kept]
 
     replacement_news_ids = {row["id"] for row in news_items()}
     payload["news"] = [*news_items(), *[row for row in payload.get("news") or [] if row.get("id") not in replacement_news_ids]]
     payload.setdefault("policy", {})["afirCurrentSessionsSourceBound"] = True
     payload["policy"]["afirConsultationsNeverPresentedAsOpen"] = True
+    payload["policy"]["afirEnergyPostLaunchEvidenceSourceBound"] = True
+    payload["policy"]["afirDr12UpcomingSourceBound"] = True
     payload.setdefault("qualityPass", {})["afirCurrentAuthoritativeDossiers"] = [row["id"] for row in dossiers]
 
     PRODUCTS.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
