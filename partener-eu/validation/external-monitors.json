@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-04T14:55:49Z",
-  "validation_run_started": "2026-10-04T14:55:41Z",
+  "observed_at": "2026-10-04T14:57:55Z",
+  "validation_run_started": "2026-10-04T14:57:45Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "c1adf3b12fdf313842f4cd7fe54ddecc781c3a56803617b03c7f511607ee51d2",
-    "history_sha256": "c1adf3b12fdf313842f4cd7fe54ddecc781c3a56803617b03c7f511607ee51d2",
-    "history_path": "validation/history/20261004T145541Z.json",
+    "latest_sha256": "5e79ebd2e2348dd930282249066ae0c6b0a813aa51823249fe25c2e396135f37",
+    "history_sha256": "5e79ebd2e2348dd930282249066ae0c6b0a813aa51823249fe25c2e396135f37",
+    "history_path": "validation/history/20261004T145745Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "5706535ed92fd5f56c3d7b6c61f95ececb2b5eb7bc964b792929d159fadf9ab2",
-    "checkpoint_sha256": "5706535ed92fd5f56c3d7b6c61f95ececb2b5eb7bc964b792929d159fadf9ab2",
+    "source_state_sha256": "1b01cddafd7853ba0ecb04be623a273f1d2b9b458e1a322e9763c164825cdeaa",
+    "checkpoint_sha256": "1b01cddafd7853ba0ecb04be623a273f1d2b9b458e1a322e9763c164825cdeaa",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-10-04T08:33:06.185565Z",
-    "age_seconds": 22963,
+    "age_seconds": 23089,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -57,13 +57,13 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-10-04T08:39:43.430876+00:00",
+    "observed_at": "2026-10-04T14:56:44.464961+00:00",
     "status": "PASS",
-    "item_count": 31,
-    "error_count": 49,
+    "item_count": 65,
+    "error_count": 0,
     "hash_change_candidates": 1,
     "material_signal_candidates": 1,
-    "auth_dependency_count": 28,
+    "auth_dependency_count": 30,
     "auth_dependencies": [
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -96,6 +96,13 @@
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicare%2Futile%2Fdezbatere-publica%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicate%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/comunicate/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -257,6 +264,13 @@
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Finformatii-sesiune-energie-regenerabila-solicitanti-publici%2F&culture=ro",
         "sourcePage": "https://www.afir.ro/info-la-zi/informatii-sesiune-energie-regenerabila-solicitanti-publici/",
+        "status": "AUTH_OR_ACCESS_DEPENDENT",
+        "materialFactAction": "NONE",
+        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+      },
+      {
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicate%2Fmodel-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."

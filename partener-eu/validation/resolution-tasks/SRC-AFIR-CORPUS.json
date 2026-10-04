@@ -3,7 +3,7 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "ae21f910740c40600404f293026012790c06c1d40058922b371d1aa71c674cc6",
+  "candidate_fingerprint": "abb4d671e224183fc601704cc083bcd9f68558a5f9c81779c29ce4c357210f24",
   "previous_candidate_fingerprint": "ae21f910740c40600404f293026012790c06c1d40058922b371d1aa71c674cc6",
   "candidate_count": 1,
   "material_signal_count": 1,
@@ -11,12 +11,12 @@
     {
       "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "d1f0a89df9ae89c822d4264065995742d48adc38d1c02b34c437fd71b7f2d804",
+      "sha256": "f488790e6ee106cc57ddc32114fd31670b7d2c0039c845699c5037bd72a12bef",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     }
   ],
-  "auth_dependency_count": 28,
+  "auth_dependency_count": 30,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -49,6 +49,13 @@
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicare%2Futile%2Fdezbatere-publica%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/comunicare/utile/dezbatere-publica/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicate%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/comunicate/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
       "materialFactAction": "NONE",
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -213,11 +220,18 @@
       "status": "AUTH_OR_ACCESS_DEPENDENT",
       "materialFactAction": "NONE",
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicate%2Fmodel-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     }
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-10-04T08:39:43.430876+00:00",
+  "last_observed_at": "2026-10-04T14:56:44.464961+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
