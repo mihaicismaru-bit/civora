@@ -66,3 +66,40 @@ def test_calibration_requires_all_fields_and_does_not_lower_sample_gate(tmp_path
     assert report["evaluated_count"] == 1
     assert report["sample_target_met"] is False
     assert report["calibration_complete"] is False
+
+
+def test_calibration_band_is_pending_green_amber_then_red(tmp_path):
+    events = MetaEventStore(tmp_path / "events.sqlite3")
+    for index in range(100):
+        seed(events, "POST", f"post-{index}", f"Useful public update {index}")
+
+    shadow = MetaShadowStore(tmp_path / "shadow.sqlite3")
+    run_shadow(events, shadow)
+    decisions = [
+        compile_shadow_decision(event, policy=load_policy())
+        for event in events.events()
+    ]
+
+    assert shadow.report()["calibration_band"] == "PENDING"
+
+    all_pass = {field: "PASS" for field in EVALUATION_FIELDS}
+    for decision in decisions:
+        shadow.evaluate(decision.decision_id, all_pass)
+    green = shadow.report()
+    assert green["calibration_complete"] is True
+    assert green["calibration_band"] == "GREEN"
+    assert green["live_authority"] == "NONE"
+    assert green["external_write_count"] == 0
+
+    amber_values = dict(all_pass)
+    amber_values["voice"] = "FAIL"
+    shadow.evaluate(decisions[0].decision_id, amber_values)
+    assert shadow.report()["calibration_band"] == "AMBER"
+
+    red_values = dict(all_pass)
+    red_values["factual_grounding"] = "FAIL"
+    shadow.evaluate(decisions[1].decision_id, red_values)
+    red = shadow.report()
+    assert red["calibration_band"] == "RED"
+    assert red["live_authority"] == "NONE"
+    assert red["external_write_count"] == 0
