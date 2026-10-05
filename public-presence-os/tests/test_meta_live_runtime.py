@@ -210,6 +210,25 @@ def test_sync_refuses_safety_widening(tmp_path):
         runtime.sync_once()
 
 
+
+def test_preflight_exposes_only_secret_safe_hold_reason(tmp_path):
+    class FailingClient(FakeClient):
+        def get(self, **kwargs):
+            raise MetaLiveHold("HOLD_META_HTTP_403")
+
+    report = preflight_report(
+        db_path=tmp_path / "events.sqlite3",
+        values=env(META_THREADS_ENABLED="false"),
+        run_live_read=True,
+        client=FailingClient(),
+    )
+    assert report["HOLD REASON"] == "HOLD_META_HTTP_403"
+    rendered = json.dumps(report, sort_keys=True)
+    assert TOKEN_A not in rendered
+    assert TOKEN_B not in rendered
+    assert TOKEN_C not in rendered
+
+
 def test_failed_sync_is_durably_recorded_without_secret_material(tmp_path):
     class FailingClient(FakeClient):
         def get(self, **kwargs):
