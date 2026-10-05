@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "PARTENER_RESOLUTION_TASK_V1",
+  "taskId": "STEP-LLL-PUBLIC-STATUS-DRIFT-20261006",
+  "priority": "P0",
+  "state": "OPEN",
+  "createdAt": "2026-10-05T22:03:02.513089+00:00",
+  "scope": "material_call_status",
+  "opportunityId": "PEO-STEP-LLL-ADULTI-2026",
+  "exactCallCode": "PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66",
+  "authoritativeEvidence": {
+    "authorityClass": "T1_OFFICIAL_MYSMIS_REPORTING",
+    "canonicalUrl": "https://reporting.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+    "observedAt": "2026-10-05T22:03:02.513089+00:00",
+    "runId": "37379843061",
+    "parserVersion": "MYSMIS_EXACT_CALL_INVENTORY_V2",
+    "rawSha256": "efa04e25b83c5295f95a4c885d775b55820ac32d0c45ad6447d3056bea7954be",
+    "officialStatus": "FINALIZAT",
+    "inventoryStatus": "PASS_CANDIDATE_ONLY",
+    "pageComplete": false
+  },
+  "failClosedPolicy": {
+    "openAuthorization": false,
+    "allowedAutomaticDirection": "DEMOTE_STALE_OPEN_ONLY",
+    "targetLifecycle": "CLOSED",
+    "targetOfficialStatus": "FINALIZAT",
+    "forbiddenPublicCopy": [
+      "Stare apel: DESCHIS",
+      "Depunerea este deschisă",
+      "ACȚIONEAZĂ"
+    ],
+    "preserveOtherFactClasses": true,
+    "otherFactClasses": [
+      "deadline",
+      "budget",
+      "grant",
+      "eligibility",
+      "beneficiaries",
+      "scoring"
+    ],
+    "note": "Candidate-only inventory is not general publication authority. Exact identity + FINALIZAT may only demote a stale OPEN state; it cannot promote any other material fact."
+  },
+  "closeWhen": [
+    "producer consumes exact MySMIS FINALIZAT status",
+    "regression rejects stale active deposit language",
+    "decision products and call lifecycle rebuild to CLOSED",
+    "Pages deploy is green",
+    "public readback contains no active-deposit language for STEP-LLL"
+  ]
+}
