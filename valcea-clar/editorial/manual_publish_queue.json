@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "instance_id": "valcea",
-  "requested_at": "2026-10-04T08:58:00+03:00",
-  "requested_by": "VÂLCEA CLAR external editorial control-plane",
+  "requested_at": "2026-10-05T21:55:33+03:00",
+  "requested_by": "VÂLCEA CLAR hourly editorial worker",
   "publication_intent": "publish",
   "facts": [
     {
@@ -1117,6 +1117,154 @@
         ]
       },
       "editorial_note": "Sports result plus service follow-up. Keep the 15-goal margin as derived calculation and do not state qualification as completed before the return leg."
+    },
+    {
+      "id": "a1-cisnadie-boita-inchidere-dn7-20261005",
+      "status": "verified",
+      "section": "MOBILITATE",
+      "editorial_type": "service",
+      "editorial_form": "service_news",
+      "priority": 99,
+      "confidence": 99,
+      "publication_lifecycle": "new_story",
+      "valid_from": "2026-10-05T00:00:00+03:00",
+      "valid_until": "2026-12-19T23:59:59+02:00",
+      "slots": [
+        "evening",
+        "morning"
+      ],
+      "headline": "A1 între Cisnădie și Boița este închisă până pe 19 decembrie; traficul se mută pe DN7 și DN1",
+      "dek": "Închiderea sectorului A1 dintre Cisnădie și Boița mută traficul pe DN7 și DN1; IPJ Vâlcea avertizează asupra unui trafic mai intens pe Valea Oltului.",
+      "paragraphs": [
+        "Circulația pe A1 este închisă între nodurile Cisnădie și Boița în perioada 5 octombrie–19 decembrie 2026, pentru lucrări legate de autostrada Sibiu–Pitești.",
+        "Traficul este deviat în ambele sensuri pe DN7 prin Boița–Tălmaciu–Veștem și apoi pe DN1 către Cisnădie.",
+        "IPJ Vâlcea avertizează că traficul pe DN7 poate crește semnificativ inclusiv pe sectorul din județul Vâlcea, cu posibile coloane și timpi mai mari de parcurs.",
+        "VÂLCEA CLAR va actualiza aceeași poveste dacă perioada sau ruta de deviere sunt modificate oficial."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "CNAIR — anunț oficial A1 Cisnădie–Boița",
+          "url": "https://www.cnadnr.ro/",
+          "tier": "T1"
+        },
+        {
+          "name": "Poliția Română — rută alternativă, citată direct",
+          "url": "https://buletin.de/bucuresti/autostrada-a1-se-inchide-intre-sibiu-si-boita-pana-in-decembrie-pe-ce-ruta-vor-circula-soferii-spre-bucuresti/",
+          "tier": "T1B_ATTRIBUTED"
+        },
+        {
+          "name": "IPJ Vâlcea — impact DN7, citat direct",
+          "url": "https://alba24.ro/recomandarile-politiei-pentru-soferii-care-merg-pe-valea-oltului-dupa-inchiderea-temporara-a-autostrazii-a1-sibiu-boita-1161181.html",
+          "tier": "T1B_ATTRIBUTED"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "claims": [
+          {
+            "id": "closure",
+            "role": "material_change",
+            "kind": "fact",
+            "certainty": "CONFIRMED_FACT",
+            "text": "A1 este închisă între Cisnădie și Boița din 5 octombrie până în 19 decembrie 2026.",
+            "source_urls": [
+              "https://www.cnadnr.ro/"
+            ]
+          },
+          {
+            "id": "diversion",
+            "role": "reader_action",
+            "kind": "fact",
+            "certainty": "CONFIRMED_FACT",
+            "text": "Traficul este deviat pe DN7 prin Boița–Tălmaciu–Veștem și apoi pe DN1 către Cisnădie.",
+            "source_urls": [
+              "https://www.cnadnr.ro/",
+              "https://buletin.de/bucuresti/autostrada-a1-se-inchide-intre-sibiu-si-boita-pana-in-decembrie-pe-ce-ruta-vor-circula-soferii-spre-bucuresti/"
+            ]
+          },
+          {
+            "id": "valcea-impact",
+            "role": "reader_service",
+            "kind": "attributed_statement",
+            "certainty": "SOURCE_CLAIM",
+            "text": "IPJ Vâlcea avertizează asupra creșterii traficului pe DN7, inclusiv în județul Vâlcea.",
+            "attribution": "IPJ Vâlcea",
+            "source_urls": [
+              "https://alba24.ro/recomandarile-politiei-pentru-soferii-care-merg-pe-valea-oltului-dupa-inchiderea-temporara-a-autostrazii-a1-sibiu-boita-1161181.html"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "Service story. Keep traffic-growth claim attributed; do not infer measured delays."
+    },
+    {
+      "id": "caineni-sef-serviciu-apa-concurs-20261005",
+      "status": "verified",
+      "section": "LOCURI DE MUNCĂ",
+      "editorial_type": "service",
+      "editorial_form": "service_news",
+      "priority": 91,
+      "confidence": 100,
+      "publication_lifecycle": "new_story",
+      "valid_from": "2026-10-05T00:00:00+03:00",
+      "valid_until": "2026-10-16T14:00:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "headline": "Câineni caută șef pentru Serviciul de Alimentare cu Apă; dosarele se depun până pe 16 octombrie",
+      "dek": "Primăria Câineni organizează concurs pentru un post contractual permanent, cu normă întreagă, de șef al Serviciului de Alimentare cu Apă. Dosarele se depun în perioada 5–16 octombrie.",
+      "paragraphs": [
+        "Primăria Comunei Câineni organizează concurs pentru ocuparea unui post contractual permanent, cu normă întreagă, de șef al Serviciului de Alimentare cu Apă.",
+        "Dosarele de concurs se depun în perioada 5–16 octombrie 2026, între orele 09:00 și 14:00, la compartimentul Juridic și Resurse Umane al primăriei.",
+        "Calendarul publicat prevede selecția dosarelor pe 19 octombrie, proba scrisă pe 26 octombrie la ora 10:00, interviul pe 29 octombrie la ora 10:00 și rezultatul final pe 2 noiembrie.",
+        "Anunțul oficial precizează cerințele de studii și competențele solicitate. VÂLCEA CLAR nu publică salarii sau alte condiții care nu sunt precizate în anunț."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Posturi.gov.ro — Primăria Comunei Câineni",
+          "url": "https://posturi.gov.ro/joburi/sef-serviciu-alimentare-cu-apa/",
+          "tier": "T1"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "claims": [
+          {
+            "id": "caineni-post",
+            "role": "who_what_where",
+            "kind": "fact",
+            "certainty": "CONFIRMED_FACT",
+            "text": "Primăria Comunei Câineni scoate la concurs un post contractual permanent, cu normă întreagă, de șef al Serviciului de Alimentare cu Apă.",
+            "source_urls": [
+              "https://posturi.gov.ro/joburi/sef-serviciu-alimentare-cu-apa/"
+            ]
+          },
+          {
+            "id": "caineni-deadline",
+            "role": "reader_action",
+            "kind": "fact",
+            "certainty": "CONFIRMED_FACT",
+            "text": "Dosarele se depun în perioada 5–16 octombrie 2026, între 09:00 și 14:00.",
+            "source_urls": [
+              "https://posturi.gov.ro/joburi/sef-serviciu-alimentare-cu-apa/"
+            ]
+          },
+          {
+            "id": "caineni-calendar",
+            "role": "reader_action",
+            "kind": "fact",
+            "certainty": "CONFIRMED_FACT",
+            "text": "Selecția dosarelor este pe 19 octombrie, proba scrisă pe 26 octombrie la 10:00, interviul pe 29 octombrie la 10:00, iar rezultatul final pe 2 noiembrie.",
+            "source_urls": [
+              "https://posturi.gov.ro/joburi/sef-serviciu-alimentare-cu-apa/"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "Low-risk public-service vacancy. Do not infer salary or requirements not explicit in the official notice."
     }
   ]
 }
