@@ -2,6 +2,10 @@ name: PUBLIC PRESENCE SHADOW PREFLIGHT
 
 on:
   workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - '.github/workflows/public-presence-shadow.yml'
 
 permissions:
   contents: read
