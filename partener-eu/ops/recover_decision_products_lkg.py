@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import json
 import subprocess
 import sys
@@ -126,29 +127,110 @@ def merge_lkg(current: dict[str, Any], historical: dict[str, Any], source_sha: s
     return current
 
 
+def recover_or_preserve(current: dict[str, Any], historical: dict[str, Any] | None, source_sha: str | None, allow_dossier_resurrection: bool) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Preserve current canonical membership unless an emergency override is explicit."""
+    if not localized(current):
+        raise RuntimeError("current decision-products projection is not localized/public-safe")
+    current_dossiers = list(current.get("dossiers") or [])
+    if not current_dossiers:
+        raise RuntimeError("current decision-products projection has zero dossiers")
+
+    current_ids = {str(row.get("id")) for row in current_dossiers if row.get("id")}
+    historical_ids = {str(row.get("id")) for row in ((historical or {}).get("dossiers") or []) if row.get("id")}
+    missing_historical_ids = sorted(historical_ids - current_ids)
+    before = len(current_dossiers)
+
+    if allow_dossier_resurrection:
+        if historical is None or source_sha is None:
+            raise RuntimeError("explicit dossier resurrection requested but no localized historical LKG is available")
+        merged = merge_lkg(current, historical, source_sha)
+        return merged, {
+            "status": "RECOVERED_EXPLICIT_OVERRIDE" if len(merged.get("dossiers") or []) > before else "CURRENT_LKG_PRESERVED",
+            "sourceCommit": source_sha,
+            "beforeDossiers": before,
+            "afterDossiers": len(merged.get("dossiers") or []),
+            "historicalMissingDossierCount": len(missing_historical_ids),
+            "protectedDossiers": protected_count(merged),
+            "automaticResurrection": False,
+            "explicitOverride": True,
+        }
+
+    current.setdefault("policy", {})["lastKnownGoodRecovery"] = {
+        "sourceCommit": source_sha,
+        "recoveredDossierCount": 0,
+        "historicalMissingDossierCount": len(missing_historical_ids),
+        "preservedCurrentDossiers": True,
+        "mode": "PRESERVE_CURRENT_FAIL_CLOSED",
+        "automaticResurrectionAllowed": False,
+    }
+    return current, {
+        "status": "CURRENT_LKG_PRESERVED",
+        "sourceCommit": source_sha,
+        "beforeDossiers": before,
+        "afterDossiers": before,
+        "historicalMissingDossierCount": len(missing_historical_ids),
+        "protectedDossiers": protected_count(current),
+        "automaticResurrection": False,
+        "explicitOverride": False,
+    }
+
+
+def run_self_test() -> int:
+    policy = {"romanianPublicLanguage": True, "rawStructuredObjectsVisible": False}
+    current = {
+        "policy": dict(policy),
+        "dossiers": [{"id": "current-a", "sourceType": "MIPE_CANONICAL_V1", "quickFacts": []}],
+        "news": [{"id": "news-current", "date": "2026-10-05", "utilityScore": 10}],
+        "home": {"prepareDossierIds": ["current-a"]},
+    }
+    historical = {
+        "policy": dict(policy),
+        "dossiers": [
+            {"id": "current-a", "sourceType": "MIPE_CANONICAL_V1", "quickFacts": []},
+            {"id": "historical-b", "sourceType": "MIPE_CANONICAL_V1", "quickFacts": []},
+        ],
+        "news": [{"id": "news-old", "date": "2026-09-01", "utilityScore": 1}],
+        "home": {"prepareDossierIds": ["historical-b"]},
+    }
+    preserved, diagnostic = recover_or_preserve(copy.deepcopy(current), historical, "test-sha", False)
+    assert [row["id"] for row in preserved["dossiers"]] == ["current-a"]
+    assert [row["id"] for row in preserved["news"]] == ["news-current"]
+    assert preserved["home"]["prepareDossierIds"] == ["current-a"]
+    assert diagnostic["historicalMissingDossierCount"] == 1
+    recovered, override = recover_or_preserve(copy.deepcopy(current), historical, "test-sha", True)
+    assert {row["id"] for row in recovered["dossiers"]} == {"current-a", "historical-b"}
+    assert override["status"] == "RECOVERED_EXPLICIT_OVERRIDE"
+    print(json.dumps({"status": "PASS", "defaultDossiers": 1, "overrideDossiers": 2}, ensure_ascii=False))
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--history-limit", type=int, default=80)
+    parser.add_argument("--allow-dossier-resurrection", action="store_true")
+    parser.add_argument("--self-test", action="store_true")
     args = parser.parse_args()
+    if args.self_test:
+        return run_self_test()
+
     current = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     candidates = history(args.history_limit)
-    if not candidates:
-        raise SystemExit("No localized historical decision-products LKG found")
-    source_sha, strongest = max(
-        candidates,
-        key=lambda item: (protected_count(item[1]), len(item[1].get("dossiers") or []), str(item[1].get("generatedAt") or "")),
-    )
-    before = len(current.get("dossiers") or [])
-    merged = merge_lkg(current, strongest, source_sha)
-    PRODUCTS.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    source_sha: str | None = None
+    strongest: dict[str, Any] | None = None
+    if candidates:
+        source_sha, strongest = max(
+            candidates,
+            key=lambda item: (protected_count(item[1]), len(item[1].get("dossiers") or []), str(item[1].get("generatedAt") or "")),
+        )
+
+    try:
+        output, diagnostic = recover_or_preserve(current, strongest, source_sha, args.allow_dossier_resurrection)
+    except RuntimeError as exc:
+        raise SystemExit(f"Fail closed: {exc}. Existing deployed Pages LKG must be preserved.") from exc
+
+    PRODUCTS.write_text(json.dumps(output, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     subprocess.run([sys.executable, str(LOCALIZE)], cwd=ROOT, check=True)
-    print(json.dumps({
-        "status": "RECOVERED" if len(merged.get("dossiers") or []) > before else "CURRENT_LKG_PRESERVED",
-        "sourceCommit": source_sha,
-        "beforeDossiers": before,
-        "afterDossiers": len(merged.get("dossiers") or []),
-        "protectedDossiers": protected_count(merged),
-    }, ensure_ascii=False, indent=2))
+    print(json.dumps(diagnostic, ensure_ascii=False, indent=2))
     return 0
 
 
