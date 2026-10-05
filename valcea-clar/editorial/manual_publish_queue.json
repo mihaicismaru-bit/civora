@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "instance_id": "valcea",
-  "requested_at": "2026-10-04T08:58:00+03:00",
-  "requested_by": "VÂLCEA CLAR external editorial control-plane",
+  "requested_at": "2026-10-05T18:38:00+03:00",
+  "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
   "publication_intent": "publish",
   "facts": [
     {
@@ -1117,6 +1117,98 @@
         ]
       },
       "editorial_note": "Sports result plus service follow-up. Keep the 15-goal margin as derived calculation and do not state qualification as completed before the return leg."
+    },
+    {
+      "id": "ajofm-valcea-stimulente-angajatori-termen-31-octombrie-20260930",
+      "status": "verified",
+      "section": "ECONOMIE",
+      "editorial_type": "service",
+      "editorial_form": "service_news",
+      "priority": 95,
+      "confidence": 100,
+      "publication_lifecycle": "new_story",
+      "valid_from": "2026-09-30T00:00:00+03:00",
+      "valid_until": "2026-10-31T23:59:59+02:00",
+      "slots": [
+        "day",
+        "evening",
+        "morning"
+      ],
+      "headline": "AJOFM Vâlcea are fonduri pentru stimulente acordate angajatorilor; termenul maxim este 31 octombrie",
+      "dek": "Sprijinul vizează angajarea unor categorii prevăzute de lege; persoana trebuie înregistrată la AJOFM înainte de angajare, iar dosarele sunt soluționate cronologic în PULS, în limita fondurilor.",
+      "paragraphs": [
+        "AJOFM Vâlcea anunță fonduri pentru stimulente financiare acordate angajatorilor care încadrează persoane din categoriile prevăzute de lege.",
+        "Categoriile enumerate includ șomeri de peste 50 de ani, părinți unici, șomeri de lungă durată, tineri NEET, persoane cu handicap, șomeri aflați la cel mult doi ani de pensionare și persoane în programe de ucenicie.",
+        "Persoana pentru care se solicită stimulentul trebuie să fie înregistrată la AJOFM Vâlcea înainte de angajare, în condițiile legii.",
+        "Termenul maxim este 31 octombrie 2026, iar dosarele sunt soluționate cronologic în PULS și în limita fondurilor alocate."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "AJOFM Vâlcea — Comunicat 30.09.2026",
+          "url": "https://www.anofm.ro/valcea/comunicat-de-presa-stimulente-pentru-angajatori/",
+          "tier": "T1"
+        },
+        {
+          "name": "AJOFM Vâlcea — PDF stimulente",
+          "url": "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/09/Stimulente-pentru-angajatori-SITE.pdf",
+          "tier": "T1"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "AJOFM Vâlcea are fonduri pentru stimulente acordate angajatorilor; termenul maxim este 31 octombrie",
+          "source_urls": [
+            "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/09/Stimulente-pentru-angajatori-SITE.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Sprijinul vizează angajarea unor categorii prevăzute de lege; persoana trebuie înregistrată la AJOFM înainte de angajare, iar dosarele sunt soluționate cronologic în PULS, în limita fondurilor.",
+          "source_urls": [
+            "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/09/Stimulente-pentru-angajatori-SITE.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "ajofm-funds",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "AJOFM Vâlcea anunță fonduri disponibile pentru stimulente acordate angajatorilor care încadrează persoane din categoriile prevăzute de legislație.",
+            "source_urls": [
+              "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/09/Stimulente-pentru-angajatori-SITE.pdf"
+            ]
+          },
+          {
+            "id": "ajofm-registration",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "Persoana pentru care se solicită stimulentul trebuie să fie înregistrată la AJOFM Vâlcea înainte de angajare, în condițiile legii.",
+            "source_urls": [
+              "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/09/Stimulente-pentru-angajatori-SITE.pdf"
+            ]
+          },
+          {
+            "id": "ajofm-deadline",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "Termenul maxim anunțat pentru accesarea fondurilor este 31 octombrie 2026.",
+            "source_urls": [
+              "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/09/Stimulente-pentru-angajatori-SITE.pdf"
+            ]
+          },
+          {
+            "id": "ajofm-puls",
+            "role": "reader_action",
+            "kind": "reader_service",
+            "text": "Dosarele sunt soluționate cronologic, în ordinea depunerii în platforma PULS și în limita fondurilor alocate.",
+            "source_urls": [
+              "https://www.anofm.ro/valcea/wp-content/uploads/sites/41/2026/09/Stimulente-pentru-angajatori-SITE.pdf"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "Service story from the AJOFM Vâlcea primary release; do not infer subsidy amounts or guaranteed payment."
     }
   ]
 }
