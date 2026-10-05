@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "type": "PUBLIC_TRUTH_DRIFT_RESOLUTION",
+  "source_id": "STEP-LLL-PUBLIC-STATUS-DRIFT",
+  "status": "OPEN",
+  "severity": "P0_TRUTH_DRIFT",
+  "first_observed_at": "2026-10-05T10:24:00Z",
+  "target": {
+    "dossier_id": "PEO-STEP-LLL-ADULTI-2026",
+    "exact_call_code": "PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66"
+  },
+  "authoritative_truth": {
+    "status": "FINALIZAT",
+    "authority": "T1_OFFICIAL_MYSMIS_REPORTING",
+    "evidence_checkpoint": "partener-eu/ingest/state/resolutions/step_lll_finalized_20261005.json",
+    "observed_at": "2026-10-05T08:11:03.499848+00:00",
+    "run_id": "37281967401",
+    "raw_sha256": "8a4e698788828d7077688e390833684e262936617d39aea3c792374d9fb5cb1c"
+  },
+  "public_drift": {
+    "catalog_projection": "IN_VERIFICARE",
+    "detail_page_projection": "DESCHIS",
+    "stale_action_copy": "Depunerea este deschisă până la 30 septembrie 2026, ora 16:00.",
+    "detail_url": "https://partener.eu/dosare/peo-step-lll-adulti-2026-step-lll-competente-pentru-viitor-formare-la-locul-de-munca-si-educatia-adultilor-in/"
+  },
+  "fail_closed_policy": {
+    "automatic_open_authorization": false,
+    "preserve_last_known_good": true,
+    "required_resolution": "Reconcile the authoritative dossier producer and static dossier projection to FINALIZAT/CLOSED, add a regression test, rebuild decision products, deploy, and verify public readback."
+  },
+  "done_when": [
+    "producer no longer hardcodes OPEN/DESCHIS for STEP-LLL",
+    "regression asserts FINALIZAT/CLOSED and no open-submission copy",
+    "decision-products and lifecycle rebuild pass",
+    "public detail page no longer says DESCHIS or depunerea este deschisă",
+    "deployment readback passes"
+  ]
+}
