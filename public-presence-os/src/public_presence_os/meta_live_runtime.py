@@ -746,10 +746,12 @@ def preflight_report(
         "EVENT LOG": "PASS" if store.healthcheck() else "FAIL",
         "KILL SWITCH": "ENGAGED",
         "LIVE AUTHORITY": "NONE",
+        "HOLD REASON": "NONE",
     }
     try:
         config = MetaRuntimeConfig.from_env(values)
-    except MetaLiveHold:
+    except MetaLiveHold as exc:
+        report["HOLD REASON"] = exc.reason
         return report
     report["META APP"] = "PASS" if config.app_id == EXPECTED_APP_ID else "FAIL"
     report["FACEBOOK AUTH"] = "PASS"
@@ -762,8 +764,11 @@ def preflight_report(
         return report
     try:
         summary = MetaReadRuntime(config, client or MetaReadClient(), store).sync_once()
-    except MetaLiveHold:
+    except MetaLiveHold as exc:
+        report["HOLD REASON"] = exc.reason
         return report
+    if summary.holds:
+        report["HOLD REASON"] = ";".join(summary.holds)
     observed = dict(summary.identities)
     report["PAGE IDENTITY"] = "PASS" if observed.get("FACEBOOK_PAGE") == EXPECTED_PAGE_ID else "FAIL"
     report["INSTAGRAM BINDING"] = "PASS" if observed.get("INSTAGRAM_PROFESSIONAL") == EXPECTED_IG_ID else "FAIL"
