@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-05T01:23:27Z",
-  "validation_run_started": "2026-10-05T01:23:19Z",
+  "observed_at": "2026-10-05T05:43:23Z",
+  "validation_run_started": "2026-10-05T05:43:14Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "241ced9ef62b5b31628276bff19ce2150303e2550e47359f3175d7b3d2be2885",
-    "history_sha256": "241ced9ef62b5b31628276bff19ce2150303e2550e47359f3175d7b3d2be2885",
-    "history_path": "validation/history/20261005T012319Z.json",
+    "latest_sha256": "a2712da5e4f0439b842833e77c359828e9056a8a10d47efd60141430cddfcb4f",
+    "history_sha256": "a2712da5e4f0439b842833e77c359828e9056a8a10d47efd60141430cddfcb4f",
+    "history_path": "validation/history/20261005T054314Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "797ec9cbf6697158192bb9fe03d8b4a214ecf7b266c3096fd2ab9fa04606f532",
-    "checkpoint_sha256": "797ec9cbf6697158192bb9fe03d8b4a214ecf7b266c3096fd2ab9fa04606f532",
+    "source_state_sha256": "a45082eb38f0cec4834f27f34fafa25a31907e0bd27482199cc395ae95d0309a",
+    "checkpoint_sha256": "a45082eb38f0cec4834f27f34fafa25a31907e0bd27482199cc395ae95d0309a",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-10-04T23:18:38.653212Z",
-    "age_seconds": 7488,
+    "age_seconds": 23084,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -295,7 +295,7 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-10-04T23:19:20.441662+00:00",
+    "observed_at": "2026-10-05T02:10:28.275005+00:00",
     "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
     "source_available": false,
     "candidate_count": 56,
@@ -305,14 +305,16 @@
     "health": "PASS"
   },
   "mff_2028_2034": {
-    "observed_at": "2026-10-04T21:26:15.771182Z",
+    "observed_at": "2026-10-05T05:42:16.455582Z",
     "summary": {
       "total": 8,
       "pass": 2,
       "fail": 6,
-      "review_required": 0
+      "review_required": 1
     },
-    "hash_changed_source_ids": [],
+    "hash_changed_source_ids": [
+      "SRC-RO-MAI-EU-2028"
+    ],
     "unsafe_auto_promotions": [],
     "fail_closed": true
   },
