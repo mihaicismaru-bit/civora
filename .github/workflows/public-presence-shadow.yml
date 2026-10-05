@@ -21,6 +21,7 @@ jobs:
         working-directory: public-presence-os
     env:
       META_APP_ID: "1488219383133581"
+      META_USER_ACCESS_TOKEN: ${{ secrets.META_USER_ACCESS_TOKEN }}
       META_PAGE_ID: "2816314015107071"
       META_IG_USER_ID: "17841429701593250"
       META_THREADS_USER_ID: "28391623420464631"
@@ -64,3 +65,7 @@ jobs:
         env:
           PYTHONPATH: src
         run: python -m public_presence_os.cli validate --root .
+      - name: Run bounded Meta read-only preflight
+        env:
+          PYTHONPATH: src
+        run: python -m public_presence_os.cli meta-preflight --db "$RUNNER_TEMP/meta-events.sqlite3" --live
