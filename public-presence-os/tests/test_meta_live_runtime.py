@@ -270,6 +270,8 @@ def test_page_token_can_be_primary_authority_without_user_token(tmp_path):
     config = MetaRuntimeConfig.from_env(values)
     assert config.user_token is None
     assert config.page_token == TOKEN_B
+    assert config.redacted()["page_token_present"] is True
+    assert config.redacted()["user_token_present"] is False
 
     client = FakeClient()
     store = MetaEventStore(tmp_path / "events.sqlite3")
