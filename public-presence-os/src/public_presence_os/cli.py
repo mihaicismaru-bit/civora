@@ -54,11 +54,13 @@ def main(argv=None):
         report=meta_preflight_report(db_path=args.db,run_live_read=args.live)
         for name,value in report.items():
             print(f"{name:<24} {value}")
-        required=["META_USER_ACCESS_TOKEN"]
-        if os.getenv("META_THREADS_ENABLED", "true").strip().lower() not in {"0", "false", "no", "off"}:
-            required.append("META_THREADS_ACCESS_TOKEN")
         presence=environment_presence()
-        missing=[name for name in required if not presence[name]]
+        missing=[]
+        if not presence["META_USER_ACCESS_TOKEN"] and not presence["META_PAGE_ACCESS_TOKEN"]:
+            missing.append("META_READ_TOKEN")
+        if os.getenv("META_THREADS_ENABLED", "true").strip().lower() not in {"0", "false", "no", "off"}:
+            if not presence["META_THREADS_ACCESS_TOKEN"]:
+                missing.append("META_THREADS_ACCESS_TOKEN")
         if missing:
             print("SETUP".ljust(24)+" MISSING:"+",".join(missing))
         return 0 if report["READ CAPABILITIES"]=="PASS" or not args.live else 2
