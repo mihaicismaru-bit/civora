@@ -16,7 +16,31 @@ permissions:
   contents: read
 
 jobs:
+  contract-guards:
+    name: secret-and-shadow-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: public-presence-os
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install package and test runner
+        run: python -m pip install -e . pytest
+      - name: Run secret-material and shadow contract guards first
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m pytest -q \
+            tests/test_productization.py::test_no_secret_material \
+            tests/test_productization.py::test_shadow_preflight_workflow_contract_is_locked_and_secret_free \
+            tests/test_productization.py::test_root_ci_watches_shadow_workflow_contract
+
   tests:
+    needs: contract-guards
     name: tests-shard-${{ matrix.shard }}
     runs-on: ubuntu-latest
     timeout-minutes: 180
