@@ -3,27 +3,34 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "93095ed53d0d0a1e5ee8c91e783a9ef1fba8e6e9343eb432d3c669b6d45e0cb1",
+  "candidate_fingerprint": "8da9309afa55b6e27bcc8f1952b7f00a22dc009573cfff7187f4291f3f47054a",
   "previous_candidate_fingerprint": "93095ed53d0d0a1e5ee8c91e783a9ef1fba8e6e9343eb432d3c669b6d45e0cb1",
-  "candidate_count": 2,
-  "material_signal_count": 2,
+  "candidate_count": 3,
+  "material_signal_count": 3,
   "candidates": [
     {
-      "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-      "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "a6361ba1a80536e8583dac163bd5ee2629752924511248ac3a44fa9c01d7922e",
+      "url": "https://www.afir.ro/comunicate/",
+      "title": "Comunicate",
+      "sha256": "7555e68798a16c1358b0b8728a8bad75c4ade4c4f48521c0b75ccbd1ba08a109",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     },
     {
-      "url": "https://www.afir.ro/instrumente/nomenclator/firme-de-consultanta/",
-      "title": "Firme de consultanță - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "d7af82abb6a2b5580e107b95c61c5ed2a9b6397fa8c0afdf1145f13aa35057dd",
+      "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+      "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "sha256": "a095036e069efafa9155b0165d4b04304c86f82e4b0ddad4aee4ca15ca7e3a09",
+      "material_change_candidate": true,
+      "material_fact_action": "RESOLUTION_TASK_ONLY"
+    },
+    {
+      "url": "https://www.afir.ro/info-la-zi/",
+      "title": "Info la zi",
+      "sha256": "b86c632f82980630595f90bc2679ae278522d241800af1967f9b833d1ad2af2a",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     }
   ],
-  "auth_dependency_count": 30,
+  "auth_dependency_count": 29,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -222,13 +229,6 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
-      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Finformatii-sesiune-energie-regenerabila-solicitanti-publici%2F&culture=ro",
-      "sourcePage": "https://www.afir.ro/info-la-zi/informatii-sesiune-energie-regenerabila-solicitanti-publici/",
-      "status": "AUTH_OR_ACCESS_DEPENDENT",
-      "materialFactAction": "NONE",
-      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-    },
-    {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicate%2Fmodel-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -238,7 +238,7 @@
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-10-05T07:29:13.722424+00:00",
+  "last_observed_at": "2026-10-05T16:19:30.422756+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
