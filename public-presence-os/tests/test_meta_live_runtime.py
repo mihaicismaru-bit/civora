@@ -263,6 +263,27 @@ def test_partial_sync_never_reports_read_capabilities_pass(tmp_path):
 
 
 
+def test_page_token_can_be_primary_authority_without_user_token(tmp_path):
+    values = env(META_THREADS_ENABLED="false")
+    values.pop("META_THREADS_ACCESS_TOKEN")
+    values.pop("META_USER_ACCESS_TOKEN")
+    config = MetaRuntimeConfig.from_env(values)
+    assert config.user_token is None
+    assert config.page_token == TOKEN_B
+
+    client = FakeClient()
+    store = MetaEventStore(tmp_path / "events.sqlite3")
+    summary = MetaReadRuntime(config, client, store).sync_once()
+    assert summary.state == "READ_ONLY_REAL_SYNC_PASS"
+    assert dict(summary.identities) == {
+        "FACEBOOK_PAGE": EXPECTED_PAGE_ID,
+        "INSTAGRAM_PROFESSIONAL": EXPECTED_IG_ID,
+    }
+    assert summary.write_count == 0
+    assert client.calls[0][1].endswith(f"/{EXPECTED_PAGE_ID}")
+    assert all(call[3] == TOKEN_B for call in client.calls)
+
+
 def test_threads_can_be_held_without_blocking_facebook_instagram_read_only(tmp_path):
     values = env(META_THREADS_ENABLED="false")
     values.pop("META_THREADS_ACCESS_TOKEN")
@@ -314,5 +335,5 @@ def test_cli_preflight_without_credentials_is_precise_and_secret_free(tmp_path):
     assert "META APP                 FAIL" in result.stdout
     assert "WRITE CAPABILITIES       LOCKED" in result.stdout
     assert "LIVE AUTHORITY           NONE" in result.stdout
-    assert "MISSING:META_USER_ACCESS_TOKEN,META_THREADS_ACCESS_TOKEN" in result.stdout
+    assert "MISSING:META_READ_TOKEN,META_THREADS_ACCESS_TOKEN" in result.stdout
     assert TOKEN_A not in result.stdout
