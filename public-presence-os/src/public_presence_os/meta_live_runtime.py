@@ -86,7 +86,7 @@ class MetaRuntimeConfig:
     threads_user_id: str
     graph_version: str
     threads_version: str
-    user_token: str = field(repr=False)
+    user_token: str | None = field(default=None, repr=False)
     threads_token: str | None = field(default=None, repr=False)
     page_token: str | None = field(default=None, repr=False)
     app_secret: str | None = field(default=None, repr=False)
@@ -105,7 +105,18 @@ class MetaRuntimeConfig:
         threads_version = env.get("META_THREADS_API_VERSION", "v1.0")
         if not graph_version.startswith("v") or not threads_version.startswith("v"):
             raise MetaLiveHold("HOLD_META_API_VERSION_INVALID")
-        user_token = _required_secret(env, "META_USER_ACCESS_TOKEN")
+        user_token = env.get("META_USER_ACCESS_TOKEN") or None
+        if user_token is not None and (
+            len(user_token.strip()) < 20 or any(ch.isspace() for ch in user_token)
+        ):
+            raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_USER_ACCESS_TOKEN")
+        page_token = env.get("META_PAGE_ACCESS_TOKEN") or None
+        if page_token is not None and (
+            len(page_token.strip()) < 20 or any(ch.isspace() for ch in page_token)
+        ):
+            raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_PAGE_ACCESS_TOKEN")
+        if user_token is None and page_token is None:
+            raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_READ_TOKEN")
         threads_enabled = _bool(env.get("META_THREADS_ENABLED"), default=True)
         threads_token = env.get("META_THREADS_ACCESS_TOKEN") or None
         if threads_enabled:
@@ -114,9 +125,6 @@ class MetaRuntimeConfig:
             len(threads_token.strip()) < 20 or any(ch.isspace() for ch in threads_token)
         ):
             raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_THREADS_ACCESS_TOKEN")
-        page_token = env.get("META_PAGE_ACCESS_TOKEN") or None
-        if page_token is not None and len(page_token) < 20:
-            raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_PAGE_ACCESS_TOKEN")
         app_secret = env.get("META_APP_SECRET") or None
         if app_secret is not None and len(app_secret) < 8:
             raise MetaLiveHold("HOLD_META_SECRET_MISSING_META_APP_SECRET")
@@ -144,7 +152,7 @@ class MetaRuntimeConfig:
             "threads_user_id": self.threads_user_id,
             "graph_version": self.graph_version,
             "threads_version": self.threads_version,
-            "user_token_present": True,
+            "user_token_present": self.user_token is not None,
             "page_token_present": self.page_token is not None,
             "threads_enabled": self.threads_enabled,
             "threads_token_present": self.threads_token is not None,
@@ -506,13 +514,28 @@ class MetaReadRuntime:
         return summary
 
     def _page_authority(self) -> tuple[str, dict[str, Any]]:
-        fields = "id,name,tasks,instagram_business_account"
-        if self.config.page_token is None:
-            fields += ",access_token"
+        if self.config.page_token is not None:
+            page = self._get(
+                "FACEBOOK_PAGE",
+                f"/{self.config.graph_version}/{self.config.page_id}",
+                {"fields": "id,name,tasks,instagram_business_account"},
+                self.config.page_token,
+            )
+            if page.get("id") != self.config.page_id:
+                raise MetaLiveHold("HOLD_META_PAGE_NOT_ACCESSIBLE")
+            linked = page.get("instagram_business_account")
+            if page.get("name") != EXPECTED_NAME:
+                raise MetaLiveHold("HOLD_META_PAGE_NAME_MISMATCH")
+            if not isinstance(linked, Mapping) or linked.get("id") != self.config.ig_user_id:
+                raise MetaLiveHold("HOLD_META_INSTAGRAM_BINDING_MISMATCH")
+            return self.config.page_token, page
+
+        if self.config.user_token is None:
+            raise MetaLiveHold("HOLD_META_PAGE_AUTHORITY_MISSING")
         payload = self._get(
             "FACEBOOK_PAGE",
             f"/{self.config.graph_version}/me/accounts",
-            {"fields": fields, "limit": "100"},
+            {"fields": "id,name,tasks,instagram_business_account,access_token", "limit": "100"},
             self.config.user_token,
         )
         matches = [item for item in _data(payload) if item.get("id") == self.config.page_id]
@@ -524,7 +547,7 @@ class MetaReadRuntime:
             raise MetaLiveHold("HOLD_META_PAGE_NAME_MISMATCH")
         if not isinstance(linked, Mapping) or linked.get("id") != self.config.ig_user_id:
             raise MetaLiveHold("HOLD_META_INSTAGRAM_BINDING_MISMATCH")
-        token = self.config.page_token or page.get("access_token")
+        token = page.get("access_token")
         if not isinstance(token, str) or len(token) < 20:
             raise MetaLiveHold("HOLD_META_PAGE_AUTHORITY_MISSING")
         page.pop("access_token", None)
