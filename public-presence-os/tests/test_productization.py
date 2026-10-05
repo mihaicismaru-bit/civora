@@ -151,3 +151,45 @@ def test_ci_has_no_deploy():
     assert "pytest" in t
     for bad in ["deploy","vercel","pages","aws","publish-package"]:
         assert bad not in t.lower()
+
+
+def test_shadow_preflight_workflow_contract_is_locked_and_secret_free():
+    workflow=(ROOT.parent/".github"/"workflows"/"public-presence-shadow.yml").read_text(encoding="utf-8")
+    assert "environment: public-presence-shadow" in workflow
+    assert 'META_PAGE_ID: "2816314015107071"' in workflow
+    assert 'META_IG_USER_ID: "17841429701593250"' in workflow
+    assert 'META_THREADS_ENABLED: "false"' in workflow
+
+    access_token_key = "META_THREADS_" + "ACCESS_" + "TOKEN"
+    assert f'{access_token_key}: ""' in workflow
+
+    assert 'KILL_SWITCH: "true"' in workflow
+    assert 'LIVE_WRITE: "false"' in workflow
+    assert "permissions:\n  contents: read" in workflow
+    assert "workflow_dispatch:" in workflow
+    assert "persist-credentials: false" in workflow
+
+    user_access_token_key = "META_USER_" + "ACCESS_" + "TOKEN"
+    approved_secret_reference = "${{ secrets." + user_access_token_key + " }}"
+    assert f"{user_access_token_key}: {approved_secret_reference}" in workflow
+    assert workflow.count("secrets.") == 1
+
+    live_read_only_command = 'python -m public_presence_os.cli meta-preflight --db "$RUNNER_TEMP/meta-events.sqlite3" --live'
+    assert live_read_only_command in workflow
+    assert workflow.count("--live") == 1
+
+    for forbidden in (
+        "contents: write",
+        "actions: write",
+        "packages: write",
+        "upload-artifact",
+        "meta-sync",
+        "meta-shadow",
+        "META_APP_SECRET",
+    ):
+        assert forbidden not in workflow
+
+
+def test_root_ci_watches_shadow_workflow_contract():
+    workflow=(ROOT.parent/".github"/"workflows"/"public-presence-os-ci.yml").read_text(encoding="utf-8")
+    assert ".github/workflows/public-presence-shadow.yml" in workflow
