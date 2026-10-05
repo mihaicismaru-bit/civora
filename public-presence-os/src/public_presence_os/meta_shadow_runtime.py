@@ -35,6 +35,13 @@ EVALUATION_FIELDS = (
     "factual_grounding",
 )
 
+CRITICAL_EVALUATION_FIELDS = {
+    "false_positive",
+    "spam_risk",
+    "rights_provenance",
+    "factual_grounding",
+}
+
 
 class MetaShadowHold(ValueError):
     def __init__(self, reason: str):
@@ -176,10 +183,25 @@ class MetaShadowStore:
             ).fetchall()
         actions = Counter(row[0] for row in rows)
         risks = Counter(row[1] for row in rows)
+        evaluations = [json.loads(raw) for _, _, raw in rows]
         evaluated = sum(
-            1 for _, _, raw in rows
-            if all(value != "UNKNOWN" for value in json.loads(raw).values())
+            1 for values in evaluations
+            if all(value != "UNKNOWN" for value in values.values())
         )
+        complete = len(rows) >= 100 and evaluated == len(rows)
+        calibration_band = "PENDING"
+        if complete:
+            critical_fail = any(
+                values[field] == "FAIL"
+                for values in evaluations
+                for field in CRITICAL_EVALUATION_FIELDS
+            )
+            any_fail = any(
+                value == "FAIL"
+                for values in evaluations
+                for value in values.values()
+            )
+            calibration_band = "RED" if critical_fail else ("AMBER" if any_fail else "GREEN")
         return {
             "sample_size": len(rows),
             "evaluated_count": evaluated,
@@ -187,7 +209,8 @@ class MetaShadowStore:
             "risk_classes": dict(sorted(risks.items())),
             "target_sample_size": 100,
             "sample_target_met": len(rows) >= 100,
-            "calibration_complete": len(rows) >= 100 and evaluated == len(rows),
+            "calibration_complete": complete,
+            "calibration_band": calibration_band,
             "external_write_count": 0,
             "live_authority": "NONE",
         }
