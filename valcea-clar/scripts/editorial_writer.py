@@ -25,6 +25,7 @@ MANUAL = ROOT / "editorial" / "editorial_manual.json"
 OUTPUT = ROOT / "editorial" / "editorial_products.json"
 WRITER_ID = "manual_journalism_v1"
 ELIGIBLE_SOURCE_TIERS = {"T1", "T1B", "T2", "T3"}
+ALLOWED_CERTAINTIES = {"CONFIRMED_FACT", "SOURCE_CLAIM", "DERIVED_CALCULATION", "EDITORIAL_INTERPRETATION", "UNVERIFIED", "UNKNOWN"}
 
 
 class EditorialHold(ValueError):
@@ -120,6 +121,7 @@ def validate_claim(claim: dict[str, Any], valid_urls: set[str], min_chars: int, 
     role = str(claim.get("role") or "").strip()
     text = str(claim.get("text") or "").strip()
     kind = str(claim.get("kind") or "").strip()
+    certainty = str(claim.get("certainty") or "").strip()
     refs = [str(url).strip() for url in claim.get("source_urls") or [] if str(url).strip()]
     if not claim_id:
         raise EditorialHold("claim_id_missing")
@@ -129,6 +131,8 @@ def validate_claim(claim: dict[str, Any], valid_urls: set[str], min_chars: int, 
         raise EditorialHold(f"claim_too_short:{claim_id}")
     if kind not in allowed_kinds:
         raise EditorialHold(f"claim_kind_invalid:{claim_id}")
+    if certainty and certainty not in ALLOWED_CERTAINTIES:
+        raise EditorialHold(f"claim_certainty_invalid:{claim_id}")
     if not refs:
         raise EditorialHold(f"claim_source_missing:{claim_id}")
     unknown = sorted(set(refs) - valid_urls)
@@ -142,6 +146,7 @@ def validate_claim(claim: dict[str, Any], valid_urls: set[str], min_chars: int, 
         "text": text,
         "kind": kind,
         "source_urls": refs,
+        **({"certainty": certainty} if certainty else {}),
         **({"attribution": str(claim.get("attribution")).strip()} if claim.get("attribution") else {}),
     }
 
@@ -214,6 +219,7 @@ def compose_from_kernel(item: dict[str, Any], manual: dict[str, Any]) -> dict[st
                 "claim_id": claim["id"],
                 "role": claim["role"],
                 "kind": claim["kind"],
+                **({"certainty": claim["certainty"]} if claim.get("certainty") else {}),
                 "text_sha256": hashlib.sha256(claim["text"].encode("utf-8")).hexdigest(),
                 "source_urls": claim["source_urls"],
             }
@@ -344,7 +350,7 @@ def self_test() -> int:
             "dek": {"text": "Hotărârea publicată stabilește măsura, calendarul și cadrul necesar pentru implementarea proiectului.", "source_urls": [source["url"]]},
             "claims": [
                 {"id": "c2", "role": "context", "kind": "documented_context", "text": "Documentul oficial include calendarul de implementare și responsabilitățile instituției locale.", "source_urls": [source["url"]]},
-                {"id": "c1", "role": "material_change", "kind": "fact", "text": "Consiliul local a aprobat proiectul prin hotărârea publicată în registrul oficial al municipalității.", "source_urls": [source["url"]]}
+                {"id": "c1", "role": "material_change", "kind": "fact", "certainty": "CONFIRMED_FACT", "text": "Consiliul local a aprobat proiectul prin hotărârea publicată în registrul oficial al municipalității.", "source_urls": [source["url"]]}
             ]
         }
     }
@@ -355,6 +361,14 @@ def self_test() -> int:
     assert meta["writer_mode"] == "FACT_KERNEL_COMPOSED"
     assert meta["claim_trace_complete"] is True
     assert meta["format"] == "straight_news"
+    assert next(row for row in meta["claim_trace"] if row["claim_id"] == "c1")["certainty"] == "CONFIRMED_FACT"
+
+    bad_certainty = copy.deepcopy(base)
+    bad_certainty["id"] = "writer-bad-certainty"
+    bad_certainty["fact_kernel"]["claims"][1]["certainty"] = "NOT_A_CANON_CLASS"
+    held_certainty = transform_item(bad_certainty, manual)
+    assert held_certainty["status"] == "editorial_hold"
+    assert "claim_certainty_invalid:c1" in held_certainty["editorial_product"]["hold_reason"]
 
     bad = copy.deepcopy(base)
     bad["id"] = "writer-bad-source"
