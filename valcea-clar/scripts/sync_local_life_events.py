@@ -144,8 +144,6 @@ def merge(registry: dict, deltas: list[dict]) -> tuple[dict,int]:
         else:
             uniq[key]=row
     events=sorted(uniq.values(), key=lambda r:(str(r.get("event_start") or ""),str(r.get("start_time") or ""),str(r.get("title") or "")))
-    events, expired_changed = expire_past_events(events)
-    changed += expired_changed
     return {
         "schema_version":"1.1",
         "updated_at":datetime.now(TZ).isoformat(timespec="seconds"),
@@ -158,35 +156,8 @@ def merge(registry: dict, deltas: list[dict]) -> tuple[dict,int]:
             "prefer_primary_then_fresher_verification":True,
             "unknown_price_never_invented":True,
             "status_requires_provenance":True,
-            "past_event_status_persisted":True,
         }
     }, changed
-
-def event_terminal_date(row: dict):
-    raw=str(row.get("event_end") or row.get("event_start") or "").strip()
-    if not raw:
-        return None
-    try:
-        return datetime.fromisoformat(raw).date()
-    except Exception:
-        return None
-
-
-def expire_past_events(events: list[dict], today=None) -> tuple[list[dict], int]:
-    """Persist temporal truth instead of leaving old events marked scheduled."""
-    today = today or datetime.now(TZ).date()
-    changed = 0
-    output = []
-    for row in events:
-        item = dict(row)
-        terminal = event_terminal_date(item)
-        status = str(item.get("status") or "scheduled").lower()
-        if terminal is not None and terminal < today and status in {"scheduled", "changed", "sold_out", "unknown"}:
-            item["status"] = "past"
-            changed += 1
-        output.append(item)
-    return output, changed
-
 
 def parse_start(row: dict):
     try:
