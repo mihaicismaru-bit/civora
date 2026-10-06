@@ -189,3 +189,15 @@ def test_no_production_external_green_action_and_transition_stops_for_authorizat
     )
     assert evidence["accepted"] is False
     assert evidence["target_stage"] == "READY_FOR_LIMITED_WRITE_APPROVAL"
+
+
+@pytest.mark.parametrize("missing", ["read_ingestion_pass", "identity_binding_pass", "shadow_acceptance_pass",
+                                     "calibration_pass", "kill_switch_pass", "idempotency_pass", "retry_exhaustion_pass"])
+def test_missing_readiness_evidence_never_requests_write_approval(missing):
+    checks = dict(read_ingestion_pass=True, identity_binding_pass=True, shadow_acceptance_pass=True,
+                  calibration_pass=True, kill_switch_pass=True, idempotency_pass=True,
+                  retry_exhaustion_pass=True, authorization_receipt_pass=True)
+    checks[missing] = False
+    evidence = promotion_evidence(stage="SHADOW_REAL", **checks)
+    assert evidence["accepted"] is False
+    assert evidence["target_stage"] == "HOLD_READINESS_EVIDENCE_INCOMPLETE"

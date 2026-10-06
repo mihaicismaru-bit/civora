@@ -266,8 +266,12 @@ def promotion_evidence(
         "retry_exhaustion": retry_exhaustion_pass,
         "authorization_receipt": authorization_receipt_pass,
     }
-    accepted = all(checks.values())
-    target = "LIMITED_WRITE" if accepted else "READY_FOR_LIMITED_WRITE_APPROVAL"
+    ready = all(value is True for key, value in checks.items() if key != "authorization_receipt")
+    accepted = ready and authorization_receipt_pass is True
+    target = (
+        "LIMITED_WRITE" if accepted else
+        "READY_FOR_LIMITED_WRITE_APPROVAL" if ready else "HOLD_READINESS_EVIDENCE_INCOMPLETE"
+    )
     body = {"from_stage": stage, "target_stage": target, "checks": checks, "accepted": accepted}
     body["evidence_sha256"] = _hash(body)
     return body

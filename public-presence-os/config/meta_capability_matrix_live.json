@@ -2,6 +2,19 @@
   "schema_version": "PPOS_META_CAPABILITY_MATRIX_LIVE_V1",
   "verified_at": "2026-10-03",
   "verification_rule": "OFFICIAL_META_DOCUMENTATION_ONLY; LIVE_ENTITLEMENT_REQUIRES_TOKEN_READBACK",
+  "bounded_shadow_read_contract": {
+    "state": "HOLD_META_HTTP_400_GRAPH_100",
+    "minimum_provisioning_permissions": ["pages_show_list", "pages_read_engagement", "instagram_basic"],
+    "page_token_source": "AUTHORIZED_USER_ME_ACCOUNTS_MATCHED_PAGE_ACCESS_TOKEN",
+    "page_id": "2816314015107071",
+    "instagram_id": "17841429701593250",
+    "page_subject_proof": "PAGE_TOKEN_ME_ID_EQUALS_PAGE_ID",
+    "binding_proof": "PAGE_INSTAGRAM_BUSINESS_ACCOUNT_ID_EQUALS_INSTAGRAM_ID",
+    "live_read_entitlement": "UNVERIFIED",
+    "write_authority": "LOCKED",
+    "threads": "HOLD_EXTERNAL",
+    "notes": "Minimum identity/media provisioning does not guarantee comment entitlement. Existing permissions arrays describe API capabilities, not scopes to grant. Do not grant write-capable scopes to clear a read hold; unavailable comment reads remain HOLD and must not become PASS."
+  },
   "sources": [
     {
       "id": "META_FACEBOOK_POSTMAN",

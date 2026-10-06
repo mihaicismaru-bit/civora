@@ -1,62 +1,50 @@
 # PUBLIC PRESENCE OS — META LIVE AUTONOMY CHECKPOINT
 
 Date: 2026-10-06
-Stage: `HOLD_META_PAGE_TOKEN_EXPIRED`
-Safety: `KILL_SWITCH=ENGAGED`, `LIVE_WRITE=false`, write capabilities locked, zero external writes.
+Stage: `HOLD_META_HTTP_400_GRAPH_100`
+Internal readiness: bounded hardening tested locally; exact-head GitHub CI required before merge.
+Safety: `KILL_SWITCH=ENGAGED`, `LIVE_WRITE=false`, writes LOCKED, Threads HOLD_EXTERNAL. Zero social writes and zero Meta calls in this continuation.
 
-## Changelog
+## Baseline and provenance
 
-- Re-ran the historical failed preflight once and confirmed that GitHub reruns the historical workflow definition rather than the current `main` definition; that rerun did not exercise `META_PAGE_ACCESS_TOKEN`.
-- Hardened `.github/workflows/public-presence-shadow.yml` so the current shadow contract fails closed when `META_PAGE_ACCESS_TOKEN` is absent, without logging or exposing the secret.
-- Triggered current-main bounded shadow preflight run `37411655710`; the Page token was present, the locked shadow contract passed, but the first live Page identity GET returned HTTP 401.
-- Hardened `meta_live_runtime.py` to retain only secret-free Meta HTTP diagnostic codes from an error response.
-- Triggered one diagnostic bounded shadow preflight run `37411789319`; result: `HOLD_META_HTTP_401_GRAPH_190_SUB_463`.
-- No further live Meta calls are authorized while this blocker is unchanged.
+PR #1367: https://github.com/mihaicismaru-bit/civora/pull/1367
+Audited PR head: `a0d8dae23b3667abdb6e2ed86343b89692700860`.
+Audited main: `7f8e6b283dcd98b09d41edf77cbfd5192fd5f2c5`.
+CI run `37427293500` matches that PR head: shards 1/3 SUCCESS, 0/2 IN_PROGRESS at audit; validation incomplete. Earlier green runs cannot validate a changed head.
 
-## Read-only live state
+Latest live state comes from the owner's continuation and referenced conversation: run `37411789319`, latest attempt job `112148805751`, `HOLD_META_HTTP_400_GRAPH_100`. No Meta call or secret inspection was performed here. Historical expiry `HOLD_META_HTTP_401_GRAPH_190_SUB_463` is superseded. Graph 100 is ambiguous: PAGE READ AUTHORITY / TOKEN TYPE / PAGE ACCESS OR PERMISSION CONTEXT unresolved. It does not prove expiry, a User token, or a wrong Page ID.
 
-- META APP: PASS
-- FACEBOOK AUTH contract: PASS
-- PAGE IDENTITY: NOT EVALUABLE because authentication failed before identity payload
-- INSTAGRAM BINDING: NOT EVALUABLE because Page authority failed first
-- THREADS IDENTITY: HOLD_EXTERNAL
-- READ CAPABILITIES: FAIL
-- WRITE CAPABILITIES: LOCKED
-- KILL SWITCH: ENGAGED
-- LIVE WRITE: OFF
-- EVENT LOG boundary: PASS
-- External writes: 0
+## Internal repairs and validation
 
-## Decision
+- First Page probe remains Graph-safe `fields=id,name`.
+- Page credential `/me?fields=id,name` must resolve to Page `2816314015107071`. A User credential in the Page slot fails closed even if it can read the Page object. This proves subject, not app identity or every scope.
+- Separate Page linkage read must return `instagram_business_account.id=17841429701593250` before content ingestion. Direct IG profile access alone is insufficient binding evidence.
+- Graph 100 classifier retains only numeric diagnostics and preserves ambiguity; HTTP 400 is never retried. Raw error messages, traces and bodies are not persisted.
+- Malformed, negative/non-finite Retry-After values fall back to bounded delays; ceiling 30 seconds, maximum four attempts.
+- SA2.3 serialized restart regression replays duplicates ten times while preserving sequence, last event and accepted count, with one duplicate increment per replay.
+- Promotion stays HOLD_READINESS_EVIDENCE_INCOMPLETE whenever any prerequisite is missing. Approval readiness requires real ingestion, exact binding, shadow acceptance, calibration, kill switch, idempotency and retry evidence.
+- Shadow workflow has no push/schedule trigger. Explicit dispatch requires a non-secret material-change reference. This is operator attestation, not automatic proof of rotation; never dispatch again for an unchanged blocker.
+- CI emits 20 slowest durations to identify the CP54–CP82 bottleneck without removing coverage.
 
-Treat Graph error code `190` with subcode `463` as an expired access-token blocker. This is an authentication-expiry failure, not evidence of a Page identity mismatch and not evidence of a read-scope denial. Do not widen scopes or enable write authority in response.
+Validation: 92 targeted offline tests PASS, 15 productization tests PASS, product layout validation PASS, release package built. Targeted coverage includes authority/binding, runtime, controlled-writer failure soak, kill-switch before/mid-queue, ambiguous-write no-retry, idempotency, SA2.1–SA2.5 and shadow calibration. Windows compileall cache writes hit the long-path limit in existing CP75–CP82 filenames; full source syntax is checked in memory instead. Linux exact-head CI compileall and full suite remain required.
 
-## Blocker
+No new real observations were collected. Calibration still requires at least 100 real observations and complete evaluations. Synthetic tests and a successful identity probe do not establish READY_FOR_LIMITED_WRITE_APPROVAL.
 
-`HOLD_META_PAGE_TOKEN_EXPIRED`
+Minimum provisioning permissions do not establish all comment permissions. The full read preflight may HOLD on restricted Facebook/Instagram comments. Do not add instagram_manage_comments or other write-capable scopes, skip failures, or reinterpret partial reads as PASS. The capability matrix keeps live entitlement UNVERIFIED.
 
-The currently provisioned `META_PAGE_ACCESS_TOKEN` in GitHub environment `public-presence-shadow` is present but expired. Its value was not read, printed, copied, logged, or persisted by this checkpoint.
+## HUMAN ACTION PACKET — only credential provisioning
 
-## HUMAN ACTION PACKET
+1. In Meta Graph API Explorer select existing **presence os**, app ID `1488219383133581`. Use the Facebook user already authorized to manage Page `2816314015107071`. Obtain a **User Access Token** for that app with minimum relevant permissions `pages_show_list`, `pages_read_engagement`, `instagram_basic`, and access to the existing Page. Do not change account relationships, connect Threads or add write scopes.
+2. Privately, using that User token, request `GET /v26.0/me/accounts?fields=id,name,access_token,instagram_business_account&limit=100`. Follow pagination privately if necessary. Select exactly `id=2816314015107071` and verify `instagram_business_account.id=17841429701593250`. That entry's **access_token** is the Page Access Token; the User token must not go into the Page secret.
+3. If the Page is absent, linkage mismatches or permissions are unavailable, stop and report only the non-secret condition. Do not change accounts or widen scopes. In Meta's private token debugger verify validity, app ID `1488219383133581` and Page credential/destination. Never send token or debugger output to chat, logs or repo.
+4. GitHub → mihaicismaru-bit/civora → Settings → Environments → **public-presence-shadow** → Environment secrets → replace only **META_PAGE_ACCESS_TOKEN** with that selected Page token. Transfer only through private Meta→GitHub provisioning; never paste it into chat, files, terminal commands, workflow inputs or reports.
+5. Leave `KILL_SWITCH=true`, `LIVE_WRITE=false`, `META_THREADS_ENABLED=false`. Report only completion and a non-secret rotation time/reference.
 
-1. Replace only the GitHub environment secret `META_PAGE_ACCESS_TOKEN` in `public-presence-shadow` with a fresh, non-expired Page access token for Facebook Page `2816314015107071`, produced through the existing Meta app/login flow.
-2. Keep `KILL_SWITCH=true`, `LIVE_WRITE=false`, `META_THREADS_ENABLED=false`; do not add write scopes and do not connect Threads.
-3. No repository edit is required from the owner.
-4. After secret replacement, the next autonomous unit is exactly one bounded shadow preflight. If it passes, continue to read-only `meta-sync` and real-event `meta-shadow`; otherwise stop after one secret-free diagnostic.
+Sources: [Meta Page token request](https://www.postman.com/meta/instagram/request/lpx8lul/get-access-tokens-of-pages-you-manage), [Meta Instagram API](https://www.postman.com/meta/instagram/documentation/6yqw8pt/instagram-api).
 
 ## Next exact action
 
-Await fresh Page-token provisioning. On the first hourly run after the secret changes, execute exactly one current-main bounded shadow preflight and require:
-- PAGE IDENTITY PASS for `2816314015107071`
-- INSTAGRAM BINDING PASS for `17841429701593250`
-- READ CAPABILITIES PASS
-- THREADS IDENTITY HOLD_EXTERNAL
-- WRITE CAPABILITIES LOCKED
-- zero writes
-
-## Evidence
-
-- Workflow hardening commit: `4cdf8f925128364cf82cb04f4ae12bf4eaf3a7c8`
-- Current-main first bounded preflight: `37411655710`
-- Secret-safe diagnostic hardening commit: `28a62632144726c8835e4a4f59645116da753a49`
-- Diagnostic bounded preflight: `37411789319`
+1. Require all CI checks on final PR head; merge only with checks passing and no-push shadow trigger present. Recheck main commit/product validation. Never rerun historical preflight.
+2. After confirmed material credential/config change, dispatch exactly one current-main PUBLIC PRESENCE SHADOW PREFLIGHT with a non-secret material_change_reference. Require correct Page subject, explicit Page→IG linkage, READ CAPABILITIES PASS, Threads HOLD_EXTERNAL, writes LOCKED, kill switch ENGAGED and zero writes. On HOLD stop after one sanitized diagnostic.
+3. After read authority passes, collect bounded real read-only events and evaluate shadow calibration, preserving capability holds and real sample counts.
+4. Only when all evidence gates pass, report READY_FOR_LIMITED_WRITE_APPROVAL and request explicit owner approval for a concrete limited action. Stop before the first social write. This checkpoint grants no write scope or execution authority.
