@@ -118,6 +118,14 @@ def parse_eur(value: str) -> str | None:
     return f"{amount:.2f}"
 
 
+def parse_available_funds(value: str) -> tuple[str | None, str]:
+    """Parse official AFIR available-funds status without weakening parse_eur."""
+    cell = clean_cell(value).replace("\u00a0", " ").strip()
+    if cell.upper() == "FONDURI EPUIZATE":
+        return "0.00", "EXHAUSTED"
+    amount = parse_eur(value)
+    return amount, "REPORTED" if amount is not None else "UNKNOWN"
+
 def parse_int(value: str) -> int:
     raw = re.sub(r"[^\d-]", "", clean_cell(value))
     if not raw:
@@ -154,6 +162,7 @@ def parse_rows(table_rows: list[list[Any]]) -> list[dict[str, Any]]:
         seen.add(key)
         opens_local, opens_iso = parse_local_datetime(cells[3])
         closes_local, closes_iso = parse_local_datetime(cells[4])
+        available_funds_eur, available_funds_status = parse_available_funds(cells[8])
         parsed.append(
             {
                 "interventionCode": code,
@@ -166,7 +175,8 @@ def parse_rows(table_rows: list[list[Any]]) -> list[dict[str, Any]]:
                 "submissionCeilingEur": parse_eur(cells[5]),
                 "submittedPublicValueEur": parse_eur(cells[6]),
                 "submittedProjectCount": parse_int(cells[7]),
-                "availableFundsEur": parse_eur(cells[8]),
+                "availableFundsEur": available_funds_eur,
+                "availableFundsStatus": available_funds_status,
             }
         )
     if not parsed:
