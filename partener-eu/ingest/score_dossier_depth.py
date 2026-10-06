@@ -9,6 +9,8 @@ to seek next.
 from __future__ import annotations
 
 import json
+import re
+import unicodedata
 from pathlib import Path
 from typing import Any
 
@@ -28,6 +30,31 @@ SECTION_DIMENSIONS = {
     "actions": "Ce trebuie făcut acum",
 }
 
+
+NON_CALL_EXACT_TITLES = {
+    "document",
+    "file",
+    "data si ora inchiderii apelului",
+}
+
+
+def normalize_title(value: Any) -> str:
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    text = "".join(ch for ch in text if not unicodedata.combining(ch)).lower()
+    return re.sub(r"[^a-z0-9]+", " ", text).strip()
+
+
+def non_call_artifact_reason(dossier: dict[str, Any]) -> str | None:
+    """Route obvious documents/admin notices to entity review before enrichment."""
+    title = normalize_title(dossier.get("title"))
+    if title in NON_CALL_EXACT_TITLES:
+        return "GENERIC_DOCUMENT_OR_FIELD_LABEL"
+    if str(dossier.get("status") or "").upper() == "REVIEW" and (
+        "solicitari de clarificari aferente etapei" in title
+        or "vor primi solicitari de clarificari" in title
+    ):
+        return "ADMINISTRATIVE_CLARIFICATION_NOTICE"
+    return None
 
 def section_ok(dossier: dict[str, Any], title: str) -> bool:
     row = next((s for s in dossier.get("sections") or [] if s.get("title") == title), None)
@@ -50,6 +77,7 @@ def priority(dossier: dict[str, Any], score: int) -> int:
 def main() -> int:
     products = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     queue_rows = []
+    entity_review_rows = []
     advanced = complete = construction = identification = 0
 
     for dossier in products.get("dossiers") or []:
@@ -88,7 +116,18 @@ def main() -> int:
             "missing": missing,
             "nextPass": "SEARCH_OFFICIAL_EVIDENCE" if missing else "MONITOR_LIFECYCLE",
         }
-        if missing:
+        review_reason = non_call_artifact_reason(dossier)
+        if review_reason:
+            quality["queueEligibility"] = "REVIEW_ENTITY_TYPE"
+            dossier["dossierConstruction"]["nextPass"] = "REVIEW_ENTITY_TYPE"
+            entity_review_rows.append({
+                "dossierId": dossier.get("id"),
+                "title": dossier.get("title"),
+                "status": dossier.get("status"),
+                "reason": review_reason,
+                "action": "Verifică tipul entității; nu trata documentul/anunțul administrativ drept apel până la reconciliere.",
+            })
+        elif missing:
             queue_rows.append({
                 "dossierId": dossier.get("id"),
                 "title": dossier.get("title"),
@@ -120,6 +159,7 @@ def main() -> int:
             "openAndConsultationFirst": True,
             "failClosed": True,
             "depthScoreIsNotApprovalProbability": True,
+            "entityTypeReviewBeforeEnrichment": True,
         },
         "summary": {
             "dossiers": len(products.get("dossiers") or []),
@@ -128,8 +168,10 @@ def main() -> int:
             "construction": construction,
             "identification": identification,
             "queued": len(queue_rows),
+            "entityReview": len(entity_review_rows),
         },
         "queue": queue_rows[:100],
+        "entityReview": entity_review_rows[:100],
     }
     PRODUCTS.write_text(json.dumps(products, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     QUEUE.write_text(json.dumps(queue_payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
