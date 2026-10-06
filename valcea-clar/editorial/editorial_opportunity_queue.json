@@ -2,14 +2,14 @@
   "schema_version": "1.1",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR Editorial Opportunity Queue",
-  "generated_at": "2026-10-06T15:11:51Z",
+  "generated_at": "2026-10-06T18:31:38Z",
   "publication_authority": "NONE",
   "public_projection": false,
   "publication_model": "continuous_publication_multi_product",
   "monitor_count": 216,
-  "opportunity_count": 704,
+  "opportunity_count": 705,
   "lane_counts": {
-    "knowledge": 432,
+    "knowledge": 433,
     "monitor": 266,
     "service": 6
   },
@@ -25,6 +25,7 @@
     "LIST_INDEX": 2,
     "PERMIT_FOLLOWUP": 5,
     "ACTIVE_PERMITS_INDEX": 3,
+    "ARCHIVE_REUSE": 1,
     "CULTURAL_AGENDA": 1,
     "CAST_CREATOR_INDEX": 204,
     "PREMIERE_REPERTOIRE_TRACKER": 204
@@ -36,6 +37,7 @@
     "jobs": 5,
     "business": 2,
     "real_estate_development": 11,
+    "verified_archive": 1,
     "health": 5,
     "performing_arts": 412,
     "real_estate_market": 2
@@ -10698,6 +10700,56 @@
         }
       ],
       "lead_verification_status": null,
+      "normal_story_ready_gate_required": true
+    },
+    {
+      "id": "opp-2aed3f7d672d6260b110",
+      "publication_authority": "NONE",
+      "public_projection": false,
+      "lane": "knowledge",
+      "product_type": "ARCHIVE_REUSE",
+      "writer_format": "explainer",
+      "section": "ADMINISTRAȚIE",
+      "priority_score": 99,
+      "monitor_id": null,
+      "monitor_ids": [],
+      "monitor_family": "verified_archive",
+      "subject_id": "rm-valcea-gambling-authorizations-20260930",
+      "subject_label": "4 hotărâri pentru autorizații anuale de jocuri de noroc în cea mai recentă serie analizată a Consiliului Local Râmnicu Vâlcea",
+      "fact_recency_required": false,
+      "current_status_verification_required": false,
+      "why_now": "Fact kernel verificat disponibil pentru reutilizare editorială; poate susține un alt unghi, listă sau timeline fără un eveniment nou.",
+      "evidence_hint": "Reuse only claims already proven by the kernel unless a new verification stage adds current facts.",
+      "evidence_status": "VERIFIED_ARCHIVE_AVAILABLE",
+      "next_stage": "FACT_KERNEL_REUSE_OR_DERIVATION",
+      "source_bindings": [
+        {
+          "publisher": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
+          "tier": "T1"
+        },
+        {
+          "publisher": "HCL Râmnicu Vâlcea nr. 369/2026-09-30",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/faf4479b28578016c2258e880039d38f/$FILE/hotarirea%20369%20-%2030%20septembrie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20slot%20machine%20%28PHEONIX%20TOTAL%20GAMES%20SRL%20-%20str%20%20Carol%20I%20nr%201%29.htm",
+          "tier": "T1"
+        },
+        {
+          "publisher": "HCL Râmnicu Vâlcea nr. 368/2026-09-30",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/57dd297740727d77c2258e880039c4df/$FILE/hotarirea%20368%20-%2030%20septembrie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20slot%20machine%20%28PHEONIX%20TOTAL%20GAMES%20SRL%20-%20str%20Lucian%20Blaga%20bl%20A53%29.htm",
+          "tier": "T1"
+        },
+        {
+          "publisher": "HCL Râmnicu Vâlcea nr. 367/2026-09-30",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/3ec71fdd42e9e5c4c2258e880039b69e/$FILE/hotarirea%20367%20-%2030%20septembrie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20slot%20machine%20%28PHEONIX%20TOTAL%20GAMES%20SRL%20-%20str%20Regina%20Maria%20nr%2022%29.htm",
+          "tier": "T1"
+        },
+        {
+          "publisher": "HCL Râmnicu Vâlcea nr. 366/2026-09-30",
+          "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/93b6e47af3dd4c36c2257ad3003c531b/b5af9e2ade36112ec2258e880039a83d/$FILE/hotarirea%20366%20-%2030%20septembrie%202026%20-%20acordare%20autorizatie%20anuala%20de%20functionare%20pentru%20jocuri%20de%20noroc%20-%20slot%20machine%20%28PHEONIX%20TOTAL%20GAMES%20SRL%20-%20str%20%20Matei%20Basarab%20nr%204%29.htm",
+          "tier": "T1"
+        }
+      ],
+      "already_in_facts_registry": true,
       "normal_story_ready_gate_required": true
     },
     {
