@@ -280,7 +280,7 @@ def fail_closed_render_dossier(
             replaced = False
             safe_rows: list[str] = []
             for value in rows:
-                if fold(value).startswith("stare apel open"):
+                if fold(value).startswith("stare apel"):
                     safe_rows.append("Stare apel: necesită reverificare la sursa oficială.")
                     replaced = True
                 else:

@@ -54,7 +54,7 @@ expired_open_probe = {
         {"label": "Termen", "value": "14 august 2026", "confidence": "CONFIRMED"},
     ],
     "sections": [
-        {"title": "Rezumat executiv", "items": ["Stare apel: OPEN.", "Închidere: 14 august 2026."]},
+        {"title": "Rezumat executiv", "items": ["Stare apel: DESCHIS.", "Închidere: 14 august 2026."]},
         {"title": "Ce trebuie făcut acum", "items": ["Începe screeningul și planul de depunere."]},
     ],
 }
@@ -296,7 +296,7 @@ with tempfile.TemporaryDirectory() as td:
         assert module.FAIL_CLOSED_OPEN_STANDFIRST in detail, dossier_id
         assert module.FAIL_CLOSED_OPEN_ACTION in detail, dossier_id
         assert ">DESCHIS<" not in detail, dossier_id
-        assert "Stare apel: OPEN." not in detail, dossier_id
+        assert "Stare apel: DESCHIS." not in detail, dossier_id
         assert "ACȚIONEAZĂ" not in detail, dossier_id
 
     for row in publishable:

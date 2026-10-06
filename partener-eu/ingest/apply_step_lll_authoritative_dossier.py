@@ -278,7 +278,7 @@ def main() -> int:
     is_finalized = bool(mysmis_status and mysmis_status.get("status") == "FINALIZAT")
     current_status = "CLOSED" if is_finalized else "REVIEW"
     current_label = "FINALIZAT" if is_finalized else "ÎN VERIFICARE"
-    current_decision = "ÎNCHIS" if is_finalized else "VERIFICĂ"
+    current_decision = "REFERINȚĂ" if is_finalized else "VERIFICĂ"
     current_action = (
         "Apelul este FINALIZAT în registrul public MySMIS. Nu mai planifica o depunere; folosește dosarul pentru istoric, implementare și pregătirea unor apeluri similare."
         if is_finalized
