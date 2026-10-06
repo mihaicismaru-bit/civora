@@ -1,9 +1,23 @@
 #!/usr/bin/env python3
+import importlib.util
 import json
 import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+SCORER = ROOT / "partener-eu/ingest/score_dossier_depth.py"
+spec = importlib.util.spec_from_file_location("partener_score_dossier_depth", SCORER)
+assert spec and spec.loader
+scorer = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(scorer)
+
+assert scorer.non_call_artifact_reason({"title": "document", "status": "REVIEW"}) == "GENERIC_DOCUMENT_OR_FIELD_LABEL"
+assert scorer.non_call_artifact_reason({"title": "Data și ora închiderii apelului", "status": "EXPECTED"}) == "GENERIC_DOCUMENT_OR_FIELD_LABEL"
+assert scorer.non_call_artifact_reason({
+    "title": "Solicitanții vor primi solicitări de clarificări aferente etapei de evaluare tehnică",
+    "status": "REVIEW",
+}) == "ADMINISTRATIVE_CLARIFICATION_NOTICE"
+assert scorer.non_call_artifact_reason({"title": "Investiții productive pentru IMM", "status": "OPEN"}) is None
 products = json.loads((ROOT / "partener-eu/ingest/state/decision_products.json").read_text(encoding="utf-8"))
 queue = json.loads((ROOT / "partener-eu/ingest/state/dossier_enrichment_queue.json").read_text(encoding="utf-8"))
 canonical = json.loads((ROOT / "partener-eu/ingest/state/mipe_canonical_calls.json").read_text(encoding="utf-8"))
