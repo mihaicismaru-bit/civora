@@ -65,7 +65,7 @@ jobs:
               f"files={len(selected)} total_files={len(test_files)}"
           )
           subprocess.run(
-              [sys.executable, "-m", "pytest", "-q", *selected],
+              [sys.executable, "-m", "pytest", "-q", "--durations=20", *selected],
               check=True,
               env=os.environ.copy(),
           )

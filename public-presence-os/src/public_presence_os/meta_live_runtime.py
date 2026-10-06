@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from hashlib import sha256
 import json
+import math
 import os
 from pathlib import Path
 import sqlite3
@@ -183,11 +184,24 @@ def _http_hold_reason(exc: HTTPError) -> str:
         return reason
     code = error.get("code")
     subcode = error.get("error_subcode")
-    if isinstance(code, int):
+    if type(code) is int:
         reason += f"_GRAPH_{code}"
-    if isinstance(subcode, int) and subcode:
+    if type(subcode) is int and subcode:
         reason += f"_SUB_{subcode}"
     return reason
+
+
+def classify_meta_hold(reason: str) -> str:
+    """Classify numeric diagnostics only; Graph 100 does not prove token type."""
+    if reason == "HOLD_META_HTTP_401_GRAPH_190_SUB_463":
+        return "TOKEN_EXPIRED"
+    if reason.startswith("HOLD_META_HTTP_") and reason.split("_SUB_")[0].endswith("_GRAPH_100"):
+        return "PAGE_READ_AUTHORITY_TOKEN_TYPE_OR_PERMISSION_CONTEXT_UNRESOLVED"
+    if reason == "HOLD_META_PAGE_TOKEN_SUBJECT_MISMATCH":
+        return "PAGE_TOKEN_SUBJECT_MISMATCH"
+    if reason == "HOLD_META_INSTAGRAM_BINDING_MISMATCH":
+        return "INSTAGRAM_BINDING_MISMATCH"
+    return "UNRESOLVED"
 
 
 class MetaReadClient:
@@ -235,7 +249,13 @@ class MetaReadClient:
                 retryable = exc.code == 429 or 500 <= exc.code <= 599
                 if not retryable or attempt == self._max_attempts:
                     raise MetaLiveHold(_http_hold_reason(exc)) from None
-                delay = min(float(exc.headers.get("Retry-After", "1") or "1"), 30.0)
+                try:
+                    delay = float(exc.headers.get("Retry-After", "1") or "1")
+                except (TypeError, ValueError, AttributeError):
+                    delay = float(attempt)
+                if not math.isfinite(delay) or delay < 0:
+                    delay = float(attempt)
+                delay = min(delay, 30.0)
             except (URLError, TimeoutError):
                 if attempt == self._max_attempts:
                     raise MetaLiveHold("HOLD_META_TRANSPORT_EXHAUSTED") from None
@@ -539,19 +559,25 @@ class MetaReadRuntime:
 
     def _page_authority(self) -> tuple[str, dict[str, Any]]:
         if self.config.page_token is not None:
+            # A Page access token can prove the Page identity directly. Keep this
+            # request to Page-token-safe fields. Verify the credential subject
+            # separately: a User token may also be able to read this Page.
             page = self._get(
                 "FACEBOOK_PAGE",
                 f"/{self.config.graph_version}/{self.config.page_id}",
-                {"fields": "id,name,tasks,instagram_business_account"},
+                {"fields": "id,name"},
                 self.config.page_token,
             )
             if page.get("id") != self.config.page_id:
                 raise MetaLiveHold("HOLD_META_PAGE_NOT_ACCESSIBLE")
-            linked = page.get("instagram_business_account")
             if page.get("name") != EXPECTED_NAME:
                 raise MetaLiveHold("HOLD_META_PAGE_NAME_MISMATCH")
-            if not isinstance(linked, Mapping) or linked.get("id") != self.config.ig_user_id:
-                raise MetaLiveHold("HOLD_META_INSTAGRAM_BINDING_MISMATCH")
+            subject = self._get(
+                "FACEBOOK_PAGE", f"/{self.config.graph_version}/me",
+                {"fields": "id,name"}, self.config.page_token,
+            )
+            if subject.get("id") != self.config.page_id:
+                raise MetaLiveHold("HOLD_META_PAGE_TOKEN_SUBJECT_MISMATCH")
             return self.config.page_token, page
 
         if self.config.user_token is None:
@@ -627,6 +653,9 @@ class MetaReadRuntime:
         )
         if page_identity.get("id") != self.config.page_id or page_identity.get("name") != EXPECTED_NAME:
             raise MetaLiveHold("HOLD_META_PAGE_IDENTITY_MISMATCH")
+        linked = page_identity.get("instagram_business_account")
+        if not isinstance(linked, Mapping) or linked.get("id") != self.config.ig_user_id:
+            raise MetaLiveHold("HOLD_META_INSTAGRAM_BINDING_MISMATCH")
 
         posts = self._get(
             "FACEBOOK_PAGE",
@@ -799,6 +828,7 @@ def preflight_report(
         config = MetaRuntimeConfig.from_env(values)
     except MetaLiveHold as exc:
         report["HOLD REASON"] = exc.reason
+        report["HOLD CLASSIFICATION"] = classify_meta_hold(exc.reason)
         return report
     report["META APP"] = "PASS" if config.app_id == EXPECTED_APP_ID else "FAIL"
     report["FACEBOOK AUTH"] = "PASS"
@@ -813,6 +843,7 @@ def preflight_report(
         summary = MetaReadRuntime(config, client or MetaReadClient(), store).sync_once()
     except MetaLiveHold as exc:
         report["HOLD REASON"] = exc.reason
+        report["HOLD CLASSIFICATION"] = classify_meta_hold(exc.reason)
         return report
     if summary.holds:
         report["HOLD REASON"] = ";".join(summary.holds)

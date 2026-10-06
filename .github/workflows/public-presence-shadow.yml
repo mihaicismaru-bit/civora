@@ -2,13 +2,11 @@ name: PUBLIC PRESENCE SHADOW PREFLIGHT
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-    paths:
-      - '.github/workflows/public-presence-shadow.yml'
-      - 'public-presence-os/src/public_presence_os/meta_live_runtime.py'
-      - 'public-presence-os/tests/test_meta_live_runtime.py'
-      - 'public-presence-os/src/public_presence_os/meta_live_runtime.py'
+    inputs:
+      material_change_reference:
+        description: 'Non-secret reference to confirmed credential/config change; never enter a token'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -50,11 +48,16 @@ jobs:
       - name: Install local package
         run: python -m pip install -e .
       - name: Verify locked shadow contract
+        env:
+          MATERIAL_CHANGE_REFERENCE: ${{ inputs.material_change_reference }}
         shell: bash
         run: |
           set -euo pipefail
           python - <<'PY'
           import os
+
+          if not os.getenv("MATERIAL_CHANGE_REFERENCE", "").strip():
+              raise SystemExit("PPOS_SHADOW_MATERIAL_CHANGE_REFERENCE_REQUIRED")
 
           expected = {
               "META_APP_ID": "1488219383133581",

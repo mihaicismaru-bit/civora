@@ -171,6 +171,8 @@ class FakeClient:
         if path.endswith("/ig_media_1/comments"):
             return {"data": [{"id": "ig_comment_1", "text": "specific question", "timestamp": "2026-10-03T00:03:00Z"}]}
         if path.endswith("/me"):
+            if host == "graph.facebook.com":
+                return {"id": EXPECTED_PAGE_ID, "name": EXPECTED_NAME}
             return {"id": EXPECTED_THREADS_ID, "username": EXPECTED_USERNAME, "name": EXPECTED_NAME}
         if path.endswith("/me/threads"):
             return {"data": [{"id": "thread_1", "text": "hello", "timestamp": "2026-10-03T00:00:00Z", "has_replies": True}]}
@@ -281,6 +283,7 @@ def test_page_token_can_be_primary_authority_without_user_token(tmp_path):
     }
     assert summary.write_count == 0
     assert client.calls[0][1].endswith(f"/{EXPECTED_PAGE_ID}")
+    assert client.calls[0][2]["fields"] == "id,name"
     assert all(call[3] == TOKEN_B for call in client.calls)
 
 
