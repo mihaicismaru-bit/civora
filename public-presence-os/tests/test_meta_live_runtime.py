@@ -281,6 +281,7 @@ def test_page_token_can_be_primary_authority_without_user_token(tmp_path):
     }
     assert summary.write_count == 0
     assert client.calls[0][1].endswith(f"/{EXPECTED_PAGE_ID}")
+    assert client.calls[0][2]["fields"] == "id,name"
     assert all(call[3] == TOKEN_B for call in client.calls)
 
 
