@@ -4,6 +4,8 @@ from __future__ import annotations
 import html
 import json
 import re
+import subprocess
+import sys
 from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -106,7 +108,15 @@ def main()->int:
     REGISTRY.write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     RUNTIME.parent.mkdir(parents=True,exist_ok=True)
     RUNTIME.write_text(render(events),encoding="utf-8")
-    print(json.dumps({"status":"UPDATED","deduplicated":removed,"event_count":len(events)},ensure_ascii=False))
+
+    # Local Life owns structured event currentness, but the reader-facing route
+    # must remain inside the canonical VÂLCEA CLAR Public UX shell.
+    presenter=ROOT/"scripts"/"public_ux_fresh_rank.py"
+    subprocess.run([sys.executable,str(presenter)],cwd=ROOT.parent,check=True)
+    public_html=RUNTIME.read_text(encoding="utf-8")
+    if 'data-nav-contract="valcea-clar-primary-v2"' not in public_html:
+        raise SystemExit("Local Life canonical presentation regression: navigation contract missing")
+    print(json.dumps({"status":"UPDATED","deduplicated":removed,"event_count":len(events),"canonical_presentation":"PASS"},ensure_ascii=False))
     return 0
 
 
