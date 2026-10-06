@@ -195,8 +195,10 @@ def classify_meta_hold(reason: str) -> str:
     """Classify numeric diagnostics only; Graph 100 does not prove token type."""
     if reason == "HOLD_META_HTTP_401_GRAPH_190_SUB_463":
         return "TOKEN_EXPIRED"
-    if reason.startswith("HOLD_META_HTTP_") and reason.split("_SUB_")[0].endswith("_GRAPH_100"):
+    if "_GRAPH_100" in reason:
         return "PAGE_READ_AUTHORITY_TOKEN_TYPE_OR_PERMISSION_CONTEXT_UNRESOLVED"
+    if "_GRAPH_10" in reason:
+        return "PERMISSION_OR_ENDPOINT_CONTEXT_DENIED"
     if reason == "HOLD_META_PAGE_TOKEN_SUBJECT_MISMATCH":
         return "PAGE_TOKEN_SUBJECT_MISMATCH"
     if reason == "HOLD_META_INSTAGRAM_BINDING_MISMATCH":
@@ -648,12 +650,32 @@ class MetaReadRuntime:
         page_identity = self._get(
             "FACEBOOK_PAGE",
             f"/{self.config.graph_version}/{self.config.page_id}",
-            {"fields": "id,name,instagram_business_account"},
+            {"fields": "id,name"},
             page_token,
         )
         if page_identity.get("id") != self.config.page_id or page_identity.get("name") != EXPECTED_NAME:
             raise MetaLiveHold("HOLD_META_PAGE_IDENTITY_MISMATCH")
-        linked = page_identity.get("instagram_business_account")
+
+        # Meta's supported Facebook-Login flow exposes Page→Instagram linkage
+        # from the managed-Pages endpoint under the User access token. Do not
+        # ask the Page token for instagram_business_account: that endpoint
+        # context can return Graph code 10 even when the Page token is valid.
+        if self.config.user_token is None:
+            raise MetaLiveHold("HOLD_META_USER_AUTHORITY_REQUIRED_FOR_INSTAGRAM_BINDING")
+        try:
+            binding_payload = self._get(
+                "FACEBOOK_PAGE",
+                f"/{self.config.graph_version}/me/accounts",
+                {"fields": "id,name,instagram_business_account", "limit": "100"},
+                self.config.user_token,
+            )
+        except MetaLiveHold as exc:
+            suffix = exc.reason.removeprefix("HOLD_META_")
+            raise MetaLiveHold(f"HOLD_META_STAGE_INSTAGRAM_BINDING_{suffix}") from None
+        matches = [item for item in _data(binding_payload) if item.get("id") == self.config.page_id]
+        if len(matches) != 1:
+            raise MetaLiveHold("HOLD_META_PAGE_NOT_ACCESSIBLE")
+        linked = matches[0].get("instagram_business_account")
         if not isinstance(linked, Mapping) or linked.get("id") != self.config.ig_user_id:
             raise MetaLiveHold("HOLD_META_INSTAGRAM_BINDING_MISMATCH")
 
