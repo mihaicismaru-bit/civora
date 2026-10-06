@@ -539,19 +539,19 @@ class MetaReadRuntime:
 
     def _page_authority(self) -> tuple[str, dict[str, Any]]:
         if self.config.page_token is not None:
+            # A Page access token can prove the Page identity directly. Keep this
+            # request to Page-token-safe fields; Instagram linkage is validated by
+            # the subsequent exact IG-user read using the same Page authority.
             page = self._get(
                 "FACEBOOK_PAGE",
                 f"/{self.config.graph_version}/{self.config.page_id}",
-                {"fields": "id,name,tasks,instagram_business_account"},
+                {"fields": "id,name"},
                 self.config.page_token,
             )
             if page.get("id") != self.config.page_id:
                 raise MetaLiveHold("HOLD_META_PAGE_NOT_ACCESSIBLE")
-            linked = page.get("instagram_business_account")
             if page.get("name") != EXPECTED_NAME:
                 raise MetaLiveHold("HOLD_META_PAGE_NAME_MISMATCH")
-            if not isinstance(linked, Mapping) or linked.get("id") != self.config.ig_user_id:
-                raise MetaLiveHold("HOLD_META_INSTAGRAM_BINDING_MISMATCH")
             return self.config.page_token, page
 
         if self.config.user_token is None:
