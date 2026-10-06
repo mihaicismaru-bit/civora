@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "AFIR-DR14-ACHIZITII-SIMPLE-EXHAUSTED-20261006",
+  "status": "AUTHORITATIVE_MATERIAL_CHANGE_CONFIRMED_FAIL_CLOSED",
+  "authority": "AFIR",
+  "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+  "observedAt": "2026-10-06T02:22:38Z",
+  "priorCanonicalEvidence": {
+    "corpusFingerprint": "7b8197759290185de43704abab7d35af245a0bc54161cfb3436fd2578b51a701",
+    "sourceObservedAt": "2026-10-05T22:50:55.964706+00:00",
+    "sourceFingerprintMatchesCorpus": true,
+    "liveFundsStatus": "FAIL_PARSE",
+    "parseError": "ValueError: invalid EUR value: 'FONDURI EPUIZATE'"
+  },
+  "materialObservation": {
+    "interventionCode": "DR-14",
+    "sector": "Componenta ACHIZIȚII SIMPLE (INDIFERENT DE SECTOR)",
+    "sessionAllocationEur": "18000000.00",
+    "opensAtLocal": "01.09.2026 09:00:00",
+    "closesAtLocal": "06.10.2026 00:00:00",
+    "submissionCeilingEur": "27000000.00",
+    "submittedPublicValueEur": "35010497.00",
+    "submittedProjectCount": 753,
+    "availableFundsRaw": "FONDURI EPUIZATE",
+    "availableFundsEurAuthorizedInterpretation": "0.00",
+    "availableFundsStatus": "EXHAUSTED"
+  },
+  "siblingComponentsRemainSeparatelyObserved": [
+    {
+      "sector": "Componenta LEGUMICULTURĂ",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "availableFundsEur": "40801776.00"
+    },
+    {
+      "sector": "Componenta SECTOR ZOOTEHNIC",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "availableFundsEur": "40867563.00"
+    },
+    {
+      "sector": "Componenta ALTE SECTOARE (PENTRU TOATE PROIECTELE CARE NU ÎNDEPLINESC CONDIȚIILE ÎNCADRĂRII ÎN CELELALTE COMPONENTE)",
+      "closesAtLocal": "31.10.2026 15:59:59",
+      "availableFundsEur": "37249601.00"
+    }
+  ],
+  "materialFactBoundary": {
+    "authorize": [
+      "DR-14 component-level close timestamp for ACHIZIȚII SIMPLE",
+      "DR-14 component-level exhausted-funds state for ACHIZIȚII SIMPLE",
+      "DR-14 component-level submitted value and project count from the official counter"
+    ],
+    "doNotInfer": [
+      "parent DR-14 lifecycle closure while sibling components remain open",
+      "eligibility changes",
+      "grant or intensity changes",
+      "scoring changes",
+      "status changes for sibling components beyond their explicit counter rows"
+    ]
+  },
+  "requiredRepair": [
+    "Teach the dedicated AFIR live-funds parser to interpret the exact source marker FONDURI EPUIZATE only in availableFundsEur as 0.00 plus availableFundsStatus=EXHAUSTED.",
+    "Keep generic EUR parsing strict.",
+    "Add a regression fixture reproducing the 06.10.2026 AFIR row.",
+    "Reconcile DR-14 at component level so public copy no longer implies all four components accept projects through 31.10.2026.",
+    "Run AFIR ingestion, decision-product quality gates, deploy, and public readback before closing this resolution."
+  ],
+  "closeCriteria": [
+    "afir_live_funds.status == PASS",
+    "ACHIZIȚII SIMPLE availableFundsStatus == EXHAUSTED",
+    "ACHIZIȚII SIMPLE closesAtLocal == 06.10.2026 00:00:00",
+    "public DR-14 dossier exposes component-level state without closing the parent intervention",
+    "public readback passes after deployment"
+  ]
+}
