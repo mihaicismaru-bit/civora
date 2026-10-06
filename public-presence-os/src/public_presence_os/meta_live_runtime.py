@@ -166,6 +166,30 @@ class JsonOpener(Protocol):
     def open(self, request: Request, timeout: float): ...
 
 
+def _http_hold_reason(exc: HTTPError) -> str:
+    reason = f"HOLD_META_HTTP_{exc.code}"
+    try:
+        body = exc.read(64 * 1024 + 1)
+    except Exception:
+        return reason
+    if not body or len(body) > 64 * 1024:
+        return reason
+    try:
+        payload = json.loads(body.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return reason
+    error = payload.get("error") if isinstance(payload, Mapping) else None
+    if not isinstance(error, Mapping):
+        return reason
+    code = error.get("code")
+    subcode = error.get("error_subcode")
+    if isinstance(code, int):
+        reason += f"_GRAPH_{code}"
+    if isinstance(subcode, int) and subcode:
+        reason += f"_SUB_{subcode}"
+    return reason
+
+
 class MetaReadClient:
     def __init__(
         self,
@@ -210,7 +234,7 @@ class MetaReadClient:
             except HTTPError as exc:
                 retryable = exc.code == 429 or 500 <= exc.code <= 599
                 if not retryable or attempt == self._max_attempts:
-                    raise MetaLiveHold(f"HOLD_META_HTTP_{exc.code}") from None
+                    raise MetaLiveHold(_http_hold_reason(exc)) from None
                 delay = min(float(exc.headers.get("Retry-After", "1") or "1"), 30.0)
             except (URLError, TimeoutError):
                 if attempt == self._max_attempts:
