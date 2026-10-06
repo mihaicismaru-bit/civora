@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "status": "PASS",
+  "status": "DEGRADED_SOURCE_DRIFT",
   "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-  "corpusFingerprint": "b85970c04574a9f2b30392cb2383bf6f03dbb975dd7417b5106a30243c4707c1",
-  "sourceFingerprint": "b85970c04574a9f2b30392cb2383bf6f03dbb975dd7417b5106a30243c4707c1",
-  "sourceFingerprintMatchesCorpus": true,
-  "snapshotFingerprint": "b2555442403c4921d4687a52697984837e0fbbe02f6bf7268ad7fb22e996ad29",
-  "sourceObservedAt": "2026-10-06T05:49:56.468751+00:00",
-  "generatedAt": "2026-10-06T05:50:43.334549+00:00",
+  "corpusFingerprint": "f72e5c574bcaf74128265aa62e6b8641def5113a423906ad4ec78ae99e89ce3c",
+  "sourceFingerprint": "116be8527867a5fe93faf32254ba9a29043ebc25735316678f0f6ea80df7f75e",
+  "sourceFingerprintMatchesCorpus": false,
+  "snapshotFingerprint": "bf0194c8a1855b539a9cb48dd2c0a420cd562e46c601422751d42c198b3fa4ea",
+  "sourceObservedAt": "2026-10-06T09:34:36.543522+00:00",
+  "generatedAt": "2026-10-06T09:35:36.231186+00:00",
   "httpStatus": 200,
   "contentType": "text/html; charset=utf-8",
   "currency": "EUR",
   "policy": {
     "sourceTier": "T1",
     "purpose": "dedicated-live-available-funds-snapshot",
-    "publishableDedicatedSnapshot": true,
+    "publishableDedicatedSnapshot": false,
     "autoPromoteIntoDossierBudget": false,
     "callStatusInferenceAllowed": false,
     "eligibilityInferenceAllowed": false,
@@ -23,19 +23,48 @@
     "sourceDrift": "fail-closed-require-next-corpus-observation"
   },
   "summary": {
-    "rowCount": 5,
-    "interventionCount": 2,
+    "rowCount": 7,
+    "interventionCount": 3,
     "interventions": [
+      "DR-12",
       "DR-14",
       "DR-18"
     ],
-    "sessionAllocationTotalEur": "113000000.00",
-    "submissionCeilingTotalEur": "169500000.00",
-    "submittedPublicValueTotalEur": "52443068.00",
-    "availableFundsTotalEur": "125067429.00",
-    "submittedProjectCount": 1104
+    "sessionAllocationTotalEur": "282589647.00",
+    "submissionCeilingTotalEur": null,
+    "submittedPublicValueTotalEur": "54257054.00",
+    "availableFundsTotalEur": null,
+    "submittedProjectCount": 1125
   },
   "rows": [
+    {
+      "interventionCode": "DR-12",
+      "sector": "Componenta ALTE SECTOARE",
+      "sessionAllocationEur": "84794823.50",
+      "opensAtLocal": "06.10.2026 09:00:00",
+      "opensAtIso": "2026-10-06T09:00:00+03:00",
+      "closesAtLocal": "02.12.2026 15:59:59",
+      "closesAtIso": "2026-12-02T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "989811.00",
+      "submittedProjectCount": 5,
+      "availableFundsEur": null,
+      "availableFundsStatus": "UNKNOWN"
+    },
+    {
+      "interventionCode": "DR-12",
+      "sector": "Componenta SECTOR ZOOTEHNIC",
+      "sessionAllocationEur": "84794823.50",
+      "opensAtLocal": "06.10.2026 09:00:00",
+      "opensAtIso": "2026-10-06T09:00:00+03:00",
+      "closesAtLocal": "02.12.2026 15:59:59",
+      "closesAtIso": "2026-12-02T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "0.00",
+      "submittedProjectCount": 0,
+      "availableFundsEur": null,
+      "availableFundsStatus": "UNKNOWN"
+    },
     {
       "interventionCode": "DR-14",
       "sector": "Componenta ACHIZIȚII SIMPLE (INDIFERENT DE SECTOR)",
@@ -59,9 +88,9 @@
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
       "submissionCeilingEur": "45000000.00",
-      "submittedPublicValueEur": "7796022.00",
-      "submittedProjectCount": 159,
-      "availableFundsEur": "37203978.00",
+      "submittedPublicValueEur": "8176000.00",
+      "submittedProjectCount": 167,
+      "availableFundsEur": "36824000.00",
       "availableFundsStatus": "REPORTED"
     },
     {
@@ -73,9 +102,9 @@
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
       "submissionCeilingEur": "45000000.00",
-      "submittedPublicValueEur": "4198224.00",
-      "submittedProjectCount": 90,
-      "availableFundsEur": "40801776.00",
+      "submittedPublicValueEur": "4297407.00",
+      "submittedProjectCount": 92,
+      "availableFundsEur": "40702593.00",
       "availableFundsStatus": "REPORTED"
     },
     {
@@ -87,9 +116,9 @@
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
       "submissionCeilingEur": "45000000.00",
-      "submittedPublicValueEur": "4132437.00",
-      "submittedProjectCount": 88,
-      "availableFundsEur": "40867563.00",
+      "submittedPublicValueEur": "4377551.00",
+      "submittedProjectCount": 93,
+      "availableFundsEur": "40622449.00",
       "availableFundsStatus": "REPORTED"
     },
     {
@@ -101,19 +130,19 @@
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
       "submissionCeilingEur": "7500000.00",
-      "submittedPublicValueEur": "1305888.00",
-      "submittedProjectCount": 14,
-      "availableFundsEur": "6194112.00",
+      "submittedPublicValueEur": "1405788.00",
+      "submittedProjectCount": 15,
+      "availableFundsEur": "6094212.00",
       "availableFundsStatus": "REPORTED"
     }
   ],
   "provenance": {
     "authority": "AFIR",
     "evidenceType": "OFFICIAL_LIVE_COUNTER",
-    "corpusFingerprint": "b85970c04574a9f2b30392cb2383bf6f03dbb975dd7417b5106a30243c4707c1",
-    "sourceFingerprint": "b85970c04574a9f2b30392cb2383bf6f03dbb975dd7417b5106a30243c4707c1",
-    "snapshotFingerprint": "b2555442403c4921d4687a52697984837e0fbbe02f6bf7268ad7fb22e996ad29",
-    "sourceObservedAt": "2026-10-06T05:49:56.468751+00:00",
+    "corpusFingerprint": "f72e5c574bcaf74128265aa62e6b8641def5113a423906ad4ec78ae99e89ce3c",
+    "sourceFingerprint": "116be8527867a5fe93faf32254ba9a29043ebc25735316678f0f6ea80df7f75e",
+    "snapshotFingerprint": "bf0194c8a1855b539a9cb48dd2c0a420cd562e46c601422751d42c198b3fa4ea",
+    "sourceObservedAt": "2026-10-06T09:34:36.543522+00:00",
     "materialFactBoundary": "snapshot-only-no-cross-field-inference"
   }
 }
