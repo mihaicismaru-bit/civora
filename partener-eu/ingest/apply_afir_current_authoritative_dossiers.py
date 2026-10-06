@@ -493,8 +493,9 @@ def dr12_dossier() -> dict[str, Any]:
         "decisionAction": decision,
         "publicationState": "PUBLISHABLE",
         "standfirst": (
-            "Sesiunea DR-12 se deschide la 6 octombrie 2026, ora 09:00, cu 169.589.647 EUR disponibili "
-            "și finanțare de până la 200.000 EUR/proiect."
+            "Sesiunea DR-12 este deschisă pentru depunere, cu 169.589.647 EUR alocare totală și finanțare de până la 200.000 EUR/proiect."
+            if post_launch_evidence
+            else "Sesiunea DR-12 se deschide la 6 octombrie 2026, ora 09:00, cu 169.589.647 EUR disponibili și finanțare de până la 200.000 EUR/proiect."
         ),
         "audience": applicants,
         "quickFacts": facts([
