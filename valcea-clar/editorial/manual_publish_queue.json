@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "instance_id": "valcea",
-  "requested_at": "2026-10-05T22:23:00+03:00",
+  "requested_at": "2026-10-06T18:08:00+03:00",
   "requested_by": "VÂLCEA CLAR external editorial control-plane",
   "publication_intent": "publish",
   "facts": [
@@ -1329,6 +1329,107 @@
         ]
       },
       "editorial_note": "Low-risk service story. Do not imply selection outcome; update same story on cancellation or a material calendar change."
+    },
+    {
+      "id": "calimanesti-dn7-benzinarie-accident-20261006",
+      "status": "verified",
+      "section": "MOBILITATE",
+      "editorial_type": "news",
+      "editorial_form": "continuous_update",
+      "priority": 99,
+      "confidence": 96,
+      "publication_lifecycle": "new_story",
+      "valid_from": "2026-10-06T14:00:00+03:00",
+      "active_until": "2026-10-07T00:30:00+03:00",
+      "next_check_at": "2026-10-06T18:45:00+03:00",
+      "closure_condition": "Centrul INFOTRAFIC, IPJ Vâlcea or another attributable current traffic authority confirms normal two-way traffic, or a material new restriction supersedes the alternating-one-lane state.",
+      "social_priority": 3,
+      "slots": [
+        "evening"
+      ],
+      "headline": "Călimănești: traficul pe DN7 a fost reluat alternativ pe un fir după accidentul de la benzinărie",
+      "dek": "Circulația fusese oprită timp de câteva ore după ce un TIR a lovit o pompă de carburant. Radio România Actualități a transmis la 17:19 că traficul a fost reluat alternativ pe un fir.",
+      "paragraphs": [
+        "Traficul rutier pe DN7, la intersecția cu centura orașului Călimănești, a fost reluat alternativ pe un fir după ce circulația fusese întreruptă timp de câteva ore, potrivit unei actualizări Radio România Actualități publicate la 17:19.",
+        "Blocarea a urmat unui accident în care un autocamion frigorific a lovit o pompă de alimentare cu carburant la o stație aflată la ieșirea din Călimănești spre Sibiu. Radio România a relatat, citând Centrul INFOTRAFIC și autoritățile de intervenție, că au existat scurgeri importante de combustibil și că traficul fusese oprit complet.",
+        "Cea mai nouă stare verificată de VÂLCEA CLAR este circulația alternativă pe un singur fir. Redacția nu tratează această actualizare drept revenire la trafic normal pe ambele sensuri.",
+        "Materialul va fi actualizat pe același URL când o sursă rutieră actuală confirmă revenirea la circulație normală sau anunță o nouă restricție."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Radio România Actualități — trafic reluat alternativ pe un fir, 06.10.2026 17:19",
+          "url": "https://www.romania-actualitati.ro/stiri/romania/traficul-rutier-pe-valea-oltului-a-fost-reluat-alternativ-pe-un-fir-id235448.html",
+          "tier": "T1B"
+        },
+        {
+          "name": "Radio România — incident Călimănești / informații INFOTRAFIC, 06.10.2026 14:39–14:48",
+          "url": "https://www.radioromania.ro/stiri-locale/valcea-risc-de-explozie-pe-valea-oltului-dupa-ce-un-tir-a-lovit-o-pompa-de-carburant-id225178.html",
+          "tier": "T1B"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "continuous_update",
+        "headline": {
+          "text": "Călimănești: traficul pe DN7 a fost reluat alternativ pe un fir după accidentul de la benzinărie",
+          "source_urls": [
+            "https://www.romania-actualitati.ro/stiri/romania/traficul-rutier-pe-valea-oltului-a-fost-reluat-alternativ-pe-un-fir-id235448.html"
+          ]
+        },
+        "dek": {
+          "text": "Circulația fusese oprită timp de câteva ore după ce un TIR a lovit o pompă de carburant. Radio România Actualități a transmis la 17:19 că traficul a fost reluat alternativ pe un fir.",
+          "source_urls": [
+            "https://www.romania-actualitati.ro/stiri/romania/traficul-rutier-pe-valea-oltului-a-fost-reluat-alternativ-pe-un-fir-id235448.html",
+            "https://www.radioromania.ro/stiri-locale/valcea-risc-de-explozie-pe-valea-oltului-dupa-ce-un-tir-a-lovit-o-pompa-de-carburant-id225178.html"
+          ]
+        },
+        "claims": [
+          {
+            "id": "calimanesti-traffic-interrupted-1400",
+            "role": "documented_context",
+            "kind": "attributed_statement",
+            "certainty": "SOURCE_CLAIM",
+            "text": "Radio România a relatat, citând Centrul INFOTRAFIC, că circulația pe DN7 în zona accidentului a fost complet oprită după impactul autocamionului cu pompa de carburant.",
+            "attribution": "Centrul INFOTRAFIC, relatat de Radio România",
+            "source_urls": [
+              "https://www.radioromania.ro/stiri-locale/valcea-risc-de-explozie-pe-valea-oltului-dupa-ce-un-tir-a-lovit-o-pompa-de-carburant-id225178.html"
+            ]
+          },
+          {
+            "id": "calimanesti-fuel-leak",
+            "role": "context",
+            "kind": "attributed_statement",
+            "certainty": "SOURCE_CLAIM",
+            "text": "Radio România a relatat că impactul a provocat scurgeri importante de combustibil și intervenția serviciilor de urgență.",
+            "attribution": "Radio România, pe baza informațiilor autorităților de intervenție",
+            "source_urls": [
+              "https://www.radioromania.ro/stiri-locale/valcea-risc-de-explozie-pe-valea-oltului-dupa-ce-un-tir-a-lovit-o-pompa-de-carburant-id225178.html"
+            ]
+          },
+          {
+            "id": "calimanesti-traffic-alternate-1719",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "certainty": "SOURCE_CLAIM",
+            "text": "Radio România Actualități a transmis la 17:19 că traficul rutier la intersecția DN7 cu centura Călimănești s-a reluat alternativ pe un fir.",
+            "attribution": "Radio România Actualități, corespondent local",
+            "source_urls": [
+              "https://www.romania-actualitati.ro/stiri/romania/traficul-rutier-pe-valea-oltului-a-fost-reluat-alternativ-pe-un-fir-id235448.html"
+            ]
+          },
+          {
+            "id": "calimanesti-normal-traffic",
+            "role": "closure_condition",
+            "kind": "unknown",
+            "certainty": "UNKNOWN",
+            "text": "Revenirea la trafic normal pe ambele sensuri nu este confirmată de sursele verificate la momentul acestei actualizări.",
+            "source_urls": [
+              "https://www.romania-actualitati.ro/stiri/romania/traficul-rutier-pe-valea-oltului-a-fost-reluat-alternativ-pe-un-fir-id235448.html"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "Continuous public-safety/service story. Keep all operational claims attributed. Do not infer accident cause, liability, final medical outcome, total fuel quantity or full two-way reopening. No third-party incident image should be reused unless rights/provenance are separately cleared."
     }
   ]
 }
