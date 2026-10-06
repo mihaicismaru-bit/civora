@@ -31,7 +31,9 @@ def main() -> int:
         None,
     )
     assert d, "STEP-LLL Adults dossier missing"
-    assert d.get("status") == "OPEN"
+    assert d.get("status") == "CLOSED"
+    assert d.get("statusLabel") == "FINALIZAT"
+    assert get_fact(d, "Status")["value"] == "FINALIZAT"
     assert d.get("region") == "Național; minimum 2 regiuni de dezvoltare"
     assert get_fact(d, "Deschidere")["value"] == "29 mai 2026, 16:00"
     assert get_fact(d, "Termen")["value"] == "30 septembrie 2026, 16:00"
@@ -42,6 +44,14 @@ def main() -> int:
     assert d.get("quality", {}).get("completeness") == 100
     assert d.get("quality", {}).get("depthCompleteness") == 100
     assert d.get("quality", {}).get("stepLllAuthoritativeBundle") is True
+    status_provenance = d.get("quality", {}).get("statusProvenance") or {}
+    assert status_provenance.get("callCode") == "PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66"
+    assert status_provenance.get("status") == "FINALIZAT"
+    assert status_provenance.get("materialFactUse") == "STATUS_ONLY_DEMOTION"
+    assert status_provenance.get("observedAt")
+    assert status_provenance.get("runId")
+    assert status_provenance.get("parserVersion") == "MYSMIS_EXACT_CALL_INVENTORY_V2"
+    assert status_provenance.get("rawSha256")
     assert not d.get("quality", {}).get("blockedFactClasses")
 
     applicants = get_section(d, "Cine poate aplica")
@@ -54,6 +64,9 @@ def main() -> int:
     corr = get_section(d, "Corrigendum nr. 1 — rezumat")
     qa = get_section(d, "Q&A AM — clarificări esențiale")
     implementation = get_section(d, "Implementare")
+    executive = get_section(d, "Rezumat executiv")
+    quick = get_section(d, "Decizia rapidă")
+    actions = get_section(d, "Ce trebuie făcut acum")
 
     assert applicants and len(applicants["items"]) >= 6
     assert "fpc" in joined(applicants)
@@ -77,6 +90,13 @@ def main() -> int:
     assert "36 de luni" in joined(qa)
     assert "a1" in joined(qa) and "a2.2" in joined(qa)
     assert implementation and "36 de luni" in joined(implementation)
+    assert executive and "stare apel: finalizat" in joined(executive)
+    public_action_text = " ".join([str(d.get("decisionAction") or ""), joined(executive), joined(quick), joined(actions)]).lower()
+    assert "depunerea este deschisă" not in public_action_text
+    assert "acționează" not in public_action_text
+    assert "planifică depunerea înainte" not in public_action_text
+    assert "nu mai planifica o depunere" in public_action_text
+    assert (d.get("executiveSummary") or {}).get("status") == "CLOSED"
 
     summaries = d.get("documentSummaries") or []
     by_kind = {x.get("kind"): x for x in summaries}
