@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-06T00:10:09.321309+00:00",
-  "status": "OK",
+  "generated_at": "2026-10-06T06:33:20.535415+00:00",
+  "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
   "policy": {
     "osm_is_discovery_only": true,
     "official_website_required_for_seed_overlay": true,
@@ -12,21 +12,32 @@
   },
   "frontier_count": 111,
   "website_candidates": 18,
-  "websites_checked": 6,
-  "official_identity_matches": 1,
+  "websites_checked": 4,
+  "official_identity_matches": 0,
   "official_address_matches": 0,
-  "new_overlay_venues": [
-    "auto-d-amici-e1c1083c"
-  ],
+  "new_overlay_venues": [],
   "new_auto_eligible": [],
-  "new_review_required": [
-    "auto-d-amici-e1c1083c"
-  ],
+  "new_review_required": [],
   "verifications": [
+    {
+      "discoveryId": "osm-node-13202418033",
+      "name": "Maestro Pizza & Devivery",
+      "observedAt": "2026-10-06T06:33:56.951910+00:00",
+      "health": "OK",
+      "website": "https://pizzamaestro.ro/",
+      "https": true,
+      "nameMatch": true,
+      "localityMatch": false,
+      "streetMatch": false,
+      "pagesChecked": 2,
+      "textLength": 5161,
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
     {
       "discoveryId": "osm-node-11042860687",
       "name": "Proper Pizza",
-      "observedAt": "2026-10-06T00:10:12.434148+00:00",
+      "observedAt": "2026-10-06T06:33:59.685115+00:00",
       "health": "OK",
       "website": "https://properpizza.ro/",
       "https": true,
@@ -41,7 +52,7 @@
     {
       "discoveryId": "osm-node-13252449685",
       "name": "Proper Pizza",
-      "observedAt": "2026-10-06T00:10:14.087086+00:00",
+      "observedAt": "2026-10-06T06:34:01.286798+00:00",
       "health": "OK",
       "website": "https://properpizza.ro/",
       "https": true,
@@ -56,7 +67,7 @@
     {
       "discoveryId": "osm-node-11941798810",
       "name": "Starbucks",
-      "observedAt": "2026-10-06T00:10:15.458118+00:00",
+      "observedAt": "2026-10-06T06:34:02.531419+00:00",
       "health": "OK",
       "website": "https://www.starbucks.ro/",
       "https": true,
@@ -67,47 +78,10 @@
       "textLength": 7838,
       "verifiedOfficialIdentity": false,
       "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-13149483551",
-      "name": "Ahamata Yoga",
-      "observedAt": "2026-10-06T00:10:16.080969+00:00",
-      "health": "FAILED",
-      "website": "https://ahamatayoga.com/",
-      "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-4423759090",
-      "name": "D'Amici",
-      "observedAt": "2026-10-06T00:10:16.132977+00:00",
-      "health": "OK",
-      "website": "https://www.damici.ro/ristorante-damici/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": true,
-      "streetMatch": false,
-      "pagesChecked": 4,
-      "textLength": 164352,
-      "verifiedOfficialIdentity": true,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-13254124078",
-      "name": "Dabo Doner",
-      "observedAt": "2026-10-06T00:10:21.434965+00:00",
-      "health": "OK",
-      "website": "https://dabodoner.ro/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": false,
-      "streetMatch": false,
-      "pagesChecked": 1,
-      "textLength": 53,
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
     }
   ],
-  "provider_errors": []
+  "provider_errors": [
+    "https://overpass-api.de/api/interpreter: HTTPError: HTTP Error 504: Gateway Timeout",
+    "https://overpass.kumi.systems/api/interpreter: TimeoutError: The read operation timed out"
+  ]
 }
