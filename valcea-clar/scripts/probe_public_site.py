@@ -131,6 +131,15 @@ def story_links(html: str) -> set[str]:
     return set(story_link_sequence(html))
 
 
+def current_projection_articles(articles: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return only stories that belong on current public surfaces.
+
+    Durable archive routes stay validated by the projection contract, while
+    homepage/readback acceptance compares against the semantic current set.
+    """
+    return [row for row in articles if row.get("archive_only") is not True]
+
+
 def homepage_hero_story_path(html: str) -> str:
     hero = re.search(
         r'<article\s+class=["\'][^"\']*\bhero\b[^"\']*["\'][^>]*>(.*?)</article>',
@@ -223,7 +232,7 @@ def _public_projection_contract(
 
     articles = [row for row in (articles_doc.get("articles") or []) if isinstance(row, dict)]
     public_ids = [str(row.get("id") or "") for row in articles]
-    current_articles = [row for row in articles if row.get("archive_only") is not True]
+    current_articles = current_projection_articles(articles)
     archive_articles = [row for row in articles if row.get("archive_only") is True]
     current_public_ids = [str(row.get("id") or "") for row in current_articles]
     archive_public_ids = [str(row.get("id") or "") for row in archive_articles]
@@ -318,7 +327,7 @@ def _public_projection_contract(
             "verified_visual_count": state.get("verified_visual_count"),
         }
     )
-    return state, articles, check
+    return state, current_articles, check
 
 
 def evaluate(base_url: str) -> dict[str, Any]:
