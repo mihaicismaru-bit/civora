@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "instance_id": "valcea",
   "product": "VÂLCEA CLAR editorial product policy",
   "execution_owner": "CIVORA_SITE_ENGINE",
@@ -17,32 +17,53 @@
     "fact_kernel_required_for_automatic_reader_copy": true,
     "reputational_claims_fail_closed": true,
     "no_fake_urgency": true,
-    "verification_burden_is_risk_proportionate": true
+    "verification_burden_is_risk_proportionate": true,
+    "current_stream_is_narrower_than_archive": true,
+    "routine_service_signal_is_not_standalone_news": true
   },
   "lanes": {
     "breaking": {
       "purpose": "Rapid event-driven publication for fresh material changes.",
       "recency_affects_priority": true,
       "recency_is_eligibility_gate": true,
-      "products": ["NEWS", "SERVICE_ALERT"]
+      "products": [
+        "NEWS",
+        "SERVICE_ALERT"
+      ]
     },
     "knowledge": {
       "purpose": "Publish useful journalism from verified archives, registers and document chains even when the underlying facts are weeks, months or years old.",
       "recency_affects_priority": false,
       "recency_is_eligibility_gate": false,
-      "products": ["EXPLAINER", "TIMELINE", "LIST_INDEX", "MONEY_TRACE", "DECISION_DIGEST"]
+      "products": [
+        "EXPLAINER",
+        "TIMELINE",
+        "LIST_INDEX",
+        "MONEY_TRACE",
+        "DECISION_DIGEST"
+      ]
     },
     "monitor": {
       "purpose": "Revisit previously documented projects, permits, promises and decisions to establish present status.",
       "recency_affects_priority": false,
       "recency_is_eligibility_gate": false,
-      "products": ["STATUS_CHECK", "WHAT_HAPPENED_NEXT", "PROJECT_TRACKER", "PERMIT_FOLLOWUP"]
+      "products": [
+        "STATUS_CHECK",
+        "WHAT_HAPPENED_NEXT",
+        "PROJECT_TRACKER",
+        "PERMIT_FOLLOWUP"
+      ]
     },
     "service": {
       "purpose": "Reader-useful inventories, calendars and current lists from structured verified registers.",
       "recency_affects_priority": true,
       "recency_is_eligibility_gate": false,
-      "products": ["ACTIVE_PERMITS_INDEX", "JOBS_ROUNDUP", "PUBLIC_DECISIONS_INDEX", "UPCOMING_EVENTS"]
+      "products": [
+        "ACTIVE_PERMITS_INDEX",
+        "JOBS_ROUNDUP",
+        "PUBLIC_DECISIONS_INDEX",
+        "UPCOMING_EVENTS"
+      ]
     }
   },
   "breaking_evidence_policy": {
@@ -52,21 +73,39 @@
     "correction_path_required": true,
     "classes": {
       "LOW_RISK_ATTRIBUTABLE": {
-        "examples": ["event announcement", "traffic/service notice", "job opening", "public schedule", "non-controversial institutional update"],
+        "examples": [
+          "event announcement",
+          "traffic/service notice",
+          "public schedule",
+          "non-controversial institutional update",
+          "material local service change"
+        ],
         "minimum_evidence": "ONE_IDENTIFIED_CREDIBLE_SOURCE_WITH_EXPLICIT_ATTRIBUTION",
         "primary_source_required": false,
         "second_source_required": false,
         "copy_rule": "State who reports/announces the information and do not silently upgrade it to independently verified fact."
       },
       "MEDIUM_RISK_MATERIAL": {
-        "examples": ["material infrastructure change", "public spending claim", "business change", "significant local disruption"],
+        "examples": [
+          "material infrastructure change",
+          "public spending claim",
+          "business change",
+          "significant local disruption"
+        ],
         "minimum_evidence": "ONE_PRIMARY_OR_TWO_INDEPENDENT_CREDIBLE_SOURCES",
         "primary_source_required": false,
         "second_source_required_when_no_primary": true,
         "copy_rule": "Attribute disputed or incomplete elements and state what remains unconfirmed."
       },
       "HIGH_RISK_REPUTATIONAL": {
-        "examples": ["crime allegation", "violence with identified persons", "corruption allegation", "legal culpability", "medical harm", "dismissal or misconduct claim"],
+        "examples": [
+          "crime allegation",
+          "violence with identified persons",
+          "corruption allegation",
+          "legal culpability",
+          "medical harm",
+          "dismissal or misconduct claim"
+        ],
         "minimum_evidence": "PRIMARY_EVIDENCE_OR_STRONG_MULTI_SOURCE_REVIEW",
         "primary_source_required_by_default": true,
         "second_source_required_when_primary_is_incomplete": true,
@@ -137,7 +176,7 @@
     }
   },
   "ranking": {
-    "base_monitor_priority_weight": 1.0,
+    "base_monitor_priority_weight": 1,
     "verified_archive_reuse_bonus": 8,
     "unresolved_lead_bonus": 6,
     "changed_primary_source_bonus": 12,
@@ -150,15 +189,44 @@
   "examples": [
     {
       "scenario": "Consiliul Local a adoptat decizii acum 1-2 luni",
-      "allowed_products": ["DECISION_DIGEST", "EXPLAINER", "MONEY_TRACE", "WHAT_HAPPENED_NEXT"]
+      "allowed_products": [
+        "DECISION_DIGEST",
+        "EXPLAINER",
+        "MONEY_TRACE",
+        "WHAT_HAPPENED_NEXT"
+      ]
     },
     {
       "scenario": "Autorizație de construire emisă acum un an",
-      "allowed_products": ["PERMIT_FOLLOWUP", "STATUS_CHECK", "WHAT_HAPPENED_NEXT"]
+      "allowed_products": [
+        "PERMIT_FOLLOWUP",
+        "STATUS_CHECK",
+        "WHAT_HAPPENED_NEXT"
+      ]
     },
     {
       "scenario": "Registru de autorizații încă în termen",
-      "allowed_products": ["ACTIVE_PERMITS_INDEX", "PROJECT_TRACKER", "LIST_INDEX"]
+      "allowed_products": [
+        "ACTIVE_PERMITS_INDEX",
+        "PROJECT_TRACKER",
+        "LIST_INDEX"
+      ]
     }
-  ]
+  ],
+  "current_stream_materiality": {
+    "purpose": "Keep the live/current stream focused on material local consequences while preserving useful durable routes and service surfaces.",
+    "default_routes": {
+      "routine_recruitment": "JOBS_ROUNDUP or section/service surface",
+      "sports_fixture": "SPORT service surface",
+      "routine_emergency_aggregate": "service intelligence / archive",
+      "stale_one_off_incident": "archive until material follow-up"
+    },
+    "standalone_overrides": [
+      "standalone_materiality=PASS|MATERIAL|HIGH",
+      "major_reader_impact=true"
+    ],
+    "major_recruitment_default_min_posts": 25,
+    "fast_incident_current_max_hours": 96,
+    "archive_route_preserved": true
+  }
 }
