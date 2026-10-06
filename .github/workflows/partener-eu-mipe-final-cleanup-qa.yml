@@ -10,6 +10,8 @@ on:
       - 'partener-eu/ingest/normalize_mipe_health.py'
       - 'partener-eu/ingest/build_decision_products.py'
       - 'partener-eu/ingest/score_dossier_depth.py'
+      - 'partener-eu/ingest/apply_step_lll_authoritative_dossier.py'
+      - 'partener-eu/ops/test_step_lll_dossier.py'
       - 'partener-eu/ops/test_dossier_autonomy.py'
       - 'partener-eu/ops/audit_mipe_legacy.py'
       - 'partener-eu/ops/p10_monitor_integrity.py'
@@ -69,6 +71,8 @@ jobs:
           python -m py_compile partener-eu/ingest/mipe_windows_crawl_v3.py
           python -m py_compile partener-eu/ingest/project_mipe_v3_corpus.py
           python -m py_compile partener-eu/ingest/build_decision_products.py
+          python -m py_compile partener-eu/ingest/apply_step_lll_authoritative_dossier.py
+          python -m py_compile partener-eu/ops/test_step_lll_dossier.py
           python -m py_compile partener-eu/ops/audit_mipe_legacy.py
           python -m py_compile partener-eu/ops/p10_monitor_integrity.py
           python -m py_compile partener-eu/ops/test_mipe_final_cleanup.py
@@ -106,12 +110,14 @@ jobs:
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
           python partener-eu/ingest/refine_afir_public_dossiers.py
+          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
           python partener-eu/ingest/score_dossier_depth.py
           python partener-eu/ingest/build_mipe_enrichment_seeds.py
           python partener-eu/ingest/build_call_lifecycle.py
           python partener-eu/ingest/intelligence_index.py
           python partener-eu/ops/test_mipe_canonical_pipeline.py
           python partener-eu/ops/test_dossier_autonomy.py
+          python partener-eu/ops/test_step_lll_dossier.py
           python partener-eu/ops/test_mipe_enrichment_seed_quality.py
           python partener-eu/ops/test_frontend_regression.py
 
