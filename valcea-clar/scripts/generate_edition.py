@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -185,6 +186,67 @@ def editorial_sort_key(item: dict, now: datetime) -> tuple:
     )
 
 
+
+RECRUITMENT_SECTIONS = {"LOCURI DE MUNCĂ", "LOCURI DE MUNCA", "JOBS"}
+RECRUITMENT_STRONG_MARKERS = (
+    "dosarele se depun",
+    "depunerea dosarelor",
+    "scoate la concurs",
+    "scoate la concurs",
+    "recrutează",
+    "recruteaza",
+    "post vacant",
+    "posturi vacante",
+)
+MAJOR_RECRUITMENT_RE = re.compile(r"\b(\d{1,3})\s+(?:de\s+)?(?:posturi|locuri)\b", re.IGNORECASE)
+
+
+def standalone_recruitment_is_material(item: dict) -> bool:
+    """Fail closed on routine one-off vacancy notices in the main news stream.
+
+    VÂLCEA CLAR may still monitor these notices and expose them through service
+    products such as JOBS_ROUNDUP. A standalone news story is reserved for a
+    materially larger hiring action or an explicit editorial materiality
+    override. Durable routes already published remain in the archive, but the
+    current-news set must not be filled with ordinary recruitment notices.
+    """
+    editorial = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
+    product_type = str(
+        editorial.get("product_type")
+        or editorial.get("product")
+        or item.get("editorial_product_type")
+        or item.get("product_type")
+        or ""
+    ).strip().upper()
+    if product_type in {"JOBS_ROUNDUP", "LIST_INDEX"}:
+        return True
+
+    section = str(item.get("section") or "").strip().upper()
+    corpus = " ".join(
+        [
+            str(item.get("headline") or ""),
+            str(item.get("dek") or ""),
+            " ".join(str(p) for p in item.get("paragraphs") or []),
+        ]
+    ).casefold()
+    is_recruitment = section in RECRUITMENT_SECTIONS or any(marker in corpus for marker in RECRUITMENT_STRONG_MARKERS)
+    if not is_recruitment:
+        return True
+
+    explicit = str(
+        item.get("standalone_materiality")
+        or editorial.get("standalone_materiality")
+        or ""
+    ).strip().upper()
+    if explicit in {"PASS", "MATERIAL", "HIGH"}:
+        return True
+    if item.get("major_reader_impact") is True or editorial.get("major_reader_impact") is True:
+        return True
+
+    counts = [int(match.group(1)) for match in MAJOR_RECRUITMENT_RE.finditer(corpus)]
+    return bool(counts and max(counts) >= 5)
+
+
 def eligible_facts(registry: dict, now: datetime, slot: str, retained_ids: set[str] | None = None) -> list[dict]:
     output = []
     held = active_publication_holds()
@@ -198,6 +260,11 @@ def eligible_facts(registry: dict, now: datetime, slot: str, retained_ids: set[s
         if int(fact.get("confidence") or 0) < MIN_CONFIDENCE:
             continue
         if fact.get("material_fact_gate") not in ALLOWED_GATES:
+            continue
+        # Routine single-vacancy notices belong in service surfaces/roundups,
+        # not in the main current-news stream. This enforces the anti-filler
+        # product contract while preserving major hiring actions and overrides.
+        if not standalone_recruitment_is_material(fact):
             continue
         # Slot membership gates first publication only. Once a story has been
         # published, keep it in the canonical set while it remains valid and
@@ -404,6 +471,43 @@ def self_test() -> int:
     assert len(eligible) == 1
     assert eligible_facts(sample, now, "evening") == []
     assert [row["id"] for row in eligible_facts(sample, now, "evening", retained_ids={"x"})] == ["x"]
+    routine_recruitment = {
+        "facts": [{
+            **sample_fact,
+            "id": "routine-recruitment",
+            "section": "LOCURI DE MUNCĂ",
+            "headline": "Comuna X caută șofer; dosarele se depun până pe 16 octombrie",
+            "dek": "Primăria a publicat un singur post vacant și calendarul concursului.",
+            "paragraphs": ["Dosarele se depun până la termenul indicat de instituție, conform anunțului oficial publicat."],
+        }]
+    }
+    assert eligible_facts(routine_recruitment, now, "morning") == []
+
+    major_recruitment = {
+        "facts": [{
+            **sample_fact,
+            "id": "major-recruitment",
+            "section": "LOCURI DE MUNCĂ",
+            "headline": "Instituția scoate la concurs 57 de posturi",
+            "dek": "Campania de recrutare include 57 de posturi și are un calendar public verificat.",
+            "paragraphs": ["Dosarele se depun în perioada anunțată oficial pentru cele 57 de posturi disponibile."],
+        }]
+    }
+    assert [row["id"] for row in eligible_facts(major_recruitment, now, "morning")] == ["major-recruitment"]
+
+    jobs_roundup = {
+        "facts": [{
+            **sample_fact,
+            "id": "jobs-roundup",
+            "section": "LOCURI DE MUNCĂ",
+            "headline": "Locuri de muncă verificate în Vâlcea: termenele săptămânii",
+            "dek": "Un roundup verificat grupează mai multe oportunități și termene active.",
+            "paragraphs": ["Lista reunește anunțuri verificate și termenele lor, fără a transforma fiecare post într-o știre separată."],
+            "editorial_product": {"product_type": "JOBS_ROUNDUP"},
+        }]
+    }
+    assert [row["id"] for row in eligible_facts(jobs_roundup, now, "morning")] == ["jobs-roundup"]
+
     title_only = {"facts": [{**sample_fact, "id": "title-only", "material_fact_gate": "PASS_TITLE_DATE_ONLY"}]}
     assert eligible_facts(title_only, now, "morning") == []
     relative = {"facts": [{**sample_fact, "id": "relative", "headline": "Azi are loc programul verificat"}]}
