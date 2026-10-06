@@ -1,56 +1,35 @@
 {
-  "requested_at": "2026-10-06T21:55:00+03:00",
+  "requested_at": "2026-10-07T01:00:00+03:00",
   "requested_by": "CHATGPT_EDITORIAL_OPERATOR",
-  "reason": "Hourly Local Life currentness closure: the 19:00 CS Vâlcea 1924 – Steaua event is no longer future. Official club schedule was re-read; event lifecycle is expired fail-closed after the completed match window. AGERPRES independently reports the final 97–90 after overtime; score is not injected into the event schema because the current canonical Local Life event writer has no score field.",
+  "reason": "Hourly Local Life currentness: direct T1 revalidation of ROMÂNIA CU GLAS DE EUPHONIA for 7 Oct 2026 19:00 at Sala Lahovari; keep event eligible through its event window. No UAT deep-scan due before 07:00.",
   "expected_story_ids": [],
   "editorial_signals": [],
   "coverage_cycle": {
-    "uat_bucket": 0,
-    "scan_status": "completed",
-    "scanned_localities": [
-      "Râmnicu Vâlcea",
-      "Brezoi",
-      "Berislăvești",
-      "Copăceni",
-      "Făurești",
-      "Grădiștea",
-      "Livezi",
-      "Mihăești",
-      "Oteșani",
-      "Prundeni",
-      "Sinești",
-      "Șirineasa",
-      "Valea Mare"
-    ],
-    "material_delta_localities": [
-      "Grădiștea",
-      "Livezi",
-      "Râmnicu Vâlcea",
-      "Valea Mare",
-      "Făurești",
-      "Mihăești"
-    ],
-    "note": "T1 Distribuție Oltenia weekly outage PDF verified Grădiștea today and later-week rows including Livezi, Râmnicu Vâlcea, Valea Mare, Făurești. T1 Posturi.gov.ro closes the earlier Mihăești driver evidence gap with a same-day 16:00 application deadline. Other bucket-0 UATs yielded no fresh material delta in bounded scan."
+    "uat_bucket": null,
+    "scan_status": "not_due",
+    "scanned_localities": [],
+    "material_delta_localities": [],
+    "note": "New-day UAT bucket 0 is not due before the canonical post-07:00 window; overnight run is hot-watch/delta only."
   },
   "event_deltas": [
     {
-      "event_id": "cs-valcea-1924-steaua-20261006",
-      "title": "CS Vâlcea 1924 – Steaua București",
-      "event_start": "2026-10-06",
-      "event_end": "2026-10-06",
+      "event_id": "filarmonica-romania-glas-euphonia-20261007",
+      "title": "ROMÂNIA CU GLAS DE EUPHONIA",
+      "event_start": "2026-10-07",
+      "event_end": "2026-10-07",
       "start_time": "19:00",
-      "venue": "Sala Traian",
+      "venue": "Sala Lahovari",
       "locality": "Râmnicu Vâlcea",
-      "category": "sport / baschet",
-      "price": "unknown",
-      "free": null,
+      "category": "concert",
+      "price": "free",
+      "free": true,
       "ticket_url": null,
       "reservation_url": null,
-      "organiser": "CS Vâlcea 1924",
-      "source_url": "https://www.csvalcea.ro/",
-      "source_tier": "T1B_OFFICIAL_OWNED_FEED",
-      "checked_at": "2026-10-06T21:55:00+03:00",
-      "status": "past"
+      "organiser": "Filarmonica „Ion Dumitrescu” / Centrul Cultural Municipal Râmnicu Vâlcea",
+      "source_url": "https://filarmonica-valcea.ro/eveniment/romania-cu-glas-de-euphonia/",
+      "source_tier": "T1_OFFICIAL",
+      "checked_at": "2026-10-07T01:00:00+03:00",
+      "status": "scheduled"
     }
   ]
 }
