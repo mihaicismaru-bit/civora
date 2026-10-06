@@ -18,6 +18,7 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 OUT_JS = ROOT / "partener-eu" / "web" / "decision-products.js"
+LIVE_FUNDS = ROOT / "partener-eu" / "ingest" / "state" / "afir_live_funds.json"
 
 LAUNCH = "https://www.afir.ro/comunicate/afir-lanseaza-sesiuni-pentru-ferme-mici-si-floricultura-plante-medicinale-si-aromatice/"
 SESSIONS = "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/"
@@ -62,6 +63,19 @@ def source(label: str, url: str, supports: list[str], observed: str) -> dict[str
 
 def facts(rows: list[tuple[str, str, str]]) -> list[dict[str, str]]:
     return [{"label": label, "value": value, "confidence": confidence} for label, value, confidence in rows]
+
+
+def dr12_live_submission_evidence() -> tuple[bool, str]:
+    try:
+        payload = json.loads(LIVE_FUNDS.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return False, CURRENT_OBSERVED
+    policy = payload.get("policy") or {}
+    if payload.get("status") != "PASS" or payload.get("sourceFingerprintMatchesCorpus") is not True or policy.get("publishableDedicatedSnapshot") is not True:
+        return False, CURRENT_OBSERVED
+    rows = [row for row in payload.get("rows") or [] if str(row.get("interventionCode") or "").upper() == "DR-12"]
+    submitted = any(int(row.get("submittedProjectCount") or 0) > 0 for row in rows)
+    return submitted, str(payload.get("sourceObservedAt") or CURRENT_OBSERVED)
 
 
 def open_dossier(
@@ -438,6 +452,10 @@ def energy_public_dossier(*, storage: bool) -> dict[str, Any]:
 
 
 def dr12_dossier() -> dict[str, Any]:
+    post_launch_evidence, observed = dr12_live_submission_evidence()
+    status = "OPEN" if post_launch_evidence else "UPCOMING"
+    status_label = "DESCHIS" if post_launch_evidence else "SE DESCHIDE ÎN CURÂND"
+    decision_label = "ACȚIONEAZĂ" if post_launch_evidence else "PREGĂTEȘTE"
     applicants = [
         "Fermieri care sunt șefi ai exploatației și au cel mult 40 de ani la depunere.",
         "Beneficiari ai submăsurii 6.1 PNDR, indiferent de vârsta la momentul depunerii.",
@@ -453,11 +471,12 @@ def dr12_dossier() -> dict[str, Any]:
         source("AFIR — Detalii și Anexe DR-12", DR12, ["beneficiaries", "eligibility", "activities", "grant", "cofinancing", "documents"], CURRENT_OBSERVED),
         source("AFIR — anunț sesiune DR-12", DR12_NOTICE, ["status", "opening", "deadline"], CURRENT_OBSERVED),
         source("AFIR — Notă de îndrumare E1.2 DR-12", DR12_NOTE, ["documents", "eligibility", "risks"], CURRENT_OBSERVED),
-        source("AFIR — contor fonduri disponibile", COUNTER, ["opening", "deadline", "budget"], CURRENT_OBSERVED),
+        source("AFIR — contor fonduri disponibile", COUNTER, ["status", "opening", "deadline", "budget"] if post_launch_evidence else ["opening", "deadline", "budget"], observed),
     ]
     decision = (
-        "Pregătește dosarul acum pentru deschiderea din 6 octombrie 2026, ora 09:00; "
-        "verifică punctajul pentru etapa curentă și folosește ultima versiune a ghidului și anexelor."
+        "Depunerea este deschisă. Verifică imediat încadrarea, punctajul etapei curente și ultima versiune a ghidului și anexelor."
+        if post_launch_evidence else
+        "Pregătește dosarul acum pentru deschiderea din 6 octombrie 2026, ora 09:00; verifică punctajul pentru etapa curentă și folosește ultima versiune a ghidului și anexelor."
     )
     return {
         "id": "afir-dr12-2026",
@@ -467,19 +486,20 @@ def dr12_dossier() -> dict[str, Any]:
         "programme": "AFIR / Planul Strategic PAC 2023-2027",
         "code": "DR-12",
         "region": "România",
-        "status": "UPCOMING",
-        "statusLabel": "SE DESCHIDE ÎN CURÂND",
-        "decision": "PREGĂTEȘTE",
-        "decisionLabel": "PREGĂTEȘTE",
+        "status": status,
+        "statusLabel": status_label,
+        "decision": decision_label,
+        "decisionLabel": decision_label,
         "decisionAction": decision,
         "publicationState": "PUBLISHABLE",
         "standfirst": (
-            "Sesiunea DR-12 se deschide la 6 octombrie 2026, ora 09:00, cu 169.589.647 EUR disponibili "
-            "și finanțare de până la 200.000 EUR/proiect."
+            "Sesiunea DR-12 este deschisă pentru depunere, cu 169.589.647 EUR alocare totală și finanțare de până la 200.000 EUR/proiect."
+            if post_launch_evidence
+            else "Sesiunea DR-12 se deschide la 6 octombrie 2026, ora 09:00, cu 169.589.647 EUR disponibili și finanțare de până la 200.000 EUR/proiect."
         ),
         "audience": applicants,
         "quickFacts": facts([
-            ("Status", "SE DESCHIDE ÎN CURÂND", "CONFIRMED"),
+            ("Status", status_label, "CONFIRMED"),
             ("Deschidere", "6 octombrie 2026, 09:00", "CONFIRMED"),
             ("Termen", "2 decembrie 2026, 16:00", "CONFIRMED"),
             ("Grant", "maximum 200.000 EUR/proiect", "CONFIRMED"),
@@ -489,7 +509,7 @@ def dr12_dossier() -> dict[str, Any]:
         ]),
         "sections": [
             section("Rezumat executiv", [
-                "Stare apel: SE DESCHIDE ÎN CURÂND.",
+                f"Stare apel: {status_label}.",
                 "Deschidere: 6 octombrie 2026, ora 09:00.",
                 "Închidere: 2 decembrie 2026, ora 16:00.",
                 f"Cine poate aplica: {'; '.join(applicants)}",
@@ -499,7 +519,7 @@ def dr12_dossier() -> dict[str, Any]:
                 "Cofinanțare / contribuție proprie: intensitate maximum 80% pentru tinerii fermieri de până la 40 de ani și maximum 65% pentru celelalte categorii.",
                 "Regiune: România.",
             ], schemaVersion=1),
-            section("Decizia rapidă", [decision, "Nu depune înainte de deschiderea oficială; pregătește acum documentele și punctajul."]),
+            section("Decizia rapidă", [decision, "Depune numai după verificarea finală a eligibilității, punctajului și documentelor curente." if post_launch_evidence else "Nu depune înainte de deschiderea oficială; pregătește acum documentele și punctajul."]),
             section("Cine poate aplica", applicants, policy="GUIDE_EXPLICIT_ONLY"),
             section("Condiții esențiale de eligibilitate", [
                 "Solicitantul trebuie să se încadreze într-una dintre categoriile de beneficiari prevăzute de ghid și să fie șef al exploatației acolo unde ghidul impune această condiție.",
@@ -534,7 +554,7 @@ def dr12_dossier() -> dict[str, Any]:
                 "Confirmă forma juridică, vârsta și istoricul instalării solicitantului.",
                 "Simulează punctajul pentru pragul de 80 de puncte al primei etape.",
                 "Fixează investițiile eligibile, bugetul și dovada contribuției proprii.",
-                "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea pentru 6 octombrie, ora 09:00.",
+                "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea imediată." if post_launch_evidence else "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea pentru 6 octombrie, ora 09:00.",
             ]),
             section("Ce nu este confirmat", [
                 "Eligibilitatea unui solicitant și punctajul unui proiect concret nu pot fi stabilite fără datele sale și verificarea integrală a documentației oficiale.",
@@ -557,12 +577,14 @@ def dr12_dossier() -> dict[str, Any]:
             "applicantListPolicy": "GUIDE_EXPLICIT_ONLY",
             "applicantEvidenceAuthorized": True,
             "executiveSummaryPresent": True,
-            "afirCurrentUpcomingBundle": True,
+            "afirCurrentUpcomingBundle": not post_launch_evidence,
+            "afirCurrentOpenBundle": post_launch_evidence,
+            "afirPostLaunchSubmissionEvidence": post_launch_evidence,
         },
-        "updatedAt": CURRENT_OBSERVED,
+        "updatedAt": observed,
         "canonicalLinks": [row["url"] for row in sources],
         "executiveSummary": {
-            "status": "UPCOMING",
+            "status": status,
             "opens": "2026-10-06T09:00:00+03:00",
             "closes": "2026-12-02T16:00:00+02:00",
             "applicants": applicants,
@@ -580,7 +602,7 @@ def dr12_dossier() -> dict[str, Any]:
             "depthCompleteness": 92,
             "level": "DOSAR AVANSAT",
             "missing": ["project_specific_eligibility"],
-            "nextPass": "MONITOR_OPENING_AND_FIRST_SUBMISSIONS",
+            "nextPass": "MONITOR_LIFECYCLE_AND_FUNDS" if post_launch_evidence else "MONITOR_OPENING_AND_FIRST_SUBMISSIONS",
         },
     }
 
@@ -768,7 +790,9 @@ def main() -> int:
     payload.setdefault("policy", {})["afirCurrentSessionsSourceBound"] = True
     payload["policy"]["afirConsultationsNeverPresentedAsOpen"] = True
     payload["policy"]["afirEnergyPostLaunchEvidenceSourceBound"] = True
-    payload["policy"]["afirDr12UpcomingSourceBound"] = True
+    dr12_open = next(row for row in dossiers if row.get("id") == "afir-dr12-2026").get("status") == "OPEN"
+    payload["policy"]["afirDr12UpcomingSourceBound"] = not dr12_open
+    payload["policy"]["afirDr12PostLaunchSourceBound"] = dr12_open
     payload.setdefault("qualityPass", {})["afirCurrentAuthoritativeDossiers"] = [row["id"] for row in dossiers]
 
     PRODUCTS.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
