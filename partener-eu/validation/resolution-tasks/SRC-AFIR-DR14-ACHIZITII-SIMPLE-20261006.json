@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "source": "AFIR",
+  "authorityUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+  "observedAt": "2026-10-06T03:25:00Z",
+  "scope": {
+    "interventionCode": "DR-14",
+    "component": "Componenta ACHIZIȚII SIMPLE (INDIFERENT DE SECTOR)"
+  },
+  "authoritativeFacts": {
+    "closesAtLocal": "06.10.2026 00:00:00",
+    "submittedPublicValueEur": "35010497.00",
+    "submittedProjectCount": 753,
+    "availableFundsMarker": "FONDURI EPUIZATE",
+    "availableFundsEur": "0.00",
+    "availableFundsStatus": "EXHAUSTED"
+  },
+  "parentLifecyclePolicy": "Do not close DR-14 parent while other official components remain open.",
+  "parserResolution": {
+    "cause": "Field-specific AFIR semantic marker is rejected by generic EUR parser.",
+    "requiredChange": "Recognize FONDURI EPUIZATE only in availableFunds, map to 0.00 + EXHAUSTED, keep generic parse_eur strict.",
+    "regression": "Use the exact 2026-10-06 DR-14 row and assert parser PASS plus component-level exhausted state."
+  },
+  "publicationPolicy": {
+    "failClosedUntilParserAndRegressionPass": true,
+    "noEligibilityBudgetIntensityScoringInference": true
+  }
+}
