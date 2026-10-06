@@ -18,6 +18,8 @@ ROOT = Path(__file__).resolve().parents[2]
 PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 CANONICAL = ROOT / "partener-eu" / "ingest" / "state" / "mipe_canonical_calls.json"
 OUT_JS = ROOT / "partener-eu" / "web" / "decision-products.js"
+MYSMIS_INVENTORY = ROOT / "partener-eu" / "validation" / "mysmis_call_inventory_latest.json"
+MYSMIS_CALL_CODE = "PEO/1160/PEO_P11/OP4/ESO4.7/PEO_A66"
 TARGET_ID = "step-lll-adulti-4.3"
 TARGET_TITLE_TOKEN = "competente pentru viitor"
 
@@ -146,6 +148,37 @@ def canonical_target(payload: dict[str, Any]) -> dict[str, Any] | None:
     return None
 
 
+def exact_mysmis_status() -> dict[str, Any] | None:
+    """Return status-only evidence for the exact STEP-LLL call identity.
+
+    The MySMIS inventory is candidate-only for material publication. We use it
+    only to demote a stale OPEN state when the exact call row is FINALIZAT;
+    budget, deadline, eligibility and all other facts remain sourced elsewhere.
+    """
+    if not MYSMIS_INVENTORY.exists():
+        return None
+    payload = read(MYSMIS_INVENTORY)
+    inventory = payload.get("candidateInventory") if isinstance(payload.get("candidateInventory"), dict) else {}
+    for row in inventory.get("rows") or []:
+        if str(row.get("callCode") or "") != MYSMIS_CALL_CODE:
+            continue
+        status = str(row.get("status") or "").upper().strip()
+        if status != "FINALIZAT":
+            return None
+        return {
+            "callCode": MYSMIS_CALL_CODE,
+            "status": status,
+            "callTitle": row.get("callTitle"),
+            "canonicalUrl": payload.get("canonicalUrl"),
+            "observedAt": payload.get("observedAt"),
+            "runId": payload.get("runId"),
+            "parserVersion": payload.get("parserVersion"),
+            "rawSha256": payload.get("rawSha256"),
+            "authorityClass": payload.get("authorityClass"),
+            "materialFactUse": "STATUS_ONLY_DEMOTION",
+        }
+    return None
+
 def dossier_target(products: dict[str, Any]) -> dict[str, Any] | None:
     for d in products.get("dossiers") or []:
         identity = norm(f"{d.get('id')} {d.get('title')}")
@@ -241,19 +274,29 @@ def main() -> int:
     if any(not source_url(evidence[k]).startswith("http") for k in ("guide", "qa", "corrigendum")):
         print(json.dumps({"applied": False, "reason": "missing_required_official_bundle"}, ensure_ascii=False)); return 0
     guide, qa, corr, oir = evidence["guide"], evidence["qa"], evidence["corrigendum"], evidence["oir"]
+    mysmis_status = exact_mysmis_status()
+    is_finalized = bool(mysmis_status and mysmis_status.get("status") == "FINALIZAT")
+    current_status = "CLOSED" if is_finalized else "REVIEW"
+    current_label = "FINALIZAT" if is_finalized else "ÎN VERIFICARE"
+    current_decision = "ÎNCHIS" if is_finalized else "VERIFICĂ"
+    current_action = (
+        "Apelul este FINALIZAT în registrul public MySMIS. Nu mai planifica o depunere; folosește dosarul pentru istoric, implementare și pregătirea unor apeluri similare."
+        if is_finalized
+        else "Starea curentă nu este autorizată pentru depunere. Reverifică identitatea exactă în MySMIS înainte de orice acțiune."
+    )
     dossier.update({
-        "status": "OPEN", "statusLabel": "DESCHIS", "region": "Național; minimum 2 regiuni de dezvoltare",
-        "decision": "ACȚIONEAZĂ", "decisionLabel": "ACȚIONEAZĂ",
-        "decisionAction": "Depunerea este deschisă până la 30 septembrie 2026, ora 16:00. Verifică eligibilitatea solicitantului/parteneriatului, grupul țintă, activitățile STEP și bugetul pe documentația consolidată.",
-        "publicationState": "PUBLISHABLE",
-        "standfirst": "Apel PEO STEP-LLL pentru competențe în tehnologii critice: 92 milioane EUR, cofinanțare proprie 0%, minimum 25 participanți, minimum două regiuni și termen 30 septembrie 2026, ora 16:00. Dosarul integrează ghidul final, Corrigendum nr. 1 și Q&A-ul AM.",
+        "status": current_status, "statusLabel": current_label, "region": "Național; minimum 2 regiuni de dezvoltare",
+        "decision": current_decision, "decisionLabel": current_decision,
+        "decisionAction": current_action,
+        "publicationState": "PUBLISHABLE" if is_finalized else "PROVISIONAL_FAIL_CLOSED",
+        "standfirst": "Dosar istoric PEO STEP-LLL pentru competențe în tehnologii critice. Registrul public MySMIS marchează apelul FINALIZAT; condițiile și documentele de mai jos rămân utile ca referință pentru implementare și apeluri similare." if is_finalized else "Dosar STEP-LLL în reverificare. Condițiile istorice rămân documentate, dar starea curentă nu este autorizată pentru depunere.",
         "audience": list(APPLICANTS),
     })
-    set_fact(dossier, "Status", "DESCHIS"); set_fact(dossier, "Deschidere", "29 mai 2026, 16:00"); set_fact(dossier, "Termen", "30 septembrie 2026, 16:00")
+    set_fact(dossier, "Status", current_label); set_fact(dossier, "Deschidere", "29 mai 2026, 16:00"); set_fact(dossier, "Termen", "30 septembrie 2026, 16:00")
     set_fact(dossier, "Grant", "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR/participant"); set_fact(dossier, "Buget", "92.000.000 EUR"); set_fact(dossier, "Contribuție proprie", "0%")
     set_fact(dossier, "Durată maximă", "36 luni"); set_fact(dossier, "Arie", "Toate regiunile sau minimum 2 regiuni de dezvoltare")
     summary = [
-        "Stare apel: DESCHIS.",
+        "Stare apel: FINALIZAT." if is_finalized else "Stare apel: ÎN VERIFICARE.",
         "Deschidere: 29 mai 2026, ora 16:00.",
         "Închidere: 30 septembrie 2026, ora 16:00, după prelungirea prin Corrigendum nr. 1.",
         "Cine poate aplica: furnizori FPC și servicii pentru ocupare, structuri sindicale/patronale, asociații sectoriale și institute/centre eligibile, în condițiile ghidului.",
@@ -269,21 +312,26 @@ def main() -> int:
     ]
     sections = dossier.setdefault("sections", [])
     replace_section(sections, "Rezumat executiv", summary, metadata={"schemaVersion": 1})
-    replace_section(sections, "Decizia rapidă", [dossier["decisionAction"], "Nu folosi termenul vechi din pagina inițială a ghidului: Corrigendum nr. 1 prelungește depunerea până la 30 septembrie 2026, ora 16:00.", "Verifică din start furnizorul FPC, arhitectura parteneriatului, minimum două regiuni și delimitarea grupului țintă pe A1/A2.1/A2.2."])
+    replace_section(sections, "Decizia rapidă", [dossier["decisionAction"], "Termenul istoric final de depunere a fost 30 septembrie 2026, ora 16:00, conform Corrigendum nr. 1.", "Pentru apeluri similare, reverifică furnizorul FPC, arhitectura parteneriatului, aria regională și delimitarea grupului țintă pe A1/A2.1/A2.2."])
     replace_section(sections, "Cine poate aplica", APPLICANTS, metadata={"policy": "GUIDE_EXPLICIT_ONLY"}); replace_section(sections, "Condiții esențiale de eligibilitate", ELIGIBILITY, after="Cine poate aplica")
     replace_section(sections, "Ce finanțează și în ce condiții", ACTIVITIES); replace_section(sections, "Costuri, cofinanțare și ajutor de stat", COSTS); replace_section(sections, "Documente de pregătit", DOCUMENTS)
     replace_section(sections, "Cum se punctează", SCORING); replace_section(sections, "Indicatori și obligații", INDICATORS + OBLIGATIONS); replace_section(sections, "Riscuri de respingere sau implementare", RISKS)
     replace_section(sections, "Corrigendum nr. 1 — rezumat", CORRIGENDUM_SUMMARY, after="Riscuri de respingere sau implementare"); replace_section(sections, "Q&A AM — clarificări esențiale", QA_SUMMARY, after="Corrigendum nr. 1 — rezumat")
     replace_section(sections, "Implementare", ["Durata maximă a proiectului este de 36 de luni, cu respectarea limitelor temporale ale programului.", "Dimensionează activitățile, grupul țintă și bugetul împreună; reperul de 7.974 EUR/participant nu înlocuiește justificarea costurilor.", "Păstrează dovada legăturii dintre fiecare program de formare/competență și domeniul tehnologic STEP vizat."], after="Q&A AM — clarificări esențiale")
-    replace_section(sections, "Ce trebuie făcut acum", ["Rulează screeningul de eligibilitate pe solicitant și parteneri; confirmă furnizorul FPC eligibil.", "Alege aria proiectului — toate regiunile sau minimum două — și justifică nevoile/intervențiile pentru regiunile selectate.", "Separă grupul țintă pe activități: A1 numai șomeri, A2.1 angajați și/sau șomeri, A2.2 numai angajați.", "Dimensionează numărul de participanți (minimum 25) și bugetul, respectând reperul de 7.974 EUR/participant fără a-l trata ca pe un cost standard.", "Construiește matricea de dovezi STEP: curricula, programe, experiență anterioară și legătura cu domeniile/subdomeniile tehnologice.", "Simulează grila finală și planifică depunerea înainte de 30 septembrie 2026, ora 16:00."])
+    replace_section(sections, "Ce trebuie făcut acum", ["Nu mai planifica o depunere pe acest apel: identitatea exactă MySMIS este FINALIZATĂ." if is_finalized else "Nu trata apelul ca deschis până la o nouă confirmare autoritativă.", "Dacă proiectul este deja depus/contractat, folosește ghidul, corrigendumul și Q&A-ul pentru implementare și verificarea obligațiilor.", "Pentru un apel viitor similar, refă screeningul solicitantului/partenerilor, grupului țintă, ariei regionale și bugetului pe documentația nouă; nu reutiliza automat condițiile istorice."])
     replace_section(sections, "Ce nu este încă confirmat", ["Situațiile individuale de autorizare, încadrare a unei organizații, program de formare sau participant se validează pe documentul aplicabil cazului concret.", "Q&A-ul explică rezultatul consultării, dar nu înlocuiește ghidul final/consolidat sau corrigendumurile ulterioare."])
     add_source(dossier, guide, "MIPE — Ghidul Solicitantului STEP-LLL Adulți / pagina oficială", ["status", "opening", "beneficiaries", "eligibility", "activities", "budget", "grant", "cofinancing", "documents", "scoring", "indicators"])
     add_source(dossier, corr, "MIPE — Corrigendum nr. 1 STEP-LLL Adulți", ["deadline"]); add_source(dossier, qa, "MIPE — Q&A / Lista de răspunsuri STEP-LLL Adulți", ["beneficiaries", "eligibility", "activities", "grant", "cofinancing", "geography", "scoring", "indicators", "implementation_period", "risks"]); add_source(dossier, oir, "OIR PECU Nord-Vest — anunț oficial de lansare și actualizare STEP-LLL", ["opening", "deadline"], "T1B OFFICIAL OIR")
+    if mysmis_status and mysmis_status.get("canonicalUrl"):
+        add_source(dossier, {"url": mysmis_status["canonicalUrl"], "observedAt": mysmis_status.get("observedAt"), "tier": "T1"}, "MySMIS — registrul public, identitate exactă STEP-LLL Adulți", ["status"], "T1")
     quality = dossier.setdefault("quality", {}); verified = set(quality.get("verifiedFactClasses") or []); verified.update(SUPPORTED_CLASSES)
     quality["verifiedFactClasses"] = sorted(verified); quality["blockedFactClasses"] = [x for x in quality.get("blockedFactClasses") or [] if x not in SUPPORTED_CLASSES]; quality["completeness"] = 100; quality["depthCompleteness"] = 100; quality["evidenceCount"] = len(dossier.get("sources") or []); quality["failClosed"] = True; quality["stepLllAuthoritativeBundle"] = True; quality["applicantListPolicy"] = "GUIDE_EXPLICIT_ONLY"; quality["executiveSummaryPresent"] = True
-    dossier["executiveSummary"] = {"status": "OPEN", "opens": "2026-05-29T16:00:00+03:00", "closes": "2026-09-30T16:00:00+03:00", "applicants": APPLICANTS, "targetGroup": ["Persoane angajate și/sau șomeri cu vârsta de peste 29 de ani.", "Minimum 25 participanți/proiect."], "activities": ACTIVITIES, "callBudget": "92.000.000 EUR", "projectValue": "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR × numărul participanților; reperul nu este cost unitar.", "cofinancing": "0%", "region": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "geography": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "implementationPeriod": "Maximum 36 luni.", "evaluation": "Competitivă, conform grilei din ghidul final/consolidat.", "sourcePolicy": "GUIDE_EXPLICIT_ONLY", "sourceBound": True}
+    quality["statusProvenance"] = mysmis_status if is_finalized else {"status": "UNRESOLVED", "materialFactUse": "FAIL_CLOSED"}
+    dossier["executiveSummary"] = {"status": current_status, "opens": "2026-05-29T16:00:00+03:00", "closes": "2026-09-30T16:00:00+03:00", "applicants": APPLICANTS, "targetGroup": ["Persoane angajate și/sau șomeri cu vârsta de peste 29 de ani.", "Minimum 25 participanți/proiect."], "activities": ACTIVITIES, "callBudget": "92.000.000 EUR", "projectValue": "Valoare eligibilă maximă dimensionată cu reperul de 7.974 EUR × numărul participanților; reperul nu este cost unitar.", "cofinancing": "0%", "region": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "geography": "Toate regiunile de dezvoltare sau minimum 2 regiuni.", "implementationPeriod": "Maximum 36 luni.", "evaluation": "Competitivă, conform grilei din ghidul final/consolidat.", "sourcePolicy": "GUIDE_EXPLICIT_ONLY", "sourceBound": True}
     dossier["documentSummaries"] = [{"kind": "CORRIGENDUM", "title": "Corrigendum nr. 1", "items": CORRIGENDUM_SUMMARY, "sourceUrl": source_url(corr), "tier": corr.get("tier") or "T1"}, {"kind": "QA_AM", "title": "Q&A Autoritatea de Management", "items": QA_SUMMARY, "sourceUrl": source_url(qa), "tier": qa.get("tier") or "T1"}]
     timeline = dossier.setdefault("timeline", []); additions = [{"date": "2026-05-29", "kind": "CALL_OPENED", "text": "Deschiderea MySMIS pentru apelul STEP-LLL Adulți, ora 16:00."}, {"date": "2026-06-02", "kind": "GUIDE_FINAL_PUBLISHED", "text": "AM PEO publică ghidul final și lista de răspunsuri aferentă consultării."}, {"date": "2026-07-27", "kind": "DEADLINE_EXTENDED", "text": "Corrigendum nr. 1 prelungește depunerea până la 30 septembrie 2026, ora 16:00."}]
+    if is_finalized:
+        additions.append({"date": str(mysmis_status.get("observedAt") or "2026-10-06")[:10], "kind": "STATUS_OBSERVED_FINALIZED", "text": f"Registrul public MySMIS marchează identitatea exactă {MYSMIS_CALL_CODE} ca FINALIZAT."})
     keys = {(x.get("date"), x.get("kind"), x.get("text")) for x in timeline if isinstance(x, dict)}
     for row in additions:
         if (row["date"], row["kind"], row["text"]) not in keys: timeline.append(row)
