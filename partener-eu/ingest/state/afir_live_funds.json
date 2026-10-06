@@ -1,21 +1,21 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "status": "PASS",
+  "status": "DEGRADED_SOURCE_DRIFT",
   "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-  "corpusFingerprint": "a095036e069efafa9155b0165d4b04304c86f82e4b0ddad4aee4ca15ca7e3a09",
-  "sourceFingerprint": "a095036e069efafa9155b0165d4b04304c86f82e4b0ddad4aee4ca15ca7e3a09",
-  "sourceFingerprintMatchesCorpus": true,
-  "snapshotFingerprint": "4e7faf1df3a43dd057d6d959f860f82277f4cac0967abff61e0b9df9af6ba5e6",
-  "sourceObservedAt": "2026-10-05T16:18:24.004585+00:00",
-  "generatedAt": "2026-10-05T16:19:30.422756+00:00",
+  "corpusFingerprint": "f72e5c574bcaf74128265aa62e6b8641def5113a423906ad4ec78ae99e89ce3c",
+  "sourceFingerprint": "116be8527867a5fe93faf32254ba9a29043ebc25735316678f0f6ea80df7f75e",
+  "sourceFingerprintMatchesCorpus": false,
+  "snapshotFingerprint": "bf0194c8a1855b539a9cb48dd2c0a420cd562e46c601422751d42c198b3fa4ea",
+  "sourceObservedAt": "2026-10-06T09:34:36.543522+00:00",
+  "generatedAt": "2026-10-06T09:35:36.231186+00:00",
   "httpStatus": 200,
   "contentType": "text/html; charset=utf-8",
   "currency": "EUR",
   "policy": {
     "sourceTier": "T1",
     "purpose": "dedicated-live-available-funds-snapshot",
-    "publishableDedicatedSnapshot": true,
+    "publishableDedicatedSnapshot": false,
     "autoPromoteIntoDossierBudget": false,
     "callStatusInferenceAllowed": false,
     "eligibilityInferenceAllowed": false,
@@ -23,19 +23,48 @@
     "sourceDrift": "fail-closed-require-next-corpus-observation"
   },
   "summary": {
-    "rowCount": 5,
-    "interventionCount": 2,
+    "rowCount": 7,
+    "interventionCount": 3,
     "interventions": [
+      "DR-12",
       "DR-14",
       "DR-18"
     ],
-    "sessionAllocationTotalEur": "113000000.00",
+    "sessionAllocationTotalEur": "282589647.00",
     "submissionCeilingTotalEur": null,
-    "submittedPublicValueTotalEur": "46782366.00",
+    "submittedPublicValueTotalEur": "54257054.00",
     "availableFundsTotalEur": null,
-    "submittedProjectCount": 983
+    "submittedProjectCount": 1125
   },
   "rows": [
+    {
+      "interventionCode": "DR-12",
+      "sector": "Componenta ALTE SECTOARE",
+      "sessionAllocationEur": "84794823.50",
+      "opensAtLocal": "06.10.2026 09:00:00",
+      "opensAtIso": "2026-10-06T09:00:00+03:00",
+      "closesAtLocal": "02.12.2026 15:59:59",
+      "closesAtIso": "2026-12-02T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "989811.00",
+      "submittedProjectCount": 5,
+      "availableFundsEur": null,
+      "availableFundsStatus": "UNKNOWN"
+    },
+    {
+      "interventionCode": "DR-12",
+      "sector": "Componenta SECTOR ZOOTEHNIC",
+      "sessionAllocationEur": "84794823.50",
+      "opensAtLocal": "06.10.2026 09:00:00",
+      "opensAtIso": "2026-10-06T09:00:00+03:00",
+      "closesAtLocal": "02.12.2026 15:59:59",
+      "closesAtIso": "2026-12-02T15:59:59+02:00",
+      "submissionCeilingEur": null,
+      "submittedPublicValueEur": "0.00",
+      "submittedProjectCount": 0,
+      "availableFundsEur": null,
+      "availableFundsStatus": "UNKNOWN"
+    },
     {
       "interventionCode": "DR-14",
       "sector": "Componenta ACHIZIȚII SIMPLE (INDIFERENT DE SECTOR)",
@@ -44,10 +73,11 @@
       "opensAtIso": "2026-09-01T09:00:00+03:00",
       "closesAtLocal": "06.10.2026 00:00:00",
       "closesAtIso": "2026-10-06T00:00:00+03:00",
-      "submissionCeilingEur": null,
-      "submittedPublicValueEur": "30167121.00",
-      "submittedProjectCount": 647,
-      "availableFundsEur": null
+      "submissionCeilingEur": "27000000.00",
+      "submittedPublicValueEur": "35010497.00",
+      "submittedProjectCount": 753,
+      "availableFundsEur": "0.00",
+      "availableFundsStatus": "EXHAUSTED"
     },
     {
       "interventionCode": "DR-14",
@@ -57,10 +87,11 @@
       "opensAtIso": "2026-09-01T09:00:00+03:00",
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
-      "submissionCeilingEur": null,
-      "submittedPublicValueEur": "7258445.00",
-      "submittedProjectCount": 148,
-      "availableFundsEur": null
+      "submissionCeilingEur": "45000000.00",
+      "submittedPublicValueEur": "8176000.00",
+      "submittedProjectCount": 167,
+      "availableFundsEur": "36824000.00",
+      "availableFundsStatus": "REPORTED"
     },
     {
       "interventionCode": "DR-14",
@@ -70,10 +101,11 @@
       "opensAtIso": "2026-09-01T09:00:00+03:00",
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
-      "submissionCeilingEur": null,
-      "submittedPublicValueEur": "4152471.00",
-      "submittedProjectCount": 89,
-      "availableFundsEur": null
+      "submissionCeilingEur": "45000000.00",
+      "submittedPublicValueEur": "4297407.00",
+      "submittedProjectCount": 92,
+      "availableFundsEur": "40702593.00",
+      "availableFundsStatus": "REPORTED"
     },
     {
       "interventionCode": "DR-14",
@@ -83,10 +115,11 @@
       "opensAtIso": "2026-09-01T09:00:00+03:00",
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
-      "submissionCeilingEur": null,
-      "submittedPublicValueEur": "4082438.00",
-      "submittedProjectCount": 87,
-      "availableFundsEur": null
+      "submissionCeilingEur": "45000000.00",
+      "submittedPublicValueEur": "4377551.00",
+      "submittedProjectCount": 93,
+      "availableFundsEur": "40622449.00",
+      "availableFundsStatus": "REPORTED"
     },
     {
       "interventionCode": "DR-18",
@@ -96,19 +129,20 @@
       "opensAtIso": "2026-09-01T09:00:00+03:00",
       "closesAtLocal": "31.10.2026 15:59:59",
       "closesAtIso": "2026-10-31T15:59:59+02:00",
-      "submissionCeilingEur": null,
-      "submittedPublicValueEur": "1121891.00",
-      "submittedProjectCount": 12,
-      "availableFundsEur": null
+      "submissionCeilingEur": "7500000.00",
+      "submittedPublicValueEur": "1405788.00",
+      "submittedProjectCount": 15,
+      "availableFundsEur": "6094212.00",
+      "availableFundsStatus": "REPORTED"
     }
   ],
   "provenance": {
     "authority": "AFIR",
     "evidenceType": "OFFICIAL_LIVE_COUNTER",
-    "corpusFingerprint": "a095036e069efafa9155b0165d4b04304c86f82e4b0ddad4aee4ca15ca7e3a09",
-    "sourceFingerprint": "a095036e069efafa9155b0165d4b04304c86f82e4b0ddad4aee4ca15ca7e3a09",
-    "snapshotFingerprint": "4e7faf1df3a43dd057d6d959f860f82277f4cac0967abff61e0b9df9af6ba5e6",
-    "sourceObservedAt": "2026-10-05T16:18:24.004585+00:00",
+    "corpusFingerprint": "f72e5c574bcaf74128265aa62e6b8641def5113a423906ad4ec78ae99e89ce3c",
+    "sourceFingerprint": "116be8527867a5fe93faf32254ba9a29043ebc25735316678f0f6ea80df7f75e",
+    "snapshotFingerprint": "bf0194c8a1855b539a9cb48dd2c0a420cd562e46c601422751d42c198b3fa4ea",
+    "sourceObservedAt": "2026-10-06T09:34:36.543522+00:00",
     "materialFactBoundary": "snapshot-only-no-cross-field-inference"
   }
 }

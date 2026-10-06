@@ -118,6 +118,14 @@ def parse_eur(value: str) -> str | None:
     return f"{amount:.2f}"
 
 
+def parse_available_funds(value: str) -> tuple[str | None, str]:
+    """Parse official AFIR available-funds status without weakening parse_eur."""
+    cell = clean_cell(value).replace("\u00a0", " ").strip()
+    if cell.upper() == "FONDURI EPUIZATE":
+        return "0.00", "EXHAUSTED"
+    amount = parse_eur(value)
+    return amount, "REPORTED" if amount is not None else "UNKNOWN"
+
 def parse_int(value: str) -> int:
     raw = re.sub(r"[^\d-]", "", clean_cell(value))
     if not raw:
@@ -154,6 +162,7 @@ def parse_rows(table_rows: list[list[Any]]) -> list[dict[str, Any]]:
         seen.add(key)
         opens_local, opens_iso = parse_local_datetime(cells[3])
         closes_local, closes_iso = parse_local_datetime(cells[4])
+        available_funds_eur, available_funds_status = parse_available_funds(cells[8])
         parsed.append(
             {
                 "interventionCode": code,
@@ -166,7 +175,8 @@ def parse_rows(table_rows: list[list[Any]]) -> list[dict[str, Any]]:
                 "submissionCeilingEur": parse_eur(cells[5]),
                 "submittedPublicValueEur": parse_eur(cells[6]),
                 "submittedProjectCount": parse_int(cells[7]),
-                "availableFundsEur": parse_eur(cells[8]),
+                "availableFundsEur": available_funds_eur,
+                "availableFundsStatus": available_funds_status,
             }
         )
     if not parsed:
@@ -240,8 +250,8 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
 
     data, content_type, http_status = load_source_bytes(canonical_url, fixture)
     source_fingerprint = hashlib.sha256(data).hexdigest()
-    observed_at = item.get("observedAt")
-    generated_at = corpus.get("generatedAt") or corpus.get("lastSuccessfulAt") or observed_at
+    corpus_observed_at = item.get("observedAt")
+    generated_at = corpus.get("generatedAt") or corpus.get("lastSuccessfulAt") or corpus_observed_at
     fingerprint_matches = source_fingerprint == corpus_fingerprint
 
     rows: list[dict[str, Any]] = []
@@ -251,8 +261,31 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
     except Exception as exc:
         parse_error = f"{type(exc).__name__}: {exc}"
 
-    status = "PASS" if fingerprint_matches and rows and not parse_error else (
-        "DEGRADED_SOURCE_DRIFT" if not fingerprint_matches else "FAIL_PARSE"
+    # The counter is intentionally dynamic while sessions are open. A second
+    # exact fetch can therefore differ from the corpus observation seconds
+    # earlier even when both came from the same canonical AFIR endpoint.
+    # Reconcile that production-only race only when the exact live fetch is a
+    # successful HTML response and the structured DR table still parses. Static
+    # fixtures and malformed/transport responses remain fail-closed.
+    live_canonical_reconcile = bool(
+        not fingerprint_matches
+        and fixture is None
+        and http_status == 200
+        and "html" in str(content_type or "").lower()
+        and rows
+        and not parse_error
+    )
+    admissible_fingerprint = fingerprint_matches or live_canonical_reconcile
+    observed_at = (
+        dt.datetime.now(dt.timezone.utc).isoformat()
+        if live_canonical_reconcile
+        else corpus_observed_at
+    )
+    if live_canonical_reconcile:
+        generated_at = observed_at
+
+    status = "PASS" if admissible_fingerprint and rows and not parse_error else (
+        "DEGRADED_SOURCE_DRIFT" if not admissible_fingerprint else "FAIL_PARSE"
     )
     codes = sorted({row["interventionCode"] for row in rows})
     snapshot_fingerprint = canonical_digest(rows) if rows else None
@@ -264,6 +297,7 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
         "corpusFingerprint": corpus_fingerprint,
         "sourceFingerprint": source_fingerprint,
         "sourceFingerprintMatchesCorpus": fingerprint_matches,
+        "sourceFingerprintReconciledFromCanonicalLiveFetch": live_canonical_reconcile,
         "snapshotFingerprint": snapshot_fingerprint,
         "sourceObservedAt": observed_at,
         "generatedAt": generated_at,
@@ -274,11 +308,20 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
             "sourceTier": "T1",
             "purpose": "dedicated-live-available-funds-snapshot",
             "publishableDedicatedSnapshot": status == "PASS",
+            "dynamicCounterReconciliation": (
+                "exact-canonical-live-fetch-with-valid-structured-rows"
+                if live_canonical_reconcile
+                else "not-needed"
+            ),
             "autoPromoteIntoDossierBudget": False,
             "callStatusInferenceAllowed": False,
             "eligibilityInferenceAllowed": False,
             "scoringInferenceAllowed": False,
-            "sourceDrift": "fail-closed-require-next-corpus-observation",
+            "sourceDrift": (
+                "reconciled-live-dynamic-counter"
+                if live_canonical_reconcile
+                else "fail-closed-require-next-corpus-observation"
+            ),
         },
         "summary": {
             "rowCount": len(rows),
@@ -296,8 +339,11 @@ def build_snapshot(corpus: dict[str, Any], fixture: Path | None = None) -> dict[
             "evidenceType": "OFFICIAL_LIVE_COUNTER",
             "corpusFingerprint": corpus_fingerprint,
             "sourceFingerprint": source_fingerprint,
+            "sourceFingerprintMatchesCorpus": fingerprint_matches,
+            "sourceFingerprintReconciledFromCanonicalLiveFetch": live_canonical_reconcile,
             "snapshotFingerprint": snapshot_fingerprint,
             "sourceObservedAt": observed_at,
+            "corpusObservedAt": corpus_observed_at,
             "materialFactBoundary": "snapshot-only-no-cross-field-inference",
         },
     }

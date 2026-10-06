@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
+LIVE_FUNDS = ROOT / "partener-eu" / "ingest" / "state" / "afir_live_funds.json"
 
 
 def by_title(dossier: dict, title: str) -> dict | None:
@@ -67,7 +68,23 @@ def main() -> int:
         assert "apelul nu este încă open" not in public_text
         assert "apelul nu este inca open" not in public_text
 
-    assert dr12["status"] == "UPCOMING"
+    live = json.loads(LIVE_FUNDS.read_text(encoding="utf-8"))
+    dr12_live_rows = [
+        row for row in live.get("rows") or []
+        if str(row.get("interventionCode") or "").upper() == "DR-12"
+    ]
+    fingerprint_admissible = (
+        live.get("sourceFingerprintMatchesCorpus") is True
+        or live.get("sourceFingerprintReconciledFromCanonicalLiveFetch") is True
+    )
+    dr12_post_launch = (
+        live.get("status") == "PASS"
+        and fingerprint_admissible
+        and (live.get("policy") or {}).get("publishableDedicatedSnapshot") is True
+        and any(int(row.get("submittedProjectCount") or 0) > 0 for row in dr12_live_rows)
+    )
+    expected_dr12_status = "OPEN" if dr12_post_launch else "UPCOMING"
+    assert dr12["status"] == expected_dr12_status
     assert dr12["publicationState"] == "PUBLISHABLE"
     assert fact(dr12, "Deschidere")["value"] == "6 octombrie 2026, 09:00"
     assert fact(dr12, "Termen")["value"] == "2 decembrie 2026, 16:00"
@@ -77,7 +94,15 @@ def main() -> int:
     assert "45 puncte" in " ".join(by_title(dr12, "Cum se punctează")["items"])
     assert "NU ESTE CAZUL" in " ".join(by_title(dr12, "Riscuri de respingere sau implementare")["items"])
     assert dr12["executiveSummary"]["sourceBound"] is True
-    assert dr12["quality"]["afirCurrentUpcomingBundle"] is True
+    assert dr12["executiveSummary"]["status"] == expected_dr12_status
+    assert dr12["quality"]["afirCurrentUpcomingBundle"] is (not dr12_post_launch)
+    assert dr12["quality"]["afirCurrentOpenBundle"] is dr12_post_launch
+    assert dr12["quality"]["afirPostLaunchSubmissionEvidence"] is dr12_post_launch
+    if dr12_post_launch:
+        assert dr12["statusLabel"] == "DESCHIS"
+        assert dr12["decision"] == "ACȚIONEAZĂ"
+        assert "este deschisă pentru depunere" in dr12["standfirst"]
+        assert "nu depune înainte de deschiderea oficială" not in json.dumps(dr12, ensure_ascii=False).lower()
 
     assert dr31["status"] == "PUBLIC_CONSULTATION"
     assert dr31["publicationState"] == "PUBLISHABLE"
@@ -94,7 +119,8 @@ def main() -> int:
     assert payload["policy"]["afirCurrentSessionsSourceBound"] is True
     assert payload["policy"]["afirConsultationsNeverPresentedAsOpen"] is True
     assert payload["policy"]["afirEnergyPostLaunchEvidenceSourceBound"] is True
-    assert payload["policy"]["afirDr12UpcomingSourceBound"] is True
+    assert payload["policy"]["afirDr12UpcomingSourceBound"] is (not dr12_post_launch)
+    assert payload["policy"]["afirDr12PostLaunchSourceBound"] is dr12_post_launch
     assert payload["policy"]["derivedProjectionSynchronized"] is True
 
     home_open = payload["home"]["openDossierIds"]

@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -185,6 +186,145 @@ def editorial_sort_key(item: dict, now: datetime) -> tuple:
     )
 
 
+
+RECRUITMENT_SECTIONS = {"LOCURI DE MUNCĂ", "LOCURI DE MUNCA", "JOBS"}
+RECRUITMENT_STRONG_MARKERS = (
+    "dosarele se depun",
+    "depunerea dosarelor",
+    "scoate la concurs",
+    "scoate la concurs",
+    "recrutează",
+    "recruteaza",
+    "post vacant",
+    "posturi vacante",
+)
+MAJOR_RECRUITMENT_RE = re.compile(r"\b(\d{1,3})\s+(?:de\s+)?(?:posturi|locuri)\b", re.IGNORECASE)
+MAJOR_RECRUITMENT_STANDALONE_MIN_POSTS = 25
+SPORT_SCHEDULE_MARKERS = (
+    "meci programat",
+    "partidă programată",
+    "partida programată",
+    "programul meciului",
+    "programul oficial",
+    "joacă pe",
+    "joaca pe",
+)
+ROUTINE_EMERGENCY_BULLETIN_MARKERS = (
+    "intervenții",
+    "interventii",
+    "misiunile pompierilor",
+    "prim ajutor",
+)
+FAST_INCIDENT_CURRENT_MAX_HOURS = 96
+
+
+def standalone_recruitment_is_material(item: dict) -> bool:
+    """Fail closed on routine one-off vacancy notices in the main news stream.
+
+    VÂLCEA CLAR may still monitor these notices and expose them through service
+    products such as JOBS_ROUNDUP. A standalone news story is reserved for a
+    materially larger hiring action or an explicit editorial materiality
+    override. Durable routes already published remain in the archive, but the
+    current-news set must not be filled with ordinary recruitment notices.
+    """
+    editorial = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
+    product_type = str(
+        editorial.get("product_type")
+        or editorial.get("product")
+        or item.get("editorial_product_type")
+        or item.get("product_type")
+        or ""
+    ).strip().upper()
+    if product_type in {"JOBS_ROUNDUP", "LIST_INDEX"}:
+        return True
+
+    section = str(item.get("section") or "").strip().upper()
+    corpus = " ".join(
+        [
+            str(item.get("headline") or ""),
+            str(item.get("dek") or ""),
+            " ".join(str(p) for p in item.get("paragraphs") or []),
+        ]
+    ).casefold()
+    is_recruitment = section in RECRUITMENT_SECTIONS or any(marker in corpus for marker in RECRUITMENT_STRONG_MARKERS)
+    if not is_recruitment:
+        return True
+
+    explicit = str(
+        item.get("standalone_materiality")
+        or editorial.get("standalone_materiality")
+        or ""
+    ).strip().upper()
+    if explicit in {"PASS", "MATERIAL", "HIGH"}:
+        return True
+    if item.get("major_reader_impact") is True or editorial.get("major_reader_impact") is True:
+        return True
+
+    counts = [int(match.group(1)) for match in MAJOR_RECRUITMENT_RE.finditer(corpus)]
+    return bool(counts and max(counts) >= MAJOR_RECRUITMENT_STANDALONE_MIN_POSTS)
+
+
+def explicit_standalone_materiality(item: dict) -> bool:
+    editorial = item.get("editorial_product") if isinstance(item.get("editorial_product"), dict) else {}
+    explicit = str(
+        item.get("standalone_materiality")
+        or editorial.get("standalone_materiality")
+        or ""
+    ).strip().upper()
+    return (
+        explicit in {"PASS", "MATERIAL", "HIGH"}
+        or item.get("major_reader_impact") is True
+        or editorial.get("major_reader_impact") is True
+    )
+
+
+def current_stream_materiality_ok(item: dict, now: datetime) -> bool:
+    """Keep the live/current stream narrower than the durable archive.
+
+    The archive may contain useful service notices, fixtures and dated incidents.
+    The current stream must answer "what materially matters now", so routine
+    schedules, operational roundups and stale one-off incidents route to their
+    service/archive surfaces unless an explicit editorial materiality override
+    says otherwise.
+    """
+    if explicit_standalone_materiality(item):
+        return True
+    if not standalone_recruitment_is_material(item):
+        return False
+
+    section = str(item.get("section") or "").strip().upper()
+    story_id = str(item.get("id") or "").strip().lower()
+    corpus = " ".join(
+        [
+            str(item.get("headline") or ""),
+            str(item.get("dek") or ""),
+            " ".join(str(p) for p in item.get("paragraphs") or []),
+        ]
+    ).casefold()
+
+    # Fixtures belong to the verified Sport service surface. Results, major
+    # competition changes or explicitly material sports stories remain eligible.
+    if section == "SPORT" and any(marker in corpus for marker in SPORT_SCHEDULE_MARKERS):
+        return False
+
+    # Routine aggregate bulletins are source material / service intelligence,
+    # not standalone headline inventory in the live newsroom.
+    if section in {"URGENȚE", "SIGURANȚĂ", "EVENIMENTE"}:
+        if "interven" in corpus and any(marker in corpus for marker in ROUTINE_EMERGENCY_BULLETIN_MARKERS):
+            return False
+
+    # One-off fast incidents age out of "current" without deleting their route.
+    if story_id.startswith("fast-") and section in {"URGENȚE", "SIGURANȚĂ", "EVENIMENTE"}:
+        try:
+            age_hours = max(0.0, (now - parse_dt(str(item["valid_from"]))).total_seconds() / 3600.0)
+        except (KeyError, ValueError):
+            return False
+        if age_hours > FAST_INCIDENT_CURRENT_MAX_HOURS:
+            return False
+
+    return True
+
+
 def eligible_facts(registry: dict, now: datetime, slot: str, retained_ids: set[str] | None = None) -> list[dict]:
     output = []
     held = active_publication_holds()
@@ -198,6 +338,11 @@ def eligible_facts(registry: dict, now: datetime, slot: str, retained_ids: set[s
         if int(fact.get("confidence") or 0) < MIN_CONFIDENCE:
             continue
         if fact.get("material_fact_gate") not in ALLOWED_GATES:
+            continue
+        # The durable archive is broader than the live current-news surface.
+        # Route routine jobs, fixtures, operational bulletins and stale one-off
+        # incidents away from "current" unless explicitly material.
+        if not current_stream_materiality_ok(fact, now):
             continue
         # Slot membership gates first publication only. Once a story has been
         # published, keep it in the canonical set while it remains valid and
@@ -404,6 +549,106 @@ def self_test() -> int:
     assert len(eligible) == 1
     assert eligible_facts(sample, now, "evening") == []
     assert [row["id"] for row in eligible_facts(sample, now, "evening", retained_ids={"x"})] == ["x"]
+    routine_recruitment = {
+        "facts": [{
+            **sample_fact,
+            "id": "routine-recruitment",
+            "section": "LOCURI DE MUNCĂ",
+            "headline": "Comuna X caută șofer; dosarele se depun până pe 16 octombrie",
+            "dek": "Primăria a publicat un singur post vacant și calendarul concursului.",
+            "paragraphs": ["Dosarele se depun până la termenul indicat de instituție, conform anunțului oficial publicat."],
+        }]
+    }
+    assert eligible_facts(routine_recruitment, now, "morning") == []
+
+    major_recruitment = {
+        "facts": [{
+            **sample_fact,
+            "id": "major-recruitment",
+            "section": "LOCURI DE MUNCĂ",
+            "headline": "Instituția scoate la concurs 57 de posturi",
+            "dek": "Campania de recrutare include 57 de posturi și are un calendar public verificat.",
+            "paragraphs": ["Dosarele se depun în perioada anunțată oficial pentru cele 57 de posturi disponibile."],
+        }]
+    }
+    assert [row["id"] for row in eligible_facts(major_recruitment, now, "morning")] == ["major-recruitment"]
+
+    jobs_roundup = {
+        "facts": [{
+            **sample_fact,
+            "id": "jobs-roundup",
+            "section": "LOCURI DE MUNCĂ",
+            "headline": "Locuri de muncă verificate în Vâlcea: termenele săptămânii",
+            "dek": "Un roundup verificat grupează mai multe oportunități și termene active.",
+            "paragraphs": ["Lista reunește anunțuri verificate și termenele lor, fără a transforma fiecare post într-o știre separată."],
+            "editorial_product": {"product_type": "JOBS_ROUNDUP"},
+        }]
+    }
+    assert [row["id"] for row in eligible_facts(jobs_roundup, now, "morning")] == ["jobs-roundup"]
+
+    medium_recruitment = {
+        "facts": [{
+            **sample_fact,
+            "id": "medium-recruitment",
+            "section": "LOCURI DE MUNCĂ",
+            "headline": "Compania caută 11 zidari în Vâlcea",
+            "dek": "Oferta verificată cuprinde 11 posturi și un termen activ de candidatură.",
+            "paragraphs": ["Anunțul oficial listează 11 locuri de muncă, care rămân utile într-un roundup de servicii."],
+        }]
+    }
+    assert eligible_facts(medium_recruitment, now, "morning") == []
+
+    sport_fixture = {
+        "facts": [{
+            **sample_fact,
+            "id": "sport-fixture",
+            "section": "SPORT",
+            "headline": "SCM Vâlcea: meci programat pe 18 august 2026, de la 18:00",
+            "dek": "Programul oficial confirmă ora partidei, care aparține suprafeței de servicii Sport.",
+            "paragraphs": ["Programul oficial al clubului confirmă data și ora meciului fără o schimbare editorială materială suplimentară."],
+        }]
+    }
+    assert eligible_facts(sport_fixture, now, "morning") == []
+
+    emergency_roundup = {
+        "facts": [{
+            **sample_fact,
+            "id": "emergency-roundup",
+            "section": "URGENȚE",
+            "headline": "ISU Vâlcea: 35 de intervenții, dintre care 24 de prim ajutor",
+            "dek": "Buletinul zilnic agregă intervențiile fără un incident singular cu miză materială suplimentară.",
+            "paragraphs": ["ISU raportează intervenții de rutină și misiuni de prim ajutor în bilanțul operațional al zilei."],
+        }]
+    }
+    assert eligible_facts(emergency_roundup, now, "morning") == []
+
+    stale_fast_incident = {
+        "facts": [{
+            **sample_fact,
+            "id": "fast-isu-stale-incident",
+            "section": "URGENȚE",
+            "valid_from": "2026-08-10T08:00:00+03:00",
+            "valid_until": "2026-08-31T23:59:59+03:00",
+            "headline": "Incendiu verificat la o gospodărie din Vâlcea",
+            "dek": "Incidentul rămâne arhivă verificată, dar nu ocupă suprafața curentă după patru zile fără follow-up.",
+            "paragraphs": ["Intervenția a fost confirmată oficial, fără un follow-up material care să o mențină în fluxul curent."],
+        }]
+    }
+    assert eligible_facts(stale_fast_incident, datetime(2026, 8, 15, 8, 0, tzinfo=TZ), "morning", retained_ids={"fast-isu-stale-incident"}) == []
+
+    material_sport_override = {
+        "facts": [{
+            **sample_fact,
+            "id": "material-sport",
+            "section": "SPORT",
+            "headline": "Finala județeană își schimbă stadionul și ora de start",
+            "dek": "Schimbarea oficială afectează accesul publicului și este marcată explicit drept materială.",
+            "paragraphs": ["Organizatorul a schimbat oficial stadionul și ora, iar publicul trebuie să își ajusteze deplasarea."],
+            "standalone_materiality": "MATERIAL",
+        }]
+    }
+    assert [row["id"] for row in eligible_facts(material_sport_override, now, "morning")] == ["material-sport"]
+
     title_only = {"facts": [{**sample_fact, "id": "title-only", "material_fact_gate": "PASS_TITLE_DATE_ONLY"}]}
     assert eligible_facts(title_only, now, "morning") == []
     relative = {"facts": [{**sample_fact, "id": "relative", "headline": "Azi are loc programul verificat"}]}

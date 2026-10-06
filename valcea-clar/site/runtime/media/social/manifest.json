@@ -14,58 +14,116 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 0,
-    "autonomous_story_ids_24h": [],
+    "autonomous_stories_published_24h": 2,
+    "autonomous_story_ids_24h": [
+      "a1-cisnadie-boita-inchidere-dn7-20261005",
+      "caineni-sef-serviciu-alimentare-apa-20261005"
+    ],
     "excluded_after_correction_or_hold_24h": [],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 0,
-      "published": 0,
-      "stories": [],
-      "max_seconds": null,
-      "median_seconds": null
+      "measured": 2,
+      "published": 2,
+      "stories": [
+        {
+          "story_id": "a1-cisnadie-boita-inchidere-dn7-20261005",
+          "seconds": 9676,
+          "discovered_at_utc": "2026-10-05T19:19:29Z",
+          "published_at_utc": "2026-10-05T22:00:45Z"
+        },
+        {
+          "story_id": "caineni-sef-serviciu-alimentare-apa-20261005",
+          "seconds": 8803,
+          "discovered_at_utc": "2026-10-05T19:34:02Z",
+          "published_at_utc": "2026-10-05T22:00:45Z"
+        }
+      ],
+      "max_seconds": 9676,
+      "median_seconds": 9676
     },
     "photo_coverage": {
-      "status": "NO_PUBLISHED_STORIES",
+      "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 0,
-      "value": null,
+      "published_stories": 2,
+      "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "eligible": 0,
-      "readback_ok": 0,
-      "value": null,
-      "checks": [],
+      "status": "PASS",
+      "eligible": 2,
+      "readback_ok": 2,
+      "value": 1.0,
+      "blocker_story_ids": [],
+      "checks": [
+        {
+          "story_id": "a1-cisnadie-boita-inchidere-dn7-20261005",
+          "url": "https://valceaclar.ro/stiri/a1-cisnadie-boita-inchidere-dn7-20261005/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        },
+        {
+          "story_id": "caineni-sef-serviciu-alimentare-apa-20261005",
+          "url": "https://valceaclar.ro/stiri/caineni-sef-serviciu-alimentare-apa-20261005/",
+          "projected": true,
+          "http_status": 200,
+          "canonical_ok": true,
+          "headline_ok": true,
+          "ok": true,
+          "error": null
+        }
+      ],
+      "projection_evidence": {
+        "url": "https://raw.githubusercontent.com/mihaicismaru-bit/valcea-clar/main/content/articles.json",
+        "http_status": 200,
+        "error": null,
+        "updated_local": "2026-10-06T05:39:21.689039Z",
+        "canonical_source": "https://raw.githubusercontent.com/mihaicismaru-bit/civora/main/valcea-clar/site/runtime/live-feed.json",
+        "public_story_count": 91
+      },
       "definition": "current public projection + HTTP 200 + canonical URL + projected headline for every 24h autonomous story"
     },
     "facebook_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "status": "MEASURED",
+      "delivered": 2,
+      "eligible": 2,
+      "value": 1.0,
+      "delivered_story_ids": [
+        "a1-cisnadie-boita-inchidere-dn7-20261005",
+        "caineni-sef-serviciu-alimentare-apa-20261005"
+      ]
     },
     "instagram_delivery_rate_receipt_bound": {
-      "status": "NO_ELIGIBLE_STORIES",
-      "delivered": 0,
-      "eligible": 0,
-      "value": null
+      "status": "MEASURED",
+      "delivered": 2,
+      "eligible": 2,
+      "value": 1.0,
+      "delivered_story_ids": [
+        "a1-cisnadie-boita-inchidere-dn7-20261005",
+        "caineni-sef-serviciu-alimentare-apa-20261005"
+      ]
     },
     "duplicates": {
-      "status": "MEASURED",
+      "status": "PARTIAL",
       "value": 0,
       "content_groups": [],
       "facebook_receipt_groups": [],
       "instagram_receipt_groups": [],
-      "missing_editorial_evidence": []
+      "missing_editorial_evidence": [
+        "caineni-sef-serviciu-alimentare-apa-20261005"
+      ]
     },
     "fabricated_claims": {
-      "status": "PASS",
-      "value": 0,
+      "status": "UNKNOWN",
+      "value": null,
       "definition": "zero is asserted only when every measured published story passes material-fact and complete claim-source trace gates",
       "trace_violations": [],
-      "missing_editorial_evidence": []
+      "missing_editorial_evidence": [
+        "caineni-sef-serviciu-alimentare-apa-20261005"
+      ]
     },
     "manual_intervention": {
       "status": "MEASURED",
@@ -74,377 +132,9 @@
       "automated_workflow_dispatch_runs": [
         {
           "repository": "mihaicismaru-bit/civora",
-          "run_id": 37337396985,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T16:00:23Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37334347279,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T15:37:38Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37330360425,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-05T15:08:26Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37330094613,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T15:06:33Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37329463791,
-          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
-          "created_at": "2026-10-05T15:01:38Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37329308084,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-05T15:00:25Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37309270769,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-05T12:24:06Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37309097915,
-          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-10-05T12:22:36Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37275547277,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T07:02:48Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37275410320,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T07:01:12Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37272175213,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T06:23:33Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37271838878,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-05T06:19:28Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37270045355,
-          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
-          "created_at": "2026-10-05T05:57:05Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37266527929,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-05T05:09:33Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37266409225,
-          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-10-05T05:07:53Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37250564031,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T01:13:08Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37249407253,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T00:56:00Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37249024909,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-05T00:49:59Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37248770790,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-05T00:45:51Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37245972193,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-05T00:03:25Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37245851740,
-          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-10-05T00:01:32Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37240574844,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T22:35:09Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37238118556,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T21:57:03Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37237867434,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T21:53:09Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37237103733,
-          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
-          "created_at": "2026-10-04T21:41:22Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37236001618,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T21:25:03Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37235249103,
+          "run_id": 37420869312,
           "workflow": "VÂLCEA CLAR Social Publication Engine",
-          "created_at": "2026-10-04T21:13:58Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37235145059,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T21:12:25Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37235037675,
-          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-10-04T21:10:50Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37229936704,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T19:52:40Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37224672566,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T18:30:04Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37224417349,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T18:25:58Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37222789692,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T18:01:53Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37222663646,
-          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-10-04T18:00:11Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37221198908,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T17:37:09Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37218690102,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T16:57:38Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37210731897,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T14:50:15Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37210476719,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T14:46:04Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37206785900,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T13:45:59Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37206675376,
-          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-10-04T13:44:11Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37204765841,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T13:12:03Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37202649529,
-          "workflow": "VÂLCEA CLAR Editorial Opportunity Engine",
-          "created_at": "2026-10-04T12:35:43Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37202249431,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T12:28:57Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37190501065,
-          "workflow": "VÂLCEA CLAR Public HTTP Health",
-          "created_at": "2026-10-04T08:55:46Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37190306724,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T08:52:06Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37187544514,
-          "workflow": "VÂLCEA CLAR Live Newsroom",
-          "created_at": "2026-10-04T08:00:50Z",
-          "triggering_actor": "github-actions[bot]",
-          "triggering_actor_type": "Bot"
-        },
-        {
-          "repository": "mihaicismaru-bit/civora",
-          "run_id": 37187444950,
-          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
-          "created_at": "2026-10-04T07:59:05Z",
+          "created_at": "2026-10-06T05:54:13Z",
           "triggering_actor": "github-actions[bot]",
           "triggering_actor_type": "Bot"
         }
@@ -454,14 +144,14 @@
     },
     "soak_48h": {
       "status": "IN_PROGRESS",
-      "structural_baseline_sha": "b5b6ef59cb55dfeda4e5241b2e79f485955783f3",
-      "structural_baseline_at_utc": "2026-10-04T07:22:56Z",
-      "structural_baseline_repository": "mihaicismaru-bit/valcea-clar",
-      "structural_baseline_path": "scripts/sync_civora.py",
+      "structural_baseline_sha": "ff4ade1fe6188915359860e9bcd1224179ab5a77",
+      "structural_baseline_at_utc": "2026-10-06T05:54:01Z",
+      "structural_baseline_repository": "mihaicismaru-bit/civora",
+      "structural_baseline_path": "civora_structural_paths",
       "structural_components": [
         {
-          "sha": "6f2d4580b0d70e26626927d828b55eee095a2df4",
-          "at_utc": "2026-10-03T07:07:22Z",
+          "sha": "ff4ade1fe6188915359860e9bcd1224179ab5a77",
+          "at_utc": "2026-10-06T05:54:01Z",
           "repository": "mihaicismaru-bit/civora",
           "path": "civora_structural_paths"
         },
@@ -473,7 +163,7 @@
           "source_sha": "2e98440a1ff8851aef98d771b3d112e3600b7e79"
         }
       ],
-      "eligible_after_utc": "2026-10-06T07:22:56Z",
+      "eligible_after_utc": "2026-10-08T05:54:01Z",
       "required_hours": 48
     },
     "acceptance_ready": false,
