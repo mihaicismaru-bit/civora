@@ -42,6 +42,16 @@ FIXTURE = """<!doctype html><html><body>
 </table></body></html>"""
 
 
+EXHAUSTED_FIXTURE = """<!doctype html><html><body>
+<table>
+<tr><th>Intervenția</th><th>Sector</th><th>Alocare sesiune/sector</th><th>Dată și oră lansare sesiune</th>
+<th>Dată și oră închidere sesiune</th><th>Plafon depunere proiecte</th><th>Valoarea proiectelor depuse</th>
+<th>Număr proiecte depuse</th><th>Fonduri disponibile</th></tr>
+<tr><td>DR-14</td><td>Componenta ACHIZIȚII SIMPLE (INDIFERENT DE SECTOR)</td><td>18.000.000,00 EUR</td>
+<td>01.09.2026 09:00:00</td><td>06.10.2026 00:00:00</td><td>27.000.000,00 EUR</td>
+<td>35.010.497</td><td>753</td><td>FONDURI EPUIZATE</td></tr>
+</table></body></html>"""
+
 def load_builder_module():
     sys.path.insert(0, str(BUILDER.parent))
     spec = importlib.util.spec_from_file_location("partener_afir_live_funds_builder", BUILDER)
@@ -148,6 +158,24 @@ def main() -> int:
     assert payload["summary"]["submittedProjectCount"] == 210
 
     builder = load_builder_module()
+    exhausted_rows = builder.parse_rows(builder.parse_table(EXHAUSTED_FIXTURE.encode("utf-8")))
+    assert len(exhausted_rows) == 1
+    exhausted = exhausted_rows[0]
+    assert exhausted["interventionCode"] == "DR-14"
+    assert exhausted["closesAtLocal"] == "06.10.2026 00:00:00"
+    assert exhausted["submittedPublicValueEur"] == "35010497.00"
+    assert exhausted["submittedProjectCount"] == 753
+    assert exhausted["availableFundsEur"] == "0.00"
+    assert exhausted["availableFundsStatus"] == "EXHAUSTED"
+    assert builder.parse_available_funds("FONDURI EPUIZATE") == ("0.00", "EXHAUSTED")
+    assert builder.parse_available_funds("1.234,56 EUR") == ("1234.56", "REPORTED")
+    try:
+        builder.parse_eur("FONDURI EPUIZATE")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("generic EUR parser must remain strict for semantic status markers")
+
     for marker in ("-", "–", "—", "N/A", "N/D"):
         assert builder.parse_eur(marker) is None
     assert builder.parse_eur("1.234,56 EUR") == "1234.56"
@@ -178,6 +206,7 @@ def main() -> int:
         "18833898.00",
         "43659784.00",
     }
+    assert {row["availableFundsStatus"] for row in dr14} == {"REPORTED"}
 
     print("AFIR live-funds structured snapshot + current five-row counter + transport fail-closed regression PASS")
     return 0
