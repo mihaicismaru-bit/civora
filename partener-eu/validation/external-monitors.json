@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-07T01:44:20Z",
-  "validation_run_started": "2026-10-07T01:44:10Z",
+  "observed_at": "2026-10-07T01:49:13Z",
+  "validation_run_started": "2026-10-07T01:49:06Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "a8cfdaa0ea7be974513ec2325c547c3c4d6741044ac54121d9206bd53488567b",
-    "history_sha256": "a8cfdaa0ea7be974513ec2325c547c3c4d6741044ac54121d9206bd53488567b",
-    "history_path": "validation/history/20261007T014410Z.json",
+    "latest_sha256": "9687fbe70ab72351059698e232763630dfb7b3914e89d9f05a05e213dd412a46",
+    "history_sha256": "9687fbe70ab72351059698e232763630dfb7b3914e89d9f05a05e213dd412a46",
+    "history_path": "validation/history/20261007T014906Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "8c3faabcf732830c679ee0725aa6d67289b5e669e47e389ec15f2909a2704edf",
-    "checkpoint_sha256": "8c3faabcf732830c679ee0725aa6d67289b5e669e47e389ec15f2909a2704edf",
+    "source_state_sha256": "9a7bb5e3bf484a7b1fc1b2afe42902e5f920824c34493128d74a376400e94440",
+    "checkpoint_sha256": "9a7bb5e3bf484a7b1fc1b2afe42902e5f920824c34493128d74a376400e94440",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-10-07T01:40:00.722853Z",
-    "age_seconds": 259,
+    "age_seconds": 553,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -59,12 +59,12 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-10-06T21:49:09.068651+00:00",
+    "observed_at": "2026-10-07T01:45:55.659674+00:00",
     "status": "PASS",
     "item_count": 60,
     "error_count": 0,
-    "hash_change_candidates": 1,
-    "material_signal_candidates": 1,
+    "hash_change_candidates": 0,
+    "material_signal_candidates": 0,
     "auth_dependency_count": 29,
     "auth_dependencies": [
       {
@@ -271,12 +271,12 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       }
     ],
-    "resolution_task_required": true,
+    "resolution_task_required": false,
     "resolution_task_present_fail_closed": true,
     "material_facts_auto_promoted": false
   },
   "peo_calendar": {
-    "observed_at": "2026-10-06T21:52:15.261571+00:00",
+    "observed_at": "2026-10-07T01:46:31.659013+00:00",
     "status": "OK_OFFICIAL_OIR_COPY",
     "source": "https://oirvest.ro/wp-content/uploads/Calendarul-estimativ-consolidat-al-lansarilor-de-apeluri-de-proiecte.xlsx",
     "source_class": "OFFICIAL_INSTITUTIONAL_COPY_OIR_PECU_VEST",
@@ -375,7 +375,7 @@
     "integrity_pass": true,
     "registry_health": "DEGRADED",
     "registry_hash_changes": 3,
-    "afir_hash_changes": 1,
+    "afir_hash_changes": 0,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": true,
