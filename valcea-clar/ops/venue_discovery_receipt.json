@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-07T13:37:20.698643+00:00",
+  "generated_at": "2026-10-07T23:11:50.063705+00:00",
   "status": "OK",
   "policy": {
     "osm_is_discovery_only": true,
@@ -13,16 +13,60 @@
   "frontier_count": 111,
   "website_candidates": 18,
   "websites_checked": 4,
-  "official_identity_matches": 0,
+  "official_identity_matches": 1,
   "official_address_matches": 0,
-  "new_overlay_venues": [],
+  "new_overlay_venues": [
+    "auto-d-amici-e1c1083c"
+  ],
   "new_auto_eligible": [],
-  "new_review_required": [],
+  "new_review_required": [
+    "auto-d-amici-e1c1083c"
+  ],
   "verifications": [
+    {
+      "discoveryId": "osm-node-13149483551",
+      "name": "Ahamata Yoga",
+      "observedAt": "2026-10-07T23:11:52.529430+00:00",
+      "health": "FAILED",
+      "website": "https://ahamatayoga.com/",
+      "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-4423759090",
+      "name": "D'Amici",
+      "observedAt": "2026-10-07T23:11:52.669705+00:00",
+      "health": "OK",
+      "website": "https://www.damici.ro/ristorante-damici/",
+      "https": true,
+      "nameMatch": true,
+      "localityMatch": true,
+      "streetMatch": false,
+      "pagesChecked": 4,
+      "textLength": 164352,
+      "verifiedOfficialIdentity": true,
+      "verifiedOfficialAddress": false
+    },
+    {
+      "discoveryId": "osm-node-13254124078",
+      "name": "Dabo Doner",
+      "observedAt": "2026-10-07T23:11:58.573285+00:00",
+      "health": "OK",
+      "website": "https://dabodoner.ro/",
+      "https": true,
+      "nameMatch": true,
+      "localityMatch": false,
+      "streetMatch": false,
+      "pagesChecked": 1,
+      "textLength": 53,
+      "verifiedOfficialIdentity": false,
+      "verifiedOfficialAddress": false
+    },
     {
       "discoveryId": "osm-node-13202418033",
       "name": "Maestro Pizza & Devivery",
-      "observedAt": "2026-10-07T13:37:32.788091+00:00",
+      "observedAt": "2026-10-07T23:12:00.061410+00:00",
       "health": "OK",
       "website": "https://pizzamaestro.ro/",
       "https": true,
@@ -31,51 +75,6 @@
       "streetMatch": false,
       "pagesChecked": 2,
       "textLength": 5161,
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-11042860687",
-      "name": "Proper Pizza",
-      "observedAt": "2026-10-07T13:37:35.043622+00:00",
-      "health": "OK",
-      "website": "https://properpizza.ro/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": false,
-      "streetMatch": false,
-      "pagesChecked": 1,
-      "textLength": 1519,
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-13252449685",
-      "name": "Proper Pizza",
-      "observedAt": "2026-10-07T13:37:36.727660+00:00",
-      "health": "OK",
-      "website": "https://properpizza.ro/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": false,
-      "streetMatch": false,
-      "pagesChecked": 1,
-      "textLength": 1519,
-      "verifiedOfficialIdentity": false,
-      "verifiedOfficialAddress": false
-    },
-    {
-      "discoveryId": "osm-node-11941798810",
-      "name": "Starbucks",
-      "observedAt": "2026-10-07T13:37:37.890698+00:00",
-      "health": "OK",
-      "website": "https://www.starbucks.ro/",
-      "https": true,
-      "nameMatch": true,
-      "localityMatch": false,
-      "streetMatch": false,
-      "pagesChecked": 3,
-      "textLength": 7838,
       "verifiedOfficialIdentity": false,
       "verifiedOfficialAddress": false
     }
