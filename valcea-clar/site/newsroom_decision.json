@@ -1,17 +1,13 @@
 {
   "schema_version": "1.4",
-  "evaluated_local": "2026-10-07T22:56:48+03:00",
+  "evaluated_local": "2026-10-07T23:27:00+03:00",
   "mode": "continuous_story_first",
   "edition_windows_are_publication_gates": false,
   "recap_editions_retained": true,
   "slot_for_legacy_snapshot_compatibility": "evening",
-  "changed": false,
-  "publishable_story_count": 3,
-  "publishable_story_ids": [
-    "a1-cisnadie-boita-inchidere-dn7-20261005",
-    "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
-    "valcea-campanie-antirabica-toamna-20260925"
-  ],
+  "changed": true,
+  "publishable_story_count": 0,
+  "publishable_story_ids": [],
   "new_story_ids": [],
   "fingerprint": "68f4efb778a1aa22dbe20078aadcdef35a6fb96da754eda5cf30686a35ca97ec",
   "auto_fact_registry_count": 5,
@@ -92,6 +88,19 @@
     "durable_temporal_language_contract": "LOCAL_NEWS_OS_DURABLE_TEMPORAL_LANGUAGE_V1",
     "relative_time_words_in_durable_story_copy": false,
     "published_state_requires_canonical_route": true,
-    "published_story_retention_until_ineligible": true
+    "published_story_retention_until_ineligible": true,
+    "no_reentry_without_material_delta": true,
+    "discovery_lag_is_not_news": true,
+    "zero_news_preferred_to_filler": true
+  },
+  "owner_quality_correction": {
+    "applied_at": "2026-10-07T23:27:00+03:00",
+    "rule": "NO_RECYCLED_CURRENT_FEED",
+    "rejected_from_current": [
+      "a1-cisnadie-boita-inchidere-dn7-20261005",
+      "cj-valcea-cocos-rajdp-mandat-guvernanta-20260818",
+      "valcea-campanie-antirabica-toamna-20260925"
+    ],
+    "rationale": "Old, long-running or only indirectly local items remain archive/reference; they do not occupy CURRENT without a new material claim-level delta."
   }
 }
