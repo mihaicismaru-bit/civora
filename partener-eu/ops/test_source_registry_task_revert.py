@@ -76,6 +76,24 @@ try:
         ) is False
         assert path.read_text(encoding="utf-8") == before
 
+        # An unresolved candidate must not silently become the next comparison
+        # baseline merely because source_registry_health persisted that candidate.
+        # Keep the prior canonical hash authoritative until explicit resolution.
+        path.write_text(json.dumps({
+            "schema_version": "1.2",
+            "source_id": "SRC-TEST",
+            "status": "OPEN",
+            "previous_semantic_sha256": BASELINE,
+            "current_semantic_sha256": CANDIDATE,
+            "material_fact_autoupdate_allowed": False,
+        }), encoding="utf-8")
+        persisted_candidate = {
+            "semantic_sha256": CANDIDATE,
+            "semantic_chars": 1000,
+            "bytes": 10000,
+        }
+        assert module.task_baseline_hash("SRC-TEST", persisted_candidate) == BASELINE
+
         # New behavior: a persistent semantic change can become the comparison
         # baseline only after an explicit non-material review. The ledger and
         # task must agree, and neither may authorize material fact publication.
