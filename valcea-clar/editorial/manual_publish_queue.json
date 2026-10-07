@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "instance_id": "valcea",
-  "requested_at": "2026-10-06T18:08:00+03:00",
-  "requested_by": "VÂLCEA CLAR external editorial control-plane",
+  "requested_at": "2026-10-07T15:08:00+03:00",
+  "requested_by": "VÂLCEA CLAR hourly editorial worker",
   "publication_intent": "publish",
   "facts": [
     {
@@ -1430,6 +1430,84 @@
         ]
       },
       "editorial_note": "Continuous public-safety/service story. Keep all operational claims attributed. Do not infer accident cause, liability, final medical outcome, total fuel quantity or full two-way reopening. No third-party incident image should be reused unless rights/provenance are separately cleared."
+    },
+    {
+      "id": "ramnicu-piata-nord-inchidere-temporara-20261008",
+      "status": "verified",
+      "section": "UTIL",
+      "editorial_type": "service",
+      "editorial_form": "service_news",
+      "priority": 96,
+      "confidence": 94,
+      "publication_lifecycle": "new_story",
+      "valid_from": "2026-10-07T15:00:00+03:00",
+      "valid_until": "2026-10-09T23:59:59+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "headline": "Piața Nord se închide temporar din 8 octombrie. Unde sunt redirecționați comercianții",
+      "dek": "Primăria Râmnicu Vâlcea a anunțat închiderea temporară a Pieței Nord începând de joi, 8 octombrie, pentru lucrări de conformare la cerințele de securitate la incendiu. Comercianților li s-au indicat alternative în Piața Centrală și în PT3–Ostroveni.",
+      "paragraphs": [
+        "Piața Nord din Râmnicu Vâlcea se închide temporar începând de joi, 8 octombrie, potrivit unui anunț al Primăriei Râmnicu Vâlcea reprodus miercuri de două publicații locale. Motivul comunicat este necesitatea unor lucrări structurale pentru conformarea la cerințele de securitate la incendiu.",
+        "Pentru producătorii și comercianții de legume, fructe și flori, administrația a indicat ca variantă Piața Centrală și a anunțat inclusiv sprijin pentru transportul produselor. Firmelor care folosesc spațiile comerciale cu acces din exterior li s-a propus relocarea temporară în complexul comercial PT3 din Ostroveni.",
+        "Durata lucrărilor nu este încă stabilită public. Conform mesajului atribuit Primăriei, Piețe Prest a început etapa de proiectare, iar termenul intervențiilor va putea fi estimat după finalizarea acesteia.",
+        "Pentru cumpărători și comercianți, informația practică este că Piața Nord nu trebuie tratată ca disponibilă începând cu 8 octombrie. VÂLCEA CLAR va actualiza aceeași poveste când Primăria sau Piețe Prest publică termenul de redeschidere."
+      ],
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Jurnalul Olteniei — reproduce anunțul Primăriei Râmnicu Vâlcea, 07.10.2026",
+          "url": "https://jurnalulolteniei.ro/piata-nord-din-ramnicu-valcea-se-inchide-primaria-a-explicat-situatia/",
+          "tier": "T2"
+        },
+        {
+          "name": "Opinia Vâlcea — reproduce comunicarea privind Piața Nord, 07.10.2026",
+          "url": "https://www.opiniavl.ro/2026/10/07/piata-nord-se-inchide-pentru-lucrari-structurale-privind-securitatea-la-incendii-producatorilor-si-comerciantilor-li-s-au-oferit-variante-de-relocare-si-chiar-sprijin-pentru-transportul-produselor/",
+          "tier": "T2"
+        }
+      ],
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "claims": [
+          {
+            "id": "piata-nord-close-date",
+            "role": "material_change",
+            "kind": "attributed_statement",
+            "certainty": "SOURCE_CLAIM",
+            "text": "Primăria Râmnicu Vâlcea a anunțat închiderea temporară a Pieței Nord începând cu 8 octombrie 2026.",
+            "attribution": "Primăria Râmnicu Vâlcea, mesaj reprodus de Jurnalul Olteniei și Opinia Vâlcea",
+            "source_urls": [
+              "https://jurnalulolteniei.ro/piata-nord-din-ramnicu-valcea-se-inchide-primaria-a-explicat-situatia/",
+              "https://www.opiniavl.ro/2026/10/07/piata-nord-se-inchide-pentru-lucrari-structurale-privind-securitatea-la-incendii-producatorilor-si-comerciantilor-li-s-au-oferit-variante-de-relocare-si-chiar-sprijin-pentru-transportul-produselor/"
+            ]
+          },
+          {
+            "id": "piata-nord-relocation",
+            "role": "reader_service",
+            "kind": "attributed_statement",
+            "certainty": "SOURCE_CLAIM",
+            "text": "Producătorilor și comercianților li s-au indicat locuri în Piața Centrală, iar firmelor din spațiile comerciale exterioare li s-a propus PT3–Ostroveni.",
+            "attribution": "Primăria Râmnicu Vâlcea, mesaj reprodus de cele două surse",
+            "source_urls": [
+              "https://jurnalulolteniei.ro/piata-nord-din-ramnicu-valcea-se-inchide-primaria-a-explicat-situatia/",
+              "https://www.opiniavl.ro/2026/10/07/piata-nord-se-inchide-pentru-lucrari-structurale-privind-securitatea-la-incendii-producatorilor-si-comerciantilor-li-s-au-oferit-variante-de-relocare-si-chiar-sprijin-pentru-transportul-produselor/"
+            ]
+          },
+          {
+            "id": "piata-nord-duration",
+            "role": "closure_condition",
+            "kind": "unknown",
+            "certainty": "UNKNOWN",
+            "text": "Data redeschiderii nu este încă stabilită public.",
+            "source_urls": [
+              "https://jurnalulolteniei.ro/piata-nord-din-ramnicu-valcea-se-inchide-primaria-a-explicat-situatia/",
+              "https://www.opiniavl.ro/2026/10/07/piata-nord-se-inchide-pentru-lucrari-structurale-privind-securitatea-la-incendii-producatorilor-si-comerciantilor-li-s-au-oferit-variante-de-relocare-si-chiar-sprijin-pentru-transportul-produselor/"
+            ]
+          }
+        ]
+      },
+      "editorial_note": "Service-first coverage. Claims about sanctions or culpability are intentionally omitted pending direct primary evidence. The closure/relocation details are presented strictly as attributed municipal claims reproduced consistently by two local sources."
     }
   ]
 }
