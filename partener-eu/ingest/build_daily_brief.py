@@ -70,6 +70,22 @@ def clean_sentence(value: Any) -> str:
     return text
 
 
+def truncate_at_word(value: Any, limit: int) -> str:
+    """Trim display text without cutting a word or leaving dangling punctuation."""
+    text = re.sub(r"\s+", " ", str(value or "")).strip()
+    if len(text) <= limit:
+        return text
+    clipped = text[:limit + 1]
+    if len(clipped) > limit and not clipped[limit].isspace():
+        clipped = clipped[:limit]
+        if " " in clipped:
+            clipped = clipped.rsplit(" ", 1)[0]
+    else:
+        clipped = clipped[:limit]
+    clipped = re.sub(r"[\s\(\[\{,;:/\-–—]+$", "", clipped).rstrip(".")
+    return clipped + "…" if clipped else text[:limit].rstrip() + "…"
+
+
 def fact_row(d: dict[str, Any], *labels: str) -> dict[str, Any] | None:
     wanted = {label.lower() for label in labels}
     return next((x for x in d.get("quickFacts") or [] if str(x.get("label") or "").lower() in wanted), None)
@@ -235,7 +251,7 @@ def build_brief(payload: dict[str, Any], now: dt.datetime) -> dict[str, Any]:
     parallel.sort(key=lambda d: dossier_score(d, now), reverse=True)
     parallel_text = ""
     if parallel:
-        names = [str(x.get("title") or "")[:65] for x in parallel[:2]]
+        names = [truncate_at_word(x.get("title"), 65) for x in parallel[:2]]
         parallel_text = "În paralel: " + "; ".join(names) + "."
 
     return {
