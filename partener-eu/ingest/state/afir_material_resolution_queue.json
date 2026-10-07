@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "generatedAt": "2026-10-07T01:45:55.659674+00:00",
+  "generatedAt": "2026-10-07T09:05:08.794119+00:00",
   "policy": {
     "purpose": "record-level-material-change-resolution",
     "failClosed": true,
@@ -10,9 +10,46 @@
     "dedicatedStructuredSnapshotsMayResolveExactCandidates": true
   },
   "summary": {
-    "candidateCount": 0,
+    "candidateCount": 1,
     "unresolvedCount": 0,
     "publishableMaterialFactCount": 0
   },
-  "items": []
+  "items": [
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+      "fingerprint": "52c91339c8becdc6fbf4995de854e9f17a1df3c1b570f0675b2f2e300ff48374",
+      "observedAt": "2026-10-07T09:04:11.576635+00:00",
+      "status": "RESOLVED",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": false,
+      "publishMaterialFacts": false,
+      "materialFactAction": "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED",
+      "resolutionType": "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT",
+      "resolvedAt": "2026-10-07T09:05:08.794119+00:00",
+      "dedicatedSnapshotPublishable": true,
+      "resolutionEvidence": {
+        "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+        "sourceFingerprint": "52c91339c8becdc6fbf4995de854e9f17a1df3c1b570f0675b2f2e300ff48374",
+        "snapshotFingerprint": "8cda1c3072d46538c5e6d6f5c70eba8ca74d642f5dd8c5e1d55d70ba1e721c15",
+        "rowCount": 7,
+        "interventions": [
+          "DR-12",
+          "DR-14",
+          "DR-18"
+        ]
+      }
+    }
+  ]
 }
