@@ -22,6 +22,7 @@ from public_presence_os.meta_live_runtime import (
     MetaReadClient,
     MetaReadRuntime,
     MetaRuntimeConfig,
+    classify_meta_hold,
     preflight_report,
 )
 
@@ -265,7 +266,7 @@ def test_partial_sync_never_reports_read_capabilities_pass(tmp_path):
 
 
 
-def test_page_token_can_be_primary_authority_without_user_token(tmp_path):
+def test_page_token_without_user_token_fails_closed_at_binding_proof(tmp_path):
     values = env(META_THREADS_ENABLED="false")
     values.pop("META_THREADS_ACCESS_TOKEN")
     values.pop("META_USER_ACCESS_TOKEN")
@@ -275,16 +276,33 @@ def test_page_token_can_be_primary_authority_without_user_token(tmp_path):
 
     client = FakeClient()
     store = MetaEventStore(tmp_path / "events.sqlite3")
-    summary = MetaReadRuntime(config, client, store).sync_once()
-    assert summary.state == "READ_ONLY_REAL_SYNC_PASS"
-    assert dict(summary.identities) == {
-        "FACEBOOK_PAGE": EXPECTED_PAGE_ID,
-        "INSTAGRAM_PROFESSIONAL": EXPECTED_IG_ID,
-    }
-    assert summary.write_count == 0
+    with pytest.raises(MetaLiveHold, match="HOLD_META_USER_AUTHORITY_REQUIRED_FOR_INSTAGRAM_BINDING"):
+        MetaReadRuntime(config, client, store).sync_once()
     assert client.calls[0][1].endswith(f"/{EXPECTED_PAGE_ID}")
     assert client.calls[0][2]["fields"] == "id,name"
-    assert all(call[3] == TOKEN_B for call in client.calls)
+
+
+def test_page_token_reads_and_user_token_binding_use_supported_context(tmp_path):
+    values = env(META_THREADS_ENABLED="false")
+    values.pop("META_THREADS_ACCESS_TOKEN")
+    client = FakeClient()
+    summary = MetaReadRuntime(
+        MetaRuntimeConfig.from_env(values),
+        client,
+        MetaEventStore(tmp_path / "events.sqlite3"),
+    ).sync_once()
+    assert summary.state == "READ_ONLY_REAL_SYNC_PASS"
+    binding_calls = [call for call in client.calls if call[1].endswith("/me/accounts")]
+    assert len(binding_calls) == 1
+    assert binding_calls[0][3] == TOKEN_A
+    page_calls = [call for call in client.calls if call[1].endswith(f"/{EXPECTED_PAGE_ID}")]
+    assert page_calls
+    assert all(call[3] == TOKEN_B for call in page_calls)
+
+
+def test_graph_10_is_classified_without_exposing_message_text():
+    reason = "HOLD_META_STAGE_INSTAGRAM_BINDING_HTTP_400_GRAPH_10"
+    assert classify_meta_hold(reason) == "PERMISSION_OR_ENDPOINT_CONTEXT_DENIED"
 
 
 def test_threads_can_be_held_without_blocking_facebook_instagram_read_only(tmp_path):

@@ -18,8 +18,8 @@ def test_binding_must_match_before_content_reads(tmp_path, binding):
     class Client(FakeClient):
         def get(self, **kwargs):
             result = super().get(**kwargs)
-            if kwargs["params"].get("fields") == "id,name,instagram_business_account":
-                result["instagram_business_account"] = binding
+            if kwargs["path"].endswith("/me/accounts"):
+                result["data"][0]["instagram_business_account"] = binding
             return result
 
     client = Client()
@@ -28,6 +28,7 @@ def test_binding_must_match_before_content_reads(tmp_path, binding):
     assert report["HOLD REASON"] == "HOLD_META_INSTAGRAM_BINDING_MISMATCH"
     assert report["INSTAGRAM BINDING"] == "FAIL"
     assert report["READ CAPABILITIES"] == "FAIL"
+    assert any(call[1].endswith("/me/accounts") for call in client.calls)
     assert not any(call[1].endswith("/posts") for call in client.calls)
 
 
