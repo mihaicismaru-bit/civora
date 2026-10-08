@@ -3,10 +3,10 @@
   "id": "SRC-LEGISLATIE-API",
   "tier": "T1",
   "name": "Portal Legislativ — API SOAP oficial fără credențiale",
-  "observed_at": "2026-10-08T06:41:34Z",
-  "status": "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
-  "selected_endpoint": "https://legislatie.just.ro/apiws/FreeWebService.svc",
-  "semantic_sha256": "10664a9b442042cf536ad97b5c3643c1d5bbac72c951c737251f26114777e36d",
+  "observed_at": "2026-10-08T14:04:36Z",
+  "status": "DEGRADED_SOAP_TOKEN_UNAVAILABLE",
+  "selected_endpoint": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+  "semantic_sha256": "bfb4d1d9ed0a54b84301092311d503389534331deb6802c39bc5e8f3fb22f8d8",
   "last_success_at": null,
   "last_known_good_preserved": false,
   "probes": [
@@ -54,14 +54,17 @@
     {
       "endpoint": "http://legislatie.just.ro/apiws/FreeWebService.svc",
       "landing": {
-        "ok": false,
-        "http_status": 500,
-        "final_url": null,
-        "bytes": 0,
-        "body_sha256": null,
-        "markers_found": [],
+        "ok": true,
+        "http_status": 200,
+        "final_url": "http://legislatie.just.ro/apiws/FreeWebService.svc",
+        "bytes": 3045,
+        "body_sha256": "87fc0924923577478c224afd68c48df8cd4a3d0ee35f75431d4d1a70d210575d",
+        "markers_found": [
+          "FreeWebService",
+          "Service"
+        ],
         "transport": "urllib-get",
-        "error": "HTTP Error 500: Internal Server Error"
+        "error": null
       },
       "token_probe": {
         "token_received": false,
@@ -79,8 +82,8 @@
         {
           "transport": "urllib-soap",
           "ok": false,
-          "http_status": 500,
-          "error": "HTTP Error 500: System.ServiceModel.ServiceActivationException"
+          "http_status": 404,
+          "error": "HTTP Error 404: Not Found"
         },
         {
           "transport": "curl-ipv4-soap",
@@ -90,7 +93,7 @@
         }
       ],
       "ok": false,
-      "degraded": false
+      "degraded": true
     }
   ],
   "policy": {
