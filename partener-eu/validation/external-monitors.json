@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-08T16:41:38Z",
-  "validation_run_started": "2026-10-08T16:41:29Z",
+  "observed_at": "2026-10-08T16:51:40Z",
+  "validation_run_started": "2026-10-08T16:51:29Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "1be72b21723f640cc9ae2d0e6b9f0aff594ae7e9cbe6e1c2665165925d283367",
-    "history_sha256": "1be72b21723f640cc9ae2d0e6b9f0aff594ae7e9cbe6e1c2665165925d283367",
-    "history_path": "validation/history/20261008T164129Z.json",
+    "latest_sha256": "f7104620cd87ee0bda0dcad33c55a81214a571405782b382aa27acb17eed83aa",
+    "history_sha256": "f7104620cd87ee0bda0dcad33c55a81214a571405782b382aa27acb17eed83aa",
+    "history_path": "validation/history/20261008T165129Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "03589bf4e429aa234882bd829623e3054846d08429d3a04c0be23d171300a637",
-    "checkpoint_sha256": "03589bf4e429aa234882bd829623e3054846d08429d3a04c0be23d171300a637",
+    "source_state_sha256": "253c92e8e86ca603b5c91ffca23b72995b61a03279791fea98ed4591934413fe",
+    "checkpoint_sha256": "253c92e8e86ca603b5c91ffca23b72995b61a03279791fea98ed4591934413fe",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-10-08T13:45:52.118228Z",
-    "age_seconds": 10545,
+    "age_seconds": 11147,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -57,13 +57,13 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-10-08T09:20:55.462864+00:00",
+    "observed_at": "2026-10-08T16:48:42.286550+00:00",
     "status": "PASS",
-    "item_count": 60,
+    "item_count": 59,
     "error_count": 0,
-    "hash_change_candidates": 2,
-    "material_signal_candidates": 2,
-    "auth_dependency_count": 29,
+    "hash_change_candidates": 3,
+    "material_signal_candidates": 3,
+    "auth_dependency_count": 28,
     "auth_dependencies": [
       {
         "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -260,13 +260,6 @@
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
-      },
-      {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicate%2Fmodel-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
-        "status": "AUTH_OR_ACCESS_DEPENDENT",
-        "materialFactAction": "NONE",
-        "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       }
     ],
     "resolution_task_required": true,
@@ -373,7 +366,7 @@
     "integrity_pass": true,
     "registry_health": "DEGRADED",
     "registry_hash_changes": 1,
-    "afir_hash_changes": 2,
+    "afir_hash_changes": 3,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": true,
