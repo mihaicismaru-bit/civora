@@ -385,3 +385,22 @@ def test_graph10_identifies_read_stage_without_sensitive_values(tmp_path, platfo
     assert classify_meta_hold(reason) == "PERMISSION_OR_ENDPOINT_CONTEXT_DENIED"
     assert TOKEN_B not in reason
     assert endpoint not in reason
+
+
+@pytest.mark.parametrize("reason", [
+    "HOLD_META_HTTP_400_GRAPH_100",
+    "HOLD_META_HTTP_401_GRAPH_190_SUB_463",
+    "HOLD_META_HTTP_403",
+])
+def test_other_graph_codes_preserve_original_hold(tmp_path, reason):
+    class DeniedClient:
+        def get(self, **kwargs):
+            raise MetaLiveHold(reason)
+
+    runtime = MetaReadRuntime(
+        MetaRuntimeConfig.from_env(env()), DeniedClient(),
+        MetaEventStore(tmp_path / "events.sqlite3"),
+    )
+    with pytest.raises(MetaLiveHold) as failure:
+        runtime._get("FACEBOOK_PAGE", "/v26.0/me", {"fields": "id"}, TOKEN_B)
+    assert failure.value.reason == reason
