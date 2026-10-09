@@ -2,6 +2,8 @@
 
 ## Invariante
 
+Verificare suplimentară după #54: setul de 91 ID-uri și titlurile publice sunt identice cu checkpoint-ul baseline restaurat; sitemap-ul, proiecția și manifestul canonic coincid. Nu s-au modificat articole, media sau canonul pentru fixul de receipt. Probe: evidence/hourly_public_verification.json.
+
 Păstrează misiunea pentru întreg județul Vâlcea; identitatea/brandul; standardul factual și proveniența; produsele editoriale și Local Life; research, surse, media cu drepturi, corecții și istoricul; publicarea demonstrată prin body/readback/receipt; single-writer pe resursă și idempotency. Un comunicat/semnal nu este automat articol. Un material vechi nu reintră în CURRENT fără delta materială nouă.
 
 Arhitectura CIVORA, repo layout, workflow-uri, registries, cronuri și API-uri interne sunt alegeri tehnice revizuibile. Instrucțiunea ownerului pentru Reset 2026 prevalează asupra cerințelor tehnice istorice. Arhitectura veche nu devine contract pentru reconstrucție.

@@ -46,3 +46,5 @@ Baseline: Vercel lista patru proiecte, dar deploymenturile răspundeau 403. Foll
 Inventarul de branches și PR-uri deschise este capturat în `evidence/open_prs.json` și `branches.json`. Vechimea nu justifică închidere/ștergere; toate au rămas păstrate.
 
 Dependențe: runtime Python 3.12/3.13; Actions checkout/setup/upload/deploy; Pillow în renderer-ele sociale; local-news-os/core; standard-library HTTP/JSON/zoneinfo. Nu există manifest central de dependențe VÂLCEA. Nu s-a eliminat nicio dependență fără probă. tzdata a fost instalat numai în mediul Windows de audit pentru testare, fără schimbare de dependențe de producție.
+
+Prima rulare orară a inspectat sursele ultimelor patru deploymenturi Vercel: numai fișiere statice expuse și un vercel.json fără crons. Configurația Build Output și cloud cron rămân INVESTIGATE, conform 09. Nu s-au schimbat workflow-urile/scripturile writerilor CIVORA între confirmarea ownerului și HEAD-ul inițial al acestei rulări. #54 corectează exclusiv receipt-ul reconciliatorului public existent.

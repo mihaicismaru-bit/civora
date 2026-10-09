@@ -11,5 +11,6 @@ Acesta este un brief, nu o soluție aleasă. Faza 1 nu a început.
 7. Care hosting este efectiv live și care proiecte sunt doar probes? Compară utilizarea infrastructurii deja disponibile după inventarierea aliasurilor/deployments; nu adăuga servicii.
 8. Cum se păstrează rutele, timestamps, corrections, SEO, article/media rights și research în migrare? Ce exercițiu de restaurare demonstrează recuperarea Git + Drive + stare externă?
 9. Cum se măsoară discovery→factual closure→publication→body readback și freshness, fără target de volum? Cum se izolează un canal social fără a bloca site-ul?
+10. Cum separăm identitatea receipt-ului, ceasul de execuție și expirarea TTL? #54 demonstrează că hash-ul trebuie să descrie bytes publicați după reconciliere; stabilizarea timestampurilor nu trebuie să ascundă o schimbare reală de eligibility.
 
 Artefacte necesare înainte de alegere: matrice completă resource→writer→trigger→commit→deploy→receipt; inventar scheduler extern/cloud; probe de regen/recovery; baseline cost/output; riscuri și tradeoff pentru fiecare alternativă. Canonul editorial este invariant; CIVORA actual nu este cerință.

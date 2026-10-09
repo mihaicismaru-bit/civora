@@ -11,7 +11,7 @@
 | documente Drive LEGACY__*__SUPERSEDED | istorie și decizii vechi | editorial | referință | etichetă superseded explicită | confuzie de autoritate | ARCHIVE — clasificare, fără mutare în această fază |
 | Live Newsroom / Autonomous Editions / Local Life Sync | writeri înregistrați cu scope suprapus | site_engine | mai multe lane-uri active | git add/push asupra runtime, concurrency diferită | stale overwrite | INVESTIGATE — fără oprire |
 | deploy-pages manual | cale de deploy manuală | proiecție publică | Pages | workflow prezent cu confirmare DEPLOY | concurență cu Public Sync | INVESTIGATE — păstrat |
-| Vercel 4 proiecte | deployment legacy/probe potențial | cloud account | necunoscute | list projects; deployments 403 | rol live necunoscut | INVESTIGATE — păstrat |
+| Vercel 4 proiecte | deployment legacy/probe potențial | cloud account | cloud cron/Build Output necunoscute | 08: deploymenturi și aliasuri recuperate; 09: surse statice inspectate, un vercel.json fără crons | rol live/cron nedemonstrat | INVESTIGATE — păstrat |
 | branchuri/PR-uri vechi | lucrări istorice | autorii PR | dependențe neevaluate | listare live | pierdere de lucru | INVESTIGATE — fără închidere |
 | scripturi fără referință workflow | experiment/funcție posibil importată/manuală | maintainer | import/dynamic/manual nerezolvate | numai Git + scanare statică | false dead-code classification | INVESTIGATE — fără ștergere |
 | cache/log/tmp | candidat junk | local runtime | necunoscute | căutare extensii/nume, nicio dovadă suficientă de inutilitate | eliminare evidence | DELETE SAFE: niciun element demonstrat |
@@ -21,3 +21,5 @@ Dezactivările vizează înregistrări orfane, nu 8 căi de publicare active. Fi
 Nu s-a adăugat un workflow, framework, writer, serviciu cloud, bază de date, scheduler sau strat de compatibilitate. Nu s-a șters un fișier editorial ori un resource de producție. Nu s-au mutat documente Drive.
 
 Testele de preview, dependențele și documentația fără referințe directe nu sunt declarate „junk” automat. Referințele statice incomplete sunt o limită explicită a inventarului. Consolidarea celor 142 workflow-uri VÂLCEA necesită verificarea output-ului și a consumatorilor înaintea opririi.
+
+Mentenanță suplimentară #54: KEEP reconciliatorul existent, corectat receipt hash/lead date. Nicio ștergere sau dezactivare suplimentară. Churn-ul timestampurilor rămâne REFACTOR LATER, fără a masca expirarea TTL.

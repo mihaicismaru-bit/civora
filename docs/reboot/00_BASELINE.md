@@ -42,3 +42,5 @@ Bundle-urile locale din directorul proiectului `checkpoints/` conțin istoria co
 4. Pentru raportul CIVORA, revert-ul PR-ului de documentare elimină numai documentele; starea Actions se recuperează separat.
 
 Rollback-ul tehnic public ar readuce și incidentul zero-current. Se folosește numai dacă apar regresii și după identificarea unui LKG editorial acceptabil. Nu se declară un homepage cu știri reciclate drept LKG factual.
+
+Checkpoint de observație suplimentar, fără înlocuirea baseline-ului: la 9 octombrie 12:16:04 Europe/Bucharest, CIVORA `7ea9bcde83045dfb8b4969ecf57763bd05fcaf11`, public `bb1f012cf7ceca9529bf2dda43693c908cca322f`. Receipt și readback după #54 verificate în `evidence/hourly_public_verification.json`. Rollback-ul #54 folosește revert normal al merge-ului `2d67f1c022eb1305f140dd90cb5df25b5a484999`, fără rescrierea main; bundle-urile inițiale rămân punctele de restaurare Git verificate.
