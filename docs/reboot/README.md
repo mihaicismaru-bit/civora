@@ -10,3 +10,5 @@ Rapoartele publice conțin numai identificatori tehnici, referințe și dovezi f
 # Actualizare de stabilizare
 
 [08 — Ownership follow-up](08_OWNERSHIP_FOLLOWUP.md): recovery Pages corectat, inventar Vercel recuperat, matrice writeri extinsă și limite restante.
+
+[09 — Hourly receipt audit](09_HOURLY_RECEIPT_AUDIT.md): receipt hash/lead metadata corectat și surse Vercel inspectate read-only.

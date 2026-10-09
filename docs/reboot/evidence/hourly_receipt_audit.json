@@ -1,0 +1,178 @@
+{
+  "at": "2026-10-09T09:13:03.081Z",
+  "automation_id": "v-lcea-clar-reboot-faza-0",
+  "initial_heads": {
+    "civora": "2d669a0c8049b9302ee24a6c42832edc0c0586d8",
+    "public": "ac8df90b960218dc27f760e971af835ab3d3b51e"
+  },
+  "civora_writer_code_delta_since_owner_status": "none; latest change is durable monitor state",
+  "vercel_source_trees": [
+    {
+      "id": "dpl_9RCccvy9gGgcRk5qVVKVfh4ArYet",
+      "tree": [
+        {
+          "name": "src",
+          "type": "directory",
+          "mode": 16749,
+          "children": [
+            {
+              "name": "editor",
+              "type": "directory",
+              "mode": 16749,
+              "children": [
+                {
+                  "name": "index.html",
+                  "type": "file",
+                  "mode": 33206,
+                  "uid": "71015e768c6cce97aebc51c87439041b60fe8d8e"
+                }
+              ]
+            },
+            {
+              "name": "index.html",
+              "type": "file",
+              "mode": 33206,
+              "uid": "6a627673adfcb1140ff8aa1012896ccdf9731f34"
+            },
+            {
+              "name": "robots.txt",
+              "type": "file",
+              "mode": 33206,
+              "uid": "cafcefcade505258edf62d17e195abc95ee37d68"
+            },
+            {
+              "name": "vercel.json",
+              "type": "file",
+              "mode": 33206,
+              "uid": "2d23a99ed4030accb3ececf3748ec75ffbd9087e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dpl_GzzY51zn8wGwbio1HaiLCqVjbLoY",
+      "tree": [
+        {
+          "name": "src",
+          "type": "directory",
+          "mode": 16749,
+          "children": [
+            {
+              "name": "editor",
+              "type": "directory",
+              "mode": 16749,
+              "children": [
+                {
+                  "name": "index.html",
+                  "type": "file",
+                  "mode": 33206,
+                  "uid": "d7ab0f08a2cd249eb58cfa9cc2ed6b1517a008ed"
+                }
+              ]
+            },
+            {
+              "name": "index.html",
+              "type": "file",
+              "mode": 33206,
+              "uid": "d1f62fd93de70b9c26c0223df3b287f388007284"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dpl_AHPab5CHgfbN3WtpPjqqBCMLxZLy",
+      "tree": [
+        {
+          "name": "src",
+          "type": "directory",
+          "mode": 16749,
+          "children": [
+            {
+              "name": "index.html",
+              "type": "file",
+              "mode": 33206,
+              "uid": "0f2010554b5ee9c5c82d398b432a00ef7c4cfb6e"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dpl_7L2b2SHdzLyMZvcWJm73M4cr8Lx8",
+      "tree": [
+        {
+          "name": "src",
+          "type": "directory",
+          "mode": 16749,
+          "children": [
+            {
+              "name": "index.html",
+              "type": "file",
+              "mode": 33206,
+              "uid": "9cb86366d141dda0bcad567f6413aaa2eda189a0"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "deployed_vercel_json": {
+    "deployment": "dpl_9RCccvy9gGgcRk5qVVKVfh4ArYet",
+    "file_id": "2d23a99ed4030accb3ececf3748ec75ffbd9087e",
+    "cleanUrls": true,
+    "trailingSlash": true,
+    "redirects": [
+      {
+        "source": "/admin",
+        "destination": "/editor/",
+        "permanent": false
+      }
+    ],
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          {
+            "key": "X-Content-Type-Options",
+            "value": "nosniff"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "strict-origin-when-cross-origin"
+          }
+        ]
+      },
+      {
+        "source": "/editor/(.*)",
+        "headers": [
+          {
+            "key": "X-Robots-Tag",
+            "value": "noindex, nofollow"
+          }
+        ]
+      }
+    ],
+    "crons_declared": false
+  },
+  "cron_limit": "source file tree is not deployed Build Output configuration or dashboard cron state; no cloud resource was disabled",
+  "official_reference": "https://vercel.com/docs/cron-jobs",
+  "receipt_before": {
+    "articles_sha_matches_bytes": false,
+    "lead_story_id": null,
+    "lead_published_at": "2026-09-14T16:48:58+03:00",
+    "current_ids": [],
+    "article_count": 91
+  },
+  "regression_tests": {
+    "before": "four failures",
+    "after": "4 targeted PASS; reconciler self-test PASS; 39 suite tests PASS in 19.977s"
+  },
+  "fix": {
+    "pr": "https://github.com/mihaicismaru-bit/valcea-clar/pull/54",
+    "commit": "bac66289f3c6e3d0d7f59162f25dad1663e02420",
+    "scope": "existing receipt metadata only; generated state excluded"
+  },
+  "remaining": "timestamp churn, cloud cron state, CIVORA-wide resource ownership; PARTIAL"
+}

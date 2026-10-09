@@ -16,6 +16,7 @@
 | P2 | 1002 fișiere clasificate INVESTIGATE | dead-code audit static incomplet; import graph + dispatch/manual consumers + artefacte recente înainte de delete |
 | P2 | PR-uri vechi, prototype/vnext și verticale colocate | pierdere de control/scope; analizează independent fără merge sau ștergere automată |
 | P2 | status Drive append-heavy, header/version stale | boot cost și autoritate confuză; compactare numai cu snapshot și delta verificată |
-| P2 | Public Sync actualizează updated_at la fiecare reconciliere; state lead_published_at/hash păstrează valori de dinainte de reconcile | idempotency și semantică metadata incompletă; verifică diff repetat fără delta, apoi curăță în mecanismul existent fără scheduler nou |
+| RESOLVED | receipt lead_published_at/hash proveneau dinainte de reconcile | #54 recalculează hash-ul fișierului persistat și lead publication date/null; regresii pentru current și zero-current PASS; vezi 09 |
+| P2 | Public Sync actualizează updated_at la fiecare reconciliere; fallback-uri de provenance folosesc ora execuției | idempotency incompletă; verifică diff repetat și TTL înainte de curățare, fără scheduler nou; #54 nu rezolvă churn-ul |
 
 Nu sunt ascunse ca PASS global rezultatele locale ale guard-urilor. Nu există dovadă de writer neînregistrat din scanarea existentă; există posibilitate demonstrată de suprapunere între writeri înregistrați. Nu s-a introdus un mecanism nou pentru a o masca.
