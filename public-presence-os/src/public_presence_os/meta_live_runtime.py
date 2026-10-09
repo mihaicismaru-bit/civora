@@ -527,7 +527,32 @@ class MetaReadRuntime:
 
     def _get(self, platform: str, path: str, params: Mapping[str, str], token: str) -> dict[str, Any]:
         host = "graph.threads.net" if platform == "THREADS" else "graph.facebook.com"
-        return self.client.get(host=host, path=path, params=params, token=token)
+        try:
+            return self.client.get(host=host, path=path, params=params, token=token)
+        except MetaLiveHold as exc:
+            if "_GRAPH_10" not in exc.reason:
+                raise
+            # Only fixed stage labels cross the diagnostic boundary; never include
+            # tokens, URLs, response messages, query values, or object identifiers.
+            endpoint = path.rsplit("/", 1)[-1]
+            if endpoint == "me" and platform == "FACEBOOK_PAGE":
+                stage = "PAGE_TOKEN_SUBJECT"
+            elif endpoint == self.config.page_id:
+                stage = "PAGE_IDENTITY"
+            elif endpoint == "accounts":
+                stage = "MANAGED_PAGES"
+            elif endpoint == "posts":
+                stage = "PAGE_POSTS"
+            elif endpoint == self.config.ig_user_id:
+                stage = "INSTAGRAM_IDENTITY"
+            elif endpoint == "media":
+                stage = "INSTAGRAM_MEDIA"
+            elif endpoint == "comments":
+                stage = "PAGE_COMMENTS" if platform == "FACEBOOK_PAGE" else "INSTAGRAM_COMMENTS"
+            else:
+                stage = "OTHER_READ"
+            suffix = exc.reason.removeprefix("HOLD_META_")
+            raise MetaLiveHold(f"HOLD_META_STAGE_{stage}_{suffix}") from None
 
     def sync_once(self) -> SyncSummary:
         if not self.config.kill_switch_engaged or self.config.live_write_enabled:
