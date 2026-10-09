@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "generatedAt": "2026-10-09T02:25:43.053900+00:00",
+  "generatedAt": "2026-10-09T09:27:51.412553+00:00",
   "policy": {
     "purpose": "record-level-material-change-resolution",
     "failClosed": true,
@@ -11,7 +11,7 @@
   },
   "summary": {
     "candidateCount": 1,
-    "unresolvedCount": 0,
+    "unresolvedCount": 1,
     "publishableMaterialFactCount": 0
   },
   "items": [
@@ -20,9 +20,9 @@
       "sourceTier": "T1",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
       "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-      "fingerprint": "6bdb13c66051ed3617aeac05238ad2827d587e0c41b960a4f17c2b103dbbf607",
-      "observedAt": "2026-10-09T02:24:43.816336+00:00",
-      "status": "RESOLVED",
+      "fingerprint": "f8b102e2555103a814847fcaf43debba5886667e48f431dd5aae40512b7c5d46",
+      "observedAt": "2026-10-09T09:26:48.405067+00:00",
+      "status": "OPEN",
       "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
       "blockedFactClasses": [
         "deadline",
@@ -32,24 +32,10 @@
         "beneficiaries",
         "material_call_status"
       ],
-      "requiresReconciliation": false,
+      "requiresReconciliation": true,
       "publishMaterialFacts": false,
-      "materialFactAction": "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED",
-      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED",
-      "resolutionType": "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT",
-      "resolvedAt": "2026-10-09T02:25:43.053900+00:00",
-      "dedicatedSnapshotPublishable": true,
-      "resolutionEvidence": {
-        "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-        "sourceFingerprint": "6bdb13c66051ed3617aeac05238ad2827d587e0c41b960a4f17c2b103dbbf607",
-        "snapshotFingerprint": "957a86316cb0b3205614493ba7772fe7d45af1a889ccf1d1ae76137ab8ecf755",
-        "rowCount": 7,
-        "interventions": [
-          "DR-12",
-          "DR-14",
-          "DR-18"
-        ]
-      }
+      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
     }
   ]
 }
