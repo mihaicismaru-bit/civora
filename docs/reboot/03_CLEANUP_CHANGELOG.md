@@ -37,4 +37,6 @@ Continuare 9 octombrie 2026: [PR public #53](https://github.com/mihaicismaru-bit
 
 Rollback #53: revert normal prin PR; Public Sync rămâne disponibil. Nu a fost necesar rollback. Nu s-a dezactivat nicio cale activă în această continuare.
 
+Predarea follow-up-ului: [PR CIVORA #1370](https://github.com/mihaicismaru-bit/civora/pull/1370), commit inițial de documentare `f5c9792d7dd64f6cfac5ddde43378511ac15f427`; numai docs/reboot, fără cod operațional.
+
 Revert PR #51 prin branch/PR; enable pentru ID-urile orfane conform receipts; recuperare Git din bundle în director nou. Nu rescrie main. Starea externă se verifică independent după rollback. Nu s-a aplicat rollback deoarece nu a fost identificată o regresie a patch-ului la testele executate.
