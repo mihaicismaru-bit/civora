@@ -1,0 +1,9 @@
+# VÂLCEA CLAR — Reset 2026, Faza 0
+
+Audit realizat la 9 octombrie 2026. Citește 00 → 07. Acest director documentează infrastructura existentă și limitele verificării; nu definește arhitectura următoare.
+
+Inventarul detaliat este în `evidence/file_inventory.csv` și `workflow_inventory.csv`. Coloanele de dependențe/referințe sunt indicii statice, nu dovada exhaustivă a execuției. `INVESTIGATE` înseamnă că utilizarea sau proprietarul exact nu au fost demonstrate. Nu autorizează ștergerea.
+
+`preservation_sha256.csv` identifică fișierele baseline prin SHA-256. CSV-ul acoperă ambele repository-uri; inventarul clasificat acoperă VÂLCEA CLAR, LOCAL NEWS OS, toate workflow-urile CIVORA și proiecția publică. Celelalte verticale CIVORA sunt inventariate la nivel de componente și workflow-uri, fără audit semantic complet.
+
+Rapoartele publice conțin numai identificatori tehnici, referințe și dovezi fără credențiale. Canonul privat din Drive este referențiat, nu copiat integral în repository-ul public. Scripturile temporare folosite pentru audit nu sunt mecanisme de producție și nu sunt adăugate în repo.

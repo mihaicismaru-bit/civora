@@ -1,0 +1,21 @@
+# 05 — Datorie tehnică rămasă
+
+| Prioritate | Problemă demonstrată / limită | Impact și următorul control |
+|---|---|---|
+| P0 | Live Newsroom, Editions și Local Life scriu scope runtime suprapus cu concurrency diferită | risc stale overwrite; dovedește single-writer per resursă și tranzacția câștigătoare înainte de dezactivare |
+| P0 | feed derivat conține încă 1 story, manifest CURRENT=0 | defect semantic/proiecție; manifestul a corectat proiecția publică local, dar upstream trebuie reconciliat prin writer existent |
+| RESOLVED | livrarea zero-current era blocată de reconciliator și teste UX | #51 + #52, Public Sync 37877613582 și readback independent confirmă zero-current + 91 rute |
+| P1 | Pages manual și Public Sync au grupuri de concurrency diferite | cale de override manual; nu se oprește înainte de evaluarea rolului de recovery |
+| P1 | 4 Vercel projects, deployments 403, cron/alias necunoscut | inventar extern incomplet; acces read-only pentru deployments/domains/cron și verificarea proprietarului |
+| P1 | scheduler ChatGPT cloud neenumerabil din sesiune | writer/orchestrator extern enable-state necunoscut; inventar prin suprafața autorizată disponibilă ownerului |
+| P1 | Local Life near-term verificări vechi / public lag inițial | utilitate stale; respectă TTL/fail-closed, fără umplerea golurilor cu date inventate |
+| P1 | resolver UNROUTED/NO_PRIMARY_MATCH în status istoric recent | editorial yield insuficient; cercetare target claim-level și dispositions explicite |
+| P1 | secrete/state externe nu sunt în checkpoint Git; backup Drive complet netestat | recuperare globală nedemonstrată; fără destructive cleanup extern |
+| P2 | 142 workflow-uri VÂLCEA, multe checks paralele/fine-grained | compute și complexity; măsoară output/consumatori și consolidatează ulterior numai după dovezi |
+| P2 | 423 fișiere generate clasificate REFACTOR LATER, stări în Git | churn și dualitate de stare; păstrează până la regenerare exactă/LKG |
+| P2 | 1002 fișiere clasificate INVESTIGATE | dead-code audit static incomplet; import graph + dispatch/manual consumers + artefacte recente înainte de delete |
+| P2 | PR-uri vechi, prototype/vnext și verticale colocate | pierdere de control/scope; analizează independent fără merge sau ștergere automată |
+| P2 | status Drive append-heavy, header/version stale | boot cost și autoritate confuză; compactare numai cu snapshot și delta verificată |
+| P2 | Public Sync actualizează updated_at la fiecare reconciliere; state lead_published_at/hash păstrează valori de dinainte de reconcile | idempotency și semantică metadata incompletă; verifică diff repetat fără delta, apoi curăță în mecanismul existent fără scheduler nou |
+
+Nu sunt ascunse ca PASS global rezultatele locale ale guard-urilor. Nu există dovadă de writer neînregistrat din scanarea existentă; există posibilitate demonstrată de suprapunere între writeri înregistrați. Nu s-a introdus un mecanism nou pentru a o masca.
