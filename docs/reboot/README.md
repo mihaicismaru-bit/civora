@@ -7,3 +7,6 @@ Inventarul detaliat este în `evidence/file_inventory.csv` și `workflow_invento
 `preservation_sha256.csv` identifică fișierele baseline prin SHA-256. CSV-ul acoperă ambele repository-uri; inventarul clasificat acoperă VÂLCEA CLAR, LOCAL NEWS OS, toate workflow-urile CIVORA și proiecția publică. Celelalte verticale CIVORA sunt inventariate la nivel de componente și workflow-uri, fără audit semantic complet.
 
 Rapoartele publice conțin numai identificatori tehnici, referințe și dovezi fără credențiale. Canonul privat din Drive este referențiat, nu copiat integral în repository-ul public. Scripturile temporare folosite pentru audit nu sunt mecanisme de producție și nu sunt adăugate în repo.
+# Actualizare de stabilizare
+
+[08 — Ownership follow-up](08_OWNERSHIP_FOLLOWUP.md): recovery Pages corectat, inventar Vercel recuperat, matrice writeri extinsă și limite restante.

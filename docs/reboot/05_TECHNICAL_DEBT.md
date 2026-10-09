@@ -2,11 +2,11 @@
 
 | Prioritate | Problemă demonstrată / limită | Impact și următorul control |
 |---|---|---|
-| P0 | Live Newsroom, Editions și Local Life scriu scope runtime suprapus cu concurrency diferită | risc stale overwrite; dovedește single-writer per resursă și tranzacția câștigătoare înainte de dezactivare |
+| P0 | runtime suprapus: Newsroom/UX/metadata, Editions, Local Life, Recovery, Social media și rollback | risc stale overwrite; matrice extinsă în 08; dovedește ownership și tranzacția câștigătoare înainte de dezactivare |
 | P0 | feed derivat conține încă 1 story, manifest CURRENT=0 | defect semantic/proiecție; manifestul a corectat proiecția publică local, dar upstream trebuie reconciliat prin writer existent |
 | RESOLVED | livrarea zero-current era blocată de reconciliator și teste UX | #51 + #52, Public Sync 37877613582 și readback independent confirmă zero-current + 91 rute |
-| P1 | Pages manual și Public Sync au grupuri de concurrency diferite | cale de override manual; nu se oprește înainte de evaluarea rolului de recovery |
-| P1 | 4 Vercel projects, deployments 403, cron/alias necunoscut | inventar extern incomplet; acces read-only pentru deployments/domains/cron și verificarea proprietarului |
+| RESOLVED | Pages manual omitea reconcilierea și avea concurrency diferită | #53 refolosește readiness/reconcile și grupul Public Sync; run 37901247379 + readback PASS; ambele căi păstrate |
+| P1 | Vercel cron și Git linkage necunoscute; erori ale contextului explicit | follow-up a recuperat 4 proiecte / 6 deploymenturi / 8 aliasuri în același cont; răspunsurile omit cron și gitSource, deci acestea rămân INVESTIGATE |
 | P1 | scheduler ChatGPT cloud neenumerabil din sesiune | writer/orchestrator extern enable-state necunoscut; inventar prin suprafața autorizată disponibilă ownerului |
 | P1 | Local Life near-term verificări vechi / public lag inițial | utilitate stale; respectă TTL/fail-closed, fără umplerea golurilor cu date inventate |
 | P1 | resolver UNROUTED/NO_PRIMARY_MATCH în status istoric recent | editorial yield insuficient; cercetare target claim-level și dispositions explicite |

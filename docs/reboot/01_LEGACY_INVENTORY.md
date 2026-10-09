@@ -19,7 +19,7 @@ Inventar per fișier: `evidence/file_inventory.csv`, cu `path/id | purpose | own
 
 Calea editorială existentă: surse/ingest/semnale → primary verification/manual intake → Fact Kernel Builder → facts_registry → Live Newsroom/editorial writer/integrity → manifest/runtime → Public Sync în repository-ul public → reconciliere/currentness/Local Life → build/metadata/verify → Pages → readback → persistare proiecție. Socialul are adaptoare și lane-uri independente; SITE PASS precedă distribuția conform canonului.
 
-Public Sync: `1,16,31,46 * * * *`; workflow-ul manual deploy-pages poate livra tot în Pages, dar are alt grup de concurență (`pages` față de `valcea-clar-civora-public-sync`). Manualul nu a fost executat.
+Public Sync: `1,16,31,46 * * * *`. Baseline: deploy-pages manual avea alt grup (`pages`). După #53, ambele folosesc `valcea-clar-civora-public-sync`, fără cancel-in-progress; calea manuală a fost executată și verificată prin readback (08).
 
 ## Writeri și proprietate
 
@@ -28,7 +28,7 @@ Public Sync: `1,16,31,46 * * * *`; workflow-ul manual deploy-pages poate livra t
 | facts_registry | Fact Kernel Builder înregistrat | gate existent single-writer |
 | site/runtime, editions, current_edition | Live Newsroom și Autonomous Editions | ambele înregistrate; grupuri de concurență distincte, scope suprapus |
 | site/runtime/unde-iesim | Local Life Sync și writerii runtime mai largi | snapshot copy/retry poate suprascrie o proiecție mai nouă |
-| Pages public | Public Sync; deploy-pages manual | două căi existente, serializare comună nedemonstrată |
+| Pages public | Public Sync; deploy-pages manual | două căi păstrate, grup comun după #53; deployment manual și readback PASS |
 | Facebook/Instagram/TikTok | Social Publication Engine | guard existent PASS; nu s-a publicat social în audit |
 | Threads | adaptor Threads înregistrat | lane separat; delivery live nu este reverificată în Faza 0 |
 | X/LinkedIn/YouTube/Telegram/WhatsApp | OUTBOX_ONLY în registry | preview/outbox nu sunt livrare |
@@ -41,7 +41,7 @@ Rolurile registrelor de surse sunt în `source_control_map.json`: politica edito
 
 Workerul ChatGPT orar „Vâlcea Clar Redacție” este descris în canon/receipts ca orchestrator extern. Nu există în această sesiune API de enumerare a schedulerului ChatGPT clasic; înregistrarea live/enable-state nu este demonstrată. Directorul local Codex automations a avut zero intrări observabile; nu dovedește absența automatizărilor cloud.
 
-Vercel listează patru proiecte: valcea-clar, valcea-clar-live, valcea-clar-autonom, valcea-clar-editor-probe. Citirea deploymenturilor returnează 403; CLI vercel nu este disponibil. Cronuri, aliasuri, deployment activ și rol operațional rămân INVESTIGATE. Nu s-a oprit niciun proiect.
+Baseline: Vercel lista patru proiecte, dar deploymenturile răspundeau 403. Follow-up [08_OWNERSHIP_FOLLOWUP.md](08_OWNERSHIP_FOLLOWUP.md) a recuperat deploymenturile/domeniile/aliasurile prin contextul implicit al connectorului, cu aceleași ID-uri și accountId: 4 proiecte, 6 deploymenturi, 8 aliasuri. Cronurile cloud și Git linkage rămân nedemonstrate; niciun proiect nu a fost oprit. Același follow-up extinde matricea writerilor CIVORA și consemnează serializarea comună Pages după #53.
 
 Inventarul de branches și PR-uri deschise este capturat în `evidence/open_prs.json` și `branches.json`. Vechimea nu justifică închidere/ștergere; toate au rămas păstrate.
 
