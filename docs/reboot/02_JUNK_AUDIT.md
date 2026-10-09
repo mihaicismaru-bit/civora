@@ -23,3 +23,9 @@ Nu s-a adăugat un workflow, framework, writer, serviciu cloud, bază de date, s
 Testele de preview, dependențele și documentația fără referințe directe nu sunt declarate „junk” automat. Referințele statice incomplete sunt o limită explicită a inventarului. Consolidarea celor 142 workflow-uri VÂLCEA necesită verificarea output-ului și a consumatorilor înaintea opririi.
 
 Mentenanță suplimentară #54: KEEP reconciliatorul existent, corectat receipt hash/lead date. Nicio ștergere sau dezactivare suplimentară. Churn-ul timestampurilor rămâne REFACTOR LATER, fără a masca expirarea TTL.
+
+## Continuare orară: Local Life
+
+DISABLE efectuat asupra comportamentului snapshot/copy complet din Local Life Sync (#1374), înlocuit cu regenerarea existentă după fetch. Nu s-a dezactivat writerul sau o cale activă. Generatori și ruta canonică S5 KEEP; gap public S5 INVESTIGATE. Nicio ștergere editorială.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).

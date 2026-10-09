@@ -14,3 +14,9 @@ Acesta este un brief, nu o soluție aleasă. Faza 1 nu a început.
 10. Cum separăm identitatea receipt-ului, ceasul de execuție și expirarea TTL? #54 demonstrează că hash-ul trebuie să descrie bytes publicați după reconciliere; stabilizarea timestampurilor nu trebuie să ascundă o schimbare reală de eligibility.
 
 Artefacte necesare înainte de alegere: matrice completă resource→writer→trigger→commit→deploy→receipt; inventar scheduler extern/cloud; probe de regen/recovery; baseline cost/output; riscuri și tradeoff pentru fiecare alternativă. Canonul editorial este invariant; CIVORA actual nu este cerință.
+
+## Continuare orară: Local Life
+
+Întrebare pentru cercetarea ulterioară: ce contract permite derivarea fiecărei proiecții din HEAD-ul sursă actual și păstrează ownership-ul copil la retry? #1374 demonstrează o corecție locală în mecanismul existent, fără alegere arhitecturală. Ce contract de livrare lipsește pentru suprafața S5 deja canonică? Nu se începe reconstrucția.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).

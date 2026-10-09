@@ -32,3 +32,9 @@ Baseline public are 91 articole; fixul le păstrează în proiecție/arhivă. In
 Folderul Drive conține separat HQ/control, blockers, engine pointers, newsroom/articles/editions, product/site, sources/local intelligence, Local Life, media, distribution, hourly receipts și archive. Listările live sunt capturate în `drive_reference_inventory.json`; lista hourly este bounded și nu este declarată backup complet. Research-ul, agenda DJC și legacy superseded sunt păstrate. Fișierele sincronizate `sources/` nu au fost editate.
 
 Preservation hash verifică identitatea fișierelor Git; nu dovedește backup complet Drive/social/cloud. Nicio ștergere ireversibilă nu este justificată până la recuperare verificată pentru resursa respectivă.
+
+## Continuare orară: Local Life
+
+Readback înainte/după #1374: 36 ID-uri canonice Local Life păstrate, 91 ID-uri/titluri publice baseline păstrate, ruta canonică S5 hash neschimbat. Proiecțiile generate au fost actualizate de generatorii existenți; nu pretindem bytes identici. Public HEAD neschimbat; S5 public 404 preexistent. Probe în 10/evidence.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).

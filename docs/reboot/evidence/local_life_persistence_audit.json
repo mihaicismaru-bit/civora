@@ -1,0 +1,105 @@
+{
+  "code_pr": "https://github.com/mihaicismaru-bit/civora/pull/1374",
+  "code_commit": "77337bc8ea4f26b3bfc192a40b7b347a524c05ce",
+  "merge_commit": "e461b43a0b6525841d4d22e57b6d52ad88a91836",
+  "operational_run": {
+    "conclusion": "success",
+    "headSha": "e461b43a0b6525841d4d22e57b6d52ad88a91836",
+    "jobs": [
+      {
+        "completedAt": "2026-10-09T10:25:03Z",
+        "conclusion": "success",
+        "databaseId": 113776754572,
+        "name": "sync",
+        "startedAt": "2026-10-09T10:24:15Z",
+        "status": "completed",
+        "steps": [
+          {
+            "completedAt": "2026-10-09T10:24:16Z",
+            "conclusion": "success",
+            "name": "Set up job",
+            "number": 1,
+            "startedAt": "2026-10-09T10:24:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T10:24:53Z",
+            "conclusion": "success",
+            "name": "Run actions/checkout@v6",
+            "number": 2,
+            "startedAt": "2026-10-09T10:24:16Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T10:24:53Z",
+            "conclusion": "success",
+            "name": "Run actions/setup-python@v6",
+            "number": 3,
+            "startedAt": "2026-10-09T10:24:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T10:24:57Z",
+            "conclusion": "success",
+            "name": "Validate Local Life event writer",
+            "number": 4,
+            "startedAt": "2026-10-09T10:24:53Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T10:25:00Z",
+            "conclusion": "success",
+            "name": "Persist Local Life registries and complete route tree",
+            "number": 5,
+            "startedAt": "2026-10-09T10:24:57Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T10:25:00Z",
+            "conclusion": "success",
+            "name": "Post Run actions/setup-python@v6",
+            "number": 9,
+            "startedAt": "2026-10-09T10:25:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T10:25:00Z",
+            "conclusion": "success",
+            "name": "Post Run actions/checkout@v6",
+            "number": 10,
+            "startedAt": "2026-10-09T10:25:00Z",
+            "status": "completed"
+          },
+          {
+            "completedAt": "2026-10-09T10:25:00Z",
+            "conclusion": "success",
+            "name": "Complete job",
+            "number": 11,
+            "startedAt": "2026-10-09T10:25:00Z",
+            "status": "completed"
+          }
+        ],
+        "url": "https://github.com/mihaicismaru-bit/civora/actions/runs/37917372566/job/113776754572"
+      }
+    ],
+    "status": "completed",
+    "url": "https://github.com/mihaicismaru-bit/civora/actions/runs/37917372566"
+  },
+  "operational_commit": "b8b302b21bc54bcb7906e7a42ffbaf99be9fc16f",
+  "operational_paths": [
+    "valcea-clar/editorial/local_life_events.json",
+    "valcea-clar/site/runtime/unde-iesim/cinema/index.html",
+    "valcea-clar/site/runtime/unde-iesim/index.html",
+    "valcea-clar/site/runtime/unde-iesim/sport/index.html"
+  ],
+  "regressions": {
+    "material_failures_before": 6,
+    "tests_after": 2,
+    "result": "PASS",
+    "seconds": 15.575
+  },
+  "essential_guards": "site ownership / strict automation surface / social ownership PASS",
+  "pr_checks": "5 PASS",
+  "active_delivery_paths_disabled": 0,
+  "verdict": "PARTIAL"
+}

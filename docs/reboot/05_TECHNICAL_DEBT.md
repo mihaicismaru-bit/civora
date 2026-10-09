@@ -20,3 +20,9 @@
 | P2 | Public Sync actualizează updated_at la fiecare reconciliere; fallback-uri de provenance folosesc ora execuției | idempotency incompletă; verifică diff repetat și TTL înainte de curățare, fără scheduler nou; #54 nu rezolvă churn-ul |
 
 Nu sunt ascunse ca PASS global rezultatele locale ale guard-urilor. Nu există dovadă de writer neînregistrat din scanarea existentă; există posibilitate demonstrată de suprapunere între writeri înregistrați. Nu s-a introdus un mecanism nou pentru a o masca.
+
+## Continuare orară: Local Life
+
+REZOLVAT pentru Local Life Sync: snapshot stale după fetch/retry și staging întreg arbore; #1374 cu două regresii. P1 INVESTIGATE: S5 /unde-iesim/verificat/ canonic există, public 404 înainte/după. Rămân scope-urile comune ale altor writeri, cloud cron și timestamp churn; single-writer global nedemonstrat.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
