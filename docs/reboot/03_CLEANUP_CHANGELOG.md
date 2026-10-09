@@ -52,3 +52,9 @@ Revert PR #51 prin branch/PR; enable pentru ID-urile orfane conform receipts; re
 #1374: commit 77337bc8ea4f26b3bfc192a40b7b347a524c05ce, merge e461b43a0b6525841d4d22e57b6d52ad88a91836. Două regresii concurență PASS, self-test + trei guarduri PASS, cinci CI PASS. Run 37917372566 SUCCESS; persist b8b302b21bc54bcb7906e7a42ffbaf99be9fc16f limitat la patru fișiere deținute. Readback independent și procedura revert selectiv în 10; rollback nefolosit.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+Rulare 11:08 UTC: două scenarii locale Newsroom demonstrează 6 overwrite; 6 rute S5 read-only, 5 public 404. Niciun patch cod sau dispatch extern. Adăugate raport 11 și trei probe; fixture-ul inițial incomplet a fost corectat și exclus din concluzia de overwrite. Scope/rollback în 11.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).

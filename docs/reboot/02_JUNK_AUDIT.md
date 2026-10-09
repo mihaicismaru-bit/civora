@@ -29,3 +29,9 @@ Mentenanță suplimentară #54: KEEP reconciliatorul existent, corectat receipt 
 DISABLE efectuat asupra comportamentului snapshot/copy complet din Local Life Sync (#1374), înlocuit cu regenerarea existentă după fetch. Nu s-a dezactivat writerul sau o cale activă. Generatori și ruta canonică S5 KEEP; gap public S5 INVESTIGATE. Nicio ștergere editorială.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+INVESTIGATE: snapshot Newsroom suprascrie în fixture local fitness/media/UX; nu este șters sau dezactivat. KEEP: active canonice S5, generatori și public delivery. REFACTOR LATER: contractul S5 către public și tranzacția Newsroom. Nicio curățare de producție fără dovezi suplimentare.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).

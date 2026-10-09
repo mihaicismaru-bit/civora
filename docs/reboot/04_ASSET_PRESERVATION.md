@@ -38,3 +38,9 @@ Preservation hash verifică identitatea fișierelor Git; nu dovedește backup co
 Readback înainte/după #1374: 36 ID-uri canonice Local Life păstrate, 91 ID-uri/titluri publice baseline păstrate, ruta canonică S5 hash neschimbat. Proiecțiile generate au fost actualizate de generatorii existenți; nu pretindem bytes identici. Public HEAD neschimbat; S5 public 404 preexistent. Probe în 10/evidence.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+Verificare curentă: 36 evenimente canonice și 91 ID-uri/titluri publice păstrate, receipt valid, hash S5 neschimbat. Șase pagini S5 canonice sunt active utile KEEP chiar dacă cinci rute publice răspund 404. Niciun conținut nou sau design schimbat.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).

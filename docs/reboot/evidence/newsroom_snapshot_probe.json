@@ -1,0 +1,52 @@
+{
+  "scope": "private local Git remotes only; no production dispatch",
+  "workflow": "valcea-clar-newsroom-live.yml",
+  "baseline_civora_head": "830e18d6e75cfb85c90b850e6c9b5f205d3b5847",
+  "fixture_changes": "/tmp relocated under fixture .git; post-push exporter stubbed, copy/persistence/retry unchanged",
+  "result": "RISK_REPRODUCED",
+  "cases": [
+    {
+      "case": "main_advanced_before_fetch",
+      "shell_completed": true,
+      "observations": [
+        {
+          "path": "valcea-clar/site/runtime/unde-iesim/fitness/index.html",
+          "newer_state_preserved": false,
+          "observed": "BASE"
+        },
+        {
+          "path": "valcea-clar/site/runtime/media/social/fixture.txt",
+          "newer_state_preserved": false,
+          "observed": "BASE"
+        },
+        {
+          "path": "valcea-clar/site/public_ux_state.json",
+          "newer_state_preserved": false,
+          "observed": "BASE"
+        }
+      ]
+    },
+    {
+      "case": "rejected_push_retry",
+      "shell_completed": true,
+      "observations": [
+        {
+          "path": "valcea-clar/site/runtime/unde-iesim/fitness/index.html",
+          "newer_state_preserved": false,
+          "observed": "BASE"
+        },
+        {
+          "path": "valcea-clar/site/runtime/media/social/fixture.txt",
+          "newer_state_preserved": false,
+          "observed": "BASE"
+        },
+        {
+          "path": "valcea-clar/site/public_ux_state.json",
+          "newer_state_preserved": false,
+          "observed": "BASE"
+        }
+      ]
+    }
+  ],
+  "production_change": false
+}

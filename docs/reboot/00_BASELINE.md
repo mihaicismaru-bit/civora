@@ -50,3 +50,9 @@ Checkpoint de observație suplimentar, fără înlocuirea baseline-ului: la 9 oc
 Baseline continuare 10:10 UTC: CIVORA 96f3155ba87844e55fb8607d3e1b2fa7a9803779 / public bb1f012cf7ceca9529bf2dda43693c908cca322f. Checkpoint-urile validate rămân valabile. Merge mentenanță e461b43a0b6525841d4d22e57b6d52ad88a91836; commit operațional b8b302b21bc54bcb7906e7a42ffbaf99be9fc16f. Rollback selectiv și probe înainte/după în 10.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+HEAD-uri live: CIVORA 830e18d6e75cfb85c90b850e6c9b5f205d3b5847; public bb1f012cf7ceca9529bf2dda43693c908cca322f. Checkpoint Git existent valabil, recovery extern incomplet. Schimbări în această rulare: numai documentație/probe; rollback prin revert normal.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).

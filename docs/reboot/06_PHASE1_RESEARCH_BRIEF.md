@@ -20,3 +20,9 @@ Artefacte necesare înainte de alegere: matrice completă resource→writer→tr
 Întrebare pentru cercetarea ulterioară: ce contract permite derivarea fiecărei proiecții din HEAD-ul sursă actual și păstrează ownership-ul copil la retry? #1374 demonstrează o corecție locală în mecanismul existent, fără alegere arhitecturală. Ce contract de livrare lipsește pentru suprafața S5 deja canonică? Nu se începe reconstrucția.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+Întrebări fără alegere vNext: cum se păstrează story/decision/event/receipt într-o tranzacție care nu reintroduce starea peer veche? Ce parte din contractul S5 canonic este eligibilă pentru proiecția publică existentă? Nu aplica mirror HTML sau regenerare editorială fără validarea invariantelor.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).

@@ -14,3 +14,5 @@ Rapoartele publice conțin numai identificatori tehnici, referințe și dovezi f
 [09 — Hourly receipt audit](09_HOURLY_RECEIPT_AUDIT.md): receipt hash/lead metadata corectat și surse Vercel inspectate read-only.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md): regenerare după fetch/retry, scope restrâns și probe de păstrare; verdict PARTIAL.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md): overwrite local demonstrat, gap public S5 și limitele schedulerului.
