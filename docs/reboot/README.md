@@ -12,3 +12,5 @@ Rapoartele publice conțin numai identificatori tehnici, referințe și dovezi f
 [08 — Ownership follow-up](08_OWNERSHIP_FOLLOWUP.md): recovery Pages corectat, inventar Vercel recuperat, matrice writeri extinsă și limite restante.
 
 [09 — Hourly receipt audit](09_HOURLY_RECEIPT_AUDIT.md): receipt hash/lead metadata corectat și surse Vercel inspectate read-only.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md): regenerare după fetch/retry, scope restrâns și probe de păstrare; verdict PARTIAL.

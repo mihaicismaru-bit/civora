@@ -25,3 +25,9 @@ Actualizare după „next+”: [08_OWNERSHIP_FOLLOWUP.md](08_OWNERSHIP_FOLLOWUP.
 **STOP după Faza 0.** Nu este autorizată prin acest raport pornirea unui runtime nou sau a unei arhitecturi vNext.
 
 Prima continuare orară: [09_HOURLY_RECEIPT_AUDIT.md](09_HOURLY_RECEIPT_AUDIT.md). #54 integrat și Public Sync 37909884441 SUCCESS; receipt verificat independent în producție, 39 teste PASS, 91 ID-uri/titluri păstrate, zero-current, sitemap exact și rute critice HTTP 200. Sursele Vercel inspectate adaugă dovezi fără a închide cloud cron/Build Output. Verdict PARTIAL; continuarea orară urmărește restanțele Fazei 0 și nu pornește reconstrucția.
+
+## Continuare orară: Local Life
+
+Verdict rămâne **PARTIAL**. #1374 integrat; Local Life persistență corectată și scope restrâns. Două regresii + self-test/guarduri + cinci CI PASS, run 37917372566 SUCCESS. Readback: 36 evenimente canonice și 91 articole păstrate, receipt corect, opt rute HTTP 200; public HEAD neschimbat, livrarea noului commit canonic nu este revendicată. S5 public 404 preexistent documentat. Zero căi active dezactivate. Următoarea acțiune: audit/reproducere locală pentru writerii cu scope larg și contractul de proiecție S5. Detalii/probe în 10. Cron cloud și single-writer global rămân neînchise; STOP după Faza 0.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).

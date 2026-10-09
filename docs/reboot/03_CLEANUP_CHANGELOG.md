@@ -46,3 +46,9 @@ Prima continuare orară: #54 corectează receipt-ul după reconcile, commit `bac
 Predare orară: [PR CIVORA #1373](https://github.com/mihaicismaru-bit/civora/pull/1373), commit inițial de documentare după rebase `52234bd74fb6a4950ceb443f89519f3c351d3443`; numai docs/reboot. Public Sync #54: run 37909884441 SUCCESS și receipt/readback independent PASS.
 
 Revert PR #51 prin branch/PR; enable pentru ID-urile orfane conform receipts; recuperare Git din bundle în director nou. Nu rescrie main. Starea externă se verifică independent după rollback. Nu s-a aplicat rollback deoarece nu a fost identificată o regresie a patch-ului la testele executate.
+
+## Continuare orară: Local Life
+
+#1374: commit 77337bc8ea4f26b3bfc192a40b7b347a524c05ce, merge e461b43a0b6525841d4d22e57b6d52ad88a91836. Două regresii concurență PASS, self-test + trei guarduri PASS, cinci CI PASS. Run 37917372566 SUCCESS; persist b8b302b21bc54bcb7906e7a42ffbaf99be9fc16f limitat la patru fișiere deținute. Readback independent și procedura revert selectiv în 10; rollback nefolosit.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).

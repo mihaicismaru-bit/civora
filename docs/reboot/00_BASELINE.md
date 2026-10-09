@@ -44,3 +44,9 @@ Bundle-urile locale din directorul proiectului `checkpoints/` conțin istoria co
 Rollback-ul tehnic public ar readuce și incidentul zero-current. Se folosește numai dacă apar regresii și după identificarea unui LKG editorial acceptabil. Nu se declară un homepage cu știri reciclate drept LKG factual.
 
 Checkpoint de observație suplimentar, fără înlocuirea baseline-ului: la 9 octombrie 12:16:04 Europe/Bucharest, CIVORA `7ea9bcde83045dfb8b4969ecf57763bd05fcaf11`, public `bb1f012cf7ceca9529bf2dda43693c908cca322f`. Receipt și readback după #54 verificate în `evidence/hourly_public_verification.json`. Rollback-ul #54 folosește revert normal al merge-ului `2d67f1c022eb1305f140dd90cb5df25b5a484999`, fără rescrierea main; bundle-urile inițiale rămân punctele de restaurare Git verificate.
+
+## Continuare orară: Local Life
+
+Baseline continuare 10:10 UTC: CIVORA 96f3155ba87844e55fb8607d3e1b2fa7a9803779 / public bb1f012cf7ceca9529bf2dda43693c908cca322f. Checkpoint-urile validate rămân valabile. Merge mentenanță e461b43a0b6525841d4d22e57b6d52ad88a91836; commit operațional b8b302b21bc54bcb7906e7a42ffbaf99be9fc16f. Rollback selectiv și probe înainte/după în 10.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).

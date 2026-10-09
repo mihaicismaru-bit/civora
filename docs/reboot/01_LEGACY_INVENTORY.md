@@ -48,3 +48,9 @@ Inventarul de branches și PR-uri deschise este capturat în `evidence/open_prs.
 Dependențe: runtime Python 3.12/3.13; Actions checkout/setup/upload/deploy; Pillow în renderer-ele sociale; local-news-os/core; standard-library HTTP/JSON/zoneinfo. Nu există manifest central de dependențe VÂLCEA. Nu s-a eliminat nicio dependență fără probă. tzdata a fost instalat numai în mediul Windows de audit pentru testare, fără schimbare de dependențe de producție.
 
 Prima rulare orară a inspectat sursele ultimelor patru deploymenturi Vercel: numai fișiere statice expuse și un vercel.json fără crons. Configurația Build Output și cloud cron rămân INVESTIGATE, conform 09. Nu s-au schimbat workflow-urile/scripturile writerilor CIVORA între confirmarea ownerului și HEAD-ul inițial al acestei rulări. #54 corectează exclusiv receipt-ul reconciliatorului public existent.
+
+## Continuare orară: Local Life
+
+Local Life Sync persistă acum exclusiv registry + hub/sport/cinema/meniul-zilei/fitness și regenerează după fiecare fetch. Scope-ul celorlalți writeri rămâne deschis. Matricea clasificată și dovezile sunt în 10.
+
+[10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
