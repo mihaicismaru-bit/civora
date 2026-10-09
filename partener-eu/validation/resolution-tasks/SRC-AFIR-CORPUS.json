@@ -3,20 +3,27 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "28ea11d0cf5d21b5b562ff3425a42842613e0a4423031d4d0e1a6a3e8e32777a",
+  "candidate_fingerprint": "5c9e5b662c9d3074c9dff3980e5765958ca54c92f52338f16fb35c376c42614a",
   "previous_candidate_fingerprint": "28ea11d0cf5d21b5b562ff3425a42842613e0a4423031d4d0e1a6a3e8e32777a",
-  "candidate_count": 1,
-  "material_signal_count": 1,
+  "candidate_count": 2,
+  "material_signal_count": 2,
   "candidates": [
     {
       "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "f8b102e2555103a814847fcaf43debba5886667e48f431dd5aae40512b7c5d46",
+      "sha256": "258ee449b22b1b53b88b8f200d1b88615e4d5ffea600109859867290933de9c2",
+      "material_change_candidate": true,
+      "material_fact_action": "RESOLUTION_TASK_ONLY"
+    },
+    {
+      "url": "https://www.afir.ro/info-la-zi/",
+      "title": "Info la zi",
+      "sha256": "a37828e5816ef6131923e754dcad36f856419ed7b7511743eb6b12e04a06ba9b",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     }
   ],
-  "auth_dependency_count": 28,
+  "auth_dependency_count": 29,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -213,11 +220,18 @@
       "status": "AUTH_OR_ACCESS_DEPENDENT",
       "materialFactAction": "NONE",
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Finformatii-sesiune-energie-regenerabila-solicitanti-publici%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/info-la-zi/informatii-sesiune-energie-regenerabila-solicitanti-publici/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     }
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-10-09T09:27:51.412553+00:00",
+  "last_observed_at": "2026-10-09T16:28:02.552467+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
