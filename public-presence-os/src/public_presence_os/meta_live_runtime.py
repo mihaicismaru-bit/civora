@@ -530,7 +530,8 @@ class MetaReadRuntime:
         try:
             return self.client.get(host=host, path=path, params=params, token=token)
         except MetaLiveHold as exc:
-            if "_GRAPH_10" not in exc.reason:
+            graph_code = exc.reason.partition("_GRAPH_")[2].partition("_")[0]
+            if graph_code != "10":
                 raise
             # Only fixed stage labels cross the diagnostic boundary; never include
             # tokens, URLs, response messages, query values, or object identifiers.
