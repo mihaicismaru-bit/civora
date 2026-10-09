@@ -2,19 +2,69 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-10-09T22:20:38+03:00",
+  "generated_at": "2026-10-10T02:22:11+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-10-09T22:19:01+03:00",
-  "task_count": 82,
+  "queue_generated_at": "2026-10-10T02:20:43+03:00",
+  "task_count": 70,
   "primary_match_count": 0,
-  "no_match_count": 34,
-  "unrouted_count": 48,
+  "no_match_count": 27,
+  "unrouted_count": 43,
   "target_count": 19,
   "targets_ok": 15,
   "results": [
+    {
+      "signal_id": "7bad9d6864526db98f9a44d6",
+      "signal_title": "O școală nouă și încă o grădiniță, printre investițiile pregătite de Ionel Vlădulescu la Budești",
+      "signal_url": "https://www.impactreal.ro/2026/10/09/o-scoala-noua-si-inca-o-gradinita-printre-investitiile-pregatite-de-ionel-vladulescu-la-budesti/",
+      "signal_publisher": "Impact Real",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-09T23:37:25+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "44c9319761ef423ee5a1f0c9",
+      "signal_title": "Sibianca Dominique Simionescu a urcat pe scena „Vocea României” și a cucerit trei jurați. Tudor Chirilă: „Eu nu m-am întors la vocea ta. M-am întors la nebunia ta”",
+      "signal_url": "https://www.turnulsfatului.ro/2026/10/09/sibianca-dominique-simionescu-a-urcat-pe-scena-vocea-romaniei-si-a-cucerit-trei-jurati-tudor-chirila-eu-nu-m-am-intors-la-vocea-ta-m-am-intors-la-nebunia-ta/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-10-09T22:35:41+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
     {
       "signal_id": "b9afc63d6e955472a3cab932",
       "signal_title": "ACUM – Incendiu de pădure în zona Mănăstirii Boia, în Câineni. Pompierii intervin la trei focare",
@@ -1004,121 +1054,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "e70d51e7cd62d362148c52dc",
-      "signal_title": "Lecție de siguranță pentru elevii din Râmnicu Vâlcea",
-      "signal_url": "https://jurnalulolteniei.ro/lectie-de-siguranta-pentru-elevii-din-ramnicu-valcea/",
-      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-08T10:29:31+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "9034539027ecc8759c0902ab",
-      "signal_title": "Dosar penal după ce au reparat băncile din primărie",
-      "signal_url": "https://jurnalulolteniei.ro/dosar-penal-dupa-ce-au-reparat-bancile-din-primarie/",
-      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
-      "signal_published_at": "2026-10-08T10:17:28+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "07b84a6fc8a1ffcb0645f6c3",
-      "signal_title": "Daniela Ionele, profesor Merito de la Agnita, mesaje emoționante despre cum elevii din școlile tehnologice au fost „uitați” de Ziua Educației: „Învățarea unei meserii cere timp și exercițiu”",
-      "signal_url": "https://www.turnulsfatului.ro/2026/10/08/daniela-ionele-profesor-merito-de-la-agnita-mesaje-emotionante-despre-cum-elevii-din-scolile-tehnologice-au-fost-uitati-de-ziua-educatiei-invatarea-unei-meserii-cere-timp/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-08T10:04:16+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "774dc064801cbf52dfc5bc99",
-      "signal_title": "Reținut pentru spălare de bani după o fraudă bancară",
-      "signal_url": "https://jurnalulolteniei.ro/retinut-pentru-spalare-de-bani-dupa-o-frauda-bancara/",
-      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-08T09:53:15+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "3fc8472996fe4497f0129519",
       "signal_title": "Trei zile prin Mălaia, cu aparatul foto în mână. Fotografii din patru orașe vin să descopere Valea Lotrului",
       "signal_url": "https://seintamplainvalcea.ro/2026/10/08/trei-zile-prin-malaia-cu-aparatul-foto-in-mana-fotografii-din-patru-orase-vin-sa-descopere-valea-lotrului/",
@@ -1129,33 +1064,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "b559fb4ab44361c32334fec5",
-      "signal_title": "Craiova: Urmărit internațional, prins de polițiști",
-      "signal_url": "https://jurnalulolteniei.ro/craiova-urmarit-international-prins-de-politisti-2/",
-      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-08T09:37:42+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "d12bae4d191b0a2bacc00372",
@@ -1216,18 +1124,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "b040fc96c07a3b6f035fe27e",
-      "signal_title": "Taxiuri verificate la Craiova, 13 sancțiuni de peste 30.000 de lei",
-      "signal_url": "https://jurnalulolteniei.ro/taxiuri-verificate-la-craiova-13-sanctiuni-de-peste-30-000-de-lei/",
-      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
-      "signal_published_at": "2026-10-08T09:27:04+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "9a3dc5e434a62529e469dc05",
@@ -1339,18 +1235,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "33f8755ee9ee2bc382d4be48",
-      "signal_title": "Mamografii gratuite pentru femeile din Dolj și din țară",
-      "signal_url": "https://jurnalulolteniei.ro/mamografii-gratuite-pentru-femeile-din-dolj-si-din-tara/",
-      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
-      "signal_published_at": "2026-10-08T08:46:37+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "3d7d26cfc1dcd35d2d9fcb59",
       "signal_title": "FOTO – A murit femeia rănită grav în accidentul de la Goranu – DN 7. Un camion al Armatei, implicat în impact",
       "signal_url": "https://seintamplainvalcea.ro/2026/10/08/foto-a-murit-femeia-ranita-grav-in-accidentul-de-la-goranu-dn-7-un-camion-al-armatei-implicat-in-impact/",
@@ -1378,44 +1262,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "6edc9192188d0cd74b913afc",
-      "signal_title": "„O societate educată gândește mai critic, este greu de manipulat”. Discurs manifest al lui Sorin Cristea, directorul general al CONA",
-      "signal_url": "https://www.turnulsfatului.ro/2026/10/08/o-societate-educata-gandeste-mai-critic-este-greu-de-manipulat-discurs-manifest-al-lui-sorin-cristea-directorul-general-al-cona/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-08T08:22:56+03:00",
-      "verification_route_id": "education",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "ccd-valcea-noutati",
-            "name": "Casa Corpului Didactic Vâlcea",
-            "url": "https://ccdvl.ro/category/noutati/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "isj-valcea-comunicate",
-            "name": "Inspectoratul Școlar Județean Vâlcea",
-            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 3
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "ac131068efcc9afb202c843e",
       "signal_title": "Dorinel Boncan vrea să le dea celor plecați motive să revină la Drăgoești: un cartier nou, terenuri pentru case și utilități pentru cei care vor să deschidă afaceri",
       "signal_url": "https://www.impactreal.ro/2026/10/07/dorinel-boncan-vrea-sa-le-dea-celor-plecati-motive-sa-revina-la-dragoesti-un-cartier-nou-terenuri-pentru-case-si-utilitati-pentru-cei-care-vor-sa-deschida-afaceri/",
@@ -1426,94 +1272,6 @@
       "publication_authority": "NONE",
       "material_fact_ready": false,
       "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "e82e5e017b49e210730d01f8",
-      "signal_title": "FOTO – Aparatură de aproape 3,5 milioane de euro pentru spitalele din Vâlcea. Ce a ajuns la Mihăești și la Județean",
-      "signal_url": "https://seintamplainvalcea.ro/2026/10/07/foto-aparatura-de-aproape-35-milioane-de-euro-pentru-spitalele-din-valcea-ce-a-ajuns-la-mihaesti-si-la-judetean/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-10-07T21:03:26+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "f9591b16682860ac1305b854",
-      "signal_title": "Continuare about SJU Vâlcea și Spitalul din Mihăești, dotate cu aparatură medicală performantă din bani europeni!",
-      "signal_url": "https://www.curierul.ro/sju-valcea-si-spitalul-din-mihaesti-dotate-cu-aparatura-medicala-performanta-din-bani-europeni/",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-07T20:36:28+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "1812ee3947bc14758215a45f",
-      "signal_title": "Continuare about SJU Vâlcea și Spitalul din Mihăești, dotate cu aparatură medicală performantă din bani europeni!",
-      "signal_url": "https://www.curierul.ro/sju-valcea-si-spitalul-din-mihaesti-dotate-cu-aparatura-medicala-performanta-din-bani-europeni/",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-07T20:36:28+03:00",
-      "verification_route_id": "health",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "dsp-valcea-anunturi",
-            "name": "Direcția de Sănătate Publică Vâlcea",
-            "url": "https://www.aspjvalcea.ro/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "spital-horezu-noutati",
-            "name": "Spitalul Orășenesc Horezu",
-            "url": "https://spitalulhorezu.ro/blog/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
     },
     {
       "signal_id": "0a36b3e3826bc4a569ffddd6",
@@ -1683,33 +1441,6 @@
       "signal_publisher": "Se întâmplă în Vâlcea",
       "signal_tier": "T2",
       "signal_published_at": "2026-10-07T13:06:53+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "cffe63057abde5e004662e11",
-      "signal_title": "FOTO – ACCIDENT cu trei autovehicule pe DN 7, între Vâlcea și Pitești. Un tânăr vâlcean, implicat în impact",
-      "signal_url": "https://seintamplainvalcea.ro/2026/10/07/foto-accident-cu-trei-autovehicule-pe-dn-7-intre-valcea-si-pitesti-un-tanar-valcean-implicat-in-impact/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-07T11:56:27+03:00",
       "verification_route_id": "police_public_safety",
       "attempts": [
         {
@@ -1929,30 +1660,6 @@
       "signal_title": "Social Awards 2026: 90.000 de euro pentru comunități mai puternice",
       "signal_url": "https://www.eurovalcea.ro/2026/10/06/social-awards-2026-90-000-de-euro-pentru-comunitati-mai-puternice/",
       "signal_publisher": "EuroVâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "c9349c9458d262893e8a9602",
-      "signal_title": "Partajează pe Facebook(Se deschide într-o fereastră nouă) Facebook",
-      "signal_url": "https://www.facebook.com/login/?next=https%3A%2F%2Fwww.facebook.com%2Fshare_channel%2F%3Ftype%3Dreshare%26link%3Dhttps%253A%252F%252Fwww.curierul.ro%252Fsju-valcea-si-spitalul-din-mihaesti-dotate-cu-aparatura-medicala-performanta-din-bani-europeni%252F%26app_id%3D966242223397117%26source_surface%3Dexternal_reshare%26display%26hashtag",
-      "signal_publisher": "Curierul de Vâlcea",
-      "signal_published_at": null,
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "c3bfada5a98676d3cd890513",
-      "signal_title": "Partajează pe X(Se deschide într-o fereastră nouă) X",
-      "signal_url": "https://x.com/intent/tweet?via=curierulvl&text=SJU%20V%C3%A2lcea%20%C8%99i%20Spitalul%20din%20Mih%C4%83e%C8%99ti%2C%20dotate%20cu%20aparatur%C4%83%20medical%C4%83%20performant%C4%83%20din%20bani%20europeni%21&url=https%3A%2F%2Fwww.curierul.ro%2Fsju-valcea-si-spitalul-din-mihaesti-dotate-cu-aparatura-medicala-performanta-din-bani-europeni%2F",
-      "signal_publisher": "Curierul de Vâlcea",
       "signal_published_at": null,
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
