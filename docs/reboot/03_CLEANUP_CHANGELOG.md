@@ -33,4 +33,10 @@ O încercare de merge #52 cu SHA prescurtat a fost refuzată de GitHub. Comanda 
 
 ## Rollback
 
+Continuare 9 octombrie 2026: [PR public #53](https://github.com/mihaicismaru-bit/valcea-clar/pull/53), commit `264b3b243cf5864adad54b3224a075269e9b61d1`, merge `ff5b64cd3b0499fe3e3d725b5ecbd5b7fff53d5c`. Refolosește readiness/reconcile în recovery manual, mută testele după reconciliere și folosește grupul existent Public Sync. 38 teste locale PASS, trei checks PR PASS, deployment manual 37901247379 SUCCESS și readback independent 0 current / 91 archive PASS. Inventarul Vercel a fost recuperat fără mutații cloud. Detalii și limite: 08_OWNERSHIP_FOLLOWUP.md; probe: external_followup.json și recovery_pages_verification.json.
+
+Rollback #53: revert normal prin PR; Public Sync rămâne disponibil. Nu a fost necesar rollback. Nu s-a dezactivat nicio cale activă în această continuare.
+
+Predarea follow-up-ului: [PR CIVORA #1370](https://github.com/mihaicismaru-bit/civora/pull/1370), commit inițial de documentare `f5c9792d7dd64f6cfac5ddde43378511ac15f427`; numai docs/reboot, fără cod operațional.
+
 Revert PR #51 prin branch/PR; enable pentru ID-urile orfane conform receipts; recuperare Git din bundle în director nou. Nu rescrie main. Starea externă se verifică independent după rollback. Nu s-a aplicat rollback deoarece nu a fost identificată o regresie a patch-ului la testele executate.

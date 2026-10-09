@@ -20,4 +20,6 @@ Efectuat: 8 metadata workflows orfane disabled_manually; guard zero-current core
 
 Următoarea acțiune exactă înainte de închiderea completă a Fazei 0: obține inventarul read-only al schedulerului ChatGPT și deploymenturilor/aliasurilor/cronurilor Vercel, apoi închide matricea de ownership pe resursele comune `site/runtime`, `editions`, `current_edition` și Pages. Dezactivează o cale activă numai după demonstrarea mecanismului rămas și a rollback-ului. Aceasta este stabilizare restantă Faza 0, nu începutul reconstrucției.
 
+Actualizare după „next+”: [08_OWNERSHIP_FOLLOWUP.md](08_OWNERSHIP_FOLLOWUP.md). Pages manual este reconciliat și serializat cu Public Sync (#53), verificat prin deployment și readback exact 0/91. Vercel deploymenturi/domenii/aliasuri sunt acum inventariate; cronurile și schedulerul clasic rămân necunoscute. Următoarea acțiune se restrânge la aceste schedulere și ownership CIVORA (inclusiv Recovery, media socială și rollback). Verdictul rămâne PARTIAL, fără dezactivări noi sau pierdere editorială.
+
 **STOP după Faza 0.** Nu este autorizată prin acest raport pornirea unui runtime nou sau a unei arhitecturi vNext.
