@@ -43,4 +43,6 @@ Predarea follow-up-ului: [PR CIVORA #1370](https://github.com/mihaicismaru-bit/c
 
 Prima continuare orară: #54 corectează receipt-ul după reconcile, commit `bac66289f3c6e3d0d7f59162f25dad1663e02420`, merge `2d67f1c022eb1305f140dd90cb5df25b5a484999`. Patru regresii inițial eșuate, după fix patru targeted + self-test și 39 teste publice PASS. Inspecție Vercel sources read-only: patru deploymenturi, numai fișiere statice expuse, singurul vercel.json fără crons; Build Output/cloud cron rămân INVESTIGATE. Nicio dezactivare nouă. 09_HOURLY_RECEIPT_AUDIT.md consemnează efectele, probele și rollback prin revert #54.
 
+Predare orară: [PR CIVORA #1373](https://github.com/mihaicismaru-bit/civora/pull/1373), commit inițial de documentare după rebase `52234bd74fb6a4950ceb443f89519f3c351d3443`; numai docs/reboot. Public Sync #54: run 37909884441 SUCCESS și receipt/readback independent PASS.
+
 Revert PR #51 prin branch/PR; enable pentru ID-urile orfane conform receipts; recuperare Git din bundle în director nou. Nu rescrie main. Starea externă se verifică independent după rollback. Nu s-a aplicat rollback deoarece nu a fost identificată o regresie a patch-ului la testele executate.
