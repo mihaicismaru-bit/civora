@@ -13,7 +13,7 @@
 - [PR public #51](https://github.com/mihaicismaru-bit/valcea-clar/pull/51), merged la 2026-10-09T02:57:25Z.
 - Merge: `bb6bca930f25125929593174b32fa13f38958ee1`.
 - [PR public #52](https://github.com/mihaicismaru-bit/valcea-clar/pull/52): adaptează trei contracte UX vechi pentru starea zero-current, păstrând verificările pentru lead normal și toate rutele arhivate. Commit `5d8c8ebfa6b70235f1545ebec3419125097975eb`, merge `e2dfde7f818d0e52c8b33a030701328752704999`.
-- PR-ul CIVORA pentru raport este legat din predarea finală și păstrează în istoria Git commiturile acestui director.
+- [PR CIVORA #1369](https://github.com/mihaicismaru-bit/civora/pull/1369) predă acest director; commitul inițial de documentare este `84dcf73ac292f81e8dd90b048e898db92b4521b3`. Istoria PR-ului păstrează și completarea referinței de predare.
 
 ## Teste
 
