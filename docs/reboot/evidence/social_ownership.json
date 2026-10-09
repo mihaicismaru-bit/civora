@@ -1,0 +1,145 @@
+{
+  "checked_at": "2026-10-09T02:51:12Z",
+  "status": "PASS",
+  "execution_owner": "civora_site_engine",
+  "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
+  "registered_channels": 9,
+  "active_direct_channels": [
+    "facebook",
+    "instagram",
+    "threads",
+    "tiktok"
+  ],
+  "chatgpt_direct_publication_allowed": false,
+  "errors": [],
+  "checks": [
+    {
+      "check": "publication_holds_reconciled_before_social_validation",
+      "passed": true,
+      "held_story_count": 41,
+      "outboxes_changed": 0,
+      "items_removed": 0,
+      "removed_by_outbox": {}
+    },
+    {
+      "check": "publication_holds_absent_from_all_social_outboxes",
+      "passed": true,
+      "held_story_count": 41,
+      "outboxes_checked": 7
+    },
+    {
+      "check": "deprecated_parallel_workflow_absent:.github/workflows/valcea-clar-instagram-backlog.yml",
+      "passed": true
+    },
+    {
+      "check": "deprecated_parallel_workflow_absent:.github/workflows/valcea-clar-text-first-social.yml",
+      "passed": true
+    },
+    {
+      "check": "execution_owner",
+      "passed": true
+    },
+    {
+      "check": "scheduler",
+      "passed": true
+    },
+    {
+      "check": "state_owner",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_scheduled_publication_disabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_direct_publication_disabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_credential_access_disabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_state_ownership_disabled",
+      "passed": true
+    },
+    {
+      "check": "local_runner_disabled",
+      "passed": true
+    },
+    {
+      "check": "self_hosted_runner_disabled",
+      "passed": true
+    },
+    {
+      "check": "paid_llm_api_not_required",
+      "passed": true
+    },
+    {
+      "check": "missing_credentials_fail_closed",
+      "passed": true
+    },
+    {
+      "check": "missing_adapter_fail_closed",
+      "passed": true
+    },
+    {
+      "check": "legacy_items_stay_facebook_only",
+      "passed": true
+    },
+    {
+      "check": "channel:facebook",
+      "status": "active",
+      "direct_publication_enabled": true,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    },
+    {
+      "check": "channel:instagram",
+      "status": "active",
+      "direct_publication_enabled": true,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    },
+    {
+      "check": "channel:threads",
+      "status": "active",
+      "direct_publication_enabled": true,
+      "workflow": ".github/workflows/valcea-clar-threads-editorial.yml"
+    },
+    {
+      "check": "channel:x",
+      "status": "outbox_only",
+      "direct_publication_enabled": false,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    },
+    {
+      "check": "channel:linkedin",
+      "status": "outbox_only",
+      "direct_publication_enabled": false,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    },
+    {
+      "check": "channel:youtube",
+      "status": "outbox_only",
+      "direct_publication_enabled": false,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    },
+    {
+      "check": "channel:tiktok",
+      "status": "active",
+      "direct_publication_enabled": true,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    },
+    {
+      "check": "channel:telegram",
+      "status": "outbox_only",
+      "direct_publication_enabled": false,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    },
+    {
+      "check": "channel:whatsapp",
+      "status": "outbox_only",
+      "direct_publication_enabled": false,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml"
+    }
+  ]
+}

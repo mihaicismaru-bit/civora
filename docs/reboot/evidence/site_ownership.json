@@ -1,0 +1,351 @@
+{
+  "checked_at": "2026-10-09T02:51:12Z",
+  "status": "PASS",
+  "execution_owner": "civora_site_engine",
+  "scheduler": "github_actions",
+  "registered_jobs": 31,
+  "runtime_files_scanned": 301,
+  "retired_external_monitors": [
+    "VC-INV-2026-001",
+    "LEGACY-CHATGPT-VALCEA-CLAR-*",
+    "LEGACY-CHATGPT-SOCIAL-PUBLISHING-*"
+  ],
+  "retired_workflows": [
+    ".github/workflows/valcea-clar-facebook.yml"
+  ],
+  "errors": [],
+  "checks": [
+    {
+      "check": "static_projection:output_is_committed_runtime",
+      "passed": true
+    },
+    {
+      "check": "static_projection:canonical_trailing_slash_enabled",
+      "passed": true
+    },
+    {
+      "check": "static_projection:no_vercel_build_or_runtime_compute",
+      "passed": true
+    },
+    {
+      "check": "execution_owner",
+      "passed": true
+    },
+    {
+      "check": "scheduler",
+      "passed": true
+    },
+    {
+      "check": "state_owner",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_external_control_plane_enabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_scheduled_scope_control_plane_only",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_production_scheduler_disabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_conversation_runtime_disabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_direct_social_publication_disabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_social_credential_access_disabled",
+      "passed": true
+    },
+    {
+      "check": "chatgpt_state_ownership_disabled",
+      "passed": true
+    },
+    {
+      "check": "paid_llm_api_not_required",
+      "passed": true
+    },
+    {
+      "check": "local_agent_runtime_not_required",
+      "passed": true
+    },
+    {
+      "check": "self_hosted_runner_disabled",
+      "passed": true
+    },
+    {
+      "check": "workflow:live_newsroom",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-newsroom-live.yml",
+      "schedule": [
+        "*/5 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:live_newsroom_operator_bridge",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-live-newsroom-operator.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:edition_recovery_operator",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-edition-recovery.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:fact_kernel_builder",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-fact-kernel.yml",
+      "schedule": [
+        "4,19,34,49 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:editorial_writer_acceptance",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-editorial-writer.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:autonomous_editions",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-editions.yml",
+      "schedule": [
+        "45,55 4,5,6 * * *",
+        "30,40 15,16,17 * * *"
+      ]
+    },
+    {
+      "check": "workflow:source_radar",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-source-radar.yml",
+      "schedule": [
+        "*/10 * * * *",
+        "23 * * * *",
+        "47 */6 * * *"
+      ]
+    },
+    {
+      "check": "workflow:structured_primary_alerts",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-structured-alerts.yml",
+      "schedule": [
+        "2,22,42 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:editorial_opportunity_queue",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-editorial-opportunity-engine.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:cultural_sources",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-festival-intelligence-monitor.yml",
+      "schedule": [
+        "13 */2 * * *",
+        "29 */6 * * *"
+      ]
+    },
+    {
+      "check": "workflow:identity_intelligence",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-people-intelligence.yml",
+      "schedule": [
+        "29 */6 * * *"
+      ]
+    },
+    {
+      "check": "workflow:person_candidate_discovery",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-person-candidate-discovery.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:photo_candidate_discovery",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-photo-candidate-discovery.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:monitor_ledger",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-monitor-ledger.yml",
+      "schedule": [
+        "11 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:observed_metrics",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-observed-metrics-harvest.yml",
+      "schedule": [
+        "23 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:venue_ingest",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-venues-ingest.yml",
+      "schedule": [
+        "23 */6 * * *"
+      ]
+    },
+    {
+      "check": "workflow:olanesti_investigation",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-olanesti-investigation-monitor.yml",
+      "schedule": [
+        "17 4,14 * * *"
+      ]
+    },
+    {
+      "check": "workflow:social_distribution",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-social-publishing.yml",
+      "schedule": [
+        "7,22,37,52 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:story_social_metadata_projection",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-story-social-metadata.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:threads_direct_adapter",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-threads-editorial.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:public_http_health",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-public-health.yml",
+      "schedule": [
+        "23,53 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:quality_gate",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-quality.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:ownership_guard",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-engine-guard.yml",
+      "schedule": [
+        "11 2 * * *"
+      ]
+    },
+    {
+      "check": "workflow:edition_delivery_ledger",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-edition-delivery.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:s2_research_writing_acceptance",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-s2-research-writing.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:s3_visuals_channels",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-s3-visuals.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:s4_publication_experience",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-s4-publication-ux.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:s5_distinctive_products",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-s5-distinctive-products.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:s6_operations_governance",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-s6-operations-governance.yml",
+      "schedule": [
+        "37 * * * *"
+      ]
+    },
+    {
+      "check": "workflow:publication_hold_projection",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-hold-projection.yml",
+      "schedule": []
+    },
+    {
+      "check": "workflow:local_life_sync",
+      "passed": true,
+      "workflow": ".github/workflows/valcea-clar-local-life-sync.yml",
+      "schedule": []
+    },
+    {
+      "check": "editions:deterministic zero-LLM generator",
+      "passed": true
+    },
+    {
+      "check": "editions:LLM-not-required assertion",
+      "passed": true
+    },
+    {
+      "check": "editions:paid-API-not-required assertion",
+      "passed": true
+    },
+    {
+      "check": "social:social ownership validator",
+      "passed": true
+    },
+    {
+      "check": "social:native TikTok publishing adapter",
+      "passed": true
+    },
+    {
+      "check": "social:public social media asset projection",
+      "passed": true
+    },
+    {
+      "check": "social:Facebook runtime secret reference",
+      "passed": true
+    },
+    {
+      "check": "social:Instagram runtime secret reference",
+      "passed": true
+    },
+    {
+      "check": "social:TikTok runtime secret reference",
+      "passed": true
+    },
+    {
+      "check": "social:no social publication from pull requests",
+      "passed": true
+    },
+    {
+      "check": "social:native Facebook publishing adapter",
+      "passed": true
+    },
+    {
+      "check": "social:native Instagram publishing adapter",
+      "passed": true
+    }
+  ]
+}
