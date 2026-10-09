@@ -540,7 +540,8 @@ class MetaReadRuntime:
             elif endpoint == self.config.page_id:
                 stage = "PAGE_IDENTITY"
             elif endpoint == "accounts":
-                stage = "MANAGED_PAGES"
+                # The binding caller already provides its specific stage label.
+                raise
             elif endpoint == "posts":
                 stage = "PAGE_POSTS"
             elif endpoint == self.config.ig_user_id:
