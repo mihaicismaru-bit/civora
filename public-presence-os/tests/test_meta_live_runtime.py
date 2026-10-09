@@ -358,3 +358,30 @@ def test_cli_preflight_without_credentials_is_precise_and_secret_free(tmp_path):
     assert "LIVE AUTHORITY           NONE" in result.stdout
     assert "MISSING:META_READ_TOKEN,META_THREADS_ACCESS_TOKEN" in result.stdout
     assert TOKEN_A not in result.stdout
+
+
+@pytest.mark.parametrize("platform,endpoint,stage", [
+    ("FACEBOOK_PAGE", EXPECTED_PAGE_ID, "PAGE_IDENTITY"),
+    ("FACEBOOK_PAGE", "me", "PAGE_TOKEN_SUBJECT"),
+    ("FACEBOOK_PAGE", EXPECTED_PAGE_ID + "/posts", "PAGE_POSTS"),
+    ("FACEBOOK_PAGE", "post-1/comments", "PAGE_COMMENTS"),
+    ("INSTAGRAM", EXPECTED_IG_ID, "INSTAGRAM_IDENTITY"),
+    ("INSTAGRAM", EXPECTED_IG_ID + "/media", "INSTAGRAM_MEDIA"),
+    ("INSTAGRAM", "media-1/comments", "INSTAGRAM_COMMENTS"),
+])
+def test_graph10_identifies_read_stage_without_sensitive_values(tmp_path, platform, endpoint, stage):
+    class DeniedClient:
+        def get(self, **kwargs):
+            raise MetaLiveHold("HOLD_META_HTTP_400_GRAPH_10")
+
+    runtime = MetaReadRuntime(
+        MetaRuntimeConfig.from_env(env()), DeniedClient(),
+        MetaEventStore(tmp_path / "events.sqlite3"),
+    )
+    with pytest.raises(MetaLiveHold) as failure:
+        runtime._get(platform, "/v26.0/" + endpoint, {"fields": "id"}, TOKEN_B)
+    reason = failure.value.reason
+    assert reason == "HOLD_META_STAGE_" + stage + "_HTTP_400_GRAPH_10"
+    assert classify_meta_hold(reason) == "PERMISSION_OR_ENDPOINT_CONTEXT_DENIED"
+    assert TOKEN_B not in reason
+    assert endpoint not in reason
