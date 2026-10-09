@@ -51,4 +51,6 @@ Nicio cale CIVORA activă nu a fost dezactivată. Un grup comun numai pentru pri
 
 Nu există API disponibil pentru enumerarea taskurilor ChatGPT clasice. Încercarea read-only cua.getState() a eșuat la inițializarea sandboxului Windows, înainte de acces la browser. Nicio stare UI citită sau schimbată. Inventarul Pages automations nu ar demonstra starea taskului clasic. S-a cerut ownerului starea/cadența/ultimul rezultat pentru „Vâlcea Clar Redacție”, fără secrete.
 
-Următorul pas: inventar read-only al taskului clasic și cronurilor Vercel, apoi decizie documentată de ownership per resursă CIVORA, cu livrare rămasă și rollback demonstrate înainte de dezactivarea unei căi active. **STOP: fără implementarea Fazei 1.**
+Actualizare owner, 9 octombrie 2026: utilizatorul confirmă că a oprit taskul discutat „Vâlcea Clar Redacție”. Stare: **OPRIT — confirmare owner**, fără verificare live independentă. Utilizatorul nu crede că ar mai fi activ în altă parte; această apreciere nu constituie inventar complet al altor schedulere. Agentul nu a efectuat o dezactivare și nu a modificat taskul.
+
+Următorul pas: inventar read-only al cronurilor Vercel și, dacă există, al copiilor taskului clasic, apoi decizie documentată de ownership per resursă CIVORA, cu livrare rămasă și rollback demonstrate înainte de dezactivarea unei căi active. Taskul cunoscut nu mai este tratat ca activ fără dovezi contrare. **STOP: fără implementarea Fazei 1.**

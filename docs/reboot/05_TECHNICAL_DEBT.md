@@ -7,7 +7,7 @@
 | RESOLVED | livrarea zero-current era blocată de reconciliator și teste UX | #51 + #52, Public Sync 37877613582 și readback independent confirmă zero-current + 91 rute |
 | RESOLVED | Pages manual omitea reconcilierea și avea concurrency diferită | #53 refolosește readiness/reconcile și grupul Public Sync; run 37901247379 + readback PASS; ambele căi păstrate |
 | P1 | Vercel cron și Git linkage necunoscute; erori ale contextului explicit | follow-up a recuperat 4 proiecte / 6 deploymenturi / 8 aliasuri în același cont; răspunsurile omit cron și gitSource, deci acestea rămân INVESTIGATE |
-| P1 | scheduler ChatGPT cloud neenumerabil din sesiune | writer/orchestrator extern enable-state necunoscut; inventar prin suprafața autorizată disponibilă ownerului |
+| P1 | taskul ChatGPT cunoscut este oprit conform ownerului; inventarul cloud nu este enumerabil din sesiune | 9 octombrie: confirmare owner pentru „Vâlcea Clar Redacție”, fără readback independent; absența altor copii rămâne nedemonstrată |
 | P1 | Local Life near-term verificări vechi / public lag inițial | utilitate stale; respectă TTL/fail-closed, fără umplerea golurilor cu date inventate |
 | P1 | resolver UNROUTED/NO_PRIMARY_MATCH în status istoric recent | editorial yield insuficient; cercetare target claim-level și dispositions explicite |
 | P1 | secrete/state externe nu sunt în checkpoint Git; backup Drive complet netestat | recuperare globală nedemonstrată; fără destructive cleanup extern |
