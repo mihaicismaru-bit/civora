@@ -31,3 +31,9 @@ Prima continuare orară: [09_HOURLY_RECEIPT_AUDIT.md](09_HOURLY_RECEIPT_AUDIT.md
 Verdict rămâne **PARTIAL**. #1374 integrat; Local Life persistență corectată și scope restrâns. Două regresii + self-test/guarduri + cinci CI PASS, run 37917372566 SUCCESS. Readback: 36 evenimente canonice și 91 articole păstrate, receipt corect, opt rute HTTP 200; public HEAD neschimbat, livrarea noului commit canonic nu este revendicată. S5 public 404 preexistent documentat. Zero căi active dezactivate. Următoarea acțiune: audit/reproducere locală pentru writerii cu scope larg și contractul de proiecție S5. Detalii/probe în 10. Cron cloud și single-writer global rămân neînchise; STOP după Faza 0.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+Verdict **PARTIAL**. Probe noi: Newsroom snapshot suprascrie șase stări peer în două scenarii locale; 5/6 rute S5 public 404, toate canonice existente. Opt rute critice 200, 36 evenimente și 91 articole păstrate, receipt corect. Nicio modificare sau dezactivare de producție în această rulare. Restanțe: single-writer global, livrare S5, cron cloud și recovery extern. Următoarea acțiune: validarea regresiei tranzacției story/decision/event/receipt înainte de reducerea scope-ului Newsroom. STOP după Faza 0.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).

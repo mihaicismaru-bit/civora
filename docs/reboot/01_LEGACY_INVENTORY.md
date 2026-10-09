@@ -54,3 +54,9 @@ Prima rulare orară a inspectat sursele ultimelor patru deploymenturi Vercel: nu
 Local Life Sync persistă acum exclusiv registry + hub/sport/cinema/meniul-zilei/fitness și regenerează după fiecare fetch. Scope-ul celorlalți writeri rămâne deschis. Matricea clasificată și dovezile sunt în 10.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+Matrice suplimentară în 11: Newsroom snapshot 12 căi, state S5 OPERATIONAL numai canonic, 6 rute S5 comparate public, constructor public separat și schedule Public Sync configurat versus ultimele rulări returnate.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).

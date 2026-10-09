@@ -26,3 +26,9 @@ Nu sunt ascunse ca PASS global rezultatele locale ale guard-urilor. Nu există d
 REZOLVAT pentru Local Life Sync: snapshot stale după fetch/retry și staging întreg arbore; #1374 cu două regresii. P1 INVESTIGATE: S5 /unde-iesim/verificat/ canonic există, public 404 înainte/după. Rămân scope-urile comune ale altor writeri, cloud cron și timestamp churn; single-writer global nedemonstrat.
 
 [10 — Local Life persistence audit](10_LOCAL_LIFE_PERSISTENCE_AUDIT.md).
+
+## Continuare orară: Newsroom / S5
+
+P0: suprascrierea snapshot Newsroom este demonstrată în două scenarii locale, pentru fitness/media socială/public_ux_state; nu se afirmă incident live. P1: cinci rute S5 canonice public 404; state OPERATIONAL nu dovedește delivery. P1 INVESTIGATE: git add || true poate masca pathspec lipsă (fixture). Scheduling real Public Sync rămâne de investigat; configurația nu dovedește cadența.
+
+[11 — Newsroom / S5 audit](11_NEWSROOM_S5_AUDIT.md).
