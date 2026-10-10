@@ -61,8 +61,8 @@ const synthetic={company:'FAKE-CONTRACT-ONLY',name:'NO REAL CONTACT',
 assert.equal(r.status,201);assert.equal(data.ok,true);
 assert.equal(inserted.length,1);
 assert.equal(inserted[0][2],synthetic.company);
-assert.match(inserted[0][15],/^[a-f0-9]{64}$/);
-assert.equal(inserted[0][15].includes('1.2.3.4'),false);
+assert.match(inserted[0][13],/^[a-f0-9]{64}$/);
+assert.equal(inserted[0][13].includes('1.2.3.4'),false);
 
 ({r,data}=await call('POST','/',synthetic,missing));
 assert.equal(r.status,503);assert.deepEqual(data,{ok:false,error:'PERSISTENCE_UNAVAILABLE'});
