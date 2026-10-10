@@ -1,0 +1,48 @@
+name: PARTENER.EU RPM Lead Contract
+
+on:
+  workflow_dispatch:
+    inputs:
+      live_health:
+        type: boolean
+        default: false
+        description: 'Read-only /health on live Cloudflare Worker (requires deployed health route and D1 binding)'
+  push:
+    branches: [main]
+    paths:
+      - 'partener-eu/lead-api/**'
+      - 'partener-eu/ops/test_rpm_lead_worker.mjs'
+      - 'partener-eu/ops/probe_rpm_lead_health.py'
+      - '.github/workflows/partener-eu-rpm-lead-contract.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'partener-eu/lead-api/**'
+      - 'partener-eu/ops/test_rpm_lead_worker.mjs'
+      - 'partener-eu/ops/probe_rpm_lead_health.py'
+      - '.github/workflows/partener-eu-rpm-lead-contract.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: JS syntax and in-memory persistence/health regressions
+        run: |
+          node --check partener-eu/lead-api/src/worker.js
+          node --check partener-eu/ops/test_rpm_lead_worker.mjs
+          python -m py_compile partener-eu/ops/probe_rpm_lead_health.py
+          node partener-eu/ops/test_rpm_lead_worker.mjs
+      - name: Optional read-only live /health — never insert a lead
+        if: github.event_name == 'workflow_dispatch' && inputs.live_health
+        run: python partener-eu/ops/probe_rpm_lead_health.py
