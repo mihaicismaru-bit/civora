@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-E10-OFFICIAL-SOURCE-RECEIPT-ADAPTER-001",
+  "status": "CANONICAL",
+  "purpose": "Transform already-prefetched official-source readbacks into the exact read-only receipt registry consumed by EUCONS opportunity matching, failing closed on conflicts or projection drift without performing network fetches or external writes.",
+  "canonical_dependencies": {
+    "matching_contract": "eucons/opportunities/matching_contract.json",
+    "matching_engine": "eucons/opportunities/match_opportunities.py"
+  },
+  "source_projection": {
+    "required_product": "EUCONS_COMMERCIAL_OS",
+    "required_bridge_id": "PARTENER_P11_TO_EUCONS_E09",
+    "read_only_required": true,
+    "source_mutation_allowed_required": false,
+    "required_opportunity_id_field": "id",
+    "required_material_facts_field": "material_facts"
+  },
+  "readback": {
+    "required_fields": [
+      "opportunity_id",
+      "readback_state",
+      "source_product",
+      "source_authority",
+      "source_url",
+      "source_document_sha256",
+      "verified_at",
+      "fact_values",
+      "conflict_fact_classes"
+    ],
+    "allowed_states": [
+      "OFFICIAL_READBACK_COMPLETE",
+      "OFFICIAL_SOURCE_CONFLICT"
+    ],
+    "complete_state": "OFFICIAL_READBACK_COMPLETE",
+    "conflict_state": "OFFICIAL_SOURCE_CONFLICT",
+    "source_url_scheme": "https",
+    "forbidden_source_products": [
+      "PARTENER.EU"
+    ],
+    "forbidden_source_hostnames": [
+      "partener.eu",
+      "www.partener.eu"
+    ],
+    "allowed_fact_classes": [
+      "status",
+      "deadline",
+      "budget",
+      "grant",
+      "beneficiaries",
+      "eligibility",
+      "scoring",
+      "indicators",
+      "obligations"
+    ],
+    "required_candidate_fact_classes": [
+      "status",
+      "deadline"
+    ],
+    "future_verified_at_forbidden": true,
+    "raw_fact_values_must_not_enter_output": true
+  },
+  "output_registry": {
+    "schema_version": 1,
+    "state": "READ_ONLY_OFFICIAL_SOURCE_RECEIPTS",
+    "verified_state": "VERIFIED_OFFICIAL_SOURCE",
+    "conflict_state": "BLOCKED_SOURCE_CONFLICT",
+    "verification_method": "OFFICIAL_SOURCE_READBACK",
+    "receipt_fields": [
+      "receipt_id",
+      "opportunity_id",
+      "verification_state",
+      "verification_method",
+      "source_product",
+      "source_authority",
+      "source_url",
+      "source_document_sha256",
+      "verified_at",
+      "verified_fact_hashes"
+    ]
+  },
+  "output_boundaries": {
+    "eligibility_state": "NOT_ASSESSED",
+    "maximum_next_state": "RESEARCH_READY",
+    "human_review_required": true,
+    "external_contact_enabled": false,
+    "automatic_offer_enabled": false,
+    "automatic_send_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false,
+    "network_fetch_enabled": false
+  },
+  "rules": {
+    "partener_is_discovery_only": true,
+    "prefetched_readbacks_only": true,
+    "exact_projection_value_hash_binding": true,
+    "readback_value_mismatch_becomes_conflict": true,
+    "explicit_conflict_becomes_blocked_receipt": true,
+    "partial_verified_fact_sets_are_allowed_but_downstream_candidate_gate_remains_authoritative": true,
+    "duplicate_receipt_ids_fail_closed": true,
+    "duplicate_source_fact_disagreement_fails_closed_downstream": true,
+    "projection_source_mutation_forbidden": true,
+    "raw_fact_values_never_emitted": true,
+    "person_level_fields_forbidden": true,
+    "network_fetch_forbidden": true,
+    "external_write_or_send_forbidden": true,
+    "repository_runtime_output_forbidden": true
+  }
+}
