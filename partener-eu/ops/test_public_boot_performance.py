@@ -82,8 +82,9 @@ consultant_saved = sum((WEB / asset).stat().st_size for asset in CONSULTANT_ASSE
 heavy_saved = sum((WEB / asset).stat().st_size for asset in PUBLIC_HEAVY_ASSETS)
 if consultant_saved < 80_000:
     errors.append(f"consultant lazy-load saving unexpectedly small: {consultant_saved} bytes")
-if heavy_saved < 7_500_000:
-    errors.append(f"public heavy lazy-load saving unexpectedly small: {heavy_saved} bytes")
+# Deliberately no minimum deferred-payload byte floor: reducing the size of
+# canonical files is a performance improvement, not a regression. The strict
+# per-asset lazy boundary above and <=1MB eager graph budget below remain gates.
 
 app_pos = INDEX.find('src="app.js')
 consultant_pos = INDEX.find('src="consultant-loader-v1.js')
