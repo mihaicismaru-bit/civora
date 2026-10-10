@@ -17,7 +17,8 @@ export default {
     if (request.method === "GET" && new URL(request.url).pathname === "/health") {
       try {
         if (!env.DB || typeof env.DB.prepare !== "function") throw new Error("NO_D1_BINDING");
-        await env.DB.prepare("SELECT lead_id FROM rpm_leads LIMIT 0").all();
+        const check = await env.DB.prepare("SELECT lead_id FROM rpm_leads LIMIT 0").all();
+        if (check?.success !== true) throw new Error("D1_HEALTH_UNCONFIRMED");
         return new Response(JSON.stringify({ok:true,status:"READY"}),{status:200,headers});
       } catch {
         return new Response(JSON.stringify({ok:false,status:"PERSISTENCE_UNAVAILABLE"}),{status:503,headers});
@@ -51,7 +52,7 @@ export default {
     // or provider exceptions in the response.
     try {
       if (!env.DB || typeof env.DB.prepare !== "function") throw new Error("NO_D1_BINDING");
-      await env.DB.prepare(
+      const receipt = await env.DB.prepare(
         `INSERT INTO rpm_leads
         (lead_id, created_at, company, contact_name, contact, employees, delivery_format, source_url, referrer, utm_source, utm_medium, utm_campaign, utm_content, status, notes, ip_hash, user_agent)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'NEW', '', ?, ?)`
@@ -62,6 +63,7 @@ export default {
         clean(body.utm_campaign).slice(0,180), clean(body.utm_content).slice(0,180),
         await sha256(ip + (env.IP_SALT || "")), ua.slice(0,500)
       ).run();
+      if (receipt?.success !== true) throw new Error("D1_INSERT_NOT_CONFIRMED");
     } catch {
       return new Response(JSON.stringify({ok:false,error:"PERSISTENCE_UNAVAILABLE"}),{status:503,headers});
     }
