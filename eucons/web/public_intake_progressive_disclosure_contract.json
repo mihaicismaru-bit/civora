@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "id": "EUCONS-R04-PUBLIC-INTAKE-PROGRESSIVE-DISCLOSURE-001",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "phase": "R04_PUBLIC_INTAKE_PROGRESSIVE_DISCLOSURE",
+  "status": "DRAFT_FAIL_CLOSED",
+  "purpose": "Cross-contract guard that prevents person/contact/upload data from drifting into the R04 PROFILE step while preserving the canonical R05 progressive runtime and its disabled production/provider boundaries.",
+  "source_bindings": {
+    "jtbd_contract_id": "R04-JTBD-UX-001",
+    "information_architecture_phase": "E06",
+    "inbound_runtime_contract_id": "R05-INBOUND-001",
+    "journey_surface": "JTBD_JOURNEY"
+  },
+  "profile_stage_policy": {
+    "runtime_stage": "PROFILE",
+    "internal_runtime_progression_allowed": true,
+    "production_collection_allowed": false,
+    "repository_pii_write_allowed": false,
+    "person_level_pii_allowed": false,
+    "contact_details_allowed": false,
+    "attachments_allowed": false,
+    "material_claims_allowed": false,
+    "eligibility_state": "NOT_ASSESSED",
+    "funding_claim_state": "NO_PROGRAMME_CLAIM_WITHOUT_VERIFIED_MATCH",
+    "forbidden_fields": [
+      "contact_details",
+      "contact_name",
+      "first_name",
+      "last_name",
+      "email",
+      "phone",
+      "telephone",
+      "mobile",
+      "cnp",
+      "personal_id",
+      "person_address",
+      "recipient",
+      "attachment",
+      "attachments",
+      "file",
+      "files",
+      "document_upload"
+    ],
+    "free_text_fields": [
+      "message"
+    ],
+    "free_text_rule": "NO_PERSON_LEVEL_PII_OR_CONTACT_DETAILS"
+  },
+  "journeys": [
+    {
+      "journey_id": "JRN-FUNDING-FIT",
+      "route_id": "funding_fit",
+      "path": "/ce-finantare-mi-se-potriveste/",
+      "allowed_profile_fields": [
+        "organization_name",
+        "audience_id",
+        "investment_terms"
+      ]
+    },
+    {
+      "journey_id": "JRN-PROJECT-REVIEW",
+      "route_id": "project_review",
+      "path": "/verifica-proiectul/",
+      "allowed_profile_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "investment_terms"
+      ]
+    },
+    {
+      "journey_id": "JRN-IMPLEMENTATION",
+      "route_id": "implementation_help",
+      "path": "/proiect-in-implementare/",
+      "allowed_profile_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "message"
+      ]
+    },
+    {
+      "journey_id": "JRN-RECOVERY",
+      "route_id": "recovery_help",
+      "path": "/proiect-cu-probleme/",
+      "allowed_profile_fields": [
+        "organization_name",
+        "audience_id",
+        "project_stage",
+        "message"
+      ]
+    }
+  ],
+  "contact_boundary": {
+    "contact_stage": "CONTACT",
+    "contact_before_contact_stage_forbidden": true,
+    "privacy_ack_required_at_contact": true,
+    "marketing_consent_default": false,
+    "marketing_never_conditions_operational_response": true,
+    "raw_contact_removed_from_resumable_session_after_handoff": true
+  },
+  "runtime_boundaries": {
+    "production_binding_enabled": false,
+    "production_collection_enabled": false,
+    "provider_adapter_required_for_persistence": true,
+    "repository_runtime_storage": false,
+    "repository_pii_writes_forbidden": true,
+    "telemetry_payload_values_forbidden": true,
+    "telemetry_raw_contact_forbidden": true,
+    "telemetry_production_transport_enabled": false,
+    "research_crm_separation": true
+  },
+  "decision": {
+    "state": "PASS_CROSS_CONTRACT_GUARD_ONLY",
+    "runtime_materialization_authorized": false,
+    "production_activation_authorized": false,
+    "external_action_authorized": false,
+    "next_gate": "R05_CANONICAL_RUNTIME_REMAINS_SEPARATELY_GATED"
+  }
+}
