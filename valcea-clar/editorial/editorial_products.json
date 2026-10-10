@@ -6053,7 +6053,7 @@
         ]
       },
       "primary_source_verification": {
-        "verified_at": "2026-10-10T02:10:26+03:00",
+        "verified_at": "2026-10-10T04:34:31+03:00",
         "promotion_gate": "ISU_HOMEPAGE_NUMERIC_SUMMARY_V1",
         "source_family": "ISU",
         "direct_first_party_homepage_numeric_readback": true,
@@ -7029,6 +7029,115 @@
         "auto_publish_eligible_by_format": true,
         "additional_gate": null,
         "product_fingerprint_sha256": "dbc33d871fdf11fc759463827e3de29cfaed4f260ae186735adb597ebe891985"
+      }
+    },
+    {
+      "id": "valcea-intrerupere-curent-2026-10-11-horezu",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 94,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-11T14:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-11T09:00+03:00",
+        "event_end": "2026-10-11T14:00+03:00",
+        "body_sha256": "b989eec231f77aebc7fe905e38dce81b640c2896f118cdb3ccf7d87a6afc0895"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Horezu: întrerupere de curent programată pe 11 octombrie 2026, între 09:00–14:00",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTCZ PTTR Horezu - strada Tudor Vladimirescu (parţial) în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–14:00.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Horezu, pe 11 octombrie 2026, între orele 09:00 și 14:00.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTCZ PTTR Horezu - strada Tudor Vladimirescu (parţial).",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Horezu: întrerupere de curent programată pe 11 octombrie 2026, între 09:00–14:00",
+      "dek": "Distribuție Oltenia include PTCZ PTTR Horezu - strada Tudor Vladimirescu (parţial) în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–14:00.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTCZ PTTR Horezu - strada Tudor Vladimirescu (parţial).",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Horezu, pe 11 octombrie 2026, între orele 09:00 și 14:00."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "862d95a8d896d1ebe006f3c9ee7f5b64e76917c616ceaceb46c4fb10c05a711f",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "f9513c0d363a323ab1d905946ba88874832f444cb92eef035ce7f1274af1f2d9",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F05.10-11.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2005_10%20-%2011_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "7bd5cfbd121cf08a78d9f93893edab992fedaae06aad47799cc6073961d0d748"
       }
     },
     {
@@ -24937,7 +25046,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d89dffccc42727023afb24d48a3d6efd269356918771ce747c68157d58d0d313"
+          "sha256": "83e60fbb5e428696048a900211f2fbb7c9a6c0e3a5636e3bd0d4e38dc148e4b4"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 381/2026-10-07",
@@ -25110,7 +25219,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d89dffccc42727023afb24d48a3d6efd269356918771ce747c68157d58d0d313"
+          "sha256": "83e60fbb5e428696048a900211f2fbb7c9a6c0e3a5636e3bd0d4e38dc148e4b4"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 382/2026-10-07",
@@ -25346,7 +25455,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d89dffccc42727023afb24d48a3d6efd269356918771ce747c68157d58d0d313"
+          "sha256": "83e60fbb5e428696048a900211f2fbb7c9a6c0e3a5636e3bd0d4e38dc148e4b4"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 383/2026-10-07",
@@ -26987,7 +27096,7 @@
           "name": "Primăria Municipiului Râmnicu Vâlcea — registrul HCL adoptate",
           "url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
           "tier": "T1",
-          "sha256": "d89dffccc42727023afb24d48a3d6efd269356918771ce747c68157d58d0d313"
+          "sha256": "83e60fbb5e428696048a900211f2fbb7c9a6c0e3a5636e3bd0d4e38dc148e4b4"
         },
         {
           "name": "HCL Râmnicu Vâlcea nr. 369/2026-09-30",
@@ -27083,7 +27192,7 @@
         "source_monitor": "council-watch-rm-valcea",
         "cluster_date": "2026-09-30",
         "register_url": "https://dm.primariavl.ro/dm/2026/hotarari.nsf/vwHotarariByAn?OpenView&Count=500",
-        "register_sha256": "d89dffccc42727023afb24d48a3d6efd269356918771ce747c68157d58d0d313",
+        "register_sha256": "83e60fbb5e428696048a900211f2fbb7c9a6c0e3a5636e3bd0d4e38dc148e4b4",
         "latest_decision_window": 25,
         "matching_decisions": 4,
         "verified_official_documents": 4,
@@ -30114,6 +30223,769 @@
       }
     },
     {
+      "id": "valcea-intrerupere-curent-2026-10-13-glavile",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-13T17:30+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-13T09:30+03:00",
+        "event_end": "2026-10-13T17:30+03:00",
+        "body_sha256": "be1acd15ef9e9b990036ede4e339270d5816b7a865cc8e8c8f90d17fb79c2898"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Glăvile: întrerupere de curent programată pe 13 octombrie 2026, între 09:30–17:30",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTA Aninoasa 1, PTA Aninoasa 2, PTA Moară Ştubeu (terţ), PTA Croitoreşti, PTA Glăvile 1 în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:30–17:30.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Glăvile, pe 13 octombrie 2026, între orele 09:30 și 17:30.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTA Aninoasa 1, PTA Aninoasa 2, PTA Moară Ştubeu (terţ), PTA Croitoreşti, PTA Glăvile 1.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Glăvile: întrerupere de curent programată pe 13 octombrie 2026, între 09:30–17:30",
+      "dek": "Distribuție Oltenia include PTA Aninoasa 1, PTA Aninoasa 2, PTA Moară Ştubeu (terţ), PTA Croitoreşti, PTA Glăvile 1 în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:30–17:30.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTA Aninoasa 1, PTA Aninoasa 2, PTA Moară Ştubeu (terţ), PTA Croitoreşti, PTA Glăvile 1.",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Glăvile, pe 13 octombrie 2026, între orele 09:30 și 17:30."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "70c440d3f9d5ac0106778914d3740aa2c6b595d9870db69d9fd795b5aee665c2",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "46837dbf5db3532094c98049f019ba00f6347d642e64e33537e291b6aa8f08ed",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "f1cae01a27fcf3695a38e1d236f9807afa373a6cfe40a65e0462aaee20e8d77d"
+      }
+    },
+    {
+      "id": "valcea-intrerupere-curent-2026-10-14-ramnicu-valcea",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-14T16:30+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-14T08:30+03:00",
+        "event_end": "2026-10-14T16:30+03:00",
+        "body_sha256": "71c600fc635b521348b6ed20a488144bebb0cd6f942feb7ab205c93926eef577"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Râmnicu Vâlcea: întrerupere de curent programată pe 14 octombrie 2026, între 08:30–16:30",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTCZ Pompe Apă Bujoreni în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 08:30–16:30.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Râmnicu Vâlcea, pe 14 octombrie 2026, între orele 08:30 și 16:30.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTCZ Pompe Apă Bujoreni.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Râmnicu Vâlcea: întrerupere de curent programată pe 14 octombrie 2026, între 08:30–16:30",
+      "dek": "Distribuție Oltenia include PTCZ Pompe Apă Bujoreni în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 08:30–16:30.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTCZ Pompe Apă Bujoreni.",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Râmnicu Vâlcea, pe 14 octombrie 2026, între orele 08:30 și 16:30."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "e254a0e6fff8b0db8bd5b72549d2657d126f28dea646a42c9c50c1b3e6e980fb",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "427725aa38d9d900a45215cb1297dd544bd021eb9f1da7eff9ea88a1bee95577",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "5e8e389ddbc2dd00b48dcc53d14142df9fa9bbf05e71a11f3a0e71ced70a2f44"
+      }
+    },
+    {
+      "id": "valcea-intrerupere-curent-2026-10-15-ladesti",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-15T17:30+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-15T09:30+03:00",
+        "event_end": "2026-10-15T17:30+03:00",
+        "body_sha256": "8c3a646671fb188e01aaea9e87ed5b40cd5c9fce8bbe17a797788187ebfe563d"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Lădești: întrerupere de curent programată pe 15 octombrie 2026, între 09:30–17:30",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTA Olteanca Lădești în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:30–17:30.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Lădești, pe 15 octombrie 2026, între orele 09:30 și 17:30.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTA Olteanca Lădești.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Lădești: întrerupere de curent programată pe 15 octombrie 2026, între 09:30–17:30",
+      "dek": "Distribuție Oltenia include PTA Olteanca Lădești în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:30–17:30.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTA Olteanca Lădești.",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Lădești, pe 15 octombrie 2026, între orele 09:30 și 17:30."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "5e95b6be85a6cb20ed9b819df024c9e4950ac91de45c27fc082f644dd1b58fac",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "5cdd450dfeba55e0a23597b7a378d0390b23bcdc29bd88785b1ea2a0668df04c",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "482ccdf8482322cbf45de3776f4a4cf8ef58a6ea5f660350ec12b29125755af5"
+      }
+    },
+    {
+      "id": "valcea-intrerupere-curent-2026-10-16-dragasani",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-16T17:30+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-16T09:30+03:00",
+        "event_end": "2026-10-16T17:30+03:00",
+        "body_sha256": "ae48cef3cf4e7e9c8cd8e1ef4dd3f86f9cb996bb435bfb4f90335b86c258dcec"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Drăgășani: întrerupere de curent programată pe 16 octombrie 2026, între 09:30–17:30",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTA Zlătărei 3, PTA Avram Iancu, PTAB Braniștei în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:30–17:30.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Drăgășani, pe 16 octombrie 2026, între orele 09:30 și 17:30.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTA Zlătărei 3, PTA Avram Iancu, PTAB Braniștei.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Drăgășani: întrerupere de curent programată pe 16 octombrie 2026, între 09:30–17:30",
+      "dek": "Distribuție Oltenia include PTA Zlătărei 3, PTA Avram Iancu, PTAB Braniștei în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:30–17:30.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTA Zlătărei 3, PTA Avram Iancu, PTAB Braniștei.",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Drăgășani, pe 16 octombrie 2026, între orele 09:30 și 17:30."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "f8e53edaffb334a7ca28fb432f60f9aac926be66e75ab4c0b33bb5106db46719",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "27ad4df79bac4df2ab70d08ddf96d7d43d1d126f21679e0b0f53531a45e42b99",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F12.10%20%E2%80%93%2018.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2012_10%20-%2018_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "78d2e59d0b143ac81c0d17f7cb908957f672bf32bed28edefe8c3ada3b09e88d"
+      }
+    },
+    {
+      "id": "valcea-intrerupere-curent-2026-10-21-cernisoara",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-21T17:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-21T09:00+03:00",
+        "event_end": "2026-10-21T17:00+03:00",
+        "body_sha256": "d850b09479962f49cbb1835fa233ee6892f04c4ffbefae72d286e619ba00a95b"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Cernişoara: întrerupere de curent programată pe 21 octombrie 2026, între 09:00–17:00",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTAB Gospodărie Apă Armăşeşti (terţ) în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Cernişoara, pe 21 octombrie 2026, între orele 09:00 și 17:00.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTAB Gospodărie Apă Armăşeşti (terţ).",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Cernişoara: întrerupere de curent programată pe 21 octombrie 2026, între 09:00–17:00",
+      "dek": "Distribuție Oltenia include PTAB Gospodărie Apă Armăşeşti (terţ) în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTAB Gospodărie Apă Armăşeşti (terţ).",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Cernişoara, pe 21 octombrie 2026, între orele 09:00 și 17:00."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "838c153a67484d9312ebb2eb562889f00ad9f3b9550f3679d326bf0d677ef745",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "f4b56947b7d231a63afe8b3826258931961f74f112b21bb3650891780d36d6cd",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "4bba5f410c7a6f7399514d081d697162eb282f11ec7d1b724b536bc3caa7db74"
+      }
+    },
+    {
+      "id": "valcea-intrerupere-curent-2026-10-22-cernisoara",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-22T17:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-22T09:00+03:00",
+        "event_end": "2026-10-22T17:00+03:00",
+        "body_sha256": "cea1158d0285e7152e3ed06793df2acd84c634757bd97e997a911887046df474"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Cernişoara: întrerupere de curent programată pe 22 octombrie 2026, între 09:00–17:00",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTA Armăşeşti 2, PTA Groşi, PTA Modoia, PTAB Modoia 2, PTA Staţie Epurare Cernişoara (terţ), PTA Izlaz în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Cernişoara, pe 22 octombrie 2026, între orele 09:00 și 17:00.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTA Armăşeşti 2, PTA Groşi, PTA Modoia, PTAB Modoia 2, PTA Staţie Epurare Cernişoara (terţ), PTA Izlaz.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Cernişoara: întrerupere de curent programată pe 22 octombrie 2026, între 09:00–17:00",
+      "dek": "Distribuție Oltenia include PTA Armăşeşti 2, PTA Groşi, PTA Modoia, PTAB Modoia 2, PTA Staţie Epurare Cernişoara (terţ), PTA Izlaz în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTA Armăşeşti 2, PTA Groşi, PTA Modoia, PTAB Modoia 2, PTA Staţie Epurare Cernişoara (terţ), PTA Izlaz.",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Cernişoara, pe 22 octombrie 2026, între orele 09:00 și 17:00."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "afad1cdd8fc48c0003d35025ab1ebbebaf3e56683acbcc44d4d882c631b7c905",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "a9339bc49d734d326704ead727af2044314625995ae1e6ddb4da5281f9239e3e",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "38c1a46bd58fd057af4dd6fad323fece2bda81e9f2a57debffb74a60c4738fd3"
+      }
+    },
+    {
+      "id": "valcea-intrerupere-curent-2026-10-23-stroesti",
+      "status": "verified",
+      "section": "UTIL",
+      "priority": 88,
+      "confidence": 99,
+      "valid_from": "2026-10-10T04:32+03:00",
+      "valid_until": "2026-10-23T17:00+03:00",
+      "slots": [
+        "morning",
+        "evening"
+      ],
+      "editorial_type": "service",
+      "publication_lifecycle": "new_story",
+      "material_fact_gate": "PASS",
+      "sources": [
+        {
+          "name": "Distribuție Oltenia — întreruperi programate Vâlcea",
+          "url": "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf",
+          "tier": "T1"
+        }
+      ],
+      "auto_generated": true,
+      "auto_scope": "structured_primary_fact_kernel",
+      "structured_primary_event": {
+        "source_id": "distributie-oltenia-planned-electricity-interruptions",
+        "parser": "RO_UTILITY_ELECTRICITY_INTERRUPTION_LISTING_V1",
+        "event_start": "2026-10-23T09:00+03:00",
+        "event_end": "2026-10-23T17:00+03:00",
+        "body_sha256": "6572d402f41845cce5d743cca2a96d2b1c1f0cff38ca09a9f04fe7dcc7f2c441"
+      },
+      "fact_kernel": {
+        "format_hint": "service_news",
+        "headline": {
+          "text": "Stroeşti: întrerupere de curent programată pe 23 octombrie 2026, între 09:00–17:00",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "dek": {
+          "text": "Distribuție Oltenia include PTA Stroeşti 2, PTA Cireşu 1, PTA Obroceşti, PTA Dianu 1, PTA Dianu 2 în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+          "source_urls": [
+            "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+          ]
+        },
+        "claims": [
+          {
+            "id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text": "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Stroeşti, pe 23 octombrie 2026, între orele 09:00 și 17:00.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text": "Zona indicată în documentul oficial este PTA Stroeşti 2, PTA Cireşu 1, PTA Obroceşti, PTA Dianu 1, PTA Dianu 2.",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ]
+      },
+      "headline": "Stroeşti: întrerupere de curent programată pe 23 octombrie 2026, între 09:00–17:00",
+      "dek": "Distribuție Oltenia include PTA Stroeşti 2, PTA Cireşu 1, PTA Obroceşti, PTA Dianu 1, PTA Dianu 2 în programul lucrărilor pentru prevenirea și corectarea avariilor. Intervalul anunțat este 09:00–17:00.",
+      "paragraphs": [
+        "Zona indicată în documentul oficial este PTA Stroeşti 2, PTA Cireşu 1, PTA Obroceşti, PTA Dianu 1, PTA Dianu 2.",
+        "Distribuție Oltenia a programat o întrerupere a alimentării cu energie electrică în Stroeşti, pe 23 octombrie 2026, între orele 09:00 și 17:00."
+      ],
+      "editorial_product": {
+        "writer_id": "manual_journalism_v1",
+        "writer_mode": "FACT_KERNEL_COMPOSED",
+        "format": "service_news",
+        "claim_trace_complete": true,
+        "source_level_trace": true,
+        "headline_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+        ],
+        "dek_source_urls": [
+          "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+        ],
+        "claim_trace": [
+          {
+            "claim_id": "affected-scope",
+            "role": "material_change",
+            "kind": "fact",
+            "text_sha256": "a509d81cdd9eedb3b9e00ecefdf4f0ebc7b0ed0950af26fb85106d4a20038631",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          },
+          {
+            "claim_id": "schedule",
+            "role": "who_what_when_where",
+            "kind": "reader_service",
+            "text_sha256": "7659c1a5d6329a59e58da70bca701277b0c41e4f0eff56f71affdc376777daa2",
+            "source_urls": [
+              "https://www.distributieoltenia.ro/resources/ckfinder/core/connector/php/connector.php?command=Proxy&lang=en&type=Files&currentFolder=%2FDO%2FINTRERUPERI%20PROGRAMATE%2F2026%2Foct%2F19.-25.10%2F&hash=b6aa3f17237de08c&fileName=Lucrari%20pentru%20prevenire%20si%20corectare%20avarii%20-%20saptamana%2019_10%20-%2025_10_2026%20-%20Valcea.pdf"
+            ]
+          }
+        ],
+        "auto_publish_eligible_by_format": true,
+        "additional_gate": null,
+        "product_fingerprint_sha256": "22824625a18a75c0754b845d50490774afabe00bc10c44af54655b6a284d7e73"
+      }
+    },
+    {
       "id": "caineni-cornetu-avrig-acord-mediu-20260921",
       "status": "editorial_hold",
       "section": "MEDIU",
@@ -32186,8 +33058,8 @@
     }
   ],
   "stats": {
-    "story_count": 198,
-    "fact_kernel_composed": 164,
+    "story_count": 206,
+    "fact_kernel_composed": 172,
     "legacy_passthrough": 25,
     "editorial_holds": 9
   },
@@ -32198,5 +33070,5 @@
     "reputational_formats_fail_closed": true,
     "satire_routed_separately": true
   },
-  "registry_fingerprint_sha256": "9bf93d0b8599fb3ee846b1934030e72d104621f5460201047804d227abd012e1"
+  "registry_fingerprint_sha256": "822519ff00d04a35d20b36c5c1843f7544dab28df62c9ac88b24175ce32aa96c"
 }
