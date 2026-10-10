@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-10-10T18:34:22Z",
+  "generated_at": "2026-10-10T22:30:21Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -126,8 +126,7 @@
         "ajofm-valcea-statistics",
         "posturi-gov-valcea-all",
         "ejobs-valcea",
-        "bestjobs-valcea",
-        "linkedin-jobs-valcea"
+        "bestjobs-valcea"
       ],
       "official_changed_sources": [
         "ajofm-valcea-press",
@@ -135,6 +134,7 @@
         "posturi-gov-valcea-all"
       ],
       "degraded_sources": [
+        "linkedin-jobs-valcea",
         "olx-jobs-valcea"
       ],
       "sources": [
@@ -167,7 +167,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.anofm.ro/valcea/categorie/statistica-somaj/?anselectat=2026",
-          "fingerprint": "78674af8516269c5ea8c57536d320d3e133c637cf0d211e4b49d13acf5326ffe",
+          "fingerprint": "9464e7b00a0184e4ace7bea120e0b0307d0866eff0e171117f4a492fced0c684",
           "match_count": 24,
           "matched_terms": [
             "șomaj",
@@ -188,7 +188,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://posturi.gov.ro/judet/valcea/",
-          "fingerprint": "f9ea690861efd2ac279c0288447800ad92c499209cd880e20a143c32825da885",
+          "fingerprint": "9197744894a3096befa47f4e77d854eeb044762c878674ae66f85976a641e4f8",
           "match_count": 16,
           "matched_terms": [
             "Vâlcea",
@@ -208,7 +208,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "e9f573d135c24cea3c0c701bb6c0eb32d33d19e693dc57c81f2df0c43d6adcb9",
+          "fingerprint": "41c8c531f9db98a339adb86f81dc3f5ac394dfb15cbd6facab9fed6f1c411b72",
           "match_count": 19,
           "matched_terms": [
             "Joburi",
@@ -219,7 +219,7 @@
           "numeric_signals": [
             {
               "kind": "jobs",
-              "value_text": "1313"
+              "value_text": "1248"
             }
           ],
           "health": "OK",
@@ -254,24 +254,15 @@
           "url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
           "source_class": "T2_DISCOVERY_ONLY",
           "publication_authority": false,
-          "reachable": true,
-          "http_status": 200,
-          "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
-          "fingerprint": "e53f1aeb4bf21a27f7f0283b349aa5d350df249b580707fc02d4a13f46395631",
-          "match_count": 16,
-          "matched_terms": [
-            "joburi",
-            "Vîlcea"
-          ],
-          "numeric_signals": [
-            {
-              "kind": "jobs",
-              "value_text": "6"
-            }
-          ],
-          "health": "OK",
-          "error": null,
-          "change": "CHANGED_REVIEW_REQUIRED"
+          "reachable": false,
+          "http_status": 429,
+          "fingerprint": null,
+          "match_count": 0,
+          "matched_terms": [],
+          "numeric_signals": [],
+          "health": "UNREACHABLE",
+          "error": "HTTP 429",
+          "change": "PROBE_FAILED"
         },
         {
           "id": "olx-jobs-valcea",
