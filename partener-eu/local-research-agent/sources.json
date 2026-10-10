@@ -1,0 +1,252 @@
+{
+  "schema": "PARTENER_EU_LOCAL_RESEARCH_SOURCE_REGISTRY_V1",
+  "version": "2026.09.03.1",
+  "policy": {
+    "market_intelligence_only": true,
+    "material_fact_use": false,
+    "open_call_authorized": false,
+    "publication_effect": "NONE",
+    "notes": "Local acquisition expands coverage but never authorizes call facts. PARTENER Engine must reconcile and admit material fields separately."
+  },
+  "sources": [
+    {
+      "source_id": "RO_MYSMIS_CALLS",
+      "source_family": "ROMANIA",
+      "programme_family": "MySMIS2021",
+      "authority_class": "T1_OFFICIAL_SYSTEM",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/finantari-programe-2021-2027",
+      "allow_hosts": ["resurse.mysmis2021.gov.ro"],
+      "strategy": "browser",
+      "markers_any": ["apeluri validate", "finantari programe", "mysmis"],
+      "browser_wait_ms": 2500
+    },
+    {
+      "source_id": "RO_MYSMIS_HOME",
+      "source_family": "ROMANIA",
+      "programme_family": "MySMIS2021",
+      "authority_class": "T1_OFFICIAL_SYSTEM",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "url": "https://resurse.mysmis2021.gov.ro/ords/repo_bo/r/mysmis-2021/home",
+      "allow_hosts": ["resurse.mysmis2021.gov.ro"],
+      "strategy": "browser",
+      "markers_any": ["mysmis2021", "ministerul investițiilor", "2021-2027"],
+      "browser_wait_ms": 1800
+    },
+    {
+      "source_id": "RO_AFIR_FUNDS_COUNTER",
+      "source_family": "ROMANIA",
+      "programme_family": "AFIR_PS2027",
+      "authority_class": "T1_OFFICIAL_AGENCY",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+      "allow_hosts": ["www.afir.ro", "afir.ro"],
+      "strategy": "auto",
+      "markers_any": ["contor fonduri disponibile", "intervenția", "sesiune"]
+    },
+    {
+      "source_id": "EEA_RO_CSF_CALLS",
+      "source_family": "EEA_NORWAY",
+      "programme_family": "Civil Society Fund Romania",
+      "authority_class": "T1_OFFICIAL_FUND_OPERATOR",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://eeagrants.org/en/civil-society-fund/romania/calls",
+      "allow_hosts": ["eeagrants.org", "www.eeagrants.org"],
+      "strategy": "auto",
+      "markers_any": ["romania", "call", "civil society"]
+    },
+    {
+      "source_id": "INTERREG_RO_BG",
+      "source_family": "INTERREG",
+      "programme_family": "Romania-Bulgaria",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_DISCOVERY_ONLY",
+      "url": "https://interregviarobg.eu/",
+      "allow_hosts": ["interregviarobg.eu", "www.interregviarobg.eu"],
+      "strategy": "browser",
+      "markers_any": ["romania", "bulgaria", "interreg"],
+      "browser_wait_ms": 1800
+    },
+    {
+      "source_id": "INTERREG_RO_UA",
+      "source_family": "INTERREG",
+      "programme_family": "NEXT Romania-Ukraine",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_DISCOVERY_ONLY",
+      "url": "https://ro-ua.net/en/",
+      "allow_hosts": ["ro-ua.net", "www.ro-ua.net"],
+      "strategy": "browser",
+      "markers_any": ["romania", "ukraine", "interreg"],
+      "browser_wait_ms": 1800
+    },
+    {
+      "source_id": "INTERREG_RO_MD",
+      "source_family": "INTERREG",
+      "programme_family": "NEXT Romania-Republic of Moldova",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_DISCOVERY_ONLY",
+      "url": "https://ro-md.net/en/",
+      "allow_hosts": ["ro-md.net", "www.ro-md.net"],
+      "strategy": "browser",
+      "markers_any": ["romania", "moldova", "interreg"],
+      "browser_wait_ms": 1800
+    },
+    {
+      "source_id": "INTERREG_RO_HU",
+      "source_family": "INTERREG",
+      "programme_family": "Romania-Hungary",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_DISCOVERY_ONLY",
+      "url": "https://interreg-rohu.eu/en/",
+      "allow_hosts": ["interreg-rohu.eu", "www.interreg-rohu.eu"],
+      "strategy": "auto",
+      "markers_any": ["romania", "hungary", "interreg"]
+    },
+    {
+      "source_id": "INTERREG_RO_RS",
+      "source_family": "INTERREG",
+      "programme_family": "Romania-Serbia",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "PLANNED",
+      "url": "https://www.romania-serbia.net/",
+      "allow_hosts": ["www.romania-serbia.net", "romania-serbia.net"],
+      "strategy": "auto",
+      "markers_any": ["romania", "serbia", "interreg"]
+    },
+    {
+      "source_id": "INTERREG_DANUBE_CALLS",
+      "source_family": "INTERREG",
+      "programme_family": "Danube Region",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://interreg-danube.eu/calls-for-proposals/",
+      "allow_hosts": ["interreg-danube.eu", "www.interreg-danube.eu"],
+      "strategy": "auto",
+      "markers_any": ["calls for proposals", "danube"]
+    },
+    {
+      "source_id": "INTERREG_EUROPE",
+      "source_family": "INTERREG",
+      "programme_family": "Interreg Europe",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "url": "https://www.interregeurope.eu/",
+      "allow_hosts": ["www.interregeurope.eu", "interregeurope.eu"],
+      "strategy": "auto",
+      "markers_any": ["interreg europe", "policy learning"]
+    },
+    {
+      "source_id": "EU_FT_TOPIC_SEARCH",
+      "source_family": "EU_DIRECT",
+      "programme_family": "Funding & Tenders",
+      "authority_class": "T1_OFFICIAL_PORTAL",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-search",
+      "allow_hosts": ["ec.europa.eu"],
+      "strategy": "browser",
+      "markers_any": ["funding", "tenders", "opportunities"],
+      "browser_wait_ms": 3500,
+      "max_bytes": 12000000
+    },
+    {
+      "source_id": "EU_LIFE_CALLS",
+      "source_family": "EU_DIRECT",
+      "programme_family": "LIFE",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://cinea.ec.europa.eu/programmes/life/life-calls-proposals_en",
+      "allow_hosts": ["cinea.ec.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["life", "calls for proposals"]
+    },
+    {
+      "source_id": "EU_INNOVATION_FUND_CALLS",
+      "source_family": "EU_DIRECT",
+      "programme_family": "Innovation Fund",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://climate.ec.europa.eu/eu-action/eu-funding-climate-action/innovation-fund/calls-proposals_en",
+      "allow_hosts": ["climate.ec.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["innovation fund", "calls"]
+    },
+    {
+      "source_id": "EU_EUI_PORTICO",
+      "source_family": "EU_DIRECT",
+      "programme_family": "European Urban Initiative",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://portico.urban-initiative.eu/urban-panorama/european-urban-initiative",
+      "allow_hosts": ["portico.urban-initiative.eu"],
+      "strategy": "browser",
+      "markers_any": ["european urban initiative", "urban"],
+      "browser_wait_ms": 1800
+    },
+    {
+      "source_id": "EU_EIC_FUNDING",
+      "source_family": "EU_DIRECT",
+      "programme_family": "European Innovation Council",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "CALL_INDEX_DISCOVERY",
+      "url": "https://eic.ec.europa.eu/eic-funding-opportunities_en",
+      "allow_hosts": ["eic.ec.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["eic", "funding opportunities"]
+    },
+    {
+      "source_id": "EU_HORIZON_PROGRAMME",
+      "source_family": "EU_DIRECT",
+      "programme_family": "Horizon Europe",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "url": "https://research-and-innovation.ec.europa.eu/funding/funding-opportunities/funding-programmes-and-open-calls/horizon-europe_en",
+      "allow_hosts": ["research-and-innovation.ec.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["horizon europe", "research and innovation"]
+    },
+    {
+      "source_id": "EU_CERV_PROGRAMME",
+      "source_family": "EU_DIRECT",
+      "programme_family": "CERV",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "PROGRAMMING",
+      "url": "https://commission.europa.eu/funding-tenders/find-funding/eu-funding-programmes/citizens-equality-rights-and-values-programme_en",
+      "allow_hosts": ["commission.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["citizens, equality, rights and values", "cerv"]
+    },
+    {
+      "source_id": "EU_DIGITAL_PROGRAMME",
+      "source_family": "EU_DIRECT",
+      "programme_family": "Digital Europe",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "url": "https://digital-strategy.ec.europa.eu/en/activities/digital-programme",
+      "allow_hosts": ["digital-strategy.ec.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["digital europe programme", "digital programme"]
+    },
+    {
+      "source_id": "EU_CEF_PROGRAMME",
+      "source_family": "EU_DIRECT",
+      "programme_family": "Connecting Europe Facility",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "url": "https://cinea.ec.europa.eu/programmes/connecting-europe-facility_en",
+      "allow_hosts": ["cinea.ec.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["connecting europe facility", "cef"]
+    },
+    {
+      "source_id": "EU_ERASMUS_PROGRAMME",
+      "source_family": "EU_DIRECT",
+      "programme_family": "Erasmus+",
+      "authority_class": "T1_OFFICIAL_PROGRAMME",
+      "observation_state": "PROGRAMME_INTELLIGENCE",
+      "url": "https://erasmus-plus.ec.europa.eu/programme-guide/part-c/how-to-apply",
+      "allow_hosts": ["erasmus-plus.ec.europa.eu"],
+      "strategy": "auto",
+      "markers_any": ["how to apply", "erasmus"]
+    }
+  ]
+}
