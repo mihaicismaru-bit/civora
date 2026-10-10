@@ -2,21 +2,29 @@
   "schema_version": "1.0",
   "product": "VÂLCEA CLAR",
   "stage": "S6_OPERATIONS_GOVERNANCE",
-  "observed_at": "2026-10-07T22:14:18+00:00",
-  "material_fingerprint_sha256": "58e39df12a20e8065c71bd2cee25d3be6f2e32cdb321848a782872d3d2a5f671",
+  "observed_at": "2026-10-10T07:42:37+00:00",
+  "material_fingerprint_sha256": "3e3b3441adec50f6c4ce3e6529b2d0598ca596b8282e67bc9b624e93bfa32933",
   "policy_version": "1.1",
   "status": "READY_WITH_KNOWN_LIMITATIONS",
   "blockers": [],
   "warnings": [
     {
-      "code": "KNOWN_CHANNEL_MEDIA_BACKLOG",
-      "summary": "S1 has explicit blocked channel deliveries",
+      "code": "CHANNEL_DELIVERY_BACKLOG",
+      "summary": "S1 is not fully reconciled because non-site channel deliveries remain pending/blocked; site core stays independently operational",
       "evidence": {
-        "delivered": 2,
-        "pending": 0,
-        "blocked": 3,
-        "cancelled": 0,
-        "other": 0
+        "counts": {
+          "delivered": 10,
+          "pending": 8,
+          "blocked": 22,
+          "cancelled": 0,
+          "other": 0
+        },
+        "blocker_channels": [
+          "facebook",
+          "instagram",
+          "threads",
+          "tiktok"
+        ]
       }
     },
     {
@@ -42,23 +50,24 @@
       "unsafe": []
     },
     "s1_delivery": {
-      "edition_id": "2026-10-07-evening",
-      "complete": true,
+      "edition_id": "2026-10-10-morning",
+      "complete": false,
       "fully_delivered": false,
       "counts": {
-        "delivered": 2,
-        "pending": 0,
-        "blocked": 3,
+        "delivered": 10,
+        "pending": 8,
+        "blocked": 22,
         "cancelled": 0,
         "other": 0
       },
       "blocker_channels": [
         "facebook",
         "instagram",
+        "threads",
         "tiktok"
       ],
       "site_blocker_count": 0,
-      "channel_backlog_count": 3,
+      "channel_backlog_count": 30,
       "lane_model": "site_core_and_each_social_channel_are_independent"
     },
     "s3_visuals": {
@@ -91,10 +100,10 @@
       "valid": true
     },
     "public_runtime": {
-      "edition_id": "2026-10-07-evening",
-      "story_routes": 91,
-      "ux_routes": 129,
-      "safe_story_count": 91
+      "edition_id": "2026-10-10-morning",
+      "story_routes": 99,
+      "ux_routes": 137,
+      "safe_story_count": 99
     }
   },
   "lkg": {
