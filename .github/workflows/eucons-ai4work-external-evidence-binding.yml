@@ -1,0 +1,33 @@
+name: EUCONS AI4WORK External Evidence Binding Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-external-evidence-binding.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/**'
+      - '.github/workflows/eucons-ai4work-external-evidence-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-external-evidence-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  external-evidence-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Reject unverifiable activation evidence references
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_external_evidence_binding_control.py

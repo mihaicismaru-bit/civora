@@ -1,0 +1,36 @@
+{
+  "schema_version": "eucons.ai4work_source_register_provenance_manifest.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "artifact_class": "CONTROL_SCHEMA_NOT_EVIDENCE",
+  "purpose": "Require immutable byte-level provenance for every source-register entry before any PROD final package may rely on the register.",
+  "source_register_schema": "eucons.ai4work_source_register_snapshot.v0.1",
+  "prod_requirements": {
+    "exact_source_provenance_census": true,
+    "exact_source_snapshot_census": true,
+    "source_register_sha256_binding": true,
+    "recompute_snapshot_sha256_from_actual_bytes": true,
+    "verified_at_timezone_required": true,
+    "future_verification_timestamp_forbidden": true,
+    "synthetic": false,
+    "evidence_eligible": true,
+    "status": "VERIFIED_REAL_SOURCE",
+    "secondary_evidence_h1_h5_numeric_points": 0,
+    "project_activity_as_need_evidence": false,
+    "source_register_numeric_rank_eligible": false
+  },
+  "test_twin_requirements": {
+    "status": "TEST_TWIN_NON_EVIDENCE",
+    "synthetic": true,
+    "evidence_eligible": false,
+    "test_twin_evidence_eligible": false,
+    "promotion_to_prod_forbidden": true
+  },
+  "allowed_source_types": [
+    "OFFICIAL_PUBLIC_AUTHORITY",
+    "OFFICIAL_STATISTICAL_OR_EU_INSTITUTION",
+    "INSTITUTIONAL_RESEARCH_OR_EVALUATION",
+    "FIRST_PARTY_CONTROLLED_ARTIFACT",
+    "METHOD_OR_GDPR_CONTROL_ARTIFACT"
+  ],
+  "boundary": "A URL, title or VERIFIED_FOR_FINAL_PACKAGE label is never sufficient provenance. PROD requires the captured source bytes and a recomputed SHA-256 for every registered source. This control does not make secondary evidence numerically rank-eligible and does not treat project activity, funding or training supply as proof of need."
+}

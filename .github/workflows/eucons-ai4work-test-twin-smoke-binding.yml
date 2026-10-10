@@ -1,0 +1,40 @@
+name: EUCONS AI4WORK TEST TWIN Smoke Binding
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/test_prod_activation_test_twin_smoke_binding.py'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - '.github/workflows/eucons-ai4work-test-twin-smoke-binding.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/prod_activation_gate.py'
+      - 'eucons/research/ai4work-step/test_prod_activation_test_twin_smoke_binding.py'
+      - 'eucons/research/ai4work-step/PROD_ACTIVATION_MANIFEST_DRAFT.json'
+      - '.github/workflows/eucons-ai4work-test-twin-smoke-binding.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-test-twin-smoke-binding-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-twin-smoke-binding:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Validate TEST TWIN smoke remains synthetic NON-EVIDENCE
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_prod_activation_test_twin_smoke_binding.py
+      - name: Confirm repository activation remains fail-closed
+        working-directory: eucons/research/ai4work-step
+        run: python prod_activation_gate.py

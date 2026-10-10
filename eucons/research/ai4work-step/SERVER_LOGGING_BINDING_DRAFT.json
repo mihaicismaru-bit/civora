@@ -1,0 +1,56 @@
+{
+  "schema_version": "eucons.ai4work_server_logging_binding.v0.1",
+  "research_id": "AI4WORK-STEP-NF-RUN-001",
+  "date": "2026-08-28",
+  "status": "PROVIDER_PROFILE_FROZEN_ACCOUNT_CONFIGURATION_OPEN",
+  "evidence_class": "CONTROL_ARTIFACT_NOT_NEED_EVIDENCE",
+  "collection_enabled": false,
+  "provider": "CLAUS WEB SRL",
+  "service_family": "Shared Hosting / cPanel",
+  "provider_profile_source": {
+    "reference": "CONTROLLED_FIRST_PARTY_CLAUS_WEB_REPLY_2026_08_28_TICKET_219320",
+    "documentary_binding": "CLAUS_WEB_DOCUMENTARY_BINDING.json",
+    "documentary_binding_sha256": "b2ba26fb6cb63d91a7c924accff9d652236a347155eae24afa52d03381a00c26",
+    "status": "FROZEN_FIRST_PARTY_PROVIDER_PROFILE"
+  },
+  "provider_confirmed_raw_access_fields": [
+    "visitor_ip",
+    "exact_timestamp",
+    "http_method",
+    "full_url_including_query_string",
+    "referer",
+    "user_agent",
+    "http_response_status",
+    "transferred_size",
+    "cf_ray_id_when_cloudflare_path_is_used"
+  ],
+  "provider_confirmed_management": {
+    "raw_access_archiving": "CONFIGURABLE_PER_CPANEL_ACCOUNT",
+    "archive_location_examples": ["/logs/", "/logs/archive/"],
+    "retention": "CONFIGURABLE_PER_CPANEL_ACCOUNT_AND_CONSTRAINED_BY_AVAILABLE_HOSTING_STORAGE",
+    "global_security_logs": "NOT_CONFIRMED_AS_LONG_TERM_EXPORTABLE_BEYOND_PROVIDER_SECURITY_RETENTION",
+    "backup_deleted_data": "MAY_REMAIN_TEMPORARILY_IN_ROTATIONAL_RESIDUAL_OR_IMMUTABLE_BACKUPS_UNTIL_NATURAL_RETENTION_EXPIRY; ordinary production restoration is not expected except authorised recovery/legal/incident cases"
+  },
+  "research_policy_constraints": {
+    "questionnaire_answers_in_query_string": "FORBIDDEN",
+    "direct_identifiers_in_query_string": "FORBIDDEN",
+    "recruitment_channel_transport": "URL_FRAGMENT_OR_DEDICATED_FIRST_PARTY_HEADER_ONLY; NEVER_QUERY_STRING",
+    "application_request_body_logging": "FORBIDDEN",
+    "raw_idempotency_key_logging": "FORBIDDEN",
+    "ip_or_user_agent_in_analytical_store_or_nf06": "FORBIDDEN",
+    "target_access_log_retention": "MAXIMUM_7_DAYS_IF_ACCOUNT_CONFIGURATION_CAN_ENFORCE_IT"
+  },
+  "account_specific_open_facts": {
+    "current_raw_access_archive_setting": null,
+    "current_raw_access_retention_setting": null,
+    "current_authorised_log_access_roles": null,
+    "current_account_service_mapping_for_eucons_ro": "CONTROLLED_2026_PROVIDER_CORRESPONDENCE_EXISTS_BUT_LIVE_CPANEL_BINDING_NOT_READ_BACK",
+    "annex5_account_override": null,
+    "provider_bound_deletion_backup_execution_test": null
+  },
+  "prod_gate_rule": "The frozen provider profile does not satisfy the PROD server-logging gate by itself. Before real collection, the actual eucons.ro cPanel account must be read back and bound to an immutable record showing the effective Raw Access/archive/retention settings and authorised access; any mismatch with the research policy must be corrected and revalidated before activation.",
+  "test_twin_policy": "Any provider-bound smoke data are TEST_TWIN_NON_EVIDENCE and permanently non-promotable.",
+  "merge_authorized": false,
+  "deploy_authorized": false,
+  "real_collection_authorized": false
+}

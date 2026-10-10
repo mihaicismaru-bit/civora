@@ -57,6 +57,7 @@ def submit(payload: dict, store: SQLiteResearchStorage, channel_id: str) -> tupl
 
 def test_twin_frame(records: list[dict]) -> tuple[dict, bytes]:
     source_bytes = NF06.canonical_export_bytes(records)
+    received_at = sorted(record["received_at"] for record in records)
     frame = {
         "research_id": "AI4WORK-STEP-NF-RUN-001",
         "collection_frame_id": "AI4WORK-CF-TEST-E2E-001",
@@ -66,8 +67,9 @@ def test_twin_frame(records: list[dict]) -> tuple[dict, bytes]:
             "AI4WORK_ADULTS_V1": 1,
             "AI4WORK_EMPLOYERS_V1": 1,
         },
-        "collection_started_at": "2026-01-01T00:00:00+00:00",
-        "collection_closed_at": "2026-12-31T23:59:59+00:00",
+        **NF06.instrument_definition_hashes(),
+        "collection_started_at": received_at[0],
+        "collection_closed_at": received_at[-1],
         "collection_channels": [ADULT_CHANNEL, EMPLOYER_CHANNEL],
         "collection_channel_register_sha256": CHANNEL_REGISTER_SHA,
         "source_system": "eucons.ro",
@@ -87,8 +89,8 @@ class EndToEndTestTwinChain(unittest.TestCase):
         The HTTP/store portion runs only through the local reference adapter and
         isolated SQLite test store. Its exported normalized records are copied
         into a separately labelled synthetic TEST TWIN batch before NF06
-        pre-ingest. The synthetic batch must remain permanently NON_EVIDENCE and
-        must fail if anyone attempts PROD promotion.
+        pre-ingest. Rights-held records must be absent from export. The synthetic
+        batch remains permanently NON_EVIDENCE and must fail PROD promotion.
         """
         with tempfile.TemporaryDirectory() as td:
             store = SQLiteResearchStorage(Path(td) / "ai4work-test-twin-chain.sqlite")
@@ -98,6 +100,17 @@ class EndToEndTestTwinChain(unittest.TestCase):
             self.assertEqual(adult_response[0], 201)
             self.assertEqual(employer_response[0], 201)
 
+            adult_receipt = json.loads(adult_response[2].decode("utf-8"))["response_id"]
+            self.assertTrue(store.set_analysis_hold(adult_receipt, "OBJECTED_PENDING_REVIEW"))
+            held_export = (
+                store.export("AI4WORK_ADULTS_V1")
+                + store.export("AI4WORK_EMPLOYERS_V1")
+            )
+            self.assertEqual(len(held_export), 1)
+            self.assertEqual(held_export[0]["form_id"], "AI4WORK_EMPLOYERS_V1")
+            self.assertNotEqual(held_export[0]["response_id"], adult_receipt)
+
+            self.assertTrue(store.clear_analysis_hold(adult_receipt))
             exported_real_shape = (
                 store.export("AI4WORK_ADULTS_V1")
                 + store.export("AI4WORK_EMPLOYERS_V1")
@@ -132,6 +145,9 @@ class EndToEndTestTwinChain(unittest.TestCase):
             self.assertEqual(manifest["channel_counts"], {ADULT_CHANNEL: 1, EMPLOYER_CHANNEL: 1})
             self.assertEqual(manifest["dominant_channel_share"], 0.5)
             self.assertEqual(manifest["source_export_sha256"], hashlib.sha256(source_bytes).hexdigest())
+            self.assertTrue(manifest["instrument_content_hashes_validated"])
+            self.assertEqual(manifest["form_contract_sha256"], frame["form_contract_sha256"])
+            self.assertEqual(manifest["forms_definition_sha256"], frame["forms_definition_sha256"])
 
             rendered_manifest = NF06.manifest_json_bytes(manifest).decode("utf-8")
             self.assertNotIn("Pregătirea rapidă", rendered_manifest)

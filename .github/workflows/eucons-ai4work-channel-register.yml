@@ -1,0 +1,46 @@
+name: EUCONS AI4WORK Channel Register Gate
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/research/ai4work-step/COLLECTION_CHANNEL_REGISTER_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_FRAME_DRAFT.json'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/collection_channel_register_control.py'
+      - 'eucons/research/ai4work-step/channel_register_prod_gate.py'
+      - 'eucons/research/ai4work-step/test_collection_channel_register_control.py'
+      - '.github/workflows/eucons-ai4work-channel-register.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'eucons/research/ai4work-step/COLLECTION_CHANNEL_REGISTER_DRAFT.json'
+      - 'eucons/research/ai4work-step/COLLECTION_FRAME_DRAFT.json'
+      - 'eucons/research/ai4work-step/form_contract.json'
+      - 'eucons/research/ai4work-step/collection_channel_register_control.py'
+      - 'eucons/research/ai4work-step/channel_register_prod_gate.py'
+      - 'eucons/research/ai4work-step/test_collection_channel_register_control.py'
+      - '.github/workflows/eucons-ai4work-channel-register.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: eucons-ai4work-channel-register-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  channel-register-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run collection channel register tests
+        working-directory: eucons/research/ai4work-step
+        run: python -m unittest -v test_collection_channel_register_control.py
+      - name: Enforce fail-closed channel registry PROD gate
+        working-directory: eucons/research/ai4work-step
+        run: python channel_register_prod_gate.py
