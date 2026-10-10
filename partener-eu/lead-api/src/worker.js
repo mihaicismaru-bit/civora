@@ -12,6 +12,17 @@ export default {
       "Cache-Control": "no-store"
     };
     if (request.method === "OPTIONS") return new Response(null,{status:204,headers});
+    // Read-only, PII-free health probe. A table/binding check is not proof that
+    // an external production lead can be persisted; never claim end-to-end success.
+    if (request.method === "GET" && new URL(request.url).pathname === "/health") {
+      try {
+        if (!env.DB || typeof env.DB.prepare !== "function") throw new Error("NO_D1_BINDING");
+        await env.DB.prepare("SELECT lead_id FROM rpm_leads LIMIT 0").all();
+        return new Response(JSON.stringify({ok:true,status:"READY"}),{status:200,headers});
+      } catch {
+        return new Response(JSON.stringify({ok:false,status:"PERSISTENCE_UNAVAILABLE"}),{status:503,headers});
+      }
+    }
     if (request.method !== "POST") return new Response(JSON.stringify({ok:false,error:"METHOD_NOT_ALLOWED"}),{status:405,headers});
 
     let body;
@@ -36,17 +47,24 @@ export default {
     const now = new Date().toISOString();
     const lead_id = crypto.randomUUID();
 
-    await env.DB.prepare(
-      `INSERT INTO rpm_leads
-      (lead_id, created_at, company, contact_name, contact, employees, delivery_format, source_url, referrer, utm_source, utm_medium, utm_campaign, utm_content, status, notes, ip_hash, user_agent)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'NEW', '', ?, ?)`
-    ).bind(
-      lead_id, now, company, contact_name, contact, employees, delivery_format,
-      clean(body.source_url).slice(0,500), clean(body.referrer).slice(0,500),
-      clean(body.utm_source).slice(0,120), clean(body.utm_medium).slice(0,120),
-      clean(body.utm_campaign).slice(0,180), clean(body.utm_content).slice(0,180),
-      await sha256(ip + (env.IP_SALT || "")), ua.slice(0,500)
-    ).run();
+    // Never report success unless D1 confirms the INSERT. Never return PII
+    // or provider exceptions in the response.
+    try {
+      if (!env.DB || typeof env.DB.prepare !== "function") throw new Error("NO_D1_BINDING");
+      await env.DB.prepare(
+        `INSERT INTO rpm_leads
+        (lead_id, created_at, company, contact_name, contact, employees, delivery_format, source_url, referrer, utm_source, utm_medium, utm_campaign, utm_content, status, notes, ip_hash, user_agent)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'NEW', '', ?, ?)`
+      ).bind(
+        lead_id, now, company, contact_name, contact, employees, delivery_format,
+        clean(body.source_url).slice(0,500), clean(body.referrer).slice(0,500),
+        clean(body.utm_source).slice(0,120), clean(body.utm_medium).slice(0,120),
+        clean(body.utm_campaign).slice(0,180), clean(body.utm_content).slice(0,180),
+        await sha256(ip + (env.IP_SALT || "")), ua.slice(0,500)
+      ).run();
+    } catch {
+      return new Response(JSON.stringify({ok:false,error:"PERSISTENCE_UNAVAILABLE"}),{status:503,headers});
+    }
 
     return new Response(JSON.stringify({ok:true,lead_id}),{status:201,headers});
   }
