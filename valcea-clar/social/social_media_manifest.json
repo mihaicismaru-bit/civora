@@ -14,7 +14,7 @@
     "schema_version": "1.0",
     "contract": "VALCEA_CLAR_TRUTH_BOUND_AUTONOMY_ACCEPTANCE_V1",
     "window_hours": 24,
-    "autonomous_stories_published_24h": 8,
+    "autonomous_stories_published_24h": 9,
     "autonomous_story_ids_24h": [
       "valcea-intrerupere-curent-2026-10-11-horezu",
       "valcea-intrerupere-curent-2026-10-13-glavile",
@@ -23,13 +23,14 @@
       "valcea-intrerupere-curent-2026-10-16-dragasani",
       "valcea-intrerupere-curent-2026-10-21-cernisoara",
       "valcea-intrerupere-curent-2026-10-22-cernisoara",
-      "valcea-intrerupere-curent-2026-10-23-stroesti"
+      "valcea-intrerupere-curent-2026-10-23-stroesti",
+      "valcea-intrerupere-curent-2026-10-24-daesti"
     ],
     "excluded_after_correction_or_hold_24h": [],
     "discovery_to_publish_latency": {
       "status": "MEASURED",
-      "measured": 8,
-      "published": 8,
+      "measured": 9,
+      "published": 9,
       "stories": [
         {
           "story_id": "valcea-intrerupere-curent-2026-10-11-horezu",
@@ -78,24 +79,32 @@
           "seconds": 119,
           "discovered_at_utc": "2026-10-10T01:34:45Z",
           "published_at_utc": "2026-10-10T01:36:44Z"
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-10-24-daesti",
+          "seconds": 120,
+          "discovered_at_utc": "2026-10-10T18:44:11Z",
+          "published_at_utc": "2026-10-10T18:46:11Z"
         }
       ],
-      "max_seconds": 119,
+      "max_seconds": 120,
       "median_seconds": 119
     },
     "photo_coverage": {
       "status": "MEASURED",
       "real_photo_stories": 0,
-      "published_stories": 8,
+      "published_stories": 9,
       "value": 0.0,
       "definition": "rights-bearing, non-synthetic, subject-matched, editor-approved real photograph"
     },
     "public_http_readback": {
-      "status": "PASS",
-      "eligible": 8,
+      "status": "BLOCKED",
+      "eligible": 9,
       "readback_ok": 8,
-      "value": 1.0,
-      "blocker_story_ids": [],
+      "value": 0.8889,
+      "blocker_story_ids": [
+        "valcea-intrerupere-curent-2026-10-24-daesti"
+      ],
       "checks": [
         {
           "story_id": "valcea-intrerupere-curent-2026-10-11-horezu",
@@ -176,6 +185,16 @@
           "headline_ok": true,
           "ok": true,
           "error": null
+        },
+        {
+          "story_id": "valcea-intrerupere-curent-2026-10-24-daesti",
+          "url": "https://valceaclar.ro/stiri/valcea-intrerupere-curent-2026-10-24-daesti/",
+          "projected": false,
+          "http_status": null,
+          "canonical_ok": false,
+          "headline_ok": false,
+          "ok": false,
+          "reason": "missing_from_public_projection"
         }
       ],
       "projection_evidence": {
@@ -191,8 +210,8 @@
     "facebook_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 3,
-      "eligible": 8,
-      "value": 0.375,
+      "eligible": 9,
+      "value": 0.3333,
       "delivered_story_ids": [
         "valcea-intrerupere-curent-2026-10-11-horezu",
         "valcea-intrerupere-curent-2026-10-13-glavile",
@@ -202,8 +221,8 @@
     "instagram_delivery_rate_receipt_bound": {
       "status": "MEASURED",
       "delivered": 3,
-      "eligible": 8,
-      "value": 0.375,
+      "eligible": 9,
+      "value": 0.3333,
       "delivered_story_ids": [
         "valcea-intrerupere-curent-2026-10-11-horezu",
         "valcea-intrerupere-curent-2026-10-13-glavile",
@@ -239,6 +258,38 @@
         }
       ],
       "automated_workflow_dispatch_runs": [
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 38077120960,
+          "workflow": "VÂLCEA CLAR Social Publication Engine",
+          "created_at": "2026-10-10T18:46:15Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 38076983018,
+          "workflow": "VÂLCEA CLAR Live Newsroom",
+          "created_at": "2026-10-10T18:44:16Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 38076857415,
+          "workflow": "VÂLCEA CLAR Fact Kernel Builder",
+          "created_at": "2026-10-10T18:42:23Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
+        {
+          "repository": "mihaicismaru-bit/civora",
+          "run_id": 38076418505,
+          "workflow": "VÂLCEA CLAR Public HTTP Health",
+          "created_at": "2026-10-10T18:35:51Z",
+          "triggering_actor": "github-actions[bot]",
+          "triggering_actor_type": "Bot"
+        },
         {
           "repository": "mihaicismaru-bit/civora",
           "run_id": 38063150962,
