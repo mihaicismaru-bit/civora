@@ -2,19 +2,307 @@
   "schema_version": "1.0",
   "contract": "LOCAL_NEWS_OS_PRIMARY_SIGNAL_VERIFICATION_STATE_V1",
   "instance_id": "valcea",
-  "generated_at": "2026-10-10T02:22:11+03:00",
+  "generated_at": "2026-10-10T11:59:57+03:00",
   "publication_authority": "NONE",
   "primary_match_is_fact_kernel": false,
   "primary_match_may_publish_directly": false,
   "required_next_gate": "STRUCTURED_FACT_EXTRACTION_FROM_PRIMARY_EVIDENCE",
-  "queue_generated_at": "2026-10-10T02:20:43+03:00",
-  "task_count": 70,
+  "queue_generated_at": "2026-10-10T11:58:35+03:00",
+  "task_count": 74,
   "primary_match_count": 0,
-  "no_match_count": 27,
-  "unrouted_count": 43,
-  "target_count": 19,
-  "targets_ok": 15,
+  "no_match_count": 30,
+  "unrouted_count": 44,
+  "target_count": 20,
+  "targets_ok": 16,
   "results": [
+    {
+      "signal_id": "180a298c48970db6789cb042",
+      "signal_title": "FOTO. Pompierii au reluat intervenția la incendiul de pădure din Câineni. Focul se întinde pe 4 hectare",
+      "signal_url": "https://seintamplainvalcea.ro/2026/10/10/foto-pompierii-au-reluat-interventia-la-incendiul-de-padure-din-caineni-focul-se-intinde-pe-4-hectare/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-10T11:11:15+03:00",
+      "verification_route_id": "fire_rescue_alert",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "isu-valcea-stiri-locale",
+            "name": "ISU Vâlcea — Știri locale",
+            "url": "https://isuvl.igsu.ro/stiri-locale"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "isu-valcea-comunicate",
+            "name": "ISU Vâlcea",
+            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 8
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "inhga-avertizari-hidrologice-valcea",
+            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
+            "url": "https://www.hidro.ro/warning/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "6f92db0dadd47a40a068bb47",
+      "signal_title": "Bazinul semiolimpic din Râmnicu Vâlcea va purta numele profesorului Silviu Grecu. Înot gratuit pentru elevii din clasele I-IV",
+      "signal_url": "https://evenimentvalcean.ro/bazinul-semiolimpic-din-ramnicu-valcea-va-purta-numele-profesorului-silviu-grecu-inot-gratuit-pentru-elevii-din-clasele-i-iv/",
+      "signal_publisher": "Eveniment Vâlcean",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-10T10:53:51+03:00",
+      "verification_route_id": "education",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "ccd-valcea-noutati",
+            "name": "Casa Corpului Didactic Vâlcea",
+            "url": "https://ccdvl.ro/category/noutati/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "isj-valcea-comunicate",
+            "name": "Inspectoratul Școlar Județean Vâlcea",
+            "url": "https://www.isjvalcea.ro/avizier/comunicate-de-pres%C4%83"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 3
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "19552b5aafc0b8b573a906de",
+      "signal_title": "Deputatul vâlcean Ștefan Ovidiu Popa, mesaj direct pentru PNL: Blocajele politice îi costă pe români",
+      "signal_url": "https://seintamplainvalcea.ro/2026/10/10/deputatul-valcean-stefan-ovidiu-popa-mesaj-direct-pentru-pnl-blocajele-politice-ii-costa-pe-romani/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-10T10:43:20+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "63f22745ae4dbda4fa4dc764",
+      "signal_title": "O sibiancă a scris, acum 30 de ani, un altfel de abecedar pentru sora ei. Acum a devenit o carte pe care a ilustrat-o fiica ei de opt ani",
+      "signal_url": "https://www.turnulsfatului.ro/2026/10/10/o-sibianca-a-scris-acum-30-de-ani-un-altfel-de-abecedar-pentru-sora-ei-acum-a-devenit-o-carte-pe-care-a-ilustrat-o-fiica-ei-de-opt-ani/",
+      "signal_publisher": "Turnul Sfatului",
+      "signal_published_at": "2026-10-10T10:05:22+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "457a7b7b6bd105617c1b2bc0",
+      "signal_title": "Peste 6 milioane de lei, decontate pentru investiții în stațiunile balneare. Călimănești, printre localitățile vizate",
+      "signal_url": "https://seintamplainvalcea.ro/2026/10/10/peste-6-milioane-de-lei-decontate-pentru-investitii-in-statiunile-balneare-calimanesti-printre-localitatile-vizate/",
+      "signal_publisher": "Se întâmplă în Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-10T09:50:11+03:00",
+      "verification_route_id": "calimanesti_administration",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "primaria-calimanesti-comunicate",
+            "name": "Primăria Orașului Călimănești",
+            "url": "https://www.primaria-calimanesti.ro/anunturi/comunicate.html"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "efd02bb49cfa0354f8e5bbec",
+      "signal_title": "O oră din viața ta poate însemna atât de mult pentru altcineva",
+      "signal_url": "https://jurnalulolteniei.ro/o-ora-din-viata-ta-poate-insemna-atat-de-mult-pentru-altcineva/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-10T08:37:25+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "22789dc6e017f2a32487f099",
+      "signal_title": "Gaze naturale pentru aproape 9.000 de locuitori din Dolj",
+      "signal_url": "https://jurnalulolteniei.ro/gaze-naturale-pentru-aproape-9-000-de-locuitori-din-dolj/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-10T08:03:49+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "479ab1caad638fd80ce67a01",
+      "signal_title": "Încă un RMN, anunțat pentru Urgențele din Severin",
+      "signal_url": "https://jurnalulolteniei.ro/inca-un-rmn-anuntat-pentru-urgentele-din-severin/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-10T07:54:15+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "4c1d131e7b449312814df8a7",
+      "signal_title": "Mehedinți: 8 milioane de lei pentru energie verde",
+      "signal_url": "https://jurnalulolteniei.ro/mehedinti-8-milioane-de-lei-pentru-energie-verde/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-10T07:29:01+03:00",
+      "verification_route_id": "utilities",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "news_source_id",
+            "id": "apavil-comunicate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=1178"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "apavil-opriri-programate",
+            "name": "APAVIL S.A.",
+            "url": "https://apavil.ro/?page_id=962"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 2
+        },
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "cet-govora-termoficare-advisories",
+            "name": "CET Govora S.A. — Termoficare Vâlcea",
+            "url": "https://www.termoficarevalcea.ro/blog/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 1
+        },
+        {
+          "target": {
+            "ref_type": "primary_target_id",
+            "id": "aba-olt-sga-valcea",
+            "name": "Administrația Bazinală de Apă Olt — SGA Vâlcea",
+            "url": "https://olt.rowater.ro/sga-valcea/"
+          },
+          "status": "PASS",
+          "error": null,
+          "documents_examined": 10
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
+    {
+      "signal_id": "9363c682c04797cef786ff10",
+      "signal_title": "Anchetă în Dolj: o armă ar fi fost folosită într-un plan fictiv",
+      "signal_url": "https://jurnalulolteniei.ro/ancheta-in-dolj-o-arma-ar-fi-fost-folosita-intr-un-plan-fictiv/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_published_at": "2026-10-10T06:55:28+03:00",
+      "verification_route_id": "general_local_signal",
+      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
+      "publication_authority": "NONE",
+      "material_fact_ready": false,
+      "fact_kernel_ready": false
+    },
+    {
+      "signal_id": "4816c96e99a1457c15496ca8",
+      "signal_title": "Anchetă după un accident mortal produs la o demolare în Dolj",
+      "signal_url": "https://jurnalulolteniei.ro/ancheta-dupa-un-accident-mortal-produs-la-o-demolare-in-dolj/",
+      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
+      "signal_tier": "T2",
+      "signal_published_at": "2026-10-10T06:38:18+03:00",
+      "verification_route_id": "police_public_safety",
+      "attempts": [
+        {
+          "target": {
+            "ref_type": "manual_watch_source_id",
+            "id": "ipj-valcea-stiri",
+            "name": "Inspectoratul de Poliție Județean Vâlcea",
+            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
+          },
+          "status": "DEGRADED",
+          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
+          "documents_examined": 0
+        }
+      ],
+      "publication_authority": "NONE",
+      "signal_is_fact": false,
+      "material_fact_ready": false,
+      "fact_kernel_ready": false,
+      "status": "NO_PRIMARY_MATCH"
+    },
     {
       "signal_id": "7bad9d6864526db98f9a44d6",
       "signal_title": "O școală nouă și încă o grădiniță, printre investițiile pregătite de Ionel Vlădulescu la Budești",
@@ -892,33 +1180,6 @@
       "status": "NO_PRIMARY_MATCH"
     },
     {
-      "signal_id": "133cc7e60e417bbf28bcb61e",
-      "signal_title": "Conflictul a degenerat. Suporterii au răsturnat bănci, au aruncat cu sticle, iar jandarmii au folosit spray-uri lacrimogene și cer întăriri în centrul Sibiului",
-      "signal_url": "https://www.turnulsfatului.ro/2026/10/08/conflictul-dintre-galerii-a-degenerat-au-rasturnat-banci-au-aruncat-cu-sticle-iar-jandarmii-au-folosit-spray-uri-lacrimogene-si-cer-intariri-in-centrul-sibiului/",
-      "signal_publisher": "Turnul Sfatului",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-08T16:47:08+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
       "signal_id": "78f9836f13fab13c6c7005d9",
       "signal_title": "Comunicat de presă – DIGITALIZAREA FIRMEI AVI PISCINE SRL",
       "signal_url": "https://jurnalulolteniei.ro/comunicat-de-presa-digitalizarea-firmei-avi-piscine-srl-3/",
@@ -1003,18 +1264,6 @@
       "fact_kernel_ready": false
     },
     {
-      "signal_id": "e053d1c6c79eb541b46325e3",
-      "signal_title": "Maia Sandu: Putin a vrut Moldova al doilea Belarus",
-      "signal_url": "https://jurnalulolteniei.ro/maia-sandu-putin-a-vrut-moldova-al-doilea-belarus/",
-      "signal_publisher": "Jurnalul Olteniei — Vâlcea",
-      "signal_published_at": "2026-10-08T14:12:28+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
       "signal_id": "9f01e7d0e1f2446c82f54aa5",
       "signal_title": "Continuare about Piața Nord se închide. Comercianții sunt relocați în Piața Centrală",
       "signal_url": "https://www.curierul.ro/piata-nord-se-inchide-comerciantii-sunt-relocati-in-piata-centrala/",
@@ -1052,18 +1301,6 @@
       "material_fact_ready": false,
       "fact_kernel_ready": false,
       "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "3fc8472996fe4497f0129519",
-      "signal_title": "Trei zile prin Mălaia, cu aparatul foto în mână. Fotografii din patru orașe vin să descopere Valea Lotrului",
-      "signal_url": "https://seintamplainvalcea.ro/2026/10/08/trei-zile-prin-malaia-cu-aparatul-foto-in-mana-fotografii-din-patru-orase-vin-sa-descopere-valea-lotrului/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_published_at": "2026-10-08T09:50:29+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
     },
     {
       "signal_id": "d12bae4d191b0a2bacc00372",
@@ -1367,106 +1604,6 @@
       "signal_url": "https://www.indiscret.ro/2026/10/07/lovitura-de-48-miliarde-la-ccr-bolojan-pierde-duelul-cu-lia/",
       "signal_publisher": "Indiscret în Oltenia",
       "signal_published_at": "2026-10-07T17:25:23+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "fe955457e4ba09004521e1c6",
-      "signal_title": "FOTO – O mașină parcată a luat foc la Horezu",
-      "signal_url": "https://seintamplainvalcea.ro/2026/10/07/foto-o-masina-parcata-a-luat-la-horezu/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-07T16:50:51+03:00",
-      "verification_route_id": "fire_rescue_alert",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "primary_target_id",
-            "id": "isu-valcea-stiri-locale",
-            "name": "ISU Vâlcea — Știri locale",
-            "url": "https://isuvl.igsu.ro/stiri-locale"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "news_source_id",
-            "id": "isu-valcea-comunicate",
-            "name": "ISU Vâlcea",
-            "url": "https://isuvl.igsu.ro/comunicate-de-presa"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 8
-        },
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "inhga-avertizari-hidrologice-valcea",
-            "name": "Institutul Național de Hidrologie și Gospodărire a Apelor (INHGA)",
-            "url": "https://www.hidro.ro/warning/"
-          },
-          "status": "PASS",
-          "error": null,
-          "documents_examined": 10
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "fce1211ddb1f2236a7163b1f",
-      "signal_title": "Victorie de prestigiu pentru Mihai Desrobitu la Rm. Vâlcea: plănuiește să se bată acasă pentru centura internațională WBC",
-      "signal_url": "https://www.impactreal.ro/2026/10/07/victorie-de-prestigiu-pentru-mihai-desrobitu-la-rm-valcea-planuieste-sa-se-bata-acasa-pentru-centura-internationala-wbc/",
-      "signal_publisher": "Impact Real",
-      "signal_published_at": "2026-10-07T14:50:59+03:00",
-      "verification_route_id": "general_local_signal",
-      "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
-      "publication_authority": "NONE",
-      "material_fact_ready": false,
-      "fact_kernel_ready": false
-    },
-    {
-      "signal_id": "ff86c3b98162fd870024d978",
-      "signal_title": "FOTO/VIDEO. ACCIDENT în RÂMNICU VÂLCEA, pe b-dul Nicolae Bălcescu",
-      "signal_url": "https://seintamplainvalcea.ro/2026/10/07/foto-video-accident-in-ramnicu-valcea-pe-b-dul-nicolae-balcescu/",
-      "signal_publisher": "Se întâmplă în Vâlcea",
-      "signal_tier": "T2",
-      "signal_published_at": "2026-10-07T13:06:53+03:00",
-      "verification_route_id": "police_public_safety",
-      "attempts": [
-        {
-          "target": {
-            "ref_type": "manual_watch_source_id",
-            "id": "ipj-valcea-stiri",
-            "name": "Inspectoratul de Poliție Județean Vâlcea",
-            "url": "https://vl.politiaromana.ro/ro/stiri-si-media/stiri"
-          },
-          "status": "DEGRADED",
-          "error": "URLError: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1032)>",
-          "documents_examined": 0
-        }
-      ],
-      "publication_authority": "NONE",
-      "signal_is_fact": false,
-      "material_fact_ready": false,
-      "fact_kernel_ready": false,
-      "status": "NO_PRIMARY_MATCH"
-    },
-    {
-      "signal_id": "5c581a458a28f3d6162aa05d",
-      "signal_title": "Harta-firmelor.ro: platforma gratuită care arată cine se află în spatele companiilor din România",
-      "signal_url": "https://stirileolteniei.ro/harta-firmelor-ro-platforma-gratuita-care-arata-cine-se-afla-in-spatele-companiilor-din-romania/",
-      "signal_publisher": "Știrile Olteniei",
-      "signal_published_at": "2026-10-07T07:37:48+03:00",
       "verification_route_id": "general_local_signal",
       "status": "UNROUTED_NEEDS_TARGET_DISCOVERY",
       "publication_authority": "NONE",
