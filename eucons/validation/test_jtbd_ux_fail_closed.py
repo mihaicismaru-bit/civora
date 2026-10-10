@@ -31,6 +31,14 @@ def expect_failure(validator, data, label):
         raise AssertionError(f"fail-closed regression accepted: {label}")
 
 
+def expect_home_failure(validator, rendered, journeys, label):
+    try:
+        validator.validate_homepage_render(rendered, journeys)
+    except validator.ValidationError:
+        return
+    raise AssertionError(f"homepage fail-closed regression accepted: {label}")
+
+
 def main():
     validator = load_validator()
     canonical = json.loads(CONTRACT_PATH.read_text(encoding="utf-8"))
@@ -64,7 +72,26 @@ def main():
     broken["accessibility_acceptance"]["minimum_touch_target_px"] = 32
     expect_failure(validator, broken, "undersized touch target")
 
-    print(json.dumps({"status": "PASS", "phase": "R04", "negative_cases": 7}, ensure_ascii=False))
+    builder = validator.load_builder()
+    rendered_home = builder.render_home(builder.load_contracts())
+    journeys = canonical["journeys"]
+    validator.validate_homepage_render(rendered_home, journeys)
+
+    broken_home = rendered_home.replace(
+        validator.HOMEPAGE_PRIMARY_ACTION,
+        '<a class="eu-button eu-button--primary" href="/verifica-proiectul/">Cere evaluarea proiectului</a>',
+        1,
+    )
+    expect_home_failure(validator, broken_home, journeys, "hero bypasses four-journey chooser")
+
+    broken_home = rendered_home.replace(
+        validator.HOMEPAGE_SECONDARY_ACTION,
+        validator.HOMEPAGE_LEGACY_OFFER_ACTION,
+        1,
+    )
+    expect_home_failure(validator, broken_home, journeys, "generic offer promoted above journey selection")
+
+    print(json.dumps({"status": "PASS", "phase": "R04", "negative_cases": 9}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
