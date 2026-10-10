@@ -18,7 +18,7 @@ function request(method, path='/', body=null, origin='https://partener.eu'){
 let inserted=[];
 const DB={
   prepare(query){
-    if(query.startsWith('SELECT')) return {all:async()=>({results:[]})};
+    if(query.startsWith('SELECT')) return {all:async()=>({results:[],success:true})};
     assert.match(query,/INSERT INTO rpm_leads/);
     return {bind(...params){return {run:async()=>{
       inserted.push(params);
@@ -69,6 +69,15 @@ assert.equal(r.status,503);assert.deepEqual(data,{ok:false,error:'PERSISTENCE_UN
 ({r,data}=await call('POST','/',synthetic,failed));
 assert.equal(r.status,503);assert.equal(data.error,'PERSISTENCE_UNAVAILABLE');
 assert.equal(JSON.stringify(data).includes(synthetic.contact),false);
+// A D1 return value with success=false must never produce HTTP 201.
+const falseDb={DB:{prepare(query){
+  if(query.startsWith('SELECT')) return {all:async()=>({success:false})};
+  return {bind(){return {run:async()=>({success:false})}}};
+}},IP_SALT:'only-a-test-salt'};
+({r,data}=await call('GET','/health',null,falseDb));
+assert.equal(r.status,503);
+({r,data}=await call('POST','/',synthetic,falseDb));
+assert.equal(r.status,503);assert.equal(data.error,'PERSISTENCE_UNAVAILABLE');
 // A honeypot must NOT hit D1 or claim a stored lead ID.
 const before=inserted.length;
 ({r,data}=await call('POST','/',{...synthetic,website:'bot-honeypot'},good));
