@@ -59,6 +59,8 @@ PAGE_WAIT_MS = max(0, int(os.getenv("MIPE_PAGE_WAIT_MS", "350")))
 MAX_DOC_BYTES = max(1_000_000, int(os.getenv("MIPE_MAX_DOC_BYTES", "25000000")))
 MAX_DOCUMENTS = max(20, int(os.getenv("MIPE_MAX_DOCUMENTS", "160")))
 MAX_FRONTIER = max(200, int(os.getenv("MIPE_MAX_FRONTIER", "3000")))
+BROWSER_RECYCLE_PAGES = max(5, int(os.getenv("MIPE_BROWSER_RECYCLE_PAGES", "15")))
+MAX_BROWSER_RESTARTS = max(1, int(os.getenv("MIPE_MAX_BROWSER_RESTARTS", "5")))
 BROWSER_EXECUTABLE = os.getenv("MIPE_BROWSER_EXECUTABLE", "").strip()
 HEADLESS = os.getenv("MIPE_HEADLESS", "0").strip().lower() not in {"0", "false", "no"}
 RETRIEVAL_TRANSPORT = os.getenv("MIPE_RETRIEVAL_TRANSPORT", "playwright-edge-direct-romania-v3").strip()
@@ -392,15 +394,38 @@ def main() -> int:
         }
         if BROWSER_EXECUTABLE:
             launch["executable_path"] = BROWSER_EXECUTABLE
-        browser = pw.chromium.launch(**launch)
-        context = browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131 Safari/537.36 Edg/131",
-            locale="ro-RO", timezone_id="Europe/Bucharest", viewport={"width": 1440, "height": 1000},
-        )
-        context.set_default_timeout(6000)
-        context.set_default_navigation_timeout(PAGE_TIMEOUT_MS)
-        context.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined});")
-        context.route("**/*", lambda route: route.abort() if route.request.resource_type in {"image", "media", "font"} else route.continue_())
+
+        def open_browser() -> tuple[Any, Any]:
+            next_browser = pw.chromium.launch(**launch)
+            next_context = next_browser.new_context(
+                user_agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/131 Safari/537.36",
+                locale="ro-RO", timezone_id="Europe/Bucharest", viewport={"width": 1440, "height": 1000},
+            )
+            next_context.set_default_timeout(6000)
+            next_context.set_default_navigation_timeout(PAGE_TIMEOUT_MS)
+            next_context.add_init_script("Object.defineProperty(navigator,'webdriver',{get:()=>undefined});")
+            next_context.route(
+                "**/*",
+                lambda route: route.abort()
+                if route.request.resource_type in {"image", "media", "font"}
+                else route.continue_(),
+            )
+            return next_browser, next_context
+
+        def close_browser(active_browser: Any, active_context: Any) -> None:
+            try:
+                active_context.close()
+            except Exception:
+                pass
+            try:
+                active_browser.close()
+            except Exception:
+                pass
+
+        browser, context = open_browser()
+        pages_since_launch = 0
+        browser_restarts = 0
+        planned_recycles = 0
 
         while queue and len(seen) < MAX_PAGES and time.monotonic() < deadline:
             _rank, _seq, url, depth, hint, parent = heapq.heappop(queue)
@@ -408,96 +433,125 @@ def main() -> int:
             if url in seen:
                 continue
             seen.add(url)
-            page = context.new_page()
             print(f"[MIPE V3 {len(seen)}/{MAX_PAGES} d={depth}] {url}", flush=True)
-            try:
-                response = page.goto(url, wait_until="commit", timeout=PAGE_TIMEOUT_MS)
+
+            if pages_since_launch >= BROWSER_RECYCLE_PAGES:
+                close_browser(browser, context)
+                browser, context = open_browser()
+                pages_since_launch = 0
+                planned_recycles += 1
+                print(f"  BROWSER RECYCLE planned={planned_recycles}", flush=True)
+
+            while True:
+                page = None
                 try:
-                    page.wait_for_load_state("domcontentloaded", timeout=min(PAGE_TIMEOUT_MS, 7000))
-                except PlaywrightTimeoutError:
-                    pass
-                if PAGE_WAIT_MS:
-                    page.wait_for_timeout(PAGE_WAIT_MS)
-                status = response.status if response else 0
-                if status and status >= 400:
-                    raise RuntimeError(f"HTTP {status}")
-                final = canonicalize(page.url)
-                if not final:
-                    raise RuntimeError("redirect_outside_official_host")
-                source_available = True
-                title = choose_title(page, final, hint)
-                text, selector = extract_text(page, title)
-                links = page.locator("a[href]").evaluate_all("els=>els.map(a=>({href:a.href,text:(a.innerText||a.textContent||'').trim()}))")
+                    page = context.new_page()
+                    response = page.goto(url, wait_until="commit", timeout=PAGE_TIMEOUT_MS)
+                    try:
+                        page.wait_for_load_state("domcontentloaded", timeout=min(PAGE_TIMEOUT_MS, 7000))
+                    except PlaywrightTimeoutError:
+                        pass
+                    if PAGE_WAIT_MS:
+                        page.wait_for_timeout(PAGE_WAIT_MS)
+                    status = response.status if response else 0
+                    if status and status >= 400:
+                        raise RuntimeError(f"HTTP {status}")
+                    final = canonicalize(page.url)
+                    if not final:
+                        raise RuntimeError("redirect_outside_official_host")
+                    source_available = True
+                    title = choose_title(page, final, hint)
+                    text, selector = extract_text(page, title)
+                    links = page.locator("a[href]").evaluate_all("els=>els.map(a=>({href:a.href,text:(a.innerText||a.textContent||'').trim()}))")
 
-                doc_refs = []
-                for link in links:
-                    href = canonicalize(str(link.get("href") or ""), final)
-                    if not href:
-                        continue
-                    label = clean(link.get("text"))
-                    if is_document(href):
-                        doc_refs.append({"name": label or Path(urllib.parse.urlparse(href).path).name, "url": href})
-                        if href not in documents and href not in previous_doc_urls and len(documents) < MAX_DOCUMENTS and time.monotonic() < deadline - 15:
-                            try:
-                                r = context.request.get(href, timeout=PAGE_TIMEOUT_MS, fail_on_status_code=False)
-                                raw = r.body()
-                                if r.ok and raw and len(raw) <= MAX_DOC_BYTES:
-                                    doc_text, extraction = extract_document(raw, href)
-                                    documents[href] = {
-                                        "url": href,
-                                        "name": label or Path(urllib.parse.urlparse(href).path).name,
-                                        "status": r.status,
-                                        "contentType": r.headers.get("content-type", ""),
-                                        "bytes": len(raw),
-                                        "sha256": hashlib.sha256(raw).hexdigest(),
-                                        "extraction": extraction,
-                                        "textPreview": doc_text,
-                                        "observedAt": observed_at,
-                                        "source": "MIPE",
-                                        "tier": "T1",
-                                        "verification": "CANONICAL_OFFICIAL_FETCH",
-                                    }
-                            except Exception as doc_exc:
-                                documents[href] = {"url": href, "name": label, "error": f"{type(doc_exc).__name__}: {doc_exc}", "observedAt": observed_at}
-                        continue
-                    if depth < MAX_DEPTH:
-                        enqueue(href, depth + 1, label, final)
+                    doc_refs = []
+                    for link in links:
+                        href = canonicalize(str(link.get("href") or ""), final)
+                        if not href:
+                            continue
+                        label = clean(link.get("text"))
+                        if is_document(href):
+                            doc_refs.append({"name": label or Path(urllib.parse.urlparse(href).path).name, "url": href})
+                            if href not in documents and href not in previous_doc_urls and len(documents) < MAX_DOCUMENTS and time.monotonic() < deadline - 15:
+                                try:
+                                    r = context.request.get(href, timeout=PAGE_TIMEOUT_MS, fail_on_status_code=False)
+                                    raw = r.body()
+                                    if r.ok and raw and len(raw) <= MAX_DOC_BYTES:
+                                        doc_text, extraction = extract_document(raw, href)
+                                        documents[href] = {
+                                            "url": href,
+                                            "name": label or Path(urllib.parse.urlparse(href).path).name,
+                                            "status": r.status,
+                                            "contentType": r.headers.get("content-type", ""),
+                                            "bytes": len(raw),
+                                            "sha256": hashlib.sha256(raw).hexdigest(),
+                                            "extraction": extraction,
+                                            "textPreview": doc_text,
+                                            "observedAt": observed_at,
+                                            "source": "MIPE",
+                                            "tier": "T1",
+                                            "verification": "CANONICAL_OFFICIAL_FETCH",
+                                        }
+                                except Exception as doc_exc:
+                                    documents[href] = {"url": href, "name": label, "error": f"{type(doc_exc).__name__}: {doc_exc}", "observedAt": observed_at}
+                            continue
+                        if depth < MAX_DEPTH:
+                            enqueue(href, depth + 1, label, final)
 
-                accepted = relevant_page(title, text, final) and len(text) >= 100
-                if accepted:
-                    event = classify_event(title, text)
-                    pclass = page_class(title, text, final)
-                    pages.append({
-                        "id": hashlib.sha256(final.encode()).hexdigest()[:20],
-                        "url": final,
-                        "title": title,
-                        "programme": programme_tag(final, title, text),
-                        "pageClass": pclass,
-                        "kind": event,
-                        "summary": clean(text[:1200]),
-                        "textPreview": text,
-                        "documents": doc_refs[:80],
-                        "contentHash": hashlib.sha256(text.encode()).hexdigest(),
-                        "contentSelector": selector,
-                        "tier": "T1",
-                        "source": "MIPE",
-                        "observedAt": observed_at,
-                        "retrievalTransport": RETRIEVAL_TRANSPORT,
-                        "verification": "CANONICAL_OFFICIAL_FETCH",
-                    })
-                if url in seed_urls:
-                    roots.append({"root": url, "ok": True, "status": status, "finalUrl": final})
-                print(f"  OK accepted={accepted} links={len(links)} docs={len(doc_refs)} title={title[:100]!r}", flush=True)
-            except Exception as exc:
-                err = f"{type(exc).__name__}: {exc}"
-                failures.append({"url": url, "error": err})
-                if url in seed_urls:
-                    roots.append({"root": url, "ok": False, "error": err})
-                print(f"  FAIL {err}", flush=True)
-            finally:
-                page.close()
-        context.close()
-        browser.close()
+                    accepted = relevant_page(title, text, final) and len(text) >= 100
+                    if accepted:
+                        event = classify_event(title, text)
+                        pclass = page_class(title, text, final)
+                        pages.append({
+                            "id": hashlib.sha256(final.encode()).hexdigest()[:20],
+                            "url": final,
+                            "title": title,
+                            "programme": programme_tag(final, title, text),
+                            "pageClass": pclass,
+                            "kind": event,
+                            "summary": clean(text[:1200]),
+                            "textPreview": text,
+                            "documents": doc_refs[:80],
+                            "contentHash": hashlib.sha256(text.encode()).hexdigest(),
+                            "contentSelector": selector,
+                            "tier": "T1",
+                            "source": "MIPE",
+                            "observedAt": observed_at,
+                            "retrievalTransport": RETRIEVAL_TRANSPORT,
+                            "verification": "CANONICAL_OFFICIAL_FETCH",
+                        })
+                    if url in seed_urls:
+                        roots.append({"root": url, "ok": True, "status": status, "finalUrl": final})
+                    pages_since_launch += 1
+                    print(f"  OK accepted={accepted} links={len(links)} docs={len(doc_refs)} title={title[:100]!r}", flush=True)
+                    break
+                except Exception as exc:
+                    err = f"{type(exc).__name__}: {exc}"
+                    target_closed = "target page, context or browser has been closed" in str(exc).lower()
+                    if not target_closed:
+                        try:
+                            target_closed = not browser.is_connected()
+                        except Exception:
+                            target_closed = True
+                    if target_closed and browser_restarts < MAX_BROWSER_RESTARTS:
+                        browser_restarts += 1
+                        close_browser(browser, context)
+                        browser, context = open_browser()
+                        pages_since_launch = 0
+                        print(f"  BROWSER RECOVERY restart={browser_restarts}/{MAX_BROWSER_RESTARTS}: {err}", flush=True)
+                        continue
+                    failures.append({"url": url, "error": err})
+                    if url in seed_urls:
+                        roots.append({"root": url, "ok": False, "error": err})
+                    print(f"  FAIL {err}", flush=True)
+                    break
+                finally:
+                    if page is not None:
+                        try:
+                            page.close()
+                        except Exception:
+                            pass
+        close_browser(browser, context)
 
     current_by_url = {p["url"]: p for p in pages}
     previous_by_url = {p.get("url"): p for p in previous_corpus.get("pages", []) if p.get("url")}
@@ -535,6 +589,9 @@ def main() -> int:
         "deadlineReached": time.monotonic() >= deadline,
         "maxPages": MAX_PAGES,
         "maxDepth": MAX_DEPTH,
+        "browserRecyclePages": BROWSER_RECYCLE_PAGES,
+        "browserRestarts": browser_restarts,
+        "plannedBrowserRecycles": planned_recycles,
         "collectorVersion": "3.0",
         "frontierVersion": 1,
         "transport": RETRIEVAL_TRANSPORT,

@@ -41,6 +41,8 @@ env:
   MIPE_PAGE_WAIT_MS: '350'
   MIPE_MAX_DOC_BYTES: '25000000'
   MIPE_MAX_DOCUMENTS: '300'
+  MIPE_BROWSER_RECYCLE_PAGES: '15'
+  MIPE_MAX_BROWSER_RESTARTS: '5'
   MIPE_HEADLESS: '1'
   MIPE_BROWSER_EXECUTABLE: ''
   MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'
@@ -58,7 +60,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           ref: main
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Validate NAS Linux runtime
         shell: bash
@@ -98,6 +100,8 @@ jobs:
             [[ -n '${{ inputs.max_pages }}' ]] && pages='${{ inputs.max_pages }}'
             [[ -n '${{ inputs.max_depth }}' ]] && depth='${{ inputs.max_depth }}'
             persist='${{ inputs.persist }}'
+          elif [[ '${{ github.event_name }}' == 'push' ]]; then
+            pages='30'; depth='3'; persist='false'
           fi
           {
             echo "MIPE_MAX_PAGES=$pages"
