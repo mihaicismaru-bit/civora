@@ -768,6 +768,55 @@ def main() -> int:
         energy_public_dossier(storage=True),
     ]
 
+    # DR-14 partial closure: official AFIR announcement, 6 October 2026.
+    # Preserve the intervention's OPEN status; one component is CLOSED.
+    dr14 = next(row for row in dossiers if row["id"] == "afir-dr14-2026")
+    closure_url = (
+        "https://www.afir.ro/comunicate/"
+        "fondurile-alocate-interventiei-dr-14-pentru-componenta-achizitii-simple-au-fost-epuizate/"
+    )
+    closure_warning = (
+        "Achiziții simple: ÎNCHISĂ din 6 octombrie 2026, după epuizarea "
+        "fondurilor. Comunicarea AFIR din 6 octombrie nu închide celelalte "
+        "componente (zootehnic, legumicultură, alte sectoare); verifică "
+        "disponibilitatea actuală pentru fiecare componentă."
+    )
+    dr14["standfirst"] = (
+        "DR-14: componenta Achiziții simple a fost ÎNCHISĂ pe 6 octombrie "
+        "2026, după epuizarea fondurilor. Celelalte componente se verifică "
+        "separat, până la termenul general de 31 octombrie sau epuizarea "
+        "fondurilor."
+    )
+    dr14["decisionAction"] = (
+        "Nu pregăti depunerea pentru Achiziții simple — componenta este "
+        "închisă. Verifică în sursa oficială disponibilitatea componentei "
+        "zootehnic, legumicultură ori alte sectoare înainte de depunere."
+    )
+    _set_fact(dr14, "Achiziții simple", "ÎNCHISĂ din 6 octombrie 2026")
+    for entry in dr14["sections"]:
+        if entry["title"] in {
+            "Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum",
+            "Riscuri de respingere sau implementare",
+        }:
+            entry["items"].insert(0, closure_warning)
+        elif entry["title"] == "Ce finanțează și în ce condiții":
+            entry["items"].append(closure_warning)
+    dr14["timeline"].insert(0, {
+        "date": "2026-10-06T12:55:00+03:00",
+        "kind": "COMPONENT_CLOSED",
+        "text": "AFIR: fondurile pentru Achiziții simple au fost epuizate; închiderea este numai pe această componentă.",
+    })
+    dr14["sources"].append(source(
+        "AFIR — închiderea componentei Achiziții simple (6.10.2026)",
+        closure_url, ["status", "component_status", "risks"],
+        "2026-10-11T07:22:47+03:00",
+    ))
+    dr14["canonicalLinks"] = [item["url"] for item in dr14["sources"]]
+    dr14["quality"]["evidenceCount"] = len(dr14["sources"])
+    dr14["quality"]["componentPartialClosureProven"] = True
+    dr14["executiveSummary"]["componentWarning"] = closure_warning
+    dr14["updatedAt"] = "2026-10-11T07:22:47+03:00"
+
     replace_codes = {"dr 12", "dr 14", "dr 18", "dr 31"}
     kept = []
     for row in payload.get("dossiers") or []:

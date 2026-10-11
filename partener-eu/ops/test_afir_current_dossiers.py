@@ -43,6 +43,39 @@ def main() -> int:
         assert by_title(dossier, "Cine poate aplica")["items"] == dossier["audience"]
         assert dossier["executiveSummary"]["applicants"] == dossier["audience"]
 
+    # Regression: AFIR closed only the "Achiziții simple" DR-14 component
+    # on 6 October 2026; the three remaining components are not auto-closed.
+    closure_url = (
+        "https://www.afir.ro/comunicate/"
+        "fondurile-alocate-interventiei-dr-14-pentru-componenta-achizitii-simple-au-fost-epuizate/"
+    )
+    assert dr14["quality"]["componentPartialClosureProven"] is True
+    assert dr14["status"] == "OPEN"
+    assert dr14["statusLabel"] == "DESCHIS"
+    assert fact(dr14, "Achiziții simple")["value"] == "ÎNCHISĂ din 6 octombrie 2026"
+    assert "Achiziții simple" in dr14["standfirst"] and "ÎNCHISĂ" in dr14["standfirst"]
+    assert "Nu pregăti depunerea pentru Achiziții simple" in dr14["decisionAction"]
+    assert dr14["executiveSummary"]["componentWarning"].startswith("Achiziții simple: ÎNCHISĂ")
+    assert any(
+        row["url"] == closure_url and "component_status" in row["supports"]
+        for row in dr14["sources"]
+    )
+    assert closure_url in dr14["canonicalLinks"]
+    assert any(
+        row.get("kind") == "COMPONENT_CLOSED"
+        and str(row.get("date", "")).startswith("2026-10-06")
+        for row in dr14["timeline"]
+    )
+    for section_title in ("Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum",
+                          "Riscuri de respingere sau implementare"):
+        assert any(
+            "Achiziții simple" in item and "ÎNCHISĂ" in item
+            for item in by_title(dr14, section_title)["items"]
+        ), section_title
+    # This partial closure must never flow to the DR-18 dossier.
+    assert fact(dr18, "Achiziții simple") is None
+    assert dr18["status"] == "OPEN"
+
     assert fact(dr14, "Buget")["value"] == "108.000.000 EUR"
     assert "50.000 EUR" in fact(dr14, "Grant")["value"]
     assert "80 puncte" in " ".join(by_title(dr14, "Cum se punctează")["items"])
