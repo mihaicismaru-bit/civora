@@ -74,11 +74,48 @@ jobs:
           grep -F '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' partener-eu/web/sitemap.xml
           test -s partener-eu/web/home-public-data.js
 
+      - name: Skip redeploy when the built site is unchanged
+        id: change
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          python - <<'PY'
+          import datetime, hashlib, json, os, pathlib
+          root = pathlib.Path('partener-eu/web')
+          h = hashlib.sha256()
+          for f in sorted(p for p in root.rglob('*') if p.is_file()):
+              h.update(str(f.relative_to(root)).encode() + b'\0' + f.read_bytes() + b'\0')
+          site = h.hexdigest()
+          try:
+              last = json.loads(pathlib.Path('partener-eu/deployment/latest.json').read_text(encoding='utf-8'))
+          except Exception:
+              last = {}
+          age_h = 1e9
+          try:
+              seen = datetime.datetime.fromisoformat(str(last.get('observed_at')).replace('Z', '+00:00'))
+              age_h = (datetime.datetime.now(datetime.timezone.utc) - seen).total_seconds() / 3600
+          except Exception:
+              pass
+          # Only automatic (workflow_run) redeploys are skipped, only when the exact same
+          # site is already LIVE, and never for more than 6h so the 12h freshness watch stays quiet.
+          skip = (
+              os.environ.get('EVENT') == 'workflow_run'
+              and last.get('status') == 'LIVE'
+              and last.get('site_sha256') == site
+              and age_h < 6
+          )
+          print(f'site_sha256={site} last={last.get("site_sha256")} age_h={age_h:.2f} skip={skip}')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as out:
+              out.write(f'site={site}\nskip={"true" if skip else "false"}\n')
+          PY
+
       - id: configure
+        if: steps.change.outputs.skip != 'true'
         continue-on-error: true
         uses: actions/configure-pages@v5
 
       - id: upload
+        if: steps.change.outputs.skip != 'true'
         continue-on-error: true
         uses: actions/upload-pages-artifact@v4
         with:
@@ -87,6 +124,7 @@ jobs:
 
       - name: Deploy
         id: deployment
+        if: steps.change.outputs.skip != 'true'
         continue-on-error: true
         uses: actions/deploy-pages@v4
         with:
@@ -108,7 +146,7 @@ jobs:
 
       - name: Attempt and verify HTTPS enforcement
         id: https_control
-        if: always()
+        if: always() && steps.change.outputs.skip != 'true'
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
@@ -184,13 +222,14 @@ jobs:
           PY
 
       - name: Record deployment, public-readback and HTTPS-control status
-        if: always()
+        if: always() && steps.change.outputs.skip != 'true'
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
           CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
           UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
           DEPLOY_OUTCOME: ${{ steps.deployment.outcome }}
           READBACK_OUTCOME: ${{ steps.readback.outcome }}
+          SITE_SHA256: ${{ steps.change.outputs.site }}
         run: |
           mkdir -p partener-eu/deployment
           python - <<'PY'
@@ -235,6 +274,7 @@ jobs:
               'public_readback': public_readback,
               'https_control': https_control,
               'lkg_preserved': not ok,
+              'site_sha256': os.environ.get('SITE_SHA256') or None,
           }
           deployment_dir = pathlib.Path('partener-eu/deployment')
           (deployment_dir/'last-attempt.json').write_text(
@@ -285,7 +325,7 @@ jobs:
           fi
 
       - name: Enforce deployment result after evidence persistence
-        if: always()
+        if: always() && steps.change.outputs.skip != 'true'
         env:
           CONFIGURE_OUTCOME: ${{ steps.configure.outcome }}
           UPLOAD_OUTCOME: ${{ steps.upload.outcome }}
