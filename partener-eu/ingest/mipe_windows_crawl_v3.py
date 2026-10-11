@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""PARTENER.EU MIPE Windows crawler v3.
+"""PARTENER.EU MIPE Romanian acquisition crawler v3.
 
-Purpose: use a temporary/self-hosted Windows runner in Romania as an official
-MIPE collection node. This is a corpus crawler, not a news scraper.
+Purpose: use a self-hosted runner in Romania as an official MIPE collection
+node. The supported runtime is a headless Linux container on the NAS. This is a
+corpus crawler, not a news scraper.
 
 It:
 - visits official MIPE pages with a real browser;
@@ -60,6 +61,7 @@ MAX_DOCUMENTS = max(20, int(os.getenv("MIPE_MAX_DOCUMENTS", "160")))
 MAX_FRONTIER = max(200, int(os.getenv("MIPE_MAX_FRONTIER", "3000")))
 BROWSER_EXECUTABLE = os.getenv("MIPE_BROWSER_EXECUTABLE", "").strip()
 HEADLESS = os.getenv("MIPE_HEADLESS", "0").strip().lower() not in {"0", "false", "no"}
+RETRIEVAL_TRANSPORT = os.getenv("MIPE_RETRIEVAL_TRANSPORT", "playwright-edge-direct-romania-v3").strip()
 
 DOCUMENT_EXTENSIONS = (".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".zip", ".7z", ".rar")
 ASSET_EXTENSIONS = (".jpg", ".jpeg", ".png", ".gif", ".svg", ".webp", ".css", ".js", ".woff", ".woff2", ".ico")
@@ -480,7 +482,7 @@ def main() -> int:
                         "tier": "T1",
                         "source": "MIPE",
                         "observedAt": observed_at,
-                        "retrievalTransport": "playwright-edge-direct-romania-v3",
+                        "retrievalTransport": RETRIEVAL_TRANSPORT,
                         "verification": "CANONICAL_OFFICIAL_FETCH",
                     })
                 if url in seed_urls:
@@ -535,7 +537,7 @@ def main() -> int:
         "maxDepth": MAX_DEPTH,
         "collectorVersion": "3.0",
         "frontierVersion": 1,
-        "transport": "playwright-edge-direct-romania-v3",
+        "transport": RETRIEVAL_TRANSPORT,
     }
 
     corpus = {
