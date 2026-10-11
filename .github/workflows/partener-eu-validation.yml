@@ -194,6 +194,11 @@ jobs:
           echo "exit_code=$CODE" >> "$GITHUB_OUTPUT"
           exit 0
 
+      - name: Compact validation history (fail-closed, keeps P10 day evidence)
+        if: always()
+        shell: bash
+        run: python partener-eu/ops/compact_validation_history.py || echo "History compaction skipped (invariant check failed); nothing deleted."
+
       - name: Persist validation ledger and safe source corrections
         if: always()
         shell: bash
