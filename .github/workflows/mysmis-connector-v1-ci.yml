@@ -1,0 +1,62 @@
+name: MySMIS Connector v1 CI
+
+on:
+  push:
+    branches:
+      - eupf/mysmis-connector-v1
+    paths:
+      - 'partener-eu/mysmis-connector-v1/**'
+      - '.github/workflows/mysmis-connector-v1-ci.yml'
+  pull_request:
+    paths:
+      - 'partener-eu/mysmis-connector-v1/**'
+      - '.github/workflows/mysmis-connector-v1-ci.yml'
+
+permissions:
+  contents: read
+
+env:
+  CONNECTOR_SOURCE_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  connector-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: partener-eu/mysmis-connector-v1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CONNECTOR_SOURCE_HEAD }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run connector regression suite
+        run: npm test
+      - name: Verify MV3 extension browser compatibility and attested import closure
+        run: npm run verify:extension-browser
+      - name: Syntax-check every attested extension JavaScript module
+        run: |
+          node -e 'const c=require("./build/runtime-files.json"); for (const f of c.EXTENSION.filter((v)=>/\\.(?:js|mjs)$/.test(v))) console.log(f)' | xargs -r -n1 node --check
+      - name: Syntax-check bounded loopback broker
+        run: node --check native/loopback-broker.mjs
+      - name: Build exact-head install bundle
+        run: node scripts/build-install-bundle.mjs
+      - name: Verify generated install bundle offline
+        run: |
+          BUNDLE="$(find dist -mindepth 1 -maxdepth 1 -type d | head -n1)"
+          test -n "$BUNDLE"
+          node native/install-preflight-cli.mjs --bundle "$BUNDLE" --attempt-id CI-EXACT-HEAD-BUNDLE
+      - name: Archive exact-head install bundle
+        run: |
+          BUNDLE="$(find dist -mindepth 1 -maxdepth 1 -type d | head -n1)"
+          SHORT_HEAD="${CONNECTOR_SOURCE_HEAD:0:12}"
+          (cd dist && zip -qr "MYSMIS_CONNECTOR_INSTALL_BUNDLE_${SHORT_HEAD}.zip" "$(basename "$BUNDLE")")
+      - name: Upload exact-head install bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MYSMIS_CONNECTOR_INSTALL_BUNDLE_${{ env.CONNECTOR_SOURCE_HEAD }}
+          path: partener-eu/mysmis-connector-v1/dist/MYSMIS_CONNECTOR_INSTALL_BUNDLE_*.zip
+          if-no-files-found: error
+          retention-days: 14
