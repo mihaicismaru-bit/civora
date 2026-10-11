@@ -99,7 +99,7 @@ Când lipsește un câmp, coada cere next_evidence_action precis (ce document, c
 
 Input: ID stabil, snapshot canonic, manifest de documente oficiale, texte/extrageri cu hash și versiune, facts existente, lipsuri și deadline-uri de actualitate.
 
-Eu analizez documentele originale, nu doar outputul parserului; verificeligibilitate versus grup țintă; reconstruiesc plafon, costuri, punctaje, documente și obligații; scriu verdict/explicații, completez claim ledger, semnalez contradicții și fac adversarial review.
+Eu analizez documentele originale, nu doar outputul parserului; verific eligibilitate versus grup țintă; reconstruiesc plafon, costuri, punctaje, documente și obligații; scriu verdict/explicații, completez claim ledger, semnalez contradicții și fac adversarial review.
 
 Output: analysis_candidate.json + claim_evidence_ledger.json + editorial_review.md + run_id + verdict PASS/DEGRADED/FAIL + next_evidence_action. Nu se persistă duplicate nejustificate ale corpusului, nu se scriu date de client și nu se face publicare directă dintr-un text al modelului.
 
