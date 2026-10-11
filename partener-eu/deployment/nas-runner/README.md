@@ -21,9 +21,11 @@ runners and consume the immutable acquisition artifact.
 - Microsoft Playwright Python `v1.61.0-noble` image.
 - GitHub Actions runner `2.337.0`, verified with its published SHA-256 digest.
 - One Chromium page at a time, images/media/fonts blocked by the crawler.
-- Container limits: 1.25 CPU, 1152 MiB RAM, 256 MiB shared memory.
+- Container limits: 1152 MiB RAM and 256 MiB shared memory. CPU and PID Compose
+  limits are intentionally omitted because this DSM kernel does not expose the
+  required cgroup controllers.
 
-The Compose project is deployed under `/volume1/docker/civora-romania-runner`.
-The runner work directory and credentials stay in the `runner_state` named
-volume. No crawler result is canonical until the downstream engine validates
-the handoff and persists it.
+The active Compose project is deployed under
+`/volume1/docker/civora-romania-nas-runner`. The runner work directory and
+credentials stay in the `runner_state` named volume. No crawler result is
+canonical until the downstream engine validates the handoff and persists it.
