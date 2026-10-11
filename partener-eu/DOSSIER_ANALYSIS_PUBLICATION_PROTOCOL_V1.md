@@ -130,3 +130,32 @@ Gata = analiza + fact ledger + diff material + gate PASS + checkpoint + public r
 - Crește fracția de dosare utile decizional, fără umflarea artificială a scorului, a numărului de workflow-uri sau a notificărilor.
 
 **Status final al acestui fișier:** doar propunere. Nu schimbăm încă motorul, sursele, paginile sau numărul de apeluri publicate.
+
+
+## 12. Hourly — Dossier Analyst v1 (activat la 2026-10-11)
+
+Worker: **PARTENER Dossier Analyst Hourly**, la fiecare oră, cu un singur \`dossier_id\` activ; **nu** presupune finalizarea unui dosar complex într-o oră. \`PARTENER Site Keeper\` funcționează separat și are proprietatea pentru site/deploy/source health, nu pentru rescrierea candidatului editorial aflat în lucru.
+
+**Selectarea exactă a unității:**
+1. Citește ultimul checkpoint verificat, starea PR-urilor și current main.
+2. Dacă există dosar \`ANALYSIS_IN_PROGRESS\` cu dovadă nouă accesibilă, continuă-l; altfel selectează cel mai mare impact dintre OPEN cu termen apropiat și confirmat, conflict material, corrigendum care schimbă o decizie, consultare/EXPECTED cu ghid aplicabil și backlogul cu depth scăzut.
+3. Nu bloca toată coada pentru un PDF inaccesibil: două strategii oficiale distincte, încercări bounded, \`NEEDS_EVIDENCE\`, apoi alt dosar eligibil. Nu inventa text și nu ocoli restricțiile de acces.
+4. Nu reactiva automat analizele finalizate fără dovadă nouă/version change.
+
+**Stările de lucru (independente de publicarea datelor):**
+\`SELECTED → ANALYSIS_IN_PROGRESS → NEEDS_EVIDENCE | ANALYZED_PENDING_GATE → PUBLISHABLE_VERIFIED → PUBLISHED_READBACK_PASS\`.
+La eroare \`FAIL/QUARANTINED\`, fără publicare. \`ANALYZED_PENDING_GATE\` nu este \`PUBLISHABLE\`.
+
+**Lease și idempotency:** identitate unică \`dossier_id + applicable_source_version_hash + analyst_protocol_version\`. Un singur writer pentru candidatul aferent acelei identități. Dacă există un PR/checkpoint curent pentru același dosar, actualizează numai acel candidat, fără fișiere sau PR-uri duplicate. Reconciliază din nou cu main înainte de orice write sau merge. Nu face commit doar pentru heartbeat.
+
+**Pachetul de predare** (un singur folder/PR reutilizabil pentru o schimbare materială): \`analysis_candidate\`, \`claim_evidence_ledger\`, \`editorial_review\`, \`source_manifest\`, \`next_evidence_action\`, \`diff_before_after\`, \`run_id\`, \`candidate_base_sha\` și \`checkpoint\`. Nu păstrează texte brute duplicate sau date de client. Fiecare claim e \`OFFICIAL_FACT/ANALYSIS/SCENARIO\`; dovezile oficiale au URL, pagină/secțiune, versiune, hash, fetched_at, parser_version și run_id când sunt verificate.
+
+**Publication handoff (separare a autorităților):**
+- Analistul ChatGPT produce numai candidate. Nu are voie să modifice direct \`decision_products.json\`, \`p11-public-data.js\` ori pagina publică pe baza propriului text.
+- \`DAPP_EVIDENCE_GATE\` este **un gate nou necesar**, nu presupunem că actualul \`quality_gate.py\` îl implementează deja: trebuie testat pentru sursă/versiune/document exact, pagină/citat, contradicții, unități, beneficiar vs. grup țintă, lifecycle, valid_to și hash. **Până la implementarea și trecerea demonstrată a acestui gate, Hourly rămâne ANALYSIS/STAGING-ONLY, fără autopublicare de fapte noi.**
+- După implementarea gate-ului, PARTENER generează un material diff determinist, testează \`PUBLISHABLE\`/fail-closed, face review CI exact-head, PR collision-free, merge controlat, Pages și public readback. Automatizarea poate promova numai dacă TOATE gate-urile cerute sunt verzi, inclusiv orice aprobare obligatorie a mediului; nu ocolește GitHub environment. La eșec LKG rămâne servit și se păstrează motivul \`PROVISIONAL_FAIL_CLOSED\`.
+- Un apel OPEN fără stare/termen confirmate și actuale, un buget RON/EUR contradictoriu ori eligibilitate nesusținută determină blocajul exact al schimbării materiale, nu dispariția întregului catalog.
+
+**Demonstrația de performanță:** KPI principal = numărul de dosare cu fapte relevante și dovezi complete, nu numărul de rulări sau de cuvinte. Monitorizăm separat \`claims_confirmed_exact\`, \`claims_unknown\`, \`material_conflicts\`, \`application_decision_coverage\`, \`elapsed_to_published_readback\` și \`duplicate_or_stale_release_count=0\`. Fără delta materială, fără alertă.
+
+**Checkpoint inițial:** \`PARTENER-DAPP-S0-20261011-FIVE-PILOTS\`, vezi PR #1390. Prioritate pentru prima analiză: \`mai-fami-am22n-2026\`, cu refacerea verificărilor oficiale și analiză a contradicției de monedă.
