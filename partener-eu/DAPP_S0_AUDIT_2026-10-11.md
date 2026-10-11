@@ -7,7 +7,7 @@
 
 ## 1. Ce am măsurat
 
-\`ingest/state/dossier_enrichment_queue.json\` din 2026-10-11T12:28:25Z: 192 dosare (16 complete, 27 avansate, 123 în construcție, 26 identificare); 182 în coada de enriquecire, 4 în verificare de tip entitate. Acest scor măsoară **prezența unor secțiuni**, nu demonstrarea fiecărui fapt din ghid.
+\`ingest/state/dossier_enrichment_queue.json\` din 2026-10-11T12:28:25Z: 192 dosare (16 complete, 27 avansate, 123 în construcție, 26 identificare); 182 în coada de îmbogățire, 4 în verificare de tip entitate. Acest scor măsoară **prezența unor secțiuni**, nu demonstrarea fiecărui fapt din ghid.
 
 Pentru S0 am înghețat **identitatea + sursele + lacunele + starea internă**, folosind hashul blobului Git pentru fiecare sursă de date. Nu confundăm Git blob SHA cu hashul raw al ghidului. Niciun original PDF/ZIP nou nu a fost arhivat și hashuit în acest sprint; lipsa este explicită și blochează declararea \`CONFIRMED\` în pipeline-ul final.
 
