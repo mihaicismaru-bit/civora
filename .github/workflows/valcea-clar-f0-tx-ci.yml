@@ -1,0 +1,36 @@
+name: Vâlcea Clar F0 Newsroom Transaction CI
+on:
+  pull_request:
+    paths:
+      - 'valcea-clar/scripts/newsroom_tx_safe_candidate.sh'
+      - 'valcea-clar/scripts/newsroom_tx_integrity_candidate.py'
+      - 'valcea-clar/tests/test_newsroom_tx_candidate.py'
+      - '.github/workflows/valcea-clar-newsroom-live.yml'
+      - '.github/workflows/valcea-clar-f0-tx-ci.yml'
+permissions:
+  contents: read
+jobs:
+  transaction-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Syntax and contract integrity
+        run: |
+          bash -n valcea-clar/scripts/newsroom_tx_safe_candidate.sh
+          python -m py_compile valcea-clar/scripts/newsroom_tx_integrity_candidate.py valcea-clar/tests/test_newsroom_tx_candidate.py
+          python - <<'PY'
+          from pathlib import Path
+          y=Path('.github/workflows/valcea-clar-newsroom-live.yml').read_text()
+          assert 'TX_GUARD_SCRIPT' in y
+          assert 'newsroom_tx_safe_candidate.sh' in y
+          block=y.split('      - name: Persist live newsroom publication atomically',1)[1].split('      - name: Dispatch Social Publication Engine',1)[0]
+          assert 'cp -a' not in block and 'git reset --hard origin/main' not in block
+          PY
+      - name: Git fixture concurrency regression
+        run: python -m unittest discover -s valcea-clar/tests -p 'test_newsroom_tx_candidate.py' -v
