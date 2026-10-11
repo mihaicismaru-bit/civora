@@ -46,6 +46,8 @@ function openDossier(id){
  if(d?.canonicalPath){location.assign(d.canonicalPath);return}
  window.PARTENER_LOAD_DECISION_HUB?.().then(()=>window.PARTENER_DECISION_UI?.openDossier?.(id)).catch(()=>{});
 }
+// Free-text descriptions go to the Ask engine (intent + word ranking); profile shortcuts open the filterable explorer.
+function openAsk(query){location.assign('/?view=ask&q='+encodeURIComponent(query))}
 function openHub(query='',tab='dossiers'){
  if(query){location.assign('/?q='+encodeURIComponent(query));return}
  const routes={open:'/finantari/deschise/',prepare:'/finantari/in-pregatire/',news:'/schimbari/',dossiers:'/dosare/'};
@@ -118,7 +120,7 @@ function render(){
    search=document.createElement('form');search.className='conciergeSearch';
    search.innerHTML='<label for="conciergeQ">Descrie investiția ta</label><div><input id="conciergeQ" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ex. hală de producție și utilaje pentru o firmă din Vâlcea"><button type="submit">Găsește finanțări</button></div>';
    p?.insertAdjacentElement('afterend',search);
-   search.onsubmit=e=>{e.preventDefault();const q=search.querySelector('input')?.value.trim();if(q)openHub(q,'dossiers')};
+   search.onsubmit=e=>{e.preventDefault();const q=search.querySelector('input')?.value.trim();if(q)openAsk(q)};
  }
  let profiles=hero.querySelector('.conciergeProfiles');
  if(!profiles){
@@ -144,14 +146,14 @@ function render(){
  const changes=recentNews();
  const surface=document.createElement('div');surface.className='conciergeSurface';surface.dataset.conciergeSurface='1';
  surface.innerHTML=`
+   <section class="conciergeSection conciergeOpen">
+     <div class="conciergeSectionHead"><div><span>Deschise acum</span><h2>Finanțări la care poți lucra acum</h2><p>Doar apeluri cu stare și termen confirmate din surse oficiale.</p></div><button data-concierge-hub="open">Vezi toate ${canonicalOpenTotal?`(${canonicalOpenTotal})`:''} →</button></div>
+     <div class="conciergeGrid">${open.slice(0,6).map(d=>card(d,'open')).join('')||'<div class="conciergeEmpty">Nu există acum apeluri deschise care trec toate verificările noastre.</div>'}</div>
+   </section>
    <section class="conciergeService" data-rpm-promo="1" aria-label="Română pentru Muncă">
      <div class="conciergeServiceIcon" aria-hidden="true">RO</div>
      <div class="conciergeServiceCopy"><span>Serviciu pentru angajatori</span><h2>Ai angajați străini? Română pentru Muncă.</h2><p>Curs de limba română organizat pentru echipe: program, participare și documentele necesare, într-un singur flux.</p></div>
      <a href="/romana-pentru-munca/">Vezi oferta <b>→</b></a>
-   </section>
-   <section class="conciergeSection conciergeOpen">
-     <div class="conciergeSectionHead"><div><span>Deschise acum</span><h2>Finanțări la care poți lucra acum</h2><p>Doar apeluri cu stare și termen confirmate din surse oficiale.</p></div><button data-concierge-hub="open">Vezi toate ${canonicalOpenTotal?`(${canonicalOpenTotal})`:''} →</button></div>
-     <div class="conciergeGrid">${open.slice(0,6).map(d=>card(d,'open')).join('')||'<div class="conciergeEmpty">Nu există acum apeluri deschise care trec toate verificările noastre.</div>'}</div>
    </section>
    <section class="conciergeSection conciergeUpcoming">
      <div class="conciergeSectionHead"><div><span>Se pregătesc</span><h2>Merită să începi pregătirea</h2><p>Nu sunt încă sesiuni deschise. Le separăm clar ca să nu confunzi pregătirea cu depunerea.</p></div><button data-concierge-hub="prepare">Vezi toate →</button></div>
@@ -172,7 +174,9 @@ function render(){
  surface.querySelectorAll('[data-concierge-hub]').forEach(b=>b.onclick=()=>openHub('',b.dataset.conciergeHub));
  surface.querySelector('[data-concierge-consultation]')?.addEventListener('click',()=>location.assign('/consultari/'));
 }
-window.addEventListener('load',()=>setTimeout(render,560),{once:true});
-document.addEventListener('click',event=>{if(isTypingTarget(event.target))return;setTimeout(render,360)},true);
-setTimeout(render,760);
+const needsRender=()=>{const hero=document.querySelector('.main .hero');return !!hero&&!document.querySelector('[data-concierge-surface]')};
+render();
+const appRoot=document.getElementById('app');
+if(appRoot)new MutationObserver(()=>{if(needsRender())render()}).observe(appRoot,{childList:true});
+window.addEventListener('popstate',()=>setTimeout(()=>{if(needsRender())render()},0));
 })();
