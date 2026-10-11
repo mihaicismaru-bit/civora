@@ -2,18 +2,18 @@ name: PARTENER.EU MIPE Windows Crawl v3
 
 on:
   schedule:
-    - cron: '17 */3 * * *'
+    - cron: '20 4,14 * * *'
   workflow_dispatch:
     inputs:
       max_pages:
         description: 'Număr maxim de pagini MIPE'
         required: true
-        default: '120'
+        default: '2000'
         type: string
       max_depth:
         description: 'Adâncime maximă de crawl'
         required: true
-        default: '3'
+        default: '6'
         type: string
       persist:
         description: 'Permite motorului PARTENER să persiste handoff-ul procesat în main'
@@ -36,11 +36,11 @@ permissions:
 env:
   PYTHONUTF8: '1'
   MIPE_ACQUISITION_ONLY: '1'
-  MIPE_RUNTIME_SECONDS: '1200'
+  MIPE_RUNTIME_SECONDS: '4800'
   MIPE_PAGE_TIMEOUT_MS: '18000'
   MIPE_PAGE_WAIT_MS: '350'
   MIPE_MAX_DOC_BYTES: '25000000'
-  MIPE_MAX_DOCUMENTS: '160'
+  MIPE_MAX_DOCUMENTS: '1000'
 
 concurrency:
   group: partener-eu-mipe-ro-crawl-v3
@@ -49,7 +49,7 @@ concurrency:
 jobs:
   crawl:
     runs-on: [self-hosted, Windows, X64]
-    timeout-minutes: 30
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v6
         with:
@@ -110,7 +110,7 @@ jobs:
       - name: Resolve crawl budget and snapshot non-acquisition outputs
         shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
         run: |
-          $pages='120'; $depth='3'; $persist='true'
+          $pages='2000'; $depth='6'; $persist='true'  # twice-daily full crawl; stops early when the frontier is exhausted
           if('${{ github.event_name }}' -eq 'workflow_dispatch'){
             if('${{ inputs.max_pages }}'){$pages='${{ inputs.max_pages }}'}
             if('${{ inputs.max_depth }}'){$depth='${{ inputs.max_depth }}'}

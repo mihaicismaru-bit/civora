@@ -3,7 +3,7 @@ name: PARTENER.EU MIPE Ingestion
 on:
   workflow_dispatch:
   schedule:
-    - cron: '17 * * * *'
+    - cron: '50 5,15 * * *'
   pull_request:
     paths:
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
