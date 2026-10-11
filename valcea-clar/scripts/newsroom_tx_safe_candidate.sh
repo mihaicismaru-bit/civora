@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # F0 proposal: existing Newsroom's Git persistence step only. Never a publisher.
 set -euo pipefail
-: "\${BASE_SHA:?BASE_SHA required}"
-: "\${TX_GUARD_SCRIPT:?TX_GUARD_SCRIPT required}"
+: "${BASE_SHA:?BASE_SHA required}"
+: "${TX_GUARD_SCRIPT:?TX_GUARD_SCRIPT required}"
 root=$(git rev-parse --show-toplevel)
 cd "$root"
 test "$(git rev-parse HEAD)" = "$BASE_SHA" || { echo TX_HOLD_BASE_HEAD_MISMATCH >&2; exit 7; }
@@ -21,7 +21,7 @@ paths=(
   valcea-clar/state/source_health.json
   valcea-clar/ops/resolution_tasks
 )
-for p in "\${paths[@]}"; do
+for p in "${paths[@]}"; do
   if test -e "$p" || test -n "$(git ls-files -- "$p")"; then git add -A -- "$p"; fi
 done
 scratch=$(mktemp -d)
