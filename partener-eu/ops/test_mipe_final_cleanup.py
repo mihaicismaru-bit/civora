@@ -99,6 +99,10 @@ def main() -> int:
 
     assert "runs-on: [self-hosted, Linux, X64, romania-nas]" in acquisition
     assert "MIPE_HEADLESS: '1'" in acquisition
+    assert "MIPE_BROWSER_RECYCLE_PAGES: '15'" in acquisition
+    assert "MIPE_MAX_BROWSER_RESTARTS: '5'" in acquisition
+    assert "fetch-depth: 1" in acquisition
+    assert "pages='30'; depth='3'; persist='false'" in acquisition
     assert "MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'" in acquisition
     assert "permissions:\n  contents: read" in acquisition
     assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
@@ -114,6 +118,16 @@ def main() -> int:
     ):
         assert forbidden not in acquisition, f"SURFACEMC crossed processing boundary: {forbidden}"
     assert "contents: write" not in acquisition
+
+    for recovery_token in (
+        "BROWSER_RECYCLE_PAGES",
+        "MAX_BROWSER_RESTARTS",
+        "BROWSER RECYCLE",
+        "BROWSER RECOVERY",
+        "browserRestarts",
+        "plannedBrowserRecycles",
+    ):
+        assert recovery_token in crawler, recovery_token
 
     guard = 'if os.getenv("MIPE_ACQUISITION_ONLY", "").strip().lower() in {"1", "true", "yes"}:'
     assert crawler.count(guard) == 1
