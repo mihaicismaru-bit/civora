@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "kind": "PARTENER_DAPP_S0_BASELINE",
+  "analysisAsOf": "2026-10-11",
+  "state": "PILOT_BASELINE_ONLY_NO_PUBLICATION",
+  "baseMainSha": "3afb42e2ce33742a2658b027e35733216aa78814",
+  "provenance": {
+    "dossierEnrichmentQueue": {
+      "path": "partener-eu/ingest/state/dossier_enrichment_queue.json",
+      "gitBlobSha": "577598e8002a3286010381e8d3ee860d78fa9f70",
+      "generatedAt": "2026-10-11T12:28:25Z"
+    },
+    "p11Projection": {
+      "path": "partener-eu/web/p11-public-data.js",
+      "gitBlobSha": "0023ca873bbb6b504a3d2e0ee2b1a053d90d",
+      "asOf": "2026-09-27T17:22:00Z"
+    },
+    "afirCorpus": {
+      "path": "partener-eu/ingest/state/afir_corpus.json",
+      "gitBlobSha": "18394a7b5a6e86eda71ae3b193c522517e8fb070",
+      "generatedAt": "2026-10-11T12:27:26.896068+00:00"
+    },
+    "note": "Git blob SHA fingerprints repository projection files only; NEVER represent them as original official-document sha256. Official PDF/ZIP raw_sha256, fetched_at, parser_version and run_id must be captured by authorized acquisition before an analyst claim is publish-authorized."
+  },
+  "gates": {
+    "materialFactAutopromoted": false,
+    "publishAuthorized": false,
+    "sourceReadLevel": "PARTIAL_EVIDENCE_AUDIT_NOT_FULL_DOCUMENT_COMPLETENESS",
+    "snapshotFrozen": true
+  },
+  "candidates": [
+    {
+      "id": "mai-fami-am22n-2026",
+      "pilotRole": "P0_OPEN_URGENT_OFFICIAL_CONFLICT",
+      "programme": "FAMI",
+      "canonicalLayer": "P11",
+      "p11Status": "OPEN",
+      "p11PublicationState": "PUBLISHABLE",
+      "depthCompleteness": 50,
+      "missing": [
+        "beneficiaries",
+        "activities",
+        "costs",
+        "documents",
+        "scoring",
+        "indicators"
+      ],
+      "documentUrls": [
+        "https://fed.mai.gov.ro/11317/lansare-apel-am22n-dezvoltarea-de-resurse-educationale-si-programe-de-formare-pentru-specializarea-cadrelor-didactice-in-vederea-predarii-limbii-romane-ca-limba-straina/",
+        "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf"
+      ],
+      "analystObservations": [
+        {
+          "fact": "call_budget",
+          "sourceState": "OFFICIAL_GUIDE_READ",
+          "value": 2000000,
+          "currency": "RON",
+          "provenance": "signed guide page 3, section E page 14; launch body RON; launch summary contradicts as EUR",
+          "status": "CONFIRMED_FROM_GUIDE_NOT_RELEASE_APPROVAL"
+        },
+        {
+          "fact": "submission_deadline",
+          "sourceState": "OFFICIAL_GUIDE_READ",
+          "value": "2026-10-16T16:00:00+03:00",
+          "provenance": "signed guide page 3, section F page 14",
+          "status": "CONFIRMED_FROM_GUIDE_NOT_RELEASE_APPROVAL"
+        },
+        {
+          "fact": "applicant_types",
+          "sourceState": "OFFICIAL_GUIDE_READ",
+          "value": "public institutions; Romanian associations/foundations; authorised education/research institutions; international organisations subject to applicable rules",
+          "provenance": "signed guide section G, printed page 15; launch summary says NGOs only",
+          "status": "CATEGORY_CONFLICT_LANDING_SUMMARY_GUIDE"
+        }
+      ],
+      "blockingRisks": [
+        "LANDING_SUMMARY_CURRENCY_EUR_VS_RON",
+        "LANDING_SUMMARY_NGO_ONLY_VS_BROADER_SIGNED_GUIDE",
+        "NO_PAGE_LEVEL_PROVENANCE_FOR_REMAINING_MATERIAL_FACTS"
+      ],
+      "nextEvidenceAction": "Acquire/hash current signed specific guide + general guide + annexed evaluation grid, CF and clarification tables; build exact claim ledger with section/page and resolve launch-summary conflicts. Preserve latest current OPEN gate independently."
+    },
+    {
+      "id": "mipe-e62eeffb2413dc306c",
+      "pilotRole": "P0_HISTORICAL_CONSULTATION_ENTITY_AND_VERSION_RECONCILIATION",
+      "programme": "POCIDIF Action 1.2",
+      "canonicalLayer": "DECISION_PRODUCTS",
+      "internalStatus": "PUBLIC_CONSULTATION",
+      "depthCompleteness": 33,
+      "missing": [
+        "deadline",
+        "financing",
+        "beneficiaries",
+        "activities",
+        "costs",
+        "documents",
+        "scoring",
+        "indicators"
+      ],
+      "documentUrls": [
+        "https://mfe.gov.ro/ghiduri_pocidif/consultare-publica-ghidul-solicitantului-aferent-actiunii-1-2-sprijin-pentru-proiecte-in-domeniul-tehnologiilor-avansate-si-crearea-de-hub-uri-de-inovare-si-transfer-tehnologic-in-domenii-prioritare/",
+        "https://www.research.gov.ro/s-a-relansat-in-consultare-publica-ghidul-solicitantului-aferent-actiunii-1-2-sprijin-pentru-proiecte-in-domeniul-tehnologiilor-avansate-si-crearea-de-hub-uri-de-inovare-si-transfer-tehnologic-in-dome-21438/",
+        "https://poc.research.gov.ro/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1"
+      ],
+      "analystObservations": [
+        {
+          "fact": "consultation_period",
+          "sourceState": "OFFICIAL_OI_HISTORY_READ",
+          "value": "2024-09-11 to 2024-09-13 17:00 (2024 relaunch)",
+          "provenance": "2024 official research.gov.ro relaunch announcement",
+          "status": "HISTORICAL_NOT_CURRENT"
+        },
+        {
+          "fact": "later_call_event",
+          "sourceState": "OFFICIAL_OI_HISTORY_READ",
+          "value": "Action 1.2 related call launches recorded in September 2024",
+          "provenance": "OI list of POCIDIF Action 1.2 calls, individual exact calls not reconciled",
+          "status": "NEEDS_ENTITY_SPLIT"
+        }
+      ],
+      "blockingRisks": [
+        "NO_CURRENT_2026_CONSULTATION_EVIDENCE",
+        "OLD_GUIDE_DRAFT_VS_LATER_DISTINCT_EXACT_CALLS",
+        "MIPE_MAIN_URL_FETCH_TIMEOUT"
+      ],
+      "nextEvidenceAction": "Inspect 2023/2024 consultation PDFs, September 2024 relaunch and separately launched exact Action 1.2 calls with code/project scope; split historical consultation vs actual call and remove misleading current consultation interpretation only after gated reconciliation."
+    },
+    {
+      "id": "afir-energy-2026",
+      "pilotRole": "P1_AFIR_CURRENT_GUIDE_V7_LIFECYCLE",
+      "programme": "AFIR / Fondul pentru Modernizare",
+      "canonicalLayer": "P11",
+      "p11Status": "DISCOVERED",
+      "p11PublicationState": "PUBLISHABLE",
+      "depthCompleteness": null,
+      "missing": [
+        "official_document_raw_hash_and_page_map",
+        "version_effective_date_check",
+        "current_submission_session_confirmation",
+        "eligible_costs_and_scoring_exact_tables"
+      ],
+      "documentUrls": [
+        "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-schema-energie/",
+        "https://www.afir.ro/info-la-zi/sesiune-depunere-proiecte-schema-de-energie/"
+      ],
+      "analystObservations": [
+        {
+          "fact": "guide_version",
+          "sourceState": "OFFICIAL_AFIR_PAGE_READ",
+          "value": "V7, June 2026",
+          "provenance": "AFIR Detalii și Anexe Schemă ENERGIE, document table row 1",
+          "status": "GUIDE_LISTED_NOT_FULLY_READ"
+        },
+        {
+          "fact": "potential_applicant_classes",
+          "sourceState": "OFFICIAL_AFIR_PAGE_READ",
+          "value": "agricultural and food industry enterprises; OUAI/FOUAI",
+          "provenance": "AFIR official source page beneficiaries section",
+          "status": "SITE_SUMMARY_REQUIRES_GUIDE_CROSSCHECK"
+        },
+        {
+          "fact": "material_lifecycle",
+          "sourceState": "P11_RECORD_ONLY",
+          "value": "DISCOVERED",
+          "provenance": "P11 projection asOf 2026-09-27",
+          "status": "NO_OPEN_ASSERTION"
+        }
+      ],
+      "blockingRisks": [
+        "GUIDE_VERSION_NOT_TEXT_VERIFIED",
+        "NOT_ENOUGH_EVIDENCE_FOR_CURRENT_OPEN",
+        "P11_EVIDENCE_FROM_AUGUST"
+      ],
+      "nextEvidenceAction": "Fetch actual AFIR V7 guide and all applicable annexes, capture hash/fetched_at/version; read eligibility, cost and scoring sections; corroborate current session in the official AFIR deposition/calendar endpoint without inferring OPEN from document index."
+    },
+    {
+      "id": "mipe-3b3ab4d9361706669b",
+      "pilotRole": "P0_MIPE_CORRIGENDUM_LIFECYCLE_RECONCILIATION",
+      "programme": "Program Dezvoltare Durabilă / MIPE",
+      "canonicalLayer": "DECISION_PRODUCTS",
+      "internalStatus": "OPEN",
+      "depthCompleteness": 50,
+      "missing": [
+        "deadline",
+        "financing",
+        "beneficiaries",
+        "costs",
+        "scoring",
+        "indicators"
+      ],
+      "documentUrls": [
+        "https://mfe.gov.ro/ghiduri_pdd/pdd-ghidul-solicitantului-conditii-de-accesare-a-finantarii-pentru-proiecte-noi-de-management-al-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-riscurilor-de-dezastre/",
+        "https://mfe.gov.ro/pddtj-actualizeaza-ghidul-solicitantului-conditii-de-accesare-a-finantarii-pentru-proiecte-noi-de-management-al-principalelor-tipuri-de-risc-identificate-in-pnmrd/",
+        "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf"
+      ],
+      "analystObservations": [
+        {
+          "fact": "internal_open",
+          "sourceState": "ENRICHMENT_QUEUE_ONLY",
+          "value": "OPEN but deadline absent",
+          "provenance": "dossier_enrichment_queue.json",
+          "status": "NOT_PROOF_OF_CURRENT_APPLICABILITY"
+        },
+        {
+          "fact": "corrigendum",
+          "sourceState": "REPO_DOCUMENT_DISCOVERY_ONLY",
+          "value": "updated guide/document linked September 2026",
+          "provenance": "queue URLs; direct official page inaccessible during this audit",
+          "status": "NEEDS_OFFICIAL_DOCUMENT_FETCH"
+        }
+      ],
+      "blockingRisks": [
+        "OPEN_WITHOUT_DEADLINE_IN_ENRICHMENT_QUEUE",
+        "MATERIAL_GUIDE_AMENDMENT_NOT_DIFFED",
+        "OFFICIAL_PAGE_UNAVAILABLE_IN_TOOL"
+      ],
+      "nextEvidenceAction": "Acquire original guide ZIP, signed update PDF and new corrigendum via existing authorized source worker; parse all parts; reconcile exact changed sections and lifecycle/current deadline before any OPEN or material field promotion."
+    },
+    {
+      "id": "me-fm-storage-standalone-2026",
+      "pilotRole": "P1_HIGH_DETAIL_POSITIVE_CONTROL",
+      "programme": "Ministerul Energiei / Fondul pentru Modernizare",
+      "canonicalLayer": "P11",
+      "p11Status": "OPEN",
+      "p11PublicationState": "PUBLISHABLE",
+      "depthCompleteness": null,
+      "missing": [
+        "current_official_deadline_refresh",
+        "full_document_version_map",
+        "claim_page_section_evidence_for_all_enriched_material_facts"
+      ],
+      "documentUrls": [
+        "https://legislatie.just.ro/Public/DetaliiDocumentAfis/313994",
+        "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/"
+      ],
+      "analystObservations": [
+        {
+          "fact": "p11_funding_shape",
+          "sourceState": "P11_RECORD_ONLY",
+          "value": "€150m call budget; up to 69000 EUR/MWh, max €15m per enterprise; in P11 effective verified materialFacts",
+          "provenance": "P11 projection asOf 2026-09-27, original legal text not reacquired in S0",
+          "status": "REQUIRES_CURRENT_OFFICIAL_REVALIDATION"
+        },
+        {
+          "fact": "p11_deadline",
+          "sourceState": "P11_RECORD_ONLY",
+          "value": "2026-10-30",
+          "provenance": "P11 projection asOf 2026-09-27",
+          "status": "RECHECK_BEFORE_CURRENT_OPEN"
+        }
+      ],
+      "blockingRisks": [
+        "LEGAL_ACT_NOT_FETCHABLE_IN_S0",
+        "P11_SNAPSHOT_OLDER_THAN_ANALYSIS_DATE"
+      ],
+      "nextEvidenceAction": "Use official legal act/current scheme guide and exact call notice, capture current deadline; map every existing eligibility, technical threshold, grant and scoring claim to paragraph/annex, confirm units, version and state; measure claim coverage as positive control."
+    }
+  ]
+}
