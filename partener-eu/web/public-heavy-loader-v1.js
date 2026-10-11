@@ -76,12 +76,16 @@ function loadAskSuite(){
   if(window.PARTENER_ASK_V2_READY)return Promise.resolve(true);
   if(askPromise)return askPromise;
   askPromise=(async()=>{
+    // Compact deploy-time index (~0.3 MB gzip) instead of ~5.7 MB of full
+    // projections; the full data remains the fallback if the index is missing.
+    const data=loadScript('ask-index.js?v=20261011-ask1').then(()=>{
+      if(!window.PARTENER_ASK_INDEX)throw new Error('ask-index.js fără date');
+    }).catch(()=>Promise.all([loadDecisionData(),loadCanonicalCalls()]));
     await Promise.all([
       loadStyle('ask-partener-v2.css?v=20260923-lazy-r1','partener-ask-v2-css'),
-      loadDecisionData(),
-      loadCanonicalCalls(),
+      data,
     ]);
-    await loadScript('ask-partener-v2.js?v=20260923-lazy-r1');
+    await loadScript('ask-partener-v2.js?v=20261011-ux1');
     window.PARTENER_ASK_V2_READY=true;
     return true;
   })().catch(error=>{askPromise=null;throw error});
@@ -120,7 +124,9 @@ document.addEventListener('click',event=>{
   const target=event.target instanceof Element?event.target:null;
   if(!target)return;
   if(target.closest('[data-r="ask"],#ago'))loadAskSuite().catch(()=>{});
-  if(target.closest('[data-c]'))loadLifecycleSuite().catch(()=>{});
+  const call=target.closest('[data-c]');
+  // Calls with a static dossier page navigate there; no need for the 330 KB lifecycle suite.
+  if(call&&!(window.PARTENER_DOSSIER_ROUTES||{})[call.dataset.c])loadLifecycleSuite().catch(()=>{});
   if(target.closest('[data-decision-load]'))loadDecisionHub().catch(()=>{});
 },true);
 

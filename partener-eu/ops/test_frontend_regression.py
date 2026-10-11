@@ -142,13 +142,19 @@ for heavy in (
         errors.append(f"heavy public asset remains eager: {heavy}")
 
 active_app = (WEB / "app.js").read_text(encoding="utf-8").casefold()
+# Hub links stay crawlable (real href) and open the in-app view for JS users;
+# every in-app view has its own URL via the History API, so Back and shared
+# links work, and calls with a static dossier page open that page.
 for marker in (
     "new urlsearchparams(location.search)",
-    "initialq=(urlparams.get('q')||'').trim()",
+    "u.get('q')",
     'href="/finantari/" data-r="explorer"',
     'href="/finantari/in-pregatire/" data-r="calendar"',
     'href="/?view=ask" data-r="ask"',
-    "e.preventdefault();s.route=x.dataset.r",
+    "e.preventdefault();go({route:x.dataset.r",
+    "history[replace?'replacestate':'pushstate']",
+    "addeventlistener('popstate'",
+    "window.partener_dossier_routes",
 ):
     if marker not in active_app:
         errors.append(f"crawlable SPA bridge missing: {marker}")
@@ -156,8 +162,10 @@ for marker in (
 for stale_public_label in ("pilot", "facts demo", "corpusul canonic demo", "apeluri deschise în pilot"):
     if stale_public_label in active_app:
         errors.append(f"development label remains in active public app: {stale_public_label}")
-if "apeluri deschise verificate" not in active_app:
-    errors.append("verified open-call metric is missing")
+# The app hero must be identical to the static HTML hero so nothing flips while scripts load.
+index_h1 = index.split("<h1>", 1)[1].split("</h1>", 1)[0].casefold() if "<h1>" in index else ""
+if not index_h1 or f"<h1>{index_h1}</h1>" not in active_app:
+    errors.append("app hero headline differs from the static HTML hero")
 
 if "new MutationObserver" in public_copy:
     errors.append("public-product-copy-v1.js contains a global MutationObserver")

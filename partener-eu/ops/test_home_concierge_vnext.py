@@ -56,6 +56,8 @@ for token in (
     'const amount=v.amount;',
     'd?.canonicalPath',
     "location.assign('/?q='+encodeURIComponent(query))",
+    # free-text search goes to the Ask engine (word/intent ranking)
+    "location.assign('/?view=ask&q='+encodeURIComponent(query))",
     "open:'/finantari/deschise/'",
     "prepare:'/finantari/in-pregatire/'",
     "news:'/schimbari/'",

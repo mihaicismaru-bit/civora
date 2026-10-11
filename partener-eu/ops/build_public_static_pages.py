@@ -402,7 +402,7 @@ def page_shell(
   <meta name="description" content="{esc(description)}">
   <meta name="robots" content="index,follow,max-image-preview:large">
   <link rel="canonical" href="{esc(canonical(path))}">
-  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:opsz,wght@8..60,400..800&family=Source+Serif+4:opsz,wght@8..60,600..700&display=swap">\n  <link rel="stylesheet" href="/public-static-v1.css?v=20260923-ux1">\n  <link rel="stylesheet" href="/brand-civic-intelligence-v1.css?v=20260924-brand1">\n  <link rel="icon" type="image/svg+xml" href="/brand-mark-v1.svg?v=20260924-brand1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">\n  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:opsz,wght@8..60,400..800&family=Source+Serif+4:opsz,wght@8..60,600..700&display=swap">\n  <link rel="stylesheet" href="/public-static-v1.css?v=20261011-ux1">\n  <link rel="stylesheet" href="/brand-civic-intelligence-v1.css?v=20260924-brand1">\n  <link rel="icon" type="image/svg+xml" href="/brand-mark-v1.svg?v=20260924-brand1">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="PARTENER.EU">
   <meta property="og:title" content="{esc(title)}">
@@ -429,6 +429,27 @@ def page_shell(
 </body>
 </html>
 """
+
+
+HELP_CTA_URL = "https://eucons.ro/evaluare-proiect/"
+HELP_CTA_STATUSES = {"OPEN", "PUBLIC_CONSULTATION"} | PREPARE_STATUSES
+
+
+def help_cta(dossier: dict[str, Any], href: str) -> str:
+    """Bridge from an actionable dossier to Euroconsult's project evaluation.
+
+    Shown only while there is still something to apply for or prepare; closed
+    or unverified dossiers get no commercial call to action.
+    """
+    if str(dossier.get("status") or "").upper() not in HELP_CTA_STATUSES:
+        return ""
+    campaign = href.strip("/").split("/")[-1] or "dosar"
+    url = f"{HELP_CTA_URL}?utm_source=partener.eu&utm_medium=dosar&utm_campaign={campaign}"
+    return (
+        '<div class="helpBox"><b>Vrei ajutor cu acest dosar?</b>'
+        "<p>Euroconsult verifică dacă proiectul tău se potrivește apelului și ce ai de pregătit.</p>"
+        f'<a class="helpCta" href="{esc(url)}" rel="noopener">Cere o evaluare a proiectului →</a></div>'
+    )
 
 
 def dossier_href(dossier: dict[str, Any], slug_by_id: dict[str, str]) -> str:
@@ -941,6 +962,7 @@ def build(
   <div>{''.join(sections) or '<div class="empty">Detaliile sunt încă în structurare.</div>'}</div>
   <aside>
     <div class="decisionBox"><small>Ce trebuie făcut acum</small><strong>{esc(dossier.get('decisionLabel') or dossier.get('decision') or 'VERIFICĂ')}</strong><p>{esc(dossier.get('decisionAction') or 'Verifică dosarul și sursa oficială înainte de a acționa.')}</p></div>
+    {help_cta(dossier, href)}
     <div class="qualityBox"><b>Calitatea dosarului</b><span>Completitudine: {esc(quality.get('completeness') or 0)}%</span><span>{esc(quality.get('dossierLevel') or '')}</span><small>Completitudinea nu este probabilitate de aprobare.</small></div>
     <div class="sourcesBox"><h2>Surse și proveniență</h2>{''.join(sources) or '<p>Sursa nu este încă atașată public.</p>'}</div>
   </aside>
@@ -1047,6 +1069,22 @@ def build(
                 meaningful_lastmod(dossier.get("updatedAt")),
             )
         )
+
+    # Small id -> canonical static page map, so the dynamic homepage, explorer
+    # and Ask results navigate to real URLs (shareable, Back button works)
+    # instead of rendering detail views on "/" or lazy-loading megabytes.
+    dossier_routes = {
+        str(dossier.get("id")): dossier_href(dossier, slug_by_id)
+        for dossier in publishable
+        if dossier.get("id")
+    }
+    write_page(
+        web_root,
+        "dossier-routes.js",
+        "window.PARTENER_DOSSIER_ROUTES="
+        + json.dumps(dossier_routes, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+        + ";\n",
+    )
 
     sitemap_nodes = []
     for path, lastmod in urls:

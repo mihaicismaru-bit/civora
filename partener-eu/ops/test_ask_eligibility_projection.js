@@ -28,6 +28,7 @@ function render(audience,options={}){
   };
   const dossier={
     id:'TEST-ENERGY',
+    publicationState:'PUBLISHABLE',
     title:'Finanțare pentru energie regenerabilă',
     programme:'Program test',
     region:'România',
