@@ -20,10 +20,6 @@ from typing import Iterable
 DEFAULT_LARGE_BYTES = 512 * 1024
 
 PROTECTED_PREFIXES = (
-    "valcea-clar/site/runtime/",
-    "valcea-clar/dist/",
-    "valcea-clar/validation/",
-    "valcea-clar/private-evidence/",
     "partener-eu/validation/",
     "partener-eu/private-evidence/",
     "private-evidence/",
