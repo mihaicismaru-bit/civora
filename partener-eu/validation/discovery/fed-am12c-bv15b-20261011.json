@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "runId": "PARTENER-SITEKEEPER-20261011-1022-FED-COVERAGE",
+  "observedAt": "2026-10-11T07:26:46Z",
+  "mainBaseline": "9cd75843e4c4af52f43883f8cd695c6234cf6a95",
+  "authority": "MAI — Autoritatea de Management Afaceri Interne",
+  "tier": "T1",
+  "publicationState": "PROVISIONAL_FAIL_CLOSED",
+  "reason": "Source HTML/PDF raw SHA-256, parser, exact call identity cross-check and production quality gates not yet persisted. This file is a discovery/QA candidate only, not a published call.",
+  "requiredNextGates": [
+    "FETCH+HASH official announcement and signed guide bytes",
+    "PARSE+NORMALIZE status, FEN allocation in RON, beneficiaries, dates, rates",
+    "DEDUP against canonical FED call identities",
+    "RECONCILE conflicting announcement summary currency against signed guide",
+    "QUALITY GATE and generated dossiers with tests",
+    "Merge approved PR; deploy; public readback; checkpoint"
+  ],
+  "officialRecords": [
+    {
+      "code": "AM12C",
+      "programme": "FAMI 2021–2027",
+      "statusOfficial": "Activ",
+      "launchDate": "2026-09-30",
+      "openAt": "2026-09-30T16:00:00+03:00",
+      "deadline": "2027-03-30T16:00:00+03:00",
+      "allocationFEN": {
+        "amount": 5500000,
+        "currency": "RON",
+        "source": "signed specific guide v1.0"
+      },
+      "rates": {
+        "standard": 75,
+        "localBudgetPublicEligible": 98,
+        "localBudgetPublicBreakdown": "75% FEN + 23% FNN"
+      },
+      "minimumScore": 70,
+      "applicantScope": "Public institutions and authorities with relevant legal competencies; exact eligibility only from signed guide; not a general SME call.",
+      "sourceConflict": "Announcement structured SUMMARY displays 1,100,000 EUR; launch narrative and signed guide establish FEN 5,500,000 RON. Do not publish the summary EUR as the grant allocation.",
+      "officialAnnouncement": "https://fed.mai.gov.ro/11544/am12c-continuarea-consolidarii-capacitatii-sistemului-national-de-azil-in-ceea-ce-priveste-infrastructura-si-serviciile-inclusiv-la-nivel-local-si-regional/",
+      "officialSignedGuide": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM12C-vers.1.0-1.pdf",
+      "rawHtmlSha256": null,
+      "rawGuideSha256": null,
+      "parserVersion": null
+    },
+    {
+      "code": "BV15B",
+      "programme": "IMFV 2021–2027",
+      "statusOfficial": "Activ",
+      "launchDate": "2026-09-30",
+      "openAt": "2026-09-30T16:00:00+03:00",
+      "deadline": "2027-09-30T16:00:00+03:00",
+      "allocationFEN": {
+        "amount": 2530000,
+        "currency": "RON",
+        "source": "signed specific guide v1.0"
+      },
+      "rates": {
+        "standard": 75,
+        "conditional": 90
+      },
+      "minimumScore": 70,
+      "applicantScope": "Central/public authorities or public institutions with border-management-related statutory competencies; exact eligibility only from signed guide.",
+      "sourceConflict": "Announcement structured SUMMARY displays 2,530,000 EUR; launch narrative and signed guide establish FEN 2,530,000 RON. Do not publish the summary EUR as the grant allocation.",
+      "officialAnnouncement": "https://fed.mai.gov.ro/11538/bv15b-imbunatatirea-cooperarii-interinstitutionale-si-activitati-de-formare-lansare-apel-de-proiecte/",
+      "officialSignedGuide": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-BV15B-v1.0-1.pdf",
+      "rawHtmlSha256": null,
+      "rawGuideSha256": null,
+      "parserVersion": null
+    }
+  ],
+  "publicCoverage": {
+    "officialOpen": "2 candidate calls",
+    "foundInPublicOpenCatalog": false,
+    "foundInPublicDossiers": false,
+    "publicOpenCatalog": "https://partener.eu/finantari/deschise/",
+    "publicDossiers": "https://partener.eu/dosare/",
+    "observedExistingOpenCount": 14
+  },
+  "safety": {
+    "noDirectPublish": true,
+    "preserveLKG": true,
+    "unknownsRemainUnknown": true,
+    "noClientData": true
+  }
+}
