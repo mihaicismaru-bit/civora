@@ -101,8 +101,15 @@ def main() -> int:
     assert "MIPE_HEADLESS: '1'" in acquisition
     assert "MIPE_BROWSER_RECYCLE_PAGES: '15'" in acquisition
     assert "MIPE_MAX_BROWSER_RESTARTS: '5'" in acquisition
+    assert "MIPE_DOC_EXTRACT_TIMEOUT_SECONDS: '20'" in acquisition
+    assert "MIPE_DOC_EXTRACT_MEMORY_MB: '384'" in acquisition
     assert "fetch-depth: 1" in acquisition
     assert "pages='30'; depth='3'; persist='false'" in acquisition
+    assert "MIPE_RUNTIME_SECONDS=600" in acquisition
+    assert "MIPE_MAX_DOCUMENTS=20" in acquisition
+    assert "MIPE_MAX_DOC_BYTES=8000000" in acquisition
+    assert "MIPE_DOC_EXTRACT_TIMEOUT_SECONDS=8" in acquisition
+    assert "MIPE_DOC_EXTRACT_MEMORY_MB=256" in acquisition
     assert "MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'" in acquisition
     assert "permissions:\n  contents: read" in acquisition
     assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
@@ -126,8 +133,18 @@ def main() -> int:
         "BROWSER RECOVERY",
         "browserRestarts",
         "plannedBrowserRecycles",
+        "DOC_EXTRACT_WORKER",
+        "DOC_EXTRACT_TIMEOUT_SECONDS",
+        "DOC_EXTRACT_MEMORY_MB",
+        "HASH_ONLY_EXTRACTION_TIMEOUT",
+        "connection closed while reading from the driver",
     ):
         assert recovery_token in crawler, recovery_token
+
+    worker = text("partener-eu/ingest/mipe_document_extract_worker.py")
+    assert "Resource-isolated PDF/DOCX" in worker
+    assert "PdfReader" in worker
+    assert "parse_docx" in worker
 
     guard = 'if os.getenv("MIPE_ACQUISITION_ONLY", "").strip().lower() in {"1", "true", "yes"}:'
     assert crawler.count(guard) == 1
