@@ -4,7 +4,7 @@
   "product": "VÂLCEA CLAR market intelligence state",
   "execution_owner": "CIVORA_SITE_ENGINE",
   "state_owner": "GITHUB_REPOSITORY",
-  "generated_at": "2026-10-10T22:30:21Z",
+  "generated_at": "2026-10-11T01:52:18Z",
   "mode": "LIVE_SOURCE_HEALTH",
   "monitor_count": 3,
   "monitors": [
@@ -134,7 +134,6 @@
         "posturi-gov-valcea-all"
       ],
       "degraded_sources": [
-        "linkedin-jobs-valcea",
         "olx-jobs-valcea"
       ],
       "sources": [
@@ -208,7 +207,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.ejobs.ro/locuri-de-munca/ramnicu-valcea",
-          "fingerprint": "41c8c531f9db98a339adb86f81dc3f5ac394dfb15cbd6facab9fed6f1c411b72",
+          "fingerprint": "3f2b9f3b5881e035949e9e414c3ff99a86232cf2f710aeabedfd6ed2689fef6b",
           "match_count": 19,
           "matched_terms": [
             "Joburi",
@@ -235,7 +234,7 @@
           "reachable": true,
           "http_status": 200,
           "final_url": "https://www.bestjobs.eu/locuri-de-munca-in-valcea",
-          "fingerprint": "55aae73842a4bafe5de0f50cc3e9cb6508d8cdf66652c9453624242775854335",
+          "fingerprint": "e9a3dd77bc478944bd4540e4b3f851c1d210af07e56e5ed65da63d3201a67455",
           "match_count": 26,
           "matched_terms": [
             "locuri de munca",
@@ -254,15 +253,26 @@
           "url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
           "source_class": "T2_DISCOVERY_ONLY",
           "publication_authority": false,
-          "reachable": false,
-          "http_status": 429,
-          "fingerprint": null,
-          "match_count": 0,
-          "matched_terms": [],
-          "numeric_signals": [],
-          "health": "UNREACHABLE",
-          "error": "HTTP 429",
-          "change": "PROBE_FAILED"
+          "reachable": true,
+          "http_status": 200,
+          "final_url": "https://ro.linkedin.com/jobs/jobs-in-v%C3%AElcea",
+          "fingerprint": "60a3e453e4d8adc5a2c8481aedbbfe7ea99fb92ac6a4e087c2d3cb8a0e5066bc",
+          "match_count": 20,
+          "matched_terms": [
+            "joburi",
+            "Vîlcea",
+            "Vâlcea",
+            "Râmnicu Vâlcea"
+          ],
+          "numeric_signals": [
+            {
+              "kind": "jobs",
+              "value_text": "7"
+            }
+          ],
+          "health": "OK",
+          "error": null,
+          "change": "NEW_BASELINE"
         },
         {
           "id": "olx-jobs-valcea",
