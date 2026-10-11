@@ -3,7 +3,7 @@ name: PARTENER.EU MIPE Engine v3
 on:
   workflow_run:
     workflows:
-      - 'PARTENER.EU MIPE Windows Crawl v3'
+      - 'PARTENER.EU MIPE Romania NAS Crawl v3'
     types: [completed]
     branches: [main]
   workflow_dispatch:
@@ -81,7 +81,7 @@ jobs:
           assert corpus.get('schemaVersion') == 3
           assert corpus.get('source') == 'MIPE'
           assert corpus.get('lastRun',{}).get('collectorVersion') == '3.0'
-          assert corpus.get('lastRun',{}).get('transport') == 'playwright-edge-direct-romania-v3'
+          assert corpus.get('lastRun',{}).get('transport') == 'playwright-chromium-direct-romania-v3'
           assert corpus.get('lastRun',{}).get('sourceAvailable') is True
           for page in corpus.get('pages',[]):
               assert page.get('url','').startswith('https://mfe.gov.ro/')

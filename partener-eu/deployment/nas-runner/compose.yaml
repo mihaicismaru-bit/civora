@@ -1,0 +1,59 @@
+services:
+  romania-nas-runner:
+    image: mcr.microsoft.com/playwright/python:v1.61.0-noble
+    container_name: civora-romania-nas-runner
+    user: root
+    working_dir: /runner
+    environment:
+      RUNNER_ALLOW_RUNASROOT: '1'
+      REPO_URL: https://github.com/mihaicismaru-bit/civora
+      RUNNER_NAME: synology-ds220plus-romania
+      RUNNER_LABELS: romania-nas
+      RUNNER_TOKEN: ${RUNNER_TOKEN:-}
+      RUNNER_VERSION: 2.337.0
+      RUNNER_ARCHIVE_SHA256: 70920811a4f8ad4328818682bca5c6469c1c942fab52448868071d0063816613
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
+      PYTHONUNBUFFERED: '1'
+      TZ: Europe/Bucharest
+    volumes:
+      - runner_state:/runner
+    tmpfs:
+      - /tmp:size=384m,mode=1777
+    shm_size: 256m
+    mem_limit: 1152m
+    restart: unless-stopped
+    stop_grace_period: 2m
+    entrypoint: ["/bin/bash", "-lc"]
+    command:
+      - |
+        set -euo pipefail
+        archive="actions-runner-linux-x64-$${RUNNER_VERSION}.tar.gz"
+        if [[ ! -x ./config.sh ]]; then
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends curl ca-certificates
+          rm -rf /var/lib/apt/lists/*
+          curl -fL --retry 5 --retry-delay 3 \
+            "https://github.com/actions/runner/releases/download/v$${RUNNER_VERSION}/$${archive}" \
+            -o "$${archive}"
+          echo "$${RUNNER_ARCHIVE_SHA256}  $${archive}" | sha256sum -c -
+          tar xzf "$${archive}"
+          rm -f "$${archive}"
+          ./bin/installdependencies.sh
+        fi
+        if [[ ! -f .runner ]]; then
+          if [[ -z "$${RUNNER_TOKEN:-}" ]]; then
+            echo 'RUNNER_TOKEN is required for first registration only.' >&2
+            exit 64
+          fi
+          ./config.sh --unattended --replace \
+            --url "$${REPO_URL}" \
+            --token "$${RUNNER_TOKEN}" \
+            --name "$${RUNNER_NAME}" \
+            --labels "$${RUNNER_LABELS}" \
+            --work _work
+        fi
+        unset RUNNER_TOKEN
+        exec ./run.sh
+
+volumes:
+  runner_state:

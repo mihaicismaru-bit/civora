@@ -76,13 +76,13 @@ def main() -> int:
     assert "partener-mipe-transport-matrix" in transport_scout
     assert "partener-pages-diagnostic" in pages_diagnostic
 
-    # Evidence stays UTF-8 on disk, while console JSON must be locale-safe on
-    # Windows runners whose default stdout encoding can be cp1252.
+    # Evidence stays UTF-8 on disk, while console JSON remains locale-safe for
+    # historical replay tooling and mixed runner environments.
     assert 'OUT.write_text(json.dumps(payload, ensure_ascii=False' in transport_runtime
     assert 'print(json.dumps(payload, ensure_ascii=True, indent=2))' in transport_runtime
 
     # Preserve all static acquisition-boundary assertions formerly owned by the
-    # standalone Windows Crawl v3 QA workflow, so consolidation cannot reduce coverage.
+    # standalone crawler QA workflow, so consolidation cannot reduce coverage.
     for token in (
         'schemaVersion": 3',
         'playwright-edge-direct-romania-v3',
@@ -97,7 +97,9 @@ def main() -> int:
     ):
         assert token in crawler, token
 
-    assert "runs-on: [self-hosted, Windows, X64]" in acquisition
+    assert "runs-on: [self-hosted, Linux, X64, romania-nas]" in acquisition
+    assert "MIPE_HEADLESS: '1'" in acquisition
+    assert "MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'" in acquisition
     assert "permissions:\n  contents: read" in acquisition
     assert "MIPE_ACQUISITION_ONLY: '1'" in acquisition
     assert "PARTENER_MIPE_ACQUISITION_HANDOFF_V1" in acquisition
@@ -118,7 +120,7 @@ def main() -> int:
     assert crawler.index(guard) > crawler.index("CORPUS_PATH.write_text")
     assert crawler.index(guard) < crawler.index('prior_items = {i.get("url")')
 
-    assert "- 'PARTENER.EU MIPE Windows Crawl v3'" in engine
+    assert "- 'PARTENER.EU MIPE Romania NAS Crawl v3'" in engine
     assert "actions/download-artifact@v4" in engine
     assert "PARTENER_MIPE_ACQUISITION_HANDOFF_V1" in engine
     assert "corpusSha256" in engine
@@ -134,7 +136,7 @@ def main() -> int:
         assert required in engine, f"PARTENER engine missing processor: {required}"
 
     assert "PARTENER.EU MIPE Engine v3" in pages
-    assert "- 'PARTENER.EU MIPE Windows Crawl v3'" not in pages
+    assert "- 'PARTENER.EU MIPE Romania NAS Crawl v3'" not in pages
     assert "def build_projection(" in projector
     assert "CANONICAL_OFFICIAL_FETCH" in projector
     assert "replay" in projector.lower()

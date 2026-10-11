@@ -1,4 +1,4 @@
-name: PARTENER.EU MIPE Windows Crawl v3
+name: PARTENER.EU MIPE Romania NAS Crawl v3
 
 on:
   schedule:
@@ -40,7 +40,10 @@ env:
   MIPE_PAGE_TIMEOUT_MS: '18000'
   MIPE_PAGE_WAIT_MS: '350'
   MIPE_MAX_DOC_BYTES: '25000000'
-  MIPE_MAX_DOCUMENTS: '1000'
+  MIPE_MAX_DOCUMENTS: '300'
+  MIPE_HEADLESS: '1'
+  MIPE_BROWSER_EXECUTABLE: ''
+  MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'
 
 concurrency:
   group: partener-eu-mipe-ro-crawl-v3
@@ -48,7 +51,8 @@ concurrency:
 
 jobs:
   crawl:
-    runs-on: [self-hosted, Windows, X64]
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: [self-hosted, Linux, X64, romania-nas]
     timeout-minutes: 100
     steps:
       - uses: actions/checkout@v6
@@ -56,91 +60,69 @@ jobs:
           ref: main
           fetch-depth: 0
 
-      - name: Bootstrap Python 3.12
-        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+      - name: Validate NAS Linux runtime
+        shell: bash
         run: |
-          $ErrorActionPreference='Stop'
-          $python=$null
-          $cmd=Get-Command python.exe -ErrorAction SilentlyContinue
-          if($cmd){
-            try { & $cmd.Source -c "import sys; assert sys.version_info >= (3,11)"; if($LASTEXITCODE -eq 0){$python=$cmd.Source} } catch {}
-          }
-          if(-not $python){
-            $py=Get-Command py.exe -ErrorAction SilentlyContinue
-            if($py){
-              try { $candidate=(& $py.Source -3.12 -c "import sys; print(sys.executable)" 2>$null).Trim(); if($candidate -and (Test-Path $candidate)){$python=$candidate} } catch {}
-            }
-          }
-          if(-not $python){
-            $version='3.12.10'
-            $installer=Join-Path $env:RUNNER_TEMP "python-$version-amd64.exe"
-            $target=Join-Path $env:RUNNER_TEMP 'partener-python312'
-            Invoke-WebRequest -Uri "https://www.python.org/ftp/python/$version/python-$version-amd64.exe" -OutFile $installer
-            $p=Start-Process -FilePath $installer -ArgumentList @('/quiet','InstallAllUsers=0',"TargetDir=$target",'PrependPath=0','Include_launcher=0','Include_test=0','Include_pip=1','SimpleInstall=1') -Wait -PassThru
-            if($p.ExitCode -ne 0){throw "Instalarea Python a eșuat: $($p.ExitCode)"}
-            $python=Join-Path $target 'python.exe'
-          }
-          if(-not (Test-Path $python)){throw "Python indisponibil: $python"}
-          "PYTHON_EXE=$python" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          (Split-Path $python -Parent) | Out-File $env:GITHUB_PATH -Encoding utf8 -Append
-          & $python --version
+          set -euo pipefail
+          python --version
+          python - <<'PY'
+          import platform, sys
+          assert sys.version_info >= (3, 11), sys.version
+          assert platform.system() == 'Linux', platform.platform()
+          assert platform.machine() in {'x86_64', 'AMD64'}, platform.machine()
+          PY
 
-      - name: Prepare Edge + Playwright + document extraction
-        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+      - name: Validate Chromium, Playwright and document extraction
+        shell: bash
         run: |
-          $ErrorActionPreference='Stop'
-          & $env:PYTHON_EXE -m pip install --disable-pip-version-check playwright pypdf
-          $candidates=@()
-          if(${env:ProgramFiles(x86)}){$candidates += (Join-Path ${env:ProgramFiles(x86)} 'Microsoft\Edge\Application\msedge.exe')}
-          if($env:ProgramFiles){$candidates += (Join-Path $env:ProgramFiles 'Microsoft\Edge\Application\msedge.exe')}
-          if($env:LOCALAPPDATA){$candidates += (Join-Path $env:LOCALAPPDATA 'Microsoft\Edge\Application\msedge.exe')}
-          try{$reg=(Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\msedge.exe' -ErrorAction Stop).'(default)';if($reg){$candidates+=$reg}}catch{}
-          $edge=$candidates|Where-Object{$_ -and (Test-Path $_)}|Select-Object -Unique|Select-Object -First 1
-          if($edge){
-            Write-Host "Microsoft Edge: $edge"
-            "MIPE_BROWSER_EXECUTABLE=$edge" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-            "MIPE_HEADLESS=0" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          } else {
-            Write-Host 'Edge indisponibil; instalez Chromium Playwright.'
-            & $env:PYTHON_EXE -m playwright install chromium
-            "MIPE_BROWSER_EXECUTABLE=" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-            "MIPE_HEADLESS=1" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          }
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check --no-cache-dir 'playwright==1.61.0' pypdf
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          import pypdf
+          with sync_playwright() as pw:
+              browser = pw.chromium.launch(headless=True, args=['--disable-dev-shm-usage', '--no-sandbox'])
+              page = browser.new_page()
+              page.set_content('<title>NAS ready</title>')
+              assert page.title() == 'NAS ready'
+              browser.close()
+          print('Chromium headless ready on NAS')
+          PY
 
       - name: Resolve crawl budget and snapshot non-acquisition outputs
-        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        shell: bash
         run: |
-          $pages='2000'; $depth='6'; $persist='true'  # twice-daily full crawl; stops early when the frontier is exhausted
-          if('${{ github.event_name }}' -eq 'workflow_dispatch'){
-            if('${{ inputs.max_pages }}'){$pages='${{ inputs.max_pages }}'}
-            if('${{ inputs.max_depth }}'){$depth='${{ inputs.max_depth }}'}
-            $persist='${{ inputs.persist }}'.ToLower()
-          }
-          "MIPE_MAX_PAGES=$pages" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          "MIPE_MAX_DEPTH=$depth" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          "MIPE_PERSIST_REQUESTED=$persist" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          $state=(Get-FileHash 'partener-eu/ingest/state/mipe_state.json' -Algorithm SHA256).Hash.ToLower()
-          $feed=(Get-FileHash 'partener-eu/web/mipe-news.js' -Algorithm SHA256).Hash.ToLower()
-          "MIPE_STATE_BEFORE_SHA=$state" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          "MIPE_FEED_BEFORE_SHA=$feed" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          Write-Host "SURFACEMC acquisition: max_pages=$pages max_depth=$depth persist_requested=$persist"
+          set -euo pipefail
+          pages='2000'; depth='6'; persist='true'
+          if [[ '${{ github.event_name }}' == 'workflow_dispatch' ]]; then
+            [[ -n '${{ inputs.max_pages }}' ]] && pages='${{ inputs.max_pages }}'
+            [[ -n '${{ inputs.max_depth }}' ]] && depth='${{ inputs.max_depth }}'
+            persist='${{ inputs.persist }}'
+          fi
+          {
+            echo "MIPE_MAX_PAGES=$pages"
+            echo "MIPE_MAX_DEPTH=$depth"
+            echo "MIPE_PERSIST_REQUESTED=${persist,,}"
+            echo "MIPE_STATE_BEFORE_SHA=$(sha256sum partener-eu/ingest/state/mipe_state.json | cut -d' ' -f1)"
+            echo "MIPE_FEED_BEFORE_SHA=$(sha256sum partener-eu/web/mipe-news.js | cut -d' ' -f1)"
+          } >> "$GITHUB_ENV"
+          echo "SURFACEMC acquisition on NAS: max_pages=$pages max_depth=$depth persist_requested=${persist,,}"
 
       - name: Acquire official MIPE corpus from Romania
-        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
-        run: '& $env:PYTHON_EXE partener-eu/ingest/mipe_windows_crawl_v3_entry.py'
+        shell: bash
+        run: python partener-eu/ingest/mipe_windows_crawl_v3_entry.py
 
       - name: Enforce acquisition-only boundary and build immutable handoff
-        shell: powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -File {0}
+        shell: bash
         run: |
-          $ErrorActionPreference='Stop'
-          $state=(Get-FileHash 'partener-eu/ingest/state/mipe_state.json' -Algorithm SHA256).Hash.ToLower()
-          $feed=(Get-FileHash 'partener-eu/web/mipe-news.js' -Algorithm SHA256).Hash.ToLower()
-          if($state -ne $env:MIPE_STATE_BEFORE_SHA){throw 'SURFACEMC boundary violation: mipe_state.json changed during acquisition'}
-          if($feed -ne $env:MIPE_FEED_BEFORE_SHA){throw 'SURFACEMC boundary violation: mipe-news.js changed during acquisition'}
-          $commit=(git rev-parse HEAD).Trim()
-          $env:MIPE_ACQUISITION_COMMIT=$commit
-          "MIPE_ACQUISITION_COMMIT=$commit" | Out-File $env:GITHUB_ENV -Encoding utf8 -Append
-          @'
+          set -euo pipefail
+          state="$(sha256sum partener-eu/ingest/state/mipe_state.json | cut -d' ' -f1)"
+          feed="$(sha256sum partener-eu/web/mipe-news.js | cut -d' ' -f1)"
+          [[ "$state" == "$MIPE_STATE_BEFORE_SHA" ]] || { echo 'SURFACEMC boundary violation: mipe_state.json changed during acquisition' >&2; exit 1; }
+          [[ "$feed" == "$MIPE_FEED_BEFORE_SHA" ]] || { echo 'SURFACEMC boundary violation: mipe-news.js changed during acquisition' >&2; exit 1; }
+          commit="$(git rev-parse HEAD)"
+          echo "MIPE_ACQUISITION_COMMIT=$commit" >> "$GITHUB_ENV"
+          MIPE_ACQUISITION_COMMIT="$commit" python - <<'PY'
           import hashlib,json,os
           from pathlib import Path
           corpus_path=Path('partener-eu/ingest/state/mipe_ro_corpus.json')
@@ -181,8 +163,7 @@ jobs:
           }
           (handoff/'mipe_ro_acquisition_manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
           print(json.dumps({'corpusSha256':digest,'pages':len(corpus.get('pages',[])),'documents':len(corpus.get('documents',[])),'persistRequested':manifest['persistRequested']},ensure_ascii=False,indent=2))
-          '@ | Set-Content -Encoding UTF8 .\validate_mipe_acquisition.py
-          & $env:PYTHON_EXE .\validate_mipe_acquisition.py
+          PY
 
       - name: Upload SURFACEMC acquisition handoff
         uses: actions/upload-artifact@v4
