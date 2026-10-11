@@ -27,6 +27,8 @@ import io
 import json
 import os
 import re
+import subprocess
+import sys
 import time
 import urllib.parse
 import zipfile
@@ -40,6 +42,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STATE_PATH = ROOT / "partener-eu/ingest/state/mipe_state.json"
 CORPUS_PATH = ROOT / "partener-eu/ingest/state/mipe_ro_corpus.json"
 FEED_PATH = ROOT / "partener-eu/web/mipe-news.js"
+DOC_EXTRACT_WORKER = Path(__file__).with_name("mipe_document_extract_worker.py")
 
 OFFICIAL_HOSTS = {"mfe.gov.ro", "www.mfe.gov.ro"}
 ROOT_URL = "https://mfe.gov.ro/"
@@ -61,6 +64,8 @@ MAX_DOCUMENTS = max(20, int(os.getenv("MIPE_MAX_DOCUMENTS", "160")))
 MAX_FRONTIER = max(200, int(os.getenv("MIPE_MAX_FRONTIER", "3000")))
 BROWSER_RECYCLE_PAGES = max(5, int(os.getenv("MIPE_BROWSER_RECYCLE_PAGES", "15")))
 MAX_BROWSER_RESTARTS = max(1, int(os.getenv("MIPE_MAX_BROWSER_RESTARTS", "5")))
+DOC_EXTRACT_TIMEOUT_SECONDS = max(5, int(os.getenv("MIPE_DOC_EXTRACT_TIMEOUT_SECONDS", "20")))
+DOC_EXTRACT_MEMORY_MB = max(128, int(os.getenv("MIPE_DOC_EXTRACT_MEMORY_MB", "384")))
 BROWSER_EXECUTABLE = os.getenv("MIPE_BROWSER_EXECUTABLE", "").strip()
 HEADLESS = os.getenv("MIPE_HEADLESS", "0").strip().lower() not in {"0", "false", "no"}
 RETRIEVAL_TRANSPORT = os.getenv("MIPE_RETRIEVAL_TRANSPORT", "playwright-edge-direct-romania-v3").strip()
@@ -297,12 +302,41 @@ def extract_pdf(data: bytes) -> str:
 
 def extract_document(data: bytes, url: str) -> tuple[str, str]:
     ext = path_ext(url)
-    if ext == ".pdf":
-        text = extract_pdf(data)
-        return text, "PDF_TEXT" if text else "HASH_ONLY"
-    if ext == ".docx":
-        text = parse_docx(data)
-        return text, "DOCX_TEXT" if text else "HASH_ONLY"
+    if ext in {".pdf", ".docx"}:
+        def limit_worker() -> None:
+            try:
+                import resource
+                memory_bytes = DOC_EXTRACT_MEMORY_MB * 1024 * 1024
+                resource.setrlimit(resource.RLIMIT_AS, (memory_bytes, memory_bytes))
+                cpu_seconds = DOC_EXTRACT_TIMEOUT_SECONDS + 2
+                resource.setrlimit(resource.RLIMIT_CPU, (cpu_seconds, cpu_seconds))
+            except Exception:
+                pass
+
+        try:
+            completed = subprocess.run(
+                [sys.executable, str(DOC_EXTRACT_WORKER), ext.lstrip(".")],
+                input=data,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                timeout=DOC_EXTRACT_TIMEOUT_SECONDS,
+                check=False,
+                preexec_fn=limit_worker if os.name == "posix" else None,
+            )
+        except subprocess.TimeoutExpired:
+            return "", "HASH_ONLY_EXTRACTION_TIMEOUT"
+        except Exception:
+            return "", "HASH_ONLY_EXTRACTION_FAILED"
+        if completed.returncode != 0:
+            return "", "HASH_ONLY_EXTRACTION_LIMITED"
+        try:
+            result = json.loads(completed.stdout.decode("utf-8"))
+            text = clean(result.get("text"))[:120000]
+        except Exception:
+            text = ""
+        if ext == ".pdf":
+            return text, "PDF_TEXT_ISOLATED" if text else "HASH_ONLY"
+        return text, "DOCX_TEXT_ISOLATED" if text else "HASH_ONLY"
     if ext in {".csv"}:
         try:
             return data.decode("utf-8-sig", errors="replace")[:120000], "CSV_TEXT"
@@ -527,7 +561,13 @@ def main() -> int:
                     break
                 except Exception as exc:
                     err = f"{type(exc).__name__}: {exc}"
-                    target_closed = "target page, context or browser has been closed" in str(exc).lower()
+                    lowered_error = str(exc).lower()
+                    target_closed = any(marker in lowered_error for marker in (
+                        "target page, context or browser has been closed",
+                        "connection closed while reading from the driver",
+                        "browser has been closed",
+                        "browsercontext.new_page",
+                    ))
                     if not target_closed:
                         try:
                             target_closed = not browser.is_connected()

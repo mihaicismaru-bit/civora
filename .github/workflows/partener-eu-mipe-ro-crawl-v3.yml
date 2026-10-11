@@ -43,6 +43,8 @@ env:
   MIPE_MAX_DOCUMENTS: '300'
   MIPE_BROWSER_RECYCLE_PAGES: '15'
   MIPE_MAX_BROWSER_RESTARTS: '5'
+  MIPE_DOC_EXTRACT_TIMEOUT_SECONDS: '20'
+  MIPE_DOC_EXTRACT_MEMORY_MB: '384'
   MIPE_HEADLESS: '1'
   MIPE_BROWSER_EXECUTABLE: ''
   MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'
@@ -102,6 +104,11 @@ jobs:
             persist='${{ inputs.persist }}'
           elif [[ '${{ github.event_name }}' == 'push' ]]; then
             pages='30'; depth='3'; persist='false'
+            echo 'MIPE_RUNTIME_SECONDS=600' >> "$GITHUB_ENV"
+            echo 'MIPE_MAX_DOCUMENTS=20' >> "$GITHUB_ENV"
+            echo 'MIPE_MAX_DOC_BYTES=8000000' >> "$GITHUB_ENV"
+            echo 'MIPE_DOC_EXTRACT_TIMEOUT_SECONDS=8' >> "$GITHUB_ENV"
+            echo 'MIPE_DOC_EXTRACT_MEMORY_MB=256' >> "$GITHUB_ENV"
           fi
           {
             echo "MIPE_MAX_PAGES=$pages"
