@@ -41,8 +41,16 @@ loader = (WEB / "public-heavy-loader-v1.js").read_text(encoding="utf-8")
 assert "loadScript('ask-index.js" in loader, "Ask does not load the compact index"
 assert loader.index("ask-index.js") < loader.index("loadDecisionData(),loadCanonicalCalls()"), "full data must only be the fallback"
 ask = (WEB / "ask-partener-v2.js").read_text(encoding="utf-8")
-for token in ("window.PARTENER_ASK_INDEX", "window.PARTENER_DECISION_PRODUCTS", "window.PARTENER_MIPE_CANONICAL_CALLS", "ROUTES()[id]", "get('q')"):
+for token in ("window.PARTENER_ASK_INDEX", "window.PARTENER_DECISION_PRODUCTS", "window.PARTENER_MIPE_CANONICAL_CALLS", "ROUTES()[id]", "get('q')", "P.dossiers.filter(publishable)", "function conceptGroups(", "if(topicGroups&&!topicMatched)"):
     assert token in ask, f"ask-partener-v2.js missing {token}"
+
+# word matching: whole word for short tokens, word prefix otherwise, never mid-word
+import re as _re
+has_src = _re.search(r"const has=\(text,t\)=>[^;]+;", ask).group(0)
+check = subprocess.run(["node", "-e", has_src + """
+const ok=[has('firmei mici','firm'),!has('sunt confirmate','firma'),has('apa potabila','apa'),!has('apare des','apa'),has('fotovoltaice','fotovoltaic')];
+process.exit(ok.every(Boolean)?0:1)"""], capture_output=True)
+assert check.returncode == 0, "Ask word matching regressed"
 
 # 3. homepage order + immediate render (no delayed layout jump)
 concierge = (WEB / "home-concierge-vnext.js").read_text(encoding="utf-8")
@@ -62,14 +70,15 @@ with tempfile.TemporaryDirectory() as tmp:
     ops = Path(tmp) / "partener-eu" / "ops"
     web.mkdir(parents=True); ops.mkdir(parents=True)
     (ops / "build_ask_index.js").write_text((OPS / "build_ask_index.js").read_text(encoding="utf-8"), encoding="utf-8")
-    dossier = {"id": "d1", "title": "Apel Test", "status": "OPEN", "sources": [{"url": "https://x.ro", "tier": "T1", "label": "S"}],
+    dossier = {"id": "d1", "title": "Apel Test", "status": "OPEN", "publicationState": "PUBLISHABLE", "sources": [{"url": "https://x.ro", "tier": "T1", "label": "S"}],
                "quickFacts": [{"label": "Termen", "value": "1 ianuarie 2030", "confidence": "CONFIRMED"}, {"label": "Altceva", "value": "zgomot"}],
                "sections": [{"title": "Activități", "items": ["Utilaje și echipamente", "utilaje"]}, {"title": "Ce nu este încă confirmat", "items": ["Bugetul"]}]}
-    (web / "decision-products.js").write_text("window.PARTENER_DECISION_PRODUCTS=" + json.dumps({"dossiers": [dossier]}) + ";", encoding="utf-8")
+    (web / "decision-products.js").write_text("window.PARTENER_DECISION_PRODUCTS=" + json.dumps({"dossiers": [dossier, {"id": "d2", "title": "Provizoriu", "publicationState": "PROVISIONAL_FAIL_CLOSED"}]}) + ";", encoding="utf-8")
     (web / "mipe-canonical-calls.js").write_text("window.PARTENER_MIPE_CANONICAL_CALLS=" + json.dumps({"calls": [{"id": "c1", "activities": ["Digitalizare"]}]}) + ";", encoding="utf-8")
     subprocess.run(["node", str(ops / "build_ask_index.js")], check=True, capture_output=True)
     raw = (web / "ask-index.js").read_text(encoding="utf-8")
     payload = json.loads(raw[len("window.PARTENER_ASK_INDEX="):].rstrip().rstrip(";"))
+    assert [x["id"] for x in payload["dossiers"]] == ["d1"], "non-publishable dossiers must not reach Ask"
     d = payload["dossiers"][0]
     assert d["sectionTitles"] == ["activitati", "ce nu este inca confirmat"]
     assert "utilaje:1" in d["sectionVocab"].split(","), d["sectionVocab"]

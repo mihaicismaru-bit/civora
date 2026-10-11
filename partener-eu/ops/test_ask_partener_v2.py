@@ -62,7 +62,8 @@ assert 'beneficiar ori zonă structurată incompatibilă' in js
 assert 'beneficiar sau zonă structurată incompatibilă' in js
 assert 'Am înțeles întrebarea astfel:' in js
 assert 'Beneficiar:' in js and 'Investiție:' in js and 'Zonă:' in js
-assert 'P.dossiers.map(d=>rank(d,ts,interpretation))' in js
+# only dossiers that pass the publication gate are ranked as answers
+assert 'P.dossiers.filter(publishable).map(d=>rank(d,ts,interpretation))' in js
 assert 'eligibilitatea din datele verificate' in js
 assert 'activitățile din datele verificate' in js
 assert 'quality?.completeness' in js

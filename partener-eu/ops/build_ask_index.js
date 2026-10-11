@@ -49,8 +49,10 @@ function sectionVocabulary(sections) {
   return [...masks].map(([w, m]) => `${w}:${m.toString(36)}`).join(',');
 }
 
-const dossiers = P.dossiers.map(d => ({
+// Ask answers only with dossiers that pass the publication gate (the same set that gets static pages).
+const dossiers = P.dossiers.filter(d => String(d.publicationState || '').toUpperCase() === 'PUBLISHABLE').map(d => ({
   id: d.id,
+  publicationState: d.publicationState,
   title: d.title,
   programme: d.programme,
   region: d.region,
