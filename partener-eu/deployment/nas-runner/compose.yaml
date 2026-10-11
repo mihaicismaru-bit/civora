@@ -21,8 +21,6 @@ services:
       - /tmp:size=384m,mode=1777
     shm_size: 256m
     mem_limit: 1152m
-    cpus: 1.25
-    pids_limit: 512
     restart: unless-stopped
     stop_grace_period: 2m
     entrypoint: ["/bin/bash", "-lc"]
