@@ -1,0 +1,622 @@
+{
+  "schema_version": "DAPP_ANALYSIS_CANDIDATE_V1",
+  "dossier_id": "afir-energy-2026",
+  "source_version": "AFIR Solar Autoconsum V7 (09.06.2026), session 03/2026; closure announced 17.08.2026; evaluation index updated 07.10.2026",
+  "base_main_sha": "a41df5d9bfb870dfd467e0de6d7deec09e5d864d",
+  "analysis_run_id": "DAPP-AFIR-ENERGY-20261012143528",
+  "analysis_checked_at_utc": "2026-10-12T14:35:28.232Z",
+  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261012-H01",
+  "state": "NEEDS_EVIDENCE",
+  "publication_gate": "PROVISIONAL_FAIL_CLOSED",
+  "publish_authorized": false,
+  "scope_note": "ONE dossier only: agricultural / food industry AFIR Schema Energie solar autoconsumption, third session 2026; public-beneficiary schemes cited only for disambiguation.",
+  "analysis_candidate": {
+    "title": "AFIR Schema ENERGIE — panouri fotovoltaice pentru autoconsumul întreprinderilor agricole și alimentare",
+    "verdict_30_seconds": "A treia sesiune AFIR ENERGIE pentru fermieri și procesatori s-a închis la 14 august 2026, conform anunțului oficial AFIR din 17 august. Rapoartele de evaluare publicate în septembrie și octombrie confirmă trecerea la evaluare. În octombrie 2026 nu se depun proiecte noi în această sesiune. Un ghid V7 disponibil nu reprezintă o sesiune deschisă.",
+    "funding": "Bugetul sesiunii: 265 milioane EUR, dintre care 145 milioane EUR pentru până la 1 MW inclusiv și 120 milioane EUR peste 1 MW. Sprijin de până la 100% din costurile eligibile, în limite de 650.000 EUR/MW pentru <=1 MW și 550.000 EUR/MW peste 1 MW; maxim 20 milioane EUR per beneficiar, inclusiv proiecte multiple.",
+    "who_can_apply": "Întreprinderi agricole și din industria alimentară și OUAI/FOUAI, în condițiile schemei. Verificarea codurilor CAEN și a condițiilor cumulative rămâne dependentă de ghidul complet.",
+    "what_is_financed": "Capacități noi de producere a energiei electrice din surse solare pentru autoconsum, cu sau fără stocare integrată. Nu confundați cu două apeluri distincte pentru instituții publice deschise în septembrie.",
+    "how_evaluated": "Au fost publicate rapoarte de evaluare la 7 septembrie (>1 MW) și 7 octombrie 2026 (<=1 MW). Grila completă și condițiile eliminatorii rămân UNKNOWN în această analiză.",
+    "three_actions": [
+      "Pentru proiectele deja depuse, consultați raportul componentei relevante pe pagina AFIR și verificați individual procedura și termenul de contestare din documentația aplicabilă.",
+      "Pentru proiectele nedepuse, nu încercați depunerea în sesiunea 03/2026 închisă; urmăriți exclusiv noul anunț oficial dacă AFIR decide o altă sesiune.",
+      "Pentru pregătirea viitoare, verificați forma juridică, CAEN-ul, locul de consum, autoconsumul și documentele tehnice; nu presupuneți că măsura ANCPI din iulie–august rămâne aplicabilă."
+    ],
+    "caveats": [
+      "Nu este confirmată o nouă sesiune agricolă în octombrie 2026.",
+      "TVA, costurile, scoringul, excluderile, indicatorii și anexele trebuie confruntate cu PDF-ul complet al ghidului V7.",
+      "NU se atribuie solicitantului agricol termenul 20.11.2026 al celor două apeluri distincte pentru beneficiari publici."
+    ]
+  },
+  "claim_evidence_ledger": [
+    {
+      "claim_id": "AFIR01",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "entity",
+      "value": {
+        "scheme": "Schema Energie Autoconsum",
+        "session": "03/2026",
+        "scope": "agricultural and food processing private-sector applicants"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S1"
+      ],
+      "document_locator": "opening paragraph",
+      "evidence_paraphrase": "Distinct from 2026 energy calls for public institutions.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR02",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "lifecycle",
+      "value": {
+        "opened": "2026-06-15",
+        "closed": "2026-08-14",
+        "timezone": "Europe/Bucharest",
+        "closing_hour": null,
+        "current_submission_possible": false
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S2"
+      ],
+      "document_locator": "press release opening paragraphs",
+      "evidence_paraphrase": "AFIR expressly announces session closed; exact hour is not supplied.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR03",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "lifecycle_evaluation",
+      "value": {
+        "evaluation_reports": [
+          "2026-09-07 >1 MW",
+          "2026-10-07 <=1 MW"
+        ]
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S3"
+      ],
+      "document_locator": "evaluation table, session 3/2026 rows",
+      "evidence_paraphrase": "Separate rows for eligible, nonconforming and ineligible submissions.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR04",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "call_budget",
+      "value": {
+        "total": 265000000,
+        "currency": "EUR",
+        "scope": "session allocation"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S1"
+      ],
+      "document_locator": "paragraph 2",
+      "evidence_paraphrase": "Allocation is for whole third session, not maximum per project.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR05",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "call_budget_split",
+      "value": {
+        "up_to_1mw": 145000000,
+        "above_1mw": 120000000,
+        "currency": "EUR"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S1"
+      ],
+      "document_locator": "paragraph 2",
+      "evidence_paraphrase": "Division is by installed generation capacity.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR06",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "applicant_types",
+      "value": [
+        "legally registered agricultural enterprises",
+        "food-industry enterprises",
+        "OUAI/FOUAI pursuant to Law 138/2004"
+      ],
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S4"
+      ],
+      "document_locator": "Beneficiari a/b/c",
+      "evidence_paraphrase": "Legal form is necessary but not sufficient; detailed CAEN constraints unverified.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR07",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "eligible_activities",
+      "value": {
+        "new_solar_generation": true,
+        "integrated_storage_optional": true,
+        "standalone_storage_not_in_this_call": true
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S4"
+      ],
+      "document_locator": "Scop / Obiective",
+      "evidence_paraphrase": "Autoconsum for eligible activity, not any energy project.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR08",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "grant_intensity",
+      "value": {
+        "maximum_public_share_of_eligible_costs_percent": 100,
+        "not_all_project_costs": true
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S1"
+      ],
+      "document_locator": "grant paragraph",
+      "evidence_paraphrase": "Expenditure eligibility requires detailed guide.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR09",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "grant_unit_limit",
+      "value": {
+        "capacity_mw": "<=1",
+        "maximum_eur_per_mw": 650000
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S1"
+      ],
+      "document_locator": "grant paragraph",
+      "evidence_paraphrase": "Cap per installed MW, not a flat grant for each project.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR10",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "grant_unit_limit",
+      "value": {
+        "capacity_mw": ">1",
+        "maximum_eur_per_mw": 550000
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S1"
+      ],
+      "document_locator": "grant paragraph",
+      "evidence_paraphrase": "Cap per installed MW, not a flat grant for each project.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR11",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "beneficiary_cap",
+      "value": {
+        "maximum_eur_per_beneficiary": 20000000
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S1"
+      ],
+      "document_locator": "multiple projects paragraph",
+      "evidence_paraphrase": "Aggregate cap applies across submitted investments.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR12",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "multiple_projects",
+      "value": {
+        "allowed": true,
+        "condition": "different points of consumption"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S4"
+      ],
+      "document_locator": "Sprijin nerambursabil",
+      "evidence_paraphrase": "Projects for same consumption location must not be conflated.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR13",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "submission_method",
+      "value": {
+        "online": "AFIR",
+        "application_pdf_requires_desktop_Adobe_reader": true,
+        "manual_completion_not_automated": true
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S4"
+      ],
+      "document_locator": "instructions above Ghidul solicitantului & Anexe",
+      "evidence_paraphrase": "Use latest application version; do not fill via browser or bots.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR14",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "temporary_ANCPI_exception",
+      "value": {
+        "valid_from": "2026-07-24",
+        "valid_to": "2026-08-14",
+        "document_replacement_declaration_only_in_specific_outage_case": true
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S5"
+      ],
+      "document_locator": "measures bullets",
+      "evidence_paraphrase": "Historical workaround; not a general exception for future sessions.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR15",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "distinct_entity",
+      "value": {
+        "public_sector_calls_start": "2026-09-28",
+        "same_as_agro_autoconsumption": false
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_HTML_VERIFIED_PENDING_PROVENANCE",
+      "source_ids": [
+        "S6"
+      ],
+      "document_locator": "opening paragraphs",
+      "evidence_paraphrase": "Do not project the public-sector autumn deadline onto agro-industrial Schema Energie session 03.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR16",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "scoring",
+      "value": null,
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "INSUFFICIENT_DOCUMENT_EVIDENCE",
+      "source_ids": [],
+      "document_locator": "guide V7 selection grid not read",
+      "evidence_paraphrase": "UNKNOWN: cannot state scores, ranking, eligibility eliminations.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR17",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "VAT_and_tax_treatment",
+      "value": null,
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "INSUFFICIENT_DOCUMENT_EVIDENCE",
+      "source_ids": [],
+      "document_locator": "guide V7 financing annex not read",
+      "evidence_paraphrase": "UNKNOWN: do not promise automatic VAT reimbursement.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR18",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "cost_categories_and_state_aid_detail",
+      "value": null,
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "INSUFFICIENT_DOCUMENT_EVIDENCE",
+      "source_ids": [],
+      "document_locator": "guide V7 expenditure and state-aid sections not read",
+      "evidence_paraphrase": "UNKNOWN: do not classify a cost as eligible without exact guide.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR19",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "technical_thresholds_and_indicators",
+      "value": null,
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "INSUFFICIENT_DOCUMENT_EVIDENCE",
+      "source_ids": [],
+      "document_locator": "guide V7 technical annex not read",
+      "evidence_paraphrase": "UNKNOWN: no assertion on autoconsumption 70% or siting technical cutoffs.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR20",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "new_application_session_2026",
+      "value": null,
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "INSUFFICIENT_DOCUMENT_EVIDENCE",
+      "source_ids": [],
+      "document_locator": "current official session-specific notice not supplied",
+      "evidence_paraphrase": "UNKNOWN: no announcement proving a new agricultural session after 14 August.",
+      "source_version": "AFIR Schema Energie 2026 session 03; guide V7 June 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    }
+  ],
+  "source_manifest": [
+    {
+      "source_id": "S1",
+      "authority": "AFIR",
+      "document_title": "AFIR announcement third session",
+      "url": "https://www.afir.ro/comunicate/265-de-milioane-de-euro-pentru-investitii-in-producerea-energiei-electrice/",
+      "document_date": "2026-06-09",
+      "locator": "press release: allocation, dates, grant thresholds, applicants",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_REVIEWED_GUIDE_DOCUMENT_NOT_EXTRACTED"
+    },
+    {
+      "source_id": "S2",
+      "authority": "AFIR",
+      "document_title": "AFIR closure press release",
+      "url": "https://www.afir.ro/comunicate/inchiderea-sesiunii-pentru-investitiile-in-producerea-energiei-electrice-din-surse-solare/",
+      "document_date": "2026-08-17",
+      "locator": "press release: explicit closure and applications received",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_REVIEWED_GUIDE_DOCUMENT_NOT_EXTRACTED"
+    },
+    {
+      "source_id": "S3",
+      "authority": "AFIR",
+      "document_title": "AFIR reports session 03/2026",
+      "url": "https://www.afir.ro/rapoarte/rapoarte-feadr/evaluare/",
+      "document_date": "2026-10-07",
+      "locator": "evaluation report index rows: 07 September and 07 October 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_REVIEWED_GUIDE_DOCUMENT_NOT_EXTRACTED"
+    },
+    {
+      "source_id": "S4",
+      "authority": "AFIR",
+      "document_title": "AFIR V7 guide and application index",
+      "url": "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-schema-energie",
+      "document_date": "2026-06-09",
+      "locator": "page sections: Scop, Obiective, Beneficiari, Sprijin nerambursabil, Ghidul solicitantului & Anexe",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_REVIEWED_GUIDE_DOCUMENT_NOT_EXTRACTED"
+    },
+    {
+      "source_id": "S5",
+      "authority": "AFIR",
+      "document_title": "AFIR ANCPI temporary measure",
+      "url": "https://www.afir.ro/comunicate/masuri-afir-pentru-atenuarea-efectelor-provocate-de-indisponibilitatea-sistemului-ancpi-completare/",
+      "document_date": "2026-07-29",
+      "locator": "temporary workaround 24 July to 14 August 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_REVIEWED_GUIDE_DOCUMENT_NOT_EXTRACTED"
+    },
+    {
+      "source_id": "S6",
+      "authority": "AFIR",
+      "document_title": "AFIR distinct public-beneficiary funding",
+      "url": "https://www.afir.ro/info-la-zi/informatii-sesiune-energie-regenerabila-solicitanti-publici",
+      "document_date": "2026-09-22",
+      "locator": "two public-sector calls are distinct and opened 28 September 2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_REVIEWED_GUIDE_DOCUMENT_NOT_EXTRACTED"
+    }
+  ],
+  "editorial_review": {
+    "adversarial_checks": [
+      {
+        "question": "Este apelul încă OPEN?",
+        "result": "NO_FOR_THIRD_SESSION",
+        "basis": "AFIR explicit closure 17.08; 2026 evaluation reports"
+      },
+      {
+        "question": "Bugetul este grant pe proiect?",
+        "result": "NO",
+        "basis": "265m EUR allocation separated from EUR/MW intensity and EUR20m beneficiary cap"
+      },
+      {
+        "question": "Cine aplică versus cine beneficiază?",
+        "result": "Applicants are qualified enterprises and OUAI/FOUAI; end-user target group separate; no target group numerical claims."
+      },
+      {
+        "question": "Sunt cele două apeluri de septembrie aceeași schemă?",
+        "result": "NO",
+        "basis": "Distinct public-beneficiary calls; do not transfer deadlines/budgets"
+      },
+      {
+        "question": "Există grila și anexe integral verificate?",
+        "result": "NO",
+        "basis": "Original V7 PDF retrieval unsuccessful from direct official URL and index download"
+      },
+      {
+        "question": "Hashurile sunt ghid original?",
+        "result": "NO",
+        "basis": "No raw/semantic guide hash claimed or recalculated"
+      }
+    ],
+    "decision_utility": "Closed-session alert and correct beneficiary/scheme separation; focus applicants already submitted on published evaluation lists rather than new submission.",
+    "release_decision": "BLOCKED: claim-level gate not verified integrated, exact raw document provenance and annexes missing."
+  },
+  "material_diff": {
+    "baseline": "P11 asOf 2026-09-27: status DISCOVERED, materialFacts empty, blockedFactClasses all, publicationDecision BLOCK_MATERIAL_FACTS / OPEN_DEADLINE_EXPIRED_REQUIRES_REFRESH.",
+    "new_evidence": "AFIR closure 17.08.2026 and 07.09/07.10.2026 evaluation report index positively establish session 03/2026 closed; official grant/unit and applicant distinctions assembled in analyst ledger.",
+    "production_change": "NONE",
+    "old_page_preserved": true
+  },
+  "next_evidence_action": "Acquire approved V7 19.94MB guide (09.06.2026), 2026 application form and applicable annexes via existing AFIR authorized ingestion; verify CAEN, >400kW exception, site/autoconsum rules, cost list, VAT, selection grid, appeals procedure and eventual newer session announcement. No retry loop of failed direct PDF access.",
+  "checkpoint_details": {
+    "storage": "GitHub DAPP staging branch only",
+    "replay": "Run PARTENER claim-level gate against exact sourced claims when implemented; assert CLOSED not OPEN; verify monetary units and separate public call identity.",
+    "rollback": "Drop/revert this staging-only commit or branch; main, P11, decision_products, Pages and LKG unaffected."
+  },
+  "gate_checks": {
+    "DAPP_EVIDENCE_GATE": "NOT_VERIFIED_IMPLEMENTED",
+    "original_guide_full_text": "UNAVAILABLE",
+    "guide_raw_hash": "NOT_OBTAINED",
+    "source_version_audit": "PARTIAL",
+    "CI_exact_head": "NOT_RUN",
+    "merge": "NOT_DONE",
+    "public_readback": "NOT_DONE"
+  },
+  "needs_user": false
+}
