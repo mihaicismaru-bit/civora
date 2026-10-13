@@ -2,18 +2,20 @@
   "schema_version": "DAPP_ANALYST_CANDIDATE_V1",
   "dossier_id": "mipe-3b3ab4d9361706669b",
   "title": "PDD — Managementul principalelor tipuri de risc identificate în PNMRD",
-  "analyst_run_id": "DAPP-PDD-20261012-H01-STATUS-EVIDENCE",
-  "generated_at": "2026-10-12T12:37:03.383Z",
+  "analyst_run_id": "DAPP-PDD-20261013-H02-AMENDMENT-VISUAL",
+  "generated_at": "2026-10-13",
   "candidate_base_sha": "00b04e3578dba377a563655dd9ffe1f430f8fbd7",
   "candidate_branch": "partener/dapp-pdd-risk-851-854-20261012",
   "analyst_protocol_version": "DAPP_V1_DRAFT_PR_1389_SECTION_12",
-  "work_state": "NEEDS_EVIDENCE",
+  "work_state": "ANALYSIS_IN_PROGRESS",
   "publish_state": "PROVISIONAL_FAIL_CLOSED",
   "published": false,
   "source_version": {
     "initial_guide_reference": "2025-12-29 listing, content not read",
-    "amendment_reference": "2026-09 (OMIPE nr. 1465/2026 mentioned by existing product), content not read",
-    "current_applicable_version": "UNKNOWN"
+    "amendment_reference": "OMIPE 1465 din 21.09.2026, 3 pages visually inspected as mirrored scan",
+    "current_applicable_version": "AMENDMENT_VISUALLY_READ_FROM_MIRROR; OFFICIAL_PUBLISHED_AT_AND_ORIGINAL_BINARY_UNVERIFIED",
+    "amendment_scope": "renames PDD to PDDTJ; modifies deadline separately for PDD/851 and PDD/854",
+    "applicability_caveat": "Art. II uses effective date of publication on official MIPE Guides + News pages; 21 Sep signing date not sufficient."
   },
   "source_manifest": {
     "official_document_references": [
@@ -71,29 +73,79 @@
         "snapshot_generated_at": "2026-10-11T19:48:39Z"
       }
     ],
-    "provenance_warning": "Git blob SHAs are repository fingerprint references, NOT raw or semantic SHA256 of official documents. No PDF ZIP hash has been calculated or claimed in this editorial run. SURFACEMC/authorized PARTENER acquisition owns MIPE originals."
+    "provenance_warning": "Git blob SHAs are repository fingerprint references, NOT raw or semantic SHA256 of official documents. No PDF ZIP hash has been calculated or claimed in this editorial run. SURFACEMC/authorized PARTENER acquisition owns MIPE originals.",
+    "amended_order_visual_source": {
+      "authority": "MIPE",
+      "document": "OMIPE 1465 / 21.09.2026",
+      "official_url": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+      "visual_mirror_url": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+      "mirror_page_count": 3,
+      "read_method": "visual screenshot all 3 pages",
+      "verified_passages": [
+        "p2 Art I 1/2",
+        "p3 Art I 3",
+        "p3 Art II"
+      ],
+      "original_binary_obtained": false,
+      "original_raw_sha256": null,
+      "original_semantic_sha256": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "official_published_at": null,
+      "note": "Mirrored primary signed document visibly read; authoritative MIPE binary and official publish-date readback still unavailable; no release-certification."
+    },
+    "supplementary_discovery": [
+      {
+        "url": "https://www.fonduri-structurale.ro/stiri/41321/pddtj-a-fost-prelungit-apelul-pentru-proiecte-noi-de-management-al-principalelor-tipuri-de-risc-identificate-in-pnmrd",
+        "source_class": "MEDIA_DISCOVERY_ONLY",
+        "published_on": "2026-09-22",
+        "role": "Independent pointer to primary order and same deadlines"
+      },
+      {
+        "url": "https://www.fonduri-structurale.ro/stiri/39217/pdd-s-a-lansat-apelul-pentru-finantarea-proiectelor-noi-de-management-al-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-riscurilor-de-dezastre",
+        "source_class": "MEDIA_DISCOVERY_ONLY",
+        "published_on": "2025-12-30",
+        "role": "Historical initial call information, not post-amendment authority"
+      }
+    ]
   },
   "analysis_candidate": {
-    "headline": "PDD — Managementul riscurilor: actualizare de ghid identificată; fereastra de depunere nu este certificată",
-    "thirty_second_verdict": "Există o referință oficială la ghidul PDD și la o actualizare în septembrie 2026, dar din datele examinate nu se poate confirma o perioadă activă de depunere în octombrie 2026. Nu folosiți eticheta internă OPEN ca dovadă pentru un termen de depunere.",
-    "applicant_eligibility": "DE VERIFICAT — lista eligibililor, condițiile cumulative, parteneriatele și excluderile nu au fost confirmate din versiunea aplicabilă a ghidului.",
+    "headline": "PDD/851 investiții și PDD/854 capacitate administrativă — două apeluri cu termene distincte în OMIPE 1465/2026 (staging)",
+    "thirty_second_verdict": "ORDIN MIPE 1465/21.09.2026 (copie scanată citită vizual) indică PDD/851 la 30.09.2027 17:00 și PDD/854 la 18.12.2027 17:00. NU reprezintă o certificare OPEN pentru depunere: lipsesc dovada datată a publicării actului pe MIPE, disponibilitatea MySMIS și proveniența originalului. Solicitantul eligibil se verifică distinct pentru tipul A/B.",
+    "applicant_eligibility": "DE VERIFICAT pentru fiecare cod. Relatarea de lansare din 2025 indică ANAR/Administrații Bazinale și ANM pentru A, MMAP/ANAR pentru B, dar ghidul din 2025 nu a fost parcurs integral și condițiile cumulative/excluderile nu sunt încă certificate.",
     "target_groups": "NECONFIRMAT — nu confundați eventualele comunități protejate prin intervenție cu solicitantul finanțării.",
-    "activities": "În contextul programului apare Acțiunea 3.1 Managementul principalelor tipuri de risc identificate în PNMRD (referință de index); lista proiectelor și cheltuielilor eligibile rămâne NECONFIRMATĂ în această analiză.",
-    "financing": "NECONFIRMAT — bugetul apelului, grantul individual, moneda, intensitatea, contribuția proprie, TVA și ajutorul de stat nu sunt certificate.",
+    "activities": "Conform anunțului istoric (necertificat prin ghid): A investiții în managementul riscului de inundații și infrastructura de monitorizare/avertizare; B elaborarea documentațiilor de planificare și pregătire tehnico-economică. Ghidul aplicabil încă necesar.",
+    "financing": "NECONFIRMAT la nivel de ghid actual. Relatarea din 2025 sugerează alocări distincte 30,5 milioane EUR (A) și 5 milioane EUR (B), NU granturi individuale; originalul și schimbările ulterioare trebuie verificate.",
     "selection": "NECONFIRMAT — grilele, condițiile eliminatorii și punctajul necesită verificarea anexelor aplicabile.",
     "documents": "Există referințe la ghidul din decembrie 2025 și documentul de modificare din septembrie 2026. Lista anexelor/cererii de finanțare nu este certificată.",
     "risk_review": [
-      "CRITICAL: parserul consideră deadline verified deși proba conține doar etichete de formular fără dată de închidere.",
-      "CRITICAL: decizia internă ACȚIONEAZĂ și OPEN CONFIRMED poate sugera pregătirea urgentă a unei depuneri care nu a fost verificată.",
-      "HIGH: un ordin de modificare din 2026 apare în documentele indexate dar nu este confruntat cu ghidul inițial și anexele."
+      "CRITICAL: dosarul generic guide-level e proiectat cu status OPEN și cod «—», deși ordinul separă două apeluri cu deadline diferit.",
+      "CRITICAL: potrivit Art. II, aplicabilitatea începe la publicarea MIPE, nu automat la semnarea din 21.09.2026.",
+      "HIGH: o copie vizuală a ordinului de pe un mirror NU certifică identitatea/hashul PDF original al ministerului.",
+      "HIGH: nu confundați alocările A/B cu grantul pe proiect; nu declarați eligibilă o instituție doar pe baza unui comunicat istoric.",
+      "HIGH: diferite fusuri sezoniere la cele două deadline-uri; publicați ore locale + offset numai după recertificare."
     ],
     "three_actions": [
-      "Verificați prin SURFACEMC și registrul oficial apelul exact, data și ora deschiderii/închiderii și relația cu ghidul din 2025; în lipsa dovezii, păstrați termenul UNKNOWN.",
-      "Obțineți prin circuitul autorizat textul OMIPE nr.1465/2026 și versiunea aplicabilă a ghidului/anexelor; extrageți diferențele materiale, fără presupuneri după titlu.",
-      "Din documentele reconciliate, construiți matricea solicitant–activități–costuri–punctaj–indicatori și abia atunci redactați recomandarea GO/NO-GO."
+      "SURFACEMC: recuperați originalul OMIPE 1465/2026 din MIPE, capturați data publicării și raw/semantic hashes; reconciliați Art. II.",
+      "PARTENER: tratați PDD/851 și PDD/854 ca două child CALL IDs sub parentul de ghid; verificați perioada și formularul în MySMIS oficial, separat.",
+      "Analistul: citiți ghidul 5999/2025 cu anexele/grilele aplicabile pentru fiecare apel și certificați solicitanți, costuri, TVA, punctaj, indicatori și grant individual."
     ],
-    "editorial_label": "RESEARCH_CANDIDATE_NOT_SITE_RELEASE",
-    "disclaimer": "Nicio valoare financiară, condiție de eligibilitate sau dată de depunere nu este autorizată spre publicare din acest candidat."
+    "editorial_label": "MIRROR_PRIMARY_VISUAL_STAGING_NOT_SITE_RELEASE",
+    "disclaimer": "Nicio valoare financiară, condiție de eligibilitate sau dată de depunere nu este autorizată spre publicare din acest candidat.",
+    "call_identity_split": [
+      {
+        "code": "PDD/851",
+        "project_type": "proiecte noi de investiții",
+        "closing_local_candidate": "2027-09-30T17:00:00+03:00",
+        "evidence_state": "UNKNOWN_FOR_RELEASE"
+      },
+      {
+        "code": "PDD/854",
+        "project_type": "consolidarea capacității administrative",
+        "closing_local_candidate": "2027-12-18T17:00:00+02:00",
+        "evidence_state": "UNKNOWN_FOR_RELEASE"
+      }
+    ]
   },
   "claim_evidence_ledger": [
     {
@@ -359,10 +411,234 @@
         }
       ],
       "analyst_note": "URL presence supports inventory only, not document completeness/validated content."
+    },
+    {
+      "claim_id": "PDD-H02-001",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "call_identity",
+      "statement": "PDD/851 is the distinct investment-project call under PNMRD.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "PRIMARY_DOCUMENT_VISUAL_ON_SECONDARY_MIRROR_NOT_CANONICAL_SOURCE_CERTIFICATION",
+      "scope": "PDD/851",
+      "value": null,
+      "unit": null,
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_MINISTERIAL_ORDER_MIRRORED_COPY_VISUALLY_READ",
+          "authority": "Ministerul Investitiilor si Proiectelor Europene",
+          "document_type": "OMIPE",
+          "document_title": "Ordin MIPE nr. 1465 din 21.09.2026",
+          "official_reference": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+          "mirror_visual_reference": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+          "original_document_version": "OMIPE 1465/21.09.2026, copy of signed 3-page order",
+          "page_or_section": "pagina 2, Art. I punctul 2, pct. 4.3.2",
+          "evidence_excerpt": "PDD/851 ... proiecte noi de investiții",
+          "original_document_raw_sha256": null,
+          "original_document_semantic_sha256": null,
+          "original_document_fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        }
+      ],
+      "analyst_note": "Do not collapse guide-level dossier to one call."
+    },
+    {
+      "claim_id": "PDD-H02-002",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "call_identity",
+      "statement": "PDD/854 is the separate capacity-building call under PNMRD.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "PRIMARY_DOCUMENT_VISUAL_ON_SECONDARY_MIRROR_NOT_CANONICAL_SOURCE_CERTIFICATION",
+      "scope": "PDD/854",
+      "value": null,
+      "unit": null,
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_MINISTERIAL_ORDER_MIRRORED_COPY_VISUALLY_READ",
+          "authority": "Ministerul Investitiilor si Proiectelor Europene",
+          "document_type": "OMIPE",
+          "document_title": "Ordin MIPE nr. 1465 din 21.09.2026",
+          "official_reference": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+          "mirror_visual_reference": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+          "original_document_version": "OMIPE 1465/21.09.2026, copy of signed 3-page order",
+          "page_or_section": "pagina 2, Art. I punctul 2, pct. 4.3.2",
+          "evidence_excerpt": "PDD/854 ... consolidare a capacității administrative",
+          "original_document_raw_sha256": null,
+          "original_document_semantic_sha256": null,
+          "original_document_fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        }
+      ],
+      "analyst_note": "Separate distinct applicant/project track and own lifecycle."
+    },
+    {
+      "claim_id": "PDD-H02-003",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "deadline",
+      "statement": "Amendment text gives PDD/851 closing 30.09.2027 17:00 local Romanian time; official publication applicability remains to be pinned.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "PRIMARY_DOCUMENT_VISUAL_ON_SECONDARY_MIRROR_NOT_CANONICAL_SOURCE_CERTIFICATION",
+      "scope": "PDD/851",
+      "value": null,
+      "unit": null,
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_MINISTERIAL_ORDER_MIRRORED_COPY_VISUALLY_READ",
+          "authority": "Ministerul Investitiilor si Proiectelor Europene",
+          "document_type": "OMIPE",
+          "document_title": "Ordin MIPE nr. 1465 din 21.09.2026",
+          "official_reference": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+          "mirror_visual_reference": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+          "original_document_version": "OMIPE 1465/21.09.2026, copy of signed 3-page order",
+          "page_or_section": "pagina 2, Art. I pct. 2 / 4.3.2",
+          "evidence_excerpt": "30 septembrie 2027, ora 17:00",
+          "original_document_raw_sha256": null,
+          "original_document_semantic_sha256": null,
+          "original_document_fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        }
+      ],
+      "analyst_note": "Visually verified in mirrored ministerial order, NOT release-certified; reconcile publication date and active MySMIS lifecycle."
+    },
+    {
+      "claim_id": "PDD-H02-004",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "deadline",
+      "statement": "Amendment text gives PDD/854 closing 18.12.2027 17:00 local Romanian time; official publication applicability remains to be pinned.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "PRIMARY_DOCUMENT_VISUAL_ON_SECONDARY_MIRROR_NOT_CANONICAL_SOURCE_CERTIFICATION",
+      "scope": "PDD/854",
+      "value": null,
+      "unit": null,
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_MINISTERIAL_ORDER_MIRRORED_COPY_VISUALLY_READ",
+          "authority": "Ministerul Investitiilor si Proiectelor Europene",
+          "document_type": "OMIPE",
+          "document_title": "Ordin MIPE nr. 1465 din 21.09.2026",
+          "official_reference": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+          "mirror_visual_reference": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+          "original_document_version": "OMIPE 1465/21.09.2026, copy of signed 3-page order",
+          "page_or_section": "pagina 2, Art. I pct. 2 / 4.3.2",
+          "evidence_excerpt": "18 decembrie 2027, ora 17:00",
+          "original_document_raw_sha256": null,
+          "original_document_semantic_sha256": null,
+          "original_document_fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        }
+      ],
+      "analyst_note": "Distinct from investment call; not an extension of a single undifferentiated guide dossier."
+    },
+    {
+      "claim_id": "PDD-H02-005",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "version_applicability",
+      "statement": "Art. II states amendment enters into force on publication on MIPE official Guides and News pages; signature alone is not effective date.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "PRIMARY_DOCUMENT_VISUAL_ON_SECONDARY_MIRROR_NOT_CANONICAL_SOURCE_CERTIFICATION",
+      "scope": "OMIPE 1465/2026",
+      "value": null,
+      "unit": null,
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_MINISTERIAL_ORDER_MIRRORED_COPY_VISUALLY_READ",
+          "authority": "Ministerul Investitiilor si Proiectelor Europene",
+          "document_type": "OMIPE",
+          "document_title": "Ordin MIPE nr. 1465 din 21.09.2026",
+          "official_reference": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+          "mirror_visual_reference": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+          "original_document_version": "OMIPE 1465/21.09.2026, copy of signed 3-page order",
+          "page_or_section": "pagina 3, Art. II",
+          "evidence_excerpt": "intră în vigoare începând cu data publicării",
+          "original_document_raw_sha256": null,
+          "original_document_semantic_sha256": null,
+          "original_document_fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        }
+      ],
+      "analyst_note": "Need official dated MIPE page receipt, not just media publication date."
+    },
+    {
+      "claim_id": "PDD-H02-006",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "programme_name",
+      "statement": "Art. I changes programme name PDD to Programul Dezvoltare Durabilă și Tranziție Justă and acronym PDD to PDDTJ throughout.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "PRIMARY_DOCUMENT_VISUAL_ON_SECONDARY_MIRROR_NOT_CANONICAL_SOURCE_CERTIFICATION",
+      "scope": "PDDTJ",
+      "value": null,
+      "unit": null,
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_MINISTERIAL_ORDER_MIRRORED_COPY_VISUALLY_READ",
+          "authority": "Ministerul Investitiilor si Proiectelor Europene",
+          "document_type": "OMIPE",
+          "document_title": "Ordin MIPE nr. 1465 din 21.09.2026",
+          "official_reference": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+          "mirror_visual_reference": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+          "original_document_version": "OMIPE 1465/21.09.2026, copy of signed 3-page order",
+          "page_or_section": "pagina 3, Art. I pct. 3",
+          "evidence_excerpt": "sintagma „Programul Dezvoltare Durabilă” se va citi",
+          "original_document_raw_sha256": null,
+          "original_document_semantic_sha256": null,
+          "original_document_fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        }
+      ],
+      "analyst_note": "Name/alias normalization; preserve old aliases for history and avoid splitting one legal instrument by programme label."
+    },
+    {
+      "claim_id": "PDD-H02-007",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "amendment_scope",
+      "statement": "The three numbered changes in OMIPE 1465/2026 concern order title, closing timetable and programme title/acronym; no eligibility or financing amendment is included in this specific instrument.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "PRIMARY_DOCUMENT_VISUAL_ON_SECONDARY_MIRROR_NOT_CANONICAL_SOURCE_CERTIFICATION",
+      "scope": "OMIPE 1465/2026",
+      "value": null,
+      "unit": null,
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_MINISTERIAL_ORDER_MIRRORED_COPY_VISUALLY_READ",
+          "authority": "Ministerul Investitiilor si Proiectelor Europene",
+          "document_type": "OMIPE",
+          "document_title": "Ordin MIPE nr. 1465 din 21.09.2026",
+          "official_reference": "https://mfe.gov.ro/wp-content/uploads/2026/09/dc9ca8e9ca95998906c724742ea1bf23.pdf",
+          "mirror_visual_reference": "https://fonduri-structurale-media.s3.eu-central-1.amazonaws.com/PDDTJ_OMIPE_nr_1465_34ff11d177.pdf",
+          "original_document_version": "OMIPE 1465/21.09.2026, copy of signed 3-page order",
+          "page_or_section": "pagina 2, Art. I pct. 1-2; pagina 3 pct. 3",
+          "evidence_excerpt": "Titlul ordinului ... data şi ora închiderii",
+          "original_document_raw_sha256": null,
+          "original_document_semantic_sha256": null,
+          "original_document_fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        }
+      ],
+      "analyst_note": "Do not infer old financial/eligibility values remain applicable unless original guide plus other amendments checked."
     }
   ],
   "editorial_review": {
-    "analyst_verdict": "NEEDS_EVIDENCE",
+    "analyst_verdict": "ANALYSIS_IN_PROGRESS / PROVISIONAL_FAIL_CLOSED",
     "reader_value": "Prevents false OPEN/deadline certainty; distinguishes current 2026 guide amendment from older 2025 reference.",
     "adversarial_tests": [
       {
@@ -393,7 +669,32 @@
     ],
     "internal_source_verification": "PASS_REPO_SNAPSHOTS_ONLY",
     "exact_document_claim_gate": "NOT_VERIFIED_OR_FAILED",
-    "staging_qa": "UNPUBLISHED"
+    "staging_qa": "UNPUBLISHED",
+    "primary_document_visual_inspection": "PASS_3_PAGES_MIRRORED_ORDER",
+    "official_binary_provenance": "MISSING",
+    "release_certification": "FAIL_CLOSED",
+    "new_adversarial_tests": [
+      {
+        "test": "Are two different calls collapsed into one OPEN guide entity?",
+        "result": "YES_INTERNAL_IDENTITY_RISK",
+        "basis": "Main call_lifecycle has generic dossier id, code «—», OPEN from DOSSIER_STATUS; order p2 separates 851 & 854."
+      },
+      {
+        "test": "Does signed-on date prove legal effectiveness?",
+        "result": "NO",
+        "basis": "Art. II page 3 defines publication on MIPE official pages as effective date."
+      },
+      {
+        "test": "Are dates confirmed for site release?",
+        "result": "NO",
+        "basis": "Only visually read mirrored 3-page order, no original MIPE hash/date receipt and no MySMIS check."
+      },
+      {
+        "test": "Did this instrument alter grants/eligibility?",
+        "result": "NOT IN THIS ORDER",
+        "basis": "Enumerated p2-3 amendments: title, deadline, programme terminology; full other changes unknown."
+      }
+    ]
   },
   "material_diff": {
     "baseline": "2026-10-11 canonical queue and 2026-10-12 latest main snapshots",
@@ -408,28 +709,43 @@
       "Constrain deadline verification to actual application date/time evidence rather than the presence of deadline labels.",
       "When a fail-closed item has UNKNOWN deadline, do not render confirmed OPEN or an imperative action.",
       "Pin call version/corrigendum before recommending applicant decision."
+    ],
+    "h02_delta": [
+      "Read all three pages of OMIPE 1465/21.09.2026 as government-stamped document hosted by third-party mirror; exact p2 deadline table located.",
+      "Identified two separately coded calls PDD/851 (A) and PDD/854 (B), which generic OPEN-with-no-code parent must not represent as one application window.",
+      "Extracted provisional amended deadlines 2027-09-30 17:00 (851) and 2027-12-18 17:00 (854), whereas historical 2025 announcement gave 2026 deadlines.",
+      "Art. II makes effective date conditional on MIPE official publication, unverified; no original hash or official current registration.",
+      "Instrument also renames PDD to PDDTJ; no grant/eligibility amendments in this specific order."
     ]
   },
   "next_evidence_action": {
-    "authorized_owner": "SURFACEMC for MIPE source acquisition; PARTENER for analysis and gate",
-    "action": "Acquire precise official application calendar/status plus 2026-09 OMIPE 1465/2026 PDF and source guide/annex inventory; return excerpt-level parsed evidence to the PARTENER analyst.",
-    "attempted_official_methods": [
-      "Direct official pages/PDF through public reader (failed)",
-      "Official PDD index via search (dated listing only, original inaccessible)"
-    ],
-    "max_methods_reached": true,
-    "retry_same_methods": false,
-    "after_blocker": "Select next eligible dossier on next run unless new verified source snapshot exists."
+    "authorized_owner": "SURFACEMC MIPE acquisition + PARTENER evidence gate",
+    "bounded_current_run": "Original MIPE release URL and official PDF fetch failed; order was read from 3-page mirrored scanned PDF. Do not retry same MIPE access paths without new route.",
+    "first": "Obține MIPE original OMIPE 1465/2026 plus official dated publication receipt and binary hash; verify exact copy equivalence to mirrored scan.",
+    "second": "Read original Ghid 5999/2025 ZIP and appendices and any intervening amendment for PDD/851 and PDD/854; clarify applicant, money and grile.",
+    "third": "Check distinct MySMIS public records of 851 and 854 and eligibility/closing state.",
+    "after_blocker": "If no sanctioned new source route, mark NEEDS_EVIDENCE and on following hourly choose next dossier.",
+    "outstanding": [
+      "OFFICIAL_ORIGINAL_BINARY",
+      "OFFICIAL_PUBLISHED_AT",
+      "FULL_GUIDE_AND_ANNEXES",
+      "MYSMIS_CALL_LIFECYCLE",
+      "DAPP_EVIDENCE_GATE"
+    ]
   },
   "checkpoint": {
-    "id": "PARTENER-DAPP-PDD-20261012-H01",
-    "commit_intent": "one material staging candidate in existing PDD branch",
-    "branch_reused": true,
-    "version_reconciliation_pending": true,
-    "site_keeper_files_touched": false,
-    "main_untouched": true,
+    "id": "PARTENER-DAPP-PDD-20261013-H02-AMENDMENT-VISUAL",
+    "previous": "PARTENER-DAPP-PDD-20261012-H01",
+    "changed": "PDD generic vs PDD/851+854, 2027 timetable, effectiveness conditioned on publication; 7 new claim entries",
+    "base_main_seen": "5e49c2d0cd4fecefde06bc8eaf4fbca896d908a3",
+    "branch_before_update": "2e50a20f59e649da38f698655f8d42ae1a5262c0",
+    "commit_scope": "partener-eu/validation/dapp_staging/mipe-3b3ab4d9361706669b/PDD_H01_20261012_editorial_candidate.json",
     "release_authorized": false,
-    "rollback": "Delete/revert this staging candidate commit on its branch. No P11, decision_products or live site files were changed.",
-    "handoff_status": "ANALYSIS_STAGING_ONLY"
-  }
+    "quality_review": "STRUCTURAL_ASSERTIONS_PENDING_READBACK",
+    "replay": "Re-read original MIPE order and compare page 2/3 exact claims with this rolling staging candidate; rerun DAPP_EVIDENCE_GATE once implemented.",
+    "rollback": "Revert only the H02 staging update commit to branch pre-update 2e50a20f59e649da38f698655f8d42ae1a5262c0; main/P11/decision products/live remain unchanged."
+  },
+  "previous_analyst_run_id": "DAPP-PDD-20261012-H01-STATUS-EVIDENCE",
+  "latest_main_observed_sha": "5e49c2d0cd4fecefde06bc8eaf4fbca896d908a3",
+  "previous_branch_head_sha": "2e50a20f59e649da38f698655f8d42ae1a5262c0"
 }
