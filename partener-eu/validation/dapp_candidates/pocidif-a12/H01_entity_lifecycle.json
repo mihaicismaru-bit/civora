@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "artifact": "DAPP_STAGING_ONLY",
+  "dossier_id": "mipe-e62eeffb2413dc306c",
+  "dossier_title": "POCIDIF Acțiunea 1.2 — consultare 2024 versus apeluri predefinite",
+  "status": "NEEDS_EVIDENCE",
+  "publication_state": "PROVISIONAL_FAIL_CLOSED",
+  "publish_authorized": false,
+  "run_id": "DAPP-POCIDIF-A12-20261013-H01-ENTITY-LIFECYCLE",
+  "analyst_protocol_version": "DAPP_v1_draft_1389_sec12",
+  "source_version": "notice_2024-09-10_and_2024-09-23; guide_binary_unverified",
+  "candidate_base_main_sha": "ae8eded5d5f5c1ead679764ce65c9256e806da47",
+  "candidate_base_branch_sha": "00b04e3578dba377a563655dd9ffe1f430f8fbd7",
+  "reference_prs": [
+    1389,
+    1390
+  ],
+  "analysis_candidate": {
+    "editorial_level": "IDENTIFIED_HISTORICAL_RECONCILIATION",
+    "short_verdict": "Dosarul intern reprezintă o consultare publică din 2024, nu dovada unei consultări active în 2026. Un apel ulterior din 2024 este necompetitiv și destinat proiectelor predefinite ALFRED și HRIA; accesul public generic nu este demonstrat.",
+    "lifecycle": "HISTORICAL_CONSULTATION_EXPIRED; CURRENT_2026_STATE_UNKNOWN",
+    "applicant_vs_target": "Nu deduce eligibilitatea IMM/ONG/UAT din titlul generic. Apelul oficial ulterior identifică proiectele predefinite, iar solicitanții/partenerii juridici trebuie citiți din ghidul aprobat.",
+    "budget_call": null,
+    "grant_per_project": null,
+    "currency": null,
+    "cofinancing": null,
+    "vat": null,
+    "state_aid": "Schema de ajutor de stat citată în anunț; regimul aplicabil proiectelor NECERTIFICAT fără ghid și schemă integrală",
+    "eligible_costs": null,
+    "scoring": null,
+    "documents": null,
+    "indicators": null,
+    "implementation": null,
+    "risks": [
+      "FALS_CURRENT_CONSULTATION_ON_2026_SITE",
+      "ENTITY_COLLISION_GENERIC_GUIDE_VS_SPECIFIC_PREDEFINED_CALL",
+      "IMPOSSIBLE_PUBLIC_DEADLINE_YEAR_2023_BEFORE_2024_START",
+      "CLAIM_LEVEL_BINARY_PROVENANCE_MISSING"
+    ],
+    "three_actions": [
+      "Nu porni o cerere de finanțare bazată pe pagina de consultare 2024; cere codul exact al apelului și starea actuală MySMIS.",
+      "Identifică dacă proiectul este unul dintre ALFRED/HRIA înainte de evaluarea eligibilității; separă solicitantul/partenerii de beneficiarii finali.",
+      "Verifică ghidul aprobat prin OMIPE 6293/19.09.2024, anexele și rectificarea termenului la sursa oficială înainte de orice bugetare."
+    ]
+  },
+  "claim_evidence_ledger": [
+    {
+      "claim_id": "P12-001",
+      "label": "historic_consultation_start",
+      "value": "2024-09-11",
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www.research.gov.ro/s-a-relansat-in-consultare-publica-ghidul-solicitantului-aferent-actiunii-1-2-sprijin-pentru-proiecte-in-domeniul-tehnologiilor-avansate-si-crearea-de-hub-uri-de-inovare-si-transfer-tehnologic-in-dome-21438/",
+        "document_version": "notice_2024-09-10",
+        "page_or_section": "Perioada de consultare publică",
+        "evidence_excerpt": "începând cu data de 11.09.2024",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-002",
+      "label": "historic_consultation_close",
+      "value": "2024-09-13T17:00:00 Europe/Bucharest",
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www.research.gov.ro/s-a-relansat-in-consultare-publica-ghidul-solicitantului-aferent-actiunii-1-2-sprijin-pentru-proiecte-in-domeniul-tehnologiilor-avansate-si-crearea-de-hub-uri-de-inovare-si-transfer-tehnologic-in-dome-21438/",
+        "document_version": "notice_2024-09-10",
+        "page_or_section": "Perioada de consultare publică",
+        "evidence_excerpt": "până la data de 13.09.2024, ora 17.00",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-003",
+      "label": "later_launch",
+      "value": "2024-09-23 (official notice updated date)",
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www2.poc.mcid.gov.ro/ro/articol/4445/la-lansarea-apelului-de-sprijin-pentru-2-proiecte-in-domeniul-tehnologiilor-avansate-i-crearea-de-hub-uri-de-inovare-i-transfer-tehnologic-in-domenii-prioritare-p1-pocidif",
+        "document_version": "notice_updated_2024-09-23",
+        "page_or_section": "Anunț cu privire la lansarea apelului; page footer",
+        "evidence_excerpt": "Modificat la: 2024-09-23 12:00:00",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-004",
+      "label": "launched_call_project_scope",
+      "value": [
+        "ALFRED",
+        "HRIA"
+      ],
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www2.poc.mcid.gov.ro/ro/articol/4445/la-lansarea-apelului-de-sprijin-pentru-2-proiecte-in-domeniul-tehnologiilor-avansate-i-crearea-de-hub-uri-de-inovare-i-transfer-tehnologic-in-domenii-prioritare-p1-pocidif",
+        "document_version": "notice_updated_2024-09-23",
+        "page_or_section": "Proiectele prioritare, predefinite",
+        "evidence_excerpt": "1. Infrastructura europeană ... ALFRED; 2. HUB Român de Inteligență Artificială - HRIA",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-005",
+      "label": "launched_call_selection_type",
+      "value": "NONCOMPETITIVE_PREDEFINED",
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www2.poc.mcid.gov.ro/ro/articol/4445/la-lansarea-apelului-de-sprijin-pentru-2-proiecte-in-domeniul-tehnologiilor-avansate-i-crearea-de-hub-uri-de-inovare-i-transfer-tehnologic-in-domenii-prioritare-p1-pocidif",
+        "document_version": "notice_updated_2024-09-23",
+        "page_or_section": "Prezentul apel",
+        "evidence_excerpt": "Prezentul apel este necompetitiv, cu depunere la termen.",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-006",
+      "label": "launched_call_submission_start",
+      "value": "2024-09-24T10:00:00 Europe/Bucharest",
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www2.poc.mcid.gov.ro/ro/articol/4445/la-lansarea-apelului-de-sprijin-pentru-2-proiecte-in-domeniul-tehnologiilor-avansate-i-crearea-de-hub-uri-de-inovare-i-transfer-tehnologic-in-domenii-prioritare-p1-pocidif",
+        "document_version": "notice_updated_2024-09-23",
+        "page_or_section": "Proiectele vor putea fi depuse",
+        "evidence_excerpt": "începând cu data de 24 septembrie 2024, ora 10.00",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-007",
+      "label": "announced_deadline_year_inversion",
+      "value": {
+        "start": "2024-09-24T10:00:00",
+        "printed_close": "2023-12-23T17:00:00",
+        "resolution": "CONFLICT_DO_NOT_AUTOCORRECT"
+      },
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "CONFLICT",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www2.poc.mcid.gov.ro/ro/articol/4445/la-lansarea-apelului-de-sprijin-pentru-2-proiecte-in-domeniul-tehnologiilor-avansate-i-crearea-de-hub-uri-de-inovare-i-transfer-tehnologic-in-domenii-prioritare-p1-pocidif",
+        "document_version": "notice_updated_2024-09-23",
+        "page_or_section": "Data de închidere a apelului",
+        "evidence_excerpt": "Data de închidere a apelului este de 23 decembrie 2023, ora 17.00.",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-008",
+      "label": "applicable_guide_approval_order",
+      "value": "OMIPE 6293/19.09.2024",
+      "fact_class": "OFFICIAL_FACT",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://www2.poc.mcid.gov.ro/ro/articol/4445/la-lansarea-apelului-de-sprijin-pentru-2-proiecte-in-domeniul-tehnologiilor-avansate-i-crearea-de-hub-uri-de-inovare-i-transfer-tehnologic-in-domenii-prioritare-p1-pocidif",
+        "document_version": "notice_updated_2024-09-23",
+        "page_or_section": "Documentele aferente apelului, punctul 2",
+        "evidence_excerpt": "aprobat prin OMIPE nr. 6293/19.09.2024",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    },
+    {
+      "claim_id": "P12-009",
+      "label": "current_2026_consultation_and_open_status",
+      "value": "UNKNOWN_NOT_ESTABLISHED",
+      "fact_class": "ANALYSIS",
+      "scope": "POCIDIF_P1_A12_HISTORICAL_2024",
+      "evidence_state_for_release": "UNKNOWN",
+      "editorial_observation": "OFFICIAL_SOURCE_SEARCH_EXCERPT_ONLY_NOT_BINARY_CERTIFIED",
+      "evidence": {
+        "official_url": "https://poc.research.gov.ro/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1",
+        "document_version": "official_index_as_read_2026-10-13",
+        "page_or_section": "Acțiunea 1.2 / Ghiduri lansate în consultare",
+        "evidence_excerpt": "latest listed Action 1.2 consultation 10.09.2024; launched calls listed 2023 and 2024",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null
+      }
+    }
+  ],
+  "editorial_review": {
+    "adversarial_pass": true,
+    "high_risk_findings": [
+      "Oficialul publică închiderea 23.12.2023 deși deschiderea este 24.09.2024; tratăm CONFLICT, nu 23.12.2024 ca fapt.",
+      "Indexul include istoric 2023/2024; nu demonstrează consultare activă în 2026.",
+      "Un ghid generic Acțiunea 1.2 și apelurile ALFRED/HRIA nu trebuie comasate într-o oportunitate deschisă tuturor.",
+      "Nicio sumă de finanțare, rată TVA sau grilă nu este confirmată din ghidul final."
+    ],
+    "claims_exact_release_confirmed": 0,
+    "claims_release_unknown": 8,
+    "claims_release_conflict": 1,
+    "quality": "ANALYSIS_DEGRADED_NEEDS_BINARY_AND_GUIDE",
+    "method": "Read latest repository projection, draft protocol and five-pilot baseline; compare OI official indexed notice extracts for 2024 consultation, later launch, and P1 index. Attempts to open canonical official hosts returned timeout/502; use excerpt only as staging evidence."
+  },
+  "source_manifest": [
+    {
+      "kind": "OFFICIAL_CONSULTATION_NOTICE",
+      "url": "https://www.research.gov.ro/s-a-relansat-in-consultare-publica-ghidul-solicitantului-aferent-actiunii-1-2-sprijin-pentru-proiecte-in-domeniul-tehnologiilor-avansate-si-crearea-de-hub-uri-de-inovare-si-transfer-tehnologic-in-dome-21438/",
+      "version": "published_2024-09-10",
+      "access": "OFFICIAL_SEARCH_RESULT_TEXT_READ; DIRECT_OPEN_TIMEOUT",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null
+    },
+    {
+      "kind": "OFFICIAL_CALL_LAUNCH_NOTICE",
+      "url": "https://www2.poc.mcid.gov.ro/ro/articol/4445/la-lansarea-apelului-de-sprijin-pentru-2-proiecte-in-domeniul-tehnologiilor-avansate-i-crearea-de-hub-uri-de-inovare-i-transfer-tehnologic-in-domenii-prioritare-p1-pocidif",
+      "version": "updated_2024-09-23T12:00",
+      "access": "OFFICIAL_SEARCH_RESULT_TEXT_READ; DIRECT_OPEN_HTTP_502",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null
+    },
+    {
+      "kind": "OFFICIAL_P1_INDEX",
+      "url": "https://poc.research.gov.ro/ro/articol/4428/apeluri-de-proiecte-pocidif-prioritatea-1",
+      "version": "indexed_2026-10-13",
+      "access": "OFFICIAL_SEARCH_RESULT_TEXT_READ; DIRECT_OPEN_TIMEOUT",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null
+    },
+    {
+      "kind": "REPO_INTERNAL_QUEUE",
+      "path": "partener-eu/ingest/state/dossier_enrichment_queue.json",
+      "git_blob_sha": "0a8414edd021f48822e432158cc85e55d9caa4f9",
+      "generated_at": "2026-10-13T13:01:58Z",
+      "is_official_document_hash": false
+    },
+    {
+      "kind": "REPO_INTERNAL_LIFECYCLE",
+      "path": "partener-eu/ingest/state/call_lifecycle.json",
+      "git_blob_sha": "eac15d67b967dbdc245f956acd4b22b7ed112aa8",
+      "generated_at": "2026-10-13T13:01:58Z",
+      "is_official_document_hash": false
+    },
+    {
+      "kind": "DAPP_S0_DRAFT_PR_1390",
+      "path": "partener-eu/validation/dapp_s0_pilot_20261011.json",
+      "git_blob_sha": "966aa56faa549621cfc98df6c1d725cab8922c35",
+      "is_official_document_hash": false
+    }
+  ],
+  "next_evidence_action": {
+    "owner": "SURFACEMC_MI​PE_ACQUISITION_ONLY_then_PARTENER_PROCESS",
+    "specific": "Fetch exact official final guide attached to 23.09.2024 launch, OMIPE 6293/19.09.2024 and annexes; resolve published deadline year via authoritative corrigendum / MySMIS official call code. Record raw SHA-256, version, fetched_at, parser_version and ingest run_id; split consultation history from ALFRED/HRIA call; then claim-level re-review.",
+    "max_access_methods_applied": 2,
+    "repeat_same_access_without_new_source": false
+  },
+  "material_diff": {
+    "baseline": "2026-10-13 lifecycle projected CONSULTATION from historical guide without deadline",
+    "new": "Official 2024 consultation conclusively historical; exact 2024 separate noncompetitive pre-defined call ALFRED + HRIA; official printed close 2023 earlier than open 2024 (CONFLICT).",
+    "publishing_effect": "STAGING_ONLY; not changing decision_products/P11; no current OPEN assertion"
+  },
+  "checkpoint": {
+    "checkpoint_id": "PARTENER-DAPP-POCIDIF-A12-20261013-H01-2024-ENTITY-AND-DEADLINE-CONFLICT",
+    "base_branch_sha": "00b04e3578dba377a563655dd9ffe1f430f8fbd7",
+    "base_main_sha": "ae8eded5d5f5c1ead679764ce65c9256e806da47",
+    "persistence": "GITHUB_BRANCH_STAGING_IF_WRITE_CONFIRMED",
+    "rollback": {
+      "method": "restore_file_nonexistence_or_revert_single_create_commit",
+      "previous_branch_sha": "00b04e3578dba377a563655dd9ffe1f430f8fbd7"
+    },
+    "replay": {
+      "inputs": [
+        "queue git blob sha 0a8414...",
+        "lifecycle git blob sha eac15d...",
+        "OI 2024 consultation + launch official notice URLs"
+      ],
+      "gate_to_recheck": "DAPP_EVIDENCE_GATE claim level IMPLEMENTED+TESTED+MERGED is not proven"
+    }
+  }
+}
