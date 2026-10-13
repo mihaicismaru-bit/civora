@@ -1,0 +1,588 @@
+{
+  "schema_version": "DAPP_ANALYST_CANDIDATE_V1",
+  "dossier_id": "me-fm-storage-standalone-2026",
+  "title": "Ministerul Energiei / Fondul pentru Modernizare — instalații stand-alone de stocare în baterii",
+  "analyst_run_id": "DAPP-FM-STANDALONE-20261013-H01-CLAIM-COVERAGE",
+  "generated_on": "2026-10-13",
+  "candidate_base_sha": "5e49c2d0cd4fecefde06bc8eaf4fbca896d908a3",
+  "candidate_branch": "partener-dapp-fm-storage-20261012",
+  "analyst_protocol_version": "DAPP_V1_DRAFT_PR_1389_SECTION_12",
+  "work_state": "NEEDS_EVIDENCE",
+  "publish_state": "PROVISIONAL_FAIL_CLOSED",
+  "published": false,
+  "source_version": {
+    "government_digest": "2026-09-18",
+    "ministerial_guide": "NOT_REACQUIRED_THIS_RUN",
+    "scheme_law": "portal legislativ document 313994; applicable version unverified",
+    "p11_asof": "2026-09-27T17:22:00Z"
+  },
+  "source_manifest": {
+    "official_secondary_read": [
+      {
+        "title": "Oportunități de finanțare – Societăți comerciale – septembrie 2026",
+        "publisher": "Instituția Prefectului Județul Vrancea",
+        "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+        "published_on": "2026-09-18",
+        "web_text_section_lines": "194-210",
+        "content_read": true,
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "parser_version": null,
+        "source_acquisition_run_id": null
+      }
+    ],
+    "original_legal_not_read": [
+      {
+        "url": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/313994",
+        "method_1": "Direct display route inaccessible",
+        "method_2": "DetaliiDocument alternative returned 502",
+        "document_read": false,
+        "raw_sha256": null,
+        "semantic_sha256": null
+      }
+    ],
+    "repo_projection": [
+      {
+        "path": "partener-eu/web/p11-public-data.js",
+        "blob_sha": "0023ca873bbb6b504a3d2c7f5986f1b1a053d90d",
+        "projection_asof": "2026-09-27T17:22:00Z"
+      },
+      {
+        "path": "partener-eu/ingest/state/dossier_enrichment_queue.json",
+        "blob_sha": "d60867551fc694eb50e1ba3a2bd12efe88860054",
+        "generated_at": "2026-10-12T22:40:35Z"
+      }
+    ],
+    "provenance_warning": "Git blob SHA is NOT raw/semantic SHA256 of the official legal guide. Prefectura digest is a government secondary summary; claim-level exact authoritative guide citations still missing."
+  },
+  "analysis_candidate": {
+    "headline": "Stocare stand-alone: două limite EUR, rambursare în lei și condiții cumulative — ghidul exact mai trebuie recertificat",
+    "quick_verdict": "Instituția Prefectului Vrancea a publicat în 18.09.2026 un rezumat oficial cu termen 30.10.2026, buget 150 milioane EUR, maximum 69.000 EUR/MWh și 15 milioane EUR per întreprindere. Acesta NU validează singur statutul OPEN curent sau condițiile tehnice din ghidul original.",
+    "applicant_vs_target": "Solicitant: societate comercială eligibilă, inclusiv nou-înființată, cu CAEN35 și condițiile aferente; nu comunitățile deservite de serviciile energetice. Grup-țintă final distinct de solicitant — nu este definit în rezumatul citit.",
+    "decision_utility": "La evaluarea unei cereri trebuie aplicate simultan limita EUR/MWh, limita EUR/întreprindere, procentul de cheltuieli eligibile și finanțarea diferenței; nu interpreta bugetul 150m ca grant individual. Pentru investiție integrată unui parc fotovoltaic, nu transfera condițiile programului stand-alone fără verificarea schemei.",
+    "three_actions": [
+      "Solicitantul verifică înainte de bugetare forma societății, CAEN35 și capitalul social minim la startup; verifică interdicția parteneriatelor.",
+      "Calculează ajutorul cerut ca valoare care respectă cumulativ plafonul de 69.000 EUR/MWh, 15.000.000 EUR/întreprindere și maximum 100% din costul eligibil; planifică flux de numerar pentru rambursarea în RON.",
+      "Prin motorul PARTENER/SURFACEMC, obține ghidul original și orice corrigendum, verifică statutul MySMIS și ora termenului, grila, indicatorii, TVA și condițiile tehnice înainte de GO/NO-GO."
+    ],
+    "editorial_label": "RESEARCH_CANDIDATE_NOT_SITE_RELEASE"
+  },
+  "claim_evidence_ledger": [
+    {
+      "claim_id": "FM-H01-001",
+      "fact_class": "identity",
+      "statement": "Apelul finanțează instalații autonome de stocare în baterii, Fondul pentru modernizare, Ministerul Energiei.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 194, 202-203",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-002",
+      "fact_class": "applicant_types",
+      "statement": "Solicitanții descriși sunt societăți comerciale micro, mici, mijlocii, mari, inclusiv nou-înființate.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 204",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-003",
+      "fact_class": "startup_capital",
+      "statement": "Întreprinderile nou-înființate trebuie să aibă capital social subscris și vărsat de minimum 100.000 lei.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 204",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-004",
+      "fact_class": "caen",
+      "statement": "Activitățile din actul constitutiv trebuie să corespundă diviziunii CAEN 35 Rev.3 sau echivalent.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 204-205",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-005",
+      "fact_class": "no_partnership",
+      "statement": "Cererile se depun individual; parteneriatele sunt excluse.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 205",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-006",
+      "fact_class": "grant_aggregation",
+      "statement": "Plafonul de 15 milioane EUR este per întreprindere, indiferent câte proiecte depune.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 205,207",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-007",
+      "fact_class": "activities",
+      "statement": "Investiția eligibilă rezumată include echipamente noi și construcții pentru stocare autonomă.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 206",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-008",
+      "fact_class": "network",
+      "statement": "Instalațiile autonome trebuie conectate la liniile de transport sau distribuție a energiei.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 206",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-009",
+      "fact_class": "budget",
+      "statement": "Alocarea apelului: 150.000.000 EUR (buget apel, nu grant per proiect).",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 206",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-010",
+      "fact_class": "aid_intensity",
+      "statement": "Intensitatea ajutorului este de cel mult 100% din cheltuielile eligibile, nu din toate costurile.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 207",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-011",
+      "fact_class": "aid_payment_currency",
+      "statement": "Plata ajutorului se face în LEI prin rambursarea cheltuielilor eligibile; plafoanele sunt nominalizate în EUR.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 207",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-012",
+      "fact_class": "max_unit_aid",
+      "statement": "Ajutorul solicitat este de maximum 69.000 EUR/MWh de capacitate de stocare instalată.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 207",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-013",
+      "fact_class": "financing_gap",
+      "statement": "Beneficiarul suportă diferența până la costul total din surse neajutate pentru aceleași cheltuieli.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 207",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-014",
+      "fact_class": "no_double_aid",
+      "statement": "Ajutorul pentru aceleași cheltuieli nu poate fi cumulat cu un alt ajutor de stat, inclusiv de minimis.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 208",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-015",
+      "fact_class": "deadline_date",
+      "statement": "Anunțul guvernamental din 18 septembrie indică termenul 30 octombrie 2026 (fără oră); nu dovedește singur OPEN la 13 octombrie.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "OFFICIAL_SECONDARY_SUMMARY_CORROBORATED",
+      "evidence": [
+        {
+          "document_title": "OPORTUNITĂȚI DE FINANȚARE – Societăți comerciale – SEPTEMBRIE 2026",
+          "publisher": "Instituția Prefectului Județul Vrancea",
+          "published_on": "2026-09-18",
+          "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+          "location": "secțiunea STAND-ALONE, extragere web linii 210",
+          "source_tier": "OFFICIAL_GOV_SECONDARY",
+          "original_raw_sha256": null,
+          "original_semantic_sha256": null,
+          "parser_version": null,
+          "source_acquisition_run_id": null
+        }
+      ],
+      "analyst_note": "Sursă guvernamentală secundară, NU substituie schema/ghidul original pentru DAPP_EVIDENCE_GATE."
+    },
+    {
+      "claim_id": "FM-H01-016",
+      "fact_class": "current_open",
+      "statement": "Apelul este în continuare deschis, fără modificări sau suspendare, la 13 octombrie 2026.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-017",
+      "fact_class": "hour_deadline",
+      "statement": "Ora exactă și fusul orar al închiderii depunerilor sunt confirmate.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-018",
+      "fact_class": "power_duration",
+      "statement": "Sunt confirmate la nivel de ghid condițiile minimum 1 MW, C/P >=2 și 2 ore descărcare.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-019",
+      "fact_class": "property_eligibility",
+      "statement": "Drepturile reale admise, perioada lor de valabilitate și excluderile locative sunt probate la nivel de articol.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-020",
+      "fact_class": "atr_trigger",
+      "statement": "Momentul exact al prezentării ATR este probat în documentul juridic aplicabil.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-021",
+      "fact_class": "cost_vat",
+      "statement": "TVA și toate categoriile de cheltuieli eligibile/neeligibile sunt certificate din ghid/anexe.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-022",
+      "fact_class": "scoring",
+      "statement": "Formula de punctaj 100–0 și criteriile de departajare sunt probate din grila aplicabilă.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-023",
+      "fact_class": "incentive_effect",
+      "statement": "Regulile precise privind demararea lucrărilor și efectul stimulativ sunt probate din schema aplicabilă.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-024",
+      "fact_class": "application_docs",
+      "statement": "Lista completă a documentelor obligatorii și indicatorilor tehnici este probată din anexele actuale.",
+      "claim_type": "OFFICIAL_FACT",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    },
+    {
+      "claim_id": "FM-H01-025",
+      "fact_class": "other_scheme_collision",
+      "statement": "Schema pentru întreprinderi stand-alone nu trebuie confundată cu ghidurile separate de stocare pentru entități publice din septembrie 2026.",
+      "claim_type": "ANALYSIS",
+      "evidence_state": "UNKNOWN",
+      "editorial_support": "NOT_SUPPORTED_BY_READ_PRIMARY",
+      "evidence": [],
+      "analyst_note": "Revendicare prezentă/posibilă în P11 sau necesară deciziei, încă necertificată din ghid; nu publica drept CONFIRMED."
+    }
+  ],
+  "editorial_review": {
+    "verdict": "NEEDS_EVIDENCE",
+    "secondary_official_claims_corrob": 15,
+    "claims_confirmed_exact_primary": 0,
+    "claims_unknown_for_release": 25,
+    "material_conflicts_proven": 0,
+    "adversarial_checks": [
+      {
+        "item": "status/deadline",
+        "result": "UNVERIFIED_CURRENT_OPEN",
+        "detail": "Termenul 30.10 publicat la 18.09; nu există dovada actuală a lipsei de suspendare/prelungire sau a orei."
+      },
+      {
+        "item": "currency/units",
+        "result": "SECONDARY_OFFICIAL_CROSSCHECK",
+        "detail": "Buget și plafoane EUR; plata ajutorului în RON; ratele sunt pe MWh, nu MW."
+      },
+      {
+        "item": "eligibility",
+        "result": "SECONDARY_OFFICIAL_CROSSCHECK",
+        "detail": "CAEN35, startup 100k lei, proiect individual; alte condiții din ghid necertificate."
+      },
+      {
+        "item": "threshold/scoring",
+        "result": "NEEDS_PRIMARY",
+        "detail": "P11 descrie 1 MW, C/P≥2, 2 ore, ATR, drepturi imobiliare și scor liniar. Aceste clauze NU apar în rezumatul Prefecturii; nu le certificăm pe baza lui."
+      },
+      {
+        "item": "documents/TVA/state_aid",
+        "result": "PARTIAL",
+        "detail": "Necumulul este descris în rezumat; lista exhaustivă de costuri, TVA și documente rămâne necitită."
+      },
+      {
+        "item": "gate",
+        "result": "FAIL_CLOSED",
+        "detail": "DAPP_EVIDENCE_GATE claim-level implementat/testat/integrat nu este probat."
+      }
+    ]
+  },
+  "material_diff": {
+    "baseline": "P11 asOf 2026-09-27; DAPP S0 pilot PR #1390",
+    "new_findings": [
+      "Am confruntat 25 de afirmații cu secțiunea 194–210 a unui rezumat oficial guvernamental, separat de P11: 15 au corespondent explicit în rezumat, restul nu sunt probate acolo.",
+      "Risc de supra-certificare: P11 prezintă detalii tehnice, scoring, ATR, TVA și drepturi imobiliare cu verifiedFactClasses, dar sursa legală exactă nu a putut fi recitită în această rulare.",
+      "Separare critică între ajutor denominat la plafoane EUR, plată în lei și bugetul apelului 150m EUR; nu reprezintă trei granturi alternative.",
+      "Data 30.10 apare oficial în digestul din septembrie, dar OPEN la 13.10 și ora limită rămân UNKNOWN pentru acest analist."
+    ],
+    "production_changes": [],
+    "p11_changes": [],
+    "site_changes": []
+  },
+  "next_evidence_action": {
+    "owner": "PARTENER engine / authorized acquisition; Site Keeper only source health and deploy, without candidate edit",
+    "action": "Obține versiunea autentică a schemei și ghidului stand-alone cu anexe (Portal Legislativ 313994 ori sursa Ministerului Energiei prin circuit autorizat); extrage exact articole/pagini pentru praguri 1MW C/P≥2, ATR, efect stimulativ, drepturi, TVA, scor, termene și eventuale modificări, împreună cu hashurile reale ale originalelor. Reconfirmă exact sesiunea MySMIS înainte de OPEN.",
+    "attempted_primary_methods": [
+      "Portal Legislativ DetaliiDocumentAfis/313994",
+      "Portal Legislativ DetaliiDocument/313994"
+    ],
+    "retry_identical_methods": false,
+    "max_methods_reached": true,
+    "after_blocker": "Pe rularea viitoare, dacă nu există dovadă nouă, selectează alt dosar."
+  },
+  "checkpoint": {
+    "id": "PARTENER-DAPP-FM-20261013-H01-OFFICIAL-SECONDARY-COVERAGE",
+    "base_main_sha": "5e49c2d0cd4fecefde06bc8eaf4fbca896d908a3",
+    "git_branch": "partener-dapp-fm-storage-20261012",
+    "lease_check": "branch identical to an ancestor of main and no open FM DAPP PR found before writing; branch fast-forwarded with expected_sha",
+    "release_authorized": false,
+    "rollback": "Revert only this staging candidate commit on its branch; production P11, decision_products and public pages remain untouched.",
+    "site_keeper_files_touched": false
+  }
+}
