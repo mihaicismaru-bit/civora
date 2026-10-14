@@ -1,12 +1,12 @@
 {
   "schema_version": "DAPP_ANALYSIS_CANDIDATE_V1",
   "dossier_id": "afir-energy-2026",
-  "source_version": "AFIR Solar Autoconsum V7 (09.06.2026), session 03/2026; closure announced 17.08.2026; evaluation index updated 07.10.2026",
-  "base_main_sha": "a41df5d9bfb870dfd467e0de6d7deec09e5d864d",
-  "analysis_run_id": "DAPP-AFIR-ENERGY-20261012143528",
-  "analysis_checked_at_utc": "2026-10-12T14:35:28.232Z",
-  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261012-H01",
-  "state": "NEEDS_EVIDENCE",
+  "source_version": "AFIR Schema Energie V7 (09.06.2026) / session 03/2026; plus AFIR prefinancing SGB communiqué 30.09.2026 (staging, does not reopen closed session)",
+  "base_main_sha": "bbaaac144db1e268e68e45652acb34de56b405e6",
+  "analysis_run_id": "DAPP-AFIR-ENERGY-20261015-H02-PREFINANCING-SGB",
+  "analysis_checked_at_utc": "2026-10-14T23:27:24.379Z",
+  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261015-H02-SGB-PREFINANCING-STAGING",
+  "state": "ANALYSIS_IN_PROGRESS",
   "publication_gate": "PROVISIONAL_FAIL_CLOSED",
   "publish_authorized": false,
   "scope_note": "ONE dossier only: agricultural / food industry AFIR Schema Energie solar autoconsumption, third session 2026; public-beneficiary schemes cited only for disambiguation.",
@@ -26,7 +26,17 @@
       "Nu este confirmată o nouă sesiune agricolă în octombrie 2026.",
       "TVA, costurile, scoringul, excluderile, indicatorii și anexele trebuie confruntate cu PDF-ul complet al ghidului V7.",
       "NU se atribuie solicitantului agricol termenul 20.11.2026 al celor două apeluri distincte pentru beneficiari publici."
-    ]
+    ],
+    "prefinancing_private_beneficiaries": {
+      "title": "Prefinanțare pentru beneficiari privați care implementează Schema Energie",
+      "verdict": "AFIR a publicat la 30.09.2026 un model de SGB pentru prefinanțare. Pentru beneficiarii privați cu contract, plafonul este 30% din ajutorul nerambursabil rămas de decontat la data cererii, condiționat de SGB pentru 100% din avans, valabilă până la expirarea execuției contractului. Dosarul se depune în sistemul AFIR conform anexei contractuale și graficului; avansul se justifică până la ultima cerere de rambursare.",
+      "publication_caveat": "Informație candidat, sursa originală SGB și contractul de finanțare neinspectate; nu se certifică accesul efectiv al fiecărui beneficiar, nu se deschide o sesiune nouă.",
+      "actions": [
+        "Beneficiarii privați contractați: calculați ajutorul încă neplătit și plafonul orientativ de cel mult 30%; cereți băncii confirmarea posibilității emiterii unei SGB integrale cu valabilitate până la finalul execuției.",
+        "Confruntați dosarul de prefinanțare și modelul SGB AFIR actual cu anexa contractului și cu graficul de eșalonare a plăților înainte de depunere.",
+        "Planificați documentele de justificare a avansului pentru ultima cerere de rambursare; pentru proiectele necontractate și pentru o nouă sesiune, nu deduceți un drept de prefinanțare ori statut OPEN."
+      ]
+    }
   },
   "claim_evidence_ledger": [
     {
@@ -474,6 +484,196 @@
       "parser_version": null,
       "source_run_id": null,
       "analyst_reviewed_at": "2026-10-12T14:35:28.232Z"
+    },
+    {
+      "claim_id": "AFIR21",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "prefinancing_model_private_contract_beneficiaries",
+      "value": {
+        "provided": true,
+        "beneficiary_scope": "private beneficiaries of AFIR renewable energy aid scheme, agriculture and food industry",
+        "model": "Scrisoare de Garanție Bancară (SGB)",
+        "application_document": "prefinancing request file according to financing-contract annex"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_EXACT_PASSAGE_STAGING_NO_CLAIM_GATE",
+      "source_ids": [
+        "S7"
+      ],
+      "document_locator": "press release, first and second body paragraphs (30 September 2026)",
+      "evidence_paraphrase": "SGB model announced for private beneficiaries with financing-contract annex for prefinancing request",
+      "source_version": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "official_url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "original_document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "document_date": "2026-09-30",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
+    },
+    {
+      "claim_id": "AFIR22",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "prefinancing_ceiling_unpaid_grant",
+      "value": {
+        "maximum_percent": 30,
+        "base": "nonrefundable state aid remaining to be reimbursed at prefinancing request date",
+        "not_base": "total project cost or unconditionally original approved grant"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_EXACT_PASSAGE_STAGING_NO_CLAIM_GATE",
+      "source_ids": [
+        "S7"
+      ],
+      "document_locator": "press release, third body paragraph",
+      "evidence_paraphrase": "Advance is capped at 30% of the remaining unreimbursed state aid",
+      "source_version": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "official_url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "original_document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "document_date": "2026-09-30",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
+    },
+    {
+      "claim_id": "AFIR23",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "prefinancing_sgb_full_security",
+      "value": {
+        "guarantee_coverage_percent": 100,
+        "guaranteed_amount": "entire requested advance",
+        "issuer": "banking credit institution operating in Romania"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_EXACT_PASSAGE_STAGING_NO_CLAIM_GATE",
+      "source_ids": [
+        "S7"
+      ],
+      "document_locator": "press release, third body paragraph",
+      "evidence_paraphrase": "Bank guarantee equal to the amount of prefinancing requested",
+      "source_version": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "official_url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "original_document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "document_date": "2026-09-30",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
+    },
+    {
+      "claim_id": "AFIR24",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "prefinancing_sgb_expiry",
+      "value": {
+        "validity_until": "expiration of the contract execution duration",
+        "not_only": "date of advance disbursement"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_EXACT_PASSAGE_STAGING_NO_CLAIM_GATE",
+      "source_ids": [
+        "S7"
+      ],
+      "document_locator": "press release, fourth body paragraph",
+      "evidence_paraphrase": "Guarantee must remain valid until expiry of contract execution duration",
+      "source_version": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "official_url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "original_document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "document_date": "2026-09-30",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
+    },
+    {
+      "claim_id": "AFIR25",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "prefinancing_request_timing",
+      "value": {
+        "may_request": "at any stage of project implementation subject to scheduled payments",
+        "after_installments": "proportional to unpaid nonrefundable aid remaining",
+        "processing": "via AFIR information system under financing-contract conditions"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_EXACT_PASSAGE_STAGING_NO_CLAIM_GATE",
+      "source_ids": [
+        "S7"
+      ],
+      "document_locator": "press release, second and fifth body paragraphs",
+      "evidence_paraphrase": "Request can be lodged during implementation, observing payment schedule and remaining aid",
+      "source_version": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "official_url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "original_document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "document_date": "2026-09-30",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
+    },
+    {
+      "claim_id": "AFIR26",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "prefinancing_final_justification",
+      "value": {
+        "proof_due": "last reimbursement request",
+        "proof": "supporting documents",
+        "form_recommendation": "current AFIR model and forms; native SGB template not inspected in this pass"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_EXACT_PASSAGE_STAGING_NO_CLAIM_GATE",
+      "source_ids": [
+        "S7"
+      ],
+      "document_locator": "press release, fifth and sixth body paragraphs",
+      "evidence_paraphrase": "Advance must be supported with documents by the final reimbursement request",
+      "source_version": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "official_url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "original_document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "document_date": "2026-09-30",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
+    },
+    {
+      "claim_id": "AFIR27",
+      "claim_type": "ANALYSIS",
+      "fact_class": "interpretation_prefinancing_not_new_call",
+      "value": {
+        "reopens_closed_session": false,
+        "who_should_act": "private beneficiaries with signed financing contracts",
+        "distinction": "noncontracted applicants have no automatic right to prefinancing"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_EXACT_PASSAGE_STAGING_NO_CLAIM_GATE",
+      "source_ids": [
+        "S7",
+        "S2"
+      ],
+      "document_locator": "press release, paragraphs 1–6 plus separate 17 August 2026 official closure communiqué",
+      "evidence_paraphrase": "Financing-contract-dependent prefinancing guidance cannot be read as a new intake announcement",
+      "source_version": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "official_url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "original_document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "document_date": "2026-09-30",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
     }
   ],
   "source_manifest": [
@@ -560,6 +760,22 @@
       "parser_version": null,
       "acquisition_run_id": null,
       "access_state": "OFFICIAL_HTML_REVIEWED_GUIDE_DOCUMENT_NOT_EXTRACTED"
+    },
+    {
+      "source_id": "S7",
+      "authority": "AFIR",
+      "document_title": "AFIR, Model SGB pentru acordarea unei prefinanțări beneficiarilor privați ai Schemei de energie, comunicat 30.09.2026 13:30",
+      "url": "https://www.afir.ro/comunicate/model-sgb-pentru-acordarea-unei-prefinantari-beneficiarilor-privati-ai-schemei-de-energie/",
+      "document_date": "2026-09-30",
+      "locator": "official press release paragraphs 1–6 (screen lines 226–235): SGB for private beneficiaries, 30% unpaid grant, 100% security, validity through contract execution, request and justification",
+      "document_version": "official 30 September 2026 13:30 release; not asserted as modification of signed V7",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_READ_EXACT_TEXT; NATIVE_SGB_FORM_AND_FINANCING_CONTRACT_ANNEX_NOT_READ",
+      "provenance_note": "Web research is an analyst review, not a SURFACEMC fetched-at/hash/parser evidence receipt"
     }
   ],
   "editorial_review": {
@@ -594,20 +810,59 @@
         "basis": "No raw/semantic guide hash claimed or recalculated"
       }
     ],
-    "decision_utility": "Closed-session alert and correct beneficiary/scheme separation; focus applicants already submitted on published evaluation lists rather than new submission.",
-    "release_decision": "BLOCKED: claim-level gate not verified integrated, exact raw document provenance and annexes missing."
+    "decision_utility": "New material implementation-stage liquidity guidance for private contracted beneficiaries; avoid interpreting advances as call reopening or as a fixed percentage of total investment.",
+    "release_decision": "BLOCKED / PROVISIONAL_FAIL_CLOSED: prefinancing claims reviewed as official HTML but lacking verified native form/contract annex, acquisition provenance and DAPP_EVIDENCE_GATE",
+    "h02_prefinancing_adversarial_checks": [
+      {
+        "question": "30% se aplică valorii totale a proiectului sau întregului grant inițial?",
+        "result": "NU",
+        "basis": "Comunicatul oficial limitează baza la ajutorul nerambursabil rămas de decontat la momentul cererii."
+      },
+      {
+        "question": "100% garanție SGB înseamnă 100% intensitate de sprijin nerambursabil?",
+        "result": "NU",
+        "basis": "Garanția privește integral avansul solicitat; intensitatea grantului este un fapt separat."
+      },
+      {
+        "question": "O întreprindere care nu are contract semnat poate cere automat acest avans?",
+        "result": "NU ESTE DOVEDIT",
+        "basis": "Comunicatul cere dosar potrivit anexei contractului de finanțare, depunere în sistem și condiții contractuale."
+      },
+      {
+        "question": "Modelul SGB redeschide sesiunea privată 03/2026 sau se aplică apelurilor pentru entități publice?",
+        "result": "NU",
+        "basis": "Comunicat de implementare pentru beneficiari privați, distinct de apeluri și de anunțul oficial de închidere din august."
+      },
+      {
+        "question": "SGB original, grila de costuri aferente și anexele contractuale sunt inspectate?",
+        "result": "NU",
+        "basis": "Doar comunicatul oficial HTML, originalele native încă lipsesc; starea claim-level rămâne UNKNOWN."
+      }
+    ]
   },
   "material_diff": {
     "baseline": "P11 asOf 2026-09-27: status DISCOVERED, materialFacts empty, blockedFactClasses all, publicationDecision BLOCK_MATERIAL_FACTS / OPEN_DEADLINE_EXPIRED_REQUIRES_REFRESH.",
     "new_evidence": "AFIR closure 17.08.2026 and 07.09/07.10.2026 evaluation report index positively establish session 03/2026 closed; official grant/unit and applicant distinctions assembled in analyst ledger.",
-    "production_change": "NONE",
-    "old_page_preserved": true
+    "production_change": "NONE; dossier candidate branch only",
+    "old_page_preserved": true,
+    "h02_delta": [
+      "Official AFIR communiqué dated 30 September 2026 adds private-beneficiary SGB-based prefinancing path relevant to the same Schema Energie.",
+      "Maximum prefinancing is 30% of unpaid remaining nonrefundable aid, not gross project value or automatically initial grant.",
+      "SGB guarantees 100% of requested advance and remains valid to end of contract execution.",
+      "Requests can occur during implementation per payment schedule; advances must be documented at final reimbursement.",
+      "No change to status of closed 03/2026 application intake; no source native hash or gate certification."
+    ],
+    "new_claims": 7
   },
-  "next_evidence_action": "Acquire approved V7 19.94MB guide (09.06.2026), 2026 application form and applicable annexes via existing AFIR authorized ingestion; verify CAEN, >400kW exception, site/autoconsum rules, cost list, VAT, selection grid, appeals procedure and eventual newer session announcement. No retry loop of failed direct PDF access.",
+  "next_evidence_action": "Obține prin circuitul oficial AFIR modelul SGB și anexa contractuală a cererii de prefinanțare (versiunea aplicabilă), extrage și verifică condițiile SGB și eventualele costuri bancare; recuperează apoi ghidul V7 și anexele/grila lipsă printr-o metodă autorizată nouă, fără reîncercarea buclei PDF. Capturează raw/semantic SHA-256, fetched_at, parser_version și source_run_id doar pentru documentele realmente obținute. Rulează DAPP_EVIDENCE_GATE când este implementat. Păstrează CLOSED pentru sesiunea 03/2026.",
   "checkpoint_details": {
     "storage": "GitHub DAPP staging branch only",
-    "replay": "Run PARTENER claim-level gate against exact sourced claims when implemented; assert CLOSED not OPEN; verify monetary units and separate public call identity.",
-    "rollback": "Drop/revert this staging-only commit or branch; main, P11, decision_products, Pages and LKG unaffected."
+    "replay": "Compare SGB AFIR original with exact 30% remaining-aid, 100% guarantee, contract validity, remaining aid and final reimbursement claims; run claim-level gate when engine exists; assert closed 03/2026 unchanged.",
+    "rollback": "Revert only this H02 staging update on branch partener-dapp-afir-energy-20261012 to prior head 9785ea7da34e7923d574a517bb2575386587bfda; do not change main, P11, decision products, site or LKG.",
+    "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261012-H01",
+    "previous_candidate_blob_sha": "39605f8318bf81050b3d00c7219a06da6afdb44d",
+    "previous_branch_head": "9785ea7da34e7923d574a517bb2575386587bfda",
+    "base_main_observed": "bbaaac144db1e268e68e45652acb34de56b405e6"
   },
   "gate_checks": {
     "DAPP_EVIDENCE_GATE": "NOT_VERIFIED_IMPLEMENTED",
@@ -616,7 +871,11 @@
     "source_version_audit": "PARTIAL",
     "CI_exact_head": "NOT_RUN",
     "merge": "NOT_DONE",
-    "public_readback": "NOT_DONE"
+    "public_readback": "NOT_DONE",
+    "native_SGB_template": "UNAVAILABLE_NOT_INSPECTED",
+    "contractual_annex": "UNAVAILABLE_NOT_INSPECTED"
   },
-  "needs_user": false
+  "needs_user": false,
+  "previous_analysis_run_id": "DAPP-AFIR-ENERGY-20261012143528",
+  "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261012-H01"
 }
