@@ -1,0 +1,266 @@
+{
+  "kind": "DAPP_INCREMENTAL_ANALYSIS_CANDIDATE",
+  "dossier_id": "mai-fami-am22n-2026",
+  "title": "AM22N — Resurse educaționale și formarea cadrelor didactice RLS",
+  "state": "ANALYSIS_IN_PROGRESS",
+  "source_version": "Ghid specific AM22N v1.0 (16.09.2026) + metodologia selecție v2.0 (11.02.2025) + ghid general v4.0 (17.03.2026)",
+  "run_id": "DAPP-AM22N-20261014-H04-GENERAL-ADMISSIBILITY-CONTROLS",
+  "checkpoint": "PARTENER-DAPP-AM22N-20261014-H04-CGA8-CGA13-DURATION-SCORING-STAGING",
+  "candidate_base_main_sha": "9df83a6798e4eab1f31b128b25bd5d17b0e4ee7a",
+  "previous_candidate_branch_head_sha": "22c9291b6a9b3e909d5dc99f11e1f9a1019ed4f2",
+  "prior_checkpoint": "PARTENER-DAPP-AM22N-20261014-H03-CLARIFICATIONS-STAGING",
+  "single_writer_check": "Existing H02/H03 on the same candidate branch verified; no AM22N-specific open PR; H04 nonexistent before write; branch head stable at preflight; only this one new staging file is written.",
+  "analysis_candidate": {
+    "editorial_summary": "Ghidul specific se citește împreună cu metodologia generală v2.0 și ghidul general v4.0. Cele mai costisitoare riscuri de inadmisibilitate sunt capacitatea operațională, subcontractarea activităților, costurile neeligibile >30%, durata inițială și pragurile cumulative pe secțiuni.",
+    "applicant_vs_target_group": "Solicitantul/coaplicanții sunt entități publice/private eligibile conform G; profesorii formați și beneficiarii resurselor sunt grupul țintă, nu sunt automat solicitanți.",
+    "application_decision": "REQUIRES_MANUAL_FINAL_CHECK; NOT_APPROVED_FOR_RELEASE",
+    "three_next_actions": [
+      "Verifică minimum 3 FTE cumulat (ori excepția aplicabilă unei instituții publice), statutul fiscal, rolurile coaplicanților și lipsa subcontractării activităților.",
+      "Controlează fiecare linie de buget pentru eligibilitate și fundamentare; ține distinct alocarea FEN a apelului de TCE maxim pe proiect.",
+      "Planifică 24 luni și simulează pragurile A/B/C + total 70; obține Anexa 1 Secțiunea D și grila XLSX înaintea depunerii."
+    ]
+  },
+  "claim_evidence_ledger": [
+    {
+      "claim_id": "AM22N-42",
+      "classification": "OFFICIAL_FACT",
+      "fact_class": "cga8_operational_capacity",
+      "statement": "CGA8 cere minimum 3 salariați echivalent normă întreagă, cumulat la solicitant și coaplicanți; pentru instituțiile publice criteriul de capacitate se consideră îndeplinit în baza statutului legal, cu excepția verificării subcontractării.",
+      "decision_utility": "Verifică CIM/FTE cumulat și dovezile de capacitate înainte de finalizarea aplicației; nu exclude automat instituțiile publice.",
+      "release_state": "UNKNOWN_FOR_RELEASE",
+      "evidence": [
+        {
+          "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2025/02/Metodologie_eval_selectie_-V2.0-aprobata-CM-11.02.2025.pdf",
+          "document_version": "Metodologia și criteriile pentru selecția proiectelor, v2.0, aprobată de CM 11.02.2025",
+          "pasaj": "Anexa 1, CGA8, p.12/18 (PDF p.12, index 11)",
+          "short_anchor": "cel puțin 3 angajați ... normă întreagă sau echivalent; excepția instituțiilor publice",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "parser_version": null,
+          "fetched_at": null,
+          "acquisition_run_id": null,
+          "original_binary_verified": false
+        }
+      ],
+      "adversarial_note": "Excepția pentru instituții publice nu autorizează subcontractarea; condițiile de eligibilitate din ghidul specific rămân cumulative."
+    },
+    {
+      "claim_id": "AM22N-43",
+      "classification": "OFFICIAL_FACT",
+      "fact_class": "no_subcontracted_project_activities",
+      "statement": "În CGA8 se verifică absența activităților subcontractate; Ghidul general v4.0 distinge explicit delegarea către un terț a implementării unei activități/rezultat de achizițiile de bunuri, servicii ori lucrări necesare implementării.",
+      "decision_utility": "Reconfigurează rolurile solicitantului și coaplicanților pentru livrarea efectivă; tratează achizițiile justificat, fără a masca subcontractarea rezultatelor.",
+      "release_state": "UNKNOWN_FOR_RELEASE",
+      "evidence": [
+        {
+          "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2025/02/Metodologie_eval_selectie_-V2.0-aprobata-CM-11.02.2025.pdf",
+          "document_version": "Metodologia și criteriile pentru selecția proiectelor, v2.0, aprobată de CM 11.02.2025",
+          "pasaj": "Anexa 1, CGA8, p.12/18",
+          "short_anchor": "se verifică să nu existe activități subcontractate",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "parser_version": null,
+          "fetched_at": null,
+          "acquisition_run_id": null,
+          "original_binary_verified": false
+        },
+        {
+          "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/03/GHIDUL-General-PNAI-v4.0final-INTEGRAL-4semnat.pdf",
+          "document_version": "Ghidul general PNAI v4.0, publicat 17.03.2026",
+          "pasaj": "Ghidul de eligibilitate, neeligibilități alin.(1) lit.h și alin.(2), p.61/115",
+          "short_anchor": "delegarea unei activități/rezultat; achizițiile nu sunt automat subcontractare",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "parser_version": null,
+          "fetched_at": null,
+          "acquisition_run_id": null,
+          "original_binary_verified": false
+        }
+      ],
+      "adversarial_note": "Nu se afirmă că toate serviciile achiziționate sunt interzise, nici că achiziția unui întreg rezultat devine permisă."
+    },
+    {
+      "claim_id": "AM22N-44",
+      "classification": "OFFICIAL_FACT",
+      "fact_class": "cga13_30pct_automatic_rejection",
+      "statement": "În CGA13, dacă valoarea costurilor neeligibile identificate în cererea de finanțare depășește 30% din valoarea totală eligibilă a proiectului propus, proiectul este respins din oficiu, fără solicitare de clarificări.",
+      "decision_utility": "Realizează verificarea de eligibilitate și rezonabilitate pe fiecare linie bugetară înainte de depunere; pragul nu este o marjă permisă de bugetare neeligibilă.",
+      "release_state": "UNKNOWN_FOR_RELEASE",
+      "evidence": [
+        {
+          "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2025/02/Metodologie_eval_selectie_-V2.0-aprobata-CM-11.02.2025.pdf",
+          "document_version": "Metodologia și criteriile pentru selecția proiectelor, v2.0, aprobată de CM 11.02.2025",
+          "pasaj": "Anexa 1, CGA13, p.13/18 (PDF p.13, index 12)",
+          "short_anchor": "mai mult de 30% ... respins ... fără clarificări",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "parser_version": null,
+          "fetched_at": null,
+          "acquisition_run_id": null,
+          "original_binary_verified": false
+        }
+      ],
+      "adversarial_note": "Baza de comparație este valoarea totală eligibilă a proiectului, nu alocarea apelului, și pragul >30%, nu >=30%; costurile individuale neeligibile sunt oricum excluse."
+    },
+    {
+      "claim_id": "AM22N-45",
+      "classification": "OFFICIAL_FACT",
+      "fact_class": "implementation_term_and_conditional_extension",
+      "statement": "AM22N prevede implementare inițială de 24 de luni de la semnarea contractului/deciziei; prelungirea eligibilității poate ajunge la cel mult 50% din perioada inițială doar cu justificare temeinică și fără depășirea datei de 31.12.2029.",
+      "decision_utility": "Planifică activitățile, recrutarea și livrabilele în maximum 24 luni; nu include o prelungire de 12 luni drept drept dobândit.",
+      "release_state": "UNKNOWN_FOR_RELEASE",
+      "evidence": [
+        {
+          "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+          "document_version": "Ghid specific AM22N v1.0, Decizia OI 42/16.09.2026",
+          "pasaj": "Secțiunea H.1, p.16/21 (PDF index 15)",
+          "short_anchor": "24 luni; maxim 50%; nu mai mult de 31 decembrie 2029",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "parser_version": null,
+          "fetched_at": null,
+          "acquisition_run_id": null,
+          "original_binary_verified": false
+        },
+        {
+          "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2025/02/Metodologie_eval_selectie_-V2.0-aprobata-CM-11.02.2025.pdf",
+          "document_version": "Metodologia și criteriile pentru selecția proiectelor, v2.0, aprobată de CM 11.02.2025",
+          "pasaj": "Anexa 1, CGA12, p.13/18",
+          "short_anchor": "perioada de implementare se încadrează în durata maximă din ghidul specific",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "parser_version": null,
+          "fetched_at": null,
+          "acquisition_run_id": null,
+          "original_binary_verified": false
+        }
+      ],
+      "adversarial_note": "Prelungirea este excepțională și nu extinde perioada propusă la depunere."
+    },
+    {
+      "claim_id": "AM22N-46",
+      "classification": "OFFICIAL_FACT",
+      "fact_class": "cumulative_section_scoring_thresholds",
+      "statement": "Calificarea la finanțare necesită cumulativ minimum 20/40 la relevanță, 20/40 la eficiență, 10/20 la impact/sustenabilitate și 70/100 puncte total; depășirea pragurilor nu garantează finanțarea în afara bugetului disponibil.",
+      "decision_utility": "Execută o simulare adversarială a scorului pe secțiuni, nu doar a totalului; consultă separat ponderile și subcriteriile din Anexa 2 XLSX încă neverificată.",
+      "release_state": "UNKNOWN_FOR_RELEASE",
+      "evidence": [
+        {
+          "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+          "document_version": "Ghid specific AM22N v1.0, Decizia OI 42/16.09.2026",
+          "pasaj": "Secțiunea H.2–H.3, pp.16–17/21 (PDF indices 15–16)",
+          "short_anchor": "A 20/40; B 20/40; C 10/20; total 70/100, în limita bugetului",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "parser_version": null,
+          "fetched_at": null,
+          "acquisition_run_id": null,
+          "original_binary_verified": false
+        }
+      ],
+      "adversarial_note": "Nu inventa ponderi de subcriterii din grila specifică XLSX inaccesibilă; 70/100 nu înlocuiește pragurile secțiunilor."
+    }
+  ],
+  "editorial_review": {
+    "new_claims": 5,
+    "confirmed_for_release": 0,
+    "unknown_for_release": 5,
+    "prior_material_conflicts_preserved": [
+      "Anunț HTML sumar: 2.000.000 EUR vs ghid specific și corpul anunțului: 2.000.000 RON",
+      "Anunț HTML sumar: solicitanți ONG-only vs ghid specific G și sumar: entități publice/private"
+    ],
+    "adversarial_checks": [
+      "CGA8 3 FTE este cumulat, iar excepția pentru instituții publice nu permite subcontractarea.",
+      "CGA13 prag strict >30% și denominator = valoarea totală eligibilă a proiectului, nu alocarea apelului.",
+      "Implementare inițială max.24 luni, prelungire excepțională max.50%, plafon absolut 31.12.2029.",
+      "Calitatea cere simultan prag pe secțiuni și total; ponderi individuale XLSX UNKNOWN.",
+      "Tabelul H.9 răspuns TVA=NU privește proiecte >5 mil EUR, nu deductibilitatea sau eligibilitatea generală a TVA.",
+      "2026-10-14 pagina AM22N indică status Activ și 16.10.2026 ora 16:00 România; acceptarea efectivă ROFED neverificată."
+    ],
+    "source_binary_certified": false
+  },
+  "source_manifest": [
+    {
+      "source_id": "methodology",
+      "url": "https://fed.mai.gov.ro/wp-content/uploads/2025/02/Metodologie_eval_selectie_-V2.0-aprobata-CM-11.02.2025.pdf",
+      "document_version": "Metodologia și criteriile pentru selecția proiectelor, v2.0, aprobată de CM 11.02.2025",
+      "access": "Official page/PDF rendered and text-checked through web viewer on 2026-10-14; no original binary download",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "parser_version": null,
+      "fetched_at": null,
+      "acquisition_run_id": null,
+      "original_binary_verified": false
+    },
+    {
+      "source_id": "general",
+      "url": "https://fed.mai.gov.ro/wp-content/uploads/2026/03/GHIDUL-General-PNAI-v4.0final-INTEGRAL-4semnat.pdf",
+      "document_version": "Ghidul general PNAI v4.0, publicat 17.03.2026",
+      "access": "Official page/PDF rendered and text-checked through web viewer on 2026-10-14; no original binary download",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "parser_version": null,
+      "fetched_at": null,
+      "acquisition_run_id": null,
+      "original_binary_verified": false
+    },
+    {
+      "source_id": "am22n",
+      "url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+      "document_version": "Ghid specific AM22N v1.0, Decizia OI 42/16.09.2026",
+      "access": "Official page/PDF rendered and text-checked through web viewer on 2026-10-14; no original binary download",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "parser_version": null,
+      "fetched_at": null,
+      "acquisition_run_id": null,
+      "original_binary_verified": false
+    },
+    {
+      "source_id": "notice",
+      "url": "https://fed.mai.gov.ro/11317/lansare-apel-am22n-dezvoltarea-de-resurse-educationale-si-programe-de-formare-pentru-specializarea-cadrelor-didactice-in-vederea-predarii-limbii-romane-ca-limba-straina/",
+      "document_version": "Anunț lansare 16.09.2026, editat 17.09.2026",
+      "access": "Official page/PDF rendered and text-checked through web viewer on 2026-10-14; no original binary download",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "parser_version": null,
+      "fetched_at": null,
+      "acquisition_run_id": null,
+      "original_binary_verified": false
+    }
+  ],
+  "next_evidence_action": {
+    "status": "NEEDS_EVIDENCE_FOR_ANNEXES_AND_CLAIM_GATE",
+    "blocked_docs": [
+      "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Cerere-de-finantare-6.docx",
+      "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Anexa_2_Grila_evaluare_admisibilitate_calitate_ponderi_apel-1-1-6.xlsx"
+    ],
+    "bounded_methods": "Official web viewer returned unsupported MIME; direct container HTTP/DNS could not resolve domain; do not loop.",
+    "next": "Obtain native Annex 1 section D and Annex 2 scoring via authorized ingest, compute real binary hashes and parse provenance, then run claim-level DAPP_EVIDENCE_GATE on exact head."
+  },
+  "material_diff": {
+    "prior_nominal_claim_count": 41,
+    "new_claim_ids": [
+      "AM22N-42",
+      "AM22N-43",
+      "AM22N-44",
+      "AM22N-45",
+      "AM22N-46"
+    ],
+    "nominal_total_after": 46,
+    "material_consequence": "Explicitly reject simplistic 100% eligibility, outsourced activities, and total-only scoring; precheck >30% cost rejection and 3 FTE; candidate only",
+    "production_modified": false
+  },
+  "publication_gate": {
+    "required": "DAPP_EVIDENCE_GATE",
+    "implemented_tested_integrated": "NOT_DEMONSTRATED",
+    "state": "PROVISIONAL_FAIL_CLOSED",
+    "publish_authorized": false
+  },
+  "rollback": {
+    "scope": "Delete/revert only AM22N_H04_general_admissibility_controls.json on candidate branch",
+    "prior_candidate_branch_head_sha": "22c9291b6a9b3e909d5dc99f11e1f9a1019ed4f2",
+    "production_rollback_needed": false
+  },
+  "provenance_note": "SHA values here refer only to Git commit refs explicitly verified. Source PDF raw/semantic SHA-256 intentionally left null; Git blob SHA must not be confused with original PDF content hash."
+}
