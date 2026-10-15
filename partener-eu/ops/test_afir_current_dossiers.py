@@ -46,6 +46,21 @@ def main() -> int:
     assert fact(dr14, "Buget")["value"] == "108.000.000 EUR"
     assert "50.000 EUR" in fact(dr14, "Grant")["value"]
     assert "80 puncte" in " ".join(by_title(dr14, "Cum se punctează")["items"])
+    # AFIR 2026-10-06: only DR-14's simple-acquisitions component closed.
+    assert dr14["status"] == "OPEN", "DR-14 itself remains open for three sectors"
+    components = dr14["componentStatuses"]
+    assert components["Achiziții simple"] == "CLOSED_2026-10-06"
+    for name in ("Zootehnic", "Legumicultură", "Alte sectoare"):
+        assert components[name] == "OPEN_SUBJECT_TO_FUNDS", name
+    assert "Achiziții simple" in dr14["standfirst"] and "6 octombrie 2026" in dr14["standfirst"]
+    assert "Nu mai depune" in dr14["decisionAction"]
+    assert fact(dr14, "Achiziții simple")["value"] == "ÎNCHISĂ din 6 octombrie 2026"
+    assert any(item.get("kind") == "COMPONENT_CLOSED" for item in dr14["timeline"])
+    closure_url = "https://www.afir.ro/comunicate/fondurile-alocate-interventiei-dr-14-pentru-componenta-achizitii-simple-au-fost-epuizate/"
+    assert any(source.get("url") == closure_url and "component_status" in source.get("supports", []) for source in dr14["sources"])
+    assert dr14["quality"]["evidenceCount"] == len(dr14["sources"])
+    assert "6 octombrie 2026" in " ".join(by_title(dr14, "Rezumat executiv")["items"])
+    assert "6 octombrie 2026" in " ".join(by_title(dr14, "Ce finanțează și în ce condiții")["items"])
     assert fact(dr18, "Buget")["value"] == "5.000.000 EUR"
     assert "100.000 EUR" in fact(dr18, "Grant")["value"]
     assert "85% sau 65%" in fact(dr18, "Grant")["value"]
