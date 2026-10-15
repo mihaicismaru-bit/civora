@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "runId": "PARTENER-SITEKEEPER-20261015-1938-AMIF-TALENT",
+  "observedAt": "2026-10-15T16:38:00Z",
+  "mainBaseline": "c62c41158b3a568e11e556c9287d28362440874f",
+  "publicationState": "PROVISIONAL_FAIL_CLOSED",
+  "readiness": "OFFICIAL_STATUS_VERIFIED_GUIDE_AND_INGEST_QG_PENDING",
+  "opportunity": {
+    "code": "AMIF/2026/SA/2.1.1",
+    "programme": "FAMI 2021–2027 — Facilitatea Tematică / Acțiuni specifice",
+    "title": "Sprijin pentru serviciile consulare din statele membre pentru inovare în materie de talente și Parteneriat pentru talente",
+    "authority": "Comisia Europeană — DG HOME, prin Autoritatea de Management Afaceri Interne (MAI)",
+    "sourceClass": "T1_AUTHORITY",
+    "officialStatus": "Lansat (potrivit paginii oficiale MAI; public projection requires QG)",
+    "applicationToRomanianAuthorityDeadline": "2026-10-30T16:00:00+02:00",
+    "applicationToECDeadline": "2026-11-23",
+    "ECDeadlineTime": "UNKNOWN",
+    "clarificationToRomanianAuthorityDate": "2026-10-15",
+    "clarificationHour": "UNKNOWN",
+    "totalEur": 80000000,
+    "lots": [
+      {
+        "id": 1,
+        "name": "Inovare în materie de talente",
+        "allocationEur": 40000000
+      },
+      {
+        "id": 2,
+        "name": "Sprijin pentru Parteneriatul pentru talente",
+        "allocationEur": 40000000
+      }
+    ],
+    "europeanContributionPerProjectMinEur": 3000000,
+    "europeanContributionPerProjectMaxEur": 4000000,
+    "cofinancingMaxPct": 90,
+    "applicantScope": "Aplicații ale statelor membre; un stat membru poate transmite o aplicație per lot. Nu este un apel general pentru ONG-uri sau IMM-uri; eligibilitatea concretă se verifică în apelul și condițiile CE.",
+    "deadlineEvidencePriority": "Textul de Actualizare 10 septembrie 2026, care prelungește termenul față de instrucțiunile inițiale din josul paginii."
+  },
+  "evidence": [
+    {
+      "officialUrl": "https://fed.mai.gov.ro/11221/apel-actiune-specifica-fami-2026-sa-2-1-1-sprijin-pentru-serviciile-consulare-din-statele-membre-pentru-inovare-in-materie-de-talente-si-parteneriat-pentru-talente/",
+      "publishedAt": "2026-08-25",
+      "lastEditedAt": "2026-09-10",
+      "observedAt": "2026-10-15T16:38:00Z",
+      "section": "Actualizare 10 septembrie 2026",
+      "supports": [
+        "call_identity",
+        "deadline_to_mgmt_authority",
+        "deadline_to_EC",
+        "clarifications",
+        "budget",
+        "cofinancing",
+        "beneficiary_scope"
+      ],
+      "rawHtmlSha256": null,
+      "parserVersion": "HUMAN_REVIEW_OFFICIAL_RENDERED_TEXT_V1",
+      "note": "Original historical deadline 5 October/31 October printed lower on page is superseded by the more recent dated update."
+    }
+  ],
+  "presenceCheck": {
+    "publicOpenCatalog": "https://partener.eu/finantari/deschise/",
+    "present": false,
+    "publicDossierIndex": "https://partener.eu/dosare/",
+    "dossierPresent": false
+  },
+  "requiredGates": [
+    "Fetch and SHA-256 official HTML plus call-for-interest document",
+    "Extract exact eligible entities and submission route from official CE terms",
+    "Reconcile 10 September deadline update against original dates",
+    "Dedup against canonical call inventory",
+    "Generate explanatory dossier with provenance and UNKNOWN fields",
+    "Run quality gate; publish only after CI, deploy and public readback"
+  ],
+  "safety": {
+    "autoPublish": false,
+    "rawHashNotCaptured": true,
+    "unknownsRemainUnknown": true,
+    "privateDataAbsent": true
+  }
+}
