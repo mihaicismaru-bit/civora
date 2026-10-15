@@ -1,0 +1,216 @@
+{
+  "kind": "DAPP_INCREMENTAL_ANALYSIS_CANDIDATE",
+  "dossier_id": "mai-fami-am22n-2026",
+  "title": "AM22N — Dezvoltarea resurselor educaționale și formarea profesorilor RLS",
+  "state": "ANALYSIS_IN_PROGRESS",
+  "publication_state": "PROVISIONAL_FAIL_CLOSED",
+  "source_version": "Ghid specific AM22N v1.0, Decizia OI 42/16.09.2026",
+  "base_main_sha": "c62c41158b3a568e11e556c9287d28362440874f",
+  "previous_candidate_branch_head_sha": "25d9d620e145930eae94352666bf4b989572f41c",
+  "run_id": "DAPP-AM22N-20261015-H06-INTERVENTION-PARTNER-DOCS",
+  "checkpoint": "PARTENER-DAPP-AM22N-20261015-H06-INTERVENTION-PARTNER-DOCS-STAGING",
+  "prior_checkpoint": "PARTENER-DAPP-AM22N-20261015-H05-DELIVERABLES-INDICATORS-GDPR-LOCAL-STAGING",
+  "publish_authorized": false,
+  "single_writer_check": {
+    "existing_branch": "partener-dapp-am22n-analyst-candidate-20261011",
+    "existing_H02_H03_H04_verified": true,
+    "H05_local_only": true,
+    "target_preexisting": false,
+    "preflight_head": "25d9d620e145930eae94352666bf4b989572f41c",
+    "no_concurrent_writes_intended": true
+  },
+  "analysis_candidate": {
+    "headline": "AM22N: încadrare unică pe cod de intervenție, limitele partenerilor externi, probe salariale și document Word obligatoriu",
+    "editorial_summary": "H06 identifică patru condiții aplicative suplimentare din ghidul semnat: un cod de intervenție per tabel selectat după ponderea costurilor eligibile; partenerii stabiliți în afara României pot intra numai ca cobeneficiari; centralizatorul salarizării și statele pe 12 luni reprezintă dovezi cerute; descrierea detaliată a activităților se anexează separat în Word.",
+    "applicant_vs_target_group": "Solicitanții/liderii sunt entitățile eligibile conform G.1; partenerii externi numai cobeneficiari conform G.2; participanții direcți sunt cei cel puțin 25 profesori/absolvenți umaniști, migranții și refugiații sunt utilizatorii finali ai resurselor.",
+    "live_status_observation": "Pagina MAI afișează Activ, termen 16.10.2026 ora 16:00 (Europe/Bucharest); ROFED transaction acceptance not tested.",
+    "confirmed_financial_baseline": "Ghid: alocarea apelului 2.000.000 RON FEN, TCE maximum/proiect 2.222.222 lei; contradicție încă activă cu sumarul EUR; nu se schimbă P11.",
+    "three_actions": [
+      "Construiește matricea de costuri eligibile pe tip de intervenție și fixează câte un cod pentru fiecare tabel al anexei VI.",
+      "Verifică partenerii externi și calitatea de cobeneficiar, plus documentele lor conforme și traducerile legalizate aplicabile.",
+      "Pregătește dosarul probator salarial și Word-ul separat de activități, apoi reconciliază D4/Anexa 1 și Anexa 2 înaintea depunerii."
+    ],
+    "publication_gate": "DAPP_EVIDENCE_GATE not demonstrated in main; all new facts staging-only"
+  },
+  "claim_evidence_ledger": {
+    "claims": [
+      {
+        "claim_id": "AM22N-53",
+        "classification": "OFFICIAL_FACT",
+        "fact_class": "intervention_code_cost_majority",
+        "statement": "Ghidul impune un singur cod de încadrare din fiecare tabel al anexei VI; când mai multe coduri ar fi posibile, prevalează codul majoritar după costul total eligibil atribuit fiecărui cod.",
+        "decision_utility": "Construiește matrice de alocare a costurilor pe cod de intervenție, alege codul majoritar pentru fiecare tabel, fără clasificare multiplă simultană.",
+        "evidence_state": "UNKNOWN_FOR_RELEASE",
+        "source_review_status": "OFFICIAL_PDF_WEB_TEXT_AND_PAGE_RENDER",
+        "evidence": [
+          {
+            "authority": "MAI/IGI/OI FAMI",
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+            "document_version": "Ghid specific AM22N v1.0; Decizia OI nr. 42/16.09.2026",
+            "page_or_section": "C.4, printed p.9 (PDF zero index 8)",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "release_blocker": "Native PDF byte hashing/annex-specific evidence unavailable; DAPP_EVIDENCE_GATE not certified"
+      },
+      {
+        "claim_id": "AM22N-54",
+        "classification": "OFFICIAL_FACT",
+        "fact_class": "crossborder_cobeneficiary_only",
+        "statement": "Entitățile înregistrate în alt stat UE ori stat terț sunt eligibile doar ca și cobeneficiari în parteneriat cu beneficiar eligibil potrivit G.1; nu se califică prin această excepție drept lider unic.",
+        "decision_utility": "Dacă un partener este stabilit în afara României, stabilește beneficiar român eligibil și verifică documentele în limba română.",
+        "evidence_state": "UNKNOWN_FOR_RELEASE",
+        "source_review_status": "OFFICIAL_PDF_WEB_TEXT_AND_PAGE_RENDER",
+        "evidence": [
+          {
+            "authority": "MAI/IGI/OI FAMI",
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+            "document_version": "Ghid specific AM22N v1.0; Decizia OI nr. 42/16.09.2026",
+            "page_or_section": "G.2, printed p.15 (PDF zero index 14)",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "release_blocker": "Native PDF byte hashing/annex-specific evidence unavailable; DAPP_EVIDENCE_GATE not certified"
+      },
+      {
+        "claim_id": "AM22N-55",
+        "classification": "OFFICIAL_FACT",
+        "fact_class": "personnel_cost_evidence",
+        "statement": "Ghidul G.3 solicită centralizatorul salarizării practicate de solicitant și parteneri pentru funcțiile propuse și statele de plată pe ultimele 12 luni; aplicabilitatea și modalitatea de încărcare trebuie reconciliate cu Anexa 1 secțiunea D4.",
+        "decision_utility": "Verifică existența și coerența centralizatorului salarizării, raportat la roluri, costuri și statele de plată; nu prezuma disponibilitate pentru entități noi.",
+        "evidence_state": "UNKNOWN_FOR_RELEASE",
+        "source_review_status": "OFFICIAL_PDF_WEB_TEXT_AND_PAGE_RENDER",
+        "evidence": [
+          {
+            "authority": "MAI/IGI/OI FAMI",
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+            "document_version": "Ghid specific AM22N v1.0; Decizia OI nr. 42/16.09.2026",
+            "page_or_section": "G.3, printed p.16 (PDF zero index 15)",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "release_blocker": "Native PDF byte hashing/annex-specific evidence unavailable; DAPP_EVIDENCE_GATE not certified"
+      },
+      {
+        "claim_id": "AM22N-56",
+        "classification": "OFFICIAL_FACT",
+        "fact_class": "separate_word_technical_activities",
+        "statement": "În plus față de formularul ROFED, ghidul G.3 cere anexarea unui document Word separat cu descrierea detaliată a activităților proiectului pentru verificarea conformității tehnice.",
+        "decision_utility": "Adaugă documentul Word tehnic separat la checklist și mapează fiecare activitate la rezultat, indicator, resurse, durată și locație.",
+        "evidence_state": "UNKNOWN_FOR_RELEASE",
+        "source_review_status": "OFFICIAL_PDF_WEB_TEXT_AND_PAGE_RENDER",
+        "evidence": [
+          {
+            "authority": "MAI/IGI/OI FAMI",
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+            "document_version": "Ghid specific AM22N v1.0; Decizia OI nr. 42/16.09.2026",
+            "page_or_section": "G.3, printed p.16 (PDF zero index 15)",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "release_blocker": "Native PDF byte hashing/annex-specific evidence unavailable; DAPP_EVIDENCE_GATE not certified"
+      }
+    ]
+  },
+  "editorial_review": {
+    "verdict": "FOUR_NEW_OFFICIAL_GUIDE_RULES_FOUND_BUT_RELEASE_FAIL_CLOSED",
+    "confirmed_for_release": 0,
+    "unknown_for_release": 4,
+    "conflict_brought_forward": [
+      "RON vs EUR in launch summary",
+      "ONG-only launch summary vs broader G.1 signed guide"
+    ],
+    "adversarial_checks": [
+      "Codul majoritar se aplică separat fiecărui tabel, nu cod exclusiv universal pentru întreaga cerere.",
+      "G.2 nu dovedește eligibilitatea autonomă a firmelor/entităților externe ca lider.",
+      "Documentele G.3 nu substituie lista completă D4 și tratamentul de excepții pentru instituții ori entități noi.",
+      "Nu confunda materialul salarial cu reguli specifice de eligibilitate a TVA.",
+      "Nu considera pagina Activ dovadă că ROFED primește efectiv depuneri."
+    ],
+    "sources_reviewed": [
+      "Ghid specific AM22N v1.0 pag. 9,15,16 (PDF rendere și text)",
+      "MAI pagina lansare 16 sept.2026, editată 17 sept.2026"
+    ]
+  },
+  "source_manifest": {
+    "sources": [
+      {
+        "source_id": "AM22N_OFFICIAL_GUIDE",
+        "authority": "MAI/IGI/OI FAMI",
+        "url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-AM22N-semnat.pdf",
+        "document_version": "v1.0 Decizia OI 42/16.09.2026",
+        "pdf_pages": 21,
+        "reviewed_printed_pages": [
+          9,
+          15,
+          16
+        ],
+        "retrieval": "official web-rendered PDF page/text",
+        "fetched_at": null,
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "parser_version": null,
+        "source_acquisition_run_id": null
+      },
+      {
+        "source_id": "AM22N_LAUNCH",
+        "authority": "MAI",
+        "url": "https://fed.mai.gov.ro/11317/lansare-apel-am22n-dezvoltarea-de-resurse-educationale-si-programe-de-formare-pentru-specializarea-cadrelor-didactice-in-vederea-predarii-limbii-romane-ca-limba-straina/",
+        "observed_local_date": "2026-10-15",
+        "status": "Activ",
+        "deadline": "2026-10-16T16:00:00+03:00",
+        "fetched_at": null,
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "parser_version": null
+      }
+    ]
+  },
+  "next_evidence_action": {
+    "blocker": "NATIVE_ANNEXES_AND_DAPP_EVIDENCE_GATE",
+    "next_exact_action": "Inspectează Anexa 1 D4 și grila Anexa 2 numai dacă apare o cale oficială autorizată nouă/snapshot disponibil; confruntă H05 local cu H06 pe același branch și certifică hashurile binare numai după achiziție reală. Nu publica.",
+    "avoid_repeated_downloads": true
+  },
+  "material_diff": {
+    "prior_remote_max_claim": "AM22N-46",
+    "prior_local_claims": [
+      "AM22N-47",
+      "AM22N-48",
+      "AM22N-49",
+      "AM22N-50",
+      "AM22N-51",
+      "AM22N-52"
+    ],
+    "new_claim_ids": [
+      "AM22N-53",
+      "AM22N-54",
+      "AM22N-55",
+      "AM22N-56"
+    ],
+    "new_claim_count": 4,
+    "production_modified": false,
+    "p11_modified": false,
+    "decision_products_modified": false
+  },
+  "rollback": {
+    "strategy": "Remove only H06 staged file by separate reviewed commit if necessary; no production rollback required.",
+    "replay": "Compare source Ghid v1.0 section C.4 p9 and G.2-G.3 pp15-16 to ledger AM22N-53..56; reconcile H05 local separately.",
+    "last_known_good_main": "c62c41158b3a568e11e556c9287d28362440874f"
+  }
+}
