@@ -2,12 +2,12 @@
   "schema_version": "DAPP_ANALYST_CANDIDATE_V1",
   "dossier_id": "mipe-3b3ab4d9361706669b",
   "title": "PDD — Managementul principalelor tipuri de risc identificate în PNMRD",
-  "analyst_run_id": "DAPP-PDD-20261013-H02-AMENDMENT-VISUAL",
-  "generated_at": "2026-10-13",
+  "analyst_run_id": "DAPP-PDD-20261015-H03-GOV-PORTAL-CROSSCHECK",
+  "generated_at": "2026-10-15",
   "candidate_base_sha": "00b04e3578dba377a563655dd9ffe1f430f8fbd7",
   "candidate_branch": "partener/dapp-pdd-risk-851-854-20261012",
   "analyst_protocol_version": "DAPP_V1_DRAFT_PR_1389_SECTION_12",
-  "work_state": "ANALYSIS_IN_PROGRESS",
+  "work_state": "NEEDS_EVIDENCE",
   "publish_state": "PROVISIONAL_FAIL_CLOSED",
   "published": false,
   "source_version": {
@@ -107,6 +107,51 @@
         "published_on": "2025-12-30",
         "role": "Historical initial call information, not post-amendment authority"
       }
+    ],
+    "government_portal_index_corroboration": [
+      {
+        "role": "government_call_directory_PDD851",
+        "url": "https://oportunitati-ue.gov.ro/apel/pdd-851-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-investitii/",
+        "authority": "Portal guvernamental Oportunități UE",
+        "document_type": "PUBLIC_CALL_DIRECTORY",
+        "source_version": "LIVE_PAGE_INDEX_VERSION_UNKNOWN",
+        "read_method": "OFFICIAL_DOMAIN_SEARCH_INDEX_EXCERPT_ONLY",
+        "original_page_open": false,
+        "original_binary_obtained": false,
+        "original_raw_sha256": null,
+        "original_semantic_sha256": null,
+        "original_document_fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null,
+        "index_observed_at": "2026-10-15",
+        "index_excerpt_fields": "PDD/851, Buget UE 30.500.000 EUR, open 23 ianuarie 2026 17:00, close 30 septembrie 2027 17:00, Corrigendum Nr.1 - 21-09-2026",
+        "reference_results": [
+          "turn157275search0",
+          "turn166375search0",
+          "turn383575search0"
+        ]
+      },
+      {
+        "role": "government_call_directory_PDD854",
+        "url": "https://oportunitati-ue.gov.ro/apel/pdd-854-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-consolidare-a-capacitatii-administrative/",
+        "authority": "Portal guvernamental Oportunități UE",
+        "document_type": "PUBLIC_CALL_DIRECTORY",
+        "source_version": "LIVE_PAGE_INDEX_VERSION_UNKNOWN",
+        "read_method": "OFFICIAL_DOMAIN_SEARCH_INDEX_EXCERPT_ONLY",
+        "original_page_open": false,
+        "original_binary_obtained": false,
+        "original_raw_sha256": null,
+        "original_semantic_sha256": null,
+        "original_document_fetched_at": null,
+        "parser_version": null,
+        "source_run_id": null,
+        "index_observed_at": "2026-10-15",
+        "index_excerpt_fields": "PDD/854, Buget UE 5.000.000 EUR, open 05 iunie 2026 17:00, close 18 decembrie 2027 17:00",
+        "reference_results": [
+          "turn157275search1",
+          "turn166375search1"
+        ]
+      }
     ]
   },
   "analysis_candidate": {
@@ -115,7 +160,7 @@
     "applicant_eligibility": "DE VERIFICAT pentru fiecare cod. Relatarea de lansare din 2025 indică ANAR/Administrații Bazinale și ANM pentru A, MMAP/ANAR pentru B, dar ghidul din 2025 nu a fost parcurs integral și condițiile cumulative/excluderile nu sunt încă certificate.",
     "target_groups": "NECONFIRMAT — nu confundați eventualele comunități protejate prin intervenție cu solicitantul finanțării.",
     "activities": "Conform anunțului istoric (necertificat prin ghid): A investiții în managementul riscului de inundații și infrastructura de monitorizare/avertizare; B elaborarea documentațiilor de planificare și pregătire tehnico-economică. Ghidul aplicabil încă necesar.",
-    "financing": "NECONFIRMAT la nivel de ghid actual. Relatarea din 2025 sugerează alocări distincte 30,5 milioane EUR (A) și 5 milioane EUR (B), NU granturi individuale; originalul și schimbările ulterioare trebuie verificate.",
+    "financing": "Government portal indexed call-level Buget UE (not total eligible project value/grant per project): PDD/851 30.500.000 EUR, PDD/854 5.000.000 EUR. These are UNKNOWN_FOR_RELEASE pending direct current-page verification and original 2025 guide/2026 amendment cross-check. Contribution/TVA/maximum per operation remain UNKNOWN.",
     "selection": "NECONFIRMAT — grilele, condițiile eliminatorii și punctajul necesită verificarea anexelor aplicabile.",
     "documents": "Există referințe la ghidul din decembrie 2025 și documentul de modificare din septembrie 2026. Lista anexelor/cererii de finanțare nu este certificată.",
     "risk_review": [
@@ -123,12 +168,13 @@
       "CRITICAL: potrivit Art. II, aplicabilitatea începe la publicarea MIPE, nu automat la semnarea din 21.09.2026.",
       "HIGH: o copie vizuală a ordinului de pe un mirror NU certifică identitatea/hashul PDF original al ministerului.",
       "HIGH: nu confundați alocările A/B cu grantul pe proiect; nu declarați eligibilă o instituție doar pe baza unui comunicat istoric.",
-      "HIGH: diferite fusuri sezoniere la cele două deadline-uri; publicați ore locale + offset numai după recertificare."
+      "HIGH: diferite fusuri sezoniere la cele două deadline-uri; publicați ore locale + offset numai după recertificare.",
+      "H03: Buget UE 30,5 mil./5 mil. EUR pe apel, verificat doar în indexul unui portal guvernamental; NU îl prezentați drept grant maxim individual sau cost eligibil total."
     ],
     "three_actions": [
-      "SURFACEMC: recuperați originalul OMIPE 1465/2026 din MIPE, capturați data publicării și raw/semantic hashes; reconciliați Art. II.",
-      "PARTENER: tratați PDD/851 și PDD/854 ca două child CALL IDs sub parentul de ghid; verificați perioada și formularul în MySMIS oficial, separat.",
-      "Analistul: citiți ghidul 5999/2025 cu anexele/grilele aplicabile pentru fiecare apel și certificați solicitanți, costuri, TVA, punctaj, indicatori și grant individual."
+      "SURFACEMC/PARTENER: obțineți printr-un traseu oficial nou originalele OMIPE 1465/2026 + Ghid 5999/2025 și anexele; păstrați hash, publicația datată și versiunea.",
+      "PARTENER: verificați prin readback oficial separat PDD/851 și PDD/854 (inclusiv MySMIS), astfel încât parentul de ghid să nu declare OPEN fără dovadă.",
+      "ANALIST: după confirmarea directă a paginilor, reconciliați distinct Buget UE 30,5 mil./5 mil. EUR versus grant/proiect, TVA/cofinanțare/eligibilitate/grile."
     ],
     "editorial_label": "MIRROR_PRIMARY_VISUAL_STAGING_NOT_SITE_RELEASE",
     "disclaimer": "Nicio valoare financiară, condiție de eligibilitate sau dată de depunere nu este autorizată spre publicare din acest candidat.",
@@ -145,7 +191,35 @@
         "closing_local_candidate": "2027-12-18T17:00:00+02:00",
         "evidence_state": "UNKNOWN_FOR_RELEASE"
       }
-    ]
+    ],
+    "government_directory_editorial_crosscheck": {
+      "indexed_as_of": "2026-10-15",
+      "authority": "oportunitati-ue.gov.ro",
+      "review_status": "INDEX_EXCERPT_ONLY_NOT_CERTIFIED",
+      "calls": [
+        {
+          "code": "PDD/851",
+          "opening_local_candidate": "2026-01-23T17:00:00+02:00",
+          "closing_local_candidate": "2027-09-30T17:00:00+03:00",
+          "eu_budget_candidate": 30500000,
+          "currency": "EUR",
+          "budget_scope": "EU_CALL_ALLOCATION_NOT_PER_PROJECT"
+        },
+        {
+          "code": "PDD/854",
+          "opening_local_candidate": "2026-06-05T17:00:00+03:00",
+          "closing_local_candidate": "2027-12-18T17:00:00+02:00",
+          "eu_budget_candidate": 5000000,
+          "currency": "EUR",
+          "budget_scope": "EU_CALL_ALLOCATION_NOT_PER_PROJECT"
+        }
+      ],
+      "warnings": [
+        "Indexed government portal is not source-guide binary readback",
+        "No direct fresh MySMIS status/current official authority verified",
+        "Full guide not available: eligibility, costs, scoring and grants stay UNKNOWN"
+      ]
+    }
   },
   "claim_evidence_ledger": [
     {
@@ -504,9 +578,25 @@
           "parser_version": null,
           "source_run_id": null,
           "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        },
+        {
+          "source_type": "OFFICIAL_GOVERNMENT_PORTAL_SEARCH_INDEX_ONLY",
+          "authority": "Portal guvernamental Oportunități UE",
+          "document_type": "PUBLIC_CALL_DIRECTORY",
+          "document_title": "PDD/851 official government call directory",
+          "official_reference": "https://oportunitati-ue.gov.ro/apel/pdd-851-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-investitii/",
+          "document_version": "PAGE_VERSION_UNKNOWN",
+          "page_or_section": "Indexed Calendar > Data închiderii",
+          "evidence_excerpt": "30 septembrie 2027 17:00",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Independent public government portal indexed excerpt corroborates mirrored order; full current page/primary MIPE original not retrieved, hence UNKNOWN for release."
         }
       ],
-      "analyst_note": "Visually verified in mirrored ministerial order, NOT release-certified; reconcile publication date and active MySMIS lifecycle."
+      "analyst_note": "Visually verified in mirrored ministerial order, NOT release-certified; reconcile publication date and active MySMIS lifecycle. H03: independent gov directory index corroboration, not certified page readback."
     },
     {
       "claim_id": "PDD-H02-004",
@@ -536,9 +626,25 @@
           "parser_version": null,
           "source_run_id": null,
           "access_note": "Screenshot visually inspected in this run; mirrored scanned government order. Original MIPE endpoint not fetchable; no original binary hash or same-bytes check."
+        },
+        {
+          "source_type": "OFFICIAL_GOVERNMENT_PORTAL_SEARCH_INDEX_ONLY",
+          "authority": "Portal guvernamental Oportunități UE",
+          "document_type": "PUBLIC_CALL_DIRECTORY",
+          "document_title": "PDD/854 official government call directory",
+          "official_reference": "https://oportunitati-ue.gov.ro/apel/pdd-854-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-consolidare-a-capacitatii-administrative/",
+          "document_version": "PAGE_VERSION_UNKNOWN",
+          "page_or_section": "Indexed Calendar > Data închiderii",
+          "evidence_excerpt": "18 decembrie 2027 17:00",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "access_note": "Independent public government portal indexed excerpt corroborates mirrored order; full current page/primary MIPE original not retrieved, hence UNKNOWN for release."
         }
       ],
-      "analyst_note": "Distinct from investment call; not an extension of a single undifferentiated guide dossier."
+      "analyst_note": "Distinct from investment call; not an extension of a single undifferentiated guide dossier. H03: independent gov directory index corroboration, not certified page readback."
     },
     {
       "claim_id": "PDD-H02-005",
@@ -635,6 +741,150 @@
         }
       ],
       "analyst_note": "Do not infer old financial/eligibility values remain applicable unless original guide plus other amendments checked."
+    },
+    {
+      "claim_id": "PDD-H03-001",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "call_eu_allocation",
+      "claim_type": "OFFICIAL_FACT",
+      "scope": "PDD/851",
+      "statement": "Government call directory indexes EU call budget of 30,500,000 EUR for investment track; NOT per-project grant.",
+      "value": 30500000,
+      "unit": "EUR",
+      "evidence_state": "UNKNOWN",
+      "qualifiers": [
+        "Government portal INDEX EXCERPT ONLY; not original signed guide/call",
+        "Not a per-project grant amount; not current MySMIS verified OPEN",
+        "Official current-page and document hash absent"
+      ],
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_GOVERNMENT_PORTAL_SEARCH_INDEX_ONLY",
+          "authority": "Portal guvernamental Oportunități UE",
+          "document_type": "PUBLIC_CALL_DIRECTORY",
+          "document_title": "PDD/851 — pagina apelului",
+          "official_reference": "https://oportunitati-ue.gov.ro/apel/pdd-851-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-investitii/",
+          "document_version": "PAGE_VERSION_UNKNOWN",
+          "page_or_section": "Buget > Buget UE",
+          "evidence_excerpt": "Buget UE: 30.500.000 EUR",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "index_observed_at": "2026-10-15",
+          "access_note": "gov domain search index observed, full page timeout; release gate remains FAIL_CLOSED"
+        }
+      ],
+      "analyst_note": "New independent government-domain index evidence, editorial corroboration only. Validate against original guide, any corrigendum and direct portal readback before promotion."
+    },
+    {
+      "claim_id": "PDD-H03-002",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "call_eu_allocation",
+      "claim_type": "OFFICIAL_FACT",
+      "scope": "PDD/854",
+      "statement": "Government call directory indexes EU call budget of 5,000,000 EUR for capacity-building track; NOT per-project grant.",
+      "value": 5000000,
+      "unit": "EUR",
+      "evidence_state": "UNKNOWN",
+      "qualifiers": [
+        "Government portal INDEX EXCERPT ONLY; not original signed guide/call",
+        "Not a per-project grant amount; not current MySMIS verified OPEN",
+        "Official current-page and document hash absent"
+      ],
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_GOVERNMENT_PORTAL_SEARCH_INDEX_ONLY",
+          "authority": "Portal guvernamental Oportunități UE",
+          "document_type": "PUBLIC_CALL_DIRECTORY",
+          "document_title": "PDD/854 — pagina apelului",
+          "official_reference": "https://oportunitati-ue.gov.ro/apel/pdd-854-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-consolidare-a-capacitatii-administrative/",
+          "document_version": "PAGE_VERSION_UNKNOWN",
+          "page_or_section": "Buget > Buget UE",
+          "evidence_excerpt": "Buget UE: 5.000.000 EUR",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "index_observed_at": "2026-10-15",
+          "access_note": "gov domain search index observed, full page timeout; release gate remains FAIL_CLOSED"
+        }
+      ],
+      "analyst_note": "New independent government-domain index evidence, editorial corroboration only. Validate against original guide, any corrigendum and direct portal readback before promotion."
+    },
+    {
+      "claim_id": "PDD-H03-003",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "opening_time",
+      "claim_type": "OFFICIAL_FACT",
+      "scope": "PDD/851",
+      "statement": "Government call directory indexes 23 January 2026, 17:00 Romanian local as opening time for PDD/851.",
+      "value": "2026-01-23T17:00:00+02:00",
+      "unit": "Europe/Bucharest",
+      "evidence_state": "UNKNOWN",
+      "qualifiers": [
+        "Government portal INDEX EXCERPT ONLY; not original signed guide/call",
+        "Not a per-project grant amount; not current MySMIS verified OPEN",
+        "Official current-page and document hash absent"
+      ],
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_GOVERNMENT_PORTAL_SEARCH_INDEX_ONLY",
+          "authority": "Portal guvernamental Oportunități UE",
+          "document_type": "PUBLIC_CALL_DIRECTORY",
+          "document_title": "PDD/851 — pagina apelului",
+          "official_reference": "https://oportunitati-ue.gov.ro/apel/pdd-851-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-investitii/",
+          "document_version": "PAGE_VERSION_UNKNOWN",
+          "page_or_section": "Calendar > Data deschiderii",
+          "evidence_excerpt": "23 ianuarie 2026 17:00",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "index_observed_at": "2026-10-15",
+          "access_note": "gov domain search index observed, full page timeout; release gate remains FAIL_CLOSED"
+        }
+      ],
+      "analyst_note": "New independent government-domain index evidence, editorial corroboration only. Validate against original guide, any corrigendum and direct portal readback before promotion."
+    },
+    {
+      "claim_id": "PDD-H03-004",
+      "dossier_id": "mipe-3b3ab4d9361706669b",
+      "fact_class": "opening_time",
+      "claim_type": "OFFICIAL_FACT",
+      "scope": "PDD/854",
+      "statement": "Government call directory indexes 5 June 2026, 17:00 Romanian local as opening time for PDD/854.",
+      "value": "2026-06-05T17:00:00+03:00",
+      "unit": "Europe/Bucharest",
+      "evidence_state": "UNKNOWN",
+      "qualifiers": [
+        "Government portal INDEX EXCERPT ONLY; not original signed guide/call",
+        "Not a per-project grant amount; not current MySMIS verified OPEN",
+        "Official current-page and document hash absent"
+      ],
+      "evidence": [
+        {
+          "source_type": "OFFICIAL_GOVERNMENT_PORTAL_SEARCH_INDEX_ONLY",
+          "authority": "Portal guvernamental Oportunități UE",
+          "document_type": "PUBLIC_CALL_DIRECTORY",
+          "document_title": "PDD/854 — pagina apelului",
+          "official_reference": "https://oportunitati-ue.gov.ro/apel/pdd-854-managementul-principalelor-tipuri-de-risc-identificate-in-planul-national-de-management-al-riscurilor-la-dezastre-pnmrd-proiecte-noi-de-consolidare-a-capacitatii-administrative/",
+          "document_version": "PAGE_VERSION_UNKNOWN",
+          "page_or_section": "Calendar > Data deschiderii",
+          "evidence_excerpt": "05 iunie 2026 17:00",
+          "raw_sha256": null,
+          "semantic_sha256": null,
+          "fetched_at": null,
+          "parser_version": null,
+          "source_run_id": null,
+          "index_observed_at": "2026-10-15",
+          "access_note": "gov domain search index observed, full page timeout; release gate remains FAIL_CLOSED"
+        }
+      ],
+      "analyst_note": "New independent government-domain index evidence, editorial corroboration only. Validate against original guide, any corrigendum and direct portal readback before promotion."
     }
   ],
   "editorial_review": {
@@ -694,6 +944,28 @@
         "result": "NOT IN THIS ORDER",
         "basis": "Enumerated p2-3 amendments: title, deadline, programme terminology; full other changes unknown."
       }
+    ],
+    "new_h03_adversarial_tests": [
+      {
+        "test": "Are 30.5m and 5m per-project aid?",
+        "result": "NO — EU CALL ALLOCATIONS ONLY",
+        "basis": "Index field exactly 'Buget UE' for each separate PDD call; project ceilings remain unknown."
+      },
+      {
+        "test": "Are dates sufficient proof of OPEN now?",
+        "result": "NO — search index is not current MySMIS/application check",
+        "basis": "Date labels indicate calendar, not an active current submission interface."
+      },
+      {
+        "test": "Do indexed gov pages independently corroborate two-call split and 2027 closing dates?",
+        "result": "YES AS INDEX CORROBORATION ONLY",
+        "basis": "Separate official government-domain URLs and indexed calendar for codes PDD/851 and PDD/854; no full page retrieval."
+      },
+      {
+        "test": "May any new fact be released?",
+        "result": "NO",
+        "basis": "Original official MIPE guide/2026 original order and claim-level DAPP_EVIDENCE_GATE are absent."
+      }
     ]
   },
   "material_diff": {
@@ -716,36 +988,44 @@
       "Extracted provisional amended deadlines 2027-09-30 17:00 (851) and 2027-12-18 17:00 (854), whereas historical 2025 announcement gave 2026 deadlines.",
       "Art. II makes effective date conditional on MIPE official publication, unverified; no original hash or official current registration.",
       "Instrument also renames PDD to PDDTJ; no grant/eligibility amendments in this specific order."
+    ],
+    "h03_delta": [
+      "Two distinct official government directory call listings independently corroborate PDD/851 and PDD/854 with exact amended closing dates previously read only on mirrored OMIPE.",
+      "Four new candidate facts: call EU allocations 30.500.000 and 5.000.000 EUR plus distinct 2026 opening dates, all marked UNKNOWN for release due to indexed-only evidence.",
+      "Source-type correction: call-level Buget UE is NOT grant maximum per project, total project cost or funding success probability.",
+      "No lifecycle or product promotion: generic parent remains PROVISIONAL_FAIL_CLOSED with no verified MySMIS current status."
     ]
   },
   "next_evidence_action": {
     "authorized_owner": "SURFACEMC MIPE acquisition + PARTENER evidence gate",
     "bounded_current_run": "Original MIPE release URL and official PDF fetch failed; order was read from 3-page mirrored scanned PDF. Do not retry same MIPE access paths without new route.",
-    "first": "Obține MIPE original OMIPE 1465/2026 plus official dated publication receipt and binary hash; verify exact copy equivalence to mirrored scan.",
-    "second": "Read original Ghid 5999/2025 ZIP and appendices and any intervening amendment for PDD/851 and PDD/854; clarify applicant, money and grile.",
+    "first": "Folosind DOAR un traseu oficial autorizat nou, obține originalul MIPE OMIPE 1465/2026, dovada publicării și hashuri; accesul inițial MIPE este deja epuizat și nu trebuie repetat în buclă.",
+    "second": "Obține readback direct la cele două pagini oportunitati-ue.gov.ro și ghidul oficial 5999/2025 + anexele; reconciliază Buget UE versus total/grant per proiect și verifică eventualele actualizări.",
     "third": "Check distinct MySMIS public records of 851 and 854 and eligibility/closing state.",
-    "after_blocker": "If no sanctioned new source route, mark NEEDS_EVIDENCE and on following hourly choose next dossier.",
+    "after_blocker": "Dacă sursele directe rămân inaccesibile, setează NEEDS_EVIDENCE (nu ANALYSIS_IN_PROGRESS) și în următorul hourly alege alt dosar.",
     "outstanding": [
       "OFFICIAL_ORIGINAL_BINARY",
       "OFFICIAL_PUBLISHED_AT",
       "FULL_GUIDE_AND_ANNEXES",
       "MYSMIS_CALL_LIFECYCLE",
-      "DAPP_EVIDENCE_GATE"
+      "DAPP_EVIDENCE_GATE",
+      "GOV_DIRECTORY_DIRECT_READBACK",
+      "BUDGET_SCOPE_CROSSCHECK"
     ]
   },
   "checkpoint": {
-    "id": "PARTENER-DAPP-PDD-20261013-H02-AMENDMENT-VISUAL",
-    "previous": "PARTENER-DAPP-PDD-20261012-H01",
-    "changed": "PDD generic vs PDD/851+854, 2027 timetable, effectiveness conditioned on publication; 7 new claim entries",
-    "base_main_seen": "5e49c2d0cd4fecefde06bc8eaf4fbca896d908a3",
-    "branch_before_update": "2e50a20f59e649da38f698655f8d42ae1a5262c0",
-    "commit_scope": "partener-eu/validation/dapp_staging/mipe-3b3ab4d9361706669b/PDD_H01_20261012_editorial_candidate.json",
+    "id": "PARTENER-DAPP-PDD-20261015-H03-GOV-PORTAL-CROSSCHECK-STAGING",
+    "previous": "PARTENER-DAPP-PDD-20261013-H02-AMENDMENT-VISUAL",
+    "base_main_seen": "c62c41158b3a568e11e556c9287d28362440874f",
+    "previous_branch_head_sha": "60e38098ef96cda87f0f78dff73fd5133964e624",
+    "candidate_blob_sha_before": "a71ffbc2154bb610b222e8f9cfb19907ec0feb10",
+    "analysis_delta": "4 provisional new call-level claims, 2 independent deadline corroborations, source/financial scope corrected",
     "release_authorized": false,
-    "quality_review": "STRUCTURAL_ASSERTIONS_PENDING_READBACK",
-    "replay": "Re-read original MIPE order and compare page 2/3 exact claims with this rolling staging candidate; rerun DAPP_EVIDENCE_GATE once implemented.",
-    "rollback": "Revert only the H02 staging update commit to branch pre-update 2e50a20f59e649da38f698655f8d42ae1a5262c0; main/P11/decision products/live remain unchanged."
+    "gate": "DAPP_EVIDENCE_GATE_UNVERIFIED_FAIL_CLOSED",
+    "rollback": "Revert ONLY this branch's H03 staging update to previous ref 60e38098ef96cda87f0f78dff73fd5133964e624; no production files changed.",
+    "replay": "Direct-read both government call pages and compare listed budgets/open/close with signed guide/OMIPE; only then rerun deterministic evidence gate."
   },
-  "previous_analyst_run_id": "DAPP-PDD-20261012-H01-STATUS-EVIDENCE",
-  "latest_main_observed_sha": "5e49c2d0cd4fecefde06bc8eaf4fbca896d908a3",
-  "previous_branch_head_sha": "2e50a20f59e649da38f698655f8d42ae1a5262c0"
+  "previous_analyst_run_id": "DAPP-PDD-20261013-H02-AMENDMENT-VISUAL",
+  "latest_main_observed_sha": "c62c41158b3a568e11e556c9287d28362440874f",
+  "previous_branch_head_sha": "60e38098ef96cda87f0f78dff73fd5133964e624"
 }
