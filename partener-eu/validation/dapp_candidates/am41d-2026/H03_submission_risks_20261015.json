@@ -1,0 +1,75 @@
+{
+  "dossier_id": "mai-fami-am41d-2026",
+  "state": "ANALYSIS_IN_PROGRESS",
+  "publication_state": "PROVISIONAL_FAIL_CLOSED",
+  "publish_authorized": false,
+  "source_version": "AM41D v2.0/Decision OI 43/25.09.2026",
+  "run_id": "DAPP-AM41D-20261015-H03-SUBMISSION",
+  "base_main_sha": "bbaaac144db1e268e68e45652acb34de56b405e6",
+  "base_branch_sha": "044d8514ddbf217a40d68ce5016abd3dbe0bcbf0",
+  "analysis_candidate": "Near-duplicate proposals risk collective rejection if applicant refuses withdrawal. ROFED ignores text beyond character limit. Verify general criteria and original annexes.",
+  "claim_evidence_ledger": [
+    {
+      "id": "H03-01",
+      "field": "similar_applications",
+      "status": "UNKNOWN",
+      "document": "AM41D v2.0",
+      "page": 20,
+      "section": "N.6",
+      "url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-apel-AM41D-Relocare-v2.0.sIG_.pdf"
+    },
+    {
+      "id": "H03-02",
+      "field": "resubmission_deadline",
+      "status": "UNKNOWN",
+      "document": "AM41D v2.0",
+      "page": 20,
+      "section": "N.7"
+    },
+    {
+      "id": "H03-03",
+      "field": "character_overflow_ignored",
+      "status": "UNKNOWN",
+      "document": "AM41D v2.0",
+      "page": 19,
+      "section": "L.4"
+    },
+    {
+      "id": "H03-04",
+      "field": "general_evaluation_criteria_apply",
+      "status": "UNKNOWN",
+      "document": "AM41D v2.0",
+      "page": 18,
+      "section": "J.4-J.5"
+    },
+    {
+      "id": "H03-05",
+      "field": "questions_after_10days_no_reply",
+      "status": "UNKNOWN",
+      "document": "AM41D v2.0",
+      "page": 19,
+      "section": "M.4-M.5"
+    },
+    {
+      "id": "H03-06",
+      "field": "transitional_rules_on_revision",
+      "status": "UNKNOWN",
+      "document": "AM41D v2.0",
+      "page": 18,
+      "section": "K.1-K.4"
+    }
+  ],
+  "editorial_review": "Rendered official PDF pages 17–20 inspected; new facts do not duplicate H02. No native Annex 1/2, no raw original hashes. Conflicts RON/EUR and PN versions retained.",
+  "source_manifest": {
+    "pdf": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/Ghid-specific-apel-AM41D-Relocare-v2.0.sIG_.pdf",
+    "raw_sha256": null,
+    "semantic_sha256": null,
+    "fetched_at": null,
+    "parser_version": null
+  },
+  "next_evidence_action": "Obtain native annexes and verify exact checklist/evaluation rubric; no release until DAPP_EVIDENCE_GATE integrated.",
+  "material_diff": "Six incremental application controls; no production diff.",
+  "checkpoint": "PARTENER-DAPP-AM41D-20261015-H03-STAGING",
+  "rollback": "Revert only H03 staging commit; LKG remains",
+  "replay": "Re-read official AM41D v2.0 pages 17–20 + H02 before release"
+}
