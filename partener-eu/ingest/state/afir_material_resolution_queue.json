@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "generatedAt": "2026-10-15T19:30:51.777590+00:00",
+  "generatedAt": "2026-10-16T10:10:48.910237+00:00",
   "policy": {
     "purpose": "record-level-material-change-resolution",
     "failClosed": true,
@@ -18,10 +18,32 @@
     {
       "sourceId": "AFIR_CORPUS",
       "sourceTier": "T1",
+      "title": "Comunicate",
+      "canonicalUrl": "https://www.afir.ro/comunicate/",
+      "fingerprint": "e6f77c4d521f3dc480df93ba82c8076aebb1cb69a180caaa260c333d882d8515",
+      "observedAt": "2026-10-16T10:09:53.232931+00:00",
+      "status": "OPEN",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": true,
+      "publishMaterialFacts": false,
+      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
+    },
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
       "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-      "fingerprint": "dd959b7d29c99bc4edb0286aab05bf5c116024f0bc875682ddd46a02eded5cf1",
-      "observedAt": "2026-10-15T19:29:49.463219+00:00",
+      "fingerprint": "6a0b6b2134abbe56960038038140b79f2d1c24345ae3d1e0cd48243648440328",
+      "observedAt": "2026-10-16T10:10:06.007659+00:00",
       "status": "RESOLVED",
       "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
       "blockedFactClasses": [
@@ -37,12 +59,12 @@
       "materialFactAction": "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED",
       "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED",
       "resolutionType": "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT",
-      "resolvedAt": "2026-10-15T19:30:51.777590+00:00",
+      "resolvedAt": "2026-10-16T10:10:48.910237+00:00",
       "dedicatedSnapshotPublishable": true,
       "resolutionEvidence": {
         "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-        "sourceFingerprint": "dd959b7d29c99bc4edb0286aab05bf5c116024f0bc875682ddd46a02eded5cf1",
-        "snapshotFingerprint": "ee8d1727f2cf37e707597ef39ba957429241e120ae9a2ba404a6c88f020394bd",
+        "sourceFingerprint": "6a0b6b2134abbe56960038038140b79f2d1c24345ae3d1e0cd48243648440328",
+        "snapshotFingerprint": "1487802d5706e7804a5952d525b6b3b72bb27a1fad93ed33471a328230497b39",
         "rowCount": 7,
         "interventions": [
           "DR-12",
@@ -50,28 +72,6 @@
           "DR-18"
         ]
       }
-    },
-    {
-      "sourceId": "AFIR_CORPUS",
-      "sourceTier": "T1",
-      "title": "Info la zi",
-      "canonicalUrl": "https://www.afir.ro/info-la-zi/",
-      "fingerprint": "23587aa4766db400257b8de2256083019bdd5813f8a968acb1c0dec514d1df4b",
-      "observedAt": "2026-10-15T19:29:26.695000+00:00",
-      "status": "OPEN",
-      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
-      "blockedFactClasses": [
-        "deadline",
-        "eligibility",
-        "budget",
-        "scoring",
-        "beneficiaries",
-        "material_call_status"
-      ],
-      "requiresReconciliation": true,
-      "publishMaterialFacts": false,
-      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
-      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
     }
   ]
 }
