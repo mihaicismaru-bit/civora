@@ -1,22 +1,25 @@
 {
   "metadata": {
     "dossier_id": "mai-fami-am11h-2026",
-    "run_id": "DAPP-AM11H-20261015-H03-MEDIATION-AUDIT-COVERAGE",
-    "checkpoint": "PARTENER-DAPP-AM11H-20261015-H03-STAFFING-COVERAGE-STAGING",
+    "run_id": "DAPP-AM11H-20261016-H04-GIURGIU-CONSULTATION-CROSSCHECK",
+    "checkpoint": "PARTENER-DAPP-AM11H-20261016-H04-GIURGIU-OPERATIONAL-MISMATCH-STAGING",
     "source_version": "Ghid specific AM11H v2.0, Decizia OI nr. 44/28.09.2026",
-    "candidate_base_sha": "bbaaac144db1e268e68e45652acb34de56b405e6",
+    "candidate_base_sha": "032af2e88cb4344e64b3814d35e0a33878683018",
     "source_version_hash": null,
     "publication_authorized": false,
     "release_state": "PROVISIONAL_FAIL_CLOSED",
-    "analyst_protocol": "DAPP v1 draft PR #1389 §12"
+    "analyst_protocol": "DAPP v1 draft PR #1389 §12",
+    "previous_run_id": "DAPP-AM11H-20261015-H03-MEDIATION-AUDIT-COVERAGE",
+    "last_reviewed_on": "2026-10-16",
+    "branch_base_sha": "564f56857d930933ff408bb85677b7dc9e86a99d"
   },
   "analysis_candidate": {
     "state": "ANALYSIS_IN_PROGRESS",
-    "new_material": "Daily mediation at six IGI centres, separate attendance ledgers, reuse of REACT.RO materials, custody/screening/minor scope, and IGI premises upkeep; reinforce conditional per-person support limits.",
+    "new_material": "Official signed consultation clarifications: Giurgiu IGI centre's unavailability for NGO activities conflicts operationally with six-centre daily mediation staffing; accepted extracurricular child activities and conditional support for vulnerable applicants outside IGI centres are already reflected in guide v2.0.",
     "three_actions": [
-      "Build centre-specific daily mediator and language-curriculum staffing plan with absences covered.",
-      "Implement separate activity attendance ledgers and per-person conditional material assistance receipts.",
-      "Confirm real IGI premises access and child safeguards; validate Annex 1 section D and Annex 2 criteria before application."
+      "Resolve with IGI the centre-by-centre operating model for Giurgiu transfers and mediator coverage before fixing Giurgiu premises/personnel budget; no inference of personnel cost disallowance.",
+      "Cost the revised C.8 children’s extracurricular services and conditional supplies separately, with needs and participation evidence.",
+      "Verify official Annex 2 evaluation grid, current ROFED receipt, and both guide and consultation document binaries before claim-level release."
     ]
   },
   "claim_evidence_ledger": {
@@ -130,19 +133,179 @@
         "fetched_at": null,
         "parser_version": null,
         "official_source_run_id": null
+      },
+      {
+        "claim_id": "AM11H-H04-01",
+        "fact_kind": "OFFICIAL_FACT",
+        "fact_class": "implementation.giurgiu_unavailable_premises",
+        "value": "Signed consultation synthesis explicitly states Giurgiu CRCPSA cannot provide NGO partner activity space during roughly two years of rehabilitation; only international protection registration will remain on site, with applicants subsequently transferred to other centres.",
+        "evidence_state": "UNKNOWN",
+        "release_confirmation": false,
+        "evidence": [
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/tabel-sinteza-clarificariAM11H-16.09.2026vr-semnat.pdf",
+            "document": "Sinteza clarificărilor AM11H semnată",
+            "page_printed": 1,
+            "section": "C.8 / prima observație OIM, coloana NEPRELUAT",
+            "evidence_excerpt": "nu mai poate fi asigurat spațiul necesar pentru desfășurarea activităților",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          }
+        ],
+        "analyst_qualification": "This is an official operational assertion, not an explicit prohibition on financing zone-related personnel costs."
+      },
+      {
+        "claim_id": "AM11H-H04-02",
+        "fact_kind": "ANALYSIS",
+        "fact_class": "eligibility.operating_model_igi_six_centres_vs_giurgiu",
+        "value": "The guide requires daily mediator presence across six IGI centres, while the signed consultation matrix reports unavailable activity premises at Giurgiu; an applicant must resolve location/staffing/service provision in its centre-by-centre plan rather than assume Giurgiu premises can host NGO personnel.",
+        "evidence_state": "CONFLICT",
+        "release_confirmation": false,
+        "evidence": [
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/33.Ghid-AM11H.sIG_.pdf",
+            "document": "Ghid specific AM11H v2.0 Decizia OI 44/28.09.2026",
+            "page_printed": 11,
+            "section": "C.8 daily mediator requirement",
+            "evidence_excerpt": "în cadrul celor 6 Centre Regionale IGI se va asigura prezența zilnică",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          },
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/tabel-sinteza-clarificariAM11H-16.09.2026vr-semnat.pdf",
+            "document": "Sinteza clarificărilor AM11H semnată",
+            "page_printed": 1,
+            "section": "C.8 / prima observație OIM, coloana NEPRELUAT",
+            "evidence_excerpt": "CRCPSA Giurgiu va fi menținută exclusiv activitatea privind înregistrarea cererilor",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          }
+        ],
+        "analyst_qualification": "Potential practical mismatch, not a formally established legal contradiction or waiver of guide requirements; budget eligibility for Giurgiu-zone posts remains UNKNOWN."
+      },
+      {
+        "claim_id": "AM11H-H04-03",
+        "fact_kind": "OFFICIAL_FACT",
+        "fact_class": "activities.children_extracurricular_non_school",
+        "value": "Recreational optional activities outside educational institutions, including chess, painting, music and sports clubs, were marked PRELUAT in the clarification summary and appear in current guide C.8.",
+        "evidence_state": "UNKNOWN",
+        "release_confirmation": false,
+        "evidence": [
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/tabel-sinteza-clarificariAM11H-16.09.2026vr-semnat.pdf",
+            "document": "Sinteza clarificărilor AM11H semnată",
+            "page_printed": 2,
+            "section": "C.8 / a doua observație OIM, coloana PRELUAT",
+            "evidence_excerpt": "activităților opționale, recreaționale care nu sunt realizate prin intermediul unităţilor de învăţământ",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          },
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/33.Ghid-AM11H.sIG_.pdf",
+            "document": "Ghid specific AM11H v2.0",
+            "page_printed": 10,
+            "section": "C.8 / cheltuieli pentru copii",
+            "evidence_excerpt": "abonamente/cursuri de șah, cursuri de pictură, muzică",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          }
+        ],
+        "analyst_qualification": "Subject to individual needs, activity scope, general eligible-cost and procurement rules; not unlimited discretionary spending."
+      },
+      {
+        "claim_id": "AM11H-H04-04",
+        "fact_kind": "OFFICIAL_FACT",
+        "fact_class": "target_support.installation_package_outside_centres_and_materials",
+        "value": "Installation package ceiling 300 RON/person extends to applicants for international protection living outside IGI centres if vulnerable; school supplies may also support children participating in project education when individual needs justify participation.",
+        "evidence_state": "UNKNOWN",
+        "release_confirmation": false,
+        "evidence": [
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/tabel-sinteza-clarificariAM11H-16.09.2026vr-semnat.pdf",
+            "document": "Sinteza clarificărilor AM11H semnată",
+            "page_printed": 2,
+            "section": "C.8 / a treia observație OIM, coloana PRELUAT și continuare p.3",
+            "evidence_excerpt": "care locuiesc în afara acestora și se află în situații de vulnerabilitate",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          },
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/33.Ghid-AM11H.sIG_.pdf",
+            "document": "Ghid specific AM11H v2.0",
+            "page_printed": 9,
+            "section": "C.8 / materiale școlare pentru copii",
+            "evidence_excerpt": "copiilor care participă la activitățile educaționale organizate în cadrul proiectului",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          },
+          {
+            "official_url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/33.Ghid-AM11H.sIG_.pdf",
+            "document": "Ghid specific AM11H v2.0",
+            "page_printed": 10,
+            "section": "C.8 / pachete de instalare",
+            "evidence_excerpt": "în limita a 300 lei/persoană",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "official_source_run_id": null,
+            "method": "OFFICIAL_PDF_PARSED_AND_PAGE_SCREENSHOT_CHECKED_2026-10-16"
+          }
+        ],
+        "analyst_qualification": "Two distinct forms of conditional assistance; cap applies to installation package only, not the educational supplies."
       }
     ],
     "cumulative_reference": [
       "PARTENER-DAPP-AM11H-20261014-H01-V2-OFFICIAL-CONFLICTS-STAGING",
       "PARTENER-DAPP-AM11H-20261015-H02-OPERATIONS-INDICATORS-STAGING"
     ],
-    "previous_local_only_claim_count": 18
+    "previous_local_only_claim_count": 18,
+    "previous_h03_new_claim_count": 5,
+    "h04_new_claim_count": 4
   },
   "editorial_review": {
     "state": "PROVISIONAL_FAIL_CLOSED",
     "material_conflicts_preserved": 5,
     "notes": "Guide vs official HTML currency/applicant/call type/version and guide cofinance; published data unchanged. Conditional caps 70/300/100 RON are NOT universal allowances.",
-    "no_release": true
+    "no_release": true,
+    "high_risk_h04": {
+      "GIURGIU_OPERATIONAL_MISMATCH": "CONFLICT: signed matrix explicitly says no physical NGO partner space for ~2y; guide still specifies 6-centre daily presence. Cannot auto-waive or auto-budget by centre.",
+      "MATERIAL_SCOPE_EXPANSIONS": "OFFICIAL_TEXT_READ (staging only): extracurric activities outside schools, vulnerable applicants housed offsite, conditional schooling materials. Needs still constrain spending.",
+      "CURRENCY_AND_LIFECYCLE": "GUIDE RON 5.25m FEN; landing summary EUR conflict; 2026-10-16 16:00 Romanian time from guide, ROFED not tested.",
+      "SOURCE_CERTIFICATION": "Web-parsed official signed PDFs with page screenshots; raw binary hash unavailable because direct HTTPS access failed. No new CONFIRMED-for-release claims.",
+      "RELEASE": "DAPP_EVIDENCE_GATE not verified as implemented and integrated; no publish or main changes."
+    },
+    "new_release_confirmed_count": 0,
+    "new_unknown_count": 3,
+    "new_conflict_count": 1
   },
   "source_manifest": [
     {
@@ -154,22 +317,51 @@
       "semantic_sha256": null,
       "fetched_at": null,
       "parser_version": null
+    },
+    {
+      "document": "AM11H signed consultation clarification synthesis (three pages)",
+      "url": "https://fed.mai.gov.ro/wp-content/uploads/2026/09/tabel-sinteza-clarificariAM11H-16.09.2026vr-semnat.pdf",
+      "document_version": "official signed clarification synthesis, referenced on MAI AM11H launch page; posted Sept 2026",
+      "pages_checked": [
+        1,
+        2,
+        3
+      ],
+      "access": "WEB_PDF_EXTRACT+VISUAL_SCREENSHOTS; CONTAINER_HTTPS_DNS_FAILED",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "run_id": "DAPP-AM11H-20261016-H04-GIURGIU-CONSULTATION-CROSSCHECK",
+      "not_duplicated_binary": true
     }
   ],
   "next_evidence_action": {
-    "blocker": "Annex 1 DOCX, Annex 2 XLSX unavailable after two earlier distinct official access methods; original guide binary hash missing. DAPP_EVIDENCE_GATE not certified.",
-    "action": "Authorized acquisition of native documents and claim-by-claim S1 implementation check; select next dossier if access still unavailable."
+    "blocker": "Giurgiu cannot host NGO partner personnel during rehabilitation per official clarification, while guide still plans six centres; official specific guide/consultation original binaries and native Annex 1 DOCX/Annex 2 XLSX not obtained, DAPP_EVIDENCE_GATE unverified",
+    "action": "Obtain authorised written operational model or newer official clarification for Giurgiu, then native Annex 2 and original binary provenance; in the next hour move to another dossier if no new evidence. No further identical access loops.",
+    "needs_user": false
   },
   "material_diff": {
     "five_unique_claims_added": 5,
     "cumulative_claims_total_in_local_archive": 23,
-    "production_modifications": 0
+    "production_modifications": 0,
+    "h04": {
+      "source": "signed AM11H consultation clarification matrix + guide C.8",
+      "new_unique_claims": 4,
+      "delta": "Giurgiu premises unavailable vs six-centre daily mediator plan; accepted optional activities and offsite-vulnerable installation support corroborated in guide.",
+      "production_modifications": 0,
+      "baseline_candidate_commit": "564f56857d930933ff408bb85677b7dc9e86a99d",
+      "baseline_main_commit": "032af2e88cb4344e64b3814d35e0a33878683018"
+    }
   },
   "checkpoint": {
-    "base_sha": "bbaaac144db1e268e68e45652acb34de56b405e6",
-    "branch": "partener-dapp-am11h-editorial-20261014",
-    "rollback": "Delete staging candidate only; main and Pages were never modified.",
-    "replay": "Staging structural check only; production replay not run.",
+    "checkpoint_id": "PARTENER-DAPP-AM11H-20261016-H04-GIURGIU-OPERATIONAL-MISMATCH-STAGING",
+    "source_version": "AM11H guide v2.0 decision 44/28.09.2026 + signed consultation clarification",
+    "base_sha": "032af2e88cb4344e64b3814d35e0a33878683018",
+    "branch_head_before_write": "564f56857d930933ff408bb85677b7dc9e86a99d",
+    "candidate_blob_before_write": "d2b244a3632f7fd588de4b5510c8886a734c921d",
+    "rollback": "Revert this single staging-only update or restore prior Git blob d2b244a3632f7fd588de4b5510c8886a734c921d; main/P11/decision_products remain untouched.",
+    "replay": "Compare signed clarification matrix PDF pp1-3 against guide v2 pp9-11, validate four additions, retain two financially material source conflicts; no production replay/public readback until gate certified.",
     "public_readback": null
   }
 }
