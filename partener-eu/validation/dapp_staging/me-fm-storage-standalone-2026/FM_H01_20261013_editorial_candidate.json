@@ -584,5 +584,39 @@
     "release_authorized": false,
     "rollback": "Revert only this staging candidate commit on its branch; production P11, decision_products and public pages remain untouched.",
     "site_keeper_files_touched": false
+  },
+  "increment_H02": {
+    "run_id": "DAPP-FM-20261016-H02-CAP-DECISION",
+    "state": "ANALYSIS_STAGING_ONLY",
+    "source": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+    "source_section": "stand-alone, lines 204-210",
+    "source_raw_sha256": null,
+    "primary_guide_verified": false,
+    "analysis": "100% eligible intensity does not mean 100% of project cost. Cumulative bounds: 69000 EUR/MWh, 15000000 EUR per company, eligible costs. Multiple applications do not multiply company cap.",
+    "scenarios": [
+      {
+        "power_mw": 1,
+        "capacity_mwh": 2,
+        "eligible_cost_eur": 300000,
+        "theoretical_ceiling_eur": 138000,
+        "gap_eur": 162000
+      },
+      {
+        "power_mw": 2,
+        "capacity_mwh": 4,
+        "eligible_cost_eur": 180000,
+        "theoretical_ceiling_eur": 180000
+      },
+      {
+        "power_mw": 1,
+        "capacity_mwh": 2,
+        "illustrative_offer_eur": 100000,
+        "offer_eur_mwh": 50000,
+        "additional_own_funds_vs_cap_eur": 38000
+      }
+    ],
+    "notes": "Examples are ANALYSIS not grants or scoring promises. Current MySMIS OPEN and exact deadline hour remain UNKNOWN. DAPP_EVIDENCE_GATE not verified.",
+    "next_evidence_action": "Original legal guide and exact scoring annex; raw hashes and claim-level passage mapping required.",
+    "checkpoint": "PARTENER-DAPP-FM-20261016-H02-CAP-DECISION-STAGING"
   }
 }
