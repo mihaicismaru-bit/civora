@@ -544,7 +544,20 @@
         "signed_deadline": "2026-10-16T16:00:00+03:00",
         "launch_html_status": "Activ",
         "review_date": "2026-10-18",
-        "ROFED_status": "UNKNOWN"
+        "ROFED_status": "UNKNOWN",
+        "current_p11_snapshot": {
+          "as_of": "2026-09-27T17:22:00Z",
+          "status": "OPEN",
+          "publication_state": "PUBLISHABLE",
+          "deadline": "2026-10-16T16:00:00+03:00",
+          "auto_material_update_allowed": false
+        },
+        "current_lifecycle_snapshot": {
+          "generated_at": "2026-10-17T18:01:18Z",
+          "stage": "OPEN",
+          "publication_state": "PUBLISHABLE",
+          "stage_evidence_type": "DOSSIER_STATUS"
+        }
       },
       "unit": null,
       "scope": "CALL",
@@ -562,7 +575,7 @@
       "parser_version": null,
       "source_run_id": null,
       "analyst_run_id": "DAPP-AM22L-20261018-H02-POSTDEADLINE-INTEGRATION-OPERATIONS",
-      "analyst_note": "Guide expiry does not independently certify ROFED closure, but HTML Activ cannot support OPEN."
+      "analyst_note": "Guide expiry does not independently certify ROFED closure, but HTML Activ cannot support OPEN. Main P11 (as-of Sep27) retains OPEN/PUBLISHABLE with deadline already elapsed on Oct18; lifecycle generated 17 Oct still OPEN. This is an internal material contradiction, not proof of real-time ROFED accessibility."
     },
     {
       "claim_id": "AM22L-H02-002",
@@ -963,6 +976,34 @@
       "fetched_at": null,
       "parser_version": null,
       "source_run_id": null
+    },
+    {
+      "id": "p11_snapshot_20260927",
+      "type": "GITHUB_INTERNAL_P11_NOT_DIRECT_OFFICIAL_EVIDENCE",
+      "url": "https://github.com/mihaicismaru-bit/civora/blob/main/partener-eu/p11/opportunity_bundle.json",
+      "version": "as_of 2026-09-27T17:22:00Z",
+      "git_blob_sha": "ce6dd639cdca848a81882d8aa6b13b36dcc5a654",
+      "hash_semantics": "GIT_BLOB_SHA_NOT_DOCUMENT_RAW_SHA",
+      "read": "AM22L opportunity material_facts status OPEN and closes 2026-10-16 16:00+03, PUBLISHABLE",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null
+    },
+    {
+      "id": "lifecycle_snapshot_20261017",
+      "type": "GITHUB_INTERNAL_LIFECYCLE_NOT_DIRECT_OFFICIAL_EVIDENCE",
+      "url": "https://github.com/mihaicismaru-bit/civora/blob/main/partener-eu/ingest/state/call_lifecycle.json",
+      "version": "generated 2026-10-17T18:01:18Z",
+      "git_blob_sha": "36b7e2506cbe1c9cf4d51974cfa98149a2379f5c",
+      "hash_semantics": "GIT_BLOB_SHA_NOT_DOCUMENT_RAW_SHA",
+      "read": "AM22L code OPEN / PUBLISHABLE, status evidence DOSSIER_STATUS only",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null
     }
   ],
   "editorial_review": {
@@ -1014,6 +1055,11 @@
         "test": "Can 70/100 alone guarantee grant award?",
         "result": "NO",
         "basis": "Guide H.3 subject to call budget and reserve list."
+      },
+      {
+        "test": "Is P11 'PUBLISHABLE' a DAPP claim-level gate PASS after 16 Oct deadline?",
+        "result": "NO; PROVISIONAL_FAIL_CLOSED FOR NEW FACT RELEASE",
+        "basis": "P11 as-of 27 September and lifecycle 17 Oct still state OPEN/PUBLISHABLE despite elapsed official deadline; evidence type DOSSIER_STATUS, not ROFED live status."
       }
     ]
   },
@@ -1037,7 +1083,8 @@
       "15 atomic NEW, distinctly scoped STAGING claims (14 UNKNOWN, 1 CONFLICT), sourced to signed v1 guide/Ghid general PNAI v4.0 exact printed pages; raw/semantic SHA remains unavailable.",
       "Operational decision utility: 6h/week language classes, participant assistance duration and exceptions, income survey, 12-month residence-permit tests, applicant vs target.",
       "Partner and application documents: B7 agreement before submission and lead-only reporting, 12-month payroll evidence and Word activities appendix, and conditional VAT rule.",
-      "Quantified scoring/selection/implementation risks; no new confirmed-for-release claims, no production/decision_products/P11/site mutations."
+      "Quantified scoring/selection/implementation risks; no new confirmed-for-release claims, no production/decision_products/P11/site mutations.",
+      "Exact-main provenance crosscheck: P11 bundle as-of 2026-09-27 preserves OPEN/PUBLISHABLE and deadline 2026-10-16 16:00, while lifecycle generated 2026-10-17 18:01Z remains OPEN/PUBLISHABLE based only on DOSSIER_STATUS; no current ROFED acceptance evidence. Main/P11 protected: editor-only candidate."
     ]
   },
   "rollback": "Restore previous AM22L H01 candidate content at Git blob e25f418731321f01a8897b012b133d5a3139760e using normal branch revert to the pre-H02 commit (not hard-reset main); leave production LKG and P11 unchanged.",
@@ -1054,6 +1101,17 @@
     "run_id": "DAPP-AM22L-20261018-H02-POSTDEADLINE-INTEGRATION-OPERATIONS",
     "release_allowed": false,
     "readback": "NOT_RUN",
-    "rollback": "Restore previous AM22L H01 candidate content at Git blob e25f418731321f01a8897b012b133d5a3139760e using normal branch revert to the pre-H02 commit (not hard-reset main); leave production LKG and P11 unchanged."
+    "rollback": "Restore previous AM22L H01 candidate content at Git blob e25f418731321f01a8897b012b133d5a3139760e using normal branch revert to the pre-H02 commit (not hard-reset main); leave production LKG and P11 unchanged.",
+    "internal_projection_crosscheck": {
+      "p11_as_of": "2026-09-27T17:22:00Z",
+      "p11_blob_sha": "ce6dd639cdca848a81882d8aa6b13b36dcc5a654",
+      "lifecycle_as_of": "2026-10-17T18:01:18Z",
+      "lifecycle_blob_sha": "36b7e2506cbe1c9cf4d51974cfa98149a2379f5c",
+      "p11_status": "OPEN/PUBLISHABLE",
+      "lifecycle_status": "OPEN/PUBLISHABLE",
+      "canonical_main_sha": "c067e3f4b26ee8d0a5b2c1b263b8fbd73d74c5d1",
+      "release_allowed": false
+    },
+    "previous_h02_blob_sha": "8662a5d2b8f1572df4fa8d6bd6a0f18254520e91"
   }
 }
