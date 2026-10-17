@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "runId": "PARTENER-SITEKEEPER-20261017T0444Z-OPEN-TRUTH",
+  "observedAt": "2026-10-17T04:44:24Z",
+  "authority": "T1",
+  "status": "DEGRADED",
+  "publicationState": "PROVISIONAL_FAIL_CLOSED",
+  "mainHead": "b8ba208100c15373ceb68864b236694adae653bb",
+  "incident": "EXPIRED_OPEN_PUBLIC_VIEW_CONFLICT_AND_STATIC_RENDER_TIME_DEFECT",
+  "officialDeadline": {
+    "cohort": [
+      "AM11H",
+      "AM11I",
+      "AM22L",
+      "AM22M",
+      "AM22N",
+      "AM2A1G",
+      "AM41D"
+    ],
+    "local": "2026-10-16T16:00:00+03:00",
+    "officialUrl": "https://fed.mai.gov.ro/11306/lansare-apel-am2a1g-actiune-specifica-pact-migratie-integrarea-sociala-si-economica-a-resortisantilor-tarilor-terte-cu-sedere-legala-in-ro-in-regiunea-6/",
+    "observation": "Official AM2A1G launch notice lists deadline, while status summary remains Activ; expiry alone does not prove administrative closure."
+  },
+  "observedDeployment": {
+    "record": "partener-eu/deployment/latest.json",
+    "gitSha": "22af5359b748d009d650fa67bbb1c509deebc378",
+    "observedAt": "2026-10-16T19:38:53.552725+00:00",
+    "readbackStatus": "PASS",
+    "currentOpenCount": 7,
+    "expiredDeadlineSemanticGate": "PASS",
+    "expectedManifestSha256": "49b71a483f9a1517eca7b9354c6eedf104cdd93e9180cd4515df2de35e70479b"
+  },
+  "independentlyRetrievedPublicPage": {
+    "canonicalUrl": "https://partener.eu/finantari/deschise/",
+    "accessibleViaWeb": true,
+    "cardsObserved": 14,
+    "expiredFamiCardsObserved": 7,
+    "observation": "Public text retrieval shows stale 14-card output; cannot certify whether web cached a pre-redeploy document.",
+    "directCacheBustedRead": "INCONCLUSIVE_WEB_TOOL_NOT_ACCESSIBLE",
+    "browserProof": "UNAVAILABLE_OPERA_NOT_CONNECTED_BROWSER_CONTEXT_REQUIRED"
+  },
+  "deterministicCodeDefect": {
+    "source": "partener-eu/ops/build_public_static_pages.py",
+    "sourceBlobSha": "9340b7b0b9a850c3a2614bef1ff8bf2d5ce0c010",
+    "cause": "build() evaluates OPEN and consultations with decision_products.generatedAt instead of actual UTC render clock",
+    "regressionPath": "partener-eu/ops/test_public_static_pages.py",
+    "regressionBlobSha": "80a5d1cefa45f0f203407385cdd036f8b8f25fd6",
+    "testScenario": "Snapshot 2026-10-16T11:30Z, render times 12:59Z vs 13:01Z for 16:00 Europe/Bucharest deadline"
+  },
+  "remedialAttempt": {
+    "branch": "partener/render-clock-fail-closed-20261017",
+    "writeStatus": "BLOCKED_BY_SAFETY_CHECKS",
+    "repoPatchPersisted": false,
+    "productionModified": false
+  },
+  "followUp": [
+    "Apply latest-main bounded render_clock source correction and regression through a permitted write",
+    "Run unit/contract CI and deploy only on green",
+    "Recheck public route with independent cache-busted response, manifest hash and semantic card count",
+    "Add at-deadline re-render trigger or dynamic expiry protection independent of recurring source fetches",
+    "Reconcile source registry freshness and P10 integrity separately"
+  ],
+  "safety": {
+    "lastKnownGoodProtected": true,
+    "noUnauthorizedPublish": true,
+    "unknownsRemainUnknown": true,
+    "noSecrets": true
+  }
+}
