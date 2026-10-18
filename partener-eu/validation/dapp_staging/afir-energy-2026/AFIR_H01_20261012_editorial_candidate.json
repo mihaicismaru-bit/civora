@@ -1,12 +1,12 @@
 {
   "schema_version": "DAPP_ANALYSIS_CANDIDATE_V1",
   "dossier_id": "afir-energy-2026",
-  "source_version": "AFIR Schema Energie V7 (09.06.2026) / session 03/2026; plus AFIR prefinancing SGB communiqué 30.09.2026 (staging, does not reopen closed session)",
-  "base_main_sha": "bbaaac144db1e268e68e45652acb34de56b405e6",
-  "analysis_run_id": "DAPP-AFIR-ENERGY-20261015-H02-PREFINANCING-SGB",
-  "analysis_checked_at_utc": "2026-10-14T23:27:24.379Z",
-  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261015-H02-SGB-PREFINANCING-STAGING",
-  "state": "ANALYSIS_IN_PROGRESS",
+  "source_version": "AFIR Schema Energie private session 03/2026 (guide V7 Jun 2026) + AFIR SGB announcement 30.09.2026 + payment forms Ed. I/Rev. 2 official index (native RAR unverified)",
+  "base_main_sha": "dc18098402aa3d5fc7e1e1ab0a670327aef71d8b",
+  "analysis_run_id": "DAPP-AFIR-ENERGY-20261018-H03-PAYMENT-FORMS-REV2",
+  "analysis_checked_at_utc": "2026-10-18T18:24:10Z",
+  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261018-H03-PAYMENT-FORMS-INDEX-STAGING",
+  "state": "NEEDS_EVIDENCE",
   "publication_gate": "PROVISIONAL_FAIL_CLOSED",
   "publish_authorized": false,
   "scope_note": "ONE dossier only: agricultural / food industry AFIR Schema Energie solar autoconsumption, third session 2026; public-beneficiary schemes cited only for disambiguation.",
@@ -36,6 +36,11 @@
         "Confruntați dosarul de prefinanțare și modelul SGB AFIR actual cu anexa contractului și cu graficul de eșalonare a plăților înainte de depunere.",
         "Planificați documentele de justificare a avansului pentru ultima cerere de rambursare; pentru proiectele necontractate și pentru o nouă sesiune, nu deduceți un drept de prefinanțare ori statut OPEN."
       ]
+    },
+    "payment_form_update_staging": {
+      "decision": "For contracted private beneficiaries preparing payment claims: AFIR now indexes Ed. I / Rev. 2 payment forms and instructions. Check the actual native forms against the funding contract before using them. Index labels alone do not certify template fields or legal effective date.",
+      "not_new_application_window": true,
+      "native_archive_read": false
     }
   },
   "claim_evidence_ledger": [
@@ -674,6 +679,93 @@
       "parser_version": null,
       "source_run_id": null,
       "analyst_reviewed_at": "2026-10-14T23:27:24.379Z"
+    },
+    {
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_INDEX_ONLY_STAGING; NATIVE_RAR_UNVERIFIED",
+      "source_ids": [
+        "S8",
+        "S9"
+      ],
+      "source_version": "AFIR payment forms Ed. I/Rev. 2 official index (reviewed 18.10.2026); separate from guide V7",
+      "official_url": "https://www.afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare/",
+      "original_document_title": "AFIR, Tipizate și Formulare alte Programe de finanțare",
+      "document_date": null,
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-18T18:24:10Z",
+      "claim_id": "AFIR28",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "payment_forms_version_index",
+      "value": {
+        "listed_payment_forms": "Formulare Plată Beneficiari Schemă Energie",
+        "edition": "I",
+        "revision": "2",
+        "second_listed_document": "Instr De Plata Schema De Energie (Editia I, Revizia 2)",
+        "scope": "implementation/payment documentation; not guide V7, not new grant call"
+      },
+      "document_locator": "HTML section 'Documente', first and second entries",
+      "evidence_paraphrase": "Official AFIR forms index labels the payment forms and payment instructions Ed. I/Rev. 2; native archive not inspected."
+    },
+    {
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_INDEX_ONLY_STAGING; NATIVE_RAR_UNVERIFIED",
+      "source_ids": [
+        "S8",
+        "S9"
+      ],
+      "source_version": "AFIR payment forms Ed. I/Rev. 2 official index (reviewed 18.10.2026); separate from guide V7",
+      "official_url": "https://www.afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare/",
+      "original_document_title": "AFIR, Tipizate și Formulare alte Programe de finanțare",
+      "document_date": null,
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-18T18:24:10Z",
+      "claim_id": "AFIR29",
+      "claim_type": "ANALYSIS",
+      "fact_class": "payment_forms_change_decision",
+      "value": {
+        "action": "Contracted private beneficiaries preparing payment requests should cross-check Ed. I/Rev. 2 against their contract and the actual downloaded forms",
+        "not_a_new_call": true,
+        "requires_native_archive": true
+      },
+      "document_locator": "HTML introductory warning on electronic-document version and list of Scheme Energie forms",
+      "evidence_paraphrase": "Using an old form can block electronic processing; verify the specific contract-applicable revision, do not substitute general V7."
+    },
+    {
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_HTML_INDEX_ONLY_STAGING; NATIVE_RAR_UNVERIFIED",
+      "source_ids": [
+        "S8",
+        "S9"
+      ],
+      "source_version": "AFIR payment forms Ed. I/Rev. 2 official index (reviewed 18.10.2026); separate from guide V7",
+      "official_url": "https://www.afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare/",
+      "original_document_title": "AFIR, Tipizate și Formulare alte Programe de finanțare",
+      "document_date": null,
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_at": "2026-10-18T18:24:10Z",
+      "claim_id": "AFIR30",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "payment_archive_resource_name",
+      "value": {
+        "resource_filename": "formulare-plată-beneficiari-schemă-energie-actualizat-07102026.rar",
+        "date_in_filename": "2026-10-07",
+        "effective_date": "UNKNOWN",
+        "content_verified": false
+      },
+      "document_locator": "Official AFIR first 'Formulare Plată Beneficiari ... Ed. I, Rev. 2' download target (native RAR)",
+      "evidence_paraphrase": "A date stamp appears in the download filename; it does not establish the exact revision date or legal effective period."
     }
   ],
   "source_manifest": [
@@ -776,6 +868,38 @@
       "acquisition_run_id": null,
       "access_state": "OFFICIAL_HTML_READ_EXACT_TEXT; NATIVE_SGB_FORM_AND_FINANCING_CONTRACT_ANNEX_NOT_READ",
       "provenance_note": "Web research is an analyst review, not a SURFACEMC fetched-at/hash/parser evidence receipt"
+    },
+    {
+      "source_id": "S8",
+      "authority": "AFIR",
+      "document_title": "Tipizate și Formulare alte Programe de finanțare — payment forms for Schema Energie",
+      "url": "https://www.afir.ro/instrumente/instrumente-de-lucru/tipizate-si-formulare-alte-programe-de-finantare/",
+      "document_date": null,
+      "locator": "HTML heading 'Documente', entries 'Formulare Plată Beneficiari Schemă Energie (Ed. I, Rev. 2)' and 'Instr De Plata Schema De Energie (Editia I, Revizia 2)'; guidance paragraph says to use current versions",
+      "document_version": "Official index labels both Ed. I/Rev. 2; separate V7 applicant guide unaffected",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_HTML_REVIEWED; NATIVE_ARCHIVE_NOT_READ",
+      "provenance_note": "Analyst web review; no persisted acquisition receipt or exact file contents. Official archive URL returns octet-stream unsupported and raw media link inaccessible."
+    },
+    {
+      "source_id": "S9",
+      "authority": "AFIR",
+      "document_title": "Formulare Plată Beneficiari Schemă Energie (Ed. I, Rev. 2), official RAR resource",
+      "url": "https://www.afir.ro/api/file/document?filename=Formulare+Plat%C4%83+Beneficiari+Schem%C4%83+Energie+%28+Ed.+I%2C+Rev.+2+%29&filetype=rar&url=%2Fmedia%2Fweyhxvfz%2Fformulare-plat%C4%83-beneficiari-schem%C4%83-energie-actualizat-07102026.rar",
+      "document_date": null,
+      "locator": "Linked official RAR resource; filename contains actualizat-07102026; internal files/version history not inspected",
+      "document_version": "Ed. I/Rev. 2 (HTML label); 07.10.2026 only appears in official resource filename",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "FETCH_FAILED_UNSUPPORTED_BINARY_CONTENT; FOLLOWUP_DIRECT_MEDIA_URL_INACCESSIBLE",
+      "provenance_note": "Neither the ZIP/RAR bytes nor file-level manifest were obtained; date embedded in filename is not proof of a legal effective date."
     }
   ],
   "editorial_review": {
@@ -811,7 +935,7 @@
       }
     ],
     "decision_utility": "New material implementation-stage liquidity guidance for private contracted beneficiaries; avoid interpreting advances as call reopening or as a fixed percentage of total investment.",
-    "release_decision": "BLOCKED / PROVISIONAL_FAIL_CLOSED: prefinancing claims reviewed as official HTML but lacking verified native form/contract annex, acquisition provenance and DAPP_EVIDENCE_GATE",
+    "release_decision": "PROVISIONAL_FAIL_CLOSED; H03 indexes implementation-form revision but native archive, contract annex, exact-source acquisition provenance and DAPP_EVIDENCE_GATE unverified.",
     "h02_prefinancing_adversarial_checks": [
       {
         "question": "30% se aplică valorii totale a proiectului sau întregului grant inițial?",
@@ -838,6 +962,24 @@
         "result": "NU",
         "basis": "Doar comunicatul oficial HTML, originalele native încă lipsesc; starea claim-level rămâne UNKNOWN."
       }
+    ],
+    "h03_payment_forms_adversarial_checks": [
+      {
+        "question": "Does listing Ed. I/Rev. 2 prove the legal effective date is 7 October 2026?",
+        "result": "NO — 07.10.2026 appears only in the archive filename, no signed approval or archive contents read."
+      },
+      {
+        "question": "Does it change guide V7, eligible costs, scoring or session 03/2026 closure?",
+        "result": "NO EVIDENCE — distinct implementation forms; guide V7 unchanged in observed official index."
+      },
+      {
+        "question": "Can the current RAR be declared audited?",
+        "result": "NO — official API returned unsupported octet-stream; direct media link inaccessible."
+      },
+      {
+        "question": "Does AFIR's general instruction imply automated form completion is allowed?",
+        "result": "NO — use AFIR's published current forms and its own completion instructions."
+      }
     ]
   },
   "material_diff": {
@@ -852,17 +994,23 @@
       "Requests can occur during implementation per payment schedule; advances must be documented at final reimbursement.",
       "No change to status of closed 03/2026 application intake; no source native hash or gate certification."
     ],
-    "new_claims": 7
+    "new_claims": 3,
+    "h03_delta": [
+      "New decision-relevant AFIR official forms index check: both payment forms and payment instructions are listed as Ed. I, Rev. 2.",
+      "Official download filename contains a 07.10.2026 update hint, but not a verified legal change date; native RAR contents remain inaccessible.",
+      "Improved post-award guidance for contracted private beneficiaries: verify current payment forms, not just V7 application guide; no new application call implied.",
+      "Zero material changes to public P11/decision products, site, or 03/2026 closed-session status."
+    ]
   },
-  "next_evidence_action": "Obține prin circuitul oficial AFIR modelul SGB și anexa contractuală a cererii de prefinanțare (versiunea aplicabilă), extrage și verifică condițiile SGB și eventualele costuri bancare; recuperează apoi ghidul V7 și anexele/grila lipsă printr-o metodă autorizată nouă, fără reîncercarea buclei PDF. Capturează raw/semantic SHA-256, fetched_at, parser_version și source_run_id doar pentru documentele realmente obținute. Rulează DAPP_EVIDENCE_GATE când este implementat. Păstrează CLOSED pentru sesiunea 03/2026.",
+  "next_evidence_action": "Obține prin achiziție AFIR autorizată pachetul RAR 'Formulare Plată Beneficiari Schemă Energie (Ed. I, Rev. 2)' și instrucțiunile de plată Rev.2. Enumeră fișierele, data semnării și condițiile contractuale, verifică și citează formularele concrete, capturează hashurile native/metadatele de achiziție. Continuă recuperarea SGB și a ghidului V7 nativ; nu repeta cele două metode RAR indisponibile. Confirmă doar documente réellement citite; DAPP_EVIDENCE_GATE înainte de orice release.",
   "checkpoint_details": {
     "storage": "GitHub DAPP staging branch only",
-    "replay": "Compare SGB AFIR original with exact 30% remaining-aid, 100% guarantee, contract validity, remaining aid and final reimbursement claims; run claim-level gate when engine exists; assert closed 03/2026 unchanged.",
-    "rollback": "Revert only this H02 staging update on branch partener-dapp-afir-energy-20261012 to prior head 9785ea7da34e7923d574a517bb2575386587bfda; do not change main, P11, decision products, site or LKG.",
-    "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261012-H01",
-    "previous_candidate_blob_sha": "39605f8318bf81050b3d00c7219a06da6afdb44d",
-    "previous_branch_head": "9785ea7da34e7923d574a517bb2575386587bfda",
-    "base_main_observed": "bbaaac144db1e268e68e45652acb34de56b405e6"
+    "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261015-H02-SGB-PREFINANCING-STAGING",
+    "previous_candidate_blob_sha": "94be27bdaf608997f759200de514645cf2dac120",
+    "previous_branch_head": "d8506d61c2d09a72d17518d8891b844095988258",
+    "base_main_observed": "dc18098402aa3d5fc7e1e1ab0a670327aef71d8b",
+    "replay": "Fetch AFIR forms index and the native RAR/Rev.2 instructions via authorized acquisition; ensure printed revision/validity/contract applicability; assert session 03/2026 closure stays unchanged; then run DAPP_EVIDENCE_GATE once implemented.",
+    "rollback": "Revert only H03 update on branch partener-dapp-afir-energy-20261012 to previous branch head d8506d61c2d09a72d17518d8891b844095988258; never touch main/P11/decision_products/site/LKG."
   },
   "gate_checks": {
     "DAPP_EVIDENCE_GATE": "NOT_VERIFIED_IMPLEMENTED",
@@ -873,9 +1021,12 @@
     "merge": "NOT_DONE",
     "public_readback": "NOT_DONE",
     "native_SGB_template": "UNAVAILABLE_NOT_INSPECTED",
-    "contractual_annex": "UNAVAILABLE_NOT_INSPECTED"
+    "contractual_annex": "UNAVAILABLE_NOT_INSPECTED",
+    "native_payment_forms_rev2": "FAIL_NOT_READ",
+    "payment_forms_raw_sha256": "FAIL_NOT_OBTAINED",
+    "dapp_claim_gate_certified": "NOT_CERTIFIED"
   },
   "needs_user": false,
-  "previous_analysis_run_id": "DAPP-AFIR-ENERGY-20261012143528",
-  "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261012-H01"
+  "previous_analysis_run_id": "DAPP-AFIR-ENERGY-20261015-H02-PREFINANCING-SGB",
+  "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261015-H02-SGB-PREFINANCING-STAGING"
 }
