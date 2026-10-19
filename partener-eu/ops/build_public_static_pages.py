@@ -609,11 +609,18 @@ def compact_home_news(
 def build(
     products_path: Path = DEFAULT_PRODUCTS,
     web_root: Path = DEFAULT_WEB,
+    *,
+    render_clock: dt.datetime | None = None,
 ) -> dict[str, Any]:
     payload = json.loads(products_path.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
     news = payload.get("news") or []
-    generated = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
+    # The source snapshot timestamp is provenance, not a live OPEN authorization.
+    # Evaluate expiry at render time even when decision_products.json is older.
+    generated = render_clock if render_clock is not None else dt.datetime.now(dt.timezone.utc)
+    if generated.tzinfo is None or generated.utcoffset() is None:
+        raise ValueError("render_clock must include a timezone")
+    generated = generated.astimezone(dt.timezone.utc)
 
     for dirname in GENERATED_DIRS:
         shutil.rmtree(web_root / dirname, ignore_errors=True)
