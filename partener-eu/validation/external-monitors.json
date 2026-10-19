@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-19T10:03:04Z",
-  "validation_run_started": "2026-10-19T10:02:52Z",
+  "observed_at": "2026-10-19T11:29:52Z",
+  "validation_run_started": "2026-10-19T11:29:23Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "8f6c64a709bc795f12723c15fe41a735d46c6473ce018b47925496180530660b",
-    "history_sha256": "8f6c64a709bc795f12723c15fe41a735d46c6473ce018b47925496180530660b",
-    "history_path": "validation/history/20261019T100252Z.json",
+    "latest_sha256": "e459e4e9a5a5364d4dd225e7c52da48803230be22aa0fb07bb0c5e7da26fa6d8",
+    "history_sha256": "e459e4e9a5a5364d4dd225e7c52da48803230be22aa0fb07bb0c5e7da26fa6d8",
+    "history_path": "validation/history/20261019T112923Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "e33560afadf94bc3be4c36c35a5168581e018f3e69859668150872f118b725ae",
-    "checkpoint_sha256": "e33560afadf94bc3be4c36c35a5168581e018f3e69859668150872f118b725ae",
+    "source_state_sha256": "6f98728a0c821433520ac10752a0516581b1a76b98fdc110bd842abdf05636b6",
+    "checkpoint_sha256": "6f98728a0c821433520ac10752a0516581b1a76b98fdc110bd842abdf05636b6",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-10-19T09:46:38.323065Z",
-    "age_seconds": 986,
+    "age_seconds": 6194,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -63,12 +63,12 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-10-18T18:19:28.097403+00:00",
+    "observed_at": "2026-10-19T11:20:35.280130+00:00",
     "status": "PASS",
     "item_count": 59,
     "error_count": 0,
-    "hash_change_candidates": 1,
-    "material_signal_candidates": 1,
+    "hash_change_candidates": 2,
+    "material_signal_candidates": 2,
     "auth_dependency_count": 28,
     "auth_dependencies": [
       {
@@ -287,12 +287,12 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-10-18T18:21:12.304334+00:00",
-    "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
-    "source_available": false,
-    "candidate_count": 60,
-    "parsed_relevant_count": null,
-    "published_item_count": 60,
+    "observed_at": "2026-10-19T10:03:41.337703+00:00",
+    "status": "OK",
+    "source_available": true,
+    "candidate_count": 288,
+    "parsed_relevant_count": 269,
+    "published_item_count": null,
     "last_known_good_preserved": false,
     "health": "PASS"
   },
@@ -374,7 +374,7 @@
     "integrity_pass": true,
     "registry_health": "DEGRADED",
     "registry_hash_changes": 7,
-    "afir_hash_changes": 1,
+    "afir_hash_changes": 2,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": false,
