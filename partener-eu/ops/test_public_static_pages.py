@@ -20,6 +20,54 @@ spec.loader.exec_module(module)
 
 payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
 
+# Regression: a source snapshot from 10 October must not keep the 16 October
+# 16:00 Romania deadline OPEN after it passes. The test runs deterministically
+# around the exact deadline and leaves canonical decision products untouched.
+with tempfile.TemporaryDirectory() as td:
+    fixture_root = Path(td)
+    fixture_path = fixture_root / "expiry-fixture.json"
+    fixture = {
+        "generatedAt": "2026-10-10T00:00:00Z",
+        "dossiers": [{
+            "id": "expiry-boundary",
+            "title": "Synthetic expiry boundary",
+            "programme": "TEST ONLY",
+            "status": "OPEN",
+            "statusLabel": "DESCHIS",
+            "publicationState": "PUBLISHABLE",
+            "standfirst": "Termen sintetic 16 octombrie 2026, ora 16:00.",
+            "quickFacts": [
+                {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+                {"label": "Termen", "value": "2026-10-16T16:00:00+03:00", "confidence": "CONFIRMED"}
+            ],
+            "sections": [{"title": "Rezumat executiv", "items": ["Stare apel: DESCHIS."]}],
+            "sources": []
+        }],
+        "news": []
+    }
+    fixture_path.write_text(json.dumps(fixture), encoding="utf-8")
+    fixture_original_bytes = fixture_path.read_bytes()
+    before = module.parse_date("2026-10-16T15:59:00+03:00")
+    after = module.parse_date("2026-10-16T16:01:00+03:00")
+    assert before is not None and after is not None
+    before_root = fixture_root / "before"
+    after_root = fixture_root / "after"
+    before_manifest = module.build(fixture_path, before_root, render_clock=before)
+    after_manifest = module.build(fixture_path, after_root, render_clock=after)
+    assert before_manifest["currentOpen"] == 1, before_manifest
+    assert after_manifest["currentOpen"] == 0, after_manifest
+    assert after_manifest["failClosedOpenRefresh"] == 1, after_manifest
+    before_open_html = (before_root / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    after_open_html = (after_root / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    assert 'data-dossier-id="expiry-boundary"' in before_open_html
+    assert 'data-dossier-id="expiry-boundary"' not in after_open_html
+    after_dossier_html = (after_root / "dosare/expiry-boundary/index.html").read_text(encoding="utf-8")
+    assert "ÎN VERIFICARE" in after_dossier_html
+    assert module.FAIL_CLOSED_OPEN_ACTION in after_dossier_html
+    assert fixture_path.read_bytes() == fixture_original_bytes
+
+
+
 # Confirmed call budget is a valid financing summary when grant size is unknown.
 budget_probe = {
     "id": "budget-probe", "title": "Budget probe", "programme": "TEST",
