@@ -1,0 +1,193 @@
+{
+  "schema_version": "DAPP_ANALYST_STAGING_V1",
+  "dossier_id": "mipe-e5cc149d3d1a057ad0",
+  "title": "PEO PRIMII — MIPE consultare, reconciliere cu schema scolara MEC",
+  "state": "NEEDS_EVIDENCE",
+  "release": "PROVISIONAL_FAIL_CLOSED",
+  "publish_authorized": false,
+  "run_id": "DAPP-PEO-PRIMII-20261019-H01-MEC-SUBGRANT-ENTITY-SPLIT",
+  "checkpoint": "PARTENER-DAPP-PEO-PRIMII-20261019-H01-MEC-MIPE-SEPARATION-FAILCLOSED",
+  "source_version": "MIPE_PEO_CONSULTATION_UNREAD__MEC_SUBGRANT_OMEC5798_2026_20261013",
+  "candidate_base_sha": "74d91138c6133c98e7b06b13b34de3ae1bc7778b",
+  "queue_git_blob_sha": "21272e2f07a5d27c3adfadeafe3da7b094c26d60",
+  "call_lifecycle_git_blob_sha": "0a5acd9469936a1414efacad8bfd64b453b97fa6",
+  "analysis_candidate": {
+    "verdict": "MIPE PRIMII guide consultation is discoverable but its native guide/status/deadline were NOT verified. A distinct MEC school-grant selection under the same PRIMII name closed applications on 12 October 2026 at 17:00 and is assessing submissions, with interim list scheduled for 20 October. No cross-entity claim promotion.",
+    "applicant_vs_target": "MEC is sole parent-project beneficiary; eligible applicants to its school grant scheme are public primary schools with legal personality meeting cumulative conditions; pupils are final target. Eligibility of MIPE guide consultation not established.",
+    "funding": "MEC PRIMII project >1.21 billion RON (parent project); MEC school-grant simplified EUR 1,408.83 unit cost per pupil-year at InforEuro Sep 2026. Neither constitutes an MIPE call budget or school maximum grant.",
+    "actions": [
+      "School applicants: check actual interim list publication from 20 Oct; appeal within 2 calendar days from real publication.",
+      "Do not treat MEC closed school round as currently open MIPE consultation, or transpose eligibility/currency/thresholds.",
+      "SURFACEMC must acquire MIPE signed guide+ZIP+annexes/version/deadline and PARTENER engine must apply DAPP_EVIDENCE_GATE."
+    ]
+  },
+  "claim_evidence_ledger": [
+    {
+      "id": "PRIMII-001",
+      "type": "ANALYSIS",
+      "scope": "MIPE_CONSULTATION",
+      "status": "UNKNOWN",
+      "claim": "Queue/lifecycle label alone does not prove a current consultation; source unacquired.",
+      "evidence": [
+        "R1",
+        "R2"
+      ]
+    },
+    {
+      "id": "PRIMII-002",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_SCHOOL_SCHEME_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "MEC project beneficiary, public primary school applicants, pupils target.",
+      "evidence": [
+        "E1:p1"
+      ]
+    },
+    {
+      "id": "PRIMII-003",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_SCHOOL_SCHEME_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "School submission close 2026-10-12 17:00; not MIPE consultation close.",
+      "evidence": [
+        "E1:p2"
+      ]
+    },
+    {
+      "id": "PRIMII-004",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_SCHOOL_SCHEME_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "Cumulative school eligibility: high/very high dropout list, >=60 primary pupils, no double financing.",
+      "evidence": [
+        "E1:p1"
+      ]
+    },
+    {
+      "id": "PRIMII-005",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_SCHOOL_SCHEME_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "MEC reported 709 applications on 14 Oct, NOT 709 approvals.",
+      "evidence": [
+        "E2:headline"
+      ]
+    },
+    {
+      "id": "PRIMII-006",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_PARENT_PROJECT_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "Over RON 1.21bn parent PRIMII project budget; roughly 50k primary pupils.",
+      "evidence": [
+        "E2:body"
+      ]
+    },
+    {
+      "id": "PRIMII-007",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_SCHOOL_SCHEME_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "Simplified unit EUR 1408.83 Sep 2026 InforEuro, not maximum per school.",
+      "evidence": [
+        "E1:p1"
+      ]
+    },
+    {
+      "id": "PRIMII-008",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_SCHOOL_SCHEME_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "Interim list planned 2026-10-20, appeals 2 calendar days from ACTUAL posting.",
+      "evidence": [
+        "E1:p2"
+      ]
+    },
+    {
+      "id": "PRIMII-009",
+      "type": "OFFICIAL_FACT",
+      "scope": "MEC_SCHOOL_SCHEME_ONLY",
+      "status": "UNKNOWN_FOR_RELEASE",
+      "claim": "100-point ranking risk/MATE, marginalization/UNICEF, locality, with administrative eligibility gates.",
+      "evidence": [
+        "E1:p5-p6"
+      ]
+    },
+    {
+      "id": "PRIMII-010",
+      "type": "ANALYSIS",
+      "scope": "ENTITY_RECONCILIATION",
+      "status": "STAGING_ONLY",
+      "claim": "MIPE consultation and MEC school grant are distinct procedures despite shared project name.",
+      "evidence": [
+        "M1",
+        "E1"
+      ]
+    }
+  ],
+  "source_manifest": [
+    {
+      "id": "E1",
+      "url": "https://edu.ro/sites/default/files/2026-10/Anexa_OMEC_5798_2026_Metodologie_ev_sel_cf.pdf",
+      "version": "Anexa 1 OMEC 5798/13.10.2026",
+      "pages": "1,2,5,6",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null
+    },
+    {
+      "id": "E2",
+      "url": "https://www.edu.ro/press_rel_74_26_PRIMII_aplicatii_scoli",
+      "version": "2026-10-14",
+      "section": "body",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null
+    },
+    {
+      "id": "M1",
+      "url": "https://mfe.gov.ro/peo-consultare-publica-ghidul-solicitantului-conditii-specifice-primii-program-pentru-reusita-invatamantului-primar-prin-masuri-integrate-de-interventie/",
+      "version": null,
+      "read": false,
+      "raw_sha256": null
+    },
+    {
+      "id": "R1",
+      "path": "partener-eu/ingest/state/dossier_enrichment_queue.json",
+      "git_blob_sha": "21272e2f07a5d27c3adfadeafe3da7b094c26d60",
+      "official": false
+    },
+    {
+      "id": "R2",
+      "path": "partener-eu/ingest/state/call_lifecycle.json",
+      "git_blob_sha": "0a5acd9469936a1414efacad8bfd64b453b97fa6",
+      "official": false
+    }
+  ],
+  "editorial_review": {
+    "pass": "STAGING_ONLY",
+    "official_conflicts_new": 0,
+    "entity_mapping_risk": 1,
+    "publication_blockers": [
+      "MIPE original guide missing",
+      "original source sha256/versions unavailable",
+      "DAPP_EVIDENCE_GATE not verified"
+    ],
+    "claims_promoted": 0
+  },
+  "next_evidence_action": "SURFACEMC acquire exact MIPE PRIMII native guide+annexes/version/closing date; verify actual MEC 20 Oct list separately; do not retry same failing MIPE URLs without new evidence.",
+  "material_diff": {
+    "before": "MIPE queue PUBLIC_CONSULTATION no official consultation date/close confirmed",
+    "after": "MIPE status UNKNOWN, MEC separate school round CLOSED and evaluating",
+    "production_change": false
+  },
+  "rollback": {
+    "main_unmodified": true,
+    "p11_unmodified": true,
+    "decision_products_unmodified": true,
+    "method": "discard this staging branch; last-known-good unaffected"
+  },
+  "needs_user": false
+}
