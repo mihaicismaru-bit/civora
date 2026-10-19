@@ -1,0 +1,42 @@
+name: EUCONS Public Intake Progressive Disclosure
+
+on:
+  pull_request:
+    paths:
+      - 'eucons/web/public_intake_progressive_disclosure_contract.json'
+      - 'eucons/web/jtbd_ux_contract.json'
+      - 'eucons/web/information_architecture.json'
+      - 'eucons/leads/inbound_runtime_contract.json'
+      - 'eucons/validation/validate_public_intake_progressive_disclosure.py'
+      - 'eucons/validation/test_public_intake_progressive_disclosure_fail_closed.py'
+      - '.github/workflows/eucons-public-intake-progressive-disclosure.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'eucons/web/public_intake_progressive_disclosure_contract.json'
+      - 'eucons/web/jtbd_ux_contract.json'
+      - 'eucons/web/information_architecture.json'
+      - 'eucons/leads/inbound_runtime_contract.json'
+      - 'eucons/validation/validate_public_intake_progressive_disclosure.py'
+      - 'eucons/validation/test_public_intake_progressive_disclosure_fail_closed.py'
+      - '.github/workflows/eucons-public-intake-progressive-disclosure.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate R04 to R05 progressive disclosure guard
+        run: python3 eucons/validation/validate_public_intake_progressive_disclosure.py
+      - name: Test R04 to R05 guard fail-closed behavior
+        run: python3 eucons/validation/test_public_intake_progressive_disclosure_fail_closed.py
