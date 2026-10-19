@@ -1,0 +1,34 @@
+name: EUCONS Mobile Navigation Accessibility
+
+on:
+  pull_request:
+    paths:
+      - "eucons/web/assets/eucons.css"
+      - "eucons/web/jtbd_ux_contract.json"
+      - "eucons/validation/validate_mobile_navigation_accessibility.py"
+      - "eucons/validation/test_mobile_navigation_accessibility_fail_closed.py"
+      - ".github/workflows/eucons-mobile-navigation-accessibility.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "eucons/web/assets/eucons.css"
+      - "eucons/web/jtbd_ux_contract.json"
+      - "eucons/validation/validate_mobile_navigation_accessibility.py"
+      - "eucons/validation/test_mobile_navigation_accessibility_fail_closed.py"
+      - ".github/workflows/eucons-mobile-navigation-accessibility.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate mobile navigation accessibility contract
+        run: python eucons/validation/validate_mobile_navigation_accessibility.py
+      - name: Test mobile navigation accessibility fail-closed behavior
+        run: python eucons/validation/test_mobile_navigation_accessibility_fail_closed.py
