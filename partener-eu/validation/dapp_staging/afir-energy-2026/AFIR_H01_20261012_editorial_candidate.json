@@ -1,11 +1,11 @@
 {
   "schema_version": "DAPP_ANALYSIS_CANDIDATE_V1",
   "dossier_id": "afir-energy-2026",
-  "source_version": "AFIR Schema Energie private session 03/2026 (guide V7 Jun 2026) + AFIR SGB announcement 30.09.2026 + payment forms Ed. I/Rev. 2 official index (native RAR unverified) + MADR Ordin 142/2026 private procurement annex Ed I/Rev0 (effective 29.04.2026)",
+  "source_version": "AFIR Schema Energie private session 03/2026 (guide V7 Jun 2026) + AFIR SGB announcement 30.09.2026 + payment forms Ed. I/Rev. 2 official index (native RAR unverified) + MADR Ordin 142/2026 private procurement annex Ed I/Rev0 (effective 29.04.2026); legislative cross-check of Order142 official annex",
   "base_main_sha": "3c2baaae5fcdf58fd903bf590e6fe8c0275c2942",
-  "analysis_run_id": "DAPP-AFIR-ENERGY-20261020-H04-PROCUREMENT-ORDER142-CLAIM-PAGES",
+  "analysis_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY",
   "analysis_checked_at_utc": "2026-10-20",
-  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261020-H04-PRIVATE-PROCUREMENT-STAGING",
+  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261020-H07-LEGAL-CORROBORATION-FAILCLOSED",
   "state": "ANALYSIS_IN_PROGRESS",
   "publication_gate": "PROVISIONAL_FAIL_CLOSED",
   "publish_authorized": false,
@@ -1170,6 +1170,243 @@
       "parser_version": null,
       "source_run_id": null,
       "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR47",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "conflict_of_interest_between_beneficiary_and_bidders",
+      "title": "Conflicte de interese, inclusiv între ofertanți",
+      "value": {
+        "scope": "beneficiar, ofertanti, subcontractanti, terti sustinatori, persoane implicate in evaluare",
+        "risks": "participatii, control, conducere, sot/sotie/rudenie/afinitate pana la gradul II in circumstante relevante",
+        "test": "ar influenta ori ar parea sa influenteze rezultatul procedurii",
+        "actions": "verificari, remedieri documentate, excludere/anulare numai dupa caz"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.7, art.4 pct.4.7 alin.(1)-(3),(5)-(6)",
+      "evidence_paraphrase": "Conflicte de interese, inclusiv între ofertanți",
+      "adversarial_caveat": "Nu declara orice legatura conflict automat; testul influentei ramane obligatoriu.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
+    },
+    {
+      "claim_id": "AFIR48",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "evaluation_committee_declaration",
+      "title": "Numire evaluatori și declarații înaintea evaluării",
+      "value": {
+        "appointment": "decizia reprezentantului legal",
+        "declarations": [
+          "impartialitate",
+          "confidentialitate",
+          "incompatibilitate",
+          "disponibilitate",
+          "conflict de interese"
+        ],
+        "timing": "inainte de evaluare",
+        "archive": "anexare la raportul procedurii"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.7 art.4 pct.4.7(4); p.12 art.6 pct.6.7(1)",
+      "evidence_paraphrase": "Numire evaluatori și declarații înaintea evaluării",
+      "adversarial_caveat": "Nu redacta retroactiv declaratiile.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
+    },
+    {
+      "claim_id": "AFIR49",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "qualified_signature_self_declarations",
+      "title": "Semnătura calificată pentru declarații pe proprie răspundere",
+      "value": {
+        "scope": "declaratii pe propria raspundere",
+        "signature": "certificat calificat emis de prestator de incredere, conform eIDAS",
+        "overgeneralization": "nu este dovedit ca toate anexele necesita aceeasi forma"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.5, art.4 pct.4.5",
+      "evidence_paraphrase": "Semnătura calificată pentru declarații pe proprie răspundere",
+      "adversarial_caveat": "Nu extinde automat regula asupra tuturor documentelor.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
+    },
+    {
+      "claim_id": "AFIR50",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "neutral_specifications_equivalence",
+      "title": "Caiet de sarcini neutru și echivalență dovedită",
+      "value": {
+        "specs": "clare, obiective, nediscriminatorii",
+        "brand": "numai daca descrierea nu e precis/inteligibila altfel, cu sau echivalent",
+        "proof": "ofertantul demonstreaza indeplinirea echivalenta",
+        "additional": "cerinte proportionale aplicate consecvent"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.11, art.6 pct.6.4(1)-(4)",
+      "evidence_paraphrase": "Caiet de sarcini neutru și echivalență dovedită",
+      "adversarial_caveat": "Nu admite automat echivalentul fara dovada performantei.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
+    },
+    {
+      "claim_id": "AFIR51",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "change_procurement_object_prior_approval",
+      "title": "Schimbarea tipului obiectului achiziției",
+      "value": {
+        "trigger": "schimbarea tipului de produs/serviciu/lucrare",
+        "before": "acord prealabil al autoritatii nationale de implementare FM responsabile de contract",
+        "purpose": "verificarea pastrarii scopului aprobat"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.11, art.6 pct.6.4(5)",
+      "evidence_paraphrase": "Schimbarea tipului obiectului achiziției",
+      "adversarial_caveat": "Schimbarea tipului obiectului nu este orice ajustare de model.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
+    },
+    {
+      "claim_id": "AFIR52",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "bid_evaluation_no_new_criteria_limited_clarifications",
+      "title": "Evaluare fără criterii noi; clarificări limitate",
+      "value": {
+        "criteria": "nu se adauga sau elimina dupa termen",
+        "clarifications": "neclaritati sau documente lipsa, cu exceptia propunerii tehnice si financiare",
+        "conflicts": "ofertantul in conflict se respinge",
+        "fundamental_errors": "erata inainte de termen sau anulare/reluare"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.12, art.6 pct.6.7(2),(5)-(7)",
+      "evidence_paraphrase": "Evaluare fără criterii noi; clarificări limitate",
+      "adversarial_caveat": "Clarificarile nu sunt o cale pentru o noua oferta tehnica sau financiara.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
+    },
+    {
+      "claim_id": "AFIR53",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "prebid_clarifications_shared_72h",
+      "title": "Clarificări cu minimum 72 ore înainte de închiderea ofertelor",
+      "value": {
+        "request_deadline": "cel tarziu 72 ore inainte de termenul de depunere",
+        "channel": "platforma AFIR",
+        "publication": "raspunsurile devin simultan disponibile tuturor interesatilor",
+        "restrictions": "nu se introduc cerinte sau criterii noi"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.11, art.6 pct.6.5(1)-(3)",
+      "evidence_paraphrase": "Clarificări cu minimum 72 ore înainte de închiderea ofertelor",
+      "adversarial_caveat": "Completeaza AFIR41 privind procesul competitiv; evita a doua recomandare separata cu aceeasi regula 72h. Nu este termenul de raspuns al AFIR.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
+    },
+    {
+      "claim_id": "AFIR54",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "submission_one_offer_withdrawal",
+      "title": "O ofertă per ofertant; retragere și redepunere doar înainte de termen",
+      "value": {
+        "channel": "exclusiv platforma",
+        "limit": "maximum o oferta per ofertant/procedura",
+        "withdraw_resubmit": "inainte de termen",
+        "after_deadline": "fara modificare sau inlocuire",
+        "late_or_other_channel": "nu se evalueaza"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_AFIR_PDF_AND_OFFICIAL_PORTAL_LEGISLATIV_FULL_TEXT_CROSSCHECKED_NO_NATIVE_HASH",
+      "source_ids": [
+        "S10",
+        "S11"
+      ],
+      "document_locator": "p.12, art.6 pct.6.6(1)-(5)",
+      "evidence_paraphrase": "O ofertă per ofertant; retragere și redepunere doar înainte de termen",
+      "adversarial_caveat": "Dupa termen, modificarile sunt excluse; retragerea si redepunerea raman doar inainte.",
+      "source_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20",
+      "analyst_run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY"
     }
   ],
   "source_manifest": [
@@ -1320,6 +1557,22 @@
       "acquisition_run_id": null,
       "access_state": "OFFICIAL_PDF_RENDERED_16_PAGES_AND_EXACT_ARTICLES_REVIEWED; SOURCE_BYTES_SHA_UNAVAILABLE",
       "provenance_note": "The official PDF is viewable with page images/text; no original byte-preserving retrieval certificate or raw/semantic hash was obtained. Do not promote any claim to confirmed_for_release."
+    },
+    {
+      "source_id": "S11",
+      "authority": "Ministerul Justitiei / Portal Legislativ; act MADR",
+      "document_title": "INDRUMAR METODOLOGIC din 24 aprilie 2026, Anexa Ordinului MADR nr. 142/2026",
+      "url": "https://legislatie.just.ro/Public/FormaPrintabila/00000G0AEWDCD7WQVD21R3UXOF5QS6ZZ",
+      "document_date": "2026-04-29",
+      "document_version": "Anexa Ordin MADR 142/24.04.2026, Indrumar cod IA Ed.I/Rev.0, Monitorul Oficial 348/29.04.2026",
+      "locator": "Portal Legislativ forma printabila, art.4 pct.4.5, 4.7; art.6 pct.6.4-6.7, text confruntat cu PDF AFIR pp.5,7,11,12",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_GOVERNMENT_LEGISLATION_HTML_TEXT_READ; ORIGINAL_BYTES_NOT_ACQUIRED; SECOND_OFFICIAL_CROSSCHECK",
+      "provenance_note": "Source page read in analyst browser on 2026-10-20. No byte-preserving capture, parser run or SHA; not a release certificate."
     }
   ],
   "editorial_review": {
@@ -1432,7 +1685,22 @@
         "verdict": "NO",
         "basis": "Claim-level raw PDF hash/source receipt and DAPP_EVIDENCE_GATE missing."
       }
-    ]
+    ],
+    "h07_crosscheck": {
+      "checked": "2026-10-20",
+      "primary": "S10 AFIR-hosted official PDF, printed pp.5,7,11,12",
+      "independent": "S11 Portal Legislativ, annex full text",
+      "review": "Eight pending H05+H06 granular procurement claims reconciled. AFIR53 is detailed expansion of AFIR41 (72h); do not double-count in editorial prose.",
+      "discrepancies": 0,
+      "release_eligible": 0,
+      "missing": [
+        "native_original_pdf_sha256",
+        "proof_of_source_acquisition_parser",
+        "individual_financing_contract",
+        "DAPP_EVIDENCE_GATE_tested_integrated"
+      ],
+      "critical_caution": "The guideline applies only to private SE-FM procurement procedures initiated after 29 Apr 2026; not a new grant application window."
+    }
   },
   "material_diff": {
     "baseline": "P11 asOf 2026-09-27: status DISCOVERED, materialFacts empty, blockedFactClasses all, publicationDecision BLOCK_MATERIAL_FACTS / OPEN_DEADLINE_EXPIRED_REQUIRES_REFRESH.",
@@ -1446,7 +1714,7 @@
       "Requests can occur during implementation per payment schedule; advances must be documented at final reimbursement.",
       "No change to status of closed 03/2026 application intake; no source native hash or gate certification."
     ],
-    "new_claims": 3,
+    "new_claims": 8,
     "h03_delta": [
       "New decision-relevant AFIR official forms index check: both payment forms and payment instructions are listed as Ed. I, Rev. 2.",
       "Official download filename contains a 07.10.2026 update hint, but not a verified legal change date; native RAR contents remain inaccessible.",
@@ -1460,9 +1728,17 @@
       "Temporal applicability limited to acquisitions initiated after order effective; not new 2026 funding session or change in grant eligibility.",
       "No release eligible claims due unverified original raw SHA, metadata and new deterministic DAPP_EVIDENCE_GATE; no P11/decision product/site modification."
     ],
-    "new_claims_h04": 16
+    "new_claims_h04": 16,
+    "h07_delta": [
+      "Recovered eight material H05+H06 claims AFIR47-AFIR54 into the existing candidate without separate branch or PR.",
+      "Added S11: independent official Portal Legislativ text for Order142 annex; corroborates cited articles in AFIR PDF.",
+      "Editorial dedup safeguard: AFIR53 72h expands existing AFIR41; render one decision point, not two.",
+      "No raw PDF/HTML SHA, contract annex or DAPP deterministic claim gate; all eight retain evidence_state UNKNOWN."
+    ]
   },
-  "next_evidence_action": "Acquire and hash exact native 16-page AFIR-hosted MADR Order 142/2026 procurement PDF, link document version/art/page claims; crosscheck individual SE-FM financing contract plus AFIR Ed I/Rev2 payment RAR and SGB document when transport available; obtain DAPP_EVIDENCE_GATE claim-level implementation/test/integration proof. Do not reopen closed session, alter material P11 or deploy.",
+  "next_evidence_action": {
+    "h07_next": "Acquire native AFIR PDF or official legally sourced bytes and archive raw SHA, parser manifest/fetched_at; verify contract annex applicable to beneficiary, then run DAPP_EVIDENCE_GATE S1. Keep all changes staging-only."
+  },
   "checkpoint_details": {
     "h04": {
       "run_id": "DAPP-AFIR-ENERGY-20261020-H04-PROCUREMENT-ORDER142-CLAIM-PAGES",
@@ -1480,6 +1756,17 @@
         "DAPP_EVIDENCE_GATE"
       ],
       "no_production_mutation": true
+    },
+    "h07": {
+      "run_id": "DAPP-AFIR-ENERGY-20261020-H07-LEGISLATIVE-CROSSCHECK-PENDING-REPLAY",
+      "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261020-H07-LEGAL-CORROBORATION-FAILCLOSED",
+      "base_main_sha": "3c2baaae5fcdf58fd903bf590e6fe8c0275c2942",
+      "branch_base_head_sha": "2c28037ae693fa9a450230d2502c3f1f572f8eed",
+      "previous_candidate_blob_sha": "59ce7871f8a2c592e951edb942d835fb07d8f832",
+      "claims_added": 8,
+      "expected_total_claims": 54,
+      "rollback": "Revert sole H07 candidate-file commit to 2c28037ae693fa9a450230d2502c3f1f572f8eed on staging branch; production main, P11, decision products and site unchanged",
+      "production_changed": false
     }
   },
   "gate_checks": {
@@ -1497,7 +1784,9 @@
     "dapp_claim_gate_certified": "NOT_CERTIFIED",
     "procurement_official_pdf_visual_pages": "READ_16_PAGES_ARTICLE_LEVEL",
     "procurement_pdf_raw_sha256": "NOT_OBTAINED",
-    "procurement_pdf_parser_version": "NOT_OBTAINED"
+    "procurement_pdf_parser_version": "NOT_OBTAINED",
+    "official_legislation_text_crosscheck": "PASS_ARTICLE_LEVEL",
+    "official_legislation_native_sha256": "NOT_OBTAINED"
   },
   "needs_user": false,
   "previous_analysis_run_id": "DAPP-AFIR-ENERGY-20261018-H03-PAYMENT-FORMS-REV2",
