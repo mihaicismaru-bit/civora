@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "dossier_id": "mipe-b22f91d0a0d9d2f1ad",
+  "title": "PEO — Inițiativa ALMA (Prioritatea 2, Acțiunea 2.a.2)",
+  "run_id": "DAPP-PEO-ALMA-20261020-H01-POSTCONSULTATION-DEADLINE-RECONCILIATION",
+  "checkpoint": "PARTENER-DAPP-PEO-ALMA-20261020-H01-CONSULTATION-VS-CALL-FAILCLOSED",
+  "candidate_base_sha": "3c2baaae5fcdf58fd903bf590e6fe8c0275c2942",
+  "queue_git_blob_sha": "03d19187a11aa99beee7f3339eeeddd967c32f0a",
+  "source_version": "14 Aug 2026 corrigendum and 28 Aug 2026 consolidated guide INDEXED ONLY, original native guide NOT FETCHED",
+  "status": "NEEDS_EVIDENCE",
+  "publication_gate": "PROVISIONAL_FAIL_CLOSED",
+  "DAPP_EVIDENCE_GATE_status": "NOT_CERTIFIED",
+  "publishAuthorized": false,
+  "analysis_candidate": {
+    "headline": "DAPP queue PUBLIC_CONSULTATION is historically stale relative to an officially indexed call with 30 Oct 2026, 16:00 deadline (live MySMIS status unverified).",
+    "summary": "ALMA finances organisations implementing personalised support for young NEETs, including transnational mobility and reintegration. A government Prefecture summary lists EUR 19,714,235 call allocation versus EUR 201,000–850,000 per project. This draft requires original consolidated guide and MySMIS readback before external publication.",
+    "applicant_vs_final_target": "Applicants: relevant organisations/service providers subject to legal eligibility; final target: young NEET participants aged at least 16 and under 30, not grant applicants.",
+    "three_actions": [
+      "Verify exact operational ALMA MySMIS call and 30 Oct 2026 local 16:00 closing time, including any further corrigendum.",
+      "Acquire native MIPE guide consolidated 28 Aug 2026, corrigendum 14 Aug 2026, annexes/grid; assess applicants, partners, geography and conditions.",
+      "Check accredited experience, partner network abroad and cashflow for 2–6 month mobility before application; separate call budget from project grant."
+    ]
+  },
+  "claim_evidence_ledger": [
+    {
+      "id": "ALMA01",
+      "type": "OFFICIAL_FACT",
+      "key": "submission_deadline",
+      "value": "2026-10-30 16:00 local, timezone not specified in source",
+      "source": "S2",
+      "location": "government opportunity portal indexed opening/closing date",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA02",
+      "type": "ANALYSIS",
+      "key": "queue_lifecycle_mismatch",
+      "value": "PUBLIC_CONSULTATION queue vs subsequent public 2026 call/deadline",
+      "source": "S4+S1+S2",
+      "release": "ANALYSIS_ONLY"
+    },
+    {
+      "id": "ALMA03",
+      "type": "OFFICIAL_FACT",
+      "key": "source_revision",
+      "value": "14 Aug corrigendum, 28 Aug consolidated guide",
+      "source": "S3",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA04",
+      "type": "OFFICIAL_FACT",
+      "key": "call_budget",
+      "value": "EUR 19,714,235 total",
+      "source": "S1",
+      "location": "lines 414–415",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA05",
+      "type": "OFFICIAL_FACT",
+      "key": "project_grant",
+      "value": "EUR 201,000–850,000 per project",
+      "source": "S1",
+      "location": "line 416",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA06",
+      "type": "OFFICIAL_FACT",
+      "key": "applicant_types",
+      "value": "institutional bodies; associations/foundations; social and employment providers; employers; educational institutions subject to full guide",
+      "source": "S1",
+      "location": "lines 409–410",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA07",
+      "type": "OFFICIAL_FACT",
+      "key": "target_group",
+      "value": "NEET youth aged 16 to under 30",
+      "source": "S1",
+      "location": "lines 411–412",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA08",
+      "type": "OFFICIAL_FACT",
+      "key": "mobility",
+      "value": "2–6 months transnational; >=30% share provision in summary; denominator to verify",
+      "source": "S1",
+      "location": "lines 412–413",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA09",
+      "type": "OFFICIAL_FACT",
+      "key": "participant_minimum",
+      "value": "20 in each described region category; exact project requirement unclear",
+      "source": "S1",
+      "location": "line 412",
+      "release": "UNKNOWN"
+    },
+    {
+      "id": "ALMA10",
+      "type": "ANALYSIS",
+      "key": "financing",
+      "value": "Call budget and project amount are different; contribution, VAT and aid rules unknown",
+      "source": "S1",
+      "release": "ANALYSIS_ONLY"
+    },
+    {
+      "id": "ALMA11",
+      "type": "ANALYSIS",
+      "key": "compliance",
+      "value": "Mobility obligations, scoring, eligibility/costs/document matrix require source guide",
+      "source": "S1",
+      "release": "ANALYSIS_ONLY"
+    }
+  ],
+  "source_manifest": [
+    {
+      "id": "S1",
+      "class": "OFFICIAL_GOVERNMENT_SUMMARY_HTML_READ",
+      "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+      "published": "2026-09-18",
+      "locator": "Inițiativa ALMA lines 400–417",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "parser_version": null
+    },
+    {
+      "id": "S2",
+      "class": "OFFICIAL_PORTAL_INDEX_ONLY",
+      "url": "https://oportunitati-ue.gov.ro/apel/initiativa-alma/",
+      "locator": "indexed May 28 / Oct 30 16:00 opening/closing, full page timeout",
+      "raw_sha256": null
+    },
+    {
+      "id": "S3",
+      "class": "MIPE_PRIMARY_INDEX_ONLY",
+      "url": "https://mfe.gov.ro/ghiduri_peos/apelul-de-tip-competitiv-initiativa-alma-finantat-din-prioritatea-2-valorificarea-potentialului-tinerilor-pe-piata-muncii-ocuparea-fortei-de-munca-in-randul-tinerilor-obiectiv-spec/",
+      "locator": "14 Aug corrigendum and 28 Aug consolidated guide indexed, page timeout",
+      "raw_sha256": null
+    },
+    {
+      "id": "S4",
+      "class": "INTERNAL_REPO_PROJECTION",
+      "url": "https://github.com/mihaicismaru-bit/civora/blob/main/partener-eu/ingest/state/dossier_enrichment_queue.json",
+      "git_blob_sha": "03d19187a11aa99beee7f3339eeeddd967c32f0a",
+      "generatedAt": "2026-10-19T20:47:23Z",
+      "status": "PUBLIC_CONSULTATION"
+    },
+    {
+      "id": "S5",
+      "class": "MIPE_NATIVE_ARCHIVE_NOT_READ",
+      "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/763d159acf665d520c606128a1dbf5ef.7z",
+      "raw_sha256": null
+    },
+    {
+      "id": "S6",
+      "class": "MIPE_SIGNED_CORRIGENDUM_NOT_READ",
+      "url": "https://mfe.gov.ro/wp-content/uploads/2026/08/9063ceeed9390ee8312627b23340eb81.pdf",
+      "raw_sha256": null
+    }
+  ],
+  "editorial_review": {
+    "confirmed_for_release": 0,
+    "unknown_for_release": 8,
+    "analysis_only": 3,
+    "official_conflicts_demonstrated": 0,
+    "material_internal_mismatch": 1,
+    "adversarial": [
+      "Do not equate indexed closing date with live MySMIS OPEN.",
+      "Do not equate total call budget with individual grant.",
+      "Do not infer final applicant eligibility or 30% denominator from summary.",
+      "Do not assign timezone not explicit in observed sources.",
+      "No scoring/VAT/cofinancing/eliminatory/document certification without applicable guide."
+    ]
+  },
+  "next_evidence_action": "SURFACEMC authorized MIPE acquisition of 28 Aug native consolidated archive, 14 Aug corrigendum, annexes/grid with true raw SHA-256 + version/page map; PARTENER checks current exact call MySMIS and runs integrated claim-level DAPP_EVIDENCE_GATE before any publication.",
+  "material_diff": {
+    "before": "DAPP queue as of Oct 19: PUBLIC_CONSULTATION, no deadline/budget/applicants",
+    "candidate_only": "Later submission window indexed ending Oct 30 at 16:00, 28 Aug guidance consolidation, government summary finance/target/mobility",
+    "production_delta": "NONE"
+  },
+  "rollback": "No changes to main, P11, decision_products or Pages; discard branch candidate if rejected. Restore no public state.",
+  "public_readback": "NOT_APPLICABLE_STAGING_ONLY",
+  "exact_head_ci": "NOT_RUN",
+  "single_writer_policy": "branch dedicated to ALMA; do not modify existing dossier WIP elsewhere; compare main/branch before a future update."
+}
