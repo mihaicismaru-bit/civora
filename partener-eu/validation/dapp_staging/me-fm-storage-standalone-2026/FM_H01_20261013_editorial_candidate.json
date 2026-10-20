@@ -7,7 +7,7 @@
   "candidate_base_sha": "5e49c2d0cd4fecefde06bc8eaf4fbca896d908a3",
   "candidate_branch": "partener-dapp-fm-storage-20261012",
   "analyst_protocol_version": "DAPP_V1_DRAFT_PR_1389_SECTION_12",
-  "work_state": "NEEDS_EVIDENCE",
+  "work_state": "ANALYSIS_IN_PROGRESS",
   "publish_state": "PROVISIONAL_FAIL_CLOSED",
   "published": false,
   "source_version": {
@@ -618,5 +618,468 @@
     "notes": "Examples are ANALYSIS not grants or scoring promises. Current MySMIS OPEN and exact deadline hour remain UNKNOWN. DAPP_EVIDENCE_GATE not verified.",
     "next_evidence_action": "Original legal guide and exact scoring annex; raw hashes and claim-level passage mapping required.",
     "checkpoint": "PARTENER-DAPP-FM-20261016-H02-CAP-DECISION-STAGING"
+  },
+  "increment_H03": {
+    "run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+    "protocol": "DAPP_V1_DRAFT_PR_1389_SECTION_12",
+    "dossier_id": "me-fm-storage-standalone-2026",
+    "analyst_state": "ANALYSIS_IN_PROGRESS",
+    "publish_state": "PROVISIONAL_FAIL_CLOSED",
+    "publishAuthorized": false,
+    "selected_reason": "10 zile până la termenul oficial publicat 30.10.2026; primer oficial complet accesibil în Portalul Legislativ, după H02 NEEDS_EVIDENCE",
+    "base_main_sha": "ea914c6b113a8f8da3da025411ebd904459c3dc2",
+    "previous_candidate_blob_sha": "ddfa2bac09db58c8774ebcc9914df88401aa94ab",
+    "applicable_source_version": "OME 915/14.08.2026, MO 680 bis/17.08.2026; amendments and native bytes unverified",
+    "source_manifest": [
+      {
+        "type": "OFFICIAL_PRIMARY_LEGAL_GUIDE",
+        "title": "Ghidul solicitantului – instalații autonome de stocare în baterii",
+        "authority": "Ministerul Energiei",
+        "published_on": "2026-08-17",
+        "document_version": "OME 915/14.08.2026, MO 680 bis/17.08.2026",
+        "url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+        "sections_read": [
+          "1.2",
+          "1.3.1",
+          "1.4",
+          "1.5",
+          "1.6",
+          "1.7",
+          "3.1.4",
+          "3.1.5",
+          "4.1.1",
+          "Anexa 2.1",
+          "Anexa 2.2"
+        ],
+        "text_verified": "2026-10-20",
+        "raw_sha256": null,
+        "semantic_sha256": null,
+        "fetched_at": null,
+        "parser_version": null,
+        "source_acquisition_run_id": null
+      },
+      {
+        "type": "OFFICIAL_SECONDARY_GOVERNMENT_DIGEST",
+        "authority": "Prefectura Vrancea",
+        "published_on": "2026-09-18",
+        "url": "https://vn.prefectura.mai.gov.ro/oportunitati-de-finantare-societati-comerciale-septembrie-2026/",
+        "section": "Stand-alone linii 194–210; deadline DATE ONLY 30.10.2026",
+        "raw_sha256": null
+      },
+      {
+        "type": "OFFICIAL_MINISTRY_PDF_NOT_ACQUIRED",
+        "authority": "Ministerul Energiei",
+        "url": "https://energie.gov.ro/wp-content/uploads/2026/08/Anunt-lansare-apel-proiecte-STOCARE-STAND-ALONE_final.pdf",
+        "read_state": "FETCH_FAILED",
+        "methods": [
+          "web PDF open timeout",
+          "direct container HTTP DNS failure"
+        ],
+        "reliable_deadline_time": "UNKNOWN_FOR_RELEASE",
+        "raw_sha256": null
+      },
+      {
+        "type": "OFFICIAL_MINISTRY_PDF_NOT_ACQUIRED",
+        "authority": "Ministerul Energiei",
+        "url": "https://energie.gov.ro/wp-content/uploads/2026/08/Anexa_OME_915_2026_Ghid-solicitant_stand-alone_publicat_M-Of_680-Bis.pdf",
+        "read_state": "FETCH_FAILED",
+        "methods": [
+          "web PDF open failed",
+          "direct container download failed"
+        ],
+        "raw_sha256": null
+      }
+    ],
+    "claim_evidence_ledger": [
+      {
+        "claim_id": "FM-H03-026",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "guide_identity",
+        "statement": "Ghidul solicitantului stand-alone a fost aprobat prin Ordinul Ministerului Energiei nr. 915/14.08.2026; anexa a fost publicată în Monitorul Oficial 680 bis din 17.08.2026.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Preambulul ghidului; Ordin 915/2026 art.1",
+            "evidence_excerpt": "Aprobat prin ORDINUL nr. 915 din 14 august 2026",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-027",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "selection_formula",
+        "statement": "Grila tehnico-economică punctează cel mai mic ajutor solicitat per MWh cu 100 de puncte și cel mai mare cu 0, valorile intermediare fiind evaluate liniar.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 4, secțiunea 4.1.1; Anexa 2.2",
+            "evidence_excerpt": "valoarea cea mai mică ... 100 pct; ... cea mai mare ... 0 pct",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-028",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "budget_boundary_tie_break",
+        "statement": "Pentru egalitate de punctaj la limita bugetului, se prioritizează capacitatea instalată I.1 mai mare, apoi intensitatea ajutorului mai mică dacă I.1 este egal.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 4, secțiunea 4.1.1, paragraf departajare",
+            "evidence_excerpt": "valoarea mai mare a Indicatorului I.1",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-029",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "material_change_precontract",
+        "statement": "Modificarea acționariatului/asociaților, amplasamentului sau capacității noi de stocare între depunerea cererii și semnarea contractului conduce la respingerea cererii.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 1, secțiunea 1.2, avertisment după canalul de depunere",
+            "evidence_excerpt": "Ministerul Energiei va respinge Cererea de finanțare",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-030",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "battery_technology_exclusion",
+        "statement": "Proiectele cu baterii pe bază de plumb, NiCd sau NiMH sunt excluse.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 1, secțiunea 1.3.1 lit.ii",
+            "evidence_excerpt": "baterii care utilizează tehnologii pe bază de plumb, NiCd sau NiMH",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-031",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "project_integration_exclusion",
+        "statement": "Proiectele combinate de producere a energiei regenerabile și stocare sunt excluse din acest apel stand-alone.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 1, secțiunea 1.3.1 lit.i",
+            "evidence_excerpt": "Proiectele care reprezintă proiecte combinate",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-032",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "feasibility_age",
+        "statement": "Studiul de fezabilitate trebuie să aibă cel mult doi ani la depunerea cererii de finanțare.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 3, secțiunea 3.1.5",
+            "evidence_excerpt": "nu trebuie să fie mai vechi de 2 ani",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-033",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "qualified_designer",
+        "statement": "Echipa care elaborează studiul de fezabilitate trebuie să includă personal autorizat ANRE pentru proiectarea instalațiilor electrice, iar dovada autorizării se anexează.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 3, secțiunea 3.1.5",
+            "evidence_excerpt": "personal autorizat de către Autoritatea Națională de Reglementare în domeniul Energiei",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-034",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "separate_guide_declaration",
+        "statement": "Anexa nr. 3, Declarația unică din ghid, trebuie depusă chiar dacă formularul Declarație unică generat de MySMIS a fost deja completat și depus.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Anexa 2.1, grila conformitate, criteriul 3",
+            "evidence_excerpt": "chiar dacă a fost completat și depus și Formularul",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-035",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "environmental_act_first_payment",
+        "statement": "Dacă actul de mediu nu a fost depus la cerere sau în precontractare, trebuie depus până la prima cerere de plată; lipsa acestuia atunci determină rezilierea contractului.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 3, secțiunea 3.1.4, avertisment",
+            "evidence_excerpt": "contractul de finanțare va fi reziliat",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-036",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "related_enterprise_grant_aggregation",
+        "statement": "La depunerea mai multor proiecte de către solicitant și firmele legate, declarația unică trebuie să identifice proiectele și valorile ajutoarelor, iar totalul nu poate depăși 15 milioane EUR per întreprindere.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 3, început, înainte de secțiunea 3.1",
+            "evidence_excerpt": "societățile legate cu solicitantul depun proiecte",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      },
+      {
+        "claim_id": "FM-H03-037",
+        "claim_type": "OFFICIAL_FACT",
+        "fact_class": "operating_cost_exclusion",
+        "statement": "Costurile de operare nu sunt eligibile.",
+        "evidence_state": "UNKNOWN",
+        "release_certified": false,
+        "source_state": "OFFICIAL_PRIMARY_LEGAL_TEXT_SECTION_READ_BUT_RAW_PROVENANCE_NOT_CAPTURED",
+        "evidence": [
+          {
+            "authority": "Ministerul Energiei / Portalul Legislativ al Ministerului Justiției",
+            "document": "Ghidul solicitantului pentru instalații stand-alone, aprobat prin OME 915/14.08.2026, MO 680 bis/17.08.2026",
+            "document_version": "publicare 17.08.2026; eventuale modificări ulterioare necertificate",
+            "official_url": "https://legislatie.just.ro/Public/DetaliiDocument/313994",
+            "location": "Capitolul 1, secțiunea 1.7",
+            "evidence_excerpt": "Costurile de operare nu sunt eligibile",
+            "raw_sha256": null,
+            "semantic_sha256": null,
+            "fetched_at": null,
+            "parser_version": null,
+            "source_acquisition_run_id": null
+          }
+        ],
+        "analyst_run_id": "DAPP-FM-STANDALONE-20261020-H03-OFFICIAL-GUIDE-SCORING-ELIGIBILITY",
+        "analyst_note": "Textul legal a fost localizat în sursa oficială, dar documentul nativ, hashul și gate-ul claim-level nu sunt certificate. UNKNOWN pentru release."
+      }
+    ],
+    "existing_claim_source_crosswalk": {
+      "FM-H01-003": "Cap.1 §1.4 – capital startup 100.000 lei",
+      "FM-H01-004": "Cap.1 §1.4 – CAEN diviziunea 35",
+      "FM-H01-005": "Cap.1 §1.4 – depunere individuală; fără parteneriat",
+      "FM-H01-006": "Cap.1 §1.4 și §1.7 – 15 mil. EUR per întreprindere",
+      "FM-H01-009": "Cap.1 §1.6 – alocare 150 mil. EUR, echivalent lei",
+      "FM-H01-010": "Cap.1 §1.7 – maximum 100% cheltuieli eligibile",
+      "FM-H01-011": "Cap.1 §1.7 – rambursare în lei și curs InforEuro 5,2434",
+      "FM-H01-012": "Cap.1 §1.7 – maxim 69.000 EUR/MWh",
+      "FM-H01-014": "Cap.1 §1.8 / §2.3 – interdicție cumul ajutoare pe aceleași costuri",
+      "FM-H01-018": "Cap.1 §1.5 – fiecare instalație ≥1MW, C/P ≥2",
+      "FM-H01-022": "Cap.4 §4.1.1, Anexa 2.2 – formula 100/0",
+      "FM-H01-024": "Cap.3 și Anexa 2.1 – documente și grila DA/NU"
+    },
+    "analysis_candidate": {
+      "quick_verdict": "Textul primar al ghidului este disponibil și introduce reguli eliminatorii și mecanica selecției, dar ultimul status operațional și ora exactă a termenului necesită confirmare oficială. Nu promova OPEN din P11 vechi.",
+      "funding_decision": "Finanțarea maximă admisă rezultă din minimul dintre 100% cheltuieli eligibile, 69.000 EUR/MWh și plafonul cumulativ de 15 milioane EUR/întreprindere. Rambursarea se face în lei; o solicitare sub plafon poate crește scorul relativ, dar și contribuția proprie.",
+      "scoring": "Unicul criteriu cantitativ din Anexa 2.2 este ajutorul EUR/MWh: cererea cu valoarea cea mai mică primește 100 puncte și cea mai mare 0, intermediare liniar. La limita bugetului, egalitatea de punctaj folosește capacitate I.1 și apoi intensitate; nu se inventează scor fără ofertele concurente.",
+      "eligibility_risks": "Exclude baterii plumb/NiCd/NiMH, proiecte integrate producere+stocare și parteneriate. Modificarea acționariatului, amplasamentului sau capacității înainte de contract poate determina respingere potrivit §1.2.",
+      "three_actions": [
+        "Verifică întâi proiectul stand-alone, tehnologia bateriilor, situl, forma juridică/CAEN și interdicția parteneriatelor; exclude proiectele combinate.",
+        "Construiește bugetul împreună cu studiul de fezabilitate: sfaturi ANRE, vechime SF ≤2 ani, plafon cumulativ și valoarea EUR/MWh oferită. Evaluează numerarul necesar dacă oferi mai puțin pentru punctaj.",
+        "Verifică în MySMIS anunțul exact de deschidere/închidere și pregătește Anexa 3 separat de formularul generat, Anexa 7, DNSH, documentele de mediu și de eligibilitate; nu trimite fără controlul final."
+      ],
+      "editorial_label": "ANALYSIS_CANDIDATE_NO_SITE_RELEASE"
+    },
+    "editorial_review": {
+      "adversarial_checks": [
+        {
+          "risk": "OPEN/lifecycle",
+          "state": "UNKNOWN",
+          "why": "Ghidul prevede lansarea prin anunț ulterior; Prefectura confirmă doar data 30.10.2026. PDF-ul anunțului Ministerului Energiei nu a fost citit nativ."
+        },
+        {
+          "risk": "deadline hour",
+          "state": "UNKNOWN",
+          "why": "Ora 14:00 apare în indexări, dar textul primar al anunțului nu a fost extras, deci nu este certificat la claim-level."
+        },
+        {
+          "risk": "scoring",
+          "state": "PRIMARY_TEXT_LOCATED_NOT_RELEASE_CERTIFIED",
+          "why": "Nu deduce scorul exact al unei oferte fără valorile min/max ale ofertelor valide; separă egalitatea obișnuită de departajarea la limita bugetului."
+        },
+        {
+          "risk": "TVA",
+          "state": "UNKNOWN",
+          "why": "Formularul de buget distinge TVA eligibilă/neeligibilă; regimul aplicabil solicitantului trebuie verificat la Anexa 4 și legislația fiscală. Nu afirma automat TVA eligibilă."
+        },
+        {
+          "risk": "primary bytes/version",
+          "state": "NEEDS_EVIDENCE",
+          "why": "Textul ghidului a fost citit pe portalul legislativ, dar PDF-ul original, SHA256, parser_version și eventuala modificare ulterioară nu sunt certificate."
+        },
+        {
+          "risk": "applicant vs group",
+          "state": "PASS_EDITORIAL",
+          "why": "Solicitantul este societate conform §1.4; clienții rețelei/consumatorii nu sunt solicitanți."
+        }
+      ],
+      "confirmed_for_release_new": 0,
+      "unknown_for_release_new": 12,
+      "official_conflicts_new": 0
+    },
+    "material_diff": {
+      "before": "H02: 25 claims from government secondary source, primary guide not read; cap scenarios only.",
+      "after": "H03: primary legal guide text read; 12 new atomized high-risk rules and 12 earlier claims mapped to exact legal sections; application scoring, boundary tie-break, forbidden technologies, post-submission changes, SF and declaration obligations.",
+      "production_changed": false,
+      "alerts_allowed": false
+    },
+    "next_evidence_action": "Obține prin canal autorizat PDF-ul semnat al OME915 și anunțul de sesiune, versiune+SHA256 raw/semantic+fetched_at+parser_version+run_id; verifică în text ora/posibile prelungiri MySMIS, TVA/Anexa 4 și grila completă; apoi DAPP_EVIDENCE_GATE claim-level și QA înaintea oricărei promovări.",
+    "checkpoint": {
+      "id": "PARTENER-DAPP-FM-20261020-H03-PRIMARY-LEGAL-TEXT-SCORING-FAILCLOSED",
+      "prior_blob_sha": "ddfa2bac09db58c8774ebcc9914df88401aa94ab",
+      "rollback": "Revert only H03 increment or restore previous candidate blob in same staging branch after validating exact head; do not alter main, P11, decision_products or Pages.",
+      "release_authorized": false,
+      "replay": "Compare primary portal sections against native PDF once obtained, rerun ledger 12 ids and bridge; fail closed on any mismatch."
+    }
   }
 }
