@@ -1,0 +1,172 @@
+{
+  "schema": "DAPP_COMPOSITE_STAGING_V1",
+  "dossier_id": "mipe-5c70656385834fd64c",
+  "title": "Activarea potențialului antreprenorial al tinerilor — ITI Delta Dunării",
+  "run_id": "DAPP-PEO-ITI-DELTA-20261020-H01-IDENTITY-LIFECYCLE-SPLIT",
+  "checkpoint": "PARTENER-DAPP-PEO-ITI-DELTA-20261020-H01-GEOGRAPHY-LIFECYCLE-FAILCLOSED",
+  "candidate_base_sha": "3c2baaae5fcdf58fd903bf590e6fe8c0275c2942",
+  "source_version": null,
+  "analyst_protocol": "DAPP v1 DRAFT PR #1389",
+  "state": "NEEDS_EVIDENCE",
+  "publication_state": "PROVISIONAL_FAIL_CLOSED",
+  "publish_authorized": false,
+  "claim_level_gate_verified": false,
+  "analysis_candidate": {
+    "official_status_now": "UNKNOWN",
+    "submission_deadline": "UNKNOWN",
+    "timezone": "UNKNOWN",
+    "call_code": "UNKNOWN",
+    "territorial_eligibility": "UNKNOWN",
+    "eligible_applicant": "UNKNOWN",
+    "target_group": "UNKNOWN",
+    "call_budget": "UNKNOWN",
+    "per_project_grant": "UNKNOWN",
+    "currency": "UNKNOWN",
+    "cofinancing": "UNKNOWN",
+    "VAT": "UNKNOWN",
+    "state_aid": "UNKNOWN",
+    "costs": "UNKNOWN",
+    "scoring": "UNKNOWN",
+    "documents": "UNKNOWN",
+    "indicators": "UNKNOWN",
+    "editorial_verdict": "No verified current OPEN/deadline; do not imply nationwide eligibility from generic region=România for ITI Delta Dunării. Exact applicants and financing need approved guide.",
+    "actions": [
+      "Verify exact MySMIS code, status, deadline and local timezone from authoritative operational record.",
+      "Read complete applicable ITI Delta Dunării guide, annexes, versions and corrigenda; separate eligible applicants from youth target group.",
+      "Only then build financial and eligibility checklist, applying verified grant cap, currency, cofinancing, TVA and evaluation criteria."
+    ]
+  },
+  "claim_evidence_ledger": [
+    {
+      "id": "YTHITI-01",
+      "kind": "ANALYSIS",
+      "field": "lifecycle",
+      "state": "UNKNOWN",
+      "fact": "Queue OPEN is only an unverified internal lifecycle label",
+      "evidence": "partener-eu/ingest/state/call_lifecycle.json calls[dossierId].stageEvidence/transitions; INITIAL_CANONICAL_PROJECTION",
+      "original_document_raw_sha256": null
+    },
+    {
+      "id": "YTHITI-02",
+      "kind": "ANALYSIS",
+      "field": "territory",
+      "state": "UNKNOWN",
+      "fact": "ITI Delta Dunării in title vs generic region România: presentation risk, not proven official contradiction",
+      "evidence": "partener-eu/ingest/state/call_lifecycle.json calls[dossierId].region/title",
+      "original_document_raw_sha256": null
+    },
+    {
+      "id": "YTHITI-03",
+      "kind": "ANALYSIS",
+      "field": "document_identity",
+      "state": "UNKNOWN",
+      "fact": "Dedicated guide URL found in historical official-guide index, but original guide not read",
+      "evidence": "partener-eu/ingest/state/mipe_dual_cache.json records[ghiduri_peos/].officialLinks",
+      "original_document_raw_sha256": null
+    },
+    {
+      "id": "YTHITI-04",
+      "kind": "ANALYSIS",
+      "field": "registry",
+      "state": "UNKNOWN",
+      "fact": "MySMIS inventory 50 visible/978, incomplete: absence of exact call is not negative evidence",
+      "evidence": "partener-eu/validation/mysmis_call_inventory_latest.json candidateInventory",
+      "original_document_raw_sha256": null
+    },
+    {
+      "id": "YTHITI-05",
+      "kind": "ANALYSIS",
+      "field": "entity_match",
+      "state": "UNKNOWN",
+      "fact": "2025 PEO youth social-enterprise planning row is distinct; cannot transfer budgets or eligibility",
+      "evidence": "partener-eu/ingest/state/peo_calendar_state.json items[id=f15e494794f1ec2fd6]",
+      "original_document_raw_sha256": null
+    },
+    {
+      "id": "YTHITI-06",
+      "kind": "ANALYSIS",
+      "field": "financing_and_conditions",
+      "state": "UNKNOWN",
+      "fact": "No native guide/annex passage; no financial or applicant facts are confirmed",
+      "evidence": "partener-eu/ingest/state/dossier_enrichment_queue.json queue[dossierId].missing",
+      "original_document_raw_sha256": null
+    }
+  ],
+  "source_manifest": [
+    {
+      "kind": "REPO_QUEUE",
+      "path": "partener-eu/ingest/state/dossier_enrichment_queue.json",
+      "git_blob_sha": "03d19187a11aa99beee7f3339eeeddd967c32f0a",
+      "generated_at": "2026-10-19T20:47:23Z"
+    },
+    {
+      "kind": "REPO_LIFECYCLE",
+      "path": "partener-eu/ingest/state/call_lifecycle.json",
+      "git_blob_sha": "fd2a875e7e47a1585e22c25d86fa951d48d764a6"
+    },
+    {
+      "kind": "REPO_MIPE_INDEX_CACHE",
+      "path": "partener-eu/ingest/state/mipe_dual_cache.json",
+      "git_blob_sha": "14f98f88c09be83769d840b0e478b2e7c0046e61",
+      "observed_at": "2026-08-22T16:16:25.666706+00:00"
+    },
+    {
+      "kind": "MYSMIS_PARTIAL_INVENTORY",
+      "path": "partener-eu/validation/mysmis_call_inventory_latest.json",
+      "git_blob_sha": "a8a0464e7462d87835531e45ed7197ba336ca000",
+      "observed_at": "2026-10-19T21:11:29.785449+00:00",
+      "visible": 50,
+      "total": 978,
+      "paginated": false
+    },
+    {
+      "kind": "PEO_CALENDAR_OTHER_CALL",
+      "path": "partener-eu/ingest/state/peo_calendar_state.json",
+      "git_blob_sha": "8513ff396b0a9774075001e582a9f6e8be4d4058"
+    }
+  ],
+  "official_documents": [
+    {
+      "type": "announcement",
+      "url": "https://mfe.gov.ro/peo-lansarea-apelului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii/",
+      "state": "FETCH_FAILED_TIMEOUT"
+    },
+    {
+      "type": "guide_page",
+      "url": "https://mfe.gov.ro/ghiduri_peos/ghidul-solicitantului-activarea-potentialului-antreprenorial-al-tinerilor-iti-delta-dunarii/",
+      "state": "DISCOVERED_NOT_OPENED"
+    },
+    {
+      "type": "guide_archive",
+      "url": "https://mfe.gov.ro/wp-content/uploads/2026/05/a22995069a703dde93392149985e8d13.zip",
+      "state": "NOT_FETCHED"
+    },
+    {
+      "type": "pdf",
+      "url": "https://mfe.gov.ro/wp-content/uploads/2026/05/d3050041050d308717a753887f39f27c.pdf",
+      "state": "FETCH_FAILED_INACCESSIBLE"
+    }
+  ],
+  "editorial_review": {
+    "official_facts_exact_for_release": 0,
+    "analysis_claims": 6,
+    "official_conflicts_confirmed": 0,
+    "risk": "Do not infer OPEN/nationwide eligibility/eligible applicant/budget or CLOSED from unpaginated registry.",
+    "two_official_access_attempts_exhausted": true,
+    "gate": "NOT_VERIFIED",
+    "quality": "PROVISIONAL_FAIL_CLOSED"
+  },
+  "material_diff": {
+    "before": "Queue OPEN; lifecycle generic region=România, no deadline/official stage evidence.",
+    "after": "Stage actual UNKNOWN, explicit ITI territory eligibility UNKNOWN, dedicated guide link identified from older index, exact MySMIS pending.",
+    "impact": "Editorial decision risk; does not certify material official call fact."
+  },
+  "next_evidence_action": {
+    "owner": "SURFACEMC/engine",
+    "action": "Acquire applicable MIPE ITI Delta guide and annexes from dedicated URL, record original file hashes and version; check exact MySMIS call code/status/deadline with complete paginated official data.",
+    "no_repeat_failed_search": true,
+    "next_run": "Select other dossier if no new official snapshot.",
+    "needs_user": false
+  },
+  "rollback": "Staging-only unmerged candidate. Discard this branch to revert; P11, main decision_products and live site remain unchanged."
+}
