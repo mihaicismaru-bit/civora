@@ -1,12 +1,12 @@
 {
   "schema_version": "DAPP_ANALYSIS_CANDIDATE_V1",
   "dossier_id": "afir-energy-2026",
-  "source_version": "AFIR Schema Energie private session 03/2026 (guide V7 Jun 2026) + AFIR SGB announcement 30.09.2026 + payment forms Ed. I/Rev. 2 official index (native RAR unverified)",
-  "base_main_sha": "dc18098402aa3d5fc7e1e1ab0a670327aef71d8b",
-  "analysis_run_id": "DAPP-AFIR-ENERGY-20261018-H03-PAYMENT-FORMS-REV2",
-  "analysis_checked_at_utc": "2026-10-18T18:24:10Z",
-  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261018-H03-PAYMENT-FORMS-INDEX-STAGING",
-  "state": "NEEDS_EVIDENCE",
+  "source_version": "AFIR Schema Energie private session 03/2026 (guide V7 Jun 2026) + AFIR SGB announcement 30.09.2026 + payment forms Ed. I/Rev. 2 official index (native RAR unverified) + MADR Ordin 142/2026 private procurement annex Ed I/Rev0 (effective 29.04.2026)",
+  "base_main_sha": "3c2baaae5fcdf58fd903bf590e6fe8c0275c2942",
+  "analysis_run_id": "DAPP-AFIR-ENERGY-20261020-H04-PROCUREMENT-ORDER142-CLAIM-PAGES",
+  "analysis_checked_at_utc": "2026-10-20",
+  "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261020-H04-PRIVATE-PROCUREMENT-STAGING",
+  "state": "ANALYSIS_IN_PROGRESS",
   "publication_gate": "PROVISIONAL_FAIL_CLOSED",
   "publish_authorized": false,
   "scope_note": "ONE dossier only: agricultural / food industry AFIR Schema Energie solar autoconsumption, third session 2026; public-beneficiary schemes cited only for disambiguation.",
@@ -41,6 +41,25 @@
       "decision": "For contracted private beneficiaries preparing payment claims: AFIR now indexes Ed. I / Rev. 2 payment forms and instructions. Check the actual native forms against the funding contract before using them. Index labels alone do not certify template fields or legal effective date.",
       "not_new_application_window": true,
       "native_archive_read": false
+    },
+    "procurement_private_beneficiaries_h04": {
+      "title": "Achiziții pentru beneficiarii privați ai Schemei Energie: procedură, praguri și obligații",
+      "legal_basis": "Îndrumar metodologic, Anexa Ordin MADR nr.142/2026, Ed I/Rev0, în vigoare 29 aprilie 2026",
+      "verdict": "Pentru achizițiile inițiate sub regulile aplicabile de la 29 aprilie 2026, beneficiarii privați aflați în afara Legilor 98/2016 și 99/2016 folosesc achiziție directă până la 15.000 lei fără TVA pentru servicii și 75.000 lei fără TVA pentru produse/lucrări, sau procedura competitivă AFIR peste praguri, cu excepția specială a produselor eligibile din baza AFIR de prețuri de referință. Procedura competitivă folosește platforma AFIR și criteriul prețului cel mai scăzut. Păstrează dosarul 5 ani după ultima plată.",
+      "application_lifecycle": "Sesiunea privată 03/2026 este închisă la 14 august 2026; regulile de achiziții servesc implementării proiectelor, nu reprezintă un nou apel.",
+      "key_controls": [
+        "Valoare estimată fără TVA, dar include partea eligibilă și neeligibilă a aceluiași obiect; nu fragmenta achizițiile similare.",
+        "Verifică la data semnării contractului și corespondența tehnică a unui produs aflat în baza AFIR de prețuri de referință; diferențele peste plafon sunt neeligibile.",
+        "Nicio plată cash justificată, rezultat achiziție directă publicat în platformă și beneficiarul real al ofertantului câștigător documentat înaintea semnării contractului.",
+        "Poți iniția pe riscul propriu procedura după publicarea rezultatului final al selecției, înainte de contractul de finanțare, dar nu ai un drept de finanțare garantat.",
+        "Clauza de ajustare 50% din art.7 privește exclusiv circumstanțe imprevizibile cu condiții cumulative; nu este o creștere automată de buget."
+      ],
+      "three_actions": [
+        "Înainte de a contracta, stabilește obiectul real, valoarea totală fără TVA și procedeul permis; verifică dacă intră în baza de prețuri AFIR și păstrează justificarea de piață.",
+        "Dacă procedura este competitivă, pregătește caietul de sarcini obiectiv și contractul, folosește exclusiv platforma AFIR, verifică conflictele de interese și beneficiarul real, respectă termenul contestațiilor.",
+        "Pentru rambursare/audit, păstrează documentația, ofertele, raportul, contractul, facturile și plățile timp de cinci ani după ultima plată; confruntă cu contractul individual și formele de plată Rev.2."
+      ],
+      "not_release_verified": "No raw PDF SHA/official retrieval receipt, applicable contract annex, DAPP_EVIDENCE_GATE or QA exact-head; no P11 or public update."
     }
   },
   "claim_evidence_ledger": [
@@ -766,6 +785,391 @@
       },
       "document_locator": "Official AFIR first 'Formulare Plată Beneficiari ... Ed. I, Rev. 2' download target (native RAR)",
       "evidence_paraphrase": "A date stamp appears in the download filename; it does not establish the exact revision date or legal effective period."
+    },
+    {
+      "claim_id": "AFIR31",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "procurement_scope",
+      "value": {
+        "applies_to": "SE-FM private beneficiaries outside public procurement laws 98/2016 and 99/2016",
+        "version": "Îndrumar metodologic Ed I/Rev 0",
+        "approval": "Annex MADR Order 142/2026",
+        "effective_from": "2026-04-29"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 1/16, art.1 §§1.1–1.5",
+      "evidence_paraphrase": "Does not cover the distinct 2026 public-beneficiary AFIR calls.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR32",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "direct_procurement_services_ceiling",
+      "value": {
+        "currency": "RON",
+        "value_excluding_vat": 15000,
+        "operator": "<=",
+        "scope": "services"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 1 and p. 9/16, art.1 §1.3; art.5 §5.1(1)a",
+      "evidence_paraphrase": "Threshold exclusive of VAT, not flat per project.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR33",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "direct_procurement_products_works_ceiling",
+      "value": {
+        "currency": "RON",
+        "value_excluding_vat": 75000,
+        "operator": "<=",
+        "scope": "products and works"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 1 and p. 9/16, art.1 §1.3; art.5 §5.1(1)b",
+      "evidence_paraphrase": "Special price-reference database direct-procurement route in art.5 §5.3 must be treated separately.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR34",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "value_estimate_mixed_eligible_ineligible",
+      "value": {
+        "unit": "value excluding VAT",
+        "includes": "eligible and ineligible components belonging to same procurement object",
+        "exclusively_ineligible_budget": "guidance not applicable, art4 §4.6.2(2)"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "pp. 5–6/16, art.4 §§4.6.1–4.6.2",
+      "evidence_paraphrase": "Do not apply threshold only to eligible fraction of the same object.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR35",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "anti_artificial_splitting",
+      "value": {
+        "similar_procurements_aggregated": true,
+        "artificial_splitting_prohibited": true,
+        "separate_objects_exception": "genuinely different, justified staged or functionally independent, documented"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "pp. 6–7/16, art.4 §4.6.6",
+      "evidence_paraphrase": "Contract splitting to avoid competitive procurement is prohibited.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR36",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "procurement_pre_contract_start",
+      "value": {
+        "allowed_after": "publication of final selection results",
+        "before_grant_agreement": "at applicant's own risk",
+        "grant_entitlement": false
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 5/16, art.4 §4.3(1)–(3)",
+      "evidence_paraphrase": "No automatic AFIR obligation to fund pre-contract purchases; contract controls eligible costs.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR37",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "cash_payments_prohibition",
+      "value": {
+        "cash_payment_documents_accepted": false
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 5/16, art.4 §4.4",
+      "evidence_paraphrase": "Separate treatment from VAT eligibility.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR38",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "direct_award_traceability",
+      "value": {
+        "requires_market_valuation_records": true,
+        "requires_offers_contract_records": true,
+        "publish_direct_award_result_on_AFIR_portal": true
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 9/16, art.5 §5.2",
+      "evidence_paraphrase": "Direct purchase is not paperwork-free and outcome must be published.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR39",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "reference_price_database_exception",
+      "value": {
+        "direct_purchase_possible_if": "item listed in AFIR price reference database and available there on supply contract date, and conforms to approved techno-economic documentation",
+        "competitive_procedure_required_for_qualified_exception": false
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "pp. 9–10/16, art.5 §5.3(1)–(2)",
+      "evidence_paraphrase": "Database route is a defined product-specific exception, not a general waiver.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR40",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "reference_price_database_eligible_cost_cap",
+      "value": {
+        "max_eligible_price": "reference database amount at date of supply/purchase contract signature",
+        "contract_above_reference": "excess ineligible paid by beneficiary",
+        "contract_below_reference": "contract price is reimbursable base"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "pp. 9–10/16, art.5 §5.3(3)–(4)",
+      "evidence_paraphrase": "Price cap belongs to individual qualified products and does not alter call grant ceiling.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR41",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "competitive_procurement_process",
+      "value": {
+        "platform": "AFIR electronic procurement platform",
+        "mandatory_when": "estimated cost above direct thresholds, subject to special 5.3 exception",
+        "award_criterion": "lowest price",
+        "clarification_request_deadline": "no later than 72 hours before offers close"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "pp. 10–11/16, art.6 §§6.1–6.5",
+      "evidence_paraphrase": "Clarifications cannot introduce new award rules.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR42",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "procurement_appeal_window",
+      "value": {
+        "minimum_wait_after_award_report_business_days": 6,
+        "exception": "single qualified winner, art6 §6.8(3)"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "pp. 11–13/16, art.6 §§6.3(2)k, 6.8(3)",
+      "evidence_paraphrase": "This is procurement challenge window, not grant application appeal deadline.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR43",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "vendor_beneficial_owner_check",
+      "value": {
+        "collect_before_signing_supplier_contract": true,
+        "documents": "ONRC/foreign authority/qualifying declaration as applicable",
+        "personal_data": "GDPR processing needed"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 8/16, art.4 §4.8",
+      "evidence_paraphrase": "Do not confuse vendor's beneficial owner with grant applicant or target group.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR44",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "procurement_record_retention",
+      "value": {
+        "years": 5,
+        "starts": "last project payment",
+        "applies": "direct and competitive procurement and contract implementation files"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 16/16, art.8 §8.2",
+      "evidence_paraphrase": "Retention runs after final payment, not contract signature.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR45",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "procurement_contract_modifications",
+      "value": {
+        "written_addendum_before_expiry": true,
+        "retroactive_addendum_allowed": false,
+        "unforeseen_cumulative_price_increase_cap": "50% of initial contract under specific art7 §7.2 conditions, not general option",
+        "unfunded_increase": "beneficiary own funds"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "pp. 14–15/16, art.7 §§7.1–7.3",
+      "evidence_paraphrase": "50% condition limited to unforeseen circumstances, does not authorize funding top-up.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
+    },
+    {
+      "claim_id": "AFIR46",
+      "claim_type": "OFFICIAL_FACT",
+      "fact_class": "procurement_transitional_applicability",
+      "value": {
+        "new_guidance": "for procurements initiated after effective date 2026-04-29",
+        "old_procurement": "rules in force on initiation date",
+        "breach_risk": "ineligible expenditure or recovery"
+      },
+      "evidence_state": "UNKNOWN",
+      "editorial_source_support": "OFFICIAL_PDF_16_PAGES_READ_PAGE_AND_ARTICLE_LOCATED_NATIVE_BYTES_NOT_ACQUIRED",
+      "source_ids": [
+        "S10"
+      ],
+      "document_locator": "p. 16/16, art.8 §§8.1, 8.3–8.4",
+      "evidence_paraphrase": "Cannot retroactively regrade already-started procedures without their applicable historical rules.",
+      "source_version": "MADR Ordin 142/2026, Îndrumar achiziții beneficiari privați Schema ENERGIE, Ed. I/Rev.0, effective 2026-04-29",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "fetched_at": null,
+      "parser_version": null,
+      "source_run_id": null,
+      "analyst_reviewed_date": "2026-10-20"
     }
   ],
   "source_manifest": [
@@ -900,6 +1304,22 @@
       "acquisition_run_id": null,
       "access_state": "FETCH_FAILED_UNSUPPORTED_BINARY_CONTENT; FOLLOWUP_DIRECT_MEDIA_URL_INACCESSIBLE",
       "provenance_note": "Neither the ZIP/RAR bytes nor file-level manifest were obtained; date embedded in filename is not proof of a legal effective date."
+    },
+    {
+      "source_id": "S10",
+      "authority": "MADR/AFIR",
+      "document_title": "Anexa la Ordinul MADR nr.142/2026 — Îndrumar metodologic privind achizițiile efectuate de beneficiarii privați SE-FM",
+      "url": "https://www.afir.ro/api/file/document?filename=INDRUMAR+Achizitii+Privati+ENERGIE+E.1+Rev.0+2026&filetype=pdf&url=%2Fmedia%2Fioqf0pxg%2Findrumar-achizitii-privati_energie_e1-rev0-2026.pdf",
+      "document_date": "2026-04-29",
+      "document_version": "Ed. I/Rev.0, in force 29 Apr 2026; Monitorul Oficial 348/29.04.2026",
+      "locator": "16-page exact official AFIR PDF; art.1, art.4 §4.3–4.8, art.5 §5.1–5.3, art.6, art.7, art.8; printed pp. 1, 5–16",
+      "raw_sha256": null,
+      "semantic_sha256": null,
+      "acquisition_fetched_at": null,
+      "parser_version": null,
+      "acquisition_run_id": null,
+      "access_state": "OFFICIAL_PDF_RENDERED_16_PAGES_AND_EXACT_ARTICLES_REVIEWED; SOURCE_BYTES_SHA_UNAVAILABLE",
+      "provenance_note": "The official PDF is viewable with page images/text; no original byte-preserving retrieval certificate or raw/semantic hash was obtained. Do not promote any claim to confirmed_for_release."
     }
   ],
   "editorial_review": {
@@ -935,7 +1355,7 @@
       }
     ],
     "decision_utility": "New material implementation-stage liquidity guidance for private contracted beneficiaries; avoid interpreting advances as call reopening or as a fixed percentage of total investment.",
-    "release_decision": "PROVISIONAL_FAIL_CLOSED; H03 indexes implementation-form revision but native archive, contract annex, exact-source acquisition provenance and DAPP_EVIDENCE_GATE unverified.",
+    "release_decision": "PROVISIONAL_FAIL_CLOSED. H04 exact-page AFIR procurement PDF review is editorial analysis/staging only; requires native evidence, deterministic gate and exact-head QA.",
     "h02_prefinancing_adversarial_checks": [
       {
         "question": "30% se aplică valorii totale a proiectului sau întregului grant inițial?",
@@ -980,12 +1400,44 @@
         "question": "Does AFIR's general instruction imply automated form completion is allowed?",
         "result": "NO — use AFIR's published current forms and its own completion instructions."
       }
+    ],
+    "h04_procurement_adversarial_checks": [
+      {
+        "q": "Apply these private procurement thresholds to 2026 energy calls for public authorities?",
+        "verdict": "NO",
+        "basis": "Order scope art1 private recipients outside Laws 98/2016 and 99/2016."
+      },
+      {
+        "q": "Is the 15k/75k cutoff VAT-inclusive or measured from eligible project cost only?",
+        "verdict": "EX VAT ON TOTAL OBJECT; includes eligible and ineligible portions",
+        "basis": "art1, art4 §4.6, art5 §5.1."
+      },
+      {
+        "q": "Can a database-listed equipment purchase use direct buying regardless of ordinary threshold?",
+        "verdict": "SPECIFIC CONDITIONAL EXCEPTION; confirm exact product at contract date",
+        "basis": "art5 §5.3, AFIR reference DB controls and tech match."
+      },
+      {
+        "q": "Does 50% contract increase authorize a 50% greater grant?",
+        "verdict": "NO",
+        "basis": "art7 §7.2 unpredictable circumstances only; extra beyond budget paid privately."
+      },
+      {
+        "q": "Do new rules apply retrospectively to purchases initiated before 29 Apr 2026?",
+        "verdict": "NO",
+        "basis": "art8 §8.3."
+      },
+      {
+        "q": "Can these facts be declared published because source is an AFIR-hosted PDF?",
+        "verdict": "NO",
+        "basis": "Claim-level raw PDF hash/source receipt and DAPP_EVIDENCE_GATE missing."
+      }
     ]
   },
   "material_diff": {
     "baseline": "P11 asOf 2026-09-27: status DISCOVERED, materialFacts empty, blockedFactClasses all, publicationDecision BLOCK_MATERIAL_FACTS / OPEN_DEADLINE_EXPIRED_REQUIRES_REFRESH.",
     "new_evidence": "AFIR closure 17.08.2026 and 07.09/07.10.2026 evaluation report index positively establish session 03/2026 closed; official grant/unit and applicant distinctions assembled in analyst ledger.",
-    "production_change": "NONE; dossier candidate branch only",
+    "production_change": "NONE",
     "old_page_preserved": true,
     "h02_delta": [
       "Official AFIR communiqué dated 30 September 2026 adds private-beneficiary SGB-based prefinancing path relevant to the same Schema Energie.",
@@ -1000,17 +1452,35 @@
       "Official download filename contains a 07.10.2026 update hint, but not a verified legal change date; native RAR contents remain inaccessible.",
       "Improved post-award guidance for contracted private beneficiaries: verify current payment forms, not just V7 application guide; no new application call implied.",
       "Zero material changes to public P11/decision products, site, or 03/2026 closed-session status."
-    ]
+    ],
+    "h04_delta": [
+      "NEW substantive source: 16-page AFIR-hosted official MADR Order 142/2026 private procurement methodology Ed I/Rev 0, applicable from 29 Apr 2026.",
+      "Exact service direct threshold <=15,000 RON ex VAT and goods/works <=75,000 RON ex VAT; special verified reference-price database direct route; electronic competitive award lowest-price default.",
+      "Eligibility-inclusive value estimate + prohibited splitting, documentary controls, cash payments not accepted, 5-year procurement record retention and procurement-specific appeal timing.",
+      "Temporal applicability limited to acquisitions initiated after order effective; not new 2026 funding session or change in grant eligibility.",
+      "No release eligible claims due unverified original raw SHA, metadata and new deterministic DAPP_EVIDENCE_GATE; no P11/decision product/site modification."
+    ],
+    "new_claims_h04": 16
   },
-  "next_evidence_action": "Obține prin achiziție AFIR autorizată pachetul RAR 'Formulare Plată Beneficiari Schemă Energie (Ed. I, Rev. 2)' și instrucțiunile de plată Rev.2. Enumeră fișierele, data semnării și condițiile contractuale, verifică și citează formularele concrete, capturează hashurile native/metadatele de achiziție. Continuă recuperarea SGB și a ghidului V7 nativ; nu repeta cele două metode RAR indisponibile. Confirmă doar documente réellement citite; DAPP_EVIDENCE_GATE înainte de orice release.",
+  "next_evidence_action": "Acquire and hash exact native 16-page AFIR-hosted MADR Order 142/2026 procurement PDF, link document version/art/page claims; crosscheck individual SE-FM financing contract plus AFIR Ed I/Rev2 payment RAR and SGB document when transport available; obtain DAPP_EVIDENCE_GATE claim-level implementation/test/integration proof. Do not reopen closed session, alter material P11 or deploy.",
   "checkpoint_details": {
-    "storage": "GitHub DAPP staging branch only",
-    "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261015-H02-SGB-PREFINANCING-STAGING",
-    "previous_candidate_blob_sha": "94be27bdaf608997f759200de514645cf2dac120",
-    "previous_branch_head": "d8506d61c2d09a72d17518d8891b844095988258",
-    "base_main_observed": "dc18098402aa3d5fc7e1e1ab0a670327aef71d8b",
-    "replay": "Fetch AFIR forms index and the native RAR/Rev.2 instructions via authorized acquisition; ensure printed revision/validity/contract applicability; assert session 03/2026 closure stays unchanged; then run DAPP_EVIDENCE_GATE once implemented.",
-    "rollback": "Revert only H03 update on branch partener-dapp-afir-energy-20261012 to previous branch head d8506d61c2d09a72d17518d8891b844095988258; never touch main/P11/decision_products/site/LKG."
+    "h04": {
+      "run_id": "DAPP-AFIR-ENERGY-20261020-H04-PROCUREMENT-ORDER142-CLAIM-PAGES",
+      "checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261020-H04-PRIVATE-PROCUREMENT-STAGING",
+      "source_id": "S10",
+      "base_main_sha": "3c2baaae5fcdf58fd903bf590e6fe8c0275c2942",
+      "branch_base_head_sha": "a1fa051315f9324b7d8230a605eb3681e2c8a0c5",
+      "previous_candidate_blob_sha": "c24a307142194826e74cf8f7f9cce37da1af08f7",
+      "rollback": "Revert this single H04 candidate update to branch parent commit a1fa051315f9324b7d8230a605eb3681e2c8a0c5; never alter main/P11/decision_products/site.",
+      "claims_added": 16,
+      "remaining_blockers": [
+        "native_pdf_raw_hash",
+        "fetched_at_parser_version_receipt",
+        "individual_contract_annex",
+        "DAPP_EVIDENCE_GATE"
+      ],
+      "no_production_mutation": true
+    }
   },
   "gate_checks": {
     "DAPP_EVIDENCE_GATE": "NOT_VERIFIED_IMPLEMENTED",
@@ -1024,9 +1494,12 @@
     "contractual_annex": "UNAVAILABLE_NOT_INSPECTED",
     "native_payment_forms_rev2": "FAIL_NOT_READ",
     "payment_forms_raw_sha256": "FAIL_NOT_OBTAINED",
-    "dapp_claim_gate_certified": "NOT_CERTIFIED"
+    "dapp_claim_gate_certified": "NOT_CERTIFIED",
+    "procurement_official_pdf_visual_pages": "READ_16_PAGES_ARTICLE_LEVEL",
+    "procurement_pdf_raw_sha256": "NOT_OBTAINED",
+    "procurement_pdf_parser_version": "NOT_OBTAINED"
   },
   "needs_user": false,
-  "previous_analysis_run_id": "DAPP-AFIR-ENERGY-20261015-H02-PREFINANCING-SGB",
-  "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261015-H02-SGB-PREFINANCING-STAGING"
+  "previous_analysis_run_id": "DAPP-AFIR-ENERGY-20261018-H03-PAYMENT-FORMS-REV2",
+  "previous_checkpoint": "PARTENER-DAPP-AFIR-ENERGY-20261018-H03-PAYMENT-FORMS-INDEX-STAGING"
 }
