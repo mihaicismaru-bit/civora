@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "generatedAt": "2026-10-19T20:45:56.930350+00:00",
+  "generatedAt": "2026-10-20T10:29:05.563491+00:00",
   "policy": {
     "purpose": "record-level-material-change-resolution",
     "failClosed": true,
@@ -10,8 +10,8 @@
     "dedicatedStructuredSnapshotsMayResolveExactCandidates": true
   },
   "summary": {
-    "candidateCount": 1,
-    "unresolvedCount": 0,
+    "candidateCount": 2,
+    "unresolvedCount": 1,
     "publishableMaterialFactCount": 0
   },
   "items": [
@@ -20,8 +20,8 @@
       "sourceTier": "T1",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
       "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-      "fingerprint": "d46464a2ada4fb3d9c2bdef6c38d78aef0a205aa62dff11638f55204bcfc9033",
-      "observedAt": "2026-10-19T20:45:11.190877+00:00",
+      "fingerprint": "c7a7e28d6f7609e463911e6dfc360c2f91e3be53c35f5c2d797876798a6cef47",
+      "observedAt": "2026-10-20T10:28:27.435263+00:00",
       "status": "RESOLVED",
       "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
       "blockedFactClasses": [
@@ -37,12 +37,12 @@
       "materialFactAction": "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED",
       "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED",
       "resolutionType": "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT",
-      "resolvedAt": "2026-10-19T20:45:56.930350+00:00",
+      "resolvedAt": "2026-10-20T10:29:05.563491+00:00",
       "dedicatedSnapshotPublishable": true,
       "resolutionEvidence": {
         "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-        "sourceFingerprint": "d46464a2ada4fb3d9c2bdef6c38d78aef0a205aa62dff11638f55204bcfc9033",
-        "snapshotFingerprint": "6cbb631bf6a548cd92ec217b87219a9735530b909da48aa50d9e545d9f7602bf",
+        "sourceFingerprint": "c7a7e28d6f7609e463911e6dfc360c2f91e3be53c35f5c2d797876798a6cef47",
+        "snapshotFingerprint": "4e772d0f99d404373c5d4cf9a65cc5e01f6f94dc1ac4bba53862a32dad883126",
         "rowCount": 7,
         "interventions": [
           "DR-12",
@@ -50,6 +50,28 @@
           "DR-18"
         ]
       }
+    },
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "title": "Info la zi",
+      "canonicalUrl": "https://www.afir.ro/info-la-zi/",
+      "fingerprint": "d318e37a2250fe2f4ac636db0fb78d208a22457ae43870708c178c3a99d4366c",
+      "observedAt": "2026-10-20T10:28:11.693763+00:00",
+      "status": "OPEN",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": true,
+      "publishMaterialFacts": false,
+      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
     }
   ]
 }
