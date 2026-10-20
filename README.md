@@ -6,7 +6,6 @@ Monorepo pentru trei produse:
 |---|---|---|
 | `partener-eu/` | **partener.eu** — EU Funds Intelligence (GitHub Pages, CNAME `partener.eu`) | `partener-eu-*`, `needs-factory-*`, `rpm-lead-api` |
 | `eucons/` | **eucons.ro** — site-ul și sistemul comercial Euroconsult; citește proiecția publică din partener.eu, nu o modifică | `eucons-*` |
-| `public-presence-os/` | **Public Presence OS** — publicare social media (Facebook, Instagram) | `public-presence-*` |
 
 `tools/` conține utilitare comune (ex. `repo_weight_audit.py`).
 
@@ -24,3 +23,5 @@ Colectarea rulează **de două ori pe zi**, în două ferestre (ore UTC; Români
 | Decision products → Editorial (doar dimineața) → Validare | 06:20–06:50 | 16:20–16:50 |
 
 Pages se publică după fiecare pas, dar sare peste republicare dacă site-ul construit e identic cu cel live (sub 6 h). Calculatorul cu runner-ul Windows trebuie să fie pornit la 04:20 și 14:20 UTC. Orice workflow se poate porni și manual din Actions.
+
+PUBLIC PRESENCE OS este acum separat în [mihaicismaru-bit/public-presence](https://github.com/mihaicismaru-bit/public-presence). Istoricul și rollback-ul sunt documentate în [nota de migrare](docs/PUBLIC_PRESENCE_MIGRATION.md).
