@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-24T18:25:33Z",
+  "generatedAt": "2026-10-24T18:26:00Z",
   "readiness": "DEGRADED_FAIL_CLOSED",
   "policy": {
     "purpose": "unified-search-and-evidence-index",
@@ -34,7 +34,7 @@
       "observedAt": "2026-10-24T18:25:16.893794+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 0.0,
+        "ageHours": 0.01,
         "maxAgeHours": 4
       },
       "itemCount": 59,
@@ -60,7 +60,7 @@
       "observedAt": "2026-10-24T10:40:21.628639+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 7.75,
+        "ageHours": 7.76,
         "maxAgeHours": 8
       },
       "itemCount": 30,
@@ -85,10 +85,10 @@
         "MIPE_MANAGED_PROGRAMMES"
       ],
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
-      "observedAt": "2026-10-24T09:53:30.728280+00:00",
+      "observedAt": "2026-10-24T18:25:58.362185+00:00",
       "freshness": {
-        "status": "STALE",
-        "ageHours": 8.53,
+        "status": "CURRENT",
+        "ageHours": 0.0,
         "maxAgeHours": 4
       },
       "itemCount": 1,
@@ -3103,35 +3103,31 @@
       "errors": []
     },
     "freshness": {
-      "status": "DEGRADED",
-      "current": 63,
+      "status": "PASS",
+      "current": 64,
       "total": 64,
-      "slaBreaches": [
-        "MIPE_CORPUS"
-      ],
-      "materialStatus": "DEGRADED",
-      "materialCurrent": 26,
+      "slaBreaches": [],
+      "materialStatus": "PASS",
+      "materialCurrent": 27,
       "materialTotal": 27,
-      "materialSlaBreaches": [
-        "MIPE_CORPUS"
-      ],
+      "materialSlaBreaches": [],
       "sources": [
         {
           "sourceId": "AFIR_CORPUS",
+          "status": "CURRENT",
+          "ageHours": 0.01,
+          "maxAgeHours": 4
+        },
+        {
+          "sourceId": "MIPE_CORPUS",
           "status": "CURRENT",
           "ageHours": 0.0,
           "maxAgeHours": 4
         },
         {
-          "sourceId": "MIPE_CORPUS",
-          "status": "STALE",
-          "ageHours": 8.53,
-          "maxAgeHours": 4
-        },
-        {
           "sourceId": "PEO_CALENDAR",
           "status": "CURRENT",
-          "ageHours": 7.75,
+          "ageHours": 7.76,
           "maxAgeHours": 8
         },
         {
@@ -3629,7 +3625,7 @@
         "observedAt": "2026-10-24T18:25:16.893794+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 0.0,
+          "ageHours": 0.01,
           "maxAgeHours": 4
         },
         "itemCount": 59,
@@ -3664,10 +3660,10 @@
           "MIPE_MANAGED_PROGRAMMES"
         ],
         "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
-        "observedAt": "2026-10-24T09:53:30.728280+00:00",
+        "observedAt": "2026-10-24T18:25:58.362185+00:00",
         "freshness": {
-          "status": "STALE",
-          "ageHours": 8.53,
+          "status": "CURRENT",
+          "ageHours": 0.0,
           "maxAgeHours": 4
         },
         "itemCount": 1,
@@ -3707,7 +3703,7 @@
         "observedAt": "2026-10-24T10:40:21.628639+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 7.75,
+          "ageHours": 7.76,
           "maxAgeHours": 8
         },
         "itemCount": 30,
@@ -6674,11 +6670,11 @@
     "replay": {
       "status": "PASS",
       "algorithm": "sha256-canonical-json",
-      "referenceTime": "2026-10-24T18:25:33Z",
-      "inputDigest": "03939078261220d7a3468b3fcafcaf4ffeb1130d9b9485190a18cae071de32c7",
-      "outputDigest": "72d02699adf401d7190e46ab7416da762e26fdab76910595bb840269d81d5fdd",
-      "firstPassDigest": "3bb059b96dd58b573b8141a7af20eff8e3d65b1529079ace610fda2c52d21fed",
-      "secondPassDigest": "3bb059b96dd58b573b8141a7af20eff8e3d65b1529079ace610fda2c52d21fed",
+      "referenceTime": "2026-10-24T18:26:00Z",
+      "inputDigest": "575b896f3118629fd93cb29ed6276c253c1a483437f77b7472533fe99f233549",
+      "outputDigest": "7db8a9b99dc75bd851dcc9079568f9cc305f435718c40954566d6acf6d4ca610",
+      "firstPassDigest": "5b4a92a630bf4fda96d34aedd2fcd414bdaa397873ee91cebf0420157f70aace",
+      "secondPassDigest": "5b4a92a630bf4fda96d34aedd2fcd414bdaa397873ee91cebf0420157f70aace",
       "byteEquivalent": true
     }
   },
@@ -6696,12 +6692,8 @@
       "AFIR / PS PAC 2023-2027": 59,
       "PEO": 30
     },
-    "staleOrUnknownSources": [
-      "MIPE_CORPUS"
-    ],
-    "materialStaleOrUnknownSources": [
-      "MIPE_CORPUS"
-    ],
+    "staleOrUnknownSources": [],
+    "materialStaleOrUnknownSources": [],
     "unavailableT1Sources": [
       "MIPE_CORPUS",
       "SRC-INS-TEMPO",
