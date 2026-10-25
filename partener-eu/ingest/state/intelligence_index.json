@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-25T18:35:54Z",
+  "generatedAt": "2026-10-25T18:36:42Z",
   "readiness": "DEGRADED_FAIL_CLOSED",
   "policy": {
     "purpose": "unified-search-and-evidence-index",
@@ -34,7 +34,7 @@
       "observedAt": "2026-10-25T18:35:37.799599+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 0.0,
+        "ageHours": 0.02,
         "maxAgeHours": 4
       },
       "itemCount": 59,
@@ -60,7 +60,7 @@
       "observedAt": "2026-10-25T11:03:34.965337+00:00",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 7.54,
+        "ageHours": 7.55,
         "maxAgeHours": 8
       },
       "itemCount": 30,
@@ -85,10 +85,10 @@
         "MIPE_MANAGED_PROGRAMMES"
       ],
       "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
-      "observedAt": "2026-10-25T10:14:12.578557+00:00",
+      "observedAt": "2026-10-25T18:36:41.040161+00:00",
       "freshness": {
-        "status": "STALE",
-        "ageHours": 8.36,
+        "status": "CURRENT",
+        "ageHours": 0.0,
         "maxAgeHours": 4
       },
       "itemCount": 1,
@@ -113,7 +113,7 @@
       "observedAt": "2026-10-25T17:32:42.508512Z",
       "freshness": {
         "status": "CURRENT",
-        "ageHours": 1.05,
+        "ageHours": 1.07,
         "maxAgeHours": 6
       },
       "itemCount": 60,
@@ -3103,401 +3103,397 @@
       "errors": []
     },
     "freshness": {
-      "status": "DEGRADED",
-      "current": 63,
+      "status": "PASS",
+      "current": 64,
       "total": 64,
-      "slaBreaches": [
-        "MIPE_CORPUS"
-      ],
-      "materialStatus": "DEGRADED",
-      "materialCurrent": 26,
+      "slaBreaches": [],
+      "materialStatus": "PASS",
+      "materialCurrent": 27,
       "materialTotal": 27,
-      "materialSlaBreaches": [
-        "MIPE_CORPUS"
-      ],
+      "materialSlaBreaches": [],
       "sources": [
         {
           "sourceId": "AFIR_CORPUS",
+          "status": "CURRENT",
+          "ageHours": 0.02,
+          "maxAgeHours": 4
+        },
+        {
+          "sourceId": "MIPE_CORPUS",
           "status": "CURRENT",
           "ageHours": 0.0,
           "maxAgeHours": 4
         },
         {
-          "sourceId": "MIPE_CORPUS",
-          "status": "STALE",
-          "ageHours": 8.36,
-          "maxAgeHours": 4
-        },
-        {
           "sourceId": "PEO_CALENDAR",
           "status": "CURRENT",
-          "ageHours": 7.54,
+          "ageHours": 7.55,
           "maxAgeHours": 8
         },
         {
           "sourceId": "SRC-ADR-CENTRU-PR-ACTIONS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRCENTRU-FUNDING-CATALOG",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRCENTRU-PTJ-CONSULT",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ADRVEST-PTJ-ACTIVE",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ANOFM-VALCEA-STATS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ARACIP-SCHOOL-REGISTRY",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-CSF-ROMANIA-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-EEA-MOU",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-EEA-MOU-LEGAL",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-NATIONAL-DOCUMENTS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-NORWAY-MOU-LEGAL",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EEA-GRANTS-ROMANIA-OVERVIEW",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-CEF-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-CERV-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-CREATIVE-EUROPE-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-DIGITAL-WORK-PROGRAMMES",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-EIC-WP-2026",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-ERASMUS-GUIDE-2026",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-EU4HEALTH-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-EUI-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-FUNDING-TENDERS-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-HORIZON-EUROPE",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-INNOVATION-FUND-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-JUSTICE-GATEWAY",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-LIFE-CALLS-2026",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-MFF-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-SMP-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-EU-SOLIDARITY-CALL-2026",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INS-TEMPO",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-DANUBE",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-EUROPE",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-NEXT-BSB",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROBG",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROBG-POST2027",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROHU",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROHU-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROMD",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROMD-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-RORS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-RORS-2028-2034",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-INTERREG-ROUA",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-ISJ-VALCEA",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-CALENDAR-INDEX",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MAI-FED-GENERAL-GUIDE",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MEC-CNDIPT",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MIPE-EEA-NORWAY-LANDING",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-MYSMIS-CALLS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OI-RESEARCH-HEALTH",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OI-RESEARCH-POCIDIF",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRBI-PEO",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRBI-PIDS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRCENTRU-PEO",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRNE-PEO",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO-GUIDES",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OIRVEST-PEO-MANUALS",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-OLD-FONDURI-UE",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "SRC-PREFECTURA-TM-FUNDING",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         {
           "sourceId": "VERIFIED_SOURCE_REGISTRY",
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         }
       ]
@@ -3629,7 +3625,7 @@
         "observedAt": "2026-10-25T18:35:37.799599+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 0.0,
+          "ageHours": 0.02,
           "maxAgeHours": 4
         },
         "itemCount": 59,
@@ -3664,10 +3660,10 @@
           "MIPE_MANAGED_PROGRAMMES"
         ],
         "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
-        "observedAt": "2026-10-25T10:14:12.578557+00:00",
+        "observedAt": "2026-10-25T18:36:41.040161+00:00",
         "freshness": {
-          "status": "STALE",
-          "ageHours": 8.36,
+          "status": "CURRENT",
+          "ageHours": 0.0,
           "maxAgeHours": 4
         },
         "itemCount": 1,
@@ -3707,7 +3703,7 @@
         "observedAt": "2026-10-25T11:03:34.965337+00:00",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 7.54,
+          "ageHours": 7.55,
           "maxAgeHours": 8
         },
         "itemCount": 30,
@@ -3753,7 +3749,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -3789,7 +3785,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -3827,7 +3823,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -3865,7 +3861,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -3898,7 +3894,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -3931,7 +3927,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -3965,7 +3961,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -3999,7 +3995,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4033,7 +4029,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4069,7 +4065,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4103,7 +4099,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4137,7 +4133,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4173,7 +4169,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4206,7 +4202,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4239,7 +4235,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4272,7 +4268,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4305,7 +4301,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4338,7 +4334,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4371,7 +4367,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4404,7 +4400,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4437,7 +4433,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4470,7 +4466,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4503,7 +4499,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4536,7 +4532,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4569,7 +4565,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4602,7 +4598,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4635,7 +4631,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4668,7 +4664,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4701,7 +4697,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4734,7 +4730,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4767,7 +4763,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4800,7 +4796,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4833,7 +4829,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4866,7 +4862,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4900,7 +4896,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -4933,7 +4929,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -4967,7 +4963,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5000,7 +4996,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5034,7 +5030,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5067,7 +5063,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5101,7 +5097,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5134,7 +5130,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5167,7 +5163,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5207,7 +5203,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5244,7 +5240,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5281,7 +5277,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5314,7 +5310,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5350,7 +5346,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5385,7 +5381,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5421,7 +5417,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5457,7 +5453,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5493,7 +5489,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5529,7 +5525,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5565,7 +5561,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5604,7 +5600,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5640,7 +5636,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5676,7 +5672,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5715,7 +5711,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": true,
@@ -5748,7 +5744,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5781,7 +5777,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "materialFactUse": false,
@@ -5810,7 +5806,7 @@
         "observedAt": "2026-10-25T17:32:42.508512Z",
         "freshness": {
           "status": "CURRENT",
-          "ageHours": 1.05,
+          "ageHours": 1.07,
           "maxAgeHours": 6
         },
         "itemCount": 60,
@@ -6674,11 +6670,11 @@
     "replay": {
       "status": "PASS",
       "algorithm": "sha256-canonical-json",
-      "referenceTime": "2026-10-25T18:35:54Z",
-      "inputDigest": "97a10da11a2d413b4c7a7b3cd3c0ded5794ec4ac2bad67656dba7e8cf4da3b9a",
-      "outputDigest": "b1e1acc09708c80a057ade9a8ef751b079784a7f24e4dc477e31bfdef386b2bc",
-      "firstPassDigest": "a96a9e080349c3a03127f9a219da545ae5e4520cf5e965efd8b41db309d406ea",
-      "secondPassDigest": "a96a9e080349c3a03127f9a219da545ae5e4520cf5e965efd8b41db309d406ea",
+      "referenceTime": "2026-10-25T18:36:42Z",
+      "inputDigest": "515b427be0f959d23fa48f377e3a0e0d06cbf0da2ec695ad1689cacf1e3e373a",
+      "outputDigest": "1b7be20538eed0215236af1eb41e14e5d72728c8de681522ac3ebc93a71ff118",
+      "firstPassDigest": "1916c2d08684ed0c0fc81cca68f463f0798bef1dbcad15a16c6da52c7ddfa89d",
+      "secondPassDigest": "1916c2d08684ed0c0fc81cca68f463f0798bef1dbcad15a16c6da52c7ddfa89d",
       "byteEquivalent": true
     }
   },
@@ -6696,12 +6692,8 @@
       "AFIR / PS PAC 2023-2027": 59,
       "PEO": 30
     },
-    "staleOrUnknownSources": [
-      "MIPE_CORPUS"
-    ],
-    "materialStaleOrUnknownSources": [
-      "MIPE_CORPUS"
-    ],
+    "staleOrUnknownSources": [],
+    "materialStaleOrUnknownSources": [],
     "unavailableT1Sources": [
       "MIPE_CORPUS",
       "SRC-INS-TEMPO",
