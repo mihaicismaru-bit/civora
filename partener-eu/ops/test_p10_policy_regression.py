@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-"""Static guard for P10 orchestration and fail-closed publication policy."""
+"""Regression guard for P10 orchestration and fail-closed publication policy."""
+import io
 import json
 import re
+import tempfile
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 from urllib.parse import urlsplit
+
+import p10_monitor_integrity as integrity_monitor
 
 REPO = Path(__file__).resolve().parents[2]
 PARTENER = REPO / "partener-eu"
@@ -26,6 +32,86 @@ central_source_registry = json.loads((PARTENER / "ingest" / "source_registry.jso
 stale_validation_trigger = PARTENER / "ops" / "p10-validation-trigger.txt"
 
 errors = []
+
+
+# Exercise the production detector and exit code, not another substring check.
+# All generated evidence is confined to a temporary fixture, never the ledger.
+def test_validation_schedule_contract() -> None:
+    schedule = "  schedule:\n    - cron: '50 6,16 * * *'\n      timezone: 'Europe/Bucharest'\n"
+    assert validation.count(schedule) == 1, "review the changed production schedule contract"
+    without_schedule = validation.replace(schedule, "")
+    cases = {
+        "current twice-daily schedule": (validation, True),
+        "comments and double quotes": (
+            validation.replace(schedule, schedule.replace("'", '"').replace(
+                "  schedule:\n", "  schedule: # existing cadence\n"
+            )), True,
+        ),
+        "missing workflow": ("", False),
+        "missing schedule": (without_schedule, False),
+        "empty schedule": (validation.replace(schedule, "  schedule:\n"), False),
+        "commented schedule": (
+            validation.replace(schedule, "".join("# " + line + "\n" for line in schedule.splitlines())), False,
+        ),
+        "old cadence": (validation.replace("50 6,16 * * *", "17 */6 * * *"), False),
+        "different cadence": (validation.replace("50 6,16 * * *", "50 6 * * *"), False),
+        "malformed cron": (validation.replace("50 6,16 * * *", "50 6,16 * *"), False),
+        "commented cron": (validation.replace("    - cron:", "    # - cron:"), False),
+        "missing timezone": (validation.replace("      timezone: 'Europe/Bucharest'\n", ""), False),
+        "changed timezone": (validation.replace("Europe/Bucharest", "UTC"), False),
+        "schedule outside on": (without_schedule + "\nother:\n" + schedule, False),
+        "schedule inside job script": (
+            without_schedule + "\n  fake:\n    steps:\n      - run: |\n"
+            + "".join("        " + line + "\n" for line in schedule.splitlines()), False,
+        ),
+        "duplicate schedule": (validation.replace(schedule, schedule * 2), False),
+        "duplicate on": (validation + "\non:\n" + schedule, False),
+        "additional cron": (validation.replace(schedule, schedule + "    - cron: '0 * * * *'\n"), False),
+    }
+    for label, (workflow, expected) in cases.items():
+        assert integrity_monitor.validation_schedule_is_configured(workflow) is expected, label
+
+    with tempfile.TemporaryDirectory() as temp:
+        root = Path(temp)
+        history = root / "history"
+        history.mkdir()
+        latest = {"run_started": "2026-10-29T13:36:00Z", "frontend_checks": [{"pass": True}]}
+        for path, value in [
+            (root / "latest.json", latest),
+            (history / "20261029T133600Z.json", latest),
+            (root / "state.json", {"fixture": "unchanged"}),
+            (root / "checkpoint.json", {"fixture": "unchanged"}),
+        ]:
+            path.write_text(json.dumps(value), encoding="utf-8")
+        with patch.multiple(
+            integrity_monitor,
+            ROOT=root, LATEST=root / "latest.json", HISTORY=history,
+            STATE=root / "state.json", CHECKPOINT=root / "checkpoint.json",
+            INGEST_STATE=root / "ingest", TASKS=root / "tasks",
+            INTEGRATIONS=root / "integrations.json", OUT=root / "result.json",
+            VALIDATION_WORKFLOW=root / "workflow.yml",
+        ):
+            for label, (workflow, expected) in cases.items():
+                integrity_monitor.VALIDATION_WORKFLOW.write_text(workflow, encoding="utf-8")
+                with redirect_stdout(io.StringIO()):
+                    code = integrity_monitor.main()
+                report = json.loads(integrity_monitor.OUT.read_text(encoding="utf-8"))
+                assert code == (0 if expected else 2), label
+                assert report["summary"]["critical_policy_fail"] is (not expected), label
+                assert report["autonomous_orchestration"]["scheduled_validation_configured"] is expected, label
+                assert any("scheduled production validation" in error for error in report["summary"]["policy_errors"]) is (not expected), label
+
+            # A valid schedule must never excuse other integrity failures.
+            integrity_monitor.VALIDATION_WORKFLOW.write_text(validation, encoding="utf-8")
+            integrity_monitor.CHECKPOINT.write_text('{"fixture": "diverged"}', encoding="utf-8")
+            with redirect_stdout(io.StringIO()):
+                assert integrity_monitor.main() == 2, "checkpoint corruption must fail closed"
+            report = json.loads(integrity_monitor.OUT.read_text(encoding="utf-8"))
+            assert "source state and recovery checkpoint diverge" in report["summary"]["policy_errors"]
+    print(f"PASS P10 schedule contract: {len(cases)} detector/monitor cases + checkpoint corruption")
+
+
+test_validation_schedule_contract()
 
 for marker in [
     "workflow_run:",
