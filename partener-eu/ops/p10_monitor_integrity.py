@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import tempfile
 from typing import Any
 
@@ -105,6 +106,36 @@ def task_is_fail_closed(path: pathlib.Path) -> bool:
 
 def workflow_list_contains(text: str, name: str) -> bool:
     return f"      - '{name}'" in text
+
+
+def validation_schedule_is_configured(text: str) -> bool:
+    """Check the existing block-style schedule contract, not scheduler liveness.
+
+    PR #1384 intentionally changed validation to twice daily. Keep that exact
+    cron/timezone contract fail-closed; a future cadence change needs review.
+    Scope the check to on.schedule so comments, job scripts and other triggers
+    cannot stand in for an active schedule. Unsupported YAML forms fail closed.
+    """
+    lines = [line.split("#", 1)[0].rstrip() for line in text.splitlines()]
+    lines = [line for line in lines if line.strip()]
+
+    def children(lines: list[str], header: str) -> list[str]:
+        if lines.count(header) != 1:
+            return []
+        indent = len(header) - len(header.lstrip())
+        result = []
+        for line in lines[lines.index(header) + 1:]:
+            if len(line) - len(line.lstrip()) <= indent:
+                break
+            result.append(line)
+        return result
+
+    schedule = children(children(lines, "on:"), "  schedule:")
+    return bool(
+        len(schedule) == 2
+        and re.fullmatch(r"    - cron: (['\"])50 6,16 \* \* \*\1", schedule[0])
+        and re.fullmatch(r"      timezone: (['\"])Europe/Bucharest\1", schedule[1])
+    )
 
 
 def main() -> int:
@@ -229,7 +260,7 @@ def main() -> int:
         and pages_handoff_integrated
         and not duplicate_direct_handoffs
     )
-    scheduled_validation_configured = "schedule:" in validation_workflow_text and "17 */6 * * *" in validation_workflow_text
+    scheduled_validation_configured = validation_schedule_is_configured(validation_workflow_text)
     peo_candidate_state_only = (
         "peo_calendar_state.json" in peo_workflow_text
         and "git add partener-eu/web/peo-calendar.js" not in peo_workflow_text
@@ -238,7 +269,7 @@ def main() -> int:
     if not workflow_run_integrated:
         errors.append("autonomous monitor routing is incomplete or duplicates the post-deploy validation handoff")
     if not scheduled_validation_configured:
-        errors.append("scheduled production validation is not configured")
+        errors.append("scheduled production validation is missing or differs from the expected cron/timezone contract")
     if not peo_candidate_state_only:
         errors.append("PEO scheduled calendar workflow is not candidate-state-only")
 
