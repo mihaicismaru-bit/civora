@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-29T11:08:18Z",
-  "validation_run_started": "2026-10-29T11:08:09Z",
+  "observed_at": "2026-10-29T12:21:13Z",
+  "validation_run_started": "2026-10-29T12:21:04Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "74867a368827fb7210e9c6647f6a7e0f2e7ceed48b47e92aed5af8c442ce58db",
-    "history_sha256": "74867a368827fb7210e9c6647f6a7e0f2e7ceed48b47e92aed5af8c442ce58db",
-    "history_path": "validation/history/20261029T110809Z.json",
+    "latest_sha256": "1c73e54a322207006a73b56556441de427b3ba810937ef66de97f289f449ee7e",
+    "history_sha256": "1c73e54a322207006a73b56556441de427b3ba810937ef66de97f289f449ee7e",
+    "history_path": "validation/history/20261029T122104Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "e79a02885949ac40e21a4292746f6eeee4de368fb5f16a25a3bf08a6d6e0993b",
-    "checkpoint_sha256": "e79a02885949ac40e21a4292746f6eeee4de368fb5f16a25a3bf08a6d6e0993b",
+    "source_state_sha256": "2d320d099585d85341577a51c642f02e3f03151ba74b06467d6af3682f335e7e",
+    "checkpoint_sha256": "2d320d099585d85341577a51c642f02e3f03151ba74b06467d6af3682f335e7e",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-10-29T10:48:47.357999Z",
-    "age_seconds": 1171,
+    "age_seconds": 5546,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -61,12 +61,12 @@
     "fail_closed": true
   },
   "afir": {
-    "observed_at": "2026-10-28T20:38:11.888919+00:00",
+    "observed_at": "2026-10-29T11:51:04.061900+00:00",
     "status": "PASS",
     "item_count": 59,
     "error_count": 0,
-    "hash_change_candidates": 1,
-    "material_signal_candidates": 1,
+    "hash_change_candidates": 2,
+    "material_signal_candidates": 2,
     "auth_dependency_count": 28,
     "auth_dependencies": [
       {
@@ -252,15 +252,15 @@
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fsesiune-depunere-de-proiecte-dr-12%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/sesiune-depunere-de-proiecte-dr-12/",
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fproiect-de-modificare-ghid-implementare-dr-36-ed-ii-rev-0-versiune-spre-informare%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/info-la-zi/proiect-de-modificare-ghid-implementare-dr-36-ed-ii-rev-0-versiune-spre-informare/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
       },
       {
-        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fdeschidere-sesiuni-proiecte-energie-regenerabila-beneficiari-publici%2F&culture=ro",
-        "sourcePage": "https://www.afir.ro/info-la-zi/deschidere-sesiuni-proiecte-energie-regenerabila-beneficiari-publici/",
+        "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fsesiune-depunere-de-proiecte-dr-12%2F&culture=ro",
+        "sourcePage": "https://www.afir.ro/info-la-zi/sesiune-depunere-de-proiecte-dr-12/",
         "status": "AUTH_OR_ACCESS_DEPENDENT",
         "materialFactAction": "NONE",
         "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -285,11 +285,11 @@
     "publication_policy": "candidate-state-only; web material facts are not auto-promoted on scheduled hash changes"
   },
   "mipe": {
-    "observed_at": "2026-10-28T19:41:21.376306+00:00",
+    "observed_at": "2026-10-29T10:58:10.334000+00:00",
     "status": "OK",
     "source_available": true,
-    "candidate_count": 114,
-    "parsed_relevant_count": 113,
+    "candidate_count": 229,
+    "parsed_relevant_count": 228,
     "published_item_count": null,
     "last_known_good_preserved": false,
     "health": "PASS"
@@ -372,7 +372,7 @@
     "integrity_pass": true,
     "registry_health": "DEGRADED",
     "registry_hash_changes": 5,
-    "afir_hash_changes": 1,
+    "afir_hash_changes": 2,
     "peo_calendar_changes": 0,
     "mipe_health": "PASS",
     "autonomous_orchestration_configured": false,
