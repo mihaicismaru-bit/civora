@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-10-29T21:16:32Z",
-  "validation_run_started": "2026-10-29T21:16:23Z",
+  "observed_at": "2026-10-30T10:56:38Z",
+  "validation_run_started": "2026-10-30T10:56:28Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "f55fdebb40dfe8243bd29cdeb1c27293be9fc87800f38fe497951c7dc6940350",
-    "history_sha256": "f55fdebb40dfe8243bd29cdeb1c27293be9fc87800f38fe497951c7dc6940350",
-    "history_path": "validation/history/20261029T211623Z.json",
+    "latest_sha256": "31de200fa8e7f0bffa187fe9e584728dfb7e4c7ff2522ebfcd1610413c9c6c34",
+    "history_sha256": "31de200fa8e7f0bffa187fe9e584728dfb7e4c7ff2522ebfcd1610413c9c6c34",
+    "history_path": "validation/history/20261030T105628Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "600de6ca2b7b89136cc652ab16761108241c0bbbe992a30423e28b953b074326",
-    "checkpoint_sha256": "600de6ca2b7b89136cc652ab16761108241c0bbbe992a30423e28b953b074326",
+    "source_state_sha256": "98bad11ca30566d2ba8e87d9a3690c2f1530fe194c05e6176d54d762911d406b",
+    "checkpoint_sha256": "98bad11ca30566d2ba8e87d9a3690c2f1530fe194c05e6176d54d762911d406b",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,9 +18,9 @@
   },
   "source_registry": {
     "observed_at": "2026-10-29T19:29:33.368441Z",
-    "age_seconds": 6419,
+    "age_seconds": 55625,
     "stale_after_seconds": 28800,
-    "stale": false,
+    "stale": true,
     "health": "DEGRADED",
     "summary": {
       "total": 60,
@@ -291,14 +291,16 @@
     "health": "PASS"
   },
   "mff_2028_2034": {
-    "observed_at": "2026-10-29T19:43:24.183725Z",
+    "observed_at": "2026-10-30T10:55:33.166684Z",
     "summary": {
       "total": 8,
       "pass": 2,
       "fail": 6,
-      "review_required": 0
+      "review_required": 1
     },
-    "hash_changed_source_ids": [],
+    "hash_changed_source_ids": [
+      "SRC-RO-MAI-EU-2028"
+    ],
     "unsafe_auto_promotions": [],
     "fail_closed": true
   },
