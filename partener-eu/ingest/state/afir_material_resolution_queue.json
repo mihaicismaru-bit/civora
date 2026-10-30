@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "source": "AFIR",
-  "generatedAt": "2026-10-29T20:42:16.896266+00:00",
+  "generatedAt": "2026-10-30T11:43:18.908637+00:00",
   "policy": {
     "purpose": "record-level-material-change-resolution",
     "failClosed": true,
@@ -10,18 +10,40 @@
     "dedicatedStructuredSnapshotsMayResolveExactCandidates": true
   },
   "summary": {
-    "candidateCount": 1,
-    "unresolvedCount": 0,
+    "candidateCount": 4,
+    "unresolvedCount": 3,
     "publishableMaterialFactCount": 0
   },
   "items": [
     {
       "sourceId": "AFIR_CORPUS",
       "sourceTier": "T1",
+      "title": "Comunicate",
+      "canonicalUrl": "https://www.afir.ro/comunicate/",
+      "fingerprint": "24cada10a2a04209efc6770a9784e4ef11e88350f242b5a1cb6b6071a2dc4644",
+      "observedAt": "2026-10-30T11:42:00.907087+00:00",
+      "status": "OPEN",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": true,
+      "publishMaterialFacts": false,
+      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
+    },
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
       "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-      "fingerprint": "dee0db45ae0e68654ad48cbd6b9696bcb71d8129cb52f755a4381d3d59758e53",
-      "observedAt": "2026-10-29T20:41:41.195121+00:00",
+      "fingerprint": "4dc48e0dca878150fe07c2152edea6648b40ce8659f92255e45da8bc6fd78bce",
+      "observedAt": "2026-10-30T11:42:18.216414+00:00",
       "status": "RESOLVED",
       "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
       "blockedFactClasses": [
@@ -37,12 +59,12 @@
       "materialFactAction": "NONE_DOSSIER_FIELDS_REMAIN_BLOCKED",
       "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED",
       "resolutionType": "STRUCTURED_AUTHORITATIVE_LIVE_FUNDS_SNAPSHOT",
-      "resolvedAt": "2026-10-29T20:42:16.896266+00:00",
+      "resolvedAt": "2026-10-30T11:43:18.908637+00:00",
       "dedicatedSnapshotPublishable": true,
       "resolutionEvidence": {
         "canonicalUrl": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
-        "sourceFingerprint": "dee0db45ae0e68654ad48cbd6b9696bcb71d8129cb52f755a4381d3d59758e53",
-        "snapshotFingerprint": "5522a16e106acac90ddbfb777ec33e6eb28885c5cd49646d60360321d5d5e6ce",
+        "sourceFingerprint": "4dc48e0dca878150fe07c2152edea6648b40ce8659f92255e45da8bc6fd78bce",
+        "snapshotFingerprint": "6bca55dee7cd0af06de56e2df8d0544922b2ef082debb191e8d4e191f4b8e213",
         "rowCount": 7,
         "interventions": [
           "DR-12",
@@ -50,6 +72,50 @@
           "DR-18"
         ]
       }
+    },
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "title": "Info la zi",
+      "canonicalUrl": "https://www.afir.ro/info-la-zi/",
+      "fingerprint": "8e6f4c63fe69016aa62903bdd02ad42edb8916db541bcbf23c2c0492ddbc13dc",
+      "observedAt": "2026-10-30T11:41:56.248119+00:00",
+      "status": "OPEN",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": true,
+      "publishMaterialFacts": false,
+      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
+    },
+    {
+      "sourceId": "AFIR_CORPUS",
+      "sourceTier": "T1",
+      "title": "Sesiuni primire proiecte - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "canonicalUrl": "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
+      "fingerprint": "ee05d63f6d2cf2e4cab71092f027ff6f839effaff9c09531d55657305fb52914",
+      "observedAt": "2026-10-30T11:41:57.503303+00:00",
+      "status": "OPEN",
+      "reason": "AFIR_RECORD_MATERIAL_CHANGE_CANDIDATE",
+      "blockedFactClasses": [
+        "deadline",
+        "eligibility",
+        "budget",
+        "scoring",
+        "beneficiaries",
+        "material_call_status"
+      ],
+      "requiresReconciliation": true,
+      "publishMaterialFacts": false,
+      "materialFactAction": "RECONCILE_OFFICIAL_AFIR_MATERIAL_CHANGE",
+      "lastKnownGoodPolicy": "PRESERVE_UNTIL_RECONCILED"
     }
   ]
 }
