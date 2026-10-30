@@ -3,20 +3,41 @@
   "source_url": "https://www.afir.ro/",
   "source_tier": "T1",
   "criticality": "HIGH",
-  "candidate_fingerprint": "6ab82d104a32da6bb4f9b2cc380457f439096267c86ca13c083fcb32aaf960e0",
+  "candidate_fingerprint": "7d53cfb1d69e49867cc241eaec10f3b8a74fb51888fecb9f60ea8aa8a04cb83d",
   "previous_candidate_fingerprint": "6ab82d104a32da6bb4f9b2cc380457f439096267c86ca13c083fcb32aaf960e0",
-  "candidate_count": 1,
-  "material_signal_count": 1,
+  "candidate_count": 4,
+  "material_signal_count": 4,
   "candidates": [
+    {
+      "url": "https://www.afir.ro/comunicate/",
+      "title": "Comunicate",
+      "sha256": "24cada10a2a04209efc6770a9784e4ef11e88350f242b5a1cb6b6071a2dc4644",
+      "material_change_candidate": true,
+      "material_fact_action": "RESOLUTION_TASK_ONLY"
+    },
     {
       "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
       "title": "Contor fonduri disponibile - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
-      "sha256": "dee0db45ae0e68654ad48cbd6b9696bcb71d8129cb52f755a4381d3d59758e53",
+      "sha256": "4dc48e0dca878150fe07c2152edea6648b40ce8659f92255e45da8bc6fd78bce",
+      "material_change_candidate": true,
+      "material_fact_action": "RESOLUTION_TASK_ONLY"
+    },
+    {
+      "url": "https://www.afir.ro/info-la-zi/",
+      "title": "Info la zi",
+      "sha256": "8e6f4c63fe69016aa62903bdd02ad42edb8916db541bcbf23c2c0492ddbc13dc",
+      "material_change_candidate": true,
+      "material_fact_action": "RESOLUTION_TASK_ONLY"
+    },
+    {
+      "url": "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
+      "title": "Sesiuni primire proiecte - Portalul AFIR - informații PS 2027 și depunere proiecte Online",
+      "sha256": "ee05d63f6d2cf2e4cab71092f027ff6f839effaff9c09531d55657305fb52914",
       "material_change_candidate": true,
       "material_fact_action": "RESOLUTION_TASK_ONLY"
     }
   ],
-  "auth_dependency_count": 28,
+  "auth_dependency_count": 29,
   "auth_dependencies": [
     {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2F&culture=ro",
@@ -201,6 +222,13 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fprelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/info-la-zi/prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/",
+      "status": "AUTH_OR_ACCESS_DEPENDENT",
+      "materialFactAction": "NONE",
+      "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
+    },
+    {
       "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fproiect-de-modificare-ghid-implementare-dr-36-ed-ii-rev-0-versiune-spre-informare%2F&culture=ro",
       "sourcePage": "https://www.afir.ro/info-la-zi/proiect-de-modificare-ghid-implementare-dr-36-ed-ii-rev-0-versiune-spre-informare/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
@@ -208,8 +236,8 @@
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
     },
     {
-      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Finfo-la-zi%2Fsesiune-depunere-de-proiecte-dr-12%2F&culture=ro",
-      "sourcePage": "https://www.afir.ro/info-la-zi/sesiune-depunere-de-proiecte-dr-12/",
+      "requestedUrl": "https://www.afir.ro/umbraco/surface/authentication/LogIn?redirectUrl=%2Fcomunicate%2Fprelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18%2F&culture=ro",
+      "sourcePage": "https://www.afir.ro/comunicate/prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/",
       "status": "AUTH_OR_ACCESS_DEPENDENT",
       "materialFactAction": "NONE",
       "reason": "AFIR exposes this route through an authentication surface; no access was fabricated."
@@ -217,7 +245,7 @@
   ],
   "technical_classification": "AUTH_REDIRECTS_EXCLUDED_FROM_CHANGE_CANDIDATES",
   "first_observed_at": "2026-08-12T08:51:30.702569+00:00",
-  "last_observed_at": "2026-10-29T20:42:16.896266+00:00",
+  "last_observed_at": "2026-10-30T11:43:18.908637+00:00",
   "corpus_policy": {
     "failClosed": true,
     "materialFactsAutoPromoted": false,
