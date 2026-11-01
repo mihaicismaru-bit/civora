@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
   "checkpoint": "PARTENER-EU-CIVORA-P10-0020",
-  "observed_at": "2026-11-01T11:20:22Z",
-  "validation_run_started": "2026-11-01T11:20:12Z",
+  "observed_at": "2026-11-01T11:23:09Z",
+  "validation_run_started": "2026-11-01T11:23:00Z",
   "integrity": {
     "latest_history_equal": true,
-    "latest_sha256": "6b7e28fff422c81d15c215299c9b79d342f1f63ef4b2a89006ff55f3b22c192c",
-    "history_sha256": "6b7e28fff422c81d15c215299c9b79d342f1f63ef4b2a89006ff55f3b22c192c",
-    "history_path": "validation/history/20261101T112012Z.json",
+    "latest_sha256": "6622d0fb0bfe4a99f87f5fc8f183846ebd7bc22b50d29b161dbb6cfe921db497",
+    "history_sha256": "6622d0fb0bfe4a99f87f5fc8f183846ebd7bc22b50d29b161dbb6cfe921db497",
+    "history_path": "validation/history/20261101T112300Z.json",
     "source_state_checkpoint_equal": true,
-    "source_state_sha256": "5d295c2713cf3cebba0f9344202a20dbdf5df93de2b3d826d6af204676610974",
-    "checkpoint_sha256": "5d295c2713cf3cebba0f9344202a20dbdf5df93de2b3d826d6af204676610974",
+    "source_state_sha256": "c4d98b4a9d99f77d2a88ae355cfdf2ed770222c30905e6eee13a8eadbb29e995",
+    "checkpoint_sha256": "c4d98b4a9d99f77d2a88ae355cfdf2ed770222c30905e6eee13a8eadbb29e995",
     "frontend_regression_pass": true,
     "frontend_pass": 10,
     "frontend_total": 10,
@@ -18,7 +18,7 @@
   },
   "source_registry": {
     "observed_at": "2026-11-01T11:10:19.918328Z",
-    "age_seconds": 602,
+    "age_seconds": 769,
     "stale_after_seconds": 28800,
     "stale": false,
     "health": "DEGRADED",
@@ -301,14 +301,16 @@
     "health": "PASS"
   },
   "mff_2028_2034": {
-    "observed_at": "2026-10-31T18:38:48.094088Z",
+    "observed_at": "2026-11-01T11:21:52.124490Z",
     "summary": {
       "total": 8,
       "pass": 2,
       "fail": 6,
-      "review_required": 0
+      "review_required": 1
     },
-    "hash_changed_source_ids": [],
+    "hash_changed_source_ids": [
+      "SRC-RO-MAI-EU-2028"
+    ],
     "unsafe_auto_promotions": [],
     "fail_closed": true
   },
