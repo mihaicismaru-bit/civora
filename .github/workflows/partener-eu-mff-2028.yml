@@ -5,6 +5,7 @@ on:
     - cron: '10 * * * *'
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - 'partener-eu/ingest/mff_2028_source_registry.json'
       - 'partener-eu/ingest/mff_2028_probe.py'
@@ -14,6 +15,7 @@ permissions:
 
 jobs:
   monitor:
+    if: ${{ github.repository == 'mihaicismaru-bit/civora' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
