@@ -21,6 +21,8 @@ on:
       - 'PARTENER.EU Editorial Daily Products'
     types: [completed]
   workflow_dispatch:
+  schedule:
+    - cron: '35 * * * *'
 
 permissions:
   contents: write
@@ -102,10 +104,10 @@ jobs:
               age_h = (datetime.datetime.now(datetime.timezone.utc) - seen).total_seconds() / 3600
           except Exception:
               pass
-          # Only automatic (workflow_run) redeploys are skipped, only when the exact same
-          # site is already LIVE, and never for more than 6h so the 12h freshness watch stays quiet.
+          # Automatic workflow_run/schedule redeploys are skipped when the exact same
+          # site is already LIVE, and never for more than 6h so freshness is still re-proved.
           skip = (
-              os.environ.get('EVENT') == 'workflow_run'
+              os.environ.get('EVENT') in {'workflow_run', 'schedule'}
               and last.get('status') == 'LIVE'
               and last.get('site_sha256') == site
               and age_h < 6
