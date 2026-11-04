@@ -748,6 +748,22 @@ def dr31_dossier() -> dict[str, Any]:
 def news_items() -> list[dict[str, Any]]:
     return [
         {
+            "id": "news-afir-dr14-dr18-extended-2026-10-30",
+            "kind": "DEADLINE_EXTENDED",
+            "programme": "AFIR / PS PAC 2023-2027",
+            "date": "2026-10-30T11:40:00+02:00",
+            "headline": "DR-14 și DR-18: depunerea se prelungește până la 16 noiembrie, ora 16:00",
+            "standfirst": "AFIR a prelungit termenul inițial de 31 octombrie la 16 noiembrie 2026, ora 16:00, doar pentru componentele cu fonduri. DR-14 Achiziții simple a fost epuizată pe 6 octombrie.",
+            "meaning": "Se mai pot pregăti și depune proiecte numai pentru DR-14 zootehnic, legumicultură, alte sectoare și DR-18, în limita fondurilor; verifică situația AFIR înaintea depunerii.",
+            "audience": ["fermieri și forme asociative care îndeplinesc ghidurile AFIR aplicabile"],
+            "confirmed": ["Termen: 16 noiembrie 2026, ora 16:00, conform AFIR.", "DR-14 Achiziții simple este exclusă, fiind epuizată din 6 octombrie.", "Prag de calitate noiembrie: 40 puncte, conform AFIR."],
+            "notConfirmed": ["Disponibilul viitor al fondurilor și eligibilitatea unui solicitant concret necesită verificare curentă."],
+            "actions": ["Verifică la AFIR componenta și disponibilul curent.", "Deschide ghidul și anexele DR-14/DR-18 aplicabile.", "Pregătește depunerea înainte de 16 noiembrie, 16:00."],
+            "dossierId": "afir-dr14-2026",
+            "source": {"label": "AFIR — prelungire oficială DR-14/DR-18 din 30 octombrie 2026", "url": EXTENSION, "tier": "T1"},
+            "utilityScore": 100,
+        },
+        {
             "id": "news-afir-dr14-dr18-open-2026-09-01", "kind": "CALL_OPENED",
             "programme": "AFIR / PS PAC 2023-2027", "date": "2026-09-01T09:00:00+03:00",
             "headline": "DR-14 și DR-18 sunt deschise pentru depunere",
