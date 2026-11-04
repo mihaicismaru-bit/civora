@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import datetime as dt
 import json
+import os
 import re
 import unicodedata
 from pathlib import Path
@@ -76,7 +77,18 @@ def main() -> int:
     dossiers = payload.get("dossiers") or []
     clock = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
 
+    source_scope = os.environ.get("PARTENER_PRODUCT_SOURCE_SCOPE", "").strip().upper()
+    if source_scope not in {"", "AFIR"}:
+        raise RuntimeError(f"Unknown product source scope: {source_scope}")
+
     for dossier in dossiers:
+        # AFIR's source-only writer must preserve all unrelated LKG bodies.
+        # The full Decision Products engine remains the exclusive owner of
+        # cross-programme completeness recalculations and PEO STEP dossiers.
+        if source_scope == "AFIR" and dossier.get("sourceType") not in {
+            "AFIR_CANONICAL", "AFIR_INGESTED_PROVISIONAL"
+        }:
+            continue
         completeness = int((dossier.get("quality") or {}).get("completeness") or 0)
         row = fact(dossier, "Completitudine critică")
         if row:
