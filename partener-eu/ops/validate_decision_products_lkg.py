@@ -117,6 +117,28 @@ def validate_afir_source_scope(baseline: dict[str, Any], candidate: dict[str, An
         if unexpected:
             raise AssertionError(f"AFIR-only projection mutated {key} outside source scope: {unexpected[:12]}")
         protected += len(set(original) - allowlist)
+    # Nov-2026 safety hold: a hashed AFIR discovery row and a human-visible
+    # announcement are NOT by themselves an immutable, reviewed material
+    # source receipt. The extension to 16 Nov is real, but publishing the
+    # changed deadline/status or its news event must wait for exact raw bytes,
+    # a SHA-256-bound parser/run/fetched-at manifest, and reviewed admission.
+    # This check runs again against the freshest main LKG before persistence.
+    extension_ids = {"afir-dr14-2026", "afir-dr18-2026"}
+    prior_dossiers = {str(row.get("id")): row for row in baseline.get("dossiers") or [] if row.get("id")}
+    next_dossiers = {str(row.get("id")): row for row in candidate.get("dossiers") or [] if row.get("id")}
+    modified_extension = sorted(
+        dossier_id for dossier_id in extension_ids
+        if prior_dossiers.get(dossier_id) != next_dossiers.get(dossier_id)
+    )
+    extension_news_id = "news-afir-dr14-dr18-extended-2026-10-30"
+    prior_news = {str(row.get("id")): row for row in baseline.get("news") or [] if row.get("id")}
+    next_news = {str(row.get("id")): row for row in candidate.get("news") or [] if row.get("id")}
+    if modified_extension or prior_news.get(extension_news_id) != next_news.get(extension_news_id):
+        raise AssertionError(
+            "AFIR DR14/DR18 extension material release HELD: immutable official "
+            "notice raw bytes + URL/fetched_at/SHA-256/parser_version/run_id "
+            "and reviewed field-scoped admission are still required"
+        )
     return {"afirOnlySourceScope": "PASS", "unmodifiedOtherDossiersAndNews": protected}
 
 
