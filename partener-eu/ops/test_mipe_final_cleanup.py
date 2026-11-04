@@ -61,7 +61,7 @@ def main() -> int:
 
     assert "cron: '11 */3 * * *'" not in scheduler
     assert "workflow_dispatch:" in scheduler
-    assert "20 4,14 * * *" in acquisition  # twice-daily full crawl (2026-10-11)
+    assert "15 * * * *" in acquisition  # hourly full crawl owner (2026-11-04)
     assert "cron: '7 * * * *'" not in dual_cache
     assert "workflow_dispatch:" in dual_cache
 
