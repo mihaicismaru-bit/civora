@@ -120,10 +120,14 @@ def dr14_dr18_extension_counter_proof() -> str:
         except (TypeError, ValueError):
             return False
 
+    # AFIR removes exhausted sectors from later live counter tables. Accept
+    # either the October fingerprint retaining Achiziții simple as EXHAUSTED
+    # or the newer official table containing only the three funded sectors.
     if not (
-        len(dr14) == 4 and len(simple) == 1 and len(active) == 3
+        len(active) == 3
         and len(dr18) == 1
-        and simple[0].get("availableFundsStatus") == "EXHAUSTED"
+        and len(simple) in (0, 1)
+        and (not simple or simple[0].get("availableFundsStatus") == "EXHAUSTED")
         and all(row.get("closesAtIso") == expected_close and available(row) for row in [*active, *dr18])
     ):
         raise RuntimeError("AFIR extension: official component scope/date/availability conflict")
