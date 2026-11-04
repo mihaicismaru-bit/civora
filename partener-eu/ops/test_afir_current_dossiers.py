@@ -89,15 +89,25 @@ def main() -> int:
     dr12, dr14, dr18, dr31 = (
         dossiers[key] for key in ("afir-dr12-2026", "afir-dr14-2026", "afir-dr18-2026", "afir-dr31-2026-2027")
     )
+    expired = datetime.now(timezone.utc) >= datetime.fromisoformat("2026-11-16T16:00:00+02:00")
     for dossier in (dr14, dr18):
-        assert dossier["status"] == "OPEN"
-        assert dossier["publicationState"] == "PUBLISHABLE"
+        if expired:
+            assert dossier["status"] == "REVIEW"
+            assert dossier["publicationState"] == "PROVISIONAL_FAIL_CLOSED"
+            assert "status" in dossier["quality"]["blockedFactClasses"]
+            assert dossier["executiveSummary"]["status"] == "REVIEW"
+            assert fact(dossier, "Status")["value"] == "ÎN VERIFICARE"
+            assert "depunere deschisă" in dossier["decisionAction"]
+        else:
+            assert dossier["status"] == "OPEN"
+            assert dossier["publicationState"] == "PUBLISHABLE"
         assert fact(dossier, "Deschidere")["value"] == "1 septembrie 2026, 09:00"
         assert fact(dossier, "Termen")["value"] == "16 noiembrie 2026, 16:00 (componente cu fonduri)"
         assert dossier["executiveSummary"]["closes"] == "2026-11-16T16:00:00+02:00"
         assert any(row.get("url") == "https://www.afir.ro/info-la-zi/prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/" and "deadline" in set(row.get("supports") or []) for row in dossier["sources"])
         assert dossier["quality"]["afirCurrentSessionBundle"] is True
-        assert dossier["quality"]["blockedFactClasses"] == []
+        if not expired:
+            assert dossier["quality"]["blockedFactClasses"] == []
         assert all(str(row.get("url") or "").startswith("https://www.afir.ro/") for row in dossier["sources"])
         assert by_title(dossier, "Cine poate aplica")["items"] == dossier["audience"]
         assert dossier["executiveSummary"]["applicants"] == dossier["audience"]
