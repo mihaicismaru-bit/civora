@@ -86,7 +86,7 @@ jobs:
           # to overwrite or erase the broader canonical product projection.
           cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
-          python partener-eu/ingest/sync_decision_products_projection.py
+          PARTENER_PRODUCT_SOURCE_SCOPE=AFIR python partener-eu/ingest/sync_decision_products_projection.py
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
           python partener-eu/ops/test_afir_current_dossiers.py
@@ -162,7 +162,7 @@ jobs:
           # to overwrite or erase the broader canonical product projection.
           cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
-          python partener-eu/ingest/sync_decision_products_projection.py
+          PARTENER_PRODUCT_SOURCE_SCOPE=AFIR python partener-eu/ingest/sync_decision_products_projection.py
 
       - name: Validate decision products, Romanian public language and LKG continuity
         run: |
