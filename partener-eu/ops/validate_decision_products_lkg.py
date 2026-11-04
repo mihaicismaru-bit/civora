@@ -77,12 +77,47 @@ def validate(baseline: dict[str, Any], candidate: dict[str, Any]) -> dict[str, A
     }
 
 
+# The AFIR publisher may replace only the six exact official AFIR dossiers and
+# their dated news events. No AFIR refresh may delete/change other programmes'
+# LKG dossier or news bodies, even if upstream discovery returned fewer rows.
+AFIR_OVERLAY_IDS = {
+    "afir-dr12-2026", "afir-dr14-2026", "afir-dr18-2026",
+    "afir-dr31-2026-2027",
+    "afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026",
+}
+AFIR_OVERLAY_NEWS = {
+    "news-afir-dr14-dr18-extended-2026-10-30",
+    "news-afir-dr14-dr18-open-2026-09-01",
+    "news-afir-dr31-consultation-2026-08-28",
+}
+
+
+def validate_afir_source_scope(baseline: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
+    protected = 0
+    for key, allowlist in (("dossiers", AFIR_OVERLAY_IDS), ("news", AFIR_OVERLAY_NEWS)):
+        original = {str(x.get("id")): x for x in baseline.get(key) or [] if x.get("id")}
+        latest = {str(x.get("id")): x for x in candidate.get(key) or [] if x.get("id")}
+        unexpected = sorted(
+            i for i in original.keys() | latest.keys()
+            if i not in allowlist and original.get(i) != latest.get(i)
+        )
+        if unexpected:
+            raise AssertionError(f"AFIR-only projection mutated {key} outside source scope: {unexpected[:12]}")
+        protected += len(set(original) - allowlist)
+    return {"afirOnlySourceScope": "PASS", "unmodifiedOtherDossiersAndNews": protected}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline", type=Path, required=True)
     parser.add_argument("--candidate", type=Path, required=True)
+    parser.add_argument("--afir-source-scoped", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(validate(load(args.baseline), load(args.candidate)), ensure_ascii=False, indent=2))
+    baseline, candidate = load(args.baseline), load(args.candidate)
+    result = validate(baseline, candidate)
+    if args.afir_source_scoped:
+        result.update(validate_afir_source_scope(baseline, candidate))
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 
