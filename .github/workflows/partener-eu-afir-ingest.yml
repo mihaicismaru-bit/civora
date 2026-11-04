@@ -86,7 +86,6 @@ jobs:
           # to overwrite or erase the broader canonical product projection.
           cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
-          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
           python partener-eu/ingest/sync_decision_products_projection.py
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
@@ -94,7 +93,8 @@ jobs:
           python partener-eu/ops/test_step_lll_dossier.py
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
-              --candidate partener-eu/ingest/state/decision_products.json; then
+              --candidate partener-eu/ingest/state/decision_products.json \
+              --afir-source-scoped; then
             echo 'Fresh AFIR projection is admissible over the public LKG.'
           else
             echo 'Fresh AFIR projection is correctly blocked; the checked-in public LKG remains publishable.'
@@ -161,7 +161,6 @@ jobs:
           # to overwrite or erase the broader canonical product projection.
           cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
-          python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
           python partener-eu/ingest/sync_decision_products_projection.py
 
       - name: Validate decision products, Romanian public language and LKG continuity
@@ -172,7 +171,8 @@ jobs:
           python partener-eu/ops/test_step_lll_dossier.py
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
-              --candidate partener-eu/ingest/state/decision_products.json; then
+              --candidate partener-eu/ingest/state/decision_products.json \
+              --afir-source-scoped; then
             echo 'Fresh AFIR projection supersedes the public LKG.'
           else
             echo 'Fresh AFIR projection blocked; persisting the recovered public LKG.'
@@ -200,7 +200,8 @@ jobs:
             accept_product_candidate=true
             if ! python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/current-main-decision-products.json \
-              --candidate /tmp/decision_products.json; then
+              --candidate /tmp/decision_products.json \
+              --afir-source-scoped; then
               accept_product_candidate=false
               echo 'Fresh AFIR product projection no longer supersedes latest main; preserving current public LKG while persisting fresh AFIR evidence.'
             fi
