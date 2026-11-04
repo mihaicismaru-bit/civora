@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,7 +37,9 @@ def main() -> int:
         assert dossier["status"] == "OPEN"
         assert dossier["publicationState"] == "PUBLISHABLE"
         assert fact(dossier, "Deschidere")["value"] == "1 septembrie 2026, 09:00"
-        assert fact(dossier, "Termen")["value"] == "31 octombrie 2026, 16:00"
+        assert fact(dossier, "Termen")["value"] == "16 noiembrie 2026, 16:00 (componente cu fonduri)"
+        assert dossier["executiveSummary"]["closes"] == "2026-11-16T16:00:00+02:00"
+        assert any(row.get("url") == "https://www.afir.ro/info-la-zi/prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/" and "deadline" in set(row.get("supports") or []) for row in dossier["sources"])
         assert dossier["quality"]["afirCurrentSessionBundle"] is True
         assert dossier["quality"]["blockedFactClasses"] == []
         assert all(str(row.get("url") or "").startswith("https://www.afir.ro/") for row in dossier["sources"])
@@ -46,6 +49,8 @@ def main() -> int:
     assert fact(dr14, "Buget")["value"] == "108.000.000 EUR"
     assert "50.000 EUR" in fact(dr14, "Grant")["value"]
     assert "80 puncte" in " ".join(by_title(dr14, "Cum se punctează")["items"])
+    assert "epuizată" in json.dumps(by_title(dr14, "Riscuri de respingere sau implementare"), ensure_ascii=False).lower()
+    assert "achiziții simple este epuizată" in json.dumps(by_title(dr14, "Ce finanțează și în ce condiții"), ensure_ascii=False).lower()
     assert fact(dr18, "Buget")["value"] == "5.000.000 EUR"
     assert "100.000 EUR" in fact(dr18, "Grant")["value"]
     assert "85% sau 65%" in fact(dr18, "Grant")["value"]
@@ -124,11 +129,15 @@ def main() -> int:
     assert payload["policy"]["derivedProjectionSynchronized"] is True
 
     home_open = payload["home"]["openDossierIds"]
-    # DR-14 and DR-18 keep their source-bound historical dossier evidence, but
-    # their authoritative 31 October 2026 deadline is past. The freshness-first
-    # homepage must therefore not surface either dossier as actionable OPEN.
-    assert "afir-dr14-2026" not in home_open
-    assert "afir-dr18-2026" not in home_open
+    # AFIR's official 30 Oct notice extends the *funded components* of both
+    # interventions to 16 Nov 16:00. The old 31 Oct deadline must not remove
+    # these actionable dossiers prematurely; after the new deadline, the
+    # homepage freshness filter must exclude them automatically.
+    if datetime.now(timezone.utc) < datetime.fromisoformat("2026-11-16T16:00:00+02:00"):
+        assert {"afir-dr14-2026", "afir-dr18-2026"} <= set(home_open)
+    else:
+        assert "afir-dr14-2026" not in home_open
+        assert "afir-dr18-2026" not in home_open
     assert {"afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"} <= set(home_open)
     if dr12_post_launch:
         assert "afir-dr12-2026" in home_open
