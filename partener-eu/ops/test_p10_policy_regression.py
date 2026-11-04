@@ -119,6 +119,14 @@ def has_exact_yaml_scalar(workflow: str, key: str, value: str) -> bool:
         workflow,
     ))
 
+# Hourly :15 NAS acquisition has a 100-minute job bound (80-minute crawler).
+# GitHub must serialize, not cancel an active collection when the next hour ticks.
+# A cancelled job produces no immutable SURFACEMC handoff for PARTENER Engine.
+if not has_exact_yaml_scalar(mipe_nas_workflow, "group", "partener-eu-mipe-ro-crawl-v3"):
+    errors.append("MIPE NAS acquisition does not use its dedicated single-run lock")
+if not has_exact_yaml_scalar(mipe_nas_workflow, "cancel-in-progress", "false"):
+    errors.append("hourly MIPE NAS schedule can cancel in-flight acquisition before handoff")
+
 for workflow_name, workflow in [
     ("PARTENER.EU Pages", pages_workflow),
     ("PARTENER.EU Go Live", go_live_workflow),
