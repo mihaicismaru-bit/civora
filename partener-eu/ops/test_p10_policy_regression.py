@@ -60,6 +60,13 @@ hourly_slots = [
 for workflow_name, workflow_text, cron in hourly_slots:
     if f"cron: '{cron}'" not in workflow_text:
         errors.append(f"{workflow_name} is not scheduled hourly at canonical cron {cron}")
+# The MFF source monitor has a contents:write ledger step. A PR branch push or
+# manual workflow_dispatch on a non-main ref must never reset and push to main.
+if "  push:\n    branches: [main]\n" not in mff_workflow:
+    errors.append("MFF source monitor can be triggered from a non-main branch")
+if ("github.repository == 'mihaicismaru-bit/civora'" not in mff_workflow
+        or "github.ref == 'refs/heads/main'" not in mff_workflow):
+    errors.append("MFF source monitor main-only ledger writer guard missing")
 if "ACTIVE_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS" not in acceptance:
     errors.append("P10 acceptance contract does not record hourly autonomous validation")
 
