@@ -10,6 +10,7 @@ canonical public dossier.
 from __future__ import annotations
 
 import json
+import datetime as dt
 import re
 import unicodedata
 from pathlib import Path
@@ -837,6 +838,32 @@ def main() -> int:
         energy_public_dossier(storage=False),
         energy_public_dossier(storage=True),
     ]
+
+    # A confirmed application window authorizes OPEN only until its exact
+    # deadline. After expiry, do not infer CLOSED; hold as REVIEW pending a new
+    # official source/reconciliation. This keeps the old dossier as history but
+    # prevents a stale OPEN from reaching any public/current surface.
+    if dt.datetime.now(dt.timezone.utc) >= dt.datetime.fromisoformat("2026-11-16T16:00:00+02:00"):
+        for dossier in dossiers[:2]:
+            dossier["status"] = "REVIEW"
+            dossier["statusLabel"] = "TERMEN DEPĂȘIT — STARE DE VERIFICAT"
+            dossier["decision"] = "VERIFICĂ"
+            dossier["decisionLabel"] = "VERIFICĂ"
+            dossier["decisionAction"] = "Termenul oficial verificat a expirat. Verifică o nouă comunicare AFIR; nu presupune depunere deschisă."
+            dossier["publicationState"] = "PROVISIONAL_FAIL_CLOSED"
+            dossier["standfirst"] = "Termenul din 16 noiembrie 2026 a expirat. Date istorice; nu există autorizare pentru un status OPEN nou fără dovadă AFIR."
+            dossier["executiveSummary"]["status"] = "REVIEW"
+            dossier["quality"]["verifiedFactClasses"] = [
+                fact_class for fact_class in dossier["quality"]["verifiedFactClasses"]
+                if fact_class != "status"
+            ]
+            dossier["quality"]["blockedFactClasses"] = ["status"]
+            for row in dossier.get("quickFacts") or []:
+                if row.get("label") == "Status":
+                    row.update(value="ÎN VERIFICARE", confidence="SYSTEM_GATED")
+            for section_row in dossier.get("sections") or []:
+                if section_row.get("title") in {"Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"}:
+                    section_row["items"] = [dossier["decisionAction"]]
 
     replace_codes = {"dr 12", "dr 14", "dr 18", "dr 31"}
     kept = []
