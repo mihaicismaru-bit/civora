@@ -28,6 +28,17 @@ spec.loader.exec_module(adapter)
 
 PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V1"
 INDEX_URL = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
+# Previously verified official exact call pages. This is only a discovery fallback.
+# Fresh HTTPS readback, hash, semantic reconciliation and publication gates remain mandatory.
+PINNED_OFFICIAL_CALLS = (
+    (1, "https://eeagrants.org/en/eea-civil-society-fund-romania/calls/call-1-strengthening-democracy-and-rule-law-through-civil-society-initiatives"),
+    (2, "https://eeagrants.org/en/eea-civil-society-fund-romania/calls/call-2-empowering-civic-participation-underserved-communities"),
+    (3, "https://eeagrants.org/en/eea-civil-society-fund-romania/calls/call-3-community-driven-projects-human-rights-and-social-justice"),
+    (4, "https://eeagrants.org/en/eea-civil-society-fund-romania/calls/call-4-promoting-diversity-equality-and-combating-gender-based-violence"),
+    (5, "https://eeagrants.org/en/eea-civil-society-fund-romania/calls/call-5-roma-inclusion-and-empowerment-through-development-interethnic-communities"),
+    (6, "https://eeagrants.org/ro/eea-civil-society-fund-romania/calls/call-6-protecting-human-rights-through-climate-and-environmental-actions"),
+    (7, "https://eeagrants.org/ro/eea-civil-society-fund-romania/calls/call-7-organisational-development-experienced-csos-and-federations"),
+)
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
 MAX_BYTES = 4_000_000
 USER_AGENT = "PARTENER.EU source-intelligence/1.0 (+https://partener.eu)"
@@ -267,6 +278,40 @@ def parse_call_page(raw: bytes, *, authority_url: str) -> dict[str, Any]:
     }
 
 
+def discover_with_official_fallback(
+    raw: bytes, *, base_url: str, minimum_calls: int
+) -> tuple[list[str], str, int]:
+    """Recover exact official pages after a post-deadline dynamic index transition.
+
+    The official index must affirm the identity and exactly seven launched calls.
+    Pinned URLs grant discovery only; every detail page is re-fetched and verified.
+    """
+    linked = discover_call_urls(raw, base_url=base_url)
+    if linked:
+        return linked, "INDEX_EXACT_ANCHORS", len(linked)
+
+    flat = _flat_text(_parse_document(raw)).casefold()
+    seven_confirmed = (
+        "eea civil society fund" in flat
+        and (
+            "seven calls for proposals" in flat
+            or "șapte apeluri de proiecte" in flat
+        )
+    )
+    if not seven_confirmed or minimum_calls != len(PINNED_OFFICIAL_CALLS):
+        return [], "INDEX_WITHOUT_VERIFIED_DETAIL_LINKS", 0
+
+    pinned: list[str] = []
+    for number, url in PINNED_OFFICIAL_CALLS:
+        canonical = _official_url(url, call_detail=True)
+        if _call_number_from_url(canonical) != str(number):
+            raise RuntimeError("pinned official EEA call identity/path mismatch")
+        pinned.append(canonical)
+    if len(pinned) != len(set(pinned)):
+        raise RuntimeError("duplicate pinned official EEA call URLs")
+    return pinned, "PINNED_OFFICIAL_DETAIL_DISCOVERY_REQUIRES_FRESH_READBACK", 0
+
+
 def collect_live(
     *,
     index_url: str = INDEX_URL,
@@ -279,7 +324,9 @@ def collect_live(
     index = fetcher(index_url)
     index_final = _official_url(str(index["final_url"]), call_detail=False)
     index_raw = bytes(index["raw"])
-    call_urls = discover_call_urls(index_raw, base_url=index_final)
+    call_urls, discovery_mode, index_link_count = discover_with_official_fallback(
+        index_raw, base_url=index_final, minimum_calls=minimum_calls
+    )
     if len(call_urls) < minimum_calls:
         raise RuntimeError(
             f"discovered {len(call_urls)} call-detail URLs, below minimum {minimum_calls}"
@@ -360,6 +407,8 @@ def collect_live(
             "content_type": str(index["content_type"]),
             "raw_hash": _sha256(index_raw),
             "bytes": len(index_raw),
+            "discovery_mode": discovery_mode,
+            "direct_exact_call_links": index_link_count,
         },
         "fetched_at": fetched_at,
         "parser_version": PARSER_VERSION,
@@ -371,6 +420,8 @@ def collect_live(
         "errors": errors,
         "stats": {
             "discovered_call_urls": len(call_urls),
+            "index_direct_exact_call_links": index_link_count,
+            "official_pinned_fallback_used": discovery_mode.startswith("PINNED_"),
             "fetched_call_pages": len(pages),
             "normalized_records": len(normalized_records),
             "open_call_evidence": sum(

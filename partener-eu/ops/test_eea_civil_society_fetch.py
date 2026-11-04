@@ -142,6 +142,76 @@ def main():
     else:
         fail("non-official redirect must fail closed before call parsing")
 
+    # Current official index describes validated applications but no longer
+    # server-renders the seven exact call-detail anchors (November 2026).
+    transitioned_index = (
+        b"<html><body><h1>Calls</h1>"
+        b"EEA Civil Society Fund in Romania: a total of 863 applications "
+        b"validated under the seven calls for proposals."
+        b"<p>No results found</p></body></html>"
+    )
+    fallback, mode, direct_count = module.discover_with_official_fallback(
+        transitioned_index, base_url=INDEX, minimum_calls=7
+    )
+    expected_urls = [url for _, url in module.PINNED_OFFICIAL_CALLS]
+    if fallback != expected_urls or direct_count != 0 or not mode.startswith("PINNED_"):
+        fail("official seven-call transition must use exact pinned detail URLs")
+
+    def fetch_transitioned(url):
+        if url == INDEX:
+            return response(url, transitioned_index)
+        for number, exact in module.PINNED_OFFICIAL_CALLS:
+            if url == exact:
+                html = (CALL1_HTML
+                    .replace(b"Call #1", f"Call #{number}".encode())
+                    .replace(b"<div>Open</div>", b"<div>Closed</div>"))
+                return response(url, html)
+        raise AssertionError(f"unexpected pinned source {url}")
+
+    resumed = module.collect_live(
+        index_url=INDEX, run_id="TEST-TRANSITIONED-INDEX",
+        fetched_at=FETCHED, minimum_calls=7, fetcher=fetch_transitioned,
+    )
+    if resumed["stats"]["closed_call_evidence"] != 7 or resumed["stats"]["errors"]:
+        fail("seven exact pinned pages must receive independent closed-call readback")
+    if resumed["stats"]["index_direct_exact_call_links"] != 0:
+        fail("pinned URLs must never be falsely reported as observed index anchors")
+    if not resumed["stats"]["official_pinned_fallback_used"]:
+        fail("fallback origin must be explicit in the evidence")
+    if resumed["source_index"]["raw_hash"] != hashlib.sha256(transitioned_index).hexdigest():
+        fail("changed official index raw SHA-256 must be preserved")
+    if resumed["publish_authorized"] or resumed["material_fact_use"]:
+        fail("pinned fallback cannot authorize any material fact or publication")
+
+    def fake_unverified_index(url):
+        if url == INDEX:
+            return response(url, b"<html><h1>Calls</h1>Seven calls for proposals</html>")
+        raise AssertionError("unverified index must not fetch call details")
+
+    for minimum in (1, 7):
+        try:
+            module.collect_live(
+                index_url=INDEX, run_id="TEST-UNVERIFIED-INDEX",
+                fetched_at=FETCHED, minimum_calls=minimum, fetcher=fake_unverified_index,
+            )
+        except RuntimeError as exc:
+            if "below minimum" not in str(exc):
+                fail(f"unexpected unverified index error: {exc}")
+        else:
+            fail("unverified index must fail closed instead of using pinned URLs")
+
+    # Partial index anchors block fallback; missing links cannot be filled silently.
+    partial = INDEX_HTML.replace(
+        f'<a href="{CALL1}">Call 1</a>'.encode(), b""
+    ).replace(
+        b'<a href="/ro/eea-civil-society-fund-romania/calls/call-1-strengthening-democracy-and-rule-law-through-civil-society-initiatives">Apel 1 duplicate language</a>', b""
+    )
+    only_links, mode, direct_count = module.discover_with_official_fallback(
+        partial, base_url=INDEX, minimum_calls=7
+    )
+    if len(only_links) != 1 or mode != "INDEX_EXACT_ANCHORS" or direct_count != 1:
+        fail("partial official index must remain incomplete; no pinned fallback")
+
     print("PASS EEA CSF live acquisition: official discovery, exact-page readback, raw hashes, parsing, reconciliation and redirect guard")
 
 
