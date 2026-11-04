@@ -18,7 +18,63 @@ def fact(dossier: dict, label: str) -> dict | None:
     return next((row for row in dossier.get("quickFacts") or [] if row.get("label") == label), None)
 
 
+def test_extension_counter_proof_fail_closed() -> None:
+    """Exact positive and negative replay of hashed AFIR extension evidence."""
+    import copy
+    import importlib.util
+    import tempfile
+    from unittest.mock import patch
+
+    module_path = ROOT / "partener-eu" / "ingest" / "apply_afir_current_authoritative_dossiers.py"
+    spec = importlib.util.spec_from_file_location("afir_extension_overlay", module_path)
+    assert spec and spec.loader
+    overlay = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(overlay)
+    original = json.loads(LIVE_FUNDS.read_text(encoding="utf-8"))
+    assert overlay.dr14_dr18_extension_counter_proof() == original["sourceObservedAt"]
+
+    def replay(candidate: dict, *, should_pass: bool) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            fixture = Path(directory) / "hashed_official_counter.json"
+            fixture.write_text(json.dumps(candidate, ensure_ascii=False), encoding="utf-8")
+            with patch.object(overlay, "LIVE_FUNDS", fixture):
+                if should_pass:
+                    assert overlay.dr14_dr18_extension_counter_proof() == candidate["sourceObservedAt"]
+                else:
+                    try:
+                        overlay.dr14_dr18_extension_counter_proof()
+                    except RuntimeError:
+                        pass
+                    else:
+                        raise AssertionError("unsafe AFIR extension evidence was admitted")
+
+    # AFIR's newer live counter can omit exhausted Achiziții simple entirely.
+    omitted = copy.deepcopy(original)
+    omitted["rows"] = [
+        row for row in omitted["rows"]
+        if not (row.get("interventionCode") == "DR-14"
+                and "ACHIZI" in str(row.get("sector") or "").upper())
+    ]
+    replay(omitted, should_pass=True)
+    held = copy.deepcopy(original)
+    held["status"] = "PROVISIONAL_FAIL_CLOSED"
+    replay(held, should_pass=False)
+    held = copy.deepcopy(original)
+    held["sourceFingerprintMatchesCorpus"] = False
+    held["sourceFingerprintReconciledFromCanonicalLiveFetch"] = False
+    replay(held, should_pass=False)
+    held = copy.deepcopy(original)
+    held["rows"] = [row for row in held["rows"] if row.get("interventionCode") != "DR-18"]
+    replay(held, should_pass=False)
+    held = copy.deepcopy(original)
+    for row in held["rows"]:
+        if row.get("interventionCode") == "DR-18":
+            row["closesAtIso"] = "2026-10-31T16:00:00+02:00"
+    replay(held, should_pass=False)
+
+
 def main() -> int:
+    test_extension_counter_proof_fail_closed()
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     dossiers = {row["id"]: row for row in payload.get("dossiers") or []}
     assert {
@@ -149,7 +205,7 @@ def main() -> int:
     assert fact(step, "Completitudine critică")["value"] == f"{step['quality']['completeness']}%"
 
     news_ids = {row["id"] for row in payload.get("news") or []}
-    assert {"news-afir-dr14-dr18-open-2026-09-01", "news-afir-dr31-consultation-2026-08-28"} <= news_ids
+    assert {"news-afir-dr14-dr18-open-2026-09-01", "news-afir-dr14-dr18-extended-2026-10-30", "news-afir-dr31-consultation-2026-08-28"} <= news_ids
     print(json.dumps({"ok": True, "open": home_open, "catalogOpenCount": payload["summary"]["openCount"]}, ensure_ascii=False))
     return 0
 
