@@ -90,7 +90,8 @@ jobs:
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
           python partener-eu/ops/test_afir_current_dossiers.py
-          python partener-eu/ops/test_step_lll_dossier.py
+          # PEO-STEP-LLL has its own canonical Decision Products writer/test;
+          # AFIR acquisition must not mutate or demand new PEO dossier state.
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
               --candidate partener-eu/ingest/state/decision_products.json \
@@ -168,7 +169,8 @@ jobs:
           python partener-eu/ops/test_decision_products.py
           python partener-eu/ops/test_public_language.py
           python partener-eu/ops/test_afir_current_dossiers.py
-          python partener-eu/ops/test_step_lll_dossier.py
+          # PEO-STEP-LLL has its own canonical Decision Products writer/test;
+          # AFIR acquisition must not mutate or demand new PEO dossier state.
           if python partener-eu/ops/validate_decision_products_lkg.py \
               --baseline /tmp/decision-products-lkg.json \
               --candidate partener-eu/ingest/state/decision_products.json \
