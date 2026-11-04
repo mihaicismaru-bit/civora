@@ -90,31 +90,45 @@ def test_afir_source_scope_guard() -> None:
         ],
         "news": [{"id": "mipe-protected-news", "headline": "original"}],
     }
-    updated = copy.deepcopy(baseline)
-    updated["dossiers"][1]["deadline"] = "extended"
-    updated["news"].append({
+    # Unrelated AFIR scope remains writable, while non-AFIR LKG remains fixed.
+    allowed = copy.deepcopy(baseline)
+    allowed["dossiers"].append({
+        "id": "afir-dr12-2026", "sourceType": "AFIR_CANONICAL", "status": "OPEN"
+    })
+    assert gate.validate_afir_source_scope(baseline, allowed)["afirOnlySourceScope"] == "PASS"
+
+    def denied(candidate: dict, reason: str) -> None:
+        try:
+            gate.validate_afir_source_scope(baseline, candidate)
+        except AssertionError as error:
+            assert reason in str(error), str(error)
+        else:
+            raise AssertionError(f"unsafe AFIR projection admitted: {reason}")
+
+    for section, field in (("dossiers", "status"), ("news", "headline")):
+        altered = copy.deepcopy(allowed)
+        altered[section][0][field] = "UNAUTHORIZED"
+        denied(altered, "outside source scope")
+    removed = copy.deepcopy(allowed)
+    removed["dossiers"] = [row for row in removed["dossiers"] if row["id"] != "mipe-protected"]
+    denied(removed, "outside source scope")
+
+    # The 30 October official extension is verified as a source discovery,
+    # but a changed DR14/DR18 material deadline/status or publication news may
+    # not pass the product persistence gate until an immutable source receipt
+    # and reviewed field-scoped admission exist. No material change = no alert.
+    deadline_change = copy.deepcopy(baseline)
+    deadline_change["dossiers"][1]["deadline"] = "2026-11-16T16:00:00+02:00"
+    denied(deadline_change, "extension material release HELD")
+    new_extension_news = copy.deepcopy(baseline)
+    new_extension_news["news"].append({
         "id": "news-afir-dr14-dr18-extended-2026-10-30",
         "kind": "DEADLINE_EXTENDED",
     })
-    assert gate.validate_afir_source_scope(baseline, updated)["afirOnlySourceScope"] == "PASS"
-    for section, field in (("dossiers", "status"), ("news", "headline")):
-        altered = copy.deepcopy(updated)
-        altered[section][0][field] = "UNAUTHORIZED"
-        try:
-            gate.validate_afir_source_scope(baseline, altered)
-        except AssertionError:
-            pass
-        else:
-            raise AssertionError(f"AFIR overlay changed protected {section}")
-    removed = copy.deepcopy(updated)
-    removed["dossiers"] = [row for row in removed["dossiers"] if row["id"] != "mipe-protected"]
-    try:
-        gate.validate_afir_source_scope(baseline, removed)
-    except AssertionError:
-        pass
-    else:
-        raise AssertionError("AFIR overlay deleted a protected MIPE dossier")
-
+    denied(new_extension_news, "extension material release HELD")
+    omitted_extension = copy.deepcopy(baseline)
+    omitted_extension["dossiers"] = [row for row in omitted_extension["dossiers"] if row["id"] != "afir-dr14-2026"]
+    denied(omitted_extension, "extension material release HELD")
 
 def main() -> int:
     test_afir_source_scope_guard()
