@@ -12,6 +12,12 @@ WORKFLOWS = REPO / ".github" / "workflows"
 validation = (WORKFLOWS / "partener-eu-validation.yml").read_text(encoding="utf-8")
 peo_workflow = (WORKFLOWS / "partener-eu-peo-calendar.yml").read_text(encoding="utf-8")
 pages_workflow = (WORKFLOWS / "partener-eu-pages.yml").read_text(encoding="utf-8")
+source_registry_workflow = (WORKFLOWS / "partener-eu-source-registry.yml").read_text(encoding="utf-8")
+mipe_nas_workflow = (WORKFLOWS / "partener-eu-mipe-ro-crawl-v3.yml").read_text(encoding="utf-8")
+mipe_ingest_workflow = (WORKFLOWS / "partener-eu-mipe-ingest.yml").read_text(encoding="utf-8")
+afir_workflow = (WORKFLOWS / "partener-eu-afir-ingest.yml").read_text(encoding="utf-8")
+decision_workflow = (WORKFLOWS / "partener-eu-decision-products.yml").read_text(encoding="utf-8")
+mff_workflow = (WORKFLOWS / "partener-eu-mff-2028.yml").read_text(encoding="utf-8")
 auto_deploy_path = WORKFLOWS / "partener-eu-auto-deploy.yml"
 go_live_workflow = (WORKFLOWS / "partener-eu-go-live.yml").read_text(encoding="utf-8")
 tasks = (PARTENER / "ops" / "p10_resolution_tasks.py").read_text(encoding="utf-8")
@@ -40,8 +46,20 @@ for marker in [
     if marker not in validation:
         errors.append(f"production validation orchestration missing: {marker}")
 
-if "cron: '45 * * * *'" not in validation:
-    errors.append("production validation is not scheduled hourly at canonical :45")
+hourly_slots = [
+    ("PEO Calendar", peo_workflow, "2 * * * *"),
+    ("Verified Source Registry", source_registry_workflow, "5 * * * *"),
+    ("MFF 2028-2034", mff_workflow, "10 * * * *"),
+    ("MIPE NAS Crawl v3", mipe_nas_workflow, "15 * * * *"),
+    ("MIPE Ingestion", mipe_ingest_workflow, "20 * * * *"),
+    ("AFIR Ingestion", afir_workflow, "30 * * * *"),
+    ("Decision Products", decision_workflow, "35 * * * *"),
+    ("Pages", pages_workflow, "45 * * * *"),
+    ("Production Validation", validation, "55 * * * *"),
+]
+for workflow_name, workflow_text, cron in hourly_slots:
+    if f"cron: '{cron}'" not in workflow_text:
+        errors.append(f"{workflow_name} is not scheduled hourly at canonical cron {cron}")
 if "ACTIVE_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS" not in acceptance:
     errors.append("P10 acceptance contract does not record hourly autonomous validation")
 
