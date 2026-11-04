@@ -79,7 +79,7 @@ def run() -> None:
     req["current_qualifying_days"] = len(dates)
     req["persistent_validation_ledger"] = "LIVE"
     req["source_change_fail_closed"] = "IMPLEMENTED"
-    req["scheduled_validation"] = "ACTIVE_6_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS"
+    req["scheduled_validation"] = "ACTIVE_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS"
     req["autonomous_update_evidence"] = "COLLECTION_ACTIVE_NOT_YET_SUFFICIENT_FOR_CLOSURE"
 
     if latest:
