@@ -40,6 +40,11 @@ for marker in [
     if marker not in validation:
         errors.append(f"production validation orchestration missing: {marker}")
 
+if "cron: '45 * * * *'" not in validation:
+    errors.append("production validation is not scheduled hourly at canonical :45")
+if "ACTIVE_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS" not in acceptance:
+    errors.append("P10 acceptance contract does not record hourly autonomous validation")
+
 if "cancel-in-progress: false" not in validation:
     errors.append("production validation ledger writers are not serialized")
 if "ref: main" not in validation:
