@@ -94,9 +94,22 @@ AFIR_OVERLAY_NEWS = {
 
 def validate_afir_source_scope(baseline: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
     protected = 0
-    for key, allowlist in (("dossiers", AFIR_OVERLAY_IDS), ("news", AFIR_OVERLAY_NEWS)):
+    for key, fixed_allowlist in (("dossiers", AFIR_OVERLAY_IDS), ("news", AFIR_OVERLAY_NEWS)):
         original = {str(x.get("id")): x for x in baseline.get(key) or [] if x.get("id")}
         latest = {str(x.get("id")): x for x in candidate.get(key) or [] if x.get("id")}
+        allowlist = set(fixed_allowlist)
+        if key == "dossiers":
+            # Authorize changes to canonical AFIR-derived provisional records,
+            # but never relabel an unrelated baseline as an AFIR record.
+            for row_id in original.keys() | latest.keys():
+                first, current = original.get(row_id), latest.get(row_id)
+                def is_afir(row: dict[str, Any] | None) -> bool:
+                    return bool(
+                        row and row_id.startswith("afir-")
+                        and row.get("sourceType") in {"AFIR_CANONICAL", "AFIR_INGESTED_PROVISIONAL"}
+                    )
+                if (first is None and is_afir(current)) or (is_afir(first) and (current is None or is_afir(current))):
+                    allowlist.add(row_id)
         unexpected = sorted(
             i for i in original.keys() | latest.keys()
             if i not in allowlist and original.get(i) != latest.get(i)
