@@ -73,7 +73,51 @@ def test_extension_counter_proof_fail_closed() -> None:
     replay(held, should_pass=False)
 
 
+def test_afir_source_scope_guard() -> None:
+    """Verify that an AFIR-only candidate cannot change unrelated LKG facts."""
+    import copy
+    import importlib.util
+
+    module_path = ROOT / "partener-eu" / "ops" / "validate_decision_products_lkg.py"
+    spec = importlib.util.spec_from_file_location("afir_lkg_source_scope", module_path)
+    assert spec and spec.loader
+    gate = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gate)
+    baseline = {
+        "dossiers": [
+            {"id": "mipe-protected", "status": "REVIEW", "evidence": "original"},
+            {"id": "afir-dr14-2026", "status": "OPEN", "deadline": "old"},
+        ],
+        "news": [{"id": "mipe-protected-news", "headline": "original"}],
+    }
+    updated = copy.deepcopy(baseline)
+    updated["dossiers"][1]["deadline"] = "extended"
+    updated["news"].append({
+        "id": "news-afir-dr14-dr18-extended-2026-10-30",
+        "kind": "DEADLINE_EXTENDED",
+    })
+    assert gate.validate_afir_source_scope(baseline, updated)["afirOnlySourceScope"] == "PASS"
+    for section, field in (("dossiers", "status"), ("news", "headline")):
+        altered = copy.deepcopy(updated)
+        altered[section][0][field] = "UNAUTHORIZED"
+        try:
+            gate.validate_afir_source_scope(baseline, altered)
+        except AssertionError:
+            pass
+        else:
+            raise AssertionError(f"AFIR overlay changed protected {section}")
+    removed = copy.deepcopy(updated)
+    removed["dossiers"] = [row for row in removed["dossiers"] if row["id"] != "mipe-protected"]
+    try:
+        gate.validate_afir_source_scope(baseline, removed)
+    except AssertionError:
+        pass
+    else:
+        raise AssertionError("AFIR overlay deleted a protected MIPE dossier")
+
+
 def main() -> int:
+    test_afir_source_scope_guard()
     test_extension_counter_proof_fail_closed()
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     dossiers = {row["id"]: row for row in payload.get("dossiers") or []}
