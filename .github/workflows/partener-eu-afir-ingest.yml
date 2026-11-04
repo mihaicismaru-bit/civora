@@ -81,6 +81,10 @@ jobs:
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          # AFIR is a source-scoped writer. Keep all non-AFIR public LKG
+          # dossiers byte-identical; a partial MIPE discovery is not authority
+          # to overwrite or erase the broader canonical product projection.
+          cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
           python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
           python partener-eu/ingest/sync_decision_products_projection.py
@@ -152,6 +156,10 @@ jobs:
           python partener-eu/ingest/polish_decision_products.py
           python partener-eu/ingest/finalize_decision_products.py
           python partener-eu/ingest/localize_decision_products.py
+          # AFIR is a source-scoped writer. Keep all non-AFIR public LKG
+          # dossiers byte-identical; a partial MIPE discovery is not authority
+          # to overwrite or erase the broader canonical product projection.
+          cp /tmp/decision-products-lkg.json partener-eu/ingest/state/decision_products.json
           python partener-eu/ingest/apply_afir_current_authoritative_dossiers.py
           python partener-eu/ingest/apply_step_lll_authoritative_dossier.py
           python partener-eu/ingest/sync_decision_products_projection.py
