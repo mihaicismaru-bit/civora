@@ -49,9 +49,12 @@ env:
   MIPE_BROWSER_EXECUTABLE: ''
   MIPE_RETRIEVAL_TRANSPORT: 'playwright-chromium-direct-romania-v3'
 
+# The scheduled interval is 60 minutes, while a bounded full acquisition may
+# run up to 100 minutes. Never cancel in-flight source evidence on the next tick.
+# GitHub serializes the running job and retains at most one pending successor.
 concurrency:
   group: partener-eu-mipe-ro-crawl-v3
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   crawl:
