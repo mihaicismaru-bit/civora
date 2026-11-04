@@ -124,7 +124,14 @@ def main() -> int:
     assert payload["policy"]["derivedProjectionSynchronized"] is True
 
     home_open = payload["home"]["openDossierIds"]
-    assert {"afir-dr14-2026", "afir-dr18-2026"} <= set(home_open)
+    # DR-14 and DR-18 keep their source-bound historical dossier evidence, but
+    # their authoritative 31 October 2026 deadline is past. The freshness-first
+    # homepage must therefore not surface either dossier as actionable OPEN.
+    assert "afir-dr14-2026" not in home_open
+    assert "afir-dr18-2026" not in home_open
+    assert {"afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"} <= set(home_open)
+    if dr12_post_launch:
+        assert "afir-dr12-2026" in home_open
     assert "afir-dr31-2026-2027" in payload["home"]["prepareDossierIds"]
     # The homepage is intentionally a bounded editorial shortlist (max 8),
     # while summary.openCount is the total verified OPEN catalog count.
