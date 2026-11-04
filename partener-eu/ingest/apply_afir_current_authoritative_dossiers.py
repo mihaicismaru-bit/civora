@@ -895,6 +895,18 @@ def main() -> int:
     payload["policy"]["afirDr12UpcomingSourceBound"] = not dr12_open
     payload["policy"]["afirDr12PostLaunchSourceBound"] = dr12_open
     payload.setdefault("qualityPass", {})["afirCurrentAuthoritativeDossiers"] = [row["id"] for row in dossiers]
+    # Product generation time follows the admitted source observation, not the
+    # hourly clock: unchanged sources must not create timestamp-only commits.
+    observed = dt.datetime.fromisoformat(EXTENSION_VERIFIED_AT.replace("Z", "+00:00"))
+    previous_generated = str(payload.get("generatedAt") or "")
+    try:
+        previous = dt.datetime.fromisoformat(previous_generated.replace("Z", "+00:00"))
+        if previous.tzinfo is None:
+            previous = previous.replace(tzinfo=dt.timezone.utc)
+    except ValueError:
+        previous = dt.datetime.min.replace(tzinfo=dt.timezone.utc)
+    if previous < observed:
+        payload["generatedAt"] = EXTENSION_VERIFIED_AT
 
     PRODUCTS.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     OUT_JS.write_text("window.PARTENER_DECISION_PRODUCTS=" + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")
