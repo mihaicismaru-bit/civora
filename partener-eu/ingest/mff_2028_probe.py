@@ -56,15 +56,36 @@ def sem(raw: bytes, ctype: str) -> bytes:
 
 
 def official_https(url: str) -> bool:
-    parts = urlsplit(url)
-    host = (parts.hostname or "").lower()
-    return (
-        parts.scheme == "https"
-        and parts.username is None
-        and parts.password is None
-        and bool(host)
-        and any(host == h or host.endswith("." + h) for h in OFFICIAL_HOSTS)
+    try:
+        parts = urlsplit(url)
+        host = (parts.hostname or "").lower()
+        return (
+            parts.scheme == "https"
+            and parts.username is None
+            and parts.password is None
+            and parts.port in (None, 443)
+            and bool(host)
+            and any(host == h or host.endswith("." + h) for h in OFFICIAL_HOSTS)
+        )
+    except ValueError:
+        return False
+
+
+class _StrictOfficialRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Validate every hop before urllib follows it, not just the final URL."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not official_https(newurl):
+            raise ValueError("MFF redirect would leave official HTTPS authority")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _open_official(req, timeout=25):
+    opener = urllib.request.build_opener(
+        _StrictOfficialRedirectHandler(),
+        urllib.request.HTTPSHandler(context=ssl.create_default_context()),
     )
+    return opener.open(req, timeout=timeout)
 
 
 def validate_registry(reg: dict) -> None:
@@ -93,7 +114,7 @@ def fetch(url: str) -> dict:
     req = urllib.request.Request(
         url, headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml;q=0.9"}
     )
-    with urllib.request.urlopen(req, timeout=25, context=ssl.create_default_context()) as resp:
+    with _open_official(req, timeout=25) as resp:
         status = resp.status
         final_url = resp.geturl()
         ctype = resp.headers.get("content-type") or ""
@@ -104,6 +125,11 @@ def fetch(url: str) -> dict:
         raw = resp.read(MAX_BYTES + 1)
         if len(raw) > MAX_BYTES or len(raw) < 256:
             raise ValueError("MFF official body too large or too small; no partial hash")
+        declared = resp.headers.get("Content-Length")
+        if declared is not None:
+            declared = declared.strip()
+            if not declared.isdigit() or int(declared) != len(raw):
+                raise ValueError("MFF official body differs from declared Content-Length")
         semantic = sem(raw, ctype)
         if len(semantic) < 80:
             raise ValueError("low-information official MFF response")
