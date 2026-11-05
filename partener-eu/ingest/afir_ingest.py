@@ -339,13 +339,13 @@ def capture_extension_notice_receipt(requested_url, fetched, observed_at):
         "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
         "programme": "PS_PAC_2023_2027/DR14_DR18",
         "source_family": "AFIR",
-        "authority_class": "T1_OFFICIAL_AIR",
+        "authority_class": "T1_OFFICIAL_AGENCY",
         "observation_state": "RAW_FETCHED_PENDING_SEMANTIC_RECONCILIATION",
         "material_fact_action": "NONE",
         "publish_authorized": False,
     }
     (outdir / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\\n",
+        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
         encoding="utf-8",
     )
     return manifest
