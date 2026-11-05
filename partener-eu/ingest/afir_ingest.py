@@ -312,7 +312,7 @@ def capture_extension_notice_receipt(requested_url, fetched, observed_at):
     if (
         not run_id
         or not fetched.get("ok")
-        or norm(final_url or "") != AFIR_EXTENSION_NOTICE
+        or final_url != AFIR_EXTENSION_NOTICE
         or not isinstance(data, bytes)
         or not data
         or "html" not in content_type
