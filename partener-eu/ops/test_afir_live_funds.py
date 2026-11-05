@@ -76,9 +76,11 @@ def test_afir_fetch_transport_provenance() -> None:
     ingest = load_ingest_module()
     official = "https://www.afir.ro/info-la-zi/"
     class Response:
-        def __init__(self, final_url, data=b"verified AFIR source bytes", status=200):
+        def __init__(self, final_url, data=b"verified AFIR source bytes", status=200, declared_length=None):
             self.final_url, self.data, self.status = final_url, data, status
             self.headers = {"Content-Type": "text/html; charset=utf-8"}
+            if declared_length is not None:
+                self.headers["Content-Length"] = str(declared_length)
         def __enter__(self):
             return self
         def __exit__(self, exc_type, exc, tb):
@@ -100,6 +102,9 @@ def test_afir_fetch_transport_provenance() -> None:
         return result
 
     probe(Response(official), allowed=True)
+    probe(Response(official, declared_length=len(b"verified AFIR source bytes")), allowed=True)
+    probe(Response(official, declared_length=1), allowed=False)
+    probe(Response(official, declared_length="not-a-number"), allowed=False)
     for final in (
         "https://untrusted.example/afir-copy",
         "http://www.afir.ro/info-la-zi/",
