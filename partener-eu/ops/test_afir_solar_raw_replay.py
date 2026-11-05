@@ -4,14 +4,17 @@
 Mutates only temporary in-memory ZIP copies. Never modifies immutable evidence.
 """
 import argparse
+import copy
 from io import BytesIO
 import importlib.util
 import json
 from pathlib import Path
+from shutil import copy2
+from tempfile import TemporaryDirectory
 import re
 from zipfile import ZipFile
 
-from afir_solar_raw_replay import ACQUIRE, OBS, totals
+from afir_solar_raw_replay import ACQUIRE, OBS, replay, totals
 
 
 def modify_numeric_cell(original, cell):
@@ -54,7 +57,48 @@ def main():
                 rejected += 1
             else:
                 raise AssertionError(f'Altered {category} original cell {cell} was admitted')
-    print(json.dumps({'status': 'PASS', 'independent_raw_xlsx_negative_replays_rejected': rejected,
+    # A valid XLSX with an invented manifest must never be accepted as an
+    # official observation. Copy the evidence first; never edit the original.
+    proven = replay(root)
+    assert proven['status'] == 'RAW_ROWS_REPLAYED_NOT_PUBLISHED'
+    tamper_cases = (
+        (('official_notice_url',), 'https://example.org/notice'),
+        (('programme',), 'UNRELATED_PROGRAMME'),
+        (('parser_version',), 'unreviewed-parser'),
+        (('observation_state',), 'OPEN_CALL'),
+        (('run_id',), ''),
+        (('official_index', 'url'), 'https://example.org/index'),
+        (('official_index', 'sha256'), '0' * 64),
+        (('official_index', 'bytes'), 0),
+        (('official_index', 'fetched_at'), '1990-01-01T00:00:00Z'),
+        (('documents', 0, 'source_family'), 'MIPE'),
+        (('documents', 0, 'authority_class'), 'SELF_DECLARED'),
+        (('documents', 0, 'observation_state'), 'OPEN_CALL'),
+        (('documents', 0, 'status'), 'RECONCILED'),
+        (('documents', 0, 'parser_version'), 'unknown'),
+        (('documents', 0, 'fetched_at'), '1990-01-01T00:00:00Z'),
+    )
+    with TemporaryDirectory(prefix='afir-solar-manifest-negative-') as temp:
+        isolated = Path(temp)
+        for file in ('manifest.json', 'afir-selection-index.raw.html',
+                     'solar-3-2026-selectate.raw.xlsx', 'solar-3-2026-nefinantate.raw.xlsx'):
+            copy2(root / file, isolated / file)
+        original = json.loads((isolated / 'manifest.json').read_text(encoding='utf-8'))
+        for keys, forged_value in tamper_cases:
+            forged = copy.deepcopy(original)
+            cursor = forged
+            for key in keys[:-1]:
+                cursor = cursor[key]
+            cursor[keys[-1]] = forged_value
+            (isolated / 'manifest.json').write_text(
+                json.dumps(forged, ensure_ascii=False), encoding='utf-8')
+            try:
+                replay(isolated)
+            except (ValueError, KeyError, TypeError):
+                rejected += 1
+            else:
+                raise AssertionError(f'Forged original manifest admitted: {keys}')
+    print(json.dumps({'status': 'PASS', 'independent_raw_negative_replays_rejected': rejected,
                       'original_artifacts_modified': False, 'publish_authorized': False}))
 
 
