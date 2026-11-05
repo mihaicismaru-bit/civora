@@ -122,7 +122,18 @@ jobs:
           python -m py_compile partener-eu/ingest/build_afir_live_funds.py
 
       - name: Discover and fingerprint official AFIR corpus fail-closed
+        env:
+          PARTENER_AFIR_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-evidence
         run: python partener-eu/ingest/afir_ingest.py
+
+      - name: Upload official AFIR DR-14/DR-18 original notice (non-authorizing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr14-dr18-raw-notice-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-evidence/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Build authoritative AFIR live-funds snapshot fail-closed
         shell: bash
