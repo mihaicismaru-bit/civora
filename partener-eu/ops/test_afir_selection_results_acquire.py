@@ -37,6 +37,27 @@ def xlsx():
 assert module.parse_index(html(REFS)) == REFS
 assert module.validate_workbook(xlsx()) is True
 
+# The official catalogue is multi-session: a later solar period must not
+# invalidate the two exact 3/2026 reports already proven by the table.
+future_row = (
+    '<tr><td>Final</td><td>Selectate</td><td>ENERGIE</td>'
+    '<td>4</td><td>2027</td>'
+    '<td>15.06.2027 - 14.08.2027 (Solar Peste 1MW)</td>'
+    '<td>03.11.2027</td>'
+    f'<td><a href="{SELECTED}">Descarcă</a></td></tr>'
+).encode()
+assert module.parse_index(html(REFS).replace(b"</table>", future_row + b"</table>")) == REFS
+
+# Conversely, a changed publication date for the exact 3/2026 session
+# is a material identity mismatch and must remain fail-closed.
+bad_date = html(REFS).replace(b"03.11.2026", b"04.11.2026", 1)
+try:
+    module.parse_index(bad_date)
+except ValueError:
+    pass
+else:
+    raise AssertionError("Changed exact-session report date was admitted")
+
 for bad in [
     {"Selectate": SELECTED},
     {"Selectate": SELECTED, "Nefinanțate": SELECTED},

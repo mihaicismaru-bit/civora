@@ -68,11 +68,15 @@ def parse_index(raw):
         if len(row) < 8:
             continue
         cells = [c["text"] for c in row]
-        if cells[2].upper() != "ENERGIE" or "solar peste 1mw" not in cells[5].lower():
+        # The AFIR index also contains other reporting sessions. Ignore
+        # unrelated periods, but fail closed on contradictory rows for the
+        # exact solar 3/2026 session (type, category, date or delegation).
+        if (cells[2].upper() != "ENERGIE"
+            or cells[3] != "3" or cells[4] != "2026"
+            or "solar peste 1mw" not in cells[5].lower()
+            or "15.06.2026" not in cells[5] or "14.08.2026" not in cells[5]):
             continue
         if (cells[0] != "Final" or cells[1] not in CATEGORIES
-            or cells[3] != "3" or cells[4] != "2026"
-            or "15.06.2026" not in cells[5] or "14.08.2026" not in cells[5]
             or cells[6] != "03.11.2026"):
             raise ValueError("Unverified AFIR final-report category/session/date")
         links = row[7]["links"]
