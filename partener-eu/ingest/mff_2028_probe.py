@@ -158,9 +158,9 @@ def fetch(url: str) -> dict:
         # A 200 response from an official host can still be a WAF/login page.
         # It is not a source receipt, and must not replace last-known evidence.
         html = raw.decode("utf-8", "replace")
-        title_match = re.search(r"<title\\b[^>]*>(.*?)</title\\s*>", html, flags=re.I | re.S)
+        title_match = re.search(r"<title\b[^>]*>(.*?)</title\s*>", html, flags=re.I | re.S)
         if title_match:
-            title = re.sub(r"\\s+", " ", re.sub(r"<[^>]*>", " ", title_match.group(1))).strip().lower()
+            title = re.sub(r"\s+", " ", re.sub(r"<[^>]*>", " ", title_match.group(1))).strip().lower()
             if title.startswith(("access denied", "just a moment", "verify you are human",
                                  "attention required", "bot verification", "sign in to")):
                 raise ValueError("official host returned an interstitial, not source content")
