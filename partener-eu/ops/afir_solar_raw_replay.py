@@ -55,6 +55,30 @@ def totals(raw, category, expected, observation, collector):
     session = "Sesiunea nr. " + observation["workbook_internal_session_identifier"] + " Masura FM"
     if sum(norm(s) == norm(session) for s in shared) != 1:
         raise ValueError("Workbook session header mismatch")
+    # AFIR's official index delegates two distinct 3/2026 reports, but the
+    # original workbooks use the internal FM-06/26 code. Verify their common
+    # dated reporting period and category, WITHOUT equating those two IDs or
+    # claiming an exact funding-call identity.
+    period = observation["report_period"].split("–")
+    if len(period) != 2:
+        raise ValueError("Invalid pinned index report period")
+    labels = [norm(s) for s in shared]
+    expected_group = ("lista proiectelor selectate pentru finantare"
+                      if category == "Selectate" else "lista proiectelor nefinantate")
+    if labels.count(expected_group) != 1:
+        raise ValueError("Workbook category mismatches official index delegation")
+    count_headers = [s for s in labels
+                     if s.startswith("numarul proiectelor selectate pentru finantare:")]
+    if len(count_headers) != 1:
+        raise ValueError("Missing or duplicate dated selection header")
+    dated = re.fullmatch(
+        r"numarul proiectelor selectate pentru finantare:\\s*\\((\\d{2}\\.\\d{2}\\.\\d{4})\\s*-\\s*(\\d{2}\\.\\d{2}\\.\\d{4})\\):\\s*(\\d+)",
+        count_headers[0],
+    )
+    if (dated is None or
+        (dated[1], dated[2], int(dated[3])) !=
+        (period[0], period[1], observation["aggregates"]["selected_projects"])):
+        raise ValueError("Original workbook/report-index date range or count mismatch")
     for snippet, target in (
         ("numarul proiectelor depuse :", observation["aggregates"]["submitted_projects"]),
         ("valoarea publica totala a proiectelor depuse :", observation["aggregates"]["submitted_public_value_eur"]),
@@ -178,6 +202,10 @@ def replay(directory):
     return {"status": "RAW_ROWS_REPLAYED_NOT_PUBLISHED", "run_id": manifest["run_id"],
             "selected": result["Selectate"][0], "unfunded": result["Nefinanțate"][0],
             "selected_eur": result["Selectate"][1], "unfunded_eur": result["Nefinanțate"][1],
+            "report_index_document_binding": "CATEGORY_DELEGATION_AND_PERIOD_VERIFIED",
+            "index_session_identifier": obs["index_session_identifier"],
+            "workbook_internal_session_identifier": obs["workbook_internal_session_identifier"],
+            "identifier_alias_established": False,
             "session_identity_reconciled": False, "publish_authorized": False}
 
 
