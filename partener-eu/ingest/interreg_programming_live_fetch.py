@@ -21,9 +21,10 @@ from pathlib import Path
 import re
 import ssl
 import urllib.request
+from urllib.parse import urlsplit
 from typing import Any
 
-from interreg_programming_intelligence import normalize_programming_observation
+from interreg_programming_intelligence import OFFICIAL_HOSTS, normalize_programming_observation
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "partener-eu" / "ingest" / "source_registry.json"
@@ -96,6 +97,31 @@ def _programming_sources(registry: dict[str, Any]) -> list[dict[str, Any]]:
     return sorted(selected, key=lambda item: str(item.get("id") or ""))
 
 
+
+def _assert_official_source_origin(requested_url: str, final_url: str) -> None:
+    """Fail closed if an official Interreg source redirects to another authority.
+
+    A www/non-www canonical redirect is acceptable; a redirect to a different
+    official Interreg programme is NOT equivalent provenance for this source.
+    """
+    requested = urlsplit(requested_url)
+    final = urlsplit(final_url)
+    for part in (requested, final):
+        host = (part.hostname or "").lower()
+        if (
+            part.scheme != "https"
+            or host not in OFFICIAL_HOSTS
+            or part.username is not None
+            or part.password is not None
+            or part.port not in (None, 443)
+        ):
+            raise ValueError("untrusted Interreg source/redirect URL")
+    requested_host = (requested.hostname or "").lower().removeprefix("www.")
+    final_host = (final.hostname or "").lower().removeprefix("www.")
+    if requested_host != final_host:
+        raise ValueError("Interreg redirect crossed registered official source origin")
+
+
 def _fetch(url: str) -> tuple[bytes, str, int, str]:
     request = urllib.request.Request(
         url,
@@ -148,6 +174,7 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
         }
         try:
             raw, final_url, status, content_type = _fetch(url)
+            _assert_official_source_origin(url, final_url)
             text = _visible_text(raw, content_type)
             if len(text) < 120:
                 raise ValueError("low-information HTML body")
@@ -282,6 +309,7 @@ def replay_live_evidence(
         original = raw_dir / raw_name
         if not original.is_file() or original.is_symlink():
             raise ValueError("missing original Interreg bytes")
+        _assert_official_source_origin(str(source.get('url') or ''), str(row.get('final_url') or ''))
         raw = original.read_bytes()
         if (
             not raw or len(raw) > MAX_BYTES
