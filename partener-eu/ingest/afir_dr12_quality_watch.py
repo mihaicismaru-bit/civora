@@ -109,7 +109,64 @@ def capture(
     return manifest
 
 
+
+def replay_receipt(destination: Path) -> dict:
+    """Independently replay immutable original bytes; never authorize public facts."""
+    raw = (destination / "notice.raw.html").read_bytes()
+    manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
+    expected = {
+        "requested_url": NOTICE_URL,
+        "final_url": NOTICE_URL,
+        "raw_evidence_file": "notice.raw.html",
+        "raw_sha256": hashlib.sha256(raw).hexdigest(),
+        "raw_bytes": len(raw),
+        "parser_version": PARSER_VERSION,
+        "http_status": 200,
+        "programme": "PS_PAC_2023_2027/DR12",
+        "source_family": "AFIR",
+        "authority_class": "T1_OFFICIAL_AGENCY",
+        "stage_kind": "PREANNOUNCED_MONTHLY_QUALITY_THRESHOLD",
+        "observation_state": "RAW_MONTHLY_QUALITY_STAGE_OBSERVED_PENDING_GUIDE_COUNTER_RECONCILIATION",
+        "source_publication_date": "2026-10-01",
+        "stages": parse_notice(raw),
+        "exact_current_call_identifier_verified": False,
+        "open_call_authorized": False,
+        "eligibility_change_authorized": False,
+        "material_fact_action": "NONE",
+        "publish_authorized": False,
+        "distribution_authorized": False,
+    }
+    for field, value in expected.items():
+        if manifest.get(field) != value:
+            raise ValueError(f"DR-12 immutable replay disagreement: {field}")
+    if "html" not in str(manifest.get("content_type") or "").lower():
+        raise ValueError("DR-12 replay content-type mismatch")
+    if not str(manifest.get("run_id") or "").strip():
+        raise ValueError("DR-12 replay run_id missing")
+    if not str(manifest.get("run_attempt") or "").isdigit():
+        raise ValueError("DR-12 replay run_attempt invalid")
+    try:
+        timestamp = dt.datetime.fromisoformat(
+            str(manifest["fetched_at_utc"]).replace("Z", "+00:00")
+        )
+    except (ValueError, KeyError) as exc:
+        raise ValueError("DR-12 replay fetched_at_utc invalid") from exc
+    if timestamp.tzinfo is None or timestamp.utcoffset() != dt.timedelta():
+        raise ValueError("DR-12 replay fetched_at_utc must be UTC")
+    return manifest
+
+
 def main() -> int:
+    if len(sys.argv) == 3 and sys.argv[1] == "--replay-dir":
+        proof = replay_receipt(Path(sys.argv[2]))
+        print(json.dumps({
+            "verified": True, "raw_sha256": proof["raw_sha256"],
+            "run_id": proof["run_id"], "publish_authorized": False,
+        }, sort_keys=True))
+        return 0
+    if len(sys.argv) != 1:
+        print("usage: afir_dr12_quality_watch.py [--replay-dir PATH]", file=sys.stderr)
+        return 2
     root = os.environ.get("PARTENER_AFIR_DR12_EVIDENCE_DIR")
     run_id = os.environ.get("GITHUB_RUN_ID")
     if not root or not run_id:
