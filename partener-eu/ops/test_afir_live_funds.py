@@ -92,7 +92,10 @@ def test_afir_fetch_transport_provenance() -> None:
             return self.data[:n]
 
     def probe(response, *, allowed):
-        with patch.object(ingest.urllib.request, "urlopen", return_value=response):
+        # Mock only the terminal network read; preserve the real redirect
+        # handler tests below to reject unsafe intermediate hops.
+        with patch.object(ingest.urllib.request, "build_opener") as make_opener:
+            make_opener.return_value.open.return_value = response
             result = ingest.fetch(official, sleep=lambda _delay: None)
         assert result["ok"] is allowed, result
         if allowed:
@@ -115,6 +118,30 @@ def test_afir_fetch_transport_provenance() -> None:
     probe(Response(official, status=500), allowed=False)
     probe(Response(official, data=b""), allowed=False)
     probe(Response(official, data=b"x" * 12_000_001), allowed=False)
+    assert ingest.fetch("http://www.afir.ro/info-la-zi/")["ok"] is False
+    assert ingest.fetch("https://untrusted.example/")["ok"] is False
+
+    # A redirect chain HTTPS -> HTTP -> HTTPS would otherwise pass final-URL
+    # validation only after exposing the intermediate insecure request.
+    handler = ingest._StrictAFIRRedirectHandler()
+    origin = ingest.urllib.request.Request(official)
+    safe = handler.redirect_request(
+        origin, None, 302, "Found", {}, "https://afir.ro/info-la-zi/"
+    )
+    assert safe.full_url == "https://afir.ro/info-la-zi/"
+    for intermediate in (
+        "http://www.afir.ro/info-la-zi/",
+        "https://untrusted.example/info-la-zi/",
+        "https://www.afir.ro:444/info-la-zi/",
+        "https://www.afir.ro/umbraco/surface/authentication/login",
+        "https://user:pass@www.afir.ro/info-la-zi/",
+    ):
+        try:
+            handler.redirect_request(origin, None, 302, "Found", {}, intermediate)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"unsafe AFIR redirect accepted: {intermediate}")
 
 
 def test_extension_notice_raw_receipt() -> None:
