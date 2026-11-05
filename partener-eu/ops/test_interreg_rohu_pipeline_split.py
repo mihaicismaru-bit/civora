@@ -14,6 +14,8 @@ CURRENT_ID = "SRC-INTERREG-ROHU"
 PIPELINE_ID = "SRC-INTERREG-ROHU-2028-2034"
 PIPELINE_PROGRAMME = "Interreg Romania-Hungary 2028-2034"
 PIPELINE_URL = "https://interreg-rohu.eu/ro/programare-2027/"
+SURVEY_ID = "SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026"
+SURVEY_URL = "https://interreg-rohu.eu/ro/contribuiti-la-definirea-viitorului-cooperarii-transfrontaliere/"
 
 
 def main() -> None:
@@ -43,11 +45,24 @@ def main() -> None:
     assert "BUDGET" in note
     assert "ELIGIBILITY" in note
 
+    # The current October-November 2026 survey is a distinct official
+    # article, not the older June-August consultation on ROHU's landing page.
+    survey = by_id[SURVEY_ID]
+    assert survey["url"] == SURVEY_URL
+    assert survey["programmes"] == [PIPELINE_PROGRAMME]
+    assert survey["tier"] == "T1"
+    assert set(survey["source_families"]) == {"INTERREG", "CBC", "PROGRAMMING_PIPELINE"}
+    assert survey["observation_state"] == "PROGRAMMING_PIPELINE"
+    assert survey["material_fact_use"] is False
+    assert survey["authority_scope"] == "PROGRAMMING_FRAMEWORK"
+    assert "OPEN_CALL" in survey["note"]
+
     domains = set((plane.get("programmeDomains") or {}).get(PIPELINE_PROGRAMME) or [])
     assert domains == {"INTERREG_CBC", "PROGRAMMING_FUTURE"}
 
     selected_ids = {row["id"] for row in live._programming_sources(registry)}
     assert PIPELINE_ID in selected_ids
+    assert SURVEY_ID in selected_ids
     assert CURRENT_ID not in selected_ids
 
     print(
