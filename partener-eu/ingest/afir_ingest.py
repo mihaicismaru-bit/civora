@@ -29,7 +29,15 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "afir_state.json"
 CORPUS = ROOT / "partener-eu" / "ingest" / "state" / "afir_corpus.json"
 
 HOSTS = {"afir.ro", "www.afir.ro"}
+# Exact official notice whose raw bytes are required for DR-14/DR-18
+# deadline reconciliation; an index discovery alone is not a raw receipt.
+AFIR_EXTENSION_NOTICE = (
+    "https://www.afir.ro/info-la-zi/"
+    "prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/"
+)
+AFIR_RECEIPT_PARSER_VERSION = "afir-extension-notice-raw-v1"
 SEEDS = [
+    AFIR_EXTENSION_NOTICE,
     "https://www.afir.ro/info-la-zi/",
     "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
     "https://www.afir.ro/instrumente/sesiuni/detalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte/",
@@ -288,6 +296,61 @@ def atomic_json(path, value):
             os.unlink(temporary)
 
 
+def capture_extension_notice_receipt(requested_url, fetched, observed_at):
+    """Archive exact official notice bytes, strictly as non-authorizing evidence.
+
+    GitHub Actions artifacts are immutable within their retention window.
+    The reviewed persistent handoff and semantic admission remain separate.
+    """
+    destination = os.environ.get("PARTENER_AFIR_EVIDENCE_DIR")
+    if requested_url != AFIR_EXTENSION_NOTICE or not destination:
+        return None
+    run_id = os.environ.get("GITHUB_RUN_ID")
+    data = fetched.get("data")
+    final_url = fetched.get("url")
+    content_type = str(fetched.get("content_type") or "").lower()
+    if (
+        not run_id
+        or not fetched.get("ok")
+        or norm(final_url or "") != AFIR_EXTENSION_NOTICE
+        or not isinstance(data, bytes)
+        or not data
+        or "html" not in content_type
+    ):
+        raise ValueError("AFIR notice raw receipt lacks exact official HTTPS identity, run or HTML bytes")
+    outdir = Path(destination)
+    outdir.mkdir(parents=True, exist_ok=True)
+    raw_name = "afir-dr14-dr18-extension-notice.raw.html"
+    raw_path = outdir / raw_name
+    raw_path.write_bytes(data)
+    digest = hashlib.sha256(data).hexdigest()
+    manifest = {
+        "schema_version": "1.0",
+        "requested_url": requested_url,
+        "final_url": final_url,
+        "fetched_at_utc": observed_at,
+        "raw_sha256": digest,
+        "raw_bytes": len(data),
+        "raw_evidence_file": raw_name,
+        "http_status": fetched.get("status"),
+        "content_type": fetched.get("content_type"),
+        "parser_version": AFIR_RECEIPT_PARSER_VERSION,
+        "run_id": run_id,
+        "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
+        "programme": "PS_PAC_2023_2027/DR14_DR18",
+        "source_family": "AFIR",
+        "authority_class": "T1_OFFICIAL_AIR",
+        "observation_state": "RAW_FETCHED_PENDING_SEMANTIC_RECONCILIATION",
+        "material_fact_action": "NONE",
+        "publish_authorized": False,
+    }
+    (outdir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\\n",
+        encoding="utf-8",
+    )
+    return manifest
+
+
 def build_payload(prior, observed_at, discovered_items, errors, access_dependencies=None):
     access_dependencies = list(access_dependencies or [])
     run_status = "PASS" if len(discovered_items) >= 3 else "DEGRADED" if discovered_items else "SOURCE_UNAVAILABLE"
@@ -425,6 +488,11 @@ def main():
                     "reason": "AFIR redirected the public route to an authentication surface; no access was fabricated.",
                 })
                 continue
+            if url == AFIR_EXTENSION_NOTICE:
+                try:
+                    capture_extension_notice_receipt(url, r, now())
+                except ValueError as exc:
+                    errors.append({"url": url, "error": str(exc), "observationState": "RAW_RECEIPT_REJECTED"})
             for href, label in links:
                 dependency = auth_link_dependency(href, url)
                 if dependency:
