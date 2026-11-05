@@ -45,6 +45,27 @@ DATE_RANGE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Interreg ROHU's newer 2028-2034 questionnaire is announced as
+# "5 October – 30 November 2026" / "5 octombrie – 30 noiembrie 2026".
+# Numeric-only date parsing silently classified this active consultation as
+# programme preparation. This is *consultation* time, never OPEN_CALL time.
+MONTH_NUMBERS = {
+    "january": 1, "february": 2, "march": 3, "april": 4,
+    "may": 5, "june": 6, "july": 7, "august": 8,
+    "september": 9, "october": 10, "november": 11, "december": 12,
+    "ianuarie": 1, "februarie": 2, "martie": 3, "mai": 5,
+    "iunie": 6, "iulie": 7, "septembrie": 9, "octombrie": 10,
+    "noiembrie": 11, "decembrie": 12,
+}
+_MONTH_ALTERNATIVES = "|".join(sorted(MONTH_NUMBERS, key=len, reverse=True))
+MONTH_DATE_RANGE_RE = re.compile(
+    rf"\\b(?P<start_day>\\d{{1,2}})\\s+(?P<start_month>{_MONTH_ALTERNATIVES})"
+    rf"(?:\\s+(?P<start_year>20\\d{{2}}))?\\s*(?:–|—|-|to|until|până la)\\s*"
+    rf"(?P<end_day>\\d{{1,2}})\\s+(?P<end_month>{_MONTH_ALTERNATIVES})"
+    rf"\\s+(?P<end_year>20\\d{{2}})\\b",
+    re.IGNORECASE,
+)
+
 PROGRAMMING_TERMS = (
     "future interreg programme",
     "future programme",
@@ -97,11 +118,27 @@ def _official_url(value: str) -> str:
 
 
 def _extract_window(text: str) -> tuple[dt.date | None, dt.date | None]:
-    match = DATE_RANGE_RE.search(text)
-    if not match:
+    # Never choose an arbitrary first window from a programme landing page
+    # containing several historical and current questionnaires. Exact article
+    # sources carry one window; ambiguous combined pages remain fail-closed.
+    numeric = list(DATE_RANGE_RE.finditer(text))
+    named = list(MONTH_DATE_RANGE_RE.finditer(text))
+    if len(numeric) + len(named) > 1:
+        raise ValueError("ambiguous consultation windows in source")
+    if numeric:
+        match = numeric[0]
+        start = _parse_day(match.group("start"))
+        end = _parse_day(match.group("end"))
+    elif named:
+        match = named[0]
+        year_end = int(match.group("end_year"))
+        year_start = int(match.group("start_year") or year_end)
+        start = dt.date(year_start, MONTH_NUMBERS[match.group("start_month").lower()],
+                        int(match.group("start_day")))
+        end = dt.date(year_end, MONTH_NUMBERS[match.group("end_month").lower()],
+                      int(match.group("end_day")))
+    else:
         return None, None
-    start = _parse_day(match.group("start"))
-    end = _parse_day(match.group("end"))
     if end < start:
         raise ValueError("consultation end precedes start")
     return start, end
