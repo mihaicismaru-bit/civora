@@ -50,6 +50,45 @@ def main():
     assert active["stale_open_copy"] is False
     assert_non_authorizing(active)
 
+    # Current dedicated source (not the stale June-August survey on the
+    # ROHU landing page): dates appear as month names in both languages.
+    # 5 November is a live *consultation*, NEVER an open funding call.
+    for new_copy in (
+        "Interreg Chapter 2028-2034. Online survey Open: 5 October – 30 November 2026",
+        "Capitolul Interreg 2028–2034. Sondajul este deschis în perioada 5 octombrie – 30 noiembrie 2026.",
+    ):
+        current = build("2026-11-05T20:30:00Z", text=new_copy)
+        assert current["observation_state"] == "CONSULTATION", current
+        assert current["consultation_start"] == "2026-10-05"
+        assert current["consultation_end"] == "2026-11-30"
+        assert current["confidence"] == "HIGH"
+        assert_non_authorizing(current)
+
+        after = build("2026-12-01T12:00:00Z", text=new_copy)
+        assert after["observation_state"] == "CONSULTATION_CLOSED"
+        assert_non_authorizing(after)
+
+    # Programme landing pages can include successive surveys. Never choose
+    # the expired one simply because it appears first in aggregated page text.
+    try:
+        build("2026-11-05T20:30:00Z", text=TEXT +
+              " Interreg Chapter 2028-2034. Online survey Open: 5 October – 30 November 2026")
+    except ValueError as exc:
+        assert "ambiguous consultation windows" in str(exc)
+    else:
+        raise AssertionError("Mixed old/new surveys were incorrectly collapsed")
+
+    for malformed in (
+        "Interreg 2028-2034 survey: 31 October – 30 November 2026",
+        "Interreg 2028-2034 survey: 5 October – 30 February 2026",
+    ):
+        try:
+            build("2026-11-05T20:30:00Z", text=malformed)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Impossible consultation window accepted")
+
     planned = build("2026-05-10T12:00:00Z")
     assert planned["observation_state"] == "PLANNED"
     assert_non_authorizing(planned)
