@@ -150,7 +150,11 @@ def run(outdir, run_id, observed_at):
     if not run_id:
         raise ValueError("Missing run_id")
     root = Path(outdir)
-    root.mkdir(parents=True, exist_ok=True)
+    # Each acquisition must own a fresh evidence directory. An existing path
+    # (even an empty one) is a prior run, not a place to overwrite receipts.
+    # In particular, a retry must never upload stale XLSX files under a new
+    # FETCH_FAILED manifest or mutate an earlier immutable checkpoint.
+    root.mkdir(parents=True, exist_ok=False)
     manifest = {
         "schema": "PARTENER_EU_AFIR_SELECTION_RAW_EVIDENCE_V1",
         "status": "FETCH_FAILED", "official_index_url": INDEX_URL,
