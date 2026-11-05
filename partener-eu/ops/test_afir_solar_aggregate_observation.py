@@ -43,6 +43,8 @@ def verify(receipt: dict) -> None:
     assert receipt["authority_class"] == "OFFICIAL_AFIR_REPORT_INDEX_DELEGATED_DOCUMENT"
     assert receipt["index_session_identifier"] == "ENERGIE / 3 / 2026"
     assert receipt["workbook_internal_session_identifier"] == "FM - 06/26 - 14.08.2026"
+    assert receipt["document_binding_state"] == "SOURCE_INDEX_DELEGATED_XLSX_CATEGORY_AND_PERIOD_VERIFIED"
+    assert receipt["document_binding_scope"] == "REPORT_DOCUMENT_ONLY_NOT_CALL_IDENTIFIER_EQUIVALENCE"
     # These identities are NOT independently established as equivalent.
     assert receipt["session_identity_reconciliation"] == "REQUIRED"
     assert receipt["index_session_identifier"] != receipt["workbook_internal_session_identifier"]
@@ -87,6 +89,8 @@ def verify(receipt: dict) -> None:
         "cross_report_metadata_equal", "submitted_equals_selected_plus_unfinanced",
         "submitted_value_equals_selected_plus_unfinanced",
         "individual_beneficiary_rows_excluded",
+        "official_index_delegation_and_sheet_period_verified",
+        "workbook_selection_categories_verified",
     ))
     assert "beneficiaries" not in receipt and "rows" not in receipt
 
@@ -98,6 +102,8 @@ def main() -> int:
     # changed source URL/hash, or fabricated count may pass silently.
     mutations = [
         ("session_identity_reconciliation", "CONFIRMED"),
+        ("document_binding_state", "CALL_ALIAS_CONFIRMED"),
+        ("document_binding_scope", "OPEN_CALL"),
         ("open_call_authorized", True),
         ("publish_authorized", True),
         ("material_fact_use", True),
