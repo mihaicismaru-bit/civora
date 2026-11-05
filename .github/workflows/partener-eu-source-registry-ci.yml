@@ -28,6 +28,10 @@ on:
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
+      - 'partener-eu/ingest/interreg_programming_intelligence.py'
+      - 'partener-eu/ingest/interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_programming_intelligence.py'
+      - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
@@ -119,6 +123,11 @@ jobs:
 
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
+
+      - name: Validate Interreg named-month consultation windows and acquisition isolation
+        run: |
+          python partener-eu/ops/test_interreg_programming_intelligence.py
+          python partener-eu/ops/test_interreg_programming_live_fetch.py
 
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
