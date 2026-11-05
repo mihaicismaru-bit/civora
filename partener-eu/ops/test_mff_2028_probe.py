@@ -120,7 +120,7 @@ def run_tests():
         assert probe.run(reg, state, evidence, "test-redirect")["summary"]["fail"] == 1
         probe.urllib.request.urlopen = lambda *_args, **_kwargs: Response(b"x" * (probe.MAX_BYTES + 1))
         assert probe.run(reg, state, evidence, "test-oversized")["summary"]["fail"] == 1
-        assert not (evidence / "SRC-EU-MFF-CAP-PARTIAL-20261026.html").exists() is False or True
+        assert state.exists() and (evidence / "manifest.json").exists()
         print("PASS: official source taxonomy + raw SHA provenance + stage watch + 403/LKG + redirect/oversize fail-closed")
 
 
