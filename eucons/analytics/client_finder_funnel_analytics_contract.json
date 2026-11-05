@@ -1,0 +1,126 @@
+{
+  "schema_version": 1,
+  "id": "R11-FUNNEL-ANALYTICS-001",
+  "engine_id": "EUCONS_R11_CLIENT_FINDER_FUNNEL_ANALYTICS",
+  "product": "EUCONS_COMMERCIAL_OS",
+  "status": "CANONICAL",
+  "purpose": "Reconcile normalized internal lifecycle snapshots into provider-neutral funnel observability without turning NON_EVIDENCE fixtures, open cohorts, or incomplete lineage into performance claims.",
+  "source_mode": "PREFETCHED_INTERNAL_LIFECYCLE_SNAPSHOTS_ONLY",
+  "evidence_classes": [
+    "REAL_TELEMETRY",
+    "NON_EVIDENCE"
+  ],
+  "entry_lanes": {
+    "INBOUND": [
+      "INBOUND_COMPLETED",
+      "MATCHED",
+      "OUTREACH_PREPARED",
+      "CONTACT_APPROVED",
+      "OFFER",
+      "WON"
+    ],
+    "PROSPECT_DISCOVERY": [
+      "PROSPECT_READY",
+      "MATCHED",
+      "OUTREACH_PREPARED",
+      "CONTACT_APPROVED",
+      "OFFER",
+      "WON"
+    ]
+  },
+  "stage_sources": {
+    "INBOUND_COMPLETED": {
+      "source_contract_id": "R05-INBOUND-001",
+      "source_state": "COMPLETED"
+    },
+    "PROSPECT_READY": {
+      "source_contract_id": "R06-CF-CONTRACT-001",
+      "source_state": "READY_FOR_SCORING"
+    },
+    "MATCHED": {
+      "source_contract_id": "R07-PROSPECT-MATCH-001",
+      "source_state": "MATCHED_RESEARCH_CANDIDATE"
+    },
+    "OUTREACH_PREPARED": {
+      "source_contract_id": "R08-ACTION-PACK-001",
+      "source_state": "READY_FOR_APPROVAL"
+    },
+    "CONTACT_APPROVED": {
+      "source_contract_id": "R10-PIPELINE-001",
+      "source_state": "CONTACT_APPROVED"
+    },
+    "OFFER": {
+      "source_contract_id": "R10-PIPELINE-001",
+      "source_state": "OFFER"
+    },
+    "WON": {
+      "source_contract_id": "R10-PIPELINE-001",
+      "source_state": "WON"
+    }
+  },
+  "canonical_dependencies": {
+    "inbound_runtime": "eucons/leads/inbound_runtime_contract.json",
+    "client_finder": "eucons/prospects/client_finder_contract.json",
+    "prospect_match": "eucons/prospects/prospect_opportunity_match_contract.json",
+    "action_pack": "eucons/outreach/action_pack_contract.json",
+    "crm_pipeline": "eucons/crm/pipeline_contract.json",
+    "analytics": "eucons/analytics/analytics_contract.json"
+  },
+  "privacy": {
+    "pseudonymous_id_pattern": "^[0-9a-f]{64}$",
+    "forbidden_keys": [
+      "email",
+      "phone",
+      "contact_name",
+      "organization_name",
+      "legal_name",
+      "message",
+      "ip",
+      "ip_address",
+      "user_agent",
+      "full_url",
+      "referrer_url"
+    ],
+    "raw_pii_forbidden": true
+  },
+  "cohort_rules": {
+    "utc_z_required": true,
+    "window_start_before_window_end": true,
+    "window_end_not_after_as_of": true,
+    "closed_real_cohort_required_for_rates": true,
+    "closed_cohort_requires_contiguous_prefix_per_entity": true,
+    "record_must_fall_inside_window": true
+  },
+  "non_evidence_policy": {
+    "numeric_stage_counts_exposed": false,
+    "numeric_transition_rates_exposed": false,
+    "performance_claims_enabled": false,
+    "state": "UNKNOWN_NON_EVIDENCE"
+  },
+  "open_real_cohort_policy": {
+    "numeric_stage_counts_exposed": true,
+    "numeric_transition_rates_exposed": false,
+    "performance_claims_enabled": false,
+    "state": "COUNTS_ONLY_OPEN_COHORT"
+  },
+  "closed_real_cohort_policy": {
+    "numeric_stage_counts_exposed": true,
+    "numeric_transition_rates_exposed": true,
+    "performance_claims_enabled": true,
+    "state": "CLOSED_COHORT_REAL_TELEMETRY"
+  },
+  "external_boundaries": {
+    "network_fetch": false,
+    "transport_enabled": false,
+    "crm_write_enabled": false,
+    "pipeline_write_enabled": false,
+    "offer_send_enabled": false,
+    "outreach_enabled": false,
+    "public_reporting_enabled": false
+  },
+  "output": {
+    "schema_version": 1,
+    "internal_only": true,
+    "unknown_value": "UNKNOWN"
+  }
+}
