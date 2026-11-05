@@ -2,6 +2,7 @@
 """Hermetic DR-12 monthly-stage/provenance negative tests. No live network."""
 from __future__ import annotations
 
+import copy
 import hashlib
 import importlib.util
 import json
@@ -80,6 +81,36 @@ def main() -> None:
         assert record == json.loads((receipt / "manifest.json").read_text(encoding="utf-8"))
         assert record["raw_sha256"] == hashlib.sha256(raw()).hexdigest()
         assert (receipt / record["raw_evidence_file"]).read_bytes() == raw()
+        assert watch.replay_receipt(receipt) == record
+        original_manifest = (receipt / "manifest.json").read_bytes()
+        for key, bad in (
+            ("raw_sha256", "0" * 64),
+            ("run_id", ""),
+            ("parser_version", "unknown"),
+            ("programme", "DR-14"),
+            ("requested_url", "https://example.com"),
+            ("source_family", "UNVERIFIED"),
+            ("observation_state", "OPEN_CALL"),
+            ("open_call_authorized", True),
+            ("publish_authorized", True),
+            ("distribution_authorized", True),
+            ("fetched_at_utc", "2026-11-05T21:30:00"),
+        ):
+            altered = copy.deepcopy(record)
+            altered[key] = bad
+            (receipt / "manifest.json").write_text(
+                json.dumps(altered, ensure_ascii=False), encoding="utf-8"
+            )
+            rejected(lambda: watch.replay_receipt(receipt))
+        altered = copy.deepcopy(record)
+        altered["stages"][1]["minimum_quality_points"] = 20
+        (receipt / "manifest.json").write_text(json.dumps(altered), encoding="utf-8")
+        rejected(lambda: watch.replay_receipt(receipt), "stages")
+        (receipt / "manifest.json").write_bytes(original_manifest)
+        (receipt / "notice.raw.html").write_bytes(raw().replace(b"DR-12", b"DR-14"))
+        rejected(lambda: watch.replay_receipt(receipt))
+        (receipt / "notice.raw.html").write_bytes(raw())
+        assert watch.replay_receipt(receipt) == record
         assert record["fetched_at_utc"] == "2026-11-05T21:30:00Z"
         assert record["source_family"] == "AFIR"
         assert record["authority_class"] == "T1_OFFICIAL_AGENCY"
