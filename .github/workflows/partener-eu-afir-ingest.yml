@@ -9,6 +9,8 @@ on:
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_quality_watch.py'
+      - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
@@ -37,6 +39,8 @@ on:
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_quality_watch.py'
+      - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
@@ -91,10 +95,33 @@ jobs:
       - name: Validate AFIR live-funds parser and material-change queue fail-closed
         run: |
           python partener-eu/ops/test_afir_live_funds.py
+          python partener-eu/ops/test_afir_dr12_quality_watch.py
           python partener-eu/ops/test_afir_selection_results_acquire.py
           python partener-eu/ops/test_afir_solar_aggregate_observation.py
           python partener-eu/ingest/build_afir_material_resolution_queue.py
           python partener-eu/ops/test_afir_material_resolution_queue.py
+      - name: PR-only official DR-12 quality-stage raw capture (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_DR12_EVIDENCE_DIR: ${{ runner.temp }}/afir-dr12-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_quality_watch.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=DR12 official receipt unavailable::Source-stage observation held; no quality, eligibility or call-status publication.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          fi
+      - name: Preserve PR-only DR-12 exact official raw proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-quality-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-dr12-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
       - name: PR-only original AFIR selection source probe (non-authorizing)
         shell: bash
         env:
@@ -183,6 +210,28 @@ jobs:
           PARTENER_AFIR_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-evidence
         run: python partener-eu/ingest/afir_ingest.py
 
+      - name: Capture official DR-12 monthly-quality threshold raw bytes (review only)
+        shell: bash
+        env:
+          PARTENER_AFIR_DR12_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-dr12-quality
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_quality_watch.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo 'DR-12 threshold raw proof missing/contradictory; preserve public LKG.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          fi
+      - name: Upload original DR-12 quality-stage source and provenance (non-authorizing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-quality-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-dr12-quality/
+          retention-days: 14
+          if-no-files-found: warn
       - name: Upload official AFIR DR-14/DR-18 original notice (non-authorizing)
         if: always()
         uses: actions/upload-artifact@v4
