@@ -33,6 +33,23 @@ def modify_numeric_cell(original, cell):
     return out.getvalue()
 
 
+
+def modify_shared_text(original, before, after):
+    """Preserve workbook structure while adversarially changing one report label."""
+    before, after = before.encode("utf-8"), after.encode("utf-8")
+    with ZipFile(BytesIO(original)) as src:
+        original_xml = src.read("xl/sharedStrings.xml")
+        if original_xml.count(before) != 1:
+            raise AssertionError("Missing unique workbook string to perturb")
+        altered = original_xml.replace(before, after, 1)
+        out = BytesIO()
+        with ZipFile(out, "w") as dst:
+            for member in src.infolist():
+                dst.writestr(member, altered if member.filename == "xl/sharedStrings.xml"
+                             else src.read(member))
+    return out.getvalue()
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--evidence-dir', required=True)
@@ -57,10 +74,35 @@ def main():
                 rejected += 1
             else:
                 raise AssertionError(f'Altered {category} original cell {cell} was admitted')
+    # Exact index delegation is not enough if the original spreadsheet
+    # reports another period, another selection count or the wrong category.
+    for category, filename, group in (
+        ("Selectate", "solar-3-2026-selectate.raw.xlsx",
+         "Lista proiectelor selectate pentru finantare"),
+        ("Nefinanțate", "solar-3-2026-nefinantate.raw.xlsx",
+         "Lista proiectelor nefinanţate"),
+    ):
+        raw = (root / filename).read_bytes()
+        expected = obs["source_documents"][category]
+        for before, after in (
+            ("15.06.2026 - 14.08.2026", "16.06.2026 - 14.08.2026"),
+            (": 60", ": 61"),
+            (group, "Lista proiectelor neverificate"),
+        ):
+            changed = modify_shared_text(raw, before, after)
+            try:
+                totals(changed, category, expected, obs, acq)
+            except (ValueError, AssertionError):
+                rejected += 1
+            else:
+                raise AssertionError("Forged AFIR workbook date/count/category admitted")
     # A valid XLSX with an invented manifest must never be accepted as an
     # official observation. Copy the evidence first; never edit the original.
     proven = replay(root)
     assert proven['status'] == 'RAW_ROWS_REPLAYED_NOT_PUBLISHED'
+    assert proven['report_index_document_binding'] == 'CATEGORY_DELEGATION_AND_PERIOD_VERIFIED'
+    assert proven['identifier_alias_established'] is False
+    assert proven['session_identity_reconciled'] is False
     tamper_cases = (
         (('official_notice_url',), 'https://example.org/notice'),
         (('programme',), 'UNRELATED_PROGRAMME'),
