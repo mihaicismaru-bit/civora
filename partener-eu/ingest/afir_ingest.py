@@ -111,11 +111,33 @@ def fetch(url, timeout=25, sleep=time.sleep):
         req = urllib.request.Request(url, headers=REQUEST_HEADERS)
         try:
             with urllib.request.urlopen(req, timeout=timeout, context=context) as r:
-                data = r.read(12_000_000)
+                # Only the exact verified AFIR HTTPS authority may supply source
+                # bytes. urllib follows redirects automatically: a 200 from
+                # another host (or an HTTPS downgrade) is NOT AFIR evidence.
+                final_url = r.geturl()
+                final_parts = urllib.parse.urlsplit(final_url)
+                final_host = (final_parts.hostname or "").lower()
+                final_path = (final_parts.path or "/").lower()
+                if (
+                    final_parts.scheme != "https"
+                    or final_host not in HOSTS
+                    or final_parts.username is not None
+                    or final_parts.password is not None
+                    or any(marker in final_path for marker in AUTH_PATH_MARKERS)
+                ):
+                    raise ValueError("AFIR source authority changed or redirected to an authentication route")
+                status = getattr(r, "status", 200)
+                if status != 200:
+                    raise ValueError("AFIR source returned non-success HTTP status")
+                # Read one byte beyond the permitted body, otherwise a
+                # truncated document could be fingerprinted as complete.
+                data = r.read(12_000_001)
+                if not data or len(data) > 12_000_000:
+                    raise ValueError("AFIR source body empty or exceeds complete-byte limit")
                 return {
                     "ok": True,
-                    "url": r.geturl(),
-                    "status": getattr(r, "status", 200),
+                    "url": final_url,
+                    "status": status,
                     "content_type": r.headers.get("Content-Type", ""),
                     "data": data,
                     "attemptCount": attempt,
