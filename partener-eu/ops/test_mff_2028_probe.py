@@ -76,6 +76,25 @@ def run_tests():
     expect_bad_registry({**REGISTRY, "sources": [{**SOURCE, "open_call_authorized": True}]}, "call authority accepted")
     expect_bad_registry({**REGISTRY, "sources": [{**SOURCE, "stage": "ADOPTED_MFF"}]}, "adoption stage accepted")
 
+    # The committed official-source registry, not just the synthetic fixture,
+    # must preserve distinct October events and original update dates.
+    actual = json.loads((ROOT / "partener-eu/ingest/mff_2028_source_registry.json").read_text(encoding="utf-8"))
+    probe.validate_registry(actual)
+    expected = {
+        "SRC-EU-MFF-IRISH-NEGOTIATING-BOX-20261010": ("PRESIDENCY_NEGOTIATING_PROPOSAL", "2026-10-10", None),
+        "SRC-EU-MFF-CMO-PARTIAL-20261019": ("COUNCIL_PARTIAL_CMO_POSITION", "2026-10-19", "2026-10-20"),
+        "SRC-EU-MFF-CAP-PARTIAL-20261026": ("COUNCIL_PARTIAL_CAP_POSITION", "2026-10-26", "2026-10-28"),
+    }
+    entries = {s["id"]: s for s in actual["sources"]}
+    assert len(entries) == len(actual["sources"])
+    for sid, (stage, event_date, updated_date) in expected.items():
+        source = entries[sid]
+        assert source["stage"] == stage
+        assert source["event_date"] == event_date
+        assert source.get("updated_date") == updated_date
+        assert source["open_call_authorized"] is False
+        assert source["material_fact_publication_authorized"] is False
+
     with tempfile.TemporaryDirectory(prefix="mff-contract-") as directory:
         temp = Path(directory)
         reg = temp / "registry.json"
