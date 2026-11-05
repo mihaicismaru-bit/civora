@@ -134,6 +134,11 @@ def fetch(url, timeout=25, sleep=time.sleep):
                 data = r.read(12_000_001)
                 if not data or len(data) > 12_000_000:
                     raise ValueError("AFIR source body empty or exceeds complete-byte limit")
+                declared_length = r.headers.get("Content-Length")
+                if declared_length is not None:
+                    declared_length = declared_length.strip()
+                    if not declared_length.isdigit() or int(declared_length) != len(data):
+                        raise ValueError("AFIR source body differs from declared Content-Length")
                 return {
                     "ok": True,
                     "url": final_url,
