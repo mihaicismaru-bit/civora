@@ -69,12 +69,47 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Assert exact PR head before any AFIR evidence/test
+        shell: bash
+        env:
+          EXPECTED_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          echo "AFIR preflight exact head: $EXPECTED_SHA"
       - name: Validate AFIR live-funds parser and material-change queue fail-closed
         run: |
           python partener-eu/ops/test_afir_live_funds.py
           python partener-eu/ops/test_afir_selection_results_acquire.py
           python partener-eu/ingest/build_afir_material_resolution_queue.py
           python partener-eu/ops/test_afir_material_resolution_queue.py
+      - name: PR-only original AFIR selection source probe (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_SELECTION_EVIDENCE_DIR: ${{ runner.temp }}/afir-selection-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_selection_results_acquire.py
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=AFIR selection source unavailable::Original report bytes not admitted; inspect immutable manifest. No material fact/publication.'
+          elif [ "$result" -ne 0 ]; then
+            echo "Unexpected AFIR selection acquisition exit $result" >&2
+            exit "$result"
+          fi
+          cat "$PARTENER_AFIR_SELECTION_EVIDENCE_DIR/manifest.json"
+      - name: Upload PR-only immutable AFIR selection source evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-solar-selection-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-selection-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
       - name: Rebuild and validate the deterministic public-language boundary
         run: |
           python partener-eu/ops/recover_decision_products_lkg.py
