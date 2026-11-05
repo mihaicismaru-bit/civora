@@ -95,7 +95,8 @@ for target, kind, delegated in [
     else:
         raise AssertionError("Unverified delegated source was admitted")
 
-with tempfile.TemporaryDirectory() as root:
+with tempfile.TemporaryDirectory() as tmp:
+    root = Path(tmp) / "first-acquisition"
     def success(url, *args, **kwargs):
         return (html(REFS), "text/html") if url == module.INDEX_URL else (
             xlsx(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
@@ -112,10 +113,25 @@ with tempfile.TemporaryDirectory() as root:
     for key in ("open_call_authorized", "publish_authorized", "material_fact_use"):
         assert receipt[key] is False
     assert receipt["publication_effect"] == "NONE"
-    # Availability failure must not authorize facts, even with LKG artifacts present.
+    # Evidence from one run is immutable, including after a failed replay.
+    manifest_before = (root / "manifest.json").read_bytes()
+    xlsx_before = (root / "solar-3-2026-selectate.raw.xlsx").read_bytes()
+    try:
+        module.run(root, "unsafe-replay", "2026-11-05T08:31:00Z")
+    except FileExistsError:
+        pass
+    else:
+        raise AssertionError("Existing acquisition evidence directory was overwritten")
+    assert (root / "manifest.json").read_bytes() == manifest_before
+    assert (root / "solar-3-2026-selectate.raw.xlsx").read_bytes() == xlsx_before
+
+    # A new failed acquisition has its own manifest and cannot mix in
+    # original workbooks from an earlier successful acquisition.
+    failed_root = Path(tmp) / "failed-acquisition"
     with patch.object(module, "download_exact", side_effect=ValueError("offline outage")):
-        assert module.run(root, "offline-run-failed", "2026-11-05T08:31:00Z") == 2
-    failed = json.loads((Path(root) / "manifest.json").read_text())
+        assert module.run(failed_root, "offline-run-failed", "2026-11-05T08:31:00Z") == 2
+    failed = json.loads((failed_root / "manifest.json").read_text())
+    assert not list(failed_root.glob("*.xlsx"))
     assert failed["status"] == "FETCH_FAILED" and failed["publish_authorized"] is False
     assert failed["observation_state"] != "OPEN_CALL"
 print("AFIR solar final selection raw delegated acquisition regressions PASS")
