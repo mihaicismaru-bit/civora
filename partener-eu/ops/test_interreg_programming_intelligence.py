@@ -79,7 +79,7 @@ def main():
         raise AssertionError("Mixed old/new surveys were incorrectly collapsed")
 
     for malformed in (
-        "Interreg 2028-2034 survey: 31 October – 30 November 2026",
+        "Interreg 2028-2034 survey: 32 October – 30 November 2026",
         "Interreg 2028-2034 survey: 5 October – 30 February 2026",
     ):
         try:
