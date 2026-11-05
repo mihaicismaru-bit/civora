@@ -53,16 +53,16 @@ MONTH_NUMBERS = {
     "january": 1, "february": 2, "march": 3, "april": 4,
     "may": 5, "june": 6, "july": 7, "august": 8,
     "september": 9, "october": 10, "november": 11, "december": 12,
-    "ianuarie": 1, "februarie": 2, "martie": 3, "mai": 5,
+    "ianuarie": 1, "februarie": 2, "martie": 3, "aprilie": 4, "mai": 5,
     "iunie": 6, "iulie": 7, "septembrie": 9, "octombrie": 10,
     "noiembrie": 11, "decembrie": 12,
 }
 _MONTH_ALTERNATIVES = "|".join(sorted(MONTH_NUMBERS, key=len, reverse=True))
 MONTH_DATE_RANGE_RE = re.compile(
-    rf"\\b(?P<start_day>\\d{{1,2}})\\s+(?P<start_month>{_MONTH_ALTERNATIVES})"
-    rf"(?:\\s+(?P<start_year>20\\d{{2}}))?\\s*(?:–|—|-|to|until|până la)\\s*"
-    rf"(?P<end_day>\\d{{1,2}})\\s+(?P<end_month>{_MONTH_ALTERNATIVES})"
-    rf"\\s+(?P<end_year>20\\d{{2}})\\b",
+    rf"\b(?P<start_day>\d{{1,2}})\s+(?P<start_month>{_MONTH_ALTERNATIVES})"
+    rf"(?:\s+(?P<start_year>20\d{{2}}))?\s*(?:–|—|-|to|until|până la)\s*"
+    rf"(?P<end_day>\d{{1,2}})\s+(?P<end_month>{_MONTH_ALTERNATIVES})"
+    rf"\s+(?P<end_year>20\d{{2}})\b",
     re.IGNORECASE,
 )
 
