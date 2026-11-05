@@ -172,19 +172,38 @@ def run(outdir, run_id, observed_at):
         manifest["official_index"] = {
             "url": INDEX_URL, "sha256": hashlib.sha256(raw_index).hexdigest(),
             "bytes": len(raw_index), "content_type": content_type}
+        manifest["official_index"]["fetched_at"] = dt.datetime.now(dt.timezone.utc).isoformat()
         refs = parse_index(raw_index)
+        # Both original workbooks must pass delegation, transport and ZIP
+        # validation before either is committed into this immutable bundle.
+        # A successful partial acquisition is NOT a valid selection report.
+        staged = []
         for category in CATEGORIES:
             url = refs[category]
-            row = {"category": category, "requested_url": url, "final_url": url, "status": "FETCH_FAILED"}
-            manifest["documents"].append(row)
             raw, ctype = download_exact(url, 25_000_000, "xlsx", delegated_urls=tuple(refs.values()))
             validate_workbook(raw)
+            fetched_at = dt.datetime.now(dt.timezone.utc).isoformat()
+            staged.append((category, url, raw, ctype, fetched_at))
+        for category, url, raw, ctype, fetched_at in staged:
             fname = "solar-3-2026-" + ("selectate" if category == "Selectate" else "nefinantate") + ".raw.xlsx"
             (root / fname).write_bytes(raw)
-            row.update({"sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw),
-                        "content_type": ctype, "file": fname, "status": "RAW_FETCHED_NOT_RECONCILED"})
+            manifest["documents"].append({
+                "category": category, "requested_url": url, "final_url": url,
+                "sha256": hashlib.sha256(raw).hexdigest(), "bytes": len(raw),
+                "content_type": ctype, "file": fname,
+                "fetched_at": fetched_at, "parser_version": PARSER_VERSION,
+                "run_id": str(run_id), "source_family": "AFIR",
+                "authority_class": "OFFICIAL_AFIR_REPORT_INDEX_DELEGATED_DOCUMENT",
+                "observation_state": "SELECTION_RESULTS_DISCOVERY_PENDING_RECONCILIATION",
+                "status": "RAW_FETCHED_NOT_RECONCILED",
+            })
         manifest["status"] = "RAW_CAPTURED_PENDING_RECONCILIATION"
     except Exception as exc:
+        # Also protect against partial disk writes after both downloads pass:
+        # no failed run may retain an apparently complete workbook artifact.
+        for partial in root.glob("solar-3-2026-*.raw.xlsx"):
+            partial.unlink()
+        manifest["documents"] = []
         manifest["error"] = f"{type(exc).__name__}: {exc}"[:300]
     finally:
         (root / "manifest.json").write_text(
