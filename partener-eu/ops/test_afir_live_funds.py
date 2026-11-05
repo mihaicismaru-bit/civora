@@ -69,6 +69,49 @@ def load_ingest_module():
     return module
 
 
+def test_afir_fetch_transport_provenance() -> None:
+    """No redirected authority, TLS downgrade or truncated body becomes AFIR proof."""
+    from unittest.mock import patch
+
+    ingest = load_ingest_module()
+    official = "https://www.afir.ro/info-la-zi/"
+    class Response:
+        def __init__(self, final_url, data=b"verified AFIR source bytes", status=200):
+            self.final_url, self.data, self.status = final_url, data, status
+            self.headers = {"Content-Type": "text/html; charset=utf-8"}
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc, tb):
+            return False
+        def geturl(self):
+            return self.final_url
+        def read(self, n):
+            assert n == 12_000_001, "must reject truncated fingerprint candidates"
+            return self.data[:n]
+
+    def probe(response, *, allowed):
+        with patch.object(ingest.urllib.request, "urlopen", return_value=response):
+            result = ingest.fetch(official, sleep=lambda _delay: None)
+        assert result["ok"] is allowed, result
+        if allowed:
+            assert result["data"] == response.data
+        else:
+            assert "data" not in result, "rejected source must not expose publishable bytes"
+        return result
+
+    probe(Response(official), allowed=True)
+    for final in (
+        "https://untrusted.example/afir-copy",
+        "http://www.afir.ro/info-la-zi/",
+        "https://www.afir.ro/umbraco/surface/authentication/login",
+        "https://user:pass@www.afir.ro/info-la-zi/",
+    ):
+        probe(Response(final), allowed=False)
+    probe(Response(official, status=500), allowed=False)
+    probe(Response(official, data=b""), allowed=False)
+    probe(Response(official, data=b"x" * 12_000_001), allowed=False)
+
+
 def main() -> int:
     fixture_bytes = FIXTURE.encode("utf-8")
     fingerprint = hashlib.sha256(fixture_bytes).hexdigest()
@@ -210,6 +253,7 @@ def main() -> int:
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": None}], "amount") is None
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": "2.50"}], "amount") == "3.50"
 
+    test_afir_fetch_transport_provenance()
     ingest = load_ingest_module()
     normalized = ingest.norm(
         "https://www.afir.ro/api/file?filename=Anunț Cerere DR-12 – Investiții.pdf&download=1"
