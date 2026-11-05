@@ -12,6 +12,7 @@ on:
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
+      - 'partener-eu/ops/test_afir_solar_raw_replay.py'
       - 'partener-eu/validation/afir-solar-3-2026-aggregate-observation.json'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
@@ -39,6 +40,7 @@ on:
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
+      - 'partener-eu/ops/test_afir_solar_raw_replay.py'
       - 'partener-eu/validation/afir-solar-3-2026-aggregate-observation.json'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
@@ -113,6 +115,8 @@ jobs:
             # Read raw XLSX XML independently: serials, per-row values, headers,
             # footers and official-index source delegation, NEVER publication.
             python partener-eu/ops/afir_solar_raw_replay.py \
+              --evidence-dir "$PARTENER_AFIR_SELECTION_EVIDENCE_DIR"
+            python partener-eu/ops/test_afir_solar_raw_replay.py \
               --evidence-dir "$PARTENER_AFIR_SELECTION_EVIDENCE_DIR"
           fi
       - name: Upload PR-only immutable AFIR selection source evidence
