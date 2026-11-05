@@ -142,6 +142,11 @@ def fetch(url: str) -> dict:
             raise ValueError("untrusted redirect or non-success official response")
         if "html" not in ctype.lower():
             raise ValueError("unexpected official MFF content type")
+        # urllib does not transparently decode a compressed response body.
+        # Never hash or semantically normalize gzip/br bytes as HTML evidence.
+        content_encoding = (resp.headers.get("Content-Encoding") or "identity").strip().lower()
+        if content_encoding != "identity":
+            raise ValueError("unsupported encoded MFF body; refuse unverified raw semantics")
         raw = resp.read(MAX_BYTES + 1)
         if len(raw) > MAX_BYTES or len(raw) < 256:
             raise ValueError("MFF official body too large or too small; no partial hash")
@@ -150,6 +155,15 @@ def fetch(url: str) -> dict:
             declared = declared.strip()
             if not declared.isdigit() or int(declared) != len(raw):
                 raise ValueError("MFF official body differs from declared Content-Length")
+        # A 200 response from an official host can still be a WAF/login page.
+        # It is not a source receipt, and must not replace last-known evidence.
+        html = raw.decode("utf-8", "replace")
+        title_match = re.search(r"<title\\b[^>]*>(.*?)</title\\s*>", html, flags=re.I | re.S)
+        if title_match:
+            title = re.sub(r"\\s+", " ", re.sub(r"<[^>]*>", " ", title_match.group(1))).strip().lower()
+            if title.startswith(("access denied", "just a moment", "verify you are human",
+                                 "attention required", "bot verification", "sign in to")):
+                raise ValueError("official host returned an interstitial, not source content")
         semantic = sem(raw, ctype)
         if len(semantic) < 80:
             raise ValueError("low-information official MFF response")
