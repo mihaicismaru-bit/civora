@@ -117,6 +117,70 @@ def test_afir_fetch_transport_provenance() -> None:
     probe(Response(official, data=b"x" * 12_000_001), allowed=False)
 
 
+def test_extension_notice_raw_receipt() -> None:
+    """Receipt is exact-byte acquisition evidence, never OPEN or publish proof."""
+    from unittest.mock import patch
+
+    ingest = load_ingest_module()
+    body = b"<html><title>AFIR DR-14 DR-18 extension</title></html>"
+    fetched = {
+        "ok": True,
+        "url": ingest.AFIR_EXTENSION_NOTICE,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "data": body,
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        environment = {
+            "PARTENER_AFIR_EVIDENCE_DIR": tmp,
+            "GITHUB_RUN_ID": "41999999999",
+            "GITHUB_RUN_ATTEMPT": "1",
+        }
+        with patch.dict(ingest.os.environ, environment):
+            manifest = ingest.capture_extension_notice_receipt(
+                ingest.AFIR_EXTENSION_NOTICE, fetched, "2026-11-05T02:00:00+00:00"
+            )
+            assert manifest is not None
+            persisted = json.loads((Path(tmp) / "manifest.json").read_text(encoding="utf-8"))
+            assert persisted == manifest
+            assert (Path(tmp) / manifest["raw_evidence_file"]).read_bytes() == body
+            assert manifest["raw_sha256"] == hashlib.sha256(body).hexdigest()
+            assert manifest["run_id"] == "41999999999"
+            assert manifest["parser_version"] == ingest.AFIR_RECEIPT_PARSER_VERSION
+            assert manifest["source_family"] == "AFIR"
+            assert manifest["authority_class"] == "T1_OFFICIAL_AGENCY"
+            assert manifest["observation_state"] == "RAW_FETCHED_PENDING_SEMANTIC_RECONCILIATION"
+            assert manifest["publish_authorized"] is False
+            assert manifest["material_fact_action"] == "NONE"
+            assert ingest.capture_extension_notice_receipt(
+                "https://www.afir.ro/unrelated/", fetched, "2026-11-05T02:00:00+00:00"
+            ) is None
+            for broken in (
+                dict(fetched, url="http://www.afir.ro/info-la-zi/prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/"),
+                dict(fetched, url="https://untrusted.example/"),
+                dict(fetched, data=b""),
+                dict(fetched, content_type="application/pdf"),
+            ):
+                try:
+                    ingest.capture_extension_notice_receipt(
+                        ingest.AFIR_EXTENSION_NOTICE, broken, "2026-11-05T02:00:00+00:00"
+                    )
+                except ValueError:
+                    pass
+                else:
+                    raise AssertionError("invalid raw notice receipt must be rejected")
+        with patch.dict(ingest.os.environ, environment | {"GITHUB_RUN_ID": ""}):
+            try:
+                ingest.capture_extension_notice_receipt(
+                    ingest.AFIR_EXTENSION_NOTICE, fetched, "2026-11-05T02:00:00+00:00"
+                )
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("a receipt without real run ID is inadmissible")
+    assert ingest.AFIR_EXTENSION_NOTICE in ingest.SEEDS
+
+
 def main() -> int:
     fixture_bytes = FIXTURE.encode("utf-8")
     fingerprint = hashlib.sha256(fixture_bytes).hexdigest()
@@ -259,6 +323,7 @@ def main() -> int:
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": "2.50"}], "amount") == "3.50"
 
     test_afir_fetch_transport_provenance()
+    test_extension_notice_raw_receipt()
     ingest = load_ingest_module()
     normalized = ingest.norm(
         "https://www.afir.ro/api/file?filename=Anunț Cerere DR-12 – Investiții.pdf&download=1"
