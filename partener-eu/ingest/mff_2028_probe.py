@@ -25,11 +25,24 @@ PARSER_VERSION = "mff_2028_probe_v2"
 MAX_BYTES = 3_000_000
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/2.0 (+mff-2028-validation)"
 OFFICIAL_HOSTS = (
-    "consilium.europa.eu", "digital-strategy.ec.europa.eu", "fed.mai.gov.ro"
+    "consilium.europa.eu", "digital-strategy.ec.europa.eu",
+    "eprs.europarl.europa.eu", "fed.mai.gov.ro"
 )
 FORBIDDEN_CALL_STAGES = {
     "OPEN", "OPEN_CALL", "CLOSED_CALL", "ADOPTED_MFF",
     "PIPELINE_AS_OPEN_CALL", "PUBLICATION_AUTHORIZED",
+}
+# An editorial summary of parliamentary comments is not a formal EP vote.
+# Lock source identity + event dates before a watch row can enter the ledger.
+OCTOBER_STAGE_LOCKS = {
+    "SRC-EU-MFF-IRISH-NEGOTIATING-BOX-20261010":
+        ("PRESIDENCY_NEGOTIATING_PROPOSAL", "2026-10-10", None),
+    "SRC-EU-MFF-EP-CORAPPORTEURS-20261016":
+        ("PARLIAMENTARY_POSITION_COMMENTARY", "2026-10-16", None),
+    "SRC-EU-MFF-CMO-PARTIAL-20261019":
+        ("COUNCIL_PARTIAL_CMO_POSITION", "2026-10-19", "2026-10-20"),
+    "SRC-EU-MFF-CAP-PARTIAL-20261026":
+        ("COUNCIL_PARTIAL_CAP_POSITION", "2026-10-26", "2026-10-28"),
 }
 
 
@@ -102,6 +115,13 @@ def validate_registry(reg: dict) -> None:
             raise ValueError("MFF authority URL is not a strictly verified official HTTPS host")
         if src.get("stage") is not None and src["stage"] not in allowed:
             raise ValueError("MFF source stage is outside non-authorizing registry taxonomy")
+        if sid in OCTOBER_STAGE_LOCKS:
+            expected = OCTOBER_STAGE_LOCKS[sid]
+            observed = (src.get("stage"), src.get("event_date"), src.get("updated_date"))
+            if observed != expected:
+                raise ValueError("MFF October source identity/stage/date mismatch; fail closed")
+        if src.get("class") == "official_parliamentary_analyst_commentary" and src.get("stage") != "PARLIAMENTARY_POSITION_COMMENTARY":
+            raise ValueError("Parliamentary commentary cannot be relabelled as a formal EP position")
         if src.get("open_call_authorized", False) is not False or src.get("material_fact_publication_authorized", False) is not False:
             raise ValueError("MFF source attempted to grant publication/call authority")
     if not seen:
