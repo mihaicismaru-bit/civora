@@ -109,6 +109,12 @@ with tempfile.TemporaryDirectory() as tmp:
                for r in receipt["documents"])
     assert receipt["run_id"] == "offline-run-123"
     assert receipt["official_index"]["sha256"]
+    assert receipt["official_index"]["fetched_at"]
+    assert all(row["fetched_at"] and row["run_id"] == "offline-run-123"
+               and row["source_family"] == "AFIR"
+               and row["authority_class"] == "OFFICIAL_AFIR_REPORT_INDEX_DELEGATED_DOCUMENT"
+               and row["observation_state"] != "OPEN_CALL"
+               for row in receipt["documents"])
     assert (Path(root) / "afir-selection-index.raw.html").exists()
     for key in ("open_call_authorized", "publish_authorized", "material_fact_use"):
         assert receipt[key] is False
@@ -124,6 +130,23 @@ with tempfile.TemporaryDirectory() as tmp:
         raise AssertionError("Existing acquisition evidence directory was overwritten")
     assert (root / "manifest.json").read_bytes() == manifest_before
     assert (root / "solar-3-2026-selectate.raw.xlsx").read_bytes() == xlsx_before
+
+    # If only the first XLSX succeeds and the second times out, no partial
+    # original workbook may enter the evidence bundle or appear captured.
+    partial_root = Path(tmp) / "second-document-timeout"
+    def fail_second(url, *args, **kwargs):
+        if url == UNFUNDED:
+            raise TimeoutError("second original XLSX unavailable")
+        return success(url, *args, **kwargs)
+    with patch.object(module, "download_exact", side_effect=fail_second):
+        assert module.run(partial_root, "offline-partial-run", "2026-11-05T08:32:00Z") == 2
+    partial = json.loads((partial_root / "manifest.json").read_text())
+    assert partial["status"] == "FETCH_FAILED" and partial["documents"] == []
+    assert "TimeoutError" in partial["error"]
+    assert not list(partial_root.glob("*.xlsx"))
+    assert (partial_root / "afir-selection-index.raw.html").exists()
+    assert partial["open_call_authorized"] is False
+    assert partial["publish_authorized"] is False
 
     # A new failed acquisition has its own manifest and cannot mix in
     # original workbooks from an earlier successful acquisition.
