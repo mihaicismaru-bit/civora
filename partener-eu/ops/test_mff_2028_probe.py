@@ -36,10 +36,12 @@ BODY = ("<html><body><h1>Council partial negotiating position</h1><p>" +
 
 
 class Response:
-    def __init__(self, body=BODY, final_url=SOURCE["url"]):
+    def __init__(self, body=BODY, final_url=SOURCE["url"], declared_length=None):
         self.body = body
         self.final_url = final_url
         self.headers = {"content-type": "text/html; charset=utf-8"}
+        if declared_length is not None:
+            self.headers["Content-Length"] = str(declared_length)
         self.status = 200
 
     def __enter__(self):
@@ -55,7 +57,7 @@ class Response:
         return self.body[:limit]
 
 
-original_urlopen = probe.urllib.request.urlopen
+original_urlopen = probe._open_official
 
 
 def expect_bad_registry(payload, label):
@@ -71,6 +73,28 @@ def run_tests():
     assert not probe.official_https("http://www.consilium.europa.eu/insecure")
     assert not probe.official_https("https://www.consilium.europa.eu.evil.example/test")
     assert not probe.official_https("https://evil.example/test")
+    assert not probe.official_https("https://www.consilium.europa.eu:444/test")
+    assert not probe.official_https("https://user:pass@www.consilium.europa.eu/test")
+    # urllib's default redirects may silently traverse an insecure/off-authority
+    # intermediate before returning an apparently official final 200 response.
+    handler = probe._StrictOfficialRedirectHandler()
+    origin = probe.urllib.request.Request(SOURCE["url"])
+    valid = handler.redirect_request(
+        origin, None, 302, "Found", {}, "https://www.consilium.europa.eu/en/policies/"
+    )
+    assert probe.official_https(valid.full_url)
+    for intermediate in (
+        "http://www.consilium.europa.eu/unsafe-hop",
+        "https://untrusted.example/unsafe-hop",
+        "https://www.consilium.europa.eu:444/unsafe-hop",
+        "https://user:pass@www.consilium.europa.eu/unsafe-hop",
+    ):
+        try:
+            handler.redirect_request(origin, None, 302, "Found", {}, intermediate)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"unsafe MFF redirect accepted: {intermediate}")
     expect_bad_registry({**REGISTRY, "sources": [SOURCE, SOURCE]}, "duplicate ID accepted")
     expect_bad_registry({**REGISTRY, "stage_policy": ["OPEN_CALL"]}, "OPEN_CALL stage accepted")
     expect_bad_registry({**REGISTRY, "sources": [{**SOURCE, "open_call_authorized": True}]}, "call authority accepted")
@@ -102,7 +126,7 @@ def run_tests():
         evidence = temp / "evidence"
         reg.write_text(json.dumps(REGISTRY), encoding="utf-8")
 
-        probe.urllib.request.urlopen = lambda *_args, **_kwargs: Response()
+        probe._open_official = lambda *_args, **_kwargs: Response()
         first = probe.run(reg, state, evidence, "test-first")
         row = first["sources"][0]
         assert first["summary"] == {"total": 1, "pass": 1, "fail": 0, "review_required": 0}
@@ -118,7 +142,7 @@ def run_tests():
         assert manifest["sources"][0]["raw_sha256"] == row["raw_sha256"]
 
         changed = BODY.replace(b"partial negotiating position", b"changed negotiating position")
-        probe.urllib.request.urlopen = lambda *_args, **_kwargs: Response(changed)
+        probe._open_official = lambda *_args, **_kwargs: Response(changed)
         second = probe.run(reg, state, evidence, "test-second")
         assert second["sources"][0]["semantic_hash_changed"] is True
         assert second["sources"][0]["review_required"] is True
@@ -126,7 +150,7 @@ def run_tests():
 
         def denied(*_args, **_kwargs):
             raise urllib.error.HTTPError(SOURCE["url"], 403, "Denied", {}, None)
-        probe.urllib.request.urlopen = denied
+        probe._open_official = denied
         fail = probe.run(reg, state, evidence, "test-failed")
         row = fail["sources"][0]
         assert row["observation_state"] == "PROVISIONAL_FAIL_CLOSED"
@@ -135,10 +159,14 @@ def run_tests():
         assert row["publish_authorized"] is False and row["review_required"] is False
 
         # Refuse cross-domain redirects and partial/truncated body hashing.
-        probe.urllib.request.urlopen = lambda *_args, **_kwargs: Response(BODY, "https://evil.example/fake")
+        probe._open_official = lambda *_args, **_kwargs: Response(BODY, "https://evil.example/fake")
         assert probe.run(reg, state, evidence, "test-redirect")["summary"]["fail"] == 1
-        probe.urllib.request.urlopen = lambda *_args, **_kwargs: Response(b"x" * (probe.MAX_BYTES + 1))
+        probe._open_official = lambda *_args, **_kwargs: Response(b"x" * (probe.MAX_BYTES + 1))
         assert probe.run(reg, state, evidence, "test-oversized")["summary"]["fail"] == 1
+        probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=1)
+        assert probe.run(reg, state, evidence, "test-truncated")["summary"]["fail"] == 1
+        probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=len(BODY))
+        assert probe.run(reg, state, evidence, "test-complete")["summary"]["pass"] == 1
         assert state.exists() and (evidence / "manifest.json").exists()
         print("PASS: official source taxonomy + raw SHA provenance + stage watch + 403/LKG + redirect/oversize fail-closed")
 
@@ -147,4 +175,4 @@ if __name__ == "__main__":
     try:
         run_tests()
     finally:
-        probe.urllib.request.urlopen = original_urlopen
+        probe._open_official = original_urlopen
