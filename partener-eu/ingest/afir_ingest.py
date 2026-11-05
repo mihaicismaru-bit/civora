@@ -95,6 +95,31 @@ def norm(url, base=None):
     return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", query, ""))
 
 
+def _strict_afir_https(url):
+    """Only explicit HTTPS AFIR endpoints, including every redirect hop."""
+    try:
+        p = urllib.parse.urlsplit(url)
+        return (
+            p.scheme == "https"
+            and (p.hostname or "").lower() in HOSTS
+            and p.username is None
+            and p.password is None
+            and p.port in (None, 443)
+            and not any(marker in (p.path or "/").lower() for marker in AUTH_PATH_MARKERS)
+        )
+    except ValueError:
+        return False
+
+
+class _StrictAFIRRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Reject untrusted/intermediate redirects before any new request is made."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not _strict_afir_https(newurl):
+            raise ValueError("AFIR redirect would leave official HTTPS authority")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def _retry_delay(attempt, retry_after=None):
     """Bound retry latency so a flaky source cannot stall the ingestion job."""
     if retry_after:
@@ -112,13 +137,20 @@ def fetch(url, timeout=25, sleep=time.sleep):
     transient HTTP/network failure, but they never convert an error response
     into evidence and never bypass authentication or TLS verification.
     """
+    if not _strict_afir_https(url):
+        return {"ok": False, "url": url, "error": "Untrusted AFIR requested URL", "attemptCount": 0}
     context = ssl.create_default_context()
+    # urllib.urlopen follows redirects before returning a response. A final
+    # HTTPS URL alone cannot prove that intermediate hops stayed on AFIR TLS.
+    opener = urllib.request.build_opener(
+        _StrictAFIRRedirectHandler(), urllib.request.HTTPSHandler(context=context)
+    )
     last_error = None
     last_status = None
     for attempt in range(1, MAX_FETCH_ATTEMPTS + 1):
         req = urllib.request.Request(url, headers=REQUEST_HEADERS)
         try:
-            with urllib.request.urlopen(req, timeout=timeout, context=context) as r:
+            with opener.open(req, timeout=timeout) as r:
                 # Only the exact verified AFIR HTTPS authority may supply source
                 # bytes. urllib follows redirects automatically: a 200 from
                 # another host (or an HTTPS downgrade) is NOT AFIR evidence.
