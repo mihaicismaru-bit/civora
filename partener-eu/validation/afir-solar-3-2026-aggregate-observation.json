@@ -54,13 +54,17 @@
     "cross_report_metadata_equal": true,
     "submitted_equals_selected_plus_unfinanced": true,
     "submitted_value_equals_selected_plus_unfinanced": true,
-    "individual_beneficiary_rows_excluded": true
+    "individual_beneficiary_rows_excluded": true,
+    "official_index_delegation_and_sheet_period_verified": true,
+    "workbook_selection_categories_verified": true
   },
   "observation_state": "SELECTION_RESULTS_AGGREGATE_RECONCILIATION_PENDING",
   "open_call_authorized": false,
   "publish_authorized": false,
   "material_fact_use": false,
   "publication_effect": "NONE",
-  "replay": "Re-fetch original AFIR artifact #13419065989; verify index/XLSX SHA-256; read both workbooks and compare 60+10=70 and 89,033,526+14,212,709=103,246,235 EUR. Verify non-publication status and report header vs official index session identity.",
-  "rollback": "Remove this unadmitted aggregate observation from PR; preserve original immutable raw artifact, canonical main, public LKG and all prior evidence."
+  "replay": "Re-fetch original AFIR artifact #13419065989; verify index/XLSX SHA-256; read both workbooks and compare 60+10=70 and 89,033,526+14,212,709=103,246,235 EUR. Verify non-publication status and report header vs official index session identity. Both workbooks must each expose the dated selected-count header (15.06.2026 - 14.08.2026; 60) and their respective category labels. This verifies official index-to-document binding, NOT FM-06/26 equivalence to an OPEN_CALL identifier.",
+  "rollback": "Remove this unadmitted aggregate observation from PR; preserve original immutable raw artifact, canonical main, public LKG and all prior evidence.",
+  "document_binding_state": "SOURCE_INDEX_DELEGATED_XLSX_CATEGORY_AND_PERIOD_VERIFIED",
+  "document_binding_scope": "REPORT_DOCUMENT_ONLY_NOT_CALL_IDENTIFIER_EQUIVALENCE"
 }
