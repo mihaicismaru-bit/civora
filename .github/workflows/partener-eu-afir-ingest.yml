@@ -10,6 +10,8 @@ on:
       - 'partener-eu/ingest/afir_ingest.py'
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
+      - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
+      - 'partener-eu/validation/afir-solar-3-2026-aggregate-observation.json'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
@@ -34,6 +36,8 @@ on:
       - 'partener-eu/ingest/afir_ingest.py'
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
+      - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
+      - 'partener-eu/validation/afir-solar-3-2026-aggregate-observation.json'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
@@ -84,6 +88,7 @@ jobs:
         run: |
           python partener-eu/ops/test_afir_live_funds.py
           python partener-eu/ops/test_afir_selection_results_acquire.py
+          python partener-eu/ops/test_afir_solar_aggregate_observation.py
           python partener-eu/ingest/build_afir_material_resolution_queue.py
           python partener-eu/ops/test_afir_material_resolution_queue.py
       - name: PR-only original AFIR selection source probe (non-authorizing)
