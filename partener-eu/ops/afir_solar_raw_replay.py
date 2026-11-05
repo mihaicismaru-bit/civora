@@ -72,7 +72,7 @@ def totals(raw, category, expected, observation, collector):
     if len(count_headers) != 1:
         raise ValueError("Missing or duplicate dated selection header")
     dated = re.fullmatch(
-        r"numarul proiectelor selectate pentru finantare:\\s*\\((\\d{2}\\.\\d{2}\\.\\d{4})\\s*-\\s*(\\d{2}\\.\\d{2}\\.\\d{4})\\):\\s*(\\d+)",
+        r"numarul proiectelor selectate pentru finantare:\s*\((\d{2}\.\d{2}\.\d{4})\s*-\s*(\d{2}\.\d{2}\.\d{4})\):\s*(\d+)",
         count_headers[0],
     )
     if (dated is None or
