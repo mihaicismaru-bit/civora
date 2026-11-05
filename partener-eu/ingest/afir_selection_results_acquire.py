@@ -107,9 +107,17 @@ class NeverRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         raise ValueError("Untrusted source redirect")
 
-def download_exact(url, max_bytes, kind):
-    if url not in (INDEX_URL, NOTICE_URL) and url != delegated_xlsx_url(url):
-        raise ValueError("Unknown source URL")
+def download_exact(url, max_bytes, kind, *, delegated_urls=()):
+    # An Azure path is not sufficient authority: the URL must come from the
+    # official index fetched and parsed in THIS acquisition run.
+    if kind == "html":
+        if url not in (INDEX_URL, NOTICE_URL):
+            raise ValueError("Unknown official AFIR HTML source")
+    elif kind == "xlsx":
+        if url not in delegated_urls or url != delegated_xlsx_url(url):
+            raise ValueError("Unverified AFIR XLSX delegation")
+    else:
+        raise ValueError("Unsupported source content kind")
     parts = urllib.parse.urlsplit(url)
     if parts.scheme != "https" or parts.username or parts.password or parts.port not in (None, 443):
         raise ValueError("Unsafe source URL")
@@ -161,7 +169,7 @@ def run(outdir, run_id, observed_at):
             url = refs[category]
             row = {"category": category, "requested_url": url, "final_url": url, "status": "FETCH_FAILED"}
             manifest["documents"].append(row)
-            raw, ctype = download_exact(url, 25_000_000, "xlsx")
+            raw, ctype = download_exact(url, 25_000_000, "xlsx", delegated_urls=tuple(refs.values()))
             validate_workbook(raw)
             fname = "solar-3-2026-" + ("selectate" if category == "Selectate" else "nefinantate") + ".raw.xlsx"
             (root / fname).write_bytes(raw)

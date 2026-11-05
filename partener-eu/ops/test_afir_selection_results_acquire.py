@@ -59,8 +59,23 @@ for data in [b"<html>login</html>", b"PK\\x03\\x04damaged"]:
     else:
         raise AssertionError("Invalid delegated XLSX was admitted")
 
+# A plausible Azure Blob URL cannot self-authorize a download, even when
+# it uses the delegated hostname and a matching workbook path.
+for target, kind, delegated in [
+    (SELECTED, "xlsx", ()),
+    ("https://stportalafirprod.blob.core.windows.net/media/media/other/not-from-index.xlsx", "xlsx", tuple(REFS.values())),
+    (SELECTED, "html", tuple(REFS.values())),
+    (SELECTED, "json", tuple(REFS.values())),
+]:
+    try:
+        module.download_exact(target, 25_000_000, kind, delegated_urls=delegated)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Unverified delegated source was admitted")
+
 with tempfile.TemporaryDirectory() as root:
-    def success(url, *args):
+    def success(url, *args, **kwargs):
         return (html(REFS), "text/html") if url == module.INDEX_URL else (
             xlsx(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     with patch.object(module, "download_exact", side_effect=success):
