@@ -8,6 +8,8 @@ on:
     branches: [main]
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
+      - 'partener-eu/ingest/afir_selection_results_acquire.py'
+      - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
@@ -30,6 +32,8 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/afir_ingest.py'
+      - 'partener-eu/ingest/afir_selection_results_acquire.py'
+      - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ingest/build_afir_live_funds.py'
       - 'partener-eu/ingest/build_afir_material_resolution_queue.py'
       - 'partener-eu/ingest/build_decision_products.py'
@@ -68,6 +72,7 @@ jobs:
       - name: Validate AFIR live-funds parser and material-change queue fail-closed
         run: |
           python partener-eu/ops/test_afir_live_funds.py
+          python partener-eu/ops/test_afir_selection_results_acquire.py
           python partener-eu/ingest/build_afir_material_resolution_queue.py
           python partener-eu/ops/test_afir_material_resolution_queue.py
       - name: Rebuild and validate the deterministic public-language boundary
@@ -132,6 +137,31 @@ jobs:
         with:
           name: afir-dr14-dr18-raw-notice-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/partener-afir-evidence/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Capture original AFIR solar >1 MW final selection reports (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_SELECTION_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-selection-evidence
+        run: |
+          set +e
+          python partener-eu/ingest/afir_selection_results_acquire.py
+          status=$?
+          set -e
+          if [ "$status" -eq 2 ]; then
+            echo 'AFIR solar final results raw evidence unavailable: no material or OPEN_CALL admission.'
+          elif [ "$status" -ne 0 ]; then
+            echo "Unexpected selection acquisition exit $status" >&2
+            exit "$status"
+          fi
+
+      - name: Preserve immutable original AFIR solar selection evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-solar-selection-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-selection-evidence/
           if-no-files-found: warn
           retention-days: 14
 
