@@ -36,12 +36,14 @@ BODY = ("<html><body><h1>Council partial negotiating position</h1><p>" +
 
 
 class Response:
-    def __init__(self, body=BODY, final_url=SOURCE["url"], declared_length=None):
+    def __init__(self, body=BODY, final_url=SOURCE["url"], declared_length=None, content_encoding=None):
         self.body = body
         self.final_url = final_url
         self.headers = {"content-type": "text/html; charset=utf-8"}
         if declared_length is not None:
             self.headers["Content-Length"] = str(declared_length)
+        if content_encoding is not None:
+            self.headers["Content-Encoding"] = content_encoding
         self.status = 200
 
     def __enter__(self):
@@ -190,10 +192,24 @@ def run_tests():
         assert probe.run(reg, state, evidence, "test-oversized")["summary"]["fail"] == 1
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=1)
         assert probe.run(reg, state, evidence, "test-truncated")["summary"]["fail"] == 1
+        # An official 200 response may still be an anti-bot/interstitial page.
+        # Nor may compressed bytes be misread as verified UTF-8 HTML.
+        challenge = (b"<html><head><title>Access Denied</title></head><body>" +
+                     b"Security gateway blocked this request. " * 20 + b"</body></html>")
+        probe._open_official = lambda *_args, **_kwargs: Response(challenge)
+        challenge_row = probe.run(reg, state, evidence, "test-challenge")["sources"][0]
+        assert challenge_row["health"] == "FAIL"
+        assert challenge_row["observation_state"] == "PROVISIONAL_FAIL_CLOSED"
+        assert challenge_row["raw_sha256"] is None and challenge_row["fetched_at_utc"] is None
+        probe._open_official = lambda *_args, **_kwargs: Response(BODY, content_encoding="gzip")
+        encoded_row = probe.run(reg, state, evidence, "test-encoded")["sources"][0]
+        assert encoded_row["health"] == "FAIL" and encoded_row["raw_sha256"] is None
+        probe._open_official = lambda *_args, **_kwargs: Response(BODY, content_encoding="identity")
+        assert probe.run(reg, state, evidence, "test-identity")["summary"]["pass"] == 1
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=len(BODY))
         assert probe.run(reg, state, evidence, "test-complete")["summary"]["pass"] == 1
         assert state.exists() and (evidence / "manifest.json").exists()
-        print("PASS: official source taxonomy + raw SHA provenance + stage watch + 403/LKG + redirect/oversize fail-closed")
+        print("PASS: MFF taxonomy/provenance + 403/LKG + redirects/truncation + interstitial/compressed-body fail-closed")
 
 
 if __name__ == "__main__":
