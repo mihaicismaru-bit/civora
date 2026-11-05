@@ -68,14 +68,16 @@ def parse_index(raw):
         if len(row) < 8:
             continue
         cells = [c["text"] for c in row]
-        # The AFIR index also contains other reporting sessions. Ignore
-        # unrelated periods, but fail closed on contradictory rows for the
-        # exact solar 3/2026 session (type, category, date or delegation).
+        # Ignore genuinely unrelated session IDs. Once the official index
+        # identifies this exact 3/2026 solar >1MW session, contradictory
+        # periods must fail closed even if a second, valid report pair exists.
+        # Otherwise a changed-date row could silently bypass reconciliation.
         if (cells[2].upper() != "ENERGIE"
             or cells[3] != "3" or cells[4] != "2026"
-            or "solar peste 1mw" not in cells[5].lower()
-            or "15.06.2026" not in cells[5] or "14.08.2026" not in cells[5]):
+            or "solar peste 1mw" not in cells[5].lower()):
             continue
+        if "15.06.2026" not in cells[5] or "14.08.2026" not in cells[5]:
+            raise ValueError("Conflicting AFIR solar 3/2026 reporting period")
         if (cells[0] != "Final" or cells[1] not in CATEGORIES
             or cells[6] != "03.11.2026"):
             raise ValueError("Unverified AFIR final-report category/session/date")
