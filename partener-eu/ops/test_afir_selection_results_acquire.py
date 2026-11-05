@@ -48,6 +48,26 @@ future_row = (
 ).encode()
 assert module.parse_index(html(REFS).replace(b"</table>", future_row + b"</table>")) == REFS
 
+# A contradictory *same-session* date must not be silently skipped merely
+# because the valid pair is also present: 3/2026 would become ambiguous.
+conflicting_period_row = (
+    '<tr><td>Final</td><td>Selectate</td><td>ENERGIE</td>'
+    '<td>3</td><td>2026</td>'
+    '<td>15.06.2026 - 15.08.2026 (Solar Peste 1MW)</td>'
+    '<td>03.11.2026</td>'
+    f'<td><a href="{SELECTED}">Descarcă</a></td></tr>'
+).encode()
+for payload in (
+    html(REFS).replace(b"</table>", conflicting_period_row + b"</table>"),
+    html(REFS).replace(b"14.08.2026", b"15.08.2026", 1),
+):
+    try:
+        module.parse_index(payload)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Contradictory AFIR 3/2026 solar period was admitted")
+
 # Conversely, a changed publication date for the exact 3/2026 session
 # is a material identity mismatch and must remain fail-closed.
 bad_date = html(REFS).replace(b"03.11.2026", b"04.11.2026", 1)
