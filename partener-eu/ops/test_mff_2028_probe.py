@@ -70,6 +70,8 @@ def expect_bad_registry(payload, label):
 
 def run_tests():
     assert probe.official_https(SOURCE["url"])
+    assert probe.official_https("https://eprs.europarl.europa.eu/home/topics/budgetary-affairs/BUDGET/mff-2028-2034.html")
+    assert not probe.official_https("https://eprs.europarl.europa.eu.attacker.example/fake")
     assert not probe.official_https("http://www.consilium.europa.eu/insecure")
     assert not probe.official_https("https://www.consilium.europa.eu.evil.example/test")
     assert not probe.official_https("https://evil.example/test")
@@ -106,6 +108,7 @@ def run_tests():
     probe.validate_registry(actual)
     expected = {
         "SRC-EU-MFF-IRISH-NEGOTIATING-BOX-20261010": ("PRESIDENCY_NEGOTIATING_PROPOSAL", "2026-10-10", None),
+        "SRC-EU-MFF-EP-CORAPPORTEURS-20261016": ("PARLIAMENTARY_POSITION_COMMENTARY", "2026-10-16", None),
         "SRC-EU-MFF-CMO-PARTIAL-20261019": ("COUNCIL_PARTIAL_CMO_POSITION", "2026-10-19", "2026-10-20"),
         "SRC-EU-MFF-CAP-PARTIAL-20261026": ("COUNCIL_PARTIAL_CAP_POSITION", "2026-10-26", "2026-10-28"),
     }
@@ -118,6 +121,28 @@ def run_tests():
         assert source.get("updated_date") == updated_date
         assert source["open_call_authorized"] is False
         assert source["material_fact_publication_authorized"] is False
+
+    # Parliamentary analysts reported co-rapporteurs' criticism, not an
+    # adopted parliamentary resolution. Identity/date/stage cannot drift.
+    ep = entries["SRC-EU-MFF-EP-CORAPPORTEURS-20261016"]
+    assert ep["authority_class"] == "T1_PARLIAMENTARY_OFFICIAL_CONTEXT"
+    assert ep["class"] == "official_parliamentary_analyst_commentary"
+    assert len(actual["sources"]) == 12
+    for sid, (stage, event_date, updated_date) in expected.items():
+        entry = entries[sid]
+        for mutated in (
+            {**entry, "stage": "ADOPTED"},
+            {**entry, "event_date": "2026-10-17"},
+            {**entry, "updated_date": "2026-11-01"},
+        ):
+            candidate = {**actual, "sources": [mutated if row["id"] == sid else row for row in actual["sources"]]}
+            expect_bad_registry(candidate, f"identity/stage/date spoof accepted: {sid}")
+    # A different EPRS watch ID must not grant a vote/legislative-stage label.
+    rogue_ep = {**ep, "id": "SRC-EU-MFF-EP-UNVERIFIED", "stage": "EP_POSITION"}
+    expect_bad_registry(
+        {**actual, "sources": [rogue_ep if row["id"] == ep["id"] else row for row in actual["sources"]]},
+        "EPRS commentary promoted to EP_POSITION",
+    )
 
     with tempfile.TemporaryDirectory(prefix="mff-contract-") as directory:
         temp = Path(directory)
