@@ -1,0 +1,66 @@
+{
+  "schema": "PARTENER_AFIR_SOLAR_3_2026_AGGREGATE_OBSERVATION_V1",
+  "status": "AGGREGATES_VERIFIED_PENDING_SESSION_IDENTITY_AND_CANONICAL_RECONCILIATION",
+  "source_family": "AFIR",
+  "programme": "FONDUL_MODERNIZARE_ENERGIE_SOLAR",
+  "authority_class": "OFFICIAL_AFIR_REPORT_INDEX_DELEGATED_DOCUMENT",
+  "index_session_identifier": "ENERGIE / 3 / 2026",
+  "workbook_internal_session_identifier": "FM - 06/26 - 14.08.2026",
+  "session_identity_reconciliation": "REQUIRED",
+  "report_period": "15.06.2026–14.08.2026",
+  "official_publication_date": "2026-11-03",
+  "fetched_at": "2026-11-05T13:32:17.275373+00:00",
+  "parser_version": "artifact_tool-independent-aggregate-readback-v1",
+  "raw_acquisition_parser_version": "afir-energy-solar-final-selection-acquisition-v1",
+  "run_id": "42036605252",
+  "raw_artifact_id": 13419065989,
+  "raw_artifact_url": "https://github.com/mihaicismaru-bit/civora/actions/runs/42036605252/artifacts/13419065989",
+  "official_index_url": "https://www.afir.ro/rapoarte/rapoarte-feadr/selectie/",
+  "official_notice_url": "https://www.afir.ro/info-la-zi/raport-final-de-selectie-schema-de-energie-solar-peste-1-mw/",
+  "official_index_sha256": "331f2e844e5867338ee81d36f52d83e5998b4afdd57ff5c787a8f30fc2cdb550",
+  "aggregates": {
+    "submitted_projects": 70,
+    "selected_projects": 60,
+    "unfinanced_projects": 10,
+    "unfinanced_group_label": "Proiecte neeligibile",
+    "session_allocation_eur": 120000000,
+    "submitted_public_value_eur": 103246235,
+    "selected_public_value_eur": 89033526,
+    "unfinanced_public_value_eur": 14212709
+  },
+  "source_documents": {
+    "Selectate": {
+      "sha256": "eb520dcc4979e2de5b216b1cb528ffa6b48bce0e849fe44e3ec7e0f07027cd74",
+      "bytes": 28984,
+      "source_url": "https://stportalafirprod.blob.core.windows.net/media/media/45pgvsbh/raport-final-de-selectie-solar-peste-1mw-selectate.xlsx",
+      "fetched_at": "2026-11-05T13:32:19.550482+00:00",
+      "worksheet_title": "Lista proiectelor selectate",
+      "count": 60,
+      "total_public_eur": "89033526"
+    },
+    "Nefinanțate": {
+      "sha256": "44231f161ba5f816b44d2d9e164c03f48f749d791e7e87f760d65e5806759bec",
+      "bytes": 23953,
+      "source_url": "https://stportalafirprod.blob.core.windows.net/media/media/ftab3hsy/raport-final-de-selectie-solar-peste-1mw-nefinantate.xlsx",
+      "fetched_at": "2026-11-05T13:32:20.278012+00:00",
+      "worksheet_title": "Lista proiectelor nefinanţate",
+      "count": 10,
+      "total_public_eur": "14212709"
+    }
+  },
+  "controls": {
+    "manifest_hashes_rechecked": true,
+    "worksheet_serial_counts_verified": true,
+    "cross_report_metadata_equal": true,
+    "submitted_equals_selected_plus_unfinanced": true,
+    "submitted_value_equals_selected_plus_unfinanced": true,
+    "individual_beneficiary_rows_excluded": true
+  },
+  "observation_state": "SELECTION_RESULTS_AGGREGATE_RECONCILIATION_PENDING",
+  "open_call_authorized": false,
+  "publish_authorized": false,
+  "material_fact_use": false,
+  "publication_effect": "NONE",
+  "replay": "Re-fetch original AFIR artifact #13419065989; verify index/XLSX SHA-256; read both workbooks and compare 60+10=70 and 89,033,526+14,212,709=103,246,235 EUR. Verify non-publication status and report header vs official index session identity.",
+  "rollback": "Remove this unadmitted aggregate observation from PR; preserve original immutable raw artifact, canonical main, public LKG and all prior evidence."
+}
