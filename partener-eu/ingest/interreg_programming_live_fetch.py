@@ -119,9 +119,13 @@ def _fetch(url: str) -> tuple[bytes, str, int, str]:
     return raw, final_url, status, content_type
 
 
-def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | None = None) -> dict[str, Any]:
+def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | None = None, raw_dir: Path | None = None) -> dict[str, Any]:
     registry = _load_registry(registry_path)
     sources = _programming_sources(registry)
+    if raw_dir is not None:
+        if raw_dir.exists():
+            raise ValueError('Interreg immutable raw evidence directory already exists')
+        raw_dir.mkdir(parents=True, exist_ok=False)
     observed_at = _utc_now()
     run = run_id or f"INTERREG-PROGRAMMING-{observed_at.replace(':', '').replace('-', '')}"
     rows: list[dict[str, Any]] = []
@@ -133,6 +137,7 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
         programme = str((source.get("programmes") or [""])[0] or "")
         row: dict[str, Any] = {
             "source_id": source_id,
+            "source_owner": source.get("owner"),
             "registered_url": url,
             "programme": programme,
             "fetched_at": observed_at,
@@ -158,6 +163,13 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
                 raw_hash=raw_hash,
                 run_id=run,
             )
+            if raw_dir is not None:
+                if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', source_id):
+                    raise ValueError('unsafe Interreg source_id for immutable original')
+                raw_name = f'{source_id}.raw.html'
+                with (raw_dir / raw_name).open('xb') as handle:
+                    handle.write(raw)
+                row['raw_evidence_file'] = raw_name
             row.update(
                 {
                     "fetch_status": "PASS",
@@ -224,17 +236,106 @@ def validate_envelope(data: dict[str, Any]) -> None:
             raise ValueError(f"programming row classified OPEN_CALL: {row.get('source_id')}")
 
 
+
+def replay_live_evidence(
+    evidence: dict[str, Any],
+    raw_dir: Path,
+    registry_path: Path = REGISTRY_PATH,
+) -> int:
+    """Re-parse original bytes under the exact registered authority; no publication."""
+    validate_envelope(evidence)
+    if not raw_dir.is_dir():
+        raise ValueError("immutable Interreg raw evidence directory missing")
+    registered = {
+        str(source.get("id")): source
+        for source in _programming_sources(_load_registry(registry_path))
+    }
+    expected_files: set[str] = set()
+    seen_ids: set[str] = set()
+    if not str(evidence.get("run_id") or "").strip():
+        raise ValueError("Interreg raw evidence missing run_id")
+    for row in evidence.get("rows", []):
+        source_id = str(row.get("source_id") or "")
+        if source_id in seen_ids or source_id not in registered:
+            raise ValueError("duplicate or unregistered Interreg evidence source")
+        seen_ids.add(source_id)
+        source = registered[source_id]
+        if (
+            row.get("registered_url") != source.get("url")
+            or row.get("programme") != str((source.get("programmes") or [""])[0] or "")
+            or row.get("source_owner") != source.get("owner")
+            or row.get("fetched_at") != evidence.get("created_at")
+            or row.get("run_id") != evidence.get("run_id")
+        ):
+            raise ValueError("Interreg source registry/run provenance mismatch")
+        if row.get("fetch_status") == "FAIL":
+            if row.get("normalized") or row.get("raw_evidence_file"):
+                raise ValueError("failed Interreg source cannot have promoted original")
+            continue
+        if row.get("fetch_status") != "PASS":
+            raise ValueError("invalid Interreg raw acquisition status")
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", source_id):
+            raise ValueError("unsafe Interreg source_id")
+        raw_name = f"{source_id}.raw.html"
+        if row.get("raw_evidence_file") != raw_name:
+            raise ValueError("untrusted Interreg raw evidence path")
+        original = raw_dir / raw_name
+        if not original.is_file() or original.is_symlink():
+            raise ValueError("missing original Interreg bytes")
+        raw = original.read_bytes()
+        if (
+            not raw or len(raw) > MAX_BYTES
+            or row.get("bytes") != len(raw)
+            or row.get("raw_hash") != _sha256(raw)
+            or row.get("http_status") != 200
+            or "html" not in str(row.get("content_type") or "").lower()
+        ):
+            raise ValueError("Interreg raw bytes, type, status or SHA mismatch")
+        normalized = normalize_programming_observation(
+            {
+                "programme": row["programme"],
+                "title": row["source_owner"],
+                "text": _visible_text(raw, row["content_type"]),
+                "authority_url": row.get("final_url"),
+            },
+            fetched_at=row["fetched_at"],
+            raw_hash=row["raw_hash"],
+            run_id=row["run_id"],
+        )
+        if normalized != row.get("normalized"):
+            raise ValueError("Interreg raw-to-semantic replay disagreement")
+        expected_files.add(raw_name)
+    if {p.name for p in raw_dir.iterdir()} != expected_files:
+        raise ValueError("unknown, partial or orphaned Interreg raw evidence file")
+    if len(seen_ids) != len(registered):
+        raise ValueError("incomplete Interreg programming source set")
+    return len(expected_files)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--registry", type=Path, default=REGISTRY_PATH)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--run-id")
+    parser.add_argument("--raw-dir", type=Path)
+    parser.add_argument("--replay-dir", type=Path)
     args = parser.parse_args()
 
-    evidence = build_live_evidence(args.registry, run_id=args.run_id)
+    if args.replay_dir is not None:
+        evidence = json.loads(args.out.read_text(encoding="utf-8"))
+        count = replay_live_evidence(evidence, args.replay_dir, args.registry)
+        print(json.dumps({"verified": True, "raw_source_count": count, "run_id": evidence["run_id"], "publish_authorized": False}))
+        return 0
+
+    raw_dir = args.raw_dir or Path(str(args.out) + ".originals")
+    if args.out.exists():
+        raise ValueError("Interreg immutable evidence manifest already exists")
+    evidence = build_live_evidence(args.registry, run_id=args.run_id, raw_dir=raw_dir)
     validate_envelope(evidence)
+    replay_live_evidence(evidence, raw_dir, args.registry)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with args.out.open("x", encoding="utf-8") as handle:
+        handle.write(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n")
     print(
         json.dumps(
             {

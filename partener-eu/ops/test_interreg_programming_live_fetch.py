@@ -71,12 +71,14 @@ def main():
         try:
             live._fetch = lambda url: (html, url, 200, "text/html; charset=utf-8")
             live._utc_now = lambda: "2026-08-28T01:51:17Z"
-            envelope = live.build_live_evidence(registry, run_id="TEST-INTERREG-LIVE")
+            original_dir = Path(tmp) / "immutable-originals"
+            envelope = live.build_live_evidence(registry, run_id="TEST-INTERREG-LIVE", raw_dir=original_dir)
         finally:
             live._fetch = original_fetch
             live._utc_now = original_now
 
         live.validate_envelope(envelope)
+        assert live.replay_live_evidence(envelope, original_dir, registry) == 2
         assert envelope["source_count"] == 2
         assert envelope["fetch_pass"] == 2
         assert envelope["fetch_fail"] == 0
@@ -97,6 +99,59 @@ def main():
         assert romd["open_call_authorized"] is False
         assert romd["publish_authorized"] is False
         assert romd["material_fact_use"] is False
+
+
+        # The manifest/hash alone is not replayable provenance; the original
+        # article bytes must exist and match the exact source registry.
+        original = original_dir / "SRC-INTERREG-ROHU.raw.html"
+        saved = original.read_bytes()
+        original.write_bytes(saved.replace(b"STAKEHOLDER", b"COUNTERFEIT"))
+        try:
+            live.replay_live_evidence(envelope, original_dir, registry)
+        except ValueError as exc:
+            assert "SHA mismatch" in str(exc)
+        else:
+            raise AssertionError("tampered original must be rejected")
+        original.write_bytes(saved)
+        assert live.replay_live_evidence(envelope, original_dir, registry) == 2
+        for key, value in (
+            ("raw_hash", "0" * 64),
+            ("raw_evidence_file", "../untrusted.html"),
+            ("run_id", "forged-run"),
+            ("registered_url", "https://example.invalid/mirror"),
+        ):
+            bad = json.loads(json.dumps(envelope))
+            bad["rows"][0][key] = value
+            try:
+                live.replay_live_evidence(bad, original_dir, registry)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"forged raw manifest admitted: {key}")
+        bad = json.loads(json.dumps(envelope))
+        bad["rows"][0]["normalized"]["observation_state"] = "PLANNED"
+        try:
+            live.replay_live_evidence(bad, original_dir, registry)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("semantic state detached from original raw bytes")
+        extra = original_dir / "unclaimed.raw.html"
+        extra.write_bytes(saved)
+        try:
+            live.replay_live_evidence(envelope, original_dir, registry)
+        except ValueError as exc:
+            assert "orphaned" in str(exc)
+        else:
+            raise AssertionError("unclaimed raw file admitted")
+        extra.unlink()
+        assert live.replay_live_evidence(envelope, original_dir, registry) == 2
+        try:
+            live.build_live_evidence(registry, run_id="second-run", raw_dir=original_dir)
+        except ValueError as exc:
+            assert "already exists" in str(exc)
+        else:
+            raise AssertionError("immutable raw directory overwritten")
 
         unsafe = json.loads(json.dumps(envelope))
         unsafe["rows"][0]["normalized"]["open_call_authorized"] = True

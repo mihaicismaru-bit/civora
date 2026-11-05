@@ -125,7 +125,11 @@ jobs:
         run: |
           python partener-eu/ingest/interreg_programming_live_fetch.py \
             --out /tmp/interreg-programming-live-evidence.json \
+            --raw-dir "/tmp/interreg-programming-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/interreg_programming_live_fetch.py \
+            --out /tmp/interreg-programming-live-evidence.json \
+            --replay-dir "/tmp/interreg-programming-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
       - name: Validate live Interreg programming receipt stays fail-closed
         run: |
@@ -223,7 +227,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: partener-interreg-programming-live-evidence
-          path: /tmp/interreg-programming-live-evidence.json
+          path: |
+            /tmp/interreg-programming-live-evidence.json
+            /tmp/interreg-programming-originals-${{ github.run_id }}-${{ github.run_attempt }}/
           retention-days: 7
           if-no-files-found: error
 
