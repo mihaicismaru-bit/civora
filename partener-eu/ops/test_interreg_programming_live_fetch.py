@@ -66,6 +66,26 @@ def main():
         assert "STAKEHOLDER SURVEY NOW OPEN" in text
         assert "fake javascript" not in text
 
+        # Registry T1 authority is per source, not any host on the broad T1 list.
+        # www transport normalization is fine; off-programme redirects are not.
+        live._assert_official_source_origin(
+            "https://www.interreg-rohu.eu/ro/programare-2027/",
+            "https://interreg-rohu.eu/ro/programare-2027/",
+        )
+        for requested, resolved in (
+            ("https://interreg-rohu.eu/ro/", "https://ro-md.net/en/"),
+            ("https://interreg-rohu.eu/ro/", "http://interreg-rohu.eu/ro/"),
+            ("https://interreg-rohu.eu/ro/", "https://evil.invalid/ro/"),
+            ("https://interreg-rohu.eu/ro/", "https://user@interreg-rohu.eu/ro/"),
+            ("https://interreg-rohu.eu/ro/", "https://interreg-rohu.eu:444/ro/"),
+        ):
+            try:
+                live._assert_official_source_origin(requested, resolved)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("registered Interreg origin must not change")
+
         original_fetch = live._fetch
         original_now = live._utc_now
         try:
@@ -136,6 +156,30 @@ def main():
             pass
         else:
             raise AssertionError("semantic state detached from original raw bytes")
+        # Even a re-normalized receipt backed by the same original HTML must
+        # fail if its final URL is a *different* official Interreg authority.
+        forged = json.loads(json.dumps(envelope))
+        forged_row = next(row for row in forged["rows"] if row["source_id"] == "SRC-INTERREG-ROHU")
+        forged_row["final_url"] = "https://ro-md.net/en/"
+        forged_row["normalized"] = live.normalize_programming_observation(
+            {
+                "programme": forged_row["programme"],
+                "title": forged_row["source_owner"],
+                "text": live._visible_text(saved, forged_row["content_type"]),
+                "authority_url": forged_row["final_url"],
+            },
+            fetched_at=forged_row["fetched_at"],
+            raw_hash=forged_row["raw_hash"],
+            run_id=forged_row["run_id"],
+        )
+        live.validate_envelope(forged)
+        try:
+            live.replay_live_evidence(forged, original_dir, registry)
+        except ValueError as exc:
+            assert "crossed registered official source origin" in str(exc)
+        else:
+            raise AssertionError("cross-programme official redirect must fail replay")
+
         extra = original_dir / "unclaimed.raw.html"
         extra.write_bytes(saved)
         try:
