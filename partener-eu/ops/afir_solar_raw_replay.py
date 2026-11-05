@@ -2,6 +2,7 @@
 """Read-only AFIR solar 3/2026 original-XLSX row replay; never authorizes a call."""
 import argparse
 from decimal import Decimal
+from datetime import datetime, timedelta
 import hashlib
 import importlib.util
 from io import BytesIO
@@ -90,6 +91,19 @@ def totals(raw, category, expected, observation, collector):
     return len(serial), sum(values)
 
 
+def utc_stamp(value):
+    # Evidence timestamps are comparable UTC instants, never naive local times.
+    if not isinstance(value, str):
+        raise ValueError("Missing UTC provenance timestamp")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.utcoffset() != timedelta(0):
+            raise ValueError("Non-UTC provenance timestamp")
+    except (TypeError, ValueError) as exc:
+        raise ValueError("Invalid UTC provenance timestamp") from exc
+    return parsed
+
+
 def replay(directory):
     d = Path(directory)
     manifest = json.loads((d / "manifest.json").read_text(encoding="utf-8"))
@@ -106,9 +120,33 @@ def replay(directory):
             raise ValueError("Illegal publication/OPEN_CALL")
     if obs["session_identity_reconciliation"] != "REQUIRED":
         raise ValueError("Index/workbook identity NOT independently reconciled")
+    # Bind a fresh live capture to the SAME official authority, collector,
+    # programme and per-run observation scope as its pinned baseline. Do not
+    # require a current index hash to equal a historical hash: AFIR may add
+    # unrelated rows without changing the exact delegated session.
+    if (manifest.get("schema") != "PARTENER_EU_AFIR_SELECTION_RAW_EVIDENCE_V1"
+        or manifest.get("programme") != obs["programme"]
+        or manifest.get("parser_version") != obs["raw_acquisition_parser_version"]
+        or manifest.get("official_index_url") != obs["official_index_url"]
+        or manifest.get("official_notice_url") != obs["official_notice_url"]
+        or manifest.get("observation_state") != "SELECTION_RESULTS_DISCOVERY_PENDING_RECONCILIATION"
+        or not isinstance(manifest.get("run_id"), str) or not manifest["run_id"]):
+        raise ValueError("Unbound AFIR acquisition manifest provenance")
+    acquired_at = utc_stamp(manifest["fetched_at"])
+    index_meta = manifest["official_index"]
+    index_at = utc_stamp(index_meta["fetched_at"])
+    if (index_at < acquired_at or index_meta["url"] != obs["official_index_url"]
+        or "html" not in index_meta["content_type"].lower()):
+        raise ValueError("Untrusted official index provenance")
     index = (d / "afir-selection-index.raw.html").read_bytes()
-    if hashlib.sha256(index).hexdigest() != manifest["official_index"]["sha256"]:
-        raise ValueError("Official index raw hash mismatch")
+    if (len(index) != index_meta["bytes"]
+        or hashlib.sha256(index).hexdigest() != index_meta["sha256"]):
+        raise ValueError("Official index raw hash/length mismatch")
+    # Only the original pinned acquisition is required to retain its exact
+    # historical index. Later live recaptures may have unrelated HTML changes.
+    if (manifest["run_id"] == obs["run_id"]
+        and index_meta["sha256"] != obs["official_index_sha256"]):
+        raise ValueError("Pinned original index identity mismatch")
     delegated = collector.parse_index(index)
     result = {}
     if {x["category"] for x in manifest["documents"]} != set(collector.CATEGORIES):
@@ -119,8 +157,17 @@ def replay(directory):
         name = "solar-3-2026-" + ("selectate" if cat == "Selectate" else "nefinantate") + ".raw.xlsx"
         if (source["file"] != name or source["final_url"] != delegated[cat]
             or source["requested_url"] != pinned["source_url"] or source["sha256"] != pinned["sha256"]
-            or source["run_id"] != manifest["run_id"] or source["parser_version"] != collector.PARSER_VERSION):
+            or source["run_id"] != manifest["run_id"] or source["parser_version"] != collector.PARSER_VERSION
+            or source.get("source_family") != manifest["source_family"]
+            or source.get("authority_class") != manifest["authority_class"]
+            or source.get("observation_state") != manifest["observation_state"]
+            or source.get("status") != "RAW_FETCHED_NOT_RECONCILED"
+            or "html" in source["content_type"].lower() or "json" in source["content_type"].lower()
+            or utc_stamp(source["fetched_at"]) < index_at):
             raise ValueError("Unpinned raw delegation/provenance")
+        if (manifest["run_id"] == obs["run_id"]
+            and (source["fetched_at"] != pinned["fetched_at"] or source["bytes"] != pinned["bytes"])):
+            raise ValueError("Pinned original document provenance mismatch")
         raw = (d / name).read_bytes()
         if len(raw) != source["bytes"] or hashlib.sha256(raw).hexdigest() != source["sha256"]:
             raise ValueError("Original XLSX bytes changed")
