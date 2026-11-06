@@ -94,6 +94,17 @@ def make_evidence():
         "authority_class": "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA",
         "fetched_at": FETCHED,
         "run_id": RUN,
+        "parser_version": "EEA_CSF_ROMANIA_LIVE_FETCH_V1",
+        "adapter_version": "EEA_CSF_ROMANIA_CALLS_V1",
+        "source_index": {
+            "url": "https://eeagrants.org/en/eea-civil-society-fund-romania/calls",
+            "http_status": 200,
+            "content_type": "text/html; charset=utf-8",
+            "raw_hash": hashlib.sha256(b"official-index-fixture").hexdigest(),
+            "bytes": 1000,
+            "discovery_mode": "DIRECT_LINKS",
+            "direct_exact_call_links": 2,
+        },
         "pages": pages,
         "records": records,
         "conflicts": [],
@@ -115,9 +126,13 @@ def make_evidence():
     }
 
 
-def expect_fail(evidence, label):
+def expect_fail(evidence, label, *, reconciled_at="2026-08-27T18:30:00+00:00"):
+    # Freeze the clock so an unrelated expired OPEN label does not mask
+    # the actual adversarial invariant under test.
     try:
-        module.reconcile_live_evidence(evidence, minimum_calls=2)
+        module.reconcile_live_evidence(
+            evidence, minimum_calls=2, reconciled_at=reconciled_at
+        )
     except ValueError:
         return
     fail(f"{label}: expected fail-closed rejection")
@@ -175,6 +190,42 @@ def main():
     ambiguous_budget["records"][0]["semantic_fingerprint"] = fingerprint(ambiguous_budget["records"][0])
     expect_fail(ambiguous_budget, "source budget decimal not authorized after re-fingerprint")
 
+    # Missing or forged acquisition provenance must never authorize material
+    # field staging even when a valid semantic fingerprint is retained.
+    for field in ("run_id", "parser_version", "adapter_version", "source_index"):
+        bad = copy.deepcopy(evidence)
+        bad.pop(field)
+        expect_fail(bad, f"missing acquisition provenance {field}")
+    for field, value in (
+        ("run_id", "   "),
+        ("parser_version", "UNREGISTERED_FETCH"),
+        ("adapter_version", "UNREGISTERED_NORMALIZER"),
+    ):
+        bad = copy.deepcopy(evidence)
+        bad[field] = value
+        expect_fail(bad, f"invalid {field}: {value!r}")
+    for field, value in (
+        ("raw_hash", None), ("raw_hash", "0" * 63),
+        ("bytes", 0), ("bytes", True),
+        ("content_type", "application/json"), ("http_status", 403),
+    ):
+        bad = copy.deepcopy(evidence)
+        bad["pages"][0][field] = value
+        if field == "raw_hash":
+            bad["records"][0][field] = value
+        expect_fail(bad, f"invalid raw page {field}")
+    bad = copy.deepcopy(evidence)
+    bad["source_index"]["url"] = "https://example.com/en/eea-civil-society-fund-romania/calls"
+    expect_fail(bad, "non-official index")
+    bad = copy.deepcopy(evidence)
+    bad["records"][0]["parser_version"] = "UNREGISTERED"
+    expect_fail(bad, "record parser drift")
+    bad = copy.deepcopy(evidence)
+    bad["records"][0]["material_fact_use"] = True
+    expect_fail(bad, "record acquisition cannot pre-authorize material facts")
+    bad = copy.deepcopy(evidence)
+    bad["pages"][0]["requested_url"] = "https://evil.example/en/eea-civil-society-fund-romania/calls/call-1-forged"
+    expect_fail(bad, "non-official page request")
     bad = copy.deepcopy(evidence)
     bad["records"][0]["semantic_fingerprint"] = "0" * 64
     expect_fail(bad, "semantic fingerprint drift")
@@ -212,7 +263,10 @@ def main():
     stale_capture["fetched_at"] = "2026-11-06T17:00:00+00:00"
     for row in stale_capture["records"]:
         row["fetched_at"] = stale_capture["fetched_at"]
-    expect_fail(stale_capture, "stale official OPEN captured after deadline")
+    expect_fail(
+        stale_capture, "stale official OPEN captured after deadline",
+        reconciled_at="2026-11-06T19:00:00+00:00",
+    )
 
     mismatched_provenance = copy.deepcopy(evidence)
     mismatched_provenance["records"][0]["fetched_at"] = "2026-08-26T17:00:00+00:00"
