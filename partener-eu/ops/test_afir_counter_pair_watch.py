@@ -29,14 +29,14 @@ def delegated(zoo=65, other=578, funds="-"):
     return (f"""<!doctype html><html><body>
 <h1>Fonduri alocate sesiunilor active</h1>
 <div>Sesiune depunere dosare de finanțare DR-12 DATĂ ÎNCEPUT 06/10/2026 09:00:00
- DATĂ FINAL 02/12/2026 15:59:59</div>
+ | DATĂ FINAL 02/12/2026 15:59:59</div>
 <div>DESCRIERE ALOCARE
  <b>DR-12</b><span>Investiții în consolidarea exploatațiilor - Componenta SECTOR ZOOTEHNIC</span>
  DATĂ ȘI ORĂ LANSARE 06/10/2026 09:00:00
  ALOCARE FINANCIARĂ 84794823.50000
  DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59
  PLAFON DEPUNERE -
- VALOAREA PROIECTELOR DEPUSE 12523748.00000
+ VALOAREA PROIECTELOR DEPUSE *1 12523748.00000
  NUMĂR DOSARE DEPUSE {zoo}
  FONDURI DISPONIBILE *2 {funds}
 </div><div>DESCRIERE ALOCARE
@@ -45,7 +45,7 @@ def delegated(zoo=65, other=578, funds="-"):
  ALOCARE FINANCIARĂ 84794823.50000
  DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59
  PLAFON DEPUNERE -
- VALOAREA PROIECTELOR DEPUSE 107470146.00000
+ VALOAREA PROIECTELOR DEPUSE *1 107470146.00000
  NUMĂR DOSARE DEPUSE {other}
  FONDURI DISPONIBILE *2 {funds}
 </div></body></html>""").encode()
@@ -117,13 +117,28 @@ def test_parse_and_reconcile():
     duplicate_session = original.replace(b"</body>", extra_header + b"</body>")
     assert duplicate_session != original
     reject(lambda: probe.parse_delegated(duplicate_session))
-    # The official portal separates session dates visually with a pipe.
-    with_separator = original.replace(
-        "DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
+    # Also accept the historical portal rendering without the date pipe.
+    without_separator = original.replace(
         "| DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
+        "DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
     )
-    assert with_separator != original
-    assert probe.parse_delegated(with_separator)["SECTOR ZOOTEHNIC"]["submitted_count"] == 65
+    assert without_separator != original
+    assert probe.parse_delegated(without_separator)["SECTOR ZOOTEHNIC"]["submitted_count"] == 65
+
+    # Footnote *1 is permitted only as an exact label, never treated as a value.
+    no_footnote = original.replace(
+        "VALOAREA PROIECTELOR DEPUSE *1 ".encode("utf-8"),
+        "VALOAREA PROIECTELOR DEPUSE ".encode("utf-8"),
+    )
+    assert no_footnote != original
+    assert probe.parse_delegated(no_footnote)["ALTE SECTOARE"]["submitted_count"] == 578
+    wrong_footnote = original.replace(
+        "VALOAREA PROIECTELOR DEPUSE *1 ".encode("utf-8"),
+        "VALOAREA PROIECTELOR DEPUSE *2 ".encode("utf-8"),
+        1,
+    )
+    assert wrong_footnote != original
+    reject(lambda: probe.parse_delegated(wrong_footnote))
 
 
 def test_immutable_receipt_and_replay():
