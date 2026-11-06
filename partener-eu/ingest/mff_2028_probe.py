@@ -84,12 +84,26 @@ def official_https(url: str) -> bool:
         return False
 
 
+def same_source_authority(requested_url: str, candidate_url: str) -> bool:
+    """Bind a receipt to the exact registered source host, not another T1 host.
+
+    Council, Parliament, Commission and Romanian official hosts are all trusted
+    for their *own* registry rows, but a redirect between them is not evidence
+    for the original source. New host aliases require explicit review.
+    """
+    return (
+        official_https(requested_url)
+        and official_https(candidate_url)
+        and urlsplit(requested_url).hostname.lower() == urlsplit(candidate_url).hostname.lower()
+    )
+
+
 class _StrictOfficialRedirectHandler(urllib.request.HTTPRedirectHandler):
-    """Validate every hop before urllib follows it, not just the final URL."""
+    """Validate the source-host identity before following *every* redirect."""
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
-        if not official_https(newurl):
-            raise ValueError("MFF redirect would leave official HTTPS authority")
+        if not same_source_authority(req.full_url, newurl):
+            raise ValueError("MFF redirect would change registered official source authority")
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
@@ -138,7 +152,7 @@ def fetch(url: str) -> dict:
         status = resp.status
         final_url = resp.geturl()
         ctype = resp.headers.get("content-type") or ""
-        if not official_https(final_url) or status != 200:
+        if not same_source_authority(url, final_url) or status != 200:
             raise ValueError("untrusted redirect or non-success official response")
         if "html" not in ctype.lower():
             raise ValueError("unexpected official MFF content type")
