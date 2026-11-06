@@ -76,7 +76,13 @@ def _official_call_url(value: Any) -> str | None:
     parsed = urlparse(url)
     host = (parsed.hostname or "").lower()
     path = parsed.path or ""
-    if parsed.scheme != "https" or host not in OFFICIAL_HOSTS:
+    if (
+        parsed.scheme != "https"
+        or host not in OFFICIAL_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.port not in (None, 443)
+    ):
         return None
     prefix = next((candidate for candidate in CALL_PATH_PREFIXES if path.startswith(candidate)), None)
     if not prefix:
@@ -164,6 +170,15 @@ def normalize_record(
         return None
     authority_url = _official_call_url(_first(record, "authorityUrl", "authority_url", "url"))
     verified = authority_url in set(verified_authority_urls) if authority_url else False
+    # When the official slug itself embeds a call number, a record claiming a
+    # different number is not exact-call evidence, even after URL readback.
+    # Historical unnumbered canonical slugs remain valid, but require the
+    # independent downstream semantic reconciliation as before.
+    if verified:
+        slug = urlparse(authority_url).path.rstrip("/").rsplit("/", 1)[-1]
+        path_call_number = re.match(r"call-(\d+)-", slug, flags=re.IGNORECASE)
+        if path_call_number and int(path_call_number.group(1)) != int(call_number):
+            verified = False
     status_label = _status_label(record)
     observation_state = _observation_state(
         record,
