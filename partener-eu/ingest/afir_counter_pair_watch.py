@@ -28,11 +28,24 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v6"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v7"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
 MAX_CACHE_SKEW_SECONDS = 300
+MANIFEST_FIELDS = {
+    "schema_version", "run_id", "run_attempt", "parser_version",
+    "programme", "source_family", "authority_class", "observation_state",
+    "sources", "reconciliation", "last_known_good_action",
+    "open_call_authorized", "publish_authorized", "distribution_authorized",
+    "budget_authorized", "eligibility_authorized", "material_fact_action",
+}
+SOURCE_RECEIPT_FIELDS = {
+    "requested_url", "final_url", "fetched_at_utc", "raw_file",
+    "sha256", "byte_count", "content_type", "content_encoding",
+    "http_status", "date_header", "etag", "last_modified",
+    "age_header", "cache_control",
+}
 HEADERS = {
     "User-Agent": "PARTENER.EU-AFIR-Paired-Source-Health/1.0",
     "Accept": "text/html,application/xhtml+xml",
@@ -443,6 +456,13 @@ def replay(destination: Path) -> dict:
             or any(entry.is_symlink() or not entry.is_file() for entry in destination.iterdir())):
         raise ValueError("counter proof has orphaned, missing or symlinked files")
     manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
+    # No extension fields are permitted: a receipt with an injected call-state,
+    # publish instruction or per-source authority claim must not replay green
+    # merely because the known fields still agree with the captured bytes.
+    if not isinstance(manifest, dict) or set(manifest) != MANIFEST_FIELDS:
+        raise ValueError("counter-pair manifest contains unregistered fields")
+    if not isinstance(manifest.get("sources"), dict):
+        raise ValueError("counter-pair sources must be an exact object")
     if (
         manifest.get("schema_version") != "1.0"
         or manifest.get("parser_version") != PARSER_VERSION
@@ -463,6 +483,8 @@ def replay(destination: Path) -> dict:
     stamps = []
     for source, url in URLS.items():
         meta = manifest["sources"][source]
+        if not isinstance(meta, dict) or set(meta) != SOURCE_RECEIPT_FIELDS:
+            raise ValueError("counter source receipt contains unregistered fields")
         if (
             meta.get("requested_url") != url or meta.get("final_url") != url
             or meta.get("raw_file") != f"{source}.raw.html"
