@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import importlib
 import json
+import os
 import sys
 import tempfile
+from unittest import mock
 from copy import deepcopy
 from pathlib import Path
 
@@ -56,11 +58,13 @@ def fetches(a=None, b=None, hours=0):
         "agency": {
             "ok": True, "url": probe.AGENCY_URL, "status": 200,
             "content_type": "text/html; charset=utf-8",
+            "content_encoding": "identity",
             "fetched_at_utc": "2026-11-06T01:00:00Z", "data": agency() if a is None else a,
         },
         "delegated": {
             "ok": True, "url": probe.DELEGATED_URL, "status": 200,
             "content_type": "text/html; charset=utf-8",
+            "content_encoding": "identity",
             "fetched_at_utc": "2026-11-06T01:00:12Z" if hours == 0 else "2026-11-06T01:03:00Z",
             "data": delegated() if b is None else b,
         },
@@ -203,6 +207,7 @@ def test_immutable_receipt_and_replay():
             lambda m: m["sources"]["agency"].update(final_url="https://attacker.example/counter"),
             lambda m: m["sources"]["delegated"].update(sha256="0" * 64),
             lambda m: m["sources"]["delegated"].update(byte_count=5),
+            lambda m: m["sources"]["agency"].update(content_encoding="gzip"),
             lambda m: m["sources"]["agency"].update(fetched_at_utc="2026-11-06T01:00:00"),
             lambda m: m["reconciliation"].update(observation_state="SOURCE_COUNTER_PAIR_MATCH_REVIEW"),
             lambda m: m.update(source_family="PRESS"),
@@ -219,6 +224,55 @@ def test_immutable_receipt_and_replay():
             reject(lambda: probe.replay(target))
             path.write_bytes(raw)
         assert probe.replay(target)["verified"] is True
+        # The original receipt is an exact immutable file set. An extra file
+        # or a same-byte symlink is not independent primary-source evidence.
+        orphan = target / "orphaned.html"
+        orphan.write_bytes(b"unregistered source")
+        reject(lambda: probe.replay(target))
+        orphan.unlink()
+        if os.name != "nt":
+            original_path = target / "agency.raw.html"
+            original_bytes = original_path.read_bytes()
+            external = target.parent / "copied-agency.html"
+            external.write_bytes(original_bytes)
+            original_path.unlink()
+            original_path.symlink_to(external)
+            reject(lambda: probe.replay(target))
+            original_path.unlink()
+            original_path.write_bytes(original_bytes)
+        assert probe.replay(target)["verified"] is True
+
+
+def test_acquire_identity_encoding():
+    # A server may ignore Accept-Encoding: identity and return gzip/br.
+    # Reject before writing any original or declaring an HTML receipt.
+    class Response:
+        status = 200
+        def __init__(self, encoding):
+            self.headers = {"Content-Type": "text/html", "Content-Length": str(len(agency()))}
+            if encoding is not None:
+                self.headers["Content-Encoding"] = encoding
+        def __enter__(self):
+            return self
+        def __exit__(self, *_args):
+            return False
+        def geturl(self):
+            return probe.AGENCY_URL
+        def read(self, max_bytes):
+            return agency()[:max_bytes]
+    class Opener:
+        def __init__(self, encoding):
+            self.response = Response(encoding)
+        def open(self, *_args, **_kwargs):
+            return self.response
+    for encoding in ("gzip", "br", "identity, gzip"):
+        with mock.patch.object(probe.urllib.request, "build_opener", return_value=Opener(encoding)):
+            reject(lambda: probe.acquire("agency"))
+    for encoding in (None, "identity"):
+        with mock.patch.object(probe.urllib.request, "build_opener", return_value=Opener(encoding)):
+            receipt = probe.acquire("agency")
+            assert receipt["content_encoding"] == "identity"
+            assert receipt["data"] == agency()
 
 
 def test_capture_guards():
@@ -228,6 +282,7 @@ def test_capture_guards():
         lambda d: d["delegated"].update(url="https://evil.example/"),
         lambda d: d["agency"].update(status=302),
         lambda d: d["delegated"].update(content_type="application/json"),
+        lambda d: d["agency"].update(content_encoding="gzip"),
         lambda d: d["agency"].update(fetched_at_utc="2026-11-06T03:00:00+02:00"),
         lambda d: d["agency"].update(data=b""),
     ):
@@ -244,5 +299,6 @@ def test_capture_guards():
 if __name__ == "__main__":
     test_parse_and_reconcile()
     test_immutable_receipt_and_replay()
+    test_acquire_identity_encoding()
     test_capture_guards()
     print("AFIR counter pair: hermetic official-host, two-component, divergence and tamper regressions PASS")
