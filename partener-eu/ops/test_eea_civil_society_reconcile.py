@@ -147,6 +147,34 @@ def main():
     ]:
         fail("staging/public gates must remain explicit")
 
+    # Financial amounts must preserve the exact official integer value.
+    # An intact semantic hash alone must not legalize ambiguous numerals.
+    for raw, expected in (
+        ("€3,718,664", 3718664),
+        ("EUR 200,001", 200001),
+        ("15,000 EUR", 15000),
+        ("€ 350000", 350000),
+    ):
+        if module._parse_eur(raw, "test_budget") != expected:
+            fail(f"strict EUR integer normalization drift: {raw}")
+
+    for raw in (
+        "3,718,664", "€3.718.664", "€3,71,8664",
+        "€3,718,664.00", "€1.50", "€3,718,664 approx",
+        "EUR 3,718,664 €", "€-200", "€0", "€3 million",
+    ):
+        try:
+            module._parse_eur(raw, "test_budget")
+        except ValueError:
+            pass
+        else:
+            fail(f"ambiguous EUR source value accepted: {raw}")
+
+    ambiguous_budget = copy.deepcopy(evidence)
+    ambiguous_budget["records"][0]["budget_candidate"] = "€3,718,664.50"
+    ambiguous_budget["records"][0]["semantic_fingerprint"] = fingerprint(ambiguous_budget["records"][0])
+    expect_fail(ambiguous_budget, "source budget decimal not authorized after re-fingerprint")
+
     bad = copy.deepcopy(evidence)
     bad["records"][0]["semantic_fingerprint"] = "0" * 64
     expect_fail(bad, "semantic fingerprint drift")
