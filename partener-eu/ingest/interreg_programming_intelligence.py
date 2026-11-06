@@ -112,7 +112,16 @@ def _parse_day(value: str) -> dt.date:
 def _official_url(value: str) -> str:
     parsed = urlparse(str(value).strip())
     host = (parsed.hostname or "").lower()
-    if parsed.scheme != "https" or host not in OFFICIAL_HOSTS:
+    # Standalone normalization is a separate trust boundary from live HTTP
+    # acquisition: a hostname match with credentials or an alternate port is
+    # NOT an authoritative endpoint, even if transport would reject it later.
+    if (
+        parsed.scheme != "https"
+        or host not in OFFICIAL_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.port not in (None, 443)
+    ):
         raise ValueError(f"non-authoritative Interreg URL: {value!r}")
     return str(value).strip()
 
