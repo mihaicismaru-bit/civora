@@ -6,6 +6,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -122,6 +123,46 @@ def main() -> None:
         (receipt / "notice.raw.html").write_bytes(raw().replace(b"DR-12", b"DR-14"))
         rejected(lambda: watch.replay_receipt(receipt))
         (receipt / "notice.raw.html").write_bytes(raw())
+        assert watch.replay_receipt(receipt) == record
+
+        # The evidence receipt is an exact closed schema and closed file set.
+        # Extra authorizing keys must not hide inside an otherwise correct
+        # SHA-256 manifest, and arbitrary sidecars/symlinks are not originals.
+        unexpected = copy.deepcopy(record)
+        unexpected["open_call_status"] = "OPEN_CALL"
+        (receipt / "manifest.json").write_text(
+            json.dumps(unexpected, ensure_ascii=False), encoding="utf-8"
+        )
+        rejected(lambda: watch.replay_receipt(receipt), "unregistered fields")
+        (receipt / "manifest.json").write_bytes(original_manifest)
+
+        altered_schema = copy.deepcopy(record)
+        altered_schema["schema_version"] = "2.0"
+        (receipt / "manifest.json").write_text(
+            json.dumps(altered_schema, ensure_ascii=False), encoding="utf-8"
+        )
+        rejected(lambda: watch.replay_receipt(receipt), "schema")
+        (receipt / "manifest.json").write_bytes(original_manifest)
+
+        extra = receipt / "unregistered.json"
+        extra.write_text('{"publish_authorized": true}', encoding="utf-8")
+        rejected(lambda: watch.replay_receipt(receipt), "extra or symlinked")
+        extra.unlink()
+
+        if os.name != "nt":
+            external = base / "notice-copy.html"
+            external.write_bytes(raw())
+            original = receipt / "notice.raw.html"
+            original.unlink()
+            original.symlink_to(external)
+            rejected(lambda: watch.replay_receipt(receipt), "symlinked")
+            original.unlink()
+            original.write_bytes(raw())
+            linked_dir = base / "linked-receipt"
+            linked_dir.symlink_to(receipt, target_is_directory=True)
+            rejected(lambda: watch.replay_receipt(linked_dir), "symlinked")
+            linked_dir.unlink()
+
         assert watch.replay_receipt(receipt) == record
         assert record["fetched_at_utc"] == "2026-11-05T21:30:00Z"
         assert record["source_family"] == "AFIR"
