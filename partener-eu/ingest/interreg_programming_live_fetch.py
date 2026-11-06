@@ -159,9 +159,19 @@ def _fetch(url: str) -> tuple[bytes, str, int, str]:
         final_url = response.geturl()
         status = int(response.getcode() or 0)
         content_type = str(response.headers.get("Content-Type") or "")
+        # An HTTP 200 does not prove complete, uncompressed HTML evidence.
+        # Refuse encoded bodies and truncated originals before hashing.
+        content_encoding = str(response.headers.get("Content-Encoding") or "identity").strip().lower()
+        if content_encoding != "identity":
+            raise ValueError("unsupported encoded Interreg HTML body")
+        declared_length = response.headers.get("Content-Length")
         raw = response.read(MAX_BYTES + 1)
     if len(raw) > MAX_BYTES:
         raise ValueError(f"response exceeds {MAX_BYTES} bytes")
+    if declared_length is not None:
+        declared = str(declared_length).strip()
+        if not declared.isdecimal() or int(declared) != len(raw):
+            raise ValueError("Interreg raw response differs from declared Content-Length")
     if status != 200:
         raise ValueError(f"unexpected HTTP status {status}")
     if "html" not in content_type.lower():

@@ -124,6 +124,62 @@ def main():
         else:
             raise AssertionError("trusted final URL masked an untrusted prior hop")
 
+        # A successful status/HTML type alone cannot authorize raw receipt.
+        # Exercise the actual transport without network dependencies.
+        class RawResponse:
+            def __init__(self, *, declared=None, encoding=None):
+                self.headers = {"Content-Type": "text/html; charset=utf-8"}
+                if declared is not None:
+                    self.headers["Content-Length"] = str(declared)
+                if encoding is not None:
+                    self.headers["Content-Encoding"] = encoding
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def geturl(self):
+                return "https://interreg-rohu.eu/en/"
+
+            def getcode(self):
+                return 200
+
+            def read(self, limit):
+                return html[:limit]
+
+        class RawOpener:
+            def __init__(self, response):
+                self.response = response
+
+            def open(self, request, timeout):
+                return self.response
+
+        original_build_opener = live.urllib.request.build_opener
+        try:
+            def fetch_raw_response(**kwargs):
+                live.urllib.request.build_opener = lambda *_args, **_kw: RawOpener(RawResponse(**kwargs))
+                return live._fetch("https://interreg-rohu.eu/en/")
+
+            assert fetch_raw_response(declared=len(html))[0] == html
+            assert fetch_raw_response(encoding="identity")[0] == html
+            for kwargs, expected in (
+                ({"encoding": "gzip"}, "unsupported encoded"),
+                ({"encoding": "br"}, "unsupported encoded"),
+                ({"declared": len(html) + 9}, "Content-Length"),
+                ({"declared": len(html) - 1}, "Content-Length"),
+                ({"declared": "invalid"}, "Content-Length"),
+            ):
+                try:
+                    fetch_raw_response(**kwargs)
+                except ValueError as exc:
+                    assert expected in str(exc), (kwargs, exc)
+                else:
+                    raise AssertionError(f"unverified Interreg raw response accepted: {kwargs}")
+        finally:
+            live.urllib.request.build_opener = original_build_opener
+
         original_fetch = live._fetch
         original_now = live._utc_now
         try:
