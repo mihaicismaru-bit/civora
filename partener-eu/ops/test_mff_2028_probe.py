@@ -160,7 +160,7 @@ def run_tests():
         reg.write_text(json.dumps(REGISTRY), encoding="utf-8")
 
         probe._open_official = lambda *_args, **_kwargs: Response()
-        first = probe.run(reg, state, evidence, "test-first")
+        first = probe.run(reg, state, evidence / "test-first", "test-first")
         row = first["sources"][0]
         assert first["summary"] == {"total": 1, "pass": 1, "fail": 0, "review_required": 0}
         assert row["observation_state"] == "RAW_FETCHED_STAGE_UNRECONCILED"
@@ -169,14 +169,28 @@ def run_tests():
         assert row["stage"] == "COUNCIL_PARTIAL_CAP_POSITION"
         assert row["event_date"] == "2026-10-26" and row["updated_date"] == "2026-10-28"
         assert row["publish_authorized"] is False and row["open_call_authorized"] is False
-        assert (evidence / row["raw_evidence_file"]).read_bytes() == BODY
-        manifest = json.loads((evidence / "manifest.json").read_text(encoding="utf-8"))
+        assert (evidence / "test-first" / row["raw_evidence_file"]).read_bytes() == BODY
+        manifest = json.loads((evidence / "test-first" / "manifest.json").read_text(encoding="utf-8"))
         assert manifest["policy"] == "ACQUISITION_EVIDENCE_ONLY_NON_AUTHORIZING"
         assert manifest["sources"][0]["raw_sha256"] == row["raw_sha256"]
 
+        # An accidental retry against an existing evidence path cannot overwrite
+        # the original source, receipt manifest or committed health snapshot.
+        frozen_manifest = (evidence / "test-first" / "manifest.json").read_bytes()
+        frozen_state = state.read_bytes()
+        try:
+            probe.run(reg, state, evidence / "test-first", "test-overwrite")
+        except FileExistsError:
+            pass
+        else:
+            raise AssertionError("immutable MFF raw evidence overwritten by retry")
+        assert (evidence / "test-first" / "manifest.json").read_bytes() == frozen_manifest
+        assert (evidence / "test-first" / row["raw_evidence_file"]).read_bytes() == BODY
+        assert state.read_bytes() == frozen_state
+
         changed = BODY.replace(b"partial negotiating position", b"changed negotiating position")
         probe._open_official = lambda *_args, **_kwargs: Response(changed)
-        second = probe.run(reg, state, evidence, "test-second")
+        second = probe.run(reg, state, evidence / "test-second", "test-second")
         assert second["sources"][0]["semantic_hash_changed"] is True
         assert second["sources"][0]["review_required"] is True
         assert second["sources"][0]["publish_authorized"] is False
@@ -184,7 +198,7 @@ def run_tests():
         def denied(*_args, **_kwargs):
             raise urllib.error.HTTPError(SOURCE["url"], 403, "Denied", {}, None)
         probe._open_official = denied
-        fail = probe.run(reg, state, evidence, "test-failed")
+        fail = probe.run(reg, state, evidence / "test-failed", "test-failed")
         row = fail["sources"][0]
         assert row["observation_state"] == "PROVISIONAL_FAIL_CLOSED"
         assert row["raw_sha256"] is None and row["fetched_at_utc"] is None
@@ -193,37 +207,37 @@ def run_tests():
 
         # Refuse cross-domain redirects and partial/truncated body hashing.
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, "https://evil.example/fake")
-        assert probe.run(reg, state, evidence, "test-redirect")["summary"]["fail"] == 1
+        assert probe.run(reg, state, evidence / "test-redirect", "test-redirect")["summary"]["fail"] == 1
         # An official cross-authority final 200 cannot masquerade as Council evidence,
         # even when the transport opener has been mocked or a redirect was hidden.
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, "https://fed.mai.gov.ro/in/eu-2028-2034/")
-        cross_authority = probe.run(reg, state, evidence, "test-official-cross-authority")["sources"][0]
+        cross_authority = probe.run(reg, state, evidence / "test-official-cross-authority", "test-official-cross-authority")["sources"][0]
         assert cross_authority["health"] == "FAIL"
         assert cross_authority["observation_state"] == "PROVISIONAL_FAIL_CLOSED"
         assert cross_authority["raw_sha256"] is None
         assert cross_authority["publish_authorized"] is False
         probe._open_official = lambda *_args, **_kwargs: Response(b"x" * (probe.MAX_BYTES + 1))
-        assert probe.run(reg, state, evidence, "test-oversized")["summary"]["fail"] == 1
+        assert probe.run(reg, state, evidence / "test-oversized", "test-oversized")["summary"]["fail"] == 1
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=1)
-        assert probe.run(reg, state, evidence, "test-truncated")["summary"]["fail"] == 1
+        assert probe.run(reg, state, evidence / "test-truncated", "test-truncated")["summary"]["fail"] == 1
         # An official 200 response may still be an anti-bot/interstitial page.
         # Nor may compressed bytes be misread as verified UTF-8 HTML.
         challenge = (b"<html><head><title>Access Denied</title></head><body>" +
                      b"Security gateway blocked this request. " * 20 + b"</body></html>")
         probe._open_official = lambda *_args, **_kwargs: Response(challenge)
-        challenge_row = probe.run(reg, state, evidence, "test-challenge")["sources"][0]
+        challenge_row = probe.run(reg, state, evidence / "test-challenge", "test-challenge")["sources"][0]
         assert challenge_row["health"] == "FAIL"
         assert challenge_row["observation_state"] == "PROVISIONAL_FAIL_CLOSED"
         assert challenge_row["raw_sha256"] is None and challenge_row["fetched_at_utc"] is None
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, content_encoding="gzip")
-        encoded_row = probe.run(reg, state, evidence, "test-encoded")["sources"][0]
+        encoded_row = probe.run(reg, state, evidence / "test-encoded", "test-encoded")["sources"][0]
         assert encoded_row["health"] == "FAIL" and encoded_row["raw_sha256"] is None
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, content_encoding="identity")
-        assert probe.run(reg, state, evidence, "test-identity")["summary"]["pass"] == 1
+        assert probe.run(reg, state, evidence / "test-identity", "test-identity")["summary"]["pass"] == 1
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=len(BODY))
-        assert probe.run(reg, state, evidence, "test-complete")["summary"]["pass"] == 1
-        assert state.exists() and (evidence / "manifest.json").exists()
-        print("PASS: MFF taxonomy/provenance + 403/LKG + cross-authority redirects/truncation + interstitial/compressed-body fail-closed")
+        assert probe.run(reg, state, evidence / "test-complete", "test-complete")["summary"]["pass"] == 1
+        assert state.exists() and (evidence / "test-first" / "manifest.json").exists()
+        print("PASS: MFF taxonomy/provenance + 403/LKG + cross-authority redirects/immutable raw receipts/truncation + interstitial/compressed-body fail-closed")
 
 
 if __name__ == "__main__":
