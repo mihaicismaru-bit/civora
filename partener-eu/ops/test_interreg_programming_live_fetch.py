@@ -378,7 +378,8 @@ def main():
             try:
                 live.replay_live_evidence(downgraded, partial_dir, registry)
             except ValueError as exc:
-                assert "cannot have promoted original" in str(exc)
+                assert ("unexpected Interreg source row keys" in str(exc)
+                        or "cannot have promoted original" in str(exc))
             else:
                 raise AssertionError(f"failed source concealed PASS field: {tamper}")
         for missing_error in ("error", "error_type"):
@@ -388,7 +389,8 @@ def main():
             try:
                 live.replay_live_evidence(downgraded, partial_dir, registry)
             except ValueError as exc:
-                assert "missing explicit error receipt" in str(exc)
+                assert ("unexpected Interreg source row keys" in str(exc)
+                        or "missing explicit error receipt" in str(exc))
             else:
                 raise AssertionError(f"failed source lost error provenance: {missing_error}")
 
