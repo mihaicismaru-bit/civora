@@ -193,6 +193,17 @@ def main():
 
         live.validate_envelope(envelope)
         assert live.replay_live_evidence(envelope, original_dir, registry) == 2
+        # A symlinked directory may hide substituted original files even when
+        # every child path appears to be a regular file. Reject at the root.
+        linked_dir = Path(tmp) / "redirected-originals"
+        linked_dir.symlink_to(original_dir, target_is_directory=True)
+        try:
+            live.replay_live_evidence(envelope, linked_dir, registry)
+        except ValueError as exc:
+            assert "symlinked" in str(exc), exc
+        else:
+            raise AssertionError("symlinked Interreg evidence root admitted")
+        linked_dir.unlink()
 
         # Neither an unknown top-level field nor a forged row-level claim can
         # bypass the non-authorizing source-to-programming boundary.
@@ -232,6 +243,20 @@ def main():
                 assert "duplicate Interreg JSON key" in str(exc)
             else:
                 raise AssertionError("duplicate-key Interreg receipt admitted")
+        # Python's permissive json.loads accepts NaN/Infinity by default.
+        # These are not valid immutable evidence values at any nesting level.
+        for nonfinite in ("NaN", "Infinity", "-Infinity"):
+            for forged_json in (
+                '{"source_count":' + nonfinite + '}',
+                '{"rows":[{"normalized":{"confidence":' + nonfinite + '}}]}',
+            ):
+                try:
+                    live._load_strict_json(forged_json)
+                except ValueError as exc:
+                    assert "non-finite Interreg JSON number" in str(exc), exc
+                else:
+                    raise AssertionError("non-finite Interreg receipt admitted")
+
         for field, forged_value in (
             ("source_count", 3),
             ("fetch_pass", 1),
