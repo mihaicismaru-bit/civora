@@ -48,7 +48,7 @@ def test_delegation():
         html(href="https://evil.example/api/file/document?" + PROXY.split("?")[1]),
         html(href=PROXY + "&filetype=html"),
         html(href=PROXY.replace("06112026", "05112026")),
-        html(href=PROXY.replace("/media/nzghktz5/", "/external/nzghktz5/")),
+        html(href=PROXY.replace("%2Fmedia%2F", "%2Fexternal%2F")),
         html(href=PROXY.replace("filetype=pdf", "filetype=html")),
     ):
         refused(lambda bad=bad: note.delegated_url(bad))
