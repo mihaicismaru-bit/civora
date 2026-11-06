@@ -89,6 +89,25 @@ def main():
         else:
             raise AssertionError("Impossible consultation window accepted")
 
+    # Official November 2026 workshops are future-programming events, but the
+    # 28 October signup deadline is already past. Neither event dates nor
+    # expired workshop registration create a current funding call.
+    workshops = build(
+        "2026-11-07T00:00:00Z",
+        text=(
+            "Interreg Chapter 2028–2034 stakeholder territorial-analysis workshops. "
+            "17 noiembrie 2026 Debrecen, 18 noiembrie 2026 Timisoara, "
+            "19 noiembrie 2026 Szeged, 20 noiembrie 2026 online. "
+            "Registration closed 28 octombrie 2026. Programme preparation only."
+        ),
+        url="https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-si-contribuiti-la-definirea-capitolului-interreg-2028-2034/",
+    )
+    assert workshops["observation_state"] == "PROGRAMME_PREPARATION"
+    assert workshops["consultation_start"] is None
+    assert workshops["consultation_end"] is None
+    assert workshops["confidence"] == "MEDIUM"
+    assert_non_authorizing(workshops)
+
     planned = build("2026-05-10T12:00:00Z")
     assert planned["observation_state"] == "PLANNED"
     assert_non_authorizing(planned)

@@ -16,6 +16,8 @@ PIPELINE_PROGRAMME = "Interreg Romania-Hungary 2028-2034"
 PIPELINE_URL = "https://interreg-rohu.eu/ro/programare-2027/"
 SURVEY_ID = "SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026"
 SURVEY_URL = "https://interreg-rohu.eu/ro/contribuiti-la-definirea-viitorului-cooperarii-transfrontaliere/"
+WORKSHOPS_ID = "SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026"
+WORKSHOPS_URL = "https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-si-contribuiti-la-definirea-capitolului-interreg-2028-2034/"
 
 
 def main() -> None:
@@ -57,12 +59,28 @@ def main() -> None:
     assert survey["authority_scope"] == "PROGRAMMING_FRAMEWORK"
     assert "OPEN_CALL" in survey["note"]
 
+    # Official November workshop schedule is a separate 2028-2034 programming
+    # source: October 28 registration deadline is NOT a grant application deadline.
+    workshops = by_id[WORKSHOPS_ID]
+    assert workshops["url"] == WORKSHOPS_URL
+    assert workshops["programmes"] == [PIPELINE_PROGRAMME]
+    assert workshops["tier"] == "T1"
+    assert set(workshops["source_families"]) == {"INTERREG", "CBC", "PROGRAMMING_PIPELINE"}
+    assert workshops["authority_scope"] == "PROGRAMMING_FRAMEWORK"
+    assert workshops["observation_state"] == "PROGRAMMING_PIPELINE"
+    assert workshops["material_fact_use"] is False
+    assert workshops["credentials_required"] is False
+    assert "consultation_events" in workshops["extract"]
+    assert "28 October 2026" in workshops["note"]
+    assert "OPEN_CALL" in workshops["note"]
+
     domains = set((plane.get("programmeDomains") or {}).get(PIPELINE_PROGRAMME) or [])
     assert domains == {"INTERREG_CBC", "PROGRAMMING_FUTURE"}
 
     selected_ids = {row["id"] for row in live._programming_sources(registry)}
     assert PIPELINE_ID in selected_ids
     assert SURVEY_ID in selected_ids
+    assert WORKSHOPS_ID in selected_ids
     assert CURRENT_ID not in selected_ids
 
     print(
