@@ -27,7 +27,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v1"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v2"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -134,6 +134,9 @@ def parse_agency(raw: bytes) -> dict[str, dict]:
         if not sector or sector in found:
             raise ValueError("unknown/duplicate AFIR DR-12 component")
         found[sector] = {
+            "opens_at": row["opensAtLocal"],
+            "session_allocation_eur": row["sessionAllocationEur"],
+            "submitted_value_eur": row["submittedPublicValueEur"],
             "submitted_count": row["submittedProjectCount"],
             "funds_eur": row["availableFundsEur"],
             "funds_status": row["availableFundsStatus"],
@@ -179,6 +182,15 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
         sector = re.sub(r"\s+", " ", component.group(1)).upper()
         if sector in found:
             raise ValueError("duplicate delegated DR-12 component")
+        opened = re.search(
+            r"\bDAT.\s+.I\s+OR.\s+LANSARE\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})", chunk, re.I
+        )
+        allocation = re.search(
+            r"\bALOCARE\s+FINANCIAR.\s+([-–—]|\d+(?:[.,]\d+)*)", chunk, re.I
+        )
+        submitted = re.search(
+            r"\bVALOAREA\s+PROIECTELOR\s+DEPUSE\s+([-–—]|\d+(?:[.,]\d+)*)", chunk, re.I
+        )
         count = re.search(r"\bNUM.R\s+DOSARE\s+DEPUSE\b\s+(\d+)\b", chunk, re.I)
         funds = re.search(
             r"\bFONDURI\s+DISPONIBILE\b(?:\s*\*?\s*2)?\s+"
@@ -190,12 +202,16 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
         if funds is None:
             funds = re.search(r"\bFONDURI\s+DISPONIBILE\b(?:\s*\*?\s*2)?\s+([-–—])(?=\s|$)", chunk, re.I)
         closed = re.search(r"\bDAT.\s+.I\s+OR.\s+.NCHIDERE\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})", chunk, re.I)
-        if not count or not funds or not closed:
-            raise ValueError("delegated DR-12 count/funds/closure not parseable")
+        if not count or not funds or not closed or not opened or not allocation or not submitted:
+            raise ValueError("delegated DR-12 dates/allocation/submitted-value/count/funds not parseable")
         funds_raw = funds.group(1).strip().upper()
         amount = "0.00" if funds_raw == "FONDURI EPUIZATE" else parse_delegated_amount(funds_raw)
         day, month, year = closed.group(1)[:10].split("/")
+        open_day, open_month, open_year = opened.group(1)[:10].split("/")
         found[sector] = {
+            "opens_at": f"{open_day}.{open_month}.{open_year} {opened.group(1)[11:]}",
+            "session_allocation_eur": parse_delegated_amount(allocation.group(1)),
+            "submitted_value_eur": parse_delegated_amount(submitted.group(1)),
             "submitted_count": int(count.group(1)),
             "funds_eur": amount,
             "funds_status": ("EXHAUSTED" if funds_raw == "FONDURI EPUIZATE" else
@@ -217,29 +233,48 @@ def reconcile(raws: dict[str, bytes], span_seconds: float) -> dict:
         }
     comparable = {}
     any_count_or_date_difference = False
-    any_fund_difference = False
+    any_financial_difference = False
     any_funds_unreported = False
+    any_non_fund_amount_unreported = False
     for sector in SECTORS:
         a, b = agency[sector], delegated[sector]
         count_equal = a["submitted_count"] == b["submitted_count"]
+        open_equal = a["opens_at"] == b["opens_at"]
         close_equal = a["closes_at"] == b["closes_at"]
-        funds_known = a["funds_eur"] is not None and b["funds_eur"] is not None
-        funds_equal = funds_known and a["funds_eur"] == b["funds_eur"]
-        any_count_or_date_difference |= not count_equal or not close_equal
-        any_fund_difference |= funds_known and not funds_equal
-        any_funds_unreported |= not funds_known
+        checks = {}
+        for key in ("session_allocation_eur", "submitted_value_eur", "funds_eur"):
+            known = a[key] is not None and b[key] is not None
+            # The parser canonizes monetary amounts to two decimal places.
+            matches = (a[key] == b[key]) if known else None
+            checks[key] = {"comparable": known, "matches_if_comparable": matches}
+            any_financial_difference |= matches is False
+            if not known:
+                if key == "funds_eur":
+                    any_funds_unreported = True
+                else:
+                    any_non_fund_amount_unreported = True
+        # An exhausted counter must not silently equate to a reported zero.
+        funds_status_equal = a["funds_status"] == b["funds_status"]
+        if checks["funds_eur"]["comparable"] and not funds_status_equal:
+            any_financial_difference = True
+        any_count_or_date_difference |= not count_equal or not open_equal or not close_equal
         comparable[sector] = {
             "agency": a, "delegated": b,
             "submitted_count_matches": count_equal,
+            "opening_time_matches": open_equal,
             "closing_time_matches": close_equal,
-            "funds_comparable": funds_known,
-            "funds_match_if_comparable": funds_equal if funds_known else None,
+            "amount_checks": checks,
+            "funds_status_matches": funds_status_equal,
+            "funds_comparable": checks["funds_eur"]["comparable"],
+            "funds_match_if_comparable": checks["funds_eur"]["matches_if_comparable"],
         }
     state = (
         "SOURCE_COUNTER_DIVERGENCE_REVIEW"
-        if any_count_or_date_difference or any_fund_difference else
+        if any_count_or_date_difference or any_financial_difference else
         "SOURCE_COUNTER_CAPTURE_SKEW_REVIEW"
         if span_seconds > MAX_PAIR_SECONDS else
+        "SOURCE_COUNTER_NON_FUND_AMOUNTS_WITHHELD_REVIEW"
+        if any_non_fund_amount_unreported else
         "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW"
         if any_funds_unreported else
         "SOURCE_COUNTER_PAIR_MATCH_REVIEW"
