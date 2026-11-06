@@ -86,6 +86,44 @@ def main():
             else:
                 raise AssertionError("registered Interreg origin must not change")
 
+        # Every redirect hop must be checked *before* urllib follows it.
+        # A hostile intermediate that redirects back to the original host
+        # cannot be legitimized by an otherwise benign final response URL.
+        from urllib.request import Request
+
+        redirect = live._RegisteredOriginRedirect("https://interreg-rohu.eu/ro/")
+        allowed = redirect.redirect_request(
+            Request("https://interreg-rohu.eu/ro/"),
+            None, 302, "Found", {},
+            "https://www.interreg-rohu.eu/ro/consultation",
+        )
+        assert allowed.full_url == "https://www.interreg-rohu.eu/ro/consultation"
+        for unsafe_hop in (
+            "https://ro-md.net/en/",
+            "https://evil.invalid/intermediate",
+            "http://interreg-rohu.eu/ro/",
+            "https://user@interreg-rohu.eu/ro/",
+            "https://interreg-rohu.eu:444/ro/",
+        ):
+            try:
+                redirect.redirect_request(
+                    Request("https://interreg-rohu.eu/ro/"),
+                    None, 302, "Found", {}, unsafe_hop,
+                )
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"untrusted redirect hop followed: {unsafe_hop}")
+        try:
+            redirect.redirect_request(
+                Request("https://ro-md.net/en/off-programme-hop"),
+                None, 302, "Found", {}, "https://interreg-rohu.eu/ro/",
+            )
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("trusted final URL masked an untrusted prior hop")
+
         original_fetch = live._fetch
         original_now = live._utc_now
         try:
