@@ -23,6 +23,10 @@ SOURCE_FAMILY = "EEA_NORWAY"
 PROGRAMME_FAMILY = "EEA Civil Society Fund Romania 2021-2028"
 AUTHORITY_CLASS = "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
+FETCH_PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V1"
+ADAPTER_PARSER_VERSION = "EEA_CSF_ROMANIA_CALLS_V1"
+MAX_RAW_BYTES = 4_000_000
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 CALL_PATH_RE = re.compile(
     r"^/(?:en|ro)/eea-civil-society-fund-romania/calls/call-(?P<number>\d+)-[^/?#]+/?$",
     re.IGNORECASE,
@@ -81,6 +85,44 @@ def _parse_eur(value: Any, field: str) -> int:
     if amount <= 0:
         _fail(f"{field}: amount must be positive")
     return amount
+
+
+def _valid_raw_hash(value: Any, field: str) -> str:
+    if not isinstance(value, str) or SHA256_RE.fullmatch(value) is None:
+        _fail(f"{field}: lowercase 64-character SHA-256 required")
+    return value
+
+
+def _valid_raw_page(page: dict[str, Any], field: str) -> None:
+    if page.get("http_status") != 200:
+        _fail(f"{field}: HTTP 200 required")
+    content_type = page.get("content_type")
+    if not isinstance(content_type, str) or not (
+        "text/html" in content_type.lower()
+        or "application/xhtml+xml" in content_type.lower()
+    ):
+        _fail(f"{field}: official HTML content type required")
+    size = page.get("bytes")
+    if (isinstance(size, bool) or not isinstance(size, int)
+            or not 0 < size <= MAX_RAW_BYTES):
+        _fail(f"{field}: positive bounded raw byte count required")
+    _valid_raw_hash(page.get("raw_hash"), f"{field}.raw_hash")
+
+
+def _valid_official_index(value: Any) -> None:
+    if not isinstance(value, dict):
+        _fail("source_index: official acquisition evidence required")
+    url = value.get("url")
+    if not isinstance(url, str):
+        _fail("source_index: official index URL required")
+    parsed = urlparse(url)
+    if (parsed.scheme != "https" or (parsed.hostname or "").lower() not in OFFICIAL_HOSTS
+            or parsed.username is not None or parsed.password is not None
+            or parsed.port not in (None, 443) or parsed.query or parsed.fragment
+            or not re.fullmatch(r"/(?:en|ro)/eea-civil-society-fund-romania/calls/?",
+                                parsed.path, re.IGNORECASE)):
+        _fail("source_index: untrusted or non-canonical official index URL")
+    _valid_raw_page(value, "source_index")
 
 
 def _official_call_url(value: Any, call_number: int) -> str:
@@ -153,6 +195,15 @@ def reconcile_live_evidence(
         _fail("input live evidence cannot pre-authorize material facts")
     if evidence.get("errors") or evidence.get("conflicts"):
         _fail("live evidence contains errors/conflicts")
+    run_id = evidence.get("run_id")
+    if (not isinstance(run_id, str)
+            or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", run_id) is None):
+        _fail("run_id: non-empty bounded acquisition identity required")
+    if evidence.get("parser_version") != FETCH_PARSER_VERSION:
+        _fail("parser_version: unsupported acquisition parser")
+    if evidence.get("adapter_version") != ADAPTER_PARSER_VERSION:
+        _fail("adapter_version: unsupported normalized record parser")
+    _valid_official_index(evidence.get("source_index"))
 
     stats = evidence.get("stats")
     records = evidence.get("records")
@@ -192,6 +243,7 @@ def reconcile_live_evidence(
         call_id = page.get("call_identifier")
         if not isinstance(call_id, str) or call_id in page_by_id:
             _fail(f"duplicate/missing page call_identifier {call_id!r}")
+        _valid_raw_page(page, f"{call_id}.page")
         page_by_id[call_id] = page
 
     reconciled_records: list[dict[str, Any]] = []
@@ -215,6 +267,13 @@ def reconcile_live_evidence(
         if (record.get("fetched_at") != evidence.get("fetched_at")
                 or record.get("run_id") != evidence.get("run_id")):
             _fail(f"{call_id}: source capture timestamp/run mismatch")
+        if record.get("parser_version") != ADAPTER_PARSER_VERSION:
+            _fail(f"{call_id}: adapter parser version mismatch")
+        if (record.get("material_fact_use") is not False
+                or record.get("publish_authorized") is not False
+                or record.get("requires_reconcile") is not True):
+            _fail(f"{call_id}: acquisition record pre-authorized material facts")
+        _valid_raw_hash(record.get("raw_hash"), f"{call_id}.raw_hash")
         if not record.get("authority_url_verified"):
             _fail(f"{call_id}: exact authority URL readback not verified")
         authority_url = _official_call_url(record.get("authority_url"), call_number)
@@ -233,6 +292,7 @@ def reconcile_live_evidence(
             _fail(f"{call_id}: exact page HTTP status is not 200")
         if str(page.get("final_url") or "").rstrip("/") != authority_url:
             _fail(f"{call_id}: final URL drift between page and record")
+        _official_call_url(page.get("requested_url"), call_number)
         if page.get("raw_hash") != record.get("raw_hash"):
             _fail(f"{call_id}: raw hash drift between page and normalized evidence")
         if page.get("observation_state") != state:
