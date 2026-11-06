@@ -79,6 +79,9 @@ def run_tests():
     assert not probe.official_https("https://evil.example/test")
     assert not probe.official_https("https://www.consilium.europa.eu:444/test")
     assert not probe.official_https("https://user:pass@www.consilium.europa.eu/test")
+    assert probe.same_source_authority(SOURCE["url"], "https://www.consilium.europa.eu/en/policies/")
+    assert not probe.same_source_authority(SOURCE["url"], "https://fed.mai.gov.ro/in/eu-2028-2034/")
+    assert not probe.same_source_authority(SOURCE["url"], "https://irish-presidency.consilium.europa.eu/en/news/")
     # urllib's default redirects may silently traverse an insecure/off-authority
     # intermediate before returning an apparently official final 200 response.
     handler = probe._StrictOfficialRedirectHandler()
@@ -92,6 +95,9 @@ def run_tests():
         "https://untrusted.example/unsafe-hop",
         "https://www.consilium.europa.eu:444/unsafe-hop",
         "https://user:pass@www.consilium.europa.eu/unsafe-hop",
+        # Both are registered official sources, but *not* this source host.
+        "https://fed.mai.gov.ro/in/eu-2028-2034/",
+        "https://irish-presidency.consilium.europa.eu/en/news/",
     ):
         try:
             handler.redirect_request(origin, None, 302, "Found", {}, intermediate)
@@ -188,6 +194,14 @@ def run_tests():
         # Refuse cross-domain redirects and partial/truncated body hashing.
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, "https://evil.example/fake")
         assert probe.run(reg, state, evidence, "test-redirect")["summary"]["fail"] == 1
+        # An official cross-authority final 200 cannot masquerade as Council evidence,
+        # even when the transport opener has been mocked or a redirect was hidden.
+        probe._open_official = lambda *_args, **_kwargs: Response(BODY, "https://fed.mai.gov.ro/in/eu-2028-2034/")
+        cross_authority = probe.run(reg, state, evidence, "test-official-cross-authority")["sources"][0]
+        assert cross_authority["health"] == "FAIL"
+        assert cross_authority["observation_state"] == "PROVISIONAL_FAIL_CLOSED"
+        assert cross_authority["raw_sha256"] is None
+        assert cross_authority["publish_authorized"] is False
         probe._open_official = lambda *_args, **_kwargs: Response(b"x" * (probe.MAX_BYTES + 1))
         assert probe.run(reg, state, evidence, "test-oversized")["summary"]["fail"] == 1
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=1)
@@ -209,7 +223,7 @@ def run_tests():
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=len(BODY))
         assert probe.run(reg, state, evidence, "test-complete")["summary"]["pass"] == 1
         assert state.exists() and (evidence / "manifest.json").exists()
-        print("PASS: MFF taxonomy/provenance + 403/LKG + redirects/truncation + interstitial/compressed-body fail-closed")
+        print("PASS: MFF taxonomy/provenance + 403/LKG + cross-authority redirects/truncation + interstitial/compressed-body fail-closed")
 
 
 if __name__ == "__main__":
