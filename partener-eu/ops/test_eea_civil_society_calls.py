@@ -112,6 +112,36 @@ def main():
     if third_row["authority_url"] is not None or third_row["observation_state"] != "UNKNOWN":
         fail("non-FMO host must never authorize EEA CSF call state")
 
+    # A forged endpoint may retain an official hostname while smuggling
+    # credentials or an alternate port. Exact-call origin cannot be promoted.
+    for unsafe in (
+        CALL1.replace("https://eeagrants.org/", "https://user@eeagrants.org/"),
+        CALL1.replace("https://eeagrants.org/", "https://user:pass@eeagrants.org/"),
+        CALL1.replace("https://eeagrants.org/", "https://eeagrants.org:8443/"),
+    ):
+        forged = base_record()
+        forged["authorityUrl"] = unsafe
+        row = module.normalize_record(
+            forged, fetched_at=FETCHED, run_id="TEST-UNSAFE-ORIGIN",
+            raw_hash="raw-unsafe", verified_authority_urls=[unsafe],
+        )
+        if row["authority_url"] is not None or row["authority_url_verified"] or row["observation_state"] != "UNKNOWN":
+            fail(f"unsafe EEA official-looking endpoint admitted: {unsafe}")
+
+    # An exact official page for Call #6 is not proof of Call #1, even if the
+    # input record and verified URL list both claim an authoritative readback.
+    crossed = base_record()
+    crossed["authorityUrl"] = CALL6_RO
+    crossed_row = module.normalize_record(
+        crossed, fetched_at=FETCHED, run_id="TEST-CALL-ID-MISMATCH",
+        raw_hash="raw-crossed", verified_authority_urls=[CALL6_RO],
+    )
+    if (crossed_row["call_identifier"] != "EEA-CSF-RO-CALL-01"
+            or crossed_row["authority_url_verified"]
+            or crossed_row["observation_state"] != "UNKNOWN"
+            or not crossed_row["requires_reconcile"]):
+        fail("mismatched EEA exact-call identifier/official slug incorrectly authorized")
+
     pipeline = base_record()
     pipeline["observationState"] = "PROGRAMME_PREPARATION"
     pipeline_row = module.normalize_record(
