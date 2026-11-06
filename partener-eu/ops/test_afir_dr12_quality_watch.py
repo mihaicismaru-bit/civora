@@ -42,7 +42,70 @@ def rejected(fn, marker: str | None = None) -> None:
         raise AssertionError("bad DR-12 source/provenance admitted")
 
 
+def test_official_transport_encoding_gate() -> None:
+    """Hermetic AFIR fetch: an HTTP 200 compressed body is not raw HTML evidence."""
+    from unittest.mock import patch
+
+    class Response:
+        def __init__(self, body: bytes, encoding: str | None, length: int | None = None):
+            self.body = body
+            self.read_count = 0
+            self.status = 200
+            self.headers = {"Content-Type": "text/html; charset=utf-8"}
+            if encoding is not None:
+                self.headers["Content-Encoding"] = encoding
+            if length is not None:
+                self.headers["Content-Length"] = str(length)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+        def geturl(self):
+            return watch.NOTICE_URL
+
+        def read(self, limit: int):
+            self.read_count += 1
+            return self.body[:limit]
+
+    def fetch_response(response: Response) -> dict:
+        class Opener:
+            def open(self, request, timeout):
+                assert request.full_url == watch.NOTICE_URL
+                return response
+
+        with patch.object(watch.transport.urllib.request, "build_opener",
+                          return_value=Opener()):
+            return watch.transport.fetch(watch.NOTICE_URL, sleep=lambda _: None)
+
+    good = Response(raw(), None, len(raw()))
+    accepted = fetch_response(good)
+    assert accepted["ok"] is True and accepted["data"] == raw()
+    assert good.read_count == 1
+
+    for encoded in ("gzip", "br", "GZIP", "identity, gzip", ""):
+        bad = Response(raw(), encoded)
+        rejected_fetch = fetch_response(bad)
+        # Empty Content-Encoding, like absence, means no encoding specified;
+        # the remaining body/length/semantic gates still apply.
+        if encoded == "":
+            assert rejected_fetch["ok"] is True
+            continue
+        assert rejected_fetch["ok"] is False
+        assert rejected_fetch["attemptCount"] == 1
+        assert "unsupported encoded body" in rejected_fetch["error"]
+        assert bad.read_count == 0  # reject before reading or hashing bytes
+
+    truncated = Response(raw(), "identity", len(raw()) + 7)
+    refused = fetch_response(truncated)
+    assert refused["ok"] is False
+    assert "declared Content-Length" in refused["error"]
+
+
 def main() -> None:
+    test_official_transport_encoding_gate()
     stages = watch.parse_notice(raw())
     assert len(stages) == 2
     assert [s["minimum_quality_points"] for s in stages] == [80, 45]
