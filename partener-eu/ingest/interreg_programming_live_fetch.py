@@ -122,7 +122,27 @@ def _assert_official_source_origin(requested_url: str, final_url: str) -> None:
         raise ValueError("Interreg redirect crossed registered official source origin")
 
 
+class _RegisteredOriginRedirect(urllib.request.HTTPRedirectHandler):
+    """Reject every untrusted redirect hop *before* following it.
+
+    Checking just response.geturl() can miss an off-authority intermediate hop
+    which ultimately returns to the registered hostname. The acquisition path
+    must not contact that intermediate host, even for non-publishing evidence.
+    """
+
+    def __init__(self, registered_url: str) -> None:
+        super().__init__()
+        self.registered_url = registered_url
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _assert_official_source_origin(self.registered_url, req.full_url)
+        _assert_official_source_origin(self.registered_url, newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def _fetch(url: str) -> tuple[bytes, str, int, str]:
+    # Disallow untrusted initial endpoints as well as redirect hops.
+    _assert_official_source_origin(url, url)
     request = urllib.request.Request(
         url,
         headers={
@@ -131,7 +151,11 @@ def _fetch(url: str) -> tuple[bytes, str, int, str]:
         },
     )
     context = ssl.create_default_context()
-    with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS, context=context) as response:
+    opener = urllib.request.build_opener(
+        urllib.request.HTTPSHandler(context=context),
+        _RegisteredOriginRedirect(url),
+    )
+    with opener.open(request, timeout=TIMEOUT_SECONDS) as response:
         final_url = response.geturl()
         status = int(response.getcode() or 0)
         content_type = str(response.headers.get("Content-Type") or "")
