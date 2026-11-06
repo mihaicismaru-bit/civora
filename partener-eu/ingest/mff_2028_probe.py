@@ -193,6 +193,121 @@ def fetch(url: str) -> dict:
         }
 
 
+
+def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
+    """Independently verify immutable MFF originals against their exact registry.
+
+    The health/LKG state must never be updated from an unverified handoff.
+    This is a source-replay check, NOT a legislative-stage reconciliation or
+    publication authorization. Original HTTP headers cannot be reconstructed
+    from raw files; their receipt is still non-authorizing.
+    """
+    manifest_path = evidence_dir / "manifest.json"
+    if not manifest_path.is_file() or manifest_path.is_symlink():
+        raise ValueError("MFF replay manifest missing or symlinked")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    validate_registry(registry)
+    sources = {src["id"]: src for src in registry["sources"]}
+    rows = manifest.get("sources")
+    if (manifest.get("schema_version") != "1.0"
+            or manifest.get("parser_version") != PARSER_VERSION
+            or manifest.get("policy") != "ACQUISITION_EVIDENCE_ONLY_NON_AUTHORIZING"
+            or not isinstance(manifest.get("run_id"), str)
+            or not manifest["run_id"]
+            or not isinstance(rows, list)
+            or len(rows) != len(sources)):
+        raise ValueError("invalid or incomplete MFF replay manifest")
+    seen: set[str] = set()
+    expected_files = {"manifest.json"}
+    passed = 0
+    reviews = 0
+    for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError("invalid MFF replay row")
+        sid = row.get("id")
+        if sid not in sources or sid in seen:
+            raise ValueError("duplicate or unknown MFF replay source")
+        seen.add(sid)
+        src = sources[sid]
+        bound = {
+            "tier": src["tier"],
+            "class": src["class"],
+            "stage": src.get("stage"),
+            "event_date": src.get("event_date"),
+            "updated_date": src.get("updated_date"),
+            "url": src["url"],
+            "source_family": src.get("source_family", "PROGRAMMING_PIPELINE_MFF_2028_2034"),
+            "programme": src.get("programme", "MFF_2028_2034"),
+            "authority_class": src.get("authority_class", "T1_OFFICIAL_PROGRAMMING_AUTHORITY"),
+            "run_id": manifest["run_id"],
+            "parser_version": PARSER_VERSION,
+        }
+        if any(row.get(key) != value for key, value in bound.items()):
+            raise ValueError("MFF replay source identity, stage or provenance drift")
+        if (row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False
+                or row.get("publish_authorized") is not False
+                or row.get("auto_promote_legislative_stage") is not False):
+            raise ValueError("MFF replay attempted publication or adoption promotion")
+        if row.get("review_required") is not False and row.get("review_required") is not True:
+            raise ValueError("MFF replay review flag is not boolean")
+        if not isinstance(row.get("attempted_at_utc"), str) or not row["attempted_at_utc"]:
+            raise ValueError("MFF replay attempt time missing")
+        if row.get("ok") is True:
+            raw_name = sid + ".html"
+            raw_path = evidence_dir / raw_name
+            if (row.get("health") != "PASS"
+                    or row.get("observation_state") != "RAW_FETCHED_STAGE_UNRECONCILED"
+                    or row.get("raw_evidence_file") != raw_name
+                    or row.get("http_status") != 200
+                    or not isinstance(row.get("fetched_at_utc"), str)
+                    or not row["fetched_at_utc"]
+                    or not same_source_authority(src["url"], str(row.get("final_url") or ""))
+                    or "html" not in str(row.get("content_type") or "").lower()
+                    or not raw_path.is_file() or raw_path.is_symlink()):
+                raise ValueError("MFF replay successful receipt lacks trusted original")
+            raw = raw_path.read_bytes()
+            semantic = sem(raw, row["content_type"])
+            if (len(raw) < 256 or len(raw) > MAX_BYTES
+                    or row.get("bytes") != len(raw)
+                    or row.get("raw_sha256") != sha(raw)
+                    or row.get("semantic_bytes") != len(semantic)
+                    or row.get("semantic_sha256") != sha(semantic)):
+                raise ValueError("MFF replay original bytes or semantic SHA mismatch")
+            passed += 1
+            expected_files.add(raw_name)
+        elif row.get("ok") is False:
+            if (row.get("health") != "FAIL"
+                    or row.get("observation_state") != "PROVISIONAL_FAIL_CLOSED"
+                    or row.get("review_required") is not False
+                    or not row.get("error")
+                    or row.get("fetched_at_utc") is not None
+                    or row.get("raw_sha256") is not None
+                    or row.get("semantic_sha256") is not None
+                    or any(key in row for key in (
+                        "raw_evidence_file", "bytes", "http_status", "final_url",
+                        "content_type", "semantic_bytes"))):
+                raise ValueError("MFF failed source contains promoted evidence")
+        else:
+            raise ValueError("unknown MFF replay health state")
+        reviews += int(row["review_required"])
+    if seen != set(sources):
+        raise ValueError("incomplete MFF replay source set")
+    if ({entry.name for entry in evidence_dir.iterdir()} != expected_files
+            or any(entry.is_symlink() for entry in evidence_dir.iterdir())):
+        raise ValueError("MFF replay has orphaned or symlinked original files")
+    expected_summary = {
+        "total": len(rows),
+        "pass": passed,
+        "fail": len(rows) - passed,
+        "review_required": reviews,
+    }
+    if manifest.get("summary") != expected_summary:
+        raise ValueError("MFF replay summary disagrees with originals")
+    return expected_summary
+
+
 def run(
     registry_path: Path = REG,
     state_path: Path = STATE,
@@ -290,6 +405,7 @@ def run(
         "summary": out["summary"],
     }
     (outdir / "manifest.json").write_bytes(canonical(manifest) + b"\n")
+    replay_evidence(outdir, registry_path)
     state_path.parent.mkdir(parents=True, exist_ok=True)
     state_path.write_text(json.dumps(out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return out
