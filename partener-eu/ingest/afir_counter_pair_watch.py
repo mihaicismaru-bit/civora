@@ -447,6 +447,16 @@ def capture(fetched: dict[str, dict], destination: Path, run_id: str, run_attemp
     return manifest
 
 
+def reject_duplicate_json_fields(pairs: list[tuple[str, object]]) -> dict:
+    """Reject ambiguous JSON receipts before any schema or hash comparison."""
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f"duplicate counter receipt JSON field: {key}")
+        out[key] = value
+    return out
+
+
 def replay(destination: Path) -> dict:
     # Evidence is a closed immutable file set. Reject arbitrary files and
     # symlinks even when their pointed-to bytes would match the manifest.
@@ -455,7 +465,10 @@ def replay(destination: Path) -> dict:
             or {entry.name for entry in destination.iterdir()} != expected_files
             or any(entry.is_symlink() or not entry.is_file() for entry in destination.iterdir())):
         raise ValueError("counter proof has orphaned, missing or symlinked files")
-    manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        (destination / "manifest.json").read_text(encoding="utf-8"),
+        object_pairs_hook=reject_duplicate_json_fields,
+    )
     # No extension fields are permitted: a receipt with an injected call-state,
     # publish instruction or per-source authority claim must not replay green
     # merely because the known fields still agree with the captured bytes.
