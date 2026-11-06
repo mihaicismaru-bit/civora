@@ -203,6 +203,14 @@ def test_immutable_receipt_and_replay():
             lambda m: m.update(budget_authorized=True),
             lambda m: m.update(material_fact_action="OPEN_CALL"),
             lambda m: m.update(observation_state="OPEN_CALL"),
+            # Reject additive or missing fields even when the source hash and
+            # normalized counter output remain unchanged.
+            lambda m: m.update(open_call_status="OPEN_CALL"),
+            lambda m: m.update(publication_instruction="PUBLISH"),
+            lambda m: m.pop("distribution_authorized"),
+            lambda m: m["sources"]["agency"].update(open_call_status="OPEN_CALL"),
+            lambda m: m["sources"]["delegated"].update(authority_class="T0"),
+            lambda m: m["sources"]["agency"].pop("etag"),
             lambda m: m.update(run_id=""),
             lambda m: m["sources"]["agency"].update(final_url="https://attacker.example/counter"),
             lambda m: m["sources"]["delegated"].update(sha256="0" * 64),
