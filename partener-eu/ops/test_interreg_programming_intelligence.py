@@ -115,6 +115,25 @@ def main():
     else:
         raise AssertionError("third-party host must fail closed")
 
+    # An allowed Interreg hostname does not legitimize authority URLs that
+    # embed credentials or address an unregistered service port. This check
+    # must hold for direct normalizer callers, not only the HTTP fetch path.
+    assert_non_authorizing(build(
+        "2026-08-28T00:49:03Z", url="https://www.interreg-rohu.eu/en/"
+    ))
+    for unsafe_authority in (
+        "https://user@interreg-rohu.eu/en/",
+        "https://user:password@interreg-rohu.eu/en/",
+        "https://interreg-rohu.eu:8443/en/",
+        "https://interreg-rohu.eu:444/en/",
+    ):
+        try:
+            build("2026-08-28T00:49:03Z", url=unsafe_authority)
+        except ValueError as exc:
+            assert "non-authoritative Interreg URL" in str(exc), exc
+        else:
+            raise AssertionError(f"unsafe Interreg authority accepted: {unsafe_authority}")
+
     try:
         build("2026-08-28T00:49:03")
     except ValueError as exc:
