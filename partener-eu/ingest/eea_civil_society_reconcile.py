@@ -72,7 +72,7 @@ def _parse_eur(value: Any, field: str) -> int:
     text = value.strip().upper()
     digits_pattern = r"(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)"
     matched = re.fullmatch(
-        rf"(?:€\\s*|EUR\\s*)({digits_pattern})|({digits_pattern})\\s*(?:€|EUR)",
+        rf"(?:€\s*|EUR\s*)({digits_pattern})|({digits_pattern})\s*(?:€|EUR)",
         text,
     )
     if matched is None:
