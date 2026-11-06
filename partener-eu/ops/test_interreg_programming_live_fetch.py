@@ -193,6 +193,45 @@ def main():
 
         live.validate_envelope(envelope)
         assert live.replay_live_evidence(envelope, original_dir, registry) == 2
+
+        # Neither an unknown top-level field nor a forged row-level claim can
+        # bypass the non-authorizing source-to-programming boundary.
+        for field, value in (
+            ("open_call_status", "OPEN_CALL"),
+            ("deadline_authorized", True),
+            ("eligibility_authorized", True),
+        ):
+            for location in ("envelope", "row"):
+                forged = json.loads(json.dumps(envelope))
+                target = forged if location == "envelope" else forged["rows"][0]
+                target[field] = value
+                try:
+                    live.replay_live_evidence(forged, original_dir, registry)
+                except ValueError as exc:
+                    assert "keys" in str(exc), (field, location, exc)
+                else:
+                    raise AssertionError(f"forged Interreg authority accepted: {field}/{location}")
+        attempted_publish = json.loads(json.dumps(envelope))
+        attempted_publish["rows"][0]["publication_effect"] = "PUBLISH"
+        try:
+            live.validate_envelope(attempted_publish)
+        except ValueError as exc:
+            assert "attempted publication" in str(exc)
+        else:
+            raise AssertionError("row-level Interreg publication override admitted")
+
+        # json.loads normally accepts the last duplicate key; neither a raw
+        # receipt nor the source registry may use that ambiguous representation.
+        for duplicate in (
+            '{"run_id":"official","run_id":"forged"}',
+            '{"nested":{"open_call_status":"PLANNED","open_call_status":"OPEN_CALL"}}',
+        ):
+            try:
+                live._load_strict_json(duplicate)
+            except ValueError as exc:
+                assert "duplicate Interreg JSON key" in str(exc)
+            else:
+                raise AssertionError("duplicate-key Interreg receipt admitted")
         for field, forged_value in (
             ("source_count", 3),
             ("fetch_pass", 1),
