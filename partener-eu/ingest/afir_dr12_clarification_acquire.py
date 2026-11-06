@@ -149,6 +149,8 @@ def run(destination: Path, run_id: str, observed_at: str, attempt: str = "1") ->
     parsed = dt.datetime.fromisoformat(observed_at.replace("Z", "+00:00"))
     if parsed.tzinfo is None:
         raise ValueError("Timestamp lacks timezone")
+    if destination.exists():
+        raise ValueError("DR-12 immutable evidence destination already exists")
     destination.mkdir(parents=True, exist_ok=False)
     manifest = {
         "schema": "AFIR_DR12_CLARIFICATION_ORIGINAL_V1",
