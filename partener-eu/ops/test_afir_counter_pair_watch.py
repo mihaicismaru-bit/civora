@@ -300,7 +300,9 @@ def test_cache_freshness_fail_closed():
             # Altering an archived Age without updating semantic reconciliation
             # must be caught by replay; the raw bytes are left untouched.
             manifest = json.loads((proof / "manifest.json").read_text(encoding="utf-8"))
-            manifest["sources"]["agency"]["age_header"] = "0"
+            manifest["sources"]["agency"]["age_header" if key == "source_age_header" else "date_header"] = (
+                "0" if key == "source_age_header" else "Fri, 06 Nov 2026 01:00:00 GMT"
+            )
             (proof / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
             reject(lambda: probe.replay(proof))
 
