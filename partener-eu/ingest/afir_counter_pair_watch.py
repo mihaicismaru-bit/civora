@@ -28,7 +28,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v7"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v8"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -190,8 +190,9 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
     parser = TextOnly()
     parser.feed(raw.decode("utf-8", "replace"))
     text = re.sub(r"\s+", " ", " ".join(parser.parts))
-    # Delegated DR-12 session and each component must agree on their time window.
-    # A conflicting/duplicated session header cannot be masked by matching cards.
+    # Official delegated cards may disagree with their OWN session banner.
+    # Retain both windows and explicitly flag the conflict for semantic review;
+    # ambiguous or duplicate session banners remain hard parser errors.
     # Multiple DR-12 session banners are conflicting evidence even if one
     # is malformed: do not accept a single valid match and silently ignore it.
     banner = r"\bSesiune depunere dosare de finan.are\s+DR[-–]12\b"
@@ -206,6 +207,10 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
     if len(session_headers) != 1:
         raise ValueError("delegated DR-12 session header missing, duplicate or malformed")
     session_open, session_close = session_headers[0]
+    session_start_dt = dt.datetime.strptime(session_open, "%d/%m/%Y %H:%M:%S")
+    session_end_dt = dt.datetime.strptime(session_close, "%d/%m/%Y %H:%M:%S")
+    if session_start_dt >= session_end_dt:
+        raise ValueError("delegated DR-12 session date order invalid")
     chunks = re.split(r"\bDESCRIERE\s+ALOCARE\b", text, flags=re.I)
     found = {}
     for chunk in chunks[1:]:
@@ -255,8 +260,14 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
             raise ValueError("delegated DR-12 dates/allocation/submitted-value/count/funds not parseable")
         funds_raw = funds.group(1).strip().upper()
         amount = "0.00" if funds_raw == "FONDURI EPUIZATE" else parse_delegated_amount(funds_raw)
-        if opened.group(1) != session_open or closed.group(1) != session_close:
-            raise ValueError("delegated DR-12 component window differs from session header")
+        component_start_dt = dt.datetime.strptime(opened.group(1), "%d/%m/%Y %H:%M:%S")
+        component_end_dt = dt.datetime.strptime(closed.group(1), "%d/%m/%Y %H:%M:%S")
+        if component_start_dt >= component_end_dt:
+            raise ValueError("delegated DR-12 component date order invalid")
+        # A valid disagreement is evidence of a source inconsistency, NOT a
+        # parser failure that discards the original component facts.
+        session_window_matches = (opened.group(1) == session_open and
+                                  closed.group(1) == session_close)
         day, month, year = closed.group(1)[:10].split("/")
         open_day, open_month, open_year = opened.group(1)[:10].split("/")
         found[sector] = {
@@ -268,6 +279,9 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
             "funds_status": ("EXHAUSTED" if funds_raw == "FONDURI EPUIZATE" else
                              "UNKNOWN" if amount is None else "REPORTED"),
             "closes_at": f"{day}.{month}.{year} {closed.group(1)[11:]}",
+            "session_opens_at": session_start_dt.strftime("%d.%m.%Y %H:%M:%S"),
+            "session_closes_at": session_end_dt.strftime("%d.%m.%Y %H:%M:%S"),
+            "session_window_matches": session_window_matches,
         }
     if set(found) != set(SECTORS):
         raise ValueError("delegated page lacks two exact DR-12 allocations")
@@ -308,12 +322,14 @@ def reconcile(raws: dict[str, bytes], span_seconds: float) -> dict:
         funds_status_equal = a["funds_status"] == b["funds_status"]
         if checks["funds_eur"]["comparable"] and not funds_status_equal:
             any_financial_difference = True
-        any_count_or_date_difference |= not count_equal or not open_equal or not close_equal
+        any_count_or_date_difference |= (not count_equal or not open_equal or not close_equal
+                                         or not b["session_window_matches"])
         comparable[sector] = {
             "agency": a, "delegated": b,
             "submitted_count_matches": count_equal,
             "opening_time_matches": open_equal,
             "closing_time_matches": close_equal,
+            "delegated_session_window_matches": b["session_window_matches"],
             "amount_checks": checks,
             "funds_status_matches": funds_status_equal,
             "funds_comparable": checks["funds_eur"]["comparable"],
