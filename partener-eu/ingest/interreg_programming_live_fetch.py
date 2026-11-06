@@ -295,6 +295,9 @@ def replay_live_evidence(
 ) -> int:
     """Re-parse original bytes under the exact registered authority; no publication."""
     validate_envelope(evidence)
+    rows = evidence.get("rows")
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise ValueError("invalid Interreg evidence rows")
     if not raw_dir.is_dir():
         raise ValueError("immutable Interreg raw evidence directory missing")
     registered = {
@@ -303,9 +306,11 @@ def replay_live_evidence(
     }
     expected_files: set[str] = set()
     seen_ids: set[str] = set()
+    observed_states: dict[str, int] = {}
+    pass_count = 0
     if not str(evidence.get("run_id") or "").strip():
         raise ValueError("Interreg raw evidence missing run_id")
-    for row in evidence.get("rows", []):
+    for row in rows:
         source_id = str(row.get("source_id") or "")
         if source_id in seen_ids or source_id not in registered:
             raise ValueError("duplicate or unregistered Interreg evidence source")
@@ -320,8 +325,12 @@ def replay_live_evidence(
         ):
             raise ValueError("Interreg source registry/run provenance mismatch")
         if row.get("fetch_status") == "FAIL":
-            if row.get("normalized") or row.get("raw_evidence_file"):
+            if (row.get("normalized") or row.get("raw_evidence_file")
+                    or any(key in row for key in ("raw_hash", "bytes", "http_status", "content_type", "final_url"))):
                 raise ValueError("failed Interreg source cannot have promoted original")
+            if not row.get("error_type") or not row.get("error"):
+                raise ValueError("failed Interreg source missing explicit error receipt")
+            observed_states["FETCH_FAILED"] = observed_states.get("FETCH_FAILED", 0) + 1
             continue
         if row.get("fetch_status") != "PASS":
             raise ValueError("invalid Interreg raw acquisition status")
@@ -356,11 +365,22 @@ def replay_live_evidence(
         )
         if normalized != row.get("normalized"):
             raise ValueError("Interreg raw-to-semantic replay disagreement")
+        pass_count += 1
+        state = normalized["observation_state"]
+        observed_states[state] = observed_states.get(state, 0) + 1
         expected_files.add(raw_name)
     if {p.name for p in raw_dir.iterdir()} != expected_files:
         raise ValueError("unknown, partial or orphaned Interreg raw evidence file")
     if len(seen_ids) != len(registered):
         raise ValueError("incomplete Interreg programming source set")
+    if (type(evidence.get("source_count")) is not int
+            or type(evidence.get("fetch_pass")) is not int
+            or type(evidence.get("fetch_fail")) is not int
+            or evidence["source_count"] != len(rows)
+            or evidence["fetch_pass"] != pass_count
+            or evidence["fetch_fail"] != len(rows) - pass_count
+            or evidence.get("observation_states") != observed_states):
+        raise ValueError("Interreg replay summary differs from verified source rows")
     return len(expected_files)
 
 

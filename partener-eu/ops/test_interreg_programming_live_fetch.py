@@ -137,6 +137,20 @@ def main():
 
         live.validate_envelope(envelope)
         assert live.replay_live_evidence(envelope, original_dir, registry) == 2
+        for field, forged_value in (
+            ("source_count", 3),
+            ("fetch_pass", 1),
+            ("fetch_fail", 1),
+            ("observation_states", {"CONSULTATION": 2}),
+        ):
+            forged_summary = json.loads(json.dumps(envelope))
+            forged_summary[field] = forged_value
+            try:
+                live.replay_live_evidence(forged_summary, original_dir, registry)
+            except ValueError as exc:
+                assert "summary differs" in str(exc)
+            else:
+                raise AssertionError(f"forged Interreg summary admitted: {field}")
         assert envelope["source_count"] == 2
         assert envelope["fetch_pass"] == 2
         assert envelope["fetch_fail"] == 0
@@ -243,6 +257,45 @@ def main():
             assert "authorized OPEN" in str(exc)
         else:
             raise AssertionError("unsafe programming envelope must fail closed")
+
+        # A live 403/timeout must remain a genuine non-authorizing failure,
+        # with self-consistent summary counts; no phantom raw file is allowed.
+        def partial_fetch(url):
+            if "ro-md.net" in url:
+                raise TimeoutError("official source temporarily unavailable")
+            return html, url, 200, "text/html; charset=utf-8"
+
+        partial_dir = Path(tmp) / "partial-originals"
+        try:
+            live._fetch = partial_fetch
+            live._utc_now = lambda: "2026-08-28T01:51:17Z"
+            partial = live.build_live_evidence(registry, run_id="TEST-INTERREG-PARTIAL", raw_dir=partial_dir)
+        finally:
+            live._fetch = original_fetch
+            live._utc_now = original_now
+        assert partial["fetch_pass"] == 1 and partial["fetch_fail"] == 1
+        assert partial["observation_states"] == {"CONSULTATION_CLOSED": 1, "FETCH_FAILED": 1}
+        assert live.replay_live_evidence(partial, partial_dir, registry) == 1
+        for tamper in ("raw_hash", "final_url", "bytes"):
+            downgraded = json.loads(json.dumps(partial))
+            failed_row = next(r for r in downgraded["rows"] if r["fetch_status"] == "FAIL")
+            failed_row[tamper] = "forged evidence"
+            try:
+                live.replay_live_evidence(downgraded, partial_dir, registry)
+            except ValueError as exc:
+                assert "cannot have promoted original" in str(exc)
+            else:
+                raise AssertionError(f"failed source concealed PASS field: {tamper}")
+        for missing_error in ("error", "error_type"):
+            downgraded = json.loads(json.dumps(partial))
+            failed_row = next(r for r in downgraded["rows"] if r["fetch_status"] == "FAIL")
+            failed_row.pop(missing_error)
+            try:
+                live.replay_live_evidence(downgraded, partial_dir, registry)
+            except ValueError as exc:
+                assert "missing explicit error receipt" in str(exc)
+            else:
+                raise AssertionError(f"failed source lost error provenance: {missing_error}")
 
     print("PASS Interreg live programming evidence: exact official bytes remain non-authorizing")
 
