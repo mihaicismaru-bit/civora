@@ -182,7 +182,7 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
         count = re.search(r"\bNUM.R\s+DOSARE\s+DEPUSE\b\s+(\d+)\b", chunk, re.I)
         funds = re.search(
             r"\bFONDURI\s+DISPONIBILE\b(?:\s*\*?\s*2)?\s+"
-            r"(FONDURI\s+EPUIZATE|[-–—]|\d+(?:[.,]\d+)*)\b?",
+            r"(FONDURI\s+EPUIZATE|[-–—]|\d+(?:[.,]\d+)*)",
             chunk, re.I,
         )
         # A withheld dash may be followed by punctuation rather than a word
@@ -364,7 +364,7 @@ def main() -> int:
         print(json.dumps({"status": receipt["observation_state"], "run_id": run_id,
                           "publish_authorized": False}, ensure_ascii=False))
         return 0
-    except (ValueError, OSError, TimeoutError, Exception) as exc:
+    except Exception as exc:
         # Acquisition errors cannot delete evidence or alter the public LKG.
         print(json.dumps({"status": "SOURCE_COUNTER_PAIR_UNAVAILABLE_REVIEW",
                           "error_type": type(exc).__name__, "publish_authorized": False,
