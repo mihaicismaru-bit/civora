@@ -224,6 +224,21 @@ def test_immutable_receipt_and_replay():
             adjust(m)
             (target / "manifest.json").write_text(json.dumps(m), encoding="utf-8")
             reject(lambda: probe.replay(target))
+        # Duplicate keys are intrinsically ambiguous across JSON consumers:
+        # some retain the first value and others the last. No green replay.
+        for ambiguous in (
+            original.replace(
+                '"publish_authorized": false',
+                '"publish_authorized": true, "publish_authorized": false', 1
+            ),
+            original.replace(
+                '"raw_file": "agency.raw.html"',
+                '"raw_file": "swapped.html", "raw_file": "agency.raw.html"', 1
+            ),
+        ):
+            assert ambiguous != original
+            (target / "manifest.json").write_text(ambiguous, encoding="utf-8")
+            reject(lambda: probe.replay(target))
         (target / "manifest.json").write_text(original, encoding="utf-8")
         for source in ("agency", "delegated"):
             path = target / f"{source}.raw.html"
