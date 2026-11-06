@@ -208,7 +208,9 @@ def run(
     outdir = evidence_dir or Path(os.environ.get("PARTENER_MFF_EVIDENCE_DIR") or (
         Path(tempfile.gettempdir()) / ("partener-mff-evidence-" + rid)
     ))
-    outdir.mkdir(parents=True, exist_ok=True)
+    # Raw evidence is an immutable per-run handoff. A repeated invocation or
+    # reused artifact destination must fail closed before writing any receipt.
+    outdir.mkdir(parents=True, exist_ok=False)
     observed = now()
     out = {
         "schema_version": "1.1",
