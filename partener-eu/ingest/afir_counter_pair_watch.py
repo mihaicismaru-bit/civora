@@ -198,7 +198,7 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
             r"\bALOCARE\s+FINANCIAR.\s+([-–—]|\d+(?:[.,]\d+)*)", chunk, re.I
         )
         submitted = re.search(
-            r"\bVALOAREA\s+PROIECTELOR\s+DEPUSE\s+([-–—]|\d+(?:[.,]\d+)*)", chunk, re.I
+            r"\bVALOAREA\s+PROIECTELOR\s+DEPUSE\b(?:\s*\*\s*1)?\s+([-–—]|\d+(?:[.,]\d+)*)", chunk, re.I
         )
         count = re.search(r"\bNUM.R\s+DOSARE\s+DEPUSE\b\s+(\d+)\b", chunk, re.I)
         funds = re.search(
