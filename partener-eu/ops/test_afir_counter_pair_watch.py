@@ -117,6 +117,13 @@ def test_parse_and_reconcile():
     duplicate_session = original.replace(b"</body>", extra_header + b"</body>")
     assert duplicate_session != original
     reject(lambda: probe.parse_delegated(duplicate_session))
+    # The official portal separates session dates visually with a pipe.
+    with_separator = original.replace(
+        "DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
+        "| DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
+    )
+    assert with_separator != original
+    assert probe.parse_delegated(with_separator)["SECTOR ZOOTEHNIC"]["submitted_count"] == 65
 
 
 def test_immutable_receipt_and_replay():
