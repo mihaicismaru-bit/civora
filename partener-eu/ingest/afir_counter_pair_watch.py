@@ -78,6 +78,11 @@ def acquire(source: str) -> dict:
         ctype = res.headers.get("Content-Type", "")
         if "html" not in ctype.lower():
             raise ValueError("counter returned non-HTML source")
+        # The server may ignore Accept-Encoding: identity. Never persist or
+        # parse compressed bytes as an official HTML counter receipt.
+        content_encoding = (res.headers.get("Content-Encoding") or "identity").strip().lower()
+        if content_encoding != "identity":
+            raise ValueError("unsupported encoded AFIR counter body")
         raw = res.read(MAX_BYTES + 1)
         announced = res.headers.get("Content-Length")
         if (
@@ -89,6 +94,7 @@ def acquire(source: str) -> dict:
         return {
             "ok": True, "url": url, "status": 200, "content_type": ctype,
             "data": raw, "fetched_at_utc": observed,
+            "content_encoding": content_encoding,
             "source_date_header": res.headers.get("Date"),
             "source_etag": res.headers.get("ETag"),
             "source_last_modified": res.headers.get("Last-Modified"),
@@ -327,6 +333,7 @@ def capture(fetched: dict[str, dict], destination: Path, run_id: str, run_attemp
             row.get("ok") is not True or row.get("url") != url
             or row.get("status") != 200
             or "html" not in str(row.get("content_type") or "").lower()
+            or row.get("content_encoding", "identity") != "identity"
             or not isinstance(data, bytes) or not data or len(data) > MAX_BYTES
             or not strict_url(url, source)
         ):
@@ -336,7 +343,8 @@ def capture(fetched: dict[str, dict], destination: Path, run_id: str, run_attemp
         sources[source] = {
             "requested_url": url, "final_url": url, "fetched_at_utc": stamp.isoformat().replace("+00:00", "Z"),
             "raw_file": f"{source}.raw.html", "sha256": hashlib.sha256(data).hexdigest(),
-            "byte_count": len(data), "content_type": row["content_type"], "http_status": 200,
+            "byte_count": len(data), "content_type": row["content_type"],
+            "content_encoding": "identity", "http_status": 200,
             "date_header": row.get("source_date_header"), "etag": row.get("source_etag"),
             "last_modified": row.get("source_last_modified"),
             "age_header": row.get("source_age_header"),
@@ -366,6 +374,13 @@ def capture(fetched: dict[str, dict], destination: Path, run_id: str, run_attemp
 
 
 def replay(destination: Path) -> dict:
+    # Evidence is a closed immutable file set. Reject arbitrary files and
+    # symlinks even when their pointed-to bytes would match the manifest.
+    expected_files = {"manifest.json", *(f"{source}.raw.html" for source in URLS)}
+    if (not destination.is_dir() or destination.is_symlink()
+            or {entry.name for entry in destination.iterdir()} != expected_files
+            or any(entry.is_symlink() or not entry.is_file() for entry in destination.iterdir())):
+        raise ValueError("counter proof has orphaned, missing or symlinked files")
     manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
     if (
         manifest.get("schema_version") != "1.0"
@@ -392,6 +407,7 @@ def replay(destination: Path) -> dict:
             or meta.get("raw_file") != f"{source}.raw.html"
             or meta.get("http_status") != 200
             or "html" not in str(meta.get("content_type", "")).lower()
+            or meta.get("content_encoding") != "identity"
             or not strict_url(url, source)
         ):
             raise ValueError("counter source identity changed")
