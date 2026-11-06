@@ -166,7 +166,7 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
     parser = TextOnly()
     parser.feed(raw.decode("utf-8", "replace"))
     text = re.sub(r"\s+", " ", " ".join(parser.parts))
-    if not re.search(r"Sesiune depunere dosare de finan.tare\s+DR[-–]12\b", text, re.I):
+    if not re.search(r"Sesiune depunere dosare de finan.are\s+DR[-–]12\b", text, re.I):
         raise ValueError("delegated current DR-12 session heading missing")
     chunks = re.split(r"\bDESCRIERE\s+ALOCARE\b", text, flags=re.I)
     found = {}
