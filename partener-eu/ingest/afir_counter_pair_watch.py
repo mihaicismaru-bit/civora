@@ -337,7 +337,8 @@ def cache_health(source_meta: dict[str, dict]) -> dict:
         reasons = []
         age = meta.get("age_header")
         if age is not None:
-            if not isinstance(age, str) or not re.fullmatch(r"\\d+", age.strip()):
+            if (not isinstance(age, str) or len(age.strip()) > 10
+                    or not re.fullmatch(r"\d+", age.strip())):
                 reasons.append("INVALID_HTTP_AGE")
             elif int(age.strip()) > MAX_CACHE_SKEW_SECONDS:
                 reasons.append("HTTP_AGE_EXCEEDS_300_SECONDS")
