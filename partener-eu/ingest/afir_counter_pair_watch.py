@@ -27,7 +27,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v4"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v5"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -190,12 +190,26 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
     for chunk in chunks[1:]:
         if not re.search(r"\bDR[-–]12\b", chunk[:600], re.I):
             continue
-        component = re.search(r"\bComponenta\s+(SECTOR\s+ZOOTEHNIC|ALTE\s+SECTOARE)\b", chunk[:600], re.I)
-        if not component:
-            raise ValueError("unknown delegated DR-12 component")
-        sector = re.sub(r"\s+", " ", component.group(1)).upper()
+        component_pattern = r"\bComponenta\s+(SECTOR\s+ZOOTEHNIC|ALTE\s+SECTOARE)\b"
+        components = re.findall(component_pattern, chunk[:600], re.I)
+        if len(components) != 1:
+            raise ValueError("missing or ambiguous delegated DR-12 component")
+        sector = re.sub(r"\s+", " ", components[0]).upper()
         if sector in found:
             raise ValueError("duplicate delegated DR-12 component")
+        # Every material metric must have ONE label within this exact card.
+        # Otherwise a second contradictory field is silently hidden by
+        # re.search selecting the first apparently valid value.
+        labels = (
+            r"\bDAT.\s+.I\s+OR.\s+LANSARE\b",
+            r"\bALOCARE\s+FINANCIAR.\b",
+            r"\bDAT.\s+.I\s+OR.\s+.NCHIDERE\b",
+            r"\bVALOAREA\s+PROIECTELOR\s+DEPUSE\b",
+            r"\bNUM.R\s+DOSARE\s+DEPUSE\b",
+            r"\bFONDURI\s+DISPONIBILE\b",
+        )
+        if any(len(re.findall(label, chunk, re.I)) != 1 for label in labels):
+            raise ValueError("delegated DR-12 card contains missing or repeated material field")
         opened = re.search(
             r"\bDAT.\s+.I\s+OR.\s+LANSARE\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})", chunk, re.I
         )
