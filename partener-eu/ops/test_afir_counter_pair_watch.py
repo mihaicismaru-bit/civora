@@ -90,6 +90,33 @@ def test_parse_and_reconcile():
     reject(lambda: probe.parse_agency(agency().replace(b"</table>", agency()[agency().find(b"<tr><td>DR-12"):agency().find(b"</table>")] + b"</table>")))
     reject(lambda: probe.parse_delegated(delegated().replace("NUMĂR".encode("utf-8"), b"COUNT")))
     reject(lambda: probe.parse_delegated(delegated().replace(b"ALTE SECTOARE", b"UNKNOWN COMPONENT")))
+    # A valid-looking component card cannot overrule the delegated session banner.
+    # All values here are synthetic hermetic fixtures, not live funding facts.
+    original = delegated()
+    changed_header = original.replace(
+        "DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
+        "DATĂ FINAL 03/12/2026 15:59:59".encode("utf-8"),
+    )
+    assert changed_header != original
+    reject(lambda: probe.parse_delegated(changed_header))
+    assert probe.reconcile({"agency": agency(), "delegated": changed_header}, 12)["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW"
+
+    changed_component = original.replace(
+        "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8"),
+        "DATĂ ȘI ORĂ ÎNCHIDERE 03/12/2026 15:59:59".encode("utf-8"),
+        1,
+    )
+    assert changed_component != original
+    reject(lambda: probe.parse_delegated(changed_component))
+
+    extra_header = (
+        "<div>Sesiune depunere dosare de finanțare DR-12 "
+        "DATĂ ÎNCEPUT 06/10/2026 09:00:00 "
+        "DATĂ FINAL 02/12/2026 15:59:59</div>"
+    ).encode("utf-8")
+    duplicate_session = original.replace(b"</body>", extra_header + b"</body>")
+    assert duplicate_session != original
+    reject(lambda: probe.parse_delegated(duplicate_session))
 
 
 def test_immutable_receipt_and_replay():
