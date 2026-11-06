@@ -269,9 +269,14 @@ def reconcile_live_evidence(
             _fail(f"{call_id}: source capture timestamp/run mismatch")
         if record.get("parser_version") != ADAPTER_PARSER_VERSION:
             _fail(f"{call_id}: adapter parser version mismatch")
+        # The acquisition normalizer correctly marks CLOSED_CALL as not
+        # requiring further call-state reconciliation; it remains non-publishing.
+        expected_review = record.get("observation_state") in {
+            "OPEN_CALL", "FORTHCOMING_CALL", "UNKNOWN"
+        }
         if (record.get("material_fact_use") is not False
                 or record.get("publish_authorized") is not False
-                or record.get("requires_reconcile") is not True):
+                or record.get("requires_reconcile") is not expected_review):
             _fail(f"{call_id}: acquisition record pre-authorized material facts")
         _valid_raw_hash(record.get("raw_hash"), f"{call_id}.raw_hash")
         if not record.get("authority_url_verified"):
