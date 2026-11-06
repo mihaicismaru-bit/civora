@@ -64,13 +64,20 @@ def _parse_date(value: Any, field: str) -> str:
 def _parse_eur(value: Any, field: str) -> int:
     if not isinstance(value, str) or not value.strip():
         _fail(f"{field}: non-empty EUR amount required")
-    text = value.upper().replace("EURO", "EUR")
-    if "€" not in text and "EUR" not in text:
-        _fail(f"{field}: EUR/€ marker required")
-    digits = re.sub(r"\D", "", text)
-    if not digits:
-        _fail(f"{field}: amount digits missing")
-    amount = int(digits)
+    # The official call pages currently use exact integer EUR amounts such as
+    # €3,718,664. Stripping all non-digits silently changes decimal values,
+    # ungrouped separators and annotated estimates into invented budgets.
+    # Accept only an entire currency-marked integer with valid comma thousands
+    # grouping. Unsupported formats require source review, not normalization.
+    text = value.strip().upper()
+    digits_pattern = r"(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)"
+    matched = re.fullmatch(
+        rf"(?:€\\s*|EUR\\s*)({digits_pattern})|({digits_pattern})\\s*(?:€|EUR)",
+        text,
+    )
+    if matched is None:
+        _fail(f"{field}: exact integer EUR/€ amount with valid grouping required")
+    amount = int((matched.group(1) or matched.group(2)).replace(",", ""))
     if amount <= 0:
         _fail(f"{field}: amount must be positive")
     return amount
