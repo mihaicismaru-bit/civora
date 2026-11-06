@@ -102,8 +102,10 @@ def test_parse_and_reconcile():
         "DATĂ FINAL 03/12/2026 15:59:59".encode("utf-8"),
     )
     assert changed_header != original
-    reject(lambda: probe.parse_delegated(changed_header))
-    assert probe.reconcile({"agency": agency(), "delegated": changed_header}, 12)["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW"
+    parsed_header = probe.parse_delegated(changed_header)
+    assert all(not row["session_window_matches"] for row in parsed_header.values())
+    assert parsed_header["ALTE SECTOARE"]["session_closes_at"] == "03.12.2026 15:59:59"
+    assert probe.reconcile({"agency": agency(), "delegated": changed_header}, 12)["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
 
     changed_component = original.replace(
         "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8"),
@@ -111,7 +113,22 @@ def test_parse_and_reconcile():
         1,
     )
     assert changed_component != original
-    reject(lambda: probe.parse_delegated(changed_component))
+    parsed_component = probe.parse_delegated(changed_component)
+    assert parsed_component["SECTOR ZOOTEHNIC"]["session_window_matches"] is False
+    assert parsed_component["ALTE SECTOARE"]["session_window_matches"] is True
+    reconciled = probe.reconcile({"agency": agency(), "delegated": changed_component}, 12)
+    assert reconciled["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
+    assert reconciled["components"]["SECTOR ZOOTEHNIC"]["delegated_session_window_matches"] is False
+    assert reconciled["material_fact_action"] == "NONE"
+    # Invalid dates and reversed windows are NOT legitimate source discrepancies.
+    reject(lambda: probe.parse_delegated(original.replace(
+        "DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
+        "DATĂ FINAL 32/12/2026 15:59:59".encode("utf-8"), 1,
+    )))
+    reject(lambda: probe.parse_delegated(original.replace(
+        "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8"),
+        "DATĂ ȘI ORĂ ÎNCHIDERE 05/10/2026 15:59:59".encode("utf-8"), 1,
+    )))
 
     extra_header = (
         "<div>Sesiune depunere dosare de finanțare DR-12 "
@@ -218,6 +235,7 @@ def test_immutable_receipt_and_replay():
             lambda m: m["sources"]["agency"].update(content_encoding="gzip"),
             lambda m: m["sources"]["agency"].update(fetched_at_utc="2026-11-06T01:00:00"),
             lambda m: m["reconciliation"].update(observation_state="SOURCE_COUNTER_PAIR_MATCH_REVIEW"),
+            lambda m: m["reconciliation"]["components"]["ALTE SECTOARE"]["delegated"].update(session_window_matches=False),
             lambda m: m.update(source_family="PRESS"),
         ):
             m = json.loads(original)
@@ -247,6 +265,18 @@ def test_immutable_receipt_and_replay():
             reject(lambda: probe.replay(target))
             path.write_bytes(raw)
         assert probe.replay(target)["verified"] is True
+        # Reproduce an internally inconsistent, but valid, official-looking
+        # component window. Preserve original values and force review on replay.
+        conflict = target.parent / "conflict"
+        raw_conflict = delegated().replace(
+            "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8"),
+            "DATĂ ȘI ORĂ ÎNCHIDERE 11/11/2026 00:00:00".encode("utf-8"), 1,
+        )
+        proof = probe.capture(fetches(b=raw_conflict), conflict, "42199991112")
+        assert proof["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
+        assert proof["reconciliation"]["components"]["SECTOR ZOOTEHNIC"]["delegated"]["closes_at"] == "11.11.2026 00:00:00"
+        assert proof["publish_authorized"] is False
+        assert probe.replay(conflict)["verified"] is True
         # The original receipt is an exact immutable file set. An extra file
         # or a same-byte symlink is not independent primary-source evidence.
         orphan = target / "orphaned.html"
