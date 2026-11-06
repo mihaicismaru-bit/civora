@@ -275,6 +275,55 @@ def test_acquire_identity_encoding():
             assert receipt["data"] == agency()
 
 
+def test_cache_freshness_fail_closed():
+    # Synthetic cached 200s must never be treated as a fresh paired counter,
+    # even when capture times are 12 seconds apart and values match exactly.
+    variants = (
+        ("source_age_header", "301", "HTTP_AGE_EXCEEDS_300_SECONDS"),
+        ("source_age_header", "not-a-number", "INVALID_HTTP_AGE"),
+        ("source_age_header", "999999999999", "INVALID_HTTP_AGE"),
+        ("source_date_header", "Thu, 05 Nov 2026 01:00:00 GMT",
+         "HTTP_DATE_SKEW_EXCEEDS_300_SECONDS"),
+        ("source_date_header", "not-rfc-7231", "INVALID_HTTP_DATE"),
+    )
+    for key, value, reason in variants:
+        with tempfile.TemporaryDirectory() as td:
+            rows = deepcopy(fetches())
+            rows["agency"][key] = value
+            proof = Path(td) / "proof"
+            rec = probe.capture(rows, proof, "42199991112")
+            assert rec["observation_state"] == "SOURCE_COUNTER_CACHE_FRESHNESS_REVIEW"
+            assert rec["reconciliation"]["cache_health"]["review_required"] is True
+            assert rec["reconciliation"]["cache_health"]["sources"]["agency"]["reasons"] == [reason]
+            assert rec["publish_authorized"] is False
+            assert probe.replay(proof)["verified"] is True
+            # Altering an archived Age without updating semantic reconciliation
+            # must be caught by replay; the raw bytes are left untouched.
+            manifest = json.loads((proof / "manifest.json").read_text(encoding="utf-8"))
+            manifest["sources"]["agency"]["age_header"] = "0"
+            (proof / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
+            reject(lambda: probe.replay(proof))
+
+    with tempfile.TemporaryDirectory() as td:
+        rows = deepcopy(fetches())
+        rows["agency"]["source_age_header"] = "0"
+        rows["delegated"]["source_date_header"] = "Fri, 06 Nov 2026 01:00:12 GMT"
+        rec = probe.capture(rows, Path(td) / "fresh", "42199991113")
+        assert rec["observation_state"] == "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW"
+        assert rec["reconciliation"]["cache_health"]["review_required"] is False
+        assert probe.replay(Path(td) / "fresh")["verified"] is True
+
+    with tempfile.TemporaryDirectory() as td:
+        rows = deepcopy(fetches())
+        rows["agency"]["source_age_header"] = "3600"
+        rows["delegated"]["data"] = b"<html>invalid DR-12 session</html>"
+        rec = probe.capture(rows, Path(td) / "parse-review", "42199991114")
+        # A stale-cache finding does not conceal a more serious semantic error.
+        assert rec["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW"
+        assert rec["reconciliation"]["cache_health"]["review_required"] is True
+        assert probe.replay(Path(td) / "parse-review")["verified"] is True
+
+
 def test_capture_guards():
     for source in ("agency", "delegated"):
         reject(lambda source=source: probe.acquire.__globals__["strict_url"]("http://www.afir.ro/", source) or (_ for _ in ()).throw(ValueError()))
@@ -301,4 +350,5 @@ if __name__ == "__main__":
     test_immutable_receipt_and_replay()
     test_acquire_identity_encoding()
     test_capture_guards()
+    test_cache_freshness_fail_closed()
     print("AFIR counter pair: hermetic official-host, two-component, divergence and tamper regressions PASS")
