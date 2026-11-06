@@ -61,6 +61,18 @@ def main() -> None:
         "DR-12 - 45 de ani; 80% ajutor; 6 noiembrie – 2 decembrie 2026.",
     ):
         rejected(lambda changed=changed: watch.parse_notice(raw(changed)), "missing")
+    # A previously valid statement must not mask a second contradictory
+    # or duplicate statement, including one with malformed numbers.
+    for ambiguous in (
+        SENTENCE + " " + SENTENCE,
+        SENTENCE + " " + SENTENCE.replace("80 de puncte", "70 de puncte"),
+        SENTENCE + " " + SENTENCE.replace("5 noiembrie 2026", "6 noiembrie 2026"),
+        SENTENCE.replace("este de 80", "este " + "explicație " * 110 + "de 80"),
+    ):
+        rejected(lambda ambiguous=ambiguous: watch.parse_notice(raw(ambiguous)),
+                 "duplicated or contradictory")
+    assert watch.PARSER_VERSION.endswith("-v2")
+
     rejected(lambda: watch.parse_notice(b""))
     rejected(lambda: watch.parse_notice(b"a" * 12_000_001))
 
