@@ -29,6 +29,23 @@ from interreg_programming_intelligence import OFFICIAL_HOSTS, normalize_programm
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "partener-eu" / "ingest" / "source_registry.json"
 SCHEMA = "PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V1"
+# Closed provenance schema: forged convenience fields cannot grant publication
+# authority just because a downstream reader trusts an evidence manifest.
+ENVELOPE_KEYS = frozenset({
+    "schema", "created_at", "run_id", "source_count", "fetch_pass",
+    "fetch_fail", "observation_states", "publication_effect",
+    "canonical_corpus_mutation", "publish_authorized", "rows",
+})
+ROW_COMMON_KEYS = frozenset({
+    "source_id", "source_owner", "registered_url", "programme",
+    "fetched_at", "run_id", "publication_effect", "publish_authorized",
+    "material_fact_use", "fetch_status",
+})
+ROW_PASS_KEYS = ROW_COMMON_KEYS | {
+    "raw_evidence_file", "http_status", "content_type", "final_url",
+    "bytes", "raw_hash", "normalized",
+}
+ROW_FAIL_KEYS = ROW_COMMON_KEYS | {"error_type", "error"}
 USER_AGENT = "PARTENER.EU-Interreg-Programming/1.0"
 MAX_BYTES = 2_000_000
 TIMEOUT_SECONDS = 25
@@ -75,8 +92,21 @@ def _visible_text(raw: bytes, content_type: str) -> str:
     return html.unescape(" ".join(parser.parts))
 
 
+def _load_strict_json(raw: str) -> Any:
+    """Reject duplicate keys before JSON decoding silently keeps the last."""
+    def unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        obj: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in obj:
+                raise ValueError(f"duplicate Interreg JSON key: {key}")
+            obj[key] = value
+        return obj
+
+    return json.loads(raw, object_pairs_hook=unique_pairs)
+
+
 def _load_registry(path: Path) -> dict[str, Any]:
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = _load_strict_json(path.read_text(encoding="utf-8"))
     if not isinstance(data.get("sources"), list):
         raise ValueError("source registry missing sources[]")
     return data
@@ -275,6 +305,10 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
 
 
 def validate_envelope(data: dict[str, Any]) -> None:
+    if not isinstance(data, dict) or set(data) != ENVELOPE_KEYS:
+        raise ValueError("unexpected Interreg evidence envelope keys")
+    if not isinstance(data.get("rows"), list):
+        raise ValueError("Interreg evidence rows must be a list")
     if data.get("schema") != SCHEMA:
         raise ValueError("unexpected live-evidence schema")
     if data.get("publication_effect") != "NONE":
@@ -283,7 +317,14 @@ def validate_envelope(data: dict[str, Any]) -> None:
         raise ValueError("live programming evidence cannot mutate canonical corpus")
     if data.get("publish_authorized") is not False:
         raise ValueError("live programming evidence cannot authorize publish")
-    for row in data.get("rows", []):
+    for row in data["rows"]:
+        if not isinstance(row, dict):
+            raise ValueError("invalid Interreg source row")
+        allowed = ROW_PASS_KEYS if row.get("fetch_status") == "PASS" else ROW_FAIL_KEYS
+        if set(row) != allowed:
+            raise ValueError(f"unexpected Interreg source row keys: {row.get('source_id')}")
+        if row.get("publication_effect") != "NONE":
+            raise ValueError(f"Interreg source row attempted publication: {row.get('source_id')}")
         if row.get("publish_authorized") is not False or row.get("material_fact_use") is not False:
             raise ValueError(f"unsafe source row {row.get('source_id')}")
         normalized = row.get("normalized")
@@ -404,7 +445,7 @@ def main() -> int:
     args = parser.parse_args()
 
     if args.replay_dir is not None:
-        evidence = json.loads(args.out.read_text(encoding="utf-8"))
+        evidence = _load_strict_json(args.out.read_text(encoding="utf-8"))
         count = replay_live_evidence(evidence, args.replay_dir, args.registry)
         print(json.dumps({"verified": True, "raw_source_count": count, "run_id": evidence["run_id"], "publish_authorized": False}))
         return 0
