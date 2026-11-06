@@ -117,6 +117,19 @@ def test_parse_and_reconcile():
     duplicate_session = original.replace(b"</body>", extra_header + b"</body>")
     assert duplicate_session != original
     reject(lambda: probe.parse_delegated(duplicate_session))
+    # A contradictory DR-12 session whose date label is malformed must not be
+    # silently ignored just because the original well-formed banner still matches.
+    malformed_banner = (
+        "<div>Sesiune depunere dosare de finanțare DR-12 "
+        "DATĂ ÎNCEPUT 07/10/2026 09:00:00 "
+        "DATĂ FINALĂ 03/12/2026 15:59:59</div>"
+    ).encode("utf-8")
+    conflicting_unparseable = original.replace(b"</body>", malformed_banner + b"</body>")
+    assert conflicting_unparseable != original
+    reject(lambda: probe.parse_delegated(conflicting_unparseable))
+    assert probe.reconcile(
+        {"agency": agency(), "delegated": conflicting_unparseable}, 12
+    )["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW"
     # Also accept the historical portal rendering without the date pipe.
     without_separator = original.replace(
         "| DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),

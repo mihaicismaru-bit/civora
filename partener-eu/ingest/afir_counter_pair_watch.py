@@ -27,7 +27,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v3"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v4"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -171,8 +171,13 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
     text = re.sub(r"\s+", " ", " ".join(parser.parts))
     # Delegated DR-12 session and each component must agree on their time window.
     # A conflicting/duplicated session header cannot be masked by matching cards.
+    # Multiple DR-12 session banners are conflicting evidence even if one
+    # is malformed: do not accept a single valid match and silently ignore it.
+    banner = r"\bSesiune depunere dosare de finan.are\s+DR[-–]12\b"
+    if len(re.findall(banner, text, flags=re.I)) != 1:
+        raise ValueError("delegated DR-12 session banner missing or ambiguous")
     session_headers = re.findall(
-        r"\bSesiune depunere dosare de finan.are\s+DR[-–]12\b"
+        banner +
         r"\s+DAT.\s+.NCEPUT\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})"
         r"\s*(?:\|\s*)?DAT.\s+FINAL\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})",
         text, flags=re.I,
