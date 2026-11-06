@@ -162,6 +162,27 @@ def main():
     ]:
         fail("staging/public gates must remain explicit")
 
+    # The current official seven-call feed is CLOSED. Preserve its exact
+    # normalizer contract while still admitting only a non-publishing staging
+    # receipt, even when the reconciliation happens after the call deadline.
+    closed = copy.deepcopy(evidence)
+    for row, page in zip(closed["records"], closed["pages"]):
+        row["status_label"] = "Closed"
+        row["observation_state"] = "CLOSED_CALL"
+        row["requires_reconcile"] = False
+        row["semantic_fingerprint"] = fingerprint(row)
+        page["observation_state"] = "CLOSED_CALL"
+    closed["stats"]["open_call_evidence"] = 0
+    closed["stats"]["closed_call_evidence"] = 2
+    closed_receipt = module.reconcile_live_evidence(
+        closed, reconciled_at="2026-11-06T19:00:00+00:00", minimum_calls=2
+    )
+    if (closed_receipt["stats"]["reconciled_calls"] != 2
+            or closed_receipt["publish_authorized"]
+            or any(row["observation_state"] != "CLOSED_CALL"
+                   for row in closed_receipt["records"])):
+        fail("closed official calls must remain non-publishing staging evidence")
+
     # Financial amounts must preserve the exact official integer value.
     # An intact semantic hash alone must not legalize ambiguous numerals.
     for raw, expected in (
