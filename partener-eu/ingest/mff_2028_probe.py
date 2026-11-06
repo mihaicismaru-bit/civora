@@ -34,6 +34,23 @@ FORBIDDEN_CALL_STAGES = {
 }
 # An editorial summary of parliamentary comments is not a formal EP vote.
 # Lock source identity + event dates before a watch row can enter the ledger.
+# Strict per-run receipt schema: unregistered keys cannot smuggle a call/publication
+# instruction through an otherwise valid raw/semantic replay.
+MANIFEST_KEYS = {"schema_version", "run_id", "parser_version", "observed_at",
+                 "policy", "sources", "summary"}
+ROW_KEYS = {"id", "tier", "class", "stage", "event_date", "updated_date", "url",
+            "source_family", "programme", "authority_class", "run_id",
+            "parser_version", "attempted_at_utc", "fetched_at_utc",
+            "raw_sha256", "semantic_sha256", "ok", "review_required",
+            "auto_promote_legislative_stage", "open_call_authorized",
+            "material_fact_publication_authorized", "publish_authorized",
+            "observation_state"}
+PASS_ROW_KEYS = {"health", "http_status", "final_url", "content_type",
+                 "bytes", "semantic_bytes", "raw_evidence_file",
+                 "semantic_hash_changed"}
+FAIL_ROW_KEYS = {"health", "error", "semantic_hash_changed",
+                 "last_known_semantic_sha256"}
+
 OCTOBER_STAGE_LOCKS = {
     "SRC-EU-MFF-IRISH-NEGOTIATING-BOX-20261010":
         ("PRESIDENCY_NEGOTIATING_PROPOSAL", "2026-10-10", None),
@@ -44,6 +61,26 @@ OCTOBER_STAGE_LOCKS = {
     "SRC-EU-MFF-CAP-PARTIAL-20261026":
         ("COUNCIL_PARTIAL_CAP_POSITION", "2026-10-26", "2026-10-28"),
 }
+
+
+def _unique_json_object(pairs: list[tuple[str, object]]) -> dict:
+    """Reject duplicate decoded JSON names instead of silently keeping the last."""
+    out = {}
+    for key, value in pairs:
+        if key in out:
+            raise ValueError(f"duplicate MFF evidence JSON key: {key}")
+        out[key] = value
+    return out
+
+
+def _reject_json_constant(value: str) -> None:
+    raise ValueError(f"non-finite MFF evidence JSON constant: {value}")
+
+
+def _read_json_strict(path: Path) -> dict:
+    return json.loads(path.read_text(encoding="utf-8"),
+                      object_pairs_hook=_unique_json_object,
+                      parse_constant=_reject_json_constant)
 
 
 def now() -> str:
@@ -205,8 +242,15 @@ def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
     manifest_path = evidence_dir / "manifest.json"
     if not manifest_path.is_file() or manifest_path.is_symlink():
         raise ValueError("MFF replay manifest missing or symlinked")
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    manifest = _read_json_strict(manifest_path)
+    registry = _read_json_strict(registry_path)
+    if not isinstance(manifest, dict) or set(manifest) != MANIFEST_KEYS:
+        raise ValueError("MFF replay manifest has missing or unregistered fields")
+    summary = manifest.get("summary")
+    if (not isinstance(summary, dict)
+            or set(summary) != {"total", "pass", "fail", "review_required"}
+            or any(type(value) is not int or value < 0 for value in summary.values())):
+        raise ValueError("MFF replay summary has invalid fields or counts")
     validate_registry(registry)
     sources = {src["id"]: src for src in registry["sources"]}
     rows = manifest.get("sources")
@@ -225,6 +269,10 @@ def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
     for row in rows:
         if not isinstance(row, dict):
             raise ValueError("invalid MFF replay row")
+        extras = PASS_ROW_KEYS if row.get("ok") is True else (
+            FAIL_ROW_KEYS if row.get("ok") is False else set())
+        if set(row) != ROW_KEYS | extras:
+            raise ValueError("MFF replay row has missing or unregistered fields")
         sid = row.get("id")
         if sid not in sources or sid in seen:
             raise ValueError("duplicate or unknown MFF replay source")
@@ -255,6 +303,9 @@ def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
         if not isinstance(row.get("attempted_at_utc"), str) or not row["attempted_at_utc"]:
             raise ValueError("MFF replay attempt time missing")
         if row.get("ok") is True:
+            if (type(row.get("semantic_hash_changed")) is not bool
+                    or row["semantic_hash_changed"] is not row["review_required"]):
+                raise ValueError("MFF replay semantic-change review flag mismatch")
             raw_name = sid + ".html"
             raw_path = evidence_dir / raw_name
             if (row.get("health") != "PASS"
@@ -281,7 +332,8 @@ def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
             if (row.get("health") != "FAIL"
                     or row.get("observation_state") != "PROVISIONAL_FAIL_CLOSED"
                     or row.get("review_required") is not False
-                    or not row.get("error")
+                    or row.get("semantic_hash_changed") is not False
+                    or not isinstance(row.get("error"), str) or not row["error"]
                     or row.get("fetched_at_utc") is not None
                     or row.get("raw_sha256") is not None
                     or row.get("semantic_sha256") is not None
@@ -314,7 +366,7 @@ def run(
     evidence_dir: Path | None = None,
     run_id: str | None = None,
 ) -> dict:
-    reg = json.loads(registry_path.read_text(encoding="utf-8"))
+    reg = _read_json_strict(registry_path)
     validate_registry(reg)
     old_state = json.loads(state_path.read_text(encoding="utf-8")) if state_path.exists() else {}
     previous = {x["id"]: x for x in old_state.get("sources", [])}
