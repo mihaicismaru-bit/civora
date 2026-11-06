@@ -18,7 +18,7 @@ from pathlib import Path
 import afir_ingest as transport
 
 NOTICE_URL = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
-PARSER_VERSION = "afir-dr12-monthly-quality-watch-v2"
+PARSER_VERSION = "afir-dr12-monthly-quality-watch-v3"
 # An official notice must contain one coherent monthly-stage statement.
 # A second (even malformed) announcement must not be silently discarded.
 STAGE_INTRO = re.compile(r"\bpragul\s+de\s+calitate\s+lunar\b", re.IGNORECASE)
@@ -119,6 +119,20 @@ def capture(
 
 
 
+def _strict_json_pairs(pairs: list[tuple[str, object]]) -> dict:
+    """Preserve every JSON key's uniqueness, including inside stage objects."""
+    decoded = {}
+    for key, value in pairs:
+        if key in decoded:
+            raise ValueError(f"DR-12 receipt duplicate JSON key: {key}")
+        decoded[key] = value
+    return decoded
+
+
+def _reject_nonfinite_json(token: str):
+    raise ValueError(f"DR-12 receipt non-finite JSON number: {token}")
+
+
 def replay_receipt(destination: Path) -> dict:
     """Independently replay an exact, immutable receipt; never authorize facts."""
     # Strict file set: an unexpected sidecar, symlink, or substituted manifest
@@ -131,7 +145,11 @@ def replay_receipt(destination: Path) -> dict:
     ):
         raise ValueError("DR-12 evidence directory has missing, extra or symlinked files")
     raw = (destination / "notice.raw.html").read_bytes()
-    manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
+    manifest = json.loads(
+        (destination / "manifest.json").read_text(encoding="utf-8"),
+        object_pairs_hook=_strict_json_pairs,
+        parse_constant=_reject_nonfinite_json,
+    )
     expected_fields = {
         "schema_version", "requested_url", "final_url", "fetched_at_utc",
         "raw_evidence_file", "raw_sha256", "raw_bytes", "http_status",

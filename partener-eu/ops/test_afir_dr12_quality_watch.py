@@ -135,7 +135,7 @@ def main() -> None:
     ):
         rejected(lambda ambiguous=ambiguous: watch.parse_notice(raw(ambiguous)),
                  "duplicated or contradictory")
-    assert watch.PARSER_VERSION.endswith("-v2")
+    assert watch.PARSER_VERSION.endswith("-v3")
 
     rejected(lambda: watch.parse_notice(b""))
     rejected(lambda: watch.parse_notice(b"a" * 12_000_001))
@@ -197,6 +197,30 @@ def main() -> None:
             json.dumps(unexpected, ensure_ascii=False), encoding="utf-8"
         )
         rejected(lambda: watch.replay_receipt(receipt), "unregistered fields")
+        (receipt / "manifest.json").write_bytes(original_manifest)
+
+        # Python's default JSON decoder silently keeps the last occurrence:
+        # duplicate top-level or nested stage keys are untrusted evidence.
+        # An escaped spelling is still the same JSON key after decoding.
+        baseline = original_manifest.decode("utf-8")
+        ambiguous_manifests = (
+            baseline.replace(
+                '"publish_authorized": false',
+                '"publish_authorized": false, "publish_authorized": true', 1),
+            baseline.replace(
+                '"publish_authorized": false',
+                '"publish_authorized": false, "\\u0070ublish_authorized": true', 1),
+            baseline.replace(
+                '"minimum_quality_points": 45',
+                '"minimum_quality_points": 45, "minimum_quality_points": 20', 1),
+            baseline.replace(
+                f'"raw_bytes": {len(raw())}',
+                '"raw_bytes": NaN', 1),
+        )
+        for untrusted in ambiguous_manifests:
+            assert untrusted != baseline
+            (receipt / "manifest.json").write_text(untrusted, encoding="utf-8")
+            rejected(lambda: watch.replay_receipt(receipt), "JSON")
         (receipt / "manifest.json").write_bytes(original_manifest)
 
         altered_schema = copy.deepcopy(record)
