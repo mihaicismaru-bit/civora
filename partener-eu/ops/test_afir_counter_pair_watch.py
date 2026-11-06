@@ -130,6 +130,30 @@ def test_parse_and_reconcile():
     assert probe.reconcile(
         {"agency": agency(), "delegated": conflicting_unparseable}, 12
     )["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW"
+    # A valid first count/amount/date must not mask a second conflicting
+    # material label in the SAME delegated DR-12 card. All numbers are
+    # synthetic hermetic values and never funding facts.
+    for original_text, duplicate_text in (
+        ("NUMĂR DOSARE DEPUSE 65", "NUMĂR DOSARE DEPUSE 65 NUMĂR DOSARE DEPUSE 999"),
+        ("ALOCARE FINANCIARĂ 84794823.50000",
+         "ALOCARE FINANCIARĂ 84794823.50000 ALOCARE FINANCIARĂ 1.00000"),
+        ("FONDURI DISPONIBILE *2 -",
+         "FONDURI DISPONIBILE *2 - FONDURI DISPONIBILE *2 999.00000"),
+        ("DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59",
+         "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59 "
+         "DATĂ ȘI ORĂ ÎNCHIDERE 03/12/2026 15:59:59"),
+        ("Componenta SECTOR ZOOTEHNIC",
+         "Componenta SECTOR ZOOTEHNIC Componenta ALTE SECTOARE"),
+    ):
+        altered = original.replace(
+            original_text.encode("utf-8"), duplicate_text.encode("utf-8"), 1
+        )
+        assert altered != original
+        reject(lambda altered=altered: probe.parse_delegated(altered))
+        assert probe.reconcile(
+            {"agency": agency(), "delegated": altered}, 12
+        )["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW"
+
     # Also accept the historical portal rendering without the date pipe.
     without_separator = original.replace(
         "| DATĂ FINAL 02/12/2026 15:59:59".encode("utf-8"),
