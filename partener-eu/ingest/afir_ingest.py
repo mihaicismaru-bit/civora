@@ -169,6 +169,11 @@ def fetch(url, timeout=25, sleep=time.sleep):
                 status = getattr(r, "status", 200)
                 if status != 200:
                     raise ValueError("AFIR source returned non-success HTTP status")
+                # Servers can ignore Accept-Encoding: identity. Compressed bytes
+                # must never be fingerprinted or parsed as AFIR original HTML/PDF.
+                encoding = str(r.headers.get("Content-Encoding") or "identity").strip().lower()
+                if encoding != "identity":
+                    raise ValueError("AFIR official source returned unsupported encoded body")
                 # Read one byte beyond the permitted body, otherwise a
                 # truncated document could be fingerprinted as complete.
                 data = r.read(12_000_001)
