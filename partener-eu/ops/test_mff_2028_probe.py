@@ -206,6 +206,56 @@ def run_tests():
             else:
                 raise AssertionError(f"MFF replay must reject forged {mutation}")
             (evidence / "test-first" / "manifest.json").write_bytes(original_manifest)
+        # A replay must not silently accept duplicate decoded JSON keys, NaN,
+        # or additional instructions injected into a verified evidence envelope.
+        raw_manifest = original_manifest.decode("utf-8").strip()
+        poisoned_json = (
+            '{"run_id":"forged",' + raw_manifest[1:],
+            '{"\\u0072un_id":"forged",' + raw_manifest[1:],
+            raw_manifest.replace('"review_required":0', '"review_required":NaN', 1),
+        )
+        for payload in poisoned_json:
+            (evidence / "test-first" / "manifest.json").write_text(payload, encoding="utf-8")
+            try:
+                probe.replay_evidence(evidence / "test-first", reg)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("MFF replay accepted duplicate/non-finite JSON")
+            (evidence / "test-first" / "manifest.json").write_bytes(original_manifest)
+        for field, target in (
+            ("open_call_status", "row"),
+            ("publication_effect", "manifest"),
+            ("OPEN_CALL", "summary"),
+            ("review_required", "boolean_count"),
+        ):
+            injected = json.loads(original_manifest)
+            if target == "row":
+                injected["sources"][0][field] = "OPEN_CALL"
+            elif target == "manifest":
+                injected[field] = "OPEN_CALL"
+            elif target == "summary":
+                injected["summary"][field] = 1
+            else:
+                injected["summary"][field] = False  # bool is not an int count
+            (evidence / "test-first" / "manifest.json").write_text(json.dumps(injected), encoding="utf-8")
+            try:
+                probe.replay_evidence(evidence / "test-first", reg)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"MFF replay accepted injected {field}/{target}")
+            (evidence / "test-first" / "manifest.json").write_bytes(original_manifest)
+        injected = json.loads(original_manifest)
+        injected["sources"][0]["semantic_hash_changed"] = True
+        (evidence / "test-first" / "manifest.json").write_text(json.dumps(injected), encoding="utf-8")
+        try:
+            probe.replay_evidence(evidence / "test-first", reg)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("MFF replay accepted unreconciled semantic-change flag")
+        (evidence / "test-first" / "manifest.json").write_bytes(original_manifest)
         stray = evidence / "test-first" / "unregistered.html"
         stray.write_bytes(saved_html)
         try:
