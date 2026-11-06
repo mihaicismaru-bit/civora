@@ -165,6 +165,53 @@ def main():
     bad["records"][1]["semantic_fingerprint"] = fingerprint(bad["records"][1])
     expect_fail(bad, "deadline before publication")
 
+    # Two official EEA CSF URLs have historically shown conflicting OPEN and
+    # CLOSED labels for the same 8 October deadline. A stale OPEN after that
+    # date cannot become CURRENT material-call evidence or enter staging.
+    historical_open = copy.deepcopy(evidence)
+    try:
+        module.reconcile_live_evidence(
+            historical_open, reconciled_at="2026-11-06T19:00:00+00:00",
+            minimum_calls=2,
+        )
+    except ValueError as exc:
+        if "stale open/forthcoming status past official submission date" not in str(exc):
+            fail(f"historical OPEN wrong failure: {exc}")
+    else:
+        fail("historical OPEN accepted after official deadline")
+
+    stale_capture = copy.deepcopy(evidence)
+    stale_capture["fetched_at"] = "2026-11-06T17:00:00+00:00"
+    for row in stale_capture["records"]:
+        row["fetched_at"] = stale_capture["fetched_at"]
+    expect_fail(stale_capture, "stale official OPEN captured after deadline")
+
+    mismatched_provenance = copy.deepcopy(evidence)
+    mismatched_provenance["records"][0]["fetched_at"] = "2026-08-26T17:00:00+00:00"
+    expect_fail(mismatched_provenance, "call-specific acquisition time differs from envelope")
+    future_reconciliation = copy.deepcopy(evidence)
+    try:
+        module.reconcile_live_evidence(
+            future_reconciliation, reconciled_at="2026-08-26T18:30:00+00:00",
+            minimum_calls=2,
+        )
+    except ValueError as exc:
+        if "cannot predate" not in str(exc):
+            fail(f"retrodated reconciliation wrong failure: {exc}")
+    else:
+        fail("retrodated reconciliation accepted")
+
+    for unsafe_url in (
+        CALL1.replace("https://eeagrants.org/", "https://user@eeagrants.org/"),
+        CALL1.replace("https://eeagrants.org/", "https://eeagrants.org:8443/"),
+    ):
+        try:
+            module._official_call_url(unsafe_url, 1)
+        except ValueError:
+            pass
+        else:
+            fail(f"unsafe reconciliation authority accepted: {unsafe_url}")
+
     bad = copy.deepcopy(evidence)
     bad["errors"] = [{"url": CALL2, "error": "synthetic"}]
     bad["stats"]["errors"] = 1
