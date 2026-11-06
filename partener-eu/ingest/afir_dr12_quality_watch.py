@@ -120,9 +120,31 @@ def capture(
 
 
 def replay_receipt(destination: Path) -> dict:
-    """Independently replay immutable original bytes; never authorize public facts."""
+    """Independently replay an exact, immutable receipt; never authorize facts."""
+    # Strict file set: an unexpected sidecar, symlink, or substituted manifest
+    # must not pass as the original official-source receipt.
+    required_files = {"notice.raw.html", "manifest.json"}
+    if (
+        destination.is_symlink() or not destination.is_dir()
+        or {entry.name for entry in destination.iterdir()} != required_files
+        or any(entry.is_symlink() or not entry.is_file() for entry in destination.iterdir())
+    ):
+        raise ValueError("DR-12 evidence directory has missing, extra or symlinked files")
     raw = (destination / "notice.raw.html").read_bytes()
     manifest = json.loads((destination / "manifest.json").read_text(encoding="utf-8"))
+    expected_fields = {
+        "schema_version", "requested_url", "final_url", "fetched_at_utc",
+        "raw_evidence_file", "raw_sha256", "raw_bytes", "http_status",
+        "content_type", "parser_version", "run_id", "run_attempt",
+        "programme", "source_family", "authority_class",
+        "source_publication_date", "observation_state", "stage_kind",
+        "stages", "exact_current_call_identifier_verified",
+        "open_call_authorized", "eligibility_change_authorized",
+        "material_fact_action", "publish_authorized",
+        "distribution_authorized",
+    }
+    if set(manifest) != expected_fields or manifest.get("schema_version") != "1.0":
+        raise ValueError("DR-12 receipt schema changed or includes unregistered fields")
     expected = {
         "requested_url": NOTICE_URL,
         "final_url": NOTICE_URL,
