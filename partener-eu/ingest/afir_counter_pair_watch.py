@@ -27,7 +27,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v2"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v3"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -169,8 +169,17 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
     parser = TextOnly()
     parser.feed(raw.decode("utf-8", "replace"))
     text = re.sub(r"\s+", " ", " ".join(parser.parts))
-    if not re.search(r"Sesiune depunere dosare de finan.are\s+DR[-–]12\b", text, re.I):
-        raise ValueError("delegated current DR-12 session heading missing")
+    # Delegated DR-12 session and each component must agree on their time window.
+    # A conflicting/duplicated session header cannot be masked by matching cards.
+    session_headers = re.findall(
+        r"\bSesiune depunere dosare de finan.are\s+DR[-–]12\b"
+        r"\s+DAT.\s+.NCEPUT\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})"
+        r"\s+DAT.\s+FINAL\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})",
+        text, flags=re.I,
+    )
+    if len(session_headers) != 1:
+        raise ValueError("delegated DR-12 session header missing, duplicate or malformed")
+    session_open, session_close = session_headers[0]
     chunks = re.split(r"\bDESCRIERE\s+ALOCARE\b", text, flags=re.I)
     found = {}
     for chunk in chunks[1:]:
@@ -206,6 +215,8 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
             raise ValueError("delegated DR-12 dates/allocation/submitted-value/count/funds not parseable")
         funds_raw = funds.group(1).strip().upper()
         amount = "0.00" if funds_raw == "FONDURI EPUIZATE" else parse_delegated_amount(funds_raw)
+        if opened.group(1) != session_open or closed.group(1) != session_close:
+            raise ValueError("delegated DR-12 component window differs from session header")
         day, month, year = closed.group(1)[:10].split("/")
         open_day, open_month, open_year = opened.group(1)[:10].split("/")
         found[sector] = {
