@@ -174,7 +174,7 @@ def parse_delegated(raw: bytes) -> dict[str, dict]:
     session_headers = re.findall(
         r"\bSesiune depunere dosare de finan.are\s+DR[-–]12\b"
         r"\s+DAT.\s+.NCEPUT\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})"
-        r"\s+DAT.\s+FINAL\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})",
+        r"\s*(?:\|\s*)?DAT.\s+FINAL\s+(\d{2}/\d{2}/\d{4}\s+\d{2}:\d{2}:\d{2})",
         text, flags=re.I,
     )
     if len(session_headers) != 1:
