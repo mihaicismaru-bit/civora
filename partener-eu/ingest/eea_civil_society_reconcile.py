@@ -81,7 +81,13 @@ def _official_call_url(value: Any, call_number: int) -> str:
         _fail("authority_url: non-empty string required")
     parsed = urlparse(value)
     host = (parsed.hostname or "").lower()
-    if parsed.scheme != "https" or host not in OFFICIAL_HOSTS or parsed.username or parsed.password:
+    if (
+        parsed.scheme != "https"
+        or host not in OFFICIAL_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.port not in (None, 443)
+    ):
         _fail(f"authority_url: non-official EEA URL {value!r}")
     match = CALL_PATH_RE.match(parsed.path or "")
     if not match or int(match.group("number")) != call_number:
@@ -154,6 +160,24 @@ def reconcile_live_evidence(
     if stats.get("errors") or stats.get("conflicts") or stats.get("unknown_evidence"):
         _fail(f"unresolved live evidence stats: {stats}")
 
+    # A page that still says OPEN after its explicit official submission date
+    # is historical/contradictory evidence, not an admissible CURRENT open call.
+    # Compare calendar dates conservatively: we do not invent a closure hour.
+    def evidence_time(value: Any, field: str) -> dt.datetime:
+        try:
+            parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{field}: invalid timestamp") from exc
+        if parsed.tzinfo is None:
+            _fail(f"{field}: timezone-aware timestamp required")
+        return parsed.astimezone(dt.timezone.utc)
+
+    source_time = evidence_time(evidence.get("fetched_at"), "fetched_at")
+    reconciled_at = reconciled_at or _utc_now()
+    reconciliation_time = evidence_time(reconciled_at, "reconciled_at")
+    if reconciliation_time < source_time:
+        _fail("reconciliation cannot predate official evidence acquisition")
+
     page_by_id: dict[str, dict[str, Any]] = {}
     for page in pages:
         if not isinstance(page, dict):
@@ -181,6 +205,9 @@ def reconcile_live_evidence(
         if int(str(record.get("call_number") or "0")) != call_number:
             _fail(f"{call_id}: call_number mismatch")
 
+        if (record.get("fetched_at") != evidence.get("fetched_at")
+                or record.get("run_id") != evidence.get("run_id")):
+            _fail(f"{call_id}: source capture timestamp/run mismatch")
         if not record.get("authority_url_verified"):
             _fail(f"{call_id}: exact authority URL readback not verified")
         authority_url = _official_call_url(record.get("authority_url"), call_number)
@@ -215,6 +242,11 @@ def reconcile_live_evidence(
             _fail(f"{call_id}: publication date after submission deadline")
         if questions_deadline > deadline:
             _fail(f"{call_id}: questions deadline after submission deadline")
+        if state in {"OPEN_CALL", "FORTHCOMING_CALL"} and (
+            source_time.date() > dt.date.fromisoformat(deadline)
+            or reconciliation_time.date() > dt.date.fromisoformat(deadline)
+        ):
+            _fail(f"{call_id}: stale open/forthcoming status past official submission date")
 
         budget = _parse_eur(record.get("budget_candidate"), f"{call_id}.budget")
         grant_from = _parse_eur(record.get("grant_from_candidate"), f"{call_id}.grant_from")
@@ -264,7 +296,6 @@ def reconcile_live_evidence(
     if set(page_by_id) != seen:
         _fail("page evidence contains identities not represented in normalized records")
 
-    reconciled_at = reconciled_at or _utc_now()
     source_hash = _sha256(_canonical_json(evidence))
     batch_semantic_hash = _sha256(_canonical_json([
         [row["call_identifier"], row["semantic_fingerprint"]] for row in reconciled_records
