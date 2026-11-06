@@ -19,6 +19,7 @@ import sys
 import urllib.parse
 import urllib.request
 from decimal import Decimal, InvalidOperation
+from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -27,10 +28,11 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v5"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v6"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
+MAX_CACHE_SKEW_SECONDS = 300
 HEADERS = {
     "User-Agent": "PARTENER.EU-AFIR-Paired-Source-Health/1.0",
     "Accept": "text/html,application/xhtml+xml",
@@ -321,6 +323,64 @@ def reconcile(raws: dict[str, bytes], span_seconds: float) -> dict:
     }
 
 
+def cache_health(source_meta: dict[str, dict]) -> dict:
+    """Assess response-cache headers without inventing a source freshness claim.
+
+    Receipt capture times reflect when our client read the HTTP response, NOT
+    necessarily when the official server generated its cached body. Preserve
+    stale or malformed server headers as review evidence instead of treating a
+    fast paired fetch as semantically contemporaneous.
+    """
+    findings = {}
+    for source in URLS:
+        meta = source_meta[source]
+        reasons = []
+        age = meta.get("age_header")
+        if age is not None:
+            if not isinstance(age, str) or not re.fullmatch(r"\\d+", age.strip()):
+                reasons.append("INVALID_HTTP_AGE")
+            elif int(age.strip()) > MAX_CACHE_SKEW_SECONDS:
+                reasons.append("HTTP_AGE_EXCEEDS_300_SECONDS")
+        server_date = meta.get("date_header")
+        if server_date is not None:
+            try:
+                if not isinstance(server_date, str):
+                    raise ValueError("non-string HTTP Date")
+                parsed = parsedate_to_datetime(server_date)
+                if parsed.tzinfo is None:
+                    raise ValueError("timezone-free HTTP Date")
+                delta = abs((timestamp(meta["fetched_at_utc"]) -
+                             parsed.astimezone(dt.timezone.utc)).total_seconds())
+                if delta > MAX_CACHE_SKEW_SECONDS:
+                    reasons.append("HTTP_DATE_SKEW_EXCEEDS_300_SECONDS")
+            except (TypeError, ValueError, OverflowError, IndexError):
+                reasons.append("INVALID_HTTP_DATE")
+        findings[source] = {
+            "cache_status": "REVIEW_REQUIRED" if reasons else
+                            "UNKNOWN" if age is None and server_date is None else
+                            "NO_STALENESS_INDICATOR",
+            "reasons": reasons,
+        }
+    return {"review_required": any(v["reasons"] for v in findings.values()),
+            "sources": findings}
+
+
+def reconcile_with_cache(raws: dict[str, bytes], span: float, sources: dict[str, dict]) -> dict:
+    normalized = reconcile(raws, span)
+    health = cache_health(sources)
+    normalized["cache_health"] = health
+    # Preserve the higher-priority parser/divergence diagnosis. A cached
+    # otherwise-matching pair is never presented as a fresh matched pair.
+    if health["review_required"] and normalized["observation_state"] in (
+        "SOURCE_COUNTER_PAIR_MATCH_REVIEW",
+        "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW",
+        "SOURCE_COUNTER_NON_FUND_AMOUNTS_WITHHELD_REVIEW",
+    ):
+        normalized["pre_cache_observation_state"] = normalized["observation_state"]
+        normalized["observation_state"] = "SOURCE_COUNTER_CACHE_FRESHNESS_REVIEW"
+    return normalized
+
+
 def capture(fetched: dict[str, dict], destination: Path, run_id: str, run_attempt: str = "1") -> dict:
     if not run_id or not run_id.isdigit() or not run_attempt.isdigit() or destination.exists():
         raise ValueError("counter receipt must be new and run-scoped")
@@ -352,7 +412,7 @@ def capture(fetched: dict[str, dict], destination: Path, run_id: str, run_attemp
         }
     stamps = [timestamp(sources[s]["fetched_at_utc"]) for s in URLS]
     elapsed = (max(stamps) - min(stamps)).total_seconds()
-    normalized = reconcile(raw_by_source, elapsed)
+    normalized = reconcile_with_cache(raw_by_source, elapsed, sources)
     manifest = {
         "schema_version": "1.0", "run_id": run_id, "run_attempt": run_attempt,
         "parser_version": PARSER_VERSION, "programme": "PS_PAC_2023_2027/DR12",
@@ -420,7 +480,7 @@ def replay(destination: Path) -> dict:
             raise ValueError("counter raw proof changed")
         raws[source] = raw
     elapsed = (max(stamps) - min(stamps)).total_seconds()
-    expected = reconcile(raws, elapsed)
+    expected = reconcile_with_cache(raws, elapsed, manifest["sources"])
     if expected != manifest.get("reconciliation") or expected["observation_state"] != manifest.get("observation_state"):
         raise ValueError("counter semantic replay changed")
     return {"verified": True, "observation_state": expected["observation_state"],
