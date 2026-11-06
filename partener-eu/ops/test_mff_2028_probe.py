@@ -174,6 +174,66 @@ def run_tests():
         assert manifest["policy"] == "ACQUISITION_EVIDENCE_ONLY_NON_AUTHORIZING"
         assert manifest["sources"][0]["raw_sha256"] == row["raw_sha256"]
 
+        # An original + a manifest are not enough: independently replay before
+        # the result can replace the previous source-health/LKG snapshot.
+        assert probe.replay_evidence(evidence / "test-first", reg) == first["summary"]
+        saved_html = (evidence / "test-first" / row["raw_evidence_file"]).read_bytes()
+        (evidence / "test-first" / row["raw_evidence_file"]).write_bytes(saved_html + b"tampered")
+        try:
+            probe.replay_evidence(evidence / "test-first", reg)
+        except ValueError as exc:
+            assert "SHA mismatch" in str(exc)
+        else:
+            raise AssertionError("MFF replay must reject tampered originals")
+        (evidence / "test-first" / row["raw_evidence_file"]).write_bytes(saved_html)
+
+        original_manifest = (evidence / "test-first" / "manifest.json").read_bytes()
+        for mutation in ("adoption", "cross-authority", "counter", "duplicate"):
+            forged = json.loads(original_manifest)
+            if mutation == "adoption":
+                forged["sources"][0]["stage"] = "ADOPTED"
+            elif mutation == "cross-authority":
+                forged["sources"][0]["final_url"] = "https://fed.mai.gov.ro/in/eu-2028-2034/"
+            elif mutation == "counter":
+                forged["summary"]["pass"] += 1
+            else:
+                forged["sources"].append(dict(forged["sources"][0]))
+            (evidence / "test-first" / "manifest.json").write_text(json.dumps(forged), encoding="utf-8")
+            try:
+                probe.replay_evidence(evidence / "test-first", reg)
+            except ValueError:
+                pass
+            else:
+                raise AssertionError(f"MFF replay must reject forged {mutation}")
+            (evidence / "test-first" / "manifest.json").write_bytes(original_manifest)
+        stray = evidence / "test-first" / "unregistered.html"
+        stray.write_bytes(saved_html)
+        try:
+            probe.replay_evidence(evidence / "test-first", reg)
+        except ValueError as exc:
+            assert "orphaned" in str(exc)
+        else:
+            raise AssertionError("MFF replay must reject orphaned originals")
+        stray.unlink()
+        assert probe.replay_evidence(evidence / "test-first", reg) == first["summary"]
+
+        # A replay error cannot advance the persisted last-known health state.
+        frozen_state_before_replay = state.read_bytes()
+        original_replay = probe.replay_evidence
+        try:
+            def reject_replay(*_args, **_kwargs):
+                raise ValueError("synthetic replay integrity failure")
+            probe.replay_evidence = reject_replay
+            try:
+                probe.run(reg, state, evidence / "test-replay-failure", "test-replay-failure")
+            except ValueError as exc:
+                assert "integrity failure" in str(exc)
+            else:
+                raise AssertionError("MFF health state advanced without replay")
+        finally:
+            probe.replay_evidence = original_replay
+        assert state.read_bytes() == frozen_state_before_replay
+
         # An accidental retry against an existing evidence path cannot overwrite
         # the original source, receipt manifest or committed health snapshot.
         frozen_manifest = (evidence / "test-first" / "manifest.json").read_bytes()
