@@ -88,7 +88,7 @@ def test_parse_and_reconcile():
     assert probe.reconcile({"agency": agency(), "delegated": b"<html>DR-12</html>"}, 12)["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW"
     assert probe.reconcile({"agency": agency(other=580), "delegated": delegated()}, 12)["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
     reject(lambda: probe.parse_agency(agency().replace(b"</table>", agency()[agency().find(b"<tr><td>DR-12"):agency().find(b"</table>")] + b"</table>")))
-    reject(lambda: probe.parse_delegated(delegated().replace(b"NUMĂR", b"COUNT")))
+    reject(lambda: probe.parse_delegated(delegated().replace("NUMĂR".encode("utf-8"), b"COUNT")))
     reject(lambda: probe.parse_delegated(delegated().replace(b"ALTE SECTOARE", b"UNKNOWN COMPONENT")))
 
 
