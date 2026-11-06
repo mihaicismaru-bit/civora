@@ -10,7 +10,9 @@ on:
       - 'partener-eu/ingest/afir_ingest.py'
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
       - 'partener-eu/ingest/afir_dr12_quality_watch.py'
+      - 'partener-eu/ingest/afir_counter_pair_watch.py'
       - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
+      - 'partener-eu/ops/test_afir_counter_pair_watch.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
@@ -40,7 +42,9 @@ on:
       - 'partener-eu/ingest/afir_ingest.py'
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
       - 'partener-eu/ingest/afir_dr12_quality_watch.py'
+      - 'partener-eu/ingest/afir_counter_pair_watch.py'
       - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
+      - 'partener-eu/ops/test_afir_counter_pair_watch.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
@@ -96,6 +100,7 @@ jobs:
         run: |
           python partener-eu/ops/test_afir_live_funds.py
           python partener-eu/ops/test_afir_dr12_quality_watch.py
+          python partener-eu/ops/test_afir_counter_pair_watch.py
           python partener-eu/ops/test_afir_selection_results_acquire.py
           python partener-eu/ops/test_afir_solar_aggregate_observation.py
           python partener-eu/ingest/build_afir_material_resolution_queue.py
@@ -123,6 +128,30 @@ jobs:
         with:
           name: afir-dr12-quality-pr-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/afir-dr12-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: PR-only paired AFIR counter original capture and review-only replay
+        shell: bash
+        env:
+          PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR: ${{ runner.temp }}/afir-counter-pair-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_counter_pair_watch.py
+          code=$?
+          set -e
+          if [ "$code" -eq 2 ]; then
+            echo '::warning title=AFIR counter pair unavailable::Both original counters required before comparison; public facts held.'
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          else
+            python partener-eu/ingest/afir_counter_pair_watch.py --replay-dir "$PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR"
+          fi
+      - name: Preserve PR-only paired original counters (non-authorizing)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-counter-pair-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-counter-pair-pr-${{ github.run_id }}-${{ github.run_attempt }}/
           retention-days: 7
           if-no-files-found: warn
       - name: PR-only original AFIR selection source probe (non-authorizing)
@@ -236,6 +265,30 @@ jobs:
         with:
           name: afir-dr12-quality-raw-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/partener-afir-dr12-quality/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Capture AFIR and delegated application counters in the same run
+        shell: bash
+        env:
+          PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR: ${{ runner.temp }}/partener-afir-counter-pair
+        run: |
+          set +e
+          python partener-eu/ingest/afir_counter_pair_watch.py
+          code=$?
+          set -e
+          if [ "$code" -eq 2 ]; then
+            echo 'Counter pair unavailable: preserve official LKG and require source-health review.'
+          elif [ "$code" -ne 0 ]; then
+            exit "$code"
+          else
+            python partener-eu/ingest/afir_counter_pair_watch.py --replay-dir "$PARTENER_AFIR_COUNTER_PAIR_EVIDENCE_DIR"
+          fi
+      - name: Preserve paired AFIR counter originals and source-health review evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-counter-pair-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-counter-pair/
           retention-days: 14
           if-no-files-found: warn
       - name: Upload official AFIR DR-14/DR-18 original notice (non-authorizing)
