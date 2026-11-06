@@ -102,7 +102,10 @@ def _load_strict_json(raw: str) -> Any:
             obj[key] = value
         return obj
 
-    return json.loads(raw, object_pairs_hook=unique_pairs)
+    def reject_nonfinite(token: str) -> None:
+        raise ValueError(f"non-finite Interreg JSON number: {token}")
+
+    return json.loads(raw, object_pairs_hook=unique_pairs, parse_constant=reject_nonfinite)
 
 
 def _load_registry(path: Path) -> dict[str, Any]:
@@ -349,8 +352,8 @@ def replay_live_evidence(
     rows = evidence.get("rows")
     if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
         raise ValueError("invalid Interreg evidence rows")
-    if not raw_dir.is_dir():
-        raise ValueError("immutable Interreg raw evidence directory missing")
+    if raw_dir.is_symlink() or not raw_dir.is_dir():
+        raise ValueError("immutable Interreg raw evidence directory missing or symlinked")
     registered = {
         str(source.get("id")): source
         for source in _programming_sources(_load_registry(registry_path))
