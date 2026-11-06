@@ -18,7 +18,11 @@ from pathlib import Path
 import afir_ingest as transport
 
 NOTICE_URL = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
-PARSER_VERSION = "afir-dr12-monthly-quality-watch-v1"
+PARSER_VERSION = "afir-dr12-monthly-quality-watch-v2"
+# An official notice must contain one coherent monthly-stage statement.
+# A second (even malformed) announcement must not be silently discarded.
+STAGE_INTRO = re.compile(r"\bpragul\s+de\s+calitate\s+lunar\b", re.IGNORECASE)
+MAX_STAGE_SPAN = 480
 STAGE_PATTERN = re.compile(
     r"pragul\s+de\s+calitate\s+lunar.*?"
     r"\b80\s+de\s+puncte\b.*?"
@@ -43,8 +47,13 @@ def parse_notice(raw: bytes) -> list[dict]:
     text = transport.clean(" ".join(parser.text))
     if not re.search(r"\bDR\s*[-–]\s*12\b", text, re.IGNORECASE):
         raise ValueError("official DR-12 intervention identity missing")
-    if not STAGE_PATTERN.search(text):
-        raise ValueError("AFIR DR-12 monthly stages missing or contradictory")
+    intros = list(STAGE_INTRO.finditer(text))
+    match = STAGE_PATTERN.search(text)
+    # Never stitch 80 points from one announcement to 45 points in another,
+    # or accept a second conflicting/duplicate monthly-stage announcement.
+    if (len(intros) != 1 or match is None or match.start() != intros[0].start()
+            or match.end() - match.start() > MAX_STAGE_SPAN):
+        raise ValueError("AFIR DR-12 monthly stages missing, duplicated or contradictory")
     return [dict(stage, components=["ZOOTEHNIC", "VEGETAL"]) for stage in STAGES]
 
 
