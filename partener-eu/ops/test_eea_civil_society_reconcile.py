@@ -277,6 +277,27 @@ def main():
         if field == "raw_hash":
             bad["records"][0][field] = value
         expect_fail(bad, f"invalid raw page {field}")
+    # Provenance must bind the exact HTML media type in both the index
+    # and the call page, even when all other hashes and semantic fields agree.
+    for field in ("source_index", "pages"):
+        for invalid in (
+            "application/json; note=text/html",
+            "text/html-spoofed",
+            "application/x-application/xhtml+xml",
+        ):
+            bad = copy.deepcopy(evidence)
+            target = bad["source_index"] if field == "source_index" else bad["pages"][0]
+            target["content_type"] = invalid
+            expect_fail(bad, f"spoofed {field} MIME {invalid}")
+    valid_xhtml = copy.deepcopy(evidence)
+    valid_xhtml["source_index"]["content_type"] = "application/xhtml+xml; charset=utf-8"
+    valid_xhtml["pages"][0]["content_type"] = "application/xhtml+xml; charset=utf-8"
+    receipt = module.reconcile_live_evidence(
+        valid_xhtml, minimum_calls=2, reconciled_at="2026-08-27T18:30:00+00:00"
+    )
+    if not receipt["ready_for_staging"] or receipt["publish_authorized"]:
+        fail("valid official XHTML must remain staging-only")
+
     bad = copy.deepcopy(evidence)
     bad["source_index"]["url"] = "https://example.com/en/eea-civil-society-fund-romania/calls"
     expect_fail(bad, "non-official index")
