@@ -17,6 +17,7 @@ def _registry(path: Path) -> None:
                 "sources": [
                     {
                         "id": "SRC-INTERREG-ROHU",
+                        "owner": "Interreg Romania-Hungary Joint Secretariat",
                         "tier": "T1",
                         "url": "https://interreg-rohu.eu/en/",
                         "programmes": ["Interreg Romania-Hungary 2028-2034"],
@@ -26,6 +27,7 @@ def _registry(path: Path) -> None:
                     },
                     {
                         "id": "SRC-INTERREG-ROMD-2028-2034",
+                        "owner": "Interreg Romania-Moldova Joint Secretariat",
                         "tier": "T1",
                         "url": "https://ro-md.net/en/news-2021-2027/public-consultation-on-the-future-interreg-romania-moldova-chapter-2028-2034",
                         "programmes": ["Interreg Romania-Republic of Moldova 2028-2034"],
