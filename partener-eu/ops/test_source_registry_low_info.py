@@ -43,4 +43,59 @@ try:
 finally:
     module.TASK_DIR = original_task_dir
 
+# Official source health may not hash a successful-looking truncated HTTP body.
+# Exercise the real fetch_once transport with synthetic in-memory responses.
+class _Response:
+    status = 200
+
+    def __init__(self, payload: bytes, *, length: str | None = None, encoding: str | None = None):
+        self.payload = payload
+        self.headers = {"content-type": "text/html; charset=utf-8"}
+        if length is not None:
+            self.headers["content-length"] = length
+        if encoding is not None:
+            self.headers["content-encoding"] = encoding
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def read(self, limit: int) -> bytes:
+        return self.payload[:limit]
+
+    def geturl(self):
+        return "https://official.example.invalid/evidence"
+
+
+original_urlopen = module.urllib.request.urlopen
+try:
+    good = b"<html><body>" + b"Official programme evidence " * 400 + b"</body></html>"
+    def probe(response):
+        module.urllib.request.urlopen = lambda *_a, **_kw: response
+        return module.fetch_once("https://official.example.invalid/evidence")
+
+    healthy = probe(_Response(good, length=str(len(good)), encoding="identity"))
+    assert healthy["ok"] is True
+    assert healthy["bytes"] == len(good)
+    assert healthy["content_quality_ok"] is True
+
+    incomplete_cases = (
+        ("oversized", _Response(b"x" * (module.MAX_SOURCE_BYTES + 10)), "oversized"),
+        ("short", _Response(good, length=str(len(good) + 1)), "Content-Length"),
+        ("long", _Response(good, length=str(len(good) - 1)), "Content-Length"),
+        ("bad length", _Response(good, length="invalid"), "Content-Length"),
+        ("gzip", _Response(good, encoding="gzip"), "Content-Encoding"),
+    )
+    for label, response, expected in incomplete_cases:
+        try:
+            probe(response)
+        except ValueError as exc:
+            assert expected in str(exc), (label, exc)
+        else:
+            raise AssertionError(f"incomplete/unverifiable source marked healthy: {label}")
+finally:
+    module.urllib.request.urlopen = original_urlopen
+
 print("PASS source registry low-information regression")
