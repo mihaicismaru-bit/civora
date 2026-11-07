@@ -176,6 +176,13 @@ def test_visible_html_evidence_only():
         ('<div style="display:none">', '</div>'),
         ('<div style="display:block" style="visibility:hidden">', '</div>'),
         ('<div style="opacity:0">', '</div>'),
+        ('<div style="opacity:0!important">', '</div>'),
+        ('<div style="opacity:0.0 ! important;display:block">', '</div>'),
+        ('<div style="content-visibility:hidden">', '</div>'),
+        ('<div popover>', '</div>'),
+        ('<div popover="manual">', '</div>'),
+        ('<textarea>', '</textarea>'),
+        ('<canvas>', '</canvas>'),
         ('<dialog>', '</dialog>'),
         ('<details>', '</details>'),
         ('<datalist>', '</datalist>'),
@@ -216,6 +223,14 @@ def test_visible_html_evidence_only():
     )
     if normalized is None or normalized["observation_state"] != "UNKNOWN":
         fail("ambiguous status must propagate fail-closed through adapter")
+
+    # Visibly rendered, partially transparent editorial prose remains evidence.
+    partially_visible = (
+        b'<html><body><h1>Call #1 Valid</h1>'
+        b'<div style="opacity:0.4">Call for projects Open</div></body></html>'
+    )
+    if module.parse_call_page(partially_visible, authority_url=CALL1)["status"] != "Open":
+        fail("partially transparent visible source prose was incorrectly suppressed")
 
     visible_details = (
         b'<html><body><h1>Call #1 Valid</h1>'
