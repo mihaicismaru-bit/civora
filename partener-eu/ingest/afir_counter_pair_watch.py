@@ -28,7 +28,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v9"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v10"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -124,23 +124,82 @@ def acquire(source: str) -> dict:
             "source_cache_control": res.headers.get("Cache-Control"),
         }
 
-
 class TextOnly(HTMLParser):
+    """Extract server-visible evidence; hidden DOM is not an official counter.
+
+    This is deliberately conservative: a hidden or inert DR-12 card may not
+    supply a missing session, override a visible counter or poison its
+    duplicate detection. External stylesheet visibility remains unproven and
+    cannot be used as evidence to authorize any material publication.
+    """
+
+    VOID_TAGS = frozenset((
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr",
+    ))
+    INERT_TAGS = frozenset((
+        "head", "script", "style", "template", "noscript", "textarea",
+        "canvas", "svg", "math", "iframe", "object",
+    ))
+    HIDDEN_CLASSES = frozenset((
+        "d-none", "hidden", "invisible", "visually-hidden", "sr-only",
+    ))
+
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.parts = []
-        self.skip = 0
+        self.stack = []
+        self.hidden_depth = 0
+
+    @classmethod
+    def element_hidden(cls, tag, attrs):
+        fields = dict(attrs)
+        if tag in cls.INERT_TAGS or "hidden" in fields or "popover" in fields:
+            return True
+        if (fields.get("aria-hidden") or "").strip().lower() == "true":
+            return True
+        if cls.HIDDEN_CLASSES.intersection(
+            (fields.get("class") or "").lower().split()
+        ):
+            return True
+        # Only explicit inline hiding is recognized; CSS inferred from an
+        # external stylesheet is NOT trusted as authoritative visibility.
+        for declaration in (fields.get("style") or "").split(";"):
+            if ":" not in declaration:
+                continue
+            property_name, value = declaration.split(":", 1)
+            property_name = property_name.strip().lower()
+            value = re.sub(r"\\s*!important\\s*$", "", value.strip().lower())
+            if (property_name == "display" and value == "none"
+                    or property_name in ("visibility", "content-visibility")
+                    and value == "hidden"
+                    or property_name == "opacity"
+                    and re.fullmatch(r"0(?:\\.0+)?%?", value)):
+                return True
+        return False
 
     def handle_starttag(self, tag, attrs):
-        if tag in ("script", "style"):
-            self.skip += 1
+        hidden = self.element_hidden(tag, attrs)
+        if tag not in self.VOID_TAGS:
+            self.stack.append((tag, hidden))
+            if hidden:
+                self.hidden_depth += 1
+
+    def handle_startendtag(self, tag, attrs):
+        # Self-closing HTML has no descendant text to admit or suppress.
+        pass
 
     def handle_endtag(self, tag):
-        if tag in ("script", "style") and self.skip:
-            self.skip -= 1
+        # Tolerate malformed unmatched closures without treating a hidden
+        # descendant as visible. A broken hidden tree can only lose proof.
+        for i in range(len(self.stack) - 1, -1, -1):
+            if self.stack[i][0] == tag:
+                self.hidden_depth -= sum(hidden for _, hidden in self.stack[i:])
+                del self.stack[i:]
+                break
 
     def handle_data(self, data):
-        if not self.skip and data.strip():
+        if not self.hidden_depth and data.strip():
             self.parts.append(data.strip())
 
 
