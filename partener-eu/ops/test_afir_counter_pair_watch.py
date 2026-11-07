@@ -199,6 +199,61 @@ def test_parse_and_reconcile():
     reject(lambda: probe.parse_delegated(wrong_footnote))
 
 
+
+def test_hidden_counter_dom_fail_closed():
+    """Invisible or inert DOM cannot act as official DR-12 counter proof."""
+    real = delegated()
+    forged_banner = (
+        "Sesiune depunere dosare de finanțare DR-12 "
+        "DATĂ ÎNCEPUT 06/10/2026 09:00:00 "
+        "DATĂ FINAL 30/12/2026 15:59:59"
+    )
+    hiding = (
+        ("div hidden", "div"),
+        ("div hidden='false'", "div"),
+        ("div popover='manual'", "div"),
+        ("div aria-hidden='true'", "div"),
+        ("div class='d-none'", "div"),
+        ("div style='display:none'", "div"),
+        ("div style='visibility: hidden !important'", "div"),
+        ("div style='content-visibility: hidden'", "div"),
+        ("div style='opacity:0!important'", "div"),
+        ("div style='opacity:0.0'", "div"),
+        ("template", "template"),
+        ("textarea", "textarea"),
+        ("canvas", "canvas"),
+        ("noscript", "noscript"),
+    )
+    for opening, closing in hiding:
+        fake = f"<{opening}>{forged_banner}</{closing}>".encode("utf-8")
+        with_inert_duplicate = real.replace(b"<body>", b"<body>" + fake, 1)
+        assert probe.parse_delegated(with_inert_duplicate) == probe.parse_delegated(real), opening
+        assert probe.reconcile(
+            {"agency": agency(), "delegated": with_inert_duplicate}, 12
+        )["observation_state"] == "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW", opening
+        # When ALL apparent DR-12 evidence is hidden, parsing must fail
+        # rather than accepting hidden date/count/budget as source proof.
+        all_hidden = real.replace(b"<body>", b"<body>" + f"<{opening}>".encode(), 1)
+        all_hidden = all_hidden.replace(b"</body>", f"</{closing}></body>".encode(), 1)
+        reject(lambda all_hidden=all_hidden: probe.parse_delegated(all_hidden))
+        assert probe.reconcile(
+            {"agency": agency(), "delegated": all_hidden}, 12
+        )["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW", opening
+
+    visible = real.replace(b"<body>", b"<body style='opacity:0.65'>", 1)
+    assert probe.parse_delegated(visible) == probe.parse_delegated(real)
+    with tempfile.TemporaryDirectory() as td:
+        body = real.replace(
+            b"<body>", b"<body><div popover='auto'>" + forged_banner.encode() + b"</div>", 1
+        )
+        receipt = probe.capture(fetches(b=body), Path(td) / "proof", "42199991120")
+        assert receipt["parser_version"] == "afir-dr12-official-counter-pair-v10"
+        assert receipt["observation_state"] == "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW"
+        assert receipt["open_call_authorized"] is False
+        assert receipt["publish_authorized"] is False
+        assert probe.replay(Path(td) / "proof")["verified"] is True
+
+
 def test_immutable_receipt_and_replay():
     with tempfile.TemporaryDirectory() as td:
         target = Path(td) / "proof"
@@ -421,6 +476,7 @@ def test_capture_guards():
 
 if __name__ == "__main__":
     test_parse_and_reconcile()
+    test_hidden_counter_dom_fail_closed()
     test_immutable_receipt_and_replay()
     test_acquire_identity_encoding()
     test_capture_guards()
