@@ -56,6 +56,41 @@ def main():
         selected = live._programming_sources(live._load_registry(registry))
         assert [row["id"] for row in selected] == ["SRC-INTERREG-ROHU", "SRC-INTERREG-ROMD-2028-2034"]
 
+        # Every original must map to exactly one canonical registry entry.
+        # Duplicate IDs previously survived selection and could collapse the
+        # replay lookup dictionary, or collide on one immutable .raw.html name.
+        # Broken metadata must fail before fetch, not silently shrink coverage.
+        registry_baseline = json.loads(registry.read_text(encoding="utf-8"))
+        malformed_cases = (
+            ("duplicate", "duplicate Interreg registry source_id",
+             lambda sources: sources.append(dict(sources[1], id=sources[0]["id"]))),
+            ("missing id", "missing or unsafe Interreg registry source_id",
+             lambda sources: sources[0].pop("id")),
+            ("unsafe id", "missing or unsafe Interreg registry source_id",
+             lambda sources: sources[0].update(id="../shadow")),
+            ("family string", "invalid Interreg registry source_families",
+             lambda sources: sources[0].update(source_families="INTERREG")),
+            ("extract string", "invalid Interreg registry extract",
+             lambda sources: sources[0].update(extract="future_programming_consultations")),
+            ("missing programme", "invalid Interreg programming programme",
+             lambda sources: sources[0].update(programmes=[])),
+            ("missing owner", "missing Interreg programming source owner",
+             lambda sources: sources[0].update(owner="")),
+            ("off-authority URL", "untrusted Interreg source/redirect URL",
+             lambda sources: sources[0].update(url="https://example.invalid/false-official")),
+        )
+        bad_registry = Path(tmp) / "malformed-registry.json"
+        for label, expected, mutate in malformed_cases:
+            source_copy = json.loads(json.dumps(registry_baseline["sources"]))
+            mutate(source_copy)
+            bad_registry.write_text(json.dumps({"sources": source_copy}), encoding="utf-8")
+            try:
+                live._programming_sources(live._load_registry(bad_registry))
+            except ValueError as exc:
+                assert expected in str(exc), (label, exc)
+            else:
+                raise AssertionError(f"unverified Interreg registry admitted: {label}")
+
         html = b"""<!doctype html><html><head><title>Programming 2027+</title></head>
         <body><h1>STAKEHOLDER SURVEY NOW OPEN</h1>
         <p>The preparation of the future Interreg Programme between Romania and Hungary
