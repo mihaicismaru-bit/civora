@@ -184,7 +184,13 @@ def main():
         original_now = live._utc_now
         try:
             live._fetch = lambda url: (html, url, 200, "text/html; charset=utf-8")
-            live._utc_now = lambda: "2026-08-28T01:51:17Z"
+            capture_times = iter((
+                "2026-08-28T01:51:17Z",  # run started
+                "2026-08-28T01:51:19Z",  # first original fetched
+                "2026-08-28T01:51:23Z",  # second original fetched
+                "2026-08-28T01:51:24Z",  # receipt finalized
+            ))
+            live._utc_now = lambda: next(capture_times)
             original_dir = Path(tmp) / "immutable-originals"
             envelope = live.build_live_evidence(registry, run_id="TEST-INTERREG-LIVE", raw_dir=original_dir)
         finally:
@@ -192,7 +198,35 @@ def main():
             live._utc_now = original_now
 
         live.validate_envelope(envelope)
+        assert envelope["created_at"] == "2026-08-28T01:51:24Z"
+        assert [row["fetched_at"] for row in envelope["rows"]] == [
+            "2026-08-28T01:51:19Z", "2026-08-28T01:51:23Z"
+        ], "per-source acquisition must not inherit a stale run-start timestamp"
         assert live.replay_live_evidence(envelope, original_dir, registry) == 2
+        # A forged completion time or an out-of-order/stale source timestamp
+        # cannot survive raw replay, even if all source hashes are unchanged.
+        for index, forged_time, expected in (
+            (0, "2026-08-28T01:51:25Z", "chronology"),
+            (1, "2026-08-28T01:51:18Z", "chronology"),
+            (0, "2026-08-28T02:51:19+01:00", "UTC receipt timestamp"),
+            (0, "", "UTC receipt timestamp"),
+        ):
+            tampered = json.loads(json.dumps(envelope))
+            tampered["rows"][index]["fetched_at"] = forged_time
+            try:
+                live.replay_live_evidence(tampered, original_dir, registry)
+            except ValueError as exc:
+                assert expected in str(exc), (index, forged_time, exc)
+            else:
+                raise AssertionError(f"tampered Interreg source time admitted: {forged_time}")
+        tampered = json.loads(json.dumps(envelope))
+        tampered["created_at"] = "2026-08-28T01:51:22Z"
+        try:
+            live.replay_live_evidence(tampered, original_dir, registry)
+        except ValueError as exc:
+            assert "chronology" in str(exc), exc
+        else:
+            raise AssertionError("backdated Interreg manifest completion admitted")
         # A symlinked directory may hide substituted original files even when
         # every child path appears to be a regular file. Reject at the root.
         linked_dir = Path(tmp) / "redirected-originals"
@@ -388,12 +422,21 @@ def main():
         partial_dir = Path(tmp) / "partial-originals"
         try:
             live._fetch = partial_fetch
-            live._utc_now = lambda: "2026-08-28T01:51:17Z"
+            partial_times = iter((
+                "2026-08-28T01:51:17Z",  # run start
+                "2026-08-28T01:51:19Z",  # first source succeeds
+                "2026-08-28T01:52:00Z",  # second source times out
+                "2026-08-28T01:52:01Z",  # manifest completed
+            ))
+            live._utc_now = lambda: next(partial_times)
             partial = live.build_live_evidence(registry, run_id="TEST-INTERREG-PARTIAL", raw_dir=partial_dir)
         finally:
             live._fetch = original_fetch
             live._utc_now = original_now
         assert partial["fetch_pass"] == 1 and partial["fetch_fail"] == 1
+        assert [row["fetched_at"] for row in partial["rows"]] == [
+            "2026-08-28T01:51:19Z", "2026-08-28T01:52:00Z"
+        ], "failed Interreg acquisition must carry its own failure-observed time"
         assert partial["observation_states"] == {"CONSULTATION_CLOSED": 1, "FETCH_FAILED": 1}
         assert live.replay_live_evidence(partial, partial_dir, registry) == 1
         for tamper in ("raw_hash", "final_url", "bytes"):
