@@ -58,7 +58,12 @@ PROGRAMMING_EXTRACT_KEYS = {"future_programming_consultations", "future_programm
 
 # Only visible article prose can establish official topic and date identity.
 # Head metadata, template fragments and hidden UI text are not evidence.
-_HIDDEN_TAGS = frozenset({"head", "script", "style", "noscript", "svg", "template"})
+# Hidden-by-default browser containers must not supply call/programming identity.
+# A closed <details> also hides its body (we conservatively exclude summary).
+_HIDDEN_TAGS = frozenset({
+    "head", "script", "style", "noscript", "svg", "template",
+    "dialog", "datalist", "select", "textarea", "canvas", "iframe",
+})
 _VOID_TAGS = frozenset({
     "area", "base", "br", "col", "embed", "hr", "img", "input",
     "link", "meta", "param", "source", "track", "wbr",
@@ -78,11 +83,13 @@ class _VisibleText(HTMLParser):
         style = re.sub(r"\s+", "", attributes.get("style", "").casefold())
         hidden = (
             tag in _HIDDEN_TAGS
+            or (tag == "details" and "open" not in attributes)
             or "hidden" in attributes
             or "inert" in attributes
             or attributes.get("aria-hidden", "").strip().casefold() == "true"
             or "display:none" in style
             or "visibility:hidden" in style
+            or "content-visibility:hidden" in style
         )
         if tag not in _VOID_TAGS:
             self._elements.append((tag, hidden))
