@@ -79,16 +79,28 @@ class _VisibleText(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         tag = tag.lower()
-        attributes = {key.lower(): (value or "") for key, value in attrs}
+        # HTML parsers/browsers may honor the FIRST duplicate attribute,
+        # while dict comprehensions silently keep the LAST. Ambiguous
+        # visibility metadata must never supply official article identity.
+        attributes: dict[str, str] = {}
+        duplicate_visibility = False
+        for key, value in attrs:
+            name = key.lower()
+            if name in attributes and name in {"style", "aria-hidden", "hidden", "inert"}:
+                duplicate_visibility = True
+            attributes.setdefault(name, value or "")
         style = re.sub(r"\s+", "", attributes.get("style", "").casefold())
         hidden = (
-            tag in _HIDDEN_TAGS
+            duplicate_visibility
+            or tag in _HIDDEN_TAGS
             or (tag == "details" and "open" not in attributes)
             or "hidden" in attributes
             or "inert" in attributes
             or attributes.get("aria-hidden", "").strip().casefold() == "true"
             or "display:none" in style
             or "visibility:hidden" in style
+            or "visibility:collapse" in style
+            or "opacity:0" in style
             or "content-visibility:hidden" in style
         )
         if tag not in _VOID_TAGS:

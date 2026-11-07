@@ -547,6 +547,12 @@ def main():
             ("<iframe>", "</iframe>"),
             ("<details><summary>More information</summary>", "</details>"),
             ("<p style='content-visibility: hidden'>", "</p>"),
+            ("<div style='opacity: 0'>", "</div>"),
+            ("<div style='visibility: collapse'>", "</div>"),
+            ("<div style='display: none' style='display: block'>", "</div>"),
+            ("<div style='display: block' style='display: none'>", "</div>"),
+            ("<section aria-hidden='true' aria-hidden='false'>", "</section>"),
+            ("<section aria-hidden='false' aria-hidden='true'>", "</section>"),
         ):
             decoy_html = (
                 "<html><body><main><p>" + "Generic index without a workshop. " * 8
