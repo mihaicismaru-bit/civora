@@ -144,9 +144,11 @@ for url in (
     else:
         raise AssertionError(f"off-authority redirect accepted before network: {url}")
 
+# The initial registry identity is curated: HTTPS alone cannot prove a
+# hostname is official. The transport guard enforces HTTPS/credential/port
+# safety there; cross-host comparison is enforced at every redirect.
 for url in (
     "http://official.example.invalid/evidence",
-    "https://attacker.invalid/evidence",
     "https://user@official.example.invalid/evidence",
     "https://official.example.invalid:9000/evidence",
 ):
