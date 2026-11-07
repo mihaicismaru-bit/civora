@@ -419,6 +419,84 @@ def main():
             else:
                 raise AssertionError(f"failed source lost error provenance: {missing_error}")
 
+    # A generic 200 HTML page on the right host must not impersonate the
+    # exact 16 October 2026 ROHU 2028-2034 workshops announcement.
+    with tempfile.TemporaryDirectory() as workshop_tmp:
+        workshop_root = Path(workshop_tmp)
+        article_id = live.WORKSHOPS_SOURCE_ID
+        article_url = (
+            "https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-"
+            "si-contribuiti-la-definirea-capitolului-interreg-2028-2034/"
+        )
+        article_text = (
+            "Participați la atelierele transfrontaliere pentru Capitolul Interreg 2028-2034. "
+            "Atelier la 17 noiembrie 2026 Debrecen și la 20 noiembrie 2026 online. "
+            "Înscrierea s-a încheiat pe 28 octombrie 2026. "
+            "Aceste evenimente țin doar de programarea viitoare, nu de apeluri deschise."
+        )
+        article_html = ("<html><body><h1>" + article_text + "</h1></body></html>").encode("utf-8")
+        article_registry = workshop_root / "registry.json"
+        article_registry.write_text(json.dumps({"sources": [{
+            "id": article_id,
+            "owner": "Interreg ROHU Official",
+            "url": article_url,
+            "programmes": ["Interreg Romania-Hungary 2028-2034"],
+            "source_families": ["INTERREG", "CBC", "PROGRAMMING_PIPELINE"],
+            "extract": ["consultation_events"],
+            "material_fact_use": False,
+        }]}), encoding="utf-8")
+        live._assert_registered_article_identity(article_id, article_url, article_url, article_text)
+        for wrong_url, wrong_text in (
+            ("https://interreg-rohu.eu/ro/", article_text),
+            (article_url, article_text.replace("17 noiembrie", "16 noiembrie")),
+            (article_url, "Atelierele Interreg 2028-2034 programare viitoare"),
+        ):
+            try:
+                live._assert_registered_article_identity(article_id, article_url, wrong_url, wrong_text)
+            except ValueError as exc:
+                assert "workshop" in str(exc).lower()
+            else:
+                raise AssertionError("wrong official workshop page or schedule admitted")
+
+        previous_fetch, previous_now = live._fetch, live._utc_now
+        original_dir = workshop_root / "originals"
+        try:
+            live._fetch = lambda url: (article_html, url, 200, "text/html; charset=utf-8")
+            live._utc_now = lambda: "2026-11-06T23:34:07Z"
+            capture = live.build_live_evidence(
+                article_registry, run_id="TEST-ROHU-WORKSHOPS", raw_dir=original_dir
+            )
+        finally:
+            live._fetch, live._utc_now = previous_fetch, previous_now
+        assert capture["fetch_pass"] == 1 and capture["fetch_fail"] == 0
+        assert capture["rows"][0]["normalized"]["open_call_authorized"] is False
+        assert live.replay_live_evidence(capture, original_dir, article_registry) == 1
+
+        # Even a fully rehashed and re-normalized forged article without the
+        # verified schedule must fail raw-to-semantic replay.
+        bad_html = article_html.replace(b"17 noiembrie 2026", b"16 noiembrie 2026")
+        original_file = original_dir / (article_id + ".raw.html")
+        original_file.write_bytes(bad_html)
+        forged = json.loads(json.dumps(capture))
+        forged_row = forged["rows"][0]
+        forged_row["raw_hash"] = live._sha256(bad_html)
+        forged_row["bytes"] = len(bad_html)
+        forged_row["normalized"] = live.normalize_programming_observation({
+            "programme": forged_row["programme"],
+            "title": forged_row["source_owner"],
+            "text": live._visible_text(bad_html, forged_row["content_type"]),
+            "authority_url": article_url,
+        }, fetched_at=forged_row["fetched_at"],
+           raw_hash=forged_row["raw_hash"], run_id=forged_row["run_id"])
+        try:
+            live.replay_live_evidence(forged, original_dir, article_registry)
+        except ValueError as exc:
+            assert "identity/schedule unverified" in str(exc), exc
+        else:
+            raise AssertionError("rehashed wrong ROHU workshop schedule admitted")
+        original_file.write_bytes(article_html)
+        assert live.replay_live_evidence(capture, original_dir, article_registry) == 1
+
     print("PASS Interreg live programming evidence: exact official bytes remain non-authorizing")
 
 
