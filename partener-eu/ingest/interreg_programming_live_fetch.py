@@ -48,6 +48,8 @@ ROW_PASS_KEYS = ROW_COMMON_KEYS | {
 ROW_FAIL_KEYS = ROW_COMMON_KEYS | {"error_type", "error"}
 WORKSHOPS_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026"
 WORKSHOPS_IDENTITY_TERMS = ("2028-2034", "17 noiembrie 2026", "20 noiembrie 2026", "28 octombrie 2026")
+ROHU_SURVEY_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026"
+ROHU_SURVEY_IDENTITY_TERMS = ("2028-2034", "sondaj", "analiza teritorial", "5 octombrie", "30 noiembrie 2026")
 USER_AGENT = "PARTENER.EU-Interreg-Programming/1.0"
 MAX_BYTES = 2_000_000
 TIMEOUT_SECONDS = 25
@@ -159,22 +161,28 @@ def _assert_official_source_origin(requested_url: str, final_url: str) -> None:
 
 
 def _assert_registered_article_identity(source_id: str, registered_url: str, final_url: str, visible_text: str) -> None:
-    """Prevent a 200 HTML fallback/homepage from impersonating the ROHU workshop article.
+    """Bind ROHU future-programming article receipts to exact official content.
 
-    Event and registration dates establish source identity only, never a call
-    deadline or eligibility. This check applies during acquisition AND replay.
+    The survey is a consultation, NOT a funding-call window. A generic 200
+    homepage or a stale/mismatched date must fail both acquisition and replay.
     """
-    if source_id != WORKSHOPS_SOURCE_ID:
+    if source_id == WORKSHOPS_SOURCE_ID:
+        terms, label = WORKSHOPS_IDENTITY_TERMS, "workshop"
+        required_topic = "atelier"
+    elif source_id == ROHU_SURVEY_SOURCE_ID:
+        terms, label = ROHU_SURVEY_IDENTITY_TERMS, "survey"
+        required_topic = "sondaj"
+    else:
         return
     registered = urlsplit(registered_url)
     resolved = urlsplit(final_url)
     if registered.path.rstrip("/") != resolved.path.rstrip("/") or resolved.query:
-        raise ValueError("ROHU workshop exact official article endpoint changed")
+        raise ValueError(f"ROHU {label} exact official article endpoint changed")
     comparable = re.sub(r"\s+", " ", visible_text.casefold()).translate(
         str.maketrans({"–": "-", "—": "-", "−": "-"})
     )
-    if "atelier" not in comparable or any(term not in comparable for term in WORKSHOPS_IDENTITY_TERMS):
-        raise ValueError("ROHU workshop official article identity/schedule unverified")
+    if required_topic not in comparable or any(term not in comparable for term in terms):
+        raise ValueError(f"ROHU {label} official article identity/schedule unverified")
 
 
 class _RegisteredOriginRedirect(urllib.request.HTTPRedirectHandler):
