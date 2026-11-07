@@ -103,6 +103,40 @@ def main():
         assert "STAKEHOLDER SURVEY NOW OPEN" in text
         assert "fake javascript" not in text
 
+        # Hidden-by-default native popovers must not forge an official
+        # workshop identity/schedule in the PROGRAMMING_PIPELINE surface.
+        # A false positive here would make unrelated official HTML appear to
+        # confirm the exact 2028-2034 programming consultation article.
+        workshop_url = (
+            "https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-"
+            "si-contribuiti-la-definirea-capitolului-interreg-2028-2034/"
+        )
+        workshop_terms = (
+            "atelier 2028-2034 17 noiembrie 2026 "
+            "20 noiembrie 2026 28 octombrie 2026"
+        )
+        for opening in ('<div popover>', '<div popover="manual">',
+                        '<section popover="auto">'):
+            hostile = (
+                '<html><body><article>Unrelated official newsletter</article>'
+                + opening + workshop_terms + opening.replace('div', '/div').replace('section', '/section').split(' ')[0] + '>'
+                + '</body></html>'
+            )
+            visible = live._visible_text(hostile.encode("utf-8"), "text/html; charset=utf-8")
+            assert "17 noiembrie 2026" not in visible, opening
+            try:
+                live._assert_registered_article_identity(
+                    live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, visible
+                )
+            except ValueError as exc:
+                assert "identity/schedule unverified" in str(exc), (opening, exc)
+            else:
+                raise AssertionError(f"hidden popover forged Interreg programming identity: {opening}")
+        # Keep a positive case for directly visible official programming prose.
+        live._assert_registered_article_identity(
+            live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, workshop_terms
+        )
+
         # Registry T1 authority is per source, not any host on the broad T1 list.
         # www transport normalization is fine; off-programme redirects are not.
         live._assert_official_source_origin(
