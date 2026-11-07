@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "runId": "PARTENER-SITEKEEPER-20261015-1200-EDRIVE",
+  "observedAt": "2026-10-15T09:00:00Z",
+  "mainBaseline": "44b997088230635272102406f270973f639b4315",
+  "authority": "Ministerul Transporturilor și Infrastructurii / Direcția Generală Programe Europene Transport",
+  "tier": "T1",
+  "programme": "Fondul pentru modernizare — Programul-cheie 9",
+  "opportunity": "e-DRIVE — Măsura 1, înlocuirea flotei întreprinderilor",
+  "publicationState": "PROVISIONAL_FAIL_CLOSED",
+  "lifecycleCandidate": "EXPECTED_UPCOMING",
+  "reason": "Schema este aprobată și în vigoare, însă perioada exactă de depunere pentru apelul Măsura 1 nu este publicată în sursele oficiale verificate. Nu se promovează la OPEN fără anunț oficial de lansare și termen.",
+  "officialFacts": {
+    "schemeLegalBasis": "OMTI nr. 742/2026, publicat în Monitorul Oficial nr. 655 din 7 august 2026, care modifică OMTI nr. 2291/2025",
+    "schemeDurationUntil": "2028-12-31",
+    "measure": "Măsura 1 — ajutor de minimis",
+    "applicantScope": "Întreprinderi înregistrate în România; condițiile exacte ale apelului vor fi detaliate în Ghidul solicitantului. Măsura 1 vizează înlocuirea vehiculelor M1 și M2.",
+    "vehicleReplacementRule": "Vehiculul înlocuit trebuie să fie în proprietatea întreprinderii de cel puțin un an; schema prevede o excepție bazată pe promisiune bilaterală de vânzare-cumpărare, cu documente suplimentare.",
+    "eligibleCost": "Costurile totale pentru achiziționarea vehiculului cu emisii zero; TVA neeligibilă.",
+    "budgetSchemeEur": 56900000,
+    "budgetMeasure1Eur": 15000000,
+    "maxAidPerUniqueUndertakingEur3Years": 300000,
+    "maxAidM1VehicleEur": 30000,
+    "maxIntensityPercent": 100,
+    "implementationDeadlineLatest": "2030-06-30",
+    "selection": "Măsura 1: selecție pe punctaj; microîntreprinderi 80 puncte, întreprinderi mici 70, întreprinderi mijlocii 65; +20 puncte pentru asamblare finală în UE.",
+    "applicationWindow": null,
+    "officialStatusInterpretation": "SCHEME_ACTIVE_CALL_NOT_YET_PROVEN_OPEN"
+  },
+  "officialSources": [
+    {
+      "url": "https://legislatie.just.ro/Public/DetaliiDocumentAfis/313289",
+      "supports": ["legal_basis","beneficiaries","vehicle_categories","budget","aid_caps","eligible_costs","scheme_duration","selection","application_window_must_be_announced"],
+      "rawSha256": null,
+      "parserVersion": null
+    },
+    {
+      "url": "https://fonduri.mt.ro/documente-si-publicatii/finantari-fm/scheme-de-ajutor-de-stat/schema-de-ajutor-de-stat-8",
+      "supports": ["official_scheme_document_index"],
+      "rawSha256": null,
+      "parserVersion": null
+    },
+    {
+      "url": "https://www.mt.ro/spatiul-media/comunicate-de-presa/fm-comunicate/fm11082026",
+      "supports": ["official_2026_scheme_update_announcement"],
+      "rawSha256": null,
+      "parserVersion": null
+    }
+  ],
+  "requiredNextGates": [
+    "FETCH+HASH official MTI/DGPET scheme index and any newly published guide/call notice",
+    "PARSE exact Măsura 1 guide version, application opening and deadline, submission platform and required documents",
+    "DEDUP against canonical Fondul pentru modernizare/transport opportunities",
+    "RECONCILE all guide conditions against OMTI 742/2026 and any later amendments",
+    "QUALITY GATE dossier and lifecycle as EXPECTED/UPCOMING until authoritative launch evidence exists",
+    "Publish only after branch tests, CI, deployment and public readback"
+  ],
+  "discoveryNotes": {
+    "publicOpenCatalogChecked": "https://partener.eu/finantari/deschise/",
+    "edriveFoundInPublicOpenCatalog": false,
+    "externalSummariesNotAuthority": true,
+    "doNotInferDeadline": true,
+    "doNotPromoteToOpen": true
+  },
+  "safety": {
+    "noDirectPublish": true,
+    "preserveLKG": true,
+    "unknownsRemainUnknown": true,
+    "noClientData": true
+  }
+}
