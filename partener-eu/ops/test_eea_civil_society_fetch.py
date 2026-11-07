@@ -158,8 +158,77 @@ def test_transport_integrity():
             fail(f"EEA raw acquisition accepted an unsafe {label} response")
 
 
+
+def test_visible_html_evidence_only():
+    """Hidden markup cannot assert OPEN, change a deadline or inject exact links."""
+    forged = (
+        f'<h1>Forged #999</h1>Call for projects Open '
+        f'Submission Deadline: 01/01/2099 <a href="{CALL2}">other call</a>'
+    )
+    wrappers = [
+        ('<template>', '</template>'),
+        ('<head>', '</head>'),
+        ('<script type="text/plain">', '</script>'),
+        ('<div hidden>', '</div>'),
+        ('<div inert>', '</div>'),
+        ('<div aria-hidden="true">', '</div>'),
+        ('<div aria-hidden="false" aria-hidden="true">', '</div>'),
+        ('<div style="display:none">', '</div>'),
+        ('<div style="display:block" style="visibility:hidden">', '</div>'),
+        ('<div style="opacity:0">', '</div>'),
+        ('<dialog>', '</dialog>'),
+        ('<details>', '</details>'),
+        ('<datalist>', '</datalist>'),
+        ('<iframe>', '</iframe>'),
+        ('<svg>', '</svg>'),
+    ]
+    baseline = (
+        b'<html><body><h1>Call #1 Valid</h1>'
+        b'<div>Call for projects Closed</div>'
+        b'Submission Deadline: 08/10/2026'
+    )
+    for opening, closing in wrappers:
+        injected = (opening + forged + closing).encode("utf-8")
+        parsed = module.parse_call_page(
+            baseline + injected + b'</body></html>', authority_url=CALL1
+        )
+        if parsed["status"] != "Closed":
+            fail(f"hidden {opening} forged OPEN status")
+        if parsed["submissionDeadline"] != "08/10/2026":
+            fail(f"hidden {opening} forged material deadline")
+        if parsed["title"] != "Call #1 Valid":
+            fail(f"hidden {opening} forged title identity")
+        index_links = module.discover_call_urls(
+            b'<html><body>' + injected + b'</body></html>', base_url=INDEX
+        )
+        if index_links:
+            fail(f"hidden {opening} forged source discovery link")
+
+    visible_conflict = (baseline +
+        b'<p>Call for projects Open</p></body></html>')
+    parsed = module.parse_call_page(visible_conflict, authority_url=CALL1)
+    if parsed["status"] is not None:
+        fail("contradictory visible OPEN/CLOSED must be UNKNOWN, never OPEN")
+    normalized = module.adapter.normalize_record(
+        parsed, fetched_at=FETCHED, run_id="TEST-CONTRADICTORY-STATUS",
+        raw_hash=hashlib.sha256(visible_conflict).hexdigest(),
+        verified_authority_urls=[CALL1],
+    )
+    if normalized is None or normalized["observation_state"] != "UNKNOWN":
+        fail("ambiguous status must propagate fail-closed through adapter")
+
+    visible_details = (
+        b'<html><body><h1>Call #1 Valid</h1>'
+        b'<details open><div>Call for projects Open</div></details></body></html>'
+    )
+    if module.parse_call_page(visible_details, authority_url=CALL1)["status"] != "Open":
+        fail("explicitly open and visible details must remain usable")
+
+
+
 def main():
     test_transport_integrity()
+    test_visible_html_evidence_only()
     urls = module.discover_call_urls(INDEX_HTML, base_url=INDEX)
     if urls != [CALL1, CALL2]:
         fail(f"call discovery must prefer EN, order by call number and ignore third party: {urls}")
@@ -286,7 +355,7 @@ def main():
     if len(only_links) != 1 or mode != "INDEX_EXACT_ANCHORS" or direct_count != 1:
         fail("partial official index must remain incomplete; no pinned fallback")
 
-    print("PASS EEA CSF live acquisition: exact official redirect-hop/byte-length guards, discovery, raw hashes and non-publishing reconciliation")
+    print("PASS EEA CSF live acquisition: visible-only status/links, ambiguous-status hold, exact redirect/bytes, raw hashes, non-publishing reconciliation")
 
 
 if __name__ == "__main__":
