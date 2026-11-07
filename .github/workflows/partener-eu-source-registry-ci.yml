@@ -37,6 +37,8 @@ on:
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
       - 'partener-eu/ops/test_eea_civil_society_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_reconcile.py'
+      - 'partener-eu/web/home-concierge-vnext.js'
+      - 'partener-eu/ops/test_home_concierge_freshness.mjs'
       - 'partener-eu/ops/test_regiocentru_actions_fetch.py'
       - '.github/workflows/partener-eu-source-registry-ci.yml'
   workflow_dispatch:
@@ -143,6 +145,11 @@ jobs:
 
       - name: Validate EEA Civil Society Fund semantic reconciliation
         run: python partener-eu/ops/test_eea_civil_society_reconcile.py
+
+      - name: Validate active homepage PREPARE/CONSULTATION freshness
+        run: |
+          node --check partener-eu/web/home-concierge-vnext.js
+          node partener-eu/ops/test_home_concierge_freshness.mjs
 
       - name: Validate EEA Civil Society Fund canonical staging admission
         working-directory: partener-eu/p11
