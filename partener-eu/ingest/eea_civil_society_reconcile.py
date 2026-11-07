@@ -270,10 +270,11 @@ def reconcile_live_evidence(
     if not fallback and stats["index_direct_exact_call_links"] != expected:
         _fail("direct exact-call discovery count does not match batch")
 
-    # A page that still says OPEN after its explicit official submission date
-    # is historical/contradictory evidence, not an admissible CURRENT open call.
-    # Compare *Romanian local calendar dates* conservatively, without inventing
-    # a closure hour. UTC calendar days can lag the Romanian deadline date.
+    # Date-only official deadlines cannot establish whether an OPEN status is
+    # still actionable on the final day: a closing hour may have passed. Until
+    # an independently verified official cutoff time is in the evidence schema,
+    # fail closed on the deadline day itself (Romanian civil calendar), as well
+    # as on later days. Never invent a default closing hour.
     def evidence_time(value: Any, field: str) -> dt.datetime:
         try:
             parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
@@ -375,11 +376,14 @@ def reconcile_live_evidence(
             _fail(f"{call_id}: publication date after submission deadline")
         if questions_deadline > deadline:
             _fail(f"{call_id}: questions deadline after submission deadline")
+        # A date-only field is insufficient to authorize last-day OPEN:
+        # a real 16:00 (or earlier) cutoff cannot be inferred from DD/MM/YYYY.
+        deadline_date = dt.date.fromisoformat(deadline)
         if state in {"OPEN_CALL", "FORTHCOMING_CALL"} and (
-            source_time.astimezone(ROMANIA_TIMEZONE).date() > dt.date.fromisoformat(deadline)
-            or reconciliation_time.astimezone(ROMANIA_TIMEZONE).date() > dt.date.fromisoformat(deadline)
+            source_time.astimezone(ROMANIA_TIMEZONE).date() >= deadline_date
+            or reconciliation_time.astimezone(ROMANIA_TIMEZONE).date() >= deadline_date
         ):
-            _fail(f"{call_id}: stale open/forthcoming status past official submission date")
+            _fail(f"{call_id}: active status on/after date-only deadline requires verified cutoff time")
 
         budget = _parse_eur(record.get("budget_candidate"), f"{call_id}.budget")
         grant_from = _parse_eur(record.get("grant_from_candidate"), f"{call_id}.grant_from")
