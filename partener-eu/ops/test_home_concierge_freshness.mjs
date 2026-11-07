@@ -17,7 +17,7 @@ const window={
  PARTENER_HOME_DATA:{dossiers:[],news:[]},
  addEventListener(){}
 };
-const document={querySelector(){return null},getElementById(){return null}};
+const document={body:{classList:{toggle(){}}},querySelector(){return null},getElementById(){return null}};
 const sandbox={window,document,Date:FixedDate};
 const testedSource=source.replace(/\}\)\(\);\s*$/,
  'globalThis.__gates={isUpcoming,isConsultation,isOpen};\n})();');
