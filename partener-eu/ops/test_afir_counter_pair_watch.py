@@ -233,6 +233,8 @@ def test_immutable_receipt_and_replay():
             lambda m: m["sources"]["delegated"].update(sha256="0" * 64),
             lambda m: m["sources"]["delegated"].update(byte_count=5),
             lambda m: m["sources"]["agency"].update(content_encoding="gzip"),
+            lambda m: m["sources"]["agency"].update(content_type="application/x-nothtml"),
+            lambda m: m["sources"]["delegated"].update(content_type="text/plain; note=text/html"),
             lambda m: m["sources"]["agency"].update(fetched_at_utc="2026-11-06T01:00:00"),
             lambda m: m["reconciliation"].update(observation_state="SOURCE_COUNTER_PAIR_MATCH_REVIEW"),
             lambda m: m["reconciliation"]["components"]["ALTE SECTOARE"]["delegated"].update(session_window_matches=False),
@@ -301,8 +303,8 @@ def test_acquire_identity_encoding():
     # Reject before writing any original or declaring an HTML receipt.
     class Response:
         status = 200
-        def __init__(self, encoding):
-            self.headers = {"Content-Type": "text/html", "Content-Length": str(len(agency()))}
+        def __init__(self, encoding, content_type="text/html"):
+            self.headers = {"Content-Type": content_type, "Content-Length": str(len(agency()))}
             if encoding is not None:
                 self.headers["Content-Encoding"] = encoding
         def __enter__(self):
@@ -314,8 +316,8 @@ def test_acquire_identity_encoding():
         def read(self, max_bytes):
             return agency()[:max_bytes]
     class Opener:
-        def __init__(self, encoding):
-            self.response = Response(encoding)
+        def __init__(self, encoding, content_type="text/html"):
+            self.response = Response(encoding, content_type)
         def open(self, *_args, **_kwargs):
             return self.response
     for encoding in ("gzip", "br", "identity, gzip"):
@@ -326,6 +328,14 @@ def test_acquire_identity_encoding():
             receipt = probe.acquire("agency")
             assert receipt["content_encoding"] == "identity"
             assert receipt["data"] == agency()
+    for mime in ("application/x-nothtml", "text/html-fake",
+                 "text/plain; note=text/html", "application/xhtml+xml-fake", ""):
+        with mock.patch.object(probe.urllib.request, "build_opener",
+                               return_value=Opener(None, mime)):
+            reject(lambda: probe.acquire("agency"))
+    with mock.patch.object(probe.urllib.request, "build_opener",
+                           return_value=Opener(None, "application/xhtml+xml; charset=utf-8")):
+        assert probe.acquire("agency")["content_type"].startswith("application/xhtml+xml")
 
 
 def test_cache_freshness_fail_closed():
@@ -386,6 +396,8 @@ def test_capture_guards():
         lambda d: d["delegated"].update(url="https://evil.example/"),
         lambda d: d["agency"].update(status=302),
         lambda d: d["delegated"].update(content_type="application/json"),
+        lambda d: d["delegated"].update(content_type="application/x-nothtml"),
+        lambda d: d["agency"].update(content_type="text/plain; charset=text/html"),
         lambda d: d["agency"].update(content_encoding="gzip"),
         lambda d: d["agency"].update(fetched_at_utc="2026-11-06T03:00:00+02:00"),
         lambda d: d["agency"].update(data=b""),
@@ -394,6 +406,13 @@ def test_capture_guards():
             d = deepcopy(fetches())
             alter(d)
             reject(lambda: probe.capture(d, Path(td) / "proof", "42199991111"))
+    with tempfile.TemporaryDirectory() as td:
+        rows = deepcopy(fetches())
+        rows["agency"]["content_type"] = "application/xhtml+xml; charset=utf-8"
+        proof = Path(td) / "xhtml-positive"
+        record = probe.capture(rows, proof, "42199991115")
+        assert record["open_call_authorized"] is False
+        assert probe.replay(proof)["verified"] is True
     assert probe.strict_url(probe.AGENCY_URL, "agency")
     assert probe.strict_url(probe.DELEGATED_URL, "delegated")
     assert not probe.strict_url("https://www.afir.ro:444/finantare/contor-fonduri-disponibile/", "agency")
