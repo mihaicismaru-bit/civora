@@ -502,6 +502,14 @@ def main():
             ("<section style='visibility: hidden'>", "</section>"),
             ("<div inert>", "</div>"),
             ("<svg>", "</svg>"),
+            ("<dialog>", "</dialog>"),
+            ("<datalist>", "</datalist>"),
+            ("<select><option>", "</option></select>"),
+            ("<textarea>", "</textarea>"),
+            ("<canvas>", "</canvas>"),
+            ("<iframe>", "</iframe>"),
+            ("<details><summary>More information</summary>", "</details>"),
+            ("<p style='content-visibility: hidden'>", "</p>"),
         ):
             decoy_html = (
                 "<html><body><main><p>" + "Generic index without a workshop. " * 8
@@ -517,6 +525,14 @@ def main():
                 assert "identity/schedule unverified" in str(exc), (opening, exc)
             else:
                 raise AssertionError(f"hidden workshop terms accepted: {opening}")
+
+        # An explicitly opened details panel is readable; closing it cannot
+        # launder identity terms, while neighbouring visible text survives.
+        open_details = ("<html><body><details open><p>" + article_text
+                        + "</p></details><p>Visible footer</p></body></html>").encode("utf-8")
+        open_text = live._visible_text(open_details, "text/html; charset=utf-8")
+        assert "17 noiembrie 2026" in open_text and "Visible footer" in open_text
+        live._assert_registered_article_identity(article_id, article_url, article_url, open_text)
 
         # Exercise the acquisition and immutable replay boundary, not just
         # the HTML parser in isolation. A failed decoy has no promoted raw.
