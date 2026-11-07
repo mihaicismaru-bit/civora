@@ -56,19 +56,50 @@ TIMEOUT_SECONDS = 25
 PROGRAMMING_EXTRACT_KEYS = {"future_programming_consultations", "future_programming_updates"}
 
 
+# Only visible article prose can establish official topic and date identity.
+# Head metadata, template fragments and hidden UI text are not evidence.
+_HIDDEN_TAGS = frozenset({"head", "script", "style", "noscript", "svg", "template"})
+_VOID_TAGS = frozenset({
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "param", "source", "track", "wbr",
+})
+
+
 class _VisibleText(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
+        self._elements: list[tuple[str, bool]] = []
         self._hidden_depth = 0
         self.parts: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag.lower() in {"script", "style", "noscript", "svg"}:
-            self._hidden_depth += 1
+        tag = tag.lower()
+        attributes = {key.lower(): (value or "") for key, value in attrs}
+        style = re.sub(r"\s+", "", attributes.get("style", "").casefold())
+        hidden = (
+            tag in _HIDDEN_TAGS
+            or "hidden" in attributes
+            or "inert" in attributes
+            or attributes.get("aria-hidden", "").strip().casefold() == "true"
+            or "display:none" in style
+            or "visibility:hidden" in style
+        )
+        if tag not in _VOID_TAGS:
+            self._elements.append((tag, hidden))
+            if hidden:
+                self._hidden_depth += 1
 
     def handle_endtag(self, tag: str) -> None:
-        if tag.lower() in {"script", "style", "noscript", "svg"} and self._hidden_depth:
-            self._hidden_depth -= 1
+        # A nested closing tag must not reveal an enclosing hidden article.
+        for index in range(len(self._elements) - 1, -1, -1):
+            if self._elements[index][0] == tag.lower():
+                self._hidden_depth -= sum(int(hidden) for _, hidden in self._elements[index:])
+                del self._elements[index:]
+                break
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        # Self-closed and void tags never enclose article identity text.
+        pass
 
     def handle_data(self, data: str) -> None:
         if self._hidden_depth == 0:
