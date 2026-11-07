@@ -497,6 +497,90 @@ def main():
         original_file.write_bytes(article_html)
         assert live.replay_live_evidence(capture, original_dir, article_registry) == 1
 
+    # The official October-November ROHU survey is a FUTURE-PROGRAMMING
+    # consultation. A homepage, changed date or forged raw receipt cannot
+    # impersonate its exact official article even with a valid source hash.
+    with tempfile.TemporaryDirectory() as survey_tmp:
+        survey_root = Path(survey_tmp)
+        survey_id = live.ROHU_SURVEY_SOURCE_ID
+        survey_url = (
+            "https://interreg-rohu.eu/ro/"
+            "contribuiti-la-definirea-viitorului-cooperarii-transfrontaliere/"
+        )
+        survey_text = (
+            "Contribuiți la definirea viitorului cooperării transfrontaliere. "
+            "Pregătirea Capitolului Interreg pentru 2028–2034 și Analiza Teritorială. "
+            "Vă invităm să completați sondajul online privind cooperarea. "
+            "Sondajul este deschis în perioada 5 octombrie – 30 noiembrie 2026. "
+            "Acesta este un proces de programare, nu un apel deschis."
+        )
+        survey_html = ("<html><body><h1>" + survey_text + "</h1></body></html>").encode("utf-8")
+        survey_registry = survey_root / "registry.json"
+        survey_registry.write_text(json.dumps({"sources": [{
+            "id": survey_id,
+            "owner": "Interreg ROHU Official",
+            "url": survey_url,
+            "programmes": ["Interreg Romania-Hungary 2028-2034"],
+            "source_families": ["INTERREG", "CBC", "PROGRAMMING_PIPELINE"],
+            "extract": ["stakeholder_consultations", "programming_updates"],
+            "material_fact_use": False,
+        }]}), encoding="utf-8")
+        live._assert_registered_article_identity(survey_id, survey_url, survey_url, survey_text)
+        for wrong_url, wrong_text in (
+            ("https://interreg-rohu.eu/ro/", survey_text),
+            (survey_url + "?fallback=1", survey_text),
+            (survey_url, survey_text.replace("30 noiembrie 2026", "29 noiembrie 2026")),
+            (survey_url, "Programare Interreg 2028-2034 actualizare generica " * 5),
+        ):
+            try:
+                live._assert_registered_article_identity(survey_id, survey_url, wrong_url, wrong_text)
+            except ValueError as exc:
+                assert "survey" in str(exc).lower(), exc
+            else:
+                raise AssertionError("wrong ROHU survey endpoint/schedule admitted")
+
+        previous_fetch, previous_now = live._fetch, live._utc_now
+        originals = survey_root / "originals"
+        try:
+            live._fetch = lambda url: (survey_html, url, 200, "text/html; charset=utf-8")
+            live._utc_now = lambda: "2026-11-07T01:20:00Z"
+            receipt = live.build_live_evidence(
+                survey_registry, run_id="TEST-ROHU-SURVEY", raw_dir=originals
+            )
+        finally:
+            live._fetch, live._utc_now = previous_fetch, previous_now
+        assert receipt["fetch_pass"] == 1 and receipt["fetch_fail"] == 0
+        observation = receipt["rows"][0]["normalized"]
+        assert observation["observation_state"] == "CONSULTATION"
+        assert observation["not_a_call"] is True
+        assert observation["open_call_authorized"] is False
+        assert observation["publish_authorized"] is False
+        assert live.replay_live_evidence(receipt, originals, survey_registry) == 1
+
+        # A new semantic hash and matching SHA cannot legitimate a forged
+        # survey end date: identity is checked independently of both hashes.
+        altered = survey_html.replace(b"30 noiembrie 2026", b"29 noiembrie 2026")
+        raw_path = originals / (survey_id + ".raw.html")
+        raw_path.write_bytes(altered)
+        forged = json.loads(json.dumps(receipt))
+        row = forged["rows"][0]
+        row["raw_hash"] = live._sha256(altered)
+        row["bytes"] = len(altered)
+        row["normalized"] = live.normalize_programming_observation({
+            "programme": row["programme"],
+            "title": row["source_owner"],
+            "text": live._visible_text(altered, row["content_type"]),
+            "authority_url": survey_url,
+        }, fetched_at=row["fetched_at"], raw_hash=row["raw_hash"], run_id=row["run_id"])
+        try:
+            live.replay_live_evidence(forged, originals, survey_registry)
+        except ValueError as exc:
+            assert "survey official article identity/schedule unverified" in str(exc), exc
+        else:
+            raise AssertionError("rehashed false ROHU survey deadline admitted")
+        raw_path.write_bytes(survey_html)
+        assert live.replay_live_evidence(receipt, originals, survey_registry) == 1
+
     print("PASS Interreg live programming evidence: exact official bytes remain non-authorizing")
 
 
