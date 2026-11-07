@@ -311,9 +311,14 @@ def main():
     # CLOSED labels for the same 8 October deadline. A stale OPEN after that
     # date cannot become CURRENT material-call evidence or enter staging.
     historical_open = copy.deepcopy(evidence)
+    # Keep source capture within the 24h freshness window so this assertion
+    # isolates the independent Romanian deadline-date guard.
+    historical_open["fetched_at"] = "2026-10-08T12:00:00+00:00"
+    for row in historical_open["records"]:
+        row["fetched_at"] = historical_open["fetched_at"]
     try:
         module.reconcile_live_evidence(
-            historical_open, reconciled_at="2026-11-06T19:00:00+00:00",
+            historical_open, reconciled_at="2026-10-09T00:00:00+00:00",
             minimum_calls=2,
         )
     except ValueError as exc:
