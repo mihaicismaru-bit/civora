@@ -59,11 +59,40 @@ function isOpen(d){
  const deadline=confirmed(d,'Termen');if(!deadline)return false;
  const parsed=parseDate(deadline.value);return !!(parsed&&parsed.getTime()>=Date.now());
 }
+// A current-year reference or a PUBLISHABLE flag alone cannot establish that
+// a planned/consultation dossier is actionable *now*. An expired explicit
+// submission/consultation deadline wins over a later, unrelated calendar clue.
+// Unknown/unparseable calendars remain queryable in the dossier, not on home.
+function hasFreshPrepareEvidence(d){
+ const now=Date.now(),dated=[];
+ let expiredCutoff=false;
+ const add=(raw,cutoff=false)=>{
+   const value=parseDate(raw);
+   if(!value)return;
+   const ts=value.getTime();
+   dated.push(ts);
+   if(cutoff&&ts<=now)expiredCutoff=true;
+ };
+ for(const key of ['deadline','closesAt','closeAt','consultationDeadline'])add(d?.[key],true);
+ for(const key of ['openFrom','opensAt','openAt'])add(d?.[key]);
+ for(const row of d?.quickFacts||[]){
+   const label=norm(row?.label);
+   if(/termen|inchidere|depunere/.test(label))add(row?.value,true);
+   else if(/deschidere|calendar/.test(label))add(row?.value);
+ }
+ return !expiredCutoff&&dated.some(ts=>ts>now);
+}
 function isUpcoming(d){
  const s=currentStatus(d);
- return ['EXPECTED','ANNOUNCED','UPCOMING','PREPARE_NOW'].includes(s)&&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE';
+ return ['EXPECTED','ANNOUNCED','UPCOMING','PREPARE_NOW'].includes(s)
+   &&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE'
+   &&hasFreshPrepareEvidence(d);
 }
-function isConsultation(d){return currentStatus(d)==='PUBLIC_CONSULTATION'&&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE'};
+function isConsultation(d){
+ return currentStatus(d)==='PUBLIC_CONSULTATION'
+   &&String(d.publicationState||'').toUpperCase()==='PUBLISHABLE'
+   &&hasFreshPrepareEvidence(d);
+}
 function score(d){
  const c=Number(d?.quality?.completeness||0);const dl=parseDate(confirmed(d,'Termen')?.value);let urgency=0;
  if(dl){const days=Math.max(0,(dl-Date.now())/86400000);urgency=days<=7?30:days<=21?20:days<=45?10:0;}
@@ -137,8 +166,8 @@ function render(){
 
  document.querySelector('[data-concierge-surface]')?.remove();
  const open=P.dossiers.filter(isOpen).sort((a,b)=>score(b)-score(a));
- const openTotal=Number(P?.summary?.openCount);
- const canonicalOpenTotal=Number.isFinite(openTotal)?openTotal:open.length;
+ // Count only records still passing the live gate, never a stale snapshot total.
+ const canonicalOpenTotal=open.length;
  const legacyOpenMetric=hero.querySelector('.heroCard .big');
  if(legacyOpenMetric)legacyOpenMetric.textContent=String(canonicalOpenTotal);
  const upcoming=P.dossiers.filter(isUpcoming).sort((a,b)=>score(b)-score(a));
