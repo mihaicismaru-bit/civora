@@ -85,7 +85,81 @@ def fake_fetch(url):
     raise AssertionError(f"unexpected URL {url}")
 
 
+def test_transport_integrity():
+    """Transport and raw-byte evidence tests are hermetic: never contact a live host."""
+    from urllib.request import Request
+
+    allowed_alias = CALL1.replace("https://eeagrants.org/", "https://www.eeagrants.org/")
+    if module._same_official_endpoint(CALL1, allowed_alias + "/") != allowed_alias:
+        fail("official same-endpoint www/trailing-slash alias must remain supported")
+
+    redirect = module._RegisteredEEARedirect(CALL1)
+    if redirect.redirect_request(Request(CALL1), None, 302, "Moved", {}, allowed_alias) is None:
+        fail("same-owner same-article redirect was unexpectedly rejected")
+    for bad in (
+        "http://eeagrants.org/en/eea-civil-society-fund-romania/calls/" + CALL1.rsplit("/", 1)[-1],
+        "https://example.org/collect",
+        CALL2,
+        CALL1 + "?tracking=1",
+        "https://www.eeagrants.org/en/eea-civil-society-fund-romania/calls",
+    ):
+        try:
+            redirect.redirect_request(Request(CALL1), None, 302, "Moved", {}, bad)
+        except ValueError:
+            pass
+        else:
+            fail(f"redirect hop crossed exact official source before fetch: {bad}")
+
+    class RawResponse:
+        def __init__(self, body, *, final_url=CALL1, status=200, content_type="text/html", **headers):
+            self.body = body
+            self.final_url = final_url
+            self.status = status
+            self.headers = {"Content-Type": content_type, **headers}
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def getcode(self):
+            return self.status
+        def geturl(self):
+            return self.final_url
+        def read(self, size):
+            return self.body[:size]
+
+    original_open = module._open_registered_source
+    def attempt(reply):
+        module._open_registered_source = lambda request, *, timeout: reply
+        try:
+            return module.fetch_url(CALL1)
+        finally:
+            module._open_registered_source = original_open
+
+    raw = CALL1_HTML
+    good = attempt(RawResponse(raw, **{"Content-Length": str(len(raw))}))
+    if good["raw"] != raw or good["status"] != 200 or good["final_url"] != CALL1:
+        fail("valid complete EEA HTTPS raw reply must remain byte-identical")
+    for bad, label in (
+        (RawResponse(raw[:50], **{"Content-Length": str(len(raw))}), "truncated"),
+        (RawResponse(raw, **{"Content-Length": "bogus"}), "invalid length"),
+        (RawResponse(raw, **{"Content-Length": "1,1"}), "conflicting length"),
+        (RawResponse(raw, **{"Content-Encoding": "gzip"}), "compressed"),
+        (RawResponse(raw, status=206), "partial HTTP"),
+        (RawResponse(raw, final_url=CALL2), "redirect-to-other-call"),
+        (RawResponse(raw, final_url="https://example.org/evil"), "off-authority"),
+        (RawResponse(raw, content_type="application/pdf"), "non-HTML"),
+        (RawResponse(b""), "empty body"),
+    ):
+        try:
+            attempt(bad)
+        except (ValueError, RuntimeError):
+            pass
+        else:
+            fail(f"EEA raw acquisition accepted an unsafe {label} response")
+
+
 def main():
+    test_transport_integrity()
     urls = module.discover_call_urls(INDEX_HTML, base_url=INDEX)
     if urls != [CALL1, CALL2]:
         fail(f"call discovery must prefer EN, order by call number and ignore third party: {urls}")
@@ -212,7 +286,7 @@ def main():
     if len(only_links) != 1 or mode != "INDEX_EXACT_ANCHORS" or direct_count != 1:
         fail("partial official index must remain incomplete; no pinned fallback")
 
-    print("PASS EEA CSF live acquisition: official discovery, exact-page readback, raw hashes, parsing, reconciliation and redirect guard")
+    print("PASS EEA CSF live acquisition: exact official redirect-hop/byte-length guards, discovery, raw hashes and non-publishing reconciliation")
 
 
 if __name__ == "__main__":
