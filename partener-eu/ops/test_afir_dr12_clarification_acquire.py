@@ -95,6 +95,27 @@ def test_transport():
     assert fetch(a, "index", note.INDEX_URL)[0] == html()
     p = Response(URL, PDF, kind="pdf")
     assert fetch(p, "pdf", URL)[0] == PDF
+    # A common Azure blob default is octet-stream, but the PDF signature
+    # and final EOF marker remain compulsory on this allowed binary type.
+    p.headers["Content-Type"] = "application/octet-stream"
+    assert fetch(p, "pdf", URL)[0] == PDF
+    a.headers["Content-Type"] = "application/xhtml+xml; charset=utf-8"
+    assert fetch(a, "index", note.INDEX_URL)[0] == html()
+    # MIME parameters or lookalike types never establish official provenance.
+    for kind, url, raw, spoofed_types in (
+        ("index", note.INDEX_URL, html(), (
+            "text/html-fake", "text/plain; note=text/html",
+            "application/json; foo=text/html", "application/xhtml+xml-fake", "")),
+        ("pdf", URL, PDF, (
+            "application/pdf-fake", "text/html", "application/json; name=application/pdf",
+            "text/plain; filetype=pdf", "application/x-pdf-html", "")),
+    ):
+        for spoof in spoofed_types:
+            response = Response(url, raw, kind=kind)
+            response.headers["Content-Type"] = spoof
+            refused(lambda response=response, kind=kind, url=url:
+                    fetch(response, kind, url), "MIME")
+            assert response.reads == 0
     refused(lambda: note.acquire_exact(URL, "pdf", authorized_pdf="https://example.com"))
     for r in (Response(URL, PDF, kind="pdf", encoding="gzip"),
               Response(URL, PDF, kind="pdf", length=len(PDF) + 2)):
@@ -120,6 +141,27 @@ def test_capture_replay():
         assert not any(record[k] for k in ("call_status_authorized", "eligibility_authorized",
                                            "publish_authorized", "distribution_authorized"))
         original = (target / "manifest.json").read_bytes()
+        assert record["parser_version"] == note.VERSION
+        assert note.VERSION.endswith("-v2")
+        # Historical immutable v1 receipts remain replayable under the newer,
+        # stricter content-type gate; their parser label is not rewritten.
+        historical = copy.deepcopy(record)
+        historical["parser_version"] = note.PRIOR_REPLAY_VERSION
+        (target / "manifest.json").write_text(json.dumps(historical), encoding="utf-8")
+        assert note.replay(target)["parser_version"] == note.PRIOR_REPLAY_VERSION
+        (target / "manifest.json").write_bytes(original)
+        for document, mime in (
+            ("index", "text/html-fake"),
+            ("index", "text/plain; note=text/html"),
+            ("document", "application/pdf-fake"),
+            ("document", "application/json; note=application/pdf"),
+            ("document", "text/html"),
+        ):
+            altered = copy.deepcopy(record)
+            altered[document]["content_type"] = mime
+            (target / "manifest.json").write_text(json.dumps(altered), encoding="utf-8")
+            refused(lambda: note.replay(target), "MIME")
+        (target / "manifest.json").write_bytes(original)
         for k, value in (
             ("status", "OPEN_CALL"),
             ("source_url", "https://evil.example"),
