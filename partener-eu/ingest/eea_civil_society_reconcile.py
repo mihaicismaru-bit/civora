@@ -16,6 +16,7 @@ import pathlib
 import re
 from typing import Any
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 SCHEMA = "PARTENER_EU_EEA_CSF_RECONCILIATION_RECEIPT_V1"
 INPUT_SCHEMA = "PARTENER_EU_EEA_CSF_LIVE_EVIDENCE_V1"
@@ -24,6 +25,9 @@ PROGRAMME_FAMILY = "EEA Civil Society Fund Romania 2021-2028"
 AUTHORITY_CLASS = "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
 FETCH_PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V2"
+# Date-only deadlines of Romanian calls are interpreted in Romania's civil time,
+# never in UTC (midnight UTC can already be the following day locally).
+ROMANIA_TIMEZONE = ZoneInfo("Europe/Bucharest")
 ADAPTER_PARSER_VERSION = "EEA_CSF_ROMANIA_CALLS_V1"
 MAX_RAW_BYTES = 4_000_000
 SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -220,7 +224,8 @@ def reconcile_live_evidence(
 
     # A page that still says OPEN after its explicit official submission date
     # is historical/contradictory evidence, not an admissible CURRENT open call.
-    # Compare calendar dates conservatively: we do not invent a closure hour.
+    # Compare *Romanian local calendar dates* conservatively, without inventing
+    # a closure hour. UTC calendar days can lag the Romanian deadline date.
     def evidence_time(value: Any, field: str) -> dt.datetime:
         try:
             parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
@@ -315,8 +320,8 @@ def reconcile_live_evidence(
         if questions_deadline > deadline:
             _fail(f"{call_id}: questions deadline after submission deadline")
         if state in {"OPEN_CALL", "FORTHCOMING_CALL"} and (
-            source_time.date() > dt.date.fromisoformat(deadline)
-            or reconciliation_time.date() > dt.date.fromisoformat(deadline)
+            source_time.astimezone(ROMANIA_TIMEZONE).date() > dt.date.fromisoformat(deadline)
+            or reconciliation_time.astimezone(ROMANIA_TIMEZONE).date() > dt.date.fromisoformat(deadline)
         ):
             _fail(f"{call_id}: stale open/forthcoming status past official submission date")
 
