@@ -289,6 +289,35 @@ def main():
         reconciled_at="2026-11-06T19:00:00+00:00",
     )
 
+    # EEA Romania date-only deadlines use Romania's civil calendar, not UTC.
+    # On 8 October 2026, 21:30 UTC is already 9 October 00:30 EEST:
+    # a stale OPEN label cannot be staged during this UTC/local midnight gap.
+    local_next_day = copy.deepcopy(evidence)
+    local_next_day["fetched_at"] = "2026-10-08T21:30:00+00:00"
+    for row in local_next_day["records"]:
+        row["fetched_at"] = local_next_day["fetched_at"]
+    expect_fail(
+        local_next_day,
+        "Romania-local deadline expired although UTC date is still 8 October",
+        reconciled_at="2026-10-08T21:31:00+00:00",
+    )
+
+    # Positive boundary: 20:30 UTC is still 8 October 23:30 in Romania.
+    # The date-only policy must not invent an earlier closing hour.
+    local_deadline_day = copy.deepcopy(evidence)
+    local_deadline_day["fetched_at"] = "2026-10-08T20:30:00+00:00"
+    for row in local_deadline_day["records"]:
+        row["fetched_at"] = local_deadline_day["fetched_at"]
+    local_receipt = module.reconcile_live_evidence(
+        local_deadline_day,
+        reconciled_at="2026-10-08T20:31:00+00:00",
+        minimum_calls=2,
+    )
+    if (local_receipt["stats"]["reconciled_calls"] != 2
+            or local_receipt["publish_authorized"]
+            or not local_receipt["ready_for_staging"]):
+        fail("valid Romanian deadline-day readback was incorrectly denied")
+
     mismatched_provenance = copy.deepcopy(evidence)
     mismatched_provenance["records"][0]["fetched_at"] = "2026-08-26T17:00:00+00:00"
     expect_fail(mismatched_provenance, "call-specific acquisition time differs from envelope")
