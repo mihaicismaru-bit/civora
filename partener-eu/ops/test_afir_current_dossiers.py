@@ -130,9 +130,47 @@ def test_afir_source_scope_guard() -> None:
     omitted_extension["dossiers"] = [row for row in omitted_extension["dossiers"] if row["id"] != "afir-dr14-2026"]
     denied(omitted_extension, "extension material release HELD")
 
+def test_projection_clock_and_bucharest_dst() -> None:
+    """Current application windows use wall time, not a source build timestamp."""
+    import importlib.util
+
+    module_path = ROOT / "partener-eu" / "ingest" / "sync_decision_products_projection.py"
+    spec = importlib.util.spec_from_file_location("afir_live_projection", module_path)
+    assert spec and spec.loader
+    projection = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(projection)
+
+    # DST-aware deadlines are non-negotiable for official Romanian calls.
+    assert projection.parse_date("16 noiembrie 2026, 16:00 (componente cu fonduri)") == datetime(
+        2026, 11, 16, 14, 0, tzinfo=timezone.utc
+    )
+    assert projection.parse_date("16 iulie 2026, 16:00") == datetime(
+        2026, 7, 16, 13, 0, tzinfo=timezone.utc
+    )
+    official = {
+        "status": "OPEN", "publicationState": "PUBLISHABLE",
+        "quickFacts": [
+            {"label": "Status", "value": "DESCHIS", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": "16 noiembrie 2026, 16:00 (componente cu fonduri)", "confidence": "CONFIRMED"},
+        ],
+    }
+    assert projection.current_open(official, datetime(2026, 11, 7, 20, tzinfo=timezone.utc))
+    assert projection.current_open(official, datetime(2026, 11, 16, 14, tzinfo=timezone.utc))
+    assert not projection.current_open(official, datetime(2026, 11, 16, 14, 0, 1, tzinfo=timezone.utc))
+    assert not projection.current_open({**official, "publicationState": "REVIEW_REQUIRED"}, datetime(
+        2026, 11, 7, 20, tzinfo=timezone.utc
+    ))
+    # Static lock on the critical clock boundary: source-generatedAt is a
+    # version marker only; source timestamps may be stale or future-dated.
+    source = module_path.read_text(encoding="utf-8")
+    assert 'clock = dt.datetime.now(dt.timezone.utc)' in source
+    assert 'clock = parse_date(payload.get("generatedAt"))' not in source
+
+
 def main() -> int:
     test_afir_source_scope_guard()
     test_extension_counter_proof_fail_closed()
+    test_projection_clock_and_bucharest_dst()
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     dossiers = {row["id"]: row for row in payload.get("dossiers") or []}
     assert {
