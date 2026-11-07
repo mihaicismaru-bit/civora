@@ -169,12 +169,12 @@ class TextOnly(HTMLParser):
                 continue
             property_name, value = declaration.split(":", 1)
             property_name = property_name.strip().lower()
-            value = re.sub(r"\\s*!important\\s*$", "", value.strip().lower())
+            value = re.sub(r"\s*!important\s*$", "", value.strip().lower())
             if (property_name == "display" and value == "none"
                     or property_name in ("visibility", "content-visibility")
                     and value == "hidden"
                     or property_name == "opacity"
-                    and re.fullmatch(r"0(?:\\.0+)?%?", value)):
+                    and re.fullmatch(r"0(?:\.0+)?%?", value)):
                 return True
         return False
 
