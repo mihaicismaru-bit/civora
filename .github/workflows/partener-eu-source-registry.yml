@@ -125,7 +125,11 @@ jobs:
         run: |
           python partener-eu/ingest/interreg_programming_live_fetch.py \
             --out /tmp/interreg-programming-live-evidence.json \
+            --raw-dir "/tmp/interreg-programming-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/interreg_programming_live_fetch.py \
+            --out /tmp/interreg-programming-live-evidence.json \
+            --replay-dir "/tmp/interreg-programming-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
       - name: Validate live Interreg programming receipt stays fail-closed
         run: |
@@ -162,6 +166,69 @@ jobs:
               print('FAIL Romania-Hungary programming observation lost provenance:', obs)
               sys.exit(2)
 
+          # The newer October-November survey must have its own exact-page
+          # evidence. The older June-August ROHU survey is CLOSED; combining
+          # both into a single scraped landing-page window is forbidden.
+          survey=rows.get('SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026')
+          official_survey='https://interreg-rohu.eu/ro/contribuiti-la-definirea-viitorului-cooperarii-transfrontaliere/'
+          if not survey or survey.get('fetch_status') != 'PASS':
+              print('FAIL official current ROHU survey not captured:', survey)
+              sys.exit(2)
+          if survey.get('registered_url') != official_survey or survey.get('final_url') != official_survey:
+              print('FAIL ROHU survey exact-page identity drift:', survey.get('final_url'))
+              sys.exit(2)
+          survey_obs=survey.get('normalized') or {}
+          if (survey_obs.get('observation_state') != 'CONSULTATION'
+              or survey_obs.get('consultation_start') != '2026-10-05'
+              or survey_obs.get('consultation_end') != '2026-11-30'
+              or survey_obs.get('not_a_call') is not True
+              or survey_obs.get('open_call_authorized') is not False
+              or survey_obs.get('publish_authorized') is not False
+              or survey_obs.get('material_fact_use') is not False
+              or survey_obs.get('publication_effect') != 'NONE'):
+              print('FAIL ROHU 2026 survey consultation/call boundary:', survey_obs)
+              sys.exit(2)
+          if (survey_obs.get('raw_hash') != survey.get('raw_hash')
+              or survey_obs.get('run_id') != survey.get('run_id')
+              or survey_obs.get('fetched_at') != survey.get('fetched_at')
+              or survey_obs.get('authority_url') != official_survey
+              or not survey_obs.get('parser_version') or not survey.get('bytes')):
+              print('FAIL ROHU survey raw acquisition provenance:', survey_obs)
+              sys.exit(2)
+
+          # The official November 2026 workshops have a dedicated raw
+          # article, not an OPEN_CALL, application deadline or call index.
+          workshop=rows.get('SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026')
+          workshop_url='https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-si-contribuiti-la-definirea-capitolului-interreg-2028-2034/'
+          if not workshop or workshop.get('fetch_status') != 'PASS':
+              print('FAIL November ROHU official workshops raw acquisition missing:', workshop)
+              sys.exit(2)
+          if workshop.get('registered_url') != workshop_url or workshop.get('final_url') != workshop_url:
+              print('FAIL ROHU workshops exact-page authority mismatch')
+              sys.exit(2)
+          workshop_obs=workshop.get('normalized') or {}
+          if (workshop_obs.get('programme_family') != 'Interreg Romania-Hungary 2028-2034'
+              or workshop_obs.get('observation_state') != 'PROGRAMME_PREPARATION'
+              or workshop_obs.get('intelligence_family') != 'PROGRAMMING_PIPELINE'
+              or workshop_obs.get('not_a_call') is not True
+              or workshop_obs.get('open_call_authorized') is not False
+              or workshop_obs.get('material_fact_use') is not False
+              or workshop_obs.get('publish_authorized') is not False
+              or workshop_obs.get('publication_effect') != 'NONE'
+              or workshop.get('material_fact_use') is not False
+              or workshop.get('publish_authorized') is not False
+              or workshop.get('publication_effect') != 'NONE'):
+              print('FAIL ROHU workshops future-programming/call isolation:', workshop_obs)
+              sys.exit(2)
+          if (workshop_obs.get('authority_url') != workshop_url
+              or workshop_obs.get('raw_hash') != workshop.get('raw_hash')
+              or workshop_obs.get('fetched_at') != workshop.get('fetched_at')
+              or workshop_obs.get('run_id') != workshop.get('run_id')
+              or not workshop_obs.get('parser_version')
+              or not workshop.get('bytes')):
+              print('FAIL ROHU workshops immutable source provenance:', workshop_obs)
+              sys.exit(2)
+
           romd=rows.get('SRC-INTERREG-ROMD-2028-2034')
           if not romd:
               print('FAIL Romania-Moldova 2028-2034 programming source missing from live evidence')
@@ -193,7 +260,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: partener-interreg-programming-live-evidence
-          path: /tmp/interreg-programming-live-evidence.json
+          path: |
+            /tmp/interreg-programming-live-evidence.json
+            /tmp/interreg-programming-originals-${{ github.run_id }}-${{ github.run_attempt }}/
           retention-days: 7
           if-no-files-found: error
 

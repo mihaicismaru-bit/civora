@@ -29,7 +29,15 @@ STATE = ROOT / "partener-eu" / "ingest" / "state" / "afir_state.json"
 CORPUS = ROOT / "partener-eu" / "ingest" / "state" / "afir_corpus.json"
 
 HOSTS = {"afir.ro", "www.afir.ro"}
+# Exact official notice whose raw bytes are required for DR-14/DR-18
+# deadline reconciliation; an index discovery alone is not a raw receipt.
+AFIR_EXTENSION_NOTICE = (
+    "https://www.afir.ro/info-la-zi/"
+    "prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/"
+)
+AFIR_RECEIPT_PARSER_VERSION = "afir-extension-notice-raw-v1"
 SEEDS = [
+    AFIR_EXTENSION_NOTICE,
     "https://www.afir.ro/info-la-zi/",
     "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/",
     "https://www.afir.ro/instrumente/sesiuni/detalii-mentiuni-si-informatii-derulare-sesiuni-depunere-proiecte/",
@@ -87,6 +95,31 @@ def norm(url, base=None):
     return urllib.parse.urlunparse(("https", p.netloc.lower(), p.path or "/", "", query, ""))
 
 
+def _strict_afir_https(url):
+    """Only explicit HTTPS AFIR endpoints, including every redirect hop."""
+    try:
+        p = urllib.parse.urlsplit(url)
+        return (
+            p.scheme == "https"
+            and (p.hostname or "").lower() in HOSTS
+            and p.username is None
+            and p.password is None
+            and p.port in (None, 443)
+            and not any(marker in (p.path or "/").lower() for marker in AUTH_PATH_MARKERS)
+        )
+    except ValueError:
+        return False
+
+
+class _StrictAFIRRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Reject untrusted/intermediate redirects before any new request is made."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not _strict_afir_https(newurl):
+            raise ValueError("AFIR redirect would leave official HTTPS authority")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def _retry_delay(attempt, retry_after=None):
     """Bound retry latency so a flaky source cannot stall the ingestion job."""
     if retry_after:
@@ -104,18 +137,57 @@ def fetch(url, timeout=25, sleep=time.sleep):
     transient HTTP/network failure, but they never convert an error response
     into evidence and never bypass authentication or TLS verification.
     """
+    if not _strict_afir_https(url):
+        return {"ok": False, "url": url, "error": "Untrusted AFIR requested URL", "attemptCount": 0}
     context = ssl.create_default_context()
+    # urllib.urlopen follows redirects before returning a response. A final
+    # HTTPS URL alone cannot prove that intermediate hops stayed on AFIR TLS.
+    opener = urllib.request.build_opener(
+        _StrictAFIRRedirectHandler(), urllib.request.HTTPSHandler(context=context)
+    )
     last_error = None
     last_status = None
     for attempt in range(1, MAX_FETCH_ATTEMPTS + 1):
         req = urllib.request.Request(url, headers=REQUEST_HEADERS)
         try:
-            with urllib.request.urlopen(req, timeout=timeout, context=context) as r:
-                data = r.read(12_000_000)
+            with opener.open(req, timeout=timeout) as r:
+                # Only the exact verified AFIR HTTPS authority may supply source
+                # bytes. urllib follows redirects automatically: a 200 from
+                # another host (or an HTTPS downgrade) is NOT AFIR evidence.
+                final_url = r.geturl()
+                final_parts = urllib.parse.urlsplit(final_url)
+                final_host = (final_parts.hostname or "").lower()
+                final_path = (final_parts.path or "/").lower()
+                if (
+                    final_parts.scheme != "https"
+                    or final_host not in HOSTS
+                    or final_parts.username is not None
+                    or final_parts.password is not None
+                    or any(marker in final_path for marker in AUTH_PATH_MARKERS)
+                ):
+                    raise ValueError("AFIR source authority changed or redirected to an authentication route")
+                status = getattr(r, "status", 200)
+                if status != 200:
+                    raise ValueError("AFIR source returned non-success HTTP status")
+                # Servers can ignore Accept-Encoding: identity. Compressed bytes
+                # must never be fingerprinted or parsed as AFIR original HTML/PDF.
+                encoding = str(r.headers.get("Content-Encoding") or "identity").strip().lower()
+                if encoding != "identity":
+                    raise ValueError("AFIR official source returned unsupported encoded body")
+                # Read one byte beyond the permitted body, otherwise a
+                # truncated document could be fingerprinted as complete.
+                data = r.read(12_000_001)
+                if not data or len(data) > 12_000_000:
+                    raise ValueError("AFIR source body empty or exceeds complete-byte limit")
+                declared_length = r.headers.get("Content-Length")
+                if declared_length is not None:
+                    declared_length = declared_length.strip()
+                    if not declared_length.isdigit() or int(declared_length) != len(data):
+                        raise ValueError("AFIR source body differs from declared Content-Length")
                 return {
                     "ok": True,
-                    "url": r.geturl(),
-                    "status": getattr(r, "status", 200),
+                    "url": final_url,
+                    "status": status,
                     "content_type": r.headers.get("Content-Type", ""),
                     "data": data,
                     "attemptCount": attempt,
@@ -261,6 +333,61 @@ def atomic_json(path, value):
             os.unlink(temporary)
 
 
+def capture_extension_notice_receipt(requested_url, fetched, observed_at):
+    """Archive exact official notice bytes, strictly as non-authorizing evidence.
+
+    GitHub Actions artifacts are immutable within their retention window.
+    The reviewed persistent handoff and semantic admission remain separate.
+    """
+    destination = os.environ.get("PARTENER_AFIR_EVIDENCE_DIR")
+    if requested_url != AFIR_EXTENSION_NOTICE or not destination:
+        return None
+    run_id = os.environ.get("GITHUB_RUN_ID")
+    data = fetched.get("data")
+    final_url = fetched.get("url")
+    content_type = str(fetched.get("content_type") or "").lower()
+    if (
+        not run_id
+        or not fetched.get("ok")
+        or final_url != AFIR_EXTENSION_NOTICE
+        or not isinstance(data, bytes)
+        or not data
+        or "html" not in content_type
+    ):
+        raise ValueError("AFIR notice raw receipt lacks exact official HTTPS identity, run or HTML bytes")
+    outdir = Path(destination)
+    outdir.mkdir(parents=True, exist_ok=True)
+    raw_name = "afir-dr14-dr18-extension-notice.raw.html"
+    raw_path = outdir / raw_name
+    raw_path.write_bytes(data)
+    digest = hashlib.sha256(data).hexdigest()
+    manifest = {
+        "schema_version": "1.0",
+        "requested_url": requested_url,
+        "final_url": final_url,
+        "fetched_at_utc": observed_at,
+        "raw_sha256": digest,
+        "raw_bytes": len(data),
+        "raw_evidence_file": raw_name,
+        "http_status": fetched.get("status"),
+        "content_type": fetched.get("content_type"),
+        "parser_version": AFIR_RECEIPT_PARSER_VERSION,
+        "run_id": run_id,
+        "run_attempt": os.environ.get("GITHUB_RUN_ATTEMPT", "1"),
+        "programme": "PS_PAC_2023_2027/DR14_DR18",
+        "source_family": "AFIR",
+        "authority_class": "T1_OFFICIAL_AGENCY",
+        "observation_state": "RAW_FETCHED_PENDING_SEMANTIC_RECONCILIATION",
+        "material_fact_action": "NONE",
+        "publish_authorized": False,
+    }
+    (outdir / "manifest.json").write_text(
+        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return manifest
+
+
 def build_payload(prior, observed_at, discovered_items, errors, access_dependencies=None):
     access_dependencies = list(access_dependencies or [])
     run_status = "PASS" if len(discovered_items) >= 3 else "DEGRADED" if discovered_items else "SOURCE_UNAVAILABLE"
@@ -398,6 +525,11 @@ def main():
                     "reason": "AFIR redirected the public route to an authentication surface; no access was fabricated.",
                 })
                 continue
+            if url == AFIR_EXTENSION_NOTICE:
+                try:
+                    capture_extension_notice_receipt(url, r, now())
+                except ValueError as exc:
+                    errors.append({"url": url, "error": str(exc), "observationState": "RAW_RECEIPT_REJECTED"})
             for href, label in links:
                 dependency = auth_link_dependency(href, url)
                 if dependency:

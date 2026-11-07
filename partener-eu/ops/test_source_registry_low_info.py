@@ -43,4 +43,120 @@ try:
 finally:
     module.TASK_DIR = original_task_dir
 
-print("PASS source registry low-information regression")
+# Official source health may not hash a successful-looking truncated HTTP body.
+# Exercise the real fetch_once transport with synthetic in-memory responses.
+class _Response:
+    status = 200
+
+    def __init__(self, payload: bytes, *, length: str | None = None,
+                 encoding: str | None = None, status: int = 200,
+                 final_url: str = "https://official.example.invalid/evidence"):
+        self.payload = payload
+        self.status = status
+        self.final_url = final_url
+        self.headers = {"content-type": "text/html; charset=utf-8"}
+        if length is not None:
+            self.headers["content-length"] = length
+        if encoding is not None:
+            self.headers["content-encoding"] = encoding
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *_args):
+        return False
+
+    def read(self, limit: int) -> bytes:
+        return self.payload[:limit]
+
+    def geturl(self):
+        return self.final_url
+
+
+original_build_opener = module.urllib.request.build_opener
+try:
+    good = b"<html><body>" + b"Official programme evidence " * 400 + b"</body></html>"
+
+    class _StubOpener:
+        def __init__(self, response):
+            self.response = response
+
+        def open(self, *_args, **_kwargs):
+            return self.response
+
+    def probe(response):
+        module.urllib.request.build_opener = lambda *_handlers: _StubOpener(response)
+        return module.fetch_once("https://official.example.invalid/evidence")
+
+    healthy = probe(_Response(good, length=str(len(good)), encoding="identity"))
+    assert healthy["ok"] is True
+    assert healthy["bytes"] == len(good)
+    assert healthy["content_quality_ok"] is True
+
+    incomplete_cases = (
+        ("oversized", _Response(b"x" * (module.MAX_SOURCE_BYTES + 10)), "oversized"),
+        ("short", _Response(good, length=str(len(good) + 1)), "Content-Length"),
+        ("long", _Response(good, length=str(len(good) - 1)), "Content-Length"),
+        ("bad length", _Response(good, length="invalid"), "Content-Length"),
+        ("gzip", _Response(good, encoding="gzip"), "Content-Encoding"),
+        ("partial 206", _Response(good, status=206), "HTTP status"),
+        ("redirect 302", _Response(good, status=302), "HTTP status"),
+        ("off-domain final", _Response(good, final_url="https://attacker.invalid/evidence"), "origin"),
+        ("HTTP downgrade final", _Response(good, final_url="http://official.example.invalid/evidence"), "untrusted"),
+        ("off-port final", _Response(good, final_url="https://official.example.invalid:8443/evidence"), "untrusted"),
+    )
+    for label, response, expected in incomplete_cases:
+        try:
+            probe(response)
+        except ValueError as exc:
+            assert expected in str(exc), (label, exc)
+        else:
+            raise AssertionError(f"incomplete/unverifiable source marked healthy: {label}")
+finally:
+    module.urllib.request.build_opener = original_build_opener
+
+# A malicious intermediary must not even be contacted by the HTTP redirect
+# handler: checking only the ultimate response URL misses off-authority hops.
+import urllib.request
+
+registered = "https://official.example.invalid/evidence"
+handler = module._SourceOriginRedirect(registered)
+request = urllib.request.Request(registered)
+allowed = handler.redirect_request(
+    request, None, 302, "Found", {}, "https://www.official.example.invalid/evidence"
+)
+assert allowed.full_url == "https://www.official.example.invalid/evidence"
+
+for url in (
+    "https://attacker.invalid/evidence",
+    "https://official.example.invalid.attacker.invalid/evidence",
+    "https://official.example.invalid@attacker.invalid/evidence",
+    "https://internal.example.invalid/evidence",
+    "https://127.0.0.1/evidence",
+    "http://official.example.invalid/evidence",
+    "https://official.example.invalid:8443/evidence",
+    "https://user:pass@official.example.invalid/evidence",
+):
+    try:
+        handler.redirect_request(request, None, 302, "Found", {}, url)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"off-authority redirect accepted before network: {url}")
+
+# The initial registry identity is curated: HTTPS alone cannot prove a
+# hostname is official. The transport guard enforces HTTPS/credential/port
+# safety there; cross-host comparison is enforced at every redirect.
+for url in (
+    "http://official.example.invalid/evidence",
+    "https://user@official.example.invalid/evidence",
+    "https://official.example.invalid:9000/evidence",
+):
+    try:
+        module._assert_source_origin(url, url)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"unsafe initial registry or alias URL: {url}")
+
+print("PASS source registry low-information, partial-body and origin-lock regression")

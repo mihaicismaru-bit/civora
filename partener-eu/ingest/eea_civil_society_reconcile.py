@@ -16,6 +16,7 @@ import pathlib
 import re
 from typing import Any
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
 
 SCHEMA = "PARTENER_EU_EEA_CSF_RECONCILIATION_RECEIPT_V1"
 INPUT_SCHEMA = "PARTENER_EU_EEA_CSF_LIVE_EVIDENCE_V1"
@@ -23,6 +24,13 @@ SOURCE_FAMILY = "EEA_NORWAY"
 PROGRAMME_FAMILY = "EEA Civil Society Fund Romania 2021-2028"
 AUTHORITY_CLASS = "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
+FETCH_PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V2"
+# Date-only deadlines of Romanian calls are interpreted in Romania's civil time,
+# never in UTC (midnight UTC can already be the following day locally).
+ROMANIA_TIMEZONE = ZoneInfo("Europe/Bucharest")
+ADAPTER_PARSER_VERSION = "EEA_CSF_ROMANIA_CALLS_V1"
+MAX_RAW_BYTES = 4_000_000
+SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 CALL_PATH_RE = re.compile(
     r"^/(?:en|ro)/eea-civil-society-fund-romania/calls/call-(?P<number>\d+)-[^/?#]+/?$",
     re.IGNORECASE,
@@ -64,16 +72,75 @@ def _parse_date(value: Any, field: str) -> str:
 def _parse_eur(value: Any, field: str) -> int:
     if not isinstance(value, str) or not value.strip():
         _fail(f"{field}: non-empty EUR amount required")
-    text = value.upper().replace("EURO", "EUR")
-    if "€" not in text and "EUR" not in text:
-        _fail(f"{field}: EUR/€ marker required")
-    digits = re.sub(r"\D", "", text)
-    if not digits:
-        _fail(f"{field}: amount digits missing")
-    amount = int(digits)
+    # The official call pages currently use exact integer EUR amounts such as
+    # €3,718,664. Stripping all non-digits silently changes decimal values,
+    # ungrouped separators and annotated estimates into invented budgets.
+    # Accept only an entire currency-marked integer with valid comma thousands
+    # grouping. Unsupported formats require source review, not normalization.
+    text = value.strip().upper()
+    digits_pattern = r"(?:[0-9]{1,3}(?:,[0-9]{3})+|[0-9]+)"
+    matched = re.fullmatch(
+        rf"(?:€\s*|EUR\s*)({digits_pattern})|({digits_pattern})\s*(?:€|EUR)",
+        text,
+    )
+    if matched is None:
+        _fail(f"{field}: exact integer EUR/€ amount with valid grouping required")
+    amount = int((matched.group(1) or matched.group(2)).replace(",", ""))
     if amount <= 0:
         _fail(f"{field}: amount must be positive")
     return amount
+
+
+def _valid_raw_hash(value: Any, field: str) -> str:
+    if not isinstance(value, str) or SHA256_RE.fullmatch(value) is None:
+        _fail(f"{field}: lowercase 64-character SHA-256 required")
+    return value
+
+
+def _valid_raw_page(page: dict[str, Any], field: str) -> None:
+    if page.get("http_status") != 200:
+        _fail(f"{field}: HTTP 200 required")
+    content_type = page.get("content_type")
+    if not isinstance(content_type, str) or not (
+        "text/html" in content_type.lower()
+        or "application/xhtml+xml" in content_type.lower()
+    ):
+        _fail(f"{field}: official HTML content type required")
+    size = page.get("bytes")
+    if (isinstance(size, bool) or not isinstance(size, int)
+            or not 0 < size <= MAX_RAW_BYTES):
+        _fail(f"{field}: positive bounded raw byte count required")
+    _valid_raw_hash(page.get("raw_hash"), f"{field}.raw_hash")
+
+
+def _valid_official_index(value: Any) -> None:
+    if not isinstance(value, dict):
+        _fail("source_index: official acquisition evidence required")
+    url = value.get("url")
+    if not isinstance(url, str):
+        _fail("source_index: official index URL required")
+    parsed = urlparse(url)
+    if (parsed.scheme != "https" or (parsed.hostname or "").lower() not in OFFICIAL_HOSTS
+            or parsed.username is not None or parsed.password is not None
+            or parsed.port not in (None, 443) or parsed.query or parsed.fragment
+            or not re.fullmatch(r"/(?:en|ro)/eea-civil-society-fund-romania/calls/?",
+                                parsed.path, re.IGNORECASE)):
+        _fail("source_index: untrusted or non-canonical official index URL")
+    _valid_raw_page(value, "source_index")
+    mode = value.get("discovery_mode")
+    direct_count = value.get("direct_exact_call_links")
+    if mode not in {
+        "INDEX_EXACT_ANCHORS",
+        "PINNED_OFFICIAL_DETAIL_DISCOVERY_REQUIRES_FRESH_READBACK",
+    }:
+        _fail("source_index: unsupported acquisition discovery mode")
+    if (isinstance(direct_count, bool) or not isinstance(direct_count, int)
+            or direct_count < 0):
+        _fail("source_index: valid direct exact-call link count required")
+    if mode == "INDEX_EXACT_ANCHORS" and direct_count == 0:
+        _fail("source_index: direct-link mode has no direct links")
+    if mode.startswith("PINNED_") and direct_count != 0:
+        _fail("source_index: fallback mode contradicts direct-link evidence")
 
 
 def _official_call_url(value: Any, call_number: int) -> str:
@@ -81,7 +148,13 @@ def _official_call_url(value: Any, call_number: int) -> str:
         _fail("authority_url: non-empty string required")
     parsed = urlparse(value)
     host = (parsed.hostname or "").lower()
-    if parsed.scheme != "https" or host not in OFFICIAL_HOSTS or parsed.username or parsed.password:
+    if (
+        parsed.scheme != "https"
+        or host not in OFFICIAL_HOSTS
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.port not in (None, 443)
+    ):
         _fail(f"authority_url: non-official EEA URL {value!r}")
     match = CALL_PATH_RE.match(parsed.path or "")
     if not match or int(match.group("number")) != call_number:
@@ -140,6 +213,15 @@ def reconcile_live_evidence(
         _fail("input live evidence cannot pre-authorize material facts")
     if evidence.get("errors") or evidence.get("conflicts"):
         _fail("live evidence contains errors/conflicts")
+    run_id = evidence.get("run_id")
+    if (not isinstance(run_id, str)
+            or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", run_id) is None):
+        _fail("run_id: non-empty bounded acquisition identity required")
+    if evidence.get("parser_version") != FETCH_PARSER_VERSION:
+        _fail("parser_version: unsupported acquisition parser")
+    if evidence.get("adapter_version") != ADAPTER_PARSER_VERSION:
+        _fail("adapter_version: unsupported normalized record parser")
+    _valid_official_index(evidence.get("source_index"))
 
     stats = evidence.get("stats")
     records = evidence.get("records")
@@ -154,6 +236,59 @@ def reconcile_live_evidence(
     if stats.get("errors") or stats.get("conflicts") or stats.get("unknown_evidence"):
         _fail(f"unresolved live evidence stats: {stats}")
 
+    # Cross-check the summary against the immutable acquisition envelope.
+    # Otherwise a forged/mixed replay could carry OPEN rows while advertising
+    # CLOSED counters, or relabel the pinned fallback as direct-link evidence.
+    if (not isinstance(evidence.get("errors"), list)
+            or not isinstance(evidence.get("conflicts"), list)
+            or len(evidence["errors"]) != 0 or len(evidence["conflicts"]) != 0):
+        _fail("acquisition error/conflict ledgers must be explicitly empty")
+    expected_counts = {
+        "open_call_evidence": sum(
+            row.get("observation_state") == "OPEN_CALL" for row in records if isinstance(row, dict)
+        ),
+        "forthcoming_call_evidence": sum(
+            row.get("observation_state") == "FORTHCOMING_CALL" for row in records if isinstance(row, dict)
+        ),
+        "closed_call_evidence": sum(
+            row.get("observation_state") == "CLOSED_CALL" for row in records if isinstance(row, dict)
+        ),
+        "unknown_evidence": sum(
+            row.get("observation_state") == "UNKNOWN" for row in records if isinstance(row, dict)
+        ),
+        "errors": 0,
+        "conflicts": 0,
+        "index_direct_exact_call_links": evidence["source_index"]["direct_exact_call_links"],
+    }
+    for key, required in expected_counts.items():
+        observed = stats.get(key)
+        if isinstance(observed, bool) or not isinstance(observed, int) or observed != required:
+            _fail(f"acquisition stats mismatch for {key}: {observed!r} != {required}")
+    fallback = evidence["source_index"]["discovery_mode"].startswith("PINNED_")
+    if stats.get("official_pinned_fallback_used") is not fallback:
+        _fail("acquisition discovery mode/fallback flag drift")
+    if not fallback and stats["index_direct_exact_call_links"] != expected:
+        _fail("direct exact-call discovery count does not match batch")
+
+    # A page that still says OPEN after its explicit official submission date
+    # is historical/contradictory evidence, not an admissible CURRENT open call.
+    # Compare *Romanian local calendar dates* conservatively, without inventing
+    # a closure hour. UTC calendar days can lag the Romanian deadline date.
+    def evidence_time(value: Any, field: str) -> dt.datetime:
+        try:
+            parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{field}: invalid timestamp") from exc
+        if parsed.tzinfo is None:
+            _fail(f"{field}: timezone-aware timestamp required")
+        return parsed.astimezone(dt.timezone.utc)
+
+    source_time = evidence_time(evidence.get("fetched_at"), "fetched_at")
+    reconciled_at = reconciled_at or _utc_now()
+    reconciliation_time = evidence_time(reconciled_at, "reconciled_at")
+    if reconciliation_time < source_time:
+        _fail("reconciliation cannot predate official evidence acquisition")
+
     page_by_id: dict[str, dict[str, Any]] = {}
     for page in pages:
         if not isinstance(page, dict):
@@ -161,6 +296,7 @@ def reconcile_live_evidence(
         call_id = page.get("call_identifier")
         if not isinstance(call_id, str) or call_id in page_by_id:
             _fail(f"duplicate/missing page call_identifier {call_id!r}")
+        _valid_raw_page(page, f"{call_id}.page")
         page_by_id[call_id] = page
 
     reconciled_records: list[dict[str, Any]] = []
@@ -181,6 +317,21 @@ def reconcile_live_evidence(
         if int(str(record.get("call_number") or "0")) != call_number:
             _fail(f"{call_id}: call_number mismatch")
 
+        if (record.get("fetched_at") != evidence.get("fetched_at")
+                or record.get("run_id") != evidence.get("run_id")):
+            _fail(f"{call_id}: source capture timestamp/run mismatch")
+        if record.get("parser_version") != ADAPTER_PARSER_VERSION:
+            _fail(f"{call_id}: adapter parser version mismatch")
+        # The acquisition normalizer correctly marks CLOSED_CALL as not
+        # requiring further call-state reconciliation; it remains non-publishing.
+        expected_review = record.get("observation_state") in {
+            "OPEN_CALL", "FORTHCOMING_CALL", "UNKNOWN"
+        }
+        if (record.get("material_fact_use") is not False
+                or record.get("publish_authorized") is not False
+                or record.get("requires_reconcile") is not expected_review):
+            _fail(f"{call_id}: acquisition record pre-authorized material facts")
+        _valid_raw_hash(record.get("raw_hash"), f"{call_id}.raw_hash")
         if not record.get("authority_url_verified"):
             _fail(f"{call_id}: exact authority URL readback not verified")
         authority_url = _official_call_url(record.get("authority_url"), call_number)
@@ -191,6 +342,14 @@ def reconcile_live_evidence(
         label = str(record.get("status_label") or "").strip().upper().replace("_", " ")
         if label not in STATE_LABELS[state]:
             _fail(f"{call_id}: status label {label!r} does not support state {state}")
+        # An OPEN/FORTHCOMING observation is a perishable snapshot, even when
+        # its deadline has not passed. Reject a delayed replay rather than
+        # staging stale call availability as current. Historical CLOSED
+        # evidence remains admissible for audit/replay without publication.
+        if state in {"OPEN_CALL", "FORTHCOMING_CALL"} and (
+            reconciliation_time - source_time > dt.timedelta(hours=24)
+        ):
+            _fail(f"{call_id}: active call evidence older than 24 hours; fresh official readback required")
 
         page = page_by_id.get(call_id)
         if not page:
@@ -199,6 +358,7 @@ def reconcile_live_evidence(
             _fail(f"{call_id}: exact page HTTP status is not 200")
         if str(page.get("final_url") or "").rstrip("/") != authority_url:
             _fail(f"{call_id}: final URL drift between page and record")
+        _official_call_url(page.get("requested_url"), call_number)
         if page.get("raw_hash") != record.get("raw_hash"):
             _fail(f"{call_id}: raw hash drift between page and normalized evidence")
         if page.get("observation_state") != state:
@@ -215,6 +375,11 @@ def reconcile_live_evidence(
             _fail(f"{call_id}: publication date after submission deadline")
         if questions_deadline > deadline:
             _fail(f"{call_id}: questions deadline after submission deadline")
+        if state in {"OPEN_CALL", "FORTHCOMING_CALL"} and (
+            source_time.astimezone(ROMANIA_TIMEZONE).date() > dt.date.fromisoformat(deadline)
+            or reconciliation_time.astimezone(ROMANIA_TIMEZONE).date() > dt.date.fromisoformat(deadline)
+        ):
+            _fail(f"{call_id}: stale open/forthcoming status past official submission date")
 
         budget = _parse_eur(record.get("budget_candidate"), f"{call_id}.budget")
         grant_from = _parse_eur(record.get("grant_from_candidate"), f"{call_id}.grant_from")
@@ -264,7 +429,6 @@ def reconcile_live_evidence(
     if set(page_by_id) != seen:
         _fail("page evidence contains identities not represented in normalized records")
 
-    reconciled_at = reconciled_at or _utc_now()
     source_hash = _sha256(_canonical_json(evidence))
     batch_semantic_hash = _sha256(_canonical_json([
         [row["call_identifier"], row["semantic_fingerprint"]] for row in reconciled_records

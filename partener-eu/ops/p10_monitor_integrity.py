@@ -229,7 +229,7 @@ def main() -> int:
         and pages_handoff_integrated
         and not duplicate_direct_handoffs
     )
-    scheduled_validation_configured = "schedule:" in validation_workflow_text and "45 * * * *" in validation_workflow_text
+    scheduled_validation_configured = "schedule:" in validation_workflow_text and "55 * * * *" in validation_workflow_text
     peo_candidate_state_only = (
         "peo_calendar_state.json" in peo_workflow_text
         and "git add partener-eu/web/peo-calendar.js" not in peo_workflow_text

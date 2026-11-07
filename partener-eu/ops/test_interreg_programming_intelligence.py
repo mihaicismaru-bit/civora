@@ -50,6 +50,64 @@ def main():
     assert active["stale_open_copy"] is False
     assert_non_authorizing(active)
 
+    # Current dedicated source (not the stale June-August survey on the
+    # ROHU landing page): dates appear as month names in both languages.
+    # 5 November is a live *consultation*, NEVER an open funding call.
+    for new_copy in (
+        "Interreg Chapter 2028-2034. Online survey Open: 5 October – 30 November 2026",
+        "Capitolul Interreg 2028–2034. Sondajul este deschis în perioada 5 octombrie – 30 noiembrie 2026.",
+    ):
+        current = build("2026-11-05T20:30:00Z", text=new_copy)
+        assert current["observation_state"] == "CONSULTATION", current
+        assert current["consultation_start"] == "2026-10-05"
+        assert current["consultation_end"] == "2026-11-30"
+        assert current["confidence"] == "HIGH"
+        assert_non_authorizing(current)
+
+        after = build("2026-12-01T12:00:00Z", text=new_copy)
+        assert after["observation_state"] == "CONSULTATION_CLOSED"
+        assert_non_authorizing(after)
+
+    # Programme landing pages can include successive surveys. Never choose
+    # the expired one simply because it appears first in aggregated page text.
+    try:
+        build("2026-11-05T20:30:00Z", text=TEXT +
+              " Interreg Chapter 2028-2034. Online survey Open: 5 October – 30 November 2026")
+    except ValueError as exc:
+        assert "ambiguous consultation windows" in str(exc)
+    else:
+        raise AssertionError("Mixed old/new surveys were incorrectly collapsed")
+
+    for malformed in (
+        "Interreg 2028-2034 survey: 32 October – 30 November 2026",
+        "Interreg 2028-2034 survey: 5 October – 30 February 2026",
+    ):
+        try:
+            build("2026-11-05T20:30:00Z", text=malformed)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Impossible consultation window accepted")
+
+    # Official November 2026 workshops are future-programming events, but the
+    # 28 October signup deadline is already past. Neither event dates nor
+    # expired workshop registration create a current funding call.
+    workshops = build(
+        "2026-11-07T00:00:00Z",
+        text=(
+            "Interreg Chapter 2028–2034 stakeholder territorial-analysis workshops. "
+            "17 noiembrie 2026 Debrecen, 18 noiembrie 2026 Timisoara, "
+            "19 noiembrie 2026 Szeged, 20 noiembrie 2026 online. "
+            "Registration closed 28 octombrie 2026. Programme preparation only."
+        ),
+        url="https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-si-contribuiti-la-definirea-capitolului-interreg-2028-2034/",
+    )
+    assert workshops["observation_state"] == "PROGRAMME_PREPARATION"
+    assert workshops["consultation_start"] is None
+    assert workshops["consultation_end"] is None
+    assert workshops["confidence"] == "MEDIUM"
+    assert_non_authorizing(workshops)
+
     planned = build("2026-05-10T12:00:00Z")
     assert planned["observation_state"] == "PLANNED"
     assert_non_authorizing(planned)
@@ -75,6 +133,25 @@ def main():
         assert "non-authoritative Interreg URL" in str(exc)
     else:
         raise AssertionError("third-party host must fail closed")
+
+    # An allowed Interreg hostname does not legitimize authority URLs that
+    # embed credentials or address an unregistered service port. This check
+    # must hold for direct normalizer callers, not only the HTTP fetch path.
+    assert_non_authorizing(build(
+        "2026-08-28T00:49:03Z", url="https://www.interreg-rohu.eu/en/"
+    ))
+    for unsafe_authority in (
+        "https://user@interreg-rohu.eu/en/",
+        "https://user:password@interreg-rohu.eu/en/",
+        "https://interreg-rohu.eu:8443/en/",
+        "https://interreg-rohu.eu:444/en/",
+    ):
+        try:
+            build("2026-08-28T00:49:03Z", url=unsafe_authority)
+        except ValueError as exc:
+            assert "non-authoritative Interreg URL" in str(exc), exc
+        else:
+            raise AssertionError(f"unsafe Interreg authority accepted: {unsafe_authority}")
 
     try:
         build("2026-08-28T00:49:03")

@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/mff_2028_source_registry.json'
+      - 'partener-eu/ingest/mff_2028_probe.py'
+      - 'partener-eu/ops/test_mff_2028_probe.py'
+      - '.github/workflows/partener-eu-mff-2028.yml'
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/funding_tenders_api.py'
@@ -24,6 +28,10 @@ on:
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
+      - 'partener-eu/ingest/interreg_programming_intelligence.py'
+      - 'partener-eu/ingest/interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_programming_intelligence.py'
+      - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
@@ -68,10 +76,13 @@ jobs:
       - name: Validate registry JSON and adapter syntax
         run: |
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/mff_2028_source_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
+          python -m py_compile partener-eu/ingest/mff_2028_probe.py
+          python -m py_compile partener-eu/ops/test_mff_2028_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_calls.py
@@ -95,6 +106,9 @@ jobs:
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
 
+      - name: Validate official MFF October stage watches and immutable raw acquisition
+        run: python partener-eu/ops/test_mff_2028_probe.py
+
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
 
@@ -109,6 +123,11 @@ jobs:
 
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
+
+      - name: Validate Interreg named-month consultation windows and acquisition isolation
+        run: |
+          python partener-eu/ops/test_interreg_programming_intelligence.py
+          python partener-eu/ops/test_interreg_programming_live_fetch.py
 
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
