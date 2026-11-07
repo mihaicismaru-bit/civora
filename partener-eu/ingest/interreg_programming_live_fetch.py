@@ -167,18 +167,51 @@ def _load_registry(path: Path) -> dict[str, Any]:
 
 
 def _programming_sources(registry: dict[str, Any]) -> list[dict[str, Any]]:
+    """Validate registry identity before any network acquisition or replay.
+
+    Duplicate IDs can collapse the replay registry dictionary or collide at the
+    immutable raw-file boundary. A malformed family/extract value must not
+    silently drop a registered programming source from the expected receipt set.
+    """
     selected: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
     for source in registry.get("sources", []):
-        families = {str(x) for x in source.get("source_families", [])}
-        extract = {str(x) for x in source.get("extract", [])}
+        if not isinstance(source, dict):
+            raise ValueError("invalid Interreg registry source entry")
+        source_id = source.get("id")
+        if not isinstance(source_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", source_id):
+            raise ValueError("missing or unsafe Interreg registry source_id")
+        if source_id in seen_ids:
+            raise ValueError(f"duplicate Interreg registry source_id: {source_id}")
+        seen_ids.add(source_id)
+        for field in ("source_families", "extract"):
+            values = source.get(field, [])
+            if not isinstance(values, list) or any(
+                not isinstance(value, str) or not value.strip() for value in values
+            ):
+                raise ValueError(f"invalid Interreg registry {field}: {source_id}")
+        families = set(source.get("source_families", []))
+        extract = set(source.get("extract", []))
         if "INTERREG" not in families:
             continue
         if "PROGRAMMING_PIPELINE" not in families and not (extract & PROGRAMMING_EXTRACT_KEYS):
             continue
+        programmes = source.get("programmes")
+        if not isinstance(programmes, list) or not programmes or any(
+            not isinstance(name, str) or not name.strip() for name in programmes
+        ):
+            raise ValueError(f"invalid Interreg programming programme: {source_id}")
+        owner = source.get("owner")
+        if not isinstance(owner, str) or not owner.strip():
+            raise ValueError(f"missing Interreg programming source owner: {source_id}")
+        url = source.get("url")
+        if not isinstance(url, str):
+            raise ValueError(f"missing Interreg programming source URL: {source_id}")
+        _assert_official_source_origin(url, url)
         selected.append(source)
     if not selected:
         raise ValueError("no Interreg programming sources registered")
-    return sorted(selected, key=lambda item: str(item.get("id") or ""))
+    return sorted(selected, key=lambda item: item["id"])
 
 
 
