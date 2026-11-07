@@ -342,6 +342,14 @@ def reconcile_live_evidence(
         label = str(record.get("status_label") or "").strip().upper().replace("_", " ")
         if label not in STATE_LABELS[state]:
             _fail(f"{call_id}: status label {label!r} does not support state {state}")
+        # An OPEN/FORTHCOMING observation is a perishable snapshot, even when
+        # its deadline has not passed. Reject a delayed replay rather than
+        # staging stale call availability as current. Historical CLOSED
+        # evidence remains admissible for audit/replay without publication.
+        if state in {"OPEN_CALL", "FORTHCOMING_CALL"} and (
+            reconciliation_time - source_time > dt.timedelta(hours=24)
+        ):
+            _fail(f"{call_id}: active call evidence older than 24 hours; fresh official readback required")
 
         page = page_by_id.get(call_id)
         if not page:

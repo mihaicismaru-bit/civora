@@ -362,6 +362,33 @@ def main():
             or not local_receipt["ready_for_staging"]):
         fail("valid Romanian deadline-day readback was incorrectly denied")
 
+    # A month-old exact-page readback is not current OPEN evidence even if
+    # the call's submission deadline is still in the future. The 24h policy
+    # applies only to actionable OPEN/FORTHCOMING status, not CLOSED history.
+    expect_fail(
+        evidence, "stale but pre-deadline OPEN replay",
+        reconciled_at="2026-08-28T18:30:00+00:00",
+    )
+    edge_receipt = module.reconcile_live_evidence(
+        evidence,
+        reconciled_at="2026-08-28T17:58:46+00:00",
+        minimum_calls=2,
+    )
+    if not edge_receipt["ready_for_staging"] or edge_receipt["publish_authorized"]:
+        fail("24h exact freshness boundary must allow staging-only readback")
+    forthcoming = copy.deepcopy(evidence)
+    for row, page in zip(forthcoming["records"], forthcoming["pages"]):
+        row["status_label"] = "Forthcoming"
+        row["observation_state"] = "FORTHCOMING_CALL"
+        row["semantic_fingerprint"] = fingerprint(row)
+        page["observation_state"] = "FORTHCOMING_CALL"
+    forthcoming["stats"]["open_call_evidence"] = 0
+    forthcoming["stats"]["forthcoming_call_evidence"] = 2
+    expect_fail(
+        forthcoming, "stale forthcoming discovery replay",
+        reconciled_at="2026-08-28T18:30:00+00:00",
+    )
+
     mismatched_provenance = copy.deepcopy(evidence)
     mismatched_provenance["records"][0]["fetched_at"] = "2026-08-26T17:00:00+00:00"
     expect_fail(mismatched_provenance, "call-specific acquisition time differs from envelope")
