@@ -278,6 +278,47 @@ def main():
     if "exact call identifier" not in bsb_note or "semantic reconciliation" not in bsb_note:
         fail("Black Sea Basin source must state exact-call and reconcile requirements")
 
+    # ADR Centre exact digital action source contract: a current official
+    # action URL may be discovered without laundering its future submission
+    # window or stale prior consultation into an OPEN_CALL fact.
+    digital_id = "SRC-PR-CENTRU-DIGITAL-2"
+    digital_url = (
+        "https://www.regiocentru.ro/actiuni/"
+        "2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/"
+    )
+    digital = by_id.get(digital_id)
+    legacy_monitor = json.loads(
+        (ROOT / "partener-eu" / "ops" / "sources.json").read_text(encoding="utf-8")
+    )
+    legacy = next((row for row in legacy_monitor.get("sources", [])
+                   if row.get("id") == digital_id), None)
+    if not digital or not legacy or digital.get("url") != digital_url or legacy.get("url") != digital_url:
+        fail("ADR Centre digital 2 exact source and legacy discovery monitor must agree")
+    if urlparse(digital_url).hostname != "www.regiocentru.ro":
+        fail("ADR Centre digital source lost its exact official programme authority")
+    if digital.get("mysmis_identifier_discovery_hint") != "PRC/1059/PRC_P2/OP1/RSO1.2/PRC_A32":
+        fail("ADR Centre digital 2 exact-call discovery ID drift")
+    if digital.get("authority_scope") != "EXACT_ACTION_DISCOVERY" or digital.get("observation_state") != "EXACT_ACTION_DISCOVERY":
+        fail("ADR Centre digital source may not claim OPEN_CALL from an unverified action page")
+    if digital.get("adapter_required") != "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1":
+        fail("ADR Centre digital exact-action semantic reconcile is mandatory")
+    if not {"ROMANIA", "ADR", "CALL_REGISTRY"}.issubset(set(digital.get("source_families") or [])):
+        fail("ADR Centre digital source lost official regional provenance")
+    if "future_submission_window_candidate" not in set(digital.get("extract") or []):
+        fail("ADR Centre digital source must distinguish future window from OPEN")
+    if (digital.get("material_fact_use") is not False
+            or digital.get("open_call_authorized") is not False
+            or digital.get("material_fact_publication_authorized") is not False
+            or legacy.get("material_facts_authority") is not False
+            or legacy.get("health_scope") != "DISCOVERY_ONLY"):
+        fail("ADR Centre digital discovery attempted material authority")
+    if any(field in digital for field in (
+        "status", "call_status", "open_at", "close_at", "deadline", "budget_eur", "eligibility",
+    )):
+        fail("ADR Centre digital discovery smuggled unverified material fields")
+    if "HTTP 403" not in (legacy.get("note") or "") or "MySMIS" not in (digital.get("note") or ""):
+        fail("ADR Centre digital source must retain raw acquisition and review blockers")
+
     policy = data.get("policy") or {}
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
         fail("programming pipeline guard must explicitly prohibit OPEN_CALL promotion")
