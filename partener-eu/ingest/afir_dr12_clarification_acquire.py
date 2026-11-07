@@ -22,7 +22,8 @@ INDEX_URL = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-12/"
 BLOB_HOST = "stportalafirprod.blob.core.windows.net"
 DOC_NAME = "nota-clarificare-dr12_06112026.pdf"
 LINK_LABEL = "Clarificare istoric șef exploatație DR-12 (06.11.2026)"
-VERSION = "afir-dr12-clarification-original-v1"
+VERSION = "afir-dr12-clarification-original-v2"
+PRIOR_REPLAY_VERSION = "afir-dr12-clarification-original-v1"
 MAX_HTML, MAX_PDF = 5_000_000, 10_000_000
 NON_AUTHORITATIVE = {
     "observation_state": "NEW_DR12_CLARIFICATION_RAW_PENDING_SEMANTIC_RECONCILIATION",
@@ -32,6 +33,18 @@ NON_AUTHORITATIVE = {
     "distribution_authorized": False,
     "material_fact_action": "NONE",
 }
+
+
+def exact_media_type(value: object, allowed: frozenset[str]) -> bool:
+    """Accept a complete HTTP media type, never a substring or parameter hint."""
+    return (isinstance(value, str)
+            and value.split(";", 1)[0].strip().lower() in allowed)
+
+
+HTML_MEDIA = frozenset({"text/html", "application/xhtml+xml"})
+# Some official blob-storage objects are served as octet-stream. In that case
+# the complete PDF signature/EOF check below remains mandatory.
+PDF_MEDIA = frozenset({"application/pdf", "application/octet-stream"})
 
 
 class Links(HTMLParser):
@@ -107,10 +120,10 @@ def acquire_exact(url: str, kind: str, *, authorized_pdf: str | None = None):
         if response.geturl() != url or getattr(response, "status", 200) != 200:
             raise ValueError("AFIR document status/authority mismatch")
         ctype = (response.headers.get("Content-Type") or "").lower()
-        if kind == "index" and "html" not in ctype:
-            raise ValueError("Official DR-12 landing is not HTML")
-        if kind == "pdf" and ("html" in ctype or "json" in ctype):
-            raise ValueError("Delegated DR-12 PDF is a fallback page")
+        if kind == "index" and not exact_media_type(ctype, HTML_MEDIA):
+            raise ValueError("Official DR-12 landing MIME is not exact HTML")
+        if kind == "pdf" and not exact_media_type(ctype, PDF_MEDIA):
+            raise ValueError("Delegated DR-12 document MIME is not exact PDF/binary")
         if (response.headers.get("Content-Encoding") or "identity").strip().lower() != "identity":
             raise ValueError("Encoded official source is not raw original")
         limit = MAX_HTML if kind == "index" else MAX_PDF
@@ -215,7 +228,7 @@ def replay(destination: Path) -> dict:
     expected = {
         "schema": "AFIR_DR12_CLARIFICATION_ORIGINAL_V1",
         "status": "RAW_CAPTURED_PENDING_SEMANTIC_RECONCILIATION",
-        "source_url": INDEX_URL, "parser_version": VERSION,
+        "source_url": INDEX_URL, "parser_version": manifest.get("parser_version"),
         "programme": "PS_PAC_2023_2027/DR12", "source_family": "AFIR",
         "authority_class": "T1_OFFICIAL_AFIR_INDEX_DELEGATED_DOCUMENT",
         "document_title": LINK_LABEL, **NON_AUTHORITATIVE,
@@ -230,10 +243,12 @@ def replay(destination: Path) -> dict:
             "url": pdf_url,
         },
     }
+    if manifest.get("parser_version") not in {PRIOR_REPLAY_VERSION, VERSION}:
+        raise ValueError("DR-12 unrecognized receipt parser version")
     if any(manifest.get(k) != v for k, v in expected.items()):
         raise ValueError("DR-12 source identity or raw evidence integrity mismatch")
-    if "html" not in manifest["index"]["content_type"] or any(
-            x in manifest["document"]["content_type"] for x in ("html", "json")):
+    if (not exact_media_type(manifest["index"].get("content_type"), HTML_MEDIA)
+            or not exact_media_type(manifest["document"].get("content_type"), PDF_MEDIA)):
         raise ValueError("DR-12 evidence MIME mismatch")
     if not str(manifest.get("run_id") or "").strip() or not str(manifest.get("run_attempt") or "").isdigit():
         raise ValueError("DR-12 evidence run identity missing")
