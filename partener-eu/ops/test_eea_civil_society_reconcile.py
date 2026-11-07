@@ -102,7 +102,7 @@ def make_evidence():
             "content_type": "text/html; charset=utf-8",
             "raw_hash": hashlib.sha256(b"official-index-fixture").hexdigest(),
             "bytes": 1000,
-            "discovery_mode": "DIRECT_LINKS",
+            "discovery_mode": "INDEX_EXACT_ANCHORS",
             "direct_exact_call_links": 2,
         },
         "pages": pages,
@@ -113,6 +113,8 @@ def make_evidence():
             "discovered_call_urls": 2,
             "fetched_call_pages": 2,
             "normalized_records": 2,
+            "index_direct_exact_call_links": 2,
+            "official_pinned_fallback_used": False,
             "open_call_evidence": 2,
             "forthcoming_call_evidence": 0,
             "closed_call_evidence": 0,
@@ -161,6 +163,46 @@ def main():
         "PUBLIC_PROJECTION_QUALITY_GATE",
     ]:
         fail("staging/public gates must remain explicit")
+
+    # The provenance summary must agree with record statuses and the mode
+    # of official index discovery, even if material fields/hash are intact.
+    for key, value in (
+        ("open_call_evidence", 1),
+        ("closed_call_evidence", 1),
+        ("forthcoming_call_evidence", -1),
+        ("index_direct_exact_call_links", 0),
+        ("official_pinned_fallback_used", True),
+    ):
+        bad = copy.deepcopy(evidence)
+        bad["stats"][key] = value
+        expect_fail(bad, f"forged acquisition counter {key}")
+
+    for mode, direct_count in (
+        ("UNVERIFIED_DISCOVERY", 2),
+        ("INDEX_EXACT_ANCHORS", 0),
+        ("PINNED_OFFICIAL_DETAIL_DISCOVERY_REQUIRES_FRESH_READBACK", 2),
+    ):
+        bad = copy.deepcopy(evidence)
+        bad["source_index"]["discovery_mode"] = mode
+        bad["source_index"]["direct_exact_call_links"] = direct_count
+        expect_fail(bad, f"untrusted index mode/count {mode}")
+
+    for field in ("errors", "conflicts"):
+        bad = copy.deepcopy(evidence)
+        del bad[field]
+        expect_fail(bad, f"missing acquisition {field} ledger")
+
+    fallback = copy.deepcopy(evidence)
+    fallback["source_index"]["discovery_mode"] = "PINNED_OFFICIAL_DETAIL_DISCOVERY_REQUIRES_FRESH_READBACK"
+    fallback["source_index"]["direct_exact_call_links"] = 0
+    fallback["stats"]["index_direct_exact_call_links"] = 0
+    fallback["stats"]["official_pinned_fallback_used"] = True
+    fallback_receipt = module.reconcile_live_evidence(
+        fallback, reconciled_at="2026-08-27T18:30:00+00:00", minimum_calls=2
+    )
+    if (fallback_receipt["stats"]["reconciled_calls"] != 2
+            or fallback_receipt["publish_authorized"]):
+        fail("pinned discovery still requires readback but must allow valid staging-only receipt")
 
     # The current official seven-call feed is CLOSED. Preserve its exact
     # normalizer contract while still admitting only a non-publishing staging
