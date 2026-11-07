@@ -170,7 +170,7 @@ def _assert_registered_article_identity(source_id: str, registered_url: str, fin
     resolved = urlsplit(final_url)
     if registered.path.rstrip("/") != resolved.path.rstrip("/") or resolved.query:
         raise ValueError("ROHU workshop exact official article endpoint changed")
-    comparable = re.sub(r"\\s+", " ", visible_text.casefold()).translate(
+    comparable = re.sub(r"\s+", " ", visible_text.casefold()).translate(
         str.maketrans({"–": "-", "—": "-", "−": "-"})
     )
     if "atelier" not in comparable or any(term not in comparable for term in WORKSHOPS_IDENTITY_TERMS):
