@@ -127,6 +127,20 @@ def _valid_official_index(value: Any) -> None:
                                 parsed.path, re.IGNORECASE)):
         _fail("source_index: untrusted or non-canonical official index URL")
     _valid_raw_page(value, "source_index")
+    mode = value.get("discovery_mode")
+    direct_count = value.get("direct_exact_call_links")
+    if mode not in {
+        "INDEX_EXACT_ANCHORS",
+        "PINNED_OFFICIAL_DETAIL_DISCOVERY_REQUIRES_FRESH_READBACK",
+    }:
+        _fail("source_index: unsupported acquisition discovery mode")
+    if (isinstance(direct_count, bool) or not isinstance(direct_count, int)
+            or direct_count < 0):
+        _fail("source_index: valid direct exact-call link count required")
+    if mode == "INDEX_EXACT_ANCHORS" and direct_count == 0:
+        _fail("source_index: direct-link mode has no direct links")
+    if mode.startswith("PINNED_") and direct_count != 0:
+        _fail("source_index: fallback mode contradicts direct-link evidence")
 
 
 def _official_call_url(value: Any, call_number: int) -> str:
@@ -221,6 +235,40 @@ def reconcile_live_evidence(
         _fail(f"incomplete live batch: {stats}")
     if stats.get("errors") or stats.get("conflicts") or stats.get("unknown_evidence"):
         _fail(f"unresolved live evidence stats: {stats}")
+
+    # Cross-check the summary against the immutable acquisition envelope.
+    # Otherwise a forged/mixed replay could carry OPEN rows while advertising
+    # CLOSED counters, or relabel the pinned fallback as direct-link evidence.
+    if (not isinstance(evidence.get("errors"), list)
+            or not isinstance(evidence.get("conflicts"), list)
+            or len(evidence["errors"]) != 0 or len(evidence["conflicts"]) != 0):
+        _fail("acquisition error/conflict ledgers must be explicitly empty")
+    expected_counts = {
+        "open_call_evidence": sum(
+            row.get("observation_state") == "OPEN_CALL" for row in records if isinstance(row, dict)
+        ),
+        "forthcoming_call_evidence": sum(
+            row.get("observation_state") == "FORTHCOMING_CALL" for row in records if isinstance(row, dict)
+        ),
+        "closed_call_evidence": sum(
+            row.get("observation_state") == "CLOSED_CALL" for row in records if isinstance(row, dict)
+        ),
+        "unknown_evidence": sum(
+            row.get("observation_state") == "UNKNOWN" for row in records if isinstance(row, dict)
+        ),
+        "errors": 0,
+        "conflicts": 0,
+        "index_direct_exact_call_links": evidence["source_index"]["direct_exact_call_links"],
+    }
+    for key, required in expected_counts.items():
+        observed = stats.get(key)
+        if isinstance(observed, bool) or not isinstance(observed, int) or observed != required:
+            _fail(f"acquisition stats mismatch for {key}: {observed!r} != {required}")
+    fallback = evidence["source_index"]["discovery_mode"].startswith("PINNED_")
+    if stats.get("official_pinned_fallback_used") is not fallback:
+        _fail("acquisition discovery mode/fallback flag drift")
+    if not fallback and stats["index_direct_exact_call_links"] != expected:
+        _fail("direct exact-call discovery count does not match batch")
 
     # A page that still says OPEN after its explicit official submission date
     # is historical/contradictory evidence, not an admissible CURRENT open call.
