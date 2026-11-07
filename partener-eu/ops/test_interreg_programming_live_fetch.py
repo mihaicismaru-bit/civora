@@ -446,6 +446,55 @@ def main():
             "material_fact_use": False,
         }]}), encoding="utf-8")
         live._assert_registered_article_identity(article_id, article_url, article_url, article_text)
+
+        # A generic 200 page must not borrow its workshop identity from
+        # non-visible head/template/hidden markup, even on the exact URL.
+        decoy_html = None
+        for opening, closing in (
+            ("<head>", "</head>"),
+            ("<template>", "</template>"),
+            ("<div hidden>", "</div>"),
+            ("<section aria-hidden='true'>", "</section>"),
+            ("<div style='display: none'>", "</div>"),
+            ("<section style='visibility: hidden'>", "</section>"),
+            ("<div inert>", "</div>"),
+            ("<svg>", "</svg>"),
+        ):
+            decoy_html = (
+                "<html><body><main><p>" + "Generic index without a workshop. " * 8
+                + "</p>" + opening + "<p><span>" + article_text
+                + "</span></p>" + closing + "<p>Index footer</p></main></body></html>"
+            ).encode("utf-8")
+            extracted = live._visible_text(decoy_html, "text/html; charset=utf-8")
+            assert "17 noiembrie 2026" not in extracted, (opening, extracted)
+            assert "Index footer" in extracted, opening
+            try:
+                live._assert_registered_article_identity(article_id, article_url, article_url, extracted)
+            except ValueError as exc:
+                assert "identity/schedule unverified" in str(exc), (opening, exc)
+            else:
+                raise AssertionError(f"hidden workshop terms accepted: {opening}")
+
+        # Exercise the acquisition and immutable replay boundary, not just
+        # the HTML parser in isolation. A failed decoy has no promoted raw.
+        hidden_raw = (
+            "<html><body>" + "Generic programme index. " * 10
+            + "<div hidden><span>" + article_text
+            + "</span></div></body></html>"
+        ).encode("utf-8")
+        hidden_dir = workshop_root / "hidden-decoy-originals"
+        saved_fetch = live._fetch
+        try:
+            live._fetch = lambda url: (hidden_raw, url, 200, "text/html; charset=utf-8")
+            rejected = live.build_live_evidence(
+                article_registry, run_id="TEST-HIDDEN-IDENTITY", raw_dir=hidden_dir
+            )
+        finally:
+            live._fetch = saved_fetch
+        assert rejected["fetch_pass"] == 0 and rejected["fetch_fail"] == 1
+        assert "identity/schedule unverified" in rejected["rows"][0]["error"]
+        assert live.replay_live_evidence(rejected, hidden_dir, article_registry) == 0
+
         for wrong_url, wrong_text in (
             ("https://interreg-rohu.eu/ro/", article_text),
             (article_url, article_text.replace("17 noiembrie", "16 noiembrie")),
