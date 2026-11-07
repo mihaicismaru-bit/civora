@@ -9,6 +9,7 @@ import re
 import unicodedata
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
@@ -41,7 +42,7 @@ def parse_date(value: Any) -> dt.datetime | None:
         return None
     day, month, year = int(match.group(1)), months[match.group(2)], int(match.group(3))
     hour, minute = int(match.group(4) or 23), int(match.group(5) or 59)
-    return dt.datetime(year, month, day, hour, minute, tzinfo=dt.timezone(dt.timedelta(hours=3))).astimezone(dt.timezone.utc)
+    return dt.datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Europe/Bucharest")).astimezone(dt.timezone.utc)
 
 
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
@@ -75,7 +76,11 @@ def refresh_quality_pass(payload: dict[str, Any], dossiers: list[dict[str, Any]]
 def main() -> int:
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
-    clock = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
+    # generatedAt is a SOURCE version, not the observation clock for the live
+    # application window. A future-dated, stale or malformed source timestamp
+    # must never time-travel current OPEN/expired gating. Re-evaluate current
+    # state against wall time; output changes only when a real window crosses.
+    clock = dt.datetime.now(dt.timezone.utc)
 
     source_scope = os.environ.get("PARTENER_PRODUCT_SOURCE_SCOPE", "").strip().upper()
     if source_scope not in {"", "AFIR"}:
