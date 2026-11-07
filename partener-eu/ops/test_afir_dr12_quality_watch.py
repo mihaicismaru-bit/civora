@@ -135,7 +135,7 @@ def main() -> None:
     ):
         rejected(lambda ambiguous=ambiguous: watch.parse_notice(raw(ambiguous)),
                  "duplicated or contradictory")
-    assert watch.PARSER_VERSION.endswith("-v3")
+    assert watch.PARSER_VERSION.endswith("-v4")
 
     rejected(lambda: watch.parse_notice(b""))
     rejected(lambda: watch.parse_notice(b"a" * 12_000_001))
@@ -149,6 +149,19 @@ def main() -> None:
     }
     with tempfile.TemporaryDirectory() as tmp:
         base = Path(tmp)
+        for i, mime in enumerate(("application/x-nothtml", "text/html-fake",
+                                  "text/plain; note=text/html", "application/xhtml+xml-fake",
+                                  "", None)):
+            invalid_mime = dict(fetched, content_type=mime)
+            rejected(lambda invalid_mime=invalid_mime, i=i: watch.capture(
+                invalid_mime, base / f"mime-negative-{i}", run_id="RUN",
+                fetched_at_utc="2026-11-05T21:30:00Z"))
+            assert not (base / f"mime-negative-{i}").exists()
+        xhtml = dict(fetched, content_type="application/xhtml+xml; charset=utf-8")
+        xhtml_dir = base / "xhtml-positive"
+        assert watch.capture(xhtml, xhtml_dir, run_id="RUN",
+                             fetched_at_utc="2026-11-05T21:30:00Z")["publish_authorized"] is False
+        assert watch.replay_receipt(xhtml_dir)["content_type"] == xhtml["content_type"]
         receipt = base / "first"
         record = watch.capture(
             fetched, receipt, run_id="42199999999", run_attempt="1",
@@ -161,6 +174,8 @@ def main() -> None:
         original_manifest = (receipt / "manifest.json").read_bytes()
         for key, bad in (
             ("raw_sha256", "0" * 64),
+            ("content_type", "application/x-nothtml"),
+            ("content_type", "text/plain; charset=text/html"),
             ("run_id", ""),
             ("parser_version", "unknown"),
             ("programme", "DR-14"),
