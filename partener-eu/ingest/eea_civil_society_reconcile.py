@@ -101,10 +101,11 @@ def _valid_raw_page(page: dict[str, Any], field: str) -> None:
     if page.get("http_status") != 200:
         _fail(f"{field}: HTTP 200 required")
     content_type = page.get("content_type")
-    if not isinstance(content_type, str) or not (
-        "text/html" in content_type.lower()
-        or "application/xhtml+xml" in content_type.lower()
-    ):
+    # Substring checks would admit application/json; note=text/html or
+    # text/html-spoofed as if they were authoritative HTML receipts.
+    if (not isinstance(content_type, str) or
+            content_type.split(";", 1)[0].strip().lower()
+            not in {"text/html", "application/xhtml+xml"}):
         _fail(f"{field}: official HTML content type required")
     size = page.get("bytes")
     if (isinstance(size, bool) or not isinstance(size, int)
