@@ -302,15 +302,17 @@ def main():
         reconciled_at="2026-10-08T21:31:00+00:00",
     )
 
-    # Positive boundary: 20:30 UTC is still 8 October 23:30 in Romania.
-    # The date-only policy must not invent an earlier closing hour.
+    # Positive boundary: 12:30 UTC is 8 October 15:30 in Romania,
+    # before the official 16:00 local submission cut-off. This unit test
+    # isolates the date-only guard; exact hours need independently proven
+    # official evidence before a call can enter public projection.
     local_deadline_day = copy.deepcopy(evidence)
-    local_deadline_day["fetched_at"] = "2026-10-08T20:30:00+00:00"
+    local_deadline_day["fetched_at"] = "2026-10-08T12:30:00+00:00"
     for row in local_deadline_day["records"]:
         row["fetched_at"] = local_deadline_day["fetched_at"]
     local_receipt = module.reconcile_live_evidence(
         local_deadline_day,
-        reconciled_at="2026-10-08T20:31:00+00:00",
+        reconciled_at="2026-10-08T12:31:00+00:00",
         minimum_calls=2,
     )
     if (local_receipt["stats"]["reconciled_calls"] != 2
