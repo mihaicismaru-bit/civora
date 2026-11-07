@@ -58,7 +58,7 @@ AMOUNT_RE = r"(?:€|EUR)\s*\d[\d.,]*"
 # non-rendered descendants cannot assert OPEN, a deadline or a source identity.
 # External stylesheets are not evaluated: output remains a candidate for review.
 _HIDDEN_TAGS = {"head", "template", "script", "style", "noscript", "iframe",
-                "object", "svg", "datalist", "select"}
+                "object", "svg", "datalist", "select", "textarea", "canvas"}
 _VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input",
               "link", "meta", "param", "source", "track", "wbr"}
 
@@ -84,12 +84,16 @@ class _DocumentParser(HTMLParser):
         concealed = (
             tag in _HIDDEN_TAGS
             or (tag in {"dialog", "details"} and "open" not in values)
+            # HTML popovers are hidden by default; static acquisition cannot
+            # prove script-driven visibility, so they are never source prose.
+            or "popover" in values
             or "hidden" in values
             or "inert" in values
             or any(v in {"true", "1"} for v in values.get("aria-hidden", []))
             or any(re.search(r"(?:^|;)\s*display\s*:\s*none\b", v) for v in styles)
             or any(re.search(r"(?:^|;)\s*visibility\s*:\s*(?:hidden|collapse)\b", v) for v in styles)
-            or any(re.search(r"(?:^|;)\s*opacity\s*:\s*0(?:\.0+)?\s*(?:;|$)", v) for v in styles)
+            or any(re.search(r"(?:^|;)\s*content-visibility\s*:\s*hidden\b", v) for v in styles)
+            or any(re.search(r"(?:^|;)\s*opacity\s*:\s*0(?:\.0+)?\s*(?:!\s*important\s*)?(?:;|$)", v) for v in styles)
         )
         hidden = self._hidden_depth > 0 or concealed
         if not hidden and tag == "a":
