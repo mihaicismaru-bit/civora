@@ -18,7 +18,7 @@ from html.parser import HTMLParser
 from pathlib import Path
 from typing import Any, Callable
 from urllib.parse import urljoin, urlparse, urlunparse
-from urllib.request import Request, urlopen
+from urllib.request import Request, build_opener, HTTPSHandler, HTTPRedirectHandler
 
 MODULE_PATH = Path(__file__).with_name("eea_civil_society_calls.py")
 spec = importlib.util.spec_from_file_location("eea_csf_adapter", MODULE_PATH)
@@ -121,6 +121,42 @@ def _official_url(url: str, *, call_detail: bool | None = None) -> str:
     return urlunparse(("https", host, path.rstrip("/") or "/", "", "", ""))
 
 
+def _same_official_endpoint(registered_url: str, candidate_url: str) -> str:
+    """A redirect can change www or a trailing slash, never the source identity."""
+    original = urlparse(_official_url(registered_url))
+    destination_parts = urlparse(candidate_url)
+    if destination_parts.query or destination_parts.fragment:
+        raise ValueError("EEA source redirect introduced unregistered query/fragment")
+    destination = urlparse(_official_url(candidate_url))
+    if (
+        (original.hostname or "").removeprefix("www.")
+        != (destination.hostname or "").removeprefix("www.")
+        or original.path.rstrip("/") != destination.path.rstrip("/")
+    ):
+        raise ValueError("EEA redirect crossed registered official source endpoint")
+    return _official_url(candidate_url)
+
+
+class _RegisteredEEARedirect(HTTPRedirectHandler):
+    """Reject untrusted hops *before* urllib follows them, even if it returns later."""
+
+    def __init__(self, registered_url: str) -> None:
+        super().__init__()
+        self.registered_url = registered_url
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _same_official_endpoint(self.registered_url, newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+def _open_registered_source(request: Request, *, timeout: float):
+    opener = build_opener(
+        HTTPSHandler(context=ssl.create_default_context()),
+        _RegisteredEEARedirect(request.full_url),
+    )
+    return opener.open(request, timeout=timeout)
+
+
 def fetch_url(url: str, *, timeout: float = 20.0) -> dict[str, Any]:
     requested_url = _official_url(url)
     request = Request(
@@ -130,16 +166,23 @@ def fetch_url(url: str, *, timeout: float = 20.0) -> dict[str, Any]:
             "Accept": "text/html,application/xhtml+xml;q=0.9,*/*;q=0.1",
         },
     )
-    context = ssl.create_default_context()
-    with urlopen(request, timeout=timeout, context=context) as response:
+    with _open_registered_source(request, timeout=timeout) as response:
         status = int(response.getcode() or 0)
-        final_url = _official_url(response.geturl())
+        final_url = _same_official_endpoint(requested_url, response.geturl())
         content_type = response.headers.get("Content-Type", "")
+        encoding = (response.headers.get("Content-Encoding") or "identity").strip().lower()
+        declared_length = response.headers.get("Content-Length")
+        if status != 200:
+            raise RuntimeError(f"HTTP {status} for {requested_url}")
+        if encoding != "identity":
+            raise RuntimeError(f"unsupported encoded EEA source body: {encoding}")
         raw = response.read(MAX_BYTES + 1)
-    if status != 200:
-        raise RuntimeError(f"HTTP {status} for {requested_url}")
-    if len(raw) > MAX_BYTES:
-        raise RuntimeError(f"response exceeds {MAX_BYTES} bytes for {requested_url}")
+    if not raw or len(raw) > MAX_BYTES:
+        raise RuntimeError(f"empty or oversized EEA source body for {requested_url}")
+    if declared_length is not None:
+        declared = str(declared_length).strip()
+        if not declared.isdecimal() or int(declared) != len(raw):
+            raise RuntimeError("EEA source body differs from declared Content-Length")
     if "text/html" not in content_type.lower() and "application/xhtml+xml" not in content_type.lower():
         raise RuntimeError(f"unexpected content type {content_type!r} for {requested_url}")
     return {
