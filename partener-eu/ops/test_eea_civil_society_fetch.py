@@ -148,6 +148,9 @@ def test_transport_integrity():
         (RawResponse(raw, final_url=CALL2), "redirect-to-other-call"),
         (RawResponse(raw, final_url="https://example.org/evil"), "off-authority"),
         (RawResponse(raw, content_type="application/pdf"), "non-HTML"),
+        (RawResponse(raw, content_type="application/json; note=text/html"), "HTML token in parameter"),
+        (RawResponse(raw, content_type="text/html-spoofed"), "HTML token in forged subtype"),
+        (RawResponse(raw, content_type="application/x-application/xhtml+xml"), "XHTML token in forged subtype"),
         (RawResponse(b""), "empty body"),
     ):
         try:
