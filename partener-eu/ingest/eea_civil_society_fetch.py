@@ -217,7 +217,10 @@ def fetch_url(url: str, *, timeout: float = 20.0) -> dict[str, Any]:
         declared = str(declared_length).strip()
         if not declared.isdecimal() or int(declared) != len(raw):
             raise RuntimeError("EEA source body differs from declared Content-Length")
-    if "text/html" not in content_type.lower() and "application/xhtml+xml" not in content_type.lower():
+    # MIME must match the registered HTML media type, not merely contain the
+    # token in an arbitrary parameter or attacker-controlled subtype.
+    media_type = content_type.split(";", 1)[0].strip().lower()
+    if media_type not in {"text/html", "application/xhtml+xml"}:
         raise RuntimeError(f"unexpected content type {content_type!r} for {requested_url}")
     return {
         "requested_url": requested_url,
