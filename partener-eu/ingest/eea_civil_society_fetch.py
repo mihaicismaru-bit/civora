@@ -26,7 +26,7 @@ adapter = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(adapter)
 
-PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V1"
+PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V2"
 INDEX_URL = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
 # Previously verified official exact call pages. This is only a discovery fallback.
 # Fresh HTTPS readback, hash, semantic reconciliation and publication gates remain mandatory.
@@ -54,47 +54,77 @@ DATE_RE = r"\d{2}/\d{2}/\d{4}"
 AMOUNT_RE = r"(?:€|EUR)\s*\d[\d.,]*"
 
 
+# This parser extracts only directly visible HTML evidence. Hidden, inert and
+# non-rendered descendants cannot assert OPEN, a deadline or a source identity.
+# External stylesheets are not evaluated: output remains a candidate for review.
+_HIDDEN_TAGS = {"head", "template", "script", "style", "noscript", "iframe",
+                "object", "svg", "datalist", "select"}
+_VOID_TAGS = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+              "link", "meta", "param", "source", "track", "wbr"}
+
+
 class _DocumentParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
         self.links: list[str] = []
         self.texts: list[str] = []
         self.h1_parts: list[str] = []
-        self._in_h1 = False
-        self._ignored_depth = 0
+        self._stack: list[tuple[str, bool]] = []
+        self._hidden_depth = 0
+        self._h1_depth = 0
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         tag = tag.lower()
-        if tag in {"script", "style", "noscript"}:
-            self._ignored_depth += 1
-            return
-        if self._ignored_depth:
-            return
-        if tag == "h1":
-            self._in_h1 = True
-        if tag == "a":
-            href = dict(attrs).get("href")
-            if href:
-                self.links.append(href)
+        # Check *every* occurrence: dict(attrs) would allow duplicate attributes
+        # to hide contradictory visibility instructions.
+        values: dict[str, list[str]] = {}
+        for key, value in attrs:
+            values.setdefault(key.lower(), []).append((value or "").strip().lower())
+        styles = values.get("style", [])
+        concealed = (
+            tag in _HIDDEN_TAGS
+            or (tag in {"dialog", "details"} and "open" not in values)
+            or "hidden" in values
+            or "inert" in values
+            or any(v in {"true", "1"} for v in values.get("aria-hidden", []))
+            or any(re.search(r"(?:^|;)\s*display\s*:\s*none\b", v) for v in styles)
+            or any(re.search(r"(?:^|;)\s*visibility\s*:\s*(?:hidden|collapse)\b", v) for v in styles)
+            or any(re.search(r"(?:^|;)\s*opacity\s*:\s*0(?:\.0+)?\s*(?:;|$)", v) for v in styles)
+        )
+        hidden = self._hidden_depth > 0 or concealed
+        if not hidden and tag == "a":
+            hrefs = values.get("href", [])
+            if len(hrefs) == 1 and hrefs[0]:
+                self.links.append(hrefs[0])
+        if tag not in _VOID_TAGS:
+            self._stack.append((tag, concealed))
+            if concealed:
+                self._hidden_depth += 1
+            if tag == "h1" and not hidden:
+                self._h1_depth += 1
 
     def handle_endtag(self, tag: str) -> None:
         tag = tag.lower()
-        if tag in {"script", "style", "noscript"} and self._ignored_depth:
-            self._ignored_depth -= 1
+        # An unexpected closing tag must not clear an ancestor's hidden status.
+        matching = next((i for i in range(len(self._stack) - 1, -1, -1)
+                         if self._stack[i][0] == tag), None)
+        if matching is None:
             return
-        if self._ignored_depth:
-            return
-        if tag == "h1":
-            self._in_h1 = False
+        for element, concealed in self._stack[matching:]:
+            if concealed:
+                self._hidden_depth -= 1
+            if element == "h1" and not concealed:
+                self._h1_depth = max(0, self._h1_depth - 1)
+        del self._stack[matching:]
 
     def handle_data(self, data: str) -> None:
-        if self._ignored_depth:
+        if self._hidden_depth:
             return
         value = " ".join(data.split())
         if not value:
             return
         self.texts.append(value)
-        if self._in_h1:
+        if self._h1_depth:
             self.h1_parts.append(value)
 
 
@@ -260,10 +290,11 @@ def _status_label(flat: str) -> str | None:
         (r"\bApeluri? de proiecte\s+Închis\b", "Closed"),
         (r"\bApeluri? de proiecte\s+(?:Viitor|În pregătire)\b", "Forthcoming"),
     )
-    for pattern, value in pairs:
-        if re.search(pattern, flat, flags=re.IGNORECASE):
-            return value
-    return None
+    # Conflicting visible statuses (e.g. a page template embedding another
+    # call's badge) are never sufficient to label this exact call OPEN.
+    matched = {value for pattern, value in pairs
+               if re.search(pattern, flat, flags=re.IGNORECASE)}
+    return next(iter(matched)) if len(matched) == 1 else None
 
 
 def parse_call_page(raw: bytes, *, authority_url: str) -> dict[str, Any]:
