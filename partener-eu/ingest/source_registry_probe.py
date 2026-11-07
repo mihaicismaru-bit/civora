@@ -5,6 +5,7 @@ import re
 import ssl
 import time
 import urllib.request
+from urllib.parse import urlsplit
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -52,6 +53,44 @@ def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
     return True, None, semantic_chars
 
 
+def _assert_source_origin(registered_url: str, candidate_url: str) -> None:
+    """A registry/alias observation must stay on its declared HTTPS authority.
+
+    A redirect to another programme or an attacker-controlled host is *not*
+    official evidence. Explicit canonical_aliases are separately attempted
+    transports, each with its own locked origin.
+    """
+    registered = urlsplit(registered_url)
+    candidate = urlsplit(candidate_url)
+    for parsed in (registered, candidate):
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.port not in (None, 443)
+        ):
+            raise ValueError("untrusted official source URL or redirect")
+    # Only the harmless www canonical spelling may vary, not subdomains.
+    original_host = registered.hostname.lower().removeprefix("www.")
+    candidate_host = candidate.hostname.lower().removeprefix("www.")
+    if original_host != candidate_host:
+        raise ValueError("official source redirect crossed registered origin")
+
+
+class _SourceOriginRedirect(urllib.request.HTTPRedirectHandler):
+    """Reject an off-authority redirect *before* performing the next request."""
+
+    def __init__(self, registered_url: str) -> None:
+        super().__init__()
+        self.registered_url = registered_url
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _assert_source_origin(self.registered_url, req.full_url)
+        _assert_source_origin(self.registered_url, newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def fetch_once(url: str):
     req = urllib.request.Request(url, headers={
         "User-Agent": UA,
@@ -59,8 +98,17 @@ def fetch_once(url: str):
         "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.5",
         "Connection": "close",
     })
+    _assert_source_origin(url, url)
     ctx = ssl.create_default_context()
-    with urllib.request.urlopen(req, timeout=18, context=ctx) as r:
+    opener = urllib.request.build_opener(
+        urllib.request.HTTPSHandler(context=ctx),
+        _SourceOriginRedirect(url),
+    )
+    with opener.open(req, timeout=18) as r:
+        # Check the final response too, independent of redirect handler behavior.
+        _assert_source_origin(url, r.geturl())
+        if r.status != 200:
+            raise ValueError(f"unexpected official source HTTP status {r.status}")
         # Read one byte past the bound: exactly 3 MB without a proof of EOF
         # may be a truncated official document, not a verified healthy source.
         raw = r.read(MAX_SOURCE_BYTES + 1)
@@ -78,7 +126,7 @@ def fetch_once(url: str):
         sem = semantic_bytes(raw, ctype)
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
         return {
-            "ok": 200 <= r.status < 400,
+            "ok": r.status == 200,
             "http_status": r.status,
             "final_url": r.geturl(),
             "content_type": ctype,
