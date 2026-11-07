@@ -67,6 +67,8 @@ function hasFreshPrepareEvidence(d){
  const now=Date.now(),dated=[];
  let expiredCutoff=false;
  const add=(raw,cutoff=false)=>{
+   // A year is programme context, not a verifiable date/window.
+   if(/^20\\d{2}$/.test(String(raw??'').trim()))return;
    const value=parseDate(raw);
    if(!value)return;
    const ts=value.getTime();
