@@ -94,6 +94,9 @@ class _VisibleText(HTMLParser):
             duplicate_visibility
             or tag in _HIDDEN_TAGS
             or (tag == "details" and "open" not in attributes)
+            # Native popovers are hidden until activated by the browser.
+            # Static official-page extraction cannot attest that activation.
+            or "popover" in attributes
             or "hidden" in attributes
             or "inert" in attributes
             or attributes.get("aria-hidden", "").strip().casefold() == "true"
