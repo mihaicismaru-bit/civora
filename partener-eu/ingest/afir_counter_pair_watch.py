@@ -28,7 +28,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v8"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v9"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -53,6 +53,13 @@ HEADERS = {
     "Cache-Control": "no-cache",
     "Pragma": "no-cache",
 }
+
+
+def official_html_mime(value: object) -> bool:
+    """An HTML substring in a non-HTML media type is not source evidence."""
+    return isinstance(value, str) and value.split(";", 1)[0].strip().lower() in (
+        "text/html", "application/xhtml+xml"
+    )
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -91,7 +98,7 @@ def acquire(source: str) -> dict:
         if res.geturl() != url or getattr(res, "status", 200) != 200:
             raise ValueError("counter authority or HTTP status mismatch")
         ctype = res.headers.get("Content-Type", "")
-        if "html" not in ctype.lower():
+        if not official_html_mime(ctype):
             raise ValueError("counter returned non-HTML source")
         # The server may ignore Accept-Encoding: identity. Never persist or
         # parse compressed bytes as an official HTML counter receipt.
@@ -422,7 +429,7 @@ def capture(fetched: dict[str, dict], destination: Path, run_id: str, run_attemp
         if (
             row.get("ok") is not True or row.get("url") != url
             or row.get("status") != 200
-            or "html" not in str(row.get("content_type") or "").lower()
+            or not official_html_mime(row.get("content_type"))
             or row.get("content_encoding", "identity") != "identity"
             or not isinstance(data, bytes) or not data or len(data) > MAX_BYTES
             or not strict_url(url, source)
@@ -518,7 +525,7 @@ def replay(destination: Path) -> dict:
             meta.get("requested_url") != url or meta.get("final_url") != url
             or meta.get("raw_file") != f"{source}.raw.html"
             or meta.get("http_status") != 200
-            or "html" not in str(meta.get("content_type", "")).lower()
+            or not official_html_mime(meta.get("content_type"))
             or meta.get("content_encoding") != "identity"
             or not strict_url(url, source)
         ):
