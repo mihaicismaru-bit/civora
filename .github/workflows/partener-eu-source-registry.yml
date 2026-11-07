@@ -196,6 +196,39 @@ jobs:
               print('FAIL ROHU survey raw acquisition provenance:', survey_obs)
               sys.exit(2)
 
+          # The official November 2026 workshops have a dedicated raw
+          # article, not an OPEN_CALL, application deadline or call index.
+          workshop=rows.get('SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026')
+          workshop_url='https://interreg-rohu.eu/ro/participati-la-atelierele-transfrontaliere-si-contribuiti-la-definirea-capitolului-interreg-2028-2034/'
+          if not workshop or workshop.get('fetch_status') != 'PASS':
+              print('FAIL November ROHU official workshops raw acquisition missing:', workshop)
+              sys.exit(2)
+          if workshop.get('registered_url') != workshop_url or workshop.get('final_url') != workshop_url:
+              print('FAIL ROHU workshops exact-page authority mismatch')
+              sys.exit(2)
+          workshop_obs=workshop.get('normalized') or {}
+          if (workshop_obs.get('programme_family') != 'Interreg Romania-Hungary 2028-2034'
+              or workshop_obs.get('observation_state') != 'PROGRAMME_PREPARATION'
+              or workshop_obs.get('intelligence_family') != 'PROGRAMMING_PIPELINE'
+              or workshop_obs.get('not_a_call') is not True
+              or workshop_obs.get('open_call_authorized') is not False
+              or workshop_obs.get('material_fact_use') is not False
+              or workshop_obs.get('publish_authorized') is not False
+              or workshop_obs.get('publication_effect') != 'NONE'
+              or workshop.get('material_fact_use') is not False
+              or workshop.get('publish_authorized') is not False
+              or workshop.get('publication_effect') != 'NONE'):
+              print('FAIL ROHU workshops future-programming/call isolation:', workshop_obs)
+              sys.exit(2)
+          if (workshop_obs.get('authority_url') != workshop_url
+              or workshop_obs.get('raw_hash') != workshop.get('raw_hash')
+              or workshop_obs.get('fetched_at') != workshop.get('fetched_at')
+              or workshop_obs.get('run_id') != workshop.get('run_id')
+              or not workshop_obs.get('parser_version')
+              or not workshop.get('bytes')):
+              print('FAIL ROHU workshops immutable source provenance:', workshop_obs)
+              sys.exit(2)
+
           romd=rows.get('SRC-INTERREG-ROMD-2028-2034')
           if not romd:
               print('FAIL Romania-Moldova 2028-2034 programming source missing from live evidence')
