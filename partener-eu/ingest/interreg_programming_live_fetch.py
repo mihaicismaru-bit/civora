@@ -116,6 +116,15 @@ def _utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def _strict_utc_receipt_time(value: Any) -> dt.datetime:
+    """Only canonical UTC timestamps can establish immutable capture order."""
+    if not isinstance(value, str) or not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z", value
+    ):
+        raise ValueError("invalid Interreg UTC receipt timestamp")
+    return dt.datetime.fromisoformat(value[:-1] + "+00:00")
+
+
 def _visible_text(raw: bytes, content_type: str) -> str:
     charset = "utf-8"
     match = re.search(r"charset=([A-Za-z0-9._-]+)", content_type, re.I)
@@ -302,6 +311,9 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
         }
         try:
             raw, final_url, status, content_type = _fetch(url)
+            # Record when this individual source was fetched, not the start
+            # of an acquisition run that can span multiple slow endpoints.
+            row["fetched_at"] = _utc_now()
             _assert_official_source_origin(url, final_url)
             text = _visible_text(raw, content_type)
             if len(text) < 120:
@@ -315,7 +327,7 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
                     "text": text,
                     "authority_url": final_url,
                 },
-                fetched_at=observed_at,
+                fetched_at=row["fetched_at"],
                 raw_hash=raw_hash,
                 run_id=run,
             )
@@ -339,6 +351,9 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
             )
         except Exception as exc:
             errors += 1
+            # A failed request is observed at failure time, too. Its receipt
+            # must never inherit the stale run-start timestamp.
+            row["fetched_at"] = _utc_now()
             row.update(
                 {
                     "fetch_status": "FAIL",
@@ -356,7 +371,7 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
 
     return {
         "schema": SCHEMA,
-        "created_at": observed_at,
+        "created_at": _utc_now(),
         "run_id": run,
         "source_count": len(rows),
         "fetch_pass": len(rows) - errors,
@@ -424,6 +439,8 @@ def replay_live_evidence(
     seen_ids: set[str] = set()
     observed_states: dict[str, int] = {}
     pass_count = 0
+    receipt_created_at = _strict_utc_receipt_time(evidence.get("created_at"))
+    last_fetched_at: dt.datetime | None = None
     if not str(evidence.get("run_id") or "").strip():
         raise ValueError("Interreg raw evidence missing run_id")
     for row in rows:
@@ -431,12 +448,17 @@ def replay_live_evidence(
         if source_id in seen_ids or source_id not in registered:
             raise ValueError("duplicate or unregistered Interreg evidence source")
         seen_ids.add(source_id)
+        row_fetched_at = _strict_utc_receipt_time(row.get("fetched_at"))
+        if row_fetched_at > receipt_created_at or (
+            last_fetched_at is not None and row_fetched_at < last_fetched_at
+        ):
+            raise ValueError("Interreg receipt chronology invalid")
+        last_fetched_at = row_fetched_at
         source = registered[source_id]
         if (
             row.get("registered_url") != source.get("url")
             or row.get("programme") != str((source.get("programmes") or [""])[0] or "")
             or row.get("source_owner") != source.get("owner")
-            or row.get("fetched_at") != evidence.get("created_at")
             or row.get("run_id") != evidence.get("run_id")
         ):
             raise ValueError("Interreg source registry/run provenance mismatch")
