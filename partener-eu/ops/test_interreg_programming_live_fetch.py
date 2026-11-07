@@ -548,6 +548,7 @@ def main():
             ("<details><summary>More information</summary>", "</details>"),
             ("<p style='content-visibility: hidden'>", "</p>"),
             ("<div style='opacity: 0'>", "</div>"),
+            ("<div style='opacity: 0.0 !important'>", "</div>"),
             ("<div style='visibility: collapse'>", "</div>"),
             ("<div style='display: none' style='display: block'>", "</div>"),
             ("<div style='display: block' style='display: none'>", "</div>"),
@@ -568,6 +569,13 @@ def main():
                 assert "identity/schedule unverified" in str(exc), (opening, exc)
             else:
                 raise AssertionError(f"hidden workshop terms accepted: {opening}")
+
+        # Nonzero opacity is visible and must not hide genuine article prose.
+        semi_visible = ("<html><body><div style='opacity: 0.75'>" + article_text
+                        + "</div></body></html>").encode("utf-8")
+        semi_text = live._visible_text(semi_visible, "text/html; charset=utf-8")
+        assert "17 noiembrie 2026" in semi_text
+        live._assert_registered_article_identity(article_id, article_url, article_url, semi_text)
 
         # An explicitly opened details panel is readable; closing it cannot
         # launder identity terms, while neighbouring visible text survives.

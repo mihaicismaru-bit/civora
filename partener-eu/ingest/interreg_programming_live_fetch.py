@@ -100,7 +100,7 @@ class _VisibleText(HTMLParser):
             or "display:none" in style
             or "visibility:hidden" in style
             or "visibility:collapse" in style
-            or "opacity:0" in style
+            or re.search(r"(?:^|;)opacity:0(?:\.0+)?(?:!important)?(?:;|$)", style) is not None
             or "content-visibility:hidden" in style
         )
         if tag not in _VOID_TAGS:
