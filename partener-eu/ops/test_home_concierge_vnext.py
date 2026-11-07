@@ -64,7 +64,8 @@ for token in (
     'isTypingTarget',
     "if(!search)",
     'inputmode="search"',
-    "P?.summary?.openCount",
+    "const canonicalOpenTotal=open.length;",
+    "hasFreshPrepareEvidence",
     "canonicalOpenTotal",
     "hero.querySelector('.heroCard .big')",
 ):
