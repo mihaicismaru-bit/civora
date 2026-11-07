@@ -18,7 +18,7 @@ from pathlib import Path
 import afir_ingest as transport
 
 NOTICE_URL = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
-PARSER_VERSION = "afir-dr12-monthly-quality-watch-v3"
+PARSER_VERSION = "afir-dr12-monthly-quality-watch-v4"
 # An official notice must contain one coherent monthly-stage statement.
 # A second (even malformed) announcement must not be silently discarded.
 STAGE_INTRO = re.compile(r"\bpragul\s+de\s+calitate\s+lunar\b", re.IGNORECASE)
@@ -57,6 +57,13 @@ def parse_notice(raw: bytes) -> list[dict]:
     return [dict(stage, components=["ZOOTEHNIC", "VEGETAL"]) for stage in STAGES]
 
 
+def official_html_mime(value: object) -> bool:
+    """Accept only a real HTML media type, not substring lookalikes."""
+    return isinstance(value, str) and value.split(";", 1)[0].strip().lower() in (
+        "text/html", "application/xhtml+xml"
+    )
+
+
 def capture(
     fetched: dict,
     destination: Path,
@@ -72,7 +79,7 @@ def capture(
         or fetched.get("ok") is not True
         or fetched.get("url") != NOTICE_URL
         or fetched.get("status") != 200
-        or "html" not in str(fetched.get("content_type") or "").lower()
+        or not official_html_mime(fetched.get("content_type"))
         or not isinstance(raw, bytes)
     ):
         raise ValueError("DR-12 raw receipt lacks exact official HTTPS identity, status, run or HTML bytes")
@@ -188,7 +195,7 @@ def replay_receipt(destination: Path) -> dict:
     for field, value in expected.items():
         if manifest.get(field) != value:
             raise ValueError(f"DR-12 immutable replay disagreement: {field}")
-    if "html" not in str(manifest.get("content_type") or "").lower():
+    if not official_html_mime(manifest.get("content_type")):
         raise ValueError("DR-12 replay content-type mismatch")
     if not str(manifest.get("run_id") or "").strip():
         raise ValueError("DR-12 replay run_id missing")
