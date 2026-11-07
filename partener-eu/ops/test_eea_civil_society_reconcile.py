@@ -322,7 +322,7 @@ def main():
             minimum_calls=2,
         )
     except ValueError as exc:
-        if "stale open/forthcoming status past official submission date" not in str(exc):
+        if "active status on/after date-only deadline requires verified cutoff time" not in str(exc):
             fail(f"historical OPEN wrong failure: {exc}")
     else:
         fail("historical OPEN accepted after official deadline")
@@ -349,23 +349,33 @@ def main():
         reconciled_at="2026-10-08T21:31:00+00:00",
     )
 
-    # Positive boundary: 12:30 UTC is 8 October 15:30 in Romania,
-    # before the official 16:00 local submission cut-off. This unit test
-    # isolates the date-only guard; exact hours need independently proven
-    # official evidence before a call can enter public projection.
+    # The exact call-page schema contains only a calendar date, not a verified
+    # cutoff hour. On deadline day, even a fresh label saying OPEN cannot prove
+    # the call is still actionable. Suppress it rather than assume 23:59:59.
     local_deadline_day = copy.deepcopy(evidence)
     local_deadline_day["fetched_at"] = "2026-10-08T12:30:00+00:00"
     for row in local_deadline_day["records"]:
         row["fetched_at"] = local_deadline_day["fetched_at"]
-    local_receipt = module.reconcile_live_evidence(
+    expect_fail(
         local_deadline_day,
+        "Romania-local deadline-day OPEN lacks independently verified cutoff hour",
         reconciled_at="2026-10-08T12:31:00+00:00",
+    )
+    # Positive boundary: the preceding Romanian calendar day can still stage
+    # exact, fresh official OPEN evidence, with publication permanently gated.
+    local_previous_day = copy.deepcopy(evidence)
+    local_previous_day["fetched_at"] = "2026-10-07T12:30:00+00:00"
+    for row in local_previous_day["records"]:
+        row["fetched_at"] = local_previous_day["fetched_at"]
+    local_receipt = module.reconcile_live_evidence(
+        local_previous_day,
+        reconciled_at="2026-10-07T12:31:00+00:00",
         minimum_calls=2,
     )
     if (local_receipt["stats"]["reconciled_calls"] != 2
             or local_receipt["publish_authorized"]
             or not local_receipt["ready_for_staging"]):
-        fail("valid Romanian deadline-day readback was incorrectly denied")
+        fail("valid fresh pre-deadline official readback incorrectly denied")
 
     # A month-old exact-page readback is not current OPEN evidence even if
     # the call's submission deadline is still in the future. The 24h policy
