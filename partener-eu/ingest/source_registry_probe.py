@@ -16,6 +16,8 @@ REVIEWED_BASELINES = ROOT / "partener-eu" / "validation" / "accepted-source-base
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/1.0 (+production-validation)"
 MIN_SEMANTIC_CHARS = 256
 MIN_HTML_BYTES_FOR_LOW_INFO = 4096
+# A partial/truncated response must never become a healthy source hash or LKG.
+MAX_SOURCE_BYTES = 3_000_000
 
 
 def utc_now():
@@ -59,7 +61,19 @@ def fetch_once(url: str):
     })
     ctx = ssl.create_default_context()
     with urllib.request.urlopen(req, timeout=18, context=ctx) as r:
-        raw = r.read(3_000_000)
+        # Read one byte past the bound: exactly 3 MB without a proof of EOF
+        # may be a truncated official document, not a verified healthy source.
+        raw = r.read(MAX_SOURCE_BYTES + 1)
+        if len(raw) > MAX_SOURCE_BYTES:
+            raise ValueError("oversized official source response")
+        content_encoding = (r.headers.get("content-encoding") or "identity").strip().lower()
+        if content_encoding != "identity":
+            raise ValueError("unsupported official source Content-Encoding")
+        declared_length = r.headers.get("content-length")
+        if declared_length is not None:
+            declared = str(declared_length).strip()
+            if not declared.isdecimal() or int(declared) != len(raw):
+                raise ValueError("official source Content-Length mismatch")
         ctype = r.headers.get("content-type") or ""
         sem = semantic_bytes(raw, ctype)
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
