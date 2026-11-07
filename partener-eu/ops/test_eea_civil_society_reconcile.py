@@ -94,7 +94,7 @@ def make_evidence():
         "authority_class": "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA",
         "fetched_at": FETCHED,
         "run_id": RUN,
-        "parser_version": "EEA_CSF_ROMANIA_LIVE_FETCH_V1",
+        "parser_version": "EEA_CSF_ROMANIA_LIVE_FETCH_V2",
         "adapter_version": "EEA_CSF_ROMANIA_CALLS_V1",
         "source_index": {
             "url": "https://eeagrants.org/en/eea-civil-society-fund-romania/calls",
