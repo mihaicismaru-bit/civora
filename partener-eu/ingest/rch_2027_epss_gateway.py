@@ -49,6 +49,11 @@ class _LinkParser(raw._VisibleHTML):
         if tag.lower() == "a":
             if self.active is not None:
                 raise ValueError("nested official submission link is ambiguous")
+            # HTMLParser supplies duplicate attributes as a list. Casting to a
+            # dict silently keeps the last href, while HTML clients may follow
+            # the first: never infer an official submission target from that.
+            if sum(key.lower() == "href" for key, _ in attrs) > 1:
+                raise ValueError("duplicate href in official submission anchor")
             properties = dict(attrs)
             self.active = (properties.get("href", ""), [], self.stack[-1][1])
 
