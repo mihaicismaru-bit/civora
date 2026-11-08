@@ -157,9 +157,35 @@ def test_romania_semantic_review_candidate() -> None:
     assert 3 in guidance["page_indexes_zero_based"]
     artifact = record["immutable_evidence"]
     assert artifact["provenance_binding"] == "REVIEW_REQUIRED_NOT_CANONICALLY_ADMITTED"
-    assert artifact["source_receipt_sha256"] == "IN_PAIRED_HANDOFF_NOT_COPIED_TO_THIS_REVIEW"
-    assert len(artifact["artifact_zip_sha256"]) == 64
-    assert "not an original-document SHA" in artifact["artifact_content_note"]
+    # Independently recomputed SHA-256 of each original byte stream in exact-head
+    # artifact 13622618345; snapshot evidence, NOT semantic/source admission.
+    # No frozen ZIP hash or programme grant number can authorize OPEN_CALL.
+    expected_raw = {
+        "SRC-EU-RCH-2027-CALL1": "c7937504de290a3744ca2ea537ac2abeff1909e696765cf40dbe8fe5b014e5db",
+        "SRC-RO-MCUMP-RCH-2027": "0ee35407d4d6759b06c3a295cd17a2abcaddada572242c827ed16d24c0f1e16a",
+        "SRC-EU-RCH-2027-CALL-TEXT": "bcf5103381abca8ca76e7fd1094014fdf0f0eac8234fc3e84cc7b1aad2840bcc",
+        "SRC-EU-RCH-2027-GUIDANCE": "87dc7616eb8235959af2a11f9f54a1b99ed57b4d7deafeef199a3078aeb2eae9",
+        "SRC-EU-RCH-2027-PREPROPOSAL": "33bafea19e703f644903ce464e7994c1f8acdaccb5ef4194f96b866855ce04d7",
+    }
+    assert set(expected_raw) == set(raw.SOURCE_SPECS) | set(raw.DOCUMENT_SPECS)
+    assert artifact["original_raw_sha256_by_source_id"] == expected_raw
+    assert artifact["evidence_run_id"] == "42495089354-1"
+    assert artifact["fetched_at_earliest_utc"] == "2026-11-08T15:30:30Z"
+    assert artifact["fetched_at_latest_utc"] == "2026-11-08T15:30:34Z"
+    assert artifact["source_manifest_raw_sha256"] == "643a0f01c2246ab364dbaad024083bdba049970ab4bc804939e2b490578bef5f"
+    assert artifact["document_manifest_raw_sha256"] == "9ba0a4086315160848a920ccc44a11bfb28c15e123c5312cd51c2fac272fc93c"
+    assert artifact["paired_manifest_raw_sha256"] == "3b733f10bd50503842c670aa3f2bf85378dd7be5124eaad2ddd1f9d37119bedf"
+    assert artifact["paired_handoff_sha256"] == "84f7c5cce83a681af36fcdfc4fcdf948634b97eaedf7fe4b1a94d15eebbbe0d3"
+    assert artifact["artifact_zip_sha256"] == "e911272f87c77b7516ac6e0a09dedf93ceb0309c6849a462a57fe216ad436d1e"
+    assert artifact["parser_versions_by_kind"] == {
+        "html": raw.PARSER_VERSION,
+        "pdf": raw.DOCUMENT_PARSER_VERSION,
+        "pair": pair.PAIR_VERSION,
+    }
+    assert artifact["artifact_retention_days"] == 30
+    assert artifact["durable_canonical_persistence_verified"] is False
+    assert "NOT an original-document digest" in artifact["artifact_content_note"]
+    assert artifact["provenance_binding"] == "REVIEW_REQUIRED_NOT_CANONICALLY_ADMITTED"
     print("PASS RCH Romania Annex I semantic review candidate remains evidence-referenced, non-authorizing and distinct from EU-general eligibility")
 
 
