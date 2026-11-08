@@ -198,8 +198,8 @@ def main():
         # A successful status/HTML type alone cannot authorize raw receipt.
         # Exercise the actual transport without network dependencies.
         class RawResponse:
-            def __init__(self, *, declared=None, encoding=None):
-                self.headers = {"Content-Type": "text/html; charset=utf-8"}
+            def __init__(self, *, declared=None, encoding=None, mime="text/html; charset=utf-8"):
+                self.headers = {"Content-Type": mime}
                 if declared is not None:
                     self.headers["Content-Length"] = str(declared)
                 if encoding is not None:
@@ -235,7 +235,14 @@ def main():
 
             assert fetch_raw_response(declared=len(html))[0] == html
             assert fetch_raw_response(encoding="identity")[0] == html
+            assert fetch_raw_response(mime="application/xhtml+xml; charset=utf-8")[0] == html
+            assert live._official_html_mime(" TEXT/HTML ; charset=UTF-8")
+            assert not live._official_html_mime(None)
             for kwargs, expected in (
+                ({"mime": "application/json; note=text/html"}, "unexpected content type"),
+                ({"mime": "text/plain; filename=official.html"}, "unexpected content type"),
+                ({"mime": "application/x-fake-html"}, "unexpected content type"),
+                ({"mime": "application/pdf; name=text/html"}, "unexpected content type"),
                 ({"encoding": "gzip"}, "unsupported encoded"),
                 ({"encoding": "br"}, "unsupported encoded"),
                 ({"declared": len(html) + 9}, "Content-Length"),
@@ -269,6 +276,37 @@ def main():
             live._utc_now = original_now
 
         live.validate_envelope(envelope)
+        # Rehashed originals must not be legitimized by a fake MIME field in
+        # a supposedly immutable receipt. This was previously accepted because
+        # the replay checked for the substring "html" anywhere in the header.
+        for forged_mime in (
+            "application/json; note=text/html",
+            "text/plain; filename=official.html",
+            "application/pdf; name=text/html",
+            "application/x-fake-html",
+        ):
+            forged = json.loads(json.dumps(envelope))
+            forged["rows"][0]["content_type"] = forged_mime
+            try:
+                live.replay_live_evidence(forged, original_dir, registry)
+            except ValueError as exc:
+                assert "type, status or SHA mismatch" in str(exc), (forged_mime, exc)
+            else:
+                raise AssertionError(f"Interreg forged MIME replay passed: {forged_mime}")
+
+        # Defense-in-depth: a transport adapter regression must also fail
+        # before any original is written as PASS evidence.
+        mime_dir = Path(tmp) / "untrusted-mime-originals"
+        try:
+            live._fetch = lambda url: (html, url, 200, "application/json; note=text/html")
+            mime_failure = live.build_live_evidence(
+                registry, run_id="TEST-UNTRUSTED-MIME", raw_dir=mime_dir
+            )
+        finally:
+            live._fetch = original_fetch
+        assert mime_failure["fetch_pass"] == 0 and mime_failure["fetch_fail"] == 2
+        assert all("unexpected content type" in row["error"] for row in mime_failure["rows"])
+        assert live.replay_live_evidence(mime_failure, mime_dir, registry) == 0
         assert envelope["created_at"] == "2026-08-28T01:51:24Z"
         assert [row["fetched_at"] for row in envelope["rows"]] == [
             "2026-08-28T01:51:19Z", "2026-08-28T01:51:23Z"
