@@ -108,6 +108,9 @@ def run_test() -> None:
         replace_manifest(doc_path, future_pdf)
         assert raw.validate_handoff(root)["publish_authorized"] is False
         assert raw.validate_document_handoff(root)["publish_authorized"] is False
+        # Test the chronology gate directly: replay would also reject merely
+        # because the already-sealed manifest no longer matches these new bytes.
+        reject(pair.expected_pair, root)
         reject(pair.replay, root)
         reject(pair.seal, root)
         html_path.write_bytes(original_html)
