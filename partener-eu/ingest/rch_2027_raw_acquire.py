@@ -65,22 +65,38 @@ class _VisibleHTML(HTMLParser):
         self.chunks = []
 
     def handle_starttag(self, tag, attrs):
-        properties = dict(attrs)
-        # Normalize *all* CSS whitespace, not only spaces: official-looking
-        # text inside display:<TAB>none / visibility:<LF>hidden must not
-        # satisfy an exact-call page identity check.
+        tag = tag.lower()
+        # HTMLParser exposes duplicate attributes. Browsers can honor the first
+        # duplicate while dict(attrs) keeps the last: e.g. aria-hidden=true
+        # followed by aria-hidden=false would falsely make concealed call text
+        # an admissible official-page identity anchor.
+        properties = {}
+        ambiguous_visibility = False
+        for key, value in attrs:
+            key = key.lower()
+            if key in properties and key in {
+                "style", "aria-hidden", "hidden", "inert", "popover", "open"
+            }:
+                ambiguous_visibility = True
+            properties.setdefault(key, value or "")
+        # Source identity is never established by hidden or inactive UI text.
         css = re.sub(r"\s+", "", properties.get("style") or "").lower()
         hidden_css = (
             "display:none" in css
             or "visibility:hidden" in css
             or "visibility:collapse" in css
             or "content-visibility:hidden" in css
-            or re.search(r"(?:^|;)opacity:0(?:;|$|!important)", css) is not None
+            or re.search(r"(?:^|;)opacity:0(?:\.0+)?(?:!important)?(?:;|$)", css) is not None
         )
         hidden = (
             (self.stack[-1][1] if self.stack else False)
-            or tag in _HTML_NONVISIBLE or "hidden" in properties
-            or (properties.get("aria-hidden") or "").lower() == "true"
+            or ambiguous_visibility
+            or tag in _HTML_NONVISIBLE
+            or tag in {"dialog", "datalist", "select", "textarea", "canvas", "iframe"}
+            or (tag == "details" and "open" not in properties)
+            or "hidden" in properties or "inert" in properties
+            or "popover" in properties
+            or (properties.get("aria-hidden") or "").strip().lower() == "true"
             or hidden_css
         )
         if tag not in _HTML_VOID:
