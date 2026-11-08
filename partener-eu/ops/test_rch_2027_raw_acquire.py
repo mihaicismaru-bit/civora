@@ -64,6 +64,17 @@ def test_url_and_response_policy():
                   + b"</body></html>")
         must_reject(mod.validate_response, sid, status=200, mime="text/html",
                     encoding="identity", declared_length=None, raw=hidden)
+        # A forged call identity inside CSS-invisible descendants must not
+        # turn an unrelated HTTP 200 HTML page into an official receipt.
+        # Tabs/newlines evade a space-only CSS normalization.
+        for css in ("display:\\tnone", "visibility:\\nhidden",
+                    "visibility:collapse", "content-visibility:hidden",
+                    "opacity:0", "opacity:0!important"):
+            page = (b"<!doctype html><html><body>Unrelated maintenance page"
+                    + b"<div style='" + css.encode("ascii") + b"'>" + RAW
+                    + b"</div></body></html>")
+            must_reject(mod.validate_response, sid, status=200, mime="text/html",
+                        encoding="identity", declared_length=None, raw=page)
         must_reject(mod.validate_response, sid, status=403, mime="text/html",
                     encoding="identity", declared_length=None, raw=RAW)
         must_reject(mod.validate_response, sid, status=200, mime="text/html",
