@@ -121,5 +121,48 @@ def run_test() -> None:
         print("PASS RCH five original manifests paired, immutable SHA and run/future-time/freshness/authorization negative replay")
 
 
+def test_romania_semantic_review_candidate() -> None:
+    """Lock the reviewed *candidate* against accidental Romanian over-admission.
+
+    This offline test asserts a fail-closed editorial boundary, not that a
+    public webpage or PDF alone authorizes a live opening or final cost rules.
+    """
+    path = Path(__file__).parents[1] / "validation" / "discovery" / "rch-2027-romania-semantic-review-20261108.json"
+    record = json.loads(path.read_text(encoding="utf-8"))
+    assert record["observation_state"] == "OFFICIAL_CROSS_DOCUMENT_SEMANTIC_REVIEW_CANDIDATE"
+    assert record["review_status"] == "PARTIAL_RECONCILIATION_REVIEW_REQUIRED"
+    assert record["material_fact_action"] == "NONE"
+    assert record["publication_effect"] == "NONE"
+    assert record["remaining_release_gates"]
+    for field in (*raw.LOCKED_FALSE, "distribution_authorized", "lkg_modified"):
+        assert record[field] is False, f"RCH candidate attempted to authorize {field}"
+    assert record["semantic_findings_unadmitted"]["programme_grant_reference_not_call_identifier"] == "RCH Grant 101304744"
+    claims = record["semantic_findings_unadmitted"]
+    assert claims["exact_call_label"] == "RCH Call 1"
+    assert claims["romanian_national_funding_commitment_eur"] == 2_000_000
+    assert claims["romanian_funding_per_partner_eur_min"] == 150_000
+    assert claims["romanian_funding_per_partner_eur_max"] == 300_000
+    assert claims["romanian_project_duration_months"] == 24
+    assert claims["transnational_stage_1_submission_endpoint"] == "https://epss.proposals.ee/rch/"
+    assert claims["national_supporting_documents_endpoint"] == "https://fonduri-cultura.ro/"
+    assert "selected" in claims["national_endpoint_scope"].lower()
+    assert "indicative" in claims["romanian_cost_rules_status"].lower()
+    assert "national Annex I" in claims["european_guidance_conflict"]
+    eligible = " ".join(claims["romanian_eligible_applicants"]).lower()
+    assert "public" in eligible and not any(word in eligible for word in ("private company", "private association", "ngo"))
+    locators = record["source_locators"]
+    call_text = next(row for row in locators if row["url"].endswith("/RCH-JTC-2027-Call-Text_final.pdf"))
+    guidance = next(row for row in locators if row["url"].endswith("/RCH_JTC_2027_Guidance-for-Applicants.pdf"))
+    assert {127, 128, 129}.issubset(call_text["page_indexes_zero_based"])
+    assert 3 in guidance["page_indexes_zero_based"]
+    artifact = record["immutable_evidence"]
+    assert artifact["provenance_binding"] == "REVIEW_REQUIRED_NOT_CANONICALLY_ADMITTED"
+    assert artifact["source_receipt_sha256"] == "IN_PAIRED_HANDOFF_NOT_COPIED_TO_THIS_REVIEW"
+    assert len(artifact["artifact_zip_sha256"]) == 64
+    assert "not an original-document SHA" in artifact["artifact_content_note"]
+    print("PASS RCH Romania Annex I semantic review candidate remains evidence-referenced, non-authorizing and distinct from EU-general eligibility")
+
+
 if __name__ == "__main__":
     run_test()
+    test_romania_semantic_review_candidate()
