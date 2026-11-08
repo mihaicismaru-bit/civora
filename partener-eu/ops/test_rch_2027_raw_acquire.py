@@ -14,7 +14,7 @@ mod = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(mod)
 
-RAW = b"<!DOCTYPE html><html><head><title>RCH 2027</title></head><body>Original official call information</body></html>"
+RAW = b"<!DOCTYPE html><html><head><title>RCH 2027</title></head><body>The European Partnership launches its first Joint Transnational Call (JTC): Foundations for climate-resilient cultural heritage. RCH - Resilient Cultural Heritage. Primul apel de proiecte din cadrul parteneriatului RCH a fost publicat.</body></html>"
 STAMP = "2026-11-08T07:28:14Z"
 RUN_ID = "test-rch-2027-001"
 
@@ -49,6 +49,21 @@ def test_url_and_response_policy():
                              "text/html-fake", "application/pdf", "application/octet-stream"):
             must_reject(mod.validate_response, sid, status=200, mime=content_type,
                         encoding="identity", declared_length=None, raw=RAW)
+
+        # A valid HTTP 200 envelope containing only invisible/mismatched call
+        # identity is not an official call-detail observation.
+        wrong = b"<!doctype html><html><body>Unrelated maintenance page</body></html>"
+        must_reject(mod.validate_response, sid, status=200, mime="text/html",
+                    encoding="identity", declared_length=None, raw=wrong)
+        hidden = (b"<!doctype html><html><body>Unrelated maintenance page"
+                  + b"<script>" + RAW + b"</script>"
+                  + b"<template>" + RAW + b"</template>"
+                  + b"<div hidden>" + RAW + b"</div>"
+                  + b"<div aria-hidden='true'>" + RAW + b"</div>"
+                  + b"<div style='display:none'>" + RAW + b"</div>"
+                  + b"</body></html>")
+        must_reject(mod.validate_response, sid, status=200, mime="text/html",
+                    encoding="identity", declared_length=None, raw=hidden)
         must_reject(mod.validate_response, sid, status=403, mime="text/html",
                     encoding="identity", declared_length=None, raw=RAW)
         must_reject(mod.validate_response, sid, status=200, mime="text/html",
