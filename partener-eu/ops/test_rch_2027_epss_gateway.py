@@ -42,12 +42,15 @@ def test_transport_and_link():
                     gate.GATEWAY_URL + "?open=true", gate.GATEWAY_URL + "#call2",
                     "https://epss.proposals.ee/other/"):
         reject(gate.validate_gateway_url, altered)
+    # Real official call HTML repeats its identical submission link twice.
+    repeated = SOURCE.replace(b"</body>", b'<a href="https://epss.proposals.ee/rch/">Submission platform</a></body>')
+    assert gate.official_submission_link(repeated) == gate.GATEWAY_URL
     for html in (
         SOURCE.replace(b"Submission platform", b"Read more"),
         SOURCE.replace(b"https://epss.proposals.ee/rch/", b"https://evil.example/rch/"),
         SOURCE.replace(b'<a href=', b'<a hidden href='),
         SOURCE.replace(b'<a href=', b'<script><a href='),
-        SOURCE.replace(b"</body>", b'<a href="https://epss.proposals.ee/rch/">Submission platform</a></body>'),
+        SOURCE.replace(b"</body>", b'<a href="https://epss.proposals.ee/other/">Submission platform</a></body>'),
     ):
         reject(gate.official_submission_link, html)
     for html in (
