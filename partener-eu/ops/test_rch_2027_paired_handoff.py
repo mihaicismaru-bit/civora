@@ -94,9 +94,28 @@ def run_test() -> None:
         reject(pair.replay, root)  # stale/mixed source snapshots fail pairing
         doc_path.write_bytes(original_doc)
 
+        # Five internally consistent receipts must still fail if all claim a future capture.
+        # The independent raw handoffs only check timestamp shape; the paired gate
+        # is responsible for rejecting impossible observation chronology.
+        html_path = root / "handoff" / "rch_2027_sources.json"
+        original_html = html_path.read_bytes()
+        future_html = json.loads(original_html)
+        future_pdf = json.loads(original_doc)
+        for manifest in (future_html, future_pdf):
+            for row in manifest["receipts"]:
+                row["fetched_at_utc"] = "2099-11-08T10:00:00Z"
+        replace_manifest(html_path, future_html)
+        replace_manifest(doc_path, future_pdf)
+        assert raw.validate_handoff(root)["publish_authorized"] is False
+        assert raw.validate_document_handoff(root)["publish_authorized"] is False
+        reject(pair.replay, root)
+        reject(pair.seal, root)
+        html_path.write_bytes(original_html)
+        doc_path.write_bytes(original_doc)
+
         assert pair.replay(root) == result
         reject(pair.seal, root / "missing")
-        print("PASS RCH five original manifests paired, immutable SHA and run/freshness/authorization negative replay")
+        print("PASS RCH five original manifests paired, immutable SHA and run/future-time/freshness/authorization negative replay")
 
 
 if __name__ == "__main__":

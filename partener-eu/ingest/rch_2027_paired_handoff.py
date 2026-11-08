@@ -11,7 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -21,6 +21,8 @@ import rch_2027_raw_acquire as raw
 
 PAIR_VERSION = "RCH_2027_PAIRED_HANDOFF_V1"
 MAX_CAPTURE_SPAN_SECONDS = 1200
+# Legitimate clock skew is tolerated; an acquisition receipt cannot be from the future.
+MAX_FUTURE_SKEW_SECONDS = 300
 PAIR_NAME = "rch_2027_paired_handoff.json"
 
 
@@ -56,6 +58,8 @@ def expected_pair(root: Path) -> dict:
     oldest, newest = min(stamps), max(stamps)
     if (newest - oldest).total_seconds() > MAX_CAPTURE_SPAN_SECONDS:
         raise ValueError("RCH HTML/PDF capture spans exceeded the bounded run window")
+    if newest > datetime.now(timezone.utc) + timedelta(seconds=MAX_FUTURE_SKEW_SECONDS):
+        raise ValueError("RCH original acquisition receipts cannot claim future fetch timestamps")
 
     result = {
         "schema_version": "1.0",
