@@ -69,7 +69,7 @@ class _VisibleHTML(HTMLParser):
         # Normalize *all* CSS whitespace, not only spaces: official-looking
         # text inside display:<TAB>none / visibility:<LF>hidden must not
         # satisfy an exact-call page identity check.
-        css = re.sub(r"\\s+", "", properties.get("style") or "").lower()
+        css = re.sub(r"\s+", "", properties.get("style") or "").lower()
         hidden_css = (
             "display:none" in css
             or "visibility:hidden" in css
