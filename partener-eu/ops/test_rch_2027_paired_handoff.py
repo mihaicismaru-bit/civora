@@ -62,6 +62,15 @@ def run_test() -> None:
         replace_manifest(sealed_path, forged)
         reject(pair.replay, root)  # even with recomputed top-level hash
         sealed_path.write_bytes(original_pair)
+        # A double-key manifest can look benign to one consumer and authorizing
+        # to another: it must fail before recomputing the pair.
+        sealed_path.write_text(original_pair.decode("utf-8").replace(
+            '"publish_authorized": false',
+            '"publish_authorized": true, "publish_authorized": false', 1
+        ), encoding="utf-8")
+        reject(pair.read_manifest, sealed_path)
+        reject(pair.replay, root)
+        sealed_path.write_bytes(original_pair)
 
         forged = json.loads(original_pair)
         forged["source_manifest_raw_sha256"] = "0" * 64
