@@ -13,12 +13,14 @@ import json
 import os
 import re
 import sys
+from html.parser import HTMLParser
 from pathlib import Path
 
 import afir_ingest as transport
 
 NOTICE_URL = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
-PARSER_VERSION = "afir-dr12-monthly-quality-watch-v4"
+PARSER_VERSION = "afir-dr12-monthly-quality-watch-v5"
+PRIOR_PARSER_VERSION = "afir-dr12-monthly-quality-watch-v4"
 # An official notice must contain one coherent monthly-stage statement.
 # A second (even malformed) announcement must not be silently discarded.
 STAGE_INTRO = re.compile(r"\bpragul\s+de\s+calitate\s+lunar\b", re.IGNORECASE)
@@ -38,13 +40,81 @@ STAGES = (
 )
 
 
+class _VisibleNotice(HTMLParser):
+    """Only static visible official prose can establish monthly stage evidence.
+
+    Generic AFIR corpus parsing includes scripts, templates and hidden DOM.
+    Those bytes remain in the immutable original but cannot become a threshold.
+    """
+
+    VOID = frozenset({
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr",
+    })
+    INERT = frozenset({
+        "head", "script", "style", "noscript", "template", "svg", "math",
+        "iframe", "object", "canvas", "dialog", "select", "textarea",
+        "datalist",
+    })
+    HIDDEN_CLASSES = frozenset({
+        "d-none", "hidden", "invisible", "visually-hidden", "sr-only",
+    })
+    VISIBILITY_ATTRIBUTES = frozenset({
+        "style", "class", "hidden", "inert", "aria-hidden", "popover", "open",
+    })
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.parts: list[str] = []
+        self.stack: list[tuple[str, bool]] = []
+        self.hidden_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        values: dict[str, str] = {}
+        ambiguous = False
+        for name, value in attrs:
+            name = name.lower()
+            if name in values and name in self.VISIBILITY_ATTRIBUTES:
+                ambiguous = True
+            values.setdefault(name, value or "")
+        style = re.sub(r"\\s+", "", values.get("style", "").casefold())
+        classes = set(values.get("class", "").casefold().split())
+        hidden = (
+            ambiguous
+            or tag in self.INERT
+            or (tag == "details" and "open" not in values)
+            or "hidden" in values or "inert" in values
+            or "popover" in values
+            or values.get("aria-hidden", "").strip().casefold() == "true"
+            or bool(classes & self.HIDDEN_CLASSES)
+            or re.search(r"(?:^|;)display:none(?:!important)?(?:;|$)", style) is not None
+            or re.search(r"(?:^|;)visibility:(?:hidden|collapse)(?:!important)?(?:;|$)", style) is not None
+            or re.search(r"(?:^|;)content-visibility:hidden(?:!important)?(?:;|$)", style) is not None
+            or re.search(r"(?:^|;)opacity:0(?:\\.0+)?(?:!important)?(?:;|$)", style) is not None
+        )
+        if tag not in self.VOID:
+            self.stack.append((tag, hidden))
+            self.hidden_depth += int(hidden)
+
+    def handle_endtag(self, tag: str) -> None:
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == tag:
+                self.hidden_depth -= sum(int(hidden) for _, hidden in self.stack[index:])
+                del self.stack[index:]
+                break
+
+    def handle_data(self, data: str) -> None:
+        if not self.hidden_depth and data.strip():
+            self.parts.append(data.strip())
+
+
 def parse_notice(raw: bytes) -> list[dict]:
     """Admit exact stage evidence only if both ranges and both components occur."""
     if not isinstance(raw, bytes) or not raw or len(raw) > 12_000_000:
         raise ValueError("empty or oversized AFIR DR-12 raw source")
-    parser = transport.Parser()
+    parser = _VisibleNotice()
     parser.feed(raw.decode("utf-8", "replace"))
-    text = transport.clean(" ".join(parser.text))
+    text = transport.clean(" ".join(parser.parts))
     if not re.search(r"\bDR\s*[-–]\s*12\b", text, re.IGNORECASE):
         raise ValueError("official DR-12 intervention identity missing")
     intros = list(STAGE_INTRO.finditer(text))
@@ -170,13 +240,18 @@ def replay_receipt(destination: Path) -> dict:
     }
     if set(manifest) != expected_fields or manifest.get("schema_version") != "1.0":
         raise ValueError("DR-12 receipt schema changed or includes unregistered fields")
+    version = manifest.get("parser_version")
+    if version not in (PARSER_VERSION, PRIOR_PARSER_VERSION):
+        raise ValueError("DR-12 historical receipt parser version unrecognized")
+    # Earlier v4 receipts are replayable only if the SAME original source also
+    # passes the hardened visible-prose parser. A hidden-only v4 receipt fails.
     expected = {
         "requested_url": NOTICE_URL,
         "final_url": NOTICE_URL,
         "raw_evidence_file": "notice.raw.html",
         "raw_sha256": hashlib.sha256(raw).hexdigest(),
         "raw_bytes": len(raw),
-        "parser_version": PARSER_VERSION,
+        "parser_version": version,
         "http_status": 200,
         "programme": "PS_PAC_2023_2027/DR12",
         "source_family": "AFIR",
