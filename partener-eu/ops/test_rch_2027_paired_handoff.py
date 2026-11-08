@@ -201,7 +201,8 @@ def test_romania_semantic_review_candidate() -> None:
     assert secondary["url"] == (
         "https://uefiscdi.gov.ro/news-primul-apel-transnational-al-parteneriatului-european-resilient-cultural-heritage-rch"
     )
-    assert secondary["source_published_on"] == "2026-11-04"
+    assert secondary["call_launch_on_reported_by_notice"] == "2026-11-04"
+    assert secondary["article_publication_date_verified"] is False
     assert secondary["readback_observed_on"] == "2026-11-08"
     assert secondary["observation_state"] == "SECONDARY_OFFICIAL_NEWS_READBACK_RAW_NOT_ACQUIRED"
     assert "NOT" in secondary["binding_rule"] and "Annex I" in secondary["binding_rule"]
