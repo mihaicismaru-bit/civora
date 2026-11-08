@@ -21,7 +21,8 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[2]
 REG = ROOT / "partener-eu" / "ingest" / "mff_2028_source_registry.json"
 STATE = ROOT / "partener-eu" / "ingest" / "state" / "mff_2028_health.json"
-PARSER_VERSION = "mff_2028_probe_v2"
+PARSER_VERSION = "mff_2028_probe_v3"
+PRIOR_REPLAY_VERSION = "mff_2028_probe_v2"
 MAX_BYTES = 3_000_000
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/2.0 (+mff-2028-validation)"
 OFFICIAL_HOSTS = (
@@ -95,9 +96,16 @@ def canonical(value: object) -> bytes:
     return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
 
 
+def exact_html_mime(value: object) -> bool:
+    """Only actual HTML/XHTML response types can become MFF official HTML evidence."""
+    return (isinstance(value, str)
+            and value.split(";", 1)[0].strip().lower() in
+            {"text/html", "application/xhtml+xml"})
+
+
 def sem(raw: bytes, ctype: str) -> bytes:
-    if "html" not in (ctype or "").lower():
-        return raw
+    if not exact_html_mime(ctype):
+        raise ValueError("MFF semantic HTML normalization requires exact HTML media type")
     t = raw.decode("utf-8", "ignore")
     t = re.sub(r"<script\b[^>]*>.*?</script>", " ", t, flags=re.I | re.S)
     t = re.sub(r"<style\b[^>]*>.*?</style>", " ", t, flags=re.I | re.S)
@@ -191,7 +199,7 @@ def fetch(url: str) -> dict:
         ctype = resp.headers.get("content-type") or ""
         if not same_source_authority(url, final_url) or status != 200:
             raise ValueError("untrusted redirect or non-success official response")
-        if "html" not in ctype.lower():
+        if not exact_html_mime(ctype):
             raise ValueError("unexpected official MFF content type")
         # urllib does not transparently decode a compressed response body.
         # Never hash or semantically normalize gzip/br bytes as HTML evidence.
@@ -255,7 +263,7 @@ def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
     sources = {src["id"]: src for src in registry["sources"]}
     rows = manifest.get("sources")
     if (manifest.get("schema_version") != "1.0"
-            or manifest.get("parser_version") != PARSER_VERSION
+            or manifest.get("parser_version") not in {PARSER_VERSION, PRIOR_REPLAY_VERSION}
             or manifest.get("policy") != "ACQUISITION_EVIDENCE_ONLY_NON_AUTHORIZING"
             or not isinstance(manifest.get("run_id"), str)
             or not manifest["run_id"]
@@ -289,7 +297,7 @@ def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
             "programme": src.get("programme", "MFF_2028_2034"),
             "authority_class": src.get("authority_class", "T1_OFFICIAL_PROGRAMMING_AUTHORITY"),
             "run_id": manifest["run_id"],
-            "parser_version": PARSER_VERSION,
+            "parser_version": manifest["parser_version"],
         }
         if any(row.get(key) != value for key, value in bound.items()):
             raise ValueError("MFF replay source identity, stage or provenance drift")
@@ -315,7 +323,7 @@ def replay_evidence(evidence_dir: Path, registry_path: Path = REG) -> dict:
                     or not isinstance(row.get("fetched_at_utc"), str)
                     or not row["fetched_at_utc"]
                     or not same_source_authority(src["url"], str(row.get("final_url") or ""))
-                    or "html" not in str(row.get("content_type") or "").lower()
+                    or not exact_html_mime(row.get("content_type"))
                     or not raw_path.is_file() or raw_path.is_symlink()):
                 raise ValueError("MFF replay successful receipt lacks trusted original")
             raw = raw_path.read_bytes()
