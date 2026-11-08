@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/rch_2027_raw_acquire.py'
+      - 'partener-eu/ops/test_rch_2027_raw_acquire.py'
       - 'partener-eu/ingest/mff_2028_source_registry.json'
       - 'partener-eu/ingest/mff_2028_probe.py'
       - 'partener-eu/ops/test_mff_2028_probe.py'
@@ -83,6 +85,8 @@ jobs:
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
+          python -m py_compile partener-eu/ingest/rch_2027_raw_acquire.py
+          python -m py_compile partener-eu/ops/test_rch_2027_raw_acquire.py
           python -m py_compile partener-eu/ingest/mff_2028_probe.py
           python -m py_compile partener-eu/ops/test_mff_2028_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
@@ -122,6 +126,9 @@ jobs:
 
       - name: Validate EU/EEA/Interreg source and programming taxonomy
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Validate RCH 2027 official original-byte handoff contract
+        run: python partener-eu/ops/test_rch_2027_raw_acquire.py
 
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
@@ -237,4 +244,40 @@ jobs:
           name: partener-regiocentru-actions-live-evidence
           path: /tmp/regiocentru-actions
           retention-days: 7
+          if-no-files-found: warn
+
+      - name: Capture RCH 2027 official paired source originals (acquisition only)
+        id: rch_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --output-dir /tmp/rch-2027-call1-evidence \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Verify RCH 2027 immutable raw replay without publishing
+        if: steps.rch_live.outcome == 'success'
+        run: |
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --replay-dir /tmp/rch-2027-call1-evidence
+
+      - name: Fail closed on RCH 2027 live transport loss
+        if: steps.rch_live.outcome == 'failure'
+        run: |
+          echo 'RCH_OFFICIAL_TRANSPORT_DEGRADED / RAW_HANDOFF_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+          test -f partener-eu/validation/discovery/rch-2027-call1-20261108.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('partener-eu/validation/discovery/rch-2027-call1-20261108.json').read_text())
+          assert d['publish_authorized'] is False and d['open_call_authorized'] is False
+          assert d['observation_state']=='OFFICIAL_MULTI_SOURCE_READBACK_RAW_PENDING'
+          PY
+
+      - name: Preserve original RCH 2027 raw bytes and signed handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-rch-2027-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/rch-2027-call1-evidence
+          retention-days: 30
           if-no-files-found: warn
