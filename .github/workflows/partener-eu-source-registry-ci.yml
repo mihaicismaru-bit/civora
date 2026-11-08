@@ -6,6 +6,8 @@ on:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/rch_2027_raw_acquire.py'
       - 'partener-eu/ingest/rch_2027_paired_handoff.py'
+      - 'partener-eu/ingest/rch_2027_epss_gateway.py'
+      - 'partener-eu/ops/test_rch_2027_epss_gateway.py'
       - 'partener-eu/ops/test_rch_2027_raw_acquire.py'
       - 'partener-eu/ops/test_rch_2027_paired_handoff.py'
       - 'partener-eu/validation/discovery/rch-2027-romania-semantic-review-20261108.json'
@@ -90,6 +92,8 @@ jobs:
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/rch_2027_raw_acquire.py
           python -m py_compile partener-eu/ingest/rch_2027_paired_handoff.py
+          python -m py_compile partener-eu/ingest/rch_2027_epss_gateway.py
+          python -m py_compile partener-eu/ops/test_rch_2027_epss_gateway.py
           python -m py_compile partener-eu/ops/test_rch_2027_paired_handoff.py
           python -m py_compile partener-eu/ops/test_rch_2027_raw_acquire.py
           python -m py_compile partener-eu/ingest/mff_2028_probe.py
@@ -136,6 +140,7 @@ jobs:
         run: |
           python partener-eu/ops/test_rch_2027_raw_acquire.py
           python partener-eu/ops/test_rch_2027_paired_handoff.py
+          python partener-eu/ops/test_rch_2027_epss_gateway.py
 
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
@@ -290,6 +295,26 @@ jobs:
           assert d['publish_authorized'] is False and d['open_call_authorized'] is False
           assert d['observation_state']=='OFFICIAL_MULTI_SOURCE_READBACK_RAW_PENDING'
           PY
+
+      - name: Acquire official-linked EPSS public Call 1 login gateway (not submission authority)
+        id: rch_epss_live
+        if: steps.rch_live.outcome == 'success'
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/rch_2027_epss_gateway.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence \
+            --capture-run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Replay EPSS gateway linked to immutable five-source receipts
+        if: steps.rch_epss_live.outcome == 'success'
+        run: |
+          python partener-eu/ingest/rch_2027_epss_gateway.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence --replay
+
+      - name: Report EPSS gateway degraded without granting live submission authority
+        if: steps.rch_epss_live.outcome == 'failure'
+        run: |
+          echo 'EPSS_GATEWAY_UNVERIFIED / RCH_ORIGINALS_PRESERVED / NO_OPEN_CALL / NO_PUBLICATION'
 
       - name: Preserve original RCH 2027 raw bytes and signed handoff
         if: always()
