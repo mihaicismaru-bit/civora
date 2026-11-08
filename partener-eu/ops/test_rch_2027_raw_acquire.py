@@ -75,6 +75,31 @@ def test_url_and_response_policy():
                     + b"</div></body></html>")
             must_reject(mod.validate_response, sid, status=200, mime="text/html",
                         encoding="identity", declared_length=None, raw=page)
+        # HTML controls may be hidden without inline display:none. The old
+        # extractor accepted identity anchors inside native inactive elements.
+        for before, after in (
+            (b"<div inert>", b"</div>"),
+            (b"<dialog>", b"</dialog>"),
+            (b"<details>", b"</details>"),
+            (b"<div popover='manual'>", b"</div>"),
+            (b"<select><option>", b"</option></select>"),
+            (b"<textarea>", b"</textarea>"),
+            (b"<iframe>", b"</iframe>"),
+            (b"<datalist>", b"</datalist>"),
+            (b"<canvas>", b"</canvas>"),
+            (b"<div style='opacity:0.00'>", b"</div>"),
+            (b"<div aria-hidden='true' aria-hidden='false'>", b"</div>"),
+            (b"<div style='display:none' style='display:block'>", b"</div>"),
+            (b"<details open open>", b"</details>"),
+        ):
+            page = b"<!doctype html><html><body>Unrelated maintenance page" + before + RAW + after + b"</body></html>"
+            must_reject(mod.validate_response, sid, status=200, mime="text/html",
+                        encoding="identity", declared_length=None, raw=page)
+        # Genuine visible copy still proves the identity, including an open
+        # native details element; this guard must not suppress real evidence.
+        visible = b"<!doctype html><html><body><details open>" + RAW + b"</details></body></html>"
+        mod.validate_response(sid, status=200, mime="text/html",
+                              encoding="identity", declared_length=None, raw=visible)
         must_reject(mod.validate_response, sid, status=403, mime="text/html",
                     encoding="identity", declared_length=None, raw=RAW)
         must_reject(mod.validate_response, sid, status=200, mime="text/html",
