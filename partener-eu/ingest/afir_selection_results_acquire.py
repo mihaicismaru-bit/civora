@@ -17,7 +17,7 @@ from pathlib import Path
 INDEX_URL = "https://www.afir.ro/rapoarte/rapoarte-feadr/selectie/"
 NOTICE_URL = "https://www.afir.ro/info-la-zi/raport-final-de-selectie-schema-de-energie-solar-peste-1-mw/"
 BLOB_HOST = "stportalafirprod.blob.core.windows.net"
-PARSER_VERSION = "afir-energy-solar-final-selection-acquisition-v2"
+PARSER_VERSION = "afir-energy-solar-final-selection-acquisition-v3"
 CATEGORIES = ("Selectate", "Nefinanțate")
 # Official live evidence: AFIR index text/html, delegated workbooks OpenXML.
 # Only the true media type can authorize admission, never its parameters.

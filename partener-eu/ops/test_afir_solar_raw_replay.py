@@ -103,6 +103,25 @@ def main():
     assert proven['report_index_document_binding'] == 'CATEGORY_DELEGATION_AND_PERIOD_VERIFIED'
     assert proven['identifier_alias_established'] is False
     assert proven['session_identity_reconciled'] is False
+    # Retain immutable, genuinely captured v2 strict-MIME receipts, but
+    # reparse their original HTML with the tightened visible-table policy.
+    # This is replay compatibility only; new acquisitions are always v3.
+    with TemporaryDirectory(prefix='afir-solar-legacy-v2-') as temp:
+        legacy = Path(temp)
+        for file in ('manifest.json', 'afir-selection-index.raw.html',
+                     'solar-3-2026-selectate.raw.xlsx',
+                     'solar-3-2026-nefinantate.raw.xlsx'):
+            copy2(root / file, legacy / file)
+        v2 = json.loads((legacy / 'manifest.json').read_text(encoding='utf-8'))
+        v2['parser_version'] = 'afir-energy-solar-final-selection-acquisition-v2'
+        for document in v2['documents']:
+            document['parser_version'] = v2['parser_version']
+        (legacy / 'manifest.json').write_text(
+            json.dumps(v2, ensure_ascii=False), encoding='utf-8'
+        )
+        reviewed = replay(legacy)
+        assert reviewed['status'] == 'RAW_ROWS_REPLAYED_NOT_PUBLISHED'
+        assert reviewed['session_identity_reconciled'] is False
     tamper_cases = (
         (('official_notice_url',), 'https://example.org/notice'),
         (('programme',), 'UNRELATED_PROGRAMME'),

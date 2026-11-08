@@ -148,14 +148,18 @@ def replay(directory):
     # programme and per-run observation scope as its pinned baseline. Do not
     # require a current index hash to equal a historical hash: AFIR may add
     # unrelated rows without changing the exact delegated session.
-    # Historical v1 provenance is replayable only at the exact pinned run;
-    # all subsequent receipts must use the strict-MIME v2 acquisition.
+    # Historical v1 provenance is replayable only for its pinned run.
+    # Previously captured v2 strict-MIME receipts remain replayable under the
+    # current v3 *visible-table* parser; a hidden/ambiguous row now fails.
+    # Fresh acquisition must use v3; neither version authorizes publication.
     parser_version = manifest.get("parser_version")
     pinned_legacy = (parser_version == obs["raw_acquisition_parser_version"]
                      and manifest.get("run_id") == obs["run_id"])
     if (manifest.get("schema") != "PARTENER_EU_AFIR_SELECTION_RAW_EVIDENCE_V1"
         or manifest.get("programme") != obs["programme"]
-        or (parser_version != collector.PARSER_VERSION and not pinned_legacy)
+        or (parser_version not in (collector.PARSER_VERSION,
+                                   "afir-energy-solar-final-selection-acquisition-v2")
+            and not pinned_legacy)
         or manifest.get("official_index_url") != obs["official_index_url"]
         or manifest.get("official_notice_url") != obs["official_notice_url"]
         or manifest.get("observation_state") != "SELECTION_RESULTS_DISCOVERY_PENDING_RECONCILIATION"
