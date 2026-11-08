@@ -180,6 +180,30 @@ def test_capture_replay_and_fail_closed():
             manifest_path.write_text(json.dumps(bad), encoding="utf-8")
             must_reject(mod.validate_handoff, root)
 
+        # Rehashing an extended manifest must never smuggle in extra
+        # distribution/publication flags beyond the registered evidence schema.
+        for scope in ("handoff", "receipt"):
+            bad = deepcopy(handoff)
+            target = bad if scope == "handoff" else bad["receipts"][0]
+            target["distribution_authorized"] = True
+            bad["handoff_sha256"] = mod.sha256(mod.canonical_json({
+                k: v for k, v in bad.items() if k != "handoff_sha256"
+            }))
+            manifest_path.write_text(json.dumps(bad), encoding="utf-8")
+            must_reject(mod.validate_handoff, root)
+        # Duplicate keys are ambiguous between parsers even when the last
+        # occurrence is innocuous; reject at the JSON decode boundary.
+        manifest_path.write_text(
+            original.decode("utf-8").replace(
+                '"run_id": "', '"run_id": "forged", "run_id": "', 1
+            ), encoding="utf-8"
+        )
+        must_reject(mod.read_evidence_json, manifest_path)
+        manifest_path.write_text(original.decode("utf-8").replace(
+            '"schema_version": "1.0"', '"schema_version": NaN'
+        ), encoding="utf-8")
+        must_reject(mod.read_evidence_json, manifest_path)
+
         manifest_path.write_bytes(original)
         assert mod.validate_handoff(root)["status"] == "RAW_REPLAY_VERIFIED_NOT_PUBLISHED"
         mod.write_immutable(manifest_path, original)
@@ -273,6 +297,20 @@ def test_document_originals_and_annex_locator():
         }))
         manifest_file.write_text(json.dumps(bad), encoding="utf-8")
         must_reject(mod.validate_document_handoff, root)
+        for scope in ("handoff", "receipt"):
+            bad = deepcopy(manifest)
+            target = bad if scope == "handoff" else bad["receipts"][0]
+            target["distribution_authorized"] = True
+            bad["handoff_sha256"] = mod.sha256(mod.canonical_json({
+                k: v for k, v in bad.items() if k != "handoff_sha256"
+            }))
+            manifest_file.write_text(json.dumps(bad), encoding="utf-8")
+            must_reject(mod.validate_document_handoff, root)
+        manifest_file.write_text(original.decode("utf-8").replace(
+            '"run_id": "', '"run_id": "forged", "run_id": "', 1
+        ), encoding="utf-8")
+        must_reject(mod.read_evidence_json, manifest_file)
+
         manifest_file.write_bytes(original)
         assert mod.validate_document_handoff(root)["publish_authorized"] is False
         mod.write_immutable(manifest_file, original)
