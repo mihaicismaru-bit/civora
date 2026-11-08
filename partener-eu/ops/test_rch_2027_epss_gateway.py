@@ -49,6 +49,12 @@ def test_transport_and_link():
         SOURCE.replace(b"Submission platform", b"Read more"),
         SOURCE.replace(b"https://epss.proposals.ee/rch/", b"https://evil.example/rch/"),
         SOURCE.replace(b'<a href=', b'<a hidden href='),
+        # HTML clients and HTMLParser disagree on first/last duplicate href.
+        SOURCE.replace(b'<a href=', b'<a href="https://evil.example/rch/" href=', 1),
+        SOURCE.replace(b'<a href="https://epss.proposals.ee/rch/"',
+                       b'<a href="https://epss.proposals.ee/rch/" href="https://evil.example/rch/"', 1),
+        SOURCE.replace(b'<a href=', b'<a HREF="https://epss.proposals.ee/rch/" href=', 1),
+        SOURCE.replace(b'<a href=', b'<a href="https://epss.proposals.ee/rch/" href=', 1),
         SOURCE.replace(b'<a href=', b'<script><a href='),
         SOURCE.replace(b"</body>", b'<a href="https://epss.proposals.ee/other/">Submission platform</a></body>'),
     ):
