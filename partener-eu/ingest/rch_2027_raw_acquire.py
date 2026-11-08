@@ -66,12 +66,22 @@ class _VisibleHTML(HTMLParser):
 
     def handle_starttag(self, tag, attrs):
         properties = dict(attrs)
-        css = (properties.get("style") or "").lower().replace(" ", "")
+        # Normalize *all* CSS whitespace, not only spaces: official-looking
+        # text inside display:<TAB>none / visibility:<LF>hidden must not
+        # satisfy an exact-call page identity check.
+        css = re.sub(r"\\s+", "", properties.get("style") or "").lower()
+        hidden_css = (
+            "display:none" in css
+            or "visibility:hidden" in css
+            or "visibility:collapse" in css
+            or "content-visibility:hidden" in css
+            or re.search(r"(?:^|;)opacity:0(?:;|$|!important)", css) is not None
+        )
         hidden = (
             (self.stack[-1][1] if self.stack else False)
             or tag in _HTML_NONVISIBLE or "hidden" in properties
             or (properties.get("aria-hidden") or "").lower() == "true"
-            or "display:none" in css or "visibility:hidden" in css
+            or hidden_css
         )
         if tag not in _HTML_VOID:
             self.stack.append((tag, hidden))
