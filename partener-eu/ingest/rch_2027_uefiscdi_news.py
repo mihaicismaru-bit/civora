@@ -13,7 +13,7 @@ import json
 import re
 import ssl
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
@@ -191,6 +191,17 @@ def replay(root: Path) -> dict:
     stamp = receipt.get("fetched_at_utc")
     if not isinstance(stamp, str) or not re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", stamp):
         raise ValueError("UEFISCDI news fetched_at missing")
+    # A matching run_id alone does not prove simultaneous acquisition. Bind the
+    # secondary original to the independently verified five-source time window.
+    when = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    pair_manifest = raw.read_evidence_json(root / "handoff" / pair.PAIR_NAME)
+    last_source = datetime.strptime(
+        pair_manifest["fetched_at_latest_utc"], "%Y-%m-%dT%H:%M:%SZ"
+    ).replace(tzinfo=timezone.utc)
+    if not last_source - timedelta(minutes=5) <= when <= last_source + timedelta(minutes=20):
+        raise ValueError("UEFISCDI news original not captured in the paired source run")
+    if when > datetime.now(timezone.utc) + timedelta(minutes=5):
+        raise ValueError("UEFISCDI news evidence timestamp in future")
     body = (root / RAW_PATH).read_bytes()
     validate_response(status=200, mime=receipt.get("content_type", ""),
                       encoding=receipt.get("content_encoding", ""),
