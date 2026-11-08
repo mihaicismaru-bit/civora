@@ -78,6 +78,39 @@ def main():
     if ro_row["observation_state"] != "OPEN_CALL" or ro_row["call_identifier"] != "EEA-CSF-RO-CALL-06":
         fail("official Romanian-language call detail path must retain the same authority gate")
 
+    # The legacy official Call 1 page may retain an OPEN badge after the
+    # published 8 October deadline. Never treat stale status as active.
+    elapsed = module.normalize_record(
+        base_record(), fetched_at="2026-11-09T00:15:00Z",
+        run_id="TEST-EXPIRED-LEGACY-OPEN", raw_hash="raw-legacy-open",
+        verified_authority_urls=[CALL1],
+    )
+    if (elapsed["observation_state"] != "UNKNOWN"
+            or elapsed["status_label"] != "Open"
+            or elapsed["deadline_candidate"] != "08/10/2026"
+            or not elapsed["requires_reconcile"]
+            or elapsed["publish_authorized"]):
+        fail("elapsed official deadline must quarantine stale OPEN without claiming CLOSED")
+
+    # A date with no cutoff hour cannot negate a same-day OPEN observation.
+    same_day = module.normalize_record(
+        base_record(), fetched_at="2026-10-08T18:15:00Z",
+        run_id="TEST-SAME-DAY", raw_hash="raw-same-day",
+        verified_authority_urls=[CALL1],
+    )
+    if same_day["observation_state"] != "OPEN_CALL" or not same_day["requires_reconcile"]:
+        fail("same-day date alone must not invent a submission cutoff hour")
+
+    malformed = base_record()
+    malformed["submissionDeadline"] = "not-a-date"
+    malformed_row = module.normalize_record(
+        malformed, fetched_at="2026-11-09T00:15:00Z",
+        run_id="TEST-MALFORMED-DEADLINE", raw_hash="raw-malformed",
+        verified_authority_urls=[CALL1],
+    )
+    if malformed_row["observation_state"] != "UNKNOWN":
+        fail("malformed deadline must not authorize OPEN_CALL")
+
     unverified = module.normalize_record(
         base_record(),
         fetched_at=FETCHED,
@@ -118,6 +151,10 @@ def main():
         CALL1.replace("https://eeagrants.org/", "https://user@eeagrants.org/"),
         CALL1.replace("https://eeagrants.org/", "https://user:pass@eeagrants.org/"),
         CALL1.replace("https://eeagrants.org/", "https://eeagrants.org:8443/"),
+        CALL1 + "?tracking=1",
+        CALL1 + "#submission",
+        CALL1 + "/another-call",
+        CALL1 + "%2Fanother-call",
     ):
         forged = base_record()
         forged["authorityUrl"] = unsafe

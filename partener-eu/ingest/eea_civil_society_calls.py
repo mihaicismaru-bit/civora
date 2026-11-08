@@ -82,13 +82,17 @@ def _official_call_url(value: Any) -> str | None:
         or parsed.username is not None
         or parsed.password is not None
         or parsed.port not in (None, 443)
+        or parsed.query
+        or parsed.fragment
     ):
         return None
     prefix = next((candidate for candidate in CALL_PATH_PREFIXES if path.startswith(candidate)), None)
     if not prefix:
         return None
     slug = path[len(prefix):].strip("/")
-    if not slug:
+    # Exact article identity: reject nested/encoded paths and unregistered
+    # endpoint suffixes instead of treating them as the verified call page.
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]*", slug):
         return None
     return url
 
@@ -136,6 +140,25 @@ def _observation_state(
     if label in {"CLOSED", "CLOSED_CALL"}:
         return "CLOSED_CALL" if exact_authority else "UNKNOWN"
     return "UNKNOWN"
+
+
+def _open_conflicts_with_elapsed_deadline(record: dict[str, Any], fetched_at: str) -> bool:
+    """A legacy official OPEN badge cannot override its elapsed deadline.
+
+    EEA CSF Romania displays DD/MM/YYYY. Same-day dates cannot determine
+    a cutoff hour; unparseable dates/timestamps cannot establish OPEN.
+    """
+    deadline_text = _text(_first(record, "submissionDeadline", "submission_deadline", "deadline"))
+    if not deadline_text:
+        return False
+    try:
+        deadline = dt.datetime.strptime(deadline_text, "%d/%m/%Y").date()
+        observed = dt.datetime.fromisoformat(fetched_at.replace("Z", "+00:00"))
+        if observed.tzinfo is None:
+            return True
+        return observed.astimezone(dt.timezone.utc).date() > deadline
+    except (ValueError, TypeError, AttributeError):
+        return True
 
 
 def _semantic_fields(record: dict[str, Any], call_identifier: str, authority_url: str | None,
@@ -187,6 +210,10 @@ def normalize_record(
         authority_url_verified=verified,
         status_label=status_label,
     )
+    # An elapsed official deadline contradicts OPEN, but is not independent
+    # evidence of CLOSED. Preserve the source as UNKNOWN for reconciliation.
+    if observation_state == "OPEN_CALL" and _open_conflicts_with_elapsed_deadline(record, fetched_at):
+        observation_state = "UNKNOWN"
     semantic = _semantic_fields(record, call_identifier, authority_url, status_label)
     return {
         "schema": "PARTENER_EU_EEA_CSF_CALL_EVIDENCE_V1",
