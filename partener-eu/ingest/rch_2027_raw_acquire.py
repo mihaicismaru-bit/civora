@@ -134,6 +134,57 @@ LOCKED_FALSE = (
 )
 FAMILY = "HORIZON_EUROPE_RESILIENT_CULTURAL_HERITAGE"
 
+# A recomputed hash does not make an arbitrarily extended receipt safe.
+# Reject extra publication/OPEN fields and cross-parser ambiguous JSON.
+HTML_RECEIPT_FIELDS = frozenset({
+    "source_id", "requested_url", "final_url", "fetched_at_utc",
+    "run_id", "parser_version", "source_family", "programme_family",
+    "authority_class", "observation_state", "http_status", "content_type",
+    "content_encoding", "raw_sha256", "raw_length", "raw_path",
+}) | frozenset(LOCKED_FALSE)
+HTML_HANDOFF_FIELDS = frozenset({
+    "schema_version", "parser_version", "run_id", "programme_family",
+    "observation_state", "receipts", "source_ids", "requires", "handoff_sha256",
+}) | frozenset(LOCKED_FALSE)
+PDF_RECEIPT_FIELDS = frozenset({
+    "source_id", "requested_url", "final_url", "raw_path", "raw_sha256",
+    "raw_length", "fetched_at_utc", "parser_version", "run_id",
+    "programme_family", "source_family", "authority_class",
+    "observation_state", "content_type", "http_status",
+}) | frozenset(LOCKED_FALSE)
+PDF_HANDOFF_FIELDS = frozenset({
+    "schema_version", "parser_version", "run_id", "programme_family",
+    "observation_state", "source_ids", "receipts", "national_annex_locator",
+    "handoff_sha256",
+}) | frozenset(LOCKED_FALSE)
+
+
+def read_evidence_json(path: Path) -> dict:
+    """Parse evidence strictly; duplicate keys can disagree across consumers."""
+    def unique_pairs(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError(f"duplicate RCH evidence JSON key: {key}")
+            result[key] = value
+        return result
+
+    def bad_constant(value):
+        raise ValueError(f"non-finite RCH evidence JSON constant: {value}")
+
+    result = json.loads(
+        path.read_text(encoding="utf-8"),
+        object_pairs_hook=unique_pairs, parse_constant=bad_constant,
+    )
+    if not isinstance(result, dict):
+        raise ValueError("RCH evidence manifest must be a JSON object")
+    return result
+
+
+def require_fields(data: dict, fields: frozenset[str], scope: str) -> None:
+    if set(data) != fields:
+        raise ValueError(f"RCH {scope} receipt field-set drift")
+
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
@@ -269,7 +320,8 @@ def write_immutable(path: Path, data: bytes) -> None:
 
 
 def validate_handoff(root: Path) -> dict:
-    handoff = json.loads((root / "handoff" / "rch_2027_sources.json").read_text(encoding="utf-8"))
+    handoff = read_evidence_json(root / "handoff" / "rch_2027_sources.json")
+    require_fields(handoff, HTML_HANDOFF_FIELDS, "HTML handoff")
     recorded_hash = handoff.pop("handoff_sha256", None)
     if recorded_hash != sha256(canonical_json(handoff)):
         raise ValueError("RCH immutable handoff SHA-256 mismatch")
@@ -288,6 +340,9 @@ def validate_handoff(root: Path) -> dict:
     if not re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", str(handoff.get("run_id") or "")):
         raise ValueError("RCH run ID invalid")
     for row in receipts:
+        if not isinstance(row, dict):
+            raise ValueError("RCH HTML receipt must be an object")
+        require_fields(row, HTML_RECEIPT_FIELDS, "HTML source")
         source_id = row["source_id"]
         spec = SOURCE_SPECS[source_id]
         if (row.get("run_id") != handoff["run_id"]
@@ -470,7 +525,8 @@ def capture_documents(root: Path, run_id: str) -> dict:
 
 
 def validate_document_handoff(root: Path) -> dict:
-    manifest = json.loads((root / "handoff" / "rch_2027_documents.json").read_text(encoding="utf-8"))
+    manifest = read_evidence_json(root / "handoff" / "rch_2027_documents.json")
+    require_fields(manifest, PDF_HANDOFF_FIELDS, "PDF handoff")
     got = manifest.pop("handoff_sha256", None)
     if got != sha256(canonical_json(manifest)):
         raise ValueError("RCH document handoff SHA mismatch")
@@ -495,6 +551,9 @@ def validate_document_handoff(root: Path) -> dict:
             sorted(str(r.get("source_id")) for r in rows) != sorted(DOCUMENT_SPECS)):
         raise ValueError("RCH required official documents missing/duplicated")
     for row in rows:
+        if not isinstance(row, dict):
+            raise ValueError("RCH PDF receipt must be an object")
+        require_fields(row, PDF_RECEIPT_FIELDS, "PDF source")
         source_id = row["source_id"]
         if (row.get("requested_url") != document_url(source_id) or
                 row.get("parser_version") != DOCUMENT_PARSER_VERSION or
