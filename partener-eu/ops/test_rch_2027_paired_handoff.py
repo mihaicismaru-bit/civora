@@ -195,6 +195,26 @@ def test_romania_semantic_review_candidate() -> None:
     assert artifact["durable_canonical_persistence_verified"] is False
     assert "NOT an original-document digest" in artifact["artifact_content_note"]
     assert artifact["provenance_binding"] == "REVIEW_REQUIRED_NOT_CANONICALLY_ADMITTED"
+    # UEFISCDI is an official national *informational* source, not the Romanian
+    # funding authority. Its broad participation wording cannot broaden Annex I.
+    secondary = record["secondary_national_communication_discovery"]
+    assert secondary["url"] == (
+        "https://uefiscdi.gov.ro/news-primul-apel-transnational-al-parteneriatului-european-resilient-cultural-heritage-rch"
+    )
+    assert secondary["source_published_on"] == "2026-11-04"
+    assert secondary["readback_observed_on"] == "2026-11-08"
+    assert secondary["observation_state"] == "SECONDARY_OFFICIAL_NEWS_READBACK_RAW_NOT_ACQUIRED"
+    assert "NOT" in secondary["binding_rule"] and "Annex I" in secondary["binding_rule"]
+    assert "universities" in secondary["broad_participation_language"]
+    assert secondary["reporting_funder"].startswith("Ministry of Culture")
+    assert all(secondary[field] is False for field in (
+        "material_fact_use", "eligibility_authorized",
+        "open_call_authorized", "publish_authorized"
+    ))
+    assert all(value is None for value in secondary["raw_provenance"].values())
+    assert len(artifact["original_raw_sha256_by_source_id"]) == 5
+    assert "UEFISCDI official news" in " ".join(record["prohibited_inferences"])
+    assert "UEFISCDI" in " ".join(record["remaining_release_gates"])
     print("PASS RCH Romania Annex I semantic review candidate remains evidence-referenced, non-authorizing and distinct from EU-general eligibility")
 
 
