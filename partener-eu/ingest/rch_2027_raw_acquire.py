@@ -243,13 +243,207 @@ def capture(root: Path, run_id: str) -> dict:
     return validate_handoff(root)
 
 
+
+# Document evidence is a separate, bounded immutable handoff.  This deliberately
+# does not parse document terms or authorize OPEN_CALL/publication.
+DOCUMENT_PARSER_VERSION = "RCH_2027_OFFICIAL_PDF_ACQUISITION_V1"
+MAX_DOCUMENT_BYTES = 30_000_000
+DOCUMENT_SPECS = {
+    "SRC-EU-RCH-2027-CALL-TEXT": "RCH-JTC-2027-Call-Text_final.pdf",
+    "SRC-EU-RCH-2027-GUIDANCE": "RCH_JTC_2027_Guidance-for-Applicants.pdf",
+    "SRC-EU-RCH-2027-PREPROPOSAL": "RCH_JTC_2027_PreProposal_Template_final.pdf",
+}
+DOCUMENT_BASE = "https://www.heritageresearch-hub.eu/app/uploads/2026/11/"
+
+
+def document_url(source_id: str) -> str:
+    return DOCUMENT_BASE + DOCUMENT_SPECS[source_id]
+
+
+def validate_document_url(source_id: str, url: str) -> None:
+    if source_id not in DOCUMENT_SPECS:
+        raise ValueError("unknown RCH document identity")
+    parsed = urlsplit(url)
+    if (parsed.scheme != "https" or
+            (parsed.hostname or "").lower() not in {"www.heritageresearch-hub.eu", "heritageresearch-hub.eu"} or
+            parsed.port not in (None, 443) or parsed.username is not None or
+            parsed.password is not None or parsed.query or parsed.fragment or
+            parsed.path != urlsplit(document_url(source_id)).path):
+        raise ValueError("RCH official PDF host/path/identity drift")
+
+
+class StrictDocumentRedirects(HTTPRedirectHandler):
+    def __init__(self, source_id: str):
+        super().__init__()
+        self.source_id = source_id
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        target = urljoin(req.full_url, newurl)
+        validate_document_url(self.source_id, target)
+        return super().redirect_request(req, fp, code, msg, headers, target)
+
+
+def validate_document_response(*, status: int, mime: str, encoding: str,
+                               declared_length: str | None, raw: bytes) -> None:
+    if status != 200 or mime.split(";", 1)[0].strip().lower() != "application/pdf":
+        raise ValueError("RCH PDF status/media type rejected")
+    if encoding.strip().lower() not in ("", "identity"):
+        raise ValueError("RCH PDF opaque compressed transport rejected")
+    if len(raw) < 40 or len(raw) > MAX_DOCUMENT_BYTES or not raw.startswith(b"%PDF-"):
+        raise ValueError("RCH original PDF envelope/size invalid")
+    if b"%%EOF" not in raw[-4096:]:
+        raise ValueError("RCH truncated PDF missing EOF marker")
+    if declared_length is not None and (
+            not declared_length.isdecimal() or int(declared_length) != len(raw)):
+        raise ValueError("RCH PDF declared length mismatch")
+
+
+def fetch_document_raw(source_id: str) -> tuple[bytes, str, str]:
+    requested = document_url(source_id)
+    validate_document_url(source_id, requested)
+    opener = build_opener(
+        HTTPSHandler(context=ssl.create_default_context()),
+        StrictDocumentRedirects(source_id),
+    )
+    req = Request(requested, headers={
+        "User-Agent": "PARTENER.EU-official-evidence/1.0 (+https://partener.eu)",
+        "Accept": "application/pdf",
+        "Accept-Encoding": "identity",
+        "Cache-Control": "no-cache",
+    })
+    with opener.open(req, timeout=40) as resp:
+        final_url = resp.geturl()
+        validate_document_url(source_id, final_url)
+        status = int(getattr(resp, "status", 200))
+        mime = resp.headers.get("Content-Type", "")
+        encoding = resp.headers.get("Content-Encoding", "identity")
+        declared_length = resp.headers.get("Content-Length")
+        if (status != 200 or mime.split(";", 1)[0].strip().lower() != "application/pdf"
+                or encoding.strip().lower() not in ("", "identity")):
+            raise ValueError("RCH PDF transport rejected before reading response body")
+        raw = resp.read(MAX_DOCUMENT_BYTES + 1)
+        validate_document_response(status=status, mime=mime, encoding=encoding,
+                                   declared_length=declared_length, raw=raw)
+        return raw, final_url, "application/pdf"
+
+
+def capture_documents(root: Path, run_id: str) -> dict:
+    if not re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", run_id):
+        raise ValueError("unsafe RCH PDF evidence run ID")
+    rows = []
+    for source_id in sorted(DOCUMENT_SPECS):
+        raw, final_url, mime = fetch_document_raw(source_id)
+        validate_document_url(source_id, final_url)
+        validate_document_response(status=200, mime=mime, encoding="identity",
+                                   declared_length=None, raw=raw)
+        raw_path = f"raw/{source_id}.pdf"
+        write_immutable(root / raw_path, raw)
+        rows.append({
+            "source_id": source_id,
+            "requested_url": document_url(source_id),
+            "final_url": final_url,
+            "raw_path": raw_path,
+            "raw_sha256": sha256(raw),
+            "raw_length": len(raw),
+            "fetched_at_utc": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "parser_version": DOCUMENT_PARSER_VERSION,
+            "run_id": run_id,
+            "programme_family": FAMILY,
+            "source_family": ["EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"],
+            "authority_class": "T1B_OFFICIAL_PARTNERSHIP_OPERATOR_DOCUMENT",
+            "observation_state": "OFFICIAL_PDF_RAW_UNRECONCILED",
+            "content_type": "application/pdf",
+            "http_status": 200,
+            **{key: False for key in LOCKED_FALSE},
+        })
+    manifest = {
+        "schema_version": "1.0",
+        "parser_version": DOCUMENT_PARSER_VERSION,
+        "run_id": run_id,
+        "programme_family": FAMILY,
+        "observation_state": "DOCUMENT_RAW_ACQUIRED_SEMANTIC_RECONCILIATION_REQUIRED",
+        "source_ids": sorted(DOCUMENT_SPECS),
+        "receipts": rows,
+        "national_annex_locator": {
+            "source_id": "SRC-EU-RCH-2027-CALL-TEXT",
+            "section": "Annex I / Romania",
+            "page_index_start": 127,
+            "page_index_end": 129,
+            "location_is_publication_authority": False,
+        },
+        **{key: False for key in LOCKED_FALSE},
+    }
+    manifest["handoff_sha256"] = sha256(canonical_json(manifest))
+    write_immutable(root / "handoff" / "rch_2027_documents.json",
+                    json.dumps(manifest, sort_keys=True, ensure_ascii=False, indent=2).encode("utf-8") + b"\n")
+    return validate_document_handoff(root)
+
+
+def validate_document_handoff(root: Path) -> dict:
+    manifest = json.loads((root / "handoff" / "rch_2027_documents.json").read_text(encoding="utf-8"))
+    got = manifest.pop("handoff_sha256", None)
+    if got != sha256(canonical_json(manifest)):
+        raise ValueError("RCH document handoff SHA mismatch")
+    if (manifest.get("schema_version") != "1.0" or
+            manifest.get("parser_version") != DOCUMENT_PARSER_VERSION or
+            manifest.get("programme_family") != FAMILY or
+            manifest.get("observation_state") != "DOCUMENT_RAW_ACQUIRED_SEMANTIC_RECONCILIATION_REQUIRED" or
+            manifest.get("source_ids") != sorted(DOCUMENT_SPECS) or
+            manifest.get("national_annex_locator") != {
+                "source_id": "SRC-EU-RCH-2027-CALL-TEXT",
+                "section": "Annex I / Romania",
+                "page_index_start": 127,
+                "page_index_end": 129,
+                "location_is_publication_authority": False,
+            } or
+            not re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", str(manifest.get("run_id") or ""))):
+        raise ValueError("RCH document identity/locator drift")
+    if any(manifest.get(key) is not False for key in LOCKED_FALSE):
+        raise ValueError("RCH document manifest attempted material authorization")
+    rows = manifest.get("receipts")
+    if not isinstance(rows, list) or len(rows) != len(DOCUMENT_SPECS) or (
+            sorted(str(r.get("source_id")) for r in rows) != sorted(DOCUMENT_SPECS)):
+        raise ValueError("RCH required official documents missing/duplicated")
+    for row in rows:
+        source_id = row["source_id"]
+        if (row.get("requested_url") != document_url(source_id) or
+                row.get("parser_version") != DOCUMENT_PARSER_VERSION or
+                row.get("run_id") != manifest["run_id"] or
+                row.get("programme_family") != FAMILY or
+                row.get("source_family") != ["EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"] or
+                row.get("authority_class") != "T1B_OFFICIAL_PARTNERSHIP_OPERATOR_DOCUMENT" or
+                row.get("observation_state") != "OFFICIAL_PDF_RAW_UNRECONCILED" or
+                row.get("raw_path") != f"raw/{source_id}.pdf" or
+                row.get("content_type") != "application/pdf" or
+                row.get("http_status") != 200 or
+                not re.fullmatch(r"\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ", str(row.get("fetched_at_utc") or ""))):
+            raise ValueError("RCH document provenance drift")
+        if any(row.get(key) is not False for key in LOCKED_FALSE):
+            raise ValueError("RCH document receipt attempted material authorization")
+        validate_document_url(source_id, row.get("final_url", ""))
+        raw = (root / row["raw_path"]).read_bytes()
+        validate_document_response(status=row["http_status"], mime=row["content_type"],
+                                   encoding="identity", declared_length=str(row.get("raw_length")), raw=raw)
+        if row.get("raw_sha256") != sha256(raw):
+            raise ValueError("RCH document raw SHA mismatch")
+    return {"status": "PDF_RAW_REPLAY_VERIFIED_NOT_PUBLISHED",
+            "run_id": manifest["run_id"],
+            "source_ids": sorted(DOCUMENT_SPECS),
+            "publish_authorized": False}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="RCH 2027 original source capture/replay; never publish")
     parser.add_argument("--output-dir", default="/tmp/rch-2027-call1-evidence")
     parser.add_argument("--run-id", default="manual")
     parser.add_argument("--replay-dir")
+    parser.add_argument("--documents", action="store_true", help="PDF original-byte evidence only; no publication")
     args = parser.parse_args()
-    result = validate_handoff(Path(args.replay_dir)) if args.replay_dir else capture(Path(args.output_dir), args.run_id)
+    if args.documents:
+        result = (validate_document_handoff(Path(args.replay_dir)) if args.replay_dir
+                  else capture_documents(Path(args.output_dir), args.run_id))
+    else:
+        result = validate_handoff(Path(args.replay_dir)) if args.replay_dir else capture(Path(args.output_dir), args.run_id)
     print(json.dumps(result, sort_keys=True))
     return 0
 
