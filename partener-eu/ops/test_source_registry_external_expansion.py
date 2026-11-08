@@ -91,6 +91,25 @@ EEA_NON_CALL_ROOTS = {
     "SRC-MIPE-EEA-NORWAY-LANDING",
 }
 
+RCH_2027_SOURCE_ROOTS = {
+    "SRC-EU-RCH-2027-CALL1": {
+        "host": "www.heritageresearch-hub.eu",
+        "tier": "T1B",
+        "scope": "EXACT_CALL_DISCOVERY",
+        "state": "OFFICIAL_CALL_DETAIL_READBACK_RAW_PENDING",
+        "family": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    },
+    "SRC-RO-MCUMP-RCH-2027": {
+        "host": "www.umpcultura.ro",
+        "tier": "T1B",
+        "scope": "NATIONAL_CALL_DISCOVERY",
+        "state": "OFFICIAL_NATIONAL_CONFIRMATION_READBACK_RAW_PENDING",
+        "family": {"ROMANIA", "EU_DIRECT", "CALL_REGISTRY"},
+    },
+}
+
+RCH_2027_DISCOVERY = ROOT / "partener-eu" / "validation" / "discovery" / "rch-2027-call1-20261108.json"
+
 DIRECT_PROGRAMME_FAMILIES = {
     "SRC-EU-FUNDING-TENDERS-GATEWAY": "EU Direct Funding",
     "SRC-EU-HORIZON-EUROPE": "Horizon Europe",
@@ -161,6 +180,43 @@ def main():
     missing = sorted(set(REQUIRED) - set(by_id))
     if missing:
         fail(f"missing external source roots: {missing}")
+
+    # A new official joint-call readback is source discovery until immutable original
+    # bytes, exact submission identifier and Romanian national annex are reconciled.
+    # Never let announcement / national summary silently become OPEN_CALL.
+    for source_id, expected in RCH_2027_SOURCE_ROOTS.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"missing RCH 2027 official source: {source_id}")
+        if row.get("tier") != expected["tier"] or row.get("authority_scope") != expected["scope"]:
+            fail(f"{source_id} lost its bounded delegated authority")
+        if row.get("observation_state") != expected["state"]:
+            fail(f"{source_id} unreviewed call lifecycle promotion")
+        if (urlparse(row.get("url") or "").hostname or "").lower() != expected["host"]:
+            fail(f"{source_id} official host drift")
+        if not expected["family"].issubset(set(row.get("source_families") or [])):
+            fail(f"{source_id} missing source-family classification")
+        if row.get("material_fact_use") is not False or row.get("credentials_required") is not False:
+            fail(f"{source_id} unreviewed material facts or inaccessible gateway")
+        if row.get("open_call_authorized") is not False or row.get("material_fact_publication_authorized") is not False:
+            fail(f"{source_id} wrongly authorized OPEN_CALL or public fact")
+        if row.get("adapter_required") != "RCH_2027_EXACT_CALL_NATIONAL_ANNEX_RECONCILE":
+            fail(f"{source_id} missing independent exact-call/national-annex adapter gate")
+        if any(k in row for k in ("status", "deadline", "budget", "eligibility", "open_at", "close_at")):
+            fail(f"{source_id} contains inadmissible material facts in discovery registry")
+
+    rch = json.loads(RCH_2027_DISCOVERY.read_text(encoding="utf-8"))
+    if rch.get("observation_state") != "OFFICIAL_MULTI_SOURCE_READBACK_RAW_PENDING":
+        fail("RCH 2027 discovery escaped raw-pending gate")
+    if rch.get("material_fact_action") != "NONE" or rch.get("publish_authorized") is not False:
+        fail("RCH 2027 readback attempted material publication")
+    for key in ("fetched_at_utc", "raw_sha256", "parser_version", "run_id", "handoff_sha256"):
+        if rch.get(key) is not None:
+            fail(f"RCH 2027 web readback falsely claims raw receipt: {key}")
+    if set(rch.get("source_ids") or []) != set(RCH_2027_SOURCE_ROOTS):
+        fail("RCH 2027 source-id discovery mismatch")
+    if rch.get("independent_call_identifier_verified") is not False or rch.get("national_annex_reconciled") is not False:
+        fail("RCH 2027 exact call/national annex wrongly reconciled")
 
     for source_id, families in REQUIRED.items():
         row = by_id[source_id]
