@@ -136,7 +136,99 @@ def test_capture_replay_and_fail_closed():
         must_reject(mod.capture, root, "../unsafe-run")
 
 
+
+
+PDF = b"%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\nstartxref\n9\n%%EOF\n"
+
+
+def test_document_originals_and_annex_locator():
+    for sid in mod.DOCUMENT_SPECS:
+        url = mod.document_url(sid)
+        mod.validate_document_url(sid, url)
+        for altered in (
+            url.replace("https://", "http://", 1),
+            url.replace("www.heritageresearch-hub.eu", "evil.example"),
+            url + "?preview=true",
+            url + "#annex",
+            url.replace(".pdf", "-draft.pdf"),
+        ):
+            must_reject(mod.validate_document_url, sid, altered)
+        mod.validate_document_response(status=200, mime="application/pdf",
+                                       encoding="identity", declared_length=str(len(PDF)), raw=PDF)
+        for kwargs in (
+            {"status": 403, "mime": "application/pdf", "encoding": "identity", "declared_length": None, "raw": PDF},
+            {"status": 200, "mime": "text/html; filename=.pdf", "encoding": "identity", "declared_length": None, "raw": PDF},
+            {"status": 200, "mime": "application/pdf-fake", "encoding": "identity", "declared_length": None, "raw": PDF},
+            {"status": 200, "mime": "application/pdf", "encoding": "gzip", "declared_length": None, "raw": PDF},
+            {"status": 200, "mime": "application/pdf", "encoding": "identity", "declared_length": str(len(PDF)+1), "raw": PDF},
+            {"status": 200, "mime": "application/pdf", "encoding": "identity", "declared_length": None, "raw": b"<html>bad</html>"},
+            {"status": 200, "mime": "application/pdf", "encoding": "identity", "declared_length": None, "raw": PDF[:-6]},
+        ):
+            must_reject(mod.validate_document_response, **kwargs)
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        actual_fetch = mod.fetch_document_raw
+        calls = []
+        try:
+            def fake_fetch(sid):
+                calls.append(sid)
+                return PDF, mod.document_url(sid), "application/pdf"
+            mod.fetch_document_raw = fake_fetch
+            outcome = mod.capture_documents(root, RUN_ID)
+            assert outcome["status"] == "PDF_RAW_REPLAY_VERIFIED_NOT_PUBLISHED"
+            assert outcome["publish_authorized"] is False
+            assert calls == sorted(mod.DOCUMENT_SPECS)
+        finally:
+            mod.fetch_document_raw = actual_fetch
+        manifest_file = root / "handoff" / "rch_2027_documents.json"
+        original = manifest_file.read_bytes()
+        manifest = json.loads(original)
+        assert manifest["national_annex_locator"] == {
+            "source_id": "SRC-EU-RCH-2027-CALL-TEXT",
+            "section": "Annex I / Romania",
+            "page_index_start": 127,
+            "page_index_end": 129,
+            "location_is_publication_authority": False,
+        }
+        assert all(not r["publish_authorized"] and not r["open_call_authorized"]
+                   and not r["eligibility_authorized"] for r in manifest["receipts"])
+        raw_file = root / manifest["receipts"][0]["raw_path"]
+        raw_file.write_bytes(PDF + b"evil")
+        must_reject(mod.validate_document_handoff, root)
+        raw_file.write_bytes(PDF)
+        for change in (
+            ("publish_authorized", True),
+            ("open_call_authorized", True),
+            ("eligibility_authorized", True),
+            ("raw_sha256", "0" * 64),
+            ("raw_path", "../other.pdf"),
+            ("source_id", "SRC-EU-FAKE"),
+            ("final_url", "https://other.example/call.pdf"),
+            ("authority_class", "T1_CALL_AUTHORITY"),
+            ("observation_state", "OPEN_CALL"),
+        ):
+            bad = deepcopy(manifest)
+            bad["receipts"][0][change[0]] = change[1]
+            bad["handoff_sha256"] = mod.sha256(mod.canonical_json({
+                k: v for k, v in bad.items() if k != "handoff_sha256"
+            }))
+            manifest_file.write_text(json.dumps(bad), encoding="utf-8")
+            must_reject(mod.validate_document_handoff, root)
+        bad = deepcopy(manifest)
+        bad["national_annex_locator"]["page_index_start"] = 1
+        bad["handoff_sha256"] = mod.sha256(mod.canonical_json({
+            k: v for k, v in bad.items() if k != "handoff_sha256"
+        }))
+        manifest_file.write_text(json.dumps(bad), encoding="utf-8")
+        must_reject(mod.validate_document_handoff, root)
+        manifest_file.write_bytes(original)
+        assert mod.validate_document_handoff(root)["publish_authorized"] is False
+        mod.write_immutable(manifest_file, original)
+        must_reject(mod.write_immutable, manifest_file, b"overwritten")
+
 if __name__ == "__main__":
     test_url_and_response_policy()
     test_capture_replay_and_fail_closed()
-    print("PASS RCH 2027 paired-source TLS policy, immutable SHA handoff, nonpublishing replay and adversarial mutations")
+    test_document_originals_and_annex_locator()
+    print("PASS RCH 2027 paired HTML + three official PDFs, Annex I locator, immutable SHA handoff, nonpublishing adversarial replay")
