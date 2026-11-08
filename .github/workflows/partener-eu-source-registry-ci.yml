@@ -7,7 +7,9 @@ on:
       - 'partener-eu/ingest/rch_2027_raw_acquire.py'
       - 'partener-eu/ingest/rch_2027_paired_handoff.py'
       - 'partener-eu/ingest/rch_2027_epss_gateway.py'
+      - 'partener-eu/ingest/rch_2027_uefiscdi_news.py'
       - 'partener-eu/ops/test_rch_2027_epss_gateway.py'
+      - 'partener-eu/ops/test_rch_2027_uefiscdi_news.py'
       - 'partener-eu/ops/test_rch_2027_raw_acquire.py'
       - 'partener-eu/ops/test_rch_2027_paired_handoff.py'
       - 'partener-eu/validation/discovery/rch-2027-romania-semantic-review-20261108.json'
@@ -93,6 +95,8 @@ jobs:
           python -m py_compile partener-eu/ingest/rch_2027_raw_acquire.py
           python -m py_compile partener-eu/ingest/rch_2027_paired_handoff.py
           python -m py_compile partener-eu/ingest/rch_2027_epss_gateway.py
+          python -m py_compile partener-eu/ingest/rch_2027_uefiscdi_news.py
+          python -m py_compile partener-eu/ops/test_rch_2027_uefiscdi_news.py
           python -m py_compile partener-eu/ops/test_rch_2027_epss_gateway.py
           python -m py_compile partener-eu/ops/test_rch_2027_paired_handoff.py
           python -m py_compile partener-eu/ops/test_rch_2027_raw_acquire.py
@@ -141,6 +145,7 @@ jobs:
           python partener-eu/ops/test_rch_2027_raw_acquire.py
           python partener-eu/ops/test_rch_2027_paired_handoff.py
           python partener-eu/ops/test_rch_2027_epss_gateway.py
+          python partener-eu/ops/test_rch_2027_uefiscdi_news.py
 
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
@@ -315,6 +320,22 @@ jobs:
         if: steps.rch_epss_live.outcome == 'failure'
         run: |
           echo 'EPSS_GATEWAY_UNVERIFIED / RCH_ORIGINALS_PRESERVED / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Capture UEFISCDI RCH secondary news without granting Romanian eligibility
+        id: rch_uefiscdi_news
+        if: steps.rch_live.outcome == 'success'
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/rch_2027_uefiscdi_news.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence \
+            --capture-run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/rch_2027_uefiscdi_news.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence --replay
+
+      - name: Quarantine secondary UEFISCDI fetch failure
+        if: steps.rch_uefiscdi_news.outcome == 'failure'
+        run: |
+          echo 'UEFISCDI_SECONDARY_RAW_DEGRADED / ROMANIA_ANNEX_I_STILL_CANONICAL / NO_OPEN_CALL / NO_PUBLICATION'
 
       - name: Preserve original RCH 2027 raw bytes and signed handoff
         if: always()
