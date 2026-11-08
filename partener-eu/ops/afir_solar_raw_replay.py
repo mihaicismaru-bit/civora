@@ -148,9 +148,14 @@ def replay(directory):
     # programme and per-run observation scope as its pinned baseline. Do not
     # require a current index hash to equal a historical hash: AFIR may add
     # unrelated rows without changing the exact delegated session.
+    # Historical v1 provenance is replayable only at the exact pinned run;
+    # all subsequent receipts must use the strict-MIME v2 acquisition.
+    parser_version = manifest.get("parser_version")
+    pinned_legacy = (parser_version == obs["raw_acquisition_parser_version"]
+                     and manifest.get("run_id") == obs["run_id"])
     if (manifest.get("schema") != "PARTENER_EU_AFIR_SELECTION_RAW_EVIDENCE_V1"
         or manifest.get("programme") != obs["programme"]
-        or manifest.get("parser_version") != obs["raw_acquisition_parser_version"]
+        or (parser_version != collector.PARSER_VERSION and not pinned_legacy)
         or manifest.get("official_index_url") != obs["official_index_url"]
         or manifest.get("official_notice_url") != obs["official_notice_url"]
         or manifest.get("observation_state") != "SELECTION_RESULTS_DISCOVERY_PENDING_RECONCILIATION"
@@ -160,7 +165,7 @@ def replay(directory):
     index_meta = manifest["official_index"]
     index_at = utc_stamp(index_meta["fetched_at"])
     if (index_at < acquired_at or index_meta["url"] != obs["official_index_url"]
-        or "html" not in index_meta["content_type"].lower()):
+        or not collector.accepted_media_type("html", index_meta["content_type"])):
         raise ValueError("Untrusted official index provenance")
     index = (d / "afir-selection-index.raw.html").read_bytes()
     if (len(index) != index_meta["bytes"]
@@ -181,12 +186,12 @@ def replay(directory):
         name = "solar-3-2026-" + ("selectate" if cat == "Selectate" else "nefinantate") + ".raw.xlsx"
         if (source["file"] != name or source["final_url"] != delegated[cat]
             or source["requested_url"] != pinned["source_url"] or source["sha256"] != pinned["sha256"]
-            or source["run_id"] != manifest["run_id"] or source["parser_version"] != collector.PARSER_VERSION
+            or source["run_id"] != manifest["run_id"] or source["parser_version"] != parser_version
             or source.get("source_family") != manifest["source_family"]
             or source.get("authority_class") != manifest["authority_class"]
             or source.get("observation_state") != manifest["observation_state"]
             or source.get("status") != "RAW_FETCHED_NOT_RECONCILED"
-            or "html" in source["content_type"].lower() or "json" in source["content_type"].lower()
+            or not collector.accepted_media_type("xlsx", source["content_type"])
             or utc_stamp(source["fetched_at"]) < index_at):
             raise ValueError("Unpinned raw delegation/provenance")
         if (manifest["run_id"] == obs["run_id"]

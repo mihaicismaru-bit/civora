@@ -17,8 +17,20 @@ from pathlib import Path
 INDEX_URL = "https://www.afir.ro/rapoarte/rapoarte-feadr/selectie/"
 NOTICE_URL = "https://www.afir.ro/info-la-zi/raport-final-de-selectie-schema-de-energie-solar-peste-1-mw/"
 BLOB_HOST = "stportalafirprod.blob.core.windows.net"
-PARSER_VERSION = "afir-energy-solar-final-selection-acquisition-v1"
+PARSER_VERSION = "afir-energy-solar-final-selection-acquisition-v2"
 CATEGORIES = ("Selectate", "Nefinanțate")
+# Official live evidence: AFIR index text/html, delegated workbooks OpenXML.
+# Only the true media type can authorize admission, never its parameters.
+ALLOWED_MEDIA_TYPES = {
+    "html": frozenset({"text/html", "application/xhtml+xml"}),
+    "xlsx": frozenset({"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"}),
+}
+
+def accepted_media_type(kind, content_type):
+    if not isinstance(content_type, str):
+        return False
+    actual = content_type.split(";", 1)[0].strip().casefold()
+    return actual in ALLOWED_MEDIA_TYPES.get(kind, frozenset())
 
 def clean(text):
     return re.sub(r"\s+", " ", text or "").strip()
@@ -135,11 +147,13 @@ def download_exact(url, max_bytes, kind, *, delegated_urls=()):
     with opener.open(request, timeout=25) as res:
         if res.geturl() != url or getattr(res, "status", 200) != 200:
             raise ValueError("Source identity or status mismatch")
-        ctype = res.headers.get("Content-Type", "").lower()
-        if kind == "html" and "html" not in ctype:
-            raise ValueError("AFIR index is not HTML")
-        if kind == "xlsx" and ("html" in ctype or "json" in ctype):
-            raise ValueError("AFIR XLSX is HTML or JSON")
+        ctype = res.headers.get("Content-Type", "")
+        if not accepted_media_type(kind, ctype):
+            raise ValueError("Untrusted AFIR official source media type")
+        # urllib does not transparently decode gzip/br as source bytes.
+        encoding = (res.headers.get("Content-Encoding") or "identity").strip().casefold()
+        if encoding != "identity":
+            raise ValueError("Unsupported AFIR official source Content-Encoding")
         raw = res.read(max_bytes + 1)
         length = res.headers.get("Content-Length")
         if not raw or len(raw) > max_bytes or (

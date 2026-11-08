@@ -37,6 +37,79 @@ def xlsx():
 assert module.parse_index(html(REFS)) == REFS
 assert module.validate_workbook(xlsx()) is True
 
+# Exact MIME recorded in original live PR preflight 42442574151.
+for kind, accepted in (
+    ("html", ("text/html; charset=utf-8", "APPLICATION/XHTML+XML")),
+    ("xlsx", ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+              "APPLICATION/VND.OPENXMLFORMATS-OFFICEDOCUMENT.SPREADSHEETML.SHEET; charset=binary")),
+):
+    for header in accepted:
+        assert module.accepted_media_type(kind, header), (kind, header)
+for kind, rejected in (
+    ("html", ("text/plain; filename=index.html", "application/json; note=text/html",
+              "text/html-fake", "application/pdf", "application/octet-stream")),
+    ("xlsx", ("text/html; filename=report.xlsx", "application/json; note=report.xlsx",
+              "application/pdf", "application/octet-stream", "application/zip",
+              "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet-fake")),
+):
+    for header in rejected:
+        assert not module.accepted_media_type(kind, header), (kind, header)
+
+class FakeResponse:
+    status = 200
+    def __init__(self, url, raw, ctype, encoding="identity", length=None):
+        self.url, self.raw = url, raw
+        self.headers = {"Content-Type": ctype, "Content-Encoding": encoding,
+                        "Content-Length": str(len(raw)) if length is None else length}
+    def __enter__(self):
+        return self
+    def __exit__(self, *args):
+        return False
+    def geturl(self):
+        return self.url
+    def read(self, max_size):
+        return self.raw[:max_size]
+
+class FakeOpener:
+    def __init__(self, response):
+        self.response = response
+    def open(self, request, timeout):
+        assert request.full_url == self.response.url and timeout == 25
+        return self.response
+
+for target, kind, raw, good, bad in (
+    (module.INDEX_URL, "html", html(REFS), "text/html; charset=utf-8",
+     ("text/plain; filename=notice.html", "application/json; hint=text/html", "text/html-fake")),
+    (SELECTED, "xlsx", xlsx(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     ("application/pdf", "application/octet-stream", "text/html; filename=selected.xlsx")),
+):
+    allowed_delegation = tuple(REFS.values()) if kind == "xlsx" else ()
+    def transport(mime, encoding="identity", length=None):
+        mock = FakeResponse(target, raw, mime, encoding, length)
+        with patch.object(module.urllib.request, "build_opener", return_value=FakeOpener(mock)):
+            return module.download_exact(target, 5_000_000, kind, delegated_urls=allowed_delegation)
+    assert transport(good)[0] == raw
+    for mime in bad:
+        try:
+            transport(mime)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"Forged {kind} media type admitted: {mime}")
+    for encoding in ("gzip", "br", "identity, gzip"):
+        try:
+            transport(good, encoding=encoding)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Compressed or ambiguous raw transport admitted")
+    try:
+        transport(good, length=str(len(raw) + 1))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Truncated AFIR body admitted")
+
 # The official catalogue is multi-session: a later solar period must not
 # invalidate the two exact 3/2026 reports already proven by the table.
 future_row = (
