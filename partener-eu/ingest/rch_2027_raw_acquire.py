@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+from html.parser import HTMLParser
 import json
 import re
 import ssl
@@ -37,6 +38,68 @@ SOURCE_SPECS = {
         "observation_state": "OFFICIAL_NATIONAL_RAW_UNRECONCILED",
     },
 }
+
+# This is a source-identity guard, not a call-status or eligibility parser.
+# An HTTP 200 HTML envelope at an official URL can still be a maintenance page,
+# login/denial page, or stale template; none should enter the paired handoff.
+SOURCE_VISIBLE_TERMS = {
+    "SRC-EU-RCH-2027-CALL1": (
+        "first joint transnational call",
+        "foundations for climate-resilient cultural heritage",
+    ),
+    "SRC-RO-MCUMP-RCH-2027": (
+        "primul apel de proiecte",
+        "resilient cultural heritage",
+    ),
+}
+_HTML_VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+              "link", "meta", "param", "source", "track", "wbr"}
+_HTML_NONVISIBLE = {"head", "script", "style", "template", "noscript", "svg"}
+
+
+class _VisibleHTML(HTMLParser):
+    """Collect actual on-page text, ignoring hidden descendants and script/template data."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.chunks = []
+
+    def handle_starttag(self, tag, attrs):
+        properties = dict(attrs)
+        css = (properties.get("style") or "").lower().replace(" ", "")
+        hidden = (
+            (self.stack[-1][1] if self.stack else False)
+            or tag in _HTML_NONVISIBLE or "hidden" in properties
+            or (properties.get("aria-hidden") or "").lower() == "true"
+            or "display:none" in css or "visibility:hidden" in css
+        )
+        if tag not in _HTML_VOID:
+            self.stack.append((tag, hidden))
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        if tag not in _HTML_VOID:
+            self.handle_endtag(tag)
+
+    def handle_endtag(self, tag):
+        for i in range(len(self.stack) - 1, -1, -1):
+            if self.stack[i][0] == tag:
+                del self.stack[i:]
+                break
+
+    def handle_data(self, data):
+        if not self.stack or not self.stack[-1][1]:
+            self.chunks.append(data)
+
+
+def validate_source_identity(source_id: str, raw: bytes) -> None:
+    """Fail closed on a source-specific call page replaced by unrelated HTML."""
+    visible = _VisibleHTML()
+    visible.feed(raw.decode("utf-8", errors="replace"))
+    text = " ".join(" ".join(visible.chunks).casefold().split())
+    if any(term not in text for term in SOURCE_VISIBLE_TERMS[source_id]):
+        raise ValueError("RCH official page lacks visible source-specific call identity")
+
 ALLOWED_MIME = {"text/html", "application/xhtml+xml"}
 LOCKED_FALSE = (
     "material_fact_use", "open_call_authorized", "publish_authorized",
@@ -90,6 +153,7 @@ def validate_response(source_id: str, *, status: int, mime: str,
             raise ValueError("RCH transfer truncation/length mismatch")
     if not re.search(rb"<(?:!doctype\s+html\b|html\b)", raw[:4096], re.I):
         raise ValueError("RCH response lacks an HTML document envelope")
+    validate_source_identity(source_id, raw)
 
 
 def fetch_raw(source_id: str) -> tuple[bytes, str, str]:
