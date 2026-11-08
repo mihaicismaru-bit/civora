@@ -67,7 +67,7 @@ def test_url_and_response_policy():
         # A forged call identity inside CSS-invisible descendants must not
         # turn an unrelated HTTP 200 HTML page into an official receipt.
         # Tabs/newlines evade a space-only CSS normalization.
-        for css in ("display:\\tnone", "visibility:\\nhidden",
+        for css in ("display:\tnone", "visibility:\nhidden",
                     "visibility:collapse", "content-visibility:hidden",
                     "opacity:0", "opacity:0!important"):
             page = (b"<!doctype html><html><body>Unrelated maintenance page"
