@@ -27,10 +27,8 @@ PAIR_NAME = "rch_2027_paired_handoff.json"
 
 
 def read_manifest(path: Path) -> dict:
-    value = json.loads(path.read_text(encoding="utf-8"))
-    if not isinstance(value, dict):
-        raise ValueError("RCH handoff must be a JSON object")
-    return value
+    # Same strict duplicate-key/NaN boundary as each original-byte handoff.
+    return raw.read_evidence_json(path)
 
 
 def expected_pair(root: Path) -> dict:
