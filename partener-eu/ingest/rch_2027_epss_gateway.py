@@ -81,8 +81,10 @@ def official_submission_link(call_html: bytes) -> str:
     collector.feed(call_html.decode("utf-8", errors="replace"))
     source = raw.SOURCE_SPECS["SRC-EU-RCH-2027-CALL1"]["url"]
     candidates = [urljoin(source, x) for x in collector.candidates]
-    if len(candidates) != 1:
-        raise ValueError("RCH official call page lacks one visible submission-platform anchor")
+    # The official call page renders the same EPSS link twice (facts + body).
+    # Duplication is safe only when every matching visible anchor agrees exactly.
+    if not candidates or len(set(candidates)) != 1:
+        raise ValueError("RCH official call page has no unique EPSS submission target")
     validate_gateway_url(candidates[0])
     return candidates[0]
 
