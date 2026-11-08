@@ -77,7 +77,7 @@ class _VisibleNotice(HTMLParser):
             if name in values and name in self.VISIBILITY_ATTRIBUTES:
                 ambiguous = True
             values.setdefault(name, value or "")
-        style = re.sub(r"\\s+", "", values.get("style", "").casefold())
+        style = re.sub(r"\s+", "", values.get("style", "").casefold())
         classes = set(values.get("class", "").casefold().split())
         hidden = (
             ambiguous
@@ -90,7 +90,7 @@ class _VisibleNotice(HTMLParser):
             or re.search(r"(?:^|;)display:none(?:!important)?(?:;|$)", style) is not None
             or re.search(r"(?:^|;)visibility:(?:hidden|collapse)(?:!important)?(?:;|$)", style) is not None
             or re.search(r"(?:^|;)content-visibility:hidden(?:!important)?(?:;|$)", style) is not None
-            or re.search(r"(?:^|;)opacity:0(?:\\.0+)?(?:!important)?(?:;|$)", style) is not None
+            or re.search(r"(?:^|;)opacity:0(?:\.0+)?(?:!important)?(?:;|$)", style) is not None
         )
         if tag not in self.VOID:
             self.stack.append((tag, hidden))
