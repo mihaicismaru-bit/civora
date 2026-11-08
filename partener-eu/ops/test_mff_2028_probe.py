@@ -36,10 +36,10 @@ BODY = ("<html><body><h1>Council partial negotiating position</h1><p>" +
 
 
 class Response:
-    def __init__(self, body=BODY, final_url=SOURCE["url"], declared_length=None, content_encoding=None):
+    def __init__(self, body=BODY, final_url=SOURCE["url"], declared_length=None, content_encoding=None, content_type="text/html; charset=utf-8"):
         self.body = body
         self.final_url = final_url
-        self.headers = {"content-type": "text/html; charset=utf-8"}
+        self.headers = {"content-type": content_type}
         if declared_length is not None:
             self.headers["Content-Length"] = str(declared_length)
         if content_encoding is not None:
@@ -188,6 +188,22 @@ def run_tests():
         (evidence / "test-first" / row["raw_evidence_file"]).write_bytes(saved_html)
 
         original_manifest = (evidence / "test-first" / "manifest.json").read_bytes()
+        # Older valid parser-v2 receipts remain replayable, but never gain
+        # stronger publication, stage or content-type authority.
+        legacy = json.loads(original_manifest)
+        legacy["parser_version"] = probe.PRIOR_REPLAY_VERSION
+        legacy["sources"][0]["parser_version"] = probe.PRIOR_REPLAY_VERSION
+        (evidence / "test-first" / "manifest.json").write_text(json.dumps(legacy), encoding="utf-8")
+        assert probe.replay_evidence(evidence / "test-first", reg) == first["summary"]
+        legacy["sources"][0]["content_type"] = "application/problem+json; note=text/html"
+        (evidence / "test-first" / "manifest.json").write_text(json.dumps(legacy), encoding="utf-8")
+        try:
+            probe.replay_evidence(evidence / "test-first", reg)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("legacy MFF replay accepted fake HTML media type")
+        (evidence / "test-first" / "manifest.json").write_bytes(original_manifest)
         for mutation in ("adoption", "cross-authority", "counter", "duplicate"):
             forged = json.loads(original_manifest)
             if mutation == "adoption":
@@ -330,6 +346,28 @@ def run_tests():
         assert probe.run(reg, state, evidence / "test-oversized", "test-oversized")["summary"]["fail"] == 1
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=1)
         assert probe.run(reg, state, evidence / "test-truncated", "test-truncated")["summary"]["fail"] == 1
+        # A text/plain, JSON or PDF body is not HTML simply because a MIME
+        # parameter or suffix contains "html"; no raw receipt is admitted.
+        for idx, mime in enumerate((
+            "application/problem+json; note=text/html",
+            "text/plain; filename=notice.html",
+            "application/x-html",
+            "text/html-extra",
+            "application/pdf; filename=notice.html",
+            "",
+        )):
+            assert not probe.exact_html_mime(mime)
+            probe._open_official = lambda *_args, _mime=mime, **_kwargs: Response(BODY, content_type=_mime)
+            bad = probe.run(reg, state, evidence / f"test-mime-{idx}", f"test-mime-{idx}")
+            bad_row = bad["sources"][0]
+            assert bad_row["health"] == "FAIL" and bad_row["observation_state"] == "PROVISIONAL_FAIL_CLOSED"
+            assert bad_row["raw_sha256"] is None and bad_row["publish_authorized"] is False
+        for mime in ("text/html", "TEXT/HTML; charset=utf-8", "application/xhtml+xml; charset=utf-8"):
+            assert probe.exact_html_mime(mime)
+        probe._open_official = lambda *_args, **_kwargs: Response(BODY, content_type="application/xhtml+xml")
+        assert probe.run(reg, state, evidence / "test-xhtml", "test-xhtml")["summary"]["pass"] == 1
+        assert probe.replay_evidence(evidence / "test-xhtml", reg)["pass"] == 1
+
         # An official 200 response may still be an anti-bot/interstitial page.
         # Nor may compressed bytes be misread as verified UTF-8 HTML.
         challenge = (b"<html><head><title>Access Denied</title></head><body>" +
@@ -347,7 +385,7 @@ def run_tests():
         probe._open_official = lambda *_args, **_kwargs: Response(BODY, declared_length=len(BODY))
         assert probe.run(reg, state, evidence / "test-complete", "test-complete")["summary"]["pass"] == 1
         assert state.exists() and (evidence / "test-first" / "manifest.json").exists()
-        print("PASS: MFF taxonomy/provenance + 403/LKG + cross-authority redirects/immutable raw receipts/truncation + interstitial/compressed-body fail-closed")
+        print("PASS: MFF stage/provenance + exact HTML MIME/XHTML + legacy replay + 403/LKG + immutable raw and interstitial fail-closed")
 
 
 if __name__ == "__main__":
