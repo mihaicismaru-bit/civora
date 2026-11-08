@@ -14,7 +14,7 @@ pair = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pair)
 raw = pair.raw
 
-HTML = b"<!DOCTYPE html><html><head><title>RCH 2027</title></head><body>Official original</body></html>"
+HTML = b"<!DOCTYPE html><html><head><title>RCH 2027</title></head><body>The European Partnership launches its first Joint Transnational Call (JTC): Foundations for climate-resilient cultural heritage. RCH - Resilient Cultural Heritage. Primul apel de proiecte din cadrul parteneriatului RCH a fost publicat.</body></html>"
 PDF = b"%PDF-1.7\n1 0 obj\n<< /Type /Catalog >>\nendobj\nstartxref\n9\n%%EOF\n"
 RUN = "test-rch-pair-001"
 
