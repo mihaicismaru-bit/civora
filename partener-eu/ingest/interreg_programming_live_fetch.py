@@ -130,6 +130,13 @@ class _VisibleText(HTMLParser):
                 self.parts.append(clean)
 
 
+def _official_html_mime(value: object) -> bool:
+    """Require the exact HTML media type, never `html` in MIME parameters."""
+    return isinstance(value, str) and value.split(";", 1)[0].strip().lower() in (
+        "text/html", "application/xhtml+xml"
+    )
+
+
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -332,7 +339,7 @@ def _fetch(url: str) -> tuple[bytes, str, int, str]:
             raise ValueError("Interreg raw response differs from declared Content-Length")
     if status != 200:
         raise ValueError(f"unexpected HTTP status {status}")
-    if "html" not in content_type.lower():
+    if not _official_html_mime(content_type):
         raise ValueError(f"unexpected content type {content_type!r}")
     return raw, final_url, status, content_type
 
@@ -370,6 +377,8 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
             # of an acquisition run that can span multiple slow endpoints.
             row["fetched_at"] = _utc_now()
             _assert_official_source_origin(url, final_url)
+            if not _official_html_mime(content_type):
+                raise ValueError(f"unexpected content type {content_type!r}")
             text = _visible_text(raw, content_type)
             if len(text) < 120:
                 raise ValueError("low-information HTML body")
@@ -542,7 +551,7 @@ def replay_live_evidence(
             or row.get("bytes") != len(raw)
             or row.get("raw_hash") != _sha256(raw)
             or row.get("http_status") != 200
-            or "html" not in str(row.get("content_type") or "").lower()
+            or not _official_html_mime(row.get("content_type"))
         ):
             raise ValueError("Interreg raw bytes, type, status or SHA mismatch")
         replay_text = _visible_text(raw, row["content_type"])
