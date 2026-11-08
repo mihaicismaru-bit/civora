@@ -35,30 +35,86 @@ def accepted_media_type(kind, content_type):
 def clean(text):
     return re.sub(r"\s+", " ", text or "").strip()
 
+# The report index is HTML, not trusted structured data. Hidden script/template,
+# stale UI rows and invisible cell contents cannot establish a report identity.
+_HIDDEN_TAGS = frozenset({
+    "head", "script", "style", "noscript", "svg", "template",
+    "dialog", "datalist", "select", "textarea", "canvas", "iframe",
+})
+_VOID_TAGS = frozenset({
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "param", "source", "track", "wbr",
+})
+
 class ReportTable(HTMLParser):
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.rows, self.row, self.cell = [], None, None
+        self._elements = []
+        self._hidden_depth = 0
+
     def handle_starttag(self, tag, attrs):
+        tag = tag.lower()
+        attributes = {}
+        duplicate_visibility = False
+        for key, value in attrs:
+            name = key.lower()
+            if name in attributes and name in {"hidden", "inert", "style", "aria-hidden"}:
+                duplicate_visibility = True
+            attributes.setdefault(name, value or "")
+        style = re.sub(r"\s+", "", attributes.get("style", "").casefold())
+        hidden = (
+            duplicate_visibility or tag in _HIDDEN_TAGS
+            or (tag == "details" and "open" not in attributes)
+            or "hidden" in attributes or "inert" in attributes
+            or "popover" in attributes
+            or attributes.get("aria-hidden", "").strip().casefold() == "true"
+            or "display:none" in style
+            or "visibility:hidden" in style or "visibility:collapse" in style
+            or "content-visibility:hidden" in style
+            or re.search(r"(?:^|;)opacity:0(?:\.0+)?(?:!important)?(?:;|$)", style) is not None
+        )
+        if tag not in _VOID_TAGS:
+            self._elements.append((tag, hidden))
+            if hidden:
+                self._hidden_depth += 1
+        if self._hidden_depth:
+            return
         if tag == "tr":
             self.row = []
         elif tag == "td" and self.row is not None:
             self.cell = {"parts": [], "links": []}
         elif tag == "a" and self.cell is not None:
-            href = dict(attrs).get("href")
-            if href:
-                self.cell["links"].append(href)
+            # Preserve *all* hrefs: duplicate attributes cannot silently
+            # replace a delegated XLSX link via dict(attrs).
+            self.cell["links"].extend(
+                value for key, value in attrs if key.lower() == "href" and value
+            )
+
     def handle_data(self, data):
-        if self.cell is not None:
+        if not self._hidden_depth and self.cell is not None:
             self.cell["parts"].append(data)
+
     def handle_endtag(self, tag):
-        if tag == "td" and self.cell is not None and self.row is not None:
-            self.row.append({"text": clean(" ".join(self.cell["parts"])), "links": self.cell["links"]})
-            self.cell = None
-        elif tag == "tr" and self.row is not None:
-            if self.row:
-                self.rows.append(self.row)
-            self.row, self.cell = None, None
+        tag = tag.lower()
+        if not self._hidden_depth:
+            if tag == "td" and self.cell is not None and self.row is not None:
+                self.row.append({
+                    "text": clean(" ".join(self.cell["parts"])),
+                    "links": self.cell["links"],
+                })
+                self.cell = None
+            elif tag == "tr" and self.row is not None:
+                if self.row:
+                    self.rows.append(self.row)
+                self.row, self.cell = None, None
+        # Unbalanced child markup must not prematurely expose a hidden row.
+        for index in range(len(self._elements) - 1, -1, -1):
+            if self._elements[index][0] == tag:
+                self._hidden_depth -= sum(int(flag) for _, flag in self._elements[index:])
+                del self._elements[index:]
+                break
+
 
 def delegated_xlsx_url(href):
     # Delegation is ONLY from the original AFIR report-index table, never

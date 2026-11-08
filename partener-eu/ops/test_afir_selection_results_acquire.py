@@ -35,6 +35,81 @@ def xlsx():
     return out.getvalue()
 
 assert module.parse_index(html(REFS)) == REFS
+
+# The official HTML catalogue may contain hidden (stale or forged) rows.
+# Neither hidden rows nor embedded script/template text may establish the
+# 3/2026 report pair or override its exact delegated XLSX identity.
+valid_index = html(REFS)
+conflicting_hidden_row = (
+    '<tr><td>Final</td><td>Selectate</td><td>ENERGIE</td>'
+    '<td>3</td><td>2026</td>'
+    '<td>15.06.2026 - 15.08.2026 (Solar Peste 1MW)</td>'
+    '<td>03.11.2026</td>'
+    f'<td><a href="{SELECTED}">Fake report</a></td></tr>'
+).encode()
+for wrapper_start, wrapper_end in (
+    ('<div hidden>', '</div>'),
+    ('<div inert>', '</div>'),
+    ('<div aria-hidden="true">', '</div>'),
+    ('<div style="display: none !important">', '</div>'),
+    ('<div style="visibility: hidden">', '</div>'),
+    ('<div style="opacity:0">', '</div>'),
+    ('<div style="content-visibility:hidden">', '</div>'),
+    ('<div style="display:none" style="display:block">', '</div>'),
+    ('<template>', '</template>'),
+    ('<noscript>', '</noscript>'),
+    ('<details>', '</details>'),
+    ('<div popover>', '</div>'),
+):
+    hidden = (wrapper_start.encode() + conflicting_hidden_row +
+              wrapper_end.encode())
+    assert module.parse_index(valid_index.replace(b"</table>", hidden + b"</table>")) == REFS
+    try:
+        module.parse_index(b"<table>" + hidden + b"</table>")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"Hidden AFIR report row was accepted: {wrapper_start}")
+
+# Hidden text within an otherwise visible date cell must not compensate for
+# a conflicting official period or create an artificial quality match.
+for wrapper_start, wrapper_end in (
+    ('<span hidden>', '</span>'),
+    ('<script>', '</script>'),
+    ('<template>', '</template>'),
+    ('<span style="display:none">', '</span>'),
+):
+    injected = (
+        b"15.06.2026 - 15.08.2026 "
+        + wrapper_start.encode()
+        + b"15.06.2026 - 14.08.2026 "
+        + wrapper_end.encode()
+    )
+    payload = valid_index.replace(b"15.06.2026 - 14.08.2026 ", injected, 1)
+    try:
+        module.parse_index(payload)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError(f"Hidden AFIR period repaired a conflicting date: {wrapper_start}")
+
+# Two href attributes in a source anchor cannot collapse into one accepted link.
+dupe_anchor = (f'<a href="{SELECTED}" href="{UNFUNDED}">Descarcă</a>').encode()
+dupe_payload = valid_index.replace(
+    (f'<a href="{SELECTED}">Descarcă</a>').encode(), dupe_anchor, 1
+)
+try:
+    module.parse_index(dupe_payload)
+except ValueError:
+    pass
+else:
+    raise AssertionError("Duplicate delegated XLSX href was accepted")
+
+# An ordinary visible wrapper and nested emphasis preserve legitimate rows.
+assert module.parse_index(valid_index.replace(
+    b"<table>", b"<table><tbody>", 1
+).replace(b"</table>", b"</tbody></table>", 1)) == REFS
+
 assert module.validate_workbook(xlsx()) is True
 
 # Exact MIME recorded in original live PR preflight 42442574151.
