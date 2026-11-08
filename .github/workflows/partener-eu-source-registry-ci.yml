@@ -253,11 +253,18 @@ jobs:
           python partener-eu/ingest/rch_2027_raw_acquire.py \
             --output-dir /tmp/rch-2027-call1-evidence \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --documents \
+            --output-dir /tmp/rch-2027-call1-evidence \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
 
       - name: Verify RCH 2027 immutable raw replay without publishing
         if: steps.rch_live.outcome == 'success'
         run: |
           python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --replay-dir /tmp/rch-2027-call1-evidence
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --documents \
             --replay-dir /tmp/rch-2027-call1-evidence
 
       - name: Fail closed on RCH 2027 live transport loss
