@@ -135,7 +135,40 @@ def main() -> None:
     ):
         rejected(lambda ambiguous=ambiguous: watch.parse_notice(raw(ambiguous)),
                  "duplicated or contradictory")
-    assert watch.PARSER_VERSION.endswith("-v4")
+    assert watch.PARSER_VERSION.endswith("-v5")
+    assert watch.PRIOR_PARSER_VERSION.endswith("-v4")
+
+    # Hidden UI/template text must never establish a quality threshold.
+    # Inert content beside a real visible stage must also not create a
+    # spurious duplicate that suppresses a valid official observation.
+    hidden_wrappers = (
+        ('<div hidden>', '</div>'),
+        ('<div inert>', '</div>'),
+        ('<div aria-hidden="true">', '</div>'),
+        ('<div class="d-none">', '</div>'),
+        ('<div style="display: none !important">', '</div>'),
+        ('<div style="visibility: hidden">', '</div>'),
+        ('<div style="content-visibility: hidden">', '</div>'),
+        ('<div style="opacity: 0.0">', '</div>'),
+        ('<div style="display:none" style="display:block">', '</div>'),
+        ('<div aria-hidden="false" aria-hidden="true">', '</div>'),
+        ('<script>', '</script>'),
+        ('<template>', '</template>'),
+        ('<noscript>', '</noscript>'),
+        ('<details>', '</details>'),
+        ('<dialog>', '</dialog>'),
+    )
+    for opening, closing in hidden_wrappers:
+        hidden = opening + SENTENCE + closing
+        rejected(lambda hidden=hidden: watch.parse_notice(raw(hidden)))
+        assert watch.parse_notice(raw(hidden + SENTENCE)) == stages
+        # A forged hidden correct stage cannot redeem incorrect visible facts.
+        bad_visible = SENTENCE.replace("80 de puncte", "70 de puncte")
+        rejected(lambda hidden=hidden, bad_visible=bad_visible:
+                 watch.parse_notice(raw(hidden + bad_visible)))
+    assert watch.parse_notice(raw('<details open>' + SENTENCE + '</details>')) == stages
+    # A preceding hidden subtree must not leak into a later visible paragraph.
+    assert watch.parse_notice(raw('<div hidden><section>wrong</section></div>' + SENTENCE)) == stages
 
     rejected(lambda: watch.parse_notice(b""))
     rejected(lambda: watch.parse_notice(b"a" * 12_000_001))
@@ -172,6 +205,24 @@ def main() -> None:
         assert (receipt / record["raw_evidence_file"]).read_bytes() == raw()
         assert watch.replay_receipt(receipt) == record
         original_manifest = (receipt / "manifest.json").read_bytes()
+        # Legacy v4 non-publishing receipts remain replayable if their raw
+        # HTML also passes v5 visible-prose verification.
+        legacy = copy.deepcopy(record)
+        legacy["parser_version"] = watch.PRIOR_PARSER_VERSION
+        (receipt / "manifest.json").write_text(json.dumps(legacy), encoding="utf-8")
+        assert watch.replay_receipt(receipt) == legacy
+        (receipt / "manifest.json").write_bytes(original_manifest)
+        # A fabricated/legacy hidden-only original MUST NOT be admitted by
+        # merely relabeling its parser as v4.
+        injected = base / "legacy-hidden-only"
+        injected.mkdir()
+        forged_raw = raw('<div hidden>' + SENTENCE + '</div>')
+        forged = copy.deepcopy(legacy)
+        forged["raw_sha256"] = hashlib.sha256(forged_raw).hexdigest()
+        forged["raw_bytes"] = len(forged_raw)
+        (injected / "notice.raw.html").write_bytes(forged_raw)
+        (injected / "manifest.json").write_text(json.dumps(forged), encoding="utf-8")
+        rejected(lambda: watch.replay_receipt(injected))
         for key, bad in (
             ("raw_sha256", "0" * 64),
             ("content_type", "application/x-nothtml"),
