@@ -4,6 +4,7 @@ import json
 import sys
 import tempfile
 from copy import deepcopy
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 INGEST = Path(__file__).resolve().parents[1] / "ingest"
@@ -116,6 +117,17 @@ def test_bound_capture_and_fail_closed_replay():
         ):
             bad = deepcopy(manifest)
             bad["receipt"][field] = value
+            path.write_text(json.dumps(reseal(bad)))
+            reject(news.replay, root)
+        # Rehashing a receipt with the same run_id must not disguise a stale,
+        # delayed or future secondary capture as part of the five-source batch.
+        for bad_stamp in (
+            "2000-01-01T00:00:00Z",
+            "2099-01-01T00:00:00Z",
+            (datetime.now(timezone.utc) + timedelta(minutes=25)).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        ):
+            bad = deepcopy(manifest)
+            bad["receipt"]["fetched_at_utc"] = bad_stamp
             path.write_text(json.dumps(reseal(bad)))
             reject(news.replay, root)
         bad = deepcopy(manifest)
