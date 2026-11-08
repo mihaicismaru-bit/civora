@@ -60,7 +60,7 @@ class _LinkParser(raw._VisibleHTML):
     def handle_endtag(self, tag):
         if tag.lower() == "a" and self.active is not None:
             href, label, hidden = self.active
-            if not hidden and " ".join("".join(label).casefold().split()) == "submission platform":
+            if not hidden and " ".join("".join(label).casefold().split()).startswith("submission platform"):
                 self.candidates.append(href)
             self.active = None
         super().handle_endtag(tag)
