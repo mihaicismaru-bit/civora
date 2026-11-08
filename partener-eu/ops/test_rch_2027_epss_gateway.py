@@ -26,9 +26,9 @@ GATEWAY = (b"<!doctype html><html><body>RCH Partnership Calls for Proposals "
            b"Foundations for climate-resilient cultural heritage Sign in</body></html>")
 
 
-def reject(fn, *args):
+def reject(fn, *args, **kwargs):
     try:
-        fn(*args)
+        fn(*args, **kwargs)
     except (ValueError, FileNotFoundError, TypeError):
         return
     raise AssertionError(f"fail-closed rejection missing: {fn.__name__}")
