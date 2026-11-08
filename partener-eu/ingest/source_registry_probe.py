@@ -25,8 +25,19 @@ def utc_now():
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def official_media_type(content_type: object) -> str:
+    """Parse the actual HTTP media type, not HTML-looking parameters/suffixes."""
+    if not isinstance(content_type, str):
+        return ""
+    return content_type.split(";", 1)[0].strip().casefold()
+
+
+def is_html_content_type(content_type: object) -> bool:
+    return official_media_type(content_type) in {"text/html", "application/xhtml+xml"}
+
+
 def semantic_bytes(raw: bytes, content_type: str) -> bytes:
-    if "html" not in (content_type or "").lower():
+    if not is_html_content_type(content_type):
         return raw
     text = raw.decode("utf-8", errors="ignore")
     text = re.sub(r"<script\b[^>]*>.*?</script>", " ", text, flags=re.I | re.S)
@@ -47,7 +58,7 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
 
 def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
     semantic_chars = len(sem.decode("utf-8", errors="ignore"))
-    is_html = "html" in (content_type or "").lower()
+    is_html = is_html_content_type(content_type)
     if is_html and raw_size >= MIN_HTML_BYTES_FOR_LOW_INFO and semantic_chars < MIN_SEMANTIC_CHARS:
         return False, "LOW_INFORMATION_HTML_SHELL", semantic_chars
     return True, None, semantic_chars
@@ -109,6 +120,14 @@ def fetch_once(url: str):
         _assert_source_origin(url, r.geturl())
         if r.status != 200:
             raise ValueError(f"unexpected official source HTTP status {r.status}")
+        ctype = r.headers.get("content-type") or ""
+        if official_media_type(ctype) not in {
+            "text/html", "application/xhtml+xml", "application/pdf",
+        }:
+            # A false HTML suffix/parameter, JSON error, binary download or
+            # generic response is not healthy official source evidence.
+            # Keep the previous semantic LKG and classify as degraded.
+            raise ValueError("unsupported official source Content-Type")
         # Read one byte past the bound: exactly 3 MB without a proof of EOF
         # may be a truncated official document, not a verified healthy source.
         raw = r.read(MAX_SOURCE_BYTES + 1)
@@ -122,7 +141,6 @@ def fetch_once(url: str):
             declared = str(declared_length).strip()
             if not declared.isdecimal() or int(declared) != len(raw):
                 raise ValueError("official source Content-Length mismatch")
-        ctype = r.headers.get("content-type") or ""
         sem = semantic_bytes(raw, ctype)
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
         return {
