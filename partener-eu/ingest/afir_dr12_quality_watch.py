@@ -20,6 +20,10 @@ import afir_ingest as transport
 
 NOTICE_URL = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
 PARSER_VERSION = "afir-dr12-monthly-quality-watch-v5"
+# Official source dated 1 Oct 2026 (EEST): its earliest UTC instant is
+# 30 Sep 21:00Z. This conservative bound prevents pre-publication receipts.
+EARLIEST_SOURCE_UTC = dt.datetime(2026, 9, 30, 21, tzinfo=dt.timezone.utc)
+MAX_FUTURE_SKEW = dt.timedelta(minutes=5)
 PRIOR_PARSER_VERSION = "afir-dr12-monthly-quality-watch-v4"
 # An official notice must contain one coherent monthly-stage statement.
 # A second (even malformed) announcement must not be silently discarded.
@@ -134,6 +138,26 @@ def official_html_mime(value: object) -> bool:
     )
 
 
+def validated_receipt_time(value: object) -> dt.datetime:
+    """Require plausible UTC source-provenance time on capture AND replay.
+
+    Even correctly hashed source bytes cannot redeem an invented timestamp.
+    """
+    if not isinstance(value, str):
+        raise ValueError("DR-12 receipt fetched_at_utc must be a UTC string")
+    try:
+        observed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError("DR-12 receipt fetched_at_utc invalid") from exc
+    if observed.tzinfo is None or observed.utcoffset() != dt.timedelta(0):
+        raise ValueError("DR-12 receipt fetched_at_utc must be UTC")
+    if observed < EARLIEST_SOURCE_UTC:
+        raise ValueError("DR-12 receipt predates official source publication")
+    if observed > dt.datetime.now(dt.timezone.utc) + MAX_FUTURE_SKEW:
+        raise ValueError("DR-12 receipt fetched_at_utc is in the future")
+    return observed
+
+
 def capture(
     fetched: dict,
     destination: Path,
@@ -153,9 +177,7 @@ def capture(
         or not isinstance(raw, bytes)
     ):
         raise ValueError("DR-12 raw receipt lacks exact official HTTPS identity, status, run or HTML bytes")
-    observed = dt.datetime.fromisoformat(fetched_at_utc.replace("Z", "+00:00"))
-    if observed.tzinfo is None:
-        raise ValueError("DR-12 receipt timestamp must be timezone-aware")
+    observed = validated_receipt_time(fetched_at_utc)
     stages = parse_notice(raw)
     if destination.exists():
         raise ValueError("DR-12 immutable receipt destination already exists")
@@ -276,14 +298,7 @@ def replay_receipt(destination: Path) -> dict:
         raise ValueError("DR-12 replay run_id missing")
     if not str(manifest.get("run_attempt") or "").isdigit():
         raise ValueError("DR-12 replay run_attempt invalid")
-    try:
-        timestamp = dt.datetime.fromisoformat(
-            str(manifest["fetched_at_utc"]).replace("Z", "+00:00")
-        )
-    except (ValueError, KeyError) as exc:
-        raise ValueError("DR-12 replay fetched_at_utc invalid") from exc
-    if timestamp.tzinfo is None or timestamp.utcoffset() != dt.timedelta():
-        raise ValueError("DR-12 replay fetched_at_utc must be UTC")
+    validated_receipt_time(manifest["fetched_at_utc"])
     return manifest
 
 
