@@ -14,6 +14,7 @@ import datetime as dt
 import hashlib
 import json
 import re
+from zoneinfo import ZoneInfo
 from typing import Any, Iterable
 from urllib.parse import urlparse
 
@@ -156,7 +157,10 @@ def _open_conflicts_with_elapsed_deadline(record: dict[str, Any], fetched_at: st
         observed = dt.datetime.fromisoformat(fetched_at.replace("Z", "+00:00"))
         if observed.tzinfo is None:
             return True
-        return observed.astimezone(dt.timezone.utc).date() > deadline
+        # The official CSF deadline is a Romanian calendar date, not a UTC
+        # date. During EET/EEST, UTC may still show the previous day after
+        # midnight in Bucharest. Never promote a stale OPEN badge then.
+        return observed.astimezone(ZoneInfo("Europe/Bucharest")).date() > deadline
     except (ValueError, TypeError, AttributeError):
         return True
 
