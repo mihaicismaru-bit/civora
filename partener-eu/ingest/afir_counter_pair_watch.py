@@ -28,7 +28,7 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v10"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v11"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -186,8 +186,13 @@ class TextOnly(HTMLParser):
                 self.hidden_depth += 1
 
     def handle_startendtag(self, tag, attrs):
-        # Self-closing HTML has no descendant text to admit or suppress.
-        pass
+        # HTML ignores a self-closing slash on non-void HTML tags. For
+        # example <div hidden/> still hides its descendants until </div>.
+        # HTMLParser reports this separately, so ignoring it would expose
+        # a browser-hidden DR-12 banner/card as official source evidence.
+        # Foreign SVG/MathML roots and actual HTML voids are self-closing.
+        if tag not in self.VOID_TAGS | {"svg", "math"}:
+            self.handle_starttag(tag, attrs)
 
     def handle_endtag(self, tag):
         # Tolerate malformed unmatched closures without treating a hidden
