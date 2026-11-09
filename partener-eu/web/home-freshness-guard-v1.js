@@ -5,12 +5,10 @@ if(!P||!Array.isArray(P.dossiers)||!P.home)return;
 
 const PREPARE_STATUSES=new Set(['EXPECTED','ANNOUNCED','PUBLIC_CONSULTATION','REVIEW','PREPARE_NOW','UPCOMING']);
 const PUBLICATION_OPEN_STATES=new Set(['PUBLISHABLE']);
-const evidenceTimes=[
-  P.generatedAt,
-  window.PARTENER_DATA?.mipeIngestion?.asOf,
-  window.PARTENER_DATA?.mysmisRegistry?.observedAt
-].map(value=>new Date(value||'').getTime()).filter(Number.isFinite);
-const clock=new Date(evidenceTimes.length?Math.max(...evidenceTimes):Date.now());
+// Publication evidence can become stale, but wall-clock time cannot. Never
+// replay a historical generation/ingestion timestamp as the current date:
+// expired OPEN must fail closed even when upstream refreshes are blocked.
+const clock=new Date(Date.now());
 const currentYear=clock.getUTCFullYear();
 const currentYearStart=Date.UTC(currentYear,0,1);
 const byId=new Map(P.dossiers.map(d=>[String(d?.id||''),d]));
@@ -81,10 +79,12 @@ function closeTimestamp(d){
 function currentOpenState(d){
   if(!d||String(d.status||'').toUpperCase()!=='OPEN')return null;
   if(!PUBLICATION_OPEN_STATES.has(String(d.publicationState||'').toUpperCase()))return 'REVIEW';
-  if(!confirmedFact(d,'status')||!confirmedFact(d,'termen'))return 'REVIEW';
+  const status=confirmedFact(d,'status');
+  if(String(status?.value||'').trim().toUpperCase()!=='OPEN'||!confirmedFact(d,'termen'))return 'REVIEW';
   const closesAt=closeTimestamp(d);
   if(closesAt==null)return 'REVIEW';
-  return closesAt<clock.getTime()?'CLOSED':'OPEN';
+  // Passage of time alone is not authority to assert the official CLOSED state.
+  return closesAt<=clock.getTime()?'REVIEW':'OPEN';
 }
 
 const originalOpenIds=Array.isArray(P.home.openDossierIds)?P.home.openDossierIds.map(String):[];
@@ -106,7 +106,7 @@ if(P.summary&&typeof P.summary==='object'){
 const dossierStatusOverrides=Object.fromEntries(P.dossiers.map(d=>[String(d?.id||''),currentOpenState(d)]).filter(([,state])=>state&&state!=='OPEN'));
 
 P.freshnessGuard={
-  version:'home-freshness-guard-v1.1',
+  version:'home-freshness-guard-v1.2',
   state:removedIds.length||removedOpenIds.length?'DEGRADED':'PASS',
   asOf:clock.toISOString(),
   currentYear,
