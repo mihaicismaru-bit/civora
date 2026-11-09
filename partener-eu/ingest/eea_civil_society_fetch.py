@@ -263,7 +263,17 @@ def discover_call_urls(raw: bytes, *, base_url: str = INDEX_URL) -> list[str]:
             continue
         number = int(number_match.group(1))
         language = urlparse(candidate).path.split("/", 2)[1].lower()
-        discovered[(number, language)] = candidate
+        # Distinct exact URLs for the same call and language may represent
+        # conflicting official revisions (including stale OPEN/CLOSED aliases).
+        # Never silently select whichever anchor appears last in the index.
+        key = (number, language)
+        previous = discovered.get(key)
+        if previous is not None and previous != candidate:
+            raise RuntimeError(
+                f"ambiguous official EEA call {number} ({language}): "
+                f"{previous} vs {candidate}"
+            )
+        discovered[key] = candidate
 
     by_number: dict[int, tuple[int, str]] = {}
     for (number, language), url in discovered.items():
