@@ -237,6 +237,35 @@ def fetch_url(url: str, *, timeout: float = 20.0) -> dict[str, Any]:
     }
 
 
+def _validate_handoff_response(
+    requested_url: str, response: dict[str, Any]
+) -> tuple[str, bytes]:
+    """An injected acquisition transport is not a provenance authority.
+
+    Enforce the same source identity, HTTP success, media type and raw-body
+    limits as the built-in network fetcher before parsing or admitting bytes.
+    A forged handoff must never be accepted merely because its HTML parses.
+    """
+    if not isinstance(response, dict):
+        raise ValueError("EEA handoff is not a response envelope")
+    declared_request = response.get("requested_url")
+    if not isinstance(declared_request, str):
+        raise ValueError("EEA handoff lacks requested source identity")
+    _same_official_endpoint(requested_url, declared_request)
+    if type(response.get("status")) is not int or response["status"] != 200:
+        raise ValueError("EEA handoff lacks verified HTTP 200")
+    media_type = str(response.get("content_type") or "").split(";", 1)[0].strip().lower()
+    if media_type not in {"text/html", "application/xhtml+xml"}:
+        raise ValueError("EEA handoff has non-HTML media type")
+    raw = response.get("raw")
+    if not isinstance(raw, bytes) or not raw or len(raw) > MAX_BYTES:
+        raise ValueError("EEA handoff has absent, invalid or oversized raw HTML")
+    final_url = response.get("final_url")
+    if not isinstance(final_url, str):
+        raise ValueError("EEA handoff lacks final source identity")
+    return _same_official_endpoint(requested_url, final_url), raw
+
+
 def _parse_document(raw: bytes) -> _DocumentParser:
     parser = _DocumentParser()
     parser.feed(raw.decode("utf-8", errors="replace"))
@@ -421,8 +450,7 @@ def collect_live(
     index = fetcher(index_url)
     # Defence in depth: the injected acquisition transport cannot rebind an
     # official index receipt to a different page on the same authority.
-    index_final = _same_official_endpoint(index_url, str(index["final_url"]))
-    index_raw = bytes(index["raw"])
+    index_final, index_raw = _validate_handoff_response(index_url, index)
     call_urls, discovery_mode, index_link_count = discover_with_official_fallback(
         index_raw, base_url=index_final, minimum_calls=minimum_calls
     )
@@ -439,8 +467,7 @@ def collect_live(
             response = fetcher(requested_url)
             # A caller-supplied fetcher is not trusted to enforce redirect identity.
             # Same-domain sibling calls remain distinct immutable source endpoints.
-            final_url = _same_official_endpoint(requested_url, str(response["final_url"]))
-            raw = bytes(response["raw"])
+            final_url, raw = _validate_handoff_response(requested_url, response)
             record = parse_call_page(raw, authority_url=final_url)
             normalized = adapter.normalize_record(
                 record,
