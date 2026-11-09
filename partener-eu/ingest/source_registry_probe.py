@@ -163,6 +163,13 @@ def fetch_once(url: str):
         raw = r.read(MAX_SOURCE_BYTES + 1)
         if len(raw) > MAX_SOURCE_BYTES:
             raise ValueError("oversized official source response")
+        # HTTP 200 and a plausible media type do not prove that a document was
+        # acquired. Empty bodies, and HTML challenges served as PDF, must not
+        # overwrite the last-known semantic source hash.
+        if not raw:
+            raise ValueError("empty official source response")
+        if official_media_type(ctype) == "application/pdf" and not raw.startswith(b"%PDF-"):
+            raise ValueError("invalid official source PDF signature")
         content_encoding = (r.headers.get("content-encoding") or "identity").strip().lower()
         if content_encoding != "identity":
             raise ValueError("unsupported official source Content-Encoding")
