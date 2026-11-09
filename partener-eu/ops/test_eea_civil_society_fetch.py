@@ -274,6 +274,34 @@ def main():
     if urls != [CALL1, CALL2]:
         fail(f"call discovery must prefer EN, order by call number and ignore third party: {urls}")
 
+    # Duplicate links to the same endpoint are harmless; distinct official
+    # slugs with the same call identity/language are not. In particular,
+    # legacy and current aliases can disagree about OPEN versus CLOSED.
+    legacy_alias = CALL1.replace(
+        "call-1-strengthening-", "call-1-legacy-strengthening-"
+    )
+    for first, second in ((CALL1, legacy_alias), (legacy_alias, CALL1)):
+        ambiguous_index = (
+            '<html><body>'
+            f'<a href="{first}">Call 1</a>'
+            f'<a href="{second}">Call 1 alternate</a>'
+            '</body></html>'
+        ).encode()
+        try:
+            module.discover_call_urls(ambiguous_index, base_url=INDEX)
+        except RuntimeError as exc:
+            if "ambiguous official EEA call 1" not in str(exc):
+                fail(f"wrong duplicate-source rejection: {exc}")
+        else:
+            fail("same-language conflicting official call aliases were silently selected")
+
+    repeated = (
+        f'<html><body><a href="{CALL1}">Call 1</a>'
+        f'<a href="{CALL1}">Call 1 repeated</a></body></html>'
+    ).encode()
+    if module.discover_call_urls(repeated, base_url=INDEX) != [CALL1]:
+        fail("repeated identical official endpoint must not create ambiguity")
+
     parsed = module.parse_call_page(CALL1_HTML, authority_url=CALL1)
     if parsed["callNumber"] != "1" or parsed["status"] != "Open":
         fail("call detail parser failed number/status")
