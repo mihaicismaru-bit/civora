@@ -20,9 +20,9 @@ import afir_ingest as transport
 
 NOTICE_URL = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
 PARSER_VERSION = "afir-dr12-monthly-quality-watch-v5"
-# Official source dated 1 Oct 2026 (EEST): its earliest UTC instant is
-# 30 Sep 21:00Z. This conservative bound prevents pre-publication receipts.
-EARLIEST_SOURCE_UTC = dt.datetime(2026, 9, 30, 21, tzinfo=dt.timezone.utc)
+# AFIR official notice is timestamped 1 Oct 2026, 10:00 EEST (07:00Z).
+# An acquisition predating this exact official publication cannot be genuine.
+EARLIEST_SOURCE_UTC = dt.datetime(2026, 10, 1, 7, tzinfo=dt.timezone.utc)
 MAX_FUTURE_SKEW = dt.timedelta(minutes=5)
 PRIOR_PARSER_VERSION = "afir-dr12-monthly-quality-watch-v4"
 # An official notice must contain one coherent monthly-stage statement.
