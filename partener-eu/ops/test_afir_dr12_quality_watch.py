@@ -135,7 +135,8 @@ def main() -> None:
     ):
         rejected(lambda ambiguous=ambiguous: watch.parse_notice(raw(ambiguous)),
                  "duplicated or contradictory")
-    assert watch.PARSER_VERSION.endswith("-v5")
+    assert watch.PARSER_VERSION.endswith("-v6")
+    assert watch.PREVIOUS_PARSER_VERSION.endswith("-v5")
     assert watch.PRIOR_PARSER_VERSION.endswith("-v4")
 
     # Hidden UI/template text must never establish a quality threshold.
@@ -166,6 +167,24 @@ def main() -> None:
         bad_visible = SENTENCE.replace("80 de puncte", "70 de puncte")
         rejected(lambda hidden=hidden, bad_visible=bad_visible:
                  watch.parse_notice(raw(hidden + bad_visible)))
+    # Python HTMLParser treats <div hidden/> as a self-closing element, but
+    # the HTML DOM does not. A forged hidden monthly-stage statement must
+    # remain hidden until the actual closing tag, including legacy receipts.
+    for opener, closer in (
+        ('<div hidden/>', '</div>'),
+        ('<section style="display:none"/>', '</section>'),
+        ('<div class="d-none"/>', '</div>'),
+        ('<template/>', '</template>'),
+        ('<details/>', '</details>'),
+    ):
+        hidden = opener + SENTENCE + closer
+        rejected(lambda hidden=hidden: watch.parse_notice(raw(hidden)))
+        assert watch.parse_notice(raw(hidden + SENTENCE)) == stages
+        wrong_visible = SENTENCE.replace("45 de puncte", "40 de puncte")
+        rejected(lambda hidden=hidden, wrong_visible=wrong_visible:
+                 watch.parse_notice(raw(hidden + wrong_visible)))
+    # Real void tags remain valid and cannot accidentally shadow the notice.
+    assert watch.parse_notice(raw("<br/>" + SENTENCE)) == stages
     assert watch.parse_notice(raw('<details open>' + SENTENCE + '</details>')) == stages
     # A preceding hidden subtree must not leak into a later visible paragraph.
     assert watch.parse_notice(raw('<div hidden><section>wrong</section></div>' + SENTENCE)) == stages
@@ -228,6 +247,10 @@ def main() -> None:
         legacy["parser_version"] = watch.PRIOR_PARSER_VERSION
         (receipt / "manifest.json").write_text(json.dumps(legacy), encoding="utf-8")
         assert watch.replay_receipt(receipt) == legacy
+        legacy_v5 = copy.deepcopy(record)
+        legacy_v5["parser_version"] = watch.PREVIOUS_PARSER_VERSION
+        (receipt / "manifest.json").write_text(json.dumps(legacy_v5), encoding="utf-8")
+        assert watch.replay_receipt(receipt) == legacy_v5
         (receipt / "manifest.json").write_bytes(original_manifest)
         # A fabricated/legacy hidden-only original MUST NOT be admitted by
         # merely relabeling its parser as v4.
