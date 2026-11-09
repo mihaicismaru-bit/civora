@@ -474,6 +474,68 @@ def test_capture_guards():
     assert not probe.strict_url("https://evil.example/Sesiune/Lista", "delegated")
 
 
+def test_dr12_other_sectors_component_window_discrepancy():
+    """Synthetic Nov-11 component close in BOTH counters must not override Dec-2 banner.
+
+    The values are test fixtures, not current AFIR source receipts or a
+    verified closure decision. Keep the component date observable, require
+    semantic review, and preserve LKG even when the counter pages agree.
+    """
+    original_agency = agency()
+    other_agency_row = b"<td>02.12.2026 15:59:59</td><td>-</td><td>107.470.146</td>"
+    assert original_agency.count(other_agency_row) == 1
+    agency_early = original_agency.replace(
+        other_agency_row,
+        b"<td>11.11.2026 00:00:00</td><td>-</td><td>107.470.146</td>",
+    )
+    original_delegated = delegated()
+    end_marker = "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8")
+    assert original_delegated.count(end_marker) == 2
+    head, tail = original_delegated.rsplit(end_marker, 1)
+    delegated_early = (
+        head + "DATĂ ȘI ORĂ ÎNCHIDERE 11/11/2026 00:00:00".encode("utf-8") + tail
+    )
+
+    agency_rows = probe.parse_agency(agency_early)
+    delegated_rows = probe.parse_delegated(delegated_early)
+    assert agency_rows["ALTE SECTOARE"]["closes_at"] == "11.11.2026 00:00:00"
+    assert delegated_rows["ALTE SECTOARE"]["closes_at"] == "11.11.2026 00:00:00"
+    assert delegated_rows["ALTE SECTOARE"]["session_closes_at"] == "02.12.2026 15:59:59"
+    assert delegated_rows["ALTE SECTOARE"]["session_window_matches"] is False
+    assert delegated_rows["SECTOR ZOOTEHNIC"]["session_window_matches"] is True
+
+    observation = probe.reconcile({"agency": agency_early, "delegated": delegated_early}, 12)
+    other = observation["components"]["ALTE SECTOARE"]
+    assert other["closing_time_matches"] is True
+    assert other["delegated_session_window_matches"] is False
+    assert observation["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
+    assert observation["material_fact_action"] == "NONE"
+
+    with tempfile.TemporaryDirectory() as td:
+        receipt_dir = Path(td) / "early-close-review"
+        manifest = probe.capture(fetches(a=agency_early, b=delegated_early), receipt_dir, "42700011234")
+        assert manifest["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
+        assert manifest["last_known_good_action"] == "PRESERVE"
+        for field in (
+            "open_call_authorized", "publish_authorized", "distribution_authorized",
+            "budget_authorized", "eligibility_authorized",
+        ):
+            assert manifest[field] is False
+        assert probe.replay(receipt_dir) == {
+            "verified": True,
+            "observation_state": "SOURCE_COUNTER_DIVERGENCE_REVIEW",
+            "run_id": "42700011234",
+            "publish_authorized": False,
+        }
+        # A downstream caller cannot change the review verdict in the
+        # immutable receipt even if the original raw counter bytes are intact.
+        manifest_path = receipt_dir / "manifest.json"
+        forged = json.loads(manifest_path.read_text(encoding="utf-8"))
+        forged["observation_state"] = "SOURCE_COUNTER_PAIR_MATCH_REVIEW"
+        manifest_path.write_text(json.dumps(forged), encoding="utf-8")
+        reject(lambda: probe.replay(receipt_dir))
+
+
 if __name__ == "__main__":
     test_parse_and_reconcile()
     test_hidden_counter_dom_fail_closed()
@@ -481,4 +543,5 @@ if __name__ == "__main__":
     test_acquire_identity_encoding()
     test_capture_guards()
     test_cache_freshness_fail_closed()
+    test_dr12_other_sectors_component_window_discrepancy()
     print("AFIR counter pair: hermetic official-host, two-component, divergence and tamper regressions PASS")
