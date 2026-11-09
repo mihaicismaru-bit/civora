@@ -147,6 +147,12 @@ def _official_url(url: str, *, call_detail: bool | None = None) -> str:
         raise ValueError(f"non-official EEA URL: {url}")
     if parsed.username or parsed.password or parsed.port not in (None, 443):
         raise ValueError(f"unexpected authority components in URL: {url}")
+    # Do not silently strip query, fragment, or semicolon path parameters.
+    # In discovery these are unregistered source endpoints, even when their
+    # sanitized URL resembles a known exact call. Raw provenance must bind
+    # to what the official anchor actually named, not a rewritten URL.
+    if parsed.params or parsed.query or parsed.fragment:
+        raise ValueError(f"unregistered EEA source URL components: {url}")
     path = parsed.path or "/"
     if call_detail is True and not CALL_PATH_RE.match(path):
         raise ValueError(f"not an exact EEA CSF call-detail URL: {url}")
