@@ -170,6 +170,60 @@ def main():
             else:
                 raise AssertionError(f"ROHU polluted exact registry admitted: {forged_registry_url}")
 
+        # End-to-end immutable replay: even when an adversary recalculates
+        # the normalized semantic fingerprint after modifying final_url, the
+        # original official HTML must not authorize a different article URL.
+        exact_registry = Path(tmp) / "rohu-exact-registry.json"
+        exact_registry.write_text(json.dumps({"sources": [{
+            "id": live.WORKSHOPS_SOURCE_ID,
+            "owner": "Interreg ROHU official programming workshop",
+            "url": workshop_url,
+            "programmes": ["Interreg ROHU 2028-2034"],
+            "source_families": ["INTERREG", "PROGRAMMING_PIPELINE"],
+            "extract": ["future_programming_consultations"],
+        }]}), encoding="utf-8")
+        exact_html = (
+            "<html><body><article>" + workshop_terms
+            + " Aceste ateliere privesc numai pregatirea programarii viitoare; "
+            + "nu sunt apeluri de finantare si nu confirma o sesiune deschisa."
+            + "</article></body></html>"
+        ).encode("utf-8")
+        exact_dir = Path(tmp) / "rohu-exact-originals"
+        original_fetch_exact = live._fetch
+        try:
+            live._fetch = lambda url: (exact_html, url, 200, "text/html; charset=utf-8")
+            exact_envelope = live.build_live_evidence(
+                exact_registry, run_id="TEST-ROHU-EXACT", raw_dir=exact_dir
+            )
+        finally:
+            live._fetch = original_fetch_exact
+        assert exact_envelope["fetch_pass"] == 1, exact_envelope
+        assert live.replay_live_evidence(exact_envelope, exact_dir, exact_registry) == 1
+        for forged_final_url in variant_endpoints:
+            forged = json.loads(json.dumps(exact_envelope))
+            forged_row = forged["rows"][0]
+            forged_row["final_url"] = forged_final_url
+            forged_row["normalized"] = live.normalize_programming_observation(
+                {
+                    "programme": forged_row["programme"],
+                    "title": forged_row["source_owner"],
+                    "text": live._visible_text(exact_html, forged_row["content_type"]),
+                    "authority_url": forged_final_url,
+                },
+                fetched_at=forged_row["fetched_at"],
+                raw_hash=forged_row["raw_hash"],
+                run_id=forged_row["run_id"],
+            )
+            live.validate_envelope(forged)
+            try:
+                live.replay_live_evidence(forged, exact_dir, exact_registry)
+            except ValueError as exc:
+                assert "exact official article endpoint changed" in str(exc), (forged_final_url, exc)
+            else:
+                raise AssertionError(
+                    f"re-fingerprinted ROHU source URL survived immutable replay: {forged_final_url}"
+                )
+
         # Registry T1 authority is per source, not any host on the broad T1 list.
         # www transport normalization is fine; off-programme redirects are not.
         live._assert_official_source_origin(
