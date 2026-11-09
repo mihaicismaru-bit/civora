@@ -140,6 +140,10 @@ try:
         ("partial 206", _Response(good, status=206), "HTTP status"),
         ("redirect 302", _Response(good, status=302), "HTTP status"),
         ("off-domain final", _Response(good, final_url="https://attacker.invalid/evidence"), "origin"),
+        ("same-origin wrong endpoint", _Response(good, final_url="https://official.example.invalid/another-programme"), "endpoint"),
+        ("same-origin query swap", _Response(good, final_url="https://official.example.invalid/evidence?state=OPEN"), "endpoint"),
+        ("same-origin matrix parameter", _Response(good, final_url="https://official.example.invalid/evidence;session=123"), "untrusted"),
+        ("fragment injected", _Response(good, final_url="https://official.example.invalid/evidence#OPEN"), "untrusted"),
         ("HTTP downgrade final", _Response(good, final_url="http://official.example.invalid/evidence"), "untrusted"),
         ("off-port final", _Response(good, final_url="https://official.example.invalid:8443/evidence"), "untrusted"),
     )
@@ -164,6 +168,10 @@ allowed = handler.redirect_request(
     request, None, 302, "Found", {}, "https://www.official.example.invalid/evidence"
 )
 assert allowed.full_url == "https://www.official.example.invalid/evidence"
+slash_allowed = handler.redirect_request(
+    request, None, 302, "Found", {}, "https://official.example.invalid/evidence/"
+)
+assert slash_allowed.full_url == "https://official.example.invalid/evidence/"
 
 for url in (
     "https://attacker.invalid/evidence",
@@ -174,6 +182,10 @@ for url in (
     "http://official.example.invalid/evidence",
     "https://official.example.invalid:8443/evidence",
     "https://user:pass@official.example.invalid/evidence",
+    "https://official.example.invalid/another-programme",
+    "https://official.example.invalid/evidence?status=OPEN",
+    "https://official.example.invalid/evidence;session=123",
+    "https://official.example.invalid/evidence#OPEN",
 ):
     try:
         handler.redirect_request(request, None, 302, "Found", {}, url)
@@ -189,6 +201,8 @@ for url in (
     "http://official.example.invalid/evidence",
     "https://user@official.example.invalid/evidence",
     "https://official.example.invalid:9000/evidence",
+    "https://official.example.invalid/evidence;session=123",
+    "https://official.example.invalid/evidence#section",
 ):
     try:
         module._assert_source_origin(url, url)
@@ -197,4 +211,4 @@ for url in (
     else:
         raise AssertionError(f"unsafe initial registry or alias URL: {url}")
 
-print("PASS source registry low-information, partial-body and origin-lock regression")
+print("PASS source registry low-information, partial-body and exact-endpoint-lock regression")
