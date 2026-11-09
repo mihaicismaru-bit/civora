@@ -127,6 +127,31 @@ try:
                           length=str(len(pdf_data))))
     assert pdf["ok"] is True and pdf["bytes"] == len(pdf_data)
 
+    # A transport may return HTTP 200 with an empty body or a misleading
+    # application/pdf header over HTML anti-bot content. Neither is evidence
+    # of a successful official source observation, even without length drift.
+    for mime in ("text/html", "application/xhtml+xml", "application/pdf"):
+        for declared_length in (None, "0"):
+            try:
+                probe(_Response(b"", content_type=mime, length=declared_length))
+            except ValueError as exc:
+                assert "empty official source response" in str(exc), (mime, exc)
+            else:
+                raise AssertionError(f"empty HTTP-200 body admitted: {mime}")
+    for bogus_pdf in (
+        b"<html><title>Just a moment</title><body>Checking browser</body></html>",
+        b"<!doctype html><html><body>Service unavailable</body></html>",
+        b"%PDF",
+        b"random bytes",
+    ):
+        try:
+            probe(_Response(bogus_pdf, content_type="application/pdf",
+                            length=str(len(bogus_pdf))))
+        except ValueError as exc:
+            assert "PDF signature" in str(exc), exc
+        else:
+            raise AssertionError(f"spoofed or malformed PDF admitted: {bogus_pdf[:30]!r}")
+
     # Fail before reading any bytes: a false Content-Type cannot become
     # semantic-hash PASS even if the payload looks like a genuine HTML page.
     for mime in ("text/plain; filename=notice.html", "application/json; note=text/html",
