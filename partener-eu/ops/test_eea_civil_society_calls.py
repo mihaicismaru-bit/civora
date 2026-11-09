@@ -101,6 +101,45 @@ def main():
     if same_day["observation_state"] != "OPEN_CALL" or not same_day["requires_reconcile"]:
         fail("same-day date alone must not invent a submission cutoff hour")
 
+    # EEA CSF publishes its date-only deadline for Romania. On 8 October,
+    # Bucharest observes EEST (UTC+3). At 21:00 UTC it is already 9 October,
+    # although a UTC calendar-date comparison would still say 8 October.
+    # These remain observation candidates, never publication authorization.
+    for stamped, expected in (
+        ("2026-10-08T20:59:59Z", "OPEN_CALL"),
+        ("2026-10-08T21:00:00Z", "UNKNOWN"),
+    ):
+        row = module.normalize_record(
+            base_record(), fetched_at=stamped, run_id="TEST-EEA-EEST-BOUNDARY",
+            raw_hash="raw-eest", verified_authority_urls=[CALL1],
+        )
+        if row["observation_state"] != expected or row["publish_authorized"]:
+            fail(f"Romanian summer-time date boundary admitted stale OPEN: {stamped}: {row}")
+
+    # November uses EET (UTC+2), so the same safety rule must also survive
+    # the daylight-saving transition and preserve truly same-day candidates.
+    winter = base_record()
+    winter["submissionDeadline"] = "08/11/2026"
+    for stamped, expected in (
+        ("2026-11-08T21:59:59Z", "OPEN_CALL"),
+        ("2026-11-08T22:00:00Z", "UNKNOWN"),
+    ):
+        row = module.normalize_record(
+            winter, fetched_at=stamped, run_id="TEST-EEA-EET-BOUNDARY",
+            raw_hash="raw-eet", verified_authority_urls=[CALL1],
+        )
+        if row["observation_state"] != expected or row["publish_authorized"]:
+            fail(f"Romanian winter-time date boundary admitted stale OPEN: {stamped}: {row}")
+
+    # A naive timestamp lacks a trustworthy observation timezone.
+    naive = module.normalize_record(
+        base_record(), fetched_at="2026-10-08T22:00:00",
+        run_id="TEST-EEA-NAIVE-TIME", raw_hash="raw-naive",
+        verified_authority_urls=[CALL1],
+    )
+    if naive["observation_state"] != "UNKNOWN":
+        fail("timezone-less acquisition timestamp must not establish OPEN")
+
     malformed = base_record()
     malformed["submissionDeadline"] = "not-a-date"
     malformed_row = module.normalize_record(
