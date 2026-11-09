@@ -120,8 +120,13 @@ class _VisibleText(HTMLParser):
                 break
 
     def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        # Self-closed and void tags never enclose article identity text.
-        pass
+        # In text/html, a self-closing slash is ignored on NON-void HTML tags.
+        # HTMLParser invokes this callback for <div hidden/> or <script/>,
+        # whereas browsers keep those tags open. Ignoring the callback would
+        # make browser-hidden text available to forge official article identity.
+        # SVG/MathML roots are foreign content where self-closing is valid.
+        if tag.lower() not in _VOID_TAGS | {"svg", "math"}:
+            self.handle_starttag(tag, attrs)
 
     def handle_data(self, data: str) -> None:
         if self._hidden_depth == 0:

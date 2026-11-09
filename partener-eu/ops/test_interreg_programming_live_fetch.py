@@ -132,6 +132,38 @@ def main():
                 assert "identity/schedule unverified" in str(exc), (opening, exc)
             else:
                 raise AssertionError(f"hidden popover forged Interreg programming identity: {opening}")
+        # HTMLParser reports <div hidden/> and <script/> as self-closing,
+        # but HTML browsers ignore that slash on non-void HTML elements.
+        # Previously those browser-hidden terms became falsely visible,
+        # allowing an unrelated official page to impersonate a consultation.
+        for opening, closing in (
+            ('<div style="display:none"/>', '</div>'),
+            ('<section aria-hidden="true"/>', '</section>'),
+            ('<div hidden/>', '</div>'),
+            ('<script/>', '</script>'),
+            ('<details/>', '</details>'),
+            ('<dialog/>', '</dialog>'),
+        ):
+            hostile = (
+                '<html><body><article>Unrelated official newsletter</article>'
+                + opening + workshop_terms + closing
+                + '<p>Visible confirmation</p></body></html>'
+            )
+            visible = live._visible_text(hostile.encode("utf-8"), "text/html; charset=utf-8")
+            assert "17 noiembrie 2026" not in visible, opening
+            assert "Visible confirmation" in visible, opening
+            try:
+                live._assert_registered_article_identity(
+                    live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, visible
+                )
+            except ValueError as exc:
+                assert "identity/schedule unverified" in str(exc), (opening, exc)
+            else:
+                raise AssertionError(f"HTML non-void self-close forged identity: {opening}")
+        assert "Visible after void" in live._visible_text(
+            b"<html><body><br/><p>Visible after void</p></body></html>",
+            "text/html; charset=utf-8",
+        )
         # Keep a positive case for directly visible official programming prose.
         live._assert_registered_article_identity(
             live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, workshop_terms
