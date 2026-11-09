@@ -440,6 +440,29 @@ def main():
     else:
         fail("retrodated reconciliation accepted")
 
+    # urlparse() strips the last path-segment ';params' from parsed.path.
+    # The live fetch layer rejects these, but a separately supplied immutable
+    # replay envelope must not launder them into an apparently exact URL.
+    for suffix in (";session=123", ";tracking=1", "?source=discovery", "#details"):
+        unsafe_url = CALL1 + suffix
+        try:
+            module._official_call_url(unsafe_url, 1)
+        except ValueError:
+            pass
+        else:
+            fail(f"unregistered exact-call URL component accepted: {unsafe_url}")
+
+        bad = copy.deepcopy(evidence)
+        bad["records"][0]["authority_url"] = unsafe_url
+        bad["records"][0]["semantic_fingerprint"] = fingerprint(bad["records"][0])
+        bad["pages"][0]["requested_url"] = unsafe_url
+        bad["pages"][0]["final_url"] = unsafe_url
+        expect_fail(bad, f"re-hashed call URL provenance {suffix}")
+
+        bad_index = copy.deepcopy(evidence)
+        bad_index["source_index"]["url"] += suffix
+        expect_fail(bad_index, f"unregistered index URL component {suffix}")
+
     for unsafe_url in (
         CALL1.replace("https://eeagrants.org/", "https://user@eeagrants.org/"),
         CALL1.replace("https://eeagrants.org/", "https://eeagrants.org:8443/"),

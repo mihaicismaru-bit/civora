@@ -123,7 +123,8 @@ def _valid_official_index(value: Any) -> None:
     parsed = urlparse(url)
     if (parsed.scheme != "https" or (parsed.hostname or "").lower() not in OFFICIAL_HOSTS
             or parsed.username is not None or parsed.password is not None
-            or parsed.port not in (None, 443) or parsed.query or parsed.fragment
+            or parsed.port not in (None, 443) or parsed.params
+            or parsed.query or parsed.fragment
             or not re.fullmatch(r"/(?:en|ro)/eea-civil-society-fund-romania/calls/?",
                                 parsed.path, re.IGNORECASE)):
         _fail("source_index: untrusted or non-canonical official index URL")
@@ -160,8 +161,8 @@ def _official_call_url(value: Any, call_number: int) -> str:
     match = CALL_PATH_RE.match(parsed.path or "")
     if not match or int(match.group("number")) != call_number:
         _fail(f"authority_url: call identity/path mismatch for call {call_number}")
-    if parsed.query or parsed.fragment:
-        _fail("authority_url: query/fragment not allowed on canonical call detail")
+    if parsed.params or parsed.query or parsed.fragment:
+        _fail("authority_url: path parameters, query or fragment not allowed on canonical call detail")
     return value.rstrip("/")
 
 
