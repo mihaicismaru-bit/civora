@@ -90,6 +90,23 @@ def test():
         (root / "extra.json").write_text("{}", encoding="utf-8")
         reject(lambda: notice.replay(root), "extra or missing evidence files")
 
+    # A manually rehashed manifest can still claim a date when the official
+    # notice did not exist. Reject it independently of byte/hash consistency.
+    reject(lambda: notice._time("2026-10-30T09:39:59Z"),
+           "predates official publication")
+    notice._time("2026-10-30T09:40:00Z")
+    with tempfile.TemporaryDirectory() as t:
+        root = Path(t)
+        notice.seal(root, HTML, "text/html", fixture(), "TEST-2")
+        manifest_path = root / "manifest.json"
+        altered = json.loads(manifest_path.read_text(encoding="utf-8"))
+        altered["fetched_at"] = "2026-10-29T15:00:00Z"
+        altered["handoff_sha256"] = notice.sha(notice.canonical({
+            k: v for k, v in altered.items() if k != "handoff_sha256"
+        }))
+        manifest_path.write_text(json.dumps(altered), encoding="utf-8")
+        reject(lambda: notice.replay(root), "predates official publication")
+
     invalid_html = (
         (HTML.replace(b"nu se prelunge", b"se prelunge"),
          "exhausted component exclusion not proven"),
