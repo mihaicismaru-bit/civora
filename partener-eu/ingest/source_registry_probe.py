@@ -65,11 +65,12 @@ def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
 
 
 def _assert_source_origin(registered_url: str, candidate_url: str) -> None:
-    """A registry/alias observation must stay on its declared HTTPS authority.
+    """Bind a health observation to the exact registered HTTPS endpoint.
 
-    A redirect to another programme or an attacker-controlled host is *not*
-    official evidence. Explicit canonical_aliases are separately attempted
-    transports, each with its own locked origin.
+    A same-host redirect to another programme page is not evidence for the
+    original source, even when both pages belong to an official authority.
+    Explicit canonical_aliases are separately attempted, identity-locked
+    transports. Only a harmless www spelling or trailing slash may vary.
     """
     registered = urlsplit(registered_url)
     candidate = urlsplit(candidate_url)
@@ -80,13 +81,22 @@ def _assert_source_origin(registered_url: str, candidate_url: str) -> None:
             or parsed.username is not None
             or parsed.password is not None
             or parsed.port not in (None, 443)
+            or parsed.fragment
+            or ";" in parsed.path
         ):
             raise ValueError("untrusted official source URL or redirect")
-    # Only the harmless www canonical spelling may vary, not subdomains.
     original_host = registered.hostname.lower().removeprefix("www.")
     candidate_host = candidate.hostname.lower().removeprefix("www.")
     if original_host != candidate_host:
         raise ValueError("official source redirect crossed registered origin")
+    # Do not silently accept a different resource on the same official host.
+    # A new canonical endpoint must be registered/reviewed, not inferred
+    # from a 200 response or its plausible official-looking HTML.
+    if (
+        (registered.path.rstrip("/") or "/") != (candidate.path.rstrip("/") or "/")
+        or registered.query != candidate.query
+    ):
+        raise ValueError("official source redirect changed registered endpoint")
 
 
 class _SourceOriginRedirect(urllib.request.HTTPRedirectHandler):
