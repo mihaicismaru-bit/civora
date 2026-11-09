@@ -21,6 +21,9 @@ PARSER_VERSION = "AFIR_DR14_DR18_EXTENSION_NOTICE_RAW_V1"
 RAW_NAME = "afir-dr14-dr18-extension-notice.raw.html"
 SCHEMA = "PARTENER_EU_AFIR_EXTENSION_ORIGINAL_V1"
 MAX_BYTES = 2_000_000
+# AFIR dated this exact notice 30 October 2026, 11:40 Romania local (EET, UTC+02).
+# A self-consistent hash cannot turn a receipt dated before publication into evidence.
+NOTICE_PUBLISHED_AT_UTC = dt.datetime(2026, 10, 30, 9, 40, tzinfo=dt.timezone.utc)
 FIELDS = frozenset({
     "schema", "requested_url", "final_url", "fetched_at", "raw_sha256",
     "raw_bytes", "raw_file", "content_type", "http_status", "run_id",
@@ -191,6 +194,8 @@ def _time(text: str) -> dt.datetime:
     ):
         raise ValueError("notice timestamp must be UTC")
     observed = dt.datetime.fromisoformat(text[:-1] + "+00:00")
+    if observed < NOTICE_PUBLISHED_AT_UTC:
+        raise ValueError("notice receipt predates official publication")
     if observed > dt.datetime.now(dt.timezone.utc) + dt.timedelta(minutes=5):
         raise ValueError("notice fetched_at in future")
     return observed
