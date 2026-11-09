@@ -609,11 +609,18 @@ def compact_home_news(
 def build(
     products_path: Path = DEFAULT_PRODUCTS,
     web_root: Path = DEFAULT_WEB,
+    *,
+    evaluated_at: dt.datetime | None = None,
 ) -> dict[str, Any]:
     payload = json.loads(products_path.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
     news = payload.get("news") or []
-    generated = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
+    # generatedAt describes the age of the source artifact, not the time now.
+    # Rendering must quarantine windows that expired since the last ingest.
+    generated = evaluated_at if evaluated_at is not None else dt.datetime.now(dt.timezone.utc)
+    if generated.tzinfo is None or generated.utcoffset() is None:
+        raise ValueError("public render clock requires an aware datetime")
+    generated = generated.astimezone(dt.timezone.utc)
 
     for dirname in GENERATED_DIRS:
         shutil.rmtree(web_root / dirname, ignore_errors=True)
