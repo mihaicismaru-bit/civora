@@ -267,8 +267,60 @@ def test_visible_html_evidence_only():
 
 
 
+def test_handoff_response_integrity():
+    """The injected source transport must satisfy the network fetch contract."""
+    cases = [
+        ("non-200", {"status": 404}),
+        ("string-status", {"status": "200"}),
+        ("non-html", {"content_type": "application/json; note=text/html"}),
+        ("empty-body", {"raw": b""}),
+        ("oversized-body", {"raw": b"x" * (module.MAX_BYTES + 1)}),
+        ("not-raw-bytes", {"raw": "<html>fake</html>"}),
+        ("wrong-request", {"requested_url": CALL2}),
+        ("missing-request", {"requested_url": None}),
+    ]
+    for name, mutation in cases:
+        def bad_index(url):
+            if url != INDEX:
+                raise AssertionError("invalid index should fail before following detail links")
+            return {**response(INDEX, INDEX_HTML), **mutation}
+
+        try:
+            module.collect_live(
+                index_url=INDEX, run_id="TEST-INDEX-" + name,
+                fetched_at=FETCHED, minimum_calls=2, fetcher=bad_index,
+            )
+        except ValueError:
+            pass
+        else:
+            fail(f"unverified index handoff was accepted: {name}")
+
+        def bad_detail(url):
+            if url == INDEX:
+                return response(url, INDEX_HTML)
+            if url == CALL1:
+                return {**response(url, CALL1_HTML), **mutation}
+            if url == CALL2:
+                return response(url, CALL2_HTML)
+            raise AssertionError(f"unexpected source {url}")
+
+        evidence = module.collect_live(
+            index_url=INDEX, run_id="TEST-DETAIL-" + name,
+            fetched_at=FETCHED, minimum_calls=2, fetcher=bad_detail,
+        )
+        if evidence["stats"]["errors"] != 1 or evidence["errors"][0]["url"] != CALL1:
+            fail(f"invalid detail must be quarantined with a source error: {name}")
+        if len(evidence["pages"]) != 1 or evidence["pages"][0]["requested_url"] != CALL2:
+            fail(f"invalid detail entered verified pages: {name}")
+        if any(r["call_identifier"] == "EEA-CSF-RO-CALL-01" for r in evidence["records"]):
+            fail(f"invalid detail entered normalized records: {name}")
+        if evidence["publish_authorized"] or evidence["material_fact_use"]:
+            fail(f"invalid detail authorized publication: {name}")
+
+
 def main():
     test_transport_integrity()
+    test_handoff_response_integrity()
     test_visible_html_evidence_only()
     urls = module.discover_call_urls(INDEX_HTML, base_url=INDEX)
     if urls != [CALL1, CALL2]:
