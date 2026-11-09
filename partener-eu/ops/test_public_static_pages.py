@@ -120,7 +120,10 @@ provisional_ids = {
 
 with tempfile.TemporaryDirectory() as td:
     out = Path(td)
-    manifest = module.build(PRODUCTS, out)
+    # Capture one aware wall clock for both generation and test assertions.
+    # The product's generatedAt is provenance, not the current time.
+    render_clock = module.dt.datetime.now(module.dt.timezone.utc)
+    manifest = module.build(PRODUCTS, out, evaluated_at=render_clock)
 
     required = [
         "robots.txt",
@@ -247,9 +250,7 @@ with tempfile.TemporaryDirectory() as td:
 
     # OPEN static hub must contain only rows that pass the same current-open gate
     # used by the canonical decision projection.
-    clock = module.parse_date(payload.get("generatedAt"))
-    if clock is None:
-        raise AssertionError("decision products generatedAt is not parseable")
+    clock = render_clock
     expected_open = {
         str(row.get("id") or "")
         for row in publishable
@@ -311,5 +312,42 @@ with tempfile.TemporaryDirectory() as td:
         if status in module.PREPARE_STATUSES:
             assert marker in prepare_index
             assert marker not in open_index
+
+# Verify the exact production failure mode with a deterministic replay:
+# older canonical generatedAt, an OPEN call whose official cutoff was Nov 6,
+# and a Nov 10 render. The new page must quarantine it without inventing CLOSED.
+with tempfile.TemporaryDirectory() as td:
+    base = Path(td)
+    replay_input = json.loads(json.dumps(payload))
+    replay_input["generatedAt"] = "2026-11-03T20:33:50Z"
+    stale_call = json.loads(json.dumps(expired_open_probe))
+    stale_call["id"] = "static-expiry-clock-regression"
+    stale_call["title"] = "Stale source timestamp should not extend OPEN"
+    for item in stale_call["quickFacts"]:
+        if item["label"] == "Termen":
+            item["value"] = "2026-11-06T12:00:00+02:00"
+    replay_input["dossiers"].append(stale_call)
+    input_file = base / "stale-decisions.json"
+    input_file.write_text(json.dumps(replay_input, ensure_ascii=False), encoding="utf-8")
+    nov5 = module.parse_date("2026-11-05T10:00:00Z")
+    nov10 = module.parse_date("2026-11-10T00:25:00Z")
+    assert nov5 is not None and nov10 is not None
+    before = base / "before"
+    after = base / "after"
+    before_manifest = module.build(input_file, before, evaluated_at=nov5)
+    after_manifest = module.build(input_file, after, evaluated_at=nov10)
+    old_open = (before / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    new_open = (after / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    marker = 'data-dossier-id="static-expiry-clock-regression"'
+    assert marker in old_open, "pre-cutoff official OPEN must remain discoverable"
+    assert marker not in new_open, "stale generatedAt cannot extend expired OPEN"
+    assert after_manifest["currentOpen"] < before_manifest["currentOpen"]
+    assert after_manifest["failClosedOpenRefresh"] > before_manifest["failClosedOpenRefresh"]
+    dossier_page = (after / "dosare/index.html").read_text(encoding="utf-8")
+    assert marker in dossier_page, "expired dossier must remain queryable for history"
+    assert "ÎN VERIFICARE" in dossier_page, "expiry alone may only assert REVIEW"
+    assert after_manifest["generatedAt"] == replay_input["generatedAt"], (
+        "source-generated timestamp must remain unchanged as provenance"
+    )
 
 print("PASS public static IA / sitemap / dossier regression")
