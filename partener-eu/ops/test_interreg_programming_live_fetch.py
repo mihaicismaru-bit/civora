@@ -137,6 +137,39 @@ def main():
             live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, workshop_terms
         )
 
+        # A URI fragment, tracking query or final-segment matrix parameter may
+        # be invisible to the HTTP retrieval yet change the provenance
+        # recorded in an otherwise re-normalized programming receipt. Both
+        # capture and independent replay use this exact-article gate.
+        variant_endpoints = (
+            workshop_url + "?utm_source=untrusted",
+            workshop_url + "#different-article",
+            workshop_url.rstrip("/") + ";session=123/",
+            workshop_url.rstrip("/") + "%3Bsession=123/",
+            workshop_url.replace("/ro/participati-", "/ro/stale-participati-"),
+        )
+        for forged_final_url in variant_endpoints:
+            try:
+                live._assert_registered_article_identity(
+                    live.WORKSHOPS_SOURCE_ID, workshop_url, forged_final_url, workshop_terms
+                )
+            except ValueError as exc:
+                assert "exact official article endpoint changed" in str(exc), (forged_final_url, exc)
+            else:
+                raise AssertionError(f"ROHU forged final article endpoint admitted: {forged_final_url}")
+        # Reject a polluted registered origin as well, even when its replayed
+        # final endpoint exactly matches the malicious registry URL.
+        for forged_registry_url in variant_endpoints[:4]:
+            try:
+                live._assert_registered_article_identity(
+                    live.WORKSHOPS_SOURCE_ID, forged_registry_url,
+                    forged_registry_url, workshop_terms
+                )
+            except ValueError as exc:
+                assert "exact official article endpoint changed" in str(exc), (forged_registry_url, exc)
+            else:
+                raise AssertionError(f"ROHU polluted exact registry admitted: {forged_registry_url}")
+
         # Registry T1 authority is per source, not any host on the broad T1 list.
         # www transport normalization is fine; off-programme redirects are not.
         live._assert_official_source_origin(
