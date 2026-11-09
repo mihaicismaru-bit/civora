@@ -12,9 +12,11 @@ on:
       - 'partener-eu/ingest/afir_dr12_quality_watch.py'
       - 'partener-eu/ingest/afir_dr12_clarification_acquire.py'
       - 'partener-eu/ingest/afir_counter_pair_watch.py'
+      - 'partener-eu/ingest/afir_dr14_dr18_extension_acquire.py'
       - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
       - 'partener-eu/ops/test_afir_dr12_clarification_acquire.py'
       - 'partener-eu/ops/test_afir_counter_pair_watch.py'
+      - 'partener-eu/ops/test_afir_dr14_dr18_extension_acquire.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
@@ -46,9 +48,11 @@ on:
       - 'partener-eu/ingest/afir_dr12_quality_watch.py'
       - 'partener-eu/ingest/afir_dr12_clarification_acquire.py'
       - 'partener-eu/ingest/afir_counter_pair_watch.py'
+      - 'partener-eu/ingest/afir_dr14_dr18_extension_acquire.py'
       - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
       - 'partener-eu/ops/test_afir_dr12_clarification_acquire.py'
       - 'partener-eu/ops/test_afir_counter_pair_watch.py'
+      - 'partener-eu/ops/test_afir_dr14_dr18_extension_acquire.py'
       - 'partener-eu/ops/test_afir_selection_results_acquire.py'
       - 'partener-eu/ops/test_afir_solar_aggregate_observation.py'
       - 'partener-eu/ops/afir_solar_raw_replay.py'
@@ -110,6 +114,32 @@ jobs:
           python partener-eu/ops/test_afir_solar_aggregate_observation.py
           python partener-eu/ingest/build_afir_material_resolution_queue.py
           python partener-eu/ops/test_afir_material_resolution_queue.py
+      - name: Verify AFIR DR-14/DR-18 conditional extension notice replay contract
+        run: python partener-eu/ops/test_afir_dr14_dr18_extension_acquire.py
+      - name: PR-only official DR-14/DR-18 notice original (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_AFIR_NOTICE_EVIDENCE_DIR: ${{ runner.temp }}/afir-dr14-dr18-notice-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr14_dr18_extension_acquire.py --out "$PARTENER_AFIR_NOTICE_EVIDENCE_DIR"
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=AFIR conditional extension original unavailable::No DR-14/DR-18 deadline or call-state promotion.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr14_dr18_extension_acquire.py --replay-dir "$PARTENER_AFIR_NOTICE_EVIDENCE_DIR"
+          fi
+      - name: Preserve PR-only immutable AFIR DR-14/DR-18 notice proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr14-dr18-notice-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-dr14-dr18-notice-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
       - name: PR-only official DR-12 quality-stage raw capture (non-authorizing)
         shell: bash
         env:
