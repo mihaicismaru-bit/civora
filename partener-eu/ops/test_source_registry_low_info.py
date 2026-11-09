@@ -22,6 +22,12 @@ def check(raw_size: int, content_type: str, semantic_text: str, expected_ok: boo
 check(12_000, "text/html", "x" * 101, False, "LOW_INFORMATION_HTML_SHELL")
 check(120_000, "text/html; charset=UTF-8", "conținut oficial " * 700, True, None)
 check(2_000, "text/html", "pagină scurtă legitimă", True, None)
+# HTTP 200 may serve a tiny challenge/error HTML body; never hash it as healthy.
+check(240, "text/html", "Just a moment... Enable JavaScript and cookies to continue", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
+check(1_050, "application/xhtml+xml", "Access denied. Cloudflare Ray ID: abc", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
+check(500, "text/html", "Service unavailable", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
+# A substantive official article mentioning a challenge phrase must not be blocked.
+check(8_000, "text/html", "Access denied: security for EU funding. " * 50, True, None)
 check(12_000, "application/pdf", "x" * 50, True, None)
 # Only the actual media type may select HTML normalization or shell heuristics.
 # Misleading parameter strings and suffixes must not select HTML processing.
@@ -108,6 +114,11 @@ try:
     assert healthy["ok"] is True
     assert healthy["bytes"] == len(good)
     assert healthy["content_quality_ok"] is True
+    challenge_html = b"<html><head><title>Just a moment...</title></head><body>Please enable JavaScript and cookies to continue</body></html>"
+    challenge = probe(_Response(challenge_html, length=str(len(challenge_html))))
+    assert challenge["ok"] is True
+    assert challenge["content_quality_ok"] is False
+    assert challenge["quality_issue"] == "HTML_CHALLENGE_OR_ERROR_SHELL"
 
     xhtml = probe(_Response(good, content_type="APPLICATION/XHTML+XML; charset=UTF-8"))
     assert xhtml["ok"] is True and xhtml["content_quality_ok"] is True
