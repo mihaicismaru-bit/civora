@@ -194,7 +194,7 @@ def main() -> None:
         future_hour = (watch.dt.datetime.now(watch.dt.timezone.utc)
                        + watch.dt.timedelta(hours=1)).isoformat().replace("+00:00", "Z")
         for i, bad_time in enumerate((
-            "2026-09-30T20:59:59Z",
+            "2026-10-01T06:59:59Z",
             "2026-11-05T21:30:00+02:00",
             future_hour,
         )):
@@ -202,6 +202,11 @@ def main() -> None:
             rejected(lambda t=bad_time, p=target: watch.capture(
                 fetched, p, run_id="RUN", fetched_at_utc=t))
             assert not target.exists()
+        # Official publication is precisely 1 Oct 2026 10:00 EEST = 07:00Z.
+        boundary = base / "publication-boundary"
+        assert watch.capture(fetched, boundary, run_id="RUN",
+                             fetched_at_utc="2026-10-01T07:00:00Z")["open_call_authorized"] is False
+        assert watch.replay_receipt(boundary)["publish_authorized"] is False
         xhtml = dict(fetched, content_type="application/xhtml+xml; charset=utf-8")
         xhtml_dir = base / "xhtml-positive"
         assert watch.capture(xhtml, xhtml_dir, run_id="RUN",
@@ -249,7 +254,7 @@ def main() -> None:
             ("publish_authorized", True),
             ("distribution_authorized", True),
             ("fetched_at_utc", "2026-11-05T21:30:00"),
-            ("fetched_at_utc", "2026-09-30T20:59:59Z"),
+            ("fetched_at_utc", "2026-10-01T06:59:59Z"),
             ("fetched_at_utc", future_hour),
             ("fetched_at_utc", "2026-11-05T21:30:00+02:00"),
         ):
