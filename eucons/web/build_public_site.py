@@ -91,6 +91,7 @@ def nav() -> str:
 def footer() -> str:
     links = [
         ("/servicii/", "Servicii"),
+        ("/solicita-oferta/", "Solicită ofertă"),
         ("/ce-finantare-mi-se-potriveste/", "Ce finanțare mi se potrivește"),
         ("/verifica-proiectul/", "Verifică proiectul"),
         ("/proiect-in-implementare/", "Proiect în implementare"),
@@ -182,8 +183,8 @@ def render_home(data):
       <h1 class="eu-heading-xl">{esc(ux["homepage_contract"]["hero_headline"])}</h1>
       <p class="eu-lead">{esc(ux["homepage_contract"]["hero_lead"])}</p>
       <div class="eu-actions">
-        <a class="eu-button eu-button--primary" href="/verifica-proiectul/">Cere evaluarea proiectului</a>
-        <a class="eu-button eu-button--secondary" href="/solicita-oferta/">Solicită ofertă</a>
+        <a class="eu-button eu-button--primary" href="#trasee-home">Alege traseul potrivit</a>
+        <a class="eu-button eu-button--secondary" href="/servicii/">Vezi soluțiile</a>
       </div>
     </div>
     <aside class="eu-trust-panel eu-stack" aria-label="Cum păstrăm încrederea">
@@ -222,7 +223,7 @@ def render_home(data):
   </div>
 </section>
 <section class="eu-section eu-section--navy">
-  <div class="eu-shell eu-stack"><p class="eu-eyebrow">Următorul pas</p><h2 class="eu-heading-lg">Spune-ne ce decizie trebuie luată acum.</h2><p class="eu-lead">Începem cu informațiile minime, apoi cerem doar datele necesare traseului ales.</p><div class="eu-actions"><a class="eu-button eu-button--primary" href="/verifica-proiectul/">Cere evaluarea proiectului</a><a class="eu-button eu-button--secondary" href="/solicita-oferta/">Solicită ofertă</a></div></div>
+  <div class="eu-shell eu-stack"><p class="eu-eyebrow">Următorul pas</p><h2 class="eu-heading-lg">Spune-ne ce decizie trebuie luată acum.</h2><p class="eu-lead">Începem cu informațiile minime, apoi cerem doar datele necesare traseului ales.</p><div class="eu-actions"><a class="eu-button eu-button--primary" href="#trasee-home">Alege traseul potrivit</a><a class="eu-button eu-button--secondary" href="/servicii/">Vezi soluțiile</a></div></div>
 </section>
 """
     return shell("Consultanță pentru proiecte finanțate", "Trasee Euroconsult pentru finanțare, verificarea proiectului, implementare și remediere.", "/", body)
