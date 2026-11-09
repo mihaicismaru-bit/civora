@@ -45,6 +45,29 @@ def test():
         HTML.replace(b"<h1>", b"<header><h2>").replace(b"</h1>", b"</h2></header>"),
         "text/html; charset=utf-8"
     )
+    # A non-void self-closing slash does not close an HTML element in the
+    # browser. A formerly ignored <div hidden/> or <script/> let a forged
+    # AFIR notice nested inside invisible text pass official identity checks.
+    # Void <br/> remains genuinely self-closing and must not suppress prose.
+    article = HTML.split(b"<body>", 1)[1].split(b"</body>", 1)[0]
+    for opening, closing in (
+        (b"<div hidden/>", b"</div>"),
+        (b"<section aria-hidden='true'/>", b"</section>"),
+        (b"<div style='display:none'/>", b"</div>"),
+        (b"<div inert/>", b"</div>"),
+        (b"<script/>", b"</script>"),
+        (b"<template/>", b"</template>"),
+    ):
+        hidden_only = (b"<!doctype html><html><body>" + opening +
+                       article + closing + b"</body></html>")
+        reject(lambda source=hidden_only: notice.validate_official_notice(
+            source, "text/html"), "notice identity or conditional scope missing")
+    real_after_hidden = (b"<!doctype html><html><body><div hidden/>" +
+                         article + b"</div>" + article + b"</body></html>")
+    notice.validate_official_notice(real_after_hidden, "text/html")
+    notice.validate_official_notice(
+        HTML.replace(b"<article>", b"<br/><article>"), "text/html")
+
     with tempfile.TemporaryDirectory() as t:
         root = Path(t)
         notice.seal(root, HTML, "text/html; charset=utf-8", fixture(), "TEST-1")
