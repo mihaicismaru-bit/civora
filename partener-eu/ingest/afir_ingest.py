@@ -345,21 +345,27 @@ def capture_extension_notice_receipt(requested_url, fetched, observed_at):
     run_id = os.environ.get("GITHUB_RUN_ID")
     data = fetched.get("data")
     final_url = fetched.get("url")
-    content_type = str(fetched.get("content_type") or "").lower()
+    content_type = str(fetched.get("content_type") or "").split(";", 1)[0].strip().lower()
     if (
         not run_id
         or not fetched.get("ok")
+        or fetched.get("status") != 200
         or final_url != AFIR_EXTENSION_NOTICE
         or not isinstance(data, bytes)
         or not data
-        or "html" not in content_type
+        or len(data) > 12_000_000
+        or content_type not in {"text/html", "application/xhtml+xml"}
     ):
-        raise ValueError("AFIR notice raw receipt lacks exact official HTTPS identity, run or HTML bytes")
+        raise ValueError("AFIR notice raw receipt lacks exact official HTTPS identity, HTTP 200, run or HTML bytes")
     outdir = Path(destination)
+    if outdir.is_symlink():
+        raise ValueError("AFIR notice evidence directory is symlinked")
     outdir.mkdir(parents=True, exist_ok=True)
     raw_name = "afir-dr14-dr18-extension-notice.raw.html"
     raw_path = outdir / raw_name
-    raw_path.write_bytes(data)
+    manifest_path = outdir / "manifest.json"
+    if any(path.exists() or path.is_symlink() for path in (raw_path, manifest_path)):
+        raise ValueError("AFIR notice receipt already exists; immutable handoff cannot be overwritten")
     digest = hashlib.sha256(data).hexdigest()
     manifest = {
         "schema_version": "1.0",
@@ -381,10 +387,18 @@ def capture_extension_notice_receipt(requested_url, fetched, observed_at):
         "material_fact_action": "NONE",
         "publish_authorized": False,
     }
-    (outdir / "manifest.json").write_text(
-        json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    # Refuse even a raced overwrite. A partial receipt is held, never published.
+    try:
+        with raw_path.open("xb") as stream:
+            stream.write(data)
+        with manifest_path.open("xb") as stream:
+            stream.write((json.dumps(manifest, ensure_ascii=False, sort_keys=True, indent=2)
+                          + "\n").encode("utf-8"))
+    except FileExistsError as exc:
+        raise ValueError("AFIR notice receipt already exists; immutable handoff cannot be overwritten") from exc
+    if (raw_path.read_bytes() != data or
+            json.loads(manifest_path.read_text(encoding="utf-8")) != manifest):
+        raise ValueError("AFIR notice receipt failed immediate readback")
     return manifest
 
 
