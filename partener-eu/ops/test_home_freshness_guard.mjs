@@ -8,9 +8,16 @@ const here=path.dirname(fileURLToPath(import.meta.url));
 const guardPath=path.resolve(here,'../web/home-freshness-guard-v1.js');
 const guardSource=fs.readFileSync(guardPath,'utf8');
 
+// Hermetic clock: the source must be replayable at both its original snapshot
+// date and a later date without mistaking generatedAt for current time.
+let fakeNow=Date.parse('2026-08-26T04:00:00Z');
+class TestDate extends Date{
+  constructor(...args){super(...(args.length?args:[fakeNow]))}
+  static now(){return fakeNow}
+}
 function run(payload,data={}){
   const window={PARTENER_DECISION_PRODUCTS:structuredClone(payload),PARTENER_DATA:structuredClone(data)};
-  vm.runInNewContext(guardSource,{window,Date});
+  vm.runInNewContext(guardSource,{window,Date:TestDate});
   return window.PARTENER_DECISION_PRODUCTS;
 }
 
@@ -36,7 +43,7 @@ const out=run(payload,sourceData);
 assert.deepEqual(Array.from(out.home.openDossierIds),['open-valid']);
 assert.equal(out.summary.openCount,1);
 assert.deepEqual(Array.from(out.freshnessGuard.removedOpenDossierIds),['open-expired-ro','open-no-deadline','open-provisional']);
-assert.deepEqual({...out.freshnessGuard.dossierStatusOverrides},{'open-expired-ro':'CLOSED','open-no-deadline':'REVIEW','open-provisional':'REVIEW'});
+assert.deepEqual({...out.freshnessGuard.dossierStatusOverrides},{'open-expired-ro':'REVIEW','open-no-deadline':'REVIEW','open-provisional':'REVIEW'});
 assert.deepEqual(Array.from(out.home.prepareDossierIds),['current-2026','future-2027']);
 assert.equal(out.summary.prepareCount,2);
 assert.equal(out.freshnessGuard.state,'DEGRADED');
@@ -45,6 +52,16 @@ assert.equal(out.dossiers.length,9,'Historical dossiers remain queryable; the gu
 
 const replay=run(payload,sourceData);
 assert.deepEqual(JSON.parse(JSON.stringify(replay)),JSON.parse(JSON.stringify(out)),'Same artifact timestamp must replay deterministically.');
+
+// A stale LKG from August cannot preserve its originally valid September
+// opening in November. No official CLOSED assertion is inferred from expiry.
+fakeNow=Date.parse('2026-11-10T00:25:00Z');
+const atPresent=run(payload,sourceData);
+assert.deepEqual(Array.from(atPresent.home.openDossierIds),[]);
+assert.equal(atPresent.summary.openCount,0);
+assert.equal(atPresent.freshnessGuard.asOf,'2026-11-10T00:25:00.000Z');
+assert.equal(atPresent.freshnessGuard.dossierStatusOverrides['open-valid'],'REVIEW');
+fakeNow=Date.parse('2026-08-26T04:00:00Z');
 
 // Defense-in-depth regression for the critical static boot dataset. The raw
 // snapshot must never expose a historical OPEN badge after its own deadline
@@ -67,4 +84,4 @@ assert.notEqual(pids.status,'OPEN','Expired PIDS static snapshot must fail close
 assert.equal(pids.close,'28 august 2026, 16:00','Historical PIDS deadline must be preserved.');
 assert.equal(clusters.status,'OPEN','Fail-closed sanitation must not blanket-demote unrelated current OPEN records.');
 
-console.log('PASS home-freshness-guard-v1.2: expired/provisional/undated OPEN suppressed; raw static boot OPEN leak blocked; history preserved; replay deterministic.');
+console.log('PASS home-freshness-guard-v1.2: wall clock vs historic LKG, expired/provisional/undated OPEN held REVIEW; static boot remains guarded; replay deterministic.');
