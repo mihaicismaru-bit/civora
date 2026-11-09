@@ -88,4 +88,60 @@ assert.equal(isOpen(record('OPEN',{'Status':'CLOSED','Termen':'16 noiembrie 2026
  'contradictory confirmed status fact never authorizes OPEN');
 fixedNow=Date.parse('2026-11-07T19:00:00Z');
 
+
+// The lazily loaded decision-hub freshness guard must not mistake an old
+// successful ingestion timestamp for "now". This regression exercises its
+// complete projection against November 10 while its LKG is from November 3.
+const guardSource=fs.readFileSync(path.resolve(here,'../web/home-freshness-guard-v1.js'),'utf8');
+let guardNow=Date.parse('2026-11-10T00:25:00Z');
+class GuardDate extends Date{
+ constructor(...args){super(...(args.length?args:[guardNow]))}
+ static now(){return guardNow}
+}
+const guardRecord=(id,deadline,statusValue='OPEN')=>({
+ id,title:'Sursă oficială '+id,status:'OPEN',publicationState:'PUBLISHABLE',
+ quickFacts:[
+  {label:'Status',value:statusValue,confidence:'CONFIRMED'},
+  {label:'Termen',value:deadline,confidence:'CONFIRMED'}
+ ]
+});
+function checkGuard(rows){
+ const P={
+  generatedAt:'2026-11-03T20:33:50Z',
+  dossiers:rows,
+  home:{openDossierIds:rows.map(d=>d.id),prepareDossierIds:[]},
+  summary:{openCount:rows.length,prepareCount:0}
+ };
+ const guardWindow={
+  PARTENER_DECISION_PRODUCTS:P,
+  PARTENER_DATA:{mipeIngestion:{asOf:'2026-11-03T20:33:50Z'},
+                mysmisRegistry:{observedAt:'2026-11-02T10:00:00Z'}}
+ };
+ vm.runInNewContext(guardSource,{window:guardWindow,Date:GuardDate},
+   {filename:'home-freshness-guard-v1.js'});
+ return P;
+}
+const expired='2026-11-06T12:00:00+02:00';
+const future='2026-11-16T16:00:00+02:00';
+let guard=checkGuard([
+ guardRecord('expired',expired),
+ guardRecord('live',future),
+ guardRecord('contradictory',future,'CLOSED')
+]);
+assert.equal(Array.from(guard.home.openDossierIds).join(','),'live',
+ 'real-time gate must remove expired OPEN and contradictory official status');
+assert.equal(Array.from(guard.freshnessGuard.removedOpenDossierIds).join(','),
+ 'expired,contradictory','removed OPEN IDs must remain auditable');
+assert.equal(guard.summary.openCount,1,'homepage openCount cannot use historical LKG time');
+assert.equal(guard.freshnessGuard.dossierStatusOverrides.expired,'REVIEW',
+ 'deadline expiry alone must not invent an official CLOSED status');
+assert.equal(guard.freshnessGuard.dossierStatusOverrides.contradictory,'REVIEW');
+assert.equal(guard.freshnessGuard.asOf,new Date(guardNow).toISOString(),
+ 'freshness audit clock must reflect wall clock, not source-generatedAt');
+guardNow=Date.parse('2026-11-16T14:00:01Z');
+guard=checkGuard([guardRecord('formerly-live',future)]);
+assert.equal(guard.summary.openCount,0,
+ 'at exact end, an unchanged old LKG must fail closed without new ingestion');
+assert.equal(guard.freshnessGuard.dossierStatusOverrides['formerly-live'],'REVIEW');
+
 console.log('PASS active homepage: future-dated PREPARE/CONSULTATION only; expired/unknown/contradictory fail closed; OPEN metric is live; no promotion.');
