@@ -19,7 +19,8 @@ from pathlib import Path
 import afir_ingest as transport
 
 NOTICE_URL = "https://www.afir.ro/comunicate/170-de-milioane-euro-pentru-exploatatiile-tinerilor-fermieri/"
-PARSER_VERSION = "afir-dr12-monthly-quality-watch-v5"
+PARSER_VERSION = "afir-dr12-monthly-quality-watch-v6"
+PREVIOUS_PARSER_VERSION = "afir-dr12-monthly-quality-watch-v5"
 # AFIR official notice is timestamped 1 Oct 2026, 10:00 EEST (07:00Z).
 # An acquisition predating this exact official publication cannot be genuine.
 EARLIEST_SOURCE_UTC = dt.datetime(2026, 10, 1, 7, tzinfo=dt.timezone.utc)
@@ -99,6 +100,12 @@ class _VisibleNotice(HTMLParser):
         if tag not in self.VOID:
             self.stack.append((tag, hidden))
             self.hidden_depth += int(hidden)
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        # HTML's non-void <div hidden/> is NOT a closed element. HTMLParser's
+        # default calls handle_endtag immediately, exposing forged hidden text.
+        # Only actual void elements can be self-closing in text/html.
+        self.handle_starttag(tag, attrs)
 
     def handle_endtag(self, tag: str) -> None:
         for index in range(len(self.stack) - 1, -1, -1):
@@ -265,9 +272,9 @@ def replay_receipt(destination: Path) -> dict:
     if set(manifest) != expected_fields or manifest.get("schema_version") != "1.0":
         raise ValueError("DR-12 receipt schema changed or includes unregistered fields")
     version = manifest.get("parser_version")
-    if version not in (PARSER_VERSION, PRIOR_PARSER_VERSION):
+    if version not in (PARSER_VERSION, PREVIOUS_PARSER_VERSION, PRIOR_PARSER_VERSION):
         raise ValueError("DR-12 historical receipt parser version unrecognized")
-    # Earlier v4 receipts are replayable only if the SAME original source also
+    # Earlier v4/v5 receipts are replayable only if the SAME original source also
     # passes the hardened visible-prose parser. A hidden-only v4 receipt fails.
     expected = {
         "requested_url": NOTICE_URL,
