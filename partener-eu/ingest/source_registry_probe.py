@@ -59,6 +59,26 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
 def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
     semantic_chars = len(sem.decode("utf-8", errors="ignore"))
     is_html = is_html_content_type(content_type)
+    # Tiny HTTP-200 anti-bot/error pages are not official programme evidence.
+    # They may be far smaller than the ordinary low-information shell cutoff.
+    # Keep the signature narrow and only inspect short HTML, so real source
+    # documents mentioning these expressions remain eligible for review.
+    if is_html and semantic_chars < MIN_SEMANTIC_CHARS:
+        text = " ".join(sem.decode("utf-8", errors="ignore").casefold().split())
+        challenge_prefixes = (
+            "just a moment",
+            "checking your browser",
+            "verify you are human",
+            "verifying you are human",
+            "access denied",
+            "403 forbidden",
+            "502 bad gateway",
+            "503 service unavailable",
+            "service unavailable",
+            "sorry, you have been blocked",
+        )
+        if text.startswith(challenge_prefixes):
+            return False, "HTML_CHALLENGE_OR_ERROR_SHELL", semantic_chars
     if is_html and raw_size >= MIN_HTML_BYTES_FOR_LOW_INFO and semantic_chars < MIN_SEMANTIC_CHARS:
         return False, "LOW_INFORMATION_HTML_SHELL", semantic_chars
     return True, None, semantic_chars
