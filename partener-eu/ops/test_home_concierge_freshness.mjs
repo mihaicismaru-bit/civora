@@ -72,8 +72,20 @@ assert.equal(isOpen(timedOpen('8 octombrie 2026, 16:00')),false,
  'EEST: expired official deadline cannot leak after 13:00Z');
 assert.equal(isOpen(timedOpen('2026-10-08T16:00:00+03:00')),false,
  'offset-qualified ISO dates must remain exact, never reinterpret in browser TZ');
+fixedNow=Date.parse('2026-03-01T12:00:00Z');
 assert.equal(isUpcoming(record('EXPECTED',{'Termen':'29 martie 2026, 03:30'})),false,
- 'nonexistent DST spring local hour cannot authorize future preparation');
+ 'nonexistent DST spring local hour cannot authorize future preparation, even before that date');
+fixedNow=Date.parse('2026-10-25T00:29:59Z');
+assert.equal(isOpen(timedOpen('25 octombrie 2026, 03:30')),true,
+ 'autumn DST: ambiguous Romanian cutoff uses earliest possible 03:30');
+fixedNow=Date.parse('2026-10-25T00:30:01Z');
+assert.equal(isOpen(timedOpen('25 octombrie 2026, 03:30')),false,
+ 'autumn DST: second 03:30 cannot extend an already elapsed cutoff');
+fixedNow=Date.parse('2026-11-16T13:59:59Z');
+assert.equal(isOpen(timedOpen('16 noiembrie 2026')),false,
+ 'date-only source cannot invent a deadline hour and authorize OPEN');
+assert.equal(isOpen(record('OPEN',{'Status':'CLOSED','Termen':'16 noiembrie 2026, 16:00'})),false,
+ 'contradictory confirmed status fact never authorizes OPEN');
 fixedNow=Date.parse('2026-11-07T19:00:00Z');
 
 console.log('PASS active homepage: future-dated PREPARE/CONSULTATION only; expired/unknown/contradictory fail closed; OPEN metric is live; no promotion.');

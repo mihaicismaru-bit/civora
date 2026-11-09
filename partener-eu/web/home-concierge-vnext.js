@@ -75,8 +75,11 @@ function openHub(query='',tab='dossiers'){
 }
 function isOpen(d){
  if(currentStatus(d)!=='OPEN'||String(d.publicationState||'').toUpperCase()!=='PUBLISHABLE')return false;
- if(!confirmed(d,'Status'))return false;
+ const observedStatus=confirmed(d,'Status');
+ if(!observedStatus||!['OPEN','DESCHIS'].includes(norm(observedStatus.value).toUpperCase()))return false;
  const deadline=confirmed(d,'Termen');if(!deadline)return false;
+ // Date-only facts carry no verified cutoff hour. Never invent 23:59 OPEN.
+ if(!/\b\d{1,2}:\d{2}(?::\d{2})?\b/.test(String(deadline.value||'')))return false;
  const parsed=parseDate(deadline.value);return !!(parsed&&parsed.getTime()>=Date.now());
 }
 // A current-year reference or a PUBLISHABLE flag alone cannot establish that
