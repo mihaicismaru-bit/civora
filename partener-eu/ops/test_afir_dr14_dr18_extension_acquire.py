@@ -40,6 +40,11 @@ def fixture():
 
 def test():
     notice.validate_official_notice(HTML, "text/html; charset=utf-8")
+    # AFIR's article template can render its title as an h2 inside header.
+    notice.validate_official_notice(
+        HTML.replace(b"<h1>", b"<header><h2>").replace(b"</h1>", b"</h2></header>"),
+        "text/html; charset=utf-8"
+    )
     with tempfile.TemporaryDirectory() as t:
         root = Path(t)
         notice.seal(root, HTML, "text/html; charset=utf-8", fixture(), "TEST-1")
