@@ -93,6 +93,29 @@ def test_transport_integrity():
     if module._same_official_endpoint(CALL1, allowed_alias + "/") != allowed_alias:
         fail("official same-endpoint www/trailing-slash alias must remain supported")
 
+    # Query, fragment and semicolon path parameters must not be silently
+    # discarded by canonicalization or converted into an exact-source anchor.
+    # A misleading official link cannot be a source identity proof.
+    for bad in (INDEX + "?page=1", INDEX + "#archived",
+                CALL1 + "?tracking=1", CALL1 + "#preview",
+                CALL1 + ";session=old"):
+        try:
+            module._official_url(bad)
+        except ValueError:
+            pass
+        else:
+            fail(f"EEA endpoint canonicalizer accepted a modified source URL: {bad}")
+    for bad in (CALL1 + "?tracking=1", CALL1 + "#preview",
+                CALL1 + ";session=old"):
+        html = f'<html><body><a href="{bad}">Call 1</a></body></html>'.encode()
+        if module.discover_call_urls(html, base_url=INDEX):
+            fail(f"modified official anchor was promoted to exact call discovery: {bad}")
+    if module.discover_call_urls(
+        f'<html><body><a href="{CALL1}">Call 1</a></body></html>'.encode(),
+        base_url=INDEX,
+    ) != [CALL1]:
+        fail("unchanged exact official call link must still be discoverable")
+
     redirect = module._RegisteredEEARedirect(CALL1)
     if redirect.redirect_request(Request(CALL1), None, 302, "Moved", {}, allowed_alias) is None:
         fail("same-owner same-article redirect was unexpectedly rejected")
