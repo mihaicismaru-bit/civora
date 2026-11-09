@@ -86,18 +86,20 @@ def test():
         reject(lambda: notice.replay(root), "extra or missing evidence files")
 
     invalid_html = (
-        HTML.replace(b"nu se prelunge", b"se prelunge") ,
-        HTML.replace(b"16 noiembrie 2026", b"31 octombrie 2026"),
-        HTML.replace(b"6 octombrie", b"8 octombrie"),
-        HTML.replace(b"DR-18", b"DR-19"),
-        b"<html><head><h1>Prelungire DR-14 DR-18</h1></head></html>"
+        (HTML.replace(b"nu se prelunge", b"se prelunge"),
+         "exhausted component exclusion not proven"),
+        (HTML.replace(b"16 noiembrie 2026", b"31 octombrie 2026"),
+         "notice identity or conditional scope missing"),
+        (HTML.replace(b"6 octombrie", b"8 octombrie"),
+         "notice identity or conditional scope missing"),
+        (HTML.replace(b"DR-18", b"DR-19"),
+         "notice identity or conditional scope missing"),
+        (b"<html><head><h1>Prelungire DR-14 DR-18</h1></head></html>",
+         "notice identity or conditional scope missing"),
     )
-    for wrong in invalid_html:
+    for wrong, expected in invalid_html:
         reject(lambda wrong=wrong: notice.validate_official_notice(wrong, "text/html"),
-               "notice identity or conditional scope missing" if
-               b"nu se prelung" not in wrong or b"DR-18" not in wrong or b"16 noiembrie 2026" not in wrong or
-               b"6 octombrie" not in wrong or b"<head><h1>" in wrong else
-               "exhausted component exclusion not proven")
+               expected)
     reject(lambda: notice.validate_official_notice(HTML, "application/json; note=html"),
            "not official HTML")
     reject(lambda: notice.validate_official_notice(HTML + b"x" * notice.MAX_BYTES, "text/html"),
