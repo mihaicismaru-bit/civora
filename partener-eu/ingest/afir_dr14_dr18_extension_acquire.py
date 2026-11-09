@@ -69,7 +69,7 @@ def fold(text: str) -> str:
 
 class Visible(HTMLParser):
     SKIP = {"head", "script", "style", "noscript", "template", "svg", "iframe",
-            "nav", "footer", "header", "dialog", "textarea", "select"}
+            "nav", "footer", "dialog", "textarea", "select"}
     VOID = {"img", "meta", "link", "input", "br", "hr", "source", "wbr"}
     def __init__(self):
         super().__init__(convert_charrefs=True)
@@ -107,7 +107,7 @@ class Visible(HTMLParser):
             return
         if data.strip():
             self.text.append(data.strip())
-            if any(t == "h1" for t, _ in self.stack):
+            if any(t in {"h1", "h2"} for t, _ in self.stack):
                 self.headings.append(data.strip())
 
 
