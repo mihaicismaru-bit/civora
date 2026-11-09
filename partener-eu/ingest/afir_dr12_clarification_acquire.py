@@ -22,8 +22,8 @@ INDEX_URL = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-12/"
 BLOB_HOST = "stportalafirprod.blob.core.windows.net"
 DOC_NAME = "nota-clarificare-dr12_06112026.pdf"
 LINK_LABEL = "Clarificare istoric șef exploatație DR-12 (06.11.2026)"
-VERSION = "afir-dr12-clarification-original-v2"
-PRIOR_REPLAY_VERSION = "afir-dr12-clarification-original-v1"
+VERSION = "afir-dr12-clarification-original-v3"
+PRIOR_REPLAY_VERSIONS = {"afir-dr12-clarification-original-v1", "afir-dr12-clarification-original-v2"}
 MAX_HTML, MAX_PDF = 5_000_000, 10_000_000
 NON_AUTHORITATIVE = {
     "observation_state": "NEW_DR12_CLARIFICATION_RAW_PENDING_SEMANTIC_RECONCILIATION",
@@ -48,26 +48,95 @@ PDF_MEDIA = frozenset({"application/pdf", "application/octet-stream"})
 
 
 class Links(HTMLParser):
+    """Only an unambiguous visible anchor in the official index can delegate.
+
+    A self-closing slash on non-void HTML does not close a hidden element.
+    """
+    VOID = frozenset({
+        "area", "base", "br", "col", "embed", "hr", "img", "input",
+        "link", "meta", "param", "source", "track", "wbr",
+    })
+    INERT = frozenset({
+        "head", "script", "style", "noscript", "template", "iframe", "object",
+        "canvas", "svg", "math", "dialog", "select", "textarea", "datalist",
+    })
+    HIDDEN_CLASSES = frozenset({
+        "d-none", "hidden", "invisible", "visually-hidden", "sr-only",
+    })
+    VISIBILITY_ATTRIBUTES = frozenset({
+        "href", "style", "class", "hidden", "inert", "popover", "aria-hidden", "open",
+    })
+    HIDDEN_STYLE = re.compile(
+        r"(?:^|;)(?:display:none|visibility:(?:hidden|collapse)|"
+        r"content-visibility:hidden|opacity:0(?:\.0+)?)(?:!important)?(?:;|$)"
+    )
+
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.found = []
+        self.stack = []
+        self.hidden_depth = 0
         self.href = None
         self.words = []
+        self.anchor_depth = None
+
+    @classmethod
+    def is_hidden(cls, tag, attrs):
+        values = {}
+        ambiguous = False
+        for name, value in attrs:
+            if name in values and name in cls.VISIBILITY_ATTRIBUTES:
+                ambiguous = True
+            values.setdefault(name, value or "")
+        style = re.sub(r"\s+", "", values.get("style", "").casefold())
+        classes = set(values.get("class", "").casefold().split())
+        return (
+            ambiguous or tag in cls.INERT
+            or (tag == "details" and "open" not in values)
+            or "hidden" in values or "inert" in values or "popover" in values
+            or values.get("aria-hidden", "").strip().casefold() == "true"
+            or bool(classes & cls.HIDDEN_CLASSES)
+            or cls.HIDDEN_STYLE.search(style) is not None
+        )
 
     def handle_starttag(self, tag, attrs):
+        hidden = self.is_hidden(tag, attrs)
         if tag == "a":
-            self.href = dict(attrs).get("href")
-            self.words = []
+            if self.href is not None:
+                # Nested anchors are malformed and cannot authorize a link.
+                self.href, self.words, self.anchor_depth = None, [], None
+            elif not self.hidden_depth and not hidden:
+                hrefs = [value for name, value in attrs if name == "href"]
+                if len(hrefs) == 1 and hrefs[0]:
+                    self.href = hrefs[0]
+                    self.words = []
+                    self.anchor_depth = len(self.stack)
+        if tag not in self.VOID:
+            self.stack.append((tag, hidden))
+            self.hidden_depth += int(hidden)
+
+    def handle_startendtag(self, tag, attrs):
+        self.handle_starttag(tag, attrs)
+        # Unlike div/span/a, foreign SVG and MathML roots do self-close.
+        if tag in ("svg", "math"):
+            self.handle_endtag(tag)
 
     def handle_data(self, data):
-        if self.href is not None:
+        if self.href is not None and not self.hidden_depth:
             self.words.append(data)
 
     def handle_endtag(self, tag):
-        if tag == "a" and self.href is not None:
-            self.found.append((self.href, re.sub(r"\s+", " ", " ".join(self.words)).strip()))
-            self.href = None
-            self.words = []
+        for index in range(len(self.stack) - 1, -1, -1):
+            if self.stack[index][0] == tag:
+                if self.anchor_depth is not None and index <= self.anchor_depth:
+                    if tag == "a" and index == self.anchor_depth and self.href is not None:
+                        self.found.append((
+                            self.href, re.sub(r"\s+", " ", " ".join(self.words)).strip()
+                        ))
+                    self.href, self.words, self.anchor_depth = None, [], None
+                self.hidden_depth -= sum(int(hidden) for _, hidden in self.stack[index:])
+                del self.stack[index:]
+                break
 
 
 def delegated_url(raw_html: bytes) -> str:
@@ -243,7 +312,7 @@ def replay(destination: Path) -> dict:
             "url": pdf_url,
         },
     }
-    if manifest.get("parser_version") not in {PRIOR_REPLAY_VERSION, VERSION}:
+    if manifest.get("parser_version") not in (PRIOR_REPLAY_VERSIONS | {VERSION}):
         raise ValueError("DR-12 unrecognized receipt parser version")
     if any(manifest.get(k) != v for k, v in expected.items()):
         raise ValueError("DR-12 source identity or raw evidence integrity mismatch")
