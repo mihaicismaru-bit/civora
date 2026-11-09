@@ -149,7 +149,9 @@ def validated_receipt_time(value: object) -> dt.datetime:
         observed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
     except ValueError as exc:
         raise ValueError("DR-12 receipt fetched_at_utc invalid") from exc
-    if observed.tzinfo is None or observed.utcoffset() != dt.timedelta(0):
+    if observed.tzinfo is None:
+        raise ValueError("DR-12 receipt timestamp must be timezone-aware")
+    if observed.utcoffset() != dt.timedelta(0):
         raise ValueError("DR-12 receipt fetched_at_utc must be UTC")
     if observed < EARLIEST_SOURCE_UTC:
         raise ValueError("DR-12 receipt predates official source publication")
