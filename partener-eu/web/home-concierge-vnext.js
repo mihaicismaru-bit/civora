@@ -28,14 +28,34 @@ function displayValue(v){
  const text=String(v).replace(/\s+/g,' ').trim();
  return /^\s*[\[{]/.test(text)?'':text;
 }
+// Convert official Romanian wall-clock deadlines to exact UTC instants.
+// Device timezone must not shift an OPEN/CONSULTATION cutoff. The round-trip
+// also rejects impossible local instants at the spring DST transition and
+// selects the earlier instant on an ambiguous autumn clock change (fail closed).
+function romaniaTime(year,month,day,hour,minute){
+ const fmt=new Intl.DateTimeFormat('en-GB',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+ for(const offset of [3,2]){
+  const candidate=new Date(Date.UTC(year,month-1,day,hour-offset,minute));
+  const fields=Object.fromEntries(fmt.formatToParts(candidate).filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]));
+  if(fields.year===year&&fields.month===month&&fields.day===day&&fields.hour===hour&&fields.minute===minute)return candidate;
+ }
+ return null;
+}
 function parseDate(v){
  if(!v)return null;
- const d=new Date(v);if(!Number.isNaN(d.getTime()))return d;
- const ro=String(v).toLowerCase();
- const months={ianuarie:0,februarie:1,martie:2,aprilie:3,mai:4,iunie:5,iulie:6,august:7,septembrie:8,octombrie:9,noiembrie:10,decembrie:11};
+ const raw=String(v).trim();
+ // Explicit UTC/offset timestamps are already exact. Otherwise source dates
+ // without a timezone are Romanian local dates, NOT browser-local dates.
+ const iso=raw.match(/^(20\d{2})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/i);
+ if(iso){
+  if(iso[6]){const exact=new Date(raw);return Number.isNaN(exact.getTime())?null:exact;}
+  return romaniaTime(Number(iso[1]),Number(iso[2]),Number(iso[3]),Number(iso[4]??23),Number(iso[5]??59));
+ }
+ const ro=raw.toLocaleLowerCase('ro-RO');
+ const months={ianuarie:1,februarie:2,martie:3,aprilie:4,mai:5,iunie:6,iulie:7,august:8,septembrie:9,octombrie:10,noiembrie:11,decembrie:12};
  const m=ro.match(/(\d{1,2})\s+([a-zăâîșț]+)\s+(20\d{2})(?:[^0-9]+(\d{1,2}):(\d{2}))?/i);
- if(!m||months[m[2]]===undefined)return null;
- return new Date(Number(m[3]),months[m[2]],Number(m[1]),Number(m[4]||23),Number(m[5]||59));
+ if(!m||!months[m[2]])return null;
+ return romaniaTime(Number(m[3]),months[m[2]],Number(m[1]),Number(m[4]??23),Number(m[5]??59));
 }
 function dateText(v){
  const d=parseDate(v);if(!d)return '';

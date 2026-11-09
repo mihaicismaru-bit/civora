@@ -11,7 +11,7 @@ const source=fs.readFileSync(path.resolve(here,'../web/home-concierge-vnext.js')
 assert.ok(source.endsWith('})();\n'),'active homepage must retain its expected IIFE closure');
 assert.ok(source.includes('const canonicalOpenTotal=open.length;'),
  'homepage OPEN metric must follow the live gate rather than a stale projected total');
-const fixedNow=Date.parse('2026-11-07T19:00:00Z');
+let fixedNow=Date.parse('2026-11-07T19:00:00Z');
 class FixedDate extends Date{static now(){return fixedNow}}
 const window={
  PARTENER_HOME_DATA:{dossiers:[],news:[]},
@@ -53,4 +53,27 @@ assert.equal(isConsultation(record('EXPECTED',{'Termen consultare':'18 noiembrie
  'planned call cannot silently become public consultation');
 assert.equal(isOpen(record('EXPECTED',{'Termen':'20 noiembrie 2026'})),false,
  'future-programming evidence must never promote to OPEN');
+
+// Romania has EET (UTC+2) in November and EEST (UTC+3) in October.
+// Browser locale and its timezone must not change the call lifecycle.
+// Exact official clock cutoffs: 16:00 Romania = 14:00Z winter / 13:00Z summer.
+const timedOpen=(deadline)=>record('OPEN',{'Status':'OPEN','Termen':deadline});
+fixedNow=Date.parse('2026-11-16T13:59:59Z');
+assert.equal(isOpen(timedOpen('16 noiembrie 2026, 16:00')),true,
+ 'EET: official Romanian call remains open one second before real cutoff');
+fixedNow=Date.parse('2026-11-16T14:00:01Z');
+assert.equal(isOpen(timedOpen('16 noiembrie 2026, 16:00')),false,
+ 'EET: call cannot remain OPEN after Bucharest 16:00, even abroad');
+fixedNow=Date.parse('2026-10-08T12:59:59Z');
+assert.equal(isOpen(timedOpen('8 octombrie 2026, 16:00')),true,
+ 'EEST: correct summer UTC offset for Romanian official deadline');
+fixedNow=Date.parse('2026-10-08T13:00:01Z');
+assert.equal(isOpen(timedOpen('8 octombrie 2026, 16:00')),false,
+ 'EEST: expired official deadline cannot leak after 13:00Z');
+assert.equal(isOpen(timedOpen('2026-10-08T16:00:00+03:00')),false,
+ 'offset-qualified ISO dates must remain exact, never reinterpret in browser TZ');
+assert.equal(isUpcoming(record('EXPECTED',{'Termen':'29 martie 2026, 03:30'})),false,
+ 'nonexistent DST spring local hour cannot authorize future preparation');
+fixedNow=Date.parse('2026-11-07T19:00:00Z');
+
 console.log('PASS active homepage: future-dated PREPARE/CONSULTATION only; expired/unknown/contradictory fail closed; OPEN metric is live; no promotion.');
