@@ -409,7 +409,9 @@ def collect_live(
 ) -> dict[str, Any]:
     fetched_at = fetched_at or _utc_now()
     index = fetcher(index_url)
-    index_final = _official_url(str(index["final_url"]), call_detail=False)
+    # Defence in depth: the injected acquisition transport cannot rebind an
+    # official index receipt to a different page on the same authority.
+    index_final = _same_official_endpoint(index_url, str(index["final_url"]))
     index_raw = bytes(index["raw"])
     call_urls, discovery_mode, index_link_count = discover_with_official_fallback(
         index_raw, base_url=index_final, minimum_calls=minimum_calls
@@ -425,7 +427,9 @@ def collect_live(
     for requested_url in call_urls:
         try:
             response = fetcher(requested_url)
-            final_url = _official_url(str(response["final_url"]), call_detail=True)
+            # A caller-supplied fetcher is not trusted to enforce redirect identity.
+            # Same-domain sibling calls remain distinct immutable source endpoints.
+            final_url = _same_official_endpoint(requested_url, str(response["final_url"]))
             raw = bytes(response["raw"])
             record = parse_call_page(raw, authority_url=final_url)
             normalized = adapter.normalize_record(
