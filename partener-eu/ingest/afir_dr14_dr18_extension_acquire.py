@@ -103,7 +103,13 @@ class Visible(HTMLParser):
                 break
 
     def handle_startendtag(self, tag, attrs):
-        pass
+        # HTML's self-closing slash does not close non-void HTML elements.
+        # Treat <div hidden/> / <script/> as open elements: otherwise
+        # their browser-hidden descendants could forge the required
+        # AFIR notice date, DR identifiers and conditional exception.
+        # SVG/MathML roots have true self-closing foreign-content syntax.
+        if tag not in self.VOID | {"svg", "math"}:
+            self.handle_starttag(tag, attrs)
 
     def handle_data(self, data):
         if self.stack and self.stack[-1][1]:
