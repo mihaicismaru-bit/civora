@@ -56,6 +56,43 @@ def test_delegation():
     refused(lambda: note.validate_pdf(b"%PDF-1.7 only header"))
 
 
+
+def test_visibility_delegation():
+    """A hidden or fabricated index link is not authority for a PDF."""
+    link = ('<a href="' + PROXY.replace("&", "&amp;") + '">'
+            + note.LINK_LABEL + '</a>')
+    for wrapper in (
+        '<div hidden>{}</div>',
+        '<section aria-hidden="true">{}</section>',
+        '<div style="display:none!important">{}</div>',
+        '<div style="visibility:hidden">{}</div>',
+        '<span class="visually-hidden">{}</span>',
+        '<template>{}</template>',
+        '<dialog>{}</dialog>',
+        '<div inert>{}</div>',
+        '<details>{}</details>',
+        '<div hidden/>{}</div>',
+        '<script>{}</script>',
+    ):
+        hidden_link = ('<html><h1>DR 12</h1>' + wrapper.format(link) + '</html>').encode()
+        refused(lambda hidden_link=hidden_link: note.delegated_url(hidden_link),
+                "official link missing")
+    # Hidden impostors must not override a real visible link.
+    assert note.delegated_url(('<div hidden>' + link + '</div>' + link).encode()) == URL
+    refused(lambda: note.delegated_url((link + link).encode()), "ambiguous")
+    refused(lambda: note.delegated_url(
+        ('<a href="' + PROXY.replace("&", "&amp;")
+         + '" href="https://evil.example/">' + note.LINK_LABEL + '</a>').encode()
+    ), "official link missing")
+    refused(lambda: note.delegated_url(
+        ('<a href="' + PROXY.replace("&", "&amp;")
+         + '"><span hidden>' + note.LINK_LABEL + '</span></a>').encode()
+    ), "official link missing")
+    # Truly self-closing SVG and void HTML do not hide subsequent visible text.
+    assert note.delegated_url(('<svg/><br/>' + link).encode()) == URL
+    assert note.delegated_url(('<div><span>Header</span></div>' + link).encode()) == URL
+
+
 def test_transport():
     class Response:
         status = 200
@@ -142,13 +179,16 @@ def test_capture_replay():
                                            "publish_authorized", "distribution_authorized"))
         original = (target / "manifest.json").read_bytes()
         assert record["parser_version"] == note.VERSION
-        assert note.VERSION.endswith("-v2")
+        assert note.VERSION.endswith("-v3")
         # Historical immutable v1 receipts remain replayable under the newer,
         # stricter content-type gate; their parser label is not rewritten.
         historical = copy.deepcopy(record)
-        historical["parser_version"] = note.PRIOR_REPLAY_VERSION
+        historical["parser_version"] = "afir-dr12-clarification-original-v1"
         (target / "manifest.json").write_text(json.dumps(historical), encoding="utf-8")
-        assert note.replay(target)["parser_version"] == note.PRIOR_REPLAY_VERSION
+        assert note.replay(target)["parser_version"] == "afir-dr12-clarification-original-v1"
+        historical["parser_version"] = "afir-dr12-clarification-original-v2"
+        (target / "manifest.json").write_text(json.dumps(historical), encoding="utf-8")
+        assert note.replay(target)["parser_version"] == "afir-dr12-clarification-original-v2"
         (target / "manifest.json").write_bytes(original)
         for document, mime in (
             ("index", "text/html-fake"),
@@ -207,6 +247,7 @@ def test_capture_replay():
 
 if __name__ == "__main__":
     test_delegation()
+    test_visibility_delegation()
     test_transport()
     test_capture_replay()
     print("DR-12 clarification: hermetic acquisition, delegation and replay checks passed")
