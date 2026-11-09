@@ -326,6 +326,46 @@ def main():
     else:
         fail("non-official redirect must fail closed before call parsing")
 
+    # An injected acquisition transport may report HTTP 200 on eeagrants.org
+    # while silently rebinding the index to an exact call page. The collector
+    # must reject this before any source discovery or material reconciliation.
+    def wrong_official_index(url):
+        if url == INDEX:
+            return response(url, INDEX_HTML, final_url=CALL1)
+        raise AssertionError("untrusted index redirect was followed")
+
+    try:
+        module.collect_live(
+            index_url=INDEX, run_id="TEST-INDEX-SIBLING-REDIRECT",
+            fetched_at=FETCHED, minimum_calls=1, fetcher=wrong_official_index,
+        )
+    except ValueError:
+        pass
+    else:
+        fail("same-host index redirect to a different official page was trusted")
+
+    # A sibling exact call is also a different immutable authority endpoint,
+    # even though it shares the same official host and a valid call slug.
+    def wrong_official_detail(url):
+        if url == INDEX:
+            return response(url, INDEX_HTML)
+        if url == CALL1:
+            return response(url, CALL1_HTML, final_url=CALL2)
+        if url == CALL2:
+            return response(url, CALL2_HTML)
+        raise AssertionError(f"unexpected source {url}")
+
+    rebound = module.collect_live(
+        index_url=INDEX, run_id="TEST-DETAIL-SIBLING-REDIRECT",
+        fetched_at=FETCHED, minimum_calls=2, fetcher=wrong_official_detail,
+    )
+    if len(rebound["errors"]) != 1 or rebound["errors"][0]["url"] != CALL1:
+        fail("same-host call-detail substitution must yield an explicit source error")
+    if any(p["requested_url"] == CALL1 for p in rebound["pages"]):
+        fail("rebound call-detail source must not enter the verified raw handoff")
+    if rebound["stats"]["open_call_evidence"] != 1 or rebound["publish_authorized"]:
+        fail("untrusted official sibling source incorrectly altered EEA admission")
+
     # Current official index describes validated applications but no longer
     # server-renders the seven exact call-detail anchors (November 2026).
     transitioned_index = (
