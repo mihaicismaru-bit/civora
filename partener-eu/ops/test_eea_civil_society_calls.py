@@ -92,44 +92,40 @@ def main():
             or elapsed["publish_authorized"]):
         fail("elapsed official deadline must quarantine stale OPEN without claiming CLOSED")
 
-    # A date with no cutoff hour cannot negate a same-day OPEN observation.
-    same_day = module.normalize_record(
-        base_record(), fetched_at="2026-10-08T18:15:00Z",
-        run_id="TEST-SAME-DAY", raw_hash="raw-same-day",
-        verified_authority_urls=[CALL1],
-    )
-    if same_day["observation_state"] != "OPEN_CALL" or not same_day["requires_reconcile"]:
-        fail("same-day date alone must not invent a submission cutoff hour")
-
-    # EEA CSF publishes its date-only deadline for Romania. On 8 October,
-    # Bucharest observes EEST (UTC+3). At 21:00 UTC it is already 9 October,
-    # although a UTC calendar-date comparison would still say 8 October.
-    # These remain observation candidates, never publication authorization.
+    # Official EEA CSF index: 8 October 2026, 16:00 Bucharest (13:00Z).
+    # The exact cutoff is source-bound to this 2026 programme; the legacy
+    # call-detail OPEN badge is stale at 16:00, not at Romanian midnight.
     for stamped, expected in (
-        ("2026-10-08T20:59:59Z", "OPEN_CALL"),
+        ("2026-10-08T12:59:59Z", "OPEN_CALL"),
+        ("2026-10-08T13:00:00Z", "UNKNOWN"),
+        ("2026-10-08T18:15:00Z", "UNKNOWN"),
+        ("2026-10-08T20:59:59Z", "UNKNOWN"),
         ("2026-10-08T21:00:00Z", "UNKNOWN"),
     ):
         row = module.normalize_record(
-            base_record(), fetched_at=stamped, run_id="TEST-EEA-EEST-BOUNDARY",
+            base_record(), fetched_at=stamped, run_id="TEST-EEA-OFFICIAL-1600-CUTOFF",
             raw_hash="raw-eest", verified_authority_urls=[CALL1],
         )
         if row["observation_state"] != expected or row["publish_authorized"]:
-            fail(f"Romanian summer-time date boundary admitted stale OPEN: {stamped}: {row}")
+            fail(f"official EEA CSF 16:00 cutoff misclassified OPEN: {stamped}: {row}")
 
-    # November uses EET (UTC+2), so the same safety rule must also survive
-    # the daylight-saving transition and preserve truly same-day candidates.
+    # A synthetic later deadline has no independently verified cutoff hour.
+    # Hold same-day OPEN even before midnight, across EET/EEST boundaries.
     winter = base_record()
     winter["submissionDeadline"] = "08/11/2026"
     for stamped, expected in (
-        ("2026-11-08T21:59:59Z", "OPEN_CALL"),
+        ("2026-11-07T21:59:59Z", "OPEN_CALL"),
+        ("2026-11-07T22:00:00Z", "UNKNOWN"),
+        ("2026-11-08T11:00:00Z", "UNKNOWN"),
+        ("2026-11-08T21:59:59Z", "UNKNOWN"),
         ("2026-11-08T22:00:00Z", "UNKNOWN"),
     ):
         row = module.normalize_record(
-            winter, fetched_at=stamped, run_id="TEST-EEA-EET-BOUNDARY",
+            winter, fetched_at=stamped, run_id="TEST-EEA-UNKNOWN-HOUR-EET",
             raw_hash="raw-eet", verified_authority_urls=[CALL1],
         )
         if row["observation_state"] != expected or row["publish_authorized"]:
-            fail(f"Romanian winter-time date boundary admitted stale OPEN: {stamped}: {row}")
+            fail(f"unverified same-day cutoff admitted stale OPEN: {stamped}: {row}")
 
     # A naive timestamp lacks a trustworthy observation timezone.
     naive = module.normalize_record(
@@ -192,6 +188,8 @@ def main():
         CALL1.replace("https://eeagrants.org/", "https://eeagrants.org:8443/"),
         CALL1 + "?tracking=1",
         CALL1 + "#submission",
+        CALL1 + ";session=123",
+        CALL1 + "/;session=123",
         CALL1 + "/another-call",
         CALL1 + "%2Fanother-call",
     ):
