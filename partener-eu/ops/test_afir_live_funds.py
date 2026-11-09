@@ -179,6 +179,18 @@ def test_extension_notice_raw_receipt() -> None:
             assert manifest["observation_state"] == "RAW_FETCHED_PENDING_SEMANTIC_RECONCILIATION"
             assert manifest["publish_authorized"] is False
             assert manifest["material_fact_action"] == "NONE"
+            # The handoff is write-once even with a valid second capture.
+            try:
+                ingest.capture_extension_notice_receipt(
+                    ingest.AFIR_EXTENSION_NOTICE, dict(fetched, data=body + b"modified"),
+                    "2026-11-05T02:01:00+00:00"
+                )
+            except ValueError as exc:
+                assert "immutable handoff" in str(exc)
+            else:
+                raise AssertionError("AFIR raw receipt silently overwritten")
+            assert (Path(tmp) / manifest["raw_evidence_file"]).read_bytes() == body
+            assert json.loads((Path(tmp) / "manifest.json").read_text("utf-8")) == manifest
             assert ingest.capture_extension_notice_receipt(
                 "https://www.afir.ro/unrelated/", fetched, "2026-11-05T02:00:00+00:00"
             ) is None
@@ -187,6 +199,8 @@ def test_extension_notice_raw_receipt() -> None:
                 dict(fetched, url="https://untrusted.example/"),
                 dict(fetched, data=b""),
                 dict(fetched, content_type="application/pdf"),
+                dict(fetched, content_type="application/json; note=html"),
+                dict(fetched, status=403),
             ):
                 try:
                     ingest.capture_extension_notice_receipt(
@@ -196,6 +210,22 @@ def test_extension_notice_raw_receipt() -> None:
                     pass
                 else:
                     raise AssertionError("invalid raw notice receipt must be rejected")
+        # A symlinked evidence target cannot substitute a mutable external path.
+        target = Path(tmp) / "symlink-target"
+        target.mkdir()
+        alias = Path(tmp) / "symlink-alias"
+        alias.symlink_to(target, target_is_directory=True)
+        with patch.dict(ingest.os.environ, environment | {
+            "PARTENER_AFIR_EVIDENCE_DIR": str(alias)
+        }):
+            try:
+                ingest.capture_extension_notice_receipt(
+                    ingest.AFIR_EXTENSION_NOTICE, fetched, "2026-11-05T02:00:00+00:00"
+                )
+            except ValueError as exc:
+                assert "symlinked" in str(exc)
+            else:
+                raise AssertionError("symlinked AFIR notice evidence target accepted")
         with patch.dict(ingest.os.environ, environment | {"GITHUB_RUN_ID": ""}):
             try:
                 ingest.capture_extension_notice_receipt(
