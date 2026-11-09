@@ -278,7 +278,20 @@ def _assert_registered_article_identity(source_id: str, registered_url: str, fin
         return
     registered = urlsplit(registered_url)
     resolved = urlsplit(final_url)
-    if registered.path.rstrip("/") != resolved.path.rstrip("/") or resolved.query:
+    # An altered exact-article URL is not a canonical source receipt, even
+    # when a browser would ignore its fragment or normalize path parameters.
+    # Reject these in both the registry and replayed final endpoint: otherwise
+    # a re-normalized, re-hashed manifest could borrow the source identity.
+    ambiguous_path = any(
+        re.search(r";|%3b", parsed.path, flags=re.I) is not None
+        for parsed in (registered, resolved)
+    )
+    if (
+        registered.path.rstrip("/") != resolved.path.rstrip("/")
+        or registered.query or registered.fragment
+        or resolved.query or resolved.fragment
+        or ambiguous_path
+    ):
         raise ValueError(f"ROHU {label} exact official article endpoint changed")
     comparable = re.sub(r"\s+", " ", visible_text.casefold()).translate(
         str.maketrans({"–": "-", "—": "-", "−": "-"})
