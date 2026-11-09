@@ -190,6 +190,18 @@ def main() -> None:
                 invalid_mime, base / f"mime-negative-{i}", run_id="RUN",
                 fetched_at_utc="2026-11-05T21:30:00Z"))
             assert not (base / f"mime-negative-{i}").exists()
+        # A rehashed official HTML body is not proof of impossible timestamps.
+        future_hour = (watch.dt.datetime.now(watch.dt.timezone.utc)
+                       + watch.dt.timedelta(hours=1)).isoformat().replace("+00:00", "Z")
+        for i, bad_time in enumerate((
+            "2026-09-30T20:59:59Z",
+            "2026-11-05T21:30:00+02:00",
+            future_hour,
+        )):
+            target = base / f"time-negative-{i}"
+            rejected(lambda t=bad_time, p=target: watch.capture(
+                fetched, p, run_id="RUN", fetched_at_utc=t))
+            assert not target.exists()
         xhtml = dict(fetched, content_type="application/xhtml+xml; charset=utf-8")
         xhtml_dir = base / "xhtml-positive"
         assert watch.capture(xhtml, xhtml_dir, run_id="RUN",
@@ -237,6 +249,9 @@ def main() -> None:
             ("publish_authorized", True),
             ("distribution_authorized", True),
             ("fetched_at_utc", "2026-11-05T21:30:00"),
+            ("fetched_at_utc", "2026-09-30T20:59:59Z"),
+            ("fetched_at_utc", future_hour),
+            ("fetched_at_utc", "2026-11-05T21:30:00+02:00"),
         ):
             altered = copy.deepcopy(record)
             altered[key] = bad
