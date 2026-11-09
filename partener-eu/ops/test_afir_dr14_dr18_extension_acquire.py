@@ -49,7 +49,7 @@ def test():
         assert result["open_call_authorized"] is False
         reject(lambda: notice.seal(root, HTML, "text/html", fixture(), "TEST-1"), "File exists")
         raw = root / notice.RAW_NAME
-        raw.write_bytes(HTML + b"<!-- tampered -->")
+        raw.write_bytes(HTML.replace(b"DR-18", b"DR-19"))
         reject(lambda: notice.replay(root), "original SHA mismatch")
         raw.write_bytes(HTML)
         manifest_path = root / "manifest.json"
