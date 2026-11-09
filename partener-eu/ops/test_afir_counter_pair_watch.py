@@ -247,11 +247,44 @@ def test_hidden_counter_dom_fail_closed():
             b"<body>", b"<body><div popover='auto'>" + forged_banner.encode() + b"</div>", 1
         )
         receipt = probe.capture(fetches(b=body), Path(td) / "proof", "42199991120")
-        assert receipt["parser_version"] == "afir-dr12-official-counter-pair-v10"
+        assert receipt["parser_version"] == "afir-dr12-official-counter-pair-v11"
         assert receipt["observation_state"] == "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW"
         assert receipt["open_call_authorized"] is False
         assert receipt["publish_authorized"] is False
         assert probe.replay(Path(td) / "proof")["verified"] is True
+
+
+def test_self_closing_hidden_counter_html_fail_closed():
+    """A slash on non-void HTML does not terminate browser-hidden content."""
+    real = delegated()
+    forged_banner = (
+        "Sesiune depunere dosare de finanțare DR-12 "
+        "DATĂ ÎNCEPUT 06/10/2026 09:00:00 "
+        "DATĂ FINAL 30/12/2026 15:59:59"
+    ).encode("utf-8")
+    for tag, close in (
+        ("div hidden", "div"),
+        ("div style='display:none'", "div"),
+        ("template", "template"),
+    ):
+        # Hidden duplicate proof must not contaminate a legitimate visible
+        # page. Before the fix, HTMLParser ignored <div hidden/> and treated
+        # the conflicting banner as visible official evidence.
+        fake = f"<{tag}/>".encode("utf-8") + forged_banner + f"</{close}>".encode("utf-8")
+        with_hidden_duplicate = real.replace(b"<body>", b"<body>" + fake, 1)
+        assert probe.parse_delegated(with_hidden_duplicate) == probe.parse_delegated(real), tag
+        assert probe.reconcile(
+            {"agency": agency(), "delegated": with_hidden_duplicate}, 12
+        )["observation_state"] == "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW", tag
+
+        # If ALL purported counter proof is inside such an element, the
+        # result must be source-parse review, never a usable counter.
+        all_hidden = real.replace(b"<body>", b"<body>" + f"<{tag}/>".encode("utf-8"), 1)
+        all_hidden = all_hidden.replace(b"</body>", f"</{close}></body>".encode("utf-8"), 1)
+        reject(lambda all_hidden=all_hidden: probe.parse_delegated(all_hidden))
+        assert probe.reconcile(
+            {"agency": agency(), "delegated": all_hidden}, 12
+        )["observation_state"] == "SOURCE_COUNTER_PARSE_REVIEW", tag
 
 
 def test_immutable_receipt_and_replay():
@@ -539,6 +572,7 @@ def test_dr12_other_sectors_component_window_discrepancy():
 if __name__ == "__main__":
     test_parse_and_reconcile()
     test_hidden_counter_dom_fail_closed()
+    test_self_closing_hidden_counter_html_fail_closed()
     test_immutable_receipt_and_replay()
     test_acquire_identity_encoding()
     test_capture_guards()
