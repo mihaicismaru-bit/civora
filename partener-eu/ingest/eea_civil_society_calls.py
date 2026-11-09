@@ -83,6 +83,7 @@ def _official_call_url(value: Any) -> str | None:
         or parsed.username is not None
         or parsed.password is not None
         or parsed.port not in (None, 443)
+        or parsed.params
         or parsed.query
         or parsed.fragment
     ):
@@ -146,8 +147,11 @@ def _observation_state(
 def _open_conflicts_with_elapsed_deadline(record: dict[str, Any], fetched_at: str) -> bool:
     """A legacy official OPEN badge cannot override its elapsed deadline.
 
-    EEA CSF Romania displays DD/MM/YYYY. Same-day dates cannot determine
-    a cutoff hour; unparseable dates/timestamps cannot establish OPEN.
+    Detail pages display DD/MM/YYYY without a cutoff hour. The official
+    programme call index explicitly fixes 08/10/2026 at 16:00 Bucharest time;
+    only that source-bound deadline may use an exact hour. Other date-only
+    same-day observations are UNKNOWN, never assumed open until midnight.
+    Unparseable dates/timestamps cannot establish OPEN.
     """
     deadline_text = _text(_first(record, "submissionDeadline", "submission_deadline", "deadline"))
     if not deadline_text:
@@ -157,10 +161,17 @@ def _open_conflicts_with_elapsed_deadline(record: dict[str, Any], fetched_at: st
         observed = dt.datetime.fromisoformat(fetched_at.replace("Z", "+00:00"))
         if observed.tzinfo is None:
             return True
-        # The official CSF deadline is a Romanian calendar date, not a UTC
-        # date. During EET/EEST, UTC may still show the previous day after
-        # midnight in Bucharest. Never promote a stale OPEN badge then.
-        return observed.astimezone(ZoneInfo("Europe/Bucharest")).date() > deadline
+        # Official programme index: https://eeagrants.org/en/eea-civil-society-fund-romania/calls
+        # Seven 2026 calls closed on 08/10/2026 at 16:00 Europe/Bucharest.
+        # This fixed historical cutoff must not be projected onto later calls.
+        bucharest = ZoneInfo("Europe/Bucharest")
+        local_observed = observed.astimezone(bucharest)
+        if deadline == dt.date(2026, 10, 8):
+            exact_cutoff = dt.datetime(2026, 10, 8, 16, 0, tzinfo=bucharest)
+            return local_observed >= exact_cutoff
+        # Any other date-only deadline lacks a proven official cutoff hour:
+        # same-day OPEN badges cannot certify remaining submission time.
+        return local_observed.date() >= deadline
     except (ValueError, TypeError, AttributeError):
         return True
 
