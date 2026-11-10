@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import json
 from pathlib import Path
 
 INGEST = Path(__file__).resolve().parents[1] / "ingest"
@@ -60,11 +61,74 @@ def main():
     check(roua["readback_verified"] is True, "RO-UA exact-call readback not verified")
     check(roua["normalized"]["observation_state"] == "REVIEW_REQUIRED", "expired launched call became OPEN")
 
+    from interreg_call_reconcile import reconcile_live_evidence
+
     for row in evidence["rows"]:
+        check(row["attempted_at"].endswith("Z"), "attempted_at missing from official probe")
+        check(
+            row["attempted_at"] <= row["fetched_at"] <= evidence["created_at"],
+            "verified fetch was time-stamped before attempt or after manifest",
+        )
         normalized = row["normalized"]
+        check(
+            normalized["fetched_at"] == row["fetched_at"],
+            "normalized Interreg receipt borrowed a different fetch time",
+        )
         check(normalized["publish_authorized"] is False and normalized["material_fact_use"] is False, "normalized row became authorizing")
         check(normalized["publication_effect"] == "NONE", "normalized row emitted publication effect")
 
+    # Live TLS/HTTP failures are attempted observations, not acquired source
+    # receipts. They must remain quarantined even when the other two probes PASS.
+    def flaky_fetch(url):
+        if "open-calls-for-proposals-call-6" in url:
+            raise TimeoutError("official page unavailable")
+        return fake_fetch(url)
+
+    try:
+        live._fetch = flaky_fetch
+        partial = live.build_live_evidence(run_id="interreg-call-transport-failure")
+    finally:
+        live._fetch = original
+    live.validate_envelope(partial)
+    check(partial["fetch_pass"] == 2 and partial["fetch_fail"] == 1, "partial source health not counted")
+    failure = next(row for row in partial["rows"] if row["fetch_status"] == "FAIL")
+    check(failure["attempted_at"].endswith("Z"), "failed probe lost attempted_at")
+    check(failure["fetched_at"] is None, "failed probe invented fetched_at")
+    check(
+        "raw_hash" not in failure and "normalized" not in failure and "final_url" not in failure,
+        "failed probe invented a raw official receipt",
+    )
+    receipt = reconcile_live_evidence(partial)
+    check(receipt["stats"]["ready_for_staging"] == 0, "failed probe became staging-ready")
+    check(receipt["stats"]["review_required"] == 3, "failed probe escaped quarantine")
+    quarantined_failed = next(
+        item for item in receipt["quarantined_records"] if item["probe_id"] == failure["probe_id"]
+    )
+    check(quarantined_failed["fetched_at"] is None, "reconciliation fabricated fetch success")
+    for field, forged in (
+        ("fetched_at", "2026-11-10T19:47:50Z"),
+        ("raw_hash", "0" * 64),
+        ("normalized", {"observation_state": "OPEN_CALL"}),
+    ):
+        tampered = json.loads(json.dumps(partial))
+        failed = next(row for row in tampered["rows"] if row["fetch_status"] == "FAIL")
+        failed[field] = forged
+        try:
+            live.validate_envelope(tampered)
+        except ValueError as exc:
+            check("forged a fetched receipt" in str(exc), f"{field}: wrong rejection {exc}")
+        else:
+            raise AssertionError(f"tampered {field} on failed exact-call probe passed validation")
+
+    for fake_time in ("2026-11-10T22:00:00+02:00", "not-a-date", "2026-02-30T19:47:50Z"):
+        tampered = json.loads(json.dumps(partial))
+        tampered["rows"][0]["attempted_at"] = fake_time
+        try:
+            live.validate_envelope(tampered)
+        except (ValueError, TypeError):
+            pass
+        else:
+            raise AssertionError(f"invalid attempted_at admitted: {fake_time}")
     print("PASS Interreg exact-call live evidence stays bounded and fail-closed")
     return 0
 
