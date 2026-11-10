@@ -115,6 +115,27 @@ fakeNow=Date.parse('2026-11-05T10:00:00Z');
 const held=run(timedPayload([contradictory]));
 assert.deepEqual(Array.from(held.home.openDossierIds),[]);
 assert.equal(held.freshnessGuard.dossierStatusOverrides.conflict,'REVIEW');
+// AFIR DR-12's component counter is DD.MM.YYYY at local MIDNIGHT. It
+// must not survive until UTC midnight; date-only and slash forms use RO time.
+const afirMidnight=timedOpen('afir-dr12-other','11.11.2026 00:00:00');
+const afirSlash=timedOpen('afir-dr12-slash','11/11/2026 00:00:00');
+fakeNow=Date.parse('2026-11-10T21:59:59Z');
+assert.deepEqual(Array.from(run(timedPayload([afirMidnight,afirSlash])).home.openDossierIds),['afir-dr12-other','afir-dr12-slash']);
+fakeNow=Date.parse('2026-11-10T22:00:00Z');
+const midnightHeld=run(timedPayload([afirMidnight,afirSlash]));
+assert.deepEqual(Array.from(midnightHeld.home.openDossierIds),[]);
+assert.equal(midnightHeld.freshnessGuard.dossierStatusOverrides['afir-dr12-other'],'REVIEW');
+assert.equal(midnightHeld.freshnessGuard.dossierStatusOverrides['afir-dr12-slash'],'REVIEW');
+// An unparseable competitor cannot be ignored while a confirmed cutoff
+// is otherwise valid, and malformed official clocks cannot authorize OPEN.
+fakeNow=Date.parse('2026-11-10T08:00:00Z');
+const malformedClock=timedOpen('malformed-clock','11.11.2026 24:99');
+const malformedCompeting=timedOpen('malformed-competing','11.11.2026 00:00:00',{closesAt:'Neconfirmat'});
+const wrongSlashOrder=timedOpen('wrong-us-order','13/11/2026 00:00:00');
+const heldNumeric=run(timedPayload([malformedClock,malformedCompeting,wrongSlashOrder]));
+assert.deepEqual(Array.from(heldNumeric.home.openDossierIds),['wrong-us-order']);
+assert.equal(heldNumeric.freshnessGuard.dossierStatusOverrides['malformed-competing'],'REVIEW');
+
 // Unsupported/ambiguous time around the Bucharest DST transition also holds.
 const ambiguous=timedOpen('ambiguous','25 octombrie 2026, ora 03:30');
 fakeNow=Date.parse('2026-10-24T08:00:00Z');
