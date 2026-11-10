@@ -153,6 +153,12 @@ def parse_date(value: Any) -> dt.datetime | None:
     try:
         parsed = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
         if parsed.tzinfo is None:
+            # A zoneless ISO clock has no proven official timezone. Treating
+            # 2026-11-11T00:00 as UTC could extend a Romanian deadline by
+            # two or three hours. A date-only historical field retains the
+            # existing conservative behavior; a timestamp fails closed.
+            if "T" in raw.upper() or re.search(r"\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}", raw):
+                return None
             parsed = parsed.replace(tzinfo=dt.timezone.utc)
         return parsed.astimezone(dt.timezone.utc)
     except ValueError:
