@@ -161,6 +161,26 @@ assert.equal(heldNumeric.freshnessGuard.dossierStatusOverrides['malformed-compet
 const ambiguous=timedOpen('ambiguous','25 octombrie 2026, ora 03:30');
 fakeNow=Date.parse('2026-10-24T08:00:00Z');
 assert.deepEqual(Array.from(run(timedPayload([ambiguous])).home.openDossierIds),[]);
+// Embedded prose is not an official clock format: never strip a stated
+// hour and turn an ambiguous zoneless timestamp into a future date-only
+// cutoff. Reject impossible calendar dates even if Date.parse normalizes them.
+fakeNow=Date.parse('2026-11-10T08:00:00Z');
+const embeddedClocks=timedPayload([
+  timedOpen('embedded-zoneless','Termen: 2026-11-11T00:00:00'),
+  timedOpen('embedded-dmy-hour','Termen: 13/11/2026 00:00'),
+  timedOpen('embedded-invalid-ymd','Termen: 2026-11-31'),
+  timedOpen('embedded-invalid-dmy','Termen 11/31/2026'),
+  timedOpen('embedded-valid-ymd','Termen: 2026-11-20'),
+  timedOpen('exact-official-dmy','11.11.2026 00:00:00')
+]);
+const embeddedResult=run(embeddedClocks);
+assert.deepEqual(Array.from(embeddedResult.home.openDossierIds),
+  ['embedded-valid-ymd','exact-official-dmy']);
+for(const id of ['embedded-zoneless','embedded-dmy-hour','embedded-invalid-ymd','embedded-invalid-dmy']){
+  assert.equal(embeddedResult.freshnessGuard.dossierStatusOverrides[id],'REVIEW',id);
+}
+fakeNow=Date.parse('2026-08-26T04:00:00Z');
+
 fakeNow=Date.parse('2026-08-26T04:00:00Z');
 
 console.log('PASS home-freshness-guard-v1.3: wall clock vs historic LKG, expired/provisional/undated OPEN held REVIEW; static boot remains guarded; replay deterministic.');
