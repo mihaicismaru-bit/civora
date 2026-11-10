@@ -48,8 +48,18 @@ function parseDate(v){
  // without a timezone are Romanian local dates, NOT browser-local dates.
  const iso=raw.match(/^(20\d{2})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2})?)?$/i);
  if(iso){
-  if(iso[6]){const exact=new Date(raw);return Number.isNaN(exact.getTime())?null:exact;}
-  return romaniaTime(Number(iso[1]),Number(iso[2]),Number(iso[3]),Number(iso[4]??23),Number(iso[5]??59));
+  const year=Number(iso[1]),month=Number(iso[2]),day=Number(iso[3]);
+  const calendar=new Date(Date.UTC(year,month-1,day));
+  if(calendar.getUTCFullYear()!==year||calendar.getUTCMonth()!==month-1||calendar.getUTCDate()!==day)return null;
+  // Explicit ISO clocks need an explicit zone. A browser-local or impossible
+  // timestamp cannot establish an actionable deadline or OPEN call.
+  if(iso[4]!=null&&(!iso[6]||Number(iso[4])>23||Number(iso[5])>59))return null;
+  if(iso[6]){
+   const offset=iso[6];
+   if(offset.toUpperCase()!=='Z'&&(Number(offset.slice(1,3))>23||Number(offset.slice(4,6))>59))return null;
+   const exact=new Date(raw);return Number.isNaN(exact.getTime())?null:exact;
+  }
+  return romaniaTime(year,month,day,Number(iso[4]??23),Number(iso[5]??59));
  }
  const ro=raw.toLocaleLowerCase('ro-RO');
  const months={ianuarie:1,februarie:2,martie:3,aprilie:4,mai:5,iunie:6,iulie:7,august:8,septembrie:9,octombrie:10,noiembrie:11,decembrie:12};
@@ -80,7 +90,12 @@ function isOpen(d){
  const deadline=confirmed(d,'Termen');if(!deadline)return false;
  // Date-only facts carry no verified cutoff hour. Never invent 23:59 OPEN.
  if(!/\b\d{1,2}:\d{2}(?::\d{2})?\b/.test(String(deadline.value||'')))return false;
- const parsed=parseDate(deadline.value);return !!(parsed&&parsed.getTime()>=Date.now());
+ // All independently projected closing clocks must agree with the
+ // confirmed source fact. A future stale alternative cannot defeat a
+ // shorter/expired official deadline or an unparseable competing value.
+ const rawClocks=[deadline.value,...['deadline','closesAt','closeAt'].filter(k=>d?.[k]!=null).map(k=>d[k])];
+ const clocks=rawClocks.map(parseDate);
+ return clocks.length>0&&clocks.every(t=>t&&t.getTime()===clocks[0]?.getTime()&&t.getTime()>Date.now());
 }
 // A current-year reference or a PUBLISHABLE flag alone cannot establish that
 // a planned/consultation dossier is actionable *now*. An expired explicit
