@@ -221,6 +221,24 @@ def main():
                 "open_at", "close_at", "fetched_at", "raw_sha256",
                 "parser_version", "run_id", "handoff_sha256")):
             fail(f"{source_id} inserted invented facts or missing raw provenance")
+    # This exact MIPE endpoint is referenced by a dated official county-
+    # authority notice (06 Nov); the primary HTML/PDF bytes remain UNFETCHED.
+    # A discovered link is not a T1 receipt, an effective-date proof, a MySMIS
+    # call, or permission to publish funding facts.
+    parks = by_id["SRC-ADRVEST-PDDTJ-PARKS-1794-2026"]
+    if (parks.get("primary_t1_link_candidate") !=
+            "https://mfe.gov.ro/dgpddtj-actualizarea-ghidului-solicitantului-pentru-actiunea-dezvoltarea-intreprinderilor-si-a-antreprenoriatului-componenta-sprijin-pentru-infrastructura-de-afaceri/"
+            or parks.get("primary_t1_link_witness") !=
+            "https://www.cjgorj.ro/actualizarea-ghidului-solicitantului-pentru-actiunea-dezvoltarea-intreprinderilor-si-a-antreprenoriatului-componenta-sprijin-pentru-infrastructura-de-afaceri-parc/"
+            or parks.get("primary_t1_raw_receipt_state") !=
+            "PENDING_TRANSPORT_AND_CONTENT_VERIFICATION"):
+        fail("PDDTJ parks exact T1 link lost its official discovery or raw-pending state")
+    if any(key in parks for key in (
+            "primary_t1_fetched_at", "primary_t1_raw_sha256",
+            "primary_t1_parser_version", "primary_t1_run_id",
+            "primary_t1_publication_effective_date")):
+        fail("PDDTJ parks candidate invented successful T1 provenance or effect date")
+
     programme_domains = plane.get("programmeDomains") or {}
 
     missing = sorted(set(REQUIRED) - set(by_id))
