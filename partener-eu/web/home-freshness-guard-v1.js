@@ -75,6 +75,22 @@ function toTimestamp(value){
     const check=new Date(stamp);
     return check.getUTCFullYear()===Number(year)&&check.getUTCMonth()===Number(month)-1&&check.getUTCDate()===Number(day)?stamp:null;
   }
+  // Exact ISO and Romanian DMY clocks were handled above. If an otherwise
+  // untrusted prose field contains an explicit clock, do not let Date.parse
+  // or a later date-only fallback silently discard the hour/zone.
+  if(/\b20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}/.test(raw) ||
+     /\b\d{1,2}[./]\d{1,2}[./]20\d{2}\b\s*(?:,?\s*(?:(?:la\s+)?ora\s*)?)?\d{1,2}[:.]\d{2}/i.test(raw))return null;
+  // Date.parse may normalize impossible embedded dates (e.g. "Termen
+  // 11/31/2026" to December 1). Validate any numeric calendar date before
+  // allowing the legacy prose fallback to infer a cutoff.
+  const embedded=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/) ||
+    raw.match(/\b(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2})\b/);
+  if(embedded){
+    const ymd=String(embedded[1]).length===4;
+    const year=Number(embedded[ymd?1:3]),month=Number(embedded[2]),day=Number(embedded[ymd?3:1]);
+    const check=new Date(Date.UTC(year,month-1,day));
+    if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return null;
+  }
   const iso=Date.parse(raw);
   if(!Number.isNaN(iso))return iso;
   const ymd=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
