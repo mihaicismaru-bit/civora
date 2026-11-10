@@ -383,8 +383,10 @@ def main():
             live._fetch = lambda url: (html, url, 200, "text/html; charset=utf-8")
             capture_times = iter((
                 "2026-08-28T01:51:17Z",  # run started
-                "2026-08-28T01:51:19Z",  # first original fetched
-                "2026-08-28T01:51:23Z",  # second original fetched
+                "2026-08-28T01:51:18Z",  # first attempt
+                "2026-08-28T01:51:19Z",  # first original verified
+                "2026-08-28T01:51:22Z",  # second attempt
+                "2026-08-28T01:51:23Z",  # second original verified
                 "2026-08-28T01:51:24Z",  # receipt finalized
             ))
             live._utc_now = lambda: next(capture_times)
@@ -395,6 +397,10 @@ def main():
             live._utc_now = original_now
 
         live.validate_envelope(envelope)
+        assert envelope["schema"] == live.SCHEMA and envelope["schema"].endswith("_V2")
+        assert [row["attempted_at"] for row in envelope["rows"]] == [
+            "2026-08-28T01:51:18Z", "2026-08-28T01:51:22Z"
+        ]
         # Rehashed originals must not be legitimized by a fake MIME field in
         # a supposedly immutable receipt. This was previously accepted because
         # the replay checked for the substring "html" anywhere in the header.
@@ -431,6 +437,19 @@ def main():
             "2026-08-28T01:51:19Z", "2026-08-28T01:51:23Z"
         ], "per-source acquisition must not inherit a stale run-start timestamp"
         assert live.replay_live_evidence(envelope, original_dir, registry) == 2
+        for idx, field, value in (
+            (0, "attempted_at", "2026-08-28T01:51:20Z"),  # after verified fetched_at
+            (1, "attempted_at", "2026-08-28T01:51:16Z"),  # before prior original
+            (1, "attempted_at", "2026-08-28T01:51:25Z"),  # after completion
+        ):
+            forged = json.loads(json.dumps(envelope))
+            forged["rows"][idx][field] = value
+            try:
+                live.replay_live_evidence(forged, original_dir, registry)
+            except ValueError as exc:
+                assert "chronology" in str(exc), exc
+            else:
+                raise AssertionError(f"forged attempted_at passed: {idx} {value}")
         # A forged completion time or an out-of-order/stale source timestamp
         # cannot survive raw replay, even if all source hashes are unchanged.
         for index, forged_time, expected in (
@@ -652,8 +671,9 @@ def main():
             live._fetch = partial_fetch
             partial_times = iter((
                 "2026-08-28T01:51:17Z",  # run start
+                "2026-08-28T01:51:18Z",  # first source attempted
                 "2026-08-28T01:51:19Z",  # first source succeeds
-                "2026-08-28T01:52:00Z",  # second source times out
+                "2026-08-28T01:52:00Z",  # second source attempted (timeout)
                 "2026-08-28T01:52:01Z",  # manifest completed
             ))
             live._utc_now = lambda: next(partial_times)
@@ -662,11 +682,43 @@ def main():
             live._fetch = original_fetch
             live._utc_now = original_now
         assert partial["fetch_pass"] == 1 and partial["fetch_fail"] == 1
+        assert [row["attempted_at"] for row in partial["rows"]] == [
+            "2026-08-28T01:51:18Z", "2026-08-28T01:52:00Z"
+        ], "every Interreg source must carry its own per-source attempted_at"
         assert [row["fetched_at"] for row in partial["rows"]] == [
-            "2026-08-28T01:51:19Z", "2026-08-28T01:52:00Z"
-        ], "failed Interreg acquisition must carry its own failure-observed time"
+            "2026-08-28T01:51:19Z", None
+        ], "failed Interreg acquisition must never claim fetched_at"
         assert partial["observation_states"] == {"CONSULTATION_CLOSED": 1, "FETCH_FAILED": 1}
         assert live.replay_live_evidence(partial, partial_dir, registry) == 1
+        failed_index = next(i for i, r in enumerate(partial["rows"]) if r["fetch_status"] == "FAIL")
+        for claimed_fetch in ("2026-08-28T01:52:00Z", ""):
+            forged = json.loads(json.dumps(partial))
+            forged["rows"][failed_index]["fetched_at"] = claimed_fetch
+            try:
+                live.replay_live_evidence(forged, partial_dir, registry)
+            except ValueError as exc:
+                assert "cannot claim fetched_at" in str(exc) or "UTC receipt timestamp" in str(exc), exc
+            else:
+                raise AssertionError("failed Interreg programming row fabricated fetched_at")
+        forged = json.loads(json.dumps(partial))
+        forged["rows"][failed_index]["attempted_at"] = "2026-08-28T01:52:02Z"
+        try:
+            live.replay_live_evidence(forged, partial_dir, registry)
+        except ValueError as exc:
+            assert "chronology" in str(exc), exc
+        else:
+            raise AssertionError("attempt after manifest completion survived replay")
+
+        # Historic V1 artifacts remain readable for audit, but their failure
+        # timestamp is legacy failure-observation provenance, never new raw
+        # source evidence or authorization. New capture always emits V2.
+        legacy = json.loads(json.dumps(partial))
+        legacy["schema"] = live.LEGACY_SCHEMA
+        for row in legacy["rows"]:
+            attempt = row.pop("attempted_at")
+            if row["fetch_status"] == "FAIL":
+                row["fetched_at"] = attempt
+        assert live.replay_live_evidence(legacy, partial_dir, registry) == 1
         for tamper in ("raw_hash", "final_url", "bytes"):
             downgraded = json.loads(json.dumps(partial))
             failed_row = next(r for r in downgraded["rows"] if r["fetch_status"] == "FAIL")
