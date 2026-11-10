@@ -93,6 +93,15 @@ def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def _strict_utc(value: Any) -> dt.datetime:
+    """An attempted/fetched provenance receipt must be a real UTC instant."""
+    if not isinstance(value, str) or not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z", value
+    ):
+        raise ValueError("invalid exact-call UTC receipt timestamp")
+    return dt.datetime.fromisoformat(value[:-1] + "+00:00")
+
+
 def _visible_text(raw: bytes, content_type: str) -> str:
     charset = "utf-8"
     match = re.search(r"charset=([A-Za-z0-9._-]+)", content_type, re.I)
@@ -156,7 +165,8 @@ def build_live_evidence(*, run_id: str | None = None) -> dict[str, Any]:
             "call_identifier": probe["call_identifier"],
             "programme": probe["programme"],
             "registered_url": probe["url"],
-            "fetched_at": observed_at,
+            "attempted_at": _utc_now(),
+            "fetched_at": None,
             "run_id": run,
             "publication_effect": "NONE",
             "publish_authorized": False,
@@ -170,6 +180,7 @@ def build_live_evidence(*, run_id: str | None = None) -> dict[str, Any]:
                 raise ValueError("low-information HTML body")
             readback_verified = _markers_verified(text, tuple(probe["markers"]))
             raw_hash = _sha256(raw)
+            fetched_at = _utc_now()
             normalized = normalize_call_observation(
                 {
                     "call_identifier": probe["call_identifier"],
@@ -180,13 +191,14 @@ def build_live_evidence(*, run_id: str | None = None) -> dict[str, Any]:
                     "deadline": probe["deadline"],
                     "readback_verified": readback_verified,
                 },
-                fetched_at=observed_at,
+                fetched_at=fetched_at,
                 raw_hash=raw_hash,
                 run_id=run,
             )
             row.update(
                 {
                     "fetch_status": "PASS",
+                    "fetched_at": fetched_at,
                     "http_status": status,
                     "content_type": content_type,
                     "final_url": final_url,
@@ -198,6 +210,8 @@ def build_live_evidence(*, run_id: str | None = None) -> dict[str, Any]:
                 }
             )
         except Exception as exc:
+            # A failed attempt is not a successful fetched source receipt.
+            row["fetched_at"] = None
             row.update(
                 {
                     "fetch_status": "FAIL",
@@ -215,7 +229,7 @@ def build_live_evidence(*, run_id: str | None = None) -> dict[str, Any]:
 
     return {
         "schema": SCHEMA,
-        "created_at": observed_at,
+        "created_at": _utc_now(),
         "run_id": run,
         "probe_count": len(rows),
         "fetch_pass": sum(1 for row in rows if row.get("fetch_status") == "PASS"),
@@ -238,7 +252,33 @@ def validate_envelope(data: dict[str, Any]) -> None:
         raise ValueError("exact-call live evidence must have publication_effect=NONE")
     if data.get("canonical_corpus_mutation") is not False or data.get("publish_authorized") is not False:
         raise ValueError("exact-call live evidence cannot authorize corpus/publication mutation")
-    for row in data.get("rows", []):
+    if not isinstance(data.get("rows"), list):
+        raise ValueError("exact-call evidence rows must be a list")
+    created_at = _strict_utc(data.get("created_at"))
+    last_observed: dt.datetime | None = None
+    for row in data["rows"]:
+        if not isinstance(row, dict):
+            raise ValueError("invalid exact-call evidence row")
+        attempted_at = _strict_utc(row.get("attempted_at"))
+        if attempted_at > created_at or (last_observed is not None and attempted_at < last_observed):
+            raise ValueError("exact-call receipt chronology invalid")
+        if row.get("fetch_status") == "FAIL":
+            if row.get("fetched_at") is not None or any(
+                key in row for key in ("normalized", "raw_hash", "bytes", "final_url", "http_status")
+            ):
+                raise ValueError("failed exact-call attempt forged a fetched receipt")
+            if not row.get("error_type") or not row.get("error"):
+                raise ValueError("failed exact-call attempt missing transport error")
+            last_observed = attempted_at
+        elif row.get("fetch_status") == "PASS":
+            fetched_at = _strict_utc(row.get("fetched_at"))
+            if not attempted_at <= fetched_at <= created_at:
+                raise ValueError("exact-call receipt chronology invalid")
+            if (row.get("normalized") or {}).get("fetched_at") != row["fetched_at"]:
+                raise ValueError("exact-call normalized fetched_at drift")
+            last_observed = fetched_at
+        else:
+            raise ValueError("unexpected exact-call fetch_status")
         if row.get("publish_authorized") is not False or row.get("material_fact_use") is not False:
             raise ValueError(f"unsafe exact-call row {row.get('probe_id')}")
         normalized = row.get("normalized")
