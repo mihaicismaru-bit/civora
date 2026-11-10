@@ -40,7 +40,7 @@ function toTimestamp(value){
   // AFIR's official counters use Romanian DD.MM.YYYY HH:mm:ss (or
   // DD/MM/YYYY). Date.parse interprets these inconsistently as US/UTC dates,
   // potentially keeping a component OPEN past its local midnight cutoff.
-  const dmyLocal=raw.match(/^(\\d{1,2})[./](\\d{1,2})[./](20\\d{2})(?:\\s*,?\\s*(?:(?:la\\s+)?ora\\s*)?(\\d{1,2})[:.](\\d{2})(?::(\\d{2}))?)?$/i);
+  const dmyLocal=raw.match(/^(\d{1,2})[./](\d{1,2})[./](20\d{2})(?:\s*,?\s*(?:(?:la\s+)?ora\s*)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?)?$/i);
   if(dmyLocal){
     const [,day,month,year,hour,minute,second]=dmyLocal;
     return bucharestLocalMs(Number(year),Number(month)-1,Number(day),
@@ -49,7 +49,7 @@ function toTimestamp(value){
   }
   // Never fall back to the host engine's lenient date parser when an
   // official-looking Romanian date has an unsupported/ambiguous clock.
-  if(/^\\d{1,2}[./]\\d{1,2}[./]20\\d{2}/.test(raw))return null;
+  if(/^\d{1,2}[./]\d{1,2}[./]20\d{2}/.test(raw))return null;
   const iso=Date.parse(raw);
   if(!Number.isNaN(iso))return iso;
   const ymd=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
