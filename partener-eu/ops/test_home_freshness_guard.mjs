@@ -82,7 +82,8 @@ assert.notEqual(afir.status,'OPEN','Expired AFIR static snapshot must fail close
 assert.equal(afir.close,'14 august 2026','Historical AFIR deadline must be preserved.');
 assert.notEqual(pids.status,'OPEN','Expired PIDS static snapshot must fail closed before runtime adaptation.');
 assert.equal(pids.close,'28 august 2026, 16:00','Historical PIDS deadline must be preserved.');
-assert.equal(clusters.status,'OPEN','Fail-closed sanitation must not blanket-demote unrelated current OPEN records.');
+assert.equal(clusters.status,'REVIEW','Expired 6 Nov cluster cannot remain OPEN even when the detail page lags the ADR index.');
+assert.equal(clusters.close,'6 noiembrie 2026, 12:00','Keep the historical official deadline instead of asserting a new closure date.');
 
 // A Romanian-language exact time must expire at the official local hour,
 // not at 23:59 UTC. November is EET (UTC+2), July is EEST (UTC+3).
