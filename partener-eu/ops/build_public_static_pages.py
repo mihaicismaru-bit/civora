@@ -209,8 +209,23 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
         return False
     if not deadline or str(deadline.get("confidence") or "").upper() != "CONFIRMED":
         return False
+    # Status must be semantically OPEN in the confirmed source fact too.
+    # A stale top-level OPEN cannot override a newer CONFIRMED CLOSED/REVIEW
+    # observation, even if the deadline still lies in the future.
+    if fold(status.get("value")) not in {"open", "deschis"}:
+        return False
     closes = parse_date(deadline.get("value"))
-    return closes is not None and closes >= clock
+    if closes is None or closes < clock:
+        return False
+    # Reject mismatched or unparseable top-level cutoffs rather than silently
+    # selecting the later one. The confirmed Termen remains the comparison
+    # anchor; this is a render-only hold, never a canonical CLOSED assertion.
+    for key in ("deadline", "closesAt", "closeAt"):
+        if dossier.get(key) not in (None, ""):
+            other = parse_date(dossier[key])
+            if other is None or other != closes:
+                return False
+    return True
 
 
 def requires_open_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
