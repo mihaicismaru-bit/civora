@@ -38,6 +38,8 @@ on:
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
       - 'partener-eu/ingest/interreg_programming_intelligence.py'
       - 'partener-eu/ingest/interreg_programming_live_fetch.py'
@@ -116,6 +118,8 @@ jobs:
           python -m py_compile partener-eu/ops/p10_validate.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
+          python -m py_compile partener-eu/ingest/pddtj_oi_discovery_acquire.py
+          python -m py_compile partener-eu/ops/test_pddtj_oi_discovery_acquire.py
           python -m py_compile partener-eu/ops/test_interreg_rohu_pipeline_split.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
@@ -144,6 +148,9 @@ jobs:
 
       - name: Validate EU/EEA/Interreg source and programming taxonomy
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Prove PDDTJ delegated OI original-byte handoff remains non-authorizing
+        run: python partener-eu/ops/test_pddtj_oi_discovery_acquire.py
 
       - name: Validate RCH 2027 official original-byte handoff contract
         run: |
