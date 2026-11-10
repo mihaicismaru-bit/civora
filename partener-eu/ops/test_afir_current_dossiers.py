@@ -259,6 +259,11 @@ def main() -> int:
     assert "200.000 EUR" in fact(dr12, "Grant")["value"]
     assert "80 puncte" in " ".join(by_title(dr12, "Cum se punctează")["items"])
     assert "45 puncte" in " ".join(by_title(dr12, "Cum se punctează")["items"])
+    # Historical monthly thresholds are retained, but an applicant must never
+    # be instructed to simulate the expired first-stage 80-point threshold.
+    current_actions = " ".join(by_title(dr12, "Ce trebuie făcut acum")["items"])
+    assert "80 de puncte al primei etape" not in current_actions
+    assert "pragul de calitate al etapei curente" in current_actions
     assert "NU ESTE CAZUL" in " ".join(by_title(dr12, "Riscuri de respingere sau implementare")["items"])
     assert dr12["executiveSummary"]["sourceBound"] is True
     assert dr12["executiveSummary"]["status"] == expected_dr12_status
