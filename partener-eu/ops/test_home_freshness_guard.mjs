@@ -24,7 +24,8 @@ function run(payload,data={}){
 const payload={
   generatedAt:'2026-08-22T17:45:00Z',
   dossiers:[
-    {id:'open-valid',status:'OPEN',publicationState:'PUBLISHABLE',title:'Apel deschis',quickFacts:[{label:'Status',value:'OPEN',confidence:'CONFIRMED'},{label:'Termen',value:'2026-09-05',confidence:'CONFIRMED'}]},
+    {id:'open-valid',status:'OPEN',publicationState:'PUBLISHABLE',title:'Apel deschis',quickFacts:[{label:'Status',value:'OPEN',confidence:'CONFIRMED'},{label:'Termen',value:'2026-09-05T16:00:00+03:00',confidence:'CONFIRMED'}]},
+    {id:'open-date-only',status:'OPEN',publicationState:'PUBLISHABLE',title:'Fără oră oficială',quickFacts:[{label:'Status',value:'OPEN',confidence:'CONFIRMED'},{label:'Termen',value:'2026-09-05',confidence:'CONFIRMED'}]},
     {id:'open-expired-ro',status:'OPEN',publicationState:'PUBLISHABLE',title:'Apel expirat',quickFacts:[{label:'Status',value:'OPEN',confidence:'CONFIRMED'},{label:'Termen',value:'14 august 2026',confidence:'CONFIRMED'}]},
     {id:'open-no-deadline',status:'OPEN',publicationState:'PUBLISHABLE',title:'Apel fără termen',quickFacts:[{label:'Status',value:'OPEN',confidence:'CONFIRMED'},{label:'Termen',value:'Neconfirmat',confidence:'UNKNOWN'}]},
     {id:'open-provisional',status:'OPEN',publicationState:'PROVISIONAL_FAIL_CLOSED',title:'Apel provizoriu',quickFacts:[{label:'Status',value:'OPEN',confidence:'CONFIRMED'},{label:'Termen',value:'2026-10-01',confidence:'CONFIRMED'}]},
@@ -34,7 +35,7 @@ const payload={
     {id:'ambiguous-review',status:'REVIEW',title:'Apel fără calendar confirmat',quickFacts:[{label:'Termen',value:'Neconfirmat'}]},
     {id:'closed-history',status:'CLOSED',title:'Referință istorică 2023',quickFacts:[{label:'Termen',value:'2023-05-01'}]}
   ],
-  home:{openDossierIds:['open-valid','open-expired-ro','open-no-deadline','open-provisional'],prepareDossierIds:['stale-2023','current-2026','future-2027','ambiguous-review']},
+  home:{openDossierIds:['open-valid','open-date-only','open-expired-ro','open-no-deadline','open-provisional'],prepareDossierIds:['stale-2023','current-2026','future-2027','ambiguous-review']},
   summary:{openCount:99,prepareCount:99}
 };
 
@@ -42,13 +43,13 @@ const sourceData={mipeIngestion:{asOf:'2026-08-26T03:42:03Z'}};
 const out=run(payload,sourceData);
 assert.deepEqual(Array.from(out.home.openDossierIds),['open-valid']);
 assert.equal(out.summary.openCount,1);
-assert.deepEqual(Array.from(out.freshnessGuard.removedOpenDossierIds),['open-expired-ro','open-no-deadline','open-provisional']);
-assert.deepEqual({...out.freshnessGuard.dossierStatusOverrides},{'open-expired-ro':'REVIEW','open-no-deadline':'REVIEW','open-provisional':'REVIEW'});
+assert.deepEqual(Array.from(out.freshnessGuard.removedOpenDossierIds),['open-date-only','open-expired-ro','open-no-deadline','open-provisional']);
+assert.deepEqual({...out.freshnessGuard.dossierStatusOverrides},{'open-date-only':'REVIEW','open-expired-ro':'REVIEW','open-no-deadline':'REVIEW','open-provisional':'REVIEW'});
 assert.deepEqual(Array.from(out.home.prepareDossierIds),['current-2026','future-2027']);
 assert.equal(out.summary.prepareCount,2);
 assert.equal(out.freshnessGuard.state,'DEGRADED');
 assert.deepEqual(Array.from(out.freshnessGuard.removedPrepareDossierIds),['stale-2023','ambiguous-review']);
-assert.equal(out.dossiers.length,9,'Historical dossiers remain queryable; the guard only changes currentness surfaces.');
+assert.equal(out.dossiers.length,10,'Historical dossiers remain queryable; the guard only changes currentness surfaces.');
 
 const replay=run(payload,sourceData);
 assert.deepEqual(JSON.parse(JSON.stringify(replay)),JSON.parse(JSON.stringify(out)),'Same artifact timestamp must replay deterministically.');
@@ -116,6 +117,23 @@ fakeNow=Date.parse('2026-11-05T10:00:00Z');
 const held=run(timedPayload([contradictory]));
 assert.deepEqual(Array.from(held.home.openDossierIds),[]);
 assert.equal(held.freshnessGuard.dossierStatusOverrides.conflict,'REVIEW');
+// Date-only cutoff dates cannot be interpreted as \"end of day\" for OPEN.
+// Even with a precise competing deadline, ambiguity must hold the record.
+const dateOnly=timedOpen('date-only','16 noiembrie 2026');
+const dmyDateOnly=timedOpen('dmy-date-only','16.11.2026');
+const mixedPrecision=timedOpen('mixed-precision','16 noiembrie 2026, 16:00',
+  {closesAt:'16 noiembrie 2026'});
+fakeNow=Date.parse('2026-11-10T10:00:00Z');
+const precisionHold=run(timedPayload([dateOnly,dmyDateOnly,mixedPrecision]));
+assert.deepEqual(Array.from(precisionHold.home.openDossierIds),[]);
+for(const id of ['date-only','dmy-date-only','mixed-precision']){
+  assert.equal(precisionHold.freshnessGuard.dossierStatusOverrides[id],'REVIEW');
+}
+const preciseDmy=timedOpen('precise-dmy','16.11.2026 16:00:00');
+assert.deepEqual(Array.from(run(timedPayload([preciseDmy])).home.openDossierIds),['precise-dmy'],
+  'exact Romanian official clock continues to authorize only within verified scope');
+// Compact-home and lazy decision-hub must never disagree on date-only OPEN.
+
 // Zoneless ISO datetimes are unsafe: Date.parse uses the browser's
 // timezone, which could keep an already expired call OPEN. Explicitly
 // offset-bearing ISO remains actionable up to the exact instant.
