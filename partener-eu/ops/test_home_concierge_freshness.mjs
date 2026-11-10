@@ -89,6 +89,31 @@ assert.equal(isOpen(record('OPEN',{'Status':'CLOSED','Termen':'16 noiembrie 2026
 fixedNow=Date.parse('2026-11-07T19:00:00Z');
 
 
+// Independent compact-home gate must remain fail-closed even if the
+// separate decision-hub freshnessGuard is not loaded yet.
+fixedNow=Date.parse('2026-11-10T10:00:00Z');
+assert.equal(isOpen(timedOpen('2026-11-11T00:00:00')),false,
+ 'timezone-free ISO timestamp must never authorize OPEN');
+assert.equal(isOpen(timedOpen('2026-11-11T00:00:00+02:00')),true,
+ 'equivalent offset-qualified exact timestamp remains valid before cutoff');
+assert.equal(isOpen(timedOpen('2026-11-31T12:00:00+02:00')),false,
+ 'browser-normalized impossible ISO calendar date must never authorize OPEN');
+assert.equal(isOpen(timedOpen('2026-11-11T25:00:00+02:00')),false,
+ 'invalid official hour must fail closed');
+assert.equal(isOpen({...timedOpen('2026-11-11T00:00:00+02:00'),
+  closesAt:'2026-11-06T12:00:00+02:00'}),false,
+ 'competing expired top-level cutoff must hold even with future confirmed fact');
+assert.equal(isOpen({...timedOpen('2026-11-11T00:00:00+02:00'),
+  deadline:'Neconfirmat'}),false,
+ 'unparseable competing cutoff must not be silently ignored');
+assert.equal(isOpen({...timedOpen('2026-11-11T00:00:00+02:00'),
+  closesAt:'2026-11-11T00:00:00+02:00'}),true,
+ 'matching independent exact cutoffs retain valid OPEN state');
+fixedNow=Date.parse('2026-11-10T22:00:00Z');
+assert.equal(isOpen(timedOpen('2026-11-11T00:00:00+02:00')),false,
+ 'at the precise official deadline, OPEN must already be held');
+fixedNow=Date.parse('2026-11-07T19:00:00Z');
+
 // The lazily loaded decision-hub freshness guard must not mistake an old
 // successful ingestion timestamp for "now". This regression exercises its
 // complete projection against November 10 while its LKG is from November 3.
