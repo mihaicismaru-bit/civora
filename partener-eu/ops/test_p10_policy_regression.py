@@ -134,6 +134,18 @@ if not has_exact_yaml_scalar(mipe_nas_workflow, "group", "partener-eu-mipe-ro-cr
 if not has_exact_yaml_scalar(mipe_nas_workflow, "cancel-in-progress", "false"):
     errors.append("hourly MIPE NAS schedule can cancel in-flight acquisition before handoff")
 
+# Verified Registry is a single, serialized hourly source-health/acquisition job.
+# 2026-11-10 exact-head run 42876369268 spent 10m54s in 68 source probes,
+# then reached its old 12m job timeout before MIPE T1 and Interreg artifacts.
+# Keep a strict sub-hour bound while preserving time for raw handoff/replay.
+if not has_exact_yaml_scalar(source_registry_workflow, "group", "partener-eu-source-registry"):
+    errors.append("Verified Source Registry lost its single-run source acquisition lock")
+if not has_exact_yaml_scalar(source_registry_workflow, "cancel-in-progress", "false"):
+    errors.append("Verified Source Registry may cancel an in-flight immutable handoff")
+registry_budget = re.search(r"(?m)^    timeout-minutes: (\\d+)\\s*$", source_registry_workflow)
+if not registry_budget or not 25 <= int(registry_budget.group(1)) <= 45:
+    errors.append("Verified Source Registry needs a bounded 25-45m acquisition/replay budget")
+
 for workflow_name, workflow in [
     ("PARTENER.EU Pages", pages_workflow),
     ("PARTENER.EU Go Live", go_live_workflow),
