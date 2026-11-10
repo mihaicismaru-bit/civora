@@ -99,12 +99,27 @@ def main():
         "failed probe invented a raw official receipt",
     )
     receipt = reconcile_live_evidence(partial)
+    check(receipt["source_schema"] == live.SCHEMA, "V2 source schema detached in reconciliation")
     check(receipt["stats"]["ready_for_staging"] == 0, "failed probe became staging-ready")
     check(receipt["stats"]["review_required"] == 3, "failed probe escaped quarantine")
     quarantined_failed = next(
         item for item in receipt["quarantined_records"] if item["probe_id"] == failure["probe_id"]
     )
     check(quarantined_failed["fetched_at"] is None, "reconciliation fabricated fetch success")
+    # Old immutable V1 receipts retain the original historical failed-row
+    # timestamp semantics for replay; they are never silently rewritten to V2.
+    legacy = json.loads(json.dumps(partial))
+    legacy["schema"] = live.LEGACY_SCHEMA
+    legacy["parser_version"] = "INTERREG_CALL_LIVE_FETCH_V1"
+    for row in legacy["rows"]:
+        row.pop("attempted_at", None)
+        if row["fetch_status"] == "FAIL":
+            row["fetched_at"] = legacy["created_at"]  # historical V1 shape
+    live.validate_envelope(legacy)
+    legacy_receipt = reconcile_live_evidence(legacy)
+    check(legacy_receipt["source_schema"] == live.LEGACY_SCHEMA, "V1 replay schema lost")
+    check(legacy_receipt["stats"]["ready_for_staging"] == 0, "historical V1 control became OPEN")
+
     for field, forged in (
         ("fetched_at", "2026-11-10T19:47:50Z"),
         ("raw_hash", "0" * 64),
