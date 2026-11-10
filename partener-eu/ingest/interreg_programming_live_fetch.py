@@ -28,7 +28,8 @@ from interreg_programming_intelligence import OFFICIAL_HOSTS, normalize_programm
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "partener-eu" / "ingest" / "source_registry.json"
-SCHEMA = "PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V1"
+SCHEMA = "PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V2"
+LEGACY_SCHEMA = "PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V1"
 # Closed provenance schema: forged convenience fields cannot grant publication
 # authority just because a downstream reader trusts an evidence manifest.
 ENVELOPE_KEYS = frozenset({
@@ -38,7 +39,7 @@ ENVELOPE_KEYS = frozenset({
 })
 ROW_COMMON_KEYS = frozenset({
     "source_id", "source_owner", "registered_url", "programme",
-    "fetched_at", "run_id", "publication_effect", "publish_authorized",
+    "attempted_at", "fetched_at", "run_id", "publication_effect", "publish_authorized",
     "material_fact_use", "fetch_status",
 })
 ROW_PASS_KEYS = ROW_COMMON_KEYS | {
@@ -46,6 +47,10 @@ ROW_PASS_KEYS = ROW_COMMON_KEYS | {
     "bytes", "raw_hash", "normalized",
 }
 ROW_FAIL_KEYS = ROW_COMMON_KEYS | {"error_type", "error"}
+# Old V1 receipts are immutable archival evidence: their failed-row fetched_at
+# was a failure-observation time, NEVER proof of original document acquisition.
+LEGACY_ROW_PASS_KEYS = ROW_PASS_KEYS - {"attempted_at"}
+LEGACY_ROW_FAIL_KEYS = ROW_FAIL_KEYS - {"attempted_at"}
 WORKSHOPS_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026"
 WORKSHOPS_IDENTITY_TERMS = ("2028-2034", "17 noiembrie 2026", "20 noiembrie 2026", "28 octombrie 2026")
 ROHU_SURVEY_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026"
@@ -383,7 +388,8 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
             "source_owner": source.get("owner"),
             "registered_url": url,
             "programme": programme,
-            "fetched_at": observed_at,
+            "attempted_at": _utc_now(),
+            "fetched_at": None,
             "run_id": run,
             "publication_effect": "NONE",
             "publish_authorized": False,
@@ -433,9 +439,9 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
             )
         except Exception as exc:
             errors += 1
-            # A failed request is observed at failure time, too. Its receipt
-            # must never inherit the stale run-start timestamp.
-            row["fetched_at"] = _utc_now()
+            # An attempted fetch is NOT an acquired original; never issue a
+            # successful fetched_at or raw hash for HTTP/TLS/parser failures.
+            row["fetched_at"] = None
             row.update(
                 {
                     "fetch_status": "FAIL",
@@ -471,8 +477,9 @@ def validate_envelope(data: dict[str, Any]) -> None:
         raise ValueError("unexpected Interreg evidence envelope keys")
     if not isinstance(data.get("rows"), list):
         raise ValueError("Interreg evidence rows must be a list")
-    if data.get("schema") != SCHEMA:
+    if data.get("schema") not in (SCHEMA, LEGACY_SCHEMA):
         raise ValueError("unexpected live-evidence schema")
+    legacy = data["schema"] == LEGACY_SCHEMA
     if data.get("publication_effect") != "NONE":
         raise ValueError("live programming evidence must have publication_effect=NONE")
     if data.get("canonical_corpus_mutation") is not False:
@@ -482,9 +489,19 @@ def validate_envelope(data: dict[str, Any]) -> None:
     for row in data["rows"]:
         if not isinstance(row, dict):
             raise ValueError("invalid Interreg source row")
-        allowed = ROW_PASS_KEYS if row.get("fetch_status") == "PASS" else ROW_FAIL_KEYS
+        allowed = (
+            (LEGACY_ROW_PASS_KEYS if legacy else ROW_PASS_KEYS)
+            if row.get("fetch_status") == "PASS"
+            else (LEGACY_ROW_FAIL_KEYS if legacy else ROW_FAIL_KEYS)
+        )
         if set(row) != allowed:
             raise ValueError(f"unexpected Interreg source row keys: {row.get('source_id')}")
+        if not legacy:
+            _strict_utc_receipt_time(row.get("attempted_at"))
+            if row.get("fetch_status") == "FAIL" and row.get("fetched_at") is not None:
+                raise ValueError("failed Interreg programming fetch cannot claim fetched_at")
+            if row.get("fetch_status") == "PASS":
+                _strict_utc_receipt_time(row.get("fetched_at"))
         if row.get("publication_effect") != "NONE":
             raise ValueError(f"Interreg source row attempted publication: {row.get('source_id')}")
         if row.get("publish_authorized") is not False or row.get("material_fact_use") is not False:
@@ -522,7 +539,8 @@ def replay_live_evidence(
     observed_states: dict[str, int] = {}
     pass_count = 0
     receipt_created_at = _strict_utc_receipt_time(evidence.get("created_at"))
-    last_fetched_at: dt.datetime | None = None
+    last_observed_at: dt.datetime | None = None
+    legacy = evidence.get("schema") == LEGACY_SCHEMA
     if not str(evidence.get("run_id") or "").strip():
         raise ValueError("Interreg raw evidence missing run_id")
     for row in rows:
@@ -530,12 +548,23 @@ def replay_live_evidence(
         if source_id in seen_ids or source_id not in registered:
             raise ValueError("duplicate or unregistered Interreg evidence source")
         seen_ids.add(source_id)
-        row_fetched_at = _strict_utc_receipt_time(row.get("fetched_at"))
-        if row_fetched_at > receipt_created_at or (
-            last_fetched_at is not None and row_fetched_at < last_fetched_at
+        # V2 differentiates an unsuccessful attempt from a verified original.
+        # Replay V1 archives only for continuity; a V1 failure's timestamp
+        # must never become a successful acquired-document timestamp.
+        row_event_at = _strict_utc_receipt_time(
+            row.get("fetched_at") if legacy else row.get("attempted_at")
+        )
+        if row_event_at > receipt_created_at or (
+            last_observed_at is not None and row_event_at < last_observed_at
         ):
             raise ValueError("Interreg receipt chronology invalid")
-        last_fetched_at = row_fetched_at
+        if row.get("fetch_status") == "PASS":
+            verified_at = _strict_utc_receipt_time(row.get("fetched_at"))
+            if verified_at < row_event_at or verified_at > receipt_created_at:
+                raise ValueError("Interreg receipt chronology invalid")
+            last_observed_at = verified_at
+        else:
+            last_observed_at = row_event_at
         source = registered[source_id]
         if (
             row.get("registered_url") != source.get("url")
