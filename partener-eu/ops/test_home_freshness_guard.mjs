@@ -84,4 +84,41 @@ assert.notEqual(pids.status,'OPEN','Expired PIDS static snapshot must fail close
 assert.equal(pids.close,'28 august 2026, 16:00','Historical PIDS deadline must be preserved.');
 assert.equal(clusters.status,'OPEN','Fail-closed sanitation must not blanket-demote unrelated current OPEN records.');
 
-console.log('PASS home-freshness-guard-v1.2: wall clock vs historic LKG, expired/provisional/undated OPEN held REVIEW; static boot remains guarded; replay deterministic.');
+// A Romanian-language exact time must expire at the official local hour,
+// not at 23:59 UTC. November is EET (UTC+2), July is EEST (UTC+3).
+const timedOpen=(id,deadline,extra={})=>({
+  id,status:'OPEN',publicationState:'PUBLISHABLE',title:id,
+  quickFacts:[{label:'Status',value:'OPEN',confidence:'CONFIRMED'},
+              {label:'Termen',value:deadline,confidence:'CONFIRMED'}],
+  ...extra
+});
+const timedPayload=(dossiers)=>({generatedAt:'2026-10-01T00:00:00Z',dossiers,
+  home:{openDossierIds:dossiers.map(d=>d.id),prepareDossierIds:[]},summary:{openCount:dossiers.length,prepareCount:0}});
+const roNoon=timedOpen('ro-noon','6 noiembrie 2026, ora 12:00');
+fakeNow=Date.parse('2026-11-06T09:59:59Z');
+assert.deepEqual(Array.from(run(timedPayload([roNoon])).home.openDossierIds),['ro-noon']);
+fakeNow=Date.parse('2026-11-06T10:00:01Z');
+const expiredNoon=run(timedPayload([roNoon]));
+assert.deepEqual(Array.from(expiredNoon.home.openDossierIds),[]);
+assert.equal(expiredNoon.freshnessGuard.dossierStatusOverrides['ro-noon'],'REVIEW');
+const julyNoon=timedOpen('summer-noon','1 iulie 2026, ora 12:00');
+fakeNow=Date.parse('2026-07-01T08:59:59Z');
+assert.deepEqual(Array.from(run(timedPayload([julyNoon])).home.openDossierIds),['summer-noon']);
+fakeNow=Date.parse('2026-07-01T09:00:01Z');
+assert.deepEqual(Array.from(run(timedPayload([julyNoon])).home.openDossierIds),[]);
+
+// Competing deadlines cannot be resolved by taking the latest timestamp:
+// e.g. stale top-level Nov 30 vs confirmed call cutoff Nov 6.
+const contradictory=timedOpen('conflict','2026-11-06T12:00:00+02:00',
+  {closesAt:'2026-11-30T16:00:00+02:00'});
+fakeNow=Date.parse('2026-11-05T10:00:00Z');
+const held=run(timedPayload([contradictory]));
+assert.deepEqual(Array.from(held.home.openDossierIds),[]);
+assert.equal(held.freshnessGuard.dossierStatusOverrides.conflict,'REVIEW');
+// Unsupported/ambiguous time around the Bucharest DST transition also holds.
+const ambiguous=timedOpen('ambiguous','25 octombrie 2026, ora 03:30');
+fakeNow=Date.parse('2026-10-24T08:00:00Z');
+assert.deepEqual(Array.from(run(timedPayload([ambiguous])).home.openDossierIds),[]);
+fakeNow=Date.parse('2026-08-26T04:00:00Z');
+
+console.log('PASS home-freshness-guard-v1.3: wall clock vs historic LKG, expired/provisional/undated OPEN held REVIEW; static boot remains guarded; replay deterministic.');
