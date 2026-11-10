@@ -142,6 +142,18 @@ function confirmedFact(d,label){
   return (d?.quickFacts||[]).find(f=>String(f?.label||'').toLowerCase()===label&&String(f?.confidence||'').toUpperCase()==='CONFIRMED');
 }
 
+// An OPEN deadline without a verified hour/offset is not an exact cutoff.
+// A date-only source does not authorize assuming end-of-day. That historic
+// convention is useful for archival dates, never for a live OPEN badge.
+// Keep the compact homepage and decision-hub projections equally fail-closed.
+function hasExactDeadlineClock(value){
+  if(typeof value!=='string')return false;
+  const raw=value.trim();
+  if(/^20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(raw))return true;
+  if(/^\d{1,2}[./]\d{1,2}[./]20\d{2}\s*,?\s*(?:(?:la\s+)?ora\s*)?\d{1,2}[:.]\d{2}(?::\d{2})?$/i.test(raw))return true;
+  return /^\d{1,2}\s+(?:ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+20\d{2}\s*,?\s*(?:(?:la\s+)?ora\s*)?\d{1,2}[:.]\d{2}(?::\d{2})?$/i.test(raw);
+}
+
 function closeTimestamp(d){
   const values=[];
   for(const key of ['deadline','closesAt','closeAt'])if(d?.[key]!=null)values.push(d[key]);
@@ -149,8 +161,11 @@ function closeTimestamp(d){
   if(deadline?.value!=null)values.push(deadline.value);
   // Every present cutoff must parse and reconcile. Silently dropping an
   // unparseable (potentially newer) deadline would authorize a false OPEN.
+  // Every competing top-level or confirmed source cutoff must carry an exact
+  // clock. Otherwise review, even if another field supplies a future hour.
+  if(!values.length||values.some(value=>!hasExactDeadlineClock(value)))return null;
   const timestamps=values.map(toTimestamp);
-  return timestamps.length&&timestamps.every(ts=>ts!=null&&Number.isFinite(ts)&&ts===timestamps[0])?timestamps[0]:null;
+  return timestamps.every(ts=>ts!=null&&Number.isFinite(ts)&&ts===timestamps[0])?timestamps[0]:null;
 }
 
 function currentOpenState(d){
