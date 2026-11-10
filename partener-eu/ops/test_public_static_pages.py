@@ -113,6 +113,47 @@ matching_deadline = json.loads(json.dumps(future_open))
 matching_deadline["deadline"] = "2026-11-20T23:59:00+02:00"
 assert module.current_open(matching_deadline, semantic_clock)
 
+# DR-12 source announced two monthly scoring stages on 1 October 2026.
+# Protect applicant actions from advising the finished 80-point first stage
+# after 5 November; do not invent/auto-promote the following 45-point stage.
+dr12_stage_action = {
+    "id": "afir-dr12-2026", "title": "DR-12",
+    "publicationState": "PUBLISHABLE", "status": "OPEN",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2026-12-02T16:00:00+02:00", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Ce trebuie făcut acum", "items": [
+            "Confirmă forma juridică.",
+            "Simulează punctajul pentru pragul de 80 de puncte al primei etape.",
+        ]},
+        {"title": "Cum se punctează", "items": [
+            "Prag de calitate: 80 puncte în perioada 6 octombrie – 5 noiembrie 2026.",
+            "Prag de calitate: 45 puncte în perioada 6 noiembrie – 2 decembrie 2026.",
+        ]},
+    ],
+}
+before_stage = module.parse_date("2026-11-05T21:00:00Z")  # 23:00 Bucharest
+after_stage = module.parse_date("2026-11-05T22:00:00Z")  # 00:00 Bucharest, 6 Nov
+assert before_stage and after_stage
+assert module.current_open(dr12_stage_action, after_stage)
+assert module.fail_closed_render_dossier(dr12_stage_action, before_stage) is dr12_stage_action
+stage_guarded = module.fail_closed_render_dossier(dr12_stage_action, after_stage)
+assert stage_guarded is not dr12_stage_action
+assert stage_guarded["status"] == "OPEN"  # no new lifecycle assertion
+assert "80 de puncte al primei etape" not in " ".join(stage_guarded["sections"][0]["items"])
+assert "pragul de calitate al etapei curente" in " ".join(stage_guarded["sections"][0]["items"])
+assert stage_guarded["sections"][0]["items"][0] == "Confirmă forma juridică."
+assert stage_guarded["sections"][1] == dr12_stage_action["sections"][1]  # historical record preserved
+assert "80 de puncte al primei etape" in " ".join(dr12_stage_action["sections"][0]["items"])
+different_call = json.loads(json.dumps(dr12_stage_action))
+different_call["id"] = "other-programme"
+assert module.fail_closed_render_dossier(different_call, after_stage) is different_call
+current_stage = json.loads(json.dumps(dr12_stage_action))
+current_stage["sections"][0]["items"][1] = "Verifică pragul curent de 45 puncte în ghid."
+assert module.fail_closed_render_dossier(current_stage, after_stage) is current_stage
+
 # Consultation freshness is fail-closed just like OPEN freshness.
 consultation_clock = module.parse_date("2026-09-26T12:00:00Z")
 assert consultation_clock is not None
