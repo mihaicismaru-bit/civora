@@ -76,6 +76,43 @@ assert "DESCHIS" not in expired_card
 assert "Sunt confirmate: open" not in expired_card
 assert module.FAIL_CLOSED_OPEN_STANDFIRST in expired_card
 
+# Cross-surface semantic reconciliation: an authoritative CONFIRMED status
+# that disagrees with the stale OPEN field must not survive static rendering.
+# Nor may a later top-level cutoff overrule the confirmed Termen fact.
+semantic_clock = module.parse_date("2026-11-10T00:25:00Z")
+assert semantic_clock is not None
+future_open = json.loads(json.dumps(expired_open_probe))
+for row in future_open["quickFacts"]:
+    if row["label"] == "Termen":
+        row["value"] = "2026-11-20T23:59:00+02:00"
+assert module.current_open(future_open, semantic_clock)
+confirmed_closed = json.loads(json.dumps(future_open))
+for row in confirmed_closed["quickFacts"]:
+    if row["label"] == "Status":
+        row["value"] = "CLOSED"
+assert not module.current_open(confirmed_closed, semantic_clock)
+assert module.fail_closed_render_dossier(confirmed_closed, semantic_clock)["status"] == "REVIEW"
+confirmed_review = json.loads(json.dumps(future_open))
+for row in confirmed_review["quickFacts"]:
+    if row["label"] == "Status":
+        row["value"] = "REVIEW"
+assert not module.current_open(confirmed_review, semantic_clock)
+confirmed_ro_open = json.loads(json.dumps(future_open))
+for row in confirmed_ro_open["quickFacts"]:
+    if row["label"] == "Status":
+        row["value"] = "DESCHIS"
+assert module.current_open(confirmed_ro_open, semantic_clock)
+conflicting_deadline = json.loads(json.dumps(future_open))
+conflicting_deadline["deadline"] = "2026-12-02T23:59:00+02:00"
+assert not module.current_open(conflicting_deadline, semantic_clock)
+assert module.fail_closed_render_dossier(conflicting_deadline, semantic_clock)["status"] == "REVIEW"
+invalid_deadline = json.loads(json.dumps(future_open))
+invalid_deadline["closesAt"] = "ora imposibilă"
+assert not module.current_open(invalid_deadline, semantic_clock)
+matching_deadline = json.loads(json.dumps(future_open))
+matching_deadline["deadline"] = "2026-11-20T23:59:00+02:00"
+assert module.current_open(matching_deadline, semantic_clock)
+
 # Consultation freshness is fail-closed just like OPEN freshness.
 consultation_clock = module.parse_date("2026-09-26T12:00:00Z")
 assert consultation_clock is not None
