@@ -50,6 +50,21 @@ function toTimestamp(value){
   // Never fall back to the host engine's lenient date parser when an
   // official-looking Romanian date has an unsupported/ambiguous clock.
   if(/^\d{1,2}[./]\d{1,2}[./]20\d{2}/.test(raw))return null;
+  // Browser Date.parse interprets zoneless ISO datetimes in the VIEWER'S
+  // local timezone (and differs from Python UTC parsing). No official
+  // offset means no authority to present an OPEN / active consultation.
+  // A syntactically valid offset alone is not enough: reject impossible
+  // calendar dates that browser parsers may normalize silently.
+  if(/^20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}/.test(raw)){
+    const match=raw.match(/^(20\d{2})-(\d{2})-(\d{2})[Tt ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-]\d{2}:\d{2})$/i);
+    if(!match)return null;
+    const [,year,month,day,hour,minute,second,,offset]=match;
+    const calendar=new Date(Date.UTC(Number(year),Number(month)-1,Number(day)));
+    if(calendar.getUTCFullYear()!==Number(year)||calendar.getUTCMonth()!==Number(month)-1||calendar.getUTCDate()!==Number(day)||
+       Number(hour)>23||Number(minute)>59||Number(second||0)>59||(!/z/i.test(offset)&&Number(offset.slice(-2))>59))return null;
+    const stamp=Date.parse(raw);
+    return Number.isFinite(stamp)?stamp:null;
+  }
   const iso=Date.parse(raw);
   if(!Number.isNaN(iso))return iso;
   const ymd=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
