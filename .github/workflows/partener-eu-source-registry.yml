@@ -203,7 +203,20 @@ jobs:
           if d.get('publication_effect') != 'NONE' or d.get('canonical_corpus_mutation') is not False or d.get('publish_authorized') is not False:
               print('FAIL unsafe Interreg programming envelope')
               sys.exit(2)
+          if d.get('schema') != 'PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V2':
+              print('FAIL stale Interreg programming provenance schema')
+              sys.exit(2)
           rows={row.get('source_id'): row for row in d.get('rows', [])}
+          for row in rows.values():
+              if not row.get('attempted_at'):
+                  print('FAIL missing per-source Interreg attempted_at:', row.get('source_id'))
+                  sys.exit(2)
+              if row.get('fetch_status') == 'FAIL' and row.get('fetched_at') is not None:
+                  print('FAIL Interreg failed source fabricated fetched_at:', row.get('source_id'))
+                  sys.exit(2)
+              if row.get('fetch_status') == 'PASS' and not row.get('fetched_at'):
+                  print('FAIL Interreg successful source lacks verified fetched_at:', row.get('source_id'))
+                  sys.exit(2)
           if 'SRC-INTERREG-ROHU' in rows:
               print('FAIL current Romania-Hungary 2021-2027 source leaked into future-programming selector')
               sys.exit(2)
