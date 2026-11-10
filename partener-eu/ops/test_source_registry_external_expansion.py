@@ -171,10 +171,56 @@ def fail(msg):
     raise SystemExit(f"FAIL: {msg}")
 
 
+PDDTJ_OI_DISCOVERIES = {
+    "SRC-ADRVEST-PDDTJ-PARKS-1794-2026": {
+        "url": "https://adrvest.ro/parcuri-industriale-si-tehnologice/",
+        "state": "GUIDE_AMENDMENT_DISCOVERED_RAW_PENDING",
+        "scope": "GUIDE_AMENDMENT_DISCOVERY_ONLY",
+        "adapter": "PDDTJ_T1_PRIMARY_ORDER_AND_MYSMIS_RECONCILE",
+        "family": "GUIDE_AMENDMENT",
+    },
+    "SRC-ADRCENTRU-PDDTJ-DISABILITY-HOUSING-CONSULT-20261106": {
+        "url": "https://www.adrcentru.ro/comunicare/consultare-publica-pddtj-ghidul-solicitantului-actiunea-2-locuinte-sociale-din-cadrul-programului-dezvoltare-durabila-si-tranzitie-justa/",
+        "state": "PUBLIC_CONSULTATION_DISCOVERED_RAW_PENDING",
+        "scope": "CONSULTATION_DISCOVERY_ONLY",
+        "adapter": "PDDTJ_T1_PRIMARY_GUIDE_DATE_RECONCILE",
+        "family": "CONSULTATION",
+    },
+}
+
+
 def main():
     data = json.loads(REGISTRY.read_text(encoding="utf-8"))
     plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
     by_id = {row["id"]: row for row in data.get("sources", [])}
+
+    # The exact delegated-OI documents are monitored as discovery-only sources.
+    # Raw originals from MIPE and MySMIS must be reconciled before any material
+    # fact or publication; neither a new guide annex nor a draft opens a call.
+    for source_id, expected in PDDTJ_OI_DISCOVERIES.items():
+        row = by_id.get(source_id)
+        if row is None:
+            fail(f"missing PDDTJ OI exact-source monitor: {source_id}")
+        if (row.get("tier"), row.get("url"), row.get("observation_state"),
+                row.get("authority_scope"), row.get("adapter_required")) != (
+                "T1B", expected["url"], expected["state"],
+                expected["scope"], expected["adapter"]):
+            fail(f"{source_id} lost exact OI identity, stage or T1 reconciliation gate")
+        if row.get("programmes") != ["PDDTJ"] or not {
+            "ROMANIA", "MIPE_OI", expected["family"],
+        }.issubset(set(row.get("source_families") or [])):
+            fail(f"{source_id} missing programme or source-family identity")
+        if (row.get("material_fact_use") is not False
+                or row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False):
+            fail(f"{source_id} illegally promotes a draft/guide amendment into material facts")
+        if row.get("credentials_required") is not False:
+            fail(f"{source_id} must be a public official OI observation")
+        if any(key in row for key in (
+                "status", "deadline", "budget", "eligibility",
+                "open_at", "close_at", "fetched_at", "raw_sha256",
+                "parser_version", "run_id", "handoff_sha256")):
+            fail(f"{source_id} inserted invented facts or missing raw provenance")
     programme_domains = plane.get("programmeDomains") or {}
 
     missing = sorted(set(REQUIRED) - set(by_id))
