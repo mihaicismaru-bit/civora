@@ -19,6 +19,8 @@ on:
       - 'partener-eu/ops/test_source_registry_task_revert.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
@@ -43,6 +45,8 @@ on:
       - 'partener-eu/ops/test_source_registry_task_revert.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ops/test_interreg_programming_intelligence.py'
       - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
@@ -97,6 +101,9 @@ jobs:
       - name: Regression — external source and future-programming taxonomy stays fail-closed
         run: python partener-eu/ops/test_source_registry_external_expansion.py
 
+      - name: Regression — PDDTJ delegated OI raw capture cannot authorize calls
+        run: python partener-eu/ops/test_pddtj_oi_discovery_acquire.py
+
       - name: Regression — Interreg programming dates override stale open copy
         run: python partener-eu/ops/test_interreg_programming_intelligence.py
 
@@ -120,6 +127,29 @@ jobs:
 
       - name: Probe classified official sources without changing facts
         run: python partener-eu/ingest/source_registry_probe.py
+
+      - name: Capture PDDTJ delegated OI HTML originals (discovery only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/pddtj_oi_discovery_acquire.py \
+            --out /tmp/partener-pddtj-oi-handoff.json \
+            --raw-dir "/tmp/partener-pddtj-oi-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/pddtj_oi_discovery_acquire.py \
+            --out /tmp/partener-pddtj-oi-handoff.json \
+            --raw-dir "/tmp/partener-pddtj-oi-originals-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --replay-manifest /tmp/partener-pddtj-oi-handoff.json
+
+      - name: Archive immutable PDDTJ delegated OI evidence (not MIPE T1)
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-pddtj-delegated-oi-discovery-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/partener-pddtj-oi-handoff.json
+            /tmp/partener-pddtj-oi-originals-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Capture live Interreg programming evidence without changing facts
         run: |
