@@ -153,10 +153,12 @@ const validIsoDay=timedOpen('valid-iso-day','2026-03-31');
 const impossibleIsoDay=timedOpen('impossible-iso-day','2026-02-31');
 fakeNow=Date.parse('2026-02-28T12:00:00Z');
 const isoDayResult=run(timedPayload([validIsoDay,impossibleIsoDay]));
-assert.deepEqual(Array.from(isoDayResult.home.openDossierIds),['valid-iso-day']);
+assert.deepEqual(Array.from(isoDayResult.home.openDossierIds),[],
+  'valid ISO date-only is archival context, never a precise OPEN cutoff');
+assert.equal(isoDayResult.freshnessGuard.dossierStatusOverrides['valid-iso-day'],'REVIEW');
 assert.equal(isoDayResult.freshnessGuard.dossierStatusOverrides['impossible-iso-day'],'REVIEW');
-// AFIR DR-12's component counter is DD.MM.YYYY at local MIDNIGHT. It
-// must not survive until UTC midnight; date-only and slash forms use RO time.
+// AFIR DR-12's component counter includes a DD.MM.YYYY HH:mm:ss local
+// clock, not an inferred date-only EOD. It must not survive until UTC midnight.
 const afirMidnight=timedOpen('afir-dr12-other','11.11.2026 00:00:00');
 const afirSlash=timedOpen('afir-dr12-slash','11/11/2026 00:00:00');
 fakeNow=Date.parse('2026-11-10T21:59:59Z');
@@ -194,7 +196,9 @@ const embeddedClocks=timedPayload([
 ]);
 const embeddedResult=run(embeddedClocks);
 assert.deepEqual(Array.from(embeddedResult.home.openDossierIds),
-  ['embedded-valid-ymd','exact-official-dmy']);
+  ['exact-official-dmy']);
+assert.equal(embeddedResult.freshnessGuard.dossierStatusOverrides['embedded-valid-ymd'],'REVIEW',
+  'embedded date-only prose must not authorize an OPEN cutoff');
 for(const id of ['embedded-zoneless','embedded-dmy-hour','embedded-invalid-ymd','embedded-invalid-dmy']){
   assert.equal(embeddedResult.freshnessGuard.dossierStatusOverrides[id],'REVIEW',id);
 }
