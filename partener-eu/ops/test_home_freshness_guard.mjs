@@ -115,6 +115,19 @@ fakeNow=Date.parse('2026-11-05T10:00:00Z');
 const held=run(timedPayload([contradictory]));
 assert.deepEqual(Array.from(held.home.openDossierIds),[]);
 assert.equal(held.freshnessGuard.dossierStatusOverrides.conflict,'REVIEW');
+// Zoneless ISO datetimes are unsafe: Date.parse uses the browser's
+// timezone, which could keep an already expired call OPEN. Explicitly
+// offset-bearing ISO remains actionable up to the exact instant.
+const unzonedIso=timedOpen('unzoned-iso','2026-11-11T00:00:00');
+const zonedIso=timedOpen('zoned-iso','2026-11-11T00:00:00+02:00');
+const impossibleIso=timedOpen('impossible-iso','2026-02-31T00:00:00+02:00');
+fakeNow=Date.parse('2026-11-10T21:59:59Z');
+const isoBefore=run(timedPayload([unzonedIso,zonedIso,impossibleIso]));
+assert.deepEqual(Array.from(isoBefore.home.openDossierIds),['zoned-iso']);
+assert.equal(isoBefore.freshnessGuard.dossierStatusOverrides['unzoned-iso'],'REVIEW');
+assert.equal(isoBefore.freshnessGuard.dossierStatusOverrides['impossible-iso'],'REVIEW');
+fakeNow=Date.parse('2026-11-10T22:00:01Z');
+assert.deepEqual(Array.from(run(timedPayload([unzonedIso,zonedIso])).home.openDossierIds),[]);
 // AFIR DR-12's component counter is DD.MM.YYYY at local MIDNIGHT. It
 // must not survive until UTC midnight; date-only and slash forms use RO time.
 const afirMidnight=timedOpen('afir-dr12-other','11.11.2026 00:00:00');
