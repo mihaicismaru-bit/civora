@@ -37,6 +37,19 @@ function toTimestamp(value){
   }
   const raw=String(value).trim();
   if(!raw||/neconfirmat|necunoscut|unknown/i.test(raw))return null;
+  // AFIR's official counters use Romanian DD.MM.YYYY HH:mm:ss (or
+  // DD/MM/YYYY). Date.parse interprets these inconsistently as US/UTC dates,
+  // potentially keeping a component OPEN past its local midnight cutoff.
+  const dmyLocal=raw.match(/^(\\d{1,2})[./](\\d{1,2})[./](20\\d{2})(?:\\s*,?\\s*(?:(?:la\\s+)?ora\\s*)?(\\d{1,2})[:.](\\d{2})(?::(\\d{2}))?)?$/i);
+  if(dmyLocal){
+    const [,day,month,year,hour,minute,second]=dmyLocal;
+    return bucharestLocalMs(Number(year),Number(month)-1,Number(day),
+      hour==null?23:Number(hour),minute==null?59:Number(minute),second==null?59:Number(second),
+      hour==null?999:0);
+  }
+  // Never fall back to the host engine's lenient date parser when an
+  // official-looking Romanian date has an unsupported/ambiguous clock.
+  if(/^\\d{1,2}[./]\\d{1,2}[./]20\\d{2}/.test(raw))return null;
   const iso=Date.parse(raw);
   if(!Number.isNaN(iso))return iso;
   const ymd=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
@@ -93,10 +106,10 @@ function closeTimestamp(d){
   for(const key of ['deadline','closesAt','closeAt'])if(d?.[key]!=null)values.push(d[key]);
   const deadline=confirmedFact(d,'termen');
   if(deadline?.value!=null)values.push(deadline.value);
-  const timestamps=values.map(toTimestamp).filter(v=>v!=null&&Number.isFinite(v));
-  // A contradictory top-level deadline cannot overrule a CONFIRMED cutoff.
-  // Conflicting official-looking evidence is REVIEW, never the later OPEN.
-  return timestamps.length&&timestamps.every(ts=>ts===timestamps[0])?timestamps[0]:null;
+  // Every present cutoff must parse and reconcile. Silently dropping an
+  // unparseable (potentially newer) deadline would authorize a false OPEN.
+  const timestamps=values.map(toTimestamp);
+  return timestamps.length&&timestamps.every(ts=>ts!=null&&Number.isFinite(ts)&&ts===timestamps[0])?timestamps[0]:null;
 }
 
 function currentOpenState(d){
