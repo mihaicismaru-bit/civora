@@ -72,7 +72,8 @@ for required in (
     "confirmed(d,'Status')",
     "confirmed(d,'Termen')",
     "currentStatus(d)!=='OPEN'",
-    "parsed.getTime()>=Date.now()",
+    "rawClocks.map(parseDate)",
+    "clocks.every(t=>t&&t.getTime()===clocks[0]?.getTime()&&t.getTime()>Date.now())",
 ):
     if required not in concierge:
         errors.append(f"funding concierge contract missing: {required}")
