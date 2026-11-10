@@ -283,6 +283,38 @@ def requires_consultation_refresh(dossier: dict[str, Any], clock: dt.datetime) -
     )
 
 
+def guard_expired_dr12_stage_advice(
+    dossier: dict[str, Any], clock: dt.datetime
+) -> dict[str, Any]:
+    """Suppress an expired first-stage instruction; never infer a new threshold.
+
+    DR-12's first quality stage ended on 5 November 2026 (official AFIR
+    announcement dated 1 October). The following period's threshold is
+    evidence-watch only until canonical review. Static pages may not continue
+    telling applicants to simulate the already-ended first stage.
+    """
+    if (
+        str(dossier.get("id") or "") != "afir-dr12-2026"
+        or clock.astimezone(RO_TZ).date() < dt.date(2026, 11, 6)
+    ):
+        return dossier
+    guarded = None
+    for index, section in enumerate(dossier.get("sections") or []):
+        if fold(section.get("title")) != "ce trebuie facut acum":
+            continue
+        for item_index, item in enumerate(section.get("items") or []):
+            words = fold(item)
+            if "primei etape" not in words or not re.search(r"\\b80\\b", words):
+                continue
+            if guarded is None:
+                guarded = copy.deepcopy(dossier)
+            guarded["sections"][index]["items"][item_index] = (
+                "Verifică pragul de calitate al etapei curente în anunțul "
+                "și ghidul oficial AFIR înainte de depunere."
+            )
+    return guarded if guarded is not None else dossier
+
+
 def fail_closed_render_dossier(
     dossier: dict[str, Any], clock: dt.datetime
 ) -> dict[str, Any]:
@@ -295,7 +327,7 @@ def fail_closed_render_dossier(
     open_refresh = requires_open_refresh(dossier, clock)
     consultation_refresh = requires_consultation_refresh(dossier, clock)
     if not open_refresh and not consultation_refresh:
-        return dossier
+        return guard_expired_dr12_stage_advice(dossier, clock)
 
     rendered = copy.deepcopy(dossier)
     rendered["status"] = "REVIEW"
