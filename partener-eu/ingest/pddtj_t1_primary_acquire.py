@@ -129,6 +129,9 @@ def validate_replay(manifest, raw_dir, registry):
         raise ValueError("T1 candidate handoff fingerprint mismatch")
     if any(manifest.get(k) != v for k, v in OFF.items()):
         raise ValueError("T1 candidate crossed publication boundary")
+    if (not isinstance(manifest.get("run_id"), str)
+        or not re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", manifest["run_id"])):
+        raise ValueError("T1 replay run identity invalid")
     rows = manifest.get("rows")
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
         raise ValueError("T1 candidate row cardinality mismatch")
