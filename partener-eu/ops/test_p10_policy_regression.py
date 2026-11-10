@@ -142,7 +142,7 @@ if not has_exact_yaml_scalar(source_registry_workflow, "group", "partener-eu-sou
     errors.append("Verified Source Registry lost its single-run source acquisition lock")
 if not has_exact_yaml_scalar(source_registry_workflow, "cancel-in-progress", "false"):
     errors.append("Verified Source Registry may cancel an in-flight immutable handoff")
-registry_budget = re.search(r"(?m)^    timeout-minutes: (\\d+)\\s*$", source_registry_workflow)
+registry_budget = re.search(r"(?m)^    timeout-minutes: (\d+)\s*$", source_registry_workflow)
 if not registry_budget or not 25 <= int(registry_budget.group(1)) <= 45:
     errors.append("Verified Source Registry needs a bounded 25-45m acquisition/replay budget")
 
