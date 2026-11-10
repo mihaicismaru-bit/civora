@@ -78,6 +78,11 @@ def main():
             forged = copy.deepcopy(manifest)
             forged["rows"][0][key] = bad
             fail(lambda forged=forged: m.validate_replay(sealed(forged), path, reg), key)
+        invalid_run = copy.deepcopy(manifest)
+        invalid_run["run_id"] = "../path"
+        invalid_run["rows"][0]["run_id"] = "../path"
+        fail(lambda: m.validate_replay(sealed(invalid_run), path, reg),
+             "unsafe forged replay run id")
         altered_bytes = path / m.RAW_NAME
         altered_bytes.write_bytes(original() + b" changed")
         fail(lambda: m.validate_replay(manifest, path, reg), "modified original bytes")
