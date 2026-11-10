@@ -239,6 +239,38 @@ def main():
             "primary_t1_publication_effective_date")):
         fail("PDDTJ parks candidate invented successful T1 provenance or effect date")
 
+    # 05 Nov AM corrigendum is a contract-annex update, not an OPEN call.
+    # Search-index discovery is not an original-byte receipt for the notice/PDF.
+    clusters = by_id.get("SRC-PR-CENTRU-CLUSTERS-122-CORRIGENDUM2-20261105")
+    if not clusters:
+        fail("missing official PR Centru Clustere 1.2.2 corrigendum 2 monitor")
+    if (clusters.get("url") !=
+            "https://www.regiocentru.ro/corrigendum-nr-2-aferent-interventiei-1-2-2-clustere-inovative/"
+            or clusters.get("official_mirror_url") !=
+            "https://www.adrcentru.ro/comunicare/corrigendum-nr-2-aferent-interventiei-1-2-2-clustere-inovative/"
+            or clusters.get("exact_action_link_candidate") !=
+            "https://www.regiocentru.ro/actiuni/clustere-inovative-1-2-2/"
+            or clusters.get("event_date_discovery") != "2026-11-05"):
+        fail("Clustere corrigendum 2 lost official notice/action identity or dated discovery")
+    if (clusters.get("tier") != "T1"
+            or clusters.get("authority_scope") != "GUIDE_CORRIGENDUM_DISCOVERY_ONLY"
+            or clusters.get("observation_state") != "CORRIGENDUM_2_DISCOVERED_RAW_PENDING"
+            or clusters.get("adapter_required") != "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1"):
+        fail("Clustere corrigendum 2 source escaped discovery-only review")
+    if (clusters.get("programmes") != ["Programul Regiunea Centru 2021-2027"]
+            or not {"ROMANIA", "ADR", "GUIDE_CORRIGENDUM"}.issubset(
+                set(clusters.get("source_families") or []))):
+        fail("Clustere corrigendum 2 source lost programme/provenance family")
+    if (clusters.get("material_fact_use") is not False
+            or clusters.get("open_call_authorized") is not False
+            or clusters.get("material_fact_publication_authorized") is not False):
+        fail("Clustere corrigendum 2 fabricated OPEN or material publication authority")
+    if any(key in clusters for key in (
+            "status", "call_status", "deadline", "open_at", "close_at",
+            "budget", "eligibility", "fetched_at", "raw_sha256",
+            "parser_version", "run_id", "handoff_sha256")):
+        fail("Clustere corrigendum 2 invented call facts or unacquired raw receipt")
+
     programme_domains = plane.get("programmeDomains") or {}
 
     missing = sorted(set(REQUIRED) - set(by_id))
