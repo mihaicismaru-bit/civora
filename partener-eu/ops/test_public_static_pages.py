@@ -137,6 +137,31 @@ current_consultation = consultation_probe("29 septembrie 2026")
 assert module.current_consultation(expired_consultation, consultation_clock) is False
 assert module.current_consultation(unknown_consultation, consultation_clock) is False
 assert module.current_consultation(current_consultation, consultation_clock) is True
+# A future confirmed Termen does not override a conflicting confirmed Status
+# or a conflicting top-level deadline: all such observations render REVIEW.
+for contradicting_status in ("OPEN", "CLOSED", "REVIEW", "EXPECTED"):
+    probe = json.loads(json.dumps(current_consultation))
+    probe["quickFacts"][0]["value"] = contradicting_status
+    assert module.current_consultation(probe, consultation_clock) is False, contradicting_status
+    assert module.requires_consultation_refresh(probe, consultation_clock) is True
+    assert module.fail_closed_render_dossier(probe, consultation_clock)["status"] == "REVIEW"
+
+for inconsistent_field, inconsistent_value in (
+    ("deadline", "2026-09-30T23:59:59+03:00"),
+    ("closesAt", "neconfirmat"),
+    ("closeAt", "2026-09-27T23:59:59+03:00"),
+):
+    probe = json.loads(json.dumps(current_consultation))
+    probe[inconsistent_field] = inconsistent_value
+    assert module.current_consultation(probe, consultation_clock) is False, inconsistent_field
+    assert module.fail_closed_render_dossier(probe, consultation_clock)["status"] == "REVIEW"
+
+matching_consultation = json.loads(json.dumps(current_consultation))
+matching_consultation["deadline"] = "2026-09-29T23:59:59+03:00"
+assert module.current_consultation(matching_consultation, consultation_clock) is True
+romanian_consultation = json.loads(json.dumps(matching_consultation))
+romanian_consultation["quickFacts"][0]["value"] = "ÎN CONSULTARE"
+assert module.current_consultation(romanian_consultation, consultation_clock) is True
 assert module.requires_consultation_refresh(expired_consultation, consultation_clock) is True
 assert module.requires_consultation_refresh(unknown_consultation, consultation_clock) is True
 assert module.requires_consultation_refresh(current_consultation, consultation_clock) is False
