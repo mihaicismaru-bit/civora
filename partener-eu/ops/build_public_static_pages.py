@@ -304,7 +304,7 @@ def guard_expired_dr12_stage_advice(
             continue
         for item_index, item in enumerate(section.get("items") or []):
             words = fold(item)
-            if "primei etape" not in words or not re.search(r"\\b80\\b", words):
+            if "primei etape" not in words or not re.search(r"\b80\b", words):
                 continue
             if guarded is None:
                 guarded = copy.deepcopy(dossier)
