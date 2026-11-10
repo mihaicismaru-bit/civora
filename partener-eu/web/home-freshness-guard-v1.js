@@ -13,6 +13,19 @@ const currentYear=clock.getUTCFullYear();
 const currentYearStart=Date.UTC(currentYear,0,1);
 const byId=new Map(P.dossiers.map(d=>[String(d?.id||''),d]));
 
+// Official Romanian local deadlines need their actual clock time, not UTC EOD.
+function bucharestLocalMs(year,month,day,hour,minute,second=0,millis=0){
+  const normalized=new Date(Date.UTC(year,month,day,hour,minute,second,millis));
+  if(normalized.getUTCFullYear()!==year||normalized.getUTCMonth()!==month||normalized.getUTCDate()!==day||normalized.getUTCHours()!==hour||normalized.getUTCMinutes()!==minute||normalized.getUTCSeconds()!==second)return null;
+  const lastSunday=(m)=>{const last=new Date(Date.UTC(year,m+1,0));return last.getUTCDate()-last.getUTCDay();};
+  const march=lastSunday(2),october=lastSunday(9);
+  // 03:xx local is absent at the March DST switch and ambiguous in October.
+  // Without an explicit offset neither can authorize a current OPEN state.
+  if(hour===3&&((month===2&&day===march)||(month===9&&day===october)))return null;
+  const summer=(month>2&&month<9)||(month===2&&(day>march||(day===march&&hour>=4)))||(month===9&&(day<october||(day===october&&hour<3)));
+  return normalized.getTime()-(summer?3:2)*60*60*1000;
+}
+
 function toTimestamp(value){
   if(value==null||value==='')return null;
   if(typeof value==='number')return Number.isFinite(value)?value:null;
@@ -33,7 +46,15 @@ function toTimestamp(value){
   const folded=raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const months={ianuarie:0,februarie:1,martie:2,aprilie:3,mai:4,iunie:5,iulie:6,august:7,septembrie:8,octombrie:9,noiembrie:10,decembrie:11};
   const ro=folded.match(/\b(\d{1,2})\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(20\d{2})\b/);
-  if(ro)return Date.UTC(Number(ro[3]),months[ro[2]],Number(ro[1]),23,59,59,999);
+  if(ro){
+    const year=Number(ro[3]),month=months[ro[2]],day=Number(ro[1]);
+    const tail=folded.slice(ro.index+ro[0].length);
+    const timed=tail.match(/^\s*,?\s*(?:la\s+)?(?:ora\s+)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?/);
+    if(timed)return bucharestLocalMs(year,month,day,Number(timed[1]),Number(timed[2]),Number(timed[3]||0));
+    // An unparseable explicit clock cannot silently become 23:59:59.
+    if(/^\s*,?\s*(?:(?:la\s+)?ora\b|(?:la\s+)?\d{1,2}[:.])/.test(tail))return null;
+    return bucharestLocalMs(year,month,day,23,59,59,999);
+  }
   return null;
 }
 
@@ -73,7 +94,9 @@ function closeTimestamp(d){
   const deadline=confirmedFact(d,'termen');
   if(deadline?.value!=null)values.push(deadline.value);
   const timestamps=values.map(toTimestamp).filter(v=>v!=null&&Number.isFinite(v));
-  return timestamps.length?Math.max(...timestamps):null;
+  // A contradictory top-level deadline cannot overrule a CONFIRMED cutoff.
+  // Conflicting official-looking evidence is REVIEW, never the later OPEN.
+  return timestamps.length&&timestamps.every(ts=>ts===timestamps[0])?timestamps[0]:null;
 }
 
 function currentOpenState(d){
@@ -106,7 +129,7 @@ if(P.summary&&typeof P.summary==='object'){
 const dossierStatusOverrides=Object.fromEntries(P.dossiers.map(d=>[String(d?.id||''),currentOpenState(d)]).filter(([,state])=>state&&state!=='OPEN'));
 
 P.freshnessGuard={
-  version:'home-freshness-guard-v1.2',
+  version:'home-freshness-guard-v1.3',
   state:removedIds.length||removedOpenIds.length?'DEGRADED':'PASS',
   asOf:clock.toISOString(),
   currentYear,
