@@ -250,8 +250,23 @@ def current_consultation(dossier: dict[str, Any], clock: dt.datetime) -> bool:
         return False
     if not deadline or str(deadline.get("confidence") or "").upper() != "CONFIRMED":
         return False
+    # A confirmed deadline cannot make a consultation active if the confirmed
+    # Status fact says OPEN, CLOSED, REVIEW or any other lifecycle stage.
+    if fold(status.get("value")) not in {
+        "public consultation", "in consultare", "consultare publica"
+    }:
+        return False
     closes = parse_date(deadline.get("value"))
-    return closes is not None and closes >= clock
+    if closes is None or closes < clock:
+        return False
+    # Reconcile every present top-level cutoff against the confirmed Termen.
+    # A conflict is REVIEW-only in the public render, not a canonical closure.
+    for key in ("deadline", "closesAt", "closeAt"):
+        if dossier.get(key) not in (None, ""):
+            other = parse_date(dossier[key])
+            if other is None or other != closes:
+                return False
+    return True
 
 
 def requires_consultation_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
