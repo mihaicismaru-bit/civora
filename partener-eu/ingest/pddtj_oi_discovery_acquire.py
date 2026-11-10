@@ -18,12 +18,13 @@ import re
 import ssl
 import unicodedata
 from urllib.parse import urlsplit
+from urllib.error import HTTPError
 from urllib.request import HTTPRedirectHandler, HTTPSHandler, Request, build_opener
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY = ROOT / "partener-eu/ingest/source_registry.json"
-VERSION = "PDDTJ_OI_DISCOVERY_ORIGINAL_V1"
-SCHEMA = "PARTENER_EU_PDDTJ_OI_NONAUTHORITATIVE_HANDOFF_V1"
+VERSION = "PDDTJ_OI_DISCOVERY_ORIGINAL_V2"
+SCHEMA = "PARTENER_EU_PDDTJ_OI_NONAUTHORITATIVE_HANDOFF_V2"
 MAX_BYTES = 2_000_000
 TIMEOUT_SECONDS = 25
 PINNED = {
@@ -143,6 +144,19 @@ def validate_visible(raw, spec):
     return digest(text.encode("utf-8"))
 
 
+def require_utc_stamp(value):
+    """Audit UTC attempt and successful acquisition times, never invent failed receipts."""
+    if not isinstance(value, str) or not value:
+        raise ValueError("missing source health observation time")
+    try:
+        stamp = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError as ex:
+        raise ValueError("invalid source health observation time") from ex
+    if stamp.tzinfo is None or stamp.utcoffset() != dt.timedelta(0):
+        raise ValueError("source health observation time lacks UTC")
+    return stamp
+
+
 def source_rows(registry):
     if not isinstance(registry, dict) or not isinstance(registry.get("sources"), list):
         raise ValueError("invalid official registry")
@@ -225,6 +239,7 @@ def capture(registry, raw_dir, run_id, fetcher=network_fetch, captured_at=None):
             "authority_class": "T1B_DELEGATED_OI_DISCOVERY",
             "observation_state": spec["state"],
             "parser_version": VERSION, "run_id": run_id,
+            "attempted_at": captured_at or utc(),
             **OFF,
         }
         try:
@@ -237,17 +252,22 @@ def capture(registry, raw_dir, run_id, fetcher=network_fetch, captured_at=None):
             path = raw_dir / spec["raw"]
             path.write_bytes(raw)
             row.update({
-                "fetch_status": "PASS", "http_status": status,
-                "content_type": media, "final_url": final,
+                "fetch_status": "PASS", "source_health": "RAW_CAPTURED",
+                "http_status": status, "content_type": media, "final_url": final,
                 "fetched_at": captured_at or utc(), "raw_bytes": len(raw),
                 "raw_sha256": digest(raw), "semantic_sha256": sem,
                 "raw_file": spec["raw"],
             })
         except (OSError, ValueError, RuntimeError) as error:
-            # A 403, timeout, changed article, redirect, or shell is REVIEW,
-            # never a synthetic raw receipt or promotion.
+            # Record the *attempt* and observed HTTP status (when available),
+            # never a fabricated successful fetched_at or raw hash.
+            http_status = error.code if isinstance(error, HTTPError) else None
+            health = ("HTTP_FAILURE" if isinstance(error, HTTPError) else
+                      "IDENTITY_OR_CONTENT_REVIEW" if isinstance(error, ValueError)
+                      else "TRANSPORT_FAILURE")
             row.update({
                 "fetch_status": "FAIL_REVIEW", "error_type": type(error).__name__,
+                "source_health": health, "http_status": http_status,
                 "fetched_at": None, "raw_sha256": None, "raw_file": None,
             })
         rows.append(row)
@@ -297,33 +317,49 @@ def validate_replay(manifest, raw_dir, registry):
         }
         if any(row.get(k) != v for k, v in fixed.items()):
             raise ValueError("receipt identity/authority drift")
+        attempt_time = require_utc_stamp(row.get("attempted_at"))
         if row.get("fetch_status") == "PASS":
             n_pass += 1
             if set(row) != set(fixed) | {
-                    "fetch_status", "http_status", "content_type", "final_url",
-                    "fetched_at", "raw_bytes", "raw_sha256", "semantic_sha256", "raw_file"}:
+                    "attempted_at", "fetch_status", "source_health", "http_status",
+                    "content_type", "final_url", "fetched_at", "raw_bytes",
+                    "raw_sha256", "semantic_sha256", "raw_file"}:
                 raise ValueError("success receipt field mismatch")
             name = spec["raw"]
             expected_files.add(name)
             raw = (Path(raw_dir) / name).read_bytes()
             if (row["raw_file"] != name or row["final_url"] != spec["url"]
+                    or row["source_health"] != "RAW_CAPTURED"
                     or row["http_status"] != 200 or row["content_type"] not in HTML_TYPES
                     or row["raw_bytes"] != len(raw) or row["raw_sha256"] != digest(raw)
                     or row["semantic_sha256"] != validate_visible(raw, spec)):
                 raise ValueError("raw receipt source/hash/semantic mismatch")
-            try:
-                stamp = dt.datetime.fromisoformat(row["fetched_at"].replace("Z", "+00:00"))
-                if stamp.tzinfo is None or stamp.utcoffset() != dt.timedelta(0):
-                    raise ValueError("receipt time lacks UTC")
-            except (TypeError, AttributeError) as ex:
-                raise ValueError("invalid UTC receipt time") from ex
+            if require_utc_stamp(row.get("fetched_at")) < attempt_time:
+                raise ValueError("successful fetch precedes acquisition attempt")
         elif row.get("fetch_status") == "FAIL_REVIEW":
             if set(row) != set(fixed) | {
-                    "fetch_status", "error_type", "fetched_at", "raw_sha256", "raw_file"}:
+                    "attempted_at", "fetch_status", "error_type", "source_health",
+                    "http_status", "fetched_at", "raw_sha256", "raw_file"}:
                 raise ValueError("failure receipt field mismatch")
             if (not row["error_type"] or row["fetched_at"] is not None
                     or row["raw_sha256"] is not None or row["raw_file"] is not None):
                 raise ValueError("failure invented raw provenance")
+            if row["error_type"] == "HTTPError":
+                if (row["source_health"] != "HTTP_FAILURE"
+                        or type(row["http_status"]) is not int
+                        or not 400 <= row["http_status"] <= 599):
+                    raise ValueError("failed HTTP source-health claim mismatch")
+            elif row["error_type"] == "ValueError":
+                if (row["source_health"] != "IDENTITY_OR_CONTENT_REVIEW"
+                        or row["http_status"] is not None):
+                    raise ValueError("failed content source-health claim mismatch")
+            elif row["error_type"] in {"OSError", "TimeoutError", "URLError",
+                                      "SSLError", "RuntimeError", "ConnectionError"}:
+                if (row["source_health"] != "TRANSPORT_FAILURE"
+                        or row["http_status"] is not None):
+                    raise ValueError("failed transport source-health claim mismatch")
+            else:
+                raise ValueError("unrecognized source-health error class")
         else:
             raise ValueError("unknown observation/fetch status")
     if (manifest.get("fetch_pass") != n_pass
