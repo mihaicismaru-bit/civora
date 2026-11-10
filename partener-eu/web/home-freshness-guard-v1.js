@@ -65,6 +65,16 @@ function toTimestamp(value){
     const stamp=Date.parse(raw);
     return Number.isFinite(stamp)?stamp:null;
   }
+  // JS Date.parse normalizes impossible ISO date-only values (e.g.
+  // 2026-02-31 -> March 3). Such an untrue cutoff cannot authorize OPEN.
+  // Keep valid date-only UTC semantics consistent with the static renderer.
+  const isoDay=raw.match(/^(20\d{2})-(\d{2})-(\d{2})$/);
+  if(isoDay){
+    const [,year,month,day]=isoDay;
+    const stamp=Date.UTC(Number(year),Number(month)-1,Number(day));
+    const check=new Date(stamp);
+    return check.getUTCFullYear()===Number(year)&&check.getUTCMonth()===Number(month)-1&&check.getUTCDate()===Number(day)?stamp:null;
+  }
   const iso=Date.parse(raw);
   if(!Number.isNaN(iso))return iso;
   const ymd=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);

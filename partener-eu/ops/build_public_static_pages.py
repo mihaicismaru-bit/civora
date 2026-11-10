@@ -221,7 +221,7 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     if fold(status.get("value")) not in {"open", "deschis"}:
         return False
     closes = parse_date(deadline.get("value"))
-    if closes is None or closes < clock:
+    if closes is None or closes <= clock:
         return False
     # Reject mismatched or unparseable top-level cutoffs rather than silently
     # selecting the later one. The confirmed Termen remains the comparison
@@ -263,7 +263,7 @@ def current_consultation(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     }:
         return False
     closes = parse_date(deadline.get("value"))
-    if closes is None or closes < clock:
+    if closes is None or closes <= clock:
         return False
     # Reconcile every present top-level cutoff against the confirmed Termen.
     # A conflict is REVIEW-only in the public render, not a canonical closure.

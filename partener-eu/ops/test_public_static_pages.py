@@ -185,6 +185,7 @@ assert module.parse_date("6 noiembrie 2026, ora necunoscută") is None
 assert module.parse_date("29 martie 2026, ora 03:30") is None  # nonexistent local hour
 assert module.parse_date("25 octombrie 2026, ora 03:30") is None  # ambiguous local hour
 assert module.parse_date("31 februarie 2026, ora 12:00") is None
+assert module.parse_date("2026-02-31") is None
 
 def timed_open_probe(deadline):
     return {
@@ -208,6 +209,7 @@ assert module.current_open(aware_cutoff, module.parse_date("2026-11-10T21:59:59Z
 assert not module.current_open(aware_cutoff, module.parse_date("2026-11-10T22:00:01Z"))
 ro_cutoff = timed_open_probe("6 noiembrie 2026, ora 12:00")
 assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T09:59:59Z")) is True
+assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T10:00:00Z")) is False
 assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")) is False
 assert module.fail_closed_render_dossier(
     ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")
@@ -217,6 +219,9 @@ ro_consultation = consultation_probe("6 noiembrie 2026, ora 12:00")
 assert module.current_consultation(
     ro_consultation, module.parse_date("2026-11-06T09:59:59Z")
 ) is True
+assert module.current_consultation(
+    ro_consultation, module.parse_date("2026-11-06T10:00:00Z")
+) is False
 assert module.current_consultation(
     ro_consultation, module.parse_date("2026-11-06T10:00:01Z")
 ) is False

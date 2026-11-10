@@ -128,6 +128,14 @@ assert.equal(isoBefore.freshnessGuard.dossierStatusOverrides['unzoned-iso'],'REV
 assert.equal(isoBefore.freshnessGuard.dossierStatusOverrides['impossible-iso'],'REVIEW');
 fakeNow=Date.parse('2026-11-10T22:00:01Z');
 assert.deepEqual(Array.from(run(timedPayload([unzonedIso,zonedIso])).home.openDossierIds),[]);
+// Date.parse normalizes 2026-02-31 to March 3 on common JS engines.
+// An impossible date-only cutoff must never keep an OPEN badge alive.
+const validIsoDay=timedOpen('valid-iso-day','2026-03-31');
+const impossibleIsoDay=timedOpen('impossible-iso-day','2026-02-31');
+fakeNow=Date.parse('2026-02-28T12:00:00Z');
+const isoDayResult=run(timedPayload([validIsoDay,impossibleIsoDay]));
+assert.deepEqual(Array.from(isoDayResult.home.openDossierIds),['valid-iso-day']);
+assert.equal(isoDayResult.freshnessGuard.dossierStatusOverrides['impossible-iso-day'],'REVIEW');
 // AFIR DR-12's component counter is DD.MM.YYYY at local MIDNIGHT. It
 // must not survive until UTC midnight; date-only and slash forms use RO time.
 const afirMidnight=timedOpen('afir-dr12-other','11.11.2026 00:00:00');
