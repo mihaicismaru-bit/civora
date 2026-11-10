@@ -14,7 +14,8 @@ import json
 import re
 from typing import Any
 
-INPUT_SCHEMA = "PARTENER_EU_INTERREG_CALL_LIVE_EVIDENCE_V1"
+INPUT_SCHEMA = "PARTENER_EU_INTERREG_CALL_LIVE_EVIDENCE_V1"  # historical replay
+CURRENT_INPUT_SCHEMA = "PARTENER_EU_INTERREG_CALL_LIVE_EVIDENCE_V2"
 SCHEMA = "PARTENER_EU_INTERREG_CALL_RECONCILIATION_RECEIPT_V1"
 SOURCE_FAMILY = "INTERREG"
 AUTHORITY_CLASS = "OFFICIAL_INTERREG_PROGRAMME_AUTHORITY"
@@ -72,8 +73,8 @@ def _recompute_semantic_fingerprint(row: dict[str, Any], declared_status: str | 
 
 
 def reconcile_live_evidence(evidence: dict[str, Any], *, reconciled_at: str | None = None) -> dict[str, Any]:
-    if not isinstance(evidence, dict) or evidence.get("schema") != INPUT_SCHEMA:
-        raise ValueError(f"input schema must be {INPUT_SCHEMA}")
+    if not isinstance(evidence, dict) or evidence.get("schema") not in {INPUT_SCHEMA, CURRENT_INPUT_SCHEMA}:
+        raise ValueError(f"input schema must be {INPUT_SCHEMA} or {CURRENT_INPUT_SCHEMA}")
     if evidence.get("source_family") != SOURCE_FAMILY or evidence.get("authority_class") != AUTHORITY_CLASS:
         raise ValueError("source/authority mismatch")
     if evidence.get("publication_effect") != "NONE" or evidence.get("publish_authorized") is not False:
@@ -203,7 +204,7 @@ def reconcile_live_evidence(evidence: dict[str, Any], *, reconciled_at: str | No
 
     return {
         "schema": SCHEMA,
-        "source_schema": INPUT_SCHEMA,
+        "source_schema": evidence["schema"],
         "source_family": SOURCE_FAMILY,
         "authority_class": AUTHORITY_CLASS,
         "source_run_id": run_id,
