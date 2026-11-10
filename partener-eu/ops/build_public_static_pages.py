@@ -23,6 +23,7 @@ import re
 import shutil
 import unicodedata
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from typing import Any
 from urllib.parse import urlparse
 from xml.sax.saxutils import escape as xml_escape
@@ -31,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 DEFAULT_WEB = ROOT / "partener-eu" / "web"
 BASE_URL = "https://partener.eu"
-RO_TZ = dt.timezone(dt.timedelta(hours=3))
+RO_TZ = ZoneInfo("Europe/Bucharest")
 GENERATED_DIRS = ("finantari", "consultari", "dosare", "schimbari")
 
 STATUS_LABELS = {
@@ -122,6 +123,26 @@ def display_value(value: Any) -> str:
     return text
 
 
+def bucharest_datetime_utc(
+    year: int, month: int, day: int, hour: int, minute: int, second: int = 0
+) -> dt.datetime | None:
+    """Parse a local Romanian cutoff without guessing across DST transitions."""
+    try:
+        naive = dt.datetime(year, month, day, hour, minute, second)
+    except ValueError:
+        return None
+    first = naive.replace(tzinfo=RO_TZ, fold=0)
+    second_fold = naive.replace(tzinfo=RO_TZ, fold=1)
+    # 03:xx during October is ambiguous; 03:xx during March does not exist.
+    # Neither may authorize an OPEN badge without an explicit UTC offset.
+    if first.utcoffset() != second_fold.utcoffset():
+        return None
+    utc = first.astimezone(dt.timezone.utc)
+    if utc.astimezone(RO_TZ).replace(tzinfo=None) != naive:
+        return None
+    return utc
+
+
 def parse_date(value: Any) -> dt.datetime | None:
     raw = str(value or "").strip()
     if not raw:
@@ -151,21 +172,33 @@ def parse_date(value: Any) -> dt.datetime | None:
         "noiembrie": 11,
         "decembrie": 12,
     }
+    # fold() deliberately erases punctuation for search, so it cannot parse
+    # official times such as '6 noiembrie 2026, ora 12:00'. Keep : and .
+    # while normalizing diacritics for the public lifecycle cutoff parser.
+    normalized = "".join(
+        ch for ch in unicodedata.normalize("NFKD", raw.lower())
+        if not unicodedata.combining(ch)
+    )
     match = re.search(
-        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})(?:\D+(\d{1,2}):(\d{2}))?",
-        lowered,
+        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})\b",
+        normalized,
     )
     if not match:
         return None
-    return dt.datetime(
-        int(match.group(3)),
-        months[match.group(2)],
-        int(match.group(1)),
-        int(match.group(4) or 23),
-        int(match.group(5) or 59),
-        tzinfo=RO_TZ,
-    ).astimezone(dt.timezone.utc)
-
+    year, month, day = int(match.group(3)), months[match.group(2)], int(match.group(1))
+    tail = normalized[match.end():]
+    timed = re.match(
+        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?\b",
+        tail,
+    )
+    if timed:
+        return bucharest_datetime_utc(
+            year, month, day, int(timed.group(1)), int(timed.group(2)), int(timed.group(3) or 0)
+        )
+    # A stated but unparseable hour must never silently become EOD.
+    if re.match(r"^\s*,?\s*(?:(?:la\s+)?ora\b|(?:la\s+)?\d{1,2}[:.])", tail):
+        return None
+    return bucharest_datetime_utc(year, month, day, 23, 59, 59)
 
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
