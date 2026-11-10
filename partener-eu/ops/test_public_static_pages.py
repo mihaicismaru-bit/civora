@@ -107,6 +107,45 @@ assert module.fail_closed_render_dossier(expired_consultation, consultation_cloc
 assert module.fail_closed_render_dossier(unknown_consultation, consultation_clock)["status"] == "REVIEW"
 assert module.fail_closed_render_dossier(current_consultation, consultation_clock)["status"] == "PUBLIC_CONSULTATION"
 
+# Exact Romanian local-time regression: static pages must use the official
+# local hour, not a made-up end-of-day (fold() used to erase colons).
+assert module.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
+assert module.parse_date("6 noiembrie 2026, la ora 12.00") == module.parse_date("2026-11-06T10:00:00Z")
+assert module.parse_date("1 iulie 2026, ora 12:00") == module.parse_date("2026-07-01T09:00:00Z")
+assert module.parse_date("30 octombrie 2026, ora 16:00") == module.parse_date("2026-10-30T14:00:00Z")
+assert module.parse_date("6 noiembrie 2026, ora necunoscută") is None
+assert module.parse_date("29 martie 2026, ora 03:30") is None  # nonexistent local hour
+assert module.parse_date("25 octombrie 2026, ora 03:30") is None  # ambiguous local hour
+assert module.parse_date("31 februarie 2026, ora 12:00") is None
+
+def timed_open_probe(deadline):
+    return {
+        "id": "ro-local-hour-probe",
+        "title": "Local-hour cutoff",
+        "programme": "TEST",
+        "publicationState": "PUBLISHABLE",
+        "status": "OPEN",
+        "quickFacts": [
+            {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": deadline, "confidence": "CONFIRMED"},
+        ],
+    }
+
+ro_cutoff = timed_open_probe("6 noiembrie 2026, ora 12:00")
+assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T09:59:59Z")) is True
+assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")) is False
+assert module.fail_closed_render_dossier(
+    ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")
+)["status"] == "REVIEW"
+# The same clock rule must hold for consultation surfaces, not just OPEN calls.
+ro_consultation = consultation_probe("6 noiembrie 2026, ora 12:00")
+assert module.current_consultation(
+    ro_consultation, module.parse_date("2026-11-06T09:59:59Z")
+) is True
+assert module.current_consultation(
+    ro_consultation, module.parse_date("2026-11-06T10:00:01Z")
+) is False
+
 publishable = [
     row
     for row in (payload.get("dossiers") or [])
