@@ -609,7 +609,7 @@ def dr12_dossier() -> dict[str, Any]:
             ]),
             section("Ce trebuie făcut acum", [
                 "Confirmă forma juridică, vârsta și istoricul instalării solicitantului.",
-                "Simulează punctajul pentru pragul de 80 de puncte al primei etape.",
+                "Verifică pragul de calitate al etapei curente în anunțul și ghidul oficial AFIR înainte de depunere.",
                 "Fixează investițiile eligibile, bugetul și dovada contribuției proprii.",
                 "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea imediată." if post_launch_evidence else "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea pentru 6 octombrie, ora 09:00.",
             ]),
