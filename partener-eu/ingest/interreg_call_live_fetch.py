@@ -25,7 +25,8 @@ from typing import Any
 
 from interreg_call import normalize_call_observation
 
-SCHEMA = "PARTENER_EU_INTERREG_CALL_LIVE_EVIDENCE_V1"
+SCHEMA = "PARTENER_EU_INTERREG_CALL_LIVE_EVIDENCE_V2"
+LEGACY_SCHEMA = "PARTENER_EU_INTERREG_CALL_LIVE_EVIDENCE_V1"
 USER_AGENT = "PARTENER.EU-Interreg-Call/1.0"
 MAX_BYTES = 2_000_000
 TIMEOUT_SECONDS = 25
@@ -237,7 +238,7 @@ def build_live_evidence(*, run_id: str | None = None) -> dict[str, Any]:
         "observation_states": states,
         "source_family": "INTERREG",
         "authority_class": "OFFICIAL_INTERREG_PROGRAMME_AUTHORITY",
-        "parser_version": "INTERREG_CALL_LIVE_FETCH_V1",
+        "parser_version": "INTERREG_CALL_LIVE_FETCH_V2",
         "publication_effect": "NONE",
         "canonical_corpus_mutation": False,
         "publish_authorized": False,
@@ -246,39 +247,44 @@ def build_live_evidence(*, run_id: str | None = None) -> dict[str, Any]:
 
 
 def validate_envelope(data: dict[str, Any]) -> None:
-    if data.get("schema") != SCHEMA:
+    if data.get("schema") not in {SCHEMA, LEGACY_SCHEMA}:
         raise ValueError("unexpected exact-call live-evidence schema")
+    is_v2 = data["schema"] == SCHEMA
     if data.get("publication_effect") != "NONE":
         raise ValueError("exact-call live evidence must have publication_effect=NONE")
     if data.get("canonical_corpus_mutation") is not False or data.get("publish_authorized") is not False:
         raise ValueError("exact-call live evidence cannot authorize corpus/publication mutation")
     if not isinstance(data.get("rows"), list):
         raise ValueError("exact-call evidence rows must be a list")
-    created_at = _strict_utc(data.get("created_at"))
+    created_at = _strict_utc(data.get("created_at")) if is_v2 else None
     last_observed: dt.datetime | None = None
     for row in data["rows"]:
         if not isinstance(row, dict):
             raise ValueError("invalid exact-call evidence row")
-        attempted_at = _strict_utc(row.get("attempted_at"))
-        if attempted_at > created_at or (last_observed is not None and attempted_at < last_observed):
-            raise ValueError("exact-call receipt chronology invalid")
-        if row.get("fetch_status") == "FAIL":
-            if row.get("fetched_at") is not None or any(
-                key in row for key in ("normalized", "raw_hash", "bytes", "final_url", "http_status")
-            ):
-                raise ValueError("failed exact-call attempt forged a fetched receipt")
-            if not row.get("error_type") or not row.get("error"):
-                raise ValueError("failed exact-call attempt missing transport error")
-            last_observed = attempted_at
-        elif row.get("fetch_status") == "PASS":
-            fetched_at = _strict_utc(row.get("fetched_at"))
-            if not attempted_at <= fetched_at <= created_at:
+        # V1 originals are immutable historical receipts: accept their old
+        # provenance shape for replay, but never give it V2's verified-fetch
+        # semantics. V2 explicitly separates attempts from successful fetches.
+        if is_v2:
+            attempted_at = _strict_utc(row.get("attempted_at"))
+            if attempted_at > created_at or (last_observed is not None and attempted_at < last_observed):
                 raise ValueError("exact-call receipt chronology invalid")
-            if (row.get("normalized") or {}).get("fetched_at") != row["fetched_at"]:
-                raise ValueError("exact-call normalized fetched_at drift")
-            last_observed = fetched_at
-        else:
-            raise ValueError("unexpected exact-call fetch_status")
+            if row.get("fetch_status") == "FAIL":
+                if row.get("fetched_at") is not None or any(
+                    key in row for key in ("normalized", "raw_hash", "bytes", "final_url", "http_status")
+                ):
+                    raise ValueError("failed exact-call attempt forged a fetched receipt")
+                if not row.get("error_type") or not row.get("error"):
+                    raise ValueError("failed exact-call attempt missing transport error")
+                last_observed = attempted_at
+            elif row.get("fetch_status") == "PASS":
+                fetched_at = _strict_utc(row.get("fetched_at"))
+                if not attempted_at <= fetched_at <= created_at:
+                    raise ValueError("exact-call receipt chronology invalid")
+                if (row.get("normalized") or {}).get("fetched_at") != row["fetched_at"]:
+                    raise ValueError("exact-call normalized fetched_at drift")
+                last_observed = fetched_at
+            else:
+                raise ValueError("unexpected exact-call fetch_status")
         if row.get("publish_authorized") is not False or row.get("material_fact_use") is not False:
             raise ValueError(f"unsafe exact-call row {row.get('probe_id')}")
         normalized = row.get("normalized")
