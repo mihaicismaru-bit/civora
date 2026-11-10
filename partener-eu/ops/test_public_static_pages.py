@@ -169,6 +169,12 @@ assert module.fail_closed_render_dossier(expired_consultation, consultation_cloc
 assert module.fail_closed_render_dossier(unknown_consultation, consultation_clock)["status"] == "REVIEW"
 assert module.fail_closed_render_dossier(current_consultation, consultation_clock)["status"] == "PUBLIC_CONSULTATION"
 
+# Missing timezone offsets cannot authorize material OPEN/CONSULTATION.
+# Datetime.fromisoformat accepts zoneless ISO by default; treating an
+# unknown local cutoff as UTC would overstate freshness around midnight.
+assert module.parse_date("2026-11-11T00:00:00") is None
+assert module.parse_date("2026-11-11 00:00:00") is None
+assert module.parse_date("2026-11-11T00:00:00+02:00") == module.parse_date("2026-11-10T22:00:00Z")
 # Exact Romanian local-time regression: static pages must use the official
 # local hour, not a made-up end-of-day (fold() used to erase colons).
 assert module.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
@@ -193,6 +199,13 @@ def timed_open_probe(deadline):
         ],
     }
 
+# The same source timing must be explicit in ISO. A zoneless timestamp
+# cannot silently default to UTC and keep an OPEN call actionable.
+zoneless_cutoff = timed_open_probe("2026-11-11T00:00:00")
+aware_cutoff = timed_open_probe("2026-11-11T00:00:00+02:00")
+assert not module.current_open(zoneless_cutoff, module.parse_date("2026-11-10T21:59:59Z"))
+assert module.current_open(aware_cutoff, module.parse_date("2026-11-10T21:59:59Z"))
+assert not module.current_open(aware_cutoff, module.parse_date("2026-11-10T22:00:01Z"))
 ro_cutoff = timed_open_probe("6 noiembrie 2026, ora 12:00")
 assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T09:59:59Z")) is True
 assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")) is False
