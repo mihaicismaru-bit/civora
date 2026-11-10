@@ -7,6 +7,7 @@ import json
 import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from urllib.error import HTTPError
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "partener-eu/ingest"))
@@ -59,12 +60,15 @@ def main():
         output = root / "raw"
         manifest = m.capture(sources, output, "hermetic-123", good, stamp)
         assert manifest["fetch_pass"] == 2 and manifest["fetch_fail"] == 0
+        assert manifest["schema"].endswith("_V2")
         assert m.validate_replay(manifest, output, sources)
         assert manifest["publication_effect"] == "NONE"
         assert manifest["t1_primary_reconciled"] is False
         assert all(x["open_call_authorized"] is False and
                    x["material_fact_use"] is False and
-                   x["fetched_at"] == stamp and len(x["raw_sha256"]) == 64
+                   x["attempted_at"] == stamp and x["fetched_at"] == stamp
+                   and x["source_health"] == "RAW_CAPTURED"
+                   and len(x["raw_sha256"]) == 64
                    for x in manifest["rows"])
 
         # Modified original bytes must never pass an otherwise valid handoff.
@@ -98,6 +102,18 @@ def main():
         must_fail(lambda: m.validate_replay(fresh(bad), output, sources),
                   "zoneless receipt")
         bad = copy.deepcopy(manifest)
+        bad["rows"][0]["attempted_at"] = "2026-11-10T11:00:00"
+        must_fail(lambda: m.validate_replay(fresh(bad), output, sources),
+                  "zoneless source health attempt")
+        bad = copy.deepcopy(manifest)
+        bad["rows"][0]["attempted_at"] = "2026-11-10T12:00:00Z"
+        must_fail(lambda: m.validate_replay(fresh(bad), output, sources),
+                  "successful fetch predates attempt")
+        bad = copy.deepcopy(manifest)
+        bad["rows"][0]["source_health"] = "HTTP_FAILURE"
+        must_fail(lambda: m.validate_replay(fresh(bad), output, sources),
+                  "forged healthy original as HTTP failure")
+        bad = copy.deepcopy(manifest)
         bad["rows"][0]["final_url"] = "https://other.example/article/"
         must_fail(lambda: m.validate_replay(fresh(bad), output, sources),
                   "wrong final endpoint")
@@ -116,14 +132,16 @@ def main():
 
     # Wrong article, hidden identity and fake HTML shell may be fetched,
     # but MUST have only explicit FAIL_REVIEW without raw receipts.
-    for issue in ["wrong", "hidden", "redirect", "media", "403"]:
+    for issue in ["wrong", "hidden", "redirect", "media", "403", "timeout"]:
         with TemporaryDirectory() as temp:
             def fail_one(url):
                 sid = next(k for k, v in m.PINNED.items() if v["url"] == url)
                 spec = m.PINNED[sid]
                 if sid == next(iter(m.PINNED)):
                     if issue == "403":
-                        raise OSError("403 Forbidden")
+                        raise HTTPError(url, 403, "Forbidden", {}, None)
+                    if issue == "timeout":
+                        raise OSError("timed out")
                     if issue == "wrong":
                         return b"<html><body>Unrelated grant index</body></html>", "text/html", url, 200
                     if issue == "hidden":
@@ -139,8 +157,26 @@ def main():
             rejected = [x for x in receipt["rows"] if x["fetch_status"] == "FAIL_REVIEW"]
             assert rejected[0]["raw_sha256"] is None
             assert rejected[0]["fetched_at"] is None
+            assert rejected[0]["attempted_at"] == stamp
+            assert rejected[0]["source_health"] == (
+                "HTTP_FAILURE" if issue == "403" else
+                "TRANSPORT_FAILURE" if issue == "timeout" else
+                "IDENTITY_OR_CONTENT_REVIEW")
+            assert rejected[0]["http_status"] == (403 if issue == "403" else None)
             assert rejected[0]["open_call_authorized"] is False
             assert m.validate_replay(receipt, Path(temp) / "raw", sources)
+            # An attacker may re-hash the manifest, but cannot claim an
+            # observed HTTP status on an unrelated semantic failure.
+            forged = copy.deepcopy(receipt)
+            failed = next(x for x in forged["rows"] if x["fetch_status"] == "FAIL_REVIEW")
+            failed["http_status"] = 200
+            must_fail(lambda: m.validate_replay(fresh(forged), Path(temp) / "raw", sources),
+                      "fabricated HTTP 200 on failed acquisition")
+            forged = copy.deepcopy(receipt)
+            failed = next(x for x in forged["rows"] if x["fetch_status"] == "FAIL_REVIEW")
+            failed["attempted_at"] = "2026-11-10T11:00:00"
+            must_fail(lambda: m.validate_replay(fresh(forged), Path(temp) / "raw", sources),
+                      "untrusted missing-timezone source attempt")
 
     # Registry id/authority cannot be silently rebound to an attacker endpoint.
     altered = copy.deepcopy(sources)
@@ -155,8 +191,8 @@ def main():
               "missing acquisition run ID")
 
     print(json.dumps({"test": "PDDTJ OI acquisition + immutable replay",
-                      "positive": 2, "failure_classes": 5,
-                      "tamper_gates": 10, "result": "PASS",
+                      "positive": 2, "failure_classes": 6,
+                      "tamper_gates": 15, "result": "PASS",
                       "open_call_authorized": False, "publication_effect": "NONE"}))
 
 
