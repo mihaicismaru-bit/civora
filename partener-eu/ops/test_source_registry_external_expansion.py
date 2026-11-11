@@ -42,6 +42,7 @@ REQUIRED = {
     "SRC-INTERREG-ROMD-2028-2034": {"INTERREG", "CBC", "NEXT", "PROGRAMMING_PIPELINE"},
     "SRC-INTERREG-NEXT-BSB": {"INTERREG", "NEXT", "TRANSNATIONAL", "BLACK_SEA_BASIN", "CALL_REGISTRY"},
     "SRC-INTERREG-DANUBE": {"INTERREG", "TRANSNATIONAL"},
+    "SRC-INTERREG-DANUBE-2028-2034": {"INTERREG", "TRANSNATIONAL", "PROGRAMMING_PIPELINE"},
     "SRC-INTERREG-EUROPE": {"INTERREG", "INTERREGIONAL"},
 }
 
@@ -80,6 +81,7 @@ OFFICIAL_HOSTS = {
     "SRC-INTERREG-ROMD-2028-2034": "ro-md.net",
     "SRC-INTERREG-NEXT-BSB": "www.blacksea-cbc.net",
     "SRC-INTERREG-DANUBE": "interreg-danube.eu",
+    "SRC-INTERREG-DANUBE-2028-2034": "interreg-danube.eu",
     "SRC-INTERREG-EUROPE": "www.interregeurope.eu",
 }
 
@@ -597,6 +599,31 @@ def main():
         fail("EEA Civil Society call index must remain CALL_INDEX_DISCOVERY")
     if eea_calls.get("observation_state") != "CURRENT_CALL_REGISTRY":
         fail("EEA Civil Society call index must identify itself as a current call registry")
+
+    # The official Danube 2028+ Task Force report is future programming,
+    # never call-opening evidence for the 2021-2027 programme or the future one.
+    danube_future = by_id["SRC-INTERREG-DANUBE-2028-2034"]
+    if (danube_future.get("url") !=
+            "https://interreg-danube.eu/news/second-task-force-meeting-shapes-the-way-towards-interreg-danube-2028"):
+        fail("Danube 2028+ Task Force source lost exact official MA/JS page")
+    if danube_future.get("programmes") != ["Interreg Danube Region Programme 2028-2034"]:
+        fail("Danube 2028+ programming identity mixed with current calls")
+    if (danube_future.get("class") != "official_programming_pipeline"
+            or danube_future.get("observation_state") != "PROGRAMMING_PIPELINE"
+            or danube_future.get("authority_scope") != "PROGRAMMING_FRAMEWORK"
+            or danube_future.get("material_fact_use") is not False
+            or danube_future.get("open_call_authorized") is not False
+            or danube_future.get("material_fact_publication_authorized") is not False):
+        fail("Danube 2028+ Task Force discovery incorrectly authorized material facts")
+    danube_note = danube_future.get("note") or ""
+    if "14 October 2026" not in danube_note or "20 October 2026" not in danube_note:
+        fail("Danube 2028+ source lacks official meeting/publication provenance")
+    if "future country participation" not in danube_note or "no OPEN_CALL" not in danube_note:
+        fail("Danube 2028+ source must preserve uncertain future coverage and no-OPEN rule")
+    if any(key in danube_future for key in (
+            "status", "call_status", "deadline", "budget", "eligibility",
+            "fetched_at", "raw_sha256", "raw_hash", "parser_version", "run_id", "handoff_sha256")):
+        fail("Danube 2028+ registry invented call facts or immutable raw provenance")
 
     bsb = by_id["SRC-INTERREG-NEXT-BSB"]
     if bsb.get("material_fact_use") is not False:
