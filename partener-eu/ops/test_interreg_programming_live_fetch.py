@@ -152,6 +152,13 @@ def main():
             ('<div class="visually-hidden">', '</div>'),
             ('<div class="sr-only">', '</div>'),
             ('<div class="screen-reader-text">', '</div>'),
+            # Bootstrap responsive variants may be invisible at the target
+            # viewport even though plain HTML carries their stale text.
+            ('<div class="d-sm-none">', '</div>'),
+            ('<div class="d-md-none">', '</div>'),
+            ('<div class="d-lg-none">', '</div>'),
+            ('<div class="d-xl-none">', '</div>'),
+            ('<div class="d-xxl-none">', '</div>'),
             # Browsers differ on duplicate class attributes: never trust it.
             ('<div class="visible" class="sr-only">', '</div>'),
         ):
@@ -174,6 +181,10 @@ def main():
         # Substrings of known hidden classes must not cause false quarantines.
         assert "Visible class proof" in live._visible_text(
             b'<html><body><p class="not-d-none">Visible class proof</p></body></html>',
+            "text/html; charset=utf-8",
+        )
+        assert "Responsive class prefix proof" in live._visible_text(
+            b'<html><body><p class="not-d-md-none">Responsive class prefix proof</p></body></html>',
             "text/html; charset=utf-8",
         )
         assert "Visible after void" in live._visible_text(
