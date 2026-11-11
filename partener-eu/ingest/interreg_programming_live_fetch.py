@@ -83,6 +83,10 @@ _VOID_TAGS = frozenset({
 # ambiguous responsive-hidden nodes are treated conservatively as invisible.
 _HIDDEN_CLASSES = frozenset({
     "d-none", "hidden", "visually-hidden", "sr-only", "screen-reader-text",
+    # Bootstrap breakpoint variants are hidden at some viewport sizes. Static
+    # raw HTML cannot attest which CSS viewport rendered the claim: do not
+    # let a responsive-only duplicate establish an official source identity.
+    "d-sm-none", "d-md-none", "d-lg-none", "d-xl-none", "d-xxl-none",
 })
 
 
