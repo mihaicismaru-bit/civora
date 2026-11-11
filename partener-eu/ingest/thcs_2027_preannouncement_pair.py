@@ -207,7 +207,7 @@ def build(originals: dict, run_id: str) -> tuple[dict, dict]:
     if PRIMARY not in originals or not set(originals).issubset(SOURCE_SPECS):
         raise ValueError("verified European original required; unverified national source must stay pending")
     receipts, files = [], {}
-    for sid in sorted(SOURCE_SPECS):
+    for sid in sorted(originals):
         raw, mime, stamp = originals[sid]
         validate_html(sid, raw, mime)
         timestamp(stamp)
