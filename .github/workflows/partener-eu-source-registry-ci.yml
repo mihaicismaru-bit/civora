@@ -520,6 +520,34 @@ jobs:
           retention-days: 30
           if-no-files-found: warn
 
+      - name: Validate AFIR DR-31 consultative-guide identity and immutable replay
+        run: python partener-eu/ops/test_afir_dr31_consultation_acquire.py
+
+      - name: Acquire paired AFIR DR-31 official consultation originals (never OPEN)
+        id: afir_dr31_consultation_live
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/afir_dr31_consultation_acquire.py \
+            --out "/tmp/partener-afir-dr31-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/afir_dr31_consultation_acquire.py \
+            --replay-dir "/tmp/partener-afir-dr31-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine AFIR DR-31 missing or changed official consultation source
+        if: steps.afir_dr31_consultation_live.outcome == 'failure'
+        run: echo 'AFIR_DR31_CONSULTATION_RAW_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Preserve AFIR DR-31 immutable consultation originals and manifest
+        if: steps.afir_dr31_consultation_live.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-afir-dr31-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-afir-dr31-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Validate THCS 2027 prelaunch paired evidence stays PROGRAMMING_PIPELINE
         run: python partener-eu/ops/test_thcs_2027_preannouncement_pair.py
 
