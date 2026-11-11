@@ -11,6 +11,8 @@ on:
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
       - 'partener-eu/ingest/afir_dr12_quality_watch.py'
       - 'partener-eu/ingest/afir_dr12_clarification_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_exhaustion_acquire.py'
+      - 'partener-eu/ops/test_afir_dr12_exhaustion_acquire.py'
       - 'partener-eu/ingest/afir_counter_pair_watch.py'
       - 'partener-eu/ingest/afir_dr14_dr18_extension_acquire.py'
       - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
@@ -47,6 +49,8 @@ on:
       - 'partener-eu/ingest/afir_selection_results_acquire.py'
       - 'partener-eu/ingest/afir_dr12_quality_watch.py'
       - 'partener-eu/ingest/afir_dr12_clarification_acquire.py'
+      - 'partener-eu/ingest/afir_dr12_exhaustion_acquire.py'
+      - 'partener-eu/ops/test_afir_dr12_exhaustion_acquire.py'
       - 'partener-eu/ingest/afir_counter_pair_watch.py'
       - 'partener-eu/ingest/afir_dr14_dr18_extension_acquire.py'
       - 'partener-eu/ops/test_afir_dr12_quality_watch.py'
@@ -109,6 +113,7 @@ jobs:
           python partener-eu/ops/test_afir_live_funds.py
           python partener-eu/ops/test_afir_dr12_quality_watch.py
           python partener-eu/ops/test_afir_dr12_clarification_acquire.py
+          python partener-eu/ops/test_afir_dr12_exhaustion_acquire.py
           python partener-eu/ops/test_afir_counter_pair_watch.py
           python partener-eu/ops/test_afir_selection_results_acquire.py
           python partener-eu/ops/test_afir_solar_aggregate_observation.py
@@ -187,6 +192,30 @@ jobs:
         with:
           name: afir-dr12-clarification-pr-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/afir-dr12-note-pr-${{ github.run_id }}-${{ github.run_attempt }}/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: PR-only DR-12 11.11 other-sectors exhaustion original (non-authorizing)
+        shell: bash
+        env:
+          PARTENER_DR12_EXHAUSTION_OUT: ${{ runner.temp }}/afir-dr12-exhaustion-pr-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --out "$PARTENER_DR12_EXHAUSTION_OUT"
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo '::warning title=AFIR DR12 exhaustion original unavailable::Other-sectors closure observation held; no call status/deadline/publication authority.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --replay-dir "$PARTENER_DR12_EXHAUSTION_OUT"
+          fi
+      - name: Preserve PR-only original DR-12 exhaustion notice
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-exhaustion-pr-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/afir-dr12-exhaustion-pr-${{ github.run_id }}-${{ github.run_attempt }}/
           retention-days: 7
           if-no-files-found: warn
       - name: PR-only paired AFIR counter original capture and review-only replay
@@ -348,6 +377,30 @@ jobs:
         with:
           name: afir-dr12-clarification-raw-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/partener-afir-dr12-clarification/
+          retention-days: 14
+          if-no-files-found: warn
+      - name: Capture 11.11 DR-12 other-sectors exhaustion notice (review only)
+        shell: bash
+        env:
+          PARTENER_DR12_EXHAUSTION_OUT: ${{ runner.temp }}/partener-afir-dr12-exhaustion
+        run: |
+          set +e
+          python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --out "$PARTENER_DR12_EXHAUSTION_OUT"
+          result=$?
+          set -e
+          if [ "$result" -eq 2 ]; then
+            echo 'DR-12 closure raw source unavailable; preserve public LKG and current material facts.'
+          elif [ "$result" -ne 0 ]; then
+            exit "$result"
+          else
+            python partener-eu/ingest/afir_dr12_exhaustion_acquire.py --replay-dir "$PARTENER_DR12_EXHAUSTION_OUT"
+          fi
+      - name: Preserve original DR-12 component-exhaustion notice proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: afir-dr12-exhaustion-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/partener-afir-dr12-exhaustion/
           retention-days: 14
           if-no-files-found: warn
       - name: Capture AFIR and delegated application counters in the same run
