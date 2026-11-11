@@ -35,7 +35,7 @@ SOURCES = {
         "host": "www.water4all-partnership.eu",
         "family": "EU_DIRECT/BRUSSELS/JOINT_TRANSNATIONAL_CALL",
         "authority": "T1_OFFICIAL_JOINT_CALL_OPERATOR",
-        "state": "STAGE1_EXPIRED_PRIMARY_HTML_RAW_PENDING_SEMANTIC_REVIEW",
+        "state": "STAGE1_EXPIRED_PRIMARY_HTML_RAW_ACQUIRED_SEMANTIC_REVIEW_PENDING",
         "markers": ("water4all 2026", "10 november 2026", "6 april 2027", "epss"),
     },
     "SRC-RO-UEFISCDI-WATER4ALL-2026": {
@@ -43,7 +43,7 @@ SOURCES = {
         "host": "uefiscdi.gov.ro",
         "family": "ROMANIA/UEFISCDI/RESEARCH",
         "authority": "T1B_ROMANIAN_NATIONAL_FUNDING_AGENCY",
-        "state": "STAGE1_EXPIRED_NATIONAL_LANDING_RAW_PENDING_SEMANTIC_REVIEW",
+        "state": "STAGE1_EXPIRED_NATIONAL_LANDING_RAW_ACQUIRED_SEMANTIC_REVIEW_PENDING",
         "markers": ("water4all 2026", "10 noiembrie 2026", "aprilie 2027",
                     "water4all-2026-joint-transnational-call"),
     },
@@ -198,8 +198,8 @@ def fetch(sid):
 def build(originals, run_id):
     if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", run_id):
         raise ValueError("run_id invalid")
-    if set(originals) != set(SOURCES):
-        raise ValueError("both official paired originals required")
+    if not originals or not set(originals).issubset(SOURCES):
+        raise ValueError("at least one exact official original required, no unknown source")
     receipts = []
     for sid in sorted(SOURCES):
         raw, mime, stamp = originals[sid]
@@ -222,7 +222,11 @@ def build(originals, run_id):
         "call_identity_discovery_hint": "Water4All JTC 2026",
         "stage1": "2026-11-10T15:00:00+01:00_PREPROPOSALS_PASSED",
         "stage2": "2027-04-06T15:00:00+02:00_INVITED_FULL_PROPOSALS_ONLY",
-        "observation_state": "PAIRED_HTML_ACQUIRED_ONLY_SEMANTIC_REVIEW_REQUIRED",
+        "observation_state": ("PAIRED_HTML_ACQUIRED_ONLY_SEMANTIC_REVIEW_REQUIRED"
+                              if len(originals) == len(SOURCES) else
+                              "PARTIAL_HTML_ACQUIRED_OTHER_SOURCE_QUARANTINED"),
+        "sources_missing": sorted(set(SOURCES) - set(originals)),
+        "pair_complete": len(originals) == len(SOURCES),
         "requires": ["primary_call_announcement_pdf", "national_regulations_v8_romania",
                      "national_information_package", "current_exact_epss_endpoint",
                      "stage_specific_semantic_reconciliation", "reviewed_publication_gate"],
@@ -239,19 +243,28 @@ def replay(out):
     if any(p.is_symlink() for p in (out / "raw", out / "handoff.json")):
         raise ValueError("symlinked handoff item")
     payload = strict_json((out / "handoff.json").read_bytes())
+    rows = payload.get("receipts", [])
+    if not isinstance(rows, list):
+        raise ValueError("receipt field invalid")
+    actual_ids = [r.get("source_id") for r in rows]
+    if not actual_ids or actual_ids != sorted(set(actual_ids)) or not set(actual_ids).issubset(SOURCES):
+        raise ValueError("receipt source identity or order mismatch")
     expected = build({sid: (
         (out / "raw" / f"{sid}.html").read_bytes(),
-        next((r["content_type"] for r in payload.get("receipts", []) if r.get("source_id") == sid), ""),
-        next((r["fetched_at"] for r in payload.get("receipts", []) if r.get("source_id") == sid), "")
-    ) for sid in SOURCES}, payload.get("run_id"))
+        next(r["content_type"] for r in rows if r["source_id"] == sid),
+        next(r["fetched_at"] for r in rows if r["source_id"] == sid)
+    ) for sid in actual_ids}, payload.get("run_id"))
     if payload != expected:
         raise ValueError("handoff provenance, flags or size/hash mismatch")
-    if {p.name for p in (out / "raw").iterdir()} != {f"{sid}.html" for sid in SOURCES}:
+    if {p.name for p in (out / "raw").iterdir()} != {f"{sid}.html" for sid in actual_ids}:
         raise ValueError("raw file-set drift")
     if any(p.is_symlink() for p in (out / "raw").iterdir()):
         raise ValueError("symlinked raw original")
-    return {"status": "PAIRED_RAW_REPLAY_VERIFIED_NON_AUTHORIZING", "run_id": payload["run_id"],
-            "source_count": 2, "publication_effect": "NONE", "open_call_authorized": False}
+    return {"status": ("PAIRED_RAW_REPLAY_VERIFIED_NON_AUTHORIZING" if payload["pair_complete"]
+                       else "PARTIAL_RAW_QUARANTINED_REPLAY_VERIFIED_NON_AUTHORIZING"),
+            "run_id": payload["run_id"], "source_count": len(actual_ids),
+            "missing_sources": payload["sources_missing"], "pair_complete": payload["pair_complete"],
+            "publication_effect": "NONE", "open_call_authorized": False}
 
 
 def seal(out, originals, run_id):
@@ -282,7 +295,14 @@ def main():
         if not args.out or not args.run_id:
             parser.error("--out and --run-id required for acquisition")
         validate_registry()
-        originals = {sid: fetch(sid) for sid in sorted(SOURCES)}
+        originals = {}
+        for sid in sorted(SOURCES):
+            try:
+                originals[sid] = fetch(sid)
+            except (ValueError, OSError) as exc:
+                print(f"OFFICIAL_SOURCE_QUARANTINED {sid}: {type(exc).__name__}: {exc}")
+        if not originals:
+            raise ValueError("no validated official original; no handoff emitted")
         result = seal(args.out, originals, args.run_id)
     print(json.dumps(result, sort_keys=True))
     return 0
