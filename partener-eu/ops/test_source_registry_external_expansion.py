@@ -271,6 +271,47 @@ def main():
             "parser_version", "run_id", "handoff_sha256")):
         fail("Clustere corrigendum 2 invented call facts or unacquired raw receipt")
 
+
+    # 09 Nov regional AM contract-annex corrigenda are official discovery,
+    # NOT a current exact-call receipt, an extension, or permission for OPEN.
+    nov9_corrigenda = {
+        "SRC-PR-CENTRU-URBAN-MOBILITY-41-CORRIGENDUM2-20261109": (
+            "4.1", "19",
+            "https://www.regiocentru.ro/corrigendum-nr-2-la-ghidul-solicitantului-aferent-actiunii-4-1-dezvoltarea-mobilitatii-urbane-durabile-in-municipiile-regiunii-centru-inclusiv-zone-metropolitane-si-zone-functionale-urbane/",
+        ),
+        "SRC-PR-CENTRU-REGENERATION-81-CORRIGENDUM2-20261109": (
+            "8.1", "17",
+            "https://www.regiocentru.ro/corrigendum-nr-2-la-ghidul-solicitantului-aferent-actiunea-8-1-dezvoltare-urbana-integrata-prin-regenerarea-spatiilor-publice-punerea-in-valoare-a-patrimoniului-infrastructurii-culturale-s/",
+        ),
+    }
+    for source_id, (action, annex, official_url) in nov9_corrigenda.items():
+        row = by_id.get(source_id)
+        if row is None:
+            fail(f"missing Nov9 official ADR Centru corrigendum: {source_id}")
+        if (row.get("url"), row.get("tier"), row.get("event_date_discovery"),
+                row.get("action_identifier_discovery")) != (
+                official_url, "T1", "2026-11-09", action):
+            fail(f"{source_id} lost exact official dated identity")
+        if (row.get("authority_scope") != "GUIDE_CORRIGENDUM_DISCOVERY_ONLY"
+                or row.get("observation_state") != "CORRIGENDUM_2_DISCOVERED_RAW_PENDING"
+                or row.get("adapter_required") != "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1"):
+            fail(f"{source_id} escaped raw-pending discovery gate")
+        if (row.get("programmes") != ["Programul Regiunea Centru 2021-2027"]
+                or not {"ROMANIA", "ADR", "GUIDE_CORRIGENDUM"}.issubset(
+                    set(row.get("source_families") or []))):
+            fail(f"{source_id} lost official programme and family provenance")
+        if f"annex_{annex}_contract_amendment_notice" not in (row.get("extract") or []):
+            fail(f"{source_id} lost precise Annex {annex} contract-change scope")
+        if (row.get("material_fact_use") is not False
+                or row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False):
+            fail(f"{source_id} fabricated material publication or OPEN_CALL authority")
+        if any(key in row for key in (
+                "status", "call_status", "deadline", "budget", "eligibility",
+                "open_at", "close_at", "fetched_at", "raw_sha256",
+                "parser_version", "run_id", "handoff_sha256")):
+            fail(f"{source_id} invented source facts or unacquired raw provenance")
+
     programme_domains = plane.get("programmeDomains") or {}
 
     missing = sorted(set(REQUIRED) - set(by_id))
