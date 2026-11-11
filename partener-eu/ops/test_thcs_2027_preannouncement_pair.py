@@ -40,6 +40,21 @@ def test():
     mod.validate_html(SID_E, E, MIME)
     mod.validate_html(SID_RO, R, MIME)
     mod.validate_registry()
+    # Quarantined national evidence must reveal a bounded diagnostic only:
+    # never dump HTML, infer a source hash, or promote a planned call.
+    assert mod.national_quarantine_diagnostic(ValueError(
+        "THCS exact preannouncement/date markers missing: thcs-2027, 21 ianuarie 2027")) == {
+        "reason_code": "VISIBLE_MARKERS_MISSING",
+        "missing_markers": ["thcs-2027", "21 ianuarie 2027"]}
+    assert mod.national_quarantine_diagnostic(ValueError(
+        "THCS exact preannouncement/date markers missing: arbitrary untrusted data")) == {
+        "reason_code": "VISIBLE_MARKERS_MISSING", "missing_markers": []}
+    assert mod.national_quarantine_diagnostic(ValueError("official HTML MIME mismatch")) == {
+        "reason_code": "HTML_MIME_MISMATCH"}
+    assert mod.national_quarantine_diagnostic(ValueError("unreviewed official redirect")) == {
+        "reason_code": "OFFICIAL_ENDPOINT_DRIFT"}
+    assert mod.national_quarantine_diagnostic(OSError("unexpected remote trace")) == {
+        "reason_code": "TRANSPORT_UNAVAILABLE"}
     reject(lambda: mod.validate_html(SID_E, E.replace(b"16 November", b"19 November"), MIME), "markers")
     reject(lambda: mod.validate_html(SID_RO, R.replace(b"THCS-2027", b"THCS-2026"), MIME), "markers")
     reject(lambda: mod.validate_html(SID_E, E, "application/pdf; file=text/html"), "MIME")
