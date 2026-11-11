@@ -7,6 +7,8 @@ on:
       - 'partener-eu/ingest/amif_impact_official_receipts.py'
       - 'partener-eu/ingest/water4all_2026_official_pair.py'
       - 'partener-eu/ingest/water4all_2026_primary_documents.py'
+      - 'partener-eu/ingest/water4all_2026_romania_rules.py'
+      - 'partener-eu/ops/test_water4all_2026_romania_rules.py'
       - 'partener-eu/ingest/water4all_2026_epss_gateway.py'
       - 'partener-eu/ops/test_water4all_2026_epss_gateway.py'
       - 'partener-eu/ops/test_water4all_2026_primary_documents.py'
@@ -107,6 +109,8 @@ jobs:
           python -m py_compile partener-eu/ingest/amif_impact_official_receipts.py
           python -m py_compile partener-eu/ingest/water4all_2026_official_pair.py
           python -m py_compile partener-eu/ingest/water4all_2026_primary_documents.py
+          python -m py_compile partener-eu/ingest/water4all_2026_romania_rules.py
+          python -m py_compile partener-eu/ops/test_water4all_2026_romania_rules.py
           python -m py_compile partener-eu/ingest/water4all_2026_epss_gateway.py
           python -m py_compile partener-eu/ops/test_water4all_2026_epss_gateway.py
           python -m py_compile partener-eu/ops/test_water4all_2026_primary_documents.py
@@ -271,6 +275,37 @@ jobs:
         with:
           name: partener-water4all-docs-${{ github.run_id }}-${{ github.run_attempt }}
           path: /tmp/partener-water4all-docs-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Validate Water4All 2026 Romania annex extraction scope hermetically
+        run: python partener-eu/ops/test_water4all_2026_romania_rules.py
+
+      - name: Install pinned PDF reader for source-bound Romania annex candidate
+        run: |
+          printf '%s\n' 'pypdf==6.3.0 --hash=sha256:2d5f9741e851e378908692d571374b3cbd94582fdd1c740fcf7c029ec35ac0e6' | python -m pip install --disable-pip-version-check --only-binary=:all: --no-deps --require-hashes -r /dev/stdin
+
+      - name: Derive quarantined Romania rules candidate from immutable national-regulations PDF
+        id: water4all_romania_candidate
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/water4all_2026_romania_rules.py \
+            --source-dir "/tmp/partener-water4all-docs-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --out "/tmp/partener-water4all-romania-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/water4all_2026_romania_rules.py \
+            --source-dir "/tmp/partener-water4all-docs-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --replay-dir "/tmp/partener-water4all-romania-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine missing or drifted Romanian annex PDF semantics
+        if: steps.water4all_romania_candidate.outcome == 'failure'
+        run: echo 'WATER4ALL_ROMANIA_2026_NATIONAL_RULES_CANDIDATE_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Upload source-bound non-authorizing Water4All Romania annex candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-water4all-romania-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-water4all-romania-${{ github.run_id }}-${{ github.run_attempt }}
           retention-days: 14
           if-no-files-found: warn
 
