@@ -48,8 +48,8 @@ class OfficialLinkParser(HTMLParser):
         tag = tag.lower()
         if tag in {"meta", "link", "img", "br", "hr", "input", "source", "wbr"}:
             return
-        if tag == "a" and sum(k.lower() == "href" for k, _ in attrs) != 1:
-            raise ValueError("missing or duplicated official gateway href")
+        if tag == "a" and sum(k.lower() == "href" for k, _ in attrs) > 1:
+            raise ValueError("duplicated official gateway href")
         if self.anchor is not None and tag == "a":
             raise ValueError("nested official gateway anchor")
         attr = dict(attrs)
@@ -61,7 +61,7 @@ class OfficialLinkParser(HTMLParser):
         if tag in {"h2", "h3", "h4"}:
             self.heading = []
             self.section = False
-        if tag == "a":
+        if tag == "a" and "href" in attr:
             self.anchor = {"href": attr["href"], "hidden": hidden, "label": []}
 
     def handle_data(self, data):
