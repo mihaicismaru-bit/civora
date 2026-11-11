@@ -145,6 +145,15 @@ def main():
             ('<script/>', '</script>'),
             ('<details/>', '</details>'),
             ('<dialog/>', '</dialog>'),
+            # Bootstrap, Tailwind and WordPress style hidden-by-class nodes
+            # can carry obsolete or forged official workshop assertions.
+            ('<div class="d-none">', '</div>'),
+            ('<div class="hidden">', '</div>'),
+            ('<div class="visually-hidden">', '</div>'),
+            ('<div class="sr-only">', '</div>'),
+            ('<div class="screen-reader-text">', '</div>'),
+            # Browsers differ on duplicate class attributes: never trust it.
+            ('<div class="visible" class="sr-only">', '</div>'),
         ):
             hostile = (
                 '<html><body><article>Unrelated official newsletter</article>'
@@ -162,6 +171,11 @@ def main():
                 assert "identity/schedule unverified" in str(exc), (opening, exc)
             else:
                 raise AssertionError(f"HTML non-void self-close forged identity: {opening}")
+        # Substrings of known hidden classes must not cause false quarantines.
+        assert "Visible class proof" in live._visible_text(
+            b'<html><body><p class="not-d-none">Visible class proof</p></body></html>',
+            "text/html; charset=utf-8",
+        )
         assert "Visible after void" in live._visible_text(
             b"<html><body><br/><p>Visible after void</p></body></html>",
             "text/html; charset=utf-8",
