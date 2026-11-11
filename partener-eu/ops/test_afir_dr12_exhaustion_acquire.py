@@ -81,6 +81,8 @@ def test():
         (b"<section style='visibility:hidden'/>", b"</section>"),
         (b"<div style='content-visibility:hidden'/>", b"</div>"),
         (b"<div style='opacity:0'/>", b"</div>"),
+        (b"<div style='opacity:0.0'/>", b"</div>"),
+        (b"<div style='opacity:0%'/>", b"</div>"),
     ):
         hidden_only = (b"<html><body>" + opening + article + closing +
                        b"</body></html>")
@@ -89,6 +91,10 @@ def test():
         visible_after_hidden = (b"<html><body>" + opening + article +
                                 closing + article + b"</body></html>")
         notice.validate_official_notice(visible_after_hidden, "text/html")
+    # A semi-transparent published article is visible and must not be suppressed.
+    notice.validate_official_notice(
+        b"<html><body><div style='opacity:0.5'>" + article +
+        b"</div></body></html>", "text/html")
 
     with tempfile.TemporaryDirectory() as temp:
         out = Path(temp) / "receipt"
