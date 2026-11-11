@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/amif_impact_official_receipts.py'
+      - 'partener-eu/ops/test_amif_impact_official_receipts.py'
       - 'partener-eu/ingest/rch_2027_raw_acquire.py'
       - 'partener-eu/ingest/rch_2027_paired_handoff.py'
       - 'partener-eu/ingest/rch_2027_epss_gateway.py'
@@ -96,6 +98,8 @@ jobs:
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
+          python -m py_compile partener-eu/ingest/amif_impact_official_receipts.py
+          python -m py_compile partener-eu/ops/test_amif_impact_official_receipts.py
           python -m py_compile partener-eu/ingest/rch_2027_raw_acquire.py
           python -m py_compile partener-eu/ingest/rch_2027_paired_handoff.py
           python -m py_compile partener-eu/ingest/rch_2027_epss_gateway.py
@@ -148,6 +152,34 @@ jobs:
 
       - name: Validate EU/EEA/Interreg source and programming taxonomy
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Verify paired AMIF IMPACT Lot 3 official raw/replay contract
+        run: python partener-eu/ops/test_amif_impact_official_receipts.py
+
+      - name: Acquire MAI amendment and DG HOME primary PDF as paired non-authorizing evidence
+        id: amif_impact_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/amif_impact_official_receipts.py \
+            --out "/tmp/partener-amif-impact-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/amif_impact_official_receipts.py \
+            --replay-dir "/tmp/partener-amif-impact-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine unavailable or unreconciled AMIF original documents
+        if: steps.amif_impact_live.outcome == 'failure'
+        run: |
+          echo 'AMIF_IMPACT_PAIR_RAW_PENDING / FAIL_CLOSED / NO_OPEN_CALL / NO_PUBLICATION'
+          python partener-eu/ops/test_amif_impact_official_receipts.py
+
+      - name: Upload immutable paired AMIF originals and handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-amif-impact-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-amif-impact-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
 
       - name: Prove PDDTJ delegated OI original-byte handoff remains non-authorizing
         run: python partener-eu/ops/test_pddtj_oi_discovery_acquire.py
