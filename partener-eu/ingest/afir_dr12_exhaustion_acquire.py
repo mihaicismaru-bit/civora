@@ -149,6 +149,16 @@ def validate_official_notice(raw: bytes, content_type: str) -> None:
         r"sesiunea pentru componenta alte sectoare.{0,150}s-a inchis", body
     ):
         raise ValueError("DR-12 other-sectors closure statement not established")
+    # The deadline referenced by the exhausted *other sectors* component
+    # must appear in that same statement, not merely somewhere else on the
+    # page (e.g. the unaffected zootechnical component).
+    if not re.search(
+        r"fondurile alocate prin interventia dr-12.{0,300}"
+        r"pentru componenta alte sectoare.{0,140}"
+        r"au fost epuizate integral.{0,125}2 decembrie 2026",
+        body,
+    ):
+        raise ValueError("DR-12 exhausted-component source/deadline binding missing")
     if not re.search(
         r"sesiunea de depunere.{0,160}dr-12 continua pentru sectorul zootehnic",
         body,
