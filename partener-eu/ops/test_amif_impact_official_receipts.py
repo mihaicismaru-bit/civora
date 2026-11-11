@@ -87,6 +87,11 @@ def test():
         bad["handoff_sha256"] = mod.digest(mod.canonical({k: v for k, v in bad.items() if k != "handoff_sha256"}))
         manifest_file.write_bytes(mod.canonical(bad))
         reject(lambda: mod.replay(dest), "provenance")
+        bad = json.loads(unchanged)
+        bad["receipts"][0]["raw_path"] = "otherdir/" + Path(bad["receipts"][0]["raw_path"]).name
+        bad["handoff_sha256"] = mod.digest(mod.canonical({k: v for k, v in bad.items() if k != "handoff_sha256"}))
+        manifest_file.write_bytes(mod.canonical(bad))
+        reject(lambda: mod.replay(dest), "raw_path")
         manifest_file.write_bytes(unchanged.replace(b'"schema":', b'"schema":"fake","schema":'))
         reject(lambda: mod.replay(dest), "duplicate")
         manifest_file.write_bytes(unchanged)
