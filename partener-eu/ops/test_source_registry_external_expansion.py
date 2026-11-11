@@ -286,6 +286,52 @@ def validate_impact_lot3_pair(by_id):
 
 
 
+
+def validate_thcs_2027_preannouncement(by_id, programme_domains):
+    """The planned 16-November launch is never evidence of an already OPEN call."""
+    ids = {
+        "SRC-EU-THCS-2027-PREANNOUNCEMENT": (
+            "https://www.thcspartnership.eu/funding/jtc-2027-pre-announcement.kl",
+            "T1", "SRC-RO-UEFISCDI-THCS-2027",
+            {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE"}),
+        "SRC-RO-UEFISCDI-THCS-2027": (
+            "https://uefiscdi.gov.ro/transforming-health-and-care-systems-thcs",
+            "T1B", "SRC-EU-THCS-2027-PREANNOUNCEMENT",
+            {"ROMANIA", "EU_DIRECT", "PROGRAMMING_PIPELINE"}),
+    }
+    programme = "Horizon Europe / THCS Joint Transnational Call 2027"
+    if set(programme_domains.get(programme, [])) != {"EU_DIRECT_FUNDING", "PROGRAMMING_FUTURE"}:
+        fail("THCS 2027 planned programme lacks separated future-programming plane")
+    for source_id, (url, tier, peer, families) in ids.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"{source_id}: missing official paired preannouncement")
+        expected = {
+            "url": url, "tier": tier, "paired_official_source_id": peer,
+            "programmes": [programme], "programme_family": programme,
+            "authority_scope": "PROGRAMMING_FRAMEWORK",
+            "observation_state": "PROGRAMMING_PIPELINE",
+            "adapter_required": "THCS_2027_OFFICIAL_LAUNCH_NATIONAL_RULES_RECONCILE_V1",
+            "material_fact_use": False, "credentials_required": False,
+            "open_call_authorized": False, "material_fact_publication_authorized": False,
+        }
+        for key, value in expected.items():
+            if row.get(key) != value:
+                fail(f"{source_id}: prelaunch {key} is missing or dangerously promoted")
+        if not families.issubset(set(row.get("source_families") or [])):
+            fail(f"{source_id}: source taxonomy lost its future-programming gate")
+        if any(k in row for k in (
+            "status", "call_status", "deadline", "open_at", "close_at", "budget",
+            "budget_eur", "eligibility", "fetched_at", "raw_sha256", "parser_version",
+            "run_id", "handoff_sha256", "submission_live_authorized",
+        )):
+            fail(f"{source_id}: unacquired preannouncement invented material facts")
+        note = row.get("note") or ""
+        for marker in ("16 November 2026", "OPEN_CALL", "national", "reconcil"):
+            if marker.lower() not in note.lower():
+                fail(f"{source_id}: planned-stage or national-rule warning lost: {marker}")
+
+
 def validate_water4all_2026_pair(by_id):
     """Water4All stage-1 expiry does not open uninvited stage-2 intake."""
     pair = {
@@ -930,6 +976,7 @@ def main():
             "exact_action_link_candidate") != "https://www.regiocentru.ro/actiuni/3-3-investitii-in-infrastructura-verde-si-albastra-in-mediul-urban-regional-apel-competitiv-pentru-municipii/":
         fail("PR Centru 3.3 corrigendum lost its exact action link")
 
+    validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
     test_water4all_adversarial_pairs(by_id)
