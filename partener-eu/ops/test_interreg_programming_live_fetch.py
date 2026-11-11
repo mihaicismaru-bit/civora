@@ -822,7 +822,7 @@ def main():
         article_text = (
             "Participați la atelierele transfrontaliere pentru Capitolul Interreg 2028-2034. "
             "Atelier la 17 noiembrie 2026 Debrecen și la 20 noiembrie 2026 online. "
-            "Înscrierea s-a încheiat pe 28 octombrie 2026. "
+            "Înscrierea se face prin completarea formularului de înscriere, AICI, până la data de 28 octombrie 2026. "
             "Aceste evenimente țin doar de programarea viitoare, nu de apeluri deschise."
         )
         article_html = ("<html><body><h1>" + article_text + "</h1></body></html>").encode("utf-8")
