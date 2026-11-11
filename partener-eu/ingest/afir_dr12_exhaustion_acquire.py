@@ -78,7 +78,11 @@ class Visible(HTMLParser):
     SKIP = {"head", "script", "style", "noscript", "template", "svg", "iframe",
             "nav", "footer", "dialog", "textarea", "select"}
     VOID = {"img", "meta", "link", "input", "br", "hr", "source", "wbr"}
-    HIDDEN_CLASSES = {"hidden", "d-none", "invisible", "visually-hidden", "sr-only"}
+    # Responsive display:none variants cannot establish page-wide visible evidence.
+    HIDDEN_CLASSES = {
+        "hidden", "d-none", "d-sm-none", "d-md-none", "d-lg-none",
+        "d-xl-none", "d-xxl-none", "invisible", "visually-hidden", "sr-only"
+    }
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.stack = []
