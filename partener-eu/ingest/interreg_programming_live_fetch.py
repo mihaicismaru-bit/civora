@@ -20,6 +20,7 @@ import json
 from pathlib import Path
 import re
 import ssl
+import unicodedata
 import urllib.request
 from urllib.parse import urlsplit
 from typing import Any
@@ -52,7 +53,11 @@ ROW_FAIL_KEYS = ROW_COMMON_KEYS | {"error_type", "error"}
 LEGACY_ROW_PASS_KEYS = ROW_PASS_KEYS - {"attempted_at"}
 LEGACY_ROW_FAIL_KEYS = ROW_FAIL_KEYS - {"attempted_at"}
 WORKSHOPS_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026"
-WORKSHOPS_IDENTITY_TERMS = ("2028-2034", "17 noiembrie 2026", "20 noiembrie 2026", "28 octombrie 2026")
+# Workshop dates are separate from the registration deadline. The official
+# article's registration clause changed from 28 October to 20 November 2026;
+# preserve replay of both already-observed original revisions, but do not
+# infer a funding call, open registration, or a material publication right.
+WORKSHOPS_IDENTITY_TERMS = ("2028-2034", "17 noiembrie 2026", "20 noiembrie 2026")
 ROHU_SURVEY_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026"
 ROHU_SURVEY_IDENTITY_TERMS = ("2028-2034", "sondaj", "analiza teritorial", "5 octombrie", "30 noiembrie 2026")
 USER_AGENT = "PARTENER.EU-Interreg-Programming/1.0"
@@ -306,8 +311,24 @@ def _assert_registered_article_identity(source_id: str, registered_url: str, fin
     comparable = re.sub(r"\s+", " ", visible_text.casefold()).translate(
         str.maketrans({"–": "-", "—": "-", "−": "-"})
     )
+    comparable = "".join(
+        char for char in unicodedata.normalize("NFKD", comparable)
+        if not unicodedata.combining(char)
+    )
     if required_topic not in comparable or any(term not in comparable for term in terms):
         raise ValueError(f"ROHU {label} official article identity/schedule unverified")
+    if source_id == WORKSHOPS_SOURCE_ID:
+        # A workshop on 20 November does not prove registration ends then.
+        # Require one *visible, explicit* enrollment clause: the historical
+        # 28-Oct version and its 20-Nov replacement are replay-compatible.
+        # Conflicting clauses, unsupported dates or template-only text fail.
+        registration_clauses = re.findall(
+            r"\binscrierea se face prin completarea formularului de inscriere\b"
+            r".{0,100}?\bpana la data de (?:28 octombrie|20 noiembrie) 2026\b",
+            comparable,
+        )
+        if len(registration_clauses) != 1:
+            raise ValueError("ROHU workshop official registration clause unverified")
 
 
 class _RegisteredOriginRedirect(urllib.request.HTTPRedirectHandler):
