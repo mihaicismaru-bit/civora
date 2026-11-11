@@ -39,11 +39,12 @@ SOURCE_SPECS = {
                     "21 ianuarie 2027", "24 iunie 2027"),
     },
 }
+PRIMARY = "SRC-EU-THCS-2027-PREANNOUNCEMENT"
 OFF = ("material_fact_use", "open_call_authorized", "publish_authorized",
        "distribution_authorized", "deadline_authorized", "budget_authorized",
        "eligibility_authorized")
 MANIFEST_KEYS = {"schema", "run_id", "programme_family", "observation_state",
-                 "publication_effect", "receipts", "handoff_sha256"} | set(OFF)
+                 "publication_effect", "receipts", "pending_source_ids", "handoff_sha256"} | set(OFF)
 RECEIPT_KEYS = {"source_id", "requested_url", "final_url", "raw_file",
                 "raw_sha256", "raw_bytes", "fetched_at", "run_id",
                 "parser_version", "programme_family", "source_family",
@@ -203,8 +204,8 @@ def fetch(source_id: str):
 def build(originals: dict, run_id: str) -> tuple[dict, dict]:
     if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", run_id):
         raise ValueError("run_id invalid")
-    if set(originals) != set(SOURCE_SPECS):
-        raise ValueError("both official preannouncement originals required")
+    if PRIMARY not in originals or not set(originals).issubset(SOURCE_SPECS):
+        raise ValueError("verified European original required; unverified national source must stay pending")
     receipts, files = [], {}
     for sid in sorted(SOURCE_SPECS):
         raw, mime, stamp = originals[sid]
@@ -228,6 +229,7 @@ def build(originals: dict, run_id: str) -> tuple[dict, dict]:
         "schema": SCHEMA, "run_id": run_id, "programme_family": FAMILY,
         "observation_state": "PROGRAMMING_PIPELINE", "publication_effect": "NONE",
         "receipts": receipts,
+        "pending_source_ids": sorted(set(SOURCE_SPECS) - set(originals)),
     }
     manifest.update({key: False for key in OFF})
     manifest["handoff_sha256"] = sha(canonical(manifest))
@@ -264,8 +266,13 @@ def replay(out: Path):
         any(manifest[x] is not False for x in OFF)):
         raise ValueError("THCS publication/authority gate mismatch")
     rows = manifest["receipts"]
-    if not isinstance(rows, list) or len(rows) != 2 or set(row.get("source_id") for row in rows) != set(SOURCE_SPECS):
-        raise ValueError("THCS paired receipts missing")
+    if (not isinstance(rows, list) or not 1 <= len(rows) <= 2 or
+        any(not isinstance(row, dict) for row in rows) or
+        len({row.get("source_id") for row in rows}) != len(rows) or
+        PRIMARY not in {row.get("source_id") for row in rows} or
+        not {row.get("source_id") for row in rows}.issubset(SOURCE_SPECS) or
+        manifest.get("pending_source_ids") != sorted(set(SOURCE_SPECS) - {row.get("source_id") for row in rows})):
+        raise ValueError("THCS primary/pending source receipts mismatch")
     expected = {"manifest.json"}
     originals = {}
     for row in rows:
@@ -296,10 +303,12 @@ def replay(out: Path):
         raise ValueError("extra/missing THCS original evidence file")
     if canonical(build(originals, manifest["run_id"])[0]) != canonical(manifest):
         raise ValueError("THCS replay divergent")
-    return {"status": "THCS_PREANNOUNCEMENT_PAIR_RAW_REPLAY_VERIFIED",
+    return {"status": ("THCS_PREANNOUNCEMENT_PAIR_RAW_REPLAY_VERIFIED" if len(rows) == 2
+                       else "THCS_EU_PRIMARY_RAW_REPLAY_VERIFIED_NATIONAL_QUARANTINED"),
             "observation_state": "PROGRAMMING_PIPELINE",
             "open_call_authorized": False, "publish_authorized": False,
-            "raw_hashes": {r["source_id"]: r["raw_sha256"] for r in rows}}
+            "raw_hashes": {r["source_id"]: r["raw_sha256"] for r in rows},
+            "pending_source_ids": manifest["pending_source_ids"]}
 
 def main():
     p = argparse.ArgumentParser()
@@ -314,11 +323,20 @@ def main():
         return
     if not args.run_id:
         raise SystemExit("--run-id required")
-    originals = {sid: fetch(sid) for sid in SOURCE_SPECS}
+    originals = {}
+    for sid in SOURCE_SPECS:
+        try:
+            originals[sid] = fetch(sid)
+        except (ValueError, OSError) as exc:
+            if sid == PRIMARY:
+                raise  # no safe primary acquisition means no handoff
+            print(json.dumps({"source_id": sid, "observation_state": "NATIONAL_RAW_QUARANTINED",
+                              "error_type": type(exc).__name__, "publication_effect": "NONE"}))
     receipt = seal(args.out, originals, args.run_id)
     print(json.dumps({"status": "THCS_PREANNOUNCEMENT_RAW_ACQUIRED_NOT_PUBLISHED",
                       "run_id": receipt["run_id"], "handoff_sha256": receipt["handoff_sha256"],
-                      "sources": {r["source_id"]: r["raw_sha256"] for r in receipt["receipts"]}},
+                      "sources": {r["source_id"]: r["raw_sha256"] for r in receipt["receipts"]},
+                      "pending_source_ids": receipt["pending_source_ids"]},
                      sort_keys=True))
 
 if __name__ == "__main__":
