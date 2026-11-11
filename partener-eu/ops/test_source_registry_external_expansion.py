@@ -230,6 +230,57 @@ def main():
     plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
     by_id = {row["id"]: row for row in data.get("sources", [])}
 
+    # EIT HEI 2026: official programme call operator + Romanian NCP information.
+    # The NCP is NOT a national funder; web readback is NOT immutable source
+    # acquisition. Exact 2026 call, application route and current call-text
+    # receipt must reconcile before any canonical OPEN/deadline/budget facts.
+    eit_pair = {
+        "SRC-EU-EIT-HEI-2026-EXACT-CALL": (
+            "https://eit-hei.eu/funding-support/funding-opportunities/open-calls/call-for-proposals-2026/",
+            "T1", "EXACT_CALL_DISCOVERY_ONLY", "EXACT_CALL_DISCOVERED_RAW_PENDING",
+            "SRC-RO-UEFISCDI-EIT-HEI-2026-NCP", {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+        ),
+        "SRC-RO-UEFISCDI-EIT-HEI-2026-NCP": (
+            "https://uefiscdi.gov.ro/news-apelul-2026-eit-higher-education-initiative-pana-la-1-25-milioane-eur-pe-proiect-depunere-pana-la-13-ianuarie-2027.-calenda",
+            "T1B", "NATIONAL_INFORMATION_DISCOVERY_ONLY", "NATIONAL_INFO_READBACK_RAW_PENDING",
+            "SRC-EU-EIT-HEI-2026-EXACT-CALL", {"ROMANIA", "EU_DIRECT", "CALL_REGISTRY"},
+        ),
+    }
+    for source_id, (url, tier, scope, state, pair, families) in eit_pair.items():
+        row = by_id.get(source_id)
+        if row is None:
+            fail(f"missing exact EIT HEI 2026 paired official discovery: {source_id}")
+        if (row.get("url"), row.get("tier"), row.get("authority_scope"),
+                row.get("observation_state"), row.get("paired_official_source_id")) != (
+                url, tier, scope, state, pair):
+            fail(f"{source_id} lost exact 2026 identity or raw-pending pairing")
+        if row.get("programmes") != ["EIT Higher Education Initiative Call 2026"] or not families.issubset(
+                set(row.get("source_families") or [])):
+            fail(f"{source_id} mixed call generations or lost programme family")
+        if row.get("adapter_required") != "EIT_HEI_2026_EXACT_CALL_SUBMISSION_RECONCILE_V1":
+            fail(f"{source_id} bypassed exact-call/current-submission reconciliation")
+        if (row.get("material_fact_use") is not False
+                or row.get("credentials_required") is not False
+                or row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False):
+            fail(f"{source_id} unreviewed material fact or OPEN_CALL promotion")
+        if any(key in row for key in (
+            "status", "call_status", "deadline", "budget", "budget_eur",
+            "eligibility", "open_at", "close_at", "fetched_at", "fetched_at_utc",
+            "raw_sha256", "semantic_sha256", "parser_version", "run_id",
+            "handoff_sha256", "application_deadline",
+        )):
+            fail(f"{source_id} fabricated material facts or successful raw provenance")
+        note = (row.get("note") or "").lower()
+        if "no open_call" not in note or "immutable" not in note:
+            fail(f"{source_id} lost explicit provenance/open-state safety boundary")
+        if source_id == "SRC-RO-UEFISCDI-EIT-HEI-2026-NCP":
+            if "not a romanian national co-funding" not in note or "not funder" not in (
+                    row.get("authority_class") or "").lower():
+                fail("UEFISCDI NCP information was wrongly elevated to a funding authority")
+    if plane.get("programmeDomains", {}).get("EIT Higher Education Initiative Call 2026") != ["EU_DIRECT_FUNDING"]:
+        fail("EIT HEI 2026 lost exact-call data-plane domain classification")
+
     # UEFISCDI and the DUT secretariat describe the same exact 2026 call.
     # Search/index readback cannot substitute for an immutable paired source
     # receipt, the Romanian National Annex and current submission evidence.
