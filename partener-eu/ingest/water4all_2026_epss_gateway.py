@@ -109,6 +109,30 @@ def source_link(raw):
     return urls[0]
 
 
+class VisibleHeadings(pair.VisibleText):
+    """Require an actual visible login heading, not a sentence or script text."""
+    def __init__(self):
+        super().__init__()
+        self.active_heading = None
+        self.headings = []
+
+    def handle_starttag(self, tag, attrs):
+        super().handle_starttag(tag, attrs)
+        if tag in {"h1", "h2", "h3", "h4", "h5", "h6"} and not self.stack[-1][1]:
+            self.active_heading = (tag, [])
+
+    def handle_data(self, data):
+        super().handle_data(data)
+        if self.active_heading and not (self.stack and self.stack[-1][1]):
+            self.active_heading[1].append(data)
+
+    def handle_endtag(self, tag):
+        if self.active_heading and tag == self.active_heading[0]:
+            self.headings.append(pair.fold(" ".join(self.active_heading[1])))
+            self.active_heading = None
+        super().handle_endtag(tag)
+
+
 def validate_gateway(raw, mime):
     if (not isinstance(raw, bytes) or not 250 <= len(raw) <= MAX_BYTES or
             mime.split(";", 1)[0].strip().lower() not in {"text/html", "application/xhtml+xml"} or
@@ -121,6 +145,10 @@ def validate_gateway(raw, mime):
                    "sustainable water management", "sign in"):
         if marker not in text:
             raise ValueError("Water4All public 2026 login identity mismatch")
+    headers = VisibleHeadings()
+    headers.feed(raw.decode("utf-8", "replace"))
+    if "sign in" not in headers.headings:
+        raise ValueError("Water4All 2026 visible login heading missing")
 
 
 class NoRedirect(HTTPRedirectHandler):
