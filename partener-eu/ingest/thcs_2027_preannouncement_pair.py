@@ -23,6 +23,12 @@ PARSER_VERSION = "THCS_2027_PREANNOUNCEMENT_PAIR_RAW_V1"
 SCHEMA = "PARTENER_THCS_2027_PREANNOUNCEMENT_PAIR_V1"
 FAMILY = "Horizon Europe / THCS Joint Transnational Call 2027"
 MAX_BYTES = 5_000_000
+# Raw-HTML evidence cannot attest viewport: reject class-hidden and
+# responsive-hidden assertions before matching official programme identity.
+HIDDEN_CLASSES = frozenset({
+    "hidden", "d-none", "visually-hidden", "sr-only", "screen-reader-text",
+    "d-sm-none", "d-md-none", "d-lg-none", "d-xl-none", "d-xxl-none",
+})
 SOURCE_SPECS = {
     "SRC-EU-THCS-2027-PREANNOUNCEMENT": {
         "url": "https://www.thcspartnership.eu/funding/jtc-2027-pre-announcement.kl",
@@ -93,11 +99,12 @@ class Visible(HTMLParser):
         attrs_seen = {}
         ambiguous = False
         for key, value in attrs:
-            if key in attrs_seen and key in {"style", "hidden", "aria-hidden", "inert"}:
+            if key in attrs_seen and key in {"style", "class", "hidden", "aria-hidden", "inert"}:
                 ambiguous = True
             attrs_seen.setdefault(key, value or "")
         css = re.sub(r"\s+", "", attrs_seen.get("style", "").casefold())
-        hidden = (ambiguous or tag in self.SKIP or
+        classes = set(attrs_seen.get("class", "").casefold().split())
+        hidden = (ambiguous or bool(classes & HIDDEN_CLASSES) or tag in self.SKIP or
                   (tag == "details" and "open" not in attrs_seen) or
                   "popover" in attrs_seen or "hidden" in attrs_seen or
                   "inert" in attrs_seen or

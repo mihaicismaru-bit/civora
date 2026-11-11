@@ -48,6 +48,19 @@ def test():
         reject(lambda sid=sid, hidden=hidden: mod.validate_html(sid, hidden, MIME), "markers")
         visible_after = hidden.replace(b"</body>", b"<div>" + raw.split(b"<main>")[1].split(b"</main>")[0] + b"</div></body>")
         mod.validate_html(sid, visible_after, MIME)
+        claims = raw.split(b"<main>", 1)[1].split(b"</main>", 1)[0]
+        for css_class in sorted(mod.HIDDEN_CLASSES):
+            hidden_css = (b'<html><body><section class="' + css_class.encode()
+                          + b'">' + claims + b'</section></body></html>')
+            reject(lambda h=hidden_css, sid=sid: mod.validate_html(sid, h, MIME), "markers")
+        # Conflicting class attributes are never sufficient authority evidence.
+        ambiguous_css = (b'<html><body><section class="safe" class="d-none">'
+                         + claims + b'</section></body></html>')
+        reject(lambda h=ambiguous_css, sid=sid: mod.validate_html(sid, h, MIME), "markers")
+        # Match class tokens, not substrings of otherwise visible classes.
+        visible_css = (b'<html><body><section class="not-d-md-none">'
+                       + claims + b'</section></body></html>')
+        mod.validate_html(sid, visible_css, MIME)
     reject(lambda: mod.exact_url(SID_E, mod.SOURCE_SPECS[SID_E]["url"] + "?stale=1"), "URL")
     reject(lambda: mod.exact_url(SID_RO, "https://evil.invalid/"), "URL")
     partial, partial_files = mod.build({SID_E: originals()[SID_E]}, "T1")
