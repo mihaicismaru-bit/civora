@@ -317,6 +317,27 @@ def replay(out: Path):
             "raw_hashes": {r["source_id"]: r["raw_sha256"] for r in rows},
             "pending_source_ids": manifest["pending_source_ids"]}
 
+def national_quarantine_diagnostic(exc: Exception) -> dict:
+    """Bounded source-health reason, never raw HTML or a publishing signal."""
+    if isinstance(exc, ValueError):
+        message = str(exc)
+        prefix = "THCS exact preannouncement/date markers missing: "
+        if message.startswith(prefix):
+            # Only known, registered markers may appear in the observability log.
+            missing = [marker for marker in SOURCE_SPECS["SRC-RO-UEFISCDI-THCS-2027"]["markers"]
+                       if marker in message[len(prefix):].split(", ")]
+            return {"reason_code": "VISIBLE_MARKERS_MISSING",
+                    "missing_markers": missing}
+        if "MIME mismatch" in message:
+            return {"reason_code": "HTML_MIME_MISMATCH"}
+        if "official original size" in message or "content length mismatch" in message:
+            return {"reason_code": "ORIGINAL_SIZE_MISMATCH"}
+        if "official source URL/host drift" in message or "unreviewed official redirect" in message:
+            return {"reason_code": "OFFICIAL_ENDPOINT_DRIFT"}
+        return {"reason_code": "IDENTITY_OR_PROVENANCE_REJECTED"}
+    return {"reason_code": "TRANSPORT_UNAVAILABLE"}
+
+
 def main():
     p = argparse.ArgumentParser()
     mode = p.add_mutually_exclusive_group(required=True)
@@ -338,7 +359,8 @@ def main():
             if sid == PRIMARY:
                 raise  # no safe primary acquisition means no handoff
             print(json.dumps({"source_id": sid, "observation_state": "NATIONAL_RAW_QUARANTINED",
-                              "error_type": type(exc).__name__, "publication_effect": "NONE"}))
+                              "error_type": type(exc).__name__, "publication_effect": "NONE",
+                              **national_quarantine_diagnostic(exc)}))
     receipt = seal(args.out, originals, args.run_id)
     print(json.dumps({"status": "THCS_PREANNOUNCEMENT_RAW_ACQUIRED_NOT_PUBLISHED",
                       "run_id": receipt["run_id"], "handoff_sha256": receipt["handoff_sha256"],
