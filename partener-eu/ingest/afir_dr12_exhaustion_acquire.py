@@ -100,7 +100,7 @@ class Visible(HTMLParser):
                   attrs_seen.get("aria-hidden", "").casefold() == "true" or
                   "display:none" in style or "visibility:hidden" in style or
                   "content-visibility:hidden" in style or
-                  bool(re.search(r"(?:^|;)opacity:0(?:\\.0+)?%?(?=;|$)", style)))
+                  bool(re.search(r"(?:^|;)opacity:0(?:\.0+)?%?(?=;|$)", style)))
         if tag not in self.VOID:
             parent_hidden = self.stack[-1][1] if self.stack else False
             self.stack.append((tag, hidden or parent_hidden))
