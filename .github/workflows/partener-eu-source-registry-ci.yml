@@ -5,6 +5,8 @@ on:
     paths:
       - 'partener-eu/ingest/source_registry.json'
       - 'partener-eu/ingest/amif_impact_official_receipts.py'
+      - 'partener-eu/ingest/water4all_2026_official_pair.py'
+      - 'partener-eu/ops/test_water4all_2026_official_pair.py'
       - 'partener-eu/ops/test_amif_impact_official_receipts.py'
       - 'partener-eu/ingest/rch_2027_raw_acquire.py'
       - 'partener-eu/ingest/rch_2027_paired_handoff.py'
@@ -99,6 +101,8 @@ jobs:
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
           python -m py_compile partener-eu/ingest/amif_impact_official_receipts.py
+          python -m py_compile partener-eu/ingest/water4all_2026_official_pair.py
+          python -m py_compile partener-eu/ops/test_water4all_2026_official_pair.py
           python -m py_compile partener-eu/ops/test_amif_impact_official_receipts.py
           python -m py_compile partener-eu/ingest/rch_2027_raw_acquire.py
           python -m py_compile partener-eu/ingest/rch_2027_paired_handoff.py
@@ -178,6 +182,34 @@ jobs:
         with:
           name: partener-amif-impact-raw-${{ github.run_id }}-${{ github.run_attempt }}
           path: /tmp/partener-amif-impact-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Validate Water4All stage-specific paired raw/replay contract
+        run: python partener-eu/ops/test_water4all_2026_official_pair.py
+
+      - name: Acquire exact Water4All 2026 European and Romanian official HTML (non-authorizing)
+        id: water4all_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/water4all_2026_official_pair.py \
+            --out "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/water4all_2026_official_pair.py \
+            --replay-dir "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine unavailable Water4All original or changed stage markers
+        if: steps.water4all_live.outcome == 'failure'
+        run: |
+          echo 'WATER4ALL_2026_PAIRED_RAW_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+          python partener-eu/ops/test_water4all_2026_official_pair.py
+
+      - name: Upload immutable Water4All 2026 official pair and evidence manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-water4all-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-water4all-2026-${{ github.run_id }}-${{ github.run_attempt }}
           retention-days: 14
           if-no-files-found: warn
 
