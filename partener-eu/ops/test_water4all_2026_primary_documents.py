@@ -40,7 +40,7 @@ def run():
         mod.pdf_ok(original[0], original[1])
         for mime in ("text/html", "application/pdf-fake", "application/octet-stream"):
             reject(lambda m=mime, b=original[0]: mod.pdf_ok(b, m), "MIME")
-        reject(lambda b=original[0]: mod.pdf_ok(b[:-6], "application/pdf"), "trailer")
+        reject(lambda b=original[0]: mod.pdf_ok(b.replace(b"%%EOF", b"NOEOF"), "application/pdf"), "trailer")
         reject(lambda b=original[0]: mod.pdf_ok(b"NO" + b[2:], "application/pdf"), "magic")
     reject(lambda: mod.build({}, "qa"), "exact official")
     reject(lambda: mod.build({"FAKE": next(iter(DOCS.values()))}, "qa"), "exact official")
