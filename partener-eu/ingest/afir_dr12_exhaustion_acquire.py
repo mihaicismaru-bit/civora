@@ -78,6 +78,7 @@ class Visible(HTMLParser):
     SKIP = {"head", "script", "style", "noscript", "template", "svg", "iframe",
             "nav", "footer", "dialog", "textarea", "select"}
     VOID = {"img", "meta", "link", "input", "br", "hr", "source", "wbr"}
+    HIDDEN_CLASSES = {"hidden", "d-none", "invisible", "visually-hidden", "sr-only"}
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.stack = []
@@ -92,10 +93,14 @@ class Visible(HTMLParser):
                 duplicated = True
             attrs_seen.setdefault(k, v or "")
         style = fold(attrs_seen.get("style", "")).replace(" ", "")
+        classes = set(fold(attrs_seen.get("class", "")).split())
         hidden = (duplicated or tag in self.SKIP or
                   "hidden" in attrs_seen or "inert" in attrs_seen or
+                  bool(classes & self.HIDDEN_CLASSES) or
                   attrs_seen.get("aria-hidden", "").casefold() == "true" or
-                  "display:none" in style or "visibility:hidden" in style)
+                  "display:none" in style or "visibility:hidden" in style or
+                  "content-visibility:hidden" in style or
+                  bool(re.search(r"(?:^|;)opacity:0(?:[.;]|$)", style)))
         if tag not in self.VOID:
             parent_hidden = self.stack[-1][1] if self.stack else False
             self.stack.append((tag, hidden or parent_hidden))
