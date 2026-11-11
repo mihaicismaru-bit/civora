@@ -225,6 +225,66 @@ PDDTJ_OI_DISCOVERIES = {
 }
 
 
+def validate_impact_lot3_pair(by_id):
+    """A Commission Lot 3-only extension must not reopen Romanian national intake."""
+    notice_id = "SRC-MAI-AMIF-IMPACT-LOT3-20261110"
+    pdf_id = "SRC-EC-AMIF-IMPACT-2026-51-PDF"
+    notice_url = (
+        "https://fed.mai.gov.ro/11719/clarificari-com-actiunea-specifica-impact-"
+        "extindere-termen-limita-pentru-lotul-3-si-informatii-suplimentare-"
+        "privind-modalitatea-de-distribuire-pentru-loturile-1-si-2/"
+    )
+    pdf_url = (
+        "https://fed.mai.gov.ro/wp-content/uploads/2026/11/"
+        "1.-IMPACT-extension-of-ddl-Lot-3-and-distrib-key-Note-to-the-Committee.pdf"
+    )
+    for source_id, url, peer, scope, state in (
+        (notice_id, notice_url, pdf_id, "EXACT_CALL_AMENDMENT_DISCOVERY_ONLY",
+         "LOT3_EXTENSION_DISCOVERED_RAW_PENDING"),
+        (pdf_id, pdf_url, notice_id, "PRIMARY_DOCUMENT_DISCOVERY_ONLY",
+         "OFFICIAL_PRIMARY_PDF_READBACK_RAW_PENDING"),
+    ):
+        source = by_id.get(source_id)
+        if not source:
+            fail(f"missing exact AMIF IMPACT official amendment source: {source_id}")
+        expected = {
+            "url": url,
+            "paired_official_source_id": peer,
+            "programmes": ["FAMI"],
+            "call_identifier_discovery_hint": "AMIF/2026/SA/IMPACT",
+            "commission_note_identifier": "HOME-Funds/2026/51",
+            "affected_lot": "3",
+            "event_date_discovery": "2026-11-10",
+            "authority_scope": scope,
+            "observation_state": state,
+            "material_fact_use": False,
+            "open_call_authorized": False,
+            "material_fact_publication_authorized": False,
+            "adapter_required": "AMIF_IMPACT_LOT_SPECIFIC_PRIMARY_AND_NATIONAL_RECONCILE",
+        }
+        for key, value in expected.items():
+            if source.get(key) != value:
+                fail(f"{source_id}: prohibited or missing {key} for Lot 3-only discovery")
+        if any(key in source for key in (
+            "status", "call_status", "open_at", "close_at", "deadline",
+            "budget_eur", "eligibility", "fetched_at", "raw_sha256",
+            "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+        )):
+            fail(f"{source_id} invented material facts or immutable acquisition")
+        if source.get("url", "").split("/")[2] != "fed.mai.gov.ro":
+            fail(f"{source_id} lost exact official MAI host")
+        note = source.get("note") or ""
+        for required in (
+            "Lot 3", "20 November 2026", "11 November", "2 November 2026",
+            "Romania", "OPEN_CALL",
+        ):
+            # Both records must capture the national-vs-Commission scope.
+            if required not in note and not (
+                source_id == pdf_id and required == "2 November 2026"
+            ):
+                fail(f"{source_id}: missing lot-specific / national safety note: {required}")
+
+
 def main():
     data = json.loads(REGISTRY.read_text(encoding="utf-8"))
     plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
@@ -781,6 +841,8 @@ def main():
     if by_id["SRC-PR-CENTRU-GREEN-BLUE-33-MUNICIPAL-CORRIGENDUM2-20261030"].get(
             "exact_action_link_candidate") != "https://www.regiocentru.ro/actiuni/3-3-investitii-in-infrastructura-verde-si-albastra-in-mediul-urban-regional-apel-competitiv-pentru-municipii/":
         fail("PR Centru 3.3 corrigendum lost its exact action link")
+
+    validate_impact_lot3_pair(by_id)
 
     policy = data.get("policy") or {}
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
