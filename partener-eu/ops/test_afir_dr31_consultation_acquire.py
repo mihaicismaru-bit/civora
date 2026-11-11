@@ -13,7 +13,7 @@ import afir_dr31_consultation_acquire as mod  # noqa: E402
 
 ARTICLE = b"""<html><body><main>
 <h1>VERSIUNEA CONSULTATIVA a Ghidului solicitantului DR-31</h1>
-<p>11 noiembrie 2026, 18:00 — Agentia pentru Finantarea Investitiilor Rurale.</p>
+<p>11 noiembrie 2026, 18:00 - Agentia pentru Finantarea Investitiilor Rurale.</p>
 <p>Contributii financiare la plata primelor de asigurare.</p>
 <p>A fost publicata pentru dezbatere publica versiunea consultativa a ghidului
 solicitantului DR-31. Documentele aflate in consultare nu sunt lansarea
