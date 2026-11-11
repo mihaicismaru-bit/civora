@@ -75,6 +75,12 @@ def test():
         (b"<script/>", b"</script>"),
         (b"<template/>", b"</template>"),
         (b"<div style='display:none'/>", b"</div>"),
+        (b"<section class='d-none'/>", b"</section>"),
+        (b"<div class='visually-hidden'/>", b"</div>"),
+        (b"<div class='sr-only'/>", b"</div>"),
+        (b"<section style='visibility:hidden'/>", b"</section>"),
+        (b"<div style='content-visibility:hidden'/>", b"</div>"),
+        (b"<div style='opacity:0'/>", b"</div>"),
     ):
         hidden_only = (b"<html><body>" + opening + article + closing +
                        b"</body></html>")
