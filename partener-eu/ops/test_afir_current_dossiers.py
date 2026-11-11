@@ -257,7 +257,7 @@ def main() -> int:
     assert dr12["status"] == expected_dr12_status
     assert dr12["publicationState"] == ("PROVISIONAL_FAIL_CLOSED" if component_review else "PUBLISHABLE")
     assert fact(dr12, "Deschidere")["value"] == "6 octombrie 2026, 09:00"
-    assert fact(dr12, "Termen")["value"] == "2 decembrie 2026, 16:00"
+    assert fact(dr12, "Termen")["value"] == ("ÎN VERIFICARE PE COMPONENTE" if component_review else "2 decembrie 2026, 16:00")
     assert fact(dr12, "Buget")["value"] == "169.589.647 EUR"
     assert "200.000 EUR" in fact(dr12, "Grant")["value"]
     assert "80 puncte" in " ".join(by_title(dr12, "Cum se punctează")["items"])
