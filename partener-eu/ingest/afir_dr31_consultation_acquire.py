@@ -155,7 +155,7 @@ def registry_check(path=REGISTRY):
             row.get("observation_state") != "PROGRAMMING_PIPELINE" or
             row.get("consultation_state") != "CONSULTATION" or
             row.get("authority_class") != "T1_OFFICIAL_AGENCY" or
-            row.get("authority_scope") != "CONSULTATION_DISCOVERY_ONLY" or
+            row.get("authority_scope") != "PROGRAMMING_FRAMEWORK" or
             row.get("programme_family") != FAMILY or
             row.get("paired_official_source_id") != (DEBATE if sid == PRIMARY else PRIMARY) or
             not {"ROMANIA", "AFIR", "PROGRAMMING_PIPELINE", "CONSULTATION"}.issubset(
