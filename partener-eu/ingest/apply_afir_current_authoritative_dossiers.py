@@ -865,6 +865,48 @@ def main() -> int:
                 if section_row.get("title") in {"Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"}:
                     section_row["items"] = [dossier["decisionAction"]]
 
+    # AFIR 11 Nov officially announced exhaustion of DR-12 "alte sectoare",
+    # while zootechnical submissions have a distinct window. This is a
+    # material component-scope change, NOT authorization to rewrite canon
+    # from a historical, all-components OPEN snapshot. The notice and two
+    # counters have separate immutable receipts on this PR; a reviewed,
+    # exact-component semantic handoff is still required before publication.
+    # A provisional REVIEW replaces any misleading blanket OPEN assertion
+    # in the new candidate; production LKG remains held by admission gates.
+    if dt.datetime.now(dt.timezone.utc) >= dt.datetime.fromisoformat("2026-11-11T08:48:00+02:00"):
+        dr12 = next(d for d in dossiers if d.get("id") == "afir-dr12-2026")
+        hold = ("Starea DR-12 trebuie reconciliată separat pe componente după "
+                "comunicarea AFIR din 11 noiembrie 2026. Verifică direct "
+                "contorul și comunicatul oficial; nu presupune că ambele "
+                "componente mai primesc cereri.")
+        dr12["status"] = "REVIEW"
+        dr12["statusLabel"] = "DISPONIBILITATE PE COMPONENTE — ÎN VERIFICARE"
+        dr12["decision"] = "VERIFICĂ"
+        dr12["decisionLabel"] = "VERIFICĂ"
+        dr12["decisionAction"] = hold
+        dr12["publicationState"] = "PROVISIONAL_FAIL_CLOSED"
+        dr12["standfirst"] = hold
+        dr12["executiveSummary"]["status"] = "REVIEW"
+        dr12["quality"]["verifiedFactClasses"] = [
+            key for key in dr12["quality"]["verifiedFactClasses"]
+            if key not in {"status", "deadline", "budget"}
+        ]
+        dr12["quality"]["blockedFactClasses"] = sorted(set(
+            dr12["quality"]["blockedFactClasses"]
+        ) | {"status", "deadline", "current_component_funds"})
+        dr12["quality"]["afirCurrentOpenBundle"] = False
+        dr12["quality"]["afirCurrentUpcomingBundle"] = False
+        for row in dr12.get("quickFacts") or []:
+            if row.get("label") in {"Status", "Termen"}:
+                row.update(value="ÎN VERIFICARE PE COMPONENTE", confidence="SYSTEM_GATED")
+            elif row.get("label") == "Buget":
+                row["confidence"] = "HISTORICAL_NOT_AVAILABILITY"
+        for row in dr12.get("sections") or []:
+            if row.get("title") in {
+                "Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"
+            }:
+                row["items"] = [hold]
+
     replace_codes = {"dr 12", "dr 14", "dr 18", "dr 31"}
     kept = []
     for row in payload.get("dossiers") or []:
@@ -892,8 +934,10 @@ def main() -> int:
     payload["policy"]["afirConsultationsNeverPresentedAsOpen"] = True
     payload["policy"]["afirEnergyPostLaunchEvidenceSourceBound"] = True
     dr12_open = next(row for row in dossiers if row.get("id") == "afir-dr12-2026").get("status") == "OPEN"
-    payload["policy"]["afirDr12UpcomingSourceBound"] = not dr12_open
+    dr12_state = next(row for row in dossiers if row.get("id") == "afir-dr12-2026").get("status")
+    payload["policy"]["afirDr12UpcomingSourceBound"] = dr12_state == "UPCOMING"
     payload["policy"]["afirDr12PostLaunchSourceBound"] = dr12_open
+    payload["policy"]["afirDr12ComponentReviewRequired"] = dr12_state == "REVIEW"
     payload.setdefault("qualityPass", {})["afirCurrentAuthoritativeDossiers"] = [row["id"] for row in dossiers]
     # Product generation time follows the admitted source observation, not the
     # hourly clock: unchanged sources must not create timestamp-only commits.
