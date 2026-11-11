@@ -125,6 +125,8 @@ def test():
         man_path.write_text(original, encoding="utf-8")
         raw_path = out / notice.RAW_NAME
         raw_path.write_bytes(HTML + b"tamper")
+        reject(lambda: notice.replay(out), "raw size mismatch")
+        raw_path.write_bytes(HTML.replace(b"AFIR", b"AFRX", 1))
         reject(lambda: notice.replay(out), "original SHA mismatch")
         raw_path.write_bytes(HTML)
         assert notice.replay(out)["publish_authorized"] is False
