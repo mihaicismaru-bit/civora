@@ -78,6 +78,12 @@ _VOID_TAGS = frozenset({
     "area", "base", "br", "col", "embed", "hr", "img", "input",
     "link", "meta", "param", "source", "track", "wbr",
 })
+# A class-hidden official template must not supply programming identity. Since
+# external CSS/media queries cannot be attested from a static raw HTML capture,
+# ambiguous responsive-hidden nodes are treated conservatively as invisible.
+_HIDDEN_CLASSES = frozenset({
+    "d-none", "hidden", "visually-hidden", "sr-only", "screen-reader-text",
+})
 
 
 class _VisibleText(HTMLParser):
@@ -96,12 +102,14 @@ class _VisibleText(HTMLParser):
         duplicate_visibility = False
         for key, value in attrs:
             name = key.lower()
-            if name in attributes and name in {"style", "aria-hidden", "hidden", "inert"}:
+            if name in attributes and name in {"class", "style", "aria-hidden", "hidden", "inert"}:
                 duplicate_visibility = True
             attributes.setdefault(name, value or "")
         style = re.sub(r"\s+", "", attributes.get("style", "").casefold())
+        classes = set(attributes.get("class", "").casefold().split())
         hidden = (
             duplicate_visibility
+            or bool(classes & _HIDDEN_CLASSES)
             or tag in _HIDDEN_TAGS
             or (tag == "details" and "open" not in attributes)
             # Native popovers are hidden until activated by the browser.
