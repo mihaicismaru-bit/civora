@@ -91,6 +91,23 @@ EEA_NON_CALL_ROOTS = {
     "SRC-MIPE-EEA-NORWAY-LANDING",
 }
 
+DUT_2026_OFFICIAL_PAIR = {
+    "SRC-EU-DUT-2026-EXACT-CALL": {
+        "url": "https://dutpartnership.eu/calls/dut-call-2026",
+        "tier": "T1", "scope": "EXACT_CALL_DISCOVERY_ONLY",
+        "state": "EXACT_CALL_DISCOVERED_RAW_PENDING",
+        "paired": "SRC-RO-UEFISCDI-DUT-2026",
+        "families": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    },
+    "SRC-RO-UEFISCDI-DUT-2026": {
+        "url": "https://uefiscdi.gov.ro/driving-urban-transitions-partnership-dut",
+        "tier": "T1B", "scope": "NATIONAL_CALL_DISCOVERY_ONLY",
+        "state": "NATIONAL_CALL_DISCOVERED_RAW_PENDING",
+        "paired": "SRC-EU-DUT-2026-EXACT-CALL",
+        "families": {"ROMANIA", "EU_DIRECT", "CALL_REGISTRY"},
+    },
+}
+
 RCH_2027_SOURCE_ROOTS = {
     "SRC-EU-RCH-2027-CALL1": {
         "host": "www.heritageresearch-hub.eu",
@@ -193,6 +210,35 @@ def main():
     data = json.loads(REGISTRY.read_text(encoding="utf-8"))
     plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
     by_id = {row["id"]: row for row in data.get("sources", [])}
+
+    # UEFISCDI and the DUT secretariat describe the same exact 2026 call.
+    # Search/index readback cannot substitute for an immutable paired source
+    # receipt, the Romanian National Annex and current submission evidence.
+    for source_id, expected in DUT_2026_OFFICIAL_PAIR.items():
+        row = by_id.get(source_id)
+        if row is None:
+            fail(f"missing paired official DUT 2026 source: {source_id}")
+        if (row.get("url"), row.get("tier"), row.get("authority_scope"),
+                row.get("observation_state"), row.get("paired_official_source_id")) != (
+                expected["url"], expected["tier"], expected["scope"],
+                expected["state"], expected["paired"]):
+            fail(f"{source_id} lost official exact-call identity, pair or discovery state")
+        if (row.get("adapter_required") !=
+                "DUT_2026_EXACT_CALL_NATIONAL_ANNEX_RECONCILE_V1"):
+            fail(f"{source_id} bypassed required national-annex reconciliation")
+        if (row.get("programmes") != ["Horizon Europe / Driving Urban Transitions Call 2026"]
+                or not expected["families"].issubset(set(row.get("source_families") or []))):
+            fail(f"{source_id} lost programme or authority-family binding")
+        if (row.get("material_fact_use") is not False
+                or row.get("credentials_required") is not False
+                or row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False):
+            fail(f"{source_id} promoted DUT discovery to an authorizing source")
+        if any(key in row for key in ("status", "deadline", "budget", "eligibility",
+                                      "open_at", "close_at", "fetched_at", "raw_sha256",
+                                      "parser_version", "run_id", "handoff_sha256")):
+            fail(f"{source_id} invented material facts or unavailable provenance")
+
 
     # The exact delegated-OI documents are monitored as discovery-only sources.
     # Raw originals from MIPE and MySMIS must be reconciled before any material
