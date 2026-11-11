@@ -731,6 +731,57 @@ def main():
     if "HTTP 403" not in (legacy.get("note") or "") or "MySMIS" not in (digital.get("note") or ""):
         fail("ADR Centre digital source must retain raw acquisition and review blockers")
 
+    # PR Centru 3.3 municipal exact action + Annex 17 corrigendum: official
+    # indexed readback is discovery, not immutable acquisition or OPEN_CALL.
+    green_blue_pair = {
+        "SRC-PR-CENTRU-GREEN-BLUE-33-MUNICIPAL-CALL": (
+            "https://www.regiocentru.ro/actiuni/3-3-investitii-in-infrastructura-verde-si-albastra-in-mediul-urban-regional-apel-competitiv-pentru-municipii/",
+            "EXACT_ACTION_DISCOVERY", "EXACT_ACTION_DISCOVERED_RAW_PENDING",
+            "SRC-PR-CENTRU-GREEN-BLUE-33-MUNICIPAL-CORRIGENDUM2-20261030",
+        ),
+        "SRC-PR-CENTRU-GREEN-BLUE-33-MUNICIPAL-CORRIGENDUM2-20261030": (
+            "https://www.regiocentru.ro/corrigendum-nr-2-aferent-actiunii-3-3-investitii-in-infrastructura-verde-si-albastra-in-mediul-urban-regional-apel-competitiv-pentru-municipii/",
+            "GUIDE_CORRIGENDUM_DISCOVERY_ONLY", "CORRIGENDUM_2_DISCOVERED_RAW_PENDING",
+            "SRC-PR-CENTRU-GREEN-BLUE-33-MUNICIPAL-CALL",
+        ),
+    }
+    for source_id, (url, scope, state, paired) in green_blue_pair.items():
+        row = by_id.get(source_id)
+        if row is None or (row.get("url"), row.get("authority_scope"),
+                          row.get("observation_state"), row.get("paired_official_source_id")) != (
+                              url, scope, state, paired):
+            fail(f"{source_id} lost official exact-action/corrigendum discovery identity")
+        if row.get("mysmis_identifier_discovery_hint") != "PRC/1189/PRC_P3/OP2/RSO2.7/PRC_A28":
+            fail(f"{source_id} lost exact MySMIS identity hint")
+        if row.get("event_date_discovery") != "2026-10-30":
+            fail(f"{source_id} lost official publication-date discovery")
+        if row.get("adapter_required") != "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1":
+            fail(f"{source_id} bypassed immutable exact-action reconciliation")
+        if not {"ROMANIA", "ADR"}.issubset(set(row.get("source_families") or [])):
+            fail(f"{source_id} lost Romanian regional authority provenance")
+        if (row.get("material_fact_use") is not False
+                or row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False):
+            fail(f"{source_id} promoted unacquired discovery to material authority")
+        if any(field in row for field in (
+                "status", "call_status", "open_at", "close_at", "deadline",
+                "budget_eur", "eligibility", "fetched_at", "raw_sha256",
+                "semantic_sha256", "parser_version", "run_id", "handoff_sha256")):
+            fail(f"{source_id} fabricated material facts or immutable raw receipt")
+        if "HTTP 403" not in (row.get("note") or "") or "OPEN_CALL" not in (row.get("note") or ""):
+            fail(f"{source_id} lost fail-closed transport and OPEN boundary")
+    green_blue_monitor = next((row for row in legacy_monitor.get("sources", [])
+                              if row.get("id") == "SRC-PR-CENTRU-GREEN-BLUE-33-MUNICIPAL-CALL"), None)
+    if not green_blue_monitor or (
+        green_blue_monitor.get("url"),
+        green_blue_monitor.get("health_scope"),
+        green_blue_monitor.get("material_facts_authority"),
+    ) != ("https://www.regiocentru.ro/actiuni/3-3-investitii-in-infrastructura-verde-si-albastra-in-mediul-urban-regional-apel-competitiv-pentru-municipii/", "DISCOVERY_ONLY", False):
+        fail("PR Centru 3.3 exact-action health probe must remain discovery-only")
+    if by_id["SRC-PR-CENTRU-GREEN-BLUE-33-MUNICIPAL-CORRIGENDUM2-20261030"].get(
+            "exact_action_link_candidate") != "https://www.regiocentru.ro/actiuni/3-3-investitii-in-infrastructura-verde-si-albastra-in-mediul-urban-regional-apel-competitiv-pentru-municipii/":
+        fail("PR Centru 3.3 corrigendum lost its exact action link")
+
     policy = data.get("policy") or {}
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
         fail("programming pipeline guard must explicitly prohibit OPEN_CALL promotion")
