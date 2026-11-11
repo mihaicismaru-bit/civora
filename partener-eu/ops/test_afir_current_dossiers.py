@@ -283,7 +283,18 @@ def main() -> int:
         assert fact(dr12, "Status")["confidence"] == "SYSTEM_GATED"
         assert fact(dr12, "Termen")["confidence"] == "SYSTEM_GATED"
         assert fact(dr12, "Buget")["confidence"] == "HISTORICAL_NOT_AVAILABILITY"
-        for name in ("Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"):
+        executive_items = by_title(dr12, "Rezumat executiv")["items"]
+        executive_text = "\n".join(executive_items)
+        assert executive_items[-1] == dr12["decisionAction"]
+        for token in (
+            "Stare apel: REVIEW", "Deschidere:", "Închidere: ÎN VERIFICARE PE COMPONENTE",
+            "Cine poate aplica:", "Activități finanțate:", "Valoarea apelului:",
+            "Valoarea proiectului individual:", "Cofinanțare / contribuție proprie:"
+        ):
+            assert token in executive_text, token
+        assert "alocare inițială, nu fonduri curente disponibile" in executive_text
+        assert "Închidere: 2 decembrie 2026, ora 16:00." not in executive_text
+        for name in ("Decizia rapidă", "Ce trebuie făcut acum"):
             assert by_title(dr12, name)["items"] == [dr12["decisionAction"]]
     elif dr12_post_launch:
         assert dr12["statusLabel"] == "DESCHIS"
