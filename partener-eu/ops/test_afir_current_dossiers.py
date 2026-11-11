@@ -250,9 +250,12 @@ def main() -> int:
         and (live.get("policy") or {}).get("publishableDedicatedSnapshot") is True
         and any(int(row.get("submittedProjectCount") or 0) > 0 for row in dr12_live_rows)
     )
-    expected_dr12_status = "OPEN" if dr12_post_launch else "UPCOMING"
+    # The official AFIR 11 Nov exhaustion is component-specific. Historical
+    # submitted-project counts cannot justify a blanket DR12 OPEN claim.
+    component_review = datetime.now(timezone.utc) >= datetime.fromisoformat("2026-11-11T08:48:00+02:00")
+    expected_dr12_status = "REVIEW" if component_review else ("OPEN" if dr12_post_launch else "UPCOMING")
     assert dr12["status"] == expected_dr12_status
-    assert dr12["publicationState"] == "PUBLISHABLE"
+    assert dr12["publicationState"] == ("PROVISIONAL_FAIL_CLOSED" if component_review else "PUBLISHABLE")
     assert fact(dr12, "Deschidere")["value"] == "6 octombrie 2026, 09:00"
     assert fact(dr12, "Termen")["value"] == "2 decembrie 2026, 16:00"
     assert fact(dr12, "Buget")["value"] == "169.589.647 EUR"
@@ -267,10 +270,22 @@ def main() -> int:
     assert "NU ESTE CAZUL" in " ".join(by_title(dr12, "Riscuri de respingere sau implementare")["items"])
     assert dr12["executiveSummary"]["sourceBound"] is True
     assert dr12["executiveSummary"]["status"] == expected_dr12_status
-    assert dr12["quality"]["afirCurrentUpcomingBundle"] is (not dr12_post_launch)
-    assert dr12["quality"]["afirCurrentOpenBundle"] is dr12_post_launch
+    assert dr12["quality"]["afirCurrentUpcomingBundle"] is (not dr12_post_launch and not component_review)
+    assert dr12["quality"]["afirCurrentOpenBundle"] is (dr12_post_launch and not component_review)
     assert dr12["quality"]["afirPostLaunchSubmissionEvidence"] is dr12_post_launch
-    if dr12_post_launch:
+    if component_review:
+        assert dr12["statusLabel"] == "DISPONIBILITATE PE COMPONENTE — ÎN VERIFICARE"
+        assert dr12["decision"] == "VERIFICĂ"
+        assert "nu presupune că ambele" in dr12["standfirst"]
+        assert "status" in dr12["quality"]["blockedFactClasses"]
+        assert "current_component_funds" in dr12["quality"]["blockedFactClasses"]
+        assert "status" not in dr12["quality"]["verifiedFactClasses"]
+        assert fact(dr12, "Status")["confidence"] == "SYSTEM_GATED"
+        assert fact(dr12, "Termen")["confidence"] == "SYSTEM_GATED"
+        assert fact(dr12, "Buget")["confidence"] == "HISTORICAL_NOT_AVAILABILITY"
+        for name in ("Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"):
+            assert by_title(dr12, name)["items"] == [dr12["decisionAction"]]
+    elif dr12_post_launch:
         assert dr12["statusLabel"] == "DESCHIS"
         assert dr12["decision"] == "ACȚIONEAZĂ"
         assert "este deschisă pentru depunere" in dr12["standfirst"]
@@ -291,8 +306,9 @@ def main() -> int:
     assert payload["policy"]["afirCurrentSessionsSourceBound"] is True
     assert payload["policy"]["afirConsultationsNeverPresentedAsOpen"] is True
     assert payload["policy"]["afirEnergyPostLaunchEvidenceSourceBound"] is True
-    assert payload["policy"]["afirDr12UpcomingSourceBound"] is (not dr12_post_launch)
-    assert payload["policy"]["afirDr12PostLaunchSourceBound"] is dr12_post_launch
+    assert payload["policy"]["afirDr12UpcomingSourceBound"] is (not dr12_post_launch and not component_review)
+    assert payload["policy"]["afirDr12PostLaunchSourceBound"] is (dr12_post_launch and not component_review)
+    assert payload["policy"]["afirDr12ComponentReviewRequired"] is component_review
     assert payload["policy"]["derivedProjectionSynchronized"] is True
 
     home_open = payload["home"]["openDossierIds"]
@@ -306,7 +322,9 @@ def main() -> int:
         assert "afir-dr14-2026" not in home_open
         assert "afir-dr18-2026" not in home_open
     assert {"afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026"} <= set(home_open)
-    if dr12_post_launch:
+    if component_review:
+        assert "afir-dr12-2026" not in home_open
+    elif dr12_post_launch:
         assert "afir-dr12-2026" in home_open
     assert "afir-dr31-2026-2027" in payload["home"]["prepareDossierIds"]
     # The homepage is intentionally a bounded editorial shortlist (max 8),
