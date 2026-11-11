@@ -113,7 +113,9 @@ def main():
         )
         workshop_terms = (
             "atelier 2028-2034 17 noiembrie 2026 "
-            "20 noiembrie 2026 28 octombrie 2026"
+            "20 noiembrie 2026. "
+            "Înscrierea se face prin completarea formularului de înscriere, "
+            "AICI, până la data de 20 noiembrie 2026."
         )
         for opening in ('<div popover>', '<div popover="manual">',
                         '<section popover="auto">'):
@@ -168,6 +170,52 @@ def main():
         live._assert_registered_article_identity(
             live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, workshop_terms
         )
+
+        # Registration must be tied to the visible enrollment clause, not to
+        # the 20-Nov workshop event or a generic date elsewhere in the page.
+        # Support independently replaying the historical 28-Oct original.
+        old_registration = workshop_terms.replace(
+            "până la data de 20 noiembrie 2026",
+            "până la data de 28 octombrie 2026",
+        )
+        live._assert_registered_article_identity(
+            live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, old_registration
+        )
+        bad_registration_cases = {
+            "schedule-only": workshop_terms.split("Înscrierea")[0],
+            "unsupported-new-date": workshop_terms.replace(
+                "până la data de 20 noiembrie 2026",
+                "până la data de 21 noiembrie 2026",
+            ),
+            "contradictory-versions": workshop_terms + " " + old_registration,
+            "wrong-workshop-calendar": workshop_terms.replace(
+                "17 noiembrie 2026", "17 decembrie 2026",
+            ),
+        }
+        for label, text_candidate in bad_registration_cases.items():
+            try:
+                live._assert_registered_article_identity(
+                    live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url, text_candidate
+                )
+            except ValueError as exc:
+                assert "unverified" in str(exc), (label, exc)
+            else:
+                raise AssertionError(f"ROHU {label} admitted as verified original")
+        hidden_registration = (
+            "<html><body><article>" + workshop_terms.split("Înscrierea")[0]
+            + "</article><div hidden>"
+            + workshop_terms.split("Înscrierea")[1].join(["Înscrierea", ""])
+            + "</div></body></html>"
+        )
+        try:
+            live._assert_registered_article_identity(
+                live.WORKSHOPS_SOURCE_ID, workshop_url, workshop_url,
+                live._visible_text(hidden_registration.encode("utf-8"), "text/html"),
+            )
+        except ValueError as exc:
+            assert "registration clause unverified" in str(exc), exc
+        else:
+            raise AssertionError("hidden registration date forged ROHU source health")
 
         # A URI fragment, tracking query or final-segment matrix parameter may
         # be invisible to the HTTP retrieval yet change the provenance
