@@ -201,7 +201,7 @@ def build(originals, run_id):
     if not originals or not set(originals).issubset(SOURCES):
         raise ValueError("at least one exact official original required, no unknown source")
     receipts = []
-    for sid in sorted(SOURCES):
+    for sid in sorted(originals):
         raw, mime, stamp = originals[sid]
         validate_html(sid, raw, mime)
         timestamp_ok(stamp)
