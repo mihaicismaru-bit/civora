@@ -902,9 +902,23 @@ def main() -> int:
             elif row.get("label") == "Buget":
                 row["confidence"] = "HISTORICAL_NOT_AVAILABILITY"
         for row in dr12.get("sections") or []:
-            if row.get("title") in {
-                "Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"
-            }:
+            title = row.get("title")
+            if title == "Rezumat executiv":
+                # Preserve the mandatory executive-summary fact labels while
+                # gating component availability. Replacing the entire section
+                # with a one-line HOLD breaks product schema validation.
+                replacements = {
+                    "Stare apel:": "Stare apel: REVIEW — disponibilitate pe componente în verificare.",
+                    "Deschidere:": "Deschidere: 6 octombrie 2026, ora 09:00 (istoric; nu dovedește statut OPEN actual).",
+                    "Închidere:": "Închidere: ÎN VERIFICARE PE COMPONENTE; termenul general inițial de 2 decembrie 2026 nu dovedește disponibilitatea.",
+                    "Valoarea apelului:": "Valoarea apelului: 169.589.647 EUR alocare inițială, nu fonduri curente disponibile.",
+                }
+                gated = []
+                for item in row.get("items") or []:
+                    prefix = next((key for key in replacements if item.startswith(key)), None)
+                    gated.append(replacements[prefix] if prefix else item)
+                row["items"] = gated + [hold]
+            elif title in {"Decizia rapidă", "Ce trebuie făcut acum"}:
                 row["items"] = [hold]
 
     replace_codes = {"dr 12", "dr 14", "dr 18", "dr 31"}
