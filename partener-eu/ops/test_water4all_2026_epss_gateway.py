@@ -52,7 +52,7 @@ def run():
                      b'<a href="https://evil.invalid/">here</a></body>'),
         HEAD.replace(b'<a href=', b'<script><a href=', 1),
     ):
-        reject(lambda b=bad: gate.source_link(b), "anchor" if b.count(b'href=') > 1 and b.count(b'evil.invalid') == 0 else "")
+        reject(lambda b=bad: gate.source_link(b), "")
     for bad in (
         LOGIN.replace(b"Water4All 2026", b"Water4All 2025"),
         LOGIN.replace(b"Sign in", b"News"),
