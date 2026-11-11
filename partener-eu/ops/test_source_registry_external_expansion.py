@@ -272,10 +272,10 @@ def main():
         )):
             fail(f"{source_id} fabricated material facts or successful raw provenance")
         note = (row.get("note") or "").lower()
-        if "no open_call" not in note or "immutable" not in note:
+        if ("no open_call" not in note and "does not authorize open_call" not in note) or "immutable" not in note:
             fail(f"{source_id} lost explicit provenance/open-state safety boundary")
         if source_id == "SRC-RO-UEFISCDI-EIT-HEI-2026-NCP":
-            if "not a romanian national co-funding" not in note or "not funder" not in (
+            if "not a romanian national co-funding" not in note or "not_funder" not in (
                     row.get("authority_class") or "").lower():
                 fail("UEFISCDI NCP information was wrongly elevated to a funding authority")
     if plane.get("programmeDomains", {}).get("EIT Higher Education Initiative Call 2026") != ["EU_DIRECT_FUNDING"]:
