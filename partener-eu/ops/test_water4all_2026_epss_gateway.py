@@ -38,6 +38,7 @@ def reject(f, marker):
 def run():
     pair.validate_html(EU, HEAD, "text/html")
     assert gate.source_link(HEAD) == gate.GATEWAY
+    assert gate.source_link(HEAD.replace(b'<h1>', b'<a name="top"></a><h1>')) == gate.GATEWAY
     gate.validate_gateway(LOGIN, "text/html")
     assert gate.OLD_PDF_ENDPOINT != gate.GATEWAY
     for bad in (
