@@ -134,8 +134,8 @@ def validate(sid: str, raw: bytes, mime: str) -> None:
         must = ("versiunea consultativa", "dr-31",
                 "11 noiembrie 2026", "dezbatere publica")
         if re.search(
-            r"\\bcontributii\\b.{0,140}\\bfinanciare\\b.{0,140}"
-            r"\\bplata\\b.{0,140}\\bprimelor\\b.{0,140}\\basigurare\\b",
+            r"\bcontributii\b.{0,140}\bfinanciare\b.{0,140}"
+            r"\bplata\b.{0,140}\bprimelor\b.{0,140}\basigurare\b",
             body,
         ) is None:
             raise ValueError("DR31 exact official intervention title not visibly established")
