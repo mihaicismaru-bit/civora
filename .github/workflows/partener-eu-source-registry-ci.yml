@@ -7,6 +7,8 @@ on:
       - 'partener-eu/ingest/amif_impact_official_receipts.py'
       - 'partener-eu/ingest/water4all_2026_official_pair.py'
       - 'partener-eu/ingest/water4all_2026_primary_documents.py'
+      - 'partener-eu/ingest/water4all_2026_epss_gateway.py'
+      - 'partener-eu/ops/test_water4all_2026_epss_gateway.py'
       - 'partener-eu/ops/test_water4all_2026_primary_documents.py'
       - 'partener-eu/ops/test_water4all_2026_official_pair.py'
       - 'partener-eu/ops/test_amif_impact_official_receipts.py'
@@ -105,6 +107,8 @@ jobs:
           python -m py_compile partener-eu/ingest/amif_impact_official_receipts.py
           python -m py_compile partener-eu/ingest/water4all_2026_official_pair.py
           python -m py_compile partener-eu/ingest/water4all_2026_primary_documents.py
+          python -m py_compile partener-eu/ingest/water4all_2026_epss_gateway.py
+          python -m py_compile partener-eu/ops/test_water4all_2026_epss_gateway.py
           python -m py_compile partener-eu/ops/test_water4all_2026_primary_documents.py
           python -m py_compile partener-eu/ops/test_water4all_2026_official_pair.py
           python -m py_compile partener-eu/ops/test_amif_impact_official_receipts.py
@@ -214,6 +218,33 @@ jobs:
         with:
           name: partener-water4all-raw-${{ github.run_id }}-${{ github.run_attempt }}
           path: /tmp/partener-water4all-2026-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Verify Water4All 2026 current EPSS gateway contract and stale-PDF-link rejection
+        run: python partener-eu/ops/test_water4all_2026_epss_gateway.py
+
+      - name: Acquire source-bound current Water4All EPSS public login (never OPEN)
+        id: water4all_epss_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/water4all_2026_epss_gateway.py \
+            --source-dir "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --out "/tmp/partener-water4all-epss-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/water4all_2026_epss_gateway.py \
+            --source-dir "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --replay-dir "/tmp/partener-water4all-epss-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine EPSS drift, unverified gateway or missing operator original
+        if: steps.water4all_epss_live.outcome == 'failure'
+        run: echo 'WATER4ALL_EPSS_RAW_PENDING / OLD_PDF_ENDPOINT_NOT_CANONICAL / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Upload separate immutable Water4All current EPSS login receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-water4all-epss-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-water4all-epss-${{ github.run_id }}-${{ github.run_attempt }}
           retention-days: 14
           if-no-files-found: warn
 
