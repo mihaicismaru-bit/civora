@@ -51,6 +51,14 @@ def main():
     mod.registry_check()
     mod.validate(mod.PRIMARY, ARTICLE, MIME)
     mod.validate(mod.DEBATE, DEBATE, MIME)
+    # Official CMS markup may interrupt a visible intervention title inline.
+    inline_markup = ARTICLE.replace(
+        b"Contributii financiare la plata primelor de asigurare.",
+        b"Contributii <strong>financiare</strong> la plata <em>primelor</em> de asigurare.")
+    mod.validate(mod.PRIMARY, inline_markup, MIME)
+    rejection(lambda: mod.validate(mod.PRIMARY,
+        ARTICLE.replace(b"primelor", b"ultimelor"), MIME),
+        "intervention title")
 
     rejection(lambda: mod.validate(mod.PRIMARY,
         ARTICLE.replace(b"11 noiembrie 2026", b"12 noiembrie 2026"), MIME),
