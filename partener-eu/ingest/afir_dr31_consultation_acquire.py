@@ -128,9 +128,17 @@ def validate(sid: str, raw: bytes, mime: str) -> None:
     parser.feed(raw.decode("utf-8", "replace"))
     body = fold(" ".join(parser.parts))
     if sid == PRIMARY:
+        # AFIR renders the intervention name across multiple inline HTML
+        # fragments. Bind the *ordered* intervention tokens in a short
+        # visible span rather than requiring contiguous DOM text nodes.
         must = ("versiunea consultativa", "dr-31",
-                "contributii financiare la plata primelor de asigurare",
                 "11 noiembrie 2026", "dezbatere publica")
+        if re.search(
+            r"\\bcontributii\\b.{0,140}\\bfinanciare\\b.{0,140}"
+            r"\\bplata\\b.{0,140}\\bprimelor\\b.{0,140}\\basigurare\\b",
+            body,
+        ) is None:
+            raise ValueError("DR31 exact official intervention title not visibly established")
     else:
         must = ("documente aflate in dezbatere publica",
                 "ghid solicitant dr 31 consultativ",
