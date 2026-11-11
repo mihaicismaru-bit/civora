@@ -136,8 +136,9 @@ def validate(sid: str, raw: bytes, mime: str) -> None:
                 "ghid solicitant dr 31 consultativ",
                 "11.11.2026 - 02.12.2026",
                 "contributii financiare la plata primelor de asigurare")
-    if any(marker not in body for marker in must):
-        raise ValueError("DR31 exact consultation source/identity/window missing")
+    missing = [marker for marker in must if marker not in body]
+    if missing:
+        raise ValueError("DR31 exact consultation source/identity/window missing: " + ", ".join(missing))
     if sid == DEBATE and "inaintea aprobarii acestora prin ordin" not in body:
         raise ValueError("DR31 consultation cannot masquerade as approved guide")
 
