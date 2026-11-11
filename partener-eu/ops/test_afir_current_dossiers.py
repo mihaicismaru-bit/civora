@@ -266,7 +266,10 @@ def main() -> int:
     # be instructed to simulate the expired first-stage 80-point threshold.
     current_actions = " ".join(by_title(dr12, "Ce trebuie făcut acum")["items"])
     assert "80 de puncte al primei etape" not in current_actions
-    assert "pragul de calitate al etapei curente" in current_actions
+    if component_review:
+        assert current_actions == dr12["decisionAction"]
+    else:
+        assert "pragul de calitate al etapei curente" in current_actions
     assert "NU ESTE CAZUL" in " ".join(by_title(dr12, "Riscuri de respingere sau implementare")["items"])
     assert dr12["executiveSummary"]["sourceBound"] is True
     assert dr12["executiveSummary"]["status"] == expected_dr12_status
