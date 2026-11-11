@@ -279,6 +279,26 @@ def main():
             live._fetch = original_fetch_exact
         assert exact_envelope["fetch_pass"] == 1, exact_envelope
         assert live.replay_live_evidence(exact_envelope, exact_dir, exact_registry) == 1
+        # Immutable evidence from the earlier 28-Oct registration wording must
+        # keep replaying even after the official article's 20-Nov revision.
+        archived_html = exact_html.replace(
+            "până la data de 20 noiembrie 2026".encode("utf-8"),
+            "până la data de 28 octombrie 2026".encode("utf-8"),
+        )
+        assert archived_html != exact_html
+        archived_dir = Path(tmp) / "rohu-archived-originals"
+        try:
+            live._fetch = lambda url: (
+                archived_html, url, 200, "text/html; charset=utf-8"
+            )
+            archived_envelope = live.build_live_evidence(
+                exact_registry, run_id="TEST-ROHU-ARCHIVED", raw_dir=archived_dir
+            )
+        finally:
+            live._fetch = original_fetch_exact
+        assert archived_envelope["fetch_pass"] == 1, archived_envelope
+        assert live.replay_live_evidence(archived_envelope, archived_dir, exact_registry) == 1
+        assert archived_envelope["rows"][0]["raw_hash"] != exact_envelope["rows"][0]["raw_hash"]
         for forged_final_url in variant_endpoints:
             forged = json.loads(json.dumps(exact_envelope))
             forged_row = forged["rows"][0]
