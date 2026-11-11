@@ -60,7 +60,8 @@ def main() -> None:
     assert "OPEN_CALL" in survey["note"]
 
     # Official November workshop schedule is a separate 2028-2034 programming
-    # source: October 28 registration deadline is NOT a grant application deadline.
+    # source. A changed event-registration date is NOT a grant deadline or
+    # permission to classify the source as OPEN_CALL.
     workshops = by_id[WORKSHOPS_ID]
     assert workshops["url"] == WORKSHOPS_URL
     assert workshops["programmes"] == [PIPELINE_PROGRAMME]
@@ -71,7 +72,9 @@ def main() -> None:
     assert workshops["material_fact_use"] is False
     assert workshops["credentials_required"] is False
     assert "consultation_events" in workshops["extract"]
-    assert "28 October 2026" in workshops["note"]
+    assert "28 October" in workshops["note"]
+    assert "20 November 2026" in workshops["note"]
+    assert "raw evidence and semantic review" in workshops["note"]
     assert "OPEN_CALL" in workshops["note"]
 
     domains = set((plane.get("programmeDomains") or {}).get(PIPELINE_PROGRAMME) or [])
