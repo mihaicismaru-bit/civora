@@ -285,6 +285,94 @@ def validate_impact_lot3_pair(by_id):
                 fail(f"{source_id}: missing lot-specific / national safety note: {required}")
 
 
+
+def validate_water4all_2026_pair(by_id):
+    """Water4All stage-1 expiry does not open uninvited stage-2 intake."""
+    pair = {
+        "SRC-EU-WATER4ALL-2026-JTC": {
+            "url": "https://www.water4all-partnership.eu/joint-activities/water4all-2026-joint-transnational-call",
+            "peer": "SRC-RO-UEFISCDI-WATER4ALL-2026",
+            "state": "STAGE1_DEADLINE_PASSED_READBACK_RAW_PENDING",
+            "scope": "EXACT_CALL_STAGE_DISCOVERY_ONLY",
+            "authority": "T1_OFFICIAL_JOINT_CALL_OPERATOR",
+            "families": {"EU_DIRECT", "BRUSSELS", "JOINT_TRANSNATIONAL_CALL", "CALL_REGISTRY"},
+        },
+        "SRC-RO-UEFISCDI-WATER4ALL-2026": {
+            "url": "https://uefiscdi.gov.ro/water4all",
+            "peer": "SRC-EU-WATER4ALL-2026-JTC",
+            "state": "NATIONAL_STAGE1_DEADLINE_PASSED_READBACK_RAW_PENDING",
+            "scope": "NATIONAL_2026_CALL_STAGE_DISCOVERY_ONLY",
+            "authority": "T1B_ROMANIAN_NATIONAL_FUNDING_AGENCY",
+            "families": {"ROMANIA", "EU_DIRECT", "RESEARCH", "CALL_REGISTRY"},
+        },
+    }
+    for source_id, expected in pair.items():
+        source = by_id.get(source_id)
+        if not isinstance(source, dict):
+            fail(f"{source_id}: missing official Water4All 2026 paired discovery")
+        exact = {
+            "url": expected["url"],
+            "paired_official_source_id": expected["peer"],
+            "observation_state": expected["state"],
+            "authority_scope": expected["scope"],
+            "authority_class": expected["authority"],
+            "programme_family": "Horizon Europe / Water4All Joint Transnational Call 2026",
+            "programmes": ["EU direct programmes"],
+            "adapter_required": "WATER4ALL_2026_STAGE_SPECIFIC_PRIMARY_AND_ROMANIAN_RULES_RECONCILE_V1",
+            "material_fact_use": False,
+            "credentials_required": False,
+            "open_call_authorized": False,
+            "material_fact_publication_authorized": False,
+        }
+        for key, value in exact.items():
+            if source.get(key) != value:
+                fail(f"{source_id}: missing/bypassed paired Water4All {key}")
+        if not expected["families"].issubset(set(source.get("source_families") or [])):
+            fail(f"{source_id}: official Water4All source family was lost")
+        if any(key in source for key in (
+            "status", "call_status", "deadline", "deadline_at", "open_at", "close_at",
+            "eligibility", "budget_eur", "romania_budget_eur", "fetched_at",
+            "raw_sha256", "parser_version", "run_id", "handoff_sha256",
+            "application_status", "submission_open", "stage2_open",
+        )):
+            fail(f"{source_id}: invented Water4All material fact or raw provenance")
+        note = source.get("note") or ""
+        for required in ("10 November 2026", "6 April 2027", "OPEN_CALL",
+                         "original", "reconcil"):
+            if required.casefold() not in note.casefold():
+                fail(f"{source_id}: lost stage-specific safety note: {required}")
+        if source_id.startswith("SRC-EU-"):
+            if "23 October 2026" not in note or "EPSS" not in note:
+                fail("Water4All changed submission endpoint must be reconciled")
+        else:
+            if source.get("exact_section_discovery_hint") != "Water4all-2026":
+                fail("UEFISCDI mixed-year page cannot silently relabel 2025 or 2027")
+
+
+def test_water4all_adversarial_pairs(by_id):
+    """Negative in-memory replay ensures release-field and stage tampering fails."""
+    from copy import deepcopy
+    for source_id in ("SRC-EU-WATER4ALL-2026-JTC",
+                      "SRC-RO-UEFISCDI-WATER4ALL-2026"):
+        mutations = (
+            ("open_call_authorized", True),
+            ("material_fact_publication_authorized", True),
+            ("material_fact_use", True),
+            ("observation_state", "OPEN_CALL"),
+            ("deadline", "2027-04-06T15:00:00"),
+            ("fetched_at", "2026-11-11T10:00:00Z"),
+            ("paired_official_source_id", source_id),
+        )
+        for field, invalid_value in mutations:
+            tampered = deepcopy(by_id)
+            tampered[source_id][field] = invalid_value
+            try:
+                validate_water4all_2026_pair(tampered)
+            except SystemExit:
+                pass
+            else:
+                fail(f"Water4All negative replay admitted {source_id}.{field}")
+
 def main():
     data = json.loads(REGISTRY.read_text(encoding="utf-8"))
     plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
@@ -843,6 +931,8 @@ def main():
         fail("PR Centru 3.3 corrigendum lost its exact action link")
 
     validate_impact_lot3_pair(by_id)
+    validate_water4all_2026_pair(by_id)
+    test_water4all_adversarial_pairs(by_id)
 
     policy = data.get("policy") or {}
     if "OPEN_CALL" not in policy.get("programming_pipeline_rule", ""):
