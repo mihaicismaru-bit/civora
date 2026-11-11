@@ -50,7 +50,11 @@ def test():
         mod.validate_html(sid, visible_after, MIME)
     reject(lambda: mod.exact_url(SID_E, mod.SOURCE_SPECS[SID_E]["url"] + "?stale=1"), "URL")
     reject(lambda: mod.exact_url(SID_RO, "https://evil.invalid/"), "URL")
-    reject(lambda: mod.build({SID_E: originals()[SID_E]}, "T1"), "both")
+    partial, partial_files = mod.build({SID_E: originals()[SID_E]}, "T1")
+    assert partial["pending_source_ids"] == [SID_RO]
+    assert len(partial["receipts"]) == 1 and partial["receipts"][0]["source_id"] == SID_E
+    assert len(partial_files) == 1
+    reject(lambda: mod.build({SID_RO: originals()[SID_RO]}, "T1"), "European original")
     reject(lambda: mod.build(originals(), "BAD/ID"), "run_id")
     with tempfile.TemporaryDirectory() as tmp:
         d = Path(tmp) / "evidence"
@@ -84,6 +88,22 @@ def test():
         reject(lambda: mod.replay(d), "duplicate")
         (d / "manifest.json").write_bytes(original_manifest)
         assert mod.replay(d)["publish_authorized"] is False
+        partial_dir = Path(tmp) / "european-only"
+        partial_receipt = mod.seal(partial_dir, {SID_E: originals()[SID_E]}, "PR-THCS-EU-ONLY-1")
+        assert partial_receipt["pending_source_ids"] == [SID_RO]
+        partial_result = mod.replay(partial_dir)
+        assert partial_result["status"] == "THCS_EU_PRIMARY_RAW_REPLAY_VERIFIED_NATIONAL_QUARANTINED"
+        assert partial_result["pending_source_ids"] == [SID_RO]
+        assert len(partial_result["raw_hashes"]) == 1
+        original_partial = (partial_dir / "manifest.json").read_bytes()
+        forged_pending = json.loads(original_partial)
+        forged_pending["pending_source_ids"] = []
+        forged_pending["handoff_sha256"] = mod.sha(mod.canonical({
+            k: v for k, v in forged_pending.items() if k != "handoff_sha256"}))
+        (partial_dir / "manifest.json").write_bytes(mod.canonical(forged_pending))
+        reject(lambda: mod.replay(partial_dir), "pending source receipts mismatch")
+        (partial_dir / "manifest.json").write_bytes(original_partial)
+        assert mod.replay(partial_dir)["publish_authorized"] is False
         linked = Path(tmp) / "symlink"
         linked.symlink_to(d, target_is_directory=True)
         reject(lambda: mod.replay(linked), "symlinked")
