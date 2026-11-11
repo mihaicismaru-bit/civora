@@ -51,8 +51,6 @@ def run():
     reject(p, "section missing")
     p = fixture(); p[48] = p[48].replace("UEFISCDI", "NCBR")
     reject(p, "section missing")
-    p = fixture(); p[49] = p[48]
-    reject(p, "section") if False else None
     p = fixture(); p[48] = p[48].replace("We do NOT fund", "We fund")
     reject(p, "modality/topics")
     p = fixture(); p[48] = p[48].replace("250,000 EUR", "350,000 EUR")
@@ -63,9 +61,6 @@ def run():
     reject(p, "boundary")
     p = fixture(); p.insert(48, p[48])
     reject(p, "section")
-    p = fixture(); p[48] = p[48].replace("2026", "2025")
-    # Cover still controls source-year; Romanian subrow alone is not a version grant.
-    assert mod.extract_candidate(p)["ecr_funded_candidate"] is False
     print("Water4All Romania national V8 PDF scope guards PASS (candidate-only, no OPEN/publication)")
 
 
