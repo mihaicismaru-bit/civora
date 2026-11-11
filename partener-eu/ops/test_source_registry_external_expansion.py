@@ -240,6 +240,45 @@ def main():
             fail(f"{source_id} invented material facts or unavailable provenance")
 
 
+    # National UEFISCDI competition index is a discovery router, NOT a call.
+    # Mixed OPEN / PLANNED / CLOSED labels must never confer current call
+    # authority; each target requires exact official detail + Romanian rules.
+    transnational_id = "SRC-RO-UEFISCDI-TRANSNATIONAL-CALL-INDEX"
+    transnational = by_id.get(transnational_id)
+    if not transnational:
+        fail("missing UEFISCDI cross-programme transnational market-intelligence root")
+    if (transnational.get("url") != "https://uefiscdi.gov.ro/apeluri-transnationale"
+            or transnational.get("tier") != "T1B"
+            or transnational.get("class") != "official_national_transnational_call_index"):
+        fail("UEFISCDI transnational authority/endpoint drift")
+    if (transnational.get("authority_scope") != "NATIONAL_TRANSNATIONAL_CALL_INDEX_DISCOVERY"
+            or transnational.get("observation_state") != "CURRENT_CALL_REGISTRY"
+            or transnational.get("adapter_required") != "UEFISCDI_EXACT_CALL_NATIONAL_RULES_RECONCILE_V1"):
+        fail("UEFISCDI mixed-state index escaped the exact-call reconcile gate")
+    if transnational.get("programmes") != ["EU direct programmes"] or not {
+        "ROMANIA", "EU_DIRECT", "RESEARCH", "CALL_REGISTRY",
+    }.issubset(set(transnational.get("source_families") or [])):
+        fail("UEFISCDI transnational index lost national programme discovery identity")
+    if not {"open_competitions_discovery", "planned_competitions_discovery",
+            "closed_competitions_discovery", "specific_call_detail_links",
+            "national_annex_rules_candidates"}.issubset(set(transnational.get("extract") or [])):
+        fail("UEFISCDI index lost future/open/closed market-intelligence coverage")
+    if (transnational.get("material_fact_use") is not False
+            or transnational.get("credentials_required") is not False
+            or transnational.get("open_call_authorized") is not False
+            or transnational.get("material_fact_publication_authorized") is not False):
+        fail("UEFISCDI mixed-state index authorized unverified material facts")
+    if any(field in transnational for field in (
+            "status", "call_status", "deadline", "budget", "eligibility",
+            "open_at", "close_at", "fetched_at", "raw_sha256",
+            "parser_version", "run_id", "handoff_sha256")):
+        fail("UEFISCDI index fabricated call-level data or raw provenance")
+    index_note = (transnational.get("note") or "").lower()
+    if not all(term in index_note for term in (
+            "deschise", "în pregătire", "închise", "open_call",
+            "exact call/topic identifier", "semantic reconciliation")):
+        fail("UEFISCDI index lacks explicit mixed-stage and fail-closed warnings")
+
     # The exact delegated-OI documents are monitored as discovery-only sources.
     # Raw originals from MIPE and MySMIS must be reconciled before any material
     # fact or publication; neither a new guide annex nor a draft opens a call.
