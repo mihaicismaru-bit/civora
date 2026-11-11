@@ -79,6 +79,7 @@ class Visible(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.stack = []
         self.parts = []
+        self.headings = []
 
     def handle_starttag(self, tag, attrs):
         seen = {}
@@ -114,6 +115,8 @@ class Visible(HTMLParser):
     def handle_data(self, value):
         if value.strip() and not any(v for _, v in self.stack):
             self.parts.append(value.strip())
+            if any(tag in {"h1", "h2"} for tag, _ in self.stack):
+                self.headings.append(value.strip())
 
 
 def validate(sid: str, raw: bytes, mime: str) -> None:
@@ -128,17 +131,14 @@ def validate(sid: str, raw: bytes, mime: str) -> None:
     parser.feed(raw.decode("utf-8", "replace"))
     body = fold(" ".join(parser.parts))
     if sid == PRIMARY:
-        # AFIR renders the intervention name across multiple inline HTML
-        # fragments. Bind the *ordered* intervention tokens in a short
-        # visible span rather than requiring contiguous DOM text nodes.
-        must = ("versiunea consultativa", "dr-31",
-                "11 noiembrie 2026", "dezbatere publica")
-        if re.search(
-            r"\bcontributii\b.{0,140}\bfinanciare\b.{0,140}"
-            r"\bplata\b.{0,140}\bprimelor\b.{0,140}\basigurare\b",
-            body,
-        ) is None:
-            raise ValueError("DR31 exact official intervention title not visibly established")
+        # SURFACEMC is acquisition-only: anchor this raw page to the exact
+        # visible AFIR DR-31 consultative H1, publication day and debate
+        # reference. Do NOT interpret the intervention paragraph as approved
+        # guide content, eligibility or a funding-call state in this adapter.
+        heading = fold(" ".join(parser.headings))
+        if "versiunea consultativa" not in heading or "dr-31" not in heading:
+            raise ValueError("DR31 exact official consultative heading missing")
+        must = ("11 noiembrie 2026", "dezbatere publica")
     else:
         must = ("documente aflate in dezbatere publica",
                 "ghid solicitant dr 31 consultativ",
