@@ -294,7 +294,10 @@ def replay(out):
             raise ValueError("AMIF receipt authority/provenance drift")
         assert_url(row["source_id"], row["final_url"])
         valid_timestamp(row["fetched_at"])
-        rawpath = out / row["raw_path"]
+        expected_path = f"raw/{row['source_id']}.{'pdf' if spec['kind'] == 'pdf' else 'html'}"
+        if row["raw_path"] != expected_path:
+            raise ValueError("AMIF exact raw_path drift")
+        rawpath = out / expected_path
         if not rawpath.is_file() or rawpath.is_symlink():
             raise ValueError("original AMIF file missing/symlinked")
         raw = rawpath.read_bytes()
