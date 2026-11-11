@@ -108,6 +108,23 @@ DUT_2026_OFFICIAL_PAIR = {
     },
 }
 
+EPPERMED_2027_OFFICIAL_PAIR = {
+    "SRC-EU-EPPERMED-2027-EXACT-CALL": {
+        "url": "https://www.eppermed.eu/funding-projects/calls/jtc2027/",
+        "tier": "T1", "scope": "EXACT_CALL_DISCOVERY_ONLY",
+        "state": "EXACT_CALL_DISCOVERED_RAW_PENDING",
+        "paired": "SRC-RO-UEFISCDI-EPPERMED-2027",
+        "families": {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY"},
+    },
+    "SRC-RO-UEFISCDI-EPPERMED-2027": {
+        "url": "https://uefiscdi.gov.ro/european-partnership-for-personalised-medicine-ep-permed",
+        "tier": "T1B", "scope": "NATIONAL_CALL_DISCOVERY_ONLY",
+        "state": "NATIONAL_CALL_DISCOVERED_RAW_PENDING",
+        "paired": "SRC-EU-EPPERMED-2027-EXACT-CALL",
+        "families": {"ROMANIA", "EU_DIRECT", "RESEARCH", "CALL_REGISTRY"},
+    },
+}
+
 RCH_2027_SOURCE_ROOTS = {
     "SRC-EU-RCH-2027-CALL1": {
         "host": "www.heritageresearch-hub.eu",
@@ -239,6 +256,45 @@ def main():
                                       "parser_version", "run_id", "handoff_sha256")):
             fail(f"{source_id} invented material facts or unavailable provenance")
 
+
+    # EP PerMed CGT4PM2027: official secretariat and Romanian agency must
+    # remain a paired discovery until the revised 11-Nov guidelines, national
+    # funder rules and the exact submission endpoint have immutable receipts.
+    for source_id, expected in EPPERMED_2027_OFFICIAL_PAIR.items():
+        row = by_id.get(source_id)
+        if row is None:
+            fail(f"missing paired official EP PerMed 2027 source: {source_id}")
+        if (row.get("url"), row.get("tier"), row.get("authority_scope"),
+                row.get("observation_state"), row.get("paired_official_source_id")) != (
+                expected["url"], expected["tier"], expected["scope"],
+                expected["state"], expected["paired"]):
+            fail(f"{source_id} lost exact call, Romanian pair or raw-pending state")
+        if row.get("adapter_required") != "EPPERMED_2027_EXACT_CALL_NATIONAL_RULES_RECONCILE_V1":
+            fail(f"{source_id} bypassed exact call / updated national-rules reconciliation")
+        if (row.get("programmes") != ["Horizon Europe / EP PerMed Joint Transnational Call 2027"]
+                or not expected["families"].issubset(set(row.get("source_families") or []))):
+            fail(f"{source_id} lost programme or official source-family binding")
+        if (row.get("material_fact_use") is not False
+                or row.get("credentials_required") is not False
+                or row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False):
+            fail(f"{source_id} promoted EP PerMed discovery to authorizing evidence")
+        if any(key in row for key in (
+            "status", "call_status", "deadline", "budget", "budget_eur",
+            "eligibility", "open_at", "close_at", "fetched_at", "fetched_at_utc",
+            "raw_sha256", "semantic_sha256", "parser_version", "run_id",
+            "handoff_sha256", "application_deadline",
+        )):
+            fail(f"{source_id} invented material facts or an unreceived raw document")
+        note = (row.get("note") or "").lower()
+        if source_id == "SRC-EU-EPPERMED-2027-EXACT-CALL":
+            if ("11 november 2026" not in note or "guidelines" not in note
+                    or "annex iii" not in note or "immutable" not in note):
+                fail("EP PerMed revised 11-Nov guidelines signal lost its raw/review gate")
+            if "change_log_2026_11_11_discovery" not in (row.get("extract") or []):
+                fail("EP PerMed current guidelines change log must remain discovery-only")
+        elif "cgt4pm-2027" not in note or "multiple" not in note:
+            fail("UEFISCDI EP PerMed mixed-generation page must be exact-section isolated")
 
     # National UEFISCDI competition index is a discovery router, NOT a call.
     # Mixed OPEN / PLANNED / CLOSED labels must never confer current call
