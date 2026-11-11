@@ -60,7 +60,8 @@ def run():
     reject(lambda: mod.validate_html(RO, RO_HTML.replace(b"06 aprilie 2027", b"06 martie 2027"), "text/html"), "marker")
     reject(lambda: mod.timestamp_ok("2026-11-09T10:00:00Z"), "clock")
     reject(lambda: mod.timestamp_ok("2026-11-11T12:00:00+02:00"), "format")
-    reject(lambda: mod.build({EU: ORIGINALS[EU]}, "qa-1"), "paired")
+    reject(lambda: mod.build({}, "qa-1"), "exact official")
+    reject(lambda: mod.build({EU: ORIGINALS[EU], "FAKE": ORIGINALS[RO]}, "qa-1"), "exact official")
     reject(lambda: mod.build(ORIGINALS, "../bad-run"), "run_id")
 
     with tempfile.TemporaryDirectory() as d:
@@ -69,6 +70,7 @@ def run():
         result = mod.seal(out, ORIGINALS, "water4all-test-001")
         assert result == {"status": "PAIRED_RAW_REPLAY_VERIFIED_NON_AUTHORIZING",
                           "run_id": "water4all-test-001", "source_count": 2,
+                          "missing_sources": [], "pair_complete": True,
                           "publication_effect": "NONE", "open_call_authorized": False}
         assert mod.replay(out) == result
         reject(lambda: mod.seal(out, ORIGINALS, "again"), "immutable")
@@ -95,7 +97,24 @@ def run():
         reject(lambda: mod.replay(out), "file-set")
         (out / "raw" / "unexpected.html").unlink()
         assert mod.replay(out) == result
-    print("Water4All 2026 official paired immutable HTML acquisition/replay PASS; stage 2 not OPEN_CALL")
+        partial = root / "official-primary-partial"
+        partial_result = mod.seal(partial, {EU: ORIGINALS[EU]}, "water4all-partial-001")
+        assert partial_result == {
+            "status": "PARTIAL_RAW_QUARANTINED_REPLAY_VERIFIED_NON_AUTHORIZING",
+            "run_id": "water4all-partial-001", "source_count": 1,
+            "missing_sources": [RO], "pair_complete": False,
+            "publication_effect": "NONE", "open_call_authorized": False,
+        }
+        assert mod.replay(partial) == partial_result
+        partial_manifest = partial / "handoff.json"
+        clean_partial = partial_manifest.read_bytes()
+        forged = json.loads(clean_partial)
+        forged["pair_complete"] = True
+        forged["sources_missing"] = []
+        forged["handoff_sha256"] = mod.sha(mod.canonical({k: v for k, v in forged.items() if k != "handoff_sha256"}))
+        partial_manifest.write_bytes(mod.canonical(forged))
+        reject(lambda: mod.replay(partial), "mismatch")
+    print("Water4All 2026 paired-or-partial immutable raw/replay PASS; stage 2 not OPEN_CALL")
 
 
 if __name__ == "__main__":
