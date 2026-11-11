@@ -56,9 +56,13 @@ def main():
         b"Contributii financiare la plata primelor de asigurare.",
         b"Contributii <strong>financiare</strong> la plata <em>primelor</em> de asigurare.")
     mod.validate(mod.PRIMARY, inline_markup, MIME)
+    # Article topic prose is an unadmitted candidate, not an acquisition gate.
+    # Even a changed topic cannot authorize material publication.
+    changed_topic = ARTICLE.replace(b"primelor", b"ultimelor")
+    mod.validate(mod.PRIMARY, changed_topic, MIME)
     rejection(lambda: mod.validate(mod.PRIMARY,
-        ARTICLE.replace(b"primelor", b"ultimelor"), MIME),
-        "intervention title")
+        ARTICLE.replace(b"VERSIUNEA CONSULTATIVA", b"TEXT NERELEVANT"), MIME),
+        "consultative heading")
 
     rejection(lambda: mod.validate(mod.PRIMARY,
         ARTICLE.replace(b"11 noiembrie 2026", b"12 noiembrie 2026"), MIME),
