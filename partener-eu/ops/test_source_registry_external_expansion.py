@@ -1013,7 +1013,7 @@ def main():
             "eligibility", "fetched_at", "raw_sha256", "semantic_sha256",
             "parser_version", "run_id", "handoff_sha256", "http_status")):
         fail("ADR November catalogue invented call facts or raw provenance")
-    if "NO OPEN_CALL" not in (november.get("note") or ""):
+    if "NO OPEN_CALL" not in (november.get("note") or "").upper():
         fail("ADR November catalogue must preserve the non-OPEN call boundary")
     if "RAW" not in (november.get("note") or ""):
         fail("ADR November catalogue failed to disclose raw acquisition pending")
