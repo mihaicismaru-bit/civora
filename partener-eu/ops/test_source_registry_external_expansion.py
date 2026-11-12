@@ -976,6 +976,48 @@ def main():
             "exact_action_link_candidate") != "https://www.regiocentru.ro/actiuni/3-3-investitii-in-infrastructura-verde-si-albastra-in-mediul-urban-regional-apel-competitiv-pentru-municipii/":
         fail("PR Centru 3.3 corrigendum lost its exact action link")
 
+
+    # Keep monthly official *catalogue* issues distinct from exact T1 call authority.
+    # The November edition must not rewrite the historical July record or
+    # invent an immutable receipt from a search-index discovery / 403 response.
+    july = by_id.get("SRC-ADRCENTRU-FUNDING-CATALOG")
+    november = by_id.get("SRC-ADRCENTRU-FUNDING-CATALOG-202611")
+    if not july or july.get("url") != (
+            "https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-iulie-2026/"):
+        fail("ADR Centru July 2026 historical catalogue must be retained")
+    if not november or november.get("url") != (
+            "https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-noiembrie-2026/"):
+        fail("ADR Centru November 2026 issue lost exact official URL")
+    expected_november = {
+        "tier": "T2",
+        "authority_class": "T2_OFFICIAL_REGIONAL_CATALOG",
+        "authority_scope": "CATALOG_DISCOVERY_ONLY",
+        "observation_state": "OFFICIAL_CATALOG_DISCOVERED_RAW_PENDING",
+        "publication_date_discovery": "2026-11-11",
+        "material_fact_use": False,
+        "open_call_authorized": False,
+        "material_fact_publication_authorized": False,
+        "credentials_required": False,
+        "adapter_required": "ADR_CENTRU_CATALOG_T1_EXACT_ACTION_AND_MYSMIS_RECONCILE",
+    }
+    for key, value in expected_november.items():
+        if november.get(key) != value:
+            fail(f"ADR November discovery elevated or lost {key}")
+    if not {"ROMANIA", "ADR", "DISCOVERY"}.issubset(
+            set(november.get("source_families") or [])):
+        fail("ADR November official aggregator missing Romanian regional provenance")
+    if urlparse(november["url"]).hostname != "www.adrcentru.ro":
+        fail("ADR November catalogue lost the exact official host")
+    if any(key in november for key in (
+            "status", "call_status", "deadline", "budget", "budget_eur",
+            "eligibility", "fetched_at", "raw_sha256", "semantic_sha256",
+            "parser_version", "run_id", "handoff_sha256", "http_status")):
+        fail("ADR November catalogue invented call facts or raw provenance")
+    if "NO OPEN_CALL" not in (november.get("note") or ""):
+        fail("ADR November catalogue must preserve the non-OPEN call boundary")
+    if "RAW" not in (november.get("note") or ""):
+        fail("ADR November catalogue failed to disclose raw acquisition pending")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
