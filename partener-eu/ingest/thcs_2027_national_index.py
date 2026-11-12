@@ -81,7 +81,11 @@ def validate_html(raw: bytes, mime: str):
     if min(opened, planned, closed) < 0 or not opened < planned < closed:
         raise ValueError("UEFISCDI three visible lifecycle headings missing")
     segment = text[planned:closed]
-    if "transforming health and care systems (thcs)" in text[opened:planned]:
+    # An archived/open exact 2027 identifier contradicts a PLANNED-only
+    # listing even when the longer THCS programme name is omitted there.
+    other_stages = text[opened:planned] + " " + text[closed:]
+    if ("transforming health and care systems (thcs)" in other_stages or
+        re.search(r"(?<![a-z0-9])thcs[\\s-]*2027(?![a-z0-9])", other_stages)):
         raise ValueError("THCS also occurs outside planned lifecycle")
     # Same official planned entry must include the precise expected launch date.
     pattern = (r"transforming health and care systems\s*\(thcs\)"
