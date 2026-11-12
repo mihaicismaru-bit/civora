@@ -26,7 +26,7 @@ adapter = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(adapter)
 
-PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V2"
+PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V3"
 INDEX_URL = "https://eeagrants.org/en/eea-civil-society-fund-romania/calls"
 # Previously verified official exact call pages. This is only a discovery fallback.
 # Fresh HTTPS readback, hash, semantic reconciliation and publication gates remain mandatory.
@@ -81,8 +81,20 @@ class _DocumentParser(HTMLParser):
         for key, value in attrs:
             values.setdefault(key.lower(), []).append((value or "").strip().lower())
         styles = values.get("style", [])
+        # CSS utilities can conceal entire call-status/identity sections without
+        # hidden/aria-hidden attributes. Treat known responsive Bootstrap states
+        # as unverified visibility, never as evidence that a call is OPEN.
+        classes = {token for value in values.get("class", []) for token in value.split()}
+        css_concealed = (
+            bool(classes & {"d-none", "hidden", "invisible", "visually-hidden", "sr-only"})
+            or any(re.fullmatch(r"d-(?:sm|md|lg|xl|xxl)-none", token) for token in classes)
+            or "collapsing" in classes
+            or ("collapse" in classes and "show" not in classes)
+            or ("tab-pane" in classes and "active" not in classes)
+        )
         concealed = (
-            tag in _HIDDEN_TAGS
+            css_concealed
+            or tag in _HIDDEN_TAGS
             or (tag in {"dialog", "details"} and "open" not in values)
             # HTML popovers are hidden by default; static acquisition cannot
             # prove script-driven visibility, so they are never source prose.
