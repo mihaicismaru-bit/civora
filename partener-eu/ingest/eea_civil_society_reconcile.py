@@ -24,7 +24,7 @@ SOURCE_FAMILY = "EEA_NORWAY"
 PROGRAMME_FAMILY = "EEA Civil Society Fund Romania 2021-2028"
 AUTHORITY_CLASS = "EEA_FMO_CIVIL_SOCIETY_FUND_ROMANIA"
 OFFICIAL_HOSTS = {"eeagrants.org", "www.eeagrants.org"}
-FETCH_PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V2"
+FETCH_PARSER_VERSION = "EEA_CSF_ROMANIA_LIVE_FETCH_V3"
 # Date-only deadlines of Romanian calls are interpreted in Romania's civil time,
 # never in UTC (midnight UTC can already be the following day locally).
 ROMANIA_TIMEZONE = ZoneInfo("Europe/Bucharest")
