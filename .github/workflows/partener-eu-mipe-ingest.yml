@@ -6,6 +6,8 @@ on:
     - cron: '20 * * * *'
   pull_request:
     paths:
+      - 'partener-eu/ingest/build_mysmis_consultant_registry.py'
+      - 'partener-eu/ops/test_mipe_resilient_ingest.py'
       - 'partener-eu/ingest/mipe_discovery_ingest.py'
       - 'partener-eu/ingest/mysmis_reporting_transport_scout.py'
       - 'partener-eu/ingest/mysmis_transport_handoff.py'
@@ -91,6 +93,7 @@ jobs:
           python -m py_compile partener-eu/ingest/mipe_resilient_ingest.py
           python -m py_compile partener-eu/ingest/mipe_direct_only_ingest.py
           python -m py_compile partener-eu/ingest/normalize_mipe_health.py
+          python -m py_compile partener-eu/ingest/build_mysmis_consultant_registry.py
           python partener-eu/ops/test_mipe_resilient_ingest.py
           python partener-eu/ops/test_mipe_route_arbitration.py
 
