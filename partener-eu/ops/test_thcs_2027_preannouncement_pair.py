@@ -72,6 +72,17 @@ def test():
         ambiguous_css = (b'<html><body><section class="safe" class="d-none">'
                          + claims + b'</section></body></html>')
         reject(lambda h=ambiguous_css, sid=sid: mod.validate_html(sid, h, MIME), "markers")
+        # Bootstrap hides collapsed panes and inactive tabs despite no
+        # inline style/hidden attribute. Expanded/active variants stay visible.
+        for css_class in ("collapse", "collapsing", "tab-pane"):
+            collapsed_html = (b'<html><body><section class="' + css_class.encode()
+                              + b'">' + claims + b'</section></body></html>')
+            reject(lambda h=collapsed_html, sid=sid:
+                   mod.validate_html(sid, h, MIME), "markers")
+        for css_class in ("collapse show", "tab-pane active"):
+            expanded_html = (b'<html><body><section class="' + css_class.encode()
+                             + b'">' + claims + b'</section></body></html>')
+            mod.validate_html(sid, expanded_html, MIME)
         # Match class tokens, not substrings of otherwise visible classes.
         visible_css = (b'<html><body><section class="not-d-md-none">'
                        + claims + b'</section></body></html>')
