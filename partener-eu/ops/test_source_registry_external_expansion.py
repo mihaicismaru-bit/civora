@@ -927,7 +927,7 @@ def main():
 
     # Smart-city 2.1.2 Apel 2 is a new exact official action discovery
     # surfaced by the November ADR catalogue, but the submission window is
-    # FUTURE and the visible MySMIS string is only a partial prefix.
+    # FUTURE and the displayed MySMIS code is not independently reconciled.
     smart = by_id.get("SRC-PR-CENTRU-SMARTCITY-212-APEL2")
     smart_url = (
         "https://www.regiocentru.ro/actiuni/"
@@ -944,8 +944,8 @@ def main():
             smart.get("mysmis_identifier_discovery_hint"),
             smart.get("mysmis_identifier_verification")) != (
                 "2.1.2 / Apel 2", "PRC/1257/PRC_P2/OP1",
-                "PARTIAL_PREFIX_ONLY_NOT_EXACT_CALL_ID"):
-        fail("Smart-city Apel 2 partial MySMIS hint laundered as a full identifier")
+                "T1_DISPLAYED_ID_NOT_YET_RECONCILED_WITH_MYSMIS"):
+        fail("Smart-city Apel 2 displayed MySMIS code laundered as verified system identity")
     if smart.get("adapter_required") != "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1":
         fail("Smart-city Apel 2 omitted exact call/MySMIS semantic reconciliation")
     if not {"ROMANIA", "ADR", "CALL_REGISTRY"}.issubset(
