@@ -1015,7 +1015,7 @@ def main():
         fail("ADR November catalogue invented call facts or raw provenance")
     if "NO OPEN_CALL" not in (november.get("note") or "").upper():
         fail("ADR November catalogue must preserve the non-OPEN call boundary")
-    if "RAW" not in (november.get("note") or ""):
+    if "RAW" not in (november.get("note") or "").upper():
         fail("ADR November catalogue failed to disclose raw acquisition pending")
 
     validate_thcs_2027_preannouncement(by_id, programme_domains)
