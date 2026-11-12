@@ -966,6 +966,57 @@ def main():
     if "NO OPEN_CALL" not in (smart.get("note") or "").upper():
         fail("Smart-city Apel 2 lost explicit non-OPEN gate")
 
+    # Action 1.4.3 comprises TWO territorial ITI calls, not one generic
+    # programme status. The official page labels the action active but the
+    # published project-intake window is FUTURE as of 12 November 2026.
+    # Indexed discovery (exact official route currently HTTP 403) is not a
+    # canonical immutable raw receipt or independent MySMIS confirmation.
+    iti = by_id.get("SRC-PR-CENTRU-ITI-143-TWO-CALLS-2026")
+    if not iti or iti.get("url") != (
+            "https://www.regiocentru.ro/actiuni/"
+            "1-4-3-cresterea-competitivitatii-imm-din-cadrul-iti/"):
+        fail("PR Centru ITI 1.4.3 exact official action URL missing")
+    if (iti.get("tier"), iti.get("authority_scope"),
+            iti.get("observation_state"), iti.get("event_date_discovery")) != (
+                "T1", "EXACT_ACTION_DISCOVERY_ONLY",
+                "EXACT_ACTION_DISCOVERED_RAW_PENDING", "2026-09-25"):
+        fail("ITI 1.4.3 escaped pre-intake source-discovery quarantine")
+    if iti.get("mysmis_identifiers_discovery_hint") != {
+            "ITI Microregiunea Tara Fagarasului": "PRC/1057/PRC_P1/OP1",
+            "ITI Motii, Tara de Piatra": "PRC/1232/PRC_P1/OP1",
+    }:
+        fail("ITI 1.4.3 lost separate territorial MySMIS call IDs")
+    if iti.get("mysmis_identifier_verification") != (
+            "T1_DISPLAYED_IDS_NOT_YET_RECONCILED_WITH_MYSMIS"):
+        fail("ITI 1.4.3 laundered two indexed IDs as independently verified")
+    if iti.get("adapter_required") != (
+            "REGIOCENTRU_TWO_TERRITORIAL_CALLS_MYSMIS_RECONCILE_V1"):
+        fail("ITI 1.4.3 must reconcile both calls and their application routes")
+    if not {"ROMANIA", "ADR", "CALL_REGISTRY"}.issubset(
+            set(iti.get("source_families") or [])):
+        fail("ITI 1.4.3 lost official Romanian regional family")
+    if "future_submission_window_candidate" not in (iti.get("extract") or []):
+        fail("ITI 1.4.3 lost future-intake discriminator")
+    if any(iti.get(field) is not False for field in (
+            "material_fact_use", "open_call_authorized",
+            "material_fact_publication_authorized")):
+        fail("ITI 1.4.3 promoted planned intake to OPEN_CALL/material authority")
+    if any(field in iti for field in (
+            "status", "call_status", "open_at", "close_at", "deadline",
+            "budget", "budget_eur", "eligibility", "fetched_at", "raw_sha256",
+            "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+            "http_status")):
+        fail("ITI 1.4.3 invented material call facts or immutable raw receipt")
+    if not all(term in (iti.get("note") or "").upper() for term in (
+            "16 NOVEMBER 2026", "HTTP 403", "NO OPEN_CALL", "MYSMIS")):
+        fail("ITI 1.4.3 lost dated pre-intake and fail-closed proof gaps")
+    if iti.get("official_launch_notice_url") != (
+            "https://www.regiocentru.ro/lansare-apeluri-de-finantare-pentru-cresterea-competitivitatii-imm-din-cadrul-iti-microregiunea-tara-fagarasului-si-iti-motii-tara-de-piatra/"):
+        fail("ITI 1.4.3 lost original official launch crosscheck")
+    if iti.get("official_recent_information_notice_url") != (
+            "https://www.regiocentru.ro/sesiune-online-de-informare-privind-apelurile-de-proiecte-aferente-interventiei-1-4-3-cresterea-competitivitatii-imm-din-cadrul-iti/"):
+        fail("ITI 1.4.3 lost official November information event crosscheck")
+
     # PR Centru 3.3 municipal exact action + Annex 17 corrigendum: official
     # indexed readback is discovery, not immutable acquisition or OPEN_CALL.
     green_blue_pair = {
