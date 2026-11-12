@@ -104,7 +104,13 @@ class Visible(HTMLParser):
             attrs_seen.setdefault(key, value or "")
         css = re.sub(r"\s+", "", attrs_seen.get("style", "").casefold())
         classes = set(attrs_seen.get("class", "").casefold().split())
-        hidden = (ambiguous or bool(classes & HIDDEN_CLASSES) or tag in self.SKIP or
+        # Bootstrap collapse/tab surfaces are not visible in server HTML unless
+        # explicitly expanded/active. Never let inactive call text prove status.
+        collapsed = ("collapsing" in classes or
+                     ("collapse" in classes and "show" not in classes))
+        inactive_tab = "tab-pane" in classes and "active" not in classes
+        hidden = (ambiguous or collapsed or inactive_tab or
+                  bool(classes & HIDDEN_CLASSES) or tag in self.SKIP or
                   (tag == "details" and "open" not in attrs_seen) or
                   "popover" in attrs_seen or "hidden" in attrs_seen or
                   "inert" in attrs_seen or
