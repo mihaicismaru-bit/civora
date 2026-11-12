@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/thcs_2027_national_index.py'
+      - 'partener-eu/ops/test_thcs_2027_national_index.py'
       - 'partener-eu/ingest/amif_impact_official_receipts.py'
       - 'partener-eu/ingest/water4all_2026_official_pair.py'
       - 'partener-eu/ingest/water4all_2026_primary_documents.py'
@@ -116,6 +118,8 @@ jobs:
           python -m py_compile partener-eu/ops/test_water4all_2026_primary_documents.py
           python -m py_compile partener-eu/ops/test_water4all_2026_official_pair.py
           python -m py_compile partener-eu/ingest/thcs_2027_preannouncement_pair.py
+          python -m py_compile partener-eu/ingest/thcs_2027_national_index.py
+          python -m py_compile partener-eu/ops/test_thcs_2027_national_index.py
           python -m py_compile partener-eu/ops/test_thcs_2027_preannouncement_pair.py
           python -m py_compile partener-eu/ops/test_amif_impact_official_receipts.py
           python -m py_compile partener-eu/ingest/rch_2027_raw_acquire.py
@@ -547,6 +551,34 @@ jobs:
           path: /tmp/partener-afir-dr31-${{ github.run_id }}-${{ github.run_attempt }}
           if-no-files-found: error
           retention-days: 14
+
+      - name: Verify independent UEFISCDI THCS-2027 planned-index receipt fails closed
+        run: python partener-eu/ops/test_thcs_2027_national_index.py
+
+      - name: Acquire exact UEFISCDI planned index as distinct non-authorizing raw evidence
+        id: thcs_index_live
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/thcs_2027_national_index.py \
+            --out "/tmp/partener-thcs-index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/thcs_2027_national_index.py \
+            --replay-dir "/tmp/partener-thcs-index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine THCS index lifecycle drift without overriding national detail
+        if: steps.thcs_index_live.outcome == 'failure'
+        run: echo 'THCS_INDEX_PLANNED_RAW_PENDING / NATIONAL_DETAIL_STILL_QUARANTINED / NO_OPEN_CALL'
+
+      - name: Preserve separate immutable UEFISCDI index discovery original
+        if: steps.thcs_index_live.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-thcs-national-index-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-thcs-index-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: error
 
       - name: Validate THCS 2027 prelaunch paired evidence stays PROGRAMMING_PIPELINE
         run: python partener-eu/ops/test_thcs_2027_preannouncement_pair.py
