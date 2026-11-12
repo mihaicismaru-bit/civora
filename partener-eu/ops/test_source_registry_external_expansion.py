@@ -1018,6 +1018,48 @@ def main():
     if "RAW" not in (november.get("note") or "").upper():
         fail("ADR November catalogue failed to disclose raw acquisition pending")
 
+    # Audience-specific monthly catalogues are independent discovery surfaces,
+    # NOT independent proofs that the listed calls are open.  Exact T1/MIPE
+    # call identifiers and current action pages remain mandatory for OPEN.
+    audience_catalogues = {
+        "BUSINESS": ("Societăți comerciale", "2026-11-10",
+            "https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-societati-comerciale-noiembrie-2026/"),
+        "UNIVERSITIES": ("Universități", "2026-11-10",
+            "https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-universitati-noiembrie-2026/"),
+        "PUBLIC": ("Autorități publice", "2026-11-10",
+            "https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-autoritati-publice-noiembrie-2026/"),
+        "NGO": ("ONG", "2026-11-11",
+            "https://www.adrcentru.ro/csf/csf-ong-noiembrie-2026/"),
+    }
+    non_authorizing = (
+        "status", "call_status", "deadline", "budget", "budget_eur",
+        "eligibility", "fetched_at", "raw_sha256", "semantic_sha256",
+        "parser_version", "run_id", "handoff_sha256", "http_status",
+    )
+    for sector, (audience, published, exact_url) in audience_catalogues.items():
+        source_id = f"SRC-ADRCENTRU-FUNDING-CATALOG-202611-{sector}"
+        page = by_id.get(source_id)
+        if not page or page.get("url") != exact_url:
+            fail(f"ADR November {sector} catalogue lost exact official URL")
+        for key, value in expected_november.items():
+            if key == "publication_date_discovery":
+                value = published
+            if page.get(key) != value:
+                fail(f"ADR November {sector} catalogue elevated or lost {key}")
+        if page.get("catalog_audience") != audience:
+            fail(f"ADR November {sector} catalogue lost audience identity")
+        if not {"ROMANIA", "ADR", "DISCOVERY"}.issubset(
+                set(page.get("source_families") or [])):
+            fail(f"ADR November {sector} catalogue missing discovery provenance")
+        if urlparse(page["url"]).hostname != "www.adrcentru.ro":
+            fail(f"ADR November {sector} catalogue lost exact official host")
+        if any(key in page for key in non_authorizing):
+            fail(f"ADR November {sector} catalogue invented raw or call facts")
+        if not all(s in (page.get("note") or "").upper() for s in ("NO OPEN_CALL", "RAW", "T1")):
+            fail(f"ADR November {sector} catalogue lost explicit fail-closed boundary")
+    if len({url for _, _, url in audience_catalogues.values()}) != 4:
+        fail("ADR November audience catalogues must have distinct exact URLs")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
