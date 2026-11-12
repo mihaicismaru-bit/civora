@@ -40,6 +40,7 @@ def test():
     mod.validate_html(BASE.encode(), MIME)
     for conflicting in (
         RAW.replace(b"ERA4Health IICS4all 2027", b"THCS-2027"),
+        RAW.replace(b"ERA4Health IICS4all 2027", b"THCS 2027"),
         RAW.replace(b"AgData-2026", b"THCS-2027"),
         RAW.replace(b"AgData-2026", b"Transforming Health and Care Systems (THCS)"),
     ):
