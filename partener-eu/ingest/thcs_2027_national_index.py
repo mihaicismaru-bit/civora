@@ -37,7 +37,7 @@ FIELDS = {"schema", "run_id", "source_id", "requested_url", "final_url",
           "parser_version", "programme_family", "source_family",
           "authority_class", "authority_scope", "observation_state",
           "publication_effect", "http_status", "content_type",
-          "handoff_sha256"} | set(OFF)
+          "handoff_sha256", "source_identity_verified", "unverified_reason_code"} | set(OFF)
 
 
 def validate_registry(path=core.REGISTRY):
@@ -58,7 +58,7 @@ def validate_registry(path=core.REGISTRY):
         raise ValueError("UEFISCDI index authority drift")
 
 
-def validate_html(raw: bytes, mime: str):
+def validate_transport(raw: bytes, mime: str):
     if not isinstance(raw, bytes) or not 250 <= len(raw) <= MAX_BYTES:
         raise ValueError("implausible official index original size")
     if (not isinstance(mime, str) or
@@ -67,6 +67,10 @@ def validate_html(raw: bytes, mime: str):
         raise ValueError("official HTML MIME mismatch")
     if b"<html" not in raw[:8192].lower():
         raise ValueError("official HTML envelope missing")
+
+
+def validate_html(raw: bytes, mime: str):
+    validate_transport(raw, mime)
     parser = core.Visible()
     parser.feed(raw.decode("utf-8", "replace"))
     text = core.fold(" ".join(parser.parts))
@@ -104,7 +108,7 @@ def fetch():
         declared = response.headers.get("Content-Length")
         if declared is not None and (not declared.isdecimal() or int(declared) != len(raw)):
             raise ValueError("official index content length mismatch")
-    validate_html(raw, mime)
+    validate_transport(raw, mime)  # preserve the official original even if semantic identity drifts
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     return raw, mime, stamp
 
@@ -113,7 +117,14 @@ def build(raw: bytes, mime: str, fetched_at: str, run_id: str):
     if not isinstance(run_id, str) or not re.fullmatch(r"[A-Za-z0-9_.-]{1,120}", run_id):
         raise ValueError("run_id invalid")
     core.timestamp(fetched_at)
-    validate_html(raw, mime)
+    validate_transport(raw, mime)
+    try:
+        validate_html(raw, mime)
+        identity_verified = True
+    except ValueError:
+        # Transport and hash can be genuine even when JS-only/hidden content
+        # is not valid visible HTML evidence. Preserve RAW only; no claims.
+        identity_verified = False
     manifest = {
         "schema": SCHEMA, "run_id": run_id, "source_id": SOURCE_ID,
         "requested_url": URL, "final_url": URL, "fetched_at": fetched_at,
@@ -121,7 +132,11 @@ def build(raw: bytes, mime: str, fetched_at: str, run_id: str):
         "raw_bytes": len(raw), "parser_version": PARSER_VERSION,
         "programme_family": PROGRAMME_FAMILY, "source_family": SOURCE_FAMILY,
         "authority_class": AUTHORITY_CLASS, "authority_scope": SCOPE,
-        "observation_state": STATE, "publication_effect": "NONE",
+        "observation_state": STATE if identity_verified else "NATIONAL_INDEX_RAW_QUARANTINED",
+        "source_identity_verified": identity_verified,
+        "unverified_reason_code": None if identity_verified else
+            "VISIBLE_LIFECYCLE_OR_THCS_IDENTITY_UNVERIFIED",
+        "publication_effect": "NONE",
         "content_type": mime, "http_status": 200,
     }
     manifest.update({field: False for field in OFF})
@@ -164,7 +179,10 @@ def replay(folder: Path):
         manifest["source_family"] != SOURCE_FAMILY or
         manifest["authority_class"] != AUTHORITY_CLASS or
         manifest["authority_scope"] != SCOPE or
-        manifest["observation_state"] != STATE or
+        manifest["observation_state"] not in (STATE, "NATIONAL_INDEX_RAW_QUARANTINED") or
+        not isinstance(manifest["source_identity_verified"], bool) or
+        manifest["unverified_reason_code"] != (None if manifest["source_identity_verified"] else
+                                               "VISIBLE_LIFECYCLE_OR_THCS_IDENTITY_UNVERIFIED") or
         manifest["publication_effect"] != "NONE" or
         manifest["http_status"] != 200 or
         any(manifest[k] is not False for k in OFF)):
@@ -175,10 +193,15 @@ def replay(folder: Path):
     if core.canonical(build(raw, manifest["content_type"], manifest["fetched_at"],
                             manifest["run_id"])) != core.canonical(manifest):
         raise ValueError("national index semantic replay drift")
-    return {"status": "THCS_INDEX_PLANNED_RAW_REPLAY_VERIFIED_DISCOVERY_ONLY",
+    return {"status": ("THCS_INDEX_PLANNED_RAW_REPLAY_VERIFIED_DISCOVERY_ONLY"
+                       if manifest["source_identity_verified"] else
+                       "THCS_INDEX_RAW_QUARANTINED_REPLAY_VERIFIED_NO_SEMANTIC_AUTHORITY"),
             "source_id": SOURCE_ID, "raw_sha256": core.sha(raw),
-            "observation_state": STATE, "open_call_authorized": False,
-            "publish_authorized": False, "national_detail_verified": False}
+            "source_identity_verified": manifest["source_identity_verified"],
+            "unverified_reason_code": manifest["unverified_reason_code"],
+            "observation_state": manifest["observation_state"],
+            "open_call_authorized": False, "publish_authorized": False,
+            "national_detail_verified": False}
 
 
 def main():
@@ -187,18 +210,25 @@ def main():
     mode.add_argument("--out", type=Path)
     mode.add_argument("--replay-dir", type=Path)
     p.add_argument("--run-id")
+    p.add_argument("--require-verified", action="store_true")
     args = p.parse_args()
     validate_registry()
     if args.replay_dir:
-        print(json.dumps(replay(args.replay_dir), sort_keys=True))
+        result = replay(args.replay_dir)
+        print(json.dumps(result, sort_keys=True))
+        if args.require_verified and not result["source_identity_verified"]:
+            raise SystemExit(2)
     else:
         if not args.run_id:
             raise SystemExit("--run-id required")
         raw, mime, stamp = fetch()
         manifest = seal(args.out, raw, mime, stamp, args.run_id)
-        print(json.dumps({"status": "NATIONAL_INDEX_PLANNED_DISCOVERY_ONLY",
+        print(json.dumps({"status": ("NATIONAL_INDEX_PLANNED_DISCOVERY_ONLY" if
+                          manifest["source_identity_verified"] else "NATIONAL_INDEX_RAW_QUARANTINED"),
                           "source_id": SOURCE_ID, "raw_sha256": manifest["raw_sha256"],
                           "handoff_sha256": manifest["handoff_sha256"],
+                          "source_identity_verified": manifest["source_identity_verified"],
+                          "unverified_reason_code": manifest["unverified_reason_code"],
                           "open_call_authorized": False,
                           "national_detail_verified": False}, sort_keys=True))
 

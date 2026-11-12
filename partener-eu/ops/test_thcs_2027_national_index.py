@@ -58,7 +58,28 @@ def test():
     manifest = mod.build(RAW, MIME, stamp, "THCS-INDEX-HERMETIC")
     assert manifest["observation_state"] == "PROGRAMMING_PIPELINE"
     assert all(manifest[k] is False for k in mod.OFF)
+    # Index transition can be semantically unverified while RAW/transport remain
+    # genuine; retention and replay must still work without stage promotion.
+    unknown = RAW.replace(b"16 Noiembrie", b"19 Noiembrie")
+    quarantined = mod.build(unknown, MIME, stamp, "THCS-INDEX-DRIFT")
+    assert quarantined["source_identity_verified"] is False
+    assert quarantined["observation_state"] == "NATIONAL_INDEX_RAW_QUARANTINED"
+    assert quarantined["unverified_reason_code"] == "VISIBLE_LIFECYCLE_OR_THCS_IDENTITY_UNVERIFIED"
+    assert all(quarantined[k] is False for k in mod.OFF)
     with tempfile.TemporaryDirectory() as tmp:
+        badfolder = Path(tmp) / "drifted-official-original"
+        mod.seal(badfolder, unknown, MIME, stamp, "THCS-INDEX-DRIFT")
+        quarantined_replay = mod.replay(badfolder)
+        assert quarantined_replay["status"] == "THCS_INDEX_RAW_QUARANTINED_REPLAY_VERIFIED_NO_SEMANTIC_AUTHORITY"
+        assert quarantined_replay["source_identity_verified"] is False
+        forged = json.loads((badfolder / "manifest.json").read_bytes())
+        forged["source_identity_verified"] = True
+        forged["observation_state"] = "PROGRAMMING_PIPELINE"
+        forged["unverified_reason_code"] = None
+        forged["handoff_sha256"] = core.sha(core.canonical({
+            k:v for k,v in forged.items() if k != "handoff_sha256"}))
+        (badfolder / "manifest.json").write_bytes(core.canonical(forged))
+        reject(lambda: mod.replay(badfolder), "semantic replay drift")
         folder = Path(tmp) / "immutable"
         mod.seal(folder, RAW, MIME, stamp, "THCS-INDEX-HERMETIC")
         status = mod.replay(folder)

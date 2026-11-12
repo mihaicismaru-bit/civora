@@ -565,20 +565,21 @@ jobs:
             --out "/tmp/partener-thcs-index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
             --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           python partener-eu/ingest/thcs_2027_national_index.py \
-            --replay-dir "/tmp/partener-thcs-index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            --replay-dir "/tmp/partener-thcs-index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --require-verified
 
       - name: Quarantine THCS index lifecycle drift without overriding national detail
         if: steps.thcs_index_live.outcome == 'failure'
         run: echo 'THCS_INDEX_PLANNED_RAW_PENDING / NATIONAL_DETAIL_STILL_QUARANTINED / NO_OPEN_CALL'
 
       - name: Preserve separate immutable UEFISCDI index discovery original
-        if: steps.thcs_index_live.outcome == 'success'
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: partener-thcs-national-index-${{ github.run_id }}-${{ github.run_attempt }}
           path: /tmp/partener-thcs-index-${{ github.run_id }}-${{ github.run_attempt }}
           retention-days: 14
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Validate THCS 2027 prelaunch paired evidence stays PROGRAMMING_PIPELINE
         run: python partener-eu/ops/test_thcs_2027_preannouncement_pair.py
