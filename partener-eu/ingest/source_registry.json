@@ -1,6 +1,6 @@
 {
   "schema_version": "1.9",
-  "updated_utc": "2026-11-11",
+  "updated_utc": "2026-11-12",
   "policy": {
     "T1": "Authoritative official system or managing authority source. May support material facts when the exact source/evidence is captured and current.",
     "T1B": "Official delegated/subordinate/intermediate-body source. May support material facts within delegated scope when provenance is explicit; prefer T1 corroboration for conflicts.",
@@ -466,6 +466,39 @@
       "material_fact_use": false,
       "credentials_required": false,
       "note": "Discovery/corroboration only; resolve every material fact to the relevant T1/T1B programme source."
+    },
+    {
+      "id": "SRC-ADRCENTRU-FUNDING-CATALOG-202611",
+      "tier": "T2",
+      "class": "official_regional_funding_catalog_issue",
+      "owner": "ADR Centru",
+      "url": "https://www.adrcentru.ro/csf/catalogul-surselor-de-finantare-noiembrie-2026/",
+      "programmes": [
+        "multiple"
+      ],
+      "programme_family": "Multi-programme November 2026 funding discovery",
+      "source_families": [
+        "ROMANIA",
+        "ADR",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T2_OFFICIAL_REGIONAL_CATALOG",
+      "authority_scope": "CATALOG_DISCOVERY_ONLY",
+      "observation_state": "OFFICIAL_CATALOG_DISCOVERED_RAW_PENDING",
+      "publication_date_discovery": "2026-11-11",
+      "extract": [
+        "official_regional_catalog_discovery",
+        "exact_t1_programme_action_links",
+        "consultation_and_programming_discovery",
+        "call_state_conflict_signals"
+      ],
+      "material_fact_use": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "credentials_required": false,
+      "adapter_required": "ADR_CENTRU_CATALOG_T1_EXACT_ACTION_AND_MYSMIS_RECONCILE",
+      "note": "ADR Centru official November 2026 monthly funding-source catalogue, dated 11 November 2026. Discovery and cross-check only (T2): listed calls and consultations are NOT exact live opening authority. Every status, deadline, amount and eligibility claim requires current exact T1/T1B programme or MySMIS endpoint plus immutable original, SHA-256, fetched_at, parser_version, run_id and semantic reconciliation. Source raw receipt NOT YET ACQUIRED (web readback may return HTTP 403). Preserve previous July edition. No OPEN_CALL, LKG change, publication or distribution from this row."
     },
     {
       "id": "SRC-ADR-CENTRU-PR-ACTIONS",
