@@ -205,6 +205,17 @@ def test_visible_html_evidence_only():
         ('<div style="opacity:0!important">', '</div>'),
         ('<div style="opacity:0.0 ! important;display:block">', '</div>'),
         ('<div style="content-visibility:hidden">', '</div>'),
+        ('<div class="d-none">', '</div>'),
+        ('<div class="d-md-none">', '</div>'),
+        ('<div class="d-xxl-none">', '</div>'),
+        ('<div class="hidden">', '</div>'),
+        ('<div class="invisible">', '</div>'),
+        ('<div class="visually-hidden">', '</div>'),
+        ('<div class="sr-only">', '</div>'),
+        ('<div class="collapse">', '</div>'),
+        ('<div class="collapsing">', '</div>'),
+        ('<div class="tab-pane">', '</div>'),
+        ('<div class="d-block" class="d-sm-none">', '</div>'),
         ('<div popover>', '</div>'),
         ('<div popover="manual">', '</div>'),
         ('<textarea>', '</textarea>'),
@@ -264,6 +275,16 @@ def test_visible_html_evidence_only():
     )
     if module.parse_call_page(visible_details, authority_url=CALL1)["status"] != "Open":
         fail("explicitly open and visible details must remain usable")
+    # Known visible Bootstrap states remain usable. Hidden classes in separate
+    # attributes are still excluded by the adversarial table above.
+    for wrapper in ('class="collapse show"', 'class="tab-pane active show"',
+                    'class="d-block"', 'class="visible"'):
+        html = (
+            b'<html><body><h1>Call #1 Valid</h1><div '
+            + wrapper.encode() + b'>Call for projects Open</div></body></html>'
+        )
+        if module.parse_call_page(html, authority_url=CALL1)["status"] != "Open":
+            fail(f"visible CSS component unexpectedly suppressed: {wrapper}")
 
 
 
