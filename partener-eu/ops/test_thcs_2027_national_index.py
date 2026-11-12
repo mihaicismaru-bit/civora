@@ -57,12 +57,20 @@ def test():
     for html, why in bad:
         reject(lambda html=html: mod.validate_html(html, MIME), why)
     for css in ("hidden", 'class="d-md-none"', 'style="display:none"',
-                'aria-hidden="true"', 'class="visually-hidden"'):
+                'aria-hidden="true"', 'class="visually-hidden"',
+                'class="collapse"', 'class="collapsing"',
+                'class="tab-pane"'):
         tag = "<div " + css + ">" if css == "hidden" else "<div " + css + ">"
         hidden = (RAW.decode().replace(
             "<li>Transforming Health and Care Systems (THCS) Lansare: 16 Noiembrie 2026</li>",
             tag + "<li>Transforming Health and Care Systems (THCS) Lansare: 16 Noiembrie 2026</li></div>")).encode()
         reject(lambda h=hidden: mod.validate_html(h, MIME), "exact THCS")
+    for css in ('class="collapse show"', 'class="tab-pane active"'):
+        expanded = RAW.decode().replace(
+            "<li>Transforming Health and Care Systems (THCS) Lansare: 16 Noiembrie 2026</li>",
+            "<div " + css + "><li>Transforming Health and Care Systems (THCS) "
+            "Lansare: 16 Noiembrie 2026</li></div>").encode()
+        mod.validate_html(expanded, MIME)
     reject(lambda: mod.validate_html(RAW, "application/pdf"), "MIME")
     stamp = datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
     manifest = mod.build(RAW, MIME, stamp, "THCS-INDEX-HERMETIC")
