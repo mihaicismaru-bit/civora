@@ -925,6 +925,47 @@ def main():
     if "HTTP 403" not in (legacy.get("note") or "") or "MySMIS" not in (digital.get("note") or ""):
         fail("ADR Centre digital source must retain raw acquisition and review blockers")
 
+    # Smart-city 2.1.2 Apel 2 is a new exact official action discovery
+    # surfaced by the November ADR catalogue, but the submission window is
+    # FUTURE and the visible MySMIS string is only a partial prefix.
+    smart = by_id.get("SRC-PR-CENTRU-SMARTCITY-212-APEL2")
+    smart_url = (
+        "https://www.regiocentru.ro/actiuni/"
+        "2-1-2-platforma-regionala-pilot-de-open-inovation-in-domeniul-smart-city-apel-2/"
+    )
+    if not smart or smart.get("url") != smart_url:
+        fail("PR Centru 2.1.2 Apel 2 official exact action URL missing")
+    if (smart.get("tier"), smart.get("authority_scope"),
+            smart.get("observation_state"), smart.get("event_date_discovery")) != (
+                "T1", "EXACT_ACTION_DISCOVERY_ONLY",
+                "EXACT_ACTION_DISCOVERED_RAW_PENDING", "2026-10-29"):
+        fail("Smart-city Apel 2 promoted or lost its source-discovery lifecycle")
+    if (smart.get("action_identifier_discovery"),
+            smart.get("mysmis_identifier_discovery_hint"),
+            smart.get("mysmis_identifier_verification")) != (
+                "2.1.2 / Apel 2", "PRC/1257/PRC_P2/OP1",
+                "PARTIAL_PREFIX_ONLY_NOT_EXACT_CALL_ID"):
+        fail("Smart-city Apel 2 partial MySMIS hint laundered as a full identifier")
+    if smart.get("adapter_required") != "REGIOCENTRU_EXACT_ACTION_RECONCILE_V1":
+        fail("Smart-city Apel 2 omitted exact call/MySMIS semantic reconciliation")
+    if not {"ROMANIA", "ADR", "CALL_REGISTRY"}.issubset(
+            set(smart.get("source_families") or [])):
+        fail("Smart-city Apel 2 official regional source family missing")
+    if "future_submission_window_candidate" not in set(smart.get("extract") or []):
+        fail("Smart-city Apel 2 missing future-window discriminator")
+    if any(smart.get(field) is not False for field in (
+            "material_fact_use", "open_call_authorized",
+            "material_fact_publication_authorized")):
+        fail("Smart-city Apel 2 unauthorized OPEN_CALL/material fact promotion")
+    if any(field in smart for field in (
+            "status", "call_status", "open_at", "close_at", "deadline",
+            "budget", "budget_eur", "eligibility", "fetched_at", "raw_sha256",
+            "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+            "http_status")):
+        fail("Smart-city Apel 2 invented current facts or immutable raw receipt")
+    if "NO OPEN_CALL" not in (smart.get("note") or "").upper():
+        fail("Smart-city Apel 2 lost explicit non-OPEN gate")
+
     # PR Centru 3.3 municipal exact action + Annex 17 corrigendum: official
     # indexed readback is discovery, not immutable acquisition or OPEN_CALL.
     green_blue_pair = {
