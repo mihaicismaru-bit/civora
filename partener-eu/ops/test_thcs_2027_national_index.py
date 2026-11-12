@@ -35,6 +35,15 @@ def reject(fn, message):
 def test():
     mod.validate_registry()
     mod.validate_html(RAW, MIME)
+    # Historical THCS-2026 is allowed; exact THCS-2027 in any other
+    # lifecycle section must quarantine the index rather than validate it.
+    mod.validate_html(BASE.encode(), MIME)
+    for conflicting in (
+        RAW.replace(b"ERA4Health IICS4all 2027", b"THCS-2027"),
+        RAW.replace(b"AgData-2026", b"THCS-2027"),
+        RAW.replace(b"AgData-2026", b"Transforming Health and Care Systems (THCS)"),
+    ):
+        reject(lambda h=conflicting: mod.validate_html(h, MIME), "outside planned lifecycle")
     bad = [
         (RAW.replace(b"16 Noiembrie", b"19 Noiembrie"), "exact THCS"),
         (RAW.replace(b"Competi\xc8\x9bii \xc3\xaen preg\xc4\x83tire",
