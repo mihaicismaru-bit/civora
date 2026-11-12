@@ -1152,6 +1152,66 @@ def main():
     if len({url for _, _, url in audience_catalogues.values()}) != 4:
         fail("ADR November audience catalogues must have distinct exact URLs")
 
+    # EUI autumn 2026 and the continuously available reviewer pool are
+    # distinct NON-GRANT capacity-building opportunities. Neither can be
+    # counted as a project-financing OPEN_CALL, nor can the permanent pool
+    # extend the autumn city-under-review window.
+    eui_roles = {
+        "SRC-EU-EUI-PEER-REVIEWS-AUTUMN-2026": (
+            "https://www.urban-initiative.eu/capacity-building/peer-reviews/call-autumn2026",
+            "EXACT_CAPACITY_BUILDING_WINDOW_READBACK_RAW_PENDING",
+            "SRC-EU-EUI-PEER-REVIEWERS-PERMANENT-2026",
+            "https://connect.urban-initiative.eu/login",
+        ),
+        "SRC-EU-EUI-PEER-REVIEWERS-PERMANENT-2026": (
+            "https://www.urban-initiative.eu/capacity-building/peer-reviews/ongoing-call-peer-reviews",
+            "PERMANENT_PEER_REVIEWER_READBACK_RAW_PENDING",
+            "SRC-EU-EUI-PEER-REVIEWS-AUTUMN-2026",
+            "https://connect.urban-initiative.eu/capacity-building/peer-review-projectlist",
+        ),
+    }
+    for source_id, (url, state, pair, app_hint) in eui_roles.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"EUI capacity-building discovery missing: {source_id}")
+        if (row.get("url"), row.get("observation_state"),
+                row.get("paired_official_source_id"),
+                row.get("application_endpoint_discovery_hint")) != (
+                url, state, pair, app_hint):
+            fail(f"{source_id}: EUI autumn/permanent role or exact endpoint drift")
+        expected = {
+            "tier": "T1",
+            "class": "official_eui_capacity_building_application",
+            "authority_class": "T1_OFFICIAL_EUI_SECRETARIAT",
+            "authority_scope": "NON_GRANT_CAPACITY_BUILDING_APPLICATION_DISCOVERY_ONLY",
+            "material_fact_use": False,
+            "credentials_required": False,
+            "open_call_authorized": False,
+            "material_fact_publication_authorized": False,
+            "adapter_required": "EUI_PEER_REVIEWS_AUTUMN_PERMANENT_DISTINCT_STAGE_RECONCILE_V1",
+        }
+        if any(row.get(k) != v for k, v in expected.items()):
+            fail(f"{source_id}: EUI discovery promoted or bypassed reconciliation")
+        if row.get("programmes") != ["EU direct programmes"] or not {
+                "EU_DIRECT", "BRUSSELS", "CAPACITY_BUILDING", "NON_GRANT",
+                "DISCOVERY"}.issubset(set(row.get("source_families") or [])):
+            fail(f"{source_id}: EUI non-grant category/route was lost")
+        if any(k in row for k in (
+                "status", "call_status", "deadline", "budget", "budget_eur",
+                "eligibility", "open_at", "close_at", "fetched_at",
+                "raw_sha256", "semantic_sha256", "parser_version",
+                "run_id", "handoff_sha256", "http_status")):
+            fail(f"{source_id}: fabricated canonical fact or raw receipt")
+        note = (row.get("note") or "").lower()
+        if not all(s in note for s in ("not an investment grant", "immutable", "no open_call")):
+            fail(f"{source_id}: missing grant/receipt/open boundary")
+    if ("deadline_20261112_1200_CET_readback" not in
+            by_id["SRC-EU-EUI-PEER-REVIEWS-AUTUMN-2026"].get("extract", [])):
+        fail("EUI autumn 2026 call lost the specific 12-Nov CET distinction")
+    if "continuous_peer_reviewer_pool_discovery" not in (
+            by_id["SRC-EU-EUI-PEER-REVIEWERS-PERMANENT-2026"].get("extract", [])):
+        fail("EUI permanent individual role was conflated with autumn city intake")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
