@@ -19,6 +19,7 @@ on:
       - 'partener-eu/ops/test_source_registry_task_revert.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/eui_capacity_handoff.py'
       - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ingest/pddtj_t1_primary_acquire.py'
@@ -47,6 +48,7 @@ on:
       - 'partener-eu/ops/test_source_registry_task_revert.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/eui_capacity_handoff.py'
       - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ingest/pddtj_t1_primary_acquire.py'
@@ -107,6 +109,9 @@ jobs:
 
       - name: Regression — external source and future-programming taxonomy stays fail-closed
         run: python partener-eu/ops/test_source_registry_external_expansion.py
+
+      - name: Regression — EUI capacity-building SURFACEMC raw handoff is non-authorizing
+        run: python partener-eu/ingest/eui_capacity_handoff.py --self-test
 
       - name: Regression — PDDTJ delegated OI raw capture cannot authorize calls
         run: python partener-eu/ops/test_pddtj_oi_discovery_acquire.py
