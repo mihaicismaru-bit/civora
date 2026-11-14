@@ -464,9 +464,9 @@ def main():
         if "open_call" not in note or not (
                 "no open_call" in note or "cannot authorize open_call" in note):
             fail(f"{source_id}: lost explicit non-promotion boundary")
-    if "PROGRAMMING_PIPELINE" not in set(
-            by_id["SRC-PRC-151-INCUBATORS-RESIDENTS-CONSULT-20261113"].get("source_families") or []):
-        fail("1.5.1 consultation must not be treated as an active investment call")
+    families_151 = set(by_id["SRC-PRC-151-INCUBATORS-RESIDENTS-CONSULT-20261113"].get("source_families") or [])
+    if "CONSULTATION" not in families_151 or "PROGRAMMING_PIPELINE" in families_151:
+        fail("1.5.1 draft-guide consultation must be classified separately from future-programme pipeline")
 
     # EIT HEI 2026: official programme call operator + Romanian NCP information.
     # The NCP is NOT a national funder; web readback is NOT immutable source
