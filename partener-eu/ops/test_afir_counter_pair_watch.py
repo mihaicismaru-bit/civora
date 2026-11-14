@@ -142,7 +142,7 @@ def test_parse_and_reconcile():
     # Competing non-window facts prohibit the narrow explanation.
     altered_count = probe.reconcile(
         {"agency": agency_exhausted, "delegated": delegated_exhausted.replace(
-            b"NUMĂR DOSARE DEPUSE 65", b"NUMĂR DOSARE DEPUSE 66", 1
+            "NUMĂR DOSARE DEPUSE 65".encode("utf-8"), "NUMĂR DOSARE DEPUSE 66".encode("utf-8"), 1
         )}, 12
     )
     assert altered_count["components"]["SECTOR ZOOTEHNIC"]["delegated_session_window_review_reason"] == (
