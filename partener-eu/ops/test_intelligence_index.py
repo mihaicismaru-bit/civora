@@ -75,6 +75,12 @@ def main():
         assert index["summary"]["materialFactsAutopromoted"] == 0
         assert index["summary"]["recordCount"] == 3
         assert "MIPE_CORPUS" in index["summary"]["unavailableT1Sources"]
+        # A two-hour-old failed MIPE fetch is an observed heartbeat, not a
+        # two-hour-old verified official corpus. Never renew evidence age from LKG.
+        failed_mipe = next(row for row in index["sources"] if row["id"] == "MIPE_CORPUS")
+        assert failed_mipe["lastAttemptFreshness"]["status"] == "CURRENT"
+        assert failed_mipe["freshness"]["status"] == "UNKNOWN"
+        assert "MIPE_CORPUS" in index["summary"]["materialStaleOrUnknownSources"]
         material = next(row for row in index["records"] if row.get("materialChangeCandidate"))
         assert material["materialFactAction"] == "RESOLUTION_REQUIRED"
         assert material["publishMaterialFacts"] is False
@@ -114,6 +120,9 @@ def main():
         assert healthy_material["sources"][-1]["status"] == "DEGRADED"
         assert healthy_material["summary"]["materialResolutionTasksRequired"] == 0
         assert healthy_material["summary"]["materialStaleOrUnknownSources"] == []
+        healthy_mipe = next(row for row in healthy_material["sources"] if row["id"] == "MIPE_CORPUS")
+        assert healthy_mipe["lastAttemptFreshness"]["status"] == "CURRENT"
+        assert healthy_mipe["freshness"]["status"] == "CURRENT"
         assert healthy_material["summary"]["unavailableT1Sources"] == []
         assert healthy_material["summary"]["operationalUnavailableT1Sources"] == ["SRC-DISCOVERY-ONLY"]
         assert healthy_material["dataPlane"]["dependencyIsolation"]["blockedSourceIds"] == []
