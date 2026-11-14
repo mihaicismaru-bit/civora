@@ -63,7 +63,11 @@ const ambiguous = render({...current, calls: [
   {...current.calls[0], officialStatus:'DESCHIS', callBudgetRon:'999999999', entities:'888'},
   {...current.calls[0], officialStatus:'FINALIZAT', callBudgetRon:'1000000', entities:'5'}
 ]});
-assert.match(ambiguous.dossier, /Posibilă corespondență textuală MySMIS/);
+assert.match(ambiguous.dossier, /Corespondențe MySMIS ambigue/);
+assert.match(ambiguous.dossier, /2 linii vizibile/);
+assert.match(ambiguous.dossier, /data-cw3-mysmis-match="ambiguous"/);
+assert.doesNotMatch(ambiguous.dossier, /<h3>Stagii de practică pentru elevi<\/h3>/,
+  'An ambiguous title must not be presented as a selected candidate.');
 assert.doesNotMatch(ambiguous.dossier, /DESCHIS|FINALIZAT|999999999|1000000|888|cw3MySMISFacts/,
   'Ambiguous candidate row must never leak or attribute material official facts.');
 const aliasCandidate = render({ ...current, source: { ...current.source, canonicalUrl: otherOfficialUrl } }).dossier;

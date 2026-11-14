@@ -27,7 +27,7 @@ function similarity(a,b){const A=tokens(a),B=tokens(b);if(!A.size||!B.size)retur
 function matchCall(title,programme=''){
  const registry=D.mysmisRegistry;if(!registryCurrent(registry)||!registry.calls?.length)return null;
  const nt=norm(title),pf=family(programme);
- let best=null;
+ const candidates=[];
  for(const row of registry.calls){
   const nr=norm(row.call),rf=family(row.programme);
   if(pf&&rf&&pf!==rf)continue;
@@ -35,9 +35,14 @@ function matchCall(title,programme=''){
   let mode='TOKEN_MATCH';
   if(nt===nr){score=1;mode='EXACT_TITLE'}
   else if(Math.min(nt.length,nr.length)>=45&&(nt.includes(nr)||nr.includes(nt))){score=Math.max(score,.92);mode='TITLE_CONTAINMENT'}
-  if(!best||score>best.score)best={row,score,mode};
+  if(score>=.74)candidates.push({row,score,mode});
  }
- return best&&best.score>=.74?best:null;
+ if(!candidates.length)return null;
+ candidates.sort((a,b)=>b.score-a.score);
+ const best=candidates[0];
+ // Multiple equally strong text candidates must never select a single dossier link.
+ const ambiguityCount=candidates.filter(x=>Math.abs(x.score-best.score)<.001).length;
+ return {...best,ambiguityCount};
 }
 function stalePanel(r,evidence){
  const link=officialRegistryUrl(r.source?.canonicalUrl)?r.source.canonicalUrl:'https://resurse.mysmis2021.gov.ro'+MYSMIS_REPORT_PATH;
@@ -48,6 +53,11 @@ function stalePanel(r,evidence){
 }
 function snapshotPanel(){const r=D.mysmisRegistry;if(!r)return'';if(!registryCurrent(r))return stalePanel(r,false);return `<section class="cw3MySMISSnapshot" data-cw3-mysmis-snapshot><div><div class="eyebrow">Evidență directă MySMIS</div><h3>Registrul oficial verificat</h3><p>${esc(r.notice||'')}</p></div><div class="cw3MySMISMetrics"><span><b>${esc(r.validatedCallCount??'—')}</b><small>apeluri validate raportate</small></span><span><b>${esc(r.visibleRowCount??0)}</b><small>linii în snapshotul direct</small></span><span><b>${esc((r.explicitStatuses||[]).join(' · ')||'—')}</b><small>statusuri publicate literal</small></span></div><a href="${esc(r.source?.canonicalUrl)}" target="_blank" rel="noreferrer">Deschide registrul oficial ↗</a></section>`}
 function evidencePanel(title,programme){const r=D.mysmisRegistry;if(!r)return'';if(!registryCurrent(r))return stalePanel(r,true);const found=matchCall(title,programme);if(!found)return `<section class="cw3MySMISEvidence empty" data-cw3-mysmis-evidence><div class="eyebrow">Verificare directă MySMIS</div><h3>Nicio legătură exactă în snapshotul vizibil</h3><p>Apelul nu a putut fi legat cu suficientă încredere de una dintre liniile vizibile în snapshotul direct MySMIS. <b>Absența nu este dovadă că apelul nu există.</b> Verificarea ghidului și a înregistrării MySMIS rămâne necesară.</p><a href="${esc(r.source?.canonicalUrl)}" target="_blank" rel="noreferrer">Caută în registrul oficial ↗</a></section>`;
+ if(found.ambiguityCount>1){
+  // Do not arbitrarily pick the first of equally plausible official rows.
+  // Even the hint must stay unresolved until exact call-code reconciliation.
+  return `<section class="cw3MySMISEvidence empty" data-cw3-mysmis-evidence data-cw3-mysmis-match="ambiguous"><div class="eyebrow">Corespondențe MySMIS ambigue</div><h3>Mai multe apeluri pot corespunde acestui dosar</h3><p>${esc(found.ambiguityCount)} linii vizibile au aceeași potrivire textuală. Niciuna nu a fost selectată automat. Codul exact al apelului trebuie reconciliat înainte de a afișa statut, buget sau indicatori operaționali.</p><a href="${esc(r.source?.canonicalUrl)}" target="_blank" rel="noopener noreferrer">Verifică identificatorul exact în registrul oficial ↗</a></section>`;
+ }
  const x=found.row;
  // A programme/title similarity score is discovery, never an exact MySMIS
  // call identifier. Even EXACT_TITLE can collide across programmes/years.
