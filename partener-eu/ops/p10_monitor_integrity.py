@@ -69,7 +69,7 @@ def parse_utc(value: Any) -> dt.datetime | None:
     try:
         parsed = dt.datetime.fromisoformat(str(value).replace("Z", "+00:00"))
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+            return None  # An unzoned timestamp is not verified UTC source evidence.
         return parsed.astimezone(dt.timezone.utc)
     except Exception:
         return None
