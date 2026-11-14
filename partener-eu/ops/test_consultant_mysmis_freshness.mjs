@@ -52,8 +52,20 @@ function render(data) {
 
 const accepted = render(current);
 assert.match(accepted.snapshot, /993/);
-assert.match(accepted.dossier, /FINALIZAT/);
-assert.match(accepted.dossier, /1000000/);
+assert.match(accepted.dossier, /Posibilă corespondență textuală MySMIS/);
+assert.match(accepted.dossier, /Stagii de practică pentru elevi/);
+assert.match(accepted.dossier, /codului exact de apel/);
+assert.doesNotMatch(accepted.dossier, /FINALIZAT|1000000|cw3MySMISStatus|cw3MySMISFacts/,
+  'Title-only match is discovery; no status/budget/counters, even for an exact title.');
+// Two different official call rows can have identical titles and programme,
+// so their status and budget must not be projected onto a consultant dossier.
+const ambiguous = render({...current, calls: [
+  {...current.calls[0], officialStatus:'DESCHIS', callBudgetRon:'999999999', entities:'888'},
+  {...current.calls[0], officialStatus:'FINALIZAT', callBudgetRon:'1000000', entities:'5'}
+]});
+assert.match(ambiguous.dossier, /Posibilă corespondență textuală MySMIS/);
+assert.doesNotMatch(ambiguous.dossier, /DESCHIS|FINALIZAT|999999999|1000000|888|cw3MySMISFacts/,
+  'Ambiguous candidate row must never leak or attribute material official facts.');
 assert.match(render({ ...current, source: { ...current.source, canonicalUrl: otherOfficialUrl } }).dossier, /FINALIZAT/);
 
 for (const [name, variant] of Object.entries({
