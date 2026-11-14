@@ -4,6 +4,31 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ingest/thcs_2027_national_index.py'
+      - 'partener-eu/ops/test_thcs_2027_national_index.py'
+      - 'partener-eu/ingest/amif_impact_official_receipts.py'
+      - 'partener-eu/ingest/water4all_2026_official_pair.py'
+      - 'partener-eu/ingest/water4all_2026_primary_documents.py'
+      - 'partener-eu/ingest/water4all_2026_romania_rules.py'
+      - 'partener-eu/ops/test_water4all_2026_romania_rules.py'
+      - 'partener-eu/ingest/water4all_2026_epss_gateway.py'
+      - 'partener-eu/ops/test_water4all_2026_epss_gateway.py'
+      - 'partener-eu/ops/test_water4all_2026_primary_documents.py'
+      - 'partener-eu/ops/test_water4all_2026_official_pair.py'
+      - 'partener-eu/ops/test_amif_impact_official_receipts.py'
+      - 'partener-eu/ingest/rch_2027_raw_acquire.py'
+      - 'partener-eu/ingest/rch_2027_paired_handoff.py'
+      - 'partener-eu/ingest/rch_2027_epss_gateway.py'
+      - 'partener-eu/ingest/rch_2027_uefiscdi_news.py'
+      - 'partener-eu/ops/test_rch_2027_epss_gateway.py'
+      - 'partener-eu/ops/test_rch_2027_uefiscdi_news.py'
+      - 'partener-eu/ops/test_rch_2027_raw_acquire.py'
+      - 'partener-eu/ops/test_rch_2027_paired_handoff.py'
+      - 'partener-eu/validation/discovery/rch-2027-romania-semantic-review-20261108.json'
+      - 'partener-eu/ingest/mff_2028_source_registry.json'
+      - 'partener-eu/ingest/mff_2028_probe.py'
+      - 'partener-eu/ops/test_mff_2028_probe.py'
+      - '.github/workflows/partener-eu-mff-2028.yml'
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ingest/data_plane_contract.json'
       - 'partener-eu/ingest/funding_tenders_api.py'
@@ -20,15 +45,25 @@ on:
       - 'partener-eu/ops/p10_validate.py'
       - 'partener-eu/ops/test_p10_policy_regression.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
+      - 'partener-eu/ops/test_edrive_consultation_discovery.py'
+      - 'partener-eu/validation/discovery/edrive-guides-consultation-20261109.json'
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
       - 'partener-eu/ops/test_source_registry_alias_fallback.py'
       - 'partener-eu/ops/test_source_registry_external_expansion.py'
+      - 'partener-eu/ingest/pddtj_oi_discovery_acquire.py'
+      - 'partener-eu/ops/test_pddtj_oi_discovery_acquire.py'
       - 'partener-eu/ops/test_interreg_rohu_pipeline_split.py'
+      - 'partener-eu/ingest/interreg_programming_intelligence.py'
+      - 'partener-eu/ingest/interreg_programming_live_fetch.py'
+      - 'partener-eu/ops/test_interreg_programming_intelligence.py'
+      - 'partener-eu/ops/test_interreg_programming_live_fetch.py'
       - 'partener-eu/ops/test_funding_tenders_structured_adapter.py'
       - 'partener-eu/ops/test_funding_tenders_live_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_calls.py'
       - 'partener-eu/ops/test_eea_civil_society_fetch.py'
       - 'partener-eu/ops/test_eea_civil_society_reconcile.py'
+      - 'partener-eu/web/home-concierge-vnext.js'
+      - 'partener-eu/ops/test_home_concierge_freshness.mjs'
       - 'partener-eu/ops/test_regiocentru_actions_fetch.py'
       - '.github/workflows/partener-eu-source-registry-ci.yml'
   workflow_dispatch:
@@ -68,10 +103,35 @@ jobs:
       - name: Validate registry JSON and adapter syntax
         run: |
           python -m json.tool partener-eu/ingest/source_registry.json >/dev/null
+          python -m json.tool partener-eu/ingest/mff_2028_source_registry.json >/dev/null
           python -m json.tool partener-eu/ingest/data_plane_contract.json >/dev/null
           python -m json.tool partener-eu/ingest/regiocentru_actions_source.json >/dev/null
           python -m json.tool partener-eu/ops/sources.json >/dev/null
           python -m py_compile partener-eu/ingest/source_registry_probe.py
+          python -m py_compile partener-eu/ingest/amif_impact_official_receipts.py
+          python -m py_compile partener-eu/ingest/water4all_2026_official_pair.py
+          python -m py_compile partener-eu/ingest/water4all_2026_primary_documents.py
+          python -m py_compile partener-eu/ingest/water4all_2026_romania_rules.py
+          python -m py_compile partener-eu/ops/test_water4all_2026_romania_rules.py
+          python -m py_compile partener-eu/ingest/water4all_2026_epss_gateway.py
+          python -m py_compile partener-eu/ops/test_water4all_2026_epss_gateway.py
+          python -m py_compile partener-eu/ops/test_water4all_2026_primary_documents.py
+          python -m py_compile partener-eu/ops/test_water4all_2026_official_pair.py
+          python -m py_compile partener-eu/ingest/thcs_2027_preannouncement_pair.py
+          python -m py_compile partener-eu/ingest/thcs_2027_national_index.py
+          python -m py_compile partener-eu/ops/test_thcs_2027_national_index.py
+          python -m py_compile partener-eu/ops/test_thcs_2027_preannouncement_pair.py
+          python -m py_compile partener-eu/ops/test_amif_impact_official_receipts.py
+          python -m py_compile partener-eu/ingest/rch_2027_raw_acquire.py
+          python -m py_compile partener-eu/ingest/rch_2027_paired_handoff.py
+          python -m py_compile partener-eu/ingest/rch_2027_epss_gateway.py
+          python -m py_compile partener-eu/ingest/rch_2027_uefiscdi_news.py
+          python -m py_compile partener-eu/ops/test_rch_2027_uefiscdi_news.py
+          python -m py_compile partener-eu/ops/test_rch_2027_epss_gateway.py
+          python -m py_compile partener-eu/ops/test_rch_2027_paired_handoff.py
+          python -m py_compile partener-eu/ops/test_rch_2027_raw_acquire.py
+          python -m py_compile partener-eu/ingest/mff_2028_probe.py
+          python -m py_compile partener-eu/ops/test_mff_2028_probe.py
           python -m py_compile partener-eu/ingest/funding_tenders_api.py
           python -m py_compile partener-eu/ingest/funding_tenders_fetch.py
           python -m py_compile partener-eu/ingest/eea_civil_society_calls.py
@@ -84,6 +144,8 @@ jobs:
           python -m py_compile partener-eu/ops/p10_validate.py
           python -m py_compile partener-eu/ops/test_p10_policy_regression.py
           python -m py_compile partener-eu/ops/test_source_registry_external_expansion.py
+          python -m py_compile partener-eu/ingest/pddtj_oi_discovery_acquire.py
+          python -m py_compile partener-eu/ops/test_pddtj_oi_discovery_acquire.py
           python -m py_compile partener-eu/ops/test_interreg_rohu_pipeline_split.py
           python -m py_compile partener-eu/ops/test_funding_tenders_structured_adapter.py
           python -m py_compile partener-eu/ops/test_funding_tenders_live_fetch.py
@@ -95,8 +157,14 @@ jobs:
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
 
+      - name: Validate official MFF October stage watches and immutable raw acquisition
+        run: python partener-eu/ops/test_mff_2028_probe.py
+
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
+
+      - name: Lock e-DRIVE consultation to discovery-only, not OPEN_CALL
+        run: python partener-eu/ops/test_edrive_consultation_discovery.py
 
       - name: Validate official alias transport fallback
         run: python partener-eu/ops/test_source_registry_alias_fallback.py
@@ -107,8 +175,163 @@ jobs:
       - name: Validate EU/EEA/Interreg source and programming taxonomy
         run: python partener-eu/ops/test_source_registry_external_expansion.py
 
+      - name: Verify paired AMIF IMPACT Lot 3 official raw/replay contract
+        run: python partener-eu/ops/test_amif_impact_official_receipts.py
+
+      - name: Acquire MAI amendment and DG HOME primary PDF as paired non-authorizing evidence
+        id: amif_impact_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/amif_impact_official_receipts.py \
+            --out "/tmp/partener-amif-impact-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/amif_impact_official_receipts.py \
+            --replay-dir "/tmp/partener-amif-impact-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine unavailable or unreconciled AMIF original documents
+        if: steps.amif_impact_live.outcome == 'failure'
+        run: |
+          echo 'AMIF_IMPACT_PAIR_RAW_PENDING / FAIL_CLOSED / NO_OPEN_CALL / NO_PUBLICATION'
+          python partener-eu/ops/test_amif_impact_official_receipts.py
+
+      - name: Upload immutable paired AMIF originals and handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-amif-impact-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-amif-impact-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Validate Water4All stage-specific paired raw/replay contract
+        run: python partener-eu/ops/test_water4all_2026_official_pair.py
+
+      - name: Acquire exact Water4All 2026 European and Romanian official HTML (non-authorizing)
+        id: water4all_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/water4all_2026_official_pair.py \
+            --out "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/water4all_2026_official_pair.py \
+            --replay-dir "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine unavailable Water4All original or changed stage markers
+        if: steps.water4all_live.outcome == 'failure'
+        run: |
+          echo 'WATER4ALL_2026_PAIRED_RAW_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+          python partener-eu/ops/test_water4all_2026_official_pair.py
+
+      - name: Upload immutable Water4All 2026 official pair and evidence manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-water4all-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-water4all-2026-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Verify Water4All 2026 current EPSS gateway contract and stale-PDF-link rejection
+        run: python partener-eu/ops/test_water4all_2026_epss_gateway.py
+
+      - name: Acquire source-bound current Water4All EPSS public login (never OPEN)
+        id: water4all_epss_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/water4all_2026_epss_gateway.py \
+            --source-dir "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --out "/tmp/partener-water4all-epss-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/water4all_2026_epss_gateway.py \
+            --source-dir "/tmp/partener-water4all-2026-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --replay-dir "/tmp/partener-water4all-epss-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine EPSS drift, unverified gateway or missing operator original
+        if: steps.water4all_epss_live.outcome == 'failure'
+        run: echo 'WATER4ALL_EPSS_RAW_PENDING / OLD_PDF_ENDPOINT_NOT_CANONICAL / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Upload separate immutable Water4All current EPSS login receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-water4all-epss-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-water4all-epss-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Verify Water4All 2026 primary PDF immutable handoff and fail-closed replay
+        run: python partener-eu/ops/test_water4all_2026_primary_documents.py
+
+      - name: Acquire official Water4All 2026 call and national-regulations PDFs (non-authorizing)
+        id: water4all_docs_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/water4all_2026_primary_documents.py \
+            --out "/tmp/partener-water4all-docs-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/water4all_2026_primary_documents.py \
+            --replay-dir "/tmp/partener-water4all-docs-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine unacquired Water4All primary PDFs
+        if: steps.water4all_docs_live.outcome == 'failure'
+        run: echo 'WATER4ALL_2026_PRIMARY_PDFS_RAW_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Upload immutable Water4All 2026 primary PDF originals and manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-water4all-docs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-water4all-docs-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Validate Water4All 2026 Romania annex extraction scope hermetically
+        run: python partener-eu/ops/test_water4all_2026_romania_rules.py
+
+      - name: Install pinned PDF reader for source-bound Romania annex candidate
+        run: |
+          printf '%s\n' 'pypdf==6.3.0 --hash=sha256:2d5f9741e851e378908692d571374b3cbd94582fdd1c740fcf7c029ec35ac0e6' | python -m pip install --disable-pip-version-check --only-binary=:all: --no-deps --require-hashes -r /dev/stdin
+
+      - name: Derive quarantined Romania rules candidate from immutable national-regulations PDF
+        id: water4all_romania_candidate
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/water4all_2026_romania_rules.py \
+            --source-dir "/tmp/partener-water4all-docs-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --out "/tmp/partener-water4all-romania-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/water4all_2026_romania_rules.py \
+            --source-dir "/tmp/partener-water4all-docs-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --replay-dir "/tmp/partener-water4all-romania-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine missing or drifted Romanian annex PDF semantics
+        if: steps.water4all_romania_candidate.outcome == 'failure'
+        run: echo 'WATER4ALL_ROMANIA_2026_NATIONAL_RULES_CANDIDATE_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Upload source-bound non-authorizing Water4All Romania annex candidate
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-water4all-romania-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-water4all-romania-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Prove PDDTJ delegated OI original-byte handoff remains non-authorizing
+        run: python partener-eu/ops/test_pddtj_oi_discovery_acquire.py
+
+      - name: Validate RCH 2027 official original-byte handoff contract
+        run: |
+          python partener-eu/ops/test_rch_2027_raw_acquire.py
+          python partener-eu/ops/test_rch_2027_paired_handoff.py
+          python partener-eu/ops/test_rch_2027_epss_gateway.py
+          python partener-eu/ops/test_rch_2027_uefiscdi_news.py
+
       - name: Validate ROHU current versus future programming lifecycle split
         run: python partener-eu/ops/test_interreg_rohu_pipeline_split.py
+
+      - name: Validate Interreg named-month consultation windows and acquisition isolation
+        run: |
+          python partener-eu/ops/test_interreg_programming_intelligence.py
+          python partener-eu/ops/test_interreg_programming_live_fetch.py
 
       - name: Validate Funding & Tenders structured normalization
         run: python partener-eu/ops/test_funding_tenders_structured_adapter.py
@@ -124,6 +347,11 @@ jobs:
 
       - name: Validate EEA Civil Society Fund semantic reconciliation
         run: python partener-eu/ops/test_eea_civil_society_reconcile.py
+
+      - name: Validate active homepage PREPARE/CONSULTATION freshness
+        run: |
+          node --check partener-eu/web/home-concierge-vnext.js
+          node partener-eu/ops/test_home_concierge_freshness.mjs
 
       - name: Validate EEA Civil Society Fund canonical staging admission
         working-directory: partener-eu/p11
@@ -211,4 +439,170 @@ jobs:
           name: partener-regiocentru-actions-live-evidence
           path: /tmp/regiocentru-actions
           retention-days: 7
+          if-no-files-found: warn
+
+      - name: Capture RCH 2027 official paired source originals (acquisition only)
+        id: rch_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --output-dir /tmp/rch-2027-call1-evidence \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --documents \
+            --output-dir /tmp/rch-2027-call1-evidence \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/rch_2027_paired_handoff.py \
+            --seal --evidence-dir /tmp/rch-2027-call1-evidence
+
+      - name: Verify RCH 2027 immutable raw replay without publishing
+        if: steps.rch_live.outcome == 'success'
+        run: |
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --replay-dir /tmp/rch-2027-call1-evidence
+          python partener-eu/ingest/rch_2027_raw_acquire.py \
+            --documents \
+            --replay-dir /tmp/rch-2027-call1-evidence
+          python partener-eu/ingest/rch_2027_paired_handoff.py \
+            --replay --evidence-dir /tmp/rch-2027-call1-evidence
+
+      - name: Fail closed on RCH 2027 live transport loss
+        if: steps.rch_live.outcome == 'failure'
+        run: |
+          echo 'RCH_OFFICIAL_TRANSPORT_DEGRADED / RAW_HANDOFF_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+          test -f partener-eu/validation/discovery/rch-2027-call1-20261108.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('partener-eu/validation/discovery/rch-2027-call1-20261108.json').read_text())
+          assert d['publish_authorized'] is False and d['open_call_authorized'] is False
+          assert d['observation_state']=='OFFICIAL_MULTI_SOURCE_READBACK_RAW_PENDING'
+          PY
+
+      - name: Acquire official-linked EPSS public Call 1 login gateway (not submission authority)
+        id: rch_epss_live
+        if: steps.rch_live.outcome == 'success'
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/rch_2027_epss_gateway.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence \
+            --capture-run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Replay EPSS gateway linked to immutable five-source receipts
+        if: steps.rch_epss_live.outcome == 'success'
+        run: |
+          python partener-eu/ingest/rch_2027_epss_gateway.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence --replay
+
+      - name: Report EPSS gateway degraded without granting live submission authority
+        if: steps.rch_epss_live.outcome == 'failure'
+        run: |
+          echo 'EPSS_GATEWAY_UNVERIFIED / RCH_ORIGINALS_PRESERVED / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Capture UEFISCDI RCH secondary news without granting Romanian eligibility
+        id: rch_uefiscdi_news
+        if: steps.rch_live.outcome == 'success'
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/rch_2027_uefiscdi_news.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence \
+            --capture-run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/rch_2027_uefiscdi_news.py \
+            --evidence-dir /tmp/rch-2027-call1-evidence --replay
+
+      - name: Quarantine secondary UEFISCDI fetch failure
+        if: steps.rch_uefiscdi_news.outcome == 'failure'
+        run: |
+          echo 'UEFISCDI_SECONDARY_RAW_DEGRADED / ROMANIA_ANNEX_I_STILL_CANONICAL / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Preserve original RCH 2027 raw bytes and signed handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-rch-2027-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/rch-2027-call1-evidence
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Validate AFIR DR-31 consultative-guide identity and immutable replay
+        run: python partener-eu/ops/test_afir_dr31_consultation_acquire.py
+
+      - name: Acquire paired AFIR DR-31 official consultation originals (never OPEN)
+        id: afir_dr31_consultation_live
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/afir_dr31_consultation_acquire.py \
+            --out "/tmp/partener-afir-dr31-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/afir_dr31_consultation_acquire.py \
+            --replay-dir "/tmp/partener-afir-dr31-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine AFIR DR-31 missing or changed official consultation source
+        if: steps.afir_dr31_consultation_live.outcome == 'failure'
+        run: echo 'AFIR_DR31_CONSULTATION_RAW_PENDING / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Preserve AFIR DR-31 immutable consultation originals and manifest
+        if: steps.afir_dr31_consultation_live.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-afir-dr31-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-afir-dr31-${{ github.run_id }}-${{ github.run_attempt }}
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Verify independent UEFISCDI THCS-2027 planned-index receipt fails closed
+        run: python partener-eu/ops/test_thcs_2027_national_index.py
+
+      - name: Acquire exact UEFISCDI planned index as distinct non-authorizing raw evidence
+        id: thcs_index_live
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          python partener-eu/ingest/thcs_2027_national_index.py \
+            --out "/tmp/partener-thcs-index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/thcs_2027_national_index.py \
+            --replay-dir "/tmp/partener-thcs-index-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --require-verified
+
+      - name: Quarantine THCS index lifecycle drift without overriding national detail
+        if: steps.thcs_index_live.outcome == 'failure'
+        run: echo 'THCS_INDEX_PLANNED_RAW_PENDING / NATIONAL_DETAIL_STILL_QUARANTINED / NO_OPEN_CALL'
+
+      - name: Preserve separate immutable UEFISCDI index discovery original
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-thcs-national-index-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-thcs-index-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
+          if-no-files-found: warn
+
+      - name: Validate THCS 2027 prelaunch paired evidence stays PROGRAMMING_PIPELINE
+        run: python partener-eu/ops/test_thcs_2027_preannouncement_pair.py
+
+      - name: Acquire THCS 2027 official operator and UEFISCDI originals without OPEN authorization
+        id: thcs_2027_live
+        continue-on-error: true
+        run: |
+          python partener-eu/ingest/thcs_2027_preannouncement_pair.py \
+            --out "/tmp/partener-thcs-2027-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" \
+            --run-id "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          python partener-eu/ingest/thcs_2027_preannouncement_pair.py \
+            --replay-dir "/tmp/partener-thcs-2027-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+
+      - name: Quarantine THCS 2027 preannouncement transport, stage or identity drift
+        if: steps.thcs_2027_live.outcome == 'failure'
+        run: echo 'THCS_2027_PAIRED_RAW_PENDING / PROGRAMMING_PIPELINE / NO_OPEN_CALL / NO_PUBLICATION'
+
+      - name: Preserve THCS 2027 paired raw originals and immutable handoff
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: partener-thcs-2027-raw-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/partener-thcs-2027-${{ github.run_id }}-${{ github.run_attempt }}
+          retention-days: 14
           if-no-files-found: warn

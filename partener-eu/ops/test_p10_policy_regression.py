@@ -12,6 +12,12 @@ WORKFLOWS = REPO / ".github" / "workflows"
 validation = (WORKFLOWS / "partener-eu-validation.yml").read_text(encoding="utf-8")
 peo_workflow = (WORKFLOWS / "partener-eu-peo-calendar.yml").read_text(encoding="utf-8")
 pages_workflow = (WORKFLOWS / "partener-eu-pages.yml").read_text(encoding="utf-8")
+source_registry_workflow = (WORKFLOWS / "partener-eu-source-registry.yml").read_text(encoding="utf-8")
+mipe_nas_workflow = (WORKFLOWS / "partener-eu-mipe-ro-crawl-v3.yml").read_text(encoding="utf-8")
+mipe_ingest_workflow = (WORKFLOWS / "partener-eu-mipe-ingest.yml").read_text(encoding="utf-8")
+afir_workflow = (WORKFLOWS / "partener-eu-afir-ingest.yml").read_text(encoding="utf-8")
+decision_workflow = (WORKFLOWS / "partener-eu-decision-products.yml").read_text(encoding="utf-8")
+mff_workflow = (WORKFLOWS / "partener-eu-mff-2028.yml").read_text(encoding="utf-8")
 auto_deploy_path = WORKFLOWS / "partener-eu-auto-deploy.yml"
 go_live_workflow = (WORKFLOWS / "partener-eu-go-live.yml").read_text(encoding="utf-8")
 tasks = (PARTENER / "ops" / "p10_resolution_tasks.py").read_text(encoding="utf-8")
@@ -40,8 +46,27 @@ for marker in [
     if marker not in validation:
         errors.append(f"production validation orchestration missing: {marker}")
 
-if "cron: '45 * * * *'" not in validation:
-    errors.append("production validation is not scheduled hourly at canonical :45")
+hourly_slots = [
+    ("PEO Calendar", peo_workflow, "2 * * * *"),
+    ("Verified Source Registry", source_registry_workflow, "5 * * * *"),
+    ("MFF 2028-2034", mff_workflow, "10 * * * *"),
+    ("MIPE NAS Crawl v3", mipe_nas_workflow, "15 * * * *"),
+    ("MIPE Ingestion", mipe_ingest_workflow, "20 * * * *"),
+    ("AFIR Ingestion", afir_workflow, "30 * * * *"),
+    ("Decision Products", decision_workflow, "35 * * * *"),
+    ("Pages", pages_workflow, "45 * * * *"),
+    ("Production Validation", validation, "55 * * * *"),
+]
+for workflow_name, workflow_text, cron in hourly_slots:
+    if f"cron: '{cron}'" not in workflow_text:
+        errors.append(f"{workflow_name} is not scheduled hourly at canonical cron {cron}")
+# The MFF source monitor has a contents:write ledger step. A PR branch push or
+# manual workflow_dispatch on a non-main ref must never reset and push to main.
+if "  push:\n    branches: [main]\n" not in mff_workflow:
+    errors.append("MFF source monitor can be triggered from a non-main branch")
+if ("github.repository == 'mihaicismaru-bit/civora'" not in mff_workflow
+        or "github.ref == 'refs/heads/main'" not in mff_workflow):
+    errors.append("MFF source monitor main-only ledger writer guard missing")
 if "ACTIVE_HOURLY_PLUS_WORKFLOW_RUN_MONITOR_TRIGGERS" not in acceptance:
     errors.append("P10 acceptance contract does not record hourly autonomous validation")
 
@@ -100,6 +125,62 @@ def has_exact_yaml_scalar(workflow: str, key: str, value: str) -> bool:
         rf"(?m)^[ \\t]*{re.escape(key)}:[ \\t]*{re.escape(value)}[ \\t]*(?:#.*)?$",
         workflow,
     ))
+
+# Hourly :15 NAS acquisition has a 100-minute job bound (80-minute crawler).
+# GitHub must serialize, not cancel an active collection when the next hour ticks.
+# A cancelled job produces no immutable SURFACEMC handoff for PARTENER Engine.
+if not has_exact_yaml_scalar(mipe_nas_workflow, "group", "partener-eu-mipe-ro-crawl-v3"):
+    errors.append("MIPE NAS acquisition does not use its dedicated single-run lock")
+if not has_exact_yaml_scalar(mipe_nas_workflow, "cancel-in-progress", "false"):
+    errors.append("hourly MIPE NAS schedule can cancel in-flight acquisition before handoff")
+
+# Verified Registry is a single, serialized hourly source-health/acquisition job.
+# 2026-11-10 exact-head run 42876369268 spent 10m54s in 68 source probes,
+# then reached its old 12m job timeout before MIPE T1 and Interreg artifacts.
+# Keep a strict sub-hour bound while preserving time for raw handoff/replay.
+if not has_exact_yaml_scalar(source_registry_workflow, "group", "partener-eu-source-registry"):
+    errors.append("Verified Source Registry lost its single-run source acquisition lock")
+if not has_exact_yaml_scalar(source_registry_workflow, "cancel-in-progress", "false"):
+    errors.append("Verified Source Registry may cancel an in-flight immutable handoff")
+registry_budget = re.search(r"(?m)^    timeout-minutes: (\d+)\s*$", source_registry_workflow)
+if not registry_budget or not 25 <= int(registry_budget.group(1)) <= 45:
+    errors.append("Verified Source Registry needs a bounded 25-45m acquisition/replay budget")
+
+
+# Source-health persistence must not starve when optional per-family
+# Interreg retrieval fails after a verified, non-authorizing health probe.
+# Preserve exact-head CI and prohibit writing on pull-request checkouts.
+source_health_chain = [
+    "      - name: Probe classified official sources without changing facts",
+    "        id: source_health_probe",
+    "      - name: Validate source-health provenance and fail-closed ledger before enrichment",
+    "        id: source_health_gate",
+    "      - name: Capture PDDTJ delegated OI HTML originals (discovery only)",
+]
+if not all(anchor in source_registry_workflow for anchor in source_health_chain):
+    errors.append("Verified Source Registry lost its independent source-health verification chain")
+elif [source_registry_workflow.index(anchor) for anchor in source_health_chain] != sorted(
+    source_registry_workflow.index(anchor) for anchor in source_health_chain
+):
+    errors.append("Source-health gate must precede optional enrichment")
+persist_guard = (
+    "if: ${{ always() && github.event_name != 'pull_request' "
+    "&& steps.source_health_probe.outcome == 'success' "
+    "&& steps.source_health_gate.outcome == 'success' }}"
+)
+if persist_guard not in source_registry_workflow:
+    errors.append("Verified source-health persistence can be skipped by optional enrichment failure")
+for required in (
+    "if x.get('semantic_hash_changed') and x.get('material_fact_use')",
+    "x.get('publish_material_fact_update') is not False",
+    "x.get('resolution_task_required')",
+    "x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL'",
+):
+    health_step = source_registry_workflow.split(
+        "      - name: Validate source-health provenance and fail-closed ledger before enrichment", 1
+    )[-1].split("      - name: Capture PDDTJ delegated OI HTML originals", 1)[0]
+    if required not in health_step:
+        errors.append(f"Source-health independent gate lost safety invariant: {required}")
 
 for workflow_name, workflow in [
     ("PARTENER.EU Pages", pages_workflow),

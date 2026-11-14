@@ -20,33 +20,135 @@ import json
 from pathlib import Path
 import re
 import ssl
+import unicodedata
 import urllib.request
+from urllib.parse import urlsplit
 from typing import Any
 
-from interreg_programming_intelligence import normalize_programming_observation
+from interreg_programming_intelligence import OFFICIAL_HOSTS, normalize_programming_observation
 
 ROOT = Path(__file__).resolve().parents[2]
 REGISTRY_PATH = ROOT / "partener-eu" / "ingest" / "source_registry.json"
-SCHEMA = "PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V1"
+SCHEMA = "PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V2"
+LEGACY_SCHEMA = "PARTENER_EU_INTERREG_PROGRAMMING_LIVE_EVIDENCE_V1"
+# Closed provenance schema: forged convenience fields cannot grant publication
+# authority just because a downstream reader trusts an evidence manifest.
+ENVELOPE_KEYS = frozenset({
+    "schema", "created_at", "run_id", "source_count", "fetch_pass",
+    "fetch_fail", "observation_states", "publication_effect",
+    "canonical_corpus_mutation", "publish_authorized", "rows",
+})
+ROW_COMMON_KEYS = frozenset({
+    "source_id", "source_owner", "registered_url", "programme",
+    "attempted_at", "fetched_at", "run_id", "publication_effect", "publish_authorized",
+    "material_fact_use", "fetch_status",
+})
+ROW_PASS_KEYS = ROW_COMMON_KEYS | {
+    "raw_evidence_file", "http_status", "content_type", "final_url",
+    "bytes", "raw_hash", "normalized",
+}
+ROW_FAIL_KEYS = ROW_COMMON_KEYS | {"error_type", "error"}
+# Old V1 receipts are immutable archival evidence: their failed-row fetched_at
+# was a failure-observation time, NEVER proof of original document acquisition.
+LEGACY_ROW_PASS_KEYS = ROW_PASS_KEYS - {"attempted_at"}
+LEGACY_ROW_FAIL_KEYS = ROW_FAIL_KEYS - {"attempted_at"}
+WORKSHOPS_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-WORKSHOPS-NOV2026"
+# Workshop dates are separate from the registration deadline. The official
+# article's registration clause changed from 28 October to 20 November 2026;
+# preserve replay of both already-observed original revisions, but do not
+# infer a funding call, open registration, or a material publication right.
+WORKSHOPS_IDENTITY_TERMS = ("2028-2034", "17 noiembrie 2026", "20 noiembrie 2026")
+ROHU_SURVEY_SOURCE_ID = "SRC-INTERREG-ROHU-2028-2034-SURVEY-OCT2026"
+ROHU_SURVEY_IDENTITY_TERMS = ("2028-2034", "sondaj", "analiza teritorial", "5 octombrie", "30 noiembrie 2026")
 USER_AGENT = "PARTENER.EU-Interreg-Programming/1.0"
 MAX_BYTES = 2_000_000
 TIMEOUT_SECONDS = 25
 PROGRAMMING_EXTRACT_KEYS = {"future_programming_consultations", "future_programming_updates"}
 
 
+# Only visible article prose can establish official topic and date identity.
+# Head metadata, template fragments and hidden UI text are not evidence.
+# Hidden-by-default browser containers must not supply call/programming identity.
+# A closed <details> also hides its body (we conservatively exclude summary).
+_HIDDEN_TAGS = frozenset({
+    "head", "script", "style", "noscript", "svg", "template",
+    "dialog", "datalist", "select", "textarea", "canvas", "iframe",
+})
+_VOID_TAGS = frozenset({
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "param", "source", "track", "wbr",
+})
+# A class-hidden official template must not supply programming identity. Since
+# external CSS/media queries cannot be attested from a static raw HTML capture,
+# ambiguous responsive-hidden nodes are treated conservatively as invisible.
+_HIDDEN_CLASSES = frozenset({
+    "d-none", "hidden", "visually-hidden", "sr-only", "screen-reader-text",
+    # Bootstrap breakpoint variants are hidden at some viewport sizes. Static
+    # raw HTML cannot attest which CSS viewport rendered the claim: do not
+    # let a responsive-only duplicate establish an official source identity.
+    "d-sm-none", "d-md-none", "d-lg-none", "d-xl-none", "d-xxl-none",
+})
+
+
 class _VisibleText(HTMLParser):
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
+        self._elements: list[tuple[str, bool]] = []
         self._hidden_depth = 0
         self.parts: list[str] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag.lower() in {"script", "style", "noscript", "svg"}:
-            self._hidden_depth += 1
+        tag = tag.lower()
+        # HTML parsers/browsers may honor the FIRST duplicate attribute,
+        # while dict comprehensions silently keep the LAST. Ambiguous
+        # visibility metadata must never supply official article identity.
+        attributes: dict[str, str] = {}
+        duplicate_visibility = False
+        for key, value in attrs:
+            name = key.lower()
+            if name in attributes and name in {"class", "style", "aria-hidden", "hidden", "inert"}:
+                duplicate_visibility = True
+            attributes.setdefault(name, value or "")
+        style = re.sub(r"\s+", "", attributes.get("style", "").casefold())
+        classes = set(attributes.get("class", "").casefold().split())
+        hidden = (
+            duplicate_visibility
+            or bool(classes & _HIDDEN_CLASSES)
+            or tag in _HIDDEN_TAGS
+            or (tag == "details" and "open" not in attributes)
+            # Native popovers are hidden until activated by the browser.
+            # Static official-page extraction cannot attest that activation.
+            or "popover" in attributes
+            or "hidden" in attributes
+            or "inert" in attributes
+            or attributes.get("aria-hidden", "").strip().casefold() == "true"
+            or "display:none" in style
+            or "visibility:hidden" in style
+            or "visibility:collapse" in style
+            or re.search(r"(?:^|;)opacity:0(?:\.0+)?(?:!important)?(?:;|$)", style) is not None
+            or "content-visibility:hidden" in style
+        )
+        if tag not in _VOID_TAGS:
+            self._elements.append((tag, hidden))
+            if hidden:
+                self._hidden_depth += 1
 
     def handle_endtag(self, tag: str) -> None:
-        if tag.lower() in {"script", "style", "noscript", "svg"} and self._hidden_depth:
-            self._hidden_depth -= 1
+        # A nested closing tag must not reveal an enclosing hidden article.
+        for index in range(len(self._elements) - 1, -1, -1):
+            if self._elements[index][0] == tag.lower():
+                self._hidden_depth -= sum(int(hidden) for _, hidden in self._elements[index:])
+                del self._elements[index:]
+                break
+
+    def handle_startendtag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        # In text/html, a self-closing slash is ignored on NON-void HTML tags.
+        # HTMLParser invokes this callback for <div hidden/> or <script/>,
+        # whereas browsers keep those tags open. Ignoring the callback would
+        # make browser-hidden text available to forge official article identity.
+        # SVG/MathML roots are foreign content where self-closing is valid.
+        if tag.lower() not in _VOID_TAGS | {"svg", "math"}:
+            self.handle_starttag(tag, attrs)
 
     def handle_data(self, data: str) -> None:
         if self._hidden_depth == 0:
@@ -55,12 +157,28 @@ class _VisibleText(HTMLParser):
                 self.parts.append(clean)
 
 
+def _official_html_mime(value: object) -> bool:
+    """Require the exact HTML media type, never `html` in MIME parameters."""
+    return isinstance(value, str) and value.split(";", 1)[0].strip().lower() in (
+        "text/html", "application/xhtml+xml"
+    )
+
+
 def _sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
 def _utc_now() -> str:
     return dt.datetime.now(dt.timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def _strict_utc_receipt_time(value: Any) -> dt.datetime:
+    """Only canonical UTC timestamps can establish immutable capture order."""
+    if not isinstance(value, str) or not re.fullmatch(
+        r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z", value
+    ):
+        raise ValueError("invalid Interreg UTC receipt timestamp")
+    return dt.datetime.fromisoformat(value[:-1] + "+00:00")
 
 
 def _visible_text(raw: bytes, content_type: str) -> str:
@@ -74,29 +192,178 @@ def _visible_text(raw: bytes, content_type: str) -> str:
     return html.unescape(" ".join(parser.parts))
 
 
+def _load_strict_json(raw: str) -> Any:
+    """Reject duplicate keys before JSON decoding silently keeps the last."""
+    def unique_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        obj: dict[str, Any] = {}
+        for key, value in pairs:
+            if key in obj:
+                raise ValueError(f"duplicate Interreg JSON key: {key}")
+            obj[key] = value
+        return obj
+
+    def reject_nonfinite(token: str) -> None:
+        raise ValueError(f"non-finite Interreg JSON number: {token}")
+
+    return json.loads(raw, object_pairs_hook=unique_pairs, parse_constant=reject_nonfinite)
+
+
 def _load_registry(path: Path) -> dict[str, Any]:
-    data = json.loads(path.read_text(encoding="utf-8"))
+    data = _load_strict_json(path.read_text(encoding="utf-8"))
     if not isinstance(data.get("sources"), list):
         raise ValueError("source registry missing sources[]")
     return data
 
 
 def _programming_sources(registry: dict[str, Any]) -> list[dict[str, Any]]:
+    """Validate registry identity before any network acquisition or replay.
+
+    Duplicate IDs can collapse the replay registry dictionary or collide at the
+    immutable raw-file boundary. A malformed family/extract value must not
+    silently drop a registered programming source from the expected receipt set.
+    """
     selected: list[dict[str, Any]] = []
+    seen_ids: set[str] = set()
     for source in registry.get("sources", []):
-        families = {str(x) for x in source.get("source_families", [])}
-        extract = {str(x) for x in source.get("extract", [])}
+        if not isinstance(source, dict):
+            raise ValueError("invalid Interreg registry source entry")
+        source_id = source.get("id")
+        if not isinstance(source_id, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", source_id):
+            raise ValueError("missing or unsafe Interreg registry source_id")
+        if source_id in seen_ids:
+            raise ValueError(f"duplicate Interreg registry source_id: {source_id}")
+        seen_ids.add(source_id)
+        for field in ("source_families", "extract"):
+            values = source.get(field, [])
+            if not isinstance(values, list) or any(
+                not isinstance(value, str) or not value.strip() for value in values
+            ):
+                raise ValueError(f"invalid Interreg registry {field}: {source_id}")
+        families = set(source.get("source_families", []))
+        extract = set(source.get("extract", []))
         if "INTERREG" not in families:
             continue
         if "PROGRAMMING_PIPELINE" not in families and not (extract & PROGRAMMING_EXTRACT_KEYS):
             continue
+        programmes = source.get("programmes")
+        if not isinstance(programmes, list) or not programmes or any(
+            not isinstance(name, str) or not name.strip() for name in programmes
+        ):
+            raise ValueError(f"invalid Interreg programming programme: {source_id}")
+        owner = source.get("owner")
+        if not isinstance(owner, str) or not owner.strip():
+            raise ValueError(f"missing Interreg programming source owner: {source_id}")
+        url = source.get("url")
+        if not isinstance(url, str):
+            raise ValueError(f"missing Interreg programming source URL: {source_id}")
+        _assert_official_source_origin(url, url)
         selected.append(source)
     if not selected:
         raise ValueError("no Interreg programming sources registered")
-    return sorted(selected, key=lambda item: str(item.get("id") or ""))
+    return sorted(selected, key=lambda item: item["id"])
+
+
+
+def _assert_official_source_origin(requested_url: str, final_url: str) -> None:
+    """Fail closed if an official Interreg source redirects to another authority.
+
+    A www/non-www canonical redirect is acceptable; a redirect to a different
+    official Interreg programme is NOT equivalent provenance for this source.
+    """
+    requested = urlsplit(requested_url)
+    final = urlsplit(final_url)
+    for part in (requested, final):
+        host = (part.hostname or "").lower()
+        if (
+            part.scheme != "https"
+            or host not in OFFICIAL_HOSTS
+            or part.username is not None
+            or part.password is not None
+            or part.port not in (None, 443)
+        ):
+            raise ValueError("untrusted Interreg source/redirect URL")
+    requested_host = (requested.hostname or "").lower().removeprefix("www.")
+    final_host = (final.hostname or "").lower().removeprefix("www.")
+    if requested_host != final_host:
+        raise ValueError("Interreg redirect crossed registered official source origin")
+
+
+
+def _assert_registered_article_identity(source_id: str, registered_url: str, final_url: str, visible_text: str) -> None:
+    """Bind ROHU future-programming article receipts to exact official content.
+
+    The survey is a consultation, NOT a funding-call window. A generic 200
+    homepage or a stale/mismatched date must fail both acquisition and replay.
+    """
+    if source_id == WORKSHOPS_SOURCE_ID:
+        terms, label = WORKSHOPS_IDENTITY_TERMS, "workshop"
+        required_topic = "atelier"
+    elif source_id == ROHU_SURVEY_SOURCE_ID:
+        terms, label = ROHU_SURVEY_IDENTITY_TERMS, "survey"
+        required_topic = "sondaj"
+    else:
+        return
+    registered = urlsplit(registered_url)
+    resolved = urlsplit(final_url)
+    # An altered exact-article URL is not a canonical source receipt, even
+    # when a browser would ignore its fragment or normalize path parameters.
+    # Reject these in both the registry and replayed final endpoint: otherwise
+    # a re-normalized, re-hashed manifest could borrow the source identity.
+    ambiguous_path = any(
+        re.search(r";|%3b", parsed.path, flags=re.I) is not None
+        for parsed in (registered, resolved)
+    )
+    if (
+        registered.path.rstrip("/") != resolved.path.rstrip("/")
+        or registered.query or registered.fragment
+        or resolved.query or resolved.fragment
+        or ambiguous_path
+    ):
+        raise ValueError(f"ROHU {label} exact official article endpoint changed")
+    comparable = re.sub(r"\s+", " ", visible_text.casefold()).translate(
+        str.maketrans({"–": "-", "—": "-", "−": "-"})
+    )
+    comparable = "".join(
+        char for char in unicodedata.normalize("NFKD", comparable)
+        if not unicodedata.combining(char)
+    )
+    if required_topic not in comparable or any(term not in comparable for term in terms):
+        raise ValueError(f"ROHU {label} official article identity/schedule unverified")
+    if source_id == WORKSHOPS_SOURCE_ID:
+        # A workshop on 20 November does not prove registration ends then.
+        # Require one *visible, explicit* enrollment clause: the historical
+        # 28-Oct version and its 20-Nov replacement are replay-compatible.
+        # Conflicting clauses, unsupported dates or template-only text fail.
+        registration_clauses = re.findall(
+            r"\binscrierea se face prin completarea formularului de inscriere\b"
+            r".{0,100}?\bpana la data de (?:28 octombrie|20 noiembrie) 2026\b",
+            comparable,
+        )
+        if len(registration_clauses) != 1:
+            raise ValueError("ROHU workshop official registration clause unverified")
+
+
+class _RegisteredOriginRedirect(urllib.request.HTTPRedirectHandler):
+    """Reject every untrusted redirect hop *before* following it.
+
+    Checking just response.geturl() can miss an off-authority intermediate hop
+    which ultimately returns to the registered hostname. The acquisition path
+    must not contact that intermediate host, even for non-publishing evidence.
+    """
+
+    def __init__(self, registered_url: str) -> None:
+        super().__init__()
+        self.registered_url = registered_url
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _assert_official_source_origin(self.registered_url, req.full_url)
+        _assert_official_source_origin(self.registered_url, newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def _fetch(url: str) -> tuple[bytes, str, int, str]:
+    # Disallow untrusted initial endpoints as well as redirect hops.
+    _assert_official_source_origin(url, url)
     request = urllib.request.Request(
         url,
         headers={
@@ -105,23 +372,41 @@ def _fetch(url: str) -> tuple[bytes, str, int, str]:
         },
     )
     context = ssl.create_default_context()
-    with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS, context=context) as response:
+    opener = urllib.request.build_opener(
+        urllib.request.HTTPSHandler(context=context),
+        _RegisteredOriginRedirect(url),
+    )
+    with opener.open(request, timeout=TIMEOUT_SECONDS) as response:
         final_url = response.geturl()
         status = int(response.getcode() or 0)
         content_type = str(response.headers.get("Content-Type") or "")
+        # An HTTP 200 does not prove complete, uncompressed HTML evidence.
+        # Refuse encoded bodies and truncated originals before hashing.
+        content_encoding = str(response.headers.get("Content-Encoding") or "identity").strip().lower()
+        if content_encoding != "identity":
+            raise ValueError("unsupported encoded Interreg HTML body")
+        declared_length = response.headers.get("Content-Length")
         raw = response.read(MAX_BYTES + 1)
     if len(raw) > MAX_BYTES:
         raise ValueError(f"response exceeds {MAX_BYTES} bytes")
+    if declared_length is not None:
+        declared = str(declared_length).strip()
+        if not declared.isdecimal() or int(declared) != len(raw):
+            raise ValueError("Interreg raw response differs from declared Content-Length")
     if status != 200:
         raise ValueError(f"unexpected HTTP status {status}")
-    if "html" not in content_type.lower():
+    if not _official_html_mime(content_type):
         raise ValueError(f"unexpected content type {content_type!r}")
     return raw, final_url, status, content_type
 
 
-def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | None = None) -> dict[str, Any]:
+def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | None = None, raw_dir: Path | None = None) -> dict[str, Any]:
     registry = _load_registry(registry_path)
     sources = _programming_sources(registry)
+    if raw_dir is not None:
+        if raw_dir.exists():
+            raise ValueError('Interreg immutable raw evidence directory already exists')
+        raw_dir.mkdir(parents=True, exist_ok=False)
     observed_at = _utc_now()
     run = run_id or f"INTERREG-PROGRAMMING-{observed_at.replace(':', '').replace('-', '')}"
     rows: list[dict[str, Any]] = []
@@ -133,9 +418,11 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
         programme = str((source.get("programmes") or [""])[0] or "")
         row: dict[str, Any] = {
             "source_id": source_id,
+            "source_owner": source.get("owner"),
             "registered_url": url,
             "programme": programme,
-            "fetched_at": observed_at,
+            "attempted_at": _utc_now(),
+            "fetched_at": None,
             "run_id": run,
             "publication_effect": "NONE",
             "publish_authorized": False,
@@ -143,9 +430,16 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
         }
         try:
             raw, final_url, status, content_type = _fetch(url)
+            # Record when this individual source was fetched, not the start
+            # of an acquisition run that can span multiple slow endpoints.
+            row["fetched_at"] = _utc_now()
+            _assert_official_source_origin(url, final_url)
+            if not _official_html_mime(content_type):
+                raise ValueError(f"unexpected content type {content_type!r}")
             text = _visible_text(raw, content_type)
             if len(text) < 120:
                 raise ValueError("low-information HTML body")
+            _assert_registered_article_identity(source_id, url, final_url, text)
             raw_hash = _sha256(raw)
             normalized = normalize_programming_observation(
                 {
@@ -154,10 +448,17 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
                     "text": text,
                     "authority_url": final_url,
                 },
-                fetched_at=observed_at,
+                fetched_at=row["fetched_at"],
                 raw_hash=raw_hash,
                 run_id=run,
             )
+            if raw_dir is not None:
+                if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', source_id):
+                    raise ValueError('unsafe Interreg source_id for immutable original')
+                raw_name = f'{source_id}.raw.html'
+                with (raw_dir / raw_name).open('xb') as handle:
+                    handle.write(raw)
+                row['raw_evidence_file'] = raw_name
             row.update(
                 {
                     "fetch_status": "PASS",
@@ -171,6 +472,9 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
             )
         except Exception as exc:
             errors += 1
+            # An attempted fetch is NOT an acquired original; never issue a
+            # successful fetched_at or raw hash for HTTP/TLS/parser failures.
+            row["fetched_at"] = None
             row.update(
                 {
                     "fetch_status": "FAIL",
@@ -188,7 +492,7 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
 
     return {
         "schema": SCHEMA,
-        "created_at": observed_at,
+        "created_at": _utc_now(),
         "run_id": run,
         "source_count": len(rows),
         "fetch_pass": len(rows) - errors,
@@ -202,15 +506,37 @@ def build_live_evidence(registry_path: Path = REGISTRY_PATH, *, run_id: str | No
 
 
 def validate_envelope(data: dict[str, Any]) -> None:
-    if data.get("schema") != SCHEMA:
+    if not isinstance(data, dict) or set(data) != ENVELOPE_KEYS:
+        raise ValueError("unexpected Interreg evidence envelope keys")
+    if not isinstance(data.get("rows"), list):
+        raise ValueError("Interreg evidence rows must be a list")
+    if data.get("schema") not in (SCHEMA, LEGACY_SCHEMA):
         raise ValueError("unexpected live-evidence schema")
+    legacy = data["schema"] == LEGACY_SCHEMA
     if data.get("publication_effect") != "NONE":
         raise ValueError("live programming evidence must have publication_effect=NONE")
     if data.get("canonical_corpus_mutation") is not False:
         raise ValueError("live programming evidence cannot mutate canonical corpus")
     if data.get("publish_authorized") is not False:
         raise ValueError("live programming evidence cannot authorize publish")
-    for row in data.get("rows", []):
+    for row in data["rows"]:
+        if not isinstance(row, dict):
+            raise ValueError("invalid Interreg source row")
+        allowed = (
+            (LEGACY_ROW_PASS_KEYS if legacy else ROW_PASS_KEYS)
+            if row.get("fetch_status") == "PASS"
+            else (LEGACY_ROW_FAIL_KEYS if legacy else ROW_FAIL_KEYS)
+        )
+        if set(row) != allowed:
+            raise ValueError(f"unexpected Interreg source row keys: {row.get('source_id')}")
+        if not legacy:
+            _strict_utc_receipt_time(row.get("attempted_at"))
+            if row.get("fetch_status") == "FAIL" and row.get("fetched_at") is not None:
+                raise ValueError("failed Interreg programming fetch cannot claim fetched_at")
+            if row.get("fetch_status") == "PASS":
+                _strict_utc_receipt_time(row.get("fetched_at"))
+        if row.get("publication_effect") != "NONE":
+            raise ValueError(f"Interreg source row attempted publication: {row.get('source_id')}")
         if row.get("publish_authorized") is not False or row.get("material_fact_use") is not False:
             raise ValueError(f"unsafe source row {row.get('source_id')}")
         normalized = row.get("normalized")
@@ -224,17 +550,148 @@ def validate_envelope(data: dict[str, Any]) -> None:
             raise ValueError(f"programming row classified OPEN_CALL: {row.get('source_id')}")
 
 
+
+def replay_live_evidence(
+    evidence: dict[str, Any],
+    raw_dir: Path,
+    registry_path: Path = REGISTRY_PATH,
+) -> int:
+    """Re-parse original bytes under the exact registered authority; no publication."""
+    validate_envelope(evidence)
+    rows = evidence.get("rows")
+    if not isinstance(rows, list) or any(not isinstance(row, dict) for row in rows):
+        raise ValueError("invalid Interreg evidence rows")
+    if raw_dir.is_symlink() or not raw_dir.is_dir():
+        raise ValueError("immutable Interreg raw evidence directory missing or symlinked")
+    registered = {
+        str(source.get("id")): source
+        for source in _programming_sources(_load_registry(registry_path))
+    }
+    expected_files: set[str] = set()
+    seen_ids: set[str] = set()
+    observed_states: dict[str, int] = {}
+    pass_count = 0
+    receipt_created_at = _strict_utc_receipt_time(evidence.get("created_at"))
+    last_observed_at: dt.datetime | None = None
+    legacy = evidence.get("schema") == LEGACY_SCHEMA
+    if not str(evidence.get("run_id") or "").strip():
+        raise ValueError("Interreg raw evidence missing run_id")
+    for row in rows:
+        source_id = str(row.get("source_id") or "")
+        if source_id in seen_ids or source_id not in registered:
+            raise ValueError("duplicate or unregistered Interreg evidence source")
+        seen_ids.add(source_id)
+        # V2 differentiates an unsuccessful attempt from a verified original.
+        # Replay V1 archives only for continuity; a V1 failure's timestamp
+        # must never become a successful acquired-document timestamp.
+        row_event_at = _strict_utc_receipt_time(
+            row.get("fetched_at") if legacy else row.get("attempted_at")
+        )
+        if row_event_at > receipt_created_at or (
+            last_observed_at is not None and row_event_at < last_observed_at
+        ):
+            raise ValueError("Interreg receipt chronology invalid")
+        if row.get("fetch_status") == "PASS":
+            verified_at = _strict_utc_receipt_time(row.get("fetched_at"))
+            if verified_at < row_event_at or verified_at > receipt_created_at:
+                raise ValueError("Interreg receipt chronology invalid")
+            last_observed_at = verified_at
+        else:
+            last_observed_at = row_event_at
+        source = registered[source_id]
+        if (
+            row.get("registered_url") != source.get("url")
+            or row.get("programme") != str((source.get("programmes") or [""])[0] or "")
+            or row.get("source_owner") != source.get("owner")
+            or row.get("run_id") != evidence.get("run_id")
+        ):
+            raise ValueError("Interreg source registry/run provenance mismatch")
+        if row.get("fetch_status") == "FAIL":
+            if (row.get("normalized") or row.get("raw_evidence_file")
+                    or any(key in row for key in ("raw_hash", "bytes", "http_status", "content_type", "final_url"))):
+                raise ValueError("failed Interreg source cannot have promoted original")
+            if not row.get("error_type") or not row.get("error"):
+                raise ValueError("failed Interreg source missing explicit error receipt")
+            observed_states["FETCH_FAILED"] = observed_states.get("FETCH_FAILED", 0) + 1
+            continue
+        if row.get("fetch_status") != "PASS":
+            raise ValueError("invalid Interreg raw acquisition status")
+        if not re.fullmatch(r"[A-Za-z0-9_-]{1,128}", source_id):
+            raise ValueError("unsafe Interreg source_id")
+        raw_name = f"{source_id}.raw.html"
+        if row.get("raw_evidence_file") != raw_name:
+            raise ValueError("untrusted Interreg raw evidence path")
+        original = raw_dir / raw_name
+        if not original.is_file() or original.is_symlink():
+            raise ValueError("missing original Interreg bytes")
+        _assert_official_source_origin(str(source.get('url') or ''), str(row.get('final_url') or ''))
+        raw = original.read_bytes()
+        if (
+            not raw or len(raw) > MAX_BYTES
+            or row.get("bytes") != len(raw)
+            or row.get("raw_hash") != _sha256(raw)
+            or row.get("http_status") != 200
+            or not _official_html_mime(row.get("content_type"))
+        ):
+            raise ValueError("Interreg raw bytes, type, status or SHA mismatch")
+        replay_text = _visible_text(raw, row["content_type"])
+        _assert_registered_article_identity(source_id, str(source.get("url") or ""), str(row.get("final_url") or ""), replay_text)
+        normalized = normalize_programming_observation(
+            {
+                "programme": row["programme"],
+                "title": row["source_owner"],
+                "text": replay_text,
+                "authority_url": row.get("final_url"),
+            },
+            fetched_at=row["fetched_at"],
+            raw_hash=row["raw_hash"],
+            run_id=row["run_id"],
+        )
+        if normalized != row.get("normalized"):
+            raise ValueError("Interreg raw-to-semantic replay disagreement")
+        pass_count += 1
+        state = normalized["observation_state"]
+        observed_states[state] = observed_states.get(state, 0) + 1
+        expected_files.add(raw_name)
+    if {p.name for p in raw_dir.iterdir()} != expected_files:
+        raise ValueError("unknown, partial or orphaned Interreg raw evidence file")
+    if len(seen_ids) != len(registered):
+        raise ValueError("incomplete Interreg programming source set")
+    if (type(evidence.get("source_count")) is not int
+            or type(evidence.get("fetch_pass")) is not int
+            or type(evidence.get("fetch_fail")) is not int
+            or evidence["source_count"] != len(rows)
+            or evidence["fetch_pass"] != pass_count
+            or evidence["fetch_fail"] != len(rows) - pass_count
+            or evidence.get("observation_states") != observed_states):
+        raise ValueError("Interreg replay summary differs from verified source rows")
+    return len(expected_files)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--registry", type=Path, default=REGISTRY_PATH)
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--run-id")
+    parser.add_argument("--raw-dir", type=Path)
+    parser.add_argument("--replay-dir", type=Path)
     args = parser.parse_args()
 
-    evidence = build_live_evidence(args.registry, run_id=args.run_id)
+    if args.replay_dir is not None:
+        evidence = _load_strict_json(args.out.read_text(encoding="utf-8"))
+        count = replay_live_evidence(evidence, args.replay_dir, args.registry)
+        print(json.dumps({"verified": True, "raw_source_count": count, "run_id": evidence["run_id"], "publish_authorized": False}))
+        return 0
+
+    raw_dir = args.raw_dir or Path(str(args.out) + ".originals")
+    if args.out.exists():
+        raise ValueError("Interreg immutable evidence manifest already exists")
+    evidence = build_live_evidence(args.registry, run_id=args.run_id, raw_dir=raw_dir)
     validate_envelope(evidence)
+    replay_live_evidence(evidence, raw_dir, args.registry)
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    args.out.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with args.out.open("x", encoding="utf-8") as handle:
+        handle.write(json.dumps(evidence, ensure_ascii=False, indent=2) + "\n")
     print(
         json.dumps(
             {

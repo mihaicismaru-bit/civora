@@ -69,6 +69,175 @@ def load_ingest_module():
     return module
 
 
+def test_afir_fetch_transport_provenance() -> None:
+    """No redirected authority, TLS downgrade or truncated body becomes AFIR proof."""
+    from unittest.mock import patch
+
+    ingest = load_ingest_module()
+    official = "https://www.afir.ro/info-la-zi/"
+    class Response:
+        def __init__(self, final_url, data=b"verified AFIR source bytes", status=200, declared_length=None):
+            self.final_url, self.data, self.status = final_url, data, status
+            self.headers = {"Content-Type": "text/html; charset=utf-8"}
+            if declared_length is not None:
+                self.headers["Content-Length"] = str(declared_length)
+        def __enter__(self):
+            return self
+        def __exit__(self, exc_type, exc, tb):
+            return False
+        def geturl(self):
+            return self.final_url
+        def read(self, n):
+            assert n == 12_000_001, "must reject truncated fingerprint candidates"
+            return self.data[:n]
+
+    def probe(response, *, allowed):
+        # Mock only the terminal network read; preserve the real redirect
+        # handler tests below to reject unsafe intermediate hops.
+        with patch.object(ingest.urllib.request, "build_opener") as make_opener:
+            make_opener.return_value.open.return_value = response
+            result = ingest.fetch(official, sleep=lambda _delay: None)
+        assert result["ok"] is allowed, result
+        if allowed:
+            assert result["data"] == response.data
+        else:
+            assert "data" not in result, "rejected source must not expose publishable bytes"
+        return result
+
+    probe(Response(official), allowed=True)
+    probe(Response(official, declared_length=len(b"verified AFIR source bytes")), allowed=True)
+    probe(Response(official, declared_length=1), allowed=False)
+    probe(Response(official, declared_length="not-a-number"), allowed=False)
+    for final in (
+        "https://untrusted.example/afir-copy",
+        "http://www.afir.ro/info-la-zi/",
+        "https://www.afir.ro/umbraco/surface/authentication/login",
+        "https://user:pass@www.afir.ro/info-la-zi/",
+    ):
+        probe(Response(final), allowed=False)
+    probe(Response(official, status=500), allowed=False)
+    probe(Response(official, data=b""), allowed=False)
+    probe(Response(official, data=b"x" * 12_000_001), allowed=False)
+    assert ingest.fetch("http://www.afir.ro/info-la-zi/")["ok"] is False
+    assert ingest.fetch("https://untrusted.example/")["ok"] is False
+
+    # A redirect chain HTTPS -> HTTP -> HTTPS would otherwise pass final-URL
+    # validation only after exposing the intermediate insecure request.
+    handler = ingest._StrictAFIRRedirectHandler()
+    origin = ingest.urllib.request.Request(official)
+    safe = handler.redirect_request(
+        origin, None, 302, "Found", {}, "https://afir.ro/info-la-zi/"
+    )
+    assert safe.full_url == "https://afir.ro/info-la-zi/"
+    for intermediate in (
+        "http://www.afir.ro/info-la-zi/",
+        "https://untrusted.example/info-la-zi/",
+        "https://www.afir.ro:444/info-la-zi/",
+        "https://www.afir.ro/umbraco/surface/authentication/login",
+        "https://user:pass@www.afir.ro/info-la-zi/",
+    ):
+        try:
+            handler.redirect_request(origin, None, 302, "Found", {}, intermediate)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"unsafe AFIR redirect accepted: {intermediate}")
+
+
+def test_extension_notice_raw_receipt() -> None:
+    """Receipt is exact-byte acquisition evidence, never OPEN or publish proof."""
+    from unittest.mock import patch
+
+    ingest = load_ingest_module()
+    body = b"<html><title>AFIR DR-14 DR-18 extension</title></html>"
+    fetched = {
+        "ok": True,
+        "url": ingest.AFIR_EXTENSION_NOTICE,
+        "status": 200,
+        "content_type": "text/html; charset=utf-8",
+        "data": body,
+    }
+    with tempfile.TemporaryDirectory() as tmp:
+        environment = {
+            "PARTENER_AFIR_EVIDENCE_DIR": tmp,
+            "GITHUB_RUN_ID": "41999999999",
+            "GITHUB_RUN_ATTEMPT": "1",
+        }
+        with patch.dict(ingest.os.environ, environment):
+            manifest = ingest.capture_extension_notice_receipt(
+                ingest.AFIR_EXTENSION_NOTICE, fetched, "2026-11-05T02:00:00+00:00"
+            )
+            assert manifest is not None
+            persisted = json.loads((Path(tmp) / "manifest.json").read_text(encoding="utf-8"))
+            assert persisted == manifest
+            assert (Path(tmp) / manifest["raw_evidence_file"]).read_bytes() == body
+            assert manifest["raw_sha256"] == hashlib.sha256(body).hexdigest()
+            assert manifest["run_id"] == "41999999999"
+            assert manifest["parser_version"] == ingest.AFIR_RECEIPT_PARSER_VERSION
+            assert manifest["source_family"] == "AFIR"
+            assert manifest["authority_class"] == "T1_OFFICIAL_AGENCY"
+            assert manifest["observation_state"] == "RAW_FETCHED_PENDING_SEMANTIC_RECONCILIATION"
+            assert manifest["publish_authorized"] is False
+            assert manifest["material_fact_action"] == "NONE"
+            # The handoff is write-once even with a valid second capture.
+            try:
+                ingest.capture_extension_notice_receipt(
+                    ingest.AFIR_EXTENSION_NOTICE, dict(fetched, data=body + b"modified"),
+                    "2026-11-05T02:01:00+00:00"
+                )
+            except ValueError as exc:
+                assert "immutable handoff" in str(exc)
+            else:
+                raise AssertionError("AFIR raw receipt silently overwritten")
+            assert (Path(tmp) / manifest["raw_evidence_file"]).read_bytes() == body
+            assert json.loads((Path(tmp) / "manifest.json").read_text("utf-8")) == manifest
+            assert ingest.capture_extension_notice_receipt(
+                "https://www.afir.ro/unrelated/", fetched, "2026-11-05T02:00:00+00:00"
+            ) is None
+            for broken in (
+                dict(fetched, url="http://www.afir.ro/info-la-zi/prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/"),
+                dict(fetched, url="https://untrusted.example/"),
+                dict(fetched, data=b""),
+                dict(fetched, content_type="application/pdf"),
+                dict(fetched, content_type="application/json; note=html"),
+                dict(fetched, status=403),
+            ):
+                try:
+                    ingest.capture_extension_notice_receipt(
+                        ingest.AFIR_EXTENSION_NOTICE, broken, "2026-11-05T02:00:00+00:00"
+                    )
+                except ValueError:
+                    pass
+                else:
+                    raise AssertionError("invalid raw notice receipt must be rejected")
+        # A symlinked evidence target cannot substitute a mutable external path.
+        target = Path(tmp) / "symlink-target"
+        target.mkdir()
+        alias = Path(tmp) / "symlink-alias"
+        alias.symlink_to(target, target_is_directory=True)
+        with patch.dict(ingest.os.environ, environment | {
+            "PARTENER_AFIR_EVIDENCE_DIR": str(alias)
+        }):
+            try:
+                ingest.capture_extension_notice_receipt(
+                    ingest.AFIR_EXTENSION_NOTICE, fetched, "2026-11-05T02:00:00+00:00"
+                )
+            except ValueError as exc:
+                assert "symlinked" in str(exc)
+            else:
+                raise AssertionError("symlinked AFIR notice evidence target accepted")
+        with patch.dict(ingest.os.environ, environment | {"GITHUB_RUN_ID": ""}):
+            try:
+                ingest.capture_extension_notice_receipt(
+                    ingest.AFIR_EXTENSION_NOTICE, fetched, "2026-11-05T02:00:00+00:00"
+                )
+            except ValueError:
+                pass
+            else:
+                raise AssertionError("a receipt without real run ID is inadmissible")
+    assert ingest.AFIR_EXTENSION_NOTICE in ingest.SEEDS
+
+
 def main() -> int:
     fixture_bytes = FIXTURE.encode("utf-8")
     fingerprint = hashlib.sha256(fixture_bytes).hexdigest()
@@ -210,6 +379,8 @@ def main() -> int:
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": None}], "amount") is None
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": "2.50"}], "amount") == "3.50"
 
+    test_afir_fetch_transport_provenance()
+    test_extension_notice_raw_receipt()
     ingest = load_ingest_module()
     normalized = ingest.norm(
         "https://www.afir.ro/api/file?filename=Anunț Cerere DR-12 – Investiții.pdf&download=1"

@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0",
+  "discovered_on": "2026-11-09",
+  "programme": "Fondul pentru modernizare / Programul-cheie 9",
+  "source_family": "ROMANIA_FM_TRANSPORT",
+  "candidate": "e-DRIVE — Ghidurile solicitantului pentru Măsurile 1 (de minimis) și 2 (ajutor de stat)",
+  "candidate_lifecycle": "CONSULTATION",
+  "observation_state": "SECONDARY_DISCOVERY_OFFICIAL_RAW_UNAVAILABLE",
+  "authority_class": "T1_MTI_UNVERIFIED_DIRECT_ACQUISITION",
+  "publication_effect": "NONE",
+  "publish_authorized": false,
+  "open_call_authorized": false,
+  "official_call_topic_identifier_verified": false,
+  "official_application_window_verified": false,
+  "material_fact_action": "NONE",
+  "official_candidate_sources": [
+    {
+      "url": "https://www.mt.ro/spatiul-media/comunicate-de-presa/fm-comunicate/fm03112026",
+      "role": "MTI announcement — exact linked endpoint, not fetched",
+      "fetched_at_utc": null,
+      "raw_sha256": null,
+      "parser_version": null,
+      "run_id": null
+    },
+    {
+      "url": "https://www.mt.ro/documente/organism%20intermediar/fond_modernizare/comunicate/2026/GS_M1_%C8%99i_M2.zip",
+      "role": "MTI consultation guides archive — linked, not downloaded",
+      "fetched_at_utc": null,
+      "raw_sha256": null,
+      "parser_version": null,
+      "run_id": null
+    }
+  ],
+  "discovery_sources": [
+    {
+      "url": "https://www.musat-partners.ro/mti-demareaza-procesul-de-consultare-publica-pentru-ghidurile-solicitantului-aferente-masurilor-1-si-2-ale-schemei-e-drive/",
+      "published_date": "2026-11-04",
+      "class": "SECONDARY_DISCOVERY_NOT_AUTHORITY"
+    },
+    {
+      "url": "https://fonduri-structurale.ro/stiri/41691/mti-demareaza-procesul-de-consultare-publica-pentru-ghidurile-aferente-masurilor-1-si-2-ale-schemei-e-drive",
+      "published_date": "2026-11-04",
+      "class": "SECONDARY_DISCOVERY_NOT_AUTHORITY"
+    }
+  ],
+  "unadmitted_secondary_claims": {
+    "consultation_announced_date_candidate": "2026-11-03",
+    "feedback_deadline_candidate": "2026-11-18",
+    "measure_1_type_candidate": "DE_MINIMIS",
+    "measure_2_type_candidate": "STATE_AID",
+    "call_opening_date": null,
+    "application_deadline": null,
+    "note": "All dates are consultation-discovery candidates, NOT application dates or approved calls. The original MTI page/archive could not be fetched for independent raw SHA/replay."
+  },
+  "historical_backlog_reference": "https://github.com/mihaicismaru-bit/civora/pull/1392",
+  "required_next_gate": [
+    "Strict-TLS acquire original MTI announcement and consultation archive, with exact endpoint identity, bounded bytes and MIME",
+    "Persist immutable originals and manifest with URL, fetched_at_utc, raw_sha256, parser_version, run_id, authority class and observation state",
+    "Reconcile guide version and consultation cutoff against official originals; separate consultation feedback from application window",
+    "Only then consider reviewed PROGRAMMING_PIPELINE/CONSULTATION projection; never promote to OPEN_CALL without a separate exact official application notice and semantic reconciliation"
+  ],
+  "rollback": "Remove this discovery-only JSON and associated test from unmerged PR; no LKG, public product, publication or distribution state has been modified."
+}

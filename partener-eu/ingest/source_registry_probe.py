@@ -5,6 +5,7 @@ import re
 import ssl
 import time
 import urllib.request
+from urllib.parse import urlsplit
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -16,14 +17,27 @@ REVIEWED_BASELINES = ROOT / "partener-eu" / "validation" / "accepted-source-base
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/1.0 (+production-validation)"
 MIN_SEMANTIC_CHARS = 256
 MIN_HTML_BYTES_FOR_LOW_INFO = 4096
+# A partial/truncated response must never become a healthy source hash or LKG.
+MAX_SOURCE_BYTES = 3_000_000
 
 
 def utc_now():
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
+def official_media_type(content_type: object) -> str:
+    """Parse the actual HTTP media type, not HTML-looking parameters/suffixes."""
+    if not isinstance(content_type, str):
+        return ""
+    return content_type.split(";", 1)[0].strip().casefold()
+
+
+def is_html_content_type(content_type: object) -> bool:
+    return official_media_type(content_type) in {"text/html", "application/xhtml+xml"}
+
+
 def semantic_bytes(raw: bytes, content_type: str) -> bytes:
-    if "html" not in (content_type or "").lower():
+    if not is_html_content_type(content_type):
         return raw
     text = raw.decode("utf-8", errors="ignore")
     text = re.sub(r"<script\b[^>]*>.*?</script>", " ", text, flags=re.I | re.S)
@@ -44,10 +58,78 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
 
 def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
     semantic_chars = len(sem.decode("utf-8", errors="ignore"))
-    is_html = "html" in (content_type or "").lower()
+    is_html = is_html_content_type(content_type)
+    # Tiny HTTP-200 anti-bot/error pages are not official programme evidence.
+    # They may be far smaller than the ordinary low-information shell cutoff.
+    # Keep the signature narrow and only inspect short HTML, so real source
+    # documents mentioning these expressions remain eligible for review.
+    if is_html and semantic_chars < MIN_SEMANTIC_CHARS:
+        text = " ".join(sem.decode("utf-8", errors="ignore").casefold().split())
+        challenge_prefixes = (
+            "just a moment",
+            "checking your browser",
+            "verify you are human",
+            "verifying you are human",
+            "access denied",
+            "403 forbidden",
+            "502 bad gateway",
+            "503 service unavailable",
+            "service unavailable",
+            "sorry, you have been blocked",
+        )
+        if text.startswith(challenge_prefixes):
+            return False, "HTML_CHALLENGE_OR_ERROR_SHELL", semantic_chars
     if is_html and raw_size >= MIN_HTML_BYTES_FOR_LOW_INFO and semantic_chars < MIN_SEMANTIC_CHARS:
         return False, "LOW_INFORMATION_HTML_SHELL", semantic_chars
     return True, None, semantic_chars
+
+
+def _assert_source_origin(registered_url: str, candidate_url: str) -> None:
+    """Bind a health observation to the exact registered HTTPS endpoint.
+
+    A same-host redirect to another programme page is not evidence for the
+    original source, even when both pages belong to an official authority.
+    Explicit canonical_aliases are separately attempted, identity-locked
+    transports. Only a harmless www spelling or trailing slash may vary.
+    """
+    registered = urlsplit(registered_url)
+    candidate = urlsplit(candidate_url)
+    for parsed in (registered, candidate):
+        if (
+            parsed.scheme != "https"
+            or not parsed.hostname
+            or parsed.username is not None
+            or parsed.password is not None
+            or parsed.port not in (None, 443)
+            or parsed.fragment
+            or ";" in parsed.path
+        ):
+            raise ValueError("untrusted official source URL or redirect")
+    original_host = registered.hostname.lower().removeprefix("www.")
+    candidate_host = candidate.hostname.lower().removeprefix("www.")
+    if original_host != candidate_host:
+        raise ValueError("official source redirect crossed registered origin")
+    # Do not silently accept a different resource on the same official host.
+    # A new canonical endpoint must be registered/reviewed, not inferred
+    # from a 200 response or its plausible official-looking HTML.
+    if (
+        (registered.path.rstrip("/") or "/") != (candidate.path.rstrip("/") or "/")
+        or registered.query != candidate.query
+    ):
+        raise ValueError("official source redirect changed registered endpoint")
+
+
+class _SourceOriginRedirect(urllib.request.HTTPRedirectHandler):
+    """Reject an off-authority redirect *before* performing the next request."""
+
+    def __init__(self, registered_url: str) -> None:
+        super().__init__()
+        self.registered_url = registered_url
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        _assert_source_origin(self.registered_url, req.full_url)
+        _assert_source_origin(self.registered_url, newurl)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
 def fetch_once(url: str):
@@ -57,14 +139,49 @@ def fetch_once(url: str):
         "Accept-Language": "ro-RO,ro;q=0.9,en;q=0.5",
         "Connection": "close",
     })
+    _assert_source_origin(url, url)
     ctx = ssl.create_default_context()
-    with urllib.request.urlopen(req, timeout=18, context=ctx) as r:
-        raw = r.read(3_000_000)
+    opener = urllib.request.build_opener(
+        urllib.request.HTTPSHandler(context=ctx),
+        _SourceOriginRedirect(url),
+    )
+    with opener.open(req, timeout=18) as r:
+        # Check the final response too, independent of redirect handler behavior.
+        _assert_source_origin(url, r.geturl())
+        if r.status != 200:
+            raise ValueError(f"unexpected official source HTTP status {r.status}")
         ctype = r.headers.get("content-type") or ""
+        if official_media_type(ctype) not in {
+            "text/html", "application/xhtml+xml", "application/pdf",
+        }:
+            # A false HTML suffix/parameter, JSON error, binary download or
+            # generic response is not healthy official source evidence.
+            # Keep the previous semantic LKG and classify as degraded.
+            raise ValueError("unsupported official source Content-Type")
+        # Read one byte past the bound: exactly 3 MB without a proof of EOF
+        # may be a truncated official document, not a verified healthy source.
+        raw = r.read(MAX_SOURCE_BYTES + 1)
+        if len(raw) > MAX_SOURCE_BYTES:
+            raise ValueError("oversized official source response")
+        # HTTP 200 and a plausible media type do not prove that a document was
+        # acquired. Empty bodies, and HTML challenges served as PDF, must not
+        # overwrite the last-known semantic source hash.
+        if not raw:
+            raise ValueError("empty official source response")
+        if official_media_type(ctype) == "application/pdf" and not raw.startswith(b"%PDF-"):
+            raise ValueError("invalid official source PDF signature")
+        content_encoding = (r.headers.get("content-encoding") or "identity").strip().lower()
+        if content_encoding != "identity":
+            raise ValueError("unsupported official source Content-Encoding")
+        declared_length = r.headers.get("content-length")
+        if declared_length is not None:
+            declared = str(declared_length).strip()
+            if not declared.isdecimal() or int(declared) != len(raw):
+                raise ValueError("official source Content-Length mismatch")
         sem = semantic_bytes(raw, ctype)
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
         return {
-            "ok": 200 <= r.status < 400,
+            "ok": r.status == 200,
             "http_status": r.status,
             "final_url": r.geturl(),
             "content_type": ctype,

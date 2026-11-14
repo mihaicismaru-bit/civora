@@ -77,12 +77,82 @@ def validate(baseline: dict[str, Any], candidate: dict[str, Any]) -> dict[str, A
     }
 
 
+# The AFIR publisher may replace only the six exact official AFIR dossiers and
+# their dated news events. No AFIR refresh may delete/change other programmes'
+# LKG dossier or news bodies, even if upstream discovery returned fewer rows.
+AFIR_OVERLAY_IDS = {
+    "afir-dr12-2026", "afir-dr14-2026", "afir-dr18-2026",
+    "afir-dr31-2026-2027",
+    "afir-fm-public-autoconsum-2026", "afir-fm-public-storage-2026",
+}
+AFIR_OVERLAY_NEWS = {
+    "news-afir-dr14-dr18-extended-2026-10-30",
+    "news-afir-dr14-dr18-open-2026-09-01",
+    "news-afir-dr31-consultation-2026-08-28",
+}
+
+
+def validate_afir_source_scope(baseline: dict[str, Any], candidate: dict[str, Any]) -> dict[str, Any]:
+    protected = 0
+    for key, fixed_allowlist in (("dossiers", AFIR_OVERLAY_IDS), ("news", AFIR_OVERLAY_NEWS)):
+        original = {str(x.get("id")): x for x in baseline.get(key) or [] if x.get("id")}
+        latest = {str(x.get("id")): x for x in candidate.get(key) or [] if x.get("id")}
+        allowlist = set(fixed_allowlist)
+        if key == "dossiers":
+            # Authorize changes to canonical AFIR-derived provisional records,
+            # but never relabel an unrelated baseline as an AFIR record.
+            for row_id in original.keys() | latest.keys():
+                first, current = original.get(row_id), latest.get(row_id)
+                def is_afir(row: dict[str, Any] | None) -> bool:
+                    return bool(
+                        row and row_id.startswith("afir-")
+                        and row.get("sourceType") in {"AFIR_CANONICAL", "AFIR_INGESTED_PROVISIONAL"}
+                    )
+                if (first is None and is_afir(current)) or (is_afir(first) and (current is None or is_afir(current))):
+                    allowlist.add(row_id)
+        unexpected = sorted(
+            i for i in original.keys() | latest.keys()
+            if i not in allowlist and original.get(i) != latest.get(i)
+        )
+        if unexpected:
+            raise AssertionError(f"AFIR-only projection mutated {key} outside source scope: {unexpected[:12]}")
+        protected += len(set(original) - allowlist)
+    # Nov-2026 safety hold: a hashed AFIR discovery row and a human-visible
+    # announcement are NOT by themselves an immutable, reviewed material
+    # source receipt. The extension to 16 Nov is real, but publishing the
+    # changed deadline/status or its news event must wait for exact raw bytes,
+    # a SHA-256-bound parser/run/fetched-at manifest, and reviewed admission.
+    # This check runs again against the freshest main LKG before persistence.
+    extension_ids = {"afir-dr14-2026", "afir-dr18-2026"}
+    prior_dossiers = {str(row.get("id")): row for row in baseline.get("dossiers") or [] if row.get("id")}
+    next_dossiers = {str(row.get("id")): row for row in candidate.get("dossiers") or [] if row.get("id")}
+    modified_extension = sorted(
+        dossier_id for dossier_id in extension_ids
+        if prior_dossiers.get(dossier_id) != next_dossiers.get(dossier_id)
+    )
+    extension_news_id = "news-afir-dr14-dr18-extended-2026-10-30"
+    prior_news = {str(row.get("id")): row for row in baseline.get("news") or [] if row.get("id")}
+    next_news = {str(row.get("id")): row for row in candidate.get("news") or [] if row.get("id")}
+    if modified_extension or prior_news.get(extension_news_id) != next_news.get(extension_news_id):
+        raise AssertionError(
+            "AFIR DR14/DR18 extension material release HELD: immutable official "
+            "notice raw bytes + URL/fetched_at/SHA-256/parser_version/run_id "
+            "and reviewed field-scoped admission are still required"
+        )
+    return {"afirOnlySourceScope": "PASS", "unmodifiedOtherDossiersAndNews": protected}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--baseline", type=Path, required=True)
     parser.add_argument("--candidate", type=Path, required=True)
+    parser.add_argument("--afir-source-scoped", action="store_true")
     args = parser.parse_args()
-    print(json.dumps(validate(load(args.baseline), load(args.candidate)), ensure_ascii=False, indent=2))
+    baseline, candidate = load(args.baseline), load(args.candidate)
+    result = validate(baseline, candidate)
+    if args.afir_source_scoped:
+        result.update(validate_afir_source_scope(baseline, candidate))
+    print(json.dumps(result, ensure_ascii=False, indent=2))
     return 0
 
 

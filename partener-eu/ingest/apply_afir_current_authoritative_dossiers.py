@@ -10,6 +10,7 @@ canonical public dossier.
 from __future__ import annotations
 
 import json
+import datetime as dt
 import re
 import unicodedata
 from pathlib import Path
@@ -23,6 +24,8 @@ LIVE_FUNDS = ROOT / "partener-eu" / "ingest" / "state" / "afir_live_funds.json"
 LAUNCH = "https://www.afir.ro/comunicate/afir-lanseaza-sesiuni-pentru-ferme-mici-si-floricultura-plante-medicinale-si-aromatice/"
 SESSIONS = "https://www.afir.ro/instrumente/sesiuni/sesiuni-primire-proiecte/"
 COUNTER = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
+EXTENSION = "https://www.afir.ro/info-la-zi/prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/"
+EXTENSION_VERIFIED_AT = "2026-11-04T18:32:14Z"
 DR14 = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-14/"
 DR18 = "https://www.afir.ro/domenii-de-interventie/detalii-si-anexe-dr-18/"
 DR18_RELEASE = "https://www.afir.ro/comunicate/finantarea-investitiilor-in-floricultura-plante-medicinale-si-aromatice/"
@@ -82,6 +85,56 @@ def dr12_live_submission_evidence() -> tuple[bool, str]:
     return submitted, str(payload.get("sourceObservedAt") or CURRENT_OBSERVED)
 
 
+def dr14_dr18_extension_counter_proof() -> str:
+    """Cross-check exact 30 Oct AFIR extension against the canonical hashed counter.
+
+    AFIR's notice establishes the OPEN window; the official counter independently
+    reconciles component dates and exhausted scope. Neither the counter nor a
+    programming signal alone can infer OPEN. Any missing/conflicting proof HOLDs
+    this deterministic overlay; the published LKG remains untouched.
+    """
+    try:
+        payload = json.loads(LIVE_FUNDS.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError("AFIR extension: canonical counter evidence unavailable") from exc
+    policy = payload.get("policy") or {}
+    admissible = (
+        payload.get("status") == "PASS"
+        and policy.get("publishableDedicatedSnapshot") is True
+        and (payload.get("sourceFingerprintMatchesCorpus") is True
+             or payload.get("sourceFingerprintReconciledFromCanonicalLiveFetch") is True)
+        and str(payload.get("sourceObservedAt") or "") >= "2026-10-30"
+        and len(str(payload.get("sourceFingerprint") or "")) == 64
+    )
+    if not admissible:
+        raise RuntimeError("AFIR extension: counter provenance/status not admissible")
+    rows = payload.get("rows") or []
+    dr14 = [row for row in rows if row.get("interventionCode") == "DR-14"]
+    dr18 = [row for row in rows if row.get("interventionCode") == "DR-18"]
+    simple = [row for row in dr14 if "ACHIZI" in str(row.get("sector") or "").upper()]
+    active = [row for row in dr14 if row not in simple]
+    expected_close = "2026-11-16T15:59:59+02:00"
+
+    def available(row: dict[str, Any]) -> bool:
+        try:
+            return float(row.get("availableFundsEur") or "0") > 0
+        except (TypeError, ValueError):
+            return False
+
+    # AFIR removes exhausted sectors from later live counter tables. Accept
+    # either the October fingerprint retaining Achiziții simple as EXHAUSTED
+    # or the newer official table containing only the three funded sectors.
+    if not (
+        len(active) == 3
+        and len(dr18) == 1
+        and len(simple) in (0, 1)
+        and (not simple or simple[0].get("availableFundsStatus") == "EXHAUSTED")
+        and all(row.get("closesAtIso") == expected_close and available(row) for row in [*active, *dr18])
+    ):
+        raise RuntimeError("AFIR extension: official component scope/date/availability conflict")
+    return str(payload.get("sourceObservedAt"))
+
+
 def open_dossier(
     *, dossier_id: str, title: str, code: str, applicants: list[str], activities: list[str],
     budget: str, project_value: str, cofinancing: str, scoring: list[str], documents: list[str],
@@ -90,7 +143,7 @@ def open_dossier(
     summary = [
         "Stare apel: DESCHIS.",
         "Deschidere: 1 septembrie 2026, ora 09:00.",
-        "Închidere: 31 octombrie 2026, ora 16:00; sesiunea se poate închide mai devreme dacă se epuizează alocarea.",
+        "Închidere: 16 noiembrie 2026, ora 16:00 doar pentru componente cu fonduri; DR-14 Achiziții simple este epuizată din 6 octombrie.",
         f"Cine poate aplica: {'; '.join(applicants)}",
         f"Activități finanțate: {activities[0]}",
         f"Valoarea apelului: {budget}.",
@@ -122,7 +175,7 @@ def open_dossier(
         "quickFacts": facts([
             ("Status", "DESCHIS", "CONFIRMED"),
             ("Deschidere", "1 septembrie 2026, 09:00", "CONFIRMED"),
-            ("Termen", "31 octombrie 2026, 16:00", "CONFIRMED"),
+            ("Termen", "16 noiembrie 2026, 16:00 (componente cu fonduri)", "CONFIRMED"),
             ("Grant", project_value, "CONFIRMED"),
             ("Buget", budget, "CONFIRMED"),
             ("Contribuție proprie", cofinancing, "CONFIRMED"),
@@ -165,7 +218,7 @@ def open_dossier(
         "executiveSummary": {
             "status": "OPEN",
             "opens": "2026-09-01T09:00:00+03:00",
-            "closes": "2026-10-31T16:00:00+02:00",
+            "closes": "2026-11-16T16:00:00+02:00",
             "applicants": applicants,
             "targetGroup": [],
             "activities": activities,
@@ -556,7 +609,7 @@ def dr12_dossier() -> dict[str, Any]:
             ]),
             section("Ce trebuie făcut acum", [
                 "Confirmă forma juridică, vârsta și istoricul instalării solicitantului.",
-                "Simulează punctajul pentru pragul de 80 de puncte al primei etape.",
+                "Verifică pragul de calitate al etapei curente în anunțul și ghidul oficial AFIR înainte de depunere.",
                 "Fixează investițiile eligibile, bugetul și dovada contribuției proprii.",
                 "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea imediată." if post_launch_evidence else "Descarcă ultima versiune a ghidului, cererii și anexelor și pregătește depunerea pentru 6 octombrie, ora 09:00.",
             ]),
@@ -696,6 +749,22 @@ def dr31_dossier() -> dict[str, Any]:
 def news_items() -> list[dict[str, Any]]:
     return [
         {
+            "id": "news-afir-dr14-dr18-extended-2026-10-30",
+            "kind": "DEADLINE_EXTENDED",
+            "programme": "AFIR / PS PAC 2023-2027",
+            "date": "2026-10-30T11:40:00+02:00",
+            "headline": "DR-14 și DR-18: depunerea se prelungește până la 16 noiembrie, ora 16:00",
+            "standfirst": "AFIR a prelungit termenul inițial de 31 octombrie la 16 noiembrie 2026, ora 16:00, doar pentru componentele cu fonduri. DR-14 Achiziții simple a fost epuizată pe 6 octombrie.",
+            "meaning": "Se mai pot pregăti și depune proiecte numai pentru DR-14 zootehnic, legumicultură, alte sectoare și DR-18, în limita fondurilor; verifică situația AFIR înaintea depunerii.",
+            "audience": ["fermieri și forme asociative care îndeplinesc ghidurile AFIR aplicabile"],
+            "confirmed": ["Termen: 16 noiembrie 2026, ora 16:00, conform AFIR.", "DR-14 Achiziții simple este exclusă, fiind epuizată din 6 octombrie.", "Prag de calitate noiembrie: 40 puncte, conform AFIR."],
+            "notConfirmed": ["Disponibilul viitor al fondurilor și eligibilitatea unui solicitant concret necesită verificare curentă."],
+            "actions": ["Verifică la AFIR componenta și disponibilul curent.", "Deschide ghidul și anexele DR-14/DR-18 aplicabile.", "Pregătește depunerea înainte de 16 noiembrie, 16:00."],
+            "dossierId": "afir-dr14-2026",
+            "source": {"label": "AFIR — prelungire oficială DR-14/DR-18 din 30 octombrie 2026", "url": EXTENSION, "tier": "T1"},
+            "utilityScore": 100,
+        },
+        {
             "id": "news-afir-dr14-dr18-open-2026-09-01", "kind": "CALL_OPENED",
             "programme": "AFIR / PS PAC 2023-2027", "date": "2026-09-01T09:00:00+03:00",
             "headline": "DR-14 și DR-18 sunt deschise pentru depunere",
@@ -728,6 +797,7 @@ def news_items() -> list[dict[str, Any]]:
 
 def main() -> int:
     payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
+    counter_observed = dr14_dr18_extension_counter_proof()
     applicants14 = ["Fermieri, cu excepția persoanelor fizice."]
     applicants18 = [
         "Fermieri, cu excepția persoanelor fizice.",
@@ -737,19 +807,20 @@ def main() -> int:
     common_sources = [
         source("AFIR — anunț oficial de lansare DR-14 și DR-18", LAUNCH, ["status", "opening", "deadline", "budget", "grant", "scoring", "risks"], "2026-09-01T18:45:00+03:00"),
         source("AFIR — sesiuni primire proiecte", SESSIONS, ["status", "documents"], "2026-09-01T18:45:00+03:00"),
-        source("AFIR — contor fonduri disponibile", COUNTER, ["status", "opening", "deadline", "budget"], "2026-09-01T18:45:00+03:00"),
+        source("AFIR — contor fonduri disponibile", COUNTER, ["status", "opening", "deadline", "budget"], counter_observed),
+        source("AFIR — prelungire DR-14/DR-18, 30 octombrie", EXTENSION, ["status", "deadline", "risks"], EXTENSION_VERIFIED_AT),
     ]
     dossiers = [
         open_dossier(
             dossier_id="afir-dr14-2026", title="DR-14 — Investiții în fermele de mici dimensiuni", code="DR-14",
             applicants=applicants14,
-            activities=["Investiții tangibile și intangibile legate de modernizarea exploatațiilor agricole mici.", "Componente: zootehnic, legumicultură, alte sectoare și achiziții simple."],
+            activities=["Investiții tangibile și intangibile legate de modernizarea exploatațiilor agricole mici.", "Componente încă eligibile pentru depunere: zootehnic, legumicultură și alte sectoare; achiziții simple este epuizată."],
             budget="108.000.000 EUR", project_value="maximum 50.000 EUR/proiect; intensitate de maximum 85%", cofinancing="minimum 15%",
             scoring=["Prag minim 80 puncte în septembrie.", "Prag minim 40 puncte în octombrie."],
             documents=["Ghidul Solicitantului DR-14.", "Cererea de finanțare DR-14 — versiunea 1.1 din 2026.", "Fișa de evaluare E1.2 și anexele oficiale aplicabile componentei."],
-            risks=["Sesiunea se poate închide înainte de termen la epuizarea fondurilor.", "O versiune veche a cererii nu poate fi încărcată în sistem.", "Încadrarea greșită pe componentă sau un punctaj sub pragul lunar blochează depunerea utilă."],
+            risks=["DR-14 Achiziții simple este epuizată din 6 octombrie 2026 și NU intră în prelungire.", "Sesiunea se poate închide înainte de termen la epuizarea fondurilor.", "O versiune veche a cererii nu poate fi încărcată în sistem.", "Încadrarea greșită pe componentă sau un punctaj sub pragul lunar blochează depunerea utilă."],
             sources=[*common_sources, source("AFIR — Detalii și Anexe DR-14", DR14, ["beneficiaries", "eligibility", "activities", "grant", "cofinancing", "documents", "scoring"], "2026-09-01T18:45:00+03:00")],
-            standfirst="Sesiune deschisă pentru modernizarea fermelor mici: 108 milioane EUR în patru componente, maximum 50.000 EUR/proiect, intensitate de maximum 85% și termen 31 octombrie 2026, ora 16:00.",
+            standfirst="Sesiune deschisă pentru modernizarea fermelor mici: 108 milioane EUR în patru componente, maximum 50.000 EUR/proiect, intensitate de maximum 85% și termen prelungit 16 noiembrie 2026, ora 16:00, numai în limita fondurilor.",
         ),
         open_dossier(
             dossier_id="afir-dr18-2026", title="DR-18 — Investiții în floricultură, plante medicinale și aromatice", code="DR-18",
@@ -760,13 +831,95 @@ def main() -> int:
             documents=["Ghidul Solicitantului DR-18.", "Cererea de finanțare DR-18 și anexele economico-financiare.", "Fișa de evaluare E1.2 și anexele oficiale aplicabile."],
             risks=["Sesiunea se poate închide înainte de termen la epuizarea fondurilor.", "Intensitatea diferă în funcție de dimensiunea economică a exploatației.", "Activitățile secundare trebuie păstrate în limitele și condițiile ghidului."],
             sources=[*common_sources, source("AFIR — Detalii și Anexe DR-18", DR18, ["beneficiaries", "eligibility", "activities", "grant", "cofinancing", "documents", "scoring"], "2026-09-01T18:45:00+03:00"), source("AFIR — comunicat ghid final DR-18", DR18_RELEASE, ["beneficiaries", "activities", "grant", "cofinancing"], "2026-09-01T18:45:00+03:00")],
-            standfirst="Sesiune deschisă pentru floricultură, plante medicinale, aromatice și ornamentale: 5 milioane EUR, maximum 100.000 EUR/proiect și termen 31 octombrie 2026, ora 16:00.",
+            standfirst="Sesiune deschisă pentru floricultură, plante medicinale, aromatice și ornamentale: 5 milioane EUR, maximum 100.000 EUR/proiect și termen prelungit 16 noiembrie 2026, ora 16:00, numai în limita fondurilor.",
         ),
         dr31_dossier(),
         dr12_dossier(),
         energy_public_dossier(storage=False),
         energy_public_dossier(storage=True),
     ]
+
+    # A confirmed application window authorizes OPEN only until its exact
+    # deadline. After expiry, do not infer CLOSED; hold as REVIEW pending a new
+    # official source/reconciliation. This keeps the old dossier as history but
+    # prevents a stale OPEN from reaching any public/current surface.
+    if dt.datetime.now(dt.timezone.utc) >= dt.datetime.fromisoformat("2026-11-16T16:00:00+02:00"):
+        for dossier in dossiers[:2]:
+            dossier["status"] = "REVIEW"
+            dossier["statusLabel"] = "TERMEN DEPĂȘIT — STARE DE VERIFICAT"
+            dossier["decision"] = "VERIFICĂ"
+            dossier["decisionLabel"] = "VERIFICĂ"
+            dossier["decisionAction"] = "Termenul oficial verificat a expirat. Verifică o nouă comunicare AFIR; nu presupune depunere deschisă."
+            dossier["publicationState"] = "PROVISIONAL_FAIL_CLOSED"
+            dossier["standfirst"] = "Termenul din 16 noiembrie 2026 a expirat. Date istorice; nu există autorizare pentru un status OPEN nou fără dovadă AFIR."
+            dossier["executiveSummary"]["status"] = "REVIEW"
+            dossier["quality"]["verifiedFactClasses"] = [
+                fact_class for fact_class in dossier["quality"]["verifiedFactClasses"]
+                if fact_class != "status"
+            ]
+            dossier["quality"]["blockedFactClasses"] = ["status"]
+            for row in dossier.get("quickFacts") or []:
+                if row.get("label") == "Status":
+                    row.update(value="ÎN VERIFICARE", confidence="SYSTEM_GATED")
+            for section_row in dossier.get("sections") or []:
+                if section_row.get("title") in {"Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"}:
+                    section_row["items"] = [dossier["decisionAction"]]
+
+    # AFIR 11 Nov officially announced exhaustion of DR-12 "alte sectoare",
+    # while zootechnical submissions have a distinct window. This is a
+    # material component-scope change, NOT authorization to rewrite canon
+    # from a historical, all-components OPEN snapshot. The notice and two
+    # counters have separate immutable receipts on this PR; a reviewed,
+    # exact-component semantic handoff is still required before publication.
+    # A provisional REVIEW replaces any misleading blanket OPEN assertion
+    # in the new candidate; production LKG remains held by admission gates.
+    if dt.datetime.now(dt.timezone.utc) >= dt.datetime.fromisoformat("2026-11-11T08:48:00+02:00"):
+        dr12 = next(d for d in dossiers if d.get("id") == "afir-dr12-2026")
+        hold = ("Starea DR-12 trebuie reconciliată separat pe componente după "
+                "comunicarea AFIR din 11 noiembrie 2026. Verifică direct "
+                "contorul și comunicatul oficial; nu presupune că ambele "
+                "componente mai primesc cereri.")
+        dr12["status"] = "REVIEW"
+        dr12["statusLabel"] = "DISPONIBILITATE PE COMPONENTE — ÎN VERIFICARE"
+        dr12["decision"] = "VERIFICĂ"
+        dr12["decisionLabel"] = "VERIFICĂ"
+        dr12["decisionAction"] = hold
+        dr12["publicationState"] = "PROVISIONAL_FAIL_CLOSED"
+        dr12["standfirst"] = hold
+        dr12["executiveSummary"]["status"] = "REVIEW"
+        dr12["quality"]["verifiedFactClasses"] = [
+            key for key in dr12["quality"]["verifiedFactClasses"]
+            if key not in {"status", "deadline", "budget"}
+        ]
+        dr12["quality"]["blockedFactClasses"] = sorted(set(
+            dr12["quality"]["blockedFactClasses"]
+        ) | {"status", "deadline", "current_component_funds"})
+        dr12["quality"]["afirCurrentOpenBundle"] = False
+        dr12["quality"]["afirCurrentUpcomingBundle"] = False
+        for row in dr12.get("quickFacts") or []:
+            if row.get("label") in {"Status", "Termen"}:
+                row.update(value="ÎN VERIFICARE PE COMPONENTE", confidence="SYSTEM_GATED")
+            elif row.get("label") == "Buget":
+                row["confidence"] = "HISTORICAL_NOT_AVAILABILITY"
+        for row in dr12.get("sections") or []:
+            title = row.get("title")
+            if title == "Rezumat executiv":
+                # Preserve the mandatory executive-summary fact labels while
+                # gating component availability. Replacing the entire section
+                # with a one-line HOLD breaks product schema validation.
+                replacements = {
+                    "Stare apel:": "Stare apel: REVIEW — disponibilitate pe componente în verificare.",
+                    "Deschidere:": "Deschidere: 6 octombrie 2026, ora 09:00 (istoric; nu dovedește statut OPEN actual).",
+                    "Închidere:": "Închidere: ÎN VERIFICARE PE COMPONENTE; termenul general inițial de 2 decembrie 2026 nu dovedește disponibilitatea.",
+                    "Valoarea apelului:": "Valoarea apelului: 169.589.647 EUR alocare inițială, nu fonduri curente disponibile.",
+                }
+                gated = []
+                for item in row.get("items") or []:
+                    prefix = next((key for key in replacements if item.startswith(key)), None)
+                    gated.append(replacements[prefix] if prefix else item)
+                row["items"] = gated + [hold]
+            elif title in {"Decizia rapidă", "Ce trebuie făcut acum"}:
+                row["items"] = [hold]
 
     replace_codes = {"dr 12", "dr 14", "dr 18", "dr 31"}
     kept = []
@@ -795,9 +948,23 @@ def main() -> int:
     payload["policy"]["afirConsultationsNeverPresentedAsOpen"] = True
     payload["policy"]["afirEnergyPostLaunchEvidenceSourceBound"] = True
     dr12_open = next(row for row in dossiers if row.get("id") == "afir-dr12-2026").get("status") == "OPEN"
-    payload["policy"]["afirDr12UpcomingSourceBound"] = not dr12_open
+    dr12_state = next(row for row in dossiers if row.get("id") == "afir-dr12-2026").get("status")
+    payload["policy"]["afirDr12UpcomingSourceBound"] = dr12_state == "UPCOMING"
     payload["policy"]["afirDr12PostLaunchSourceBound"] = dr12_open
+    payload["policy"]["afirDr12ComponentReviewRequired"] = dr12_state == "REVIEW"
     payload.setdefault("qualityPass", {})["afirCurrentAuthoritativeDossiers"] = [row["id"] for row in dossiers]
+    # Product generation time follows the admitted source observation, not the
+    # hourly clock: unchanged sources must not create timestamp-only commits.
+    observed = dt.datetime.fromisoformat(EXTENSION_VERIFIED_AT.replace("Z", "+00:00"))
+    previous_generated = str(payload.get("generatedAt") or "")
+    try:
+        previous = dt.datetime.fromisoformat(previous_generated.replace("Z", "+00:00"))
+        if previous.tzinfo is None:
+            previous = previous.replace(tzinfo=dt.timezone.utc)
+    except ValueError:
+        previous = dt.datetime.min.replace(tzinfo=dt.timezone.utc)
+    if previous < observed:
+        payload["generatedAt"] = EXTENSION_VERIFIED_AT
 
     PRODUCTS.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     OUT_JS.write_text("window.PARTENER_DECISION_PRODUCTS=" + json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + ";\n", encoding="utf-8")

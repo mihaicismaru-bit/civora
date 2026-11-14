@@ -23,6 +23,7 @@ import re
 import shutil
 import unicodedata
 from pathlib import Path
+from zoneinfo import ZoneInfo
 from typing import Any
 from urllib.parse import urlparse
 from xml.sax.saxutils import escape as xml_escape
@@ -31,7 +32,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PRODUCTS = ROOT / "partener-eu" / "ingest" / "state" / "decision_products.json"
 DEFAULT_WEB = ROOT / "partener-eu" / "web"
 BASE_URL = "https://partener.eu"
-RO_TZ = dt.timezone(dt.timedelta(hours=3))
+RO_TZ = ZoneInfo("Europe/Bucharest")
 GENERATED_DIRS = ("finantari", "consultari", "dosare", "schimbari")
 
 STATUS_LABELS = {
@@ -122,6 +123,26 @@ def display_value(value: Any) -> str:
     return text
 
 
+def bucharest_datetime_utc(
+    year: int, month: int, day: int, hour: int, minute: int, second: int = 0
+) -> dt.datetime | None:
+    """Parse a local Romanian cutoff without guessing across DST transitions."""
+    try:
+        naive = dt.datetime(year, month, day, hour, minute, second)
+    except ValueError:
+        return None
+    first = naive.replace(tzinfo=RO_TZ, fold=0)
+    second_fold = naive.replace(tzinfo=RO_TZ, fold=1)
+    # 03:xx during October is ambiguous; 03:xx during March does not exist.
+    # Neither may authorize an OPEN badge without an explicit UTC offset.
+    if first.utcoffset() != second_fold.utcoffset():
+        return None
+    utc = first.astimezone(dt.timezone.utc)
+    if utc.astimezone(RO_TZ).replace(tzinfo=None) != naive:
+        return None
+    return utc
+
+
 def parse_date(value: Any) -> dt.datetime | None:
     raw = str(value or "").strip()
     if not raw:
@@ -132,6 +153,12 @@ def parse_date(value: Any) -> dt.datetime | None:
     try:
         parsed = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
         if parsed.tzinfo is None:
+            # A zoneless ISO clock has no proven official timezone. Treating
+            # 2026-11-11T00:00 as UTC could extend a Romanian deadline by
+            # two or three hours. A date-only historical field retains the
+            # existing conservative behavior; a timestamp fails closed.
+            if "T" in raw.upper() or re.search(r"\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}", raw):
+                return None
             parsed = parsed.replace(tzinfo=dt.timezone.utc)
         return parsed.astimezone(dt.timezone.utc)
     except ValueError:
@@ -151,21 +178,33 @@ def parse_date(value: Any) -> dt.datetime | None:
         "noiembrie": 11,
         "decembrie": 12,
     }
+    # fold() deliberately erases punctuation for search, so it cannot parse
+    # official times such as '6 noiembrie 2026, ora 12:00'. Keep : and .
+    # while normalizing diacritics for the public lifecycle cutoff parser.
+    normalized = "".join(
+        ch for ch in unicodedata.normalize("NFKD", raw.lower())
+        if not unicodedata.combining(ch)
+    )
     match = re.search(
-        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})(?:\D+(\d{1,2}):(\d{2}))?",
-        lowered,
+        r"\b(\d{1,2})\s+(" + "|".join(months) + r")\s+(20\d{2})\b",
+        normalized,
     )
     if not match:
         return None
-    return dt.datetime(
-        int(match.group(3)),
-        months[match.group(2)],
-        int(match.group(1)),
-        int(match.group(4) or 23),
-        int(match.group(5) or 59),
-        tzinfo=RO_TZ,
-    ).astimezone(dt.timezone.utc)
-
+    year, month, day = int(match.group(3)), months[match.group(2)], int(match.group(1))
+    tail = normalized[match.end():]
+    timed = re.match(
+        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?\b",
+        tail,
+    )
+    if timed:
+        return bucharest_datetime_utc(
+            year, month, day, int(timed.group(1)), int(timed.group(2)), int(timed.group(3) or 0)
+        )
+    # A stated but unparseable hour must never silently become EOD.
+    if re.match(r"^\s*,?\s*(?:(?:la\s+)?ora\b|(?:la\s+)?\d{1,2}[:.])", tail):
+        return None
+    return bucharest_datetime_utc(year, month, day, 23, 59, 59)
 
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
@@ -176,8 +215,23 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
         return False
     if not deadline or str(deadline.get("confidence") or "").upper() != "CONFIRMED":
         return False
+    # Status must be semantically OPEN in the confirmed source fact too.
+    # A stale top-level OPEN cannot override a newer CONFIRMED CLOSED/REVIEW
+    # observation, even if the deadline still lies in the future.
+    if fold(status.get("value")) not in {"open", "deschis"}:
+        return False
     closes = parse_date(deadline.get("value"))
-    return closes is not None and closes >= clock
+    if closes is None or closes <= clock:
+        return False
+    # Reject mismatched or unparseable top-level cutoffs rather than silently
+    # selecting the later one. The confirmed Termen remains the comparison
+    # anchor; this is a render-only hold, never a canonical CLOSED assertion.
+    for key in ("deadline", "closesAt", "closeAt"):
+        if dossier.get(key) not in (None, ""):
+            other = parse_date(dossier[key])
+            if other is None or other != closes:
+                return False
+    return True
 
 
 def requires_open_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
@@ -202,8 +256,23 @@ def current_consultation(dossier: dict[str, Any], clock: dt.datetime) -> bool:
         return False
     if not deadline or str(deadline.get("confidence") or "").upper() != "CONFIRMED":
         return False
+    # A confirmed deadline cannot make a consultation active if the confirmed
+    # Status fact says OPEN, CLOSED, REVIEW or any other lifecycle stage.
+    if fold(status.get("value")) not in {
+        "public consultation", "in consultare", "consultare publica"
+    }:
+        return False
     closes = parse_date(deadline.get("value"))
-    return closes is not None and closes >= clock
+    if closes is None or closes <= clock:
+        return False
+    # Reconcile every present top-level cutoff against the confirmed Termen.
+    # A conflict is REVIEW-only in the public render, not a canonical closure.
+    for key in ("deadline", "closesAt", "closeAt"):
+        if dossier.get(key) not in (None, ""):
+            other = parse_date(dossier[key])
+            if other is None or other != closes:
+                return False
+    return True
 
 
 def requires_consultation_refresh(dossier: dict[str, Any], clock: dt.datetime) -> bool:
@@ -212,6 +281,38 @@ def requires_consultation_refresh(dossier: dict[str, Any], clock: dt.datetime) -
         and dossier.get("status") == "PUBLIC_CONSULTATION"
         and not current_consultation(dossier, clock)
     )
+
+
+def guard_expired_dr12_stage_advice(
+    dossier: dict[str, Any], clock: dt.datetime
+) -> dict[str, Any]:
+    """Suppress an expired first-stage instruction; never infer a new threshold.
+
+    DR-12's first quality stage ended on 5 November 2026 (official AFIR
+    announcement dated 1 October). The following period's threshold is
+    evidence-watch only until canonical review. Static pages may not continue
+    telling applicants to simulate the already-ended first stage.
+    """
+    if (
+        str(dossier.get("id") or "") != "afir-dr12-2026"
+        or clock.astimezone(RO_TZ).date() < dt.date(2026, 11, 6)
+    ):
+        return dossier
+    guarded = None
+    for index, section in enumerate(dossier.get("sections") or []):
+        if fold(section.get("title")) != "ce trebuie facut acum":
+            continue
+        for item_index, item in enumerate(section.get("items") or []):
+            words = fold(item)
+            if "primei etape" not in words or not re.search(r"\b80\b", words):
+                continue
+            if guarded is None:
+                guarded = copy.deepcopy(dossier)
+            guarded["sections"][index]["items"][item_index] = (
+                "Verifică pragul de calitate al etapei curente în anunțul "
+                "și ghidul oficial AFIR înainte de depunere."
+            )
+    return guarded if guarded is not None else dossier
 
 
 def fail_closed_render_dossier(
@@ -226,7 +327,7 @@ def fail_closed_render_dossier(
     open_refresh = requires_open_refresh(dossier, clock)
     consultation_refresh = requires_consultation_refresh(dossier, clock)
     if not open_refresh and not consultation_refresh:
-        return dossier
+        return guard_expired_dr12_stage_advice(dossier, clock)
 
     rendered = copy.deepcopy(dossier)
     rendered["status"] = "REVIEW"
@@ -609,11 +710,18 @@ def compact_home_news(
 def build(
     products_path: Path = DEFAULT_PRODUCTS,
     web_root: Path = DEFAULT_WEB,
+    *,
+    evaluated_at: dt.datetime | None = None,
 ) -> dict[str, Any]:
     payload = json.loads(products_path.read_text(encoding="utf-8"))
     dossiers = payload.get("dossiers") or []
     news = payload.get("news") or []
-    generated = parse_date(payload.get("generatedAt")) or dt.datetime.now(dt.timezone.utc)
+    # generatedAt describes the age of the source artifact, not the time now.
+    # Rendering must quarantine windows that expired since the last ingest.
+    generated = evaluated_at if evaluated_at is not None else dt.datetime.now(dt.timezone.utc)
+    if generated.tzinfo is None or generated.utcoffset() is None:
+        raise ValueError("public render clock requires an aware datetime")
+    generated = generated.astimezone(dt.timezone.utc)
 
     for dirname in GENERATED_DIRS:
         shutil.rmtree(web_root / dirname, ignore_errors=True)

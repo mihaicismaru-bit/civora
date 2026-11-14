@@ -78,6 +78,74 @@ def main():
     if ro_row["observation_state"] != "OPEN_CALL" or ro_row["call_identifier"] != "EEA-CSF-RO-CALL-06":
         fail("official Romanian-language call detail path must retain the same authority gate")
 
+    # The legacy official Call 1 page may retain an OPEN badge after the
+    # published 8 October deadline. Never treat stale status as active.
+    elapsed = module.normalize_record(
+        base_record(), fetched_at="2026-11-09T00:15:00Z",
+        run_id="TEST-EXPIRED-LEGACY-OPEN", raw_hash="raw-legacy-open",
+        verified_authority_urls=[CALL1],
+    )
+    if (elapsed["observation_state"] != "UNKNOWN"
+            or elapsed["status_label"] != "Open"
+            or elapsed["deadline_candidate"] != "08/10/2026"
+            or not elapsed["requires_reconcile"]
+            or elapsed["publish_authorized"]):
+        fail("elapsed official deadline must quarantine stale OPEN without claiming CLOSED")
+
+    # Official EEA CSF index: 8 October 2026, 16:00 Bucharest (13:00Z).
+    # The exact cutoff is source-bound to this 2026 programme; the legacy
+    # call-detail OPEN badge is stale at 16:00, not at Romanian midnight.
+    for stamped, expected in (
+        ("2026-10-08T12:59:59Z", "OPEN_CALL"),
+        ("2026-10-08T13:00:00Z", "UNKNOWN"),
+        ("2026-10-08T18:15:00Z", "UNKNOWN"),
+        ("2026-10-08T20:59:59Z", "UNKNOWN"),
+        ("2026-10-08T21:00:00Z", "UNKNOWN"),
+    ):
+        row = module.normalize_record(
+            base_record(), fetched_at=stamped, run_id="TEST-EEA-OFFICIAL-1600-CUTOFF",
+            raw_hash="raw-eest", verified_authority_urls=[CALL1],
+        )
+        if row["observation_state"] != expected or row["publish_authorized"]:
+            fail(f"official EEA CSF 16:00 cutoff misclassified OPEN: {stamped}: {row}")
+
+    # A synthetic later deadline has no independently verified cutoff hour.
+    # Hold same-day OPEN even before midnight, across EET/EEST boundaries.
+    winter = base_record()
+    winter["submissionDeadline"] = "08/11/2026"
+    for stamped, expected in (
+        ("2026-11-07T21:59:59Z", "OPEN_CALL"),
+        ("2026-11-07T22:00:00Z", "UNKNOWN"),
+        ("2026-11-08T11:00:00Z", "UNKNOWN"),
+        ("2026-11-08T21:59:59Z", "UNKNOWN"),
+        ("2026-11-08T22:00:00Z", "UNKNOWN"),
+    ):
+        row = module.normalize_record(
+            winter, fetched_at=stamped, run_id="TEST-EEA-UNKNOWN-HOUR-EET",
+            raw_hash="raw-eet", verified_authority_urls=[CALL1],
+        )
+        if row["observation_state"] != expected or row["publish_authorized"]:
+            fail(f"unverified same-day cutoff admitted stale OPEN: {stamped}: {row}")
+
+    # A naive timestamp lacks a trustworthy observation timezone.
+    naive = module.normalize_record(
+        base_record(), fetched_at="2026-10-08T22:00:00",
+        run_id="TEST-EEA-NAIVE-TIME", raw_hash="raw-naive",
+        verified_authority_urls=[CALL1],
+    )
+    if naive["observation_state"] != "UNKNOWN":
+        fail("timezone-less acquisition timestamp must not establish OPEN")
+
+    malformed = base_record()
+    malformed["submissionDeadline"] = "not-a-date"
+    malformed_row = module.normalize_record(
+        malformed, fetched_at="2026-11-09T00:15:00Z",
+        run_id="TEST-MALFORMED-DEADLINE", raw_hash="raw-malformed",
+        verified_authority_urls=[CALL1],
+    )
+    if malformed_row["observation_state"] != "UNKNOWN":
+        fail("malformed deadline must not authorize OPEN_CALL")
+
     unverified = module.normalize_record(
         base_record(),
         fetched_at=FETCHED,
@@ -111,6 +179,42 @@ def main():
     )
     if third_row["authority_url"] is not None or third_row["observation_state"] != "UNKNOWN":
         fail("non-FMO host must never authorize EEA CSF call state")
+
+    # A forged endpoint may retain an official hostname while smuggling
+    # credentials or an alternate port. Exact-call origin cannot be promoted.
+    for unsafe in (
+        CALL1.replace("https://eeagrants.org/", "https://user@eeagrants.org/"),
+        CALL1.replace("https://eeagrants.org/", "https://user:pass@eeagrants.org/"),
+        CALL1.replace("https://eeagrants.org/", "https://eeagrants.org:8443/"),
+        CALL1 + "?tracking=1",
+        CALL1 + "#submission",
+        CALL1 + ";session=123",
+        CALL1 + "/;session=123",
+        CALL1 + "/another-call",
+        CALL1 + "%2Fanother-call",
+    ):
+        forged = base_record()
+        forged["authorityUrl"] = unsafe
+        row = module.normalize_record(
+            forged, fetched_at=FETCHED, run_id="TEST-UNSAFE-ORIGIN",
+            raw_hash="raw-unsafe", verified_authority_urls=[unsafe],
+        )
+        if row["authority_url"] is not None or row["authority_url_verified"] or row["observation_state"] != "UNKNOWN":
+            fail(f"unsafe EEA official-looking endpoint admitted: {unsafe}")
+
+    # An exact official page for Call #6 is not proof of Call #1, even if the
+    # input record and verified URL list both claim an authoritative readback.
+    crossed = base_record()
+    crossed["authorityUrl"] = CALL6_RO
+    crossed_row = module.normalize_record(
+        crossed, fetched_at=FETCHED, run_id="TEST-CALL-ID-MISMATCH",
+        raw_hash="raw-crossed", verified_authority_urls=[CALL6_RO],
+    )
+    if (crossed_row["call_identifier"] != "EEA-CSF-RO-CALL-01"
+            or crossed_row["authority_url_verified"]
+            or crossed_row["observation_state"] != "UNKNOWN"
+            or not crossed_row["requires_reconcile"]):
+        fail("mismatched EEA exact-call identifier/official slug incorrectly authorized")
 
     pipeline = base_record()
     pipeline["observationState"] = "PROGRAMME_PREPARATION"

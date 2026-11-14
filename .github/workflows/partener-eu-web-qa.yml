@@ -122,6 +122,7 @@ jobs:
         run: |
           python partener-eu/ops/test_public_language.py
           node partener-eu/ops/test_home_freshness_guard.mjs
+          node partener-eu/ops/test_home_concierge_freshness.mjs
           python partener-eu/ops/test_decision_products.py
 
       - name: Syntax-check active web control modules

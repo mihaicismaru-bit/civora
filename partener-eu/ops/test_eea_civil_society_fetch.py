@@ -85,10 +85,295 @@ def fake_fetch(url):
     raise AssertionError(f"unexpected URL {url}")
 
 
+def test_transport_integrity():
+    """Transport and raw-byte evidence tests are hermetic: never contact a live host."""
+    from urllib.request import Request
+
+    allowed_alias = CALL1.replace("https://eeagrants.org/", "https://www.eeagrants.org/")
+    if module._same_official_endpoint(CALL1, allowed_alias + "/") != allowed_alias:
+        fail("official same-endpoint www/trailing-slash alias must remain supported")
+
+    # Query, fragment and semicolon path parameters must not be silently
+    # discarded by canonicalization or converted into an exact-source anchor.
+    # A misleading official link cannot be a source identity proof.
+    for bad in (INDEX + "?page=1", INDEX + "#archived",
+                CALL1 + "?tracking=1", CALL1 + "#preview",
+                CALL1 + ";session=old"):
+        try:
+            module._official_url(bad)
+        except ValueError:
+            pass
+        else:
+            fail(f"EEA endpoint canonicalizer accepted a modified source URL: {bad}")
+    for bad in (CALL1 + "?tracking=1", CALL1 + "#preview",
+                CALL1 + ";session=old"):
+        html = f'<html><body><a href="{bad}">Call 1</a></body></html>'.encode()
+        if module.discover_call_urls(html, base_url=INDEX):
+            fail(f"modified official anchor was promoted to exact call discovery: {bad}")
+    if module.discover_call_urls(
+        f'<html><body><a href="{CALL1}">Call 1</a></body></html>'.encode(),
+        base_url=INDEX,
+    ) != [CALL1]:
+        fail("unchanged exact official call link must still be discoverable")
+
+    redirect = module._RegisteredEEARedirect(CALL1)
+    if redirect.redirect_request(Request(CALL1), None, 302, "Moved", {}, allowed_alias) is None:
+        fail("same-owner same-article redirect was unexpectedly rejected")
+    for bad in (
+        "http://eeagrants.org/en/eea-civil-society-fund-romania/calls/" + CALL1.rsplit("/", 1)[-1],
+        "https://example.org/collect",
+        CALL2,
+        CALL1 + "?tracking=1",
+        "https://www.eeagrants.org/en/eea-civil-society-fund-romania/calls",
+    ):
+        try:
+            redirect.redirect_request(Request(CALL1), None, 302, "Moved", {}, bad)
+        except ValueError:
+            pass
+        else:
+            fail(f"redirect hop crossed exact official source before fetch: {bad}")
+
+    class RawResponse:
+        def __init__(self, body, *, final_url=CALL1, status=200, content_type="text/html", **headers):
+            self.body = body
+            self.final_url = final_url
+            self.status = status
+            self.headers = {"Content-Type": content_type, **headers}
+        def __enter__(self):
+            return self
+        def __exit__(self, *args):
+            return False
+        def getcode(self):
+            return self.status
+        def geturl(self):
+            return self.final_url
+        def read(self, size):
+            return self.body[:size]
+
+    original_open = module._open_registered_source
+    def attempt(reply):
+        module._open_registered_source = lambda request, *, timeout: reply
+        try:
+            return module.fetch_url(CALL1)
+        finally:
+            module._open_registered_source = original_open
+
+    raw = CALL1_HTML
+    good = attempt(RawResponse(raw, **{"Content-Length": str(len(raw))}))
+    if good["raw"] != raw or good["status"] != 200 or good["final_url"] != CALL1:
+        fail("valid complete EEA HTTPS raw reply must remain byte-identical")
+    for bad, label in (
+        (RawResponse(raw[:50], **{"Content-Length": str(len(raw))}), "truncated"),
+        (RawResponse(raw, **{"Content-Length": "bogus"}), "invalid length"),
+        (RawResponse(raw, **{"Content-Length": "1,1"}), "conflicting length"),
+        (RawResponse(raw, **{"Content-Encoding": "gzip"}), "compressed"),
+        (RawResponse(raw, status=206), "partial HTTP"),
+        (RawResponse(raw, final_url=CALL2), "redirect-to-other-call"),
+        (RawResponse(raw, final_url="https://example.org/evil"), "off-authority"),
+        (RawResponse(raw, content_type="application/pdf"), "non-HTML"),
+        (RawResponse(raw, content_type="application/json; note=text/html"), "HTML token in parameter"),
+        (RawResponse(raw, content_type="text/html-spoofed"), "HTML token in forged subtype"),
+        (RawResponse(raw, content_type="application/x-application/xhtml+xml"), "XHTML token in forged subtype"),
+        (RawResponse(b""), "empty body"),
+    ):
+        try:
+            attempt(bad)
+        except (ValueError, RuntimeError):
+            pass
+        else:
+            fail(f"EEA raw acquisition accepted an unsafe {label} response")
+
+
+
+def test_visible_html_evidence_only():
+    """Hidden markup cannot assert OPEN, change a deadline or inject exact links."""
+    forged = (
+        f'<h1>Forged #999</h1>Call for projects Open '
+        f'Submission Deadline: 01/01/2099 <a href="{CALL2}">other call</a>'
+    )
+    wrappers = [
+        ('<template>', '</template>'),
+        ('<head>', '</head>'),
+        ('<script type="text/plain">', '</script>'),
+        ('<div hidden>', '</div>'),
+        ('<div inert>', '</div>'),
+        ('<div aria-hidden="true">', '</div>'),
+        ('<div aria-hidden="false" aria-hidden="true">', '</div>'),
+        ('<div style="display:none">', '</div>'),
+        ('<div style="display:block" style="visibility:hidden">', '</div>'),
+        ('<div style="opacity:0">', '</div>'),
+        ('<div style="opacity:0!important">', '</div>'),
+        ('<div style="opacity:0.0 ! important;display:block">', '</div>'),
+        ('<div style="content-visibility:hidden">', '</div>'),
+        ('<div class="d-none">', '</div>'),
+        ('<div class="d-md-none">', '</div>'),
+        ('<div class="d-xxl-none">', '</div>'),
+        ('<div class="hidden">', '</div>'),
+        ('<div class="invisible">', '</div>'),
+        ('<div class="visually-hidden">', '</div>'),
+        ('<div class="sr-only">', '</div>'),
+        ('<div class="collapse">', '</div>'),
+        ('<div class="collapsing">', '</div>'),
+        ('<div class="tab-pane">', '</div>'),
+        ('<div class="d-block" class="d-sm-none">', '</div>'),
+        ('<div popover>', '</div>'),
+        ('<div popover="manual">', '</div>'),
+        ('<textarea>', '</textarea>'),
+        ('<canvas>', '</canvas>'),
+        ('<dialog>', '</dialog>'),
+        ('<details>', '</details>'),
+        ('<datalist>', '</datalist>'),
+        ('<iframe>', '</iframe>'),
+        ('<svg>', '</svg>'),
+    ]
+    baseline = (
+        b'<html><body><h1>Call #1 Valid</h1>'
+        b'<div>Call for projects Closed</div>'
+        b'Submission Deadline: 08/10/2026'
+    )
+    for opening, closing in wrappers:
+        injected = (opening + forged + closing).encode("utf-8")
+        parsed = module.parse_call_page(
+            baseline + injected + b'</body></html>', authority_url=CALL1
+        )
+        if parsed["status"] != "Closed":
+            fail(f"hidden {opening} forged OPEN status")
+        if parsed["submissionDeadline"] != "08/10/2026":
+            fail(f"hidden {opening} forged material deadline")
+        if parsed["title"] != "Call #1 Valid":
+            fail(f"hidden {opening} forged title identity")
+        index_links = module.discover_call_urls(
+            b'<html><body>' + injected + b'</body></html>', base_url=INDEX
+        )
+        if index_links:
+            fail(f"hidden {opening} forged source discovery link")
+
+    visible_conflict = (baseline +
+        b'<p>Call for projects Open</p></body></html>')
+    parsed = module.parse_call_page(visible_conflict, authority_url=CALL1)
+    if parsed["status"] is not None:
+        fail("contradictory visible OPEN/CLOSED must be UNKNOWN, never OPEN")
+    normalized = module.adapter.normalize_record(
+        parsed, fetched_at=FETCHED, run_id="TEST-CONTRADICTORY-STATUS",
+        raw_hash=hashlib.sha256(visible_conflict).hexdigest(),
+        verified_authority_urls=[CALL1],
+    )
+    if normalized is None or normalized["observation_state"] != "UNKNOWN":
+        fail("ambiguous status must propagate fail-closed through adapter")
+
+    # Visibly rendered, partially transparent editorial prose remains evidence.
+    partially_visible = (
+        b'<html><body><h1>Call #1 Valid</h1>'
+        b'<div style="opacity:0.4">Call for projects Open</div></body></html>'
+    )
+    if module.parse_call_page(partially_visible, authority_url=CALL1)["status"] != "Open":
+        fail("partially transparent visible source prose was incorrectly suppressed")
+
+    visible_details = (
+        b'<html><body><h1>Call #1 Valid</h1>'
+        b'<details open><div>Call for projects Open</div></details></body></html>'
+    )
+    if module.parse_call_page(visible_details, authority_url=CALL1)["status"] != "Open":
+        fail("explicitly open and visible details must remain usable")
+    # Known visible Bootstrap states remain usable. Hidden classes in separate
+    # attributes are still excluded by the adversarial table above.
+    for wrapper in ('class="collapse show"', 'class="tab-pane active show"',
+                    'class="d-block"', 'class="visible"'):
+        html = (
+            b'<html><body><h1>Call #1 Valid</h1><div '
+            + wrapper.encode() + b'>Call for projects Open</div></body></html>'
+        )
+        if module.parse_call_page(html, authority_url=CALL1)["status"] != "Open":
+            fail(f"visible CSS component unexpectedly suppressed: {wrapper}")
+
+
+
+def test_handoff_response_integrity():
+    """The injected source transport must satisfy the network fetch contract."""
+    cases = [
+        ("non-200", {"status": 404}),
+        ("string-status", {"status": "200"}),
+        ("non-html", {"content_type": "application/json; note=text/html"}),
+        ("empty-body", {"raw": b""}),
+        ("oversized-body", {"raw": b"x" * (module.MAX_BYTES + 1)}),
+        ("not-raw-bytes", {"raw": "<html>fake</html>"}),
+        ("wrong-request", {"requested_url": CALL2}),
+        ("missing-request", {"requested_url": None}),
+    ]
+    for name, mutation in cases:
+        def bad_index(url):
+            if url != INDEX:
+                raise AssertionError("invalid index should fail before following detail links")
+            return {**response(INDEX, INDEX_HTML), **mutation}
+
+        try:
+            module.collect_live(
+                index_url=INDEX, run_id="TEST-INDEX-" + name,
+                fetched_at=FETCHED, minimum_calls=2, fetcher=bad_index,
+            )
+        except ValueError:
+            pass
+        else:
+            fail(f"unverified index handoff was accepted: {name}")
+
+        def bad_detail(url):
+            if url == INDEX:
+                return response(url, INDEX_HTML)
+            if url == CALL1:
+                return {**response(url, CALL1_HTML), **mutation}
+            if url == CALL2:
+                return response(url, CALL2_HTML)
+            raise AssertionError(f"unexpected source {url}")
+
+        evidence = module.collect_live(
+            index_url=INDEX, run_id="TEST-DETAIL-" + name,
+            fetched_at=FETCHED, minimum_calls=2, fetcher=bad_detail,
+        )
+        if evidence["stats"]["errors"] != 1 or evidence["errors"][0]["url"] != CALL1:
+            fail(f"invalid detail must be quarantined with a source error: {name}")
+        if len(evidence["pages"]) != 1 or evidence["pages"][0]["requested_url"] != CALL2:
+            fail(f"invalid detail entered verified pages: {name}")
+        if any(r["call_identifier"] == "EEA-CSF-RO-CALL-01" for r in evidence["records"]):
+            fail(f"invalid detail entered normalized records: {name}")
+        if evidence["publish_authorized"] or evidence["material_fact_use"]:
+            fail(f"invalid detail authorized publication: {name}")
+
+
 def main():
+    test_transport_integrity()
+    test_handoff_response_integrity()
+    test_visible_html_evidence_only()
     urls = module.discover_call_urls(INDEX_HTML, base_url=INDEX)
     if urls != [CALL1, CALL2]:
         fail(f"call discovery must prefer EN, order by call number and ignore third party: {urls}")
+
+    # Duplicate links to the same endpoint are harmless; distinct official
+    # slugs with the same call identity/language are not. In particular,
+    # legacy and current aliases can disagree about OPEN versus CLOSED.
+    legacy_alias = CALL1.replace(
+        "call-1-strengthening-", "call-1-legacy-strengthening-"
+    )
+    for first, second in ((CALL1, legacy_alias), (legacy_alias, CALL1)):
+        ambiguous_index = (
+            '<html><body>'
+            f'<a href="{first}">Call 1</a>'
+            f'<a href="{second}">Call 1 alternate</a>'
+            '</body></html>'
+        ).encode()
+        try:
+            module.discover_call_urls(ambiguous_index, base_url=INDEX)
+        except RuntimeError as exc:
+            if "ambiguous official EEA call 1" not in str(exc):
+                fail(f"wrong duplicate-source rejection: {exc}")
+        else:
+            fail("same-language conflicting official call aliases were silently selected")
+
+    repeated = (
+        f'<html><body><a href="{CALL1}">Call 1</a>'
+        f'<a href="{CALL1}">Call 1 repeated</a></body></html>'
+    ).encode()
+    if module.discover_call_urls(repeated, base_url=INDEX) != [CALL1]:
+        fail("repeated identical official endpoint must not create ambiguity")
 
     parsed = module.parse_call_page(CALL1_HTML, authority_url=CALL1)
     if parsed["callNumber"] != "1" or parsed["status"] != "Open":
@@ -142,7 +427,117 @@ def main():
     else:
         fail("non-official redirect must fail closed before call parsing")
 
-    print("PASS EEA CSF live acquisition: official discovery, exact-page readback, raw hashes, parsing, reconciliation and redirect guard")
+    # An injected acquisition transport may report HTTP 200 on eeagrants.org
+    # while silently rebinding the index to an exact call page. The collector
+    # must reject this before any source discovery or material reconciliation.
+    def wrong_official_index(url):
+        if url == INDEX:
+            return response(url, INDEX_HTML, final_url=CALL1)
+        raise AssertionError("untrusted index redirect was followed")
+
+    try:
+        module.collect_live(
+            index_url=INDEX, run_id="TEST-INDEX-SIBLING-REDIRECT",
+            fetched_at=FETCHED, minimum_calls=1, fetcher=wrong_official_index,
+        )
+    except ValueError:
+        pass
+    else:
+        fail("same-host index redirect to a different official page was trusted")
+
+    # A sibling exact call is also a different immutable authority endpoint,
+    # even though it shares the same official host and a valid call slug.
+    def wrong_official_detail(url):
+        if url == INDEX:
+            return response(url, INDEX_HTML)
+        if url == CALL1:
+            return response(url, CALL1_HTML, final_url=CALL2)
+        if url == CALL2:
+            return response(url, CALL2_HTML)
+        raise AssertionError(f"unexpected source {url}")
+
+    rebound = module.collect_live(
+        index_url=INDEX, run_id="TEST-DETAIL-SIBLING-REDIRECT",
+        fetched_at=FETCHED, minimum_calls=2, fetcher=wrong_official_detail,
+    )
+    if len(rebound["errors"]) != 1 or rebound["errors"][0]["url"] != CALL1:
+        fail("same-host call-detail substitution must yield an explicit source error")
+    if any(p["requested_url"] == CALL1 for p in rebound["pages"]):
+        fail("rebound call-detail source must not enter the verified raw handoff")
+    if rebound["stats"]["open_call_evidence"] != 1 or rebound["publish_authorized"]:
+        fail("untrusted official sibling source incorrectly altered EEA admission")
+
+    # Current official index describes validated applications but no longer
+    # server-renders the seven exact call-detail anchors (November 2026).
+    transitioned_index = (
+        b"<html><body><h1>Calls</h1>"
+        b"EEA Civil Society Fund in Romania: a total of 863 applications "
+        b"validated under the seven calls for proposals."
+        b"<p>No results found</p></body></html>"
+    )
+    fallback, mode, direct_count = module.discover_with_official_fallback(
+        transitioned_index, base_url=INDEX, minimum_calls=7
+    )
+    expected_urls = [url for _, url in module.PINNED_OFFICIAL_CALLS]
+    if fallback != expected_urls or direct_count != 0 or not mode.startswith("PINNED_"):
+        fail("official seven-call transition must use exact pinned detail URLs")
+
+    def fetch_transitioned(url):
+        if url == INDEX:
+            return response(url, transitioned_index)
+        for number, exact in module.PINNED_OFFICIAL_CALLS:
+            if url == exact:
+                html = (CALL1_HTML
+                    .replace(b"Call #1", f"Call #{number}".encode())
+                    .replace(b"<div>Open</div>", b"<div>Closed</div>"))
+                return response(url, html)
+        raise AssertionError(f"unexpected pinned source {url}")
+
+    resumed = module.collect_live(
+        index_url=INDEX, run_id="TEST-TRANSITIONED-INDEX",
+        fetched_at=FETCHED, minimum_calls=7, fetcher=fetch_transitioned,
+    )
+    if resumed["stats"]["closed_call_evidence"] != 7 or resumed["stats"]["errors"]:
+        fail("seven exact pinned pages must receive independent closed-call readback")
+    if resumed["stats"]["index_direct_exact_call_links"] != 0:
+        fail("pinned URLs must never be falsely reported as observed index anchors")
+    if not resumed["stats"]["official_pinned_fallback_used"]:
+        fail("fallback origin must be explicit in the evidence")
+    if resumed["source_index"]["raw_hash"] != hashlib.sha256(transitioned_index).hexdigest():
+        fail("changed official index raw SHA-256 must be preserved")
+    if resumed["publish_authorized"] or resumed["material_fact_use"]:
+        fail("pinned fallback cannot authorize any material fact or publication")
+
+    def fake_unverified_index(url):
+        if url == INDEX:
+            return response(url, b"<html><h1>Calls</h1>Seven calls for proposals</html>")
+        raise AssertionError("unverified index must not fetch call details")
+
+    for minimum in (1, 7):
+        try:
+            module.collect_live(
+                index_url=INDEX, run_id="TEST-UNVERIFIED-INDEX",
+                fetched_at=FETCHED, minimum_calls=minimum, fetcher=fake_unverified_index,
+            )
+        except RuntimeError as exc:
+            if "below minimum" not in str(exc):
+                fail(f"unexpected unverified index error: {exc}")
+        else:
+            fail("unverified index must fail closed instead of using pinned URLs")
+
+    # Partial index anchors block fallback; missing links cannot be filled silently.
+    partial = INDEX_HTML.replace(
+        f'<a href="{CALL1}">Call 1</a>'.encode(), b""
+    ).replace(
+        b'<a href="/ro/eea-civil-society-fund-romania/calls/call-1-strengthening-democracy-and-rule-law-through-civil-society-initiatives">Apel 1 duplicate language</a>', b""
+    )
+    only_links, mode, direct_count = module.discover_with_official_fallback(
+        partial, base_url=INDEX, minimum_calls=7
+    )
+    if len(only_links) != 1 or mode != "INDEX_EXACT_ANCHORS" or direct_count != 1:
+        fail("partial official index must remain incomplete; no pinned fallback")
+
+    print("PASS EEA CSF live acquisition: visible-only status/links, ambiguous-status hold, exact redirect/bytes, raw hashes, non-publishing reconciliation")
 
 
 if __name__ == "__main__":

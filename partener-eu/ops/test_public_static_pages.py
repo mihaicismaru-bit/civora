@@ -76,6 +76,84 @@ assert "DESCHIS" not in expired_card
 assert "Sunt confirmate: open" not in expired_card
 assert module.FAIL_CLOSED_OPEN_STANDFIRST in expired_card
 
+# Cross-surface semantic reconciliation: an authoritative CONFIRMED status
+# that disagrees with the stale OPEN field must not survive static rendering.
+# Nor may a later top-level cutoff overrule the confirmed Termen fact.
+semantic_clock = module.parse_date("2026-11-10T00:25:00Z")
+assert semantic_clock is not None
+future_open = json.loads(json.dumps(expired_open_probe))
+for row in future_open["quickFacts"]:
+    if row["label"] == "Termen":
+        row["value"] = "2026-11-20T23:59:00+02:00"
+assert module.current_open(future_open, semantic_clock)
+confirmed_closed = json.loads(json.dumps(future_open))
+for row in confirmed_closed["quickFacts"]:
+    if row["label"] == "Status":
+        row["value"] = "CLOSED"
+assert not module.current_open(confirmed_closed, semantic_clock)
+assert module.fail_closed_render_dossier(confirmed_closed, semantic_clock)["status"] == "REVIEW"
+confirmed_review = json.loads(json.dumps(future_open))
+for row in confirmed_review["quickFacts"]:
+    if row["label"] == "Status":
+        row["value"] = "REVIEW"
+assert not module.current_open(confirmed_review, semantic_clock)
+confirmed_ro_open = json.loads(json.dumps(future_open))
+for row in confirmed_ro_open["quickFacts"]:
+    if row["label"] == "Status":
+        row["value"] = "DESCHIS"
+assert module.current_open(confirmed_ro_open, semantic_clock)
+conflicting_deadline = json.loads(json.dumps(future_open))
+conflicting_deadline["deadline"] = "2026-12-02T23:59:00+02:00"
+assert not module.current_open(conflicting_deadline, semantic_clock)
+assert module.fail_closed_render_dossier(conflicting_deadline, semantic_clock)["status"] == "REVIEW"
+invalid_deadline = json.loads(json.dumps(future_open))
+invalid_deadline["closesAt"] = "ora imposibilă"
+assert not module.current_open(invalid_deadline, semantic_clock)
+matching_deadline = json.loads(json.dumps(future_open))
+matching_deadline["deadline"] = "2026-11-20T23:59:00+02:00"
+assert module.current_open(matching_deadline, semantic_clock)
+
+# DR-12 source announced two monthly scoring stages on 1 October 2026.
+# Protect applicant actions from advising the finished 80-point first stage
+# after 5 November; do not invent/auto-promote the following 45-point stage.
+dr12_stage_action = {
+    "id": "afir-dr12-2026", "title": "DR-12",
+    "publicationState": "PUBLISHABLE", "status": "OPEN",
+    "quickFacts": [
+        {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "2026-12-02T16:00:00+02:00", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Ce trebuie făcut acum", "items": [
+            "Confirmă forma juridică.",
+            "Simulează punctajul pentru pragul de 80 de puncte al primei etape.",
+        ]},
+        {"title": "Cum se punctează", "items": [
+            "Prag de calitate: 80 puncte în perioada 6 octombrie – 5 noiembrie 2026.",
+            "Prag de calitate: 45 puncte în perioada 6 noiembrie – 2 decembrie 2026.",
+        ]},
+    ],
+}
+before_stage = module.parse_date("2026-11-05T21:00:00Z")  # 23:00 Bucharest
+after_stage = module.parse_date("2026-11-05T22:00:00Z")  # 00:00 Bucharest, 6 Nov
+assert before_stage and after_stage
+assert module.current_open(dr12_stage_action, after_stage)
+assert module.fail_closed_render_dossier(dr12_stage_action, before_stage) is dr12_stage_action
+stage_guarded = module.fail_closed_render_dossier(dr12_stage_action, after_stage)
+assert stage_guarded is not dr12_stage_action
+assert stage_guarded["status"] == "OPEN"  # no new lifecycle assertion
+assert "80 de puncte al primei etape" not in " ".join(stage_guarded["sections"][0]["items"])
+assert "pragul de calitate al etapei curente" in " ".join(stage_guarded["sections"][0]["items"])
+assert stage_guarded["sections"][0]["items"][0] == "Confirmă forma juridică."
+assert stage_guarded["sections"][1] == dr12_stage_action["sections"][1]  # historical record preserved
+assert "80 de puncte al primei etape" in " ".join(dr12_stage_action["sections"][0]["items"])
+different_call = json.loads(json.dumps(dr12_stage_action))
+different_call["id"] = "other-programme"
+assert module.fail_closed_render_dossier(different_call, after_stage) is different_call
+current_stage = json.loads(json.dumps(dr12_stage_action))
+current_stage["sections"][0]["items"][1] = "Verifică pragul curent de 45 puncte în ghid."
+assert module.fail_closed_render_dossier(current_stage, after_stage) is current_stage
+
 # Consultation freshness is fail-closed just like OPEN freshness.
 consultation_clock = module.parse_date("2026-09-26T12:00:00Z")
 assert consultation_clock is not None
@@ -100,12 +178,94 @@ current_consultation = consultation_probe("29 septembrie 2026")
 assert module.current_consultation(expired_consultation, consultation_clock) is False
 assert module.current_consultation(unknown_consultation, consultation_clock) is False
 assert module.current_consultation(current_consultation, consultation_clock) is True
+# A future confirmed Termen does not override a conflicting confirmed Status
+# or a conflicting top-level deadline: all such observations render REVIEW.
+for contradicting_status in ("OPEN", "CLOSED", "REVIEW", "EXPECTED"):
+    probe = json.loads(json.dumps(current_consultation))
+    probe["quickFacts"][0]["value"] = contradicting_status
+    assert module.current_consultation(probe, consultation_clock) is False, contradicting_status
+    assert module.requires_consultation_refresh(probe, consultation_clock) is True
+    assert module.fail_closed_render_dossier(probe, consultation_clock)["status"] == "REVIEW"
+
+for inconsistent_field, inconsistent_value in (
+    ("deadline", "2026-09-30T23:59:59+03:00"),
+    ("closesAt", "neconfirmat"),
+    ("closeAt", "2026-09-27T23:59:59+03:00"),
+):
+    probe = json.loads(json.dumps(current_consultation))
+    probe[inconsistent_field] = inconsistent_value
+    assert module.current_consultation(probe, consultation_clock) is False, inconsistent_field
+    assert module.fail_closed_render_dossier(probe, consultation_clock)["status"] == "REVIEW"
+
+matching_consultation = json.loads(json.dumps(current_consultation))
+matching_consultation["deadline"] = "2026-09-29T23:59:59+03:00"
+assert module.current_consultation(matching_consultation, consultation_clock) is True
+romanian_consultation = json.loads(json.dumps(matching_consultation))
+romanian_consultation["quickFacts"][0]["value"] = "ÎN CONSULTARE"
+assert module.current_consultation(romanian_consultation, consultation_clock) is True
 assert module.requires_consultation_refresh(expired_consultation, consultation_clock) is True
 assert module.requires_consultation_refresh(unknown_consultation, consultation_clock) is True
 assert module.requires_consultation_refresh(current_consultation, consultation_clock) is False
 assert module.fail_closed_render_dossier(expired_consultation, consultation_clock)["status"] == "REVIEW"
 assert module.fail_closed_render_dossier(unknown_consultation, consultation_clock)["status"] == "REVIEW"
 assert module.fail_closed_render_dossier(current_consultation, consultation_clock)["status"] == "PUBLIC_CONSULTATION"
+
+# Missing timezone offsets cannot authorize material OPEN/CONSULTATION.
+# Datetime.fromisoformat accepts zoneless ISO by default; treating an
+# unknown local cutoff as UTC would overstate freshness around midnight.
+assert module.parse_date("2026-11-11T00:00:00") is None
+assert module.parse_date("2026-11-11 00:00:00") is None
+assert module.parse_date("2026-11-11T00:00:00+02:00") == module.parse_date("2026-11-10T22:00:00Z")
+# Exact Romanian local-time regression: static pages must use the official
+# local hour, not a made-up end-of-day (fold() used to erase colons).
+assert module.parse_date("6 noiembrie 2026, ora 12:00") == module.parse_date("2026-11-06T10:00:00Z")
+assert module.parse_date("6 noiembrie 2026, la ora 12.00") == module.parse_date("2026-11-06T10:00:00Z")
+assert module.parse_date("1 iulie 2026, ora 12:00") == module.parse_date("2026-07-01T09:00:00Z")
+assert module.parse_date("30 octombrie 2026, ora 16:00") == module.parse_date("2026-10-30T14:00:00Z")
+assert module.parse_date("6 noiembrie 2026, ora necunoscută") is None
+assert module.parse_date("29 martie 2026, ora 03:30") is None  # nonexistent local hour
+assert module.parse_date("25 octombrie 2026, ora 03:30") is None  # ambiguous local hour
+assert module.parse_date("31 februarie 2026, ora 12:00") is None
+assert module.parse_date("2026-02-31") is None
+
+def timed_open_probe(deadline):
+    return {
+        "id": "ro-local-hour-probe",
+        "title": "Local-hour cutoff",
+        "programme": "TEST",
+        "publicationState": "PUBLISHABLE",
+        "status": "OPEN",
+        "quickFacts": [
+            {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": deadline, "confidence": "CONFIRMED"},
+        ],
+    }
+
+# The same source timing must be explicit in ISO. A zoneless timestamp
+# cannot silently default to UTC and keep an OPEN call actionable.
+zoneless_cutoff = timed_open_probe("2026-11-11T00:00:00")
+aware_cutoff = timed_open_probe("2026-11-11T00:00:00+02:00")
+assert not module.current_open(zoneless_cutoff, module.parse_date("2026-11-10T21:59:59Z"))
+assert module.current_open(aware_cutoff, module.parse_date("2026-11-10T21:59:59Z"))
+assert not module.current_open(aware_cutoff, module.parse_date("2026-11-10T22:00:01Z"))
+ro_cutoff = timed_open_probe("6 noiembrie 2026, ora 12:00")
+assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T09:59:59Z")) is True
+assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T10:00:00Z")) is False
+assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")) is False
+assert module.fail_closed_render_dossier(
+    ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")
+)["status"] == "REVIEW"
+# The same clock rule must hold for consultation surfaces, not just OPEN calls.
+ro_consultation = consultation_probe("6 noiembrie 2026, ora 12:00")
+assert module.current_consultation(
+    ro_consultation, module.parse_date("2026-11-06T09:59:59Z")
+) is True
+assert module.current_consultation(
+    ro_consultation, module.parse_date("2026-11-06T10:00:00Z")
+) is False
+assert module.current_consultation(
+    ro_consultation, module.parse_date("2026-11-06T10:00:01Z")
+) is False
 
 publishable = [
     row
@@ -120,7 +280,10 @@ provisional_ids = {
 
 with tempfile.TemporaryDirectory() as td:
     out = Path(td)
-    manifest = module.build(PRODUCTS, out)
+    # Capture one aware wall clock for both generation and test assertions.
+    # The product's generatedAt is provenance, not the current time.
+    render_clock = module.dt.datetime.now(module.dt.timezone.utc)
+    manifest = module.build(PRODUCTS, out, evaluated_at=render_clock)
 
     required = [
         "robots.txt",
@@ -247,9 +410,7 @@ with tempfile.TemporaryDirectory() as td:
 
     # OPEN static hub must contain only rows that pass the same current-open gate
     # used by the canonical decision projection.
-    clock = module.parse_date(payload.get("generatedAt"))
-    if clock is None:
-        raise AssertionError("decision products generatedAt is not parseable")
+    clock = render_clock
     expected_open = {
         str(row.get("id") or "")
         for row in publishable
@@ -311,5 +472,42 @@ with tempfile.TemporaryDirectory() as td:
         if status in module.PREPARE_STATUSES:
             assert marker in prepare_index
             assert marker not in open_index
+
+# Verify the exact production failure mode with a deterministic replay:
+# older canonical generatedAt, an OPEN call whose official cutoff was Nov 6,
+# and a Nov 10 render. The new page must quarantine it without inventing CLOSED.
+with tempfile.TemporaryDirectory() as td:
+    base = Path(td)
+    replay_input = json.loads(json.dumps(payload))
+    replay_input["generatedAt"] = "2026-11-03T20:33:50Z"
+    stale_call = json.loads(json.dumps(expired_open_probe))
+    stale_call["id"] = "static-expiry-clock-regression"
+    stale_call["title"] = "Stale source timestamp should not extend OPEN"
+    for item in stale_call["quickFacts"]:
+        if item["label"] == "Termen":
+            item["value"] = "2026-11-06T12:00:00+02:00"
+    replay_input["dossiers"].append(stale_call)
+    input_file = base / "stale-decisions.json"
+    input_file.write_text(json.dumps(replay_input, ensure_ascii=False), encoding="utf-8")
+    nov5 = module.parse_date("2026-11-05T10:00:00Z")
+    nov10 = module.parse_date("2026-11-10T00:25:00Z")
+    assert nov5 is not None and nov10 is not None
+    before = base / "before"
+    after = base / "after"
+    before_manifest = module.build(input_file, before, evaluated_at=nov5)
+    after_manifest = module.build(input_file, after, evaluated_at=nov10)
+    old_open = (before / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    new_open = (after / "finantari/deschise/index.html").read_text(encoding="utf-8")
+    marker = 'data-dossier-id="static-expiry-clock-regression"'
+    assert marker in old_open, "pre-cutoff official OPEN must remain discoverable"
+    assert marker not in new_open, "stale generatedAt cannot extend expired OPEN"
+    assert after_manifest["currentOpen"] < before_manifest["currentOpen"]
+    assert after_manifest["failClosedOpenRefresh"] > before_manifest["failClosedOpenRefresh"]
+    dossier_page = (after / "dosare/index.html").read_text(encoding="utf-8")
+    assert marker in dossier_page, "expired dossier must remain queryable for history"
+    assert "ÎN VERIFICARE" in dossier_page, "expiry alone may only assert REVIEW"
+    assert after_manifest["generatedAt"] == replay_input["generatedAt"], (
+        "source-generated timestamp must remain unchanged as provenance"
+    )
 
 print("PASS public static IA / sitemap / dossier regression")

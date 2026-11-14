@@ -5,15 +5,26 @@ if(!P||!Array.isArray(P.dossiers)||!P.home)return;
 
 const PREPARE_STATUSES=new Set(['EXPECTED','ANNOUNCED','PUBLIC_CONSULTATION','REVIEW','PREPARE_NOW','UPCOMING']);
 const PUBLICATION_OPEN_STATES=new Set(['PUBLISHABLE']);
-const evidenceTimes=[
-  P.generatedAt,
-  window.PARTENER_DATA?.mipeIngestion?.asOf,
-  window.PARTENER_DATA?.mysmisRegistry?.observedAt
-].map(value=>new Date(value||'').getTime()).filter(Number.isFinite);
-const clock=new Date(evidenceTimes.length?Math.max(...evidenceTimes):Date.now());
+// Publication evidence can become stale, but wall-clock time cannot. Never
+// replay a historical generation/ingestion timestamp as the current date:
+// expired OPEN must fail closed even when upstream refreshes are blocked.
+const clock=new Date(Date.now());
 const currentYear=clock.getUTCFullYear();
 const currentYearStart=Date.UTC(currentYear,0,1);
 const byId=new Map(P.dossiers.map(d=>[String(d?.id||''),d]));
+
+// Official Romanian local deadlines need their actual clock time, not UTC EOD.
+function bucharestLocalMs(year,month,day,hour,minute,second=0,millis=0){
+  const normalized=new Date(Date.UTC(year,month,day,hour,minute,second,millis));
+  if(normalized.getUTCFullYear()!==year||normalized.getUTCMonth()!==month||normalized.getUTCDate()!==day||normalized.getUTCHours()!==hour||normalized.getUTCMinutes()!==minute||normalized.getUTCSeconds()!==second)return null;
+  const lastSunday=(m)=>{const last=new Date(Date.UTC(year,m+1,0));return last.getUTCDate()-last.getUTCDay();};
+  const march=lastSunday(2),october=lastSunday(9);
+  // 03:xx local is absent at the March DST switch and ambiguous in October.
+  // Without an explicit offset neither can authorize a current OPEN state.
+  if(hour===3&&((month===2&&day===march)||(month===9&&day===october)))return null;
+  const summer=(month>2&&month<9)||(month===2&&(day>march||(day===march&&hour>=4)))||(month===9&&(day<october||(day===october&&hour<3)));
+  return normalized.getTime()-(summer?3:2)*60*60*1000;
+}
 
 function toTimestamp(value){
   if(value==null||value==='')return null;
@@ -26,6 +37,60 @@ function toTimestamp(value){
   }
   const raw=String(value).trim();
   if(!raw||/neconfirmat|necunoscut|unknown/i.test(raw))return null;
+  // AFIR's official counters use Romanian DD.MM.YYYY HH:mm:ss (or
+  // DD/MM/YYYY). Date.parse interprets these inconsistently as US/UTC dates,
+  // potentially keeping a component OPEN past its local midnight cutoff.
+  const dmyLocal=raw.match(/^(\d{1,2})[./](\d{1,2})[./](20\d{2})(?:\s*,?\s*(?:(?:la\s+)?ora\s*)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?)?$/i);
+  if(dmyLocal){
+    const [,day,month,year,hour,minute,second]=dmyLocal;
+    return bucharestLocalMs(Number(year),Number(month)-1,Number(day),
+      hour==null?23:Number(hour),minute==null?59:Number(minute),second==null?59:Number(second),
+      hour==null?999:0);
+  }
+  // Never fall back to the host engine's lenient date parser when an
+  // official-looking Romanian date has an unsupported/ambiguous clock.
+  if(/^\d{1,2}[./]\d{1,2}[./]20\d{2}/.test(raw))return null;
+  // Browser Date.parse interprets zoneless ISO datetimes in the VIEWER'S
+  // local timezone (and differs from Python UTC parsing). No official
+  // offset means no authority to present an OPEN / active consultation.
+  // A syntactically valid offset alone is not enough: reject impossible
+  // calendar dates that browser parsers may normalize silently.
+  if(/^20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}/.test(raw)){
+    const match=raw.match(/^(20\d{2})-(\d{2})-(\d{2})[Tt ](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-]\d{2}:\d{2})$/i);
+    if(!match)return null;
+    const [,year,month,day,hour,minute,second,,offset]=match;
+    const calendar=new Date(Date.UTC(Number(year),Number(month)-1,Number(day)));
+    if(calendar.getUTCFullYear()!==Number(year)||calendar.getUTCMonth()!==Number(month)-1||calendar.getUTCDate()!==Number(day)||
+       Number(hour)>23||Number(minute)>59||Number(second||0)>59||(!/z/i.test(offset)&&Number(offset.slice(-2))>59))return null;
+    const stamp=Date.parse(raw);
+    return Number.isFinite(stamp)?stamp:null;
+  }
+  // JS Date.parse normalizes impossible ISO date-only values (e.g.
+  // 2026-02-31 -> March 3). Such an untrue cutoff cannot authorize OPEN.
+  // Keep valid date-only UTC semantics consistent with the static renderer.
+  const isoDay=raw.match(/^(20\d{2})-(\d{2})-(\d{2})$/);
+  if(isoDay){
+    const [,year,month,day]=isoDay;
+    const stamp=Date.UTC(Number(year),Number(month)-1,Number(day));
+    const check=new Date(stamp);
+    return check.getUTCFullYear()===Number(year)&&check.getUTCMonth()===Number(month)-1&&check.getUTCDate()===Number(day)?stamp:null;
+  }
+  // Exact ISO and Romanian DMY clocks were handled above. If an otherwise
+  // untrusted prose field contains an explicit clock, do not let Date.parse
+  // or a later date-only fallback silently discard the hour/zone.
+  if(/\b20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}/.test(raw) ||
+     /\b\d{1,2}[./]\d{1,2}[./]20\d{2}\b\s*(?:,?\s*(?:(?:la\s+)?ora\s*)?)?\d{1,2}[:.]\d{2}/i.test(raw))return null;
+  // Date.parse may normalize impossible embedded dates (e.g. "Termen
+  // 11/31/2026" to December 1). Validate any numeric calendar date before
+  // allowing the legacy prose fallback to infer a cutoff.
+  const embedded=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/) ||
+    raw.match(/\b(\d{1,2})[-/.](\d{1,2})[-/.](20\d{2})\b/);
+  if(embedded){
+    const ymd=String(embedded[1]).length===4;
+    const year=Number(embedded[ymd?1:3]),month=Number(embedded[2]),day=Number(embedded[ymd?3:1]);
+    const check=new Date(Date.UTC(year,month-1,day));
+    if(check.getUTCFullYear()!==year||check.getUTCMonth()!==month-1||check.getUTCDate()!==day)return null;
+  }
   const iso=Date.parse(raw);
   if(!Number.isNaN(iso))return iso;
   const ymd=raw.match(/\b(20\d{2})[-/.](\d{1,2})[-/.](\d{1,2})\b/);
@@ -35,7 +100,15 @@ function toTimestamp(value){
   const folded=raw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const months={ianuarie:0,februarie:1,martie:2,aprilie:3,mai:4,iunie:5,iulie:6,august:7,septembrie:8,octombrie:9,noiembrie:10,decembrie:11};
   const ro=folded.match(/\b(\d{1,2})\s+(ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+(20\d{2})\b/);
-  if(ro)return Date.UTC(Number(ro[3]),months[ro[2]],Number(ro[1]),23,59,59,999);
+  if(ro){
+    const year=Number(ro[3]),month=months[ro[2]],day=Number(ro[1]);
+    const tail=folded.slice(ro.index+ro[0].length);
+    const timed=tail.match(/^\s*,?\s*(?:la\s+)?(?:ora\s+)?(\d{1,2})[:.](\d{2})(?::(\d{2}))?/);
+    if(timed)return bucharestLocalMs(year,month,day,Number(timed[1]),Number(timed[2]),Number(timed[3]||0));
+    // An unparseable explicit clock cannot silently become 23:59:59.
+    if(/^\s*,?\s*(?:(?:la\s+)?ora\b|(?:la\s+)?\d{1,2}[:.])/.test(tail))return null;
+    return bucharestLocalMs(year,month,day,23,59,59,999);
+  }
   return null;
 }
 
@@ -69,22 +142,41 @@ function confirmedFact(d,label){
   return (d?.quickFacts||[]).find(f=>String(f?.label||'').toLowerCase()===label&&String(f?.confidence||'').toUpperCase()==='CONFIRMED');
 }
 
+// An OPEN deadline without a verified hour/offset is not an exact cutoff.
+// A date-only source does not authorize assuming end-of-day. That historic
+// convention is useful for archival dates, never for a live OPEN badge.
+// Keep the compact homepage and decision-hub projections equally fail-closed.
+function hasExactDeadlineClock(value){
+  if(typeof value!=='string')return false;
+  const raw=value.trim();
+  if(/^20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/i.test(raw))return true;
+  if(/^\d{1,2}[./]\d{1,2}[./]20\d{2}\s*,?\s*(?:(?:la\s+)?ora\s*)?\d{1,2}[:.]\d{2}(?::\d{2})?$/i.test(raw))return true;
+  return /^\d{1,2}\s+(?:ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|septembrie|octombrie|noiembrie|decembrie)\s+20\d{2}\s*,?\s*(?:(?:la\s+)?ora\s*)?\d{1,2}[:.]\d{2}(?::\d{2})?$/i.test(raw);
+}
+
 function closeTimestamp(d){
   const values=[];
   for(const key of ['deadline','closesAt','closeAt'])if(d?.[key]!=null)values.push(d[key]);
   const deadline=confirmedFact(d,'termen');
   if(deadline?.value!=null)values.push(deadline.value);
-  const timestamps=values.map(toTimestamp).filter(v=>v!=null&&Number.isFinite(v));
-  return timestamps.length?Math.max(...timestamps):null;
+  // Every present cutoff must parse and reconcile. Silently dropping an
+  // unparseable (potentially newer) deadline would authorize a false OPEN.
+  // Every competing top-level or confirmed source cutoff must carry an exact
+  // clock. Otherwise review, even if another field supplies a future hour.
+  if(!values.length||values.some(value=>!hasExactDeadlineClock(value)))return null;
+  const timestamps=values.map(toTimestamp);
+  return timestamps.every(ts=>ts!=null&&Number.isFinite(ts)&&ts===timestamps[0])?timestamps[0]:null;
 }
 
 function currentOpenState(d){
   if(!d||String(d.status||'').toUpperCase()!=='OPEN')return null;
   if(!PUBLICATION_OPEN_STATES.has(String(d.publicationState||'').toUpperCase()))return 'REVIEW';
-  if(!confirmedFact(d,'status')||!confirmedFact(d,'termen'))return 'REVIEW';
+  const status=confirmedFact(d,'status');
+  if(String(status?.value||'').trim().toUpperCase()!=='OPEN'||!confirmedFact(d,'termen'))return 'REVIEW';
   const closesAt=closeTimestamp(d);
   if(closesAt==null)return 'REVIEW';
-  return closesAt<clock.getTime()?'CLOSED':'OPEN';
+  // Passage of time alone is not authority to assert the official CLOSED state.
+  return closesAt<=clock.getTime()?'REVIEW':'OPEN';
 }
 
 const originalOpenIds=Array.isArray(P.home.openDossierIds)?P.home.openDossierIds.map(String):[];
@@ -106,7 +198,7 @@ if(P.summary&&typeof P.summary==='object'){
 const dossierStatusOverrides=Object.fromEntries(P.dossiers.map(d=>[String(d?.id||''),currentOpenState(d)]).filter(([,state])=>state&&state!=='OPEN'));
 
 P.freshnessGuard={
-  version:'home-freshness-guard-v1.1',
+  version:'home-freshness-guard-v1.3',
   state:removedIds.length||removedOpenIds.length?'DEGRADED':'PASS',
   asOf:clock.toISOString(),
   currentYear,
