@@ -424,6 +424,48 @@ def main():
     plane = json.loads(DATA_PLANE.read_text(encoding="utf-8"))
     by_id = {row["id"]: row for row in data.get("sources", [])}
 
+    # 13-Nov PR Centru: consultation and exact-action guide revision remain
+    # strictly discovery-only, regardless of upcoming ITI project intake.
+    pr_centre_nov13 = {
+        "SRC-PRC-151-INCUBATORS-RESIDENTS-CONSULT-20261113": (
+            "https://www.regiocentru.ro/actiuni/1-5-1-interventia-1-5-1-incubatoare-si-acceleratoare-de-afaceri-etapa-2/",
+            "CONSULTATION_DISCOVERY_ONLY",
+            "PUBLIC_CONSULTATION_DISCOVERED_RAW_PENDING",
+            None,
+        ),
+        "SRC-PRC-143-ITI-CORRIGENDUM2-20261113": (
+            "https://www.regiocentru.ro/adr-centru-in-calitate-de-autoritate-de-management-pentru-programul-regiunea-centru-pr-centru-a-emis-corrigendum-ul-nr-2-la-ghidul-solicitantului-aferent-inter/",
+            "GUIDE_CORRIGENDUM_DISCOVERY_ONLY",
+            "GUIDE_CORRIGENDUM_2_DISCOVERED_RAW_PENDING",
+            "SRC-PR-CENTRU-ITI-143-TWO-CALLS-2026",
+        ),
+    }
+    for source_id, (url, scope, state, pair) in pr_centre_nov13.items():
+        row = by_id.get(source_id)
+        if row is None:
+            fail(f"missing 13-Nov PR Centru exact official discovery {source_id}")
+        if (row.get("url"), row.get("tier"), row.get("authority_scope"),
+                row.get("observation_state"), row.get("event_date_discovery"),
+                row.get("paired_official_source_id")) != (
+                url, "T1", scope, state, "2026-11-13", pair):
+            fail(f"{source_id}: consultation/revision identity or pairing drift")
+        if row.get("programmes") != ["Programul Regiunea Centru 2021-2027"]:
+            fail(f"{source_id}: wrong managing-authority programme")
+        if any(row.get(key) is not False for key in (
+                "material_fact_use", "open_call_authorized",
+                "material_fact_publication_authorized")):
+            fail(f"{source_id}: unreviewed material call admission")
+        if any(key in row for key in (
+                "status", "call_status", "deadline", "budget", "budget_eur",
+                "eligibility", "fetched_at", "raw_sha256", "semantic_sha256",
+                "parser_version", "run_id", "handoff_sha256")):
+            fail(f"{source_id}: fabricated material fact or raw-source receipt")
+        if "no open_call" not in (row.get("note") or "").lower():
+            fail(f"{source_id}: lost explicit non-promotion boundary")
+    if "PROGRAMMING_PIPELINE" not in set(
+            by_id["SRC-PRC-151-INCUBATORS-RESIDENTS-CONSULT-20261113"].get("source_families") or []):
+        fail("1.5.1 consultation must not be treated as an active investment call")
+
     # EIT HEI 2026: official programme call operator + Romanian NCP information.
     # The NCP is NOT a national funder; web readback is NOT immutable source
     # acquisition. Exact 2026 call, application route and current call-text
