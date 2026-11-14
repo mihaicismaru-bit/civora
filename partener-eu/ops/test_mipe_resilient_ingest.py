@@ -168,6 +168,30 @@ def test_mysmis_legacy_snapshot_cannot_evade_freshness() -> None:
     data["lastRun"]["registrySnapshot"]["directOnly"] = False
     assert mysmis_module.extract_snapshot(data, now) is None
 
+def test_failed_mipe_heartbeat_is_not_fresh_official_evidence() -> None:
+    """Fresh transport failure may update monitoring, not the canonical corpus clock."""
+    now = dt.datetime(2026, 11, 14, 14, tzinfo=dt.timezone.utc)
+    failed = {
+        "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+        "lastRun": {"observedAt": "2026-11-14T12:35:20Z", "sourceAvailable": False},
+        "items": [],
+    }
+    corpus, _ = index_module.mipe_records(failed, now, {"freshnessSlaHours": 4})
+    assert corpus["lastAttemptFreshness"]["status"] == "CURRENT"
+    assert corpus["freshness"]["status"] == "UNKNOWN"
+    assert corpus["sourceAvailable"] is False
+    assert corpus["failClosed"] is True
+
+    # A success requires both live source evidence and a healthy corpus status.
+    fresh = {**failed, "status": "OK", "lastRun": {**failed["lastRun"], "sourceAvailable": True}}
+    successful, _ = index_module.mipe_records(fresh, now, {"freshnessSlaHours": 4})
+    assert successful["freshness"]["status"] == "CURRENT"
+    still_degraded = {**fresh, "status": "DEGRADED_LAST_KNOWN_GOOD_PRESERVED"}
+    degraded, _ = index_module.mipe_records(still_degraded, now, {"freshnessSlaHours": 4})
+    assert degraded["lastAttemptFreshness"]["status"] == "CURRENT"
+    assert degraded["freshness"]["status"] == "UNKNOWN"
+
+
 def main() -> int:
     test_canonical_policy()
     test_reader_contract()
@@ -176,6 +200,7 @@ def main() -> int:
     test_source_incident_isolation_keeps_direct_mysmis_usable()
     test_mysmis_consultant_requires_current_dual_proof()
     test_mysmis_legacy_snapshot_cannot_evade_freshness()
+    test_failed_mipe_heartbeat_is_not_fresh_official_evidence()
     print("MIPE resilient ingestion regression: PASS")
     return 0
 
