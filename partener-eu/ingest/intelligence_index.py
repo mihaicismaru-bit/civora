@@ -229,6 +229,12 @@ def mipe_records(
     observed_at = run.get("observedAt")
     available = bool(run.get("sourceAvailable"))
     sla = int(config.get("freshnessSlaHours") or 8)
+    # A recent failed acquisition is a fresh *attempt*, not fresh official
+    # evidence. Keep its recency observable without refreshing the LKG corpus.
+    attempt_freshness = freshness(observed_at, reference, sla)
+    state_status = str(state.get("status") or "UNKNOWN").upper()
+    verified = available and (state_status in {"PASS", "OK"} or state_status.startswith("OK_"))
+    evidence_freshness = attempt_freshness if verified else freshness(None, reference, sla)
     source = {
         "id": "MIPE_CORPUS",
         "tier": config.get("tier") or "T1",
@@ -238,7 +244,8 @@ def mipe_records(
         "dependencyScopes": config.get("dependencyScopes") or [],
         "status": state.get("status") or "UNKNOWN",
         "observedAt": observed_at,
-        "freshness": freshness(observed_at, reference, sla),
+        "freshness": evidence_freshness,
+        "lastAttemptFreshness": attempt_freshness,
         "itemCount": len(state.get("items") or []),
         "sourceAvailable": available,
         "lastKnownGoodPreserved": "LAST_KNOWN_GOOD_PRESERVED" in str(state.get("status") or ""),
