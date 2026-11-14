@@ -28,7 +28,8 @@ from build_afir_live_funds import parse_rows, parse_table
 AGENCY_URL = "https://www.afir.ro/finantare/contor-fonduri-disponibile/"
 DELEGATED_URL = "https://depunerepspac.afir.ro/Sesiune/Lista"
 URLS = {"agency": AGENCY_URL, "delegated": DELEGATED_URL}
-PARSER_VERSION = "afir-dr12-official-counter-pair-v11"
+PARSER_VERSION = "afir-dr12-official-counter-pair-v12"
+PREVIOUS_PARSER_VERSION = "afir-dr12-official-counter-pair-v11"
 SECTORS = ("SECTOR ZOOTEHNIC", "ALTE SECTOARE")
 MAX_BYTES = 5_000_000
 MAX_PAIR_SECONDS = 90
@@ -586,7 +587,7 @@ def replay(destination: Path) -> dict:
         raise ValueError("counter-pair sources must be an exact object")
     if (
         manifest.get("schema_version") != "1.0"
-        or manifest.get("parser_version") != PARSER_VERSION
+        or manifest.get("parser_version") not in (PARSER_VERSION, PREVIOUS_PARSER_VERSION)
         or not str(manifest.get("run_id", "")).isdigit()
         or not str(manifest.get("run_attempt", "")).isdigit()
         or manifest.get("programme") != "PS_PAC_2023_2027/DR12"
@@ -625,6 +626,12 @@ def replay(destination: Path) -> dict:
         raws[source] = raw
     elapsed = (max(stamps) - min(stamps)).total_seconds()
     expected = reconcile_with_cache(raws, elapsed, manifest["sources"])
+    if manifest["parser_version"] == PREVIOUS_PARSER_VERSION:
+        # V11 captured identical raw evidence before the advisory window
+        # explanation was introduced. Preserve deterministic legacy replay;
+        # NEVER upgrade old receipts or loosen their authorization fields.
+        for component in expected.get("components", {}).values():
+            component.pop("delegated_session_window_review_reason", None)
     if expected != manifest.get("reconciliation") or expected["observation_state"] != manifest.get("observation_state"):
         raise ValueError("counter semantic replay changed")
     return {"verified": True, "observation_state": expected["observation_state"],
