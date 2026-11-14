@@ -49,6 +49,8 @@ if old_age is None or old_age <= monitor_ns["MAX_REGISTRY_AGE_SECONDS"]:
     errors.append("P10 fails to mark a 9-hour old source-health ledger stale")
 if monitor_age("not-a-date") is not None:
     errors.append("P10 accepts malformed source-health timestamps")
+if monitor_age(reference.replace(tzinfo=None).isoformat()) is not None:
+    errors.append("P10 treats an unzoned source timestamp as verified UTC evidence")
 
 # A recent failed MIPE acquisition is not a fresh canonical corpus. The live
 # hosted-route status DEGRADED_LAST_KNOWN_GOOD_PRESERVED must never be PASS.
