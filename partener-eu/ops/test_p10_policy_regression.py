@@ -146,6 +146,42 @@ registry_budget = re.search(r"(?m)^    timeout-minutes: (\d+)\s*$", source_regis
 if not registry_budget or not 25 <= int(registry_budget.group(1)) <= 45:
     errors.append("Verified Source Registry needs a bounded 25-45m acquisition/replay budget")
 
+
+# Source-health persistence must not starve when optional per-family
+# Interreg retrieval fails after a verified, non-authorizing health probe.
+# Preserve exact-head CI and prohibit writing on pull-request checkouts.
+source_health_chain = [
+    "      - name: Probe classified official sources without changing facts",
+    "        id: source_health_probe",
+    "      - name: Validate source-health provenance and fail-closed ledger before enrichment",
+    "        id: source_health_gate",
+    "      - name: Capture PDDTJ delegated OI HTML originals (discovery only)",
+]
+if not all(anchor in source_registry_workflow for anchor in source_health_chain):
+    errors.append("Verified Source Registry lost its independent source-health verification chain")
+elif [source_registry_workflow.index(anchor) for anchor in source_health_chain] != sorted(
+    source_registry_workflow.index(anchor) for anchor in source_health_chain
+):
+    errors.append("Source-health gate must precede optional enrichment")
+persist_guard = (
+    "if: ${{ always() && github.event_name != 'pull_request' "
+    "&& steps.source_health_probe.outcome == 'success' "
+    "&& steps.source_health_gate.outcome == 'success' }}"
+)
+if persist_guard not in source_registry_workflow:
+    errors.append("Verified source-health persistence can be skipped by optional enrichment failure")
+for required in (
+    "if x.get('semantic_hash_changed') and x.get('material_fact_use')",
+    "x.get('publish_material_fact_update') is not False",
+    "x.get('resolution_task_required')",
+    "x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL'",
+):
+    health_step = source_registry_workflow.split(
+        "      - name: Validate source-health provenance and fail-closed ledger before enrichment", 1
+    )[-1].split("      - name: Capture PDDTJ delegated OI HTML originals", 1)[0]
+    if required not in health_step:
+        errors.append(f"Source-health independent gate lost safety invariant: {required}")
+
 for workflow_name, workflow in [
     ("PARTENER.EU Pages", pages_workflow),
     ("PARTENER.EU Go Live", go_live_workflow),
