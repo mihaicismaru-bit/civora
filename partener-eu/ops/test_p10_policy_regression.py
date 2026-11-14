@@ -65,6 +65,21 @@ for success in ("OK", "OK_NO_NEW_RELEVANT_ITEMS"):
     if monitor_mipe_health(success) != "PASS":
         errors.append(f"P10 rejects verified MIPE ingestion success status {success}")
 
+# Both observed MIPE transport-failure codes retain the previous LKG corpus.
+# The report must not claim that LKG was discarded or that it is fresh.
+monitor_mipe_lkg = monitor_ns["mipe_lkg_preserved"]
+for preserved in (
+    "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+    "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+):
+    if not monitor_mipe_lkg(preserved):
+        errors.append(f"P10 misses retained MIPE LKG for {preserved}")
+    if monitor_mipe_health(preserved) != "DEGRADED_FAIL_CLOSED":
+        errors.append(f"P10 incorrectly marks LKG-only MIPE {preserved} as fresh")
+for not_preserved in ("OK", "OK_NO_NEW_RELEVANT_ITEMS", "UNKNOWN", None):
+    if monitor_mipe_lkg(not_preserved):
+        errors.append(f"P10 fabricates MIPE LKG preservation for {not_preserved!r}")
+
 for marker in [
     "workflow_run:",
     "PARTENER.EU AFIR Ingestion",
