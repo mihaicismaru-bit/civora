@@ -141,7 +141,35 @@ jobs:
         run: python partener-eu/p11/test_interreg_call_stage.py
 
       - name: Probe classified official sources without changing facts
+        id: source_health_probe
         run: python partener-eu/ingest/source_registry_probe.py
+
+      # Persist only verified source-health evidence even when optional live
+      # Interreg enrichment fails later. Never convert a probe into call facts.
+      - name: Validate source-health provenance and fail-closed ledger before enrichment
+        id: source_health_gate
+        run: |
+          python - <<'PY'
+          import json, sys
+          from pathlib import Path
+          p=Path('partener-eu/ingest/state/source_registry_health.json')
+          d=json.loads(p.read_text(encoding='utf-8'))
+          if not d.get('observed_at') or not isinstance(d.get('sources'), list) or not d['sources']:
+              sys.exit('FAIL missing verified source-health observation')
+          bad=[]; missing=[]; unsafe_shell=[]
+          for x in d['sources']:
+              if x.get('semantic_hash_changed') and x.get('material_fact_use') and x.get('publish_material_fact_update') is not False:
+                  bad.append(x.get('id'))
+              if x.get('resolution_task_required'):
+                  task=Path('partener-eu/validation/resolution-tasks') / f"{x.get('id')}.json"
+                  if not task.exists():
+                      missing.append(x.get('id'))
+              if x.get('quality_issue') == 'LOW_INFORMATION_HTML_SHELL' and (x.get('semantic_hash_changed') or x.get('resolution_task_required')):
+                  unsafe_shell.append(x.get('id'))
+          if bad or missing or unsafe_shell:
+              sys.exit(f'FAIL verified source-health gate: {dict(unsafe=bad, missing_tasks=missing, unsafe_shells=unsafe_shell)}')
+          print('PASS source-health-only provenance / no material fact autoupdate')
+          PY
 
       - name: Capture PDDTJ delegated OI HTML originals (discovery only)
         shell: bash
@@ -489,7 +517,7 @@ jobs:
           PY
 
       - name: Persist source health ledger and resolution tasks conflict-safe
-        if: github.event_name != 'pull_request'
+        if: ${{ always() && github.event_name != 'pull_request' && steps.source_health_probe.outcome == 'success' && steps.source_health_gate.outcome == 'success' }}
         shell: bash
         run: |
           set -euo pipefail
