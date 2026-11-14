@@ -107,6 +107,48 @@ def test_parse_and_reconcile():
     assert parsed_header["ALTE SECTOARE"]["session_closes_at"] == "03.12.2026 15:59:59"
     assert probe.reconcile({"agency": agency(), "delegated": changed_header}, 12)["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
 
+    # Only the exact early-exhaustion/general-session-banner conflict is
+    # explainable; it STILL fails closed as SOURCE_COUNTER_DIVERGENCE_REVIEW.
+    # All amounts below are synthetic fixtures, never live AFIR balances.
+    agency_exhausted = agency(funds="FONDURI EPUIZATE").replace(
+        b"<td>02.12.2026 15:59:59</td>",
+        b"<td>11.11.2026 00:00:00</td>", 1,
+    )
+    delegated_exhausted = delegated(funds="FONDURI EPUIZATE").replace(
+        "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8"),
+        "DATĂ ȘI ORĂ ÎNCHIDERE 11/11/2026 00:00:00".encode("utf-8"), 1,
+    )
+    reconciled_early = probe.reconcile(
+        {"agency": agency_exhausted, "delegated": delegated_exhausted}, 12
+    )
+    assert reconciled_early["observation_state"] == "SOURCE_COUNTER_DIVERGENCE_REVIEW"
+    assert reconciled_early["material_fact_action"] == "NONE"
+    assert reconciled_early["components"]["SECTOR ZOOTEHNIC"]["delegated_session_window_review_reason"] == (
+        "EARLY_EXHAUSTED_COMPONENT_HAS_GENERAL_SESSION_END"
+    )
+    assert reconciled_early["components"]["ALTE SECTOARE"]["delegated_session_window_review_reason"] == "MATCHED"
+    # No exhaustion proof = no innocuous-divergence classification.
+    unproven_early = probe.reconcile(
+        {"agency": agency().replace(
+            b"<td>02.12.2026 15:59:59</td>", b"<td>11.11.2026 00:00:00</td>", 1
+        ), "delegated": delegated().replace(
+            "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8"),
+            "DATĂ ȘI ORĂ ÎNCHIDERE 11/11/2026 00:00:00".encode("utf-8"), 1
+        )}, 12
+    )
+    assert unproven_early["components"]["SECTOR ZOOTEHNIC"]["delegated_session_window_review_reason"] == (
+        "UNEXPLAINED_COMPONENT_VS_SESSION_WINDOW"
+    )
+    # Competing non-window facts prohibit the narrow explanation.
+    altered_count = probe.reconcile(
+        {"agency": agency_exhausted, "delegated": delegated_exhausted.replace(
+            b"NUMĂR DOSARE DEPUSE 65", b"NUMĂR DOSARE DEPUSE 66", 1
+        )}, 12
+    )
+    assert altered_count["components"]["SECTOR ZOOTEHNIC"]["delegated_session_window_review_reason"] == (
+        "UNEXPLAINED_COMPONENT_VS_SESSION_WINDOW"
+    )
+
     changed_component = original.replace(
         "DATĂ ȘI ORĂ ÎNCHIDERE 02/12/2026 15:59:59".encode("utf-8"),
         "DATĂ ȘI ORĂ ÎNCHIDERE 03/12/2026 15:59:59".encode("utf-8"),
