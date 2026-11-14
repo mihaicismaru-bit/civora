@@ -66,7 +66,10 @@ const ambiguous = render({...current, calls: [
 assert.match(ambiguous.dossier, /Posibilă corespondență textuală MySMIS/);
 assert.doesNotMatch(ambiguous.dossier, /DESCHIS|FINALIZAT|999999999|1000000|888|cw3MySMISFacts/,
   'Ambiguous candidate row must never leak or attribute material official facts.');
-assert.match(render({ ...current, source: { ...current.source, canonicalUrl: otherOfficialUrl } }).dossier, /FINALIZAT/);
+const aliasCandidate = render({ ...current, source: { ...current.source, canonicalUrl: otherOfficialUrl } }).dossier;
+assert.match(aliasCandidate, /Posibilă corespondență textuală MySMIS/);
+assert.doesNotMatch(aliasCandidate, /FINALIZAT|1000000/,
+  'Both official aliases remain valid transports, but neither can substitute exact call identity.');
 
 for (const [name, variant] of Object.entries({
   legacy_august: { ...current, observedAt: '2026-08-17T21:43:22Z' },
