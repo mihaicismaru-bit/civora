@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Static guard for P10 orchestration and fail-closed publication policy."""
 import json
+from datetime import datetime, timedelta, timezone
+from runpy import run_path
 import re
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -32,6 +34,21 @@ central_source_registry = json.loads((PARTENER / "ingest" / "source_registry.jso
 stale_validation_trigger = PARTENER / "ops" / "p10-validation-trigger.txt"
 
 errors = []
+
+# Deterministic-boundary regression: future-dated source-health ledgers must not
+# appear fresh to P10 monitoring. Bounded capture/runner skew remains allowed.
+monitor_ns = run_path(str(PARTENER / "ops" / "p10_monitor_integrity.py"))
+monitor_age = monitor_ns["age_seconds"]
+reference = datetime.now(timezone.utc)
+if monitor_age((reference + timedelta(minutes=6)).isoformat()) is not None:
+    errors.append("P10 treats a >5-minute future-dated source-health ledger as fresh")
+if monitor_age((reference + timedelta(minutes=4)).isoformat()) != 0:
+    errors.append("P10 rejects bounded source acquisition clock skew")
+old_age = monitor_age((reference - timedelta(hours=9)).isoformat())
+if old_age is None or old_age <= monitor_ns["MAX_REGISTRY_AGE_SECONDS"]:
+    errors.append("P10 fails to mark a 9-hour old source-health ledger stale")
+if monitor_age("not-a-date") is not None:
+    errors.append("P10 accepts malformed source-health timestamps")
 
 for marker in [
     "workflow_run:",

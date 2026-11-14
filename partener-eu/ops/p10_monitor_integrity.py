@@ -79,7 +79,12 @@ def age_seconds(value: Any) -> int | None:
     parsed = parse_utc(value)
     if not parsed:
         return None
-    return max(0, int((now() - parsed).total_seconds()))
+    skew_seconds = (now() - parsed).total_seconds()
+    # A future-dated health ledger cannot reset source freshness or LKG age.
+    # Accept only a bounded five-minute capture/runner clock skew.
+    if skew_seconds < -300:
+        return None
+    return max(0, int(skew_seconds))
 
 
 def canonical_sha(obj: Any) -> str:
