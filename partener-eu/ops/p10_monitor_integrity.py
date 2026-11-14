@@ -106,6 +106,15 @@ def mipe_health_status(value: Any) -> str:
     return "PASS" if value in {"OK", "OK_NO_NEW_RELEVANT_ITEMS"} else "DEGRADED_FAIL_CLOSED"
 
 
+def mipe_lkg_preserved(value: Any) -> bool:
+    # Different MIPE acquisition transports emit either of these known
+    # degraded states. Both retain the previous corpus, not fresh evidence.
+    return value in {
+        "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+        "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    }
+
+
 def task_is_fail_closed(path: pathlib.Path) -> bool:
     task = load(path, {}) or {}
     allowed = task.get("automatic_material_fact_update_allowed")
@@ -326,7 +335,7 @@ def main() -> int:
             "candidate_count": mipe_last.get("candidateCount"),
             "parsed_relevant_count": mipe_last.get("parsedRelevantCount"),
             "published_item_count": mipe_last.get("publishedItemCount"),
-            "last_known_good_preserved": mipe_status == "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+            "last_known_good_preserved": mipe_lkg_preserved(mipe_status),
             "health": mipe_health,
         },
         "mff_2028_2034": {
