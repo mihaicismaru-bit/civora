@@ -393,6 +393,21 @@ def reconcile(raws: dict[str, bytes], span_seconds: float) -> dict:
         funds_status_equal = a["funds_status"] == b["funds_status"]
         if checks["funds_eur"]["comparable"] and not funds_status_equal:
             any_financial_difference = True
+        # The delegated DR-12 banner is a GENERAL session window, whereas an
+        # exhausted component can close earlier. Preserve the divergence gate,
+        # but identify this narrowly explained case for human reconciliation.
+        # Both official component cards must agree exactly; no inferred OPEN.
+        early_exhaustion_under_general_banner = (
+            not b["session_window_matches"]
+            and count_equal and open_equal and close_equal
+            and b["session_opens_at"] == a["opens_at"]
+            and dt.datetime.strptime(a["closes_at"], "%d.%m.%Y %H:%M:%S")
+                < dt.datetime.strptime(b["session_closes_at"], "%d.%m.%Y %H:%M:%S")
+            and a["funds_status"] == b["funds_status"] == "EXHAUSTED"
+            and a["funds_eur"] == b["funds_eur"] == "0.00"
+            and all(checks[key]["matches_if_comparable"] is True
+                    for key in ("session_allocation_eur", "submitted_value_eur", "funds_eur"))
+        )
         any_count_or_date_difference |= (not count_equal or not open_equal or not close_equal
                                          or not b["session_window_matches"])
         comparable[sector] = {
@@ -401,6 +416,12 @@ def reconcile(raws: dict[str, bytes], span_seconds: float) -> dict:
             "opening_time_matches": open_equal,
             "closing_time_matches": close_equal,
             "delegated_session_window_matches": b["session_window_matches"],
+            "delegated_session_window_review_reason": (
+                "EARLY_EXHAUSTED_COMPONENT_HAS_GENERAL_SESSION_END"
+                if early_exhaustion_under_general_banner else
+                "UNEXPLAINED_COMPONENT_VS_SESSION_WINDOW"
+                if not b["session_window_matches"] else "MATCHED"
+            ),
             "amount_checks": checks,
             "funds_status_matches": funds_status_equal,
             "funds_comparable": checks["funds_eur"]["comparable"],
