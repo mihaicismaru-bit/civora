@@ -115,6 +115,37 @@ def mipe_lkg_preserved(value: Any) -> bool:
     }
 
 
+def registry_health_status(registry_stale: bool, summary: Any, rows: Any) -> str:
+    """Never trust a summary that disagrees with the actual source observations.
+
+    A dropped, malformed or forged summary must not turn failed, quarantined or
+    missing official source observations into a green operational indicator.
+    This function is health-only: it never authorizes material publication.
+    """
+    if not isinstance(summary, dict) or not isinstance(rows, list) or not rows:
+        return "DEGRADED"
+    counts = {"PASS": 0, "DEGRADED": 0, "FAIL": 0}
+    quarantined = 0
+    for row in rows:
+        if not isinstance(row, dict) or row.get("health") not in counts:
+            return "DEGRADED"
+        counts[row["health"]] += 1
+        quarantined += bool(row.get("quarantined"))
+    expected = {
+        "total": len(rows),
+        "pass": counts["PASS"],
+        "degraded": counts["DEGRADED"],
+        "fail": counts["FAIL"],
+        "quarantined": quarantined,
+    }
+    if any(type(summary.get(key)) is not int or summary[key] != value
+           for key, value in expected.items()):
+        return "DEGRADED"
+    if registry_stale or counts["DEGRADED"] or counts["FAIL"] or quarantined:
+        return "DEGRADED"
+    return "PASS"
+
+
 def task_is_fail_closed(path: pathlib.Path) -> bool:
     task = load(path, {}) or {}
     allowed = task.get("automatic_material_fact_update_allowed")
@@ -182,9 +213,7 @@ def main() -> int:
             "hash_changes": sum(bool(x.get("semantic_hash_changed")) for x in rows),
         }
     registry_summary = registry.get("summary") or {}
-    registry_health = "PASS"
-    if registry_stale or registry_summary.get("degraded") or registry_summary.get("fail"):
-        registry_health = "DEGRADED"
+    registry_health = registry_health_status(registry_stale, registry_summary, registry_rows)
     if missing_registry_tasks or unsafe_registry_updates:
         registry_health = "FAIL_POLICY"
 
