@@ -289,7 +289,7 @@ def test_hidden_counter_dom_fail_closed():
             b"<body>", b"<body><div popover='auto'>" + forged_banner.encode() + b"</div>", 1
         )
         receipt = probe.capture(fetches(b=body), Path(td) / "proof", "42199991120")
-        assert receipt["parser_version"] == "afir-dr12-official-counter-pair-v11"
+        assert receipt["parser_version"] == "afir-dr12-official-counter-pair-v12"
         assert receipt["observation_state"] == "SOURCE_COUNTER_FUNDS_WITHHELD_REVIEW"
         assert receipt["open_call_authorized"] is False
         assert receipt["publish_authorized"] is False
@@ -341,6 +341,24 @@ def test_immutable_receipt_and_replay():
         assert record["budget_authorized"] is False
         assert record["material_fact_action"] == "NONE"
         assert probe.replay(target)["verified"] is True
+        # Previously captured V11 receipts must remain replayable without
+        # recomputing or rewriting any original bytes or elevating authority.
+        legacy = target.parent / "historical-v11"
+        legacy.mkdir()
+        for source in ("agency", "delegated"):
+            file_name = f"{source}.raw.html"
+            (legacy / file_name).write_bytes((target / file_name).read_bytes())
+        historical_manifest = json.loads((target / "manifest.json").read_text(encoding="utf-8"))
+        historical_manifest["parser_version"] = probe.PREVIOUS_PARSER_VERSION
+        for component in historical_manifest["reconciliation"]["components"].values():
+            component.pop("delegated_session_window_review_reason", None)
+        (legacy / "manifest.json").write_text(
+            json.dumps(historical_manifest, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8"
+        )
+        historical_replay = probe.replay(legacy)
+        assert historical_replay["verified"] is True
+        assert historical_replay["publish_authorized"] is False
         reject(lambda: probe.capture(fetches(), target, "42199991111"))
         original = (target / "manifest.json").read_text(encoding="utf-8")
         for adjust in (
