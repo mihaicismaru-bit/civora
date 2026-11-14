@@ -30,6 +30,7 @@ on:
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
       - 'partener-eu/ops/test_consultant_crud_v4.py'
       - 'partener-eu/ops/test_consultant_runtime_v5.py'
+      - 'partener-eu/ops/test_consultant_mysmis_freshness.mjs'
       - '.github/workflows/partener-eu-web-qa.yml'
   pull_request:
     branches: [main]
@@ -59,6 +60,7 @@ on:
       - 'partener-eu/ops/test_consultant_workspace_v3.py'
       - 'partener-eu/ops/test_consultant_crud_v4.py'
       - 'partener-eu/ops/test_consultant_runtime_v5.py'
+      - 'partener-eu/ops/test_consultant_mysmis_freshness.mjs'
       - '.github/workflows/partener-eu-web-qa.yml'
 
 permissions:
@@ -117,6 +119,7 @@ jobs:
           python partener-eu/ops/test_consultant_workspace_v3.py
           python partener-eu/ops/test_consultant_crud_v4.py
           python partener-eu/ops/test_consultant_runtime_v5.py
+          node partener-eu/ops/test_consultant_mysmis_freshness.mjs
 
       - name: Public semantics and freshness
         run: |
