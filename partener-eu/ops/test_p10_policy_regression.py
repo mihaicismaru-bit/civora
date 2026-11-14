@@ -50,6 +50,21 @@ if old_age is None or old_age <= monitor_ns["MAX_REGISTRY_AGE_SECONDS"]:
 if monitor_age("not-a-date") is not None:
     errors.append("P10 accepts malformed source-health timestamps")
 
+# A recent failed MIPE acquisition is not a fresh canonical corpus. The live
+# hosted-route status DEGRADED_LAST_KNOWN_GOOD_PRESERVED must never be PASS.
+monitor_mipe_health = monitor_ns["mipe_health_status"]
+for degraded in (
+    "DEGRADED_LAST_KNOWN_GOOD_PRESERVED",
+    "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
+    "UNKNOWN",
+    None,
+):
+    if monitor_mipe_health(degraded) != "DEGRADED_FAIL_CLOSED":
+        errors.append(f"P10 reports unverified MIPE status {degraded!r} as healthy")
+for success in ("OK", "OK_NO_NEW_RELEVANT_ITEMS"):
+    if monitor_mipe_health(success) != "PASS":
+        errors.append(f"P10 rejects verified MIPE ingestion success status {success}")
+
 for marker in [
     "workflow_run:",
     "PARTENER.EU AFIR Ingestion",

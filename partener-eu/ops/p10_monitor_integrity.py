@@ -100,6 +100,12 @@ def history_path(report: dict[str, Any]) -> pathlib.Path | None:
     return HISTORY / f"{stamp}.json"
 
 
+def mipe_health_status(value: Any) -> str:
+    # Only observed direct-acquisition success states may be reported healthy.
+    # Both known LKG-preserved failures and unknown future statuses fail closed.
+    return "PASS" if value in {"OK", "OK_NO_NEW_RELEVANT_ITEMS"} else "DEGRADED_FAIL_CLOSED"
+
+
 def task_is_fail_closed(path: pathlib.Path) -> bool:
     task = load(path, {}) or {}
     allowed = task.get("automatic_material_fact_update_allowed")
@@ -197,6 +203,7 @@ def main() -> int:
     mipe = load(INGEST_STATE / "mipe_state.json", {}) or {}
     mipe_last = mipe.get("lastRun") or {}
     mipe_status = mipe.get("status") or mipe_last.get("status") or "UNKNOWN"
+    mipe_health = mipe_health_status(mipe_status)
 
     mff = load(INGEST_STATE / "mff_2028_health.json", {}) or {}
     mff_rows = mff.get("sources") or []
@@ -320,7 +327,7 @@ def main() -> int:
             "parsed_relevant_count": mipe_last.get("parsedRelevantCount"),
             "published_item_count": mipe_last.get("publishedItemCount"),
             "last_known_good_preserved": mipe_status == "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED",
-            "health": "DEGRADED_FAIL_CLOSED" if mipe_status == "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED" else "PASS",
+            "health": mipe_health,
         },
         "mff_2028_2034": {
             "observed_at": mff.get("observed_at"),
@@ -357,7 +364,7 @@ def main() -> int:
             "registry_hash_changes": len(changed_rows),
             "afir_hash_changes": len(afir_changed),
             "peo_calendar_changes": peo_change_count,
-            "mipe_health": "DEGRADED_FAIL_CLOSED" if mipe_status == "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED" else "PASS",
+            "mipe_health": mipe_health,
             "autonomous_orchestration_configured": workflow_run_integrated and scheduled_validation_configured and peo_candidate_state_only,
             "policy_errors": errors,
             "critical_policy_fail": bool(errors),
