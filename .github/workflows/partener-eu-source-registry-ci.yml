@@ -31,6 +31,8 @@ on:
       - '.github/workflows/partener-eu-mff-2028.yml'
       - 'partener-eu/ingest/source_registry_probe.py'
       - 'partener-eu/ingest/data_plane_contract.json'
+      - 'partener-eu/ingest/intelligence_index.py'
+      - 'partener-eu/ops/test_intelligence_index.py'
       - 'partener-eu/ingest/funding_tenders_api.py'
       - 'partener-eu/ingest/funding_tenders_fetch.py'
       - 'partener-eu/ingest/eea_civil_society_calls.py'
@@ -156,6 +158,8 @@ jobs:
 
       - name: Validate P10 and canonical source authority compatibility
         run: python partener-eu/ops/test_p10_policy_regression.py
+      - name: Reject future-dated official corpus freshness (replay fail-closed)
+        run: python partener-eu/ops/test_intelligence_index.py
 
       - name: Validate official MFF October stage watches and immutable raw acquisition
         run: python partener-eu/ops/test_mff_2028_probe.py

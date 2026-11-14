@@ -109,7 +109,12 @@ def freshness(observed_at: Any, reference: dt.datetime, max_age_hours: int) -> D
     observed = parse_time(observed_at)
     if not observed:
         return {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": max_age_hours}
-    age = max(0.0, (reference - observed).total_seconds() / 3600)
+    age_seconds = (reference - observed).total_seconds()
+    # A future timestamp must never refresh LKG. Allow only bounded clock skew
+    # between official acquisition and the replay runner.
+    if age_seconds < -300:
+        return {"status": "UNKNOWN", "ageHours": None, "maxAgeHours": max_age_hours}
+    age = max(0.0, age_seconds / 3600)
     return {
         "status": "CURRENT" if age <= max_age_hours else "STALE",
         "ageHours": round(age, 2),

@@ -62,6 +62,12 @@ def main():
         root = pathlib.Path(directory)
         fixture_state(root)
         reference = dt.datetime(2026, 8, 12, 10, tzinfo=dt.timezone.utc)
+        # Future-dated evidence outside a bounded five-minute clock skew
+        # cannot be treated as CURRENT or renew a stale official corpus.
+        assert mod.freshness("2026-08-12T10:04:59Z", reference, 8)["status"] == "CURRENT"
+        rejected_future = mod.freshness("2026-08-12T10:05:01Z", reference, 8)
+        assert rejected_future["status"] == "UNKNOWN", rejected_future
+        assert rejected_future["ageHours"] is None
         registry_path = root / "source_registry.json"
         index = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
         assert index["contract"]["status"] == "PASS", index["contract"]
@@ -126,6 +132,23 @@ def main():
         assert healthy_material["summary"]["unavailableT1Sources"] == []
         assert healthy_material["summary"]["operationalUnavailableT1Sources"] == ["SRC-DISCOVERY-ONLY"]
         assert healthy_material["dataPlane"]["dependencyIsolation"]["blockedSourceIds"] == []
+
+        # Even an otherwise successful MIPE acquisition cannot claim fresh
+        # authority if its timestamp is implausibly ahead of the replay clock.
+        write(root / "mipe_state.json", {
+            "status": "OK", "items": [],
+            "lastRun": {"observedAt": "2026-08-13T10:00:00Z", "sourceAvailable": True},
+        })
+        future_mipe = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
+        future_mipe_source = next(row for row in future_mipe["sources"] if row["id"] == "MIPE_CORPUS")
+        assert future_mipe_source["freshness"]["status"] == "UNKNOWN"
+        assert "MIPE_CORPUS" in future_mipe["summary"]["materialStaleOrUnknownSources"]
+        future_gates = {row["sourceId"]: row for row in future_mipe["dataPlane"]["dependencyIsolation"]["gates"]}
+        assert future_gates["MIPE_CORPUS"]["materialFactGate"] == "BLOCKED_SOURCE_DEPENDENCIES"
+        write(root / "mipe_state.json", {
+            "status": "OK", "items": [],
+            "lastRun": {"observedAt": "2026-08-12T08:00:00Z", "sourceAvailable": True},
+        })
 
         stale = mod.compile_with_replay(
             root,
