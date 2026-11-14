@@ -1256,6 +1256,48 @@ def main():
             by_id["SRC-EU-EUI-PEER-REVIEWERS-PERMANENT-2026"].get("extract", [])):
         fail("EUI permanent individual role was conflated with autumn city intake")
 
+
+    # Horizon Cluster 4 topics listed FORTHCOMING on 14 November must not
+    # become OPEN_CALL when a crawler sees an indicative 17-Nov opening date.
+    # F&T Angular topic shells are navigational, not a verified raw receipt.
+    horizon_topics = {
+        "SRC-EU-HORIZON-CL4-2027-AI-ROBOTICS-FORTHCOMING":
+            "HORIZON-CL4-2027-04-DIGITAL-EMERGING-05",
+        "SRC-EU-HORIZON-CL4-2027-PHOTONICS-FORTHCOMING":
+            "HORIZON-CL4-2027-05-DIGITAL-EMERGING-03",
+    }
+    for source_id, topic in horizon_topics.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"Horizon forthcoming exact-topic discovery missing: {source_id}")
+        expected_url = ("https://ec.europa.eu/info/funding-tenders/opportunities/"
+                        "portal/screen/opportunities/topic-details/" + topic)
+        expected = {
+            "tier": "T1", "class": "official_eu_funding_tenders_exact_topic",
+            "url": expected_url, "topic_identifier_discovery": topic,
+            "authority_class": "T1_OFFICIAL_EC_FUNDING_TENDERS",
+            "authority_scope": "EXACT_TOPIC_FORTHCOMING_DISCOVERY_ONLY",
+            "observation_state": "FORTHCOMING_EXACT_TOPIC_DISCOVERED_RAW_PENDING",
+            "material_fact_use": False, "credentials_required": False,
+            "open_call_authorized": False,
+            "material_fact_publication_authorized": False,
+            "adapter_required": "EC_FT_EXACT_TOPIC_CURRENT_STATUS_AND_ENDPOINT_RECONCILE_V1",
+        }
+        if any(row.get(k) != v for k, v in expected.items()):
+            fail(f"{source_id}: forthcoming topic identity/stage or authority was changed")
+        if not {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY", "FORTHCOMING", "DISCOVERY"}.issubset(
+                set(row.get("source_families") or [])):
+            fail(f"{source_id}: topic missing programme/source taxonomy")
+        if any(k in row for k in (
+                "status", "call_status", "deadline", "budget", "budget_eur",
+                "eligibility", "open_at", "close_at", "fetched_at",
+                "raw_sha256", "semantic_sha256", "parser_version", "run_id",
+                "handoff_sha256", "http_status", "submission_endpoint")):
+            fail(f"{source_id}: fabricated original receipt or material call fact")
+        note = (row.get("note") or "").lower()
+        if not all(s in note for s in ("js-only", "sha-256", "no open_call", "semantic")):
+            fail(f"{source_id}: missing exact-status/receipt/publication boundary")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
