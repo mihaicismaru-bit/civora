@@ -53,7 +53,7 @@ function evidencePanel(title,programme){const r=D.mysmisRegistry;if(!r)return'';
  // call identifier. Even EXACT_TITLE can collide across programmes/years.
  // Do not render a matched row's status, budget or operational counters until
  // the dossier and official snapshot carry the SAME exact verified call code.
- return `<section class="cw3MySMISEvidence empty" data-cw3-mysmis-evidence data-cw3-mysmis-match="candidate"><div class="eyebrow">Posibilă corespondență textuală MySMIS</div><h3>${esc(x.call)}</h3><p>${esc(x.programme)} · potrivire ${esc(found.mode)} · scor ${(found.score*100).toFixed(0)}%</p><p>Legătura este doar un indiciu de căutare. Fără reconcilierea codului exact de apel și a sursei oficiale actuale, statusul, bugetul și indicatorii operaționali ai acestei linii nu sunt afișați.</p><a href="${esc(r.source?.canonicalUrl)}" target="_blank" rel="noopener noreferrer">Verifică apelul exact în registrul oficial ↗</a></section>`;
+ return `<section class="cw3MySMISEvidence empty" data-cw3-mysmis-evidence data-cw3-mysmis-match="candidate"><div class="eyebrow">Posibilă corespondență textuală MySMIS</div><h3>${esc(x.call)}</h3><p>${esc(x.programme)} · potrivire ${esc(found.mode)} · scor ${(found.score*100).toFixed(0)}%</p><p>Legătura este doar un indiciu de căutare: statusul literal nu înlocuiește automat statusul canonic PARTENER.EU. Fără reconcilierea codului exact de apel și a sursei oficiale actuale, statusul, bugetul și indicatorii operaționali ai acestei linii nu sunt afișați.</p><a href="${esc(r.source?.canonicalUrl)}" target="_blank" rel="noopener noreferrer">Verifică apelul exact în registrul oficial ↗</a></section>`;
 }
 function inject(){
  const root=document.querySelector('.cw3Root');if(!root)return;
