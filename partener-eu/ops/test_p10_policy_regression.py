@@ -80,6 +80,33 @@ for not_preserved in ("OK", "OK_NO_NEW_RELEVANT_ITEMS", "UNKNOWN", None):
     if monitor_mipe_lkg(not_preserved):
         errors.append(f"P10 fabricates MIPE LKG preservation for {not_preserved!r}")
 
+# Health-only source summary must be reconciled against each actual
+# observation. A missing/forged counter is not a healthy official source feed.
+monitor_registry_health = monitor_ns["registry_health_status"]
+healthy_row = {"id": "T1-OFFICIAL", "health": "PASS", "quarantined": False}
+healthy_counts = {"total": 1, "pass": 1, "degraded": 0, "fail": 0, "quarantined": 0}
+if monitor_registry_health(False, healthy_counts, [healthy_row]) != "PASS":
+    errors.append("P10 rejects internally consistent healthy source registry")
+negative_registry_cases = (
+    (True, healthy_counts, [healthy_row], "stale source ledger"),
+    (False, {}, [healthy_row], "missing source counters"),
+    (False, healthy_counts, [], "empty observations"),
+    (False, healthy_counts, [{**healthy_row, "health": "FAIL"}], "hidden failed source"),
+    (False, healthy_counts, [{**healthy_row, "health": "DEGRADED"}], "hidden degraded source"),
+    (False, healthy_counts, [{**healthy_row, "health": "UNKNOWN"}], "unknown source health"),
+    (False, healthy_counts, [{**healthy_row, "quarantined": True}], "hidden quarantine"),
+    (False, {**healthy_counts, "total": 2}, [healthy_row], "incorrect source total"),
+    (False, {**healthy_counts, "pass": True}, [healthy_row], "non-numeric source count"),
+)
+for stale, summary, rows, reason in negative_registry_cases:
+    if monitor_registry_health(stale, summary, rows) != "DEGRADED":
+        errors.append(f"P10 promotes {reason} to green official-source health")
+# A genuinely degraded registry is represented as such, even if all counters
+# are internally consistent. No warning state is ever interpreted as a PASS.
+failed_counts = {"total": 1, "pass": 0, "degraded": 0, "fail": 1, "quarantined": 0}
+if monitor_registry_health(False, failed_counts, [{**healthy_row, "health": "FAIL"}]) != "DEGRADED":
+    errors.append("P10 hides correctly counted failed official source")
+
 for marker in [
     "workflow_run:",
     "PARTENER.EU AFIR Ingestion",
