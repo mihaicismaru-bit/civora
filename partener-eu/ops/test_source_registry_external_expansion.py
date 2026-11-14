@@ -460,7 +460,9 @@ def main():
                 "eligibility", "fetched_at", "raw_sha256", "semantic_sha256",
                 "parser_version", "run_id", "handoff_sha256")):
             fail(f"{source_id}: fabricated material fact or raw-source receipt")
-        if "no open_call" not in (row.get("note") or "").lower():
+        note = (row.get("note") or "").lower()
+        if "open_call" not in note or not (
+                "no open_call" in note or "cannot authorize open_call" in note):
             fail(f"{source_id}: lost explicit non-promotion boundary")
     if "PROGRAMMING_PIPELINE" not in set(
             by_id["SRC-PRC-151-INCUBATORS-RESIDENTS-CONSULT-20261113"].get("source_families") or []):
