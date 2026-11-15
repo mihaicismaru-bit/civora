@@ -16,6 +16,7 @@ import pathlib
 import re
 import tempfile
 from typing import Any
+from urllib.parse import urlsplit
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 VALIDATION = ROOT / "validation"
@@ -116,6 +117,33 @@ def mipe_lkg_preserved(value: Any) -> bool:
     }
 
 
+def same_official_endpoint(selected: Any, final: Any) -> bool:
+    """A successful redirect may vary only the www spelling or trailing slash.
+
+    A 200 response from another path, host, query or unsafe transport is
+    not evidence for the registered source, regardless of the row's label.
+    """
+    if not isinstance(selected, str) or not isinstance(final, str):
+        return False
+    try:
+        a, b = urlsplit(selected), urlsplit(final)
+        for u in (a, b):
+            if (
+                u.scheme != "https" or not u.hostname
+                or u.username is not None or u.password is not None
+                or u.port not in (None, 443) or u.fragment or ";" in u.path
+            ):
+                return False
+        return (
+            a.hostname.lower().removeprefix("www.")
+            == b.hostname.lower().removeprefix("www.")
+            and (a.path.rstrip("/") or "/") == (b.path.rstrip("/") or "/")
+            and a.query == b.query
+        )
+    except ValueError:
+        return False
+
+
 def registry_health_status(
     registry_stale: bool, summary: Any, rows: Any, registered_sources: Any
 ) -> str:
@@ -163,9 +191,19 @@ def registry_health_status(
                 row.get("ok") is not True
                 or row.get("content_quality_ok") is not True
                 or row.get("quality_issue") is not None
+                or type(row.get("http_status")) is not int
+                or row["http_status"] != 200
+                or not isinstance(row.get("content_type"), str)
+                or row["content_type"].split(";", 1)[0].strip().casefold()
+                   not in {"text/html", "application/xhtml+xml", "application/pdf"}
                 or type(row.get("bytes")) is not int
                 or row["bytes"] <= 0
+                or type(row.get("semantic_bytes")) is not int
+                or row["semantic_bytes"] <= 0
+                or type(row.get("semantic_chars")) is not int
+                or row["semantic_chars"] <= 0
                 or row.get("selected_url") not in allowed_transports
+                or not same_official_endpoint(row.get("selected_url"), row.get("final_url"))
                 or not all(
                     isinstance(row.get(key), str)
                     and re.fullmatch(r"[0-9a-f]{64}", row[key])
