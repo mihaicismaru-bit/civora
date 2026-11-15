@@ -94,13 +94,21 @@ def acquire(registry, raw_dir, run_id, fetcher=oi.network_fetch, observed_at=Non
         })
     except (OSError, ValueError, RuntimeError) as error:
         code = error.code if isinstance(error, HTTPError) else None
-        health = ("HTTP_FAILURE" if isinstance(error, HTTPError) else
-                  "IDENTITY_OR_CONTENT_REVIEW" if isinstance(error, ValueError) else
-                  "TRANSPORT_FAILURE")
+        # Normalize concrete transport subclasses before ValueError: SSL
+        # certificate failures are BOTH OSError and ValueError in Python.
+        # Keep the signed failure schema replayable without claiming a fetch.
+        if isinstance(error, HTTPError):
+            health, category = "HTTP_FAILURE", "HTTPError"
+        elif isinstance(error, OSError):
+            health, category = "TRANSPORT_FAILURE", "OSError"
+        elif isinstance(error, RuntimeError):
+            health, category = "TRANSPORT_FAILURE", "RuntimeError"
+        else:
+            health, category = "IDENTITY_OR_CONTENT_REVIEW", "ValueError"
         row.update({
             "fetch_status": "FAIL_REVIEW",
             "source_health": health,
-            "error_type": type(error).__name__,
+            "error_type": category,
             "http_status": code,
             "fetched_at": None,
             "raw_file": None,

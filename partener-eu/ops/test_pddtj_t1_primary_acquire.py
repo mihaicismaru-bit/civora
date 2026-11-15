@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.error import HTTPError
+from ssl import SSLCertVerificationError
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "partener-eu/ingest"))
@@ -87,12 +88,23 @@ def main():
         altered_bytes.write_bytes(original() + b" changed")
         fail(lambda: m.validate_replay(manifest, path, reg), "modified original bytes")
 
-    for issue in ["403", "timeout", "wrong", "redirect", "media", "hidden"]:
+    for issue in ["403", "timeout", "tls_cert", "broken_pipe", "runtime_subclass",
+                  "unicode_subclass", "wrong", "redirect", "media", "hidden"]:
         def broken(request):
             if issue == "403":
                 raise HTTPError(url, 403, "Forbidden", {}, None)
             if issue == "timeout":
                 raise OSError("timeout")
+            if issue == "tls_cert":
+                raise SSLCertVerificationError("certificate verify failed")
+            if issue == "broken_pipe":
+                raise BrokenPipeError("connection ended")
+            if issue == "runtime_subclass":
+                class UpstreamRuntime(RuntimeError):
+                    pass
+                raise UpstreamRuntime("transport adapter failure")
+            if issue == "unicode_subclass":
+                raise UnicodeDecodeError("utf-8", b"\\xff", 0, 1, "bad body")
             if issue == "wrong":
                 return b"<html><body>Another ministry story</body></html>", "text/html", url, 200
             if issue == "redirect":
@@ -110,16 +122,25 @@ def main():
             row = receipt["rows"][0]
             assert row["fetched_at"] is None and row["raw_sha256"] is None
             assert row["attempted_at"] == stamp
+            transport_issues = {"timeout", "tls_cert", "broken_pipe", "runtime_subclass"}
             assert row["source_health"] == (
                 "HTTP_FAILURE" if issue == "403" else
-                "TRANSPORT_FAILURE" if issue == "timeout" else
+                "TRANSPORT_FAILURE" if issue in transport_issues else
                 "IDENTITY_OR_CONTENT_REVIEW")
+            assert row["error_type"] == (
+                "HTTPError" if issue == "403" else
+                "RuntimeError" if issue == "runtime_subclass" else
+                "OSError" if issue in transport_issues else "ValueError")
             assert row["http_status"] == (403 if issue == "403" else None)
             assert m.validate_replay(receipt, path, reg)
             forged = copy.deepcopy(receipt)
             forged["rows"][0]["fetched_at"] = stamp
             fail(lambda: m.validate_replay(sealed(forged), path, reg),
                  "fabricated successful fetched_at")
+            forged = copy.deepcopy(receipt)
+            forged["rows"][0]["error_type"] = "UnrecognizedTransportSubclass"
+            fail(lambda: m.validate_replay(sealed(forged), path, reg),
+                 "unrecognized exception subclass must never pass sealed replay")
             forged = copy.deepcopy(receipt)
             forged["rows"][0]["http_status"] = 200
             fail(lambda: m.validate_replay(sealed(forged), path, reg),
@@ -134,7 +155,7 @@ def main():
     fail(lambda: m.identity(registry_drift), "unreviewed source promotion")
     print(json.dumps({
         "test": "PDDTJ MIPE T1 candidate non-admitting original-byte handoff",
-        "positive": 1, "failure_modes": 6, "tamper_checks": 27,
+        "positive": 1, "failure_modes": 10, "tamper_checks": 35,
         "result": "PASS", "publication_effect": "NONE",
     }))
 
