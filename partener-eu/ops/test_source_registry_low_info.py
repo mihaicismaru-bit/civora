@@ -22,6 +22,11 @@ def check(raw_size: int, content_type: str, semantic_text: str, expected_ok: boo
 check(12_000, "text/html", "x" * 101, False, "LOW_INFORMATION_HTML_SHELL")
 check(120_000, "text/html; charset=UTF-8", "conținut oficial " * 700, True, None)
 check(2_000, "text/html", "pagină scurtă legitimă", True, None)
+# Even tiny script-only/empty HTTP-200 HTML has no semantic evidence and
+# must preserve the source's previous verified semantic hash/LKG.
+check(150, "text/html", "", False, "EMPTY_SEMANTIC_HTML")
+check(2_000, "application/xhtml+xml", "", False, "EMPTY_SEMANTIC_HTML")
+check(6_000, "text/html", "", False, "EMPTY_SEMANTIC_HTML")
 # HTTP 200 may serve a tiny challenge/error HTML body; never hash it as healthy.
 check(240, "text/html", "Just a moment... Enable JavaScript and cookies to continue", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
 check(1_050, "application/xhtml+xml", "Access denied. Cloudflare Ray ID: abc", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
@@ -129,6 +134,12 @@ try:
     assert challenge["ok"] is True
     assert challenge["content_quality_ok"] is False
     assert challenge["quality_issue"] == "HTML_CHALLENGE_OR_ERROR_SHELL"
+
+    empty_semantic_html = b"<html><head><script>window.location='/challenge'</script></head><body><!-- empty --></body></html>"
+    empty_document = probe(_Response(empty_semantic_html, length=str(len(empty_semantic_html))))
+    assert empty_document["ok"] is True and empty_document["semantic_chars"] == 0
+    assert empty_document["content_quality_ok"] is False
+    assert empty_document["quality_issue"] == "EMPTY_SEMANTIC_HTML"
 
     javascript_shell = b"<html><body>Please enable JavaScript and cookies to continue</body></html>"
     js_gate = probe(_Response(javascript_shell, length=str(len(javascript_shell))))

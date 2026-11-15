@@ -59,6 +59,11 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
 def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
     semantic_chars = len(sem.decode("utf-8", errors="ignore"))
     is_html = is_html_content_type(content_type)
+    # HTTP-200 script/metadata-only HTML can have many raw bytes but no
+    # visible programme evidence. Never replace the prior semantic LKG
+    # with the empty-string hash (even when the HTML is below 4 KiB).
+    if is_html and semantic_chars == 0:
+        return False, "EMPTY_SEMANTIC_HTML", semantic_chars
     # Tiny HTTP-200 anti-bot/error pages are not official programme evidence.
     # They may be far smaller than the ordinary low-information shell cutoff.
     # Keep the signature narrow and only inspect short HTML, so real source
