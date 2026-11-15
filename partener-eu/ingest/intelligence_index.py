@@ -291,8 +291,38 @@ def registry_source(
     state: Dict[str, Any], reference: dt.datetime, config: Dict[str, Any]
 ) -> Dict[str, Any]:
     observed_at = state.get("observed_at")
-    summary = state.get("summary") or {}
+    rows = state.get("sources")
+    summary = state.get("summary")
+    rows = rows if isinstance(rows, list) else []
+    summary = summary if isinstance(summary, dict) else {}
     sla = int(config.get("freshnessSlaHours") or 12)
+
+    # Health summaries are metadata, not authoritative evidence of successful
+    # acquisition. Reconcile against individual observations, as P10 does.
+    counts = Counter()
+    quarantined = 0
+    valid = bool(rows)
+    for row in rows:
+        if not isinstance(row, dict) or row.get("health") not in {"PASS", "DEGRADED", "FAIL"}:
+            valid = False
+            break
+        counts[row["health"]] += 1
+        quarantined += bool(row.get("quarantined"))
+    expected = {
+        "total": len(rows),
+        "pass": counts["PASS"],
+        "degraded": counts["DEGRADED"],
+        "fail": counts["FAIL"],
+        "quarantined": quarantined,
+    }
+    summary_matches = valid and all(
+        type(summary.get(key)) is int and summary[key] == number
+        for key, number in expected.items()
+    )
+    healthy = summary_matches and not (
+        counts["DEGRADED"] or counts["FAIL"] or quarantined
+    )
+
     return {
         "id": "VERIFIED_SOURCE_REGISTRY",
         "tier": config.get("tier") or "MIXED_T1_T1B_T2",
@@ -300,14 +330,16 @@ def registry_source(
         "programmes": config.get("programmes") or [],
         "sourceFamilies": config.get("sourceFamilies") or [],
         "dependencyScopes": config.get("dependencyScopes") or [],
-        "status": "PASS" if not summary.get("fail") else "DEGRADED",
+        "status": "PASS" if healthy else "DEGRADED",
         "observedAt": observed_at,
         "freshness": freshness(observed_at, reference, sla),
-        "itemCount": int(summary.get("total") or len(state.get("sources") or [])),
-        "resolutionTasksRequired": int(summary.get("resolution_tasks_required") or 0),
+        "itemCount": len(rows),
+        "resolutionTasksRequired": sum(
+            row.get("resolution_task_required") is True
+            for row in rows if isinstance(row, dict)
+        ),
         "failClosed": True,
     }
-
 
 def state_contract_result(
     source_id: str,
