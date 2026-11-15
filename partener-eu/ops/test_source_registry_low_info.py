@@ -141,6 +141,36 @@ try:
     assert empty_document["content_quality_ok"] is False
     assert empty_document["quality_issue"] == "EMPTY_SEMANTIC_HTML"
 
+
+    # The legacy digest includes <title> and visually hidden text. Nonempty
+    # semantic text is not proof that the page contains rendered source facts.
+    metadata_shells = (
+        b"<html><head><title>Official grants 2026</title></head>"
+        b"<body><script>window.location='/verify'</script></body></html>",
+        b"<html><head><title>Official grants 2026</title></head>"
+        b"<body><div hidden>2026 grants</div></body></html>",
+        b"<html><body><section style='display:none'>2026 grants</section></body></html>",
+        b"<html><body><template>Fake notice 2026</template></body></html>",
+        b"<html><body><div class='visually-hidden'>2026 grants</div></body></html>",
+        b"<html><body><section aria-hidden='true'>2026 grants</section></body></html>",
+    )
+    for raw in metadata_shells:
+        assert module.visible_html_characters(raw) == 0
+        shell = probe(_Response(raw, length=str(len(raw))))
+        assert shell["ok"] is True
+        assert shell["content_quality_ok"] is False
+        assert shell["quality_issue"] == "EMPTY_VISIBLE_HTML"
+
+    # Preserve short legitimate HTML, including article text below 4 KiB.
+    visible_short = (
+        b"<html><head><title>Official grants 2026</title></head>"
+        b"<body><main><p>Official grant instructions.</p></main></body></html>"
+    )
+    assert module.visible_html_characters(visible_short) > 0
+    real_short = probe(_Response(visible_short, length=str(len(visible_short))))
+    assert real_short["content_quality_ok"] is True
+    assert real_short["quality_issue"] is None
+
     javascript_shell = b"<html><body>Please enable JavaScript and cookies to continue</body></html>"
     js_gate = probe(_Response(javascript_shell, length=str(len(javascript_shell))))
     assert js_gate["ok"] is True and js_gate["content_quality_ok"] is False
