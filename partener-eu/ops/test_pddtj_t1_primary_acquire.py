@@ -88,6 +88,26 @@ def main():
         altered_bytes.write_bytes(original() + b" changed")
         fail(lambda: m.validate_replay(manifest, path, reg), "modified original bytes")
 
+    # Handoff must reject symlinked raw directories and raw files, even if
+    # an attacker can keep the bytes and all signed digests identical.
+    with TemporaryDirectory() as temp:
+        root = Path(temp)
+        real = root / "real"
+        real.mkdir()
+        alias = root / "alias"
+        alias.symlink_to(real, target_is_directory=True)
+        fail(lambda: m.acquire(reg, alias, "hermetic-symlink", good, stamp),
+             "symlinked T1 acquisition target")
+        receipt = m.acquire(reg, real, "hermetic-symlink", good, stamp)
+        fail(lambda: m.validate_replay(receipt, alias, reg),
+             "symlinked replay directory")
+        raw = real / m.RAW_NAME
+        saved = real / "preserved-original"
+        raw.rename(saved)
+        raw.symlink_to(saved)
+        fail(lambda: m.validate_replay(receipt, real, reg),
+             "symlinked raw file replay despite matching bytes")
+
     for issue in ["403", "timeout", "tls_cert", "broken_pipe", "runtime_subclass",
                   "unicode_subclass", "wrong", "redirect", "media", "hidden"]:
         def broken(request):
@@ -155,7 +175,7 @@ def main():
     fail(lambda: m.identity(registry_drift), "unreviewed source promotion")
     print(json.dumps({
         "test": "PDDTJ MIPE T1 candidate non-admitting original-byte handoff",
-        "positive": 1, "failure_modes": 10, "tamper_checks": 35,
+        "positive": 1, "failure_modes": 10, "tamper_checks": 38,
         "result": "PASS", "publication_effect": "NONE",
     }))
 
