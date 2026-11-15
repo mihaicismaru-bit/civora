@@ -62,6 +62,56 @@ def main():
         root = pathlib.Path(directory)
         fixture_state(root)
         reference = dt.datetime(2026, 8, 12, 10, tzinfo=dt.timezone.utc)
+        # Acquisition timestamps without an explicit UTC offset have no
+        # verifiable timezone. They must not renew the evidence clock.
+        assert mod.parse_time("2026-08-12T10:00:00") is None
+        assert mod.parse_time("2026-08-12") is None
+        assert mod.freshness("2026-08-12T10:00:00", reference, 8)["status"] == "UNKNOWN"
+        assert mod.parse_time("2026-08-12T12:00:00+02:00") == reference
+        # Corpus rows remain discoverable but cannot claim CURRENT official
+        # evidence if the last attempt is stale or source health is degraded.
+        afir_fixture = {
+            "status": "PASS", "generatedAt": "2026-08-12T08:00:00Z",
+            "items": [{"url": "https://afir.ro/finantare/sample", "title": "Sample"}],
+        }
+        mipe_fixture = {
+            "status": "OK",
+            "lastRun": {"observedAt": "2026-08-12T08:00:00Z", "sourceAvailable": True},
+            "items": [{"url": "https://mfe.gov.ro/ghid/sample", "title": "Sample"}],
+        }
+        afir_source, afir_rows = mod.afir_records(afir_fixture, reference, {})
+        mipe_source, mipe_rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert afir_source["freshness"]["status"] == "CURRENT"
+        assert mipe_source["freshness"]["status"] == "CURRENT"
+        assert afir_rows[0]["decisionUse"] == "OFFICIAL_EVIDENCE_INDEX"
+        assert mipe_rows[0]["decisionUse"] == "OFFICIAL_EVIDENCE_INDEX"
+        for degraded_status in ("FAIL", "DEGRADED"):
+            afir_fixture["status"] = degraded_status
+            _, rows = mod.afir_records(afir_fixture, reference, {})
+            assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        afir_fixture["status"] = "PASS"
+        afir_fixture["generatedAt"] = "2026-08-11T01:00:00Z"
+        _, rows = mod.afir_records(afir_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        afir_fixture["generatedAt"] = "2026-08-12T08:00:00"
+        _, rows = mod.afir_records(afir_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        for degraded_status in ("DEGRADED_LAST_KNOWN_GOOD_PRESERVED", "SOURCE_UNAVAILABLE_LAST_KNOWN_GOOD_PRESERVED"):
+            mipe_fixture["status"] = degraded_status
+            _, rows = mod.mipe_records(mipe_fixture, reference, {})
+            assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        mipe_fixture["status"] = "OK"
+        mipe_fixture["lastRun"]["observedAt"] = "2026-08-11T01:00:00Z"
+        _, rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        mipe_fixture["lastRun"]["observedAt"] = "2026-08-12T08:00:00"
+        _, rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+        mipe_fixture["lastRun"]["observedAt"] = "2026-08-12T08:00:00Z"
+        mipe_fixture["lastRun"]["sourceAvailable"] = False
+        _, rows = mod.mipe_records(mipe_fixture, reference, {})
+        assert rows[0]["decisionUse"] == "LAST_KNOWN_GOOD_DISCOVERY_ONLY"
+
         # Future-dated evidence outside a bounded five-minute clock skew
         # cannot be treated as CURRENT or renew a stale official corpus.
         assert mod.freshness("2026-08-12T10:04:59Z", reference, 8)["status"] == "CURRENT"
