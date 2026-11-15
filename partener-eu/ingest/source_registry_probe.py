@@ -18,6 +18,8 @@ REVIEWED_BASELINES = ROOT / "partener-eu" / "validation" / "accepted-source-base
 UA = "Mozilla/5.0 CIVORA-PARTENER-EU/1.0 (+production-validation)"
 MIN_SEMANTIC_CHARS = 256
 MIN_HTML_BYTES_FOR_LOW_INFO = 4096
+# A title/hidden metadata payload with a token visible body is not source evidence.
+MIN_VISIBLE_HTML_CHARS = 20
 # A partial/truncated response must never become a healthy source hash or LKG.
 MAX_SOURCE_BYTES = 3_000_000
 
@@ -257,8 +259,15 @@ def fetch_once(url: str):
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
         # Legacy semantic digests also include <title>/hidden text. A metadata
         # shell can have a nonempty digest without any visible official evidence.
-        if content_quality_ok and is_html_content_type(ctype) and not visible_html_characters(raw):
-            content_quality_ok, quality_issue = False, "EMPTY_VISIBLE_HTML"
+        if content_quality_ok and is_html_content_type(ctype):
+            visible_chars = visible_html_characters(raw)
+            if visible_chars == 0:
+                content_quality_ok, quality_issue = False, "EMPTY_VISIBLE_HTML"
+            elif semantic_chars >= MIN_SEMANTIC_CHARS and visible_chars < MIN_VISIBLE_HTML_CHARS:
+                # An ample <title>/hidden node can inflate the legacy semantic
+                # digest while the rendered official document says only "OK".
+                # Preserve LKG and force source review, not a false freshness PASS.
+                content_quality_ok, quality_issue = False, "INSUFFICIENT_VISIBLE_HTML"
         return {
             "ok": r.status == 200,
             "http_status": r.status,

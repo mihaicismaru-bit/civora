@@ -161,6 +161,23 @@ try:
         assert shell["content_quality_ok"] is False
         assert shell["quality_issue"] == "EMPTY_VISIBLE_HTML"
 
+    # A large title or hidden payload plus one rendered token is still a
+    # metadata shell, not a substantively observed official programme page.
+    # The legacy semantic digest can exceed 256 characters in these cases.
+    near_empty_visible = (
+        b"<html><head><title>" + b"Programme details " * 30
+        + b"</title></head><body><main><p>OK</p></main></body></html>",
+        b"<html><body><section hidden>" + b"Official funds " * 40
+        + b"</section><main><span>X</span></main></body></html>",
+    )
+    for raw in near_empty_visible:
+        assert 0 < module.visible_html_characters(raw) < module.MIN_VISIBLE_HTML_CHARS
+        assert len(module.semantic_bytes(raw, "text/html")) >= module.MIN_SEMANTIC_CHARS
+        tiny = probe(_Response(raw, length=str(len(raw))))
+        assert tiny["ok"] is True
+        assert tiny["content_quality_ok"] is False
+        assert tiny["quality_issue"] == "INSUFFICIENT_VISIBLE_HTML"
+
     # Preserve short legitimate HTML, including article text below 4 KiB.
     visible_short = (
         b"<html><head><title>Official grants 2026</title></head>"
