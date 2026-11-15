@@ -115,14 +115,41 @@ def mipe_lkg_preserved(value: Any) -> bool:
     }
 
 
-def registry_health_status(registry_stale: bool, summary: Any, rows: Any) -> str:
-    """Never trust a summary that disagrees with the actual source observations.
+def registry_health_status(
+    registry_stale: bool, summary: Any, rows: Any, registered_sources: Any
+) -> str:
+    """Require a complete, identity-bound registry, not just coherent counters.
 
-    A dropped, malformed or forged summary must not turn failed, quarantined or
-    missing official source observations into a green operational indicator.
-    This function is health-only: it never authorizes material publication.
+    An attacker or partial run could omit failed sources, recompute the counters,
+    and produce a superficially healthy ledger. Compare every observation with
+    the versioned official-source roster, including identity and authority
+    metadata. Health-only: this never authorizes material publication.
     """
-    if not isinstance(summary, dict) or not isinstance(rows, list) or not rows:
+    if (not isinstance(summary, dict) or not isinstance(rows, list) or not rows
+            or not isinstance(registered_sources, list) or not registered_sources):
+        return "DEGRADED"
+    registered = {}
+    for source in registered_sources:
+        if not isinstance(source, dict) or not isinstance(source.get("id"), str):
+            return "DEGRADED"
+        source_id = source["id"]
+        if not source_id or source_id in registered:
+            return "DEGRADED"
+        registered[source_id] = source
+    observed_ids = set()
+    for row in rows:
+        if not isinstance(row, dict) or row.get("id") not in registered:
+            return "DEGRADED"
+        source_id = row["id"]
+        if source_id in observed_ids:
+            return "DEGRADED"
+        observed_ids.add(source_id)
+        expected = registered[source_id]
+        if (any(row.get(field) != expected.get(field)
+                for field in ("tier", "class", "url"))
+                or row.get("material_fact_use") is not bool(expected.get("material_fact_use"))):
+            return "DEGRADED"
+    if observed_ids != set(registered):
         return "DEGRADED"
     counts = {"PASS": 0, "DEGRADED": 0, "FAIL": 0}
     quarantined = 0
@@ -213,7 +240,10 @@ def main() -> int:
             "hash_changes": sum(bool(x.get("semantic_hash_changed")) for x in rows),
         }
     registry_summary = registry.get("summary") or {}
-    registry_health = registry_health_status(registry_stale, registry_summary, registry_rows)
+    registered_sources = (load(ROOT / "ingest" / "source_registry.json", {}) or {}).get("sources")
+    registry_health = registry_health_status(
+        registry_stale, registry_summary, registry_rows, registered_sources
+    )
     if missing_registry_tasks or unsafe_registry_updates:
         registry_health = "FAIL_POLICY"
 
