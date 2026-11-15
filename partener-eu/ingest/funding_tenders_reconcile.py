@@ -256,6 +256,11 @@ def reconcile_live_evidence(
     quarantined: list[dict[str, Any]] = []
     seen: set[str] = set()
     fetched_at = _parse_timestamp(evidence.get("fetched_at"), "fetched_at")
+    reconciled_instant = _parse_timestamp(
+        reconciled_at or dt.datetime.now(dt.timezone.utc).isoformat(), "reconciled_at"
+    )
+    if fetched_at > reconciled_instant:
+        _fail("source fetched_at cannot be after reconciliation instant")
 
     for row in batch.get("records") or []:
         if not isinstance(row, dict):
@@ -302,7 +307,10 @@ def reconcile_live_evidence(
             try:
                 deadline = _parse_timestamp(row.get("deadline_candidate"), f"{identifier}.deadline")
                 deadline_iso = deadline.isoformat()
-                if state == "OPEN_CALL" and deadline < fetched_at:
+                # Portal OPEN labels can outlive their own deadlines. Replayed
+                # evidence must be assessed at reconciliation time, not merely
+                # at the earlier source-fetch instant.
+                if state == "OPEN_CALL" and deadline <= reconciled_instant:
                     reasons.append("STALE_DEADLINE_CONTRADICTS_OPEN")
             except ValueError:
                 reasons.append("DEADLINE_FORMAT_UNRESOLVED")
@@ -372,7 +380,7 @@ def reconcile_live_evidence(
     if set(seen) - set(raw_by_id):
         _fail("normalized identifiers missing from raw Search response")
 
-    reconciled_at = reconciled_at or dt.datetime.now(dt.timezone.utc).isoformat()
+    reconciled_at = reconciled_instant.isoformat()
     return {
         "schema": SCHEMA,
         "source_schema": INPUT_SCHEMA,

@@ -168,6 +168,44 @@ def main():
     assert 'STALE_DEADLINE_CONTRADICTS_OPEN' in q[stale['identifier']]['reasons']
     assert all(r['missing_proofs'] == ['CANONICAL_STAGING_ADMISSION', 'PUBLIC_PROJECTION_QUALITY_GATE'] for r in receipt['records'])
 
+    # A historically OPEN topic must not remain staging-ready after its
+    # deadline when immutable source evidence is replayed later. At the
+    # deadline instant, OPEN is already expired (boundary is inclusive).
+    replay = mod.reconcile_live_evidence(
+        evidence,
+        raw_payload,
+        search_raw_bytes=raw_bytes,
+        reconciled_at='2026-09-22T00:00:00+00:00',
+    )
+    replay_q = {r['identifier']: r for r in replay['quarantined_records']}
+    assert direct['identifier'] in replay_q
+    assert 'STALE_DEADLINE_CONTRADICTS_OPEN' in replay_q[direct['identifier']]['reasons']
+    assert replay['stats']['ready_for_staging'] == 1
+    assert {r['identifier'] for r in replay['records']} == {future['identifier']}
+    assert replay['publish_authorized'] is False
+    assert replay['publication_effect'] == 'NONE'
+
+    # A contradictory/future fetch timestamp cannot authorize staging.
+    try:
+        mod.reconcile_live_evidence(
+            evidence, raw_payload, search_raw_bytes=raw_bytes,
+            reconciled_at='2026-08-27T23:59:59+00:00',
+        )
+    except ValueError as exc:
+        assert 'fetched_at' in str(exc)
+    else:
+        raise AssertionError('Future-dated source evidence must fail closed')
+
+    try:
+        mod.reconcile_live_evidence(
+            evidence, raw_payload, search_raw_bytes=raw_bytes,
+            reconciled_at='2026-09-22T00:00:00',
+        )
+    except ValueError as exc:
+        assert 'timezone' in str(exc)
+    else:
+        raise AssertionError('Naive reconciliation timestamps must fail closed')
+
     bad = json.loads(json.dumps(evidence))
     bad['search_receipt']['sha256'] = '0' * 64
     try:
