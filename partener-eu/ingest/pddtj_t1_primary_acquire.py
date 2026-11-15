@@ -68,6 +68,8 @@ def acquire(registry, raw_dir, run_id, fetcher=oi.network_fetch, observed_at=Non
         raise ValueError("invalid run_id")
     url, witness = identity(registry)
     raw_dir = Path(raw_dir)
+    if raw_dir.is_symlink():
+        raise ValueError("symlinked T1 raw evidence directory")
     raw_dir.mkdir(parents=True, exist_ok=True)
     if list(raw_dir.iterdir()):
         raise ValueError("new acquisition needs an empty raw directory")
@@ -79,7 +81,10 @@ def acquire(registry, raw_dir, run_id, fetcher=oi.network_fetch, observed_at=Non
         if final != url or code != 200 or media not in oi.HTML_TYPES:
             raise ValueError("original MIPE origin, media or status mismatch")
         sem = oi.validate_visible(raw, {"words": ("1794", "parcuri industriale")})
-        (raw_dir / RAW_NAME).write_bytes(raw)
+        # Exclusive creation prevents a late symlink/file replacement after
+        # the empty-directory check, before the immutable evidence handoff.
+        with (raw_dir / RAW_NAME).open("xb") as original:
+            original.write(raw)
         row.update({
             "fetch_status": "PASS",
             "source_health": "RAW_CAPTURED",
@@ -129,6 +134,11 @@ def acquire(registry, raw_dir, run_id, fetcher=oi.network_fetch, observed_at=Non
 
 
 def validate_replay(manifest, raw_dir, registry):
+    raw_dir = Path(raw_dir)
+    if raw_dir.is_symlink() or not raw_dir.is_dir():
+        raise ValueError("invalid or symlinked T1 raw evidence directory")
+    if any(path.is_symlink() for path in raw_dir.iterdir()):
+        raise ValueError("symlinked T1 raw evidence file")
     if not isinstance(manifest, dict) or manifest.get("schema") != SCHEMA:
         raise ValueError("T1 candidate handoff schema mismatch")
     proof = manifest.get("handoff_sha256")
