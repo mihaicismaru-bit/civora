@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import hashlib
+import html
 import json
 import pathlib
 import re
@@ -25,6 +26,16 @@ DEFAULT_BASE_URL = "https://partener.eu/"
 DEFAULT_MANIFEST = "partener-eu/web/static-public-manifest.json"
 DEFAULT_OUTPUT = "/tmp/partener-pages-readback.json"
 CARD_RE = re.compile(r"\bdata-dossier-id\s*=\s*[\"']", re.IGNORECASE)
+
+OPEN_CARD_RE = re.compile(
+    r"""<article\b(?=[^>]*\bdata-dossier-id\s*=\s*["'][^"']+["'])[^>]*>.*?</article>""",
+    re.IGNORECASE | re.DOTALL,
+)
+OPEN_TERM_RE = re.compile(
+    r"""<span[^>]*>\s*<b>\s*Termen:\s*</b>\s*([^<]+?)\s*</span>""",
+    re.IGNORECASE | re.DOTALL,
+)
+OPEN_BADGE_RE = re.compile(r"""class=["']status\s+status-open["']""", re.IGNORECASE)
 
 
 def canonical_bytes(value: Any) -> bytes:
@@ -66,6 +77,36 @@ def count_cards(raw: bytes) -> int:
     return len(CARD_RE.findall(raw.decode("utf-8", "replace")))
 
 
+def open_semantics_ok(raw: bytes, evaluated_at: dt.datetime | None = None) -> bool:
+    """Reject expired OPEN cards even if the deployed manifest matches.
+
+    A source artifact's generatedAt is provenance, not a live evaluation clock.
+    """
+    from build_public_static_pages import parse_date
+
+    clock = evaluated_at if evaluated_at is not None else dt.datetime.now(dt.timezone.utc)
+    if clock.tzinfo is None or clock.utcoffset() is None:
+        return False
+    clock = clock.astimezone(dt.timezone.utc)
+    cards = OPEN_CARD_RE.findall(raw.decode("utf-8", "replace"))
+    if len(cards) != count_cards(raw):
+        return False
+    for card in cards:
+        if not OPEN_BADGE_RE.search(card):
+            return False
+        terms = OPEN_TERM_RE.findall(card)
+        if len(terms) != 1:
+            return False
+        term = html.unescape(terms[0]).strip()
+        # Date-only dates cannot authorize precise current OPEN availability.
+        if not re.search(r"\d{1,2}[:.]\d{2}", term):
+            return False
+        closes = parse_date(term)
+        if closes is None or closes <= clock:
+            return False
+    return True
+
+
 def consultation_semantics_ok(raw: bytes) -> bool:
     """Active consultation hub must not expose unverified deadline copy."""
     text = raw.decode("utf-8", "replace")
@@ -104,6 +145,19 @@ def self_test() -> int:
     assert count_cards(b"<article></article>") == 0
     assert consultation_semantics_ok(b"<article><b>Termen:</b> 29 septembrie 2026</article>")
     assert not consultation_semantics_ok(b"<article><b>Termen:</b> Neconfirmat</article>")
+    # ADR Centru 1.2.2: 6 November 2026 12:00 Bucharest == 10:00 UTC.
+    cluster = (b'<article class="staticCard" data-dossier-id="cluster">'
+               b'<span class="status status-open">DESCHIS</span>'
+               b'<span><b>Termen:</b> 2026-11-06T12:00:00+02:00</span>'
+               b'</article>')
+    before = dt.datetime(2026, 11, 6, 9, 59, 59, tzinfo=dt.timezone.utc)
+    cutoff = dt.datetime(2026, 11, 6, 10, 0, 0, tzinfo=dt.timezone.utc)
+    assert open_semantics_ok(cluster, before)
+    assert not open_semantics_ok(cluster, cutoff)
+    assert not open_semantics_ok(cluster, dt.datetime(2026, 11, 16, tzinfo=dt.timezone.utc))
+    assert not open_semantics_ok(cluster.replace(b"2026-11-06T12:00:00+02:00", b"6 noiembrie 2026"), before)
+    assert not open_semantics_ok(cluster.replace(b"<b>Termen:</b>", b"<b>Grant:</b>"), before)
+    assert not open_semantics_ok(cluster.replace(b"status-open", b"status-review"), before)
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
     print("PASS public deploy readback proof self-test")
@@ -174,7 +228,9 @@ def main() -> int:
                 r_code, r_raw, r_resolved = fetch_bytes(route_url, timeout=args.timeout_seconds, token=token)
                 observed_count = count_cards(r_raw)
                 semantic_ok = True
-                if route == "consultari/":
+                if route == "finantari/deschise/":
+                    semantic_ok = open_semantics_ok(r_raw)
+                elif route == "consultari/":
                     semantic_ok = consultation_semantics_ok(r_raw)
                 route_ok = r_code == 200 and observed_count == expected_count and semantic_ok
                 route_results[route] = {
