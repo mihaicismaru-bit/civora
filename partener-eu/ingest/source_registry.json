@@ -1,6 +1,6 @@
 {
   "schema_version": "1.9",
-  "updated_utc": "2026-11-14",
+  "updated_utc": "2026-11-15",
   "policy": {
     "T1": "Authoritative official system or managing authority source. May support material facts when the exact source/evidence is captured and current.",
     "T1B": "Official delegated/subordinate/intermediate-body source. May support material facts within delegated scope when provenance is explicit; prefer T1 corroboration for conflicts.",
@@ -2900,6 +2900,73 @@
       "material_fact_publication_authorized": false,
       "adapter_required": "EC_FT_EXACT_TOPIC_CURRENT_STATUS_AND_ENDPOINT_RECONCILE_V1",
       "note": "Official EC Funding & Tenders indexed topic listing observed as FORTHCOMING (indicative 17 November 2026 opening) on 14 November 2026. Exact topic detail URL serves a JS-only shell to this transport, not the authoritative machine-readable live status or immutable original detail receipt. Discovery-only pending direct API/official raw capture, SHA-256, fetched_at, parser_version, run_id, exact current submission endpoint and semantic identity/status reconciliation. NO OPEN_CALL, no budget, deadline, eligibility publication, no alerts or deployment."
+    },
+    {
+      "id": "SRC-RO-AFIR-DR12-OTHER-EXHAUSTED-20261111",
+      "tier": "T1",
+      "owner": "AFIR — Agenția pentru Finanțarea Investițiilor Rurale",
+      "programmes": [
+        "DR-12 / PS PAC 2023-2027"
+      ],
+      "programme_family": "PS_PAC_2023_2027/DR12",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "ROMANIA",
+        "AFIR",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_AGENCY",
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "AFIR_DR12_COMPONENT_NOTICE_COUNTER_RAW_RECONCILE_V1",
+      "class": "official_exact_component_exhaustion_notice_discovery",
+      "url": "https://www.afir.ro/comunicate/fondurile-pentru-componenta-alte-sectoare-dr-12-au-fost-epuizate/",
+      "authority_scope": "EXACT_COMPONENT_LIFECYCLE_DISCOVERY_ONLY",
+      "observation_state": "EXHAUSTION_NOTICE_DISCOVERED_RAW_PENDING",
+      "event_date_discovery": "2026-11-11",
+      "component_identity_discovery": "DR-12 / ALTE SECTOARE",
+      "paired_official_source_id": "SRC-RO-AFIR-DR12-COMPONENT-COUNTER",
+      "extract": [
+        "exact_intervention_component_identity_discovery",
+        "authority_exhaustion_announcement",
+        "early_closure_stage_discovery"
+      ],
+      "note": "AFIR communication dated 11 November 2026 reports DR-12 ALTE SECTOARE funds exhausted and component intake stopped before 2 December. The separately funded DR-12 SECTOR ZOOTEHNIC is NOT closed by this event. Official notice is discovery-only until original raw bytes, fetched_at, SHA-256, parser_version, run_id and current exact component counter are acquired and semantically reconciled. NO OPEN_CALL, CLOSED_CALL, deadline/budget/eligibility publication, alerts or deployment authorized."
+    },
+    {
+      "id": "SRC-RO-AFIR-DR12-COMPONENT-COUNTER",
+      "tier": "T1",
+      "owner": "AFIR — Agenția pentru Finanțarea Investițiilor Rurale",
+      "programmes": [
+        "DR-12 / PS PAC 2023-2027"
+      ],
+      "programme_family": "PS_PAC_2023_2027/DR12",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "ROMANIA",
+        "AFIR",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_AGENCY",
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "AFIR_DR12_COMPONENT_NOTICE_COUNTER_RAW_RECONCILE_V1",
+      "class": "official_live_component_counter_discovery",
+      "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+      "authority_scope": "EXACT_COMPONENT_COUNTER_DISCOVERY_ONLY",
+      "observation_state": "CURRENT_COUNTER_DISCOVERED_RAW_PENDING",
+      "component_identity_discovery": "DR-12 / ALTE SECTOARE",
+      "paired_official_source_id": "SRC-RO-AFIR-DR12-OTHER-EXHAUSTED-20261111",
+      "extract": [
+        "dr12_component_specific_counter_readback",
+        "other_sectors_exhausted_vs_zootechnic_separate_identity",
+        "exact_component_open_closed_semantic_reconciliation"
+      ],
+      "note": "Official AFIR live funds counter separately lists DR-12 ALTE SECTOARE as FONDURI EPUIZATE and DR-12 SECTOR ZOOTEHNIC with a distinct submission window. Counter rows are mutable and a browser readback is NOT immutable raw acquisition. Pair with the 11-November original notice; require current endpoint, fetched_at, SHA-256, parser_version, run_id and component-specific semantic reconciliation before any lifecycle, budget, deadline or distribution change. NO OPEN_CALL or CLOSED_CALL authorization."
     }
   ]
 }

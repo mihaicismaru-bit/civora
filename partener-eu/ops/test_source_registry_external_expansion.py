@@ -1298,6 +1298,47 @@ def main():
         if not all(s in note for s in ("js-only", "sha-256", "no open_call", "semantic")):
             fail(f"{source_id}: missing exact-status/receipt/publication boundary")
 
+    # The AFIR 11-Nov DR-12 exhaustion notice is component-specific:
+    # ALTE SECTOARE has no bearing on the independent ZOOTEHNIC intake.
+    dr12_pair = {
+        "SRC-RO-AFIR-DR12-OTHER-EXHAUSTED-20261111": (
+            "https://www.afir.ro/comunicate/fondurile-pentru-componenta-alte-sectoare-dr-12-au-fost-epuizate/",
+            "EXACT_COMPONENT_LIFECYCLE_DISCOVERY_ONLY",
+            "EXHAUSTION_NOTICE_DISCOVERED_RAW_PENDING",
+            "SRC-RO-AFIR-DR12-COMPONENT-COUNTER"),
+        "SRC-RO-AFIR-DR12-COMPONENT-COUNTER": (
+            "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+            "EXACT_COMPONENT_COUNTER_DISCOVERY_ONLY",
+            "CURRENT_COUNTER_DISCOVERED_RAW_PENDING",
+            "SRC-RO-AFIR-DR12-OTHER-EXHAUSTED-20261111"),
+    }
+    for source_id, (url, scope, stage, peer) in dr12_pair.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"missing AFIR DR-12 component-specific official source: {source_id}")
+        required = {
+            "url": url, "tier": "T1", "authority_class": "T1_OFFICIAL_AGENCY",
+            "authority_scope": scope, "observation_state": stage,
+            "paired_official_source_id": peer,
+            "component_identity_discovery": "DR-12 / ALTE SECTOARE",
+            "adapter_required": "AFIR_DR12_COMPONENT_NOTICE_COUNTER_RAW_RECONCILE_V1",
+            "material_fact_use": False, "open_call_authorized": False,
+            "material_fact_publication_authorized": False,
+        }
+        if any(row.get(k) != v for k, v in required.items()):
+            fail(f"{source_id}: DR-12 exact component/authority/negative gate changed")
+        if not {"ROMANIA", "AFIR", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+                set(row.get("source_families") or [])):
+            fail(f"{source_id}: AFIR source family missing")
+        if any(k in row for k in (
+                "status", "call_status", "deadline", "budget", "budget_eur",
+                "eligibility", "open_at", "close_at", "fetched_at", "raw_sha256",
+                "semantic_sha256", "parser_version", "run_id", "handoff_sha256")):
+            fail(f"{source_id}: DR-12 discovery fabricated receipt/material state")
+        note = (row.get("note") or "").upper()
+        if not all(x in note for x in ("ZOOTEHNIC", "RAW", "RECONCIL", "NO OPEN_CALL")):
+            fail(f"{source_id}: cannot separate DR-12 components or raw boundary")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
