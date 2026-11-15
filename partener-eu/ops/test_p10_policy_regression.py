@@ -180,7 +180,7 @@ for stale, summary, rows, roster, reason in negative_registry_cases:
 second = {**registered_row, "id": "T1-SECOND", "url": "https://authority.example/second"}
 two_counts = {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0}
 if monitor_registry_health(False, two_counts, [healthy_row, {**healthy_row, **second,
-        "selected_url": second["url"]}], [registered_row, second]) != "PASS":
+        "selected_url": second["url"], "final_url": second["url"]}], [registered_row, second]) != "PASS":
     errors.append("P10 rejects complete two-source registered coverage")
 # Explicitly registered alternate transport is allowed, never silently inferred.
 registered_alias = {**registered_row, "canonical_aliases": ["https://www.authority.example/calls-v2"]}
