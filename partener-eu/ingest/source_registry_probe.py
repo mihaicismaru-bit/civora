@@ -7,6 +7,7 @@ import time
 import urllib.request
 from urllib.parse import urlsplit
 from datetime import datetime, timezone
+from html.parser import HTMLParser
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -54,6 +55,64 @@ def semantic_bytes(raw: bytes, content_type: str) -> bytes:
     text = re.sub(r"\b\d[\d.\s]*\s+(?:de\s+afi(?:ș|ş|s)(?:ă|a)ri|views?)\b", " ", text, flags=re.I)
     text = re.sub(r"\s+", " ", text).strip()
     return text.encode("utf-8")
+
+
+
+class _VisibleEvidenceText(HTMLParser):
+    """Reject metadata/JS/hidden-only HTTP-200 HTML as official evidence.
+
+    Independent quality guard: existing semantic-hash normalization is unchanged.
+    """
+    SKIP = {"head", "script", "style", "noscript", "template", "svg",
+            "iframe", "nav", "footer", "dialog", "textarea", "select"}
+    VOID = {"img", "meta", "link", "input", "br", "hr", "source", "wbr"}
+    HIDDEN_CLASSES = {"hidden", "d-none", "d-sm-none", "d-md-none",
+                      "d-lg-none", "d-xl-none", "d-xxl-none", "invisible",
+                      "visually-hidden", "sr-only"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.stack = []
+        self.visible_chars = 0
+
+    def handle_starttag(self, tag, attrs):
+        seen = {name: (value or "") for name, value in attrs}
+        style = seen.get("style", "").casefold().replace(" ", "")
+        css = {x.strip() for x in style.split(";")}
+        classes = set(seen.get("class", "").casefold().split())
+        hidden = (
+            tag in self.SKIP or "hidden" in seen or "inert" in seen
+            or seen.get("aria-hidden", "").casefold() == "true"
+            or bool(classes & self.HIDDEN_CLASSES)
+            or "display:none" in css or "visibility:hidden" in css
+            or "content-visibility:hidden" in css
+            or bool(re.search(r"(?:^|;)opacity:0(?:\.0+)?%?(?:;|$)", style))
+        )
+        if tag not in self.VOID:
+            parent_hidden = self.stack[-1][1] if self.stack else False
+            self.stack.append((tag, parent_hidden or hidden))
+
+    def handle_startendtag(self, tag, attrs):
+        # A slash-suffixed non-void HTML element remains open in the browser.
+        if tag not in self.VOID | {"svg", "math"}:
+            self.handle_starttag(tag, attrs)
+
+    def handle_endtag(self, tag):
+        for pos in range(len(self.stack) - 1, -1, -1):
+            if self.stack[pos][0] == tag:
+                del self.stack[pos:]
+                break
+
+    def handle_data(self, data):
+        if (not self.stack or not self.stack[-1][1]) and data.strip():
+            self.visible_chars += len(data.strip())
+
+
+def visible_html_characters(raw: bytes) -> int:
+    parser = _VisibleEvidenceText()
+    parser.feed(raw.decode("utf-8", errors="ignore"))
+    parser.close()
+    return parser.visible_chars
 
 
 def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
@@ -196,6 +255,10 @@ def fetch_once(url: str):
                 raise ValueError("official source Content-Length mismatch")
         sem = semantic_bytes(raw, ctype)
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
+        # Legacy semantic digests also include <title>/hidden text. A metadata
+        # shell can have a nonempty digest without any visible official evidence.
+        if is_html_content_type(ctype) and not visible_html_characters(raw):
+            content_quality_ok, quality_issue = False, "EMPTY_VISIBLE_HTML"
         return {
             "ok": r.status == 200,
             "http_status": r.status,
