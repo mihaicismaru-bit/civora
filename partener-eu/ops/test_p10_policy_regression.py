@@ -139,6 +139,12 @@ failed_counts = {"total": 1, "pass": 0, "degraded": 0, "fail": 1, "quarantined":
 if monitor_registry_health(False, failed_counts, [{**healthy_row, "health": "FAIL"}],
         expected_roster) != "DEGRADED":
     errors.append("P10 hides correctly counted failed official source")
+# Preserve an operator-visible acquisition gap when source registration
+# outruns live official fetch/probe evidence; never silently imply coverage.
+for field in ("registered_source_count", "observed_source_count",
+              "unobserved_registered_source_ids", "unregistered_observed_source_ids"):
+    if f'"{field}"' not in monitor:
+        errors.append(f"P10 omits source-registry roster coverage evidence: {field}")
 
 for marker in [
     "workflow_run:",
