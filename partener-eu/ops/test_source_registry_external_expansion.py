@@ -1339,6 +1339,64 @@ def main():
         if not all(x in note for x in ("ZOOTEHNIC", "RAW", "RECONCIL", "NO OPEN_CALL")):
             fail(f"{source_id}: cannot separate DR-12 components or raw boundary")
 
+    # The exact IMREG-2026-INFOME topic and its dated official call fiche are
+    # independent discovery inputs. An old indexed FORTHCOMING label or a
+    # fiche's indicative opening date must never authorize OPEN_CALL.
+    imreg_id = "IMREG-2026-INFOME"
+    imreg_pair = {
+        "SRC-EU-IMREG-2026-INFOME-EXACT-TOPIC": {
+            "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/IMREG-2026-INFOME",
+            "class": "official_eu_funding_tenders_exact_topic",
+            "scope": "EXACT_TOPIC_DISCOVERY_ONLY",
+            "state": "EXACT_TOPIC_STATUS_REVIEW_RAW_PENDING",
+            "peer": "SRC-EU-IMREG-2026-INFOME-CALL-FICHE",
+            "note_tokens": ("forthcoming", "indicative", "no open_call", "sha-256"),
+        },
+        "SRC-EU-IMREG-2026-INFOME-CALL-FICHE": {
+            "url": "https://ec.europa.eu/info/funding-tenders/opportunities/docs/2021-2027/imreg/wp-call/2026/call-fiche_imreg-2026-infome_en.pdf",
+            "class": "official_eu_funding_tenders_primary_call_document",
+            "scope": "PRIMARY_CALL_DOCUMENT_DISCOVERY_ONLY",
+            "state": "OFFICIAL_CALL_FICHE_RAW_PENDING",
+            "peer": "SRC-EU-IMREG-2026-INFOME-EXACT-TOPIC",
+            "note_tokens": ("v1.0", "indicative", "no open_call", "sha-256"),
+        },
+    }
+    forbidden_imreg_claims = {
+        "status", "call_status", "deadline", "budget", "budget_eur",
+        "eligibility", "open_at", "close_at", "fetched_at",
+        "raw_sha256", "semantic_sha256", "parser_version", "run_id",
+        "handoff_sha256", "http_status", "submission_endpoint",
+    }
+    for source_id, expected in imreg_pair.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"missing IMREG official topic/fiche pair: {source_id}")
+        fields = {
+            "url": expected["url"],
+            "class": expected["class"],
+            "tier": "T1",
+            "topic_identifier_discovery": imreg_id,
+            "authority_class": "T1_OFFICIAL_EC_FUNDING_TENDERS",
+            "authority_scope": expected["scope"],
+            "observation_state": expected["state"],
+            "paired_official_source_id": expected["peer"],
+            "material_fact_use": False,
+            "credentials_required": False,
+            "open_call_authorized": False,
+            "material_fact_publication_authorized": False,
+            "adapter_required": "EC_FT_EXACT_TOPIC_CURRENT_STATUS_AND_ENDPOINT_RECONCILE_V1",
+        }
+        if any(row.get(key) != value for key, value in fields.items()):
+            fail(f"{source_id}: official IMREG identity/authority or fail-closed pairing drift")
+        if not {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+                set(row.get("source_families") or [])):
+            fail(f"{source_id}: missing EU_DIRECT programme/source taxonomy")
+        if forbidden_imreg_claims.intersection(row):
+            fail(f"{source_id}: fabricated original evidence or material call facts")
+        note = (row.get("note") or "").lower()
+        if any(token not in note for token in expected["note_tokens"]):
+            fail(f"{source_id}: missing indicative-calendar vs live-status guard")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
