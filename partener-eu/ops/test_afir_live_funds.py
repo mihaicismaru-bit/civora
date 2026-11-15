@@ -238,6 +238,71 @@ def test_extension_notice_raw_receipt() -> None:
     assert ingest.AFIR_EXTENSION_NOTICE in ingest.SEEDS
 
 
+
+def test_hidden_counter_evidence() -> None:
+    """A hidden official-looking row must never satisfy live counter authority."""
+    builder = load_builder_module()
+    raw = FIXTURE.encode("utf-8")
+    expected = builder.parse_rows(builder.parse_table(raw))
+    assert len(expected) == 5
+    # An extra convincing DR row in a server-hidden table, table row or
+    # descendant must not duplicate a component or overwrite public facts.
+    forged = EXHAUSTED_FIXTURE.encode("utf-8")
+    for opening, closing in (
+        ('<div hidden>', '</div>'),
+        ('<div inert>', '</div>'),
+        ('<div aria-hidden="true">', '</div>'),
+        ('<div class="d-none">', '</div>'),
+        ('<div class="visually-hidden">', '</div>'),
+        ('<div style="display:none">', '</div>'),
+        ('<div style="visibility:hidden">', '</div>'),
+        ('<div style="visibility:collapse">', '</div>'),
+        ('<div style="content-visibility:hidden">', '</div>'),
+        ('<div style="opacity:0">', '</div>'),
+        ('<div style="opacity:0.0">', '</div>'),
+        ('<div style="display:none" style="display:block">', '</div>'),
+    ):
+        disguised = (opening.encode() + forged + closing.encode() + raw)
+        rows = builder.parse_rows(builder.parse_table(disguised))
+        assert rows == expected, opening
+        # Hidden-only proof cannot satisfy the dynamic hash-reconciliation
+        # fallback even when the endpoint is an HTTP 200 HTML page.
+        fake_corpus = {"items": [{
+            "url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/",
+            "sha256": "0" * 64,
+            "observedAt": "2026-11-16T00:00:00+00:00",
+        }]}
+        original = builder.load_source_bytes
+        try:
+            builder.load_source_bytes = lambda _url, _fixture: (
+                opening.encode() + forged + closing.encode(),
+                "text/html; charset=utf-8", 200
+            )
+            snapshot = builder.build_snapshot(fake_corpus, None)
+        finally:
+            builder.load_source_bytes = original
+        assert snapshot["policy"]["publishableDedicatedSnapshot"] is False
+        assert snapshot["policy"]["callStatusInferenceAllowed"] is False
+        assert snapshot["rows"] == []
+
+    row = ('<tr><td>DR-14</td><td>Componenta LEGUMICULTURĂ</td>'
+           '<td>30.000.000,00 EUR</td><td>01.09.2026 09:00:00</td>'
+           '<td>31.10.2026 15:59:59</td><td>45.000.000,00 EUR</td>'
+           '<td>283.310</td><td>6</td><td>44.716.690,00 EUR</td></tr>')
+    for marker in (' hidden', ' aria-hidden="true"', ' class="d-none"',
+                   ' style="opacity:0"', ' style="content-visibility:hidden"'):
+        augmented = FIXTURE.replace('</table>', '<tr' + marker + row[3:] + '</table>')
+        rows = builder.parse_rows(builder.parse_table(augmented.encode("utf-8")))
+        assert rows == expected, marker
+    # Hidden text inside a visible material value must not contaminate it.
+    augmented = FIXTURE.replace(
+        '<td>44.716.690,00 EUR</td>',
+        '<td><span aria-hidden="true">0 EUR</span>44.716.690,00 EUR</td>',
+    )
+    rows = builder.parse_rows(builder.parse_table(augmented.encode("utf-8")))
+    assert rows == expected
+
+
 def main() -> int:
     fixture_bytes = FIXTURE.encode("utf-8")
     fingerprint = hashlib.sha256(fixture_bytes).hexdigest()
@@ -379,6 +444,7 @@ def main() -> int:
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": None}], "amount") is None
     assert builder.decimal_total([{"amount": "1.00"}, {"amount": "2.50"}], "amount") == "3.50"
 
+    test_hidden_counter_evidence()
     test_afir_fetch_transport_provenance()
     test_extension_notice_raw_receipt()
     ingest = load_ingest_module()
