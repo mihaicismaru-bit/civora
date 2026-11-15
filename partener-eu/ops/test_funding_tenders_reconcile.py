@@ -180,10 +180,31 @@ def main():
     replay_q = {r['identifier']: r for r in replay['quarantined_records']}
     assert direct['identifier'] in replay_q
     assert 'STALE_DEADLINE_CONTRADICTS_OPEN' in replay_q[direct['identifier']]['reasons']
-    assert replay['stats']['ready_for_staging'] == 1
-    assert {r['identifier'] for r in replay['records']} == {future['identifier']}
+    assert replay['stats']['ready_for_staging'] == 0
+    assert 'STALE_OFFICIAL_EVIDENCE_FOR_CURRENT_STATE' in replay_q[direct['identifier']]['reasons']
+    assert 'STALE_OFFICIAL_EVIDENCE_FOR_CURRENT_STATE' in replay_q[future['identifier']]['reasons']
     assert replay['publish_authorized'] is False
     assert replay['publication_effect'] == 'NONE'
+
+    # Deadline in the future is insufficient: a previous official snapshot
+    # stops authorizing OPEN/FORTHCOMING staging at exactly 24 hours.
+    just_fresh = mod.reconcile_live_evidence(
+        evidence, raw_payload, search_raw_bytes=raw_bytes,
+        reconciled_at='2026-08-28T23:59:59+00:00',
+    )
+    assert just_fresh['stats']['ready_for_staging'] == 2
+    stale_boundary = mod.reconcile_live_evidence(
+        evidence, raw_payload, search_raw_bytes=raw_bytes,
+        reconciled_at='2026-08-29T00:00:00+00:00',
+    )
+    stale_boundary_q = {r['identifier']: r for r in stale_boundary['quarantined_records']}
+    assert stale_boundary['stats']['ready_for_staging'] == 0
+    assert all(
+        'STALE_OFFICIAL_EVIDENCE_FOR_CURRENT_STATE' in stale_boundary_q[identifier]['reasons']
+        for identifier in (direct['identifier'], future['identifier'])
+    )
+    assert stale_boundary['publish_authorized'] is False
+    assert stale_boundary['publication_effect'] == 'NONE'
 
     # A contradictory/future fetch timestamp cannot authorize staging.
     try:
@@ -240,7 +261,7 @@ def main():
     missing_q = {r['identifier']: r for r in missing_receipt['quarantined_records']}
     assert 'STRUCTURED_TOPIC_READBACK_NOT_VERIFIED' in missing_q[future['identifier']]['reasons']
 
-    print('PASS Funding & Tenders reconcile: structured topic status + exact page required; direct calls staged; unsafe rows quarantined')
+    print('PASS Funding & Tenders reconcile: exact readback, 24h source freshness, deadline replay and fail-closed staging')
 
 
 if __name__ == '__main__':
