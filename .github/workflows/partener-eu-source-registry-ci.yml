@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - 'partener-eu/ingest/source_registry.json'
+      - 'partener-eu/ops/test_afir_email_advisory.py'
+      - 'partener-eu/validation/discovery/afir-email-incident-20261113.json'
       - 'partener-eu/ingest/thcs_2027_national_index.py'
       - 'partener-eu/ops/test_thcs_2027_national_index.py'
       - 'partener-eu/ingest/amif_impact_official_receipts.py'
@@ -166,6 +168,10 @@ jobs:
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
+
+      - name: Validate dated AFIR communications incident is non-authorizing
+        run: python partener-eu/ops/test_afir_email_advisory.py
+
 
       - name: Lock e-DRIVE consultation to discovery-only, not OPEN_CALL
         run: python partener-eu/ops/test_edrive_consultation_discovery.py
