@@ -17,7 +17,7 @@ import urllib.request
 
 URL = ("https://www.afir.ro/info-la-zi/"
        "prelungire-sesiune-depunere-proiecte-de-investitii-aferente-dr-14-si-dr-18/")
-PARSER_VERSION = "AFIR_DR14_DR18_EXTENSION_NOTICE_RAW_V1"
+PARSER_VERSION = "AFIR_DR14_DR18_EXTENSION_NOTICE_RAW_V2"
 RAW_NAME = "afir-dr14-dr18-extension-notice.raw.html"
 SCHEMA = "PARTENER_EU_AFIR_EXTENSION_ORIGINAL_V1"
 MAX_BYTES = 2_000_000
@@ -74,6 +74,10 @@ class Visible(HTMLParser):
     SKIP = {"head", "script", "style", "noscript", "template", "svg", "iframe",
             "nav", "footer", "dialog", "textarea", "select"}
     VOID = {"img", "meta", "link", "input", "br", "hr", "source", "wbr"}
+    HIDDEN_CLASSES = {
+        "hidden", "d-none", "d-sm-none", "d-md-none", "d-lg-none",
+        "d-xl-none", "d-xxl-none", "invisible", "visually-hidden", "sr-only"
+    }
     def __init__(self):
         super().__init__(convert_charrefs=True)
         self.stack = []
@@ -88,10 +92,14 @@ class Visible(HTMLParser):
                 duplicated = True
             attrs_seen.setdefault(k, v or "")
         style = fold(attrs_seen.get("style", "")).replace(" ", "")
+        classes = set(fold(attrs_seen.get("class", "")).split())
         hidden = (duplicated or tag in self.SKIP or
+                  bool(classes & self.HIDDEN_CLASSES) or
                   "hidden" in attrs_seen or "inert" in attrs_seen or
                   attrs_seen.get("aria-hidden", "").casefold() == "true" or
-                  "display:none" in style or "visibility:hidden" in style)
+                  "display:none" in style or "visibility:hidden" in style or
+                  "content-visibility:hidden" in style or
+                  bool(re.search(r"(?:^|;)opacity:0(?:\\.0+)?%?(?=;|$)", style)))
         if tag not in self.VOID:
             parent_hidden = self.stack[-1][1] if self.stack else False
             self.stack.append((tag, hidden or parent_hidden))
