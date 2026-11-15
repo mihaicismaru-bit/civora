@@ -26,6 +26,16 @@ check(2_000, "text/html", "pagină scurtă legitimă", True, None)
 check(240, "text/html", "Just a moment... Enable JavaScript and cookies to continue", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
 check(1_050, "application/xhtml+xml", "Access denied. Cloudflare Ray ID: abc", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
 check(500, "text/html", "Service unavailable", False, "HTML_CHALLENGE_OR_ERROR_SHELL")
+# Several small HTTP-200 JS/Cloudflare gates previously passed as healthy
+# because the body was shorter than the generic 4096-byte low-info cutoff.
+for shell in (
+    "Please enable JavaScript and cookies to continue",
+    "Enable JavaScript and cookies to continue",
+    "Checking if the site connection is secure",
+    "Attention required! | Cloudflare",
+):
+    check(180, "text/html; charset=UTF-8", shell, False, "HTML_CHALLENGE_OR_ERROR_SHELL")
+check(250, "text/html", "Actual official decision content with dates and identity", True, None)
 # A substantive official article mentioning a challenge phrase must not be blocked.
 check(8_000, "text/html", "Access denied: security for EU funding. " * 50, True, None)
 check(12_000, "application/pdf", "x" * 50, True, None)
@@ -119,6 +129,11 @@ try:
     assert challenge["ok"] is True
     assert challenge["content_quality_ok"] is False
     assert challenge["quality_issue"] == "HTML_CHALLENGE_OR_ERROR_SHELL"
+
+    javascript_shell = b"<html><body>Please enable JavaScript and cookies to continue</body></html>"
+    js_gate = probe(_Response(javascript_shell, length=str(len(javascript_shell))))
+    assert js_gate["ok"] is True and js_gate["content_quality_ok"] is False
+    assert js_gate["quality_issue"] == "HTML_CHALLENGE_OR_ERROR_SHELL"
 
     xhtml = probe(_Response(good, content_type="APPLICATION/XHTML+XML; charset=UTF-8"))
     assert xhtml["ok"] is True and xhtml["content_quality_ok"] is True
