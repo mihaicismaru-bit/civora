@@ -68,6 +68,10 @@ def classify_content_quality(raw_size: int, content_type: str, sem: bytes):
         challenge_prefixes = (
             "just a moment",
             "checking your browser",
+            "checking if the site connection is secure",
+            "please enable javascript and cookies",
+            "enable javascript and cookies to continue",
+            "attention required! | cloudflare",
             "verify you are human",
             "verifying you are human",
             "access denied",
