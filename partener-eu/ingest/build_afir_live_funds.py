@@ -38,7 +38,21 @@ class SourceTransportError(RuntimeError):
 
 
 class TableParser(HTMLParser):
-    """Capture table rows/cells while tolerating nested and void markup."""
+    """Extract only visible official-counter table cells.
+
+    A server-rendered hidden row/cell (or text within a hidden ancestor)
+    is not evidence of a current component, budget or deadline. Exclude
+    it rather than letting a seemingly valid but invisible DR row pass the
+    dynamic-counter canonical-fetch reconciliation gate.
+    """
+
+    _VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input",
+             "link", "meta", "param", "source", "track", "wbr"}
+    _INERT = {"head", "script", "style", "noscript", "template", "svg",
+              "iframe", "nav", "footer"}
+    _HIDDEN_CLASSES = {"hidden", "d-none", "d-sm-none", "d-md-none",
+                       "d-lg-none", "d-xl-none", "d-xxl-none",
+                       "invisible", "visually-hidden", "sr-only"}
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -47,8 +61,35 @@ class TableParser(HTMLParser):
         self._in_cell = False
         self._row: list[str] = []
         self._cell_parts: list[str] = []
+        self._elements: list[tuple[str, bool]] = []
+
+    def _hidden(self) -> bool:
+        return bool(self._elements and self._elements[-1][1])
 
     def handle_starttag(self, tag: str, attrs) -> None:
+        attr_map: dict[str, str] = {}
+        duplicate_visibility_attr = False
+        for key, value in attrs:
+            if key in attr_map and key in {"hidden", "style", "class", "inert", "aria-hidden"}:
+                duplicate_visibility_attr = True
+            attr_map.setdefault(key, value or "")
+        style = re.sub(r"\s+", "", attr_map.get("style", "").casefold())
+        classes = set(attr_map.get("class", "").casefold().split())
+        explicitly_hidden = (
+            duplicate_visibility_attr or tag in self._INERT
+            or "hidden" in attr_map or "inert" in attr_map
+            or attr_map.get("aria-hidden", "").casefold() == "true"
+            or bool(classes & self._HIDDEN_CLASSES)
+            or "display:none" in style or "visibility:hidden" in style
+            or "visibility:collapse" in style
+            or "content-visibility:hidden" in style
+            or bool(re.search(r"(?:^|;)opacity:0(?:\\.0+)?(?=;|$)", style))
+        )
+        hidden = self._hidden() or explicitly_hidden
+        if tag not in self._VOID:
+            self._elements.append((tag, hidden))
+        if hidden:
+            return
         if tag == "tr":
             self._in_row = True
             self._row = []
@@ -57,18 +98,29 @@ class TableParser(HTMLParser):
             self._cell_parts = []
 
     def handle_endtag(self, tag: str) -> None:
-        if tag in {"td", "th"} and self._in_cell:
-            self._row.append(clean_cell(" ".join(self._cell_parts)))
-            self._cell_parts = []
-            self._in_cell = False
-        elif tag == "tr" and self._in_row:
-            if any(self._row):
-                self.rows.append(self._row)
-            self._in_row = False
-            self._row = []
+        # Check visibility before closing the corresponding ancestor.
+        if not self._hidden():
+            if tag in {"td", "th"} and self._in_cell:
+                self._row.append(clean_cell(" ".join(self._cell_parts)))
+                self._cell_parts = []
+                self._in_cell = False
+            elif tag == "tr" and self._in_row:
+                if any(self._row):
+                    self.rows.append(self._row)
+                self._in_row = False
+                self._row = []
+        for index in range(len(self._elements) - 1, -1, -1):
+            if self._elements[index][0] == tag:
+                del self._elements[index:]
+                break
+
+    def handle_startendtag(self, tag: str, attrs) -> None:
+        # Non-void <tr hidden/> does not close in HTML parsing. Remaining
+        # content must be withheld rather than mistaken for visible proof.
+        self.handle_starttag(tag, attrs)
 
     def handle_data(self, data: str) -> None:
-        if self._in_cell:
+        if self._in_cell and not self._hidden():
             value = data.strip()
             if value:
                 self._cell_parts.append(value)
