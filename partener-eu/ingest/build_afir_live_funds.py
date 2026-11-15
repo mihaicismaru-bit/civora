@@ -83,7 +83,7 @@ class TableParser(HTMLParser):
             or "display:none" in style or "visibility:hidden" in style
             or "visibility:collapse" in style
             or "content-visibility:hidden" in style
-            or bool(re.search(r"(?:^|;)opacity:0(?:\\.0+)?(?=;|$)", style))
+            or bool(re.search(r"(?:^|;)opacity:0(?:\.0+)?(?=;|$)", style))
         )
         hidden = self._hidden() or explicitly_hidden
         if tag not in self._VOID:
