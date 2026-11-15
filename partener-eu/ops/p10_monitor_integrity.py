@@ -244,6 +244,18 @@ def main() -> int:
     registry_health = registry_health_status(
         registry_stale, registry_summary, registry_rows, registered_sources
     )
+    # Surface acquisition gaps explicitly: staged registry growth must not be
+    # confused with completed official-source monitoring or publication proof.
+    expected_ids = {
+        source["id"] for source in (registered_sources or [])
+        if isinstance(source, dict) and isinstance(source.get("id"), str)
+    }
+    observed_ids = {
+        source["id"] for source in registry_rows
+        if isinstance(source, dict) and isinstance(source.get("id"), str)
+    }
+    missing_observations = sorted(expected_ids - observed_ids)
+    unexpected_observations = sorted(observed_ids - expected_ids)
     if missing_registry_tasks or unsafe_registry_updates:
         registry_health = "FAIL_POLICY"
 
@@ -353,6 +365,10 @@ def main() -> int:
             "stale_after_seconds": MAX_REGISTRY_AGE_SECONDS,
             "stale": registry_stale,
             "health": registry_health,
+            "registered_source_count": len(registered_sources) if isinstance(registered_sources, list) else None,
+            "observed_source_count": len(registry_rows),
+            "unobserved_registered_source_ids": missing_observations,
+            "unregistered_observed_source_ids": unexpected_observations,
             "summary": registry_summary,
             "tier_counts": tier_counts,
             "changed_source_ids": [x.get("id") for x in changed_rows],
