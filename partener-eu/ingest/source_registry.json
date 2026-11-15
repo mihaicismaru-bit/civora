@@ -2998,6 +2998,74 @@
         "official_alternative_contact_guidance"
       ],
       "note": "AFIR official notice dated 13 November 2026 at 09:45 reported e-mail communication interruption related to Microsoft services, recommending other published contact channels. This is a dated historical notice, not live service health and not a funding call. No restoration/current outage may be inferred without fresh official evidence. Original HTML not yet captured with immutable SHA/replay. No OPEN_CALL, deadline, budget, eligibility, current service status, public alert, publication or distribution is authorized."
+    },
+    {
+      "id": "SRC-EU-IMREG-2026-INFOME-EXACT-TOPIC",
+      "tier": "T1",
+      "owner": "European Commission / DG REGIO / Funding & Tenders Portal",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Information Measures for the EU Cohesion Policy (IMREG)",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_EC_FUNDING_TENDERS",
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "EC_FT_EXACT_TOPIC_CURRENT_STATUS_AND_ENDPOINT_RECONCILE_V1",
+      "class": "official_eu_funding_tenders_exact_topic",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/portal/screen/opportunities/topic-details/IMREG-2026-INFOME",
+      "topic_identifier_discovery": "IMREG-2026-INFOME",
+      "topic_title_discovery": "Support for information measures relating to the EU Cohesion policy for 2026",
+      "paired_official_source_id": "SRC-EU-IMREG-2026-INFOME-CALL-FICHE",
+      "extract": [
+        "exact_topic_identifier_discovery",
+        "topic_status_readback_discovery",
+        "call_document_link_discovery",
+        "current_submission_endpoint_reconciliation_pending"
+      ],
+      "authority_scope": "EXACT_TOPIC_DISCOVERY_ONLY",
+      "observation_state": "EXACT_TOPIC_STATUS_REVIEW_RAW_PENDING",
+      "note": "The official indexed F&T topic search snapshot showed FORTHCOMING while the Commission's call fiche V1.0 dated 14 October 2026 lists an indicative opening on 14 October 2026. An older indexed snapshot and an indicative calendar do not establish the current call status. Require fresh exact structured Topic Details state, verified submission endpoint, immutable original HTML and PDF bytes, SHA-256, fetched_at, parser_version, run_id, semantic cross-document reconciliation and reviewed admission. NO OPEN_CALL, deadline, budget, eligibility, publication or distribution from registry discovery."
+    },
+    {
+      "id": "SRC-EU-IMREG-2026-INFOME-CALL-FICHE",
+      "tier": "T1",
+      "owner": "European Commission / DG REGIO / Funding & Tenders Portal",
+      "programmes": [
+        "EU direct programmes"
+      ],
+      "programme_family": "Information Measures for the EU Cohesion Policy (IMREG)",
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "EU_DIRECT",
+        "BRUSSELS",
+        "CALL_REGISTRY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_EC_FUNDING_TENDERS",
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "EC_FT_EXACT_TOPIC_CURRENT_STATUS_AND_ENDPOINT_RECONCILE_V1",
+      "class": "official_eu_funding_tenders_primary_call_document",
+      "url": "https://ec.europa.eu/info/funding-tenders/opportunities/docs/2021-2027/imreg/wp-call/2026/call-fiche_imreg-2026-infome_en.pdf",
+      "topic_identifier_discovery": "IMREG-2026-INFOME",
+      "paired_official_source_id": "SRC-EU-IMREG-2026-INFOME-EXACT-TOPIC",
+      "extract": [
+        "official_call_fiche_v1_20261014_discovery",
+        "indicative_call_calendar_readback",
+        "exact_topic_status_cross_check_pending"
+      ],
+      "authority_scope": "PRIMARY_CALL_DOCUMENT_DISCOVERY_ONLY",
+      "observation_state": "OFFICIAL_CALL_FICHE_RAW_PENDING",
+      "note": "Official Commission IMREG-2026-INFOME call document V1.0 dated 14 October 2026 gives an indicative opening date and submission calendar; it does not by itself establish live OPEN_CALL status or an active submission endpoint. Original PDF bytes, %%EOF integrity, SHA-256, fetched_at, parser_version, run_id, immutable handoff and exact live structured topic status reconciliation are still missing. NO OPEN_CALL, material deadline, budget, eligibility, publication or distribution from discovery."
     }
   ]
 }
