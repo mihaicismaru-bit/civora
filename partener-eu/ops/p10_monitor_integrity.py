@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 import pathlib
+import re
 import tempfile
 from typing import Any
 
@@ -149,6 +150,29 @@ def registry_health_status(
                 for field in ("tier", "class", "url"))
                 or row.get("material_fact_use") is not bool(expected.get("material_fact_use"))):
             return "DEGRADED"
+        # Health provenance is source-family bound. An otherwise complete
+        # counter ledger cannot substitute a different programme family.
+        if row.get("source_families") != list(expected.get("source_families") or []):
+            return "DEGRADED"
+        # A PASS label and coherent counters are not proof that an official
+        # document was successfully acquired. Refuse corrupted, challenge,
+        # missing-body and unbound-hash rows even if all sources say PASS.
+        if row.get("health") == "PASS":
+            allowed_transports = [expected.get("url"), *(expected.get("canonical_aliases") or [])]
+            if (
+                row.get("ok") is not True
+                or row.get("content_quality_ok") is not True
+                or row.get("quality_issue") is not None
+                or type(row.get("bytes")) is not int
+                or row["bytes"] <= 0
+                or row.get("selected_url") not in allowed_transports
+                or not all(
+                    isinstance(row.get(key), str)
+                    and re.fullmatch(r"[0-9a-f]{64}", row[key])
+                    for key in ("raw_sha256", "semantic_sha256")
+                )
+            ):
+                return "DEGRADED"
     if observed_ids != set(registered):
         return "DEGRADED"
     counts = {"PASS": 0, "DEGRADED": 0, "FAIL": 0}
