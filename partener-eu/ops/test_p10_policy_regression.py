@@ -85,28 +85,59 @@ for not_preserved in ("OK", "OK_NO_NEW_RELEVANT_ITEMS", "UNKNOWN", None):
 # Health-only source summary must be reconciled against each actual
 # observation. A missing/forged counter is not a healthy official source feed.
 monitor_registry_health = monitor_ns["registry_health_status"]
-healthy_row = {"id": "T1-OFFICIAL", "health": "PASS", "quarantined": False}
+registered_row = {
+    "id": "T1-OFFICIAL", "tier": "T1", "class": "official_call_registry",
+    "url": "https://authority.example/calls", "material_fact_use": True,
+}
+healthy_row = {**registered_row, "health": "PASS", "quarantined": False}
 healthy_counts = {"total": 1, "pass": 1, "degraded": 0, "fail": 0, "quarantined": 0}
-if monitor_registry_health(False, healthy_counts, [healthy_row]) != "PASS":
+expected_roster = [registered_row]
+if monitor_registry_health(False, healthy_counts, [healthy_row], expected_roster) != "PASS":
     errors.append("P10 rejects internally consistent healthy source registry")
 negative_registry_cases = (
-    (True, healthy_counts, [healthy_row], "stale source ledger"),
-    (False, {}, [healthy_row], "missing source counters"),
-    (False, healthy_counts, [], "empty observations"),
-    (False, healthy_counts, [{**healthy_row, "health": "FAIL"}], "hidden failed source"),
-    (False, healthy_counts, [{**healthy_row, "health": "DEGRADED"}], "hidden degraded source"),
-    (False, healthy_counts, [{**healthy_row, "health": "UNKNOWN"}], "unknown source health"),
-    (False, healthy_counts, [{**healthy_row, "quarantined": True}], "hidden quarantine"),
-    (False, {**healthy_counts, "total": 2}, [healthy_row], "incorrect source total"),
-    (False, {**healthy_counts, "pass": True}, [healthy_row], "non-numeric source count"),
+    (True, healthy_counts, [healthy_row], expected_roster, "stale source ledger"),
+    (False, {}, [healthy_row], expected_roster, "missing source counters"),
+    (False, healthy_counts, [], expected_roster, "empty observations"),
+    (False, healthy_counts, [{**healthy_row, "health": "FAIL"}], expected_roster, "hidden failed source"),
+    (False, healthy_counts, [{**healthy_row, "health": "DEGRADED"}], expected_roster, "hidden degraded source"),
+    (False, healthy_counts, [{**healthy_row, "health": "UNKNOWN"}], expected_roster, "unknown source health"),
+    (False, healthy_counts, [{**healthy_row, "quarantined": True}], expected_roster, "hidden quarantine"),
+    (False, {**healthy_counts, "total": 2}, [healthy_row], expected_roster, "incorrect source total"),
+    (False, {**healthy_counts, "pass": True}, [healthy_row], expected_roster, "non-numeric source count"),
+    (False, healthy_counts, [healthy_row], None, "missing canonical roster"),
+    (False, healthy_counts, [healthy_row], [], "empty canonical roster"),
+    (False, healthy_counts, [healthy_row], expected_roster + expected_roster, "duplicate roster identity"),
+    (False, healthy_counts, [healthy_row], expected_roster + [
+        {**registered_row, "id": "T1-MISSING", "url": "https://authority.example/missing"}
+    ], "omitted official source with consistent counters"),
+    (False, {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0},
+        [healthy_row, healthy_row], expected_roster, "duplicate observed source"),
+    (False, healthy_counts, [{**healthy_row, "id": "T1-UNKNOWN"}], expected_roster,
+        "unknown source replacing a registered source"),
+    (False, healthy_counts, [{**healthy_row, "url": "https://authority.example/other"}],
+        expected_roster, "source endpoint substitution"),
+    (False, healthy_counts, [{**healthy_row, "tier": "T2"}], expected_roster,
+        "authority tier substitution"),
+    (False, healthy_counts, [{**healthy_row, "class": "discovery_only"}], expected_roster,
+        "authority class substitution"),
+    (False, healthy_counts, [{**healthy_row, "material_fact_use": False}],
+        expected_roster, "material fact scope substitution"),
 )
-for stale, summary, rows, reason in negative_registry_cases:
-    if monitor_registry_health(stale, summary, rows) != "DEGRADED":
+for stale, summary, rows, roster, reason in negative_registry_cases:
+    if monitor_registry_health(stale, summary, rows, roster) != "DEGRADED":
         errors.append(f"P10 promotes {reason} to green official-source health")
+# The positive two-source path also proves that roster coverage, not a fixed
+# source count, is enforced when all registered observations are healthy.
+second = {**registered_row, "id": "T1-SECOND", "url": "https://authority.example/second"}
+two_counts = {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0}
+if monitor_registry_health(False, two_counts, [healthy_row, {**second, "health": "PASS",
+        "quarantined": False}], [registered_row, second]) != "PASS":
+    errors.append("P10 rejects complete two-source registered coverage")
 # A genuinely degraded registry is represented as such, even if all counters
 # are internally consistent. No warning state is ever interpreted as a PASS.
 failed_counts = {"total": 1, "pass": 0, "degraded": 0, "fail": 1, "quarantined": 0}
-if monitor_registry_health(False, failed_counts, [{**healthy_row, "health": "FAIL"}]) != "DEGRADED":
+if monitor_registry_health(False, failed_counts, [{**healthy_row, "health": "FAIL"}],
+        expected_roster) != "DEGRADED":
     errors.append("P10 hides correctly counted failed official source")
 
 for marker in [
