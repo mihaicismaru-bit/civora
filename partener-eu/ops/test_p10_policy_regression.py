@@ -88,8 +88,14 @@ monitor_registry_health = monitor_ns["registry_health_status"]
 registered_row = {
     "id": "T1-OFFICIAL", "tier": "T1", "class": "official_call_registry",
     "url": "https://authority.example/calls", "material_fact_use": True,
+    "source_families": ["ROMANIA"],
 }
-healthy_row = {**registered_row, "health": "PASS", "quarantined": False}
+healthy_row = {
+    **registered_row, "health": "PASS", "quarantined": False,
+    "ok": True, "content_quality_ok": True, "quality_issue": None,
+    "bytes": 4096, "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64,
+    "selected_url": "https://authority.example/calls",
+}
 healthy_counts = {"total": 1, "pass": 1, "degraded": 0, "fail": 0, "quarantined": 0}
 expected_roster = [registered_row]
 if monitor_registry_health(False, healthy_counts, [healthy_row], expected_roster) != "PASS":
@@ -122,6 +128,24 @@ negative_registry_cases = (
         "authority class substitution"),
     (False, healthy_counts, [{**healthy_row, "material_fact_use": False}],
         expected_roster, "material fact scope substitution"),
+    (False, healthy_counts, [{**healthy_row, "source_families": ["EU_DIRECT"]}],
+        expected_roster, "programme source-family substitution"),
+    (False, healthy_counts, [{**healthy_row, "ok": False}],
+        expected_roster, "HTTP/acquisition error hidden as PASS"),
+    (False, healthy_counts, [{**healthy_row, "content_quality_ok": False}],
+        expected_roster, "HTML challenge hidden as PASS"),
+    (False, healthy_counts, [{**healthy_row, "quality_issue": "HTML_CHALLENGE_OR_ERROR_SHELL"}],
+        expected_roster, "error-shell metadata hidden as PASS"),
+    (False, healthy_counts, [{**healthy_row, "raw_sha256": ""}],
+        expected_roster, "missing raw body hash"),
+    (False, healthy_counts, [{**healthy_row, "semantic_sha256": "bad"}],
+        expected_roster, "invalid semantic body hash"),
+    (False, healthy_counts, [{**healthy_row, "bytes": 0}],
+        expected_roster, "empty body with forged PASS label"),
+    (False, healthy_counts, [{**healthy_row, "bytes": True}],
+        expected_roster, "boolean body length with forged PASS label"),
+    (False, healthy_counts, [{**healthy_row, "selected_url": "https://authority.example/other"}],
+        expected_roster, "unregistered transport endpoint"),
 )
 for stale, summary, rows, roster, reason in negative_registry_cases:
     if monitor_registry_health(stale, summary, rows, roster) != "DEGRADED":
@@ -130,9 +154,15 @@ for stale, summary, rows, roster, reason in negative_registry_cases:
 # source count, is enforced when all registered observations are healthy.
 second = {**registered_row, "id": "T1-SECOND", "url": "https://authority.example/second"}
 two_counts = {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0}
-if monitor_registry_health(False, two_counts, [healthy_row, {**second, "health": "PASS",
-        "quarantined": False}], [registered_row, second]) != "PASS":
+if monitor_registry_health(False, two_counts, [healthy_row, {**healthy_row, **second,
+        "selected_url": second["url"]}], [registered_row, second]) != "PASS":
     errors.append("P10 rejects complete two-source registered coverage")
+# Explicitly registered alternate transport is allowed, never silently inferred.
+registered_alias = {**registered_row, "canonical_aliases": ["https://www.authority.example/calls-v2"]}
+healthy_alias = {**healthy_row, "selected_url": registered_alias["canonical_aliases"][0]}
+if monitor_registry_health(False, healthy_counts, [healthy_alias], [registered_alias]) != "PASS":
+    errors.append("P10 rejects a curated official canonical alias with valid raw evidence")
+
 # A genuinely degraded registry is represented as such, even if all counters
 # are internally consistent. No warning state is ever interpreted as a PASS.
 failed_counts = {"total": 1, "pass": 0, "degraded": 0, "fail": 1, "quarantined": 0}
