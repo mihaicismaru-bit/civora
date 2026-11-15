@@ -43,6 +43,9 @@ STATE_LABELS = {
 }
 MISSING_PROOFS = ["CANONICAL_STAGING_ADMISSION", "PUBLIC_PROJECTION_QUALITY_GATE"]
 HEX64_RE = re.compile(r"^[0-9a-f]{64}$")
+# Replay of an immutable old receipt cannot establish a currently OPEN or
+# FORTHCOMING topic. A fresh official endpoint capture is required each day.
+MAX_CURRENT_STATE_EVIDENCE_AGE = dt.timedelta(hours=24)
 STRUCTURED_API_HOST = "api.tech.ec.europa.eu"
 STRUCTURED_API_PATH = "/search-api/prod/rest/search"
 
@@ -261,6 +264,7 @@ def reconcile_live_evidence(
     )
     if fetched_at > reconciled_instant:
         _fail("source fetched_at cannot be after reconciliation instant")
+    evidence_age = reconciled_instant - fetched_at
 
     for row in batch.get("records") or []:
         if not isinstance(row, dict):
@@ -293,6 +297,10 @@ def reconcile_live_evidence(
             reasons.append("SEMANTIC_CONFLICT")
 
         state = row.get("observation_state")
+        # A historic readback can be authentic but no longer prove a current
+        # material call state. Equality at the 24-hour bound fails closed.
+        if state in STATE_LABELS and evidence_age >= MAX_CURRENT_STATE_EVIDENCE_AGE:
+            reasons.append("STALE_OFFICIAL_EVIDENCE_FOR_CURRENT_STATE")
         label = str(row.get("status_label") or "").strip().upper().replace("_", " ")
         if state not in STATE_LABELS:
             reasons.append("NON_MATERIAL_OR_UNRESOLVED_STATE")
