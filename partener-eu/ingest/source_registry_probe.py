@@ -172,8 +172,15 @@ def fetch_once(url: str):
         # overwrite the last-known semantic source hash.
         if not raw:
             raise ValueError("empty official source response")
-        if official_media_type(ctype) == "application/pdf" and not raw.startswith(b"%PDF-"):
-            raise ValueError("invalid official source PDF signature")
+        if official_media_type(ctype) == "application/pdf":
+            if not raw.startswith(b"%PDF-"):
+                raise ValueError("invalid official source PDF signature")
+            # A %PDF- prefix alone cannot prove acquisition of a complete
+            # official document. The final trailer must be present near EOF
+            # before the body can refresh source health or semantic LKG.
+            # This is a bounded truncation check, not a full PDF parser.
+            if b"%%EOF" not in raw[-8192:]:
+                raise ValueError("incomplete official source PDF: missing EOF trailer")
         content_encoding = (r.headers.get("content-encoding") or "identity").strip().lower()
         if content_encoding != "identity":
             raise ValueError("unsupported official source Content-Encoding")

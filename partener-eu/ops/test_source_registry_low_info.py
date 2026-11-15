@@ -141,6 +141,21 @@ try:
     pdf = probe(_Response(pdf_data, content_type="application/pdf",
                           length=str(len(pdf_data))))
     assert pdf["ok"] is True and pdf["bytes"] == len(pdf_data)
+    # %PDF- alone is insufficient: partial PDF bodies with an apparently
+    # correct HTTP status, Content-Type and Content-Length cannot refresh LKG.
+    for incomplete_pdf in (
+        b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n",
+        b"%PDF-1.7\n%%EOF\n" + b"x" * 9_000,
+    ):
+        try:
+            probe(_Response(incomplete_pdf, content_type="application/pdf",
+                            length=str(len(incomplete_pdf))))
+        except ValueError as exc:
+            assert "missing EOF trailer" in str(exc), exc
+        else:
+            raise AssertionError("incomplete PDF acquired as healthy official evidence")
+    pdf_with_whitespace = pdf_data + b"\n  "
+    assert probe(_Response(pdf_with_whitespace, content_type="application/pdf"))["content_quality_ok"] is True
 
     # A transport may return HTTP 200 with an empty body or a misleading
     # application/pdf header over HTML anti-bot content. Neither is evidence
