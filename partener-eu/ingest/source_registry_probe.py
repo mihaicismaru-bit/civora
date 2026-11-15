@@ -257,7 +257,7 @@ def fetch_once(url: str):
         content_quality_ok, quality_issue, semantic_chars = classify_content_quality(len(raw), ctype, sem)
         # Legacy semantic digests also include <title>/hidden text. A metadata
         # shell can have a nonempty digest without any visible official evidence.
-        if is_html_content_type(ctype) and not visible_html_characters(raw):
+        if content_quality_ok and is_html_content_type(ctype) and not visible_html_characters(raw):
             content_quality_ok, quality_issue = False, "EMPTY_VISIBLE_HTML"
         return {
             "ok": r.status == 200,
