@@ -94,7 +94,10 @@ healthy_row = {
     **registered_row, "health": "PASS", "quarantined": False,
     "ok": True, "content_quality_ok": True, "quality_issue": None,
     "bytes": 4096, "raw_sha256": "a" * 64, "semantic_sha256": "b" * 64,
+    "semantic_bytes": 1024, "semantic_chars": 1000,
+    "http_status": 200, "content_type": "text/html; charset=utf-8",
     "selected_url": "https://authority.example/calls",
+    "final_url": "https://authority.example/calls",
 }
 healthy_counts = {"total": 1, "pass": 1, "degraded": 0, "fail": 0, "quarantined": 0}
 expected_roster = [registered_row]
@@ -132,6 +135,28 @@ negative_registry_cases = (
         expected_roster, "programme source-family substitution"),
     (False, healthy_counts, [{**healthy_row, "ok": False}],
         expected_roster, "HTTP/acquisition error hidden as PASS"),
+    (False, healthy_counts, [{**healthy_row, "http_status": 403}],
+        expected_roster, "HTTP 403 disguised as successful acquisition"),
+    (False, healthy_counts, [{**healthy_row, "http_status": True}],
+        expected_roster, "boolean HTTP status disguised as 200"),
+    (False, healthy_counts, [{**healthy_row, "content_type": "application/json"}],
+        expected_roster, "API error body disguised as official HTML"),
+    (False, healthy_counts, [{**healthy_row, "content_type": "text/htmlx"}],
+        expected_roster, "fabricated near-matching HTML media type"),
+    (False, healthy_counts, [{**healthy_row, "semantic_bytes": 0}],
+        expected_roster, "empty semantic body with a forged PASS"),
+    (False, healthy_counts, [{**healthy_row, "semantic_chars": True}],
+        expected_roster, "boolean semantic character count"),
+    (False, healthy_counts, [{**healthy_row, "final_url": None}],
+        expected_roster, "missing final URL"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "https://authority.example/other"}],
+        expected_roster, "same-host redirect to different official programme"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "https://evil.example/calls"}],
+        expected_roster, "cross-authority redirect with forged PASS"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "http://authority.example/calls"}],
+        expected_roster, "downgraded redirect with forged PASS"),
+    (False, healthy_counts, [{**healthy_row, "final_url": "https://authority.example/calls?new=1"}],
+        expected_roster, "redirect changed official query identity"),
     (False, healthy_counts, [{**healthy_row, "content_quality_ok": False}],
         expected_roster, "HTML challenge hidden as PASS"),
     (False, healthy_counts, [{**healthy_row, "quality_issue": "HTML_CHALLENGE_OR_ERROR_SHELL"}],
@@ -159,9 +184,14 @@ if monitor_registry_health(False, two_counts, [healthy_row, {**healthy_row, **se
     errors.append("P10 rejects complete two-source registered coverage")
 # Explicitly registered alternate transport is allowed, never silently inferred.
 registered_alias = {**registered_row, "canonical_aliases": ["https://www.authority.example/calls-v2"]}
-healthy_alias = {**healthy_row, "selected_url": registered_alias["canonical_aliases"][0]}
+healthy_alias = {**healthy_row, "selected_url": registered_alias["canonical_aliases"][0],
+                 "final_url": registered_alias["canonical_aliases"][0]}
 if monitor_registry_health(False, healthy_counts, [healthy_alias], [registered_alias]) != "PASS":
     errors.append("P10 rejects a curated official canonical alias with valid raw evidence")
+# Probe permits only a harmless www spelling or trailing slash on redirects.
+healthy_www = {**healthy_row, "final_url": "https://www.authority.example/calls/"}
+if monitor_registry_health(False, healthy_counts, [healthy_www], expected_roster) != "PASS":
+    errors.append("P10 rejects harmless official www/trailing-slash redirect")
 
 # A genuinely degraded registry is represented as such, even if all counters
 # are internally consistent. No warning state is ever interpreted as a PASS.
