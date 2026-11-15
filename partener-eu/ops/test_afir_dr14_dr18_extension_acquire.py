@@ -39,6 +39,7 @@ def fixture():
 
 
 def test():
+    assert notice.PARSER_VERSION == "AFIR_DR14_DR18_EXTENSION_NOTICE_RAW_V2"
     notice.validate_official_notice(HTML, "text/html; charset=utf-8")
     # AFIR's article template can render its title as an h2 inside header.
     notice.validate_official_notice(
@@ -55,6 +56,20 @@ def test():
         (b"<section aria-hidden='true'/>", b"</section>"),
         (b"<div style='display:none'/>", b"</div>"),
         (b"<div inert/>", b"</div>"),
+        (b"<section class='d-none'/>", b"</section>"),
+        (b"<section class='d-sm-none'/>", b"</section>"),
+        (b"<section class='d-md-none'/>", b"</section>"),
+        (b"<section class='d-lg-none'/>", b"</section>"),
+        (b"<section class='d-xl-none'/>", b"</section>"),
+        (b"<section class='d-xxl-none'/>", b"</section>"),
+        (b"<div class='hidden'/>", b"</div>"),
+        (b"<div class='invisible'/>", b"</div>"),
+        (b"<div class='visually-hidden'/>", b"</div>"),
+        (b"<div class='sr-only'/>", b"</div>"),
+        (b"<div style='content-visibility:hidden'/>", b"</div>"),
+        (b"<div style='opacity:0'/>", b"</div>"),
+        (b"<div style='opacity:0.0'/>", b"</div>"),
+        (b"<div style='opacity:0%'/>", b"</div>"),
         (b"<script/>", b"</script>"),
         (b"<template/>", b"</template>"),
     ):
@@ -65,6 +80,16 @@ def test():
     real_after_hidden = (b"<!doctype html><html><body><div hidden/>" +
                          article + b"</div>" + article + b"</body></html>")
     notice.validate_official_notice(real_after_hidden, "text/html")
+    for opening in (b"<div class='d-none'/>",
+                    b"<div style='content-visibility:hidden'/>",
+                    b"<div style='opacity:0.0'/>"):
+        notice.validate_official_notice(
+            b"<html><body>" + opening + article + b"</div>" +
+            article + b"</body></html>", "text/html")
+    # Semi-transparent content remains readable; avoid an overbroad CSS gate.
+    notice.validate_official_notice(
+        b"<html><body><div style='opacity:0.5'>" + article +
+        b"</div></body></html>", "text/html")
     notice.validate_official_notice(
         HTML.replace(b"<article>", b"<br/><article>"), "text/html")
 
