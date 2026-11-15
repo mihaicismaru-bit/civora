@@ -318,4 +318,51 @@ for url in (
     else:
         raise AssertionError(f"unsafe initial registry or alias URL: {url}")
 
+
+# End-to-end LKG regression: an unseen HTML document is an observation failure,
+# not a new semantic change or an invitation to update material call facts.
+with tempfile.TemporaryDirectory() as td:
+    temp_root = Path(td)
+    registry_file = temp_root / "registry.json"
+    state_file = temp_root / "health.json"
+    tasks = temp_root / "tasks"
+    fake_source = {
+        "id": "SRC-TEST-METADATA-ONLY", "tier": "T1",
+        "class": "OFFICIAL", "url": registered,
+        "source_families": ["ROMANIA", "OFFICIAL"],
+        "material_fact_use": True,
+    }
+    registry_file.write_text(json.dumps({"sources": [fake_source]}), encoding="utf-8")
+    state_file.write_text(json.dumps({"sources": [{
+        "id": fake_source["id"], "semantic_sha256": "a" * 64,
+        "semantic_chars": 500, "bytes": 8_000, "consecutive_failures": 0,
+    }]}), encoding="utf-8")
+    originals = (module.REGISTRY, module.STATE, module.TASK_DIR,
+                 module.REVIEWED_BASELINES, module.fetch_source)
+    try:
+        module.REGISTRY, module.STATE = registry_file, state_file
+        module.TASK_DIR = tasks
+        module.REVIEWED_BASELINES = temp_root / "reviewed-baselines.json"
+        module.fetch_source = lambda _src: {
+            "ok": True, "http_status": 200, "final_url": registered,
+            "content_type": "text/html", "bytes": 140,
+            "semantic_bytes": 55, "semantic_chars": 55,
+            "raw_sha256": "b" * 64, "semantic_sha256": "b" * 64,
+            "content_quality_ok": False, "quality_issue": "EMPTY_VISIBLE_HTML",
+            "selected_url": registered,
+        }
+        module.main()
+        row = json.loads(state_file.read_text(encoding="utf-8"))["sources"][0]
+        assert row["health"] == "DEGRADED"
+        assert row["semantic_sha256"] == "a" * 64
+        assert row["observed_semantic_sha256"] == "b" * 64
+        assert row["last_known_semantic_sha256"] == "a" * 64
+        assert row["semantic_hash_changed"] is False
+        assert row["resolution_task_required"] is False
+        assert row["publish_material_fact_update"] is False
+        assert not tasks.exists(), "unverified HTML wrote a resolution task"
+    finally:
+        (module.REGISTRY, module.STATE, module.TASK_DIR,
+         module.REVIEWED_BASELINES, module.fetch_source) = originals
+
 print("PASS source registry low-information, partial-body and exact-endpoint-lock regression")
