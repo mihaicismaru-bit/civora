@@ -118,6 +118,36 @@ def main():
         rejected_future = mod.freshness("2026-08-12T10:05:01Z", reference, 8)
         assert rejected_future["status"] == "UNKNOWN", rejected_future
         assert rejected_future["ageHours"] is None
+        # An internally inconsistent registry-health summary must never
+        # reclassify degraded/quarantined official observations as PASS.
+        registry_fixture = {
+            "observed_at": "2026-08-12T08:00:00Z",
+            "sources": [
+                {"health": "PASS", "quarantined": False, "resolution_task_required": False},
+                {"health": "PASS", "quarantined": False, "resolution_task_required": False},
+            ],
+            "summary": {"total": 2, "pass": 2, "degraded": 0, "fail": 0, "quarantined": 0},
+        }
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "PASS"
+        registry_fixture["sources"][1]["health"] = "DEGRADED"
+        registry_fixture["summary"]["pass"] = 1
+        registry_fixture["summary"]["degraded"] = 1
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["sources"][1]["health"] = "PASS"
+        registry_fixture["sources"][1]["quarantined"] = True
+        registry_fixture["summary"].update({"pass": 2, "degraded": 0, "quarantined": 1})
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["sources"][1]["quarantined"] = False
+        registry_fixture["summary"]["quarantined"] = 0
+        registry_fixture["summary"]["total"] = 3
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["summary"]["total"] = True
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        registry_fixture["summary"]["total"] = 2
+        registry_fixture["summary"].pop("pass")
+        assert mod.registry_source(registry_fixture, reference, {})["status"] == "DEGRADED"
+        assert mod.registry_source(registry_fixture, reference, {})["itemCount"] == 2
+
         registry_path = root / "source_registry.json"
         index = mod.compile_with_replay(root, reference, source_registry_path=registry_path)
         assert index["contract"]["status"] == "PASS", index["contract"]
