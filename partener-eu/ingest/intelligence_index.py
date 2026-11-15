@@ -45,8 +45,10 @@ def parse_time(value: Any) -> Optional[dt.datetime]:
         return None
     try:
         parsed = dt.datetime.fromisoformat(value.replace("Z", "+00:00"))
-        if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+        # A timezone-free source heartbeat cannot establish UTC freshness.
+        # Do not invent a timezone for archival or acquired official evidence.
+        if parsed.tzinfo is None or parsed.utcoffset() is None:
+            return None
         return parsed.astimezone(dt.timezone.utc)
     except ValueError:
         return None
@@ -140,6 +142,9 @@ def afir_records(
         "itemCount": len(state.get("items") or []),
         "failClosed": True,
     }
+    # Content may be indexed for discovery while its acquisition is degraded
+    # or stale; only a CURRENT, healthy official source earns the evidence label.
+    evidence_current = source_availability(source) == "AVAILABLE"
     records = []
     for row in state.get("items") or []:
         url = canonical_url(row.get("url"))
@@ -163,7 +168,7 @@ def afir_records(
             "observedAt": observed_at,
             "freshness": source["freshness"]["status"],
             "textExtracted": bool(row.get("textExtracted")),
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX",
+            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if evidence_current else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
             "materialChangeCandidate": material_candidate,
             "materialFactAction": "RESOLUTION_REQUIRED" if material_candidate else "NO_AUTO_PROMOTION",
             "publishMaterialFacts": False,
@@ -256,6 +261,7 @@ def mipe_records(
         "lastKnownGoodPreserved": "LAST_KNOWN_GOOD_PRESERVED" in str(state.get("status") or ""),
         "failClosed": True,
     }
+    evidence_current = verified and evidence_freshness["status"] == "CURRENT"
     records = []
     for row in state.get("items") or []:
         url = canonical_url(row.get("url") or row.get("sourceUrl"))
@@ -272,7 +278,7 @@ def mipe_records(
             "fingerprint": row.get("sha256") or row.get("contentHash"),
             "observedAt": row.get("observedAt") or observed_at,
             "freshness": source["freshness"]["status"],
-            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if available else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
+            "decisionUse": "OFFICIAL_EVIDENCE_INDEX" if evidence_current else "LAST_KNOWN_GOOD_DISCOVERY_ONLY",
             "materialFactAction": "EXTRACT_AND_RECONCILE_AUTHORITATIVE_EVIDENCE",
             "publishMaterialFacts": False,
             "blockedFactClasses": MATERIAL_FACT_CLASSES,
