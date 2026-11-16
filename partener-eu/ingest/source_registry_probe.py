@@ -21,6 +21,54 @@ MIN_HTML_BYTES_FOR_LOW_INFO = 4096
 # A title/hidden metadata payload with a token visible body is not source evidence.
 MIN_VISIBLE_HTML_CHARS = 20
 # A partial/truncated response must never become a healthy source hash or LKG.
+# Operational backoff for a single repeatedly 403-blocked discovery index.
+# Never apply to authorizing sources or infer fresh source health from skipped fetches.
+ADR_CENTRU_DISCOVERY_ID = "SRC-ADR-CENTRU-PR-ACTIONS"
+ADR_CENTRU_DISCOVERY_URL = "https://www.regiocentru.ro/actiuni/"
+ADR_CENTRU_403_RETRY_SKIPS = 5
+
+
+def adr_centre_discovery_403_guard(src: dict, old: dict) -> bool:
+    """Only a proven long-term 403 on this non-authorizing index may back off."""
+    try:
+        failures = int(old.get("consecutive_failures") or 0)
+    except (TypeError, ValueError):
+        return False
+    return (
+        src.get("id") == ADR_CENTRU_DISCOVERY_ID
+        and src.get("url") == ADR_CENTRU_DISCOVERY_URL
+        and old.get("url") == ADR_CENTRU_DISCOVERY_URL
+        and src.get("authority_scope") == "CALL_INDEX_DISCOVERY"
+        and src.get("material_fact_use") is False
+        and old.get("health") == "FAIL"
+        and failures >= 100
+        and "HTTP Error 403: Forbidden" in str(old.get("error") or "")
+    )
+
+
+def adr_centre_discovery_cooldown(src: dict, old: dict) -> dict | None:
+    """Return a FAIL/STALE observation, NEVER an artificial fresh receipt."""
+    if not adr_centre_discovery_403_guard(src, old):
+        return None
+    try:
+        remaining = int(old.get("cooldown_runs_remaining") or 0)
+    except (TypeError, ValueError):
+        remaining = 0
+    if remaining <= 0:
+        return None
+    return {
+        "ok": False, "health": "FAIL", "error": old["error"],
+        "content_quality_ok": False, "quality_issue": None,
+        "semantic_hash_changed": False,
+        "resolution_task_required": False, "publish_material_fact_update": False,
+        "consecutive_failures": int(old["consecutive_failures"]),
+        "last_known_semantic_sha256": old.get("last_known_semantic_sha256"),
+        "quarantined": True,
+        "probe_evidence_state": "SKIPPED_403_COOLDOWN_NOT_OBSERVED",
+        "cooldown_runs_remaining": remaining - 1,
+        "last_probe_attempt_at": old.get("last_probe_attempt_at"),
+    }
+
 MAX_SOURCE_BYTES = 3_000_000
 
 
@@ -512,6 +560,11 @@ def main():
             "material_fact_use": bool(src.get("material_fact_use")),
             "source_families": list(src.get("source_families") or []),
         }
+        cooldown = adr_centre_discovery_cooldown(src, old)
+        if cooldown is not None:
+            row.update(cooldown)
+            out["sources"].append(row)
+            continue
         try:
             row.update(fetch_source(src))
             baseline_hash = task_baseline_hash(src["id"], old)
@@ -556,6 +609,14 @@ def main():
                 "last_known_semantic_sha256": task_baseline_hash(src["id"], old),
                 "quarantined": failures >= 3,
             })
+            # A bounded periodic retry, never an invented PASS, for the exact
+            # non-authorizing ADR Centru index that repeatedly returns HTTP 403.
+            if adr_centre_discovery_403_guard(src, {**old,
+                    "url": row["url"], "health": "FAIL", "error": row["error"],
+                    "consecutive_failures": failures}):
+                row["cooldown_runs_remaining"] = ADR_CENTRU_403_RETRY_SKIPS
+                row["last_probe_attempt_at"] = observed_at
+                row["probe_evidence_state"] = "HTTP_403_ATTEMPT_FAILED"
         out["sources"].append(row)
 
     out["summary"] = {
