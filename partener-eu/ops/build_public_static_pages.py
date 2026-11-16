@@ -323,10 +323,16 @@ def quarantine_disputed_iti_monoparental_dossier(dossier: dict[str, Any]) -> dic
     This deliberately does not authorize an OPEN state or change canonical
     data. Remove the hold only after reviewed, exact-call MySMIS/guide replay.
     """
-    if (
-        not str(dossier.get("id") or "").startswith("mipe-1b5d21384b66b4b559")
-        or dossier.get("publicationState") != "PUBLISHABLE"
-    ):
+    dossier_id = str(dossier.get("id") or "")
+    title = fold(dossier.get("title"))
+    identified = (
+        dossier_id.startswith("mipe-1b5d21384b66b4b559")
+        or (
+            "sprijin pentru familii monoparentale" in title
+            and "tara fagarasului" in title
+        )
+    )
+    if not identified or dossier.get("publicationState") != "PUBLISHABLE":
         return None
     rendered = copy.deepcopy(dossier)
     rendered["status"] = "REVIEW"

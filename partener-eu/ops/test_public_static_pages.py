@@ -557,7 +557,10 @@ assert "Nu mai investi" not in iti_html
 assert "Consiliile județene ITI Moții" not in json.dumps(iti_review["sections"], ensure_ascii=False)
 assert "Sfarsitul" not in json.dumps(iti_review["sections"], ensure_ascii=False)
 # Unrelated calls and unapproved / provisional candidates are left unchanged.
-other_iti = dict(iti_bad, id="mipe-distinct-iti-motii")
+other_iti = dict(iti_bad, id="mipe-distinct-iti-motii", title="Sprijin pentru familii monoparentale — ITI Moții Țara de Piatră")
 assert module.fail_closed_render_dossier(other_iti, iti_clock) is other_iti
 not_publishable_iti = dict(iti_bad, publicationState="REVIEW_REQUIRED")
 assert module.quarantine_disputed_iti_monoparental_dossier(not_publishable_iti) is None
+# Title-bound matching covers a regenerated MIPE ID without misclassifying Moții.
+regenerated_iti = dict(iti_bad, id="mipe-updated-fagarasului")
+assert module.fail_closed_render_dossier(regenerated_iti, iti_clock)["status"] == "REVIEW"
