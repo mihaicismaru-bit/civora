@@ -31,8 +31,10 @@ def parse_date(value: Any) -> dt.datetime | None:
         return None
     try:
         parsed = dt.datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        # An offset-free ISO clock is not proof of an official timezone.
+        # Never guess UTC for a deadline used to authorize current OPEN.
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=dt.timezone.utc)
+            return None
         return parsed.astimezone(dt.timezone.utc)
     except ValueError:
         pass
@@ -42,7 +44,23 @@ def parse_date(value: Any) -> dt.datetime | None:
         return None
     day, month, year = int(match.group(1)), months[match.group(2)], int(match.group(3))
     hour, minute = int(match.group(4) or 23), int(match.group(5) or 59)
-    return dt.datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Europe/Bucharest")).astimezone(dt.timezone.utc)
+    # ZoneInfo defaults to fold=0: this silently chooses one of two
+    # autumn clock readings and even accepts the missing spring 03:xx hour.
+    # A local cutoff without an explicit offset must be unambiguous and real,
+    # matching build_public_static_pages.bucharest_datetime_utc.
+    try:
+        naive = dt.datetime(year, month, day, hour, minute)
+    except ValueError:
+        return None
+    ro_tz = ZoneInfo("Europe/Bucharest")
+    early = naive.replace(tzinfo=ro_tz, fold=0)
+    late = naive.replace(tzinfo=ro_tz, fold=1)
+    if early.utcoffset() != late.utcoffset():
+        return None
+    utc = early.astimezone(dt.timezone.utc)
+    if utc.astimezone(ro_tz).replace(tzinfo=None) != naive:
+        return None
+    return utc
 
 
 def has_exact_open_clock(value: Any) -> bool:
