@@ -1397,6 +1397,42 @@ def main():
         if any(token not in note for token in expected["note_tokens"]):
             fail(f"{source_id}: missing indicative-calendar vs live-status guard")
 
+    # Source discovery is not a verified call state. The official IMFV BV1B6
+    # launch page has incompatible budget and deadline fields within itself.
+    # Do not allow a source descriptor to launder either value into OPEN_CALL.
+    bv1b6_id = "SRC-MAI-IMFV-BV1B6-LAUNCH-20261116"
+    bv1b6 = by_id.get(bv1b6_id)
+    if not bv1b6:
+        fail("missing official IMFV BV1B6 exact-launch discovery")
+    bv1b6_expected = {
+        "tier": "T1",
+        "url": "https://fed.mai.gov.ro/11756/bv1b6-actiuni-specifice-dotarea-politiei-de-frontiera-romane-pentru-cresterea-capacitatii-operationale-a-frontex2-lansare-apel-de-proiecte/",
+        "call_identifier_discovery": "BV1B6",
+        "authority_class": "T1_MANAGING_AUTHORITY_AFACERI_INTERNE",
+        "authority_scope": "EXACT_CALL_LAUNCH_DISCOVERY_ONLY",
+        "observation_state": "LAUNCH_ANNOUNCEMENT_DISCOVERED_RAW_PENDING",
+        "adapter_required": "MAI_IMFV_EXACT_CALL_ROFED_RAW_RECONCILE_V1",
+        "material_fact_use": False,
+        "open_call_authorized": False,
+        "material_fact_publication_authorized": False,
+    }
+    if any(bv1b6.get(k) != v for k, v in bv1b6_expected.items()):
+        fail("BV1B6 discovery identity or fail-closed boundaries changed")
+    if not {"ROMANIA", "MAI", "IMFV", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+            set(bv1b6.get("source_families") or [])):
+        fail("BV1B6 programme/source families missing")
+    if {
+        "status", "call_status", "deadline", "budget", "budget_ron",
+        "eligibility", "open_at", "close_at", "fetched_at", "raw_sha256",
+        "semantic_sha256", "parser_version", "run_id", "submission_endpoint",
+    }.intersection(bv1b6):
+        fail("BV1B6 unacquired exact-call discovery fabricated material evidence")
+    bv1b6_note = (bv1b6.get("note") or "").lower()
+    if not all(token in bv1b6_note for token in (
+            "112,226,000", "112226101", "12:00 am", "16:00",
+            "ro fed", "sha-256", "no open_call", "no distribution")):
+        fail("BV1B6 conflicting official facts/raw-replay gate not documented")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
