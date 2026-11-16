@@ -12,6 +12,7 @@ import argparse
 import datetime as dt
 import hashlib
 import html
+import io
 import json
 import pathlib
 import re
@@ -26,6 +27,7 @@ DEFAULT_BASE_URL = "https://partener.eu/"
 DEFAULT_MANIFEST = "partener-eu/web/static-public-manifest.json"
 DEFAULT_OUTPUT = "/tmp/partener-pages-readback.json"
 CARD_RE = re.compile(r"\bdata-dossier-id\s*=\s*[\"']", re.IGNORECASE)
+MAX_READBACK_BYTES = 8_000_000
 
 OPEN_CARD_RE = re.compile(
     r"""<article\b(?=[^>]*\bdata-dossier-id\s*=\s*["'][^"']+["'])[^>]*>.*?</article>""",
@@ -53,6 +55,21 @@ def cache_busted(url: str, token: str) -> str:
     return urllib.parse.urlunsplit((parts.scheme, parts.netloc, parts.path, urllib.parse.urlencode(query), parts.fragment))
 
 
+class NoPublicReadbackRedirect(urllib.request.HTTPRedirectHandler):
+    """Never follow redirects: inspect neither an untrusted host nor stale routes."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise ValueError("Public readback redirects are not proof of the exact HTTPS route")
+
+
+def bounded_read(response: Any, limit: int = MAX_READBACK_BYTES) -> bytes:
+    """Accept only bounded, nonempty receipts before parsing public HTML/JSON."""
+    raw = response.read(limit + 1)
+    if not raw or len(raw) > limit:
+        raise ValueError("Public readback response is empty or exceeds the byte limit")
+    return raw
+
+
 def fetch_bytes(url: str, *, timeout: float, token: str) -> tuple[int, bytes, str]:
     target = cache_busted(url, token)
     req = urllib.request.Request(
@@ -65,11 +82,14 @@ def fetch_bytes(url: str, *, timeout: float, token: str) -> tuple[int, bytes, st
         },
         method="GET",
     )
-    with urllib.request.urlopen(req, timeout=timeout) as response:
+    # The default urlopen() redirect handler follows the redirect *before*
+    # readback_target_is_trusted() can reject it. Refuse at transport boundary.
+    opener = urllib.request.build_opener(NoPublicReadbackRedirect())
+    with opener.open(req, timeout=timeout) as response:
         resolved = response.geturl()
         if not readback_target_is_trusted(target, resolved):
-            raise ValueError("Public readback redirected away from its exact HTTPS route or cache-busting query")
-        return int(getattr(response, "status", 200)), response.read(), resolved
+            raise ValueError("Public readback must use the exact HTTPS route and cache-busting query")
+        return int(getattr(response, "status", 200)), bounded_read(response), resolved
 
 
 def readback_target_is_trusted(requested_url: str, resolved_url: str) -> bool:
@@ -191,6 +211,22 @@ def self_test() -> int:
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
     assert readback_target_is_trusted(busted, busted)
+    assert bounded_read(io.BytesIO(b"ok"), 2) == b"ok"
+    for unsafe in (io.BytesIO(b""), io.BytesIO(b"toolong")):
+        try:
+            bounded_read(unsafe, 2)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError("Empty/oversized public readback was accepted")
+    try:
+        NoPublicReadbackRedirect().redirect_request(
+            None, None, 302, "Found", {}, "https://untrusted.example/steal"
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("Public readback followed a redirect before validating it")
     assert readback_target_is_trusted(
         busted, "https://partener.eu/consultari/?partener_readback=abc&x=1"
     )
