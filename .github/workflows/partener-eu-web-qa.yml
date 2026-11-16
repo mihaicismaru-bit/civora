@@ -25,6 +25,7 @@ on:
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
+      - 'partener-eu/ops/test_decision_iti_p0_containment.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
@@ -56,6 +57,7 @@ on:
       - 'partener-eu/ops/test_public_product_v3.py'
       - 'partener-eu/ops/test_ask_partener_v2.py'
       - 'partener-eu/ops/test_ask_eligibility_projection.js'
+      - 'partener-eu/ops/test_decision_iti_p0_containment.js'
       - 'partener-eu/ops/test_home_freshness_guard.mjs'
       - 'partener-eu/ops/test_public_language.py'
       - 'partener-eu/ops/test_decision_products.py'
@@ -116,6 +118,7 @@ jobs:
           python partener-eu/ops/test_public_product_v3.py
           python partener-eu/ops/test_ask_partener_v2.py
           node partener-eu/ops/test_ask_eligibility_projection.js
+          node partener-eu/ops/test_decision_iti_p0_containment.js
 
       - name: Consultant lazy-load and runtime contracts
         run: |
