@@ -1473,6 +1473,55 @@ def main():
     if bv1b6.get("url") == bv23b.get("url") or bv1b6.get("call_identifier_discovery") == bv23b.get("call_identifier_discovery"):
         fail("BV1B6 and BV23B must remain distinct exact official calls")
 
+    # 16 Nov official ADR Centru updates are NOT a submission-status signal.
+    # A 23 Nov technical webinar and an extension for signing contracts
+    # have different semantics from an open or extended funding application.
+    prc_admin_notices = {
+        "SRC-PRC-22-DIGITAL-APEL2-INFO-20261116": {
+            "url": "https://www.regiocentru.ro/sesiune-online-de-informare-privind-apelul-de-proiecte-aferent-actiunii-2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+            "paired_official_source_id": "SRC-PR-CENTRU-DIGITAL-2",
+            "authority_scope": "TECHNICAL_INFORMATION_SESSION_DISCOVERY_ONLY",
+            "observation_state": "INFORMATION_SESSION_DISCOVERED_RAW_PENDING",
+            "adapter_required": "REGIOCENTRU_INFORMATION_EVENT_RAW_PAIR_RECONCILE_V1",
+            "event_terms": ("23 november 2026", "12:00", "information", "not the project application"),
+            "family": "INFORMATION_EVENT",
+        },
+        "SRC-PRC-111-CDI-CONTRACT-SIGN-20261116": {
+            "url": "https://www.regiocentru.ro/a-fost-prelungit-termenul-de-semnare-a-contractelor-de-finantare-pentru-cererile-de-finantare-depuse-in-cadrul-programului-regiunea-centru-interventia-1-1-1-dezvoltarea-cap/",
+            "authority_scope": "CONTRACT_SIGNING_EXTENSION_DISCOVERY_ONLY",
+            "observation_state": "CONTRACT_SIGNING_NOTICE_DISCOVERED_RAW_PENDING",
+            "adapter_required": "REGIOCENTRU_CONTRACT_SIGNING_NOTICE_RAW_RECONCILE_V1",
+            "event_terms": ("signing financing contracts", "not an extension", "does not reopen"),
+            "family": "CONTRACTING_ADMINISTRATION",
+        },
+    }
+    for source_id, expected in prc_admin_notices.items():
+        row = by_id.get(source_id)
+        if row is None:
+            fail(f"missing 16-Nov PR Centru non-call source {source_id}")
+        for field in ("url", "authority_scope", "observation_state", "adapter_required"):
+            if row.get(field) != expected[field]:
+                fail(f"{source_id}: {field} changed or confused with an OPEN call")
+        if row.get("tier") != "T1" or row.get("event_date_discovery") != "2026-11-16":
+            fail(f"{source_id}: official authority/date discovery drift")
+        if row.get("material_fact_use") is not False or row.get("open_call_authorized") is not False or row.get("material_fact_publication_authorized") is not False:
+            fail(f"{source_id}: administrative/event notice cannot authorize material call facts")
+        if not {"ROMANIA", "ADR", "DISCOVERY", expected["family"]}.issubset(set(row.get("source_families") or [])):
+            fail(f"{source_id}: source family missing or corrupted")
+        if row.get("paired_official_source_id") != expected.get("paired_official_source_id"):
+            fail(f"{source_id}: distinct call/event pairing missing or fabricated")
+        if {
+            "call_status", "status", "deadline", "close_at", "open_at",
+            "budget", "eligibility", "submission_endpoint", "raw_sha256",
+            "semantic_sha256", "fetched_at", "parser_version", "run_id",
+        }.intersection(row):
+            fail(f"{source_id}: administrative discovery fabricated raw receipt or application facts")
+        note = (row.get("note") or "").lower()
+        if not all(token in note for token in expected["event_terms"]):
+            fail(f"{source_id}: missing explicit webinar vs application or contracting distinction")
+        if "no open_call" not in note or "not_captured" not in note:
+            fail(f"{source_id}: missing fail-closed status/provenance contract")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
