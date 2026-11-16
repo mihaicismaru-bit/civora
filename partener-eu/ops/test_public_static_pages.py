@@ -668,7 +668,10 @@ with tempfile.TemporaryDirectory() as td:
     input_path = tmp / "decision_products.json"
     input_path.write_text(json.dumps(source, ensure_ascii=False), encoding="utf-8")
     output = tmp / "web"
-    report = module.build(input_path, output, evaluated_at=dr12_after_notice)
+    # Replay news after its event date; future news must stay suppressed.
+    news_clock = module.parse_date("2026-11-16T09:10:00Z")
+    assert news_clock is not None
+    report = module.build(input_path, output, evaluated_at=news_clock)
     change_html = (output / "schimbari/index.html").read_text(encoding="utf-8")
     public_home = (output / "home-public-data.js").read_text(encoding="utf-8")
     assert marker not in change_html and marker not in public_home
