@@ -6,12 +6,15 @@ const P=INDEX&&Array.isArray(INDEX.dossiers)?INDEX:window.PARTENER_DECISION_PROD
 const C=INDEX&&Array.isArray(INDEX.calls)?INDEX:window.PARTENER_MIPE_CANONICAL_CALLS;
 const ROUTES=()=>window.PARTENER_DOSSIER_ROUTES||{};
 // Only dossiers that pass the publication gate are offered as answers; provisional / review-required ones stay internal.
-const publishable=d=>String(d?.publicationState||'').toUpperCase()==='PUBLISHABLE';
+// P0 #1403: decision Ask must not echo disputed ITI Fagarasului dates,
+// eligibility or CLOSED advice from an unreviewed canonical projection.
+const publishable=d=>String(d?.publicationState||'').toUpperCase()==='PUBLISHABLE'&&!p0DisputedTerritorialDossier(d);
 if(!P||!Array.isArray(P.dossiers))return;
 const canonicalCalls=Array.isArray(C?.calls)?C.calls:[];
 const canonicalById=new Map(canonicalCalls.map(c=>[c.id,c]));
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fold=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,' ').trim();
+function p0DisputedTerritorialDossier(d){const id=String(d?.id||''),title=fold(d?.title);return id.startsWith('mipe-1b5d21384b66b4b559')||(title.includes('sprijin pentru familii monoparentale')&&title.includes('tara fagarasului'))}
 const officialTier=v=>/^T1(?:B)?(?:\b|_)/i.test(String(v||'').trim());
 const codeKey=v=>{const raw=String(v||'').trim(),key=fold(raw).replace(/\s+/g,'');return key&&!/^(?:-|—|n\/?a|unknown|necunoscut|neconfirmat)$/i.test(raw)?key:''};
 function urlKey(v){try{const u=new URL(String(v||''));if(!/^https?:$/.test(u.protocol))return '';u.hash='';u.hostname=u.hostname.toLowerCase();u.pathname=u.pathname.replace(/\/+$/,'')||'/';return u.href}catch{return ''}}
