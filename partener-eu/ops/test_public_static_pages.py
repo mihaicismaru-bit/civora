@@ -608,3 +608,71 @@ with tempfile.TemporaryDirectory() as td:
     assert report["policy"]["disputedTerritoryNewsQuarantined"] is True
     assert fake_input["news"][0]["headline"] == marker, "input remains immutable"
 print("PASS P0 ITI source and news quarantine")
+
+
+# #1402: AFIR DR-12 'alte sectoare' is exhausted as of the official
+# 11 Nov notice; the generic parent card cannot imply zootehnic is OPEN.
+# Historical replay before the notice and independent components stay intact.
+dr12_held = json.loads(json.dumps(dr12_stage_action))
+dr12_held["standfirst"] = "Sesiunea DR-12 este deschisă pentru depunere."
+dr12_held["decisionAction"] = "Depunerea este deschisă."
+dr12_held["sections"].append(
+    {"title": "Decizia rapidă", "items": ["Depunerea este deschisă."]}
+)
+dr12_held["sources"] = [
+    {"url": "https://www.afir.ro/finantare/contor-fonduri-disponibile/", "tier": "T1"}
+]
+dr12_original = json.dumps(dr12_held, ensure_ascii=False, sort_keys=True)
+dr12_before_notice = module.parse_date("2026-11-11T06:00:00Z")
+dr12_after_notice = module.parse_date("2026-11-11T08:00:00Z")
+assert dr12_before_notice and dr12_after_notice
+assert module.quarantine_unresolved_afir_dr12_components(dr12_held, dr12_before_notice) is None
+dr12_review = module.fail_closed_render_dossier(dr12_held, dr12_after_notice)
+assert dr12_review["status"] == "REVIEW"
+assert dr12_review["renderFailClosedReason"] == "P0_AFIR_DR12_COMPONENT_CONFLATION_1402"
+assert dr12_review["quality"]["completeness"] == 0
+assert dr12_review["sources"] == []
+assert dr12_review["quickFacts"][1]["confidence"] == "FAIL_CLOSED"
+assert "alte sectoare" in dr12_review["standfirst"]
+assert "zootehnic" in dr12_review["standfirst"]
+assert "Depunerea este deschisă" not in json.dumps(dr12_review, ensure_ascii=False)
+assert "2 decembrie" not in json.dumps(dr12_review, ensure_ascii=False)
+assert json.dumps(dr12_held, ensure_ascii=False, sort_keys=True) == dr12_original
+for unaffected_id in ("afir-dr12-2026-zootehnic", "afir-dr14-2026"):
+    independent = dict(dr12_held, id=unaffected_id)
+    assert module.quarantine_unresolved_afir_dr12_components(independent, dr12_after_notice) is None
+not_published_dr12 = dict(dr12_held, publicationState="REVIEW_REQUIRED")
+assert module.quarantine_unresolved_afir_dr12_components(not_published_dr12, dr12_after_notice) is None
+
+# A status-change news item for the unresolved parent must not be distributed.
+with tempfile.TemporaryDirectory() as td:
+    tmp = Path(td)
+    marker = "P0-GENERIC-DR12-UNVERIFIED-OPEN"
+    safe_marker = "SAFE-COMPONENT-UPDATE"
+    source = {
+        "generatedAt": "2026-11-16T09:00:00Z",
+        "dossiers": [dr12_held],
+        "news": [
+            {
+                "id": "generic-dr12-news", "date": "2026-11-16T09:00:00Z",
+                "dossierId": "afir-dr12-2026", "kind": "CALL_OPENED",
+                "headline": marker, "utilityScore": 90,
+            },
+            {
+                "id": "separate-component-news", "date": "2026-11-16T09:00:00Z",
+                "dossierId": "afir-dr12-2026-zootehnic", "kind": "OFFICIAL_UPDATE",
+                "headline": safe_marker, "utilityScore": 70,
+            },
+        ],
+    }
+    input_path = tmp / "decision_products.json"
+    input_path.write_text(json.dumps(source, ensure_ascii=False), encoding="utf-8")
+    output = tmp / "web"
+    report = module.build(input_path, output, evaluated_at=dr12_after_notice)
+    change_html = (output / "schimbari/index.html").read_text(encoding="utf-8")
+    public_home = (output / "home-public-data.js").read_text(encoding="utf-8")
+    assert marker not in change_html and marker not in public_home
+    assert safe_marker in change_html and safe_marker in public_home
+    assert report["quarantinedP0News"] == 1
+    assert report["homeSnapshotNews"] == 1
+print("PASS P0 AFIR DR-12 component-level review / news quarantine")
