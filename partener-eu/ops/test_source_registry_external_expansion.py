@@ -1566,6 +1566,39 @@ def main():
         if "no open_call" not in note or "not_captured" not in note:
             fail(f"{source_id}: missing fail-closed status/provenance contract")
 
+    # The September AFIR energy notice advertises two distinct public-entity
+    # sessions that may terminate early as allocations are exhausted. An old
+    # timetable and the generic application gateway never prove current OPEN.
+    energy = by_id.get("SRC-RO-AFIR-ENERGY-PUBLIC-20260917")
+    if energy is None:
+        fail("missing AFIR 2026 public-energy exact source discovery")
+    if energy.get("url") != "https://www.afir.ro/info-la-zi/comunicat-derulare-sesiune-autoconsum-si-stocare-energie-electrica-beneficiari-publici/":
+        fail("AFIR energy notice official authority URL drift")
+    if energy.get("application_gateway_discovery") != "https://depunerepspac.afir.ro/":
+        fail("AFIR energy gateway must remain discovery, not a verified call submission endpoint")
+    if energy.get("tier") != "T1" or energy.get("authority_class") != "T1_OFFICIAL_AGENCY":
+        fail("AFIR energy discovery authority provenance drift")
+    if not {"ROMANIA", "AFIR", "ENERGY", "CALL_REGISTRY", "DISCOVERY"}.issubset(set(energy.get("source_families") or [])):
+        fail("AFIR energy source family drift")
+    if energy.get("observation_state") != "SCHEDULE_NOTICE_DISCOVERED_LIVE_ENDPOINT_403_RAW_PENDING":
+        fail("AFIR energy notice must remain raw-pending until immutable receipt")
+    if any(energy.get(key) is not False for key in (
+        "material_fact_use", "open_call_authorized",
+        "material_fact_publication_authorized", "call_identifiers_verified",
+        "current_application_endpoints_verified",
+    )):
+        fail("historical AFIR two-call schedule must never authorize OPEN or material facts")
+    if energy.get("adapter_required") != "AFIR_ENERGY_2026_TWO_CALLS_CURRENT_ENDPOINT_RECONCILE_V1":
+        fail("AFIR energy notice requires separate live call identifiers and reconciliation")
+    if {"deadline", "open_at", "close_at", "budget", "eligibility", "status",
+         "raw_sha256", "fetched_at", "parser_version", "run_id"}.intersection(energy):
+        fail("AFIR energy historical discovery cannot fabricate canonical facts or raw evidence")
+    if not all(token in (energy.get("note") or "").lower() for token in (
+        "two distinct", "not proof of current open_call", "early exhaustion",
+        "http 403", "no exact individual call identifier",
+    )):
+        fail("AFIR energy source must explicitly distinguish scheduled from current status")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
