@@ -8,7 +8,9 @@ const ROUTES=()=>window.PARTENER_DOSSIER_ROUTES||{};
 // Only dossiers that pass the publication gate are offered as answers; provisional / review-required ones stay internal.
 // P0 #1403: decision Ask must not echo disputed ITI Fagarasului dates,
 // eligibility or CLOSED advice from an unreviewed canonical projection.
-const publishable=d=>String(d?.publicationState||'').toUpperCase()==='PUBLISHABLE'&&!p0DisputedTerritorialDossier(d);
+// #1402: generic AFIR DR-12 cannot authorize advice for separately funded components.
+// Exact component identities remain eligible for normal verification.
+const publishable=d=>String(d?.publicationState||'').toUpperCase()==='PUBLISHABLE'&&String(d?.id||'')!=='afir-dr12-2026'&&!p0DisputedTerritorialDossier(d);
 if(!P||!Array.isArray(P.dossiers))return;
 const canonicalCalls=Array.isArray(C?.calls)?C.calls:[];
 const canonicalById=new Map(canonicalCalls.map(c=>[c.id,c]));
