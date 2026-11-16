@@ -286,6 +286,11 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     # anchor; this is a render-only hold, never a canonical CLOSED assertion.
     for key in ("deadline", "closesAt", "closeAt"):
         if dossier.get(key) not in (None, ""):
+            # A date-only competing field may parse to the same UTC instant
+            # as a precise midnight cutoff. Equality does not establish that
+            # its official hour was ever observed. Match the JS OPEN guard.
+            if not has_explicit_open_deadline_clock(dossier[key]):
+                return False
             other = parse_date(dossier[key])
             if other is None or other != closes:
                 return False

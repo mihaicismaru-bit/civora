@@ -112,6 +112,20 @@ assert not module.current_open(invalid_deadline, semantic_clock)
 matching_deadline = json.loads(json.dumps(future_open))
 matching_deadline["deadline"] = "2026-11-20T23:59:00+02:00"
 assert module.current_open(matching_deadline, semantic_clock)
+# Cross-surface regression: an ISO date-only top-level cutoff parses to
+# UTC midnight, which can equal a CONFIRMED exact midnight cutoff by chance.
+# Matching milliseconds must not make an unproven application hour OPEN.
+midnight_open = json.loads(json.dumps(future_open))
+for row in midnight_open["quickFacts"]:
+    if row["label"] == "Termen":
+        row["value"] = "2026-11-20T00:00:00Z"
+assert module.current_open(midnight_open, semantic_clock)
+for key in ("deadline", "closesAt", "closeAt"):
+    ambiguous_midnight = json.loads(json.dumps(midnight_open))
+    ambiguous_midnight[key] = "2026-11-20"
+    assert module.parse_date(ambiguous_midnight[key]) == module.parse_date("2026-11-20T00:00:00Z")
+    assert not module.current_open(ambiguous_midnight, semantic_clock), key
+    assert module.fail_closed_render_dossier(ambiguous_midnight, semantic_clock)["status"] == "REVIEW"
 # The opening must also have occurred; all source claims must agree.
 opening_probe = json.loads(json.dumps(future_open))
 opening_probe["quickFacts"].append({"label": "Deschidere", "value": "10 noiembrie 2026, ora 09:00", "confidence": "CONFIRMED"})
