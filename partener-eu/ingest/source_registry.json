@@ -3136,6 +3136,76 @@
       "authority_scope": "PRIMARY_CALL_DOCUMENT_DISCOVERY_ONLY",
       "observation_state": "OFFICIAL_CALL_FICHE_RAW_PENDING",
       "note": "Official Commission IMREG-2026-INFOME call document V1.0 dated 14 October 2026 gives an indicative opening date and submission calendar; it does not by itself establish live OPEN_CALL status or an active submission endpoint. Original PDF bytes, %%EOF integrity, SHA-256, fetched_at, parser_version, run_id, immutable handoff and exact live structured topic status reconciliation are still missing. NO OPEN_CALL, material deadline, budget, eligibility, publication or distribution from discovery."
+    },
+    {
+      "id": "SRC-PRC-22-DIGITAL-APEL2-INFO-20261116",
+      "tier": "T1",
+      "class": "official_regional_managing_authority_information_session",
+      "owner": "ADR Centru / Autoritatea de Management Programul Regiunea Centru",
+      "url": "https://www.regiocentru.ro/sesiune-online-de-informare-privind-apelul-de-proiecte-aferent-actiunii-2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "official_mirror_url": "https://www.adrcentru.ro/comunicare/sesiune-online-de-informare-privind-apelul-de-proiecte-aferent-actiunii-2-2-intreprinderi-digitale-pentru-o-economie-avansata-apel-2/",
+      "programmes": [
+        "Programul Regiunea Centru 2021-2027"
+      ],
+      "programme_family": "Programul Regiunea Centru 2021-2027",
+      "extract": [
+        "technical_information_session_discovery",
+        "registration_link_discovery",
+        "guidance_and_MySMIS_QA_discovery",
+        "call_documentation_link_discovery"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "ROMANIA",
+        "ADR",
+        "INFORMATION_EVENT",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_REGIONAL_MANAGING_AUTHORITY",
+      "authority_scope": "TECHNICAL_INFORMATION_SESSION_DISCOVERY_ONLY",
+      "observation_state": "INFORMATION_SESSION_DISCOVERED_RAW_PENDING",
+      "event_date_discovery": "2026-11-16",
+      "paired_official_source_id": "SRC-PR-CENTRU-DIGITAL-2",
+      "action_identifier_discovery": "2.2 / Apel 2",
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "REGIOCENTRU_INFORMATION_EVENT_RAW_PAIR_RECONCILE_V1",
+      "note": "Official ADR Centru / PR Centru notice dated 16 November 2026 advertises a TECHNICAL INFORMATION SESSION online on 23 November 2026 at 12:00 local Romania time, with guide/MySMIS Q&A and registration link. This is an information EVENT, not the project application opening date, not a call deadline and not proof that the call is OPEN. Paired exact action descriptor SRC-PR-CENTRU-DIGITAL-2 remains discovery only and requires current official call endpoint, full MySMIS identifier and semantic reconciliation. Direct official HTML readback may fail (403); original bytes, requested/final URL, fetched_at UTC, SHA-256, parser_version, run_id, immutable handoff and source health are NOT_CAPTURED. No OPEN_CALL, deadline, budget, eligibility, canonical mutation, publication or distribution from this event."
+    },
+    {
+      "id": "SRC-PRC-111-CDI-CONTRACT-SIGN-20261116",
+      "tier": "T1",
+      "class": "official_regional_managing_authority_contracting_administration_notice",
+      "owner": "ADR Centru / Autoritatea de Management Programul Regiunea Centru",
+      "url": "https://www.regiocentru.ro/a-fost-prelungit-termenul-de-semnare-a-contractelor-de-finantare-pentru-cererile-de-finantare-depuse-in-cadrul-programului-regiunea-centru-interventia-1-1-1-dezvoltarea-cap/",
+      "official_mirror_url": "https://www.adrcentru.ro/comunicare/a-fost-prelungit-termenul-de-semnare-a-contractelor-de-finantare-pentru-cererile-de-finantare-depuse-in-cadrul-programului-regiunea-centru-interventia-1-1-1-dezvoltarea-cap/",
+      "programmes": [
+        "Programul Regiunea Centru 2021-2027"
+      ],
+      "programme_family": "Programul Regiunea Centru 2021-2027",
+      "extract": [
+        "administrative_contract_signature_extension_discovery",
+        "original_notice_and_linked_instruction_discovery",
+        "application_deadline_non_extension_review"
+      ],
+      "material_fact_use": false,
+      "credentials_required": false,
+      "source_families": [
+        "ROMANIA",
+        "ADR",
+        "CONTRACTING_ADMINISTRATION",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_REGIONAL_MANAGING_AUTHORITY",
+      "authority_scope": "CONTRACT_SIGNING_EXTENSION_DISCOVERY_ONLY",
+      "observation_state": "CONTRACT_SIGNING_NOTICE_DISCOVERED_RAW_PENDING",
+      "event_date_discovery": "2026-11-16",
+      "action_identifier_discovery": "1.1.1 / Dezvoltarea capacitatilor publice de CDI",
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "adapter_required": "REGIOCENTRU_CONTRACT_SIGNING_NOTICE_RAW_RECONCILE_V1",
+      "note": "Official ADR Centru / PR Centru announcement dated 16 November 2026 refers to extension of the deadline for SIGNING FINANCING CONTRACTS for already submitted applications under Intervention 1.1.1. This is NOT an extension of the application submission deadline and does NOT reopen project intake or authorize OPEN_CALL. Exact administrative extension date and underlying instruction have NOT been independently read or admitted. Original official HTML/attachment bytes, requested/final URL, fetched_at UTC, SHA-256, parser_version, run_id and immutable handoff NOT_CAPTURED. Keep separate from any future exact MySMIS call status; no budget, eligibility, application deadline, canonical mutation, publication or distribution from this discovery."
     }
   ]
 }
