@@ -139,7 +139,9 @@ function isCurrentPrepareDossier(d){
 }
 
 function confirmedFact(d,label){
-  return (d?.quickFacts||[]).find(f=>String(f?.label||'').toLowerCase()===label&&String(f?.confidence||'').toUpperCase()==='CONFIRMED');
+  // A second Status/Termen claim invalidates currentness, even if identical.
+  const rows=(d?.quickFacts||[]).filter(f=>String(f?.label||'').toLowerCase()===label);
+  return rows.length===1&&String(rows[0]?.confidence||'').toUpperCase()==='CONFIRMED'?rows[0]:null;
 }
 
 // An OPEN deadline without a verified hour/offset is not an exact cutoff.
@@ -168,13 +170,25 @@ function closeTimestamp(d){
   return timestamps.every(ts=>ts!=null&&Number.isFinite(ts)&&ts===timestamps[0])?timestamps[0]:null;
 }
 
+function openingWindowOk(d){
+  const rows=(d?.quickFacts||[]).filter(f=>String(f?.label||'').toLowerCase()==='deschidere');
+  if(rows.length>1||(rows.length&&String(rows[0]?.confidence||'').toUpperCase()!=='CONFIRMED'))return false;
+  const values=[];
+  for(const key of ['openFrom','opensAt','openAt'])if(d?.[key]!=null&&d[key]!=='')values.push(d[key]);
+  if(rows.length)values.push(rows[0].value);
+  if(!values.length)return true;
+  if(values.some(v=>!hasExactDeadlineClock(v)))return false;
+  const starts=values.map(toTimestamp);
+  return starts.every(ts=>ts!=null&&Number.isFinite(ts)&&ts===starts[0]&&ts<=clock.getTime());
+}
+
 function currentOpenState(d){
   if(!d||String(d.status||'').toUpperCase()!=='OPEN')return null;
   if(!PUBLICATION_OPEN_STATES.has(String(d.publicationState||'').toUpperCase()))return 'REVIEW';
   const status=confirmedFact(d,'status');
   if(String(status?.value||'').trim().toUpperCase()!=='OPEN'||!confirmedFact(d,'termen'))return 'REVIEW';
   const closesAt=closeTimestamp(d);
-  if(closesAt==null)return 'REVIEW';
+  if(closesAt==null||!openingWindowOk(d))return 'REVIEW';
   // Passage of time alone is not authority to assert the official CLOSED state.
   return closesAt<=clock.getTime()?'REVIEW':'OPEN';
 }

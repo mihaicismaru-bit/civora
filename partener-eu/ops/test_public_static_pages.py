@@ -112,6 +112,26 @@ assert not module.current_open(invalid_deadline, semantic_clock)
 matching_deadline = json.loads(json.dumps(future_open))
 matching_deadline["deadline"] = "2026-11-20T23:59:00+02:00"
 assert module.current_open(matching_deadline, semantic_clock)
+# The opening must also have occurred; all source claims must agree.
+opening_probe = json.loads(json.dumps(future_open))
+opening_probe["quickFacts"].append({"label": "Deschidere", "value": "10 noiembrie 2026, ora 09:00", "confidence": "CONFIRMED"})
+opening_probe["opensAt"] = "2026-11-10T09:00:00+02:00"
+before_start = module.parse_date("2026-11-10T06:59:59Z")
+at_start = module.parse_date("2026-11-10T07:00:00Z")
+assert not module.current_open(opening_probe, before_start)
+assert module.fail_closed_render_dossier(opening_probe, before_start)["status"] == "REVIEW"
+assert module.current_open(opening_probe, at_start)
+for field, value in (("opensAt", "2026-11-10T10:00:00+02:00"), ("openFrom", "2026-11-10")):
+    contradictory = json.loads(json.dumps(opening_probe))
+    contradictory[field] = value
+    assert not module.current_open(contradictory, at_start)
+for label in ("Status", "Termen", "Deschidere"):
+    duplicated = json.loads(json.dumps(opening_probe))
+    duplicated["quickFacts"].append(dict(next(r for r in duplicated["quickFacts"] if r["label"] == label)))
+    assert not module.current_open(duplicated, at_start)
+unconfirmed_start = json.loads(json.dumps(opening_probe))
+unconfirmed_start["quickFacts"][-1]["confidence"] = "UNKNOWN"
+assert not module.current_open(unconfirmed_start, at_start)
 # Exact OPEN application windows need a stated hour and zone. A date-only
 # confirmed-looking Termen is historical context, not authorization to show
 # an actionable OPEN card. Consultations keep their separate lifecycle rules.

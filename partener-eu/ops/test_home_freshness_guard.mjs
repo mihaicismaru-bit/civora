@@ -132,6 +132,26 @@ for(const id of ['date-only','dmy-date-only','mixed-precision']){
 const preciseDmy=timedOpen('precise-dmy','16.11.2026 16:00:00');
 assert.deepEqual(Array.from(run(timedPayload([preciseDmy])).home.openDossierIds),['precise-dmy'],
   'exact Romanian official clock continues to authorize only within verified scope');
+// A future/conflicting opening cannot be outweighed by a valid closing time.
+const notStarted=timedOpen('not-started','2026-11-20T16:00:00+02:00');
+notStarted.quickFacts.push({label:'Deschidere',value:'10 noiembrie 2026, ora 09:00',confidence:'CONFIRMED'});
+notStarted.opensAt='2026-11-10T09:00:00+02:00';
+fakeNow=Date.parse('2026-11-10T06:59:59Z');
+const beforeWindow=run(timedPayload([notStarted]));
+assert.deepEqual(Array.from(beforeWindow.home.openDossierIds),[]);
+assert.equal(beforeWindow.freshnessGuard.dossierStatusOverrides['not-started'],'REVIEW');
+fakeNow=Date.parse('2026-11-10T07:00:00Z');
+assert.deepEqual(Array.from(run(timedPayload([notStarted])).home.openDossierIds),['not-started']);
+for(const [key,value] of [['opensAt','2026-11-10T10:00:00+02:00'],['openFrom','2026-11-10']]){
+  const d=structuredClone(notStarted);d[key]=value;
+  assert.deepEqual(Array.from(run(timedPayload([d])).home.openDossierIds),[],key);
+}
+for(const label of ['Status','Termen','Deschidere']){
+  const d=structuredClone(notStarted);d.quickFacts.push({...d.quickFacts.find(r=>r.label===label)});
+  assert.deepEqual(Array.from(run(timedPayload([d])).home.openDossierIds),[],label);
+}
+const unknownStart=structuredClone(notStarted);unknownStart.quickFacts.find(r=>r.label==='Deschidere').confidence='UNKNOWN';
+assert.deepEqual(Array.from(run(timedPayload([unknownStart])).home.openDossierIds),[]);
 // Compact-home and lazy decision-hub must never disagree on date-only OPEN.
 
 // Zoneless ISO datetimes are unsafe: Date.parse uses the browser's

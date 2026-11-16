@@ -240,6 +240,11 @@ def has_explicit_open_deadline_clock(value: Any) -> bool:
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
         return False
+    # Duplicate source claims cannot be reconciled by selecting the first row.
+    for label in ("status", "termen"):
+        rows = [r for r in dossier.get("quickFacts") or [] if fold(r.get("label")) == label]
+        if len(rows) != 1:
+            return False
     status = fact(dossier, "Status")
     deadline = fact(dossier, "Termen")
     if not status or str(status.get("confidence") or "").upper() != "CONFIRMED":
@@ -255,6 +260,26 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
         return False
     closes = parse_date(deadline.get("value"))
     if closes is None or closes <= clock:
+        return False
+    # Fail closed when the explicitly observed opening is future-dated,
+    # duplicated, imprecise, or conflicts with a second opening field.
+    opening_rows = [r for r in dossier.get("quickFacts") or [] if fold(r.get("label")) == "deschidere"]
+    if len(opening_rows) > 1:
+        return False
+    if opening_rows and str(opening_rows[0].get("confidence") or "").upper() != "CONFIRMED":
+        return False
+    opening_values = [dossier[k] for k in ("openFrom", "opensAt", "openAt") if dossier.get(k) not in (None, "")]
+    if opening_rows:
+        opening_values.append(opening_rows[0].get("value"))
+    parsed_openings = []
+    for value in opening_values:
+        if not has_explicit_open_deadline_clock(value):
+            return False
+        when = parse_date(value)
+        if when is None or when > clock:
+            return False
+        parsed_openings.append(when)
+    if parsed_openings and any(when != parsed_openings[0] for when in parsed_openings):
         return False
     # Reject mismatched or unparseable top-level cutoffs rather than silently
     # selecting the later one. The confirmed Termen remains the comparison
