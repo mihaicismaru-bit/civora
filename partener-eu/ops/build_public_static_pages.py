@@ -315,6 +315,60 @@ def guard_expired_dr12_stage_advice(
     return guarded if guarded is not None else dossier
 
 
+def quarantine_unresolved_afir_dr12_components(
+    dossier: dict[str, Any], clock: dt.datetime
+) -> dict[str, Any] | None:
+    """P0 #1402: a generic DR-12 card must not claim every component is OPEN.
+
+    The official AFIR 11 Nov notice closes 'alte sectoare' after exhaustion;
+    zootehnic is distinct. No component-level current identity + counter
+    reconciliation has been canonically admitted. This is display-only.
+    """
+    official_notice = dt.datetime(2026, 11, 11, 8, 48, tzinfo=RO_TZ)
+    if (
+        str(dossier.get("id") or "") != "afir-dr12-2026"
+        or dossier.get("publicationState") != "PUBLISHABLE"
+        or clock.astimezone(RO_TZ) < official_notice
+    ):
+        return None
+    rendered = copy.deepcopy(dossier)
+    rendered["status"] = "REVIEW"
+    rendered["statusLabel"] = STATUS_LABELS["REVIEW"]
+    rendered["standfirst"] = (
+        "DR-12 conține componente diferite. AFIR a anunțat epuizarea "
+        "fondurilor pentru «alte sectoare»; starea componentei zootehnice "
+        "necesită verificare separată în contorul oficial."
+    )
+    rendered["decision"] = "VERIFY"
+    rendered["decisionLabel"] = "VERIFICĂ PE COMPONENTE"
+    rendered["decisionAction"] = (
+        "Nu trata sesiunea DR-12 generic drept deschisă. Verifică exact "
+        "componenta, fondurile disponibile și identificatorul oficial actual."
+    )
+    rendered["renderFailClosedReason"] = "P0_AFIR_DR12_COMPONENT_CONFLATION_1402"
+    rendered["quickFacts"] = [
+        {"label": "Status", "value": "În verificare", "confidence": "FAIL_CLOSED"},
+        {"label": "Termen", "value": "Neconfirmat pe componentă", "confidence": "FAIL_CLOSED"},
+        {"label": "Grant", "value": "Neconfirmat pe componentă", "confidence": "FAIL_CLOSED"},
+        {"label": "Buget", "value": "Neconfirmat pe componentă", "confidence": "FAIL_CLOSED"},
+    ]
+    rendered["sections"] = [
+        {"title": "Rezumat executiv", "items": [rendered["standfirst"]]},
+        {"title": "Ce trebuie făcut acum", "items": [rendered["decisionAction"]]},
+    ]
+    rendered["audience"] = []
+    # Source links are not yet bound to an exact live component and cannot
+    # certify the generic OPEN claim. Original corpus and receipts remain intact.
+    rendered["sources"] = []
+    rendered["quality"] = {
+        **(rendered.get("quality") or {}),
+        "completeness": 0,
+        "dossierLevel": "REVIEW_REQUIRED",
+        "failClosed": True,
+    }
+    return rendered
+
+
 def quarantine_disputed_iti_monoparental_dossier(dossier: dict[str, Any]) -> dict[str, Any] | None:
     """Render-only P0 hold for a documented territorial/consultation conflation.
 
@@ -381,6 +435,9 @@ def fail_closed_render_dossier(
     deadline: the public static layer moves the lifecycle state to REVIEW and asks
     for a fresh authoritative observation.
     """
+    disputed_dr12 = quarantine_unresolved_afir_dr12_components(dossier, clock)
+    if disputed_dr12 is not None:
+        return disputed_dr12
     disputed_iti = quarantine_disputed_iti_monoparental_dossier(dossier)
     if disputed_iti is not None:
         return disputed_iti
@@ -864,7 +921,10 @@ def build(
         for row in publishable
         if row.get("id")
         and row.get("renderFailClosedReason")
-        == "P0_ITI_TERRITORY_CONSULTATION_CONFLICT_1403"
+        in {
+            "P0_ITI_TERRITORY_CONSULTATION_CONFLICT_1403",
+            "P0_AFIR_DR12_COMPONENT_CONFLATION_1402",
+        }
     }
     before_quarantine_news = len(news)
     news = [
