@@ -1430,7 +1430,7 @@ def main():
     bv1b6_note = (bv1b6.get("note") or "").lower()
     if not all(token in bv1b6_note for token in (
             "112,226,000", "112226101", "12:00 am", "16:00",
-            "ro fed", "sha-256", "no open_call", "no distribution")):
+            "rofed", "sha-256", "no open_call", "no distribution")):
         fail("BV1B6 conflicting official facts/raw-replay gate not documented")
 
     validate_thcs_2027_preannouncement(by_id, programme_domains)
