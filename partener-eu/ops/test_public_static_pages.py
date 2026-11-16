@@ -2,6 +2,7 @@
 """Regression contract for crawlable PARTENER.EU public information architecture."""
 from __future__ import annotations
 
+import datetime as dt
 import importlib.util
 import json
 import re
@@ -19,6 +20,47 @@ assert spec and spec.loader
 spec.loader.exec_module(module)
 
 payload = json.loads(PRODUCTS.read_text(encoding="utf-8"))
+
+
+# Projection and static renderer must agree on DST clock safety. A naive local
+# deadline during the Romania spring gap or autumn repeated hour cannot
+# authorize a current OPEN count even when its status is CONFIRMED.
+projection_path = ROOT / "partener-eu" / "ingest" / "sync_decision_products_projection.py"
+projection_spec = importlib.util.spec_from_file_location("sync_decision_products_projection", projection_path)
+assert projection_spec and projection_spec.loader
+projection = importlib.util.module_from_spec(projection_spec)
+projection_spec.loader.exec_module(projection)
+
+def projection_open_probe(deadline):
+    return {
+        "id": "dst-boundary-regression",
+        "status": "OPEN",
+        "publicationState": "PUBLISHABLE",
+        "quickFacts": [
+            {"label": "Status", "value": "OPEN", "confidence": "CONFIRMED"},
+            {"label": "Termen", "value": deadline, "confidence": "CONFIRMED"},
+        ],
+    }
+
+for ambiguous in ("25 octombrie 2026, ora 03:30", "29 martie 2026, ora 03:30"):
+    assert projection.has_exact_open_clock(ambiguous)
+    assert projection.parse_date(ambiguous) is None, ambiguous
+    assert module.parse_date(ambiguous) is None, ambiguous
+    assert projection.current_open(
+        projection_open_probe(ambiguous), dt.datetime(2026, 1, 1, tzinfo=dt.timezone.utc)
+    ) is False, ambiguous
+assert projection.parse_date("2026-11-06T12:00:00") is None  # zoneless ISO
+assert not projection.current_open(
+    projection_open_probe("2026-11-06T12:00:00"), dt.datetime(2026, 11, 1, tzinfo=dt.timezone.utc)
+)
+for valid, expected in (
+    ("6 noiembrie 2026, ora 12:00", dt.datetime(2026, 11, 6, 10, tzinfo=dt.timezone.utc)),
+    ("1 iulie 2026, ora 12:00", dt.datetime(2026, 7, 1, 9, tzinfo=dt.timezone.utc)),
+    ("2026-10-25T03:30:00+02:00", dt.datetime(2026, 10, 25, 1, 30, tzinfo=dt.timezone.utc)),
+):
+    assert projection.parse_date(valid) == expected, valid
+    assert projection.current_open(projection_open_probe(valid), expected - dt.timedelta(seconds=1))
+    assert not projection.current_open(projection_open_probe(valid), expected)
 
 # Confirmed call budget is a valid financing summary when grant size is unknown.
 budget_probe = {
