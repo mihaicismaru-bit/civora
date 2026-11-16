@@ -247,6 +247,21 @@ def main() -> int:
             assert dossier["executiveSummary"]["status"] == "REVIEW"
             assert fact(dossier, "Status")["value"] == "ÎN VERIFICARE"
             assert "depunere deschisă" in dossier["decisionAction"]
+            executive_items = by_title(dossier, "Rezumat executiv")["items"]
+            executive_text = "\n".join(executive_items)
+            assert executive_items[-1] == dossier["decisionAction"]
+            for prefix in (
+                "Stare apel: REVIEW", "Deschidere:", "Închidere:",
+                "Cine poate aplica:", "Activități finanțate:",
+                "Valoarea apelului:", "Valoarea proiectului individual:",
+                "Cofinanțare / contribuție proprie:",
+            ):
+                assert prefix in executive_text, prefix
+            assert "alocare istorică, nu fonduri disponibile acum" in executive_text
+            assert "termenul comunicat a expirat" in executive_text
+            assert "Stare apel: DESCHIS" not in executive_text
+            for name in ("Decizia rapidă", "Ce trebuie făcut acum"):
+                assert by_title(dossier, name)["items"] == [dossier["decisionAction"]]
         else:
             assert dossier["status"] == "OPEN"
             assert dossier["publicationState"] == "PUBLISHABLE"
