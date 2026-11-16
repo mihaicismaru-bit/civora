@@ -8,7 +8,9 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 // P0 #1403: read-only quarantine applies to dynamic search, dossiers,
 // homepage and news too. Preserve canonical P for review/replay.
-const p0Held=d=>String(d?.id||'').startsWith('mipe-1b5d21384b66b4b559')||(norm(d?.title).replace(/[^a-z0-9]+/g,' ').includes('sprijin pentru familii monoparentale')&&norm(d?.title).replace(/[^a-z0-9]+/g,' ').includes('tara fagarasului'));
+// #1402: generic DR-12 mixes an exhausted and a separately evaluated component.
+// Hold only the generic identity; independently sourced component dossiers survive.
+const p0Held=d=>String(d?.id||'')==='afir-dr12-2026'||String(d?.id||'').startsWith('mipe-1b5d21384b66b4b559')||(norm(d?.title).replace(/[^a-z0-9]+/g,' ').includes('sprijin pentru familii monoparentale')&&norm(d?.title).replace(/[^a-z0-9]+/g,' ').includes('tara fagarasului'));
 const visibleDossiers=P.dossiers.filter(d=>!p0Held(d));
 const heldIds=new Set(P.dossiers.filter(p0Held).map(d=>String(d.id||'')));
 const visibleNews=P.news.filter(n=>!heldIds.has(String(n.dossierId||'')));
