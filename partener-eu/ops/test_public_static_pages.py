@@ -511,3 +511,53 @@ with tempfile.TemporaryDirectory() as td:
     )
 
 print("PASS public static IA / sitemap / dossier regression")
+
+
+# P0 #1403: mixed ITI guide / consultation close is never safe to render
+# as CLOSED, even if the canonical candidate has PUBLISHABLE.
+iti_bad = {
+    "id": "mipe-1b5d21384b66b4b559",
+    "title": "Sprijin pentru familii monoparentale — ITI Țara Făgărașului",
+    "programme": "PIDS",
+    "publicationState": "PUBLISHABLE",
+    "status": "CLOSED",
+    "statusLabel": "ÎNCHIS",
+    "standfirst": "Nu mai investi resurse de depunere.",
+    "decisionAction": "Nu mai investi resurse de depunere.",
+    "decisionLabel": "OPREȘTE",
+    "quickFacts": [
+        {"label": "Status", "value": "CLOSED", "confidence": "CONFIRMED"},
+        {"label": "Termen", "value": "31 august 2026", "confidence": "CONFIRMED"},
+        {"label": "Buget", "value": "534.932,94 euro", "confidence": "CONFIRMED"},
+    ],
+    "sections": [
+        {"title": "Cine poate aplica", "items": ["Consiliile județene ITI Moții Țara de Piatră"]},
+        {"title": "Activități finanțate", "items": [
+            "Consultare publică: comentarii până la 31.08.2026. Sfarsitul primului paragraf"
+        ]},
+        {"title": "Decizia rapidă", "items": ["Nu mai investi resurse de depunere."]},
+    ],
+    "quality": {"completeness": 86, "dossierLevel": "PUBLISHABLE"},
+}
+iti_original = json.dumps(iti_bad, ensure_ascii=False, sort_keys=True)
+iti_clock = module.parse_date("2026-11-16T05:21:00Z")
+assert iti_clock is not None
+iti_review = module.fail_closed_render_dossier(iti_bad, iti_clock)
+assert iti_review["status"] == "REVIEW"
+assert iti_review["renderFailClosedReason"] == "P0_ITI_TERRITORY_CONSULTATION_CONFLICT_1403"
+assert iti_review["decision"] == "VERIFY"
+assert iti_review["quality"]["completeness"] == 0
+assert iti_review["quickFacts"][1]["value"] == "Neconfirmat"
+assert json.dumps(iti_bad, ensure_ascii=False, sort_keys=True) == iti_original
+iti_html = module.card(iti_review, {iti_bad["id"]: "poids-fagarasului"})
+assert "ÎN VERIFICARE" in iti_html
+assert "534.932,94" not in iti_html
+assert "31 august 2026" not in iti_html
+assert "Nu mai investi" not in iti_html
+assert "Moții" not in json.dumps(iti_review["sections"], ensure_ascii=False)
+assert "Sfarsitul" not in json.dumps(iti_review["sections"], ensure_ascii=False)
+# Unrelated calls and unapproved / provisional candidates are left unchanged.
+other_iti = dict(iti_bad, id="mipe-distinct-iti-motii")
+assert module.fail_closed_render_dossier(other_iti, iti_clock) is other_iti
+not_publishable_iti = dict(iti_bad, publicationState="REVIEW_REQUIRED")
+assert module.quarantine_disputed_iti_monoparental_dossier(not_publishable_iti) is None

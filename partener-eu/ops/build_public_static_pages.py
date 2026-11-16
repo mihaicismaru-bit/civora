@@ -315,6 +315,53 @@ def guard_expired_dr12_stage_advice(
     return guarded if guarded is not None else dossier
 
 
+def quarantine_disputed_iti_monoparental_dossier(dossier: dict[str, Any]) -> dict[str, Any] | None:
+    """Render-only P0 hold for a documented territorial/consultation conflation.
+
+    Issue #1403 records a Făgărașului dossier whose CLOSED claim traces to
+    an earlier consultation window and whose eligibility mixes Moții facts.
+    This deliberately does not authorize an OPEN state or change canonical
+    data. Remove the hold only after reviewed, exact-call MySMIS/guide replay.
+    """
+    if (
+        not str(dossier.get("id") or "").startswith("mipe-1b5d21384b66b4b559")
+        or dossier.get("publicationState") != "PUBLISHABLE"
+    ):
+        return None
+    rendered = copy.deepcopy(dossier)
+    rendered["status"] = "REVIEW"
+    rendered["statusLabel"] = STATUS_LABELS["REVIEW"]
+    rendered["standfirst"] = (
+        "Starea depunerii și eligibilitatea necesită reconcilierea "
+        "distinctă a apelului ITI Țara Făgărașului cu ghidul final și MySMIS."
+    )
+    rendered["decision"] = "VERIFY"
+    rendered["decisionLabel"] = "VERIFICĂ STAREA"
+    rendered["decisionAction"] = (
+        "Nu deduce închiderea din termenul consultării și nu utiliza condiții "
+        "ale apelului ITI Moții. Verifică identificatorul și sursele oficiale."
+    )
+    rendered["renderFailClosedReason"] = "P0_ITI_TERRITORY_CONSULTATION_CONFLICT_1403"
+    rendered["quickFacts"] = [
+        {"label": "Status", "value": "În verificare", "confidence": "FAIL_CLOSED"},
+        {"label": "Termen", "value": "Neconfirmat", "confidence": "FAIL_CLOSED"},
+        {"label": "Grant", "value": "Neconfirmat", "confidence": "FAIL_CLOSED"},
+        {"label": "Buget", "value": "Neconfirmat", "confidence": "FAIL_CLOSED"},
+    ]
+    rendered["sections"] = [
+        {"title": "Rezumat executiv", "items": [rendered["standfirst"]]},
+        {"title": "Ce trebuie făcut acum", "items": [rendered["decisionAction"]]},
+    ]
+    rendered["audience"] = []
+    rendered["quality"] = {
+        **(rendered.get("quality") or {}),
+        "completeness": 0,
+        "dossierLevel": "REVIEW_REQUIRED",
+        "failClosed": True,
+    }
+    return rendered
+
+
 def fail_closed_render_dossier(
     dossier: dict[str, Any], clock: dt.datetime
 ) -> dict[str, Any]:
@@ -324,6 +371,9 @@ def fail_closed_render_dossier(
     deadline: the public static layer moves the lifecycle state to REVIEW and asks
     for a fresh authoritative observation.
     """
+    disputed_iti = quarantine_disputed_iti_monoparental_dossier(dossier)
+    if disputed_iti is not None:
+        return disputed_iti
     open_refresh = requires_open_refresh(dossier, clock)
     consultation_refresh = requires_consultation_refresh(dossier, clock)
     if not open_refresh and not consultation_refresh:
