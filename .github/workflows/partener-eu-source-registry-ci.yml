@@ -49,6 +49,7 @@ on:
       - 'partener-eu/ops/p10_validate.py'
       - 'partener-eu/ops/test_p10_policy_regression.py'
       - 'partener-eu/ops/test_source_registry_low_info.py'
+      - 'partener-eu/ops/test_source_registry_403_cooldown.py'
       - 'partener-eu/ops/test_edrive_consultation_discovery.py'
       - 'partener-eu/validation/discovery/edrive-guides-consultation-20261109.json'
       - 'partener-eu/ops/test_source_registry_current_hosts.py'
@@ -168,6 +169,9 @@ jobs:
 
       - name: Validate low-information fail-closed behavior
         run: python partener-eu/ops/test_source_registry_low_info.py
+
+      - name: Verify 403 cooldown is bounded, non-authorizing and LKG-safe
+        run: python partener-eu/ops/test_source_registry_403_cooldown.py
 
       - name: Validate dated AFIR communications incident is non-authorizing
         run: python partener-eu/ops/test_afir_email_advisory.py
