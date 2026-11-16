@@ -155,11 +155,64 @@ def test_projection_clock_and_bucharest_dst() -> None:
         ],
     }
     assert projection.current_open(official, datetime(2026, 11, 7, 20, tzinfo=timezone.utc))
-    assert projection.current_open(official, datetime(2026, 11, 16, 14, tzinfo=timezone.utc))
+    assert not projection.current_open(official, datetime(2026, 11, 16, 14, tzinfo=timezone.utc))
     assert not projection.current_open(official, datetime(2026, 11, 16, 14, 0, 1, tzinfo=timezone.utc))
     assert not projection.current_open({**official, "publicationState": "REVIEW_REQUIRED"}, datetime(
         2026, 11, 7, 20, tzinfo=timezone.utc
     ))
+    # Projection-level safety must be as strict as static and JavaScript
+    # readback. Synthetic adversarial inputs are not AFIR funding facts.
+    import copy
+
+    before = datetime(2026, 11, 16, 13, 59, tzinfo=timezone.utc)
+    def held(candidate: dict) -> None:
+        assert not projection.current_open(candidate, before)
+
+    assert projection.has_exact_open_clock("16 noiembrie 2026, 16:00")
+    assert not projection.has_exact_open_clock("16 noiembrie 2026")
+    assert not projection.has_exact_open_clock("2026-11-16T16:00:00")
+    assert projection.has_exact_open_clock("2026-11-16T16:00:00+02:00")
+
+    other = copy.deepcopy(official)
+    other["quickFacts"][0]["value"] = "ÎNCHIS"
+    held(other)
+    other = copy.deepcopy(official)
+    other["quickFacts"].append(dict(other["quickFacts"][0]))
+    held(other)
+    other = copy.deepcopy(official)
+    other["quickFacts"][1]["value"] = "16 noiembrie 2026"
+    held(other)
+    other = copy.deepcopy(official)
+    other["quickFacts"][1]["value"] = "2026-11-16T16:00:00"
+    held(other)
+    other = copy.deepcopy(official)
+    other["quickFacts"].append(dict(other["quickFacts"][1]))
+    held(other)
+    other = copy.deepcopy(official)
+    other["deadline"] = "2026-11-16"
+    held(other)
+    other = copy.deepcopy(official)
+    other["closesAt"] = "2026-11-17T16:00:00+02:00"
+    held(other)
+    other = copy.deepcopy(official)
+    other["deadline"] = "2026-11-16T16:00:00+02:00"
+    assert projection.current_open(other, before)
+    other = copy.deepcopy(official)
+    other["opensAt"] = "2026-11-17T09:00:00+02:00"
+    held(other)
+    other = copy.deepcopy(official)
+    other["quickFacts"].append({
+        "label": "Deschidere", "value": "17 noiembrie 2026, 09:00",
+        "confidence": "CONFIRMED",
+    })
+    held(other)
+    other = copy.deepcopy(official)
+    other["quickFacts"].extend([
+        {"label": "Deschidere", "value": "15 noiembrie 2026, 09:00", "confidence": "CONFIRMED"},
+        {"label": "Deschidere", "value": "16 noiembrie 2026, 09:00", "confidence": "CONFIRMED"},
+    ])
+    held(other)
+
     # Static lock on the critical clock boundary: source-generatedAt is a
     # version marker only; source timestamps may be stale or future-dated.
     source = module_path.read_text(encoding="utf-8")
