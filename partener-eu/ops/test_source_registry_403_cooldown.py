@@ -122,6 +122,8 @@ with tempfile.TemporaryDirectory() as folder:
     assert recovered_row["quarantined"] is False
     assert recovered_row.get("cooldown_runs_remaining") is None
     assert recovered_row.get("probe_evidence_state") is None
-    assert recovered_row["publish_material_fact_update"] is None
+    assert recovered_row["publish_material_fact_update"] is False
+    assert recovered_row["resolution_task_required"] is True
+    assert (probe.TASK_DIR / (source["id"] + ".json")).exists()
 
 print("PASS ADR Centru bounded 403 retry, FAIL-stale LKG, authority revocation")
