@@ -64,6 +64,9 @@ assert 'Am înțeles întrebarea astfel:' in js
 assert 'Beneficiar:' in js and 'Investiție:' in js and 'Zonă:' in js
 # only dossiers that pass the publication gate are ranked as answers
 assert 'P.dossiers.filter(publishable).map(d=>rank(d,ts,interpretation))' in js
+# P0 #1402: never offer the generic DR-12 parent as an actionable answer.
+# Independently reconciled component IDs are not categorically excluded.
+assert "String(d?.id||'')!=='afir-dr12-2026'" in js
 assert 'eligibilitatea din datele verificate' in js
 assert 'activitățile din datele verificate' in js
 assert 'quality?.completeness' in js
