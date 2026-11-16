@@ -1433,6 +1433,46 @@ def main():
             "rofed", "sha-256", "no open_call", "no distribution")):
         fail("BV1B6 conflicting official facts/raw-replay gate not documented")
 
+
+    # The 16 Nov official BV23B launch is a distinct identifier and exact page.
+    # The preceding consultation page says BV23A in body but BV23B in title
+    # and attachment: no silent BV23A/B merge, OPEN_CALL or factual promotion.
+    bv23b_id = "SRC-MAI-IMFV-BV23B-LAUNCH-20261116"
+    bv23b = by_id.get(bv23b_id)
+    if not bv23b:
+        fail("missing official IMFV BV23B exact-launch discovery")
+    bv23b_expected = {
+        "tier": "T1",
+        "url": "https://fed.mai.gov.ro/11749/bv23b-dezvoltarea-cooperarii-consulare-si-a-programelor-de-formare-lansare-apel-de-proiecte/",
+        "call_identifier_discovery": "BV23B",
+        "authority_class": "T1_MANAGING_AUTHORITY_AFACERI_INTERNE",
+        "authority_scope": "EXACT_CALL_LAUNCH_DISCOVERY_ONLY",
+        "observation_state": "LAUNCH_ANNOUNCEMENT_DISCOVERED_RAW_PENDING",
+        "adapter_required": "MAI_IMFV_EXACT_CALL_ROFED_RAW_RECONCILE_V1",
+        "material_fact_use": False,
+        "open_call_authorized": False,
+        "material_fact_publication_authorized": False,
+    }
+    if any(bv23b.get(k) != v for k, v in bv23b_expected.items()):
+        fail("BV23B exact launch identity, source authority or negative gate changed")
+    if not {"ROMANIA", "MAI", "IMFV", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+            set(bv23b.get("source_families") or [])):
+        fail("BV23B source taxonomy missing")
+    if {
+        "status", "call_status", "deadline", "budget", "budget_ron",
+        "eligibility", "open_at", "close_at", "fetched_at", "raw_sha256",
+        "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+        "submission_endpoint",
+    }.intersection(bv23b):
+        fail("BV23B discovery fabricated material fact, exact endpoint or raw receipt")
+    bv23b_note = (bv23b.get("note") or "").lower()
+    if not all(token in bv23b_note for token in (
+            "bv23a", "bv23b", "consultation", "450,000", "16:00",
+            "rofed", "sha-256", "no open_call", "no distribution")):
+        fail("BV23B distinct identity, official body/SUMAR or raw-evidence gate missing")
+    if bv1b6.get("url") == bv23b.get("url") or bv1b6.get("call_identifier_discovery") == bv23b.get("call_identifier_discovery"):
+        fail("BV1B6 and BV23B must remain distinct exact official calls")
+
     validate_thcs_2027_preannouncement(by_id, programme_domains)
     validate_impact_lot3_pair(by_id)
     validate_water4all_2026_pair(by_id)
