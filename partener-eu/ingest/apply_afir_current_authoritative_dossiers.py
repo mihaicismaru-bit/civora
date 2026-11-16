@@ -862,7 +862,27 @@ def main() -> int:
                 if row.get("label") == "Status":
                     row.update(value="ÎN VERIFICARE", confidence="SYSTEM_GATED")
             for section_row in dossier.get("sections") or []:
-                if section_row.get("title") in {"Rezumat executiv", "Decizia rapidă", "Ce trebuie făcut acum"}:
+                title = section_row.get("title")
+                if title == "Rezumat executiv":
+                    # An expired official window is not a new CLOSED finding.
+                    # Preserve the mandatory historical fact labels and source
+                    # context; replace only misleading OPEN/current claims.
+                    replacements = {
+                        "Stare apel:": "Stare apel: REVIEW — termen depășit, statut curent neconfirmat.",
+                        "Deschidere:": "Deschidere: 1 septembrie 2026, ora 09:00 (istoric).",
+                        "Închidere:": "Închidere: 16 noiembrie 2026, ora 16:00 (termenul comunicat a expirat; nu dovedește statut CLOSED actual).",
+                    }
+                    gated = []
+                    for item in section_row.get("items") or []:
+                        prefix = next((key for key in replacements if item.startswith(key)), None)
+                        if prefix:
+                            gated.append(replacements[prefix])
+                        elif item.startswith("Valoarea apelului:"):
+                            gated.append(item.rstrip(".") + " (alocare istorică, nu fonduri disponibile acum).")
+                        else:
+                            gated.append(item)
+                    section_row["items"] = gated + [dossier["decisionAction"]]
+                elif title in {"Decizia rapidă", "Ce trebuie făcut acum"}:
                     section_row["items"] = [dossier["decisionAction"]]
 
     # AFIR 11 Nov officially announced exhaustion of DR-12 "alte sectoare",
