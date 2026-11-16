@@ -305,6 +305,24 @@ assert module.current_open(ro_cutoff, module.parse_date("2026-11-06T10:00:01Z"))
 assert module.fail_closed_render_dossier(
     ro_cutoff, module.parse_date("2026-11-06T10:00:01Z")
 )["status"] == "REVIEW"
+# P0 ADR-CENTRU 1.2.2 / PRC/1056: an already-expired exact call must
+# never inherit OPEN from the source artifact's historical generatedAt.
+# The first assertion deliberately demonstrates the historical-clock trap;
+# the last assertions are render-only guards, not an inferred CLOSED status.
+cluster_122 = timed_open_probe("2026-11-06T12:00:00+02:00")
+cluster_122["id"] = "pr-centru-clusters-122-clustere-inovative"
+cluster_122["title"] = "Clustere inovative"
+cluster_source_version = module.parse_date("2026-11-03T20:33:50Z")
+cluster_live_observation = module.parse_date("2026-11-16T16:42:00Z")
+assert cluster_source_version and cluster_live_observation
+assert module.current_open(cluster_122, cluster_source_version)
+assert not module.current_open(cluster_122, cluster_live_observation)
+cluster_review = module.fail_closed_render_dossier(cluster_122, cluster_live_observation)
+assert cluster_review["status"] == "REVIEW"
+assert cluster_review["status"] != "CLOSED"
+assert module.fact(cluster_review, "Status")["confidence"] == "FAIL_CLOSED"
+assert cluster_122["status"] == "OPEN"  # immutable source observation
+
 # The same clock rule must hold for consultation surfaces, not just OPEN calls.
 ro_consultation = consultation_probe("6 noiembrie 2026, ora 12:00")
 assert module.current_consultation(
