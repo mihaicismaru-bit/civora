@@ -45,15 +45,83 @@ def parse_date(value: Any) -> dt.datetime | None:
     return dt.datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Europe/Bucharest")).astimezone(dt.timezone.utc)
 
 
+def has_exact_open_clock(value: Any) -> bool:
+    """Only an explicitly timed and timezone-grounded deadline can admit OPEN.
+
+    ISO timestamps need a real offset; a Romanian calendar date needs an
+    explicit local hour. A date-only or zoneless competing claim is review,
+    never invented end-of-day evidence. Mirrors the public renderer gate.
+    """
+    raw = str(value or "").strip()
+    if re.fullmatch(
+        r"20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:\d{2})",
+        raw, flags=re.I,
+    ):
+        return True
+    normalized = fold(raw)
+    months = (
+        r"ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|"
+        r"septembrie|octombrie|noiembrie|decembrie"
+    )
+    match = re.search(r"\b\d{1,2}\s+(?:" + months + r")\s+20\d{2}\b(.*)", normalized)
+    return bool(match and re.match(
+        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?\d{1,2}[:.]\d{2}(?::\d{2})?\b",
+        match.group(1),
+    ))
+
+
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
+    """Fail closed at the derived-home projection, not merely at render time."""
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
         return False
-    status = fact(dossier, "Status")
-    deadline = fact(dossier, "Termen")
-    if not status or status.get("confidence") != "CONFIRMED" or not deadline or deadline.get("confidence") != "CONFIRMED":
+    rows = dossier.get("quickFacts") or []
+    status_rows = [r for r in rows if fold(r.get("label")) == "status"]
+    deadline_rows = [r for r in rows if fold(r.get("label")) == "termen"]
+    if len(status_rows) != 1 or len(deadline_rows) != 1:
+        return False
+    status, deadline = status_rows[0], deadline_rows[0]
+    if str(status.get("confidence") or "").upper() != "CONFIRMED":
+        return False
+    if fold(status.get("value")) not in {"open", "deschis"}:
+        return False
+    if str(deadline.get("confidence") or "").upper() != "CONFIRMED":
+        return False
+    if not has_exact_open_clock(deadline.get("value")):
         return False
     closes = parse_date(deadline.get("value"))
-    return closes is not None and closes >= clock
+    if closes is None or closes <= clock:
+        return False
+
+    # A future opening or contradictory observed opening is never OPEN.
+    opening_rows = [r for r in rows if fold(r.get("label")) == "deschidere"]
+    if len(opening_rows) > 1:
+        return False
+    if opening_rows and str(opening_rows[0].get("confidence") or "").upper() != "CONFIRMED":
+        return False
+    openings = [
+        dossier[k] for k in ("openFrom", "opensAt", "openAt")
+        if dossier.get(k) not in (None, "")
+    ]
+    if opening_rows:
+        openings.append(opening_rows[0].get("value"))
+    observed_openings = []
+    for value in openings:
+        if not has_exact_open_clock(value):
+            return False
+        parsed = parse_date(value)
+        if parsed is None or parsed > clock:
+            return False
+        observed_openings.append(parsed)
+    if observed_openings and any(x != observed_openings[0] for x in observed_openings):
+        return False
+
+    # Do not select a favorable cutoff from contradictory source projections.
+    for key in ("deadline", "closesAt", "closeAt"):
+        if dossier.get(key) not in (None, ""):
+            value = dossier[key]
+            if not has_exact_open_clock(value) or parse_date(value) != closes:
+                return False
+    return True
 
 
 def refresh_quality_pass(payload: dict[str, Any], dossiers: list[dict[str, Any]]) -> None:
