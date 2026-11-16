@@ -40,6 +40,7 @@ def adr_centre_discovery_403_guard(src: dict, old: dict) -> bool:
         and old.get("url") == ADR_CENTRU_DISCOVERY_URL
         and src.get("authority_scope") == "CALL_INDEX_DISCOVERY"
         and src.get("material_fact_use") is False
+        and not src.get("canonical_aliases")  # approved new transport must be tried
         and old.get("health") == "FAIL"
         and failures >= 100
         and "HTTP Error 403: Forbidden" in str(old.get("error") or "")
