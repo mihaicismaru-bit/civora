@@ -468,6 +468,50 @@ def main():
     if "CONSULTATION" not in families_151 or "PROGRAMMING_PIPELINE" in families_151:
         fail("1.5.1 draft-guide consultation must be classified separately from future-programme pipeline")
 
+    # Official 13-Nov ITI notice is a dated schedule witness only. The
+    # 16-Nov noon boundary has passed, but source discovery does not prove
+    # MySMIS is currently accepting either territorially distinct call.
+    intake_notice = by_id.get("SRC-PRC-143-ITI-INTAKE-SCHEDULE-WITNESS-20261113")
+    if not intake_notice:
+        fail("missing official 13-Nov two-ITI intake schedule witness")
+    if (intake_notice.get("url") !=
+            "https://www.regiocentru.ro/sesiune-de-informare-pentru-lansarea-apelurilor-de-proiecte-pentru-dezvoltarea-imm-urilor-i-din-cele-2-iti-de-pe-raza-regiunii-centru/"
+            or intake_notice.get("event_date_discovery") != "2026-11-13"
+            or intake_notice.get("paired_official_source_id") !=
+            "SRC-PR-CENTRU-ITI-143-TWO-CALLS-2026"):
+        fail("two-ITI dated official notice identity/pairing drift")
+    if intake_notice.get("mysmis_identifiers_discovery_hint") != {
+        "ITI Microregiunea Tara Fagarasului": "PRC/1057/PRC_P1/OP1",
+        "ITI Motii, Tara de Piatra": "PRC/1232/PRC_P1/OP1",
+    }:
+        fail("two different ITI MySMIS call identities were conflated")
+    if (intake_notice.get("tier") != "T1"
+            or intake_notice.get("authority_scope") !=
+            "INTAKE_SCHEDULE_NOTICE_DISCOVERY_ONLY"
+            or intake_notice.get("observation_state") !=
+            "SCHEDULED_INTAKE_DISCOVERED_RAW_PENDING"
+            or intake_notice.get("adapter_required") !=
+            "REGIOCENTRU_TWO_TERRITORIAL_CALLS_MYSMIS_RECONCILE_V1"):
+        fail("two-ITI schedule witness bypassed original/MySMIS reconciliation")
+    if not {"ROMANIA", "ADR", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+            set(intake_notice.get("source_families") or [])):
+        fail("two-ITI notice lost provenance/programme classification")
+    if any(intake_notice.get(field) is not False for field in (
+            "material_fact_use", "open_call_authorized",
+            "material_fact_publication_authorized")):
+        fail("elapsed ITI intake schedule was promoted to material OPEN_CALL")
+    if any(field in intake_notice for field in (
+            "status", "call_status", "deadline", "open_at", "close_at",
+            "budget", "eligibility", "fetched_at", "raw_sha256",
+            "semantic_sha256", "parser_version", "run_id", "handoff_sha256",
+            "submission_endpoint")):
+        fail("two-ITI notice fabricated material fact or raw receipt")
+    note = (intake_notice.get("note") or "").upper()
+    if not all(term in note for term in (
+            "16 NOVEMBER 2026", "12:00", "HTTP 403", "NOT_CAPTURED",
+            "NO OPEN_CALL", "MYSMIS", "CORRIGENDUM 2")):
+        fail("two-ITI witness lost dated schedule and review-only conditions")
+
     # EIT HEI 2026: official programme call operator + Romanian NCP information.
     # The NCP is NOT a national funder; web readback is NOT immutable source
     # acquisition. Exact 2026 call, application route and current call-text
