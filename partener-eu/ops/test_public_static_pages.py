@@ -538,6 +538,9 @@ iti_bad = {
         {"title": "Decizia rapidă", "items": ["Nu mai investi resurse de depunere."]},
     ],
     "quality": {"completeness": 86, "dossierLevel": "PUBLISHABLE"},
+    "sources": [
+        {"url": "https://example.org/iti-motii-guide", "tier": "T1", "label": "ITI Moții"}
+    ],
 }
 iti_original = json.dumps(iti_bad, ensure_ascii=False, sort_keys=True)
 iti_clock = module.parse_date("2026-11-16T05:21:00Z")
@@ -547,6 +550,7 @@ assert iti_review["status"] == "REVIEW"
 assert iti_review["renderFailClosedReason"] == "P0_ITI_TERRITORY_CONSULTATION_CONFLICT_1403"
 assert iti_review["decision"] == "VERIFY"
 assert iti_review["quality"]["completeness"] == 0
+assert iti_review["sources"] == [], "mixed-territory source links cannot appear as verified"
 assert iti_review["quickFacts"][1]["value"] == "Neconfirmat"
 assert json.dumps(iti_bad, ensure_ascii=False, sort_keys=True) == iti_original
 iti_html = module.card(iti_review, {iti_bad["id"]: "poids-fagarasului"})
@@ -564,3 +568,43 @@ assert module.quarantine_disputed_iti_monoparental_dossier(not_publishable_iti) 
 # Title-bound matching covers a regenerated MIPE ID without misclassifying Moții.
 regenerated_iti = dict(iti_bad, id="mipe-updated-fagarasului")
 assert module.fail_closed_render_dossier(regenerated_iti, iti_clock)["status"] == "REVIEW"
+
+# Material changes referencing a P0-held dossier must not bypass that hold
+# through homepage news or /schimbari/. Unrelated events remain visible.
+with tempfile.TemporaryDirectory() as td:
+    tmp = Path(td)
+    marker = "P0-MIXED-ITI-UNVERIFIED-CLOSED"
+    safe_marker = "UNRELATED-VERIFIED-UPDATE"
+    fake_input = {
+        "generatedAt": "2026-11-16T04:00:00Z",
+        "dossiers": [iti_bad],
+        "news": [
+            {
+                "id": "unsafe-iti-change", "date": "2026-11-15T12:00:00Z",
+                "dossierId": iti_bad["id"], "kind": "STATUS_CHANGE",
+                "headline": marker, "meaning": "Closed after consultation",
+                "utilityScore": 98,
+            },
+            {
+                "id": "safe-other-change", "date": "2026-11-15T12:00:00Z",
+                "dossierId": "other-independent-dossier", "kind": "UPDATE",
+                "headline": safe_marker, "meaning": "Independent update",
+                "utilityScore": 80,
+            },
+        ],
+    }
+    path = tmp / "decision_products.json"
+    path.write_text(json.dumps(fake_input, ensure_ascii=False), encoding="utf-8")
+    out = tmp / "web"
+    report = module.build(path, out, evaluated_at=iti_clock)
+    changes = (out / "schimbari/index.html").read_text(encoding="utf-8")
+    home = (out / "home-public-data.js").read_text(encoding="utf-8")
+    detail = (out / "dosare" / module.slugify(iti_bad["id"]) / "index.html").read_text(encoding="utf-8")
+    assert marker not in changes and marker not in home
+    assert safe_marker in changes and safe_marker in home
+    assert "iti-motii-guide" not in detail
+    assert report["quarantinedP0News"] == 1
+    assert report["homeSnapshotNews"] == 1
+    assert report["policy"]["disputedTerritoryNewsQuarantined"] is True
+    assert fake_input["news"][0]["headline"] == marker, "input remains immutable"
+print("PASS P0 ITI source and news quarantine")

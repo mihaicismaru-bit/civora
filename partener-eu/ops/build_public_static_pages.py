@@ -359,6 +359,10 @@ def quarantine_disputed_iti_monoparental_dossier(dossier: dict[str, Any]) -> dic
         {"title": "Ce trebuie făcut acum", "items": [rendered["decisionAction"]]},
     ]
     rendered["audience"] = []
+    # Existing source links are unreviewed cross-ITI attachments; even a T1
+    # label cannot certify that a Moții guide belongs to Făgărașului.
+    # The immutable canonical evidence remains in the source dossier.
+    rendered["sources"] = []
     rendered["quality"] = {
         **(rendered.get("quality") or {}),
         "completeness": 0,
@@ -852,6 +856,22 @@ def build(
     publishable_by_id = {
         str(row.get("id") or ""): row for row in publishable
     }
+    # P0 #1403: a disputed CLOSED/eligibility claim cannot be redistributed
+    # as a material change while the associated dossier is quarantined.
+    # Only explicitly linked events are held; unrelated events are untouched.
+    quarantined_p0_ids = {
+        str(row.get("id"))
+        for row in publishable
+        if row.get("id")
+        and row.get("renderFailClosedReason")
+        == "P0_ITI_TERRITORY_CONSULTATION_CONFLICT_1403"
+    }
+    before_quarantine_news = len(news)
+    news = [
+        row for row in news
+        if str(row.get("dossierId") or "") not in quarantined_p0_ids
+    ]
+    quarantined_p0_news_count = before_quarantine_news - len(news)
     snapshot_rows: list[dict[str, Any]] = []
     snapshot_seen: set[str] = set()
     for row in [*open_rows[:6], *prepare_rows[:4], *consultation_rows[:4]]:
@@ -1287,12 +1307,14 @@ def build(
         "homeSnapshotBytes": home_snapshot_bytes,
         "homeSnapshotDossiers": len(snapshot_rows),
         "homeSnapshotNews": len(home_payload["news"]),
+        "quarantinedP0News": quarantined_p0_news_count,
         "policy": {
             "materialFactsInvented": False,
             "provisionalFailClosedIndexed": False,
             "queryPagesInSitemap": False,
             "openRequiresConfirmedCurrentDeadline": True,
             "expiredOrUnverifiedOpenRenderedAsReview": True,
+            "disputedTerritoryNewsQuarantined": True,
         },
     }
     write_page(
