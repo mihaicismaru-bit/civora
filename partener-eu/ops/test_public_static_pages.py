@@ -112,6 +112,22 @@ assert not module.current_open(invalid_deadline, semantic_clock)
 matching_deadline = json.loads(json.dumps(future_open))
 matching_deadline["deadline"] = "2026-11-20T23:59:00+02:00"
 assert module.current_open(matching_deadline, semantic_clock)
+# Exact OPEN application windows need a stated hour and zone. A date-only
+# confirmed-looking Termen is historical context, not authorization to show
+# an actionable OPEN card. Consultations keep their separate lifecycle rules.
+for imprecise in ("2026-11-20", "20 noiembrie 2026", "20.11.2026",
+                  "2026-11-20T23:59:00"):
+    imprecise_open = json.loads(json.dumps(future_open))
+    for row in imprecise_open["quickFacts"]:
+        if row["label"] == "Termen":
+            row["value"] = imprecise
+    assert module.current_open(imprecise_open, semantic_clock) is False, imprecise
+    assert module.fail_closed_render_dossier(imprecise_open, semantic_clock)["status"] == "REVIEW"
+assert module.has_explicit_open_deadline_clock("16 noiembrie 2026, ora 16:00")
+assert module.has_explicit_open_deadline_clock("2026-11-16T16:00:00+02:00")
+assert not module.has_explicit_open_deadline_clock("16 noiembrie 2026")
+assert not module.has_explicit_open_deadline_clock("2026-11-16")
+
 
 # DR-12 source announced two monthly scoring stages on 1 October 2026.
 # Protect applicant actions from advising the finished 80-point first stage

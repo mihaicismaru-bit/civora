@@ -206,6 +206,37 @@ def parse_date(value: Any) -> dt.datetime | None:
         return None
     return bucharest_datetime_utc(year, month, day, 23, 59, 59)
 
+def has_explicit_open_deadline_clock(value: Any) -> bool:
+    """A date-only observation is not an exact, actionable OPEN cutoff.
+
+    Preserve date-only values for historical context and consultations, but
+    do not turn them into an invented midnight/end-of-day application window.
+    ISO requires an explicit offset; Romanian dates require a stated local time.
+    The calendar validity and DST check remain in parse_date().
+    """
+    raw = str(value or "").strip()
+    if re.fullmatch(
+        r"20\d{2}-\d{2}-\d{2}[Tt ]\d{2}:\d{2}(?::\d{2}(?:\.\d{1,6})?)?(?:Z|[+-]\d{2}:\d{2})",
+        raw, flags=re.I,
+    ):
+        return True
+    normalized = "".join(
+        ch for ch in unicodedata.normalize("NFKD", raw.lower())
+        if not unicodedata.combining(ch)
+    )
+    month = (
+        r"ianuarie|februarie|martie|aprilie|mai|iunie|iulie|august|"
+        r"septembrie|octombrie|noiembrie|decembrie"
+    )
+    romanian = re.search(r"\b\d{1,2}\s+(?:" + month + r")\s+20\d{2}\b(.*)", normalized)
+    if not romanian:
+        return False
+    return bool(re.match(
+        r"^\s*,?\s*(?:(?:la\s+)?ora\s*|la\s+)?\d{1,2}[:.]\d{2}(?::\d{2})?\b",
+        romanian.group(1),
+    ))
+
+
 def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     if dossier.get("status") != "OPEN" or dossier.get("publicationState") != "PUBLISHABLE":
         return False
@@ -219,6 +250,8 @@ def current_open(dossier: dict[str, Any], clock: dt.datetime) -> bool:
     # A stale top-level OPEN cannot override a newer CONFIRMED CLOSED/REVIEW
     # observation, even if the deadline still lies in the future.
     if fold(status.get("value")) not in {"open", "deschis"}:
+        return False
+    if not has_explicit_open_deadline_clock(deadline.get("value")):
         return False
     closes = parse_date(deadline.get("value"))
     if closes is None or closes <= clock:
