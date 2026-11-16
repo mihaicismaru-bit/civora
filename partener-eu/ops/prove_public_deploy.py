@@ -66,7 +66,37 @@ def fetch_bytes(url: str, *, timeout: float, token: str) -> tuple[int, bytes, st
         method="GET",
     )
     with urllib.request.urlopen(req, timeout=timeout) as response:
-        return int(getattr(response, "status", 200)), response.read(), response.geturl()
+        resolved = response.geturl()
+        if not readback_target_is_trusted(target, resolved):
+            raise ValueError("Public readback redirected away from its exact HTTPS route or cache-busting query")
+        return int(getattr(response, "status", 200)), response.read(), resolved
+
+
+def readback_target_is_trusted(requested_url: str, resolved_url: str) -> bool:
+    """Require the exact HTTPS origin, route and cache-busting query after redirects.
+
+    A same-count manifest from a redirected route/host is not evidence that the
+    intended PARTENER.EU production page has actually been deployed.
+    """
+    try:
+        requested = urllib.parse.urlsplit(requested_url)
+        resolved = urllib.parse.urlsplit(resolved_url)
+        return (
+            requested.scheme.lower() == resolved.scheme.lower() == "https"
+            and requested.hostname is not None
+            and requested.hostname.lower() == (resolved.hostname or "").lower()
+            and requested.netloc.lower() == resolved.netloc.lower()
+            and requested.username is None
+            and requested.password is None
+            and resolved.username is None
+            and resolved.password is None
+            and requested.path.rstrip("/") == resolved.path.rstrip("/")
+            and requested.fragment == resolved.fragment == ""
+            and sorted(urllib.parse.parse_qsl(requested.query, keep_blank_values=True))
+                == sorted(urllib.parse.parse_qsl(resolved.query, keep_blank_values=True))
+        )
+    except ValueError:
+        return False
 
 
 def parse_json_bytes(raw: bytes) -> Any:
@@ -160,6 +190,15 @@ def self_test() -> int:
     assert not open_semantics_ok(cluster.replace(b"status-open", b"status-review"), before)
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
+    assert readback_target_is_trusted(busted, busted)
+    assert readback_target_is_trusted(
+        busted, "https://partener.eu/consultari/?partener_readback=abc&x=1"
+    )
+    assert not readback_target_is_trusted(busted, "https://partener.eu/consultari/?x=1")
+    assert not readback_target_is_trusted(busted, "https://www.partener.eu/consultari/?x=1&partener_readback=abc")
+    assert not readback_target_is_trusted(busted, "http://partener.eu/consultari/?x=1&partener_readback=abc")
+    assert not readback_target_is_trusted(busted, "https://partener.eu/finantari/deschise/?x=1&partener_readback=abc")
+    assert not readback_target_is_trusted(busted, "https://attacker@partener.eu/consultari/?x=1&partener_readback=abc")
     print("PASS public deploy readback proof self-test")
     return 0
 
