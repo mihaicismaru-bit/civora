@@ -40,6 +40,7 @@ for tamper_src in (
     {**source, "material_fact_use": True},
     {**source, "authority_scope": "AUTHORITATIVE_CALL"},
     {**source, "url": "https://other.example.invalid/actiuni/"},
+    {**source, "canonical_aliases": ["https://www.regiocentru.ro/new-actions/"]},
     {**source, "id": "SRC-OTHER"},
 ):
     assert not probe.adr_centre_discovery_403_guard(tamper_src, prior)
