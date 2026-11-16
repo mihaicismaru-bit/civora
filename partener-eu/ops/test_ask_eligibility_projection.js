@@ -8,7 +8,7 @@ const scriptPath=process.argv[2]||path.resolve(__dirname,'../web/ask-partener-v2
 const source=fs.readFileSync(scriptPath,'utf8');
 
 function render(audience,options={}){
-  const input={value:'energie',autocomplete:'',addEventListener(){}};
+  const input={value:options.query||'energie',autocomplete:'',addEventListener(){}};
   const output={innerHTML:'',querySelector(){return null},querySelectorAll(){return []}};
   const button={textContent:'',onclick:null};
   const eyebrow={textContent:''};
@@ -27,15 +27,15 @@ function render(audience,options={}){
     }
   };
   const dossier={
-    id:'TEST-ENERGY',
+    id:options.id||'TEST-ENERGY',
     publicationState:'PUBLISHABLE',
-    title:'Finanțare pentru energie regenerabilă',
+    title:options.title||'Finanțare pentru energie regenerabilă',
     programme:'Program test',
     region:'România',
     status:Object.prototype.hasOwnProperty.call(options,'status')?options.status:'OPEN',
     audience,
     standfirst:'Investiții în energie',
-    decisionAction:'Verifică dosarul înainte de depunere.',
+    decisionAction:options.decisionAction||'Verifică dosarul înainte de depunere.',
     quickFacts:options.quickFacts||[],
     sections:[],
     sources:[],
@@ -96,4 +96,32 @@ const factStatus=render(['IMM eligibile'],{
 assert(factStatus.includes('askV2Status VERIFIED_FACT">Deschis pentru depunere'),'a verified status fact may be displayed when no structured status exists');
 assert(!factStatus.includes('Statutul apelului nu este încă confirmat.'),'verified status fact must not be mislabeled unknown');
 
-console.log(JSON.stringify({status:'PASS',cases:5,contract:'Ask eligibility and status projection are fail-closed'}));
+
+// P0 #1403 — a disputed Făgărașului record must never be recommended
+// by Ask from a stale dynamic projection, even if marked PUBLISHABLE.
+// The distinct Moții call and unaffected dossiers stay discoverable.
+const itiTitle='Sprijin pentru familii monoparentale — ITI Microregiunea Țara Făgărașului';
+const itiQuery='sprijin familii monoparentale';
+const heldIti=render(['Școli din ITI Moții'],{
+  id:'mipe-1b5d21384b66b4b559',
+  title:itiTitle,query:itiQuery,status:'CLOSED',
+  decisionAction:'Nu mai investi resurse de depunere',
+  quickFacts:[{label:'Termen',value:'31 august 2026',confidence:'CONFIRMED'}]
+});
+assert(heldIti.includes('Nu am găsit încă o potrivire suficient de sigură'),'held ITI must not produce Ask results');
+for(const leaked of [itiTitle,'Școli din ITI Moții','Nu mai investi resurse','31 august 2026']){
+  assert(!heldIti.includes(leaked),'disputed ITI evidence leaked into Ask: '+leaked);
+}
+const heldAlias=render(['Școli din ITI Moții'],{
+  id:'mipe-reingested-20261116',title:itiTitle,query:itiQuery,status:'CLOSED'
+});
+assert(heldAlias.includes('Nu am găsit încă o potrivire suficient de sigură'),'reingested ITI identity must remain held by territorial title');
+const distinctMotii=render(['Organizații eligibile'],{
+  id:'mipe-distinct-iti-motii',
+  title:'Sprijin pentru familii monoparentale — ITI Moții, Țara de Piatră',
+  query:itiQuery,status:'CLOSED'
+});
+assert(distinctMotii.includes('ITI Moții, Țara de Piatră'),'distinct ITI territory must remain visible');
+assert(!distinctMotii.includes('Nu am găsit încă o potrivire suficient de sigură'),'other territory must not be swept into P0 hold');
+
+console.log(JSON.stringify({status:'PASS',cases:8,contract:'Ask eligibility, status and P0 territorial containment are fail-closed'}));
