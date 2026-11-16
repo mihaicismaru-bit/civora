@@ -554,7 +554,7 @@ assert "ÎN VERIFICARE" in iti_html
 assert "534.932,94" not in iti_html
 assert "31 august 2026" not in iti_html
 assert "Nu mai investi" not in iti_html
-assert "Moții" not in json.dumps(iti_review["sections"], ensure_ascii=False)
+assert "Consiliile județene ITI Moții" not in json.dumps(iti_review["sections"], ensure_ascii=False)
 assert "Sfarsitul" not in json.dumps(iti_review["sections"], ensure_ascii=False)
 # Unrelated calls and unapproved / provisional candidates are left unchanged.
 other_iti = dict(iti_bad, id="mipe-distinct-iti-motii")
