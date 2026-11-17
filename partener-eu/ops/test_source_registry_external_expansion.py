@@ -1805,6 +1805,72 @@ def main():
             hadea.get("observation_state") != "AGENCY_REFERENCE_FORMAT_AND_STATUS_WITNESS_RAW_PENDING"):
         fail("HaDEA readback cannot authorize OPEN_CALL or material publication")
 
+    # ERA4Health JTC10: a date scheduled for publication is not proof that
+    # the exact call endpoint is OPEN. On 17 November the operator's own
+    # live-discovery page still self-identifies as a PRE-ANNOUNCEMENT.
+    # The Romanian UEFISCDI calendar repeats that launch date; do not
+    # silently promote either page, infer national eligibility, or alias JTC9.
+    nanodiag_pair = {
+        "SRC-EU-ERA4HEALTH-NANODIAGNCD-2027-JTC10": (
+            "https://era4health.eu/calls/pre_NanoDiagNCD2027.php",
+            "T1", "PREANNOUNCEMENT_AND_EXPECTED_LAUNCH_DISCOVERY_ONLY",
+            "PREANNOUNCEMENT_STILL_DISPLAYED_ON_LAUNCH_DATE_RAW_PENDING",
+            "SRC-RO-UEFISCDI-ERA4HEALTH-NANODIAGNCD-2027-JTC10",
+            {"EU_DIRECT", "BRUSSELS", "PROGRAMMING_PIPELINE", "DISCOVERY"},
+        ),
+        "SRC-RO-UEFISCDI-ERA4HEALTH-NANODIAGNCD-2027-JTC10": (
+            "https://uefiscdi.gov.ro/fostering-a-european-research-area-for-health-era4health",
+            "T1B", "ROMANIAN_JTC10_REFERENCE_AND_NATIONAL_PACKAGE_DISCOVERY_ONLY",
+            "NATIONAL_LAUNCH_DATE_LISTED_PARTNERSHIP_PREANNOUNCEMENT_RAW_PENDING",
+            "SRC-EU-ERA4HEALTH-NANODIAGNCD-2027-JTC10",
+            {"ROMANIA", "EU_DIRECT", "PROGRAMMING_PIPELINE", "DISCOVERY"},
+        ),
+    }
+    for source_id, (url, tier, scope, state, paired, families) in nanodiag_pair.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"ERA4Health NanoDiagNCD JTC10 official pair missing: {source_id}")
+        if (row.get("url"), row.get("tier"), row.get("authority_scope"),
+                row.get("observation_state"), row.get("paired_official_source_id")) != (
+                url, tier, scope, state, paired):
+            fail(f"{source_id}: preannouncement/launch identity or pairing drift")
+        if row.get("programme_family") != (
+                "Horizon Europe / ERA4Health / NanoDiagNCD 2027 JTC10"):
+            fail(f"{source_id}: JTC10 mixed with historic JTC9/other editions")
+        if row.get("programmes") != ["EU direct programmes"] or not families.issubset(
+                set(row.get("source_families") or [])):
+            fail(f"{source_id}: source family taxonomy missing")
+        if row.get("event_date_discovery") != "2026-11-17":
+            fail(f"{source_id}: launch-date witness silently shifted")
+        if row.get("adapter_required") != (
+                "ERA4HEALTH_NANODIAGNCD_2027_JTC10_LIVE_CALL_NATIONAL_RULES_RECONCILE_V1"):
+            fail(f"{source_id}: live exact-call/national semantic gate missing")
+        if any(row.get(key) is not False for key in (
+                "material_fact_use", "credentials_required", "open_call_authorized",
+                "material_fact_publication_authorized")):
+            fail(f"{source_id}: premature OPEN_CALL or publication permission")
+        if {"status", "call_status", "deadline", "application_deadline", "budget",
+            "budget_eur", "eligibility", "submission_endpoint", "open_at", "close_at",
+            "raw_sha256", "semantic_sha256", "fetched_at", "fetched_at_utc",
+            "parser_version", "run_id", "handoff_sha256", "last_verified_open"
+            }.intersection(row):
+            fail(f"{source_id}: a discovery descriptor fabricated material data or raw provenance")
+        note = (row.get("note") or "").lower()
+        if not all(token in note for token in (
+                "pre-announcement", "17 november", "not_captured",
+                "open_call", "immutable", "national")):
+            fail(f"{source_id}: historical schedule vs live status/fail-closed receipt distinction lost")
+    nano_eu = by_id["SRC-EU-ERA4HEALTH-NANODIAGNCD-2027-JTC10"]
+    nano_ro = by_id["SRC-RO-UEFISCDI-ERA4HEALTH-NANODIAGNCD-2027-JTC10"]
+    if nano_eu.get("exact_edition_identifier_discovery") != (
+            "NanoDiagNCD 2027 / ERA4Health JTC10"):
+        fail("ERA4Health exact partnership JTC10 identifier mutated")
+    if nano_ro.get("exact_edition_identifier_discovery") != (
+            "ERA4Health NanoDiagNCD2027 / JTC10"):
+        fail("ERA4Health exact national JTC10 identifier mutated")
+    if "expected_launch_date_not_current_open_status" not in nano_eu.get("extract", []):
+        fail("ERA4Health expected launch date cannot authorize OPEN_CALL")
+
     print(
         "PASS external source expansion contract: "
         f"{len(REQUIRED)} roots; {len(DIRECT_PROGRAMME_FAMILIES)} direct programme families; "
