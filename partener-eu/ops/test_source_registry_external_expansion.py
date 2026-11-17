@@ -1874,6 +1874,65 @@ def main():
         fail("ERA4Health expected launch date cannot authorize OPEN_CALL")
 
 
+    # ERA4HEALTH_JTC10_LAUNCH_WITNESS (17 Nov): the exact post-preannouncement
+    # operator landing page is distinct, but says PT-Outline opens only
+    # on 20 November; a national generic index "open" label cannot
+    # authorize an exact OPEN_CALL before a live submission transaction.
+    launch = by_id.get(
+        "SRC-EU-ERA4HEALTH-NANODIAGNCD-2027-JTC10-LAUNCH-WITNESS")
+    if not launch:
+        fail("ERA4Health JTC10 exact launch landing witness missing")
+    if (launch.get("url"), launch.get("tier"),
+            launch.get("authority_scope"), launch.get("observation_state")) != (
+            "https://era4health.eu/calls/NanoDiagNCD2027.php",
+            "T1", "EXACT_JTC10_LAUNCH_PAGE_DISCOVERY_ONLY",
+            "CALL_PAGE_LAUNCHED_SUBMISSION_GATEWAY_PLANNED_RAW_PENDING"):
+        fail("JTC10 exact new launch page misidentified or premature OPEN status")
+    if launch.get("linked_preannouncement_source_id") != (
+            "SRC-EU-ERA4HEALTH-NANODIAGNCD-2027-JTC10"):
+        fail("JTC10 launch must not overwrite its preannouncement")
+    if launch.get("linked_national_source_id") != (
+            "SRC-RO-UEFISCDI-ERA4HEALTH-NANODIAGNCD-2027-JTC10"):
+        fail("JTC10 launch lacks national-reconciliation link")
+    if (launch.get("programme_family") !=
+            "Horizon Europe / ERA4Health / NanoDiagNCD 2027 JTC10"
+            or launch.get("exact_edition_identifier_discovery") !=
+            "NanoDiagNCD 2027 / ERA4Health JTC10"):
+        fail("JTC10 launch accidentally aliased to other ERA4Health calls")
+    if launch.get("event_date_discovery") != "2026-11-17":
+        fail("JTC10 launch publication date changed without official evidence")
+    if launch.get("adapter_required") != (
+            "ERA4HEALTH_NANODIAGNCD_2027_JTC10_LIVE_CALL_NATIONAL_RULES_RECONCILE_V1"):
+        fail("JTC10 exact gateway/national reconciliation gate removed")
+    if not {"EU_DIRECT", "BRUSSELS", "CALL_REGISTRY", "DISCOVERY"}.issubset(
+            set(launch.get("source_families") or [])):
+        fail("JTC10 operator launch source taxonomy incomplete")
+    if "PROGRAMMING_PIPELINE" in (launch.get("source_families") or []):
+        fail("JTC10 published landing is not future MFF programming")
+    for key in ("material_fact_use", "credentials_required",
+                "open_call_authorized", "material_fact_publication_authorized"):
+        if launch.get(key) is not False:
+            fail(f"JTC10 launch bypassed fail-closed authorization: {key}")
+    if {"status", "call_status", "deadline", "application_deadline", "budget",
+        "budget_eur", "eligibility", "submission_endpoint", "open_at", "close_at",
+        "raw_sha256", "semantic_sha256", "fetched_at", "fetched_at_utc",
+        "final_url", "parser_version", "run_id", "handoff_sha256",
+        "last_verified_open"}.intersection(launch):
+        fail("JTC10 exact landing fabricated current OPEN/terms/raw receipt")
+    expected_extracts = {
+        "exact_jtc10_post_preannouncement_call_landing_discovery",
+        "submission_platform_planned_20_nov_2026_not_yet_live_verified",
+        "call_documents_links_still_blank_at_readback",
+        "romanian_national_index_new_open_label_vs_operator_gateway_not_open",
+    }
+    if not expected_extracts.issubset(set(launch.get("extract") or [])):
+        fail("JTC10 planned submission platform and blank documents gate lost")
+    launch_note = (launch.get("note") or "").lower()
+    if not all(word in launch_note for word in (
+            "17 november", "20 november", "jtc10", "not_captured",
+            "open_call", "pre-announcement", "national", "immutable")):
+        fail("JTC10 launch status / national index conflict improperly resolved")
+
     # EIT_STEM_TALENT_2026_DEADLINE_CONFLICT: original operator call
     # (including its PDF) has 17:00 CET, but UEFISCDI NCP says 00:00 CET.
     # The divergent NCP time is never canonicalized by a registry descriptor.
