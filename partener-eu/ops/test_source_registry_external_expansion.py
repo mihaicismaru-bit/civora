@@ -2058,7 +2058,7 @@ def main():
         "tier": "T1",
         "authority_class": "T1_OFFICIAL_CINEA_COMMISSION_CALL_PROGRAMMING_ANNOUNCEMENT",
         "authority_scope": "IF26_FIVE_PLANNED_CALL_FAMILIES_DECEMBER_2026_PROGRAMMING_ONLY",
-        "observation_state": "OFFICIAL_2026_11_17_DECEMBER_03_PLANNED_FIVE_CALLS_RAW_PENDING",
+        "observation_state": "PROGRAMMING_PIPELINE_OFFICIAL_2026_11_17_DECEMBER_03_PLANNED_FIVE_CALLS_RAW_PENDING",
         "programme_family": "Innovation Fund / IF26 planned grant calls and auctions / December 2026",
         "adapter_required": "IF26_DECEMBER_2026_CALL_IDENTIFIERS_FT_ORIGINALS_RECONCILE_V1",
         "readback_date_discovery": "2026-11-17",
