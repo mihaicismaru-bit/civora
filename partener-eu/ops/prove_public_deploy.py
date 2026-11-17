@@ -127,8 +127,16 @@ def count_cards(raw: bytes) -> int:
     return len(CARD_RE.findall(raw.decode("utf-8", "replace")))
 
 
-def open_semantics_ok(raw: bytes, evaluated_at: dt.datetime | None = None) -> bool:
+def open_semantics_ok(
+    raw: bytes,
+    evaluated_at: dt.datetime | None = None,
+    *,
+    require_all_open: bool = True,
+) -> bool:
     """Reject expired OPEN cards even if the deployed manifest matches.
+
+    For the mixed /dosare/ catalogue, non-OPEN cards are permitted, but each
+    advertised OPEN card still needs a precise, future official deadline.
 
     A source artifact's generatedAt is provenance, not a live evaluation clock.
     """
@@ -143,7 +151,9 @@ def open_semantics_ok(raw: bytes, evaluated_at: dt.datetime | None = None) -> bo
         return False
     for card in cards:
         if not OPEN_BADGE_RE.search(card):
-            return False
+            if require_all_open:
+                return False
+            continue
         terms = OPEN_TERM_RE.findall(card)
         if len(terms) != 1:
             return False
@@ -208,6 +218,14 @@ def self_test() -> int:
     assert not open_semantics_ok(cluster.replace(b"2026-11-06T12:00:00+02:00", b"6 noiembrie 2026"), before)
     assert not open_semantics_ok(cluster.replace(b"<b>Termen:</b>", b"<b>Grant:</b>"), before)
     assert not open_semantics_ok(cluster.replace(b"status-open", b"status-review"), before)
+    # P0 #1404: the all-dossiers listing is mixed; an expired OPEN card must
+    # fail even when its manifest and card count match a successful deployment.
+    review = (b'<article class="staticCard" data-dossier-id="review">'
+              b'<span class="status status-review">IN VERIFICARE</span></article>')
+    assert open_semantics_ok(review, before, require_all_open=False)
+    assert open_semantics_ok(cluster + review, before, require_all_open=False)
+    assert not open_semantics_ok(cluster + review, cutoff, require_all_open=False)
+    assert not open_semantics_ok(cluster + review, before, require_all_open=True)
     busted = cache_busted("https://partener.eu/consultari/?x=1", "abc")
     assert "x=1" in busted and "partener_readback=abc" in busted
     assert readback_target_is_trusted(busted, busted)
@@ -261,9 +279,10 @@ def main() -> int:
         "finantari/deschise/": int(expected.get("currentOpen", -1)),
         "finantari/in-pregatire/": int(expected.get("prepare", -1)),
         "consultari/": int(expected.get("consultations", -1)),
+        "dosare/": int(expected.get("publishableDossiers", -1)),
     }
     if any(value < 0 for value in required_counts.values()):
-        raise SystemExit("Manifest missing one of currentOpen/prepare/consultations")
+        raise SystemExit("Manifest missing currentOpen/prepare/consultations/publishableDossiers")
 
     base_url = args.base_url.rstrip("/") + "/"
     manifest_url = urllib.parse.urljoin(base_url, "static-public-manifest.json")
@@ -307,6 +326,8 @@ def main() -> int:
                     semantic_ok = open_semantics_ok(r_raw)
                 elif route == "consultari/":
                     semantic_ok = consultation_semantics_ok(r_raw)
+                elif route == "dosare/":
+                    semantic_ok = open_semantics_ok(r_raw, require_all_open=False)
                 route_ok = r_code == 200 and observed_count == expected_count and semantic_ok
                 route_results[route] = {
                     "http_status": r_code,
@@ -341,6 +362,7 @@ def main() -> int:
             "currentOpen": expected.get("currentOpen"),
             "prepare": expected.get("prepare"),
             "consultations": expected.get("consultations"),
+            "publishableDossiers": expected.get("publishableDossiers"),
         },
         "observed_counts": {
             route: details.get("observed_cards") for route, details in final_routes.items()
