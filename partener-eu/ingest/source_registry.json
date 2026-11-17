@@ -3283,6 +3283,60 @@
         "current_per_call_submission_gateway_and_budget_exhaustion_reconciliation"
       ],
       "note": "AFIR original public notice dated 17 September 2026 identifies TWO DISTINCT Modernisation Fund calls for public entities: solar generation with integrated storage for self-consumption; separately, new electricity storage capacity. It announces an application window from 28 September 2026 10:00 to 20 November 2026 23:59 Romania local time, subject to early exhaustion of each allocation and verification of documents. This historical schedule is NOT proof of current OPEN_CALL on 17 November; official application gateway returned HTTP 403 in independent readback, and no exact individual call identifier or active per-call application endpoint has been verified. First acquire official announcement/guide and per-call live status through immutable raw bytes and requested/final URL, fetched_at UTC, SHA-256, parser_version, run_id, programme/source family, authority class and observation state, then semantic pair/reconcile. No inferred live status, budget, eligibility, deadline change, canonical write, public product, or alert. OPEN_CALL strictly forbidden from this discovery."
+    },
+    {
+      "id": "SRC-RO-AFIR-ENERGY-PUBLIC-INTAKE-20261030",
+      "tier": "T1",
+      "class": "official_agency_historical_application_volume_market_intelligence",
+      "owner": "AFIR / Ministerul Energiei — Fondul pentru Modernizare",
+      "url": "https://www.afir.ro/info-la-zi/peste-760-de-milioane-solicitate-de-entit%C4%83%C8%9Bile-publice-pentru-producerea-%C8%99i-stocarea-energiei-regenerabile/",
+      "paired_official_source_id": "SRC-RO-AFIR-ENERGY-PUBLIC-20260917",
+      "programmes": [
+        "Fondul pentru Modernizare — entități publice, sesiuni 2026"
+      ],
+      "programme_family": "FOND_MODERNIZARE_2026/PUBLIC_ENERGY",
+      "source_families": [
+        "ROMANIA",
+        "AFIR",
+        "ENERGY",
+        "DISCOVERY"
+      ],
+      "authority_class": "T1_OFFICIAL_AGENCY",
+      "authority_scope": "TWO_DISTINCT_CALLS_HISTORICAL_SUBMISSION_DEMAND_INTELLIGENCE_ONLY",
+      "observation_state": "HISTORICAL_SUBMISSION_VOLUME_DISCOVERED_RAW_PENDING",
+      "event_date_discovery": "2026-10-30",
+      "material_fact_use": false,
+      "open_call_authorized": false,
+      "material_fact_publication_authorized": false,
+      "call_identifiers_verified": false,
+      "current_application_endpoints_verified": false,
+      "credentials_required": false,
+      "adapter_required": "AFIR_ENERGY_2026_APPLICATION_VOLUME_RAW_RECONCILE_V1",
+      "extract": [
+        "official_historical_submitted_application_counts_not_grants_awarded",
+        "per_call_requested_financing_and_distinct_budget_pressure",
+        "official_as_of_date_not_current_live_status",
+        "raw_html_pdf_receipts_and_current_per_call_application_endpoint_pending"
+      ],
+      "discovery_only_submission_observation": {
+        "as_of_date": "2026-10-30",
+        "total_submitted_applications": 2445,
+        "total_requested_eur": 760365828,
+        "aggregate_announced_allocations_eur": 650000000,
+        "solar_with_integrated_storage": {
+          "submitted_applications": 1520,
+          "requested_eur": 448675448,
+          "announced_allocation_eur": 500000000
+        },
+        "standalone_storage": {
+          "submitted_applications": 925,
+          "requested_eur": 311690380,
+          "announced_allocation_eur": 150000000
+        },
+        "observation_kind": "DEMAND_ONLY_NOT_APPROVAL_OR_LIVE_OPEN_STATUS",
+        "raw_receipt_state": "NOT_CAPTURED"
+      },
+      "note": "AFIR official article published 30 October 2026, 16:30 Romania local time, reports historical demand across TWO DISTINCT Modernisation Fund calls: 2,445 submitted applications requesting EUR 760,365,828 against aggregate announced allocation EUR 650,000,000; solar self-consumption with integrated storage 1,520 applications / EUR 448,675,448 requested versus EUR 500,000,000 allocation; independent electricity storage 925 applications / EUR 311,690,380 requested versus EUR 150,000,000 allocation. Totals reconcile (1,520+925=2,445 and EUR 448,675,448+311,690,380=760,365,828). The 30-Oct article says nominal intake until 20 November 2026 23:59, subject to allocation exhaustion; this HISTORICAL reporting does NOT prove current OPEN_CALL, current per-call gateway availability, remaining funds, approvals, eligible projects or extended deadline on 17 November. Submitted applications are NOT approved grants, and aggregate oversubscription does not imply solar allocation itself was exhausted. The article's underlying PDF, exact call identifiers and current submission endpoint remain to be acquired/reconciled separately. Official HTML/PDF raw bytes, fetched_at, SHA-256, parser_version, run_id and immutable handoff are NOT_CAPTURED; no invented receipt. No OPEN_CALL, canonical material fact, homepage promotion, distribution or alert from discovery metadata alone."
     }
   ]
 }
