@@ -1721,6 +1721,71 @@ def main():
         fail("direct funding policy must require programme-specific dedicated exact-call/action evidence and keep indexes/guides non-authorizing")
 
 
+    # FutureFoodS 2026 GETS Third Joint Transnational Call: official 3-Nov
+    # launch and the Romanian national co-funder form one *exact edition* pair.
+    # The operator's generic index still labels the SECOND call Open; this
+    # mixed-generation index must never authorize OPEN for the third call.
+    futurefoods_pair = {
+        "SRC-EU-FUTUREFOODS-2026-GETS-JTC3": (
+            "https://www.futurefoodspartnership.eu/news/announcement-third-call",
+            "T1", "EXACT_JTC3_LAUNCH_DISCOVERY_ONLY",
+            "EXACT_THIRD_CALL_LAUNCH_DISCOVERED_RAW_PENDING",
+            "SRC-RO-UEFISCDI-FUTUREFOODS-2026-JTC3",
+            {"EU_DIRECT", "BRUSSELS", "JOINT_TRANSNATIONAL_CALL", "CALL_REGISTRY"},
+        ),
+        "SRC-RO-UEFISCDI-FUTUREFOODS-2026-JTC3": (
+            "https://uefiscdi.gov.ro/future-of-food-systems-partnership-futurefoods",
+            "T1B", "ROMANIA_JTC3_NATIONAL_RULES_DISCOVERY_ONLY",
+            "NATIONAL_THIRD_CALL_REFERENCE_DISCOVERED_RAW_PENDING",
+            "SRC-EU-FUTUREFOODS-2026-GETS-JTC3",
+            {"ROMANIA", "EU_DIRECT", "JOINT_TRANSNATIONAL_CALL", "CALL_REGISTRY"},
+        ),
+    }
+    for source_id, (url, tier, scope, state, pair, families) in futurefoods_pair.items():
+        row = by_id.get(source_id)
+        if not row:
+            fail(f"missing FutureFoodS JTC3 national/partnership pair: {source_id}")
+        if (row.get("url"), row.get("tier"), row.get("authority_scope"),
+                row.get("observation_state"), row.get("paired_official_source_id")) != (
+                url, tier, scope, state, pair):
+            fail(f"{source_id} lost exact third-call edition or raw-pending pairing")
+        if row.get("programme_family") != (
+                "Horizon Europe / FutureFoodS / GETS Third Joint Transnational Call 2026"):
+            fail(f"{source_id} mixed FutureFoodS calls or editions")
+        if row.get("programmes") != ["EU direct programmes"] or not families.issubset(
+                set(row.get("source_families") or [])):
+            fail(f"{source_id} lost direct/national source taxonomy")
+        if row.get("adapter_required") != (
+                "FUTUREFOODS_2026_JTC3_EXACT_CALL_NATIONAL_RULES_RECONCILE_V1"):
+            fail(f"{source_id} bypassed exact call, stage and Romanian annex reconciliation")
+        if (row.get("material_fact_use") is not False
+                or row.get("credentials_required") is not False
+                or row.get("open_call_authorized") is not False
+                or row.get("material_fact_publication_authorized") is not False):
+            fail(f"{source_id} allowed premature material or OPEN_CALL promotion")
+        if any(key in row for key in (
+                "status", "call_status", "deadline", "application_deadline",
+                "budget", "budget_eur", "eligibility", "open_at", "close_at",
+                "submission_endpoint", "fetched_at", "fetched_at_utc",
+                "raw_sha256", "semantic_sha256", "parser_version", "run_id",
+                "handoff_sha256", "last_verified_open")):
+            fail(f"{source_id} fabricated raw acquisition or material call fields")
+        note = (row.get("note") or "").lower()
+        if not all(x in note for x in (
+                "second call", "third call", "immutable", "no open_call",
+                "national", "reconcil")):
+            fail(f"{source_id} lost old-index/non-authorizing and provenance gates")
+    europe = by_id["SRC-EU-FUTUREFOODS-2026-GETS-JTC3"]
+    romania = by_id["SRC-RO-UEFISCDI-FUTUREFOODS-2026-JTC3"]
+    if europe.get("generic_index_conflict_witness") != (
+            "https://www.futurefoodspartnership.eu/funding-opportunities"):
+        fail("FutureFoodS old Second Call index conflict lost")
+    if romania.get("news_url_discovery") != (
+            "https://uefiscdi.gov.ro/news-parteneriatul-futurefoods-lanseaza-cel-de-al-treilea-apel-transnational-pentru-proiecte-de-cercetare-si-inovare"):
+        fail("FutureFoodS Romanian co-funder 4 Nov launch corroboration lost")
+    if "invitation_only_stage2_discriminator" not in europe.get("extract", []):
+        fail("FutureFoodS stage-2 invitation is not a generic open-intake claim")
+
     # HaDEA agency reference drops a separator relative to the actual F&T topic URL.
     # A coarse agency "Open" label must never resolve exact F&T submission status.
     hadea = by_id.get("SRC-EU-HADEA-CL4-2027-PHOTONICS-ID-WITNESS") or {}
