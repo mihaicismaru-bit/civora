@@ -6,6 +6,13 @@ const path=require('path');
 const vm=require('vm');
 const scriptPath=process.argv[2]||path.resolve(__dirname,'../web/ask-partener-v2.js');
 const source=fs.readFileSync(scriptPath,'utf8');
+const askIndexBuilder=fs.readFileSync(path.resolve(__dirname,'build_ask_index.js'),'utf8');
+assert(askIndexBuilder.includes("'deschidere'"),'compact Ask must retain official opening fact');
+for(const competing of ['openFrom','opensAt','openAt','deadline','closesAt','closeAt']){
+  assert(askIndexBuilder.includes(competing+': d.'+competing),
+    'compact Ask must preserve competing lifecycle observation: '+competing);
+}
+
 
 function render(audience,options={}){
   const input={value:options.query||'energie',autocomplete:'',addEventListener(){}};
